@@ -35,6 +35,9 @@ package:
 
 functions:
   app:
+    environment:
+      CLIENT_ID: ${env:SMARTLING_CLIENT_ID}
+      CLIENT_SECRET: ${env:SMARTLING_CLIENT_SECRET}
     handler: built/index.api 
     events: 
       - http:
