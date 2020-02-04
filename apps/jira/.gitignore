@@ -1,0 +1,8 @@
+node_modules
+.cache
+tags
+functions/credentials.txt
+functions/**/*.js
+functions/built
+functions/.serverless
+jira-app/build

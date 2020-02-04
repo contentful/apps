@@ -1,0 +1,46 @@
+version: 2
+# Required secret environment variables
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY
+
+jobs:
+  test:
+    docker:
+      - image: circleci/node:10-stretch
+    steps:
+      - checkout
+      - run:
+          name: 'Test, lint and build apps'
+          command: |
+            ./apps/jira/test.sh
+            ./apps/smartling/test.sh
+
+  deploy:
+    docker:
+      - image: circleci/node:10-stretch
+    steps:
+      - checkout
+      - run:
+          name: Install pip
+          command: sudo apt-get install python-pip python-dev
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      - run:
+          name: 'Deploy apps'
+          command: |
+            ./apps/jira/deploy.sh
+            ./apps/smartling/deploy.sh
+
+workflows:
+  version: 2
+  test-deploy:
+    jobs:
+      - test
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - test

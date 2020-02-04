@@ -1,0 +1,47 @@
+service:
+  name: sls-apps-smartling
+
+frameworkVersion: '>=1.0.0 <2.0.0'
+
+plugins:
+  - serverless-domain-manager
+  - serverless-express
+
+custom:
+  myStage: ${opt:stage, self:provider.stage}
+  customDomain:
+    domainName: smartling.ctfapps.net
+    stage: prd
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: ${opt:stage, 'dev'}
+  region: 'us-east-1'
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: sls-apps-smartling
+
+package:
+  include:
+    - built/**
+    - static/**
+  exclude:
+    - .git/**
+    - "**/*.ts"
+
+functions:
+  app:
+    handler: built/index.api 
+    events: 
+      - http:
+          path: /
+          method: GET
+          private: false
+      - http:
+          path: /{proxy+}
+          method: ANY
+          private: false

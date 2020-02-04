@@ -1,0 +1,1547 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`App should get a new refresh token then get the entry 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="smartling-status"
+      >
+        <div>
+          <p
+            class="Paragraph__Paragraph___2aO-9 info-p"
+            data-test-id="cf-ui-paragraph"
+          >
+            Smartling status
+          </p>
+        </div>
+        <div>
+          <div
+            class="Tag__Tag___Y-myd job-status Tag__Tag--primary___2Hk3I"
+            data-test-id="cf-ui-tag"
+          >
+            In Progress
+          </div>
+        </div>
+      </div>
+      <button
+        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+        data-test-id="request-translation"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+          tabindex="-1"
+        >
+          <span
+            class="Button__Button__label___3tcOj"
+          >
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+              data-test-id="cf-ui-icon"
+              height="18"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+              />
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+            </svg>
+             Request Translation
+          </span>
+        </span>
+      </button>
+      <div
+        class="smartling-entry"
+      >
+        <div
+          class="submission-list"
+        >
+          <p
+            class="Paragraph__Paragraph___2aO-9 info-p"
+            data-test-id="cf-ui-paragraph"
+          >
+            Translation submissions
+          </p>
+          <div
+            class="Card__Card___xXJsT submission Card__Card--padding-default___b6Brl Card__Card--is-interactive___dMQtf"
+            data-test-id="cf-ui-card"
+          >
+            <div
+              class="info"
+            >
+              <div
+                class="locale"
+              >
+                fr-FR
+              </div>
+              <span
+                class="Tooltip__Tooltip__target-wrapper___Mtw42"
+              >
+                <div
+                  class="progress-bar"
+                >
+                  <div
+                    style="width: 0%;"
+                  />
+                </div>
+              </span>
+            </div>
+            <div
+              class="status"
+            >
+              <div
+                class="Tag__Tag___Y-myd tag Tag__Tag--primary___2Hk3I"
+                data-test-id="cf-ui-tag"
+              >
+                In Progress
+              </div>
+              <br />
+              <div
+                class="date"
+              >
+                Submitted 
+                Jan 29, 2020, 2:05 PM
+              </div>
+            </div>
+          </div>
+          <div
+            class="Card__Card___xXJsT submission Card__Card--padding-default___b6Brl Card__Card--is-interactive___dMQtf"
+            data-test-id="cf-ui-card"
+          >
+            <div
+              class="info"
+            >
+              <div
+                class="locale"
+              >
+                German (Germany)
+              </div>
+            </div>
+            <div
+              class="status"
+            >
+              <div
+                class="Tag__Tag___Y-myd tag Tag__Tag--positive___1cepi"
+                data-test-id="cf-ui-tag"
+              >
+                Completed
+              </div>
+              <br />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div
+        aria-hidden="true"
+        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-top___1_DNW Tooltip__Tooltip--hidden___3uqEe"
+        contenteditable="false"
+        data-test-id="cf-ui-tooltip"
+        role="tooltip"
+        style="max-width: 360px;"
+      >
+        <div
+          class="InViewport__InViewport___2o6g4"
+          data-test-id="cf-ui-in-viewport"
+          offset="0"
+        >
+          0%
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="smartling-status"
+    >
+      <div>
+        <p
+          class="Paragraph__Paragraph___2aO-9 info-p"
+          data-test-id="cf-ui-paragraph"
+        >
+          Smartling status
+        </p>
+      </div>
+      <div>
+        <div
+          class="Tag__Tag___Y-myd job-status Tag__Tag--primary___2Hk3I"
+          data-test-id="cf-ui-tag"
+        >
+          In Progress
+        </div>
+      </div>
+    </div>
+    <button
+      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+      data-test-id="request-translation"
+      type="button"
+    >
+      <span
+        class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+        tabindex="-1"
+      >
+        <span
+          class="Button__Button__label___3tcOj"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="18"
+            viewBox="0 0 24 24"
+            width="18"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+           Request Translation
+        </span>
+      </span>
+    </button>
+    <div
+      class="smartling-entry"
+    >
+      <div
+        class="submission-list"
+      >
+        <p
+          class="Paragraph__Paragraph___2aO-9 info-p"
+          data-test-id="cf-ui-paragraph"
+        >
+          Translation submissions
+        </p>
+        <div
+          class="Card__Card___xXJsT submission Card__Card--padding-default___b6Brl Card__Card--is-interactive___dMQtf"
+          data-test-id="cf-ui-card"
+        >
+          <div
+            class="info"
+          >
+            <div
+              class="locale"
+            >
+              fr-FR
+            </div>
+            <span
+              class="Tooltip__Tooltip__target-wrapper___Mtw42"
+            >
+              <div
+                class="progress-bar"
+              >
+                <div
+                  style="width: 0%;"
+                />
+              </div>
+            </span>
+          </div>
+          <div
+            class="status"
+          >
+            <div
+              class="Tag__Tag___Y-myd tag Tag__Tag--primary___2Hk3I"
+              data-test-id="cf-ui-tag"
+            >
+              In Progress
+            </div>
+            <br />
+            <div
+              class="date"
+            >
+              Submitted 
+              Jan 29, 2020, 2:05 PM
+            </div>
+          </div>
+        </div>
+        <div
+          class="Card__Card___xXJsT submission Card__Card--padding-default___b6Brl Card__Card--is-interactive___dMQtf"
+          data-test-id="cf-ui-card"
+        >
+          <div
+            class="info"
+          >
+            <div
+              class="locale"
+            >
+              German (Germany)
+            </div>
+          </div>
+          <div
+            class="status"
+          >
+            <div
+              class="Tag__Tag___Y-myd tag Tag__Tag--positive___1cepi"
+              data-test-id="cf-ui-tag"
+            >
+              Completed
+            </div>
+            <br />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`App should load the AppConfig page and allow for installation 1`] = `
+Object {
+  "parameters": Object {
+    "projectId": "project-id-123",
+  },
+  "targetState": Object {
+    "EditorInterface": Object {
+      "author": Object {
+        "sidebar": Object {
+          "position": 1,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`App should load the AppConfig page and allow for installation 2`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="app"
+      >
+        <div
+          class="background"
+        />
+        <div
+          class="body"
+        >
+          <div
+            class="config"
+          >
+            <div
+              class="section"
+            >
+              <div
+                class="Typography__Typography___1ZUfE"
+                data-test-id="cf-ui-text-container"
+              >
+                <h1
+                  class="Heading__Heading___83D3K f36-margin-bottom--m"
+                  data-test-id="cf-ui-heading"
+                >
+                  About Smartling
+                </h1>
+                <p
+                  class="Paragraph__Paragraph___2aO-9 about-p f36-margin-bottom--m"
+                  data-test-id="cf-ui-paragraph"
+                >
+                  This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within Smartling.
+                </p>
+              </div>
+              <hr />
+            </div>
+            <div
+              class="section"
+            >
+              <div
+                class="Typography__Typography___1ZUfE"
+                data-test-id="cf-ui-text-container"
+              >
+                <h1
+                  class="Heading__Heading___83D3K f36-margin-bottom--m"
+                  data-test-id="cf-ui-heading"
+                >
+                  Configuration
+                </h1>
+              </div>
+              <div
+                class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK project-id"
+                data-test-id="projectId"
+              >
+                <div
+                  class="TextField__TextField__label-wrapper___2-MJT"
+                >
+                  <label
+                    class="FormLabel__FormLabel___3d6zQ"
+                    data-test-id="cf-ui-form-label"
+                    for="projectId"
+                  >
+                    Smartling project ID
+                    <span
+                      class="FormLabel__FormLabel__required-text___3mvdm"
+                    >
+                      (
+                      required
+                      )
+                    </span>
+                  </label>
+                </div>
+                <div
+                  class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
+                >
+                  <input
+                    aria-label="projectId"
+                    class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
+                    data-test-id="cf-ui-text-input"
+                    id="projectId"
+                    name="projectId"
+                    required=""
+                    value="project-id-123"
+                  />
+                </div>
+                <div
+                  class="TextField__TextField__hints___3Di2P"
+                >
+                  <p
+                    class="HelpText__HelpText___uWbja TextField__TextField__help-text___p4rVf"
+                    data-test-id="cf-ui-help-text"
+                  >
+                    To get the project ID, see the 'API' settings of your Smartling project.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="Typography__Typography___1ZUfE"
+                data-test-id="cf-ui-text-container"
+              >
+                <h1
+                  class="Heading__Heading___83D3K f36-margin-bottom--m"
+                  data-test-id="cf-ui-heading"
+                >
+                  Assign to content types
+                </h1>
+                <p
+                  class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
+                  data-test-id="cf-ui-paragraph"
+                >
+                  Select which content types will show the Smartling functionality in the sidebar.
+                </p>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup___2mLmO"
+                data-test-id="cf-ui-field-group"
+              >
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-author"
+                  >
+                    <input
+                      aria-label="Author"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Author"
+                      name="Author"
+                      type="checkbox"
+                      value="author"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Author"
+                      >
+                        Author
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-country"
+                  >
+                    <input
+                      aria-label="Country"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Country"
+                      name="Country"
+                      type="checkbox"
+                      value="country"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Country"
+                      >
+                        Country
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-jobListing"
+                  >
+                    <input
+                      aria-label="Job Listing"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Job Listing"
+                      name="Job Listing"
+                      type="checkbox"
+                      value="jobListing"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Job Listing"
+                      >
+                        Job Listing
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-imageWithMoreFocalPoints"
+                  >
+                    <input
+                      aria-label="Image with Focal Points"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Image with Focal Points"
+                      name="Image with Focal Points"
+                      type="checkbox"
+                      value="imageWithMoreFocalPoints"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Image with Focal Points"
+                      >
+                        Image with Focal Points
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-imageWithFocalPoint"
+                  >
+                    <input
+                      aria-label="Image with Focal Point"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Image with Focal Point"
+                      name="Image with Focal Point"
+                      type="checkbox"
+                      value="imageWithFocalPoint"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Image with Focal Point"
+                      >
+                        Image with Focal Point
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-cloudinaryImage"
+                  >
+                    <input
+                      aria-label="BynderImage"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="BynderImage"
+                      name="BynderImage"
+                      type="checkbox"
+                      value="cloudinaryImage"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="BynderImage"
+                      >
+                        BynderImage
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-heroImage"
+                  >
+                    <input
+                      aria-label="Hero Image"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Hero Image"
+                      name="Hero Image"
+                      type="checkbox"
+                      value="heroImage"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Hero Image"
+                      >
+                        Hero Image
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-article"
+                  >
+                    <input
+                      aria-label="Article"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Article"
+                      name="Article"
+                      type="checkbox"
+                      value="article"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Article"
+                      >
+                        Article
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-text"
+                  >
+                    <input
+                      aria-label="Featured"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Featured"
+                      name="Featured"
+                      type="checkbox"
+                      value="text"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Featured"
+                      >
+                        Featured
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-page"
+                  >
+                    <input
+                      aria-label="Page"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Page"
+                      name="Page"
+                      type="checkbox"
+                      value="page"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Page"
+                      >
+                        Page
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-variationContainer"
+                  >
+                    <input
+                      aria-label="Variation Container"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Variation Container"
+                      name="Variation Container"
+                      type="checkbox"
+                      value="variationContainer"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Variation Container"
+                      >
+                        Variation Container
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-imageCarousel"
+                  >
+                    <input
+                      aria-label="Image Carousel"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Image Carousel"
+                      name="Image Carousel"
+                      type="checkbox"
+                      value="imageCarousel"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Image Carousel"
+                      >
+                        Image Carousel
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-cta"
+                  >
+                    <input
+                      aria-label="CTA"
+                      class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                      data-test-id="cf-ui-controlled-input"
+                      id="CTA"
+                      name="CTA"
+                      type="checkbox"
+                      value="cta"
+                    />
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="CTA"
+                      >
+                        CTA
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="logo"
+        >
+          <img
+            alt=""
+            src="logo.svg"
+          />
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="app"
+    >
+      <div
+        class="background"
+      />
+      <div
+        class="body"
+      >
+        <div
+          class="config"
+        >
+          <div
+            class="section"
+          >
+            <div
+              class="Typography__Typography___1ZUfE"
+              data-test-id="cf-ui-text-container"
+            >
+              <h1
+                class="Heading__Heading___83D3K f36-margin-bottom--m"
+                data-test-id="cf-ui-heading"
+              >
+                About Smartling
+              </h1>
+              <p
+                class="Paragraph__Paragraph___2aO-9 about-p f36-margin-bottom--m"
+                data-test-id="cf-ui-paragraph"
+              >
+                This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within Smartling.
+              </p>
+            </div>
+            <hr />
+          </div>
+          <div
+            class="section"
+          >
+            <div
+              class="Typography__Typography___1ZUfE"
+              data-test-id="cf-ui-text-container"
+            >
+              <h1
+                class="Heading__Heading___83D3K f36-margin-bottom--m"
+                data-test-id="cf-ui-heading"
+              >
+                Configuration
+              </h1>
+            </div>
+            <div
+              class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK project-id"
+              data-test-id="projectId"
+            >
+              <div
+                class="TextField__TextField__label-wrapper___2-MJT"
+              >
+                <label
+                  class="FormLabel__FormLabel___3d6zQ"
+                  data-test-id="cf-ui-form-label"
+                  for="projectId"
+                >
+                  Smartling project ID
+                  <span
+                    class="FormLabel__FormLabel__required-text___3mvdm"
+                  >
+                    (
+                    required
+                    )
+                  </span>
+                </label>
+              </div>
+              <div
+                class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
+              >
+                <input
+                  aria-label="projectId"
+                  class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
+                  data-test-id="cf-ui-text-input"
+                  id="projectId"
+                  name="projectId"
+                  required=""
+                  value="project-id-123"
+                />
+              </div>
+              <div
+                class="TextField__TextField__hints___3Di2P"
+              >
+                <p
+                  class="HelpText__HelpText___uWbja TextField__TextField__help-text___p4rVf"
+                  data-test-id="cf-ui-help-text"
+                >
+                  To get the project ID, see the 'API' settings of your Smartling project.
+                </p>
+              </div>
+            </div>
+            <div
+              class="Typography__Typography___1ZUfE"
+              data-test-id="cf-ui-text-container"
+            >
+              <h1
+                class="Heading__Heading___83D3K f36-margin-bottom--m"
+                data-test-id="cf-ui-heading"
+              >
+                Assign to content types
+              </h1>
+              <p
+                class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
+                data-test-id="cf-ui-paragraph"
+              >
+                Select which content types will show the Smartling functionality in the sidebar.
+              </p>
+            </div>
+            <div
+              class="FieldGroup__FieldGroup___2mLmO"
+              data-test-id="cf-ui-field-group"
+            >
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-author"
+                >
+                  <input
+                    aria-label="Author"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Author"
+                    name="Author"
+                    type="checkbox"
+                    value="author"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Author"
+                    >
+                      Author
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-country"
+                >
+                  <input
+                    aria-label="Country"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Country"
+                    name="Country"
+                    type="checkbox"
+                    value="country"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Country"
+                    >
+                      Country
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-jobListing"
+                >
+                  <input
+                    aria-label="Job Listing"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Job Listing"
+                    name="Job Listing"
+                    type="checkbox"
+                    value="jobListing"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Job Listing"
+                    >
+                      Job Listing
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-imageWithMoreFocalPoints"
+                >
+                  <input
+                    aria-label="Image with Focal Points"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Image with Focal Points"
+                    name="Image with Focal Points"
+                    type="checkbox"
+                    value="imageWithMoreFocalPoints"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Image with Focal Points"
+                    >
+                      Image with Focal Points
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-imageWithFocalPoint"
+                >
+                  <input
+                    aria-label="Image with Focal Point"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Image with Focal Point"
+                    name="Image with Focal Point"
+                    type="checkbox"
+                    value="imageWithFocalPoint"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Image with Focal Point"
+                    >
+                      Image with Focal Point
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-cloudinaryImage"
+                >
+                  <input
+                    aria-label="BynderImage"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="BynderImage"
+                    name="BynderImage"
+                    type="checkbox"
+                    value="cloudinaryImage"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="BynderImage"
+                    >
+                      BynderImage
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-heroImage"
+                >
+                  <input
+                    aria-label="Hero Image"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Hero Image"
+                    name="Hero Image"
+                    type="checkbox"
+                    value="heroImage"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Hero Image"
+                    >
+                      Hero Image
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-article"
+                >
+                  <input
+                    aria-label="Article"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Article"
+                    name="Article"
+                    type="checkbox"
+                    value="article"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Article"
+                    >
+                      Article
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-text"
+                >
+                  <input
+                    aria-label="Featured"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Featured"
+                    name="Featured"
+                    type="checkbox"
+                    value="text"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Featured"
+                    >
+                      Featured
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-page"
+                >
+                  <input
+                    aria-label="Page"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Page"
+                    name="Page"
+                    type="checkbox"
+                    value="page"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Page"
+                    >
+                      Page
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-variationContainer"
+                >
+                  <input
+                    aria-label="Variation Container"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Variation Container"
+                    name="Variation Container"
+                    type="checkbox"
+                    value="variationContainer"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Variation Container"
+                    >
+                      Variation Container
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-imageCarousel"
+                >
+                  <input
+                    aria-label="Image Carousel"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="Image Carousel"
+                    name="Image Carousel"
+                    type="checkbox"
+                    value="imageCarousel"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Image Carousel"
+                    >
+                      Image Carousel
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-cta"
+                >
+                  <input
+                    aria-label="CTA"
+                    class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+                    data-test-id="cf-ui-controlled-input"
+                    id="CTA"
+                    name="CTA"
+                    type="checkbox"
+                    value="cta"
+                  />
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="CTA"
+                    >
+                      CTA
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="logo"
+      >
+        <img
+          alt=""
+          src="logo.svg"
+        />
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`App should render the sidebar app with signing and request button 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <button
+        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp signin Button__Button--primary___JImeO Button__Button--full-width___3Fmpo"
+        data-test-id="open-dialog"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+          tabindex="-1"
+        >
+          <span
+            class="Button__Button__label___3tcOj"
+          >
+            Sign in with Smartling
+          </span>
+        </span>
+      </button>
+      <br />
+      <button
+        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+        data-test-id="request-translation"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+          tabindex="-1"
+        >
+          <span
+            class="Button__Button__label___3tcOj"
+          >
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+              data-test-id="cf-ui-icon"
+              height="18"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+              />
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+            </svg>
+             Request Translation
+          </span>
+        </span>
+      </button>
+    </div>
+  </body>,
+  "container": <div>
+    <button
+      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp signin Button__Button--primary___JImeO Button__Button--full-width___3Fmpo"
+      data-test-id="open-dialog"
+      type="button"
+    >
+      <span
+        class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+        tabindex="-1"
+      >
+        <span
+          class="Button__Button__label___3tcOj"
+        >
+          Sign in with Smartling
+        </span>
+      </span>
+    </button>
+    <br />
+    <button
+      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+      data-test-id="request-translation"
+      type="button"
+    >
+      <span
+        class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+        tabindex="-1"
+      >
+        <span
+          class="Button__Button__label___3tcOj"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="18"
+            viewBox="0 0 24 24"
+            width="18"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+           Request Translation
+        </span>
+      </span>
+    </button>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

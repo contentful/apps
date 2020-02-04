@@ -1,0 +1,73 @@
+service:
+  name: sls-apps-jira-backend
+
+frameworkVersion: '>=1.0.0 <2.0.0'
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  myStage: ${opt:stage, self:provider.stage}
+  myEnvironment:
+    FRONTEND_URL:
+      prd: "https://d2lno2zmr6jxer.cloudfront.net"
+      dev: "http://localhost:1234"
+    OAUTH_REDIRECT_URI:
+      prd: https://api.jira.ctfapps.net/auth
+      dev: https://${env:JIRA_DEV_API_ID}.execute-api.us-east-1.amazonaws.com/dev/auth
+    BASE_URL:
+      prd: https://api.jira.ctfapps.net
+      dev: https://${env:JIRA_DEV_API_ID}.execute-api.us-east-1.amazonaws.com/dev
+  customDomain:
+    domainName: api.jira.ctfapps.net
+    stage: prd
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: ${opt:stage, 'dev'}
+  region: 'us-east-1'
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+
+  deploymentPrefix: sls-apps-jira-backend
+
+package:
+  include:
+    - built/**
+  exclude:
+    - .git/**
+    - "**/*.ts"
+
+functions:
+  oauth:
+    handler: built/index.handleOauthRequest
+    description: OAuth backend for Atlassian
+    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/atlassian_oauth_lambda
+    environment:
+      OAUTH_CREDENTIALS_SECRET_ID: apps/jira/${opt:stage, 'dev'}/oauth-credentials
+      OAUTH_REDIRECT_URI: ${self:custom.myEnvironment.OAUTH_REDIRECT_URI.${self:custom.myStage}}
+      FRONTEND_URL: ${self:custom.myEnvironment.FRONTEND_URL.${self:custom.myStage}}
+      OAUTH_TOKEN_EXCHANGE_ENDPOINT: https://auth.atlassian.com/oauth/token
+    events:
+      - http:
+          path: auth
+          method: get
+          cors: true
+          private: false
+  connect:
+    handler: built/index.handleConnectJsonRequest
+    description: connect.json for JIRA
+    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/jira_connect_lambda
+    environment:
+      BASE_URL: ${self:custom.myEnvironment.BASE_URL.${self:custom.myStage}}
+    events:
+      - http:
+          path: connect.json
+          method: get
+          cors: true
+          private: false
+
