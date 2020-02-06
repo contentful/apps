@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "start": "LOCAL_DEV=true ts-node src/index.ts",
-    "clean": "rimraf built",
+    "clean": "rimraf built static",
     "build-lambda": "npm run clean && tsc",
     "build-frontend": "cd ../frontend && npm run build",
+    "copy-static": "cp -R node_modules/smartling-frontend/build static",
     "build": "npm run clean && npm run build-lambda && npm run build-frontend",
     "lint": "tslint --project ./tsconfig.json",
     "lint-fix": "tslint --project ./tsconfig.json --fix",
@@ -14,7 +15,7 @@
     "test": "LOCAL_DEV=true jest **/*.spec.ts",
     "test:ci": "npm run build-frontend && npm run test",
     "test-dev": "LOCAL_DEV=true jest **/*.spec.ts --watch",
-    "deploy": "npm run build && sls deploy --stage prd"
+    "deploy": "npm run build && npm run copy-static && sls deploy --stage prd"
   },
   "dependencies": {
     "@types/express": "^4.17.2",
