@@ -34,7 +34,6 @@
     "test-dev": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
     "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'",
     "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage",
-    "xdeploy": "npm run build && contentful extension update --force",
     "configure": "contentful space use && contentful space environment use",
     "login": "contentful login",
     "logout": "contentful logout",
