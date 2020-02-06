@@ -49,7 +49,6 @@ workflows:
           filters:
             branches:
               only:
-                - copy-apps
                 - master
           requires:
             - test
