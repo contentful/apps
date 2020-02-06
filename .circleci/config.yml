@@ -10,14 +10,19 @@ jobs:
     steps:
       - checkout
       - run:
-          name: 'Test, lint and build apps'
+          name: Install dependencies
           command: |
-            ./apps/jira/test.sh
-            ./apps/smartling/test.sh
+            npm i
+            npm run bootstrap -- --concurrency=2
+      - run:
+          name: 'Test apps'
+          command: npm run test -- --concurrency=2
 
   deploy:
     docker:
       - image: circleci/node:10-stretch
+        environment:
+          STATIC_APPS_BUCKET: s3://cf-apps-jira
     steps:
       - checkout
       - run:
@@ -27,10 +32,13 @@ jobs:
           name: Install awscli
           command: sudo pip install awscli
       - run:
-          name: 'Deploy apps'
+          name: Install dependencies
           command: |
-            ./apps/jira/deploy.sh
-            ./apps/smartling/deploy.sh
+            npm i
+            npm run bootstrap -- --concurrency=2
+      - run:
+          name: 'Deploy apps'
+          command: npm run deploy -- --concurrency=1
 
 workflows:
   version: 2

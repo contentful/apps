@@ -29,9 +29,11 @@ package:
   include:
     - built/**
     - static/**
+    - node_modules/smartling-frontend/built/**
   exclude:
     - .git/**
     - "**/*.ts"
+    - node_modules/smartling-frontend/node_modules/**
 
 functions:
   app:

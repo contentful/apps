@@ -1,0 +1,17 @@
+{
+  "id": "bynder-assets",
+  "name": "Bynder Assets",
+  "srcdoc": "./build/index.html",
+  "fieldTypes": ["Object"],
+  "parameters": {
+    "installation": [
+      {
+        "id": "bynderURL",
+        "type": "Symbol",
+        "name": "Bynder URL",
+        "description": "Provide Bynder URL of your account.",
+        "required": true
+      }
+    ]
+  }
+}

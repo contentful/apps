@@ -30,10 +30,10 @@
     "build": "contentful-extension-scripts build",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
     "test": "TZ=UTC contentful-extension-scripts test --env=jsdom",
+    "test:ci": "npm run test",
     "test-dev": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
     "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'",
     "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage",
-    "deploy": "npm run build && contentful extension update --force",
     "configure": "contentful space use && contentful space environment use",
     "login": "contentful login",
     "logout": "contentful logout",
@@ -49,6 +49,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },
+  "private": true,
   "browserslist": [
     "last 5 Chrome version",
     "> 1%",

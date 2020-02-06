@@ -40,7 +40,7 @@ interface State {
 
 /** A wrapper for running the OAuth flow and passing a Jira client to the children */
 export default class AuthWrapper extends React.Component<Props, State> {
-  private expirationWatchInterval = 0;
+  private expirationWatchInterval: NodeJS.Timeout | undefined;
 
   static defaultProps = {
     mode: 'full'
@@ -108,13 +108,19 @@ export default class AuthWrapper extends React.Component<Props, State> {
     }
   };
 
+  clearExpirationInterval() {
+    if (this.expirationWatchInterval) {
+      clearInterval(this.expirationWatchInterval)
+    }
+  }
+
   watchForExpiration = () => {
-    clearInterval(this.expirationWatchInterval);
+    this.clearExpirationInterval();
     this.expirationWatchInterval = setInterval(this.refreshToken, 5000);
   };
 
   componentWillUnmount() {
-    clearInterval(this.expirationWatchInterval);
+    this.clearExpirationInterval();
   }
 
   render() {
