@@ -7,7 +7,7 @@
     "clean": "rimraf built static",
     "build-lambda": "npm run clean && tsc",
     "build-frontend": "cd ../frontend && npm run build",
-    "copy-static": "cp -R node_modules/smartling-frontend/build static",
+    "copy-static": "cp -Rv node_modules/smartling-frontend/build static",
     "build": "npm run clean && npm run build-lambda && npm run build-frontend",
     "lint": "tslint --project ./tsconfig.json",
     "lint-fix": "tslint --project ./tsconfig.json --fix",
