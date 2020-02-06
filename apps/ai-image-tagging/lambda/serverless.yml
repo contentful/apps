@@ -1,0 +1,39 @@
+service:
+  name: sls-apps-ai-image-tagging
+
+frameworkVersion: '>=1.0.0 <2.0.0'
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  customDomain:
+    domainName: ai-image-tagging.ctfapps.net
+    stage: prd
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: ${opt:stage, 'dev'}
+  region: 'us-east-1'
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: sls-apps-ai-image-tagging
+
+package:
+  exclude:
+    - node_modules/ai-image-tagging-frontend/node_modules/**
+
+functions:
+  app:
+    handler: index.handler
+    events:
+      - http:
+          path: /
+          method: ANY
+      - http:
+          path: /{proxy+}
+          method: ANY
