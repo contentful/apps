@@ -8,7 +8,8 @@
     "lint-fix": "tslint --project ./tsconfig.json --fix",
     "prettify": "prettier --config ./.prettierrc --write '{bin/*,lib/**/*.ts,typings/**.*.ts,test/**/*.ts,*.json,*.ts}'",
     "test": "ts-mocha '**/*.spec.ts'",
-    "deploy": "sls deploy --stage prd"
+    "test:ci": "npm run test",
+    "deploy": "npm run build && sls deploy --stage prd"
   },
   "dependencies": {
     "aws-sdk": "^2.581.0",

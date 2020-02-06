@@ -16,7 +16,7 @@ interface State {
 }
 /** The Jira sidebar component */
 export default class Jira extends React.Component<Props, State> {
-  private issueInterval = 0;
+  private issueInterval: NodeJS.Timeout | undefined;
 
   constructor(props: Props) {
     super(props);
@@ -35,7 +35,13 @@ export default class Jira extends React.Component<Props, State> {
   }
 
   componentWillUnmount() {
-    clearInterval(this.issueInterval);
+    this.clearIssueInterval();
+  }
+
+  clearIssueInterval() {
+    if (this.issueInterval) {
+      clearInterval(this.issueInterval)
+    }
   }
 
   sortIssues = (issues: FormattedIssue[]) => {
