@@ -22,7 +22,7 @@ jobs:
     docker:
       - image: circleci/node:10-stretch
         environment:
-          STATIC_APPS_BUCKET: s3://cf-apps-jira
+          STATIC_APPS_BUCKET: s3://cf-apps-static
     steps:
       - checkout
       - run:
