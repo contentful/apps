@@ -1,6 +1,7 @@
 {
   "name": "bynder-assets",
   "version": "1.0.0",
+  "private": true,
   "devDependencies": {
     "@babel/core": "7.3.4",
     "@babel/plugin-proposal-class-properties": "7.3.4",

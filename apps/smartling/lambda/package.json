@@ -1,6 +1,7 @@
 {
   "name": "smartling-lambda",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "start": "LOCAL_DEV=true ts-node src/index.ts",
     "clean": "rimraf built",
