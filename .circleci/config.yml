@@ -16,7 +16,7 @@ jobs:
             npm run bootstrap -- --concurrency=2
       - run:
           name: 'Test apps'
-          command: npm run test
+          command: npm run test -- --concurrency=2
 
   deploy:
     docker:
@@ -38,7 +38,7 @@ jobs:
             npm run bootstrap -- --concurrency=2
       - run:
           name: 'Deploy apps'
-          command: npm run deploy
+          command: npm run deploy -- --concurrency=1
 
 workflows:
   version: 2
