@@ -107,7 +107,11 @@ export function makeApp(fetchFn: any, issuer: any) {
     );
   });
 
-  app.use('/frontend', express.static(path.resolve(__dirname, '../node_modules/smartling-frontend/build')));
+  if (process.env.LOCAL_DEV === 'true') {
+    app.use('/frontend', express.static(path.resolve(__dirname, '../node_modules/smartling-frontend/build')));
+  } else {
+    app.use('/frontend', express.static(path.resolve(__dirname, '../../static')));
+  }
 
   app.use((_req, res) => res.status(404).send('Not found'));
 
