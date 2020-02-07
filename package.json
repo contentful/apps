@@ -3,7 +3,8 @@
   "scripts": {
     "test": "lerna run test:ci",
     "bootstrap": "lerna bootstrap",
-    "deploy": "lerna run deploy"
+    "deploy": "lerna run deploy",
+    "postinstall": "npm run bootstrap"
   },
   "dependencies": {
     "lerna": "^3.20.2"
