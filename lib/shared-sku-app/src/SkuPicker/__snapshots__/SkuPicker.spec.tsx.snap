@@ -229,7 +229,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
           tabindex="-1"
         >
           <svg
-            class="Icon__Icon___38Epv Button__Button__icon___2YX5- Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw Button__Button__icon___2YX5-"
             data-test-id="cf-ui-icon"
             height="18"
             viewBox="0 0 24 24"
@@ -273,7 +273,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
           tabindex="-1"
         >
           <svg
-            class="Icon__Icon___38Epv Button__Button__icon___2YX5- Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw Button__Button__icon___2YX5-"
             data-test-id="cf-ui-icon"
             height="18"
             viewBox="0 0 24 24"
