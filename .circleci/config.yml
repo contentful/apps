@@ -15,7 +15,7 @@ jobs:
             npm i
       - run:
           name: 'Test apps'
-          command: npm run test -- --concurrency=2
+          command: npm run test -- --concurrency=1
 
   deploy:
     docker:

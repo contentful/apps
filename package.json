@@ -2,7 +2,7 @@
   "name": "apps",
   "scripts": {
     "test": "lerna run test:ci",
-    "bootstrap": "lerna bootstrap",
+    "bootstrap": "lerna bootstrap --no-ci --concurrency=1",
     "deploy": "lerna run deploy",
     "postinstall": "npm run bootstrap"
   },
