@@ -22,6 +22,11 @@ provider:
   deploymentBucket:
     name: cf-apps-serverless-deployment
   deploymentPrefix: sls-apps-ai-image-tagging
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+       - rekognition:DetectLabels
+      Resource: "*"
 
 package:
   exclude:
