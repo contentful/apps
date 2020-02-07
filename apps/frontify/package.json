@@ -8,8 +8,8 @@
     "@babel/plugin-transform-runtime": "7.3.4",
     "@babel/preset-env": "7.3.4",
     "@babel/preset-react": "7.0.0",
-    "@contentful/contentful-extension-scripts": "^0.14.0",
-    "contentful-cli": "^0.36.0"
+    "@contentful/contentful-extension-scripts": "^0.15.1",
+    "contentful-cli": "1.2.12"
   },
   "dependencies": {
     "shared-dam-app": "^1.0.0"

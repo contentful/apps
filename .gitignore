@@ -5,3 +5,4 @@ dist
 .cache
 tags
 **/.coverage/**
+lerna-debug.log
