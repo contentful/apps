@@ -175,7 +175,7 @@ exports[`SortableList should render successfully 1`] = `
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv IconButton__IconButton__icon___3yZQN Icon__Icon--small___1yGZK undefined"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
               data-test-id="cf-ui-icon"
               height="24"
               viewBox="0 0 24 24"
@@ -371,7 +371,7 @@ exports[`SortableList should render successfully 1`] = `
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv IconButton__IconButton__icon___3yZQN Icon__Icon--small___1yGZK undefined"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
               data-test-id="cf-ui-icon"
               height="24"
               viewBox="0 0 24 24"
@@ -567,7 +567,7 @@ exports[`SortableList should render successfully 1`] = `
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv IconButton__IconButton__icon___3yZQN Icon__Icon--small___1yGZK undefined"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
               data-test-id="cf-ui-icon"
               height="24"
               viewBox="0 0 24 24"

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK, CollectionResponse } from 'contentful-ui-extensions-sdk';
 import {
   Heading,
   Paragraph,
@@ -111,8 +111,8 @@ export default class AppConfig extends React.Component<Props, State> {
       app.getParameters()
     ]);
 
-    const contentTypes = contentTypesResponse.items as ContentType[];
-    const editorInterfaces = eisResponse.items as EditorInterface[];
+    const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items
+    const editorInterfaces = (eisResponse as CollectionResponse<EditorInterface>).items
 
     const compatibleFields = getCompatibleFields(contentTypes);
     const filteredContentTypes = contentTypes.filter(ct => {
