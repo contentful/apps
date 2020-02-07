@@ -8,7 +8,7 @@
     "@babel/plugin-transform-runtime": "7.3.4",
     "@babel/preset-env": "7.3.4",
     "@babel/preset-react": "7.0.0",
-    "@contentful/contentful-extension-scripts": "0.14.1",
+    "@contentful/contentful-extension-scripts": "^0.15.1",
     "@contentful/eslint-config-extension": "0.2.0",
     "@testing-library/react": "8.0.4",
     "@types/gapi": "0.0.39",
@@ -18,7 +18,7 @@
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "@types/webpack-env": "1.13.9",
-    "contentful-cli": "0.33.2",
+    "contentful-cli": "1.2.12",
     "cssnano": "4.1.10",
     "eslint": "^6.0.1",
     "typescript": "3.5.2"
