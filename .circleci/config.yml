@@ -13,7 +13,6 @@ jobs:
           name: Install dependencies
           command: |
             npm i
-            npm run bootstrap -- --concurrency=2
       - run:
           name: 'Test apps'
           command: npm run test -- --concurrency=2
@@ -35,7 +34,6 @@ jobs:
           name: Install dependencies
           command: |
             npm i
-            npm run bootstrap -- --concurrency=2
       - run:
           name: 'Deploy apps'
           command: npm run deploy -- --concurrency=1
