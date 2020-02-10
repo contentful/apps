@@ -19,6 +19,9 @@ const sdk = {
   },
   window: {
     startAutoResizer: jest.fn()
+  },
+  app: {
+    setReady: jest.fn()
   }
 };
 
@@ -43,6 +46,11 @@ describe('App', () => {
     expect(sdk.window.startAutoResizer).toHaveBeenCalled();
   });
 
+  it('should call sdk ready fn', () => {
+    renderComponent(sdk);
+    expect(sdk.app.setReady).toHaveBeenCalled();
+  });
+
   it('should call setValue on every change in input and removeValue when input gets empty', () => {
     const { getByTestId } = renderComponent(sdk);
 
@@ -58,5 +66,12 @@ describe('App', () => {
 
     expect(sdk.field.setValue).toHaveBeenCalledTimes(1);
     expect(sdk.field.removeValue).toHaveBeenCalledTimes(1);
+  });
+
+  describe('#render', () => {
+    it('should render the extension field view', () => {
+      const { container } = renderComponent(sdk);
+      expect(container).toMatchSnapshot();
+    });
   });
 });
