@@ -50,7 +50,7 @@ exports[`SortableList should render successfully 1`] = `
             class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
             data-test-id="cf-ui-subheading"
           >
-            28a7442d
+            men-regular
           </h2>
         </div>
       </section>
@@ -160,7 +160,7 @@ exports[`SortableList should render successfully 1`] = `
             class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
             data-test-id="cf-ui-subheading"
           >
-            38a7442d
+            women-regular
           </h2>
         </div>
       </section>
@@ -270,7 +270,7 @@ exports[`SortableList should render successfully 1`] = `
             class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
             data-test-id="cf-ui-subheading"
           >
-            48a7442d
+            kids-regular
           </h2>
         </div>
       </section>

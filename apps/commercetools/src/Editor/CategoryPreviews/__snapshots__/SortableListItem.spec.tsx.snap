@@ -23,7 +23,7 @@ exports[`SortableListItem should render successfully 1`] = `
           class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
           data-test-id="cf-ui-subheading"
         >
-          28a7442d
+          men-regular
         </h2>
       </div>
     </section>
@@ -106,7 +106,7 @@ exports[`SortableListItem should render successfully the error variation for mis
           class="Heading__Heading___83D3K css-by3awh f36-margin-bottom--m"
           data-test-id="cf-ui-heading"
         >
-          men-regular
+          28a7442d
         </h1>
         <div
           class="Tag__Tag___Y-myd Tag__Tag--negative___12luW"
