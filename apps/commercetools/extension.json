@@ -1,5 +1,5 @@
 {
-  "id": "commercetools-sku",
+  "id": "commercetools",
   "name": "Commercetools",
   "fieldTypes": ["Symbol", "Symbols"],
   "srcdoc": "./build/index.html",

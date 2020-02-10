@@ -7,7 +7,14 @@
     "rootDir": "./src",
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "lib": ["dom", "es2015"],
-    "resolveJsonModule": true
-  }
+    "lib": [
+      "dom",
+      "es2015"
+    ],
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "files": [
+    "custom.d.ts"
+  ],
 }
