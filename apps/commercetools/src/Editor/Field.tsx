@@ -47,13 +47,11 @@ function makeCTAText(fieldType: string, pickerMode: "category" | "product") {
     pickerMode === "category"
       ? isArray
         ? "categories"
-        : "category"
+        : "a category"
       : isArray
       ? "products"
-      : "product";
-  return fieldType === "Array"
-    ? `Select ${beingSelected}`
-    : `Select a ${beingSelected}`;
+      : "a product";
+  return `Select ${beingSelected}`;
 }
 
 export default class Field extends React.Component<Props, State> {
