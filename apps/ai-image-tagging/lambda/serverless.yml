@@ -7,6 +7,7 @@ plugins:
   - serverless-domain-manager
 
 custom:
+  tableName: ${opt:stage, self:provider.stage}-AiImageTaggingUsage
   customDomain:
     domainName: ai-image-tagging.ctfapps.net
     stage: prd
@@ -27,6 +28,14 @@ provider:
       Action:
        - rekognition:DetectLabels
       Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+      Resource:
+        - "Fn::GetAtt": [ UsageTable, Arn ]
 
 package:
   exclude:
@@ -42,3 +51,21 @@ functions:
       - http:
           path: /{proxy+}
           method: ANY
+
+resources:
+  Resources:
+    UsageTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: period
+            AttributeType: S
+          - AttributeName: spaceId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: period
+            KeyType: HASH
+          - AttributeName: spaceId
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
