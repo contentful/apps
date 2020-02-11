@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
-    "build": "contentful-extension-scripts build",
+    "build": "contentful-extension-scripts build --no-inline",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx",
     "test": "contentful-extension-scripts test --env=jsdom --watch",
     "test:ci": "contentful-extension-scripts test --env=jsdom --coverage"
