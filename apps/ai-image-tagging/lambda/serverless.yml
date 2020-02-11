@@ -61,13 +61,13 @@ resources:
       Properties:
         TableName: ${self:custom.tableName}
         AttributeDefinitions:
-          - AttributeName: period
-            AttributeType: S
           - AttributeName: spaceId
             AttributeType: S
+          - AttributeName: period
+            AttributeType: N
         KeySchema:
-          - AttributeName: period
-            KeyType: HASH
           - AttributeName: spaceId
+            KeyType: HASH
+          - AttributeName: period
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST

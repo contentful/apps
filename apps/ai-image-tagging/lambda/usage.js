@@ -6,10 +6,8 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports = async spaceId => {
   const now = new Date();
-  const year = `${now.getFullYear()}`;
-  const month = `${now.getMonth()+1}`;
-  const formattedMonth = month.length === 1 ? `0${month}` : month;
-  const period = [year, formattedMonth].join('-');
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const period = firstDay.getTime();
 
   const { Attributes } = await documentClient.update({
     TableName: process.env.TABLE_NAME,
