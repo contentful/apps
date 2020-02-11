@@ -252,7 +252,7 @@ export default class AppConfig extends React.Component<Props, State> {
           {this.renderApp()}
         </div>
         <div className={styles.icon}>
-          <img src={(logo as unknown) as string} alt="App logo" />
+          <img src={logo} alt="App logo" />
         </div>
       </>
     );
