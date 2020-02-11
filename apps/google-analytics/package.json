@@ -26,7 +26,7 @@
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
-    "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
+    "lint:fixme": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
     "deploy": "npm run build && aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/google-analytics --acl public-read"
   },
   "dependencies": {
