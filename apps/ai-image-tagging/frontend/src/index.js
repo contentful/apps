@@ -25,7 +25,7 @@ export class App extends React.Component {
   }
 
   render() {
-    return <AITagView entries={this.props.sdk.entry.fields} />;
+    return <AITagView entries={this.props.sdk.entry.fields} space={ this.props.sdk.space} />;
   }
 }
 

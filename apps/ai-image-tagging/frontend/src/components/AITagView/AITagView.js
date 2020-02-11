@@ -3,6 +3,11 @@ import { CheckboxField, TextInput, Pill, Button } from '@contentful/forma-36-rea
 
 import { styles } from './styles';
 
+async function callAPI(url) {
+  const data = await fetch(`http://localhot:3000/tags/${url}`).then(res => res.json());
+  return data.tags;
+}
+
 export class AITagView extends React.Component {
 
   constructor(props){
@@ -58,11 +63,13 @@ export class AITagView extends React.Component {
   }
 
   fetchTags =  async () => {
+    const file = await this.props.space.getAsset(this.props.entries.image.getValue().sys.id);
+    const url = file.fields.file['en-US'].url.replace(/^\/\/images.ctfassets.net\//, '');
+
     this.setState({ isFetchingTags: true });
+
     try {
-      const aiTags = await  new Promise(res => {
-        setTimeout(() => {res([ "Devs", "People", "Group Picture" ])}, 1000);
-      });
+      const aiTags = await callAPI(url);
 
       // upload new tags
       const newTags = this.state.overwrite ? aiTags : [...aiTags, ...this.state.tags];
@@ -71,6 +78,7 @@ export class AITagView extends React.Component {
         tags: newTags
       });
     } catch(e) {
+      console.log(e)
     } finally {
       this.setState({ isFetchingTags: false });
     }
