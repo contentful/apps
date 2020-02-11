@@ -17,7 +17,7 @@
     "eslint": "^6.0.1"
   },
   "scripts": {
-    "start": "contentful-extension-scripts start --serveOnly",
+    "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx",
     "test": "contentful-extension-scripts test --env=jsdom --watch",

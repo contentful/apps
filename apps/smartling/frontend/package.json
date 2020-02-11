@@ -27,7 +27,7 @@
     "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
-    "start": "contentful-extension-scripts start --serveOnly",
+    "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
     "test": "TZ=UTC contentful-extension-scripts test --env=jsdom",
