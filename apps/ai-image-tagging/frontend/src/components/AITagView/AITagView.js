@@ -114,6 +114,7 @@ export class AITagView extends React.Component {
         }
       </div>
       <Button
+        id="fetch-tag-btn"
         className={ styles.btn }
         buttonType="primary"
         type="button"
