@@ -2,7 +2,6 @@ import { setup, renderSkuPicker } from 'shared-sku-app';
 import { fetchProductPreviews, makeProductSearchResolver } from './productResolvers';
 
 import logo from './logo.svg';
-import descriptor from '../extension.json';
 
 const DIALOG_ID = 'dialog-root';
 
@@ -64,7 +63,22 @@ setup({
   description:
     'The Shopify app allows editors to select products from their Shopify account and reference them inside of Contentful entries.',
   color: '#212F3F',
-  parameterDefinitions: descriptor.parameters.installation,
+  parameterDefinitions: [
+    {
+      "id": "storefrontAccessToken",
+      "name": "Storefront Access Token",
+      "description": "The storefront access token to your Shopify store",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "apiEndpoint",
+      "name": "API Endpoint",
+      "description": "The Shopify API endpoint",
+      "type": "Symbol",
+      "required": true
+    }
+  ],
   fetchProductPreviews,
   renderDialog,
   openDialog,

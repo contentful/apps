@@ -40,8 +40,7 @@
   "scripts": {
     "tsc": "tsc -p ./ --noEmit",
     "test": "contentful-extension-scripts test --env=jsdom --watch",
-    "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage --passWithNoTests",
-    "test:ci": "npm run test:coverage"
+    "test:ci": "contentful-extension-scripts test --env=jsdom --coverage"
   },
   "browserslist": [
     "last 5 Chrome version",

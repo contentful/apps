@@ -2,7 +2,6 @@ import pick from 'lodash/pick';
 import { setup } from 'shared-dam-app';
 
 import logo from './logo.svg';
-import descriptor from '../extension.json';
 
 const BYNDER_SDK_URL =
   'https://d8ejoa1fys2rk.cloudfront.net/modules/compactview/includes/js/client-1.5.0.min.js';
@@ -122,7 +121,15 @@ setup({
   color: '#0af',
   description:
     'The Bynder app is a widget that allows editors to select media from their Bynder account. Select or upload a file on Bynder and designate the assets that you want your entry to reference.',
-  parameterDefinitions: descriptor.parameters.installation,
+  parameterDefinitions: [
+    {
+      "id": "bynderURL",
+      "type": "Symbol",
+      "name": "Bynder URL",
+      "description": "Provide Bynder URL of your account.",
+      "required": true
+    }
+  ],
   makeThumbnail,
   renderDialog,
   openDialog,

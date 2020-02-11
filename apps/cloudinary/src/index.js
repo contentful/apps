@@ -4,7 +4,6 @@ import { Cloudinary as cloudinaryCore } from 'cloudinary-core';
 import { setup } from 'shared-dam-app';
 
 import logo from './logo.svg';
-import descriptor from '../extension.json';
 
 const VALID_IMAGE_FORMATS = ['svg', 'jpg', 'png', 'gif', 'jpeg'];
 const MAX_FILES_UPPER_LIMIT = 25;
@@ -127,7 +126,30 @@ setup({
   description:
     'The Cloudinary app is a widget that allows editors to select media from their Cloudinary account. Select or upload a file on Cloudinary and designate the assets that you want your entry to reference.',
   color: '#F4B21B',
-  parameterDefinitions: descriptor.parameters.installation,
+  parameterDefinitions: [
+    {
+      "id": "cloudName",
+      "name": "Cloud name",
+      "description": "The cloud name of the account to access.",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "apiKey",
+      "name": "API key",
+      "description": "The account API key.",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "maxFiles",
+      "name": "Max number of files",
+      "description": "The max number of files that can be added to a single field. Must be between 1 and 25",
+      "type": "Number",
+      "required": false,
+      "default": 10
+    }
+  ],
   makeThumbnail,
   renderDialog,
   openDialog,

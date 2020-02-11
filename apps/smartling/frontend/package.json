@@ -27,18 +27,13 @@
     "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
-    "start": "contentful-extension-scripts start --serveOnly",
-    "build": "contentful-extension-scripts build",
+    "start": "contentful-extension-scripts start --serve-only",
+    "build": "contentful-extension-scripts build --no-inline",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
     "test": "TZ=UTC contentful-extension-scripts test --env=jsdom",
-    "test:ci": "npm run test",
-    "test-dev": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
-    "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'",
-    "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage",
-    "configure": "contentful space use && contentful space environment use",
-    "login": "contentful login",
-    "logout": "contentful logout",
-    "help": "contentful-extension-scripts help"
+    "test:ci": "contentful-extension-scripts test --env=jsdom --coverage",
+    "test:dev": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
+    "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'"
   },
   "dependencies": {
     "@contentful/forma-36-fcss": "^0.0.20",
