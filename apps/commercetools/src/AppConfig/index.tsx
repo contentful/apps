@@ -9,8 +9,6 @@ import {
   TextField,
   Form
 } from "@contentful/forma-36-react-components";
-import tokens from "@contentful/forma-36-tokens";
-import { css } from "emotion";
 
 import FieldSelector from "./FieldSelector";
 
@@ -28,10 +26,13 @@ import {
   CompatibleFields,
   FieldsConfig
 } from "./fields";
-import { validateParameters } from "./validateParameters";
+import { validateParameters } from "./parameters";
+
+import { styles } from "./styles";
 
 import { Hash } from "../interfaces";
 import logo from "../logo.svg";
+import { FieldTypeInstructions } from "./FieldTypeInstructions";
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -43,49 +44,6 @@ interface State {
   selectedFields: FieldsConfig;
   parameters: Hash;
 }
-
-const styles = {
-  body: css({
-    height: "auto",
-    minHeight: "65vh",
-    margin: "0 auto",
-    marginTop: tokens.spacingXl,
-    padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
-    maxWidth: tokens.contentWidthText,
-    backgroundColor: tokens.colorWhite,
-    zIndex: 2,
-    boxShadow: "0px 0px 20px rgba(0, 0, 0, 0.1)",
-    borderRadius: "2px"
-  }),
-  background: css({
-    display: "block",
-    position: "absolute",
-    zIndex: -1,
-    top: 0,
-    width: "100%",
-    height: "300px",
-    backgroundColor: "#213C45"
-  }),
-  section: css({
-    margin: `${tokens.spacingXl} 0`
-  }),
-  splitter: css({
-    marginTop: tokens.spacingL,
-    marginBottom: tokens.spacingL,
-    border: 0,
-    height: "1px",
-    backgroundColor: tokens.colorElementMid
-  }),
-  icon: css({
-    display: "flex",
-    justifyContent: "center",
-    "> img": {
-      display: "block",
-      width: "70px",
-      margin: `${tokens.spacingXl} 0`
-    }
-  })
-};
 
 export default class AppConfig extends React.Component<Props, State> {
   state = {
@@ -165,7 +123,7 @@ export default class AppConfig extends React.Component<Props, State> {
     this.setState({ selectedFields });
   };
 
-  renderApp() {
+  render() {
     const {
       contentTypes,
       compatibleFields,
@@ -174,71 +132,7 @@ export default class AppConfig extends React.Component<Props, State> {
     } = this.state;
 
     return (
-      <>
-        <Typography>
-          <Heading>Configuration</Heading>
-          <Form>
-            {parameterDefinitions.map(def => {
-              const key = `config-input-${def.id}`;
-
-              return (
-                <TextField
-                  required={def.required}
-                  key={key}
-                  id={key}
-                  name={key}
-                  labelText={def.name}
-                  textInputProps={{
-                    width: "large",
-                    maxLength: 255
-                  }}
-                  helpText={def.description}
-                  value={parameters[def.id]}
-                  onChange={this.onParameterChange.bind(this, def.id)}
-                />
-              );
-            })}
-          </Form>
-          <hr className={styles.splitter} />
-        </Typography>
-        <Typography>
-          <Heading>Assign to fields</Heading>
-          {contentTypes.length > 0 ? (
-            <Paragraph>
-              This app can only be used with <strong>Short text</strong> or{" "}
-              <strong>Short text, list</strong> fields. Select which fields you’d
-              like to enable for this app.
-            </Paragraph>
-          ) : (
-            <>
-              <Paragraph>
-                This app can only be used with <strong>Short text</strong> or{" "}
-                <strong>Short text, list</strong> fields.
-              </Paragraph>
-              <Paragraph>
-                There are{" "}
-                <strong>
-                  no content types with Short text or Short text, list
-                </strong>{" "}
-                fields in this environment. You can add one here later.
-              </Paragraph>
-            </>
-          )}
-          <FieldSelector
-            contentTypes={contentTypes}
-            compatibleFields={compatibleFields}
-            selectedFields={selectedFields}
-            onSelectedFieldsChange={this.onSelectedFieldsChange}
-          />
-        </Typography>
-      </>
-    );
-  }
-
-  render() {
-    return (
-      <>
-        <div className={styles.background} />
+      <div className={styles.background}>
         <div className={styles.body}>
           <Typography>
             <Heading>About Commercetools</Heading>
@@ -247,14 +141,49 @@ export default class AppConfig extends React.Component<Props, State> {
               Commercetools account and reference them inside of Contentful
               entries.
             </Paragraph>
+
             <hr className={styles.splitter} />
+
+            <Heading>Configuration</Heading>
+            <Form>
+              {parameterDefinitions.map(def => {
+                const key = `config-input-${def.id}`;
+                return (
+                  <TextField
+                    required={def.required}
+                    key={key}
+                    id={key}
+                    name={key}
+                    labelText={def.name}
+                    textInputProps={{
+                      width: "large",
+                      maxLength: 255
+                    }}
+                    helpText={def.description}
+                    value={parameters[def.id]}
+                    onChange={this.onParameterChange.bind(this, def.id)}
+                  />
+                );
+              })}
+            </Form>
+
+            <hr className={styles.splitter} />
+
+            <FieldTypeInstructions
+              contentTypesFound={contentTypes.length > 0}
+            />
+            <FieldSelector
+              contentTypes={contentTypes}
+              compatibleFields={compatibleFields}
+              selectedFields={selectedFields}
+              onSelectedFieldsChange={this.onSelectedFieldsChange}
+            />
           </Typography>
-          {this.renderApp()}
         </div>
         <div className={styles.icon}>
           <img src={logo} alt="App logo" />
         </div>
-      </>
+      </div>
     );
   }
 }

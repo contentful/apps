@@ -1,6 +1,6 @@
 import React from "react";
 import { ToggleButton } from "@contentful/forma-36-react-components";
-import { PickerMode } from "../interfaces";
+import { PickerMode } from "../../interfaces";
 import { css } from "emotion";
 import tokens from "@contentful/forma-36-tokens";
 
