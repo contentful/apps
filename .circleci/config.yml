@@ -11,11 +11,13 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: |
-            npm i
+          command: npm i
       - run:
-          name: 'Test apps'
-          command: npm run test -- --concurrency=1
+          name: Lint
+          command: npm run lint
+      - run:
+          name: Test
+          command: npm run test
 
   deploy:
     docker:
