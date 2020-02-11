@@ -218,7 +218,7 @@ export default class AppConfig extends React.Component<Props, State> {
               <Paragraph>
                 There are{" "}
                 <strong>
-                  no content types with Short text or Short text list
+                  no content types with Short text or Short text, list
                 </strong>{" "}
                 fields in this environment. You can add one here later.
               </Paragraph>
