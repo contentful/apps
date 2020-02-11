@@ -213,7 +213,7 @@ export default class AppConfig extends React.Component<Props, State> {
             <>
               <Paragraph>
                 This app can only be used with <strong>Short text</strong> or{" "}
-                <strong>Short text list</strong> fields.
+                <strong>Short text, list</strong> fields.
               </Paragraph>
               <Paragraph>
                 There are{" "}
