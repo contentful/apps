@@ -1,14 +1,26 @@
-import { Hash } from './../interfaces';
-import { createClient } from '@commercetools/sdk-client';
-import { createAuthMiddlewareForClientCredentialsFlow } from '@commercetools/sdk-middleware-auth';
-import { createHttpMiddleware } from '@commercetools/sdk-middleware-http';
-import { createQueueMiddleware } from '@commercetools/sdk-middleware-queue';
+import { Hash } from "./../interfaces";
+import { createClient } from "@commercetools/sdk-client";
+import { createAuthMiddlewareForClientCredentialsFlow } from "@commercetools/sdk-middleware-auth";
+import { createHttpMiddleware } from "@commercetools/sdk-middleware-http";
+import { createQueueMiddleware } from "@commercetools/sdk-middleware-queue";
+
+let commercetoolsClient = null;
 
 export function makeCommerceToolsClient({
   parameters: {
-    installation: { apiEndpoint, authApiEndpoint, projectKey, clientId, clientSecret }
+    installation: {
+      apiEndpoint,
+      authApiEndpoint,
+      projectKey,
+      clientId,
+      clientSecret
+    }
   }
 }: Hash) {
+  if (commercetoolsClient) {
+    return commercetoolsClient;
+  }
+
   const authMiddleware = createAuthMiddlewareForClientCredentialsFlow({
     host: authApiEndpoint,
     projectKey: projectKey,
@@ -26,7 +38,9 @@ export function makeCommerceToolsClient({
     concurrency: 5
   });
 
-  return createClient({
+  commercetoolsClient = createClient({
     middlewares: [authMiddleware, httpMiddleware, queueMiddleware]
   });
+
+  return commercetoolsClient;
 }
