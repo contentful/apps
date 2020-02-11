@@ -27,7 +27,7 @@ export function toAppParameters(
     const value = inputValues[def.id];
     return {
       ...acc,
-      [def.id]: def.type === "Number" ? parseInt(value, 10) : value
+      [def.id]: value
     };
   }, {});
 }

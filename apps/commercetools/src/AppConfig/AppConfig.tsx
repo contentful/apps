@@ -172,41 +172,35 @@ export default class AppConfig extends React.Component<Props, State> {
       selectedFields,
       parameters
     } = this.state;
-    const parameterDefinitions = parameterDefinitions as Hash[];
-    const hasConfigurationOptions =
-      parameterDefinitions && parameterDefinitions.length > 0;
 
     return (
       <>
-        {hasConfigurationOptions && (
-          <Typography>
-            <Heading>Configuration</Heading>
-            <Form>
-              {parameterDefinitions.map(def => {
-                const key = `config-input-${def.id}`;
+        <Typography>
+          <Heading>Configuration</Heading>
+          <Form>
+            {parameterDefinitions.map(def => {
+              const key = `config-input-${def.id}`;
 
-                return (
-                  <TextField
-                    required={def.required}
-                    key={key}
-                    id={key}
-                    name={key}
-                    labelText={def.name}
-                    textInputProps={{
-                      width: def.type === "Symbol" ? "large" : "medium",
-                      type: def.type === "Symbol" ? "text" : "number",
-                      maxLength: 255
-                    }}
-                    helpText={def.description}
-                    value={parameters[def.id]}
-                    onChange={this.onParameterChange.bind(this, def.id)}
-                  />
-                );
-              })}
-            </Form>
-            <hr className={styles.splitter} />
-          </Typography>
-        )}
+              return (
+                <TextField
+                  required={def.required}
+                  key={key}
+                  id={key}
+                  name={key}
+                  labelText={def.name}
+                  textInputProps={{
+                    width: "large",
+                    maxLength: 255
+                  }}
+                  helpText={def.description}
+                  value={parameters[def.id]}
+                  onChange={this.onParameterChange.bind(this, def.id)}
+                />
+              );
+            })}
+          </Form>
+          <hr className={styles.splitter} />
+        </Typography>
         <Typography>
           <Heading>Assign to fields</Heading>
           {contentTypes.length > 0 ? (

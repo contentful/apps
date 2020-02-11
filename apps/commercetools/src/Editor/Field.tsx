@@ -145,7 +145,6 @@ export default class Field extends React.Component<Props, State> {
                 disabled={editingDisabled}
                 categories={data}
                 onChange={this.updateStateValue}
-                config={config}
                 fetchCategoryPreviews={categories => fetchCategoryPreviews(categories, config)}
               />
             ) : (

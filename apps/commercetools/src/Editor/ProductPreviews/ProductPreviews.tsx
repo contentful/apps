@@ -5,7 +5,7 @@ import difference from 'lodash/difference';
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { mapSort } from '../../utils';
 import { SortableList } from './SortableList';
-import { Hash, PreviewsFn, Product } from '../../interfaces';
+import { PreviewsFn, Product } from '../../interfaces';
 
 interface Props {
   sdk: FieldExtensionSDK;

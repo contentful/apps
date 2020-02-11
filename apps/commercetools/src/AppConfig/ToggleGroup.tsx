@@ -5,7 +5,7 @@ import { css } from "emotion";
 import tokens from "@contentful/forma-36-tokens";
 
 const styles = {
-  toggleGroup: isPickerModeSetToSku =>
+  toggleGroup: (isPickerModeSetToSku: boolean) =>
     css({
       marginTop: tokens.spacingXs,
       marginLeft: tokens.spacingL,
