@@ -5,6 +5,8 @@ const path = require('path');
 const express = require('express');
 
 const tag = require('./tag');
+const reportUsage = require('./usage');
+
 const app = express();
 
 const FRONTEND = path.dirname(require.resolve('ai-image-tagging-frontend'));
@@ -15,8 +17,16 @@ app.use('/tags', async (req, res) => {
     return;
   }
 
-  // TODO record usage for space:
-  // const [, spaceId] = req.path.split('/')
+  const [, spaceId] = req.path.split('/')
+
+  try {
+    const count = await reportUsage(spaceId);
+    console.log(`Request for ${spaceId}. Current usage: ${count}.`);
+    // TODO: we could potentially block the request
+    // if the usage limit is exceeded.
+  } catch (err) {
+    console.error(`Failed to report usage for ${spaceId}.`, err);
+  }
 
   try {
     res.json({ tags: await tag(req.path) })

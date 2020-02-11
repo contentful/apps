@@ -44,6 +44,8 @@ package:
 functions:
   app:
     handler: index.handler
+    environment:
+      TABLE_NAME: ${self:custom.tableName}
     events:
       - http:
           path: /
