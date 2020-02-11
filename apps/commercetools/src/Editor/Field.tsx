@@ -78,17 +78,12 @@ export default class Field extends React.Component<Props, State> {
     const { sdk } = this.props;
     const contentTypeId = sdk.contentType.sys.id;
     const fieldId = sdk.field.id;
-    const pickerMode = get(sdk, [
-      "parameters",
-      "installation",
-      "fieldsConfig",
-      contentTypeId,
-      fieldId
-    ]);
 
-    // Product is the value expected by the CommerceTools picker widget
-    // in order to do SKU picking.
-    return pickerMode === "category" ? "category" : "product";
+    return get(
+      sdk,
+      ["parameters", "installation", "fieldsConfig", contentTypeId, fieldId],
+      "product"
+    );
   };
 
   updateStateValue = (skus: string[]) => {

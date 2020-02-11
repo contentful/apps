@@ -1,7 +1,6 @@
 import * as React from "react";
 import get from "lodash/get";
 import set from "lodash/set";
-// eslint-disable-next-line you-dont-need-lodash-underscore/omit
 import omit from "lodash/omit";
 import tokens from "@contentful/forma-36-tokens";
 import { css } from "emotion";
@@ -14,6 +13,7 @@ import {
 
 import { ToggleGroup } from "./ToggleGroup";
 import { ContentType, CompatibleFields, FieldsConfig } from "./fields";
+import { PickerMode } from "../interfaces";
 
 const styles = {
   fieldGroup: css({
@@ -52,7 +52,7 @@ export default class FieldSelector extends React.Component<Props> {
     );
   };
 
-  onSelectedFieldTypeChange(ctId: string, fieldId: string, type: string) {
+  onSelectedFieldTypeChange(ctId: string, fieldId: string, type: PickerMode) {
     this.props.onSelectedFieldsChange(
       set(Object.assign({}, this.props.selectedFields), [ctId, fieldId], type)
     );
@@ -91,7 +91,7 @@ export default class FieldSelector extends React.Component<Props> {
                           this,
                           ct.sys.id,
                           field.id,
-                          "sku"
+                          "product"
                         )}
                       />
                       {isChecked && (

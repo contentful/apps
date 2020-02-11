@@ -1,8 +1,3 @@
-// Allow lodash uniq usage. We have lodash installed anyway and using
-// the ES6 alternative (...new Set()), would require enabling downleveling
-// iteration in TS Config which with the end transpilation cost incurred
-// would be a worse solution.
-/* eslint-disable-next-line you-dont-need-lodash-underscore/uniq */
 import uniq from 'lodash/uniq';
 import get from 'lodash/get';
 import { Hash } from './interfaces';

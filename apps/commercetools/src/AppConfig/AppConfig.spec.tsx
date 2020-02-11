@@ -155,7 +155,7 @@ describe('AppConfig', () => {
         locale: 'en',
         fieldsConfig: {
           ct3: {
-            product_d: 'sku'
+            product_d: 'product'
           }
         }
       },

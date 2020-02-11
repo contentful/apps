@@ -5,7 +5,7 @@ import { css } from "emotion";
 import tokens from "@contentful/forma-36-tokens";
 
 const styles = {
-  toggleGroup: (isPickerModeSetToSku: boolean) =>
+  toggleGroup: (isPickerModeSetToProduct: boolean) =>
     css({
       marginTop: tokens.spacingXs,
       marginLeft: tokens.spacingL,
@@ -14,14 +14,14 @@ const styles = {
         borderTopRightRadius: 0,
         borderBottomRightRadius: 0,
         position: "relative",
-        zIndex: isPickerModeSetToSku ? 1 : 0
+        zIndex: isPickerModeSetToProduct ? 1 : 0
       }),
       "> :last-of-type": css({
         borderTopLeftRadius: 0,
         borderBottomLeftRadius: 0,
         marginLeft: "-1px",
         position: "relative",
-        zIndex: isPickerModeSetToSku ? 0 : 1
+        zIndex: isPickerModeSetToProduct ? 0 : 1
       })
     })
 };
@@ -32,18 +32,18 @@ interface Props {
 }
 
 export function ToggleGroup({ activePickerMode, onChange }: Props) {
-  const isPickerModeSetToSku = activePickerMode === "sku";
+  const isPickerModeSetToProduct = activePickerMode === "product";
   return (
-    <div className={styles.toggleGroup(isPickerModeSetToSku)}>
+    <div className={styles.toggleGroup(isPickerModeSetToProduct)}>
       <ToggleButton
-        onToggle={() => onChange("sku")}
-        isActive={isPickerModeSetToSku}
+        onToggle={() => onChange("product")}
+        isActive={isPickerModeSetToProduct}
       >
         Product
       </ToggleButton>
       <ToggleButton
         onToggle={() => onChange("category")}
-        isActive={!isPickerModeSetToSku}
+        isActive={!isPickerModeSetToProduct}
       >
         Category
       </ToggleButton>

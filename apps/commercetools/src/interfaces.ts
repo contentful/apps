@@ -31,4 +31,4 @@ export type PreviewsFn = (skus: string[]) => Promise<Product[]>;
 
 export type DeleteFn = (index: number) => void;
 
-export type PickerMode = 'sku' | 'category';
+export type PickerMode = 'product' | 'category';

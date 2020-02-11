@@ -1,5 +1,6 @@
-import get from 'lodash/get';
-import set from 'lodash/set';
+import { PickerMode } from "./../interfaces";
+import get from "lodash/get";
+import set from "lodash/set";
 
 interface FieldItems {
   type: string;
@@ -30,14 +31,22 @@ export interface EditorInterface {
 }
 
 export type CompatibleFields = Record<string, Field[]>;
-export type FieldsConfig = Record<string, Record<string, string | undefined> | undefined>;
+export type FieldsConfig = Record<
+  string,
+  Record<string, PickerMode | undefined> | undefined
+>;
 
 function isCompatibleField(field: Field) {
-  const isArray = field.type === 'Array';
-  return field.type === 'Symbol' || (isArray && (field.items as FieldItems).type === 'Symbol');
+  const isArray = field.type === "Array";
+  return (
+    field.type === "Symbol" ||
+    (isArray && (field.items as FieldItems).type === "Symbol")
+  );
 }
 
-export function getCompatibleFields(contentTypes: ContentType[]): CompatibleFields {
+export function getCompatibleFields(
+  contentTypes: ContentType[]
+): CompatibleFields {
   return contentTypes.reduce((acc, ct) => {
     return {
       ...acc,
@@ -52,15 +61,18 @@ export function editorInterfacesToSelectedFields(
   appId?: string
 ): FieldsConfig {
   return eis.reduce((acc, ei) => {
-    const ctId = get(ei, ['sys', 'contentType', 'sys', 'id']);
-    const fieldIds = get(ei, ['controls'], [])
-      .filter(control => control.widgetNamespace === 'app' && control.widgetId === appId)
+    const ctId = get(ei, ["sys", "contentType", "sys", "id"]);
+    const fieldIds = get(ei, ["controls"], [])
+      .filter(
+        control =>
+          control.widgetNamespace === "app" && control.widgetId === appId
+      )
       .map(control => control.fieldId)
-      .filter(fieldId => typeof fieldId === 'string' && fieldId.length > 0);
+      .filter(fieldId => typeof fieldId === "string" && fieldId.length > 0);
 
     if (ctId && fieldIds.length > 0) {
       const fields = fieldIds.reduce((acc, fieldId) => {
-        const type = get(fieldsConfig, [ctId, fieldId], 'sku');
+        const type = get(fieldsConfig, [ctId, fieldId], "product");
         set(acc, [fieldId], type);
         return acc;
       }, {});
@@ -80,7 +92,9 @@ export function selectedFieldsToTargetState(
       const { id } = ct.sys;
       const fields = Object.keys(selectedFields[id] || {});
       const targetState =
-        fields.length > 0 ? { controls: fields.map(fieldId => ({ fieldId })) } : {};
+        fields.length > 0
+          ? { controls: fields.map(fieldId => ({ fieldId })) }
+          : {};
 
       return { ...acc, [id]: targetState };
     }, {})
