@@ -39,7 +39,7 @@ export function ToggleGroup({ activePickerMode, onChange }: Props) {
         onToggle={() => onChange("sku")}
         isActive={isPickerModeSetToSku}
       >
-        SKU
+        Product
       </ToggleButton>
       <ToggleButton
         onToggle={() => onChange("category")}
