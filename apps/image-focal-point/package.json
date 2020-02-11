@@ -19,10 +19,9 @@
     "start": "contentful-extension-scripts start",
     "build": "contentful-extension-scripts build",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx",
-    "test": "contentful-extension-scripts test --env=jsdom --watch",
-    "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage",
     "deploy": "npm run build && aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/focal-point --acl public-read",
-    "test:ci": "npm run test:coverage"
+    "test": "contentful-extension-scripts test --env=jsdom --watch",
+    "test:ci": "contentful-extension-scripts test --env=jsdom --coverage"
   },
   "dependencies": {
     "@contentful/forma-36-fcss": "0.0.31",

@@ -29,12 +29,11 @@
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
-    "test-dev": "contentful-extension-scripts test --env=jsdom --watch",
+    "deploy": "npm run build && aws s3 sync ./build s3://cf-apps-jira --acl public-read",
     "test": "contentful-extension-scripts test --env=jsdom",
-    "test:ci": "npm run test",
-    "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'",
-    "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage",
-    "deploy": "npm run build && aws s3 sync ./build s3://cf-apps-jira --acl public-read"
+    "test:ci": "contentful-extension-scripts test --env=jsdom --coverage",
+    "test:dev": "contentful-extension-scripts test --env=jsdom --watch",
+    "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'"
   },
   "dependencies": {
     "@contentful/forma-36-fcss": "^0.0.20",

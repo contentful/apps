@@ -33,7 +33,7 @@
     "build": "contentful-extension-scripts build",
     "deploy": "npm run build && aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/optimizely --acl public-read",
     "test": "TZ=UTC contentful-extension-scripts test --watch",
-    "test:coverage": "TZ=UTC contentful-extension-scripts test --env=jsdom --coverage"
+    "test:ci": "TZ=UTC contentful-extension-scripts test --env=jsdom --coverage"
   },
   "browserslist": [
     "last 5 Chrome version",
