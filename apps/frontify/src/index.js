@@ -1,6 +1,5 @@
 import { setup } from 'shared-dam-app';
 
-import descriptor from '../extension.json';
 import logo from './logo.svg';
 
 const CTA = 'Select files from Frontify';
@@ -12,7 +11,23 @@ setup({
   color: '#363D4A',
   description:
     'The Frontify app enables editors to access all digital brand assets in Frontify directly from Contentful.',
-  parameterDefinitions: descriptor.parameters.installation,
+  parameterDefinitions: [
+    {
+      "id": "domain",
+      "type": "Symbol",
+      "name": "Frontify Domain",
+      "description": "Your Frontify domain, e.g. https://weare.frontify.com",
+      "default": "https://weare.frontify.com",
+      "required": true
+    },
+    {
+      "id": "defaultAccessToken",
+      "type": "Symbol",
+      "name": "Access Token",
+      "description": "Your Frontify access token",
+      "required": false
+    }
+  ],
   makeThumbnail,
   renderDialog,
   openDialog,

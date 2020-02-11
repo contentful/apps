@@ -9,7 +9,6 @@ import { setup } from 'shared-sku-app';
 
 import get from 'lodash/get';
 import logo from './logo.svg';
-import descriptor from '../extension.json';
 import { dataTransformer } from './dataTransformer';
 
 function makeCTA(fieldType) {
@@ -173,7 +172,50 @@ setup({
   description:
     'The Commercetools app allows editors to select products from their Commercetools account and reference them inside of Contentful entries.',
   color: '#213C45',
-  parameterDefinitions: descriptor.parameters.installation,
+  parameterDefinitions: [
+    {
+      "id": "projectKey",
+      "name": "Commercetools Project Key",
+      "description": "The Commercetools project key",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "clientId",
+      "name": "Client ID",
+      "description": "The client ID",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "clientSecret",
+      "name": "Client Secret",
+      "description": "The client secret",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "apiEndpoint",
+      "name": "API Endpoint",
+      "description": "The Commercetools API endpoint",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "authApiEndpoint",
+      "name": "Auth API Endpoint",
+      "description": "The auth API endpoint",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "locale",
+      "name": "Commercetools data locale",
+      "description": "The Commercetools data locale to display",
+      "type": "Symbol",
+      "required": true
+    }
+  ],
   fetchProductPreviews,
   renderDialog,
   openDialog,

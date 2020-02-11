@@ -5,7 +5,6 @@ import flatMap from 'lodash/flatMap';
 import { setup, renderSkuPicker } from 'shared-sku-app';
 
 import logo from './logo.svg';
-import descriptor from '../extension.json';
 import { dataTransformer } from './dataTransformer';
 
 const DIALOG_ID = 'root';
@@ -163,7 +162,22 @@ setup({
   description:
     'The Commerce Layer app allows editors to select products from their Commerce Layer account and reference them inside of Contentful entries.',
   color: '#212F3F',
-  parameterDefinitions: descriptor.parameters.installation,
+  parameterDefinitions: [
+    {
+      "id": "clientId",
+      "name": "Client ID",
+      "description": "The client ID",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "apiEndpoint",
+      "name": "API Endpoint",
+      "description": "The Commerce Layer API endpoint",
+      "type": "Symbol",
+      "required": true
+    }
+  ],
   fetchProductPreviews,
   renderDialog,
   openDialog,
