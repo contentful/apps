@@ -206,7 +206,7 @@ export default class AppConfig extends React.Component<Props, State> {
           {contentTypes.length > 0 ? (
             <Paragraph>
               This app can only be used with <strong>Short text</strong> or{" "}
-              <strong>Short text list</strong> fields. Select which fields you’d
+              <strong>Short text, list</strong> fields. Select which fields you’d
               like to enable for this app.
             </Paragraph>
           ) : (
