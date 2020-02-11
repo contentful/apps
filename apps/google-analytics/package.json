@@ -27,12 +27,7 @@
     "start": "contentful-extension-scripts start --serveOnly",
     "build": "contentful-extension-scripts build",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
-    "test": "echo TODO",
-    "test:coverage": "echo TODO",
     "deploy": "npm run build && aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/google-analytics --acl public-read",
-    "configure": "contentful space use && contentful space environment use",
-    "login": "contentful login",
-    "logout": "contentful logout",
     "help": "contentful-extension-scripts help",
     "test:ci": "npm run test:coverage"
   },

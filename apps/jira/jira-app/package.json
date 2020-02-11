@@ -34,11 +34,7 @@
     "test:ci": "npm run test",
     "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'",
     "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage",
-    "deploy": "npm run build && aws s3 sync ./build s3://cf-apps-jira --acl public-read",
-    "configure": "contentful space use && contentful space environment use",
-    "login": "contentful login",
-    "logout": "contentful logout",
-    "help": "contentful-extension-scripts help"
+    "deploy": "npm run build && aws s3 sync ./build s3://cf-apps-jira --acl public-read"
   },
   "dependencies": {
     "@contentful/forma-36-fcss": "^0.0.20",

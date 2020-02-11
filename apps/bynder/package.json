@@ -20,11 +20,7 @@
     "deploy": "npm run build && aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/bynder --acl public-read",
     "test": "contentful-extension-scripts test --env=jsdom --watch",
     "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage --passWithNoTests",
-    "test:ci": "npm run test:coverage",
-    "login": "contentful login",
-    "configure": "contentful space use && contentful space environment use",
-    "logout": "contentful logout",
-    "help": "contentful-extension-scripts help"
+    "test:ci": "npm run test:coverage"
   },
   "browserslist": [
     "last 5 Chrome version",

@@ -27,10 +27,6 @@
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build",
     "deploy": "npm run build && aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/gatsby --acl public-read",
-    "login": "contentful login",
-    "configure": "contentful space use && contentful space environment use",
-    "logout": "contentful logout",
-    "help": "contentful-extension-scripts help",
     "test": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
     "test:coverage": "TZ=UTC contentful-extension-scripts test --env=jsdom --coverage",
     "test:ci": "npm run test:coverage"

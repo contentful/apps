@@ -32,10 +32,6 @@
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build",
     "deploy": "npm run build && aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/optimizely --acl public-read",
-    "configure": "contentful space use && contentful space environment use",
-    "login": "contentful login",
-    "logout": "contentful logout",
-    "help": "contentful-extension-scripts help",
     "test": "TZ=UTC contentful-extension-scripts test --watch",
     "test:coverage": "TZ=UTC contentful-extension-scripts test --env=jsdom --coverage"
   },
