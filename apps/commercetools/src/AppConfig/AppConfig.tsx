@@ -1,21 +1,24 @@
-import * as React from 'react';
+import * as React from "react";
 
-import get from 'lodash/get';
-import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import get from "lodash/get";
+import { AppExtensionSDK } from "contentful-ui-extensions-sdk";
 import {
   Heading,
   Paragraph,
   Typography,
   TextField,
   Form
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
-import { css } from 'emotion';
+} from "@contentful/forma-36-react-components";
+import tokens from "@contentful/forma-36-tokens";
+import { css } from "emotion";
 
-import FieldSelector from './FieldSelector';
+import FieldSelector from "./FieldSelector";
 
-import { toInputParameters, toAppParameters } from './parameters';
-
+import {
+  parameterDefinitions,
+  toInputParameters,
+  toAppParameters
+} from "./parameters";
 import {
   getCompatibleFields,
   editorInterfacesToSelectedFields,
@@ -24,13 +27,11 @@ import {
   ContentType,
   CompatibleFields,
   FieldsConfig
-} from './fields';
+} from "./fields";
+import { validateParameters } from "./validateParameters";
 
-import { validateParameters } from './validateParameters';
-
-import { Hash } from '../interfaces';
-import logo from '../logo.svg';
-import descriptor from '../../extension.json';
+import { Hash } from "../interfaces";
+import logo from "../logo.svg";
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -45,25 +46,25 @@ interface State {
 
 const styles = {
   body: css({
-    height: 'auto',
-    minHeight: '65vh',
-    margin: '0 auto',
+    height: "auto",
+    minHeight: "65vh",
+    margin: "0 auto",
     marginTop: tokens.spacingXl,
     padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
     maxWidth: tokens.contentWidthText,
     backgroundColor: tokens.colorWhite,
     zIndex: 2,
-    boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
-    borderRadius: '2px'
+    boxShadow: "0px 0px 20px rgba(0, 0, 0, 0.1)",
+    borderRadius: "2px"
   }),
   background: css({
-    display: 'block',
-    position: 'absolute',
+    display: "block",
+    position: "absolute",
     zIndex: -1,
     top: 0,
-    width: '100%',
-    height: '300px',
-    backgroundColor: '#213C45'
+    width: "100%",
+    height: "300px",
+    backgroundColor: "#213C45"
   }),
   section: css({
     margin: `${tokens.spacingXl} 0`
@@ -72,15 +73,15 @@ const styles = {
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
     border: 0,
-    height: '1px',
+    height: "1px",
     backgroundColor: tokens.colorElementMid
   }),
   icon: css({
-    display: 'flex',
-    justifyContent: 'center',
-    '> img': {
-      display: 'block',
-      width: '70px',
+    display: "flex",
+    justifyContent: "center",
+    "> img": {
+      display: "block",
+      width: "70px",
       margin: `${tokens.spacingXl} 0`
     }
   })
@@ -91,7 +92,7 @@ export default class AppConfig extends React.Component<Props, State> {
     contentTypes: [],
     compatibleFields: {},
     selectedFields: {},
-    parameters: toInputParameters(descriptor.parameters.installation, null)
+    parameters: toInputParameters(parameterDefinitions, null)
   };
 
   async componentDidMount() {
@@ -105,7 +106,7 @@ export default class AppConfig extends React.Component<Props, State> {
       app.getParameters()
     ]);
 
-    const fieldsConfig = get(parameters, ['fieldsConfig'], {});
+    const fieldsConfig = get(parameters, ["fieldsConfig"], {});
 
     const contentTypes = (contentTypesResponse as Hash).items as ContentType[];
     const editorInterfaces = (eisResponse as Hash).items as EditorInterface[];
@@ -121,8 +122,12 @@ export default class AppConfig extends React.Component<Props, State> {
       {
         contentTypes: filteredContentTypes,
         compatibleFields,
-        selectedFields: editorInterfacesToSelectedFields(editorInterfaces, fieldsConfig, ids.app),
-        parameters: toInputParameters(descriptor.parameters.installation, parameters)
+        selectedFields: editorInterfacesToSelectedFields(
+          editorInterfaces,
+          fieldsConfig,
+          ids.app
+        ),
+        parameters: toInputParameters(parameterDefinitions, parameters)
       },
       () => app.setReady()
     );
@@ -131,7 +136,7 @@ export default class AppConfig extends React.Component<Props, State> {
   onAppConfigure = () => {
     const { contentTypes, selectedFields } = this.state;
     const parameters = {
-      ...toAppParameters(descriptor.parameters.installation, this.state.parameters),
+      ...toAppParameters(parameterDefinitions, this.state.parameters),
       fieldsConfig: selectedFields
     };
 
@@ -161,9 +166,15 @@ export default class AppConfig extends React.Component<Props, State> {
   };
 
   renderApp() {
-    const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
-    const parameterDefinitions = descriptor.parameters.installation as Hash[];
-    const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
+    const {
+      contentTypes,
+      compatibleFields,
+      selectedFields,
+      parameters
+    } = this.state;
+    const parameterDefinitions = parameterDefinitions as Hash[];
+    const hasConfigurationOptions =
+      parameterDefinitions && parameterDefinitions.length > 0;
 
     return (
       <>
@@ -182,8 +193,8 @@ export default class AppConfig extends React.Component<Props, State> {
                     name={key}
                     labelText={def.name}
                     textInputProps={{
-                      width: def.type === 'Symbol' ? 'large' : 'medium',
-                      type: def.type === 'Symbol' ? 'text' : 'number',
+                      width: def.type === "Symbol" ? "large" : "medium",
+                      type: def.type === "Symbol" ? "text" : "number",
                       maxLength: 255
                     }}
                     helpText={def.description}
@@ -200,18 +211,21 @@ export default class AppConfig extends React.Component<Props, State> {
           <Heading>Assign to fields</Heading>
           {contentTypes.length > 0 ? (
             <Paragraph>
-              This app can only be used with <strong>Short text</strong> or{' '}
-              <strong>Short text list</strong> fields. Select which fields you’d like to enable for
-              this app.
+              This app can only be used with <strong>Short text</strong> or{" "}
+              <strong>Short text list</strong> fields. Select which fields you’d
+              like to enable for this app.
             </Paragraph>
           ) : (
             <>
               <Paragraph>
-                This app can only be used with <strong>Short text</strong> or{' '}
+                This app can only be used with <strong>Short text</strong> or{" "}
                 <strong>Short text list</strong> fields.
               </Paragraph>
               <Paragraph>
-                There are <strong>no content types with Short text or Short text list</strong>{' '}
+                There are{" "}
+                <strong>
+                  no content types with Short text or Short text list
+                </strong>{" "}
                 fields in this environment. You can add one here later.
               </Paragraph>
             </>
@@ -235,8 +249,9 @@ export default class AppConfig extends React.Component<Props, State> {
           <Typography>
             <Heading>About Commercetools</Heading>
             <Paragraph>
-              The Commercetools app allows editors to select products from their Commercetools
-              account and reference them inside of Contentful entries.
+              The Commercetools app allows editors to select products from their
+              Commercetools account and reference them inside of Contentful
+              entries.
             </Paragraph>
             <hr className={styles.splitter} />
           </Typography>
