@@ -28,7 +28,7 @@
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
-    "lint:fixme": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
+    "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
     "deploy": "npm run build && aws s3 sync ./build s3://cf-apps-jira --acl public-read",
     "test": "contentful-extension-scripts test --env=jsdom",
     "test:ci": "contentful-extension-scripts test --env=jsdom --coverage",

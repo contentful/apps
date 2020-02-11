@@ -29,7 +29,7 @@
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
-    "lint:fixme": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
+    "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
     "test": "TZ=UTC contentful-extension-scripts test --env=jsdom",
     "test:ci": "contentful-extension-scripts test --env=jsdom --coverage",
     "test:dev": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
