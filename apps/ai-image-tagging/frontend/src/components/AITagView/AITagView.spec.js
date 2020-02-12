@@ -7,11 +7,6 @@ import { AITagView } from './AITagView';
 
 const sdk = {
   ...mockProps.sdk,
-  field: {
-    getValue: jest.fn(),
-    onValueChanged: jest.fn(),
-    setValue: jest.fn(),
-  },
   entry: {
     fields: {
       image: {
@@ -23,12 +18,6 @@ const sdk = {
         setValue: jest.fn()
       }
     }
-  },
-  window: {
-    startAutoResizer: jest.fn(),
-  },
-  app: {
-    setReady: jest.fn()
   },
   space: {
     getAsset: jest.fn()
