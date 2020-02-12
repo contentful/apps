@@ -1,10 +1,12 @@
 import React from 'react';
 import { CheckboxField, TextInput, Pill, Button } from '@contentful/forma-36-react-components';
+import get from 'lodash.get';
 
 import { styles } from './styles';
 
 async function callAPI(url) {
-  const data = await fetch(`http://localhot:3000/tags/${url}`).then(res => res.json());
+  const res = await fetch(`/tags/${url}`);
+  const data = await res.json();
   return data.tags;
 }
 
@@ -38,38 +40,34 @@ export class AITagView extends React.Component {
   }
 
   addTag = async (e) => {
-    if (e.key !== "Enter") { return; }
+    if (e.key !== "Enter" || !e.target.value) { return; }
 
     const newTags = [e.target.value, ...this.state.tags];
-    try {
-      await this.props.entries.imageTags.setValue(newTags);
-      this.setState({
-        tags: newTags,
-        value: ""
-      });
-    } catch(e) {
-    }
+    await this.props.entries.imageTags.setValue(newTags);
+    this.setState({
+      tags: newTags,
+      value: ""
+    });
   }
 
   deleteTag = async (tag) => {
     const newTags = this.state.tags.filter(t => t !== tag);
-    try {
-      await this.props.entries.imageTags.setValue(newTags);
-      this.setState({
-        tags: newTags
-      });
-    } catch(e) {
-    }
+    await this.props.entries.imageTags.setValue(newTags);
+    this.setState({
+      tags: newTags
+    });
   }
 
   fetchTags =  async () => {
-    const file = await this.props.space.getAsset(this.props.entries.image.getValue().sys.id);
-    const url = file.fields.file['en-US'].url.replace(/^\/\/images.ctfassets.net\//, '');
-
+    const imageId = get(this.props.entries.image.getValue(), 'sys.id')
+    const file = await this.props.space.getAsset(imageId);
+    const locale = this.props.locale;
+    const fullURL = get(file, `fields.file.${locale}.url`);
+    const imagePath = new URL(`${location.protocol}${fullURL}`).pathname;
     this.setState({ isFetchingTags: true });
 
     try {
-      const aiTags = await callAPI(url);
+      const aiTags = await callAPI(imagePath);
 
       // upload new tags
       const newTags = this.state.overwrite ? aiTags : [...aiTags, ...this.state.tags];
@@ -78,7 +76,7 @@ export class AITagView extends React.Component {
         tags: newTags
       });
     } catch(e) {
-      console.log(e)
+      this.props.notifier.error(e.message)
     } finally {
       this.setState({ isFetchingTags: false });
     }

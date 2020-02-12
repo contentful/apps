@@ -25,7 +25,14 @@ export class App extends React.Component {
   }
 
   render() {
-    return <AITagView entries={this.props.sdk.entry.fields} space={ this.props.sdk.space} />;
+    return (
+      <AITagView
+        entries={this.props.sdk.entry.fields}
+        space={ this.props.sdk.space}
+        locale={ this.props.sdk.locales.default }
+        notifier={ this.props.sdk.notifier }
+      />
+    );
   }
 }
 
