@@ -76,7 +76,7 @@ export class AITagView extends React.Component {
         tags: newTags
       });
     } catch(e) {
-      this.props.notifier.error(e.message)
+      this.props.notifier.error("Image Tagging failed. Please try again later.")
     } finally {
       this.setState({ isFetchingTags: false });
     }
