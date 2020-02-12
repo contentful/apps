@@ -22,7 +22,7 @@ exports[`AppView when the app is installed should render the app view with confi
         class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
         data-test-id="cf-ui-paragraph"
       >
-        The AI Image Tagging app uses AWS Rekognition’s AI and deep learning capabilities to automatically assign tags to images. The tags are visible and accessible via the Contentful web app sidebar and tags are searchable in the search bar.
+        The AI Image Tagging app uses AI and deep learning capabilities to automatically assign tags to images. The tags are visible and accessible via the Contentful web app sidebar and tags are searchable in the search bar.
       </p>
       <hr
         class="css-14380qe"
@@ -299,7 +299,7 @@ exports[`AppView when the app is not installed should render the app view with i
         class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
         data-test-id="cf-ui-paragraph"
       >
-        The AI Image Tagging app uses AWS Rekognition’s AI and deep learning capabilities to automatically assign tags to images. The tags are visible and accessible via the Contentful web app sidebar and tags are searchable in the search bar.
+        The AI Image Tagging app uses AI and deep learning capabilities to automatically assign tags to images. The tags are visible and accessible via the Contentful web app sidebar and tags are searchable in the search bar.
       </p>
       <hr
         class="css-14380qe"
