@@ -19,6 +19,7 @@
     "ai-image-tagging-frontend": "1.0.0",
     "aws-serverless-express": "3.3.6",
     "express": "4.17.1",
+    "luxon": "1.22.0",
     "node-fetch": "2.6.0"
   }
 }

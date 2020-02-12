@@ -20,16 +20,16 @@ app.use('/tags', async (req, res) => {
   const [, spaceId] = req.path.split('/')
 
   try {
-    const count = await reportUsage(spaceId);
+    const [count, period] = await reportUsage(spaceId);
 
-    console.log(`Request for ${spaceId}. Current usage: ${count}.`);
+    console.log(`Request for ${spaceId}. Current usage: ${count} in ${period}.`);
 
     if (count > 1000) {
-      console.log(`usage:over-1k space:${spaceId}`);
+      console.log(`usage:over-1k spaceId:${spaceId} period:${period}`);
     } else if (count > 10000) {
-      console.log(`usage:over-10k space:${spaceId}`);
+      console.log(`usage:over-10k spaceId:${spaceId} period:${period}`);
     } else if (count > 100000) {
-      console.error(`Hard usage limit met for space ${spaceId}. Aborting.`);
+      console.error(`Hard usage limit exceeded for space ${spaceId}. Aborting.`);
       res.status(403).json({ message: 'Usage exceeded.' });
       return;
     }

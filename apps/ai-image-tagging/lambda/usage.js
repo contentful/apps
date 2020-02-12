@@ -2,12 +2,19 @@
 
 const AWS = require('aws-sdk');
 
+const { DateTime } = require('luxon');
+
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports = async spaceId => {
   const now = new Date();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-  const period = firstDay.getTime();
+  const dt = DateTime.fromObject({
+    year: now.getUTCFullYear(),
+    month: now.getUTCMonth() + 1,
+    day: 1,
+    zone: 'utc'
+  });
+  const period = dt.startOf('month').toMillis() / 1000;
 
   const { Attributes } = await documentClient.update({
     TableName: process.env.TABLE_NAME,
@@ -24,5 +31,5 @@ module.exports = async spaceId => {
     throw new Error(`Failed to report usage for ${spaceId}.`);
   }
 
-  return reqs;
+  return [reqs, period];
 }
