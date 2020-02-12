@@ -398,7 +398,7 @@ Object {
                   class="Paragraph__Paragraph___2aO-9 about-p f36-margin-bottom--m"
                   data-test-id="cf-ui-paragraph"
                 >
-                  This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within a Smartling project. Go to your Smartling 
+                  This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within a 
                   <a
                     class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
                     data-test-id="cf-ui-text-link"
@@ -410,10 +410,10 @@ Object {
                       class="TabFocusTrap__TabFocusTrap___39Vty"
                       tabindex="-1"
                     >
-                      dashboard
+                      Smartling
                     </span>
                   </a>
-                  .
+                   project.
                 </p>
               </div>
               <hr />
@@ -895,7 +895,7 @@ Object {
                 class="Paragraph__Paragraph___2aO-9 about-p f36-margin-bottom--m"
                 data-test-id="cf-ui-paragraph"
               >
-                This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within a Smartling project. Go to your Smartling 
+                This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within a 
                 <a
                   class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
                   data-test-id="cf-ui-text-link"
@@ -907,10 +907,10 @@ Object {
                     class="TabFocusTrap__TabFocusTrap___39Vty"
                     tabindex="-1"
                   >
-                    dashboard
+                    Smartling
                   </span>
                 </a>
-                .
+                 project.
               </p>
             </div>
             <hr />
@@ -1665,6 +1665,21 @@ Object {
           </div>
           <div>
             Please ensure that you have access to the connected Smartling project.
+            <br />
+            <a
+              class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+              data-test-id="cf-ui-text-link"
+              href="https://contentful.com/developers/docs/extensibility/apps/smartling/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <span
+                class="TabFocusTrap__TabFocusTrap___39Vty"
+                tabindex="-1"
+              >
+                View documentation
+              </span>
+            </a>
           </div>
         </div>
       </div>
@@ -1755,6 +1770,21 @@ Object {
         </div>
         <div>
           Please ensure that you have access to the connected Smartling project.
+          <br />
+          <a
+            class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+            data-test-id="cf-ui-text-link"
+            href="https://contentful.com/developers/docs/extensibility/apps/smartling/"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <span
+              class="TabFocusTrap__TabFocusTrap___39Vty"
+              tabindex="-1"
+            >
+              View documentation
+            </span>
+          </a>
         </div>
       </div>
     </div>

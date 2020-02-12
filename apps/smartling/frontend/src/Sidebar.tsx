@@ -311,6 +311,8 @@ export default class Sidebar extends React.Component<Props, State> {
         smartlingBody = (
           <Note title="Connection error" noteType="negative" className="general-error">
             Please ensure that you have access to the connected Smartling project.
+            <br />
+            <TextLink href="https://contentful.com/developers/docs/extensibility/apps/smartling/" target="_blank" rel="noopener noreferrer">View documentation</TextLink>
           </Note>
         );
     }

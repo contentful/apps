@@ -116,7 +116,7 @@ export default class AppConfig extends React.Component<Props, State> {
                 <Heading>About Smartling</Heading>
                 <Paragraph className="about-p">
                   This app allows you to view the translation status of entries in the Contentful
-                  web app and easily find corresponding entries within a Smartling project. Go to your Smartling <TextLink href="https://dashboard.smartling.com" target="_blank" rel="noopener noreferrer">dashboard</TextLink>.
+                  web app and easily find corresponding entries within a <TextLink href="https://dashboard.smartling.com" target="_blank" rel="noopener noreferrer">Smartling</TextLink> project. 
                 </Paragraph>
               </Typography>
               <hr />
