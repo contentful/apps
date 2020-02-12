@@ -14,7 +14,8 @@
     "@testing-library/react": "8.0.4",
     "contentful-cli": "1.2.12",
     "cssnano": "4.1.10",
-    "eslint": "^6.0.1"
+    "eslint": "^6.0.1",
+    "fetch-mock": "^9.0.0-beta.2"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
@@ -27,7 +28,10 @@
     "@contentful/forma-36-fcss": "^0.0.20",
     "@contentful/forma-36-react-components": "^3.11.3",
     "@contentful/forma-36-tokens": "^0.3.0",
-    "contentful-ui-extensions-sdk": "3.9.0",
+    "contentful-ui-extensions-sdk": "^3.10.7",
+    "emotion": "^10.0.27",
+    "lodash.camelcase": "^4.3.0",
+    "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"

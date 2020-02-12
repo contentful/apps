@@ -1,66 +1,45 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
-import { TextInput } from '@contentful/forma-36-react-components';
-import { init } from 'contentful-ui-extensions-sdk';
+import { render } from 'react-dom';
+import { init, locations } from 'contentful-ui-extensions-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
+
+import { AppView } from './components/AppView';
+import { AITagView } from './components/AITagView';
 
 export class App extends React.Component {
   static propTypes = {
     sdk: PropTypes.object.isRequired
   };
 
-  detachExternalChangeHandler = null;
-
   constructor(props) {
     super(props);
-    this.state = {
-      value: props.sdk.field.getValue() || ''
-    };
+
+    this.app = this.props.sdk.app;
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.props.sdk.window.startAutoResizer();
-
-    // Handler for external field value changes (e.g. when multiple authors are working on the same entry).
-    this.detachExternalChangeHandler = this.props.sdk.field.onValueChanged(this.onExternalChange);
+    this.app.setReady();
   }
-
-  componentWillUnmount() {
-    if (this.detachExternalChangeHandler) {
-      this.detachExternalChangeHandler();
-    }
-  }
-
-  onExternalChange = value => {
-    this.setState({ value });
-  };
-
-  onChange = e => {
-    const value = e.currentTarget.value;
-    this.setState({ value });
-    if (value) {
-      this.props.sdk.field.setValue(value);
-    } else {
-      this.props.sdk.field.removeValue();
-    }
-  };
 
   render() {
     return (
-      <TextInput
-        width="large"
-        type="text"
-        id="my-field"
-        testId="my-field"
-        value={this.state.value}
-        onChange={this.onChange}
+      <AITagView
+        entries={this.props.sdk.entry.fields}
+        space={ this.props.sdk.space}
+        locale={ this.props.sdk.locales.default }
+        notifier={ this.props.sdk.notifier }
       />
     );
   }
 }
 
 init(sdk => {
-  ReactDOM.render(<App sdk={sdk} />, document.getElementById('root'));
+  if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
+    render(<AppView sdk={sdk} />, document.getElementById('root'));
+  } else {
+    render(<App sdk={sdk} />, document.getElementById('root'));
+  }
 });
