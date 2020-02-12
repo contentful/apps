@@ -1,7 +1,8 @@
 {
   "name": "apps",
   "scripts": {
-    "test": "lerna run test:ci",
+    "lint": "lerna run lint --concurrency=1",
+    "test": "lerna run test:ci --concurrency=1",
     "bootstrap": "lerna bootstrap --no-ci --concurrency=1",
     "deploy": "lerna run deploy",
     "postinstall": "npm run bootstrap"
