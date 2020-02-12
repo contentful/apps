@@ -40,6 +40,15 @@ body {
   margin-top: var(--spacing-l);
 }
 
+.general-error {
+  margin-top: var(--spacing-l);
+
+  a {
+    margin-top: var(--spacing-2xs);
+    display: block !important;
+  }
+}
+
 .smartling-status {
   display: flex;
   flex-direction: row;
