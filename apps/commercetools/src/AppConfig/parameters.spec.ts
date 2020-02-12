@@ -1,54 +1,9 @@
-import { toInputParameters } from "./parameters";
-
-export const definitions = [
-  {
-    id: "projectKey",
-    name: "Commercetools Project Key",
-    description: "The Commercetools project key",
-    type: "Symbol",
-    required: true
-  },
-  {
-    id: "clientId",
-    name: "Client ID",
-    description: "The client ID",
-    type: "Symbol",
-    required: true
-  },
-  {
-    id: "clientSecret",
-    name: "Client Secret",
-    description: "The client secret",
-    type: "Symbol",
-    required: true
-  },
-  {
-    id: "apiEndpoint",
-    name: "API Endpoint",
-    description: "The Commercetools API endpoint",
-    type: "Symbol",
-    required: true
-  },
-  {
-    id: "authApiEndpoint",
-    name: "Auth API Endpoint",
-    description: "The auth API endpoint",
-    type: "Symbol",
-    required: true
-  },
-  {
-    id: "locale",
-    name: "Commercetools data locale",
-    description: "The Commercetools data locale to display",
-    type: "Symbol",
-    required: true
-  }
-];
+import { parameterDefinitions, toInputParameters } from "./parameters";
 
 describe("parameters", () => {
   describe("toInputParameters", () => {
     it("handles lack of paramters", () => {
-      const result = toInputParameters(definitions, {});
+      const result = toInputParameters(parameterDefinitions, {});
 
       expect(result).toEqual({
         projectKey: "",
@@ -61,7 +16,7 @@ describe("parameters", () => {
     });
 
     it("resolves parameters to string values", () => {
-      const result = toInputParameters(definitions, {
+      const result = toInputParameters(parameterDefinitions, {
         projectKey: "some-key",
         clientId: 12345,
         clientSecret: "some-secret",
