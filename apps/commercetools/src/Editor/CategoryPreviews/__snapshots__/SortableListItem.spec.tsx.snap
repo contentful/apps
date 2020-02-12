@@ -1,0 +1,179 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SortableListItem should render successfully 1`] = `
+<div>
+  <div
+    class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+    data-test-id="cf-ui-card"
+  >
+    <section
+      class="css-ijlwe4"
+    >
+      <div
+        class="Typography__Typography___1ZUfE"
+        data-test-id="cf-ui-text-container"
+      >
+        <h1
+          class="Heading__Heading___83D3K css-1xd3m0r f36-margin-bottom--m"
+          data-test-id="cf-ui-heading"
+        >
+          Mens' clothes
+        </h1>
+        <h2
+          class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+          data-test-id="cf-ui-subheading"
+        >
+          men-regular
+        </h2>
+      </div>
+    </section>
+    <div
+      class="css-zdzpuy"
+    >
+      <a
+        href="https://mc.commercetools.com/example-project/categories/28a7442d/general"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <svg
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+          data-test-id="cf-ui-icon"
+          height="18"
+          viewBox="0 0 24 24"
+          width="18"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+          />
+          <path
+            d="M0 0h24v24H0z"
+            fill="none"
+          />
+        </svg>
+      </a>
+      <button
+        class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--muted___22_IZ"
+        data-test-id="cf-ui-icon-button"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty IconButton__IconButton__inner___3fnmT"
+          tabindex="-1"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+            data-test-id="cf-ui-icon"
+            height="24"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+          <span
+            class="IconButton__IconButton__label___1kp5y helpers__sr-only___3Kv3z"
+          >
+            Delete
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SortableListItem should render successfully the error variation for missing slug 1`] = `
+<div>
+  <div
+    class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+    data-test-id="cf-ui-card"
+  >
+    <section
+      class="css-ijlwe4"
+    >
+      <div
+        class="Typography__Typography___1ZUfE"
+        data-test-id="cf-ui-text-container"
+      >
+        <h1
+          class="Heading__Heading___83D3K css-by3awh f36-margin-bottom--m"
+          data-test-id="cf-ui-heading"
+        >
+          28a7442d
+        </h1>
+        <div
+          class="Tag__Tag___Y-myd Tag__Tag--negative___12luW"
+          data-test-id="cf-ui-tag"
+        >
+          Category missing
+        </div>
+      </div>
+    </section>
+    <div
+      class="css-zdzpuy"
+    >
+      <a
+        href="https://mc.commercetools.com/example-project/categories/28a7442d/general"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <svg
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+          data-test-id="cf-ui-icon"
+          height="18"
+          viewBox="0 0 24 24"
+          width="18"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+          />
+          <path
+            d="M0 0h24v24H0z"
+            fill="none"
+          />
+        </svg>
+      </a>
+      <button
+        class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--muted___22_IZ"
+        data-test-id="cf-ui-icon-button"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty IconButton__IconButton__inner___3fnmT"
+          tabindex="-1"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+            data-test-id="cf-ui-icon"
+            height="24"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+          <span
+            class="IconButton__IconButton__label___1kp5y helpers__sr-only___3Kv3z"
+          >
+            Delete
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
