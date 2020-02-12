@@ -1,13 +1,8 @@
 'use strict';
 
-const fetch = require('node-fetch');
-const AWS = require('aws-sdk');
-
 const IMAGES_BASE = 'https://images.ctfassets.net';
 
-const rekog = new AWS.Rekognition();
-
-const fetchImage = async imageUrl => {
+const fetchImage = async (imageUrl, fetch) => {
   const res = await fetch(imageUrl);
 
   if (res.status === 200) {
@@ -23,10 +18,10 @@ const getDetectParams = imageData => ({
   MinConfidence: 70.0
 });
 
-module.exports = async path => {
-  const imageData = await fetchImage(IMAGES_BASE + path);
+module.exports = async (path, { fetch, rekog }) => {
+  const imageData = await fetchImage(IMAGES_BASE + path, fetch);
   const params = getDetectParams(imageData);
   const tags = await rekog.detectLabels(params).promise();
 
   return tags.Labels.map(label => label.Name);
-}
+};

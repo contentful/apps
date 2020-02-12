@@ -1,20 +1,9 @@
 'use strict';
 
-const AWS = require('aws-sdk');
-
 const { DateTime } = require('luxon');
 
-const documentClient = new AWS.DynamoDB.DocumentClient();
-
-module.exports = async spaceId => {
-  const now = new Date();
-  const period = DateTime.utc().startOf('month').toSeconds()
-    year: now.getUTCFullYear(),
-    month: now.getUTCMonth() + 1,
-    day: 1,
-    zone: 'utc'
-  });
-  const period = dt.startOf('month').toMillis() / 1000;
+module.exports = async (spaceId, documentClient) => {
+  const period = DateTime.utc().startOf('month').toSeconds();
 
   const { Attributes } = await documentClient.update({
     TableName: process.env.TABLE_NAME,
@@ -32,4 +21,4 @@ module.exports = async spaceId => {
   }
 
   return [reqs, period];
-}
+};
