@@ -7,6 +7,10 @@ module.exports = {
     require.resolve("@contentful/eslint-config-extension/jsx-a11y"),
     require.resolve("@contentful/eslint-config-extension/react")
   ],
+  env: {
+    browser: true,
+    es6: true
+  },
   parserOptions: {
     project: path.resolve("tsconfig.json")
   },
