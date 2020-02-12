@@ -172,4 +172,42 @@ describe('App', () => {
 
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('should show an error message when getting a general error from Smartling', async () => {
+    mockSdk.location.is = (location: string) => location === locations.LOCATION_ENTRY_SIDEBAR;
+
+    Object.defineProperty(window, 'localStorage', {
+      writable: true,
+      value: {
+        getItem: jest.fn((item: string) => {
+          switch (item) {
+            case 'token':
+              return 'access-123';
+            case 'refreshToken':
+              return 'refresh-123';
+            default:
+              return null;
+          }
+        }),
+        setItem: jest.fn(),
+        removeItem: jest.fn()
+      }
+    });
+
+    fetchMock.get(
+      '/refresh?refresh_token=',
+      401,
+      { overwriteRoutes: true }
+    );
+    fetchMock.get(
+      '/entry?spaceId=space-123&projectId=project-id-123&entryId=entry-123',
+      {},
+      { overwriteRoutes: true }
+    );
+
+    const wrapper = render(<App sdk={mockSdk as AppExtensionSDK} />);
+    await wait();
+
+    expect(wrapper).toMatchSnapshot();
+  });
 });

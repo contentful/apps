@@ -398,7 +398,22 @@ Object {
                   class="Paragraph__Paragraph___2aO-9 about-p f36-margin-bottom--m"
                   data-test-id="cf-ui-paragraph"
                 >
-                  This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within Smartling.
+                  This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within a Smartling project. Go to your Smartling 
+                  <a
+                    class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+                    data-test-id="cf-ui-text-link"
+                    href="https://dashboard.smartling.com"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <span
+                      class="TabFocusTrap__TabFocusTrap___39Vty"
+                      tabindex="-1"
+                    >
+                      dashboard
+                    </span>
+                  </a>
+                  .
                 </p>
               </div>
               <hr />
@@ -459,7 +474,7 @@ Object {
                     class="HelpText__HelpText___uWbja TextField__TextField__help-text___p4rVf"
                     data-test-id="cf-ui-help-text"
                   >
-                    To get the project ID, see the 'API' settings of your Smartling project.
+                    To get the project ID, see the 'Project Settings &gt; API' of your Smartling project.
                   </p>
                 </div>
               </div>
@@ -880,7 +895,22 @@ Object {
                 class="Paragraph__Paragraph___2aO-9 about-p f36-margin-bottom--m"
                 data-test-id="cf-ui-paragraph"
               >
-                This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within Smartling.
+                This app allows you to view the translation status of entries in the Contentful web app and easily find corresponding entries within a Smartling project. Go to your Smartling 
+                <a
+                  class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+                  data-test-id="cf-ui-text-link"
+                  href="https://dashboard.smartling.com"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <span
+                    class="TabFocusTrap__TabFocusTrap___39Vty"
+                    tabindex="-1"
+                  >
+                    dashboard
+                  </span>
+                </a>
+                .
               </p>
             </div>
             <hr />
@@ -941,7 +971,7 @@ Object {
                   class="HelpText__HelpText___uWbja TextField__TextField__help-text___p4rVf"
                   data-test-id="cf-ui-help-text"
                 >
-                  To get the project ID, see the 'API' settings of your Smartling project.
+                  To get the project ID, see the 'Project Settings &gt; API' of your Smartling project.
                 </p>
               </div>
             </div>
@@ -1491,6 +1521,243 @@ Object {
         </span>
       </span>
     </button>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`App should show an error message when getting a general error from Smartling 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="smartling-status"
+      >
+        <div>
+          <p
+            class="Paragraph__Paragraph___2aO-9 info-p"
+            data-test-id="cf-ui-paragraph"
+          >
+            Smartling status
+          </p>
+        </div>
+        <div>
+          <div
+            class="Tag__Tag___Y-myd job-status Tag__Tag--negative___12luW"
+            data-test-id="cf-ui-tag"
+          >
+            Disconnected
+          </div>
+        </div>
+      </div>
+      <button
+        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+        data-test-id="request-translation"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+          tabindex="-1"
+        >
+          <span
+            class="Button__Button__label___3tcOj"
+          >
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+              data-test-id="cf-ui-icon"
+              height="18"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+              />
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+            </svg>
+             Request Translation
+          </span>
+        </span>
+      </button>
+      <div
+        class="Note__Note___2eSKN general-error Note__Note--negative___3fkwL"
+        data-test-id="cf-ui-note"
+      >
+        <div
+          class="Note__Note__icon___20RqC"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
+            data-test-id="cf-ui-icon"
+            height="18"
+            viewBox="0 0 24 24"
+            width="18"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+            <path
+              d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+            />
+          </svg>
+        </div>
+        <div>
+          <div
+            class="Note__Note__title___2nwpx"
+          >
+            Connection error
+          </div>
+          <div>
+            Please ensure that you have access to the connected Smartling project.
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="smartling-status"
+    >
+      <div>
+        <p
+          class="Paragraph__Paragraph___2aO-9 info-p"
+          data-test-id="cf-ui-paragraph"
+        >
+          Smartling status
+        </p>
+      </div>
+      <div>
+        <div
+          class="Tag__Tag___Y-myd job-status Tag__Tag--negative___12luW"
+          data-test-id="cf-ui-tag"
+        >
+          Disconnected
+        </div>
+      </div>
+    </div>
+    <button
+      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+      data-test-id="request-translation"
+      type="button"
+    >
+      <span
+        class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+        tabindex="-1"
+      >
+        <span
+          class="Button__Button__label___3tcOj"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="18"
+            viewBox="0 0 24 24"
+            width="18"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+           Request Translation
+        </span>
+      </span>
+    </button>
+    <div
+      class="Note__Note___2eSKN general-error Note__Note--negative___3fkwL"
+      data-test-id="cf-ui-note"
+    >
+      <div
+        class="Note__Note__icon___20RqC"
+      >
+        <svg
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
+          data-test-id="cf-ui-icon"
+          height="18"
+          viewBox="0 0 24 24"
+          width="18"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0 0h24v24H0z"
+            fill="none"
+          />
+          <path
+            d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+          />
+        </svg>
+      </div>
+      <div>
+        <div
+          class="Note__Note__title___2nwpx"
+        >
+          Connection error
+        </div>
+        <div>
+          Please ensure that you have access to the connected Smartling project.
+        </div>
+      </div>
+    </div>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],

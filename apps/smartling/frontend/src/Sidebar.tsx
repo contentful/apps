@@ -10,7 +10,8 @@ import {
   TextLink,
   SkeletonContainer,
   SkeletonImage,
-  Spinner
+  Spinner,
+  Note
 } from '@contentful/forma-36-react-components';
 import smartlingClient from './smartlingClient';
 
@@ -24,6 +25,7 @@ interface State {
   token: string;
   refreshToken: string;
   showAllSubs: boolean;
+  generalError: boolean;
 }
 
 const SUBS_TO_SHOW = 3;
@@ -127,7 +129,8 @@ export default class Sidebar extends React.Component<Props, State> {
     smartlingEntry: null,
     token: window.localStorage.getItem('token') || '',
     refreshToken: window.localStorage.getItem('refreshToken') || '',
-    showAllSubs: false
+    showAllSubs: false,
+    generalError: false,
   };
 
   componentDidMount() {
@@ -177,6 +180,8 @@ export default class Sidebar extends React.Component<Props, State> {
         smartlingEntry: formatSmartlingEntry(res.data),
         showAllSubs: res.data.translationSubmissions.length <= SUBS_TO_SHOW
       });
+    } else {
+      this.setState({generalError: true});
     }
   };
 
@@ -197,7 +202,7 @@ export default class Sidebar extends React.Component<Props, State> {
 
   render() {
     const { sdk, projectId } = this.props;
-    const { smartlingEntry, token, showAllSubs } = this.state;
+    const { smartlingEntry, token, showAllSubs, generalError } = this.state;
     const smartlingLink = makeSmartlingLink(projectId, sdk.ids.entry, sdk.ids.space);
 
     const requestButton = (
@@ -293,8 +298,21 @@ export default class Sidebar extends React.Component<Props, State> {
           </div>
         );
       } else {
+        statusTag = <></>;
         smartlingBody = <></>;
       }
+    } else if (generalError) {
+        statusTag = (
+        <Tag className="job-status" tagType="negative">
+          Disconnected
+        </Tag>
+        );
+
+        smartlingBody = (
+          <Note title="Connection error" noteType="negative" className="general-error">
+            Please ensure that you have access to the connected Smartling project.
+          </Note>
+        );
     }
 
     return (

@@ -6,7 +6,8 @@ import {
   Typography,
   FieldGroup,
   CheckboxField,
-  TextField
+  TextField,
+  TextLink
 } from '@contentful/forma-36-react-components';
 import get from 'lodash.get';
 // @ts-ignore 2307
@@ -85,7 +86,7 @@ export default class AppConfig extends React.Component<Props, State> {
   };
 
   setProjectId(id: string) {
-    this.setState({ projectId: id });
+    this.setState({ projectId: id.trim() });
   }
 
   toggleCt(id: string) {
@@ -115,7 +116,7 @@ export default class AppConfig extends React.Component<Props, State> {
                 <Heading>About Smartling</Heading>
                 <Paragraph className="about-p">
                   This app allows you to view the translation status of entries in the Contentful
-                  web app and easily find corresponding entries within Smartling.
+                  web app and easily find corresponding entries within a Smartling project. Go to your Smartling <TextLink href="https://dashboard.smartling.com" target="_blank" rel="noopener noreferrer">dashboard</TextLink>.
                 </Paragraph>
               </Typography>
               <hr />
@@ -134,7 +135,7 @@ export default class AppConfig extends React.Component<Props, State> {
                 value={this.state.projectId}
                 // @ts-ignore 2339
                 onChange={e => this.setProjectId(e.target.value)}
-                helpText="To get the project ID, see the 'API' settings of your Smartling project."
+                helpText="To get the project ID, see the 'Project Settings > API' of your Smartling project."
               />
               <Typography>
                 <Heading>Assign to content types</Heading>
