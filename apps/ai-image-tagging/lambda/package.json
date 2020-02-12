@@ -6,12 +6,15 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint .",
+    "test": "jest",
+    "test:ci": "jest",
     "serve": "node serve.js",
     "build-frontend": "cd ../frontend && npm run build",
     "deploy": "npm run build-frontend && sls deploy --stage prd"
   },
   "devDependencies": {
     "eslint": "6.8.0",
+    "jest": "25.1.0",
     "serverless": "1.63.0",
     "serverless-domain-manager": "3.3.1"
   },
@@ -19,6 +22,7 @@
     "ai-image-tagging-frontend": "1.0.0",
     "aws-serverless-express": "3.3.6",
     "express": "4.17.1",
+    "luxon": "1.22.0",
     "node-fetch": "2.6.0"
   }
 }
