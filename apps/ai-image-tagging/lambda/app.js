@@ -21,11 +21,21 @@ app.use('/tags', async (req, res) => {
 
   try {
     const count = await reportUsage(spaceId);
+
     console.log(`Request for ${spaceId}. Current usage: ${count}.`);
-    // TODO: we could potentially block the request
-    // if the usage limit is exceeded.
+
+    if (count > 1000) {
+      console.log(`usage:over-1k space:${spaceId}`);
+    } else if (count > 10000) {
+      console.log(`usage:over-10k space:${spaceId}`);
+    } else if (count > 100000) {
+      console.error(`Hard usage limit met for space ${spaceId}. Aborting.`);
+      res.status(403).json({ message: 'Usage exceeded.' });
+      return;
+    }
   } catch (err) {
     console.error(`Failed to report usage for ${spaceId}.`, err);
+    // Fail open.
   }
 
   try {
