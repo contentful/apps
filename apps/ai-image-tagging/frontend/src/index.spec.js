@@ -1,6 +1,6 @@
 import React from 'react';
 import { App } from './index';
-import { render, fireEvent, cleanup, configure } from '@testing-library/react';
+import { render, cleanup, configure } from '@testing-library/react';
 
 configure({
   testIdAttribute: 'data-test-id'
@@ -35,6 +35,9 @@ const sdk = {
   locales: {
     default: 'en-US'
   },
+  space: {
+    getAsset: jest.fn()
+  }
 };
 
 describe('App', () => {

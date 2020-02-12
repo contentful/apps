@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { CheckboxField, TextInput, Pill, Button } from '@contentful/forma-36-react-components';
 import get from 'lodash.get';
 
@@ -12,12 +13,18 @@ async function callAPI(url) {
 
 export class AITagView extends React.Component {
 
+  static propTypes = {
+    entries: PropTypes.object.isRequired,
+    notifier: PropTypes.object.isRequired,
+    locale: PropTypes.string.isRequired,
+    space: PropTypes.object.isRequired
+  };
+
   constructor(props){
     super(props);
 
     this.state = {
       value: "",
-      checked: false,
       tags: props.entries.imageTags.getValue() || [],
       overwrite: true,
       isMissingImage: !props.entries.image.getValue(),
@@ -44,18 +51,18 @@ export class AITagView extends React.Component {
 
     const newTags = [e.target.value, ...this.state.tags];
     await this.props.entries.imageTags.setValue(newTags);
-    this.setState({
+    this.setState(() => ({
       tags: newTags,
       value: ""
-    });
+    }));
   }
 
   deleteTag = async (tag) => {
     const newTags = this.state.tags.filter(t => t !== tag);
     await this.props.entries.imageTags.setValue(newTags);
-    this.setState({
+    this.setState(() => ({
       tags: newTags
-    });
+    }));
   }
 
   fetchTags =  async () => {
@@ -72,13 +79,13 @@ export class AITagView extends React.Component {
       // upload new tags
       const newTags = this.state.overwrite ? aiTags : [...aiTags, ...this.state.tags];
       await this.props.entries.imageTags.setValue(newTags)
-      this.setState({
+      this.setState(() => ({
         tags: newTags
-      });
+      }));
     } catch(e) {
       this.props.notifier.error("Image Tagging failed. Please try again later.")
     } finally {
-      this.setState({ isFetchingTags: false });
+      this.setState(() => ({ isFetchingTags: false }));
     }
   }
 
@@ -123,8 +130,8 @@ export class AITagView extends React.Component {
         Auto-tag from AI
       </Button>
       <CheckboxField
-        id={`overwrite-tags`}
-        labelText={ "Overwrite existing tags" }
+        id="overwrite-tags"
+        labelText="Overwrite existing tags"
         disabled={ this.state.isMissingImage }
         checked={ this.state.overwrite }
         onChange={ this.toggleOverwrite }

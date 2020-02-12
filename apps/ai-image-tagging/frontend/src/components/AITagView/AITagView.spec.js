@@ -30,7 +30,7 @@ const sdk = {
 configure({ testIdAttribute: 'data-test-id' });
 
 function renderComponent(sdk) {
-  return render(<AITagView space={sdk.space} entries={sdk.entry.fields} locale={'en-US'} notifier={sdk.notifier} />)
+  return render(<AITagView space={sdk.space} entries={sdk.entry.fields} locale='en-US' notifier={sdk.notifier} />)
 }
 
 describe('AITagView', () => {
@@ -69,7 +69,7 @@ describe('AITagView', () => {
 
     const { getAllByTestId } = renderComponent(sdk);
     await wait();
-    expect(getAllByTestId('cf-ui-pill').length).toEqual(tags.length);
+    expect(getAllByTestId('cf-ui-pill')).toHaveLength(tags.length);
   });
 
   it('should add image tags on Enter', async () => {
@@ -87,7 +87,7 @@ describe('AITagView', () => {
     fireEvent.keyPress(getByTestId('image-tag'), { key: 'Enter', keyCode: 13 });
     await wait();
 
-    expect(getAllByTestId('cf-ui-pill').length).toEqual(1);
+    expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
   });
 
   describe('Calling AI Tags', () => {
@@ -100,7 +100,7 @@ describe('AITagView', () => {
           id: '098dsjnwe9ds'
         }
       }));
-      sdk.space.getAsset.mockImplementation((id) => ({
+      sdk.space.getAsset.mockImplementation(() => ({
         fields: {file: { 'en-US': { url }}}
       }))
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => []);
@@ -117,7 +117,7 @@ describe('AITagView', () => {
       fireEvent.click(getByTestId('cf-ui-button'));
       await wait();
 
-      expect(getAllByTestId('cf-ui-pill').length).toEqual(3);
+      expect(getAllByTestId('cf-ui-pill')).toHaveLength(3);
     });
 
     it('should fetch tags and overwrite current ones', async () => {
@@ -125,12 +125,12 @@ describe('AITagView', () => {
       const { getByTestId, getAllByTestId } = renderComponent(sdk);
       await wait();
 
-      expect(getAllByTestId('cf-ui-pill').length).toEqual(1);
+      expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-button'));
       await wait();
 
-      expect(getAllByTestId('cf-ui-pill').length).toEqual(3);
+      expect(getAllByTestId('cf-ui-pill')).toHaveLength(3);
     });
 
     it('should fetch tags and add them to current tags with overwrite option unchecked', async () => {
@@ -138,13 +138,13 @@ describe('AITagView', () => {
       const { getByTestId, getAllByTestId } = renderComponent(sdk);
       await wait();
 
-      expect(getAllByTestId('cf-ui-pill').length).toEqual(1);
+      expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-controlled-input'));
       fireEvent.click(getByTestId('cf-ui-button'));
       await wait();
 
-      expect(getAllByTestId('cf-ui-pill').length).toEqual(4);
+      expect(getAllByTestId('cf-ui-pill')).toHaveLength(4);
     });
   });
 });
