@@ -8,7 +8,7 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports = async spaceId => {
   const now = new Date();
-  const dt = DateTime.fromObject({
+  const period = DateTime.utc().startOf('month').toSeconds()
     year: now.getUTCFullYear(),
     month: now.getUTCMonth() + 1,
     day: 1,
