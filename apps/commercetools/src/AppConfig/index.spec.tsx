@@ -64,15 +64,15 @@ describe("AppConfig", () => {
   it("renders app before installation", async () => {
     const sdk = makeSdkMock();
     const { getByLabelText } = renderComponent(sdk);
-    await wait(() => getByLabelText(/Commercetools Project Key/));
+    await wait(() => getByLabelText(/commercetools Project Key/));
 
     [
-      [/Commercetools Project Key/, ""],
+      [/commercetools Project Key/, ""],
       [/Client ID/, ""],
       [/Client Secret/, ""],
       [/^API Endpoint/, ""],
       [/Auth API Endpoint/, ""],
-      [/Commercetools data locale/, ""]
+      [/commercetools data locale/, ""]
     ].forEach(([labelRe, expected]) => {
       const configInput = getByLabelText(labelRe) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
@@ -120,15 +120,15 @@ describe("AppConfig", () => {
     });
 
     const { getByLabelText } = renderComponent(sdk);
-    await wait(() => getByLabelText(/Commercetools Project Key/));
+    await wait(() => getByLabelText(/commercetools Project Key/));
 
     [
-      [/Commercetools Project Key/, "some-key"],
+      [/commercetools Project Key/, "some-key"],
       [/Client ID/, "12345"],
       [/Client Secret/, "some-secret"],
       [/^API Endpoint/, "some-endpoint"],
       [/Auth API Endpoint/, "some-auth-endpoint"],
-      [/Commercetools data locale/, "en"]
+      [/commercetools data locale/, "en"]
     ].forEach(([labelRe, expected]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
@@ -148,14 +148,14 @@ describe("AppConfig", () => {
   it("updates configuration", async () => {
     const sdk = makeSdkMock();
     const { getByLabelText } = renderComponent(sdk);
-    await wait(() => getByLabelText(/Commercetools Project Key/));
+    await wait(() => getByLabelText(/commercetools Project Key/));
     [
-      [/Commercetools Project Key/, "some-key"],
+      [/commercetools Project Key/, "some-key"],
       [/Client ID/, "12345"],
       [/Client Secret/, "some-secret"],
       [/^API Endpoint/, "some-endpoint"],
       [/Auth API Endpoint/, "some-auth-endpoint"],
-      [/Commercetools data locale/, "en"]
+      [/commercetools data locale/, "en"]
     ].forEach(([labelRe, value]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       fireEvent.change(configInput, { target: { value } });
