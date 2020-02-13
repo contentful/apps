@@ -135,10 +135,10 @@ export default class AppConfig extends React.Component<Props, State> {
       <div className={styles.background}>
         <div className={styles.body}>
           <Typography>
-            <Heading>About Commercetools</Heading>
+            <Heading>About commercetools</Heading>
             <Paragraph>
-              The Commercetools app allows editors to select products from their
-              Commercetools account and reference them inside of Contentful
+              The commercetools app allows editors to select products from their
+              commercetools account and reference them inside of Contentful
               entries.
             </Paragraph>
 

@@ -218,17 +218,17 @@ export default class AppConfig extends React.Component<Props, State> {
           {contentTypes.length > 0 ? (
             <Paragraph>
               This app can only be used with <strong>Short text</strong> or{' '}
-              <strong>Short text list</strong> fields. Select which fields you’d like to enable for
+              <strong>Short text, list</strong> fields. Select which fields you’d like to enable for
               this app.
             </Paragraph>
           ) : (
             <>
               <Paragraph>
                 This app can only be used with <strong>Short text</strong> or{' '}
-                <strong>Short text list</strong> fields.
+                <strong>Short text, list</strong> fields.
               </Paragraph>
               <Paragraph>
-                There are <strong>no content types with Short text or Short text list</strong>{' '}
+                There are <strong>no content types with Short text or Short text, list</strong>{' '}
                 fields in this environment. You can add one here later.
               </Paragraph>
             </>

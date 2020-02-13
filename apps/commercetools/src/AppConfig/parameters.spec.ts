@@ -2,7 +2,7 @@ import { parameterDefinitions, toInputParameters } from "./parameters";
 
 describe("parameters", () => {
   describe("toInputParameters", () => {
-    it("handles lack of paramters", () => {
+    it("handles lack of parameters", () => {
       const result = toInputParameters(parameterDefinitions, {});
 
       expect(result).toEqual({
