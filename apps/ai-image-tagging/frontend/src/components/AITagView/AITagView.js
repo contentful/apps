@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CheckboxField, TextInput, Pill, Button } from '@contentful/forma-36-react-components';
+import { CheckboxField, TextInput, Pill, Button, Note } from '@contentful/forma-36-react-components';
 import get from 'lodash.get';
 
 import { styles } from './styles';
@@ -28,16 +28,36 @@ export class AITagView extends React.Component {
       tags: props.entries.imageTags.getValue() || [],
       overwrite: true,
       isMissingImage: !props.entries.image.getValue(),
+      unsupportedImageType: false,
       isFetchingTags: false
     }
+
+    this.validateImage();
   }
 
   componentDidMount() {
     this.props.entries.image.onValueChanged(() => {
       this.setState(() => ({
         isMissingImage: !this.props.entries.image.getValue()
-      }))
+      }));
+      // always validate the image
+      this.validateImage();
     });
+  }
+
+  validateImage = async () => {
+    const imageId = get(this.props.entries.image.getValue(), 'sys.id');
+    if (!imageId) { return true; }
+
+    const file = await this.props.space.getAsset(imageId);
+    const locale = this.props.locale;
+    const fullURL = get(file, `fields.file.${locale}.url`);
+    // test if file extension is PNG/JPEG/JPG
+    const isImageValid = new RegExp(/\.png|jpeg|jpg$/, 'i').test(fullURL);
+
+    this.setState(() => ({
+      unsupportedImageType: !isImageValid
+    }))
   }
 
   toggleOverwrite = () => {
@@ -96,7 +116,8 @@ export class AITagView extends React.Component {
   }
 
   render() {
-    return <div>
+
+    return <div className={ styles.inputWrapper }>
       <TextInput
         testId="image-tag"
         placeholder="Type a tag and press enter"
@@ -118,12 +139,16 @@ export class AITagView extends React.Component {
           ))
         }
       </div>
+      {
+        this.state.unsupportedImageType && !this.state.isMissingImage &&
+        <Note noteType="warning" className={ styles.fileWarning }>Unfortunately, we can only auto-tag PNG/JPG/JPEG file types</Note>
+      }
       <Button
         id="fetch-tag-btn"
         className={ styles.btn }
         buttonType="primary"
         type="button"
-        disabled={ this.state.isMissingImage }
+        disabled={ this.state.isMissingImage || this.state.unsupportedImageType }
         loading={ this.state.isFetchingTags }
         onClick={ this.fetchTags }
       >
@@ -132,7 +157,7 @@ export class AITagView extends React.Component {
       <CheckboxField
         id="overwrite-tags"
         labelText="Overwrite existing tags"
-        disabled={ this.state.isMissingImage }
+        disabled={ this.state.isMissingImage || this.state.unsupportedImageType }
         checked={ this.state.overwrite }
         onChange={ this.toggleOverwrite }
       />
