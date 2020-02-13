@@ -3,7 +3,7 @@
 exports[`AppView when the app is installed should render the app view with configuration screen 1`] = `
 <div>
   <div
-    class="css-1cyywdw"
+    class="css-x3z8dg"
   />
   <div
     class="css-jwwzlh"
@@ -280,7 +280,7 @@ exports[`AppView when the app is not installed should render inline validation i
 exports[`AppView when the app is not installed should render the app view with installation screen 1`] = `
 <div>
   <div
-    class="css-1cyywdw"
+    class="css-x3z8dg"
   />
   <div
     class="css-jwwzlh"

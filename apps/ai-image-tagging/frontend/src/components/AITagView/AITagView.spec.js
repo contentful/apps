@@ -83,11 +83,31 @@ describe('AITagView', () => {
     const { getByTestId, getAllByTestId } = renderComponent(sdk);
     await wait();
 
-    getByTestId('image-tag').value = 'new tag';
-    fireEvent.keyPress(getByTestId('image-tag'), { key: 'Enter', keyCode: 13 });
+    const tagInput = getByTestId('image-tag');
+    fireEvent.change(tagInput, {target: { value: 'new tag'} });
+    fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
     await wait();
 
     expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
+  });
+
+  it('should ignore duplicate image tags', async () => {
+    sdk.entry.fields.image.getValue.mockImplementation(() => ({
+      sys: {
+        id: '098dsjnwe9ds'
+      }
+    }));
+    sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['tag1', 'tag2']);
+
+    const { getByTestId, getAllByTestId } = renderComponent(sdk);
+    await wait();
+
+    const tagInput = getByTestId('image-tag');
+    fireEvent.change(tagInput, {target: { value: 'tag1'} });
+    fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
+    await wait();
+
+    expect(getAllByTestId('cf-ui-pill')).toHaveLength(2);
   });
 
   describe('Calling AI Tags', () => {
