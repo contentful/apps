@@ -34,8 +34,8 @@ provider:
         - dynamodb:GetItem
         - dynamodb:PutItem
         - dynamodb:UpdateItem
-      Resource:
-        - "Fn::GetAtt": [ UsageTable, Arn ]
+      Resource: "arn:aws:dynamodb:*:*:table/sls*" # TODO limit to the usage table
+#         - "Fn::GetAtt": [ UsageTable, Arn ]
 
 package:
   exclude:
