@@ -45,9 +45,12 @@ describe('AITagView', () => {
   });
 
   it('should enable everything if theres an image', async () => {
-    const imgUrl = "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png"
+    const imgData = {
+      url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png",
+      contentType: 'image/png'
+    };
     sdk.space.getAsset.mockImplementation(() => ({
-      fields: {file: { 'en-US': { url: imgUrl }}}
+      fields: {file: { 'en-US': imgData }}
     }))
     sdk.entry.fields.image.getValue.mockImplementation(() => ({
       sys: {
@@ -116,7 +119,10 @@ describe('AITagView', () => {
 
   describe('Calling AI Tags', () => {
     beforeEach(() => {
-      const url = '//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.jpeg';
+      const imgData = {
+        url: '//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.jpeg',
+        contentType: 'image/png'
+      };
       const expectedPath = '/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.jpeg'
 
       sdk.entry.fields.image.getValue.mockImplementation(() => ({
@@ -125,7 +131,7 @@ describe('AITagView', () => {
         }
       }));
       sdk.space.getAsset.mockImplementation(() => ({
-        fields: {file: { 'en-US': { url }}}
+        fields: {file: { 'en-US': imgData }}
       }))
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => []);
       fetchMock.get(`/tags/${expectedPath}`, {tags: ['ai-tag-1', 'ai-tag-2', 'ai-tag-3']})
@@ -172,9 +178,12 @@ describe('AITagView', () => {
     });
 
     it('should disable btn if image is unsupported', async () => {
-      const imgUrl = "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.gif"
+      const imgData = {
+        url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.gif",
+        contentType: 'image/gif'
+      };
       sdk.space.getAsset.mockImplementation(() => ({
-        fields: {file: { 'en-US': { url: imgUrl }}}
+        fields: {file: { 'en-US': imgData }}
       }))
       const { getByTestId, getAllByTestId } = renderComponent(sdk);
       await wait();
