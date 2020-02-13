@@ -51,9 +51,9 @@ export class AITagView extends React.Component {
 
     const file = await this.props.space.getAsset(imageId);
     const locale = this.props.locale;
-    const fullURL = get(file, `fields.file.${locale}.url`);
+    const contentType = get(file, `fields.file.${locale}.contentType`);
     // test if file extension is PNG/JPEG/JPG
-    const isImageValid = new RegExp(/\.png|jpeg|jpg$/, 'i').test(fullURL);
+    const isImageValid = new RegExp(/image\/png|jpeg|jpg$/, 'i').test(contentType);
 
     this.setState(() => ({
       unsupportedImageType: !isImageValid
@@ -141,7 +141,7 @@ export class AITagView extends React.Component {
       </div>
       {
         this.state.unsupportedImageType && !this.state.isMissingImage &&
-        <Note noteType="warning" className={ styles.fileWarning }>Unfortunately, we can only auto-tag PNG/JPG/JPEG file types</Note>
+        <Note noteType="warning" className={ styles.fileWarning }>Unfortunately, we can only auto-tag PNG and JPG file types</Note>
       }
       <Button
         id="fetch-tag-btn"
