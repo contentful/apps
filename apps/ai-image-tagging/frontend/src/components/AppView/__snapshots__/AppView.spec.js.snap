@@ -261,7 +261,7 @@ exports[`AppView when the app is not installed should render inline validation i
       id="content-type-id"
       name="contentTypeId"
       required=""
-      value="aiImageTags"
+      value="imageWithAiTags"
     />
   </div>
   <div
@@ -395,7 +395,7 @@ exports[`AppView when the app is not installed should render the app view with i
             id="content-type-id"
             name="contentTypeId"
             required=""
-            value="aiImageTags"
+            value="imageWithAiTags"
           />
         </div>
         <div

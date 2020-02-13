@@ -2,7 +2,9 @@
 
 exports[`App #render should render the extension field view 1`] = `
 <div>
-  <div>
+  <div
+    class="css-qslnu8"
+  >
     <div
       class="TextInput__TextInput___36-K- TextInput__TextInput--large___KwY4O TextInput__TextInput--disabled___2t7VS"
     >

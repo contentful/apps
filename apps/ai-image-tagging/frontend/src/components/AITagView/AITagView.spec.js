@@ -45,6 +45,10 @@ describe('AITagView', () => {
   });
 
   it('should enable everything if theres an image', async () => {
+    const imgUrl = "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png"
+    sdk.space.getAsset.mockImplementation(() => ({
+      fields: {file: { 'en-US': { url: imgUrl }}}
+    }))
     sdk.entry.fields.image.getValue.mockImplementation(() => ({
       sys: {
         id: '098dsjnwe9ds'
@@ -165,6 +169,18 @@ describe('AITagView', () => {
       await wait();
 
       expect(getAllByTestId('cf-ui-pill')).toHaveLength(4);
+    });
+
+    it('should disable btn if image is unsupported', async () => {
+      const imgUrl = "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.gif"
+      sdk.space.getAsset.mockImplementation(() => ({
+        fields: {file: { 'en-US': { url: imgUrl }}}
+      }))
+      const { getByTestId, getAllByTestId } = renderComponent(sdk);
+      await wait();
+
+      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
+      expect(getByTestId('cf-ui-note')).toBeTruthy();
     });
   });
 });
