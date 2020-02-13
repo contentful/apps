@@ -54,20 +54,20 @@ functions:
           path: /{proxy+}
           method: ANY
 
-resources:
-  Resources:
-    UsageTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:custom.tableName}
-        AttributeDefinitions:
-          - AttributeName: spaceId
-            AttributeType: S
-          - AttributeName: period
-            AttributeType: N
-        KeySchema:
-          - AttributeName: spaceId
-            KeyType: HASH
-          - AttributeName: period
-            KeyType: RANGE
-        BillingMode: PAY_PER_REQUEST
+# resources:
+#   Resources:
+#     UsageTable:
+#       Type: AWS::DynamoDB::Table
+#       Properties:
+#         TableName: ${self:custom.tableName}
+#         AttributeDefinitions:
+#           - AttributeName: spaceId
+#             AttributeType: S
+#           - AttributeName: period
+#             AttributeType: N
+#         KeySchema:
+#           - AttributeName: spaceId
+#             KeyType: HASH
+#           - AttributeName: period
+#             KeyType: RANGE
+#         BillingMode: PAY_PER_REQUEST
