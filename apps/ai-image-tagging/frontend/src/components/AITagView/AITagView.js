@@ -46,23 +46,26 @@ export class AITagView extends React.Component {
     }));
   }
 
+  updateTags = async (tags) => {
+    const tagsWithoutDuplicates = [...new Set(tags)];
+    await this.props.entries.imageTags.setValue(tagsWithoutDuplicates);
+    this.setState(() => ({
+      tags: tagsWithoutDuplicates
+    }));
+  }
+
   addTag = async (e) => {
     if (e.key !== "Enter" || !e.target.value) { return; }
 
-    const newTags = [e.target.value, ...this.state.tags];
-    await this.props.entries.imageTags.setValue(newTags);
+    await this.updateTags([e.target.value, ...this.state.tags]);
     this.setState(() => ({
-      tags: newTags,
       value: ""
     }));
   }
 
   deleteTag = async (tag) => {
     const newTags = this.state.tags.filter(t => t !== tag);
-    await this.props.entries.imageTags.setValue(newTags);
-    this.setState(() => ({
-      tags: newTags
-    }));
+    await this.updateTags(newTags);
   }
 
   fetchTags =  async () => {
@@ -78,10 +81,7 @@ export class AITagView extends React.Component {
 
       // upload new tags
       const newTags = this.state.overwrite ? aiTags : [...aiTags, ...this.state.tags];
-      await this.props.entries.imageTags.setValue(newTags)
-      this.setState(() => ({
-        tags: newTags
-      }));
+      this.updateTags(newTags);
     } catch(e) {
       this.props.notifier.error("Image Tagging failed. Please try again later.")
     } finally {
