@@ -185,7 +185,7 @@ describe('AITagView', () => {
       sdk.space.getAsset.mockImplementation(() => ({
         fields: {file: { 'en-US': imgData }}
       }))
-      const { getByTestId, getAllByTestId } = renderComponent(sdk);
+      const { getByTestId } = renderComponent(sdk);
       await wait();
 
       expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
