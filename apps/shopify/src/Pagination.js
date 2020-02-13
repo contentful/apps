@@ -55,9 +55,7 @@ class Pagination {
           hasNextPage:
             get(lastProduct, ["hasNextPage"], false) || this.variants.length > 0
         },
-        products: variants.map(
-          dataTransformer(this.sdk.parameters.installation)
-        )
+        products: variants.map(dataTransformer)
       };
     }
 
