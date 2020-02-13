@@ -2,17 +2,8 @@
   "name": "frontify-assets",
   "version": "1.0.0",
   "private": true,
-  "devDependencies": {
-    "@babel/core": "7.3.4",
-    "@babel/plugin-proposal-class-properties": "7.3.4",
-    "@babel/plugin-transform-runtime": "7.3.4",
-    "@babel/preset-env": "7.3.4",
-    "@babel/preset-react": "7.0.0",
-    "@contentful/contentful-extension-scripts": "^0.15.1",
-    "contentful-cli": "1.2.12"
-  },
   "dependencies": {
-    "shared-dam-app": "^1.0.0"
+    "shared-dam-app": "file:../../lib/shared-dam-app"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",

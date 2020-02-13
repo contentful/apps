@@ -2,20 +2,10 @@
   "name": "cloudinary-assets",
   "version": "1.0.0",
   "private": true,
-  "devDependencies": {
-    "@babel/core": "7.4.5",
-    "@babel/plugin-proposal-class-properties": "7.4.4",
-    "@babel/plugin-transform-runtime": "7.4.4",
-    "@babel/preset-env": "7.4.5",
-    "@babel/preset-react": "7.0.0",
-    "@contentful/contentful-extension-scripts": "^0.15.1",
-    "contentful-cli": "1.2.12",
-    "cssnano": "4.1.10"
-  },
   "dependencies": {
     "cloudinary-core": "^2.8.0",
     "core-js": "3.1.4",
-    "shared-dam-app": "^1.0.0"
+    "shared-dam-app": "file:../../lib/shared-dam-app"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
