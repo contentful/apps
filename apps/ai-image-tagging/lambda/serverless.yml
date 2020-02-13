@@ -7,7 +7,7 @@ plugins:
   - serverless-domain-manager
 
 custom:
-  tableName: ${opt:stage, self:provider.stage}-AiImageTaggingUsage
+  tableName: sls-${opt:stage, self:provider.stage}-AiImageTaggingUsage
   customDomain:
     domainName: ai-image-tagging.ctfapps.net
     stage: prd
