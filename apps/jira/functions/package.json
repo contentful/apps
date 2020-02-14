@@ -10,7 +10,7 @@
     "prettify": "prettier --config ./.prettierrc --write '{bin/*,lib/**/*.ts,typings/**.*.ts,test/**/*.ts,*.json,*.ts}'",
     "test": "ts-mocha '**/*.spec.ts'",
     "test:ci": "npm run test",
-    "deploy": "sls deploy --stage prd"
+    "deploy": "sls deploy --stage $STAGE"
   },
   "dependencies": {
     "aws-sdk": "^2.581.0",

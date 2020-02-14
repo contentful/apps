@@ -9,7 +9,7 @@
     "pretty": "prettier --config ./.prettierrc --write '{src/*.ts,src/*.spec.ts}'",
     "test": "jest --watch",
     "test:ci": "jest",
-    "deploy": "sls deploy --stage prd"
+    "deploy": "sls deploy --stage $STAGE"
   },
   "dependencies": {
     "@types/express": "^4.17.2",

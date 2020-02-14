@@ -1,10 +1,7 @@
 version: 2
-# Required secret environment variables
-# AWS_ACCESS_KEY_ID
-# AWS_SECRET_ACCESS_KEY
 
 jobs:
-  test:
+  all:
     docker:
       - image: circleci/node:10-stretch
     steps:
@@ -29,20 +26,16 @@ jobs:
             static_bucket='cf-apps-static-test'
             test "$CIRCLE_BRANCH" == 'master' && static_bucket='cf-apps-static'
             echo "export STATIC_BUCKET=\"$static_bucket\"" >> $BASH_ENV
+            static_jira_bucket='cf-apps-jira-test'
+            test "$CIRCLE_BRANCH" == 'master' && static_jira_bucket='cf-apps-jira'
+            echo "export STATIC_JIRA_BUCKET=\"$static_jira_bucket\"" >> $BASH_ENV
             stage='test'
             test "$CIRCLE_BRANCH" == 'master' && stage='prd'
             echo "export STAGE=\"$stage\"" >> $BASH_ENV
             source "$BASH_ENV"
             echo "Static deployment bucket: $STATIC_BUCKET"
+            echo "Static Jira deployment bucket: $STATIC_JIRA_BUCKET"
             echo "API Gateway stage: $STAGE"
-
-  deploy:
-    docker:
-      - image: circleci/node:10-stretch
-        environment:
-          STATIC_APPS_BUCKET: s3://cf-apps-static
-    steps:
-      - checkout
       - run:
           name: Install pip
           command: sudo apt-get install python-pip python-dev
@@ -50,22 +43,11 @@ jobs:
           name: Install awscli
           command: sudo pip install awscli
       - run:
-          name: Install dependencies
-          command: |
-            npm i
-      - run:
-          name: 'Deploy apps'
-          command: npm run deploy -- --concurrency=1
+          name: Deploy apps
+          command: npm run deploy
 
 workflows:
   version: 2
   test-deploy:
     jobs:
-      - test
-      - deploy:
-          filters:
-            branches:
-              only:
-                - master
-          requires:
-            - test
+      - all

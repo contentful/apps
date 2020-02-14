@@ -26,7 +26,7 @@
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
     "lint:fixme": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
-    "deploy": "aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/google-analytics --acl public-read"
+    "deploy": "aws s3 sync ./build s3://${STATIC_BUCKET}/apps/google-analytics --acl public-read"
   },
   "dependencies": {
     "@contentful/forma-36-fcss": "^0.0.20",

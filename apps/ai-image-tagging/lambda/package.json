@@ -9,7 +9,7 @@
     "test": "jest",
     "test:ci": "jest",
     "serve": "node serve.js",
-    "deploy": "sls deploy --stage prd"
+    "deploy": "sls deploy --stage $STAGE"
   },
   "devDependencies": {
     "eslint": "6.8.0",

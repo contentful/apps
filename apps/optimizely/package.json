@@ -31,7 +31,7 @@
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
-    "deploy": "aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/optimizely --acl public-read",
+    "deploy": "aws s3 sync ./build s3://${STATIC_BUCKET}/apps/optimizely --acl public-read",
     "test": "TZ=UTC contentful-extension-scripts test --watch",
     "test:ci": "TZ=UTC contentful-extension-scripts test --env=jsdom"
   },
