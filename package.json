@@ -5,7 +5,7 @@
     "bootstrap": "lerna bootstrap --no-ci",
     "bootstrap:ci": "lerna bootstrap --ci --concurrency=2",
     "lint": "lerna run lint --concurrency=2",
-    "build": "lerna run build --concurrency=2",
+    "build": "lerna run build --concurrency=1",
     "test": "lerna run test:ci --concurrency=2",
     "deploy": "lerna run deploy --concurrency=2"
   },
