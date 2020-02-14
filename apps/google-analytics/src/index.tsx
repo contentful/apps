@@ -14,6 +14,8 @@ import AppConfig from './AppConfig';
 import Analytics from './Analytics';
 import { SidebarExtensionState, SidebarExtensionProps, Gapi, SavedParams } from './typings';
 import styles from './styles';
+import { Paragraph, TextLink } from '@contentful/forma-36-react-components';
+import { docsUrl } from './utils';
 
 export class SidebarExtension extends React.Component<
   SidebarExtensionProps,
@@ -26,6 +28,7 @@ export class SidebarExtension extends React.Component<
 
     this.state = {
       isAuthorized: props.gapi.analytics.auth.isAuthorized(),
+      helpText: new URLSearchParams(window.location.search).get('helpText') || '',
       ...this.getEntryStateFields()
     };
   }
@@ -36,8 +39,11 @@ export class SidebarExtension extends React.Component<
 
     sdk.window.startAutoResizer();
 
-    auth.on('signIn', () => this.setState({ isAuthorized: true }));
-    auth.on('signOut', () => window.location.reload());
+    auth.on('signIn', () => this.setState({ isAuthorized: true, helpText: '' }));
+    auth.on('signOut', () => {
+      const { helpText } = this.state
+      window.location.search = helpText && `?helpText=${encodeURIComponent(helpText)}`
+    });
 
     this.props.sdk.entry.onSysChanged(
       debounce(() => {
@@ -47,29 +53,40 @@ export class SidebarExtension extends React.Component<
   }
 
   getEntryStateFields() {
-    const { entry, parameters } = this.props.sdk;
-    const contentTypeId = (entry.getSys() as { contentType: { sys: { id: string } } }).contentType
-      .sys.id;
-    const { urlPrefix, slugField } = (parameters.installation as SavedParams).contentTypes[
-      contentTypeId
-    ];
+    const { entry, contentType, parameters } = this.props.sdk;
+    const contentTypeParams = (parameters.installation as SavedParams).contentTypes[contentType.sys.id]
+    const contentTypeName = contentType.name
+
+    if (!contentTypeParams) {
+      return { isContentTypeConfigured: false, hasSlug: false, pagePath: '', contentTypeName }
+    }
+
+    const { urlPrefix, slugField } = contentTypeParams;
     const hasSlug = slugField in entry.fields;
 
     const pagePath = hasSlug
-      ? `/${urlPrefix || ''}${entry.fields[slugField].getValue() || ''}`
+      ? `${urlPrefix || ''}${entry.fields[slugField].getValue() || ''}`
       : '';
 
     return {
+      isContentTypeConfigured: true,
       hasSlug,
       pagePath,
-      contentTypeId
+      contentTypeName,
     };
   }
 
   render() {
-    const { isAuthorized, pagePath, hasSlug, contentTypeId } = this.state;
+    const { isAuthorized, isContentTypeConfigured, pagePath, hasSlug, contentTypeName, helpText } = this.state;
     const { parameters, entry, notifier } = this.props.sdk;
     const { clientId, viewId } = parameters.installation as SavedParams;
+
+    const helpTextFrag = helpText && <>
+      <div className={styles.spaced}/>
+      <Paragraph className={styles.lightText}>
+      {helpText}. See <TextLink href={docsUrl}>this app&apos;s docs</TextLink> for help.
+      </Paragraph>
+        </>
 
     if (!isAuthorized) {
       const renderAuthButton = async (authButton: HTMLDivElement) => {
@@ -84,25 +101,37 @@ export class SidebarExtension extends React.Component<
       };
 
       return (
+        <>
         <div
           ref={renderAuthButton}
           className={isAuthorized ? styles.hidden : styles.signInButton}
         />
+        {helpTextFrag}
+        </>
       );
     }
 
-    if (!hasSlug) {
-      return <p>This {contentTypeId} entry doesn&apos;t have a valid slug field.</p>;
+    if (!isContentTypeConfigured) {
+      return <Paragraph className={styles.lightText}>The {contentTypeName}{' '}
+      content type hasn&apos;t been configured for use with this app. It must
+      have a field of type short text and must be added to the list of
+      content types in this app&apos;s configuration.</Paragraph>;
     }
 
-    if (!(entry.getSys() as { publishedAt?: Date }).publishedAt) {
-      return <p>This {contentTypeId} entry hasn&apos;t been published.</p>;
+    if (!hasSlug) {
+      return <Paragraph className={styles.lightText}>This {contentTypeName} entry doesn&apos;t have a valid slug field.</Paragraph>;
+    }
+
+    if (!entry.getSys().publishedAt) {
+      return <Paragraph className={styles.lightText}>This {contentTypeName} entry hasn&apos;t been published.</Paragraph>;
     }
 
     return (
       <section>
+        {helpTextFrag}
         <Analytics
           sdk={this.props.sdk}
+          setHelpText={helpText => this.setState({ helpText })}
           gapi={this.props.gapi}
           pagePath={pagePath}
           viewId={viewId}

@@ -1,6 +1,6 @@
 import get from 'lodash/get';
 import { CollectionResponse, EditorInterface, AppExtensionSDK } from 'contentful-ui-extensions-sdk';
-import { SavedParams } from './typings';
+import { SavedParams, GapiError } from './typings';
 
 export function formatDate(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -80,4 +80,19 @@ export function getDateRangeInterval(start: Date, end: Date) {
   }
 
   return '';
+}
+
+export const docsUrl = 'https://www.contentful.com/developers/docs/extensibility/apps/google-analytics'
+
+export function getErrorNotification(error: GapiError) {
+  if (error.status === "PERMISSION_DENIED") {
+    return "Your Google OAuth client isn't correctly configured for the Google Analytics app!"
+
+  }
+
+  for (const e of error.errors || []) {
+    if (e.reason === 'accessNotConfigured') {
+      return "The project of your Google OAuth client doesn't have the Google Analytcs APIs enabled!"
+    }
+  }
 }
