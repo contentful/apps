@@ -1,8 +1,6 @@
 import { AppExtensionSDK, SidebarExtensionSDK } from 'contentful-ui-extensions-sdk';
 
 // eslint-disable-next-line no-undef, @typescript-eslint/no-use-before-define
-export type Gapi = typeof globalThis.gapi & { analytics: typeof gapi.analytics };
-
 export interface AppConfigParams {
   sdk: AppExtensionSDK;
 }
@@ -40,10 +38,12 @@ export interface SidebarExtensionProps {
 }
 
 export interface SidebarExtensionState {
+  isContentTypeConfigured: boolean
   isAuthorized: boolean;
   hasSlug: boolean;
   pagePath: string;
-  contentTypeId: string;
+  contentTypeName: string;
+  helpText: string;
 }
 
 export interface AnalyticsProps {
@@ -51,6 +51,7 @@ export interface AnalyticsProps {
   viewId: string;
   sdk: SidebarExtensionSDK;
   gapi: Gapi;
+  setHelpText: (helpText: string) => void
 }
 
 export interface AnalyticsState {
@@ -73,7 +74,7 @@ export interface TimelineProps {
   gapi: Gapi;
   onData: (data: ChartData) => void;
   onQuery: () => void;
-  onError: () => void;
+  onError: (error: GapiError) => void;
 }
 
 export interface TimelineState {
@@ -88,7 +89,7 @@ export interface RangeOption {
 }
 
 export interface ChartData {
-  rows: {
+  rows?: {
     c: {
       v: number;
     }[];
@@ -103,16 +104,27 @@ export class DataChart {
   execute(): void;
 }
 
-declare namespace gapi.analytics {
-  export const googleCharts: {
-    DataChart: typeof DataChart;
+export interface Gapi {
+  analytics: {
+    googleCharts: {
+      DataChart: typeof DataChart;
+    };
+    auth: {
+      isAuthorized: () => boolean;
+      signOut: () => void;
+      authorize: (options: { container: HTMLElement | string; clientid: string }) => { rm: () => void };
+      on(type: string, listener: () => void): void;
+    };
   };
-  export const auth: {
-    isAuthorized: () => boolean;
-    signOut: () => void;
-    authorize: (options: { container: HTMLElement | string; clientid: string }) => void;
-    on(type: string, listener: () => void): void;
-  };
+  client: {
+    analytics: {
+      management: {
+        accountSummaries: {
+          list: () => Promise<AccountsSummary>
+        }
+      }
+    }
+  }
 }
 
 export interface AccountsSummary {
@@ -127,4 +139,15 @@ export interface AccountsSummary {
       }[];
     }[];
   };
+}
+
+export type GapiError = {
+  errors: {
+    message: string;
+    domain: string;
+    reason: string;
+  }[]
+  status: string;
+  message: string;
+  code: number;
 }

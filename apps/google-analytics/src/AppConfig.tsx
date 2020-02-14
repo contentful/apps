@@ -17,7 +17,6 @@ import { getAndUpdateSavedParams } from './utils';
 import {
   ContentType,
   EditorInterface,
-  ContentTypeField,
   CollectionResponse
 } from 'contentful-ui-extensions-sdk';
 
@@ -34,7 +33,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
 
     const [{ items: spaceContentTypes }, savedParams] = await Promise.all([
       sdk.space.getContentTypes() as Promise<
-        CollectionResponse<ContentType & { fields: ContentTypeField[] }>
+        CollectionResponse<ContentType>
       >,
       getAndUpdateSavedParams(sdk)
     ]);
@@ -52,15 +51,19 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         // sort contentTypes by display name
         allContentTypes: sortBy(spaceContentTypes, 'name').reduce(
           (acc: AllContentTypes, contentType) => {
-            acc[contentType.sys.id] = {
-              ...contentType,
-              fields: sortBy(
-                // use only short text fields of content type
-                contentType.fields.filter(f => f.type === 'Symbol'),
+            const fields = sortBy(
+              // use only short text fields of content type
+              contentType.fields.filter(f => f.type === 'Symbol'),
                 // sort by field name
                 'name'
-              )
-            };
+            )
+
+            if (fields.length) {
+              acc[contentType.sys.id] = {
+                ...contentType,
+                fields
+              };
+            }
 
             return acc;
           },
@@ -82,7 +85,6 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
 
     if (!clientId || !viewId) {
       notifier.error('You must provide both a valid client ID and view ID!');
-
       return false;
     }
 
@@ -95,6 +97,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
 
     if (!ctKeys.length || !ctKeys[0]) {
       notifier.error('You need to select at least one content type with a slug field!');
+      return false
     }
 
     if (ctKeys.some(key => key && !contentTypes[key].slugField)) {
@@ -124,6 +127,20 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
     };
   }
 
+  getBestSlugField(contentTypeId: string) {
+    const { fields } = this.state.allContentTypes[contentTypeId]
+
+    // return the only short text field
+    if (fields.length === 1) { return fields[0].id }
+
+    // find field that starts with 'slug'
+    for (const field of fields) {
+      if (/^slug/i.test(field.name)) { return field.id }
+    }
+
+    return ''
+  }
+
   handleContentTypeChange(prevKey: string, newKey: string) {
     this.setState(prevState => {
       const contentTypes: ContentTypes = {};
@@ -133,7 +150,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
       for (const [prop, value] of Object.entries(prevState.contentTypes)) {
         if (prop === prevKey) {
           contentTypes[newKey as keyof typeof contentTypes] = {
-            slugField: '',
+            slugField: this.getBestSlugField(newKey),
             urlPrefix: value.urlPrefix
           };
         } else {
@@ -185,6 +202,8 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
 
   render() {
     const { contentTypes, allContentTypes } = this.state;
+    const contentTypeEntries = Object.entries(contentTypes)
+    const hasSelectedContentTypes = contentTypeEntries.length > 0
 
     return (
       <>
@@ -198,8 +217,9 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                 This app allows you to view pageview analytics of a Contentful entry in the editor
                 sidebar. For installation instructions, please refer to the app&apos;s{' '}
                 <TextLink
-                  target="blank"
-                  href="https://www.contentful.com/developers/docs/extensibility/apps/google-analytics/">
+                  href="https://www.contentful.com/developers/docs/extensibility/apps/google-analytics/"
+                  target="_blank"
+                  rel="noopener noreferrer">
                   documentation
                 </TextLink>
                 .
@@ -255,13 +275,15 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
             </Paragraph>
 
             <div className={styles.contentTypeGrid}>
-              <FormLabel htmlFor="">Content type</FormLabel>
-              <FormLabel htmlFor="">Slug field</FormLabel>
-              <FormLabel htmlFor="">URL prefix</FormLabel>
+              {hasSelectedContentTypes && <>
+                  <FormLabel htmlFor="">Content type</FormLabel>
+                  <FormLabel htmlFor="">Slug field</FormLabel>
+                  <FormLabel htmlFor="">URL prefix</FormLabel>
+                </>}
               <div className={styles.invisible}>Remover</div>
             </div>
 
-            {Object.entries(contentTypes).map(([key, { slugField, urlPrefix }], index) => (
+            {contentTypeEntries.map(([key, { slugField, urlPrefix }], index) => (
               <div
                 key={key}
                 className={[styles.contentTypeGrid, styles.contentTypeGridInputs].join(' ')}>
@@ -329,7 +351,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
               buttonType="muted"
               disabled={Object.values(contentTypes).some(ct => !ct.slugField)}
               onClick={() => this.addContentType()}>
-              Add another content type
+              {hasSelectedContentTypes ? 'Add another content type' : 'Add a content type'}
             </Button>
           </Typography>
         </div>

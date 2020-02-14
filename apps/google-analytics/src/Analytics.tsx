@@ -3,13 +3,13 @@ import { Select, DisplayText, Paragraph } from '@contentful/forma-36-react-compo
 
 import Timeline from './Timeline';
 import styles from './styles';
-import { formatLargeNumbers, DAY_IN_MS, getDateRangeInterval } from './utils';
-import { RangeOption, AnalyticsProps, AnalyticsState, ChartData } from './typings';
+import { formatLargeNumbers, DAY_IN_MS, getDateRangeInterval, getErrorNotification } from './utils';
+import { RangeOption, AnalyticsProps, AnalyticsState, ChartData, GapiError } from './typings';
 
 const RANGE_OPTIONS: RangeOption[] = [
   { label: 'Last 7 days', startDaysAgo: 7, endDaysAgo: 0 },
   { label: 'Last 28 days', startDaysAgo: 28, endDaysAgo: 0 },
-  { label: 'Last 90 days', startDaysAgo: 90, endDaysAgo: 0 }
+  { label: 'Last 60 days', startDaysAgo: 60, endDaysAgo: 0 }
 ];
 
 const INITIAL_RANGE_INDEX = 0;
@@ -47,9 +47,22 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
   }
 
   updateTotalPageViews(data: ChartData) {
-    const totalPageViews = data.rows.reduce((acc, { c }) => acc + c[1].v, 0);
+    const totalPageViews = (data.rows || []).reduce((acc, { c }) => acc + c[1].v, 0);
 
     this.setState({ totalPageViews });
+  }
+
+  handleError(error: GapiError) {
+    const errorNotification = getErrorNotification(error)
+
+    if (errorNotification) {
+      this.props.setHelpText(errorNotification)
+    }
+    else {
+      this.props.sdk.notifier.error(error.message)
+    }
+
+    this.props.gapi.analytics.auth.signOut()
   }
 
   render() {
@@ -87,7 +100,7 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
             this.setState({ loading: false });
           }}
           onQuery={() => this.setState({ loading: true })}
-          onError={() => gapi.analytics.auth.signOut()}
+          onError={error => this.handleError(error)}
           pagePath={pagePath}
           start={start}
           end={end}

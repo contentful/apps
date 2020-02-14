@@ -14,6 +14,9 @@ export default {
     boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
     borderRadius: '2px'
   }),
+  lightText: css({
+    color: tokens.colorTextLight
+  }),
   signInButton: css({
     textAlign: 'center',
     dispay: 'none',

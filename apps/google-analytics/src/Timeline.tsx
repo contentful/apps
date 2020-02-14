@@ -7,7 +7,7 @@ import {
   SkeletonContainer,
   Paragraph
 } from '@contentful/forma-36-react-components';
-import { TimelineProps, TimelineState, ChartData, AccountsSummary, DataChart } from './typings';
+import { TimelineProps, TimelineState, ChartData, AccountsSummary, DataChart, GapiError } from './typings';
 
 const CHART_HEIGHT = 200;
 const externalUrlBase = 'https://analytics.google.com/analytics/web/#/report/content-pages';
@@ -22,34 +22,30 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
     this.props.onData(data);
   };
 
-  onError = ({ error }: { error: Error }) => {
+  onError = ({ error }: { error: GapiError }) => {
     this.setState({ loading: false });
-    this.props.sdk.notifier.error(
-      `Google Analytics App couldn't get load your page view data (${error.message})`
-    );
-    this.props.onError();
+    this.props.onError(error);
   };
 
   constructor(props: TimelineProps) {
     super(props);
     this.state = {
       viewUrl: '',
-      loading: true
+      loading: true,
     };
   }
 
   async componentDidMount() {
     let viewUrl = '';
-    const { sdk, gapi } = this.props;
+    const { gapi } = this.props;
 
     try {
       const accounts = (await gapi.client.analytics.management.accountSummaries.list()) || [];
       viewUrl = this.getExternalUrl(accounts);
     } catch (e) {
-      const error = e.result ? e.result.error : e;
-      sdk.notifier.error(
-        `Google Analytics App couldn't get a link to your dashboard (${error.message})`
-      );
+      const error: GapiError = e.result ? e.result.error : e;
+
+      return this.onError({ error: error })
     }
 
     const dataChart = new gapi.analytics.googleCharts.DataChart({
@@ -93,12 +89,19 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
     }
 
     const { dimensions, start, end, pagePath, viewId } = this.props;
+    // pathWithoutTrailingSlash
+    // filter to path with and without trailing slash
+    const untrailedPath = pagePath.replace(/\/$/, '')
+    const filters = [untrailedPath, `${untrailedPath}/`]
+      .filter(Boolean)
+      .map(p => `ga:pagePath==${p}`)
+      .join(',')
 
     const query = {
       ids: `ga:${viewId}`,
       dimensions: `ga:${dimensions}`,
       metrics: 'ga:pageViews',
-      filters: `ga:pagePath==${pagePath}`,
+      filters,
       'start-date': formatDate(start),
       'end-date': formatDate(end)
     };
@@ -142,7 +145,7 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
           <>
             <Paragraph className={styles.slug}>{pagePath}</Paragraph>
             {viewUrl ? (
-              <TextLink href={viewUrl} target="blank" icon="ExternalLink">
+              <TextLink href={viewUrl} target="_blank" rel="noopener noreferer" icon="ExternalLink">
                 Open in Google Analytics
               </TextLink>
             ) : null}
