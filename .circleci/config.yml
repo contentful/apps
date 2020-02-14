@@ -21,6 +21,18 @@ jobs:
       - run:
           name: Test
           command: npm run test
+      - run:
+          name: Configure deployment
+          command: |
+            static_bucket='cf-apps-static-test'
+            test "$CIRCLE_BRANCH" == 'master' && static_bucket='cf-apps-static'
+            echo "export STATIC_BUCKET=\"$static_bucket\"" >> $BASH_ENV
+            stage='test'
+            test "$CIRCLE_BRANCH" == 'master' && stage='prd'
+            echo "export STAGE=\"$stage\"" >> $BASH_ENV
+            source "$BASH_ENV"
+            echo "Static deployment bucket: $STATIC_BUCKET"
+            echo "API Gateway stage: $STAGE"
 
   deploy:
     docker:
