@@ -23,18 +23,21 @@ jobs:
       - run:
           name: Configure deployment
           command: |
-            static_bucket='cf-apps-static-test'
-            test "$CIRCLE_BRANCH" == 'master' && static_bucket='cf-apps-static'
-            echo "export STATIC_BUCKET=\"$static_bucket\"" >> $BASH_ENV
-            static_jira_bucket='cf-apps-jira-test'
-            test "$CIRCLE_BRANCH" == 'master' && static_jira_bucket='cf-apps-jira'
-            echo "export STATIC_JIRA_BUCKET=\"$static_jira_bucket\"" >> $BASH_ENV
+            static_s3_base="s3://cf-apps-static/apps-test-$CIRCLE_SHA1"
+            test "$CIRCLE_BRANCH" == 'master' && static_s3_base='s3://cf-apps-static/apps'
+            echo "export STATIC_S3_BASE=\"$static_s3_base\"" >> $BASH_ENV
+
+            static_jira_s3_base="s3://cf-apps-static/apps-test-$CIRCLE_SHA1/jira"
+            test "$CIRCLE_BRANCH" == 'master' && static_jira_s3_base='s3://cf-apps-jira'
+            echo "export STATIC_JIRA_S3_BASE=\"$static_jira_s3_base\"" >> $BASH_ENV
+
             stage='test'
             test "$CIRCLE_BRANCH" == 'master' && stage='prd'
             echo "export STAGE=\"$stage\"" >> $BASH_ENV
+
             source "$BASH_ENV"
-            echo "Static deployment bucket: $STATIC_BUCKET"
-            echo "Static Jira deployment bucket: $STATIC_JIRA_BUCKET"
+            echo "Static deployment S3 base: $STATIC_S3_BASE"
+            echo "Static Jira deployment S3 base: $STATIC_JIRA_S3_BASE"
             echo "API Gateway stage: $STAGE"
       - run:
           name: Install pip

@@ -20,7 +20,7 @@
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
-    "deploy": "aws s3 sync ./build s3://${STATIC_BUCKET}/apps/cloudinary --acl public-read"
+    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/cloudinary --acl public-read"
   },
   "browserslist": [
     "last 5 Chrome version",
