@@ -28,7 +28,7 @@
     "build": "contentful-extension-scripts build --no-inline",
     "deploy": "aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/gatsby --acl public-read",
     "test": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
-    "test:ci": "TZ=UTC contentful-extension-scripts test --env=jsdom --coverage"
+    "test:ci": "TZ=UTC contentful-extension-scripts test --env=jsdom"
   },
   "browserslist": [
     "last 5 Chrome version",

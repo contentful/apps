@@ -21,7 +21,7 @@
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx",
     "deploy": "aws s3 sync ./build ${STATIC_APPS_BUCKET}/apps/focal-point --acl public-read",
     "test": "contentful-extension-scripts test --env=jsdom --watch",
-    "test:ci": "contentful-extension-scripts test --env=jsdom --coverage"
+    "test:ci": "contentful-extension-scripts test --env=jsdom"
   },
   "dependencies": {
     "@contentful/forma-36-fcss": "0.0.31",
