@@ -11,7 +11,9 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: npm i
+          command: |
+            npm i
+            npm run bootstrap:ci
       - run:
           name: Lint
           command: npm run lint
