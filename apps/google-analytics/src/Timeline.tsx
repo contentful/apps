@@ -90,13 +90,12 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
 
     const { dimensions, start, end, pagePath, viewId } = this.props;
     // pathWithoutTrailingSlash
-    let filters = `ga:pagePath==${pagePath}`
-
-    // filter to path with and without trailing slash if the slug doesn't end
-    // with a trailing slash
-    if (pagePath && !pagePath.endsWith('/')) {
-      filters = `${filters},ga:pagePath==${pagePath}/`
-    }
+    // filter to path with and without trailing slash
+    const untrailedPath = pagePath.replace(/\/$/, '')
+    const filters = [untrailedPath, `${untrailedPath}/`]
+      .filter(Boolean)
+      .map(p => `ga:pagePath==${p}`)
+      .join(',')
 
     const query = {
       ids: `ga:${viewId}`,
@@ -146,7 +145,7 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
           <>
             <Paragraph className={styles.slug}>{pagePath}</Paragraph>
             {viewUrl ? (
-              <TextLink href={viewUrl} target="blank" icon="ExternalLink">
+              <TextLink href={viewUrl} target="_blank" rel="noopener noreferer" icon="ExternalLink">
                 Open in Google Analytics
               </TextLink>
             ) : null}

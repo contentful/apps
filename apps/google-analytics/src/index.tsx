@@ -81,12 +81,9 @@ export class SidebarExtension extends React.Component<
     const { parameters, entry, notifier } = this.props.sdk;
     const { clientId, viewId } = parameters.installation as SavedParams;
 
-    const helpTextFrag = helpText && <>
-      <div className={styles.spaced}/>
-      <Paragraph className={styles.lightText}>
-      {helpText}. See <TextLink href={docsUrl}>this app&apos;s docs</TextLink> for help.
+    const helpTextNode = helpText && <Paragraph className={styles.lightText}>
+      {helpText}. See <TextLink target="_blank" rel="noopener noreferer" href={docsUrl}>this app&apos;s docs</TextLink> for help.
       </Paragraph>
-        </>
 
     if (!isAuthorized) {
       const renderAuthButton = async (authButton: HTMLDivElement) => {
@@ -106,7 +103,10 @@ export class SidebarExtension extends React.Component<
           ref={renderAuthButton}
           className={isAuthorized ? styles.hidden : styles.signInButton}
         />
-        {helpTextFrag}
+          {helpTextNode && <>
+        <div className={styles.spaced}/>
+        {helpTextNode}
+        </>}
         </>
       );
     }
@@ -128,7 +128,7 @@ export class SidebarExtension extends React.Component<
 
     return (
       <section>
-        {helpTextFrag}
+        {helpTextNode}
         <Analytics
           sdk={this.props.sdk}
           setHelpText={helpText => this.setState({ helpText })}
