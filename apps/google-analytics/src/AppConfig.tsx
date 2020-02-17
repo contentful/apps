@@ -291,7 +291,6 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   name={'contentType-' + index}
                   id={'contentType-' + index}
                   value={key}
-                  hasError={!key}
                   onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
                     this.handleContentTypeChange(key, event.target.value)
                   }>

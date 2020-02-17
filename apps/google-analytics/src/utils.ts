@@ -67,7 +67,7 @@ export const DAY_IN_MS = 1000 * 60 * 60 * 24;
 const daysBreakpoints = [
   { lowerLimit: 29, interval: 'nthWeek' },
   { lowerLimit: 5, interval: 'date' },
-  { lowerLimit: -Infinity, interval: 'nthhour' }
+  { lowerLimit: -Infinity, interval: 'dateHour' }
 ];
 
 export function getDateRangeInterval(start: Date, end: Date) {
