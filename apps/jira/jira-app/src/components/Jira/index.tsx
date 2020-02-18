@@ -40,7 +40,7 @@ export default class Jira extends React.Component<Props, State> {
 
   clearIssueInterval() {
     if (this.issueInterval) {
-      clearInterval(this.issueInterval)
+      clearInterval(this.issueInterval);
     }
   }
 

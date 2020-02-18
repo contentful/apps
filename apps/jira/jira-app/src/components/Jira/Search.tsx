@@ -27,7 +27,7 @@ export default class Search extends React.Component<Props, State> {
   async componentDidUpdate(_prevProps: Props, prevState: State) {
     const { value } = this.state;
 
-    if (value.length > 4 && value !== prevState.value) {
+    if (value.length > 2 && value !== prevState.value) {
       const res = await this.props.client.searchIssues(value);
       if (res.issues.length) {
         // eslint-disable-next-line react/no-did-update-set-state

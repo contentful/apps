@@ -163,11 +163,12 @@ export default class Config extends React.Component<Props, State> {
       const data = await JiraClient.getProjects(resource.id, this.props.token);
 
       if (data.projects.length) {
-        this.setState({
+        this.setState(prevState => ({
           // if there is only one project, automatically pick it and move on
-          checkedProject: data.projects.length === 1 ? data.projects[0].id : '',
+          checkedProject:
+            data.projects.length === 1 ? data.projects[0].id : prevState.checkedProject,
           projects: data.projects
-        });
+        }));
       }
     }
   };
