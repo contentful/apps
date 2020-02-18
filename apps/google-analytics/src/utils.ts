@@ -6,7 +6,7 @@ export function formatDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-export async function getAndUpdateSavedParams(sdk: AppExtensionSDK) {
+export async function getAndUpdateSavedParams(sdk: AppExtensionSDK): Promise<SavedParams> {
   const { space, ids } = sdk;
   const [savedParams, eisResponse] = await Promise.all([
     sdk.app.getParameters() as Promise<SavedParams>,
