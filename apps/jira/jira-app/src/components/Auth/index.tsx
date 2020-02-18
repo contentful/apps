@@ -110,7 +110,7 @@ export default class AuthWrapper extends React.Component<Props, State> {
 
   clearExpirationInterval() {
     if (this.expirationWatchInterval) {
-      clearInterval(this.expirationWatchInterval)
+      clearInterval(this.expirationWatchInterval);
     }
   }
 

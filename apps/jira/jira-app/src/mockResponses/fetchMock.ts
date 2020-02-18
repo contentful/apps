@@ -209,8 +209,7 @@ fetchMock.get(
           },
           components: [],
           timeoriginalestimate: null,
-          description:
-            'Issue must be done',
+          description: 'Issue must be done',
           customfield_10010: null,
           customfield_10014: null,
           customfield_10015: null,
