@@ -29,7 +29,7 @@ export class AITagView extends React.Component {
       overwrite: true,
       isMissingImage: !props.entries.image.getValue(),
       unsupportedImageType: false,
-      imageRequirementInvalid: false,
+      imageRequirementsNotMet: false,
       isFetchingTags: false
     }
 
@@ -47,8 +47,8 @@ export class AITagView extends React.Component {
   }
 
   validateImage = async () => {
-    const FILE_LIMIT = 5000000; // 5MB limit from AWS Rekognition
-    const FILE_DIMENSION_LIMIT = 80; // 80px limit
+    const MAX_FILE_SIZE = 5 * Math.pow(2, 20); // 5MB limit from AWS Rekognition
+    const MIN_DIMENSION_SIZE = 80; // 80px limit
     const imageId = get(this.props.entries.image.getValue(), 'sys.id');
     if (!imageId) { return ; }
 
@@ -57,14 +57,14 @@ export class AITagView extends React.Component {
     const contentType = get(file, `fields.file.${locale}.contentType`);
     const details = get(file, `fields.file.${locale}.details`);
     // test if file extension is PNG/JPEG/JPG
-    const isImageTypeValid = new RegExp(/image\/png|jpeg|jpg$/, 'i').test(contentType);
-    const isImageIncompatible = details.size > FILE_LIMIT ||
-                                details.width < FILE_DIMENSION_LIMIT ||
-                                details.height < FILE_DIMENSION_LIMIT;
+    const isImageTypeValid = new RegExp(/^image\/(png|jpe?g)$/, 'i').test(contentType);
+    const isImageIncompatible = details.size > MAX_FILE_SIZE ||
+                                details.width < MIN_DIMENSION_SIZE ||
+                                details.height < MIN_DIMENSION_SIZE;
 
     this.setState(() => ({
       unsupportedImageType: !isImageTypeValid,
-      imageRequirementInvalid: isImageIncompatible
+      imageRequirementsNotMet: isImageIncompatible
     }))
   }
 
@@ -124,7 +124,7 @@ export class AITagView extends React.Component {
   }
 
   render() {
-    let hasImageError = !this.state.isMissingImage && (this.state.unsupportedImageType || this.state.imageRequirementInvalid)
+    let hasImageError = !this.state.isMissingImage && (this.state.unsupportedImageType || this.state.imageRequirementsNotMet)
     let imageErrorMsg = this.state.unsupportedImageType ? "Unfortunately, we can only auto-tag PNG and JPG file types" : "Please make sure your image is less than 5MB and has dimensions of at least 80px for both width and height";
 
     return <div className={ styles.inputWrapper }>
