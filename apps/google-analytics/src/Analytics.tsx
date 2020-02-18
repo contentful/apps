@@ -59,7 +59,7 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
       this.props.setHelpText(errorNotification)
     }
     else {
-      this.props.sdk.notifier.error(error.message)
+      this.props.sdk.notifier.error(`Google Analytics: ${error.message}`)
     }
 
     this.props.gapi.analytics.auth.signOut()
