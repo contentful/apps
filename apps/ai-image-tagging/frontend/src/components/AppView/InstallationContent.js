@@ -10,10 +10,6 @@ export function InstallationContent({
   onContentTypeNameChange,
   onContentTypeIdChange
 }) {
-  const validationMessageName = allContentTypesIds.includes(contentTypeId)
-    ? `A content type with ID "${contentTypeId}" already exists. Try a different name.`
-    : null;
-
   const validationMessageId = allContentTypesIds.includes(contentTypeId)
     ? `A content type with ID "${contentTypeId}" already exists. Try a different ID.`
     : null;
@@ -33,12 +29,11 @@ export function InstallationContent({
           placeholder: 'e.g. AI Tagged Image',
           testId: 'content-type-name-input'
         }}
-        helpText="You can use this content type to wrap images with focal point data"
+        helpText="You can use this content type to add tags to images"
         value={contentTypeName}
         onChange={onContentTypeNameChange}
         testId="content-type-name"
         id="content-type-name"
-        validationMessage={validationMessageName}
         required
       />
       <TextField
