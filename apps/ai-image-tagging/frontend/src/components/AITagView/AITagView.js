@@ -29,6 +29,7 @@ export class AITagView extends React.Component {
       overwrite: true,
       isMissingImage: !props.entries.image.getValue(),
       unsupportedImageType: false,
+      imageRequirementInvalid: false,
       isFetchingTags: false
     }
 
@@ -46,17 +47,24 @@ export class AITagView extends React.Component {
   }
 
   validateImage = async () => {
+    const FILE_LIMIT = 5000000; // 5MB limit from AWS Rekognition
+    const FILE_DIMENSION_LIMIT = 80; // 80px limit
     const imageId = get(this.props.entries.image.getValue(), 'sys.id');
-    if (!imageId) { return true; }
+    if (!imageId) { return ; }
 
     const file = await this.props.space.getAsset(imageId);
     const locale = this.props.locale;
     const contentType = get(file, `fields.file.${locale}.contentType`);
+    const details = get(file, `fields.file.${locale}.details`);
     // test if file extension is PNG/JPEG/JPG
-    const isImageValid = new RegExp(/image\/png|jpeg|jpg$/, 'i').test(contentType);
+    const isImageTypeValid = new RegExp(/image\/png|jpeg|jpg$/, 'i').test(contentType);
+    const isImageIncompatible = details.size > FILE_LIMIT ||
+                                details.width < FILE_DIMENSION_LIMIT ||
+                                details.height < FILE_DIMENSION_LIMIT;
 
     this.setState(() => ({
-      unsupportedImageType: !isImageValid
+      unsupportedImageType: !isImageTypeValid,
+      imageRequirementInvalid: isImageIncompatible
     }))
   }
 
@@ -116,6 +124,8 @@ export class AITagView extends React.Component {
   }
 
   render() {
+    let hasImageError = !this.state.isMissingImage && (this.state.unsupportedImageType || this.state.imageRequirementInvalid)
+    let imageErrorMsg = this.state.unsupportedImageType ? "Unfortunately, we can only auto-tag PNG and JPG file types" : "Please make sure your image is less than 5MB and has dimensions of at least 80px for both width and height";
 
     return <div className={ styles.inputWrapper }>
       <TextInput
@@ -140,15 +150,15 @@ export class AITagView extends React.Component {
         }
       </div>
       {
-        this.state.unsupportedImageType && !this.state.isMissingImage &&
-        <Note noteType="warning" className={ styles.fileWarning }>Unfortunately, we can only auto-tag PNG and JPG file types</Note>
+        hasImageError &&
+        <Note noteType="warning" className={ styles.fileWarning }>{ imageErrorMsg }</Note>
       }
       <Button
         id="fetch-tag-btn"
         className={ styles.btn }
         buttonType="primary"
         type="button"
-        disabled={ this.state.isMissingImage || this.state.unsupportedImageType }
+        disabled={ this.state.isMissingImage || hasImageError }
         loading={ this.state.isFetchingTags }
         onClick={ this.fetchTags }
       >
@@ -157,7 +167,7 @@ export class AITagView extends React.Component {
       <CheckboxField
         id="overwrite-tags"
         labelText="Overwrite existing tags"
-        disabled={ this.state.isMissingImage || this.state.unsupportedImageType }
+        disabled={ this.state.isMissingImage || hasImageError }
         checked={ this.state.overwrite }
         onChange={ this.toggleOverwrite }
       />
