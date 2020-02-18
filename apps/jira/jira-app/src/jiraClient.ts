@@ -78,15 +78,23 @@ export default class JiraClient {
       if (result.ok) {
         const { issues }: { issues: JiraIssue[] } = await result.json();
         return {
+          error: null,
           issues: issues.map(this.formatIssue)
+        };
+      } else if (result.status === 401) {
+        return {
+          error: 'unauthorized_error',
+          issues: [],
         };
       }
 
       return {
+        error: null,
         issues: []
       };
     } catch (e) {
       return {
+        error: 'general_error',
         issues: []
       };
     }

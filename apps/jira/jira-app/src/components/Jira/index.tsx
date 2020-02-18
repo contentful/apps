@@ -13,6 +13,7 @@ interface Props {
 interface State {
   loading: boolean;
   issues: FormattedIssue[];
+  error: IssuesResponse['error'];
 }
 /** The Jira sidebar component */
 export default class Jira extends React.Component<Props, State> {
@@ -23,7 +24,8 @@ export default class Jira extends React.Component<Props, State> {
 
     this.state = {
       loading: true,
-      issues: []
+      issues: [],
+      error: null,
     };
   }
 
@@ -86,7 +88,7 @@ export default class Jira extends React.Component<Props, State> {
       issues = this.sortIssues(res.issues);
     }
 
-    this.setState({ issues, loading: false });
+    this.setState({ issues, loading: false, error: res.error });
   };
 
   unlinkIssue = async (issueId: string) => {
@@ -131,6 +133,7 @@ export default class Jira extends React.Component<Props, State> {
           unlinkIssue={this.unlinkIssue}
           issues={this.state.issues}
           loading={this.state.loading}
+          error={this.state.error}
         />
         <Search
           entry={this.props.sdk.ids}

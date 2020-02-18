@@ -124,6 +124,7 @@ interface RequestOptions {
 
 interface IssuesResponse {
   issues: FormattedIssue[];
+  error: 'unauthorized_error' | 'general_error' | null;
 }
 
 interface SingleIssueResponse {
