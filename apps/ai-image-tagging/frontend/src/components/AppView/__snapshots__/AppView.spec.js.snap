@@ -222,7 +222,7 @@ exports[`AppView when the app is not installed should render inline validation i
       class="HelpText__HelpText___uWbja TextField__TextField__help-text___p4rVf"
       data-test-id="cf-ui-help-text"
     >
-      You can use this content type to wrap images with focal point data
+      You can use this content type to add tags to images
     </p>
   </div>
 </div>
@@ -359,7 +359,7 @@ exports[`AppView when the app is not installed should render the app view with i
             class="HelpText__HelpText___uWbja TextField__TextField__help-text___p4rVf"
             data-test-id="cf-ui-help-text"
           >
-            You can use this content type to wrap images with focal point data
+            You can use this content type to add tags to images
           </p>
         </div>
       </div>
