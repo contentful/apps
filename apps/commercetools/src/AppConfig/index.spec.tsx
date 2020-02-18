@@ -70,8 +70,8 @@ describe("AppConfig", () => {
       [/commercetools Project Key/, ""],
       [/Client ID/, ""],
       [/Client Secret/, ""],
-      [/^API Endpoint/, ""],
-      [/Auth API Endpoint/, ""],
+      [/^API URL/, ""],
+      [/Auth URL/, ""],
       [/commercetools data locale/, ""]
     ].forEach(([labelRe, expected]) => {
       const configInput = getByLabelText(labelRe) as HTMLInputElement;
@@ -126,8 +126,8 @@ describe("AppConfig", () => {
       [/commercetools Project Key/, "some-key"],
       [/Client ID/, "12345"],
       [/Client Secret/, "some-secret"],
-      [/^API Endpoint/, "some-endpoint"],
-      [/Auth API Endpoint/, "some-auth-endpoint"],
+      [/^API URL/, "some-endpoint"],
+      [/Auth URL/, "some-auth-endpoint"],
       [/commercetools data locale/, "en"]
     ].forEach(([labelRe, expected]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
@@ -153,8 +153,8 @@ describe("AppConfig", () => {
       [/commercetools Project Key/, "some-key"],
       [/Client ID/, "12345"],
       [/Client Secret/, "some-secret"],
-      [/^API Endpoint/, "some-endpoint"],
-      [/Auth API Endpoint/, "some-auth-endpoint"],
+      [/^API URL/, "some-endpoint"],
+      [/Auth URL/, "some-auth-endpoint"],
       [/commercetools data locale/, "en"]
     ].forEach(([labelRe, value]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
