@@ -1,31 +1,31 @@
 version: 2
-# Required secret environment variables
-# AWS_ACCESS_KEY_ID
-# AWS_SECRET_ACCESS_KEY
 
 jobs:
-  test:
+  all:
     docker:
       - image: circleci/node:10-stretch
     steps:
       - checkout
       - run:
           name: Install dependencies
-          command: npm i
+          command: |
+            npm i
+            npm run bootstrap:ci
       - run:
           name: Lint
           command: npm run lint
       - run:
+          name: Build
+          command: npm run build
+      - run:
           name: Test
           command: npm run test
-
-  deploy:
-    docker:
-      - image: circleci/node:10-stretch
-        environment:
-          STATIC_APPS_BUCKET: s3://cf-apps-static
-    steps:
-      - checkout
+      - run:
+          name: Exit successfully if not in master
+          command: |
+            if [ "$CIRCLE_BRANCH" != "master" ]; then
+                circleci-agent step halt
+            fi
       - run:
           name: Install pip
           command: sudo apt-get install python-pip python-dev
@@ -33,22 +33,20 @@ jobs:
           name: Install awscli
           command: sudo pip install awscli
       - run:
-          name: Install dependencies
+          name: Deploy apps to test
           command: |
-            npm i
+            STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
+                STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
+                STAGE='test' npm run deploy
       - run:
-          name: 'Deploy apps'
-          command: npm run deploy -- --concurrency=1
+          name: Deploy apps to prod
+          command: |
+            STATIC_S3_BASE="s3://cf-apps-static/apps" \
+                STATIC_JIRA_S3_BASE="s3://cf-apps-jira" \
+                STAGE='prd' npm run deploy
 
 workflows:
   version: 2
   test-deploy:
     jobs:
-      - test
-      - deploy:
-          filters:
-            branches:
-              only:
-                - master
-          requires:
-            - test
+      - all
