@@ -1,3 +1,4 @@
+import difference from "lodash/difference";
 import { ConfigurationParameters, Product } from "./../interfaces";
 import { createRequestBuilder } from "@commercetools/api-request-builder";
 import { makeCommerceToolsClient } from "./makeCommercetoolsClient";
@@ -25,7 +26,15 @@ export async function fetchProductPreviews(
   const response = await client.execute({ uri, method: "GET" });
   if (response.statusCode === 200) {
     const products = response.body.results.map(productTransformer(config));
-    return products;
+    const foundSKUs = products.map(product => product.sku);
+    const missingProducts = difference(skus, foundSKUs).map(sku => ({
+      sku,
+      image: "",
+      id: "",
+      name: "",
+      isMissing: true
+    }));
+    return [...products, ...missingProducts];
   }
   throw new Error(response.statusCode);
 }
