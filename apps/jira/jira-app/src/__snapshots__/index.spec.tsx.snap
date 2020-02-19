@@ -2436,7 +2436,8 @@ Object {
             Unauthorized
           </div>
           <div>
-            Your Jira account does not have permission to view the issues in this project. 
+            Your Jira account does not have permission to view the issues in this project.
+             
             <button
               class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
               data-test-id="cf-ui-text-link"
@@ -2486,7 +2487,8 @@ Object {
           Unauthorized
         </div>
         <div>
-          Your Jira account does not have permission to view the issues in this project. 
+          Your Jira account does not have permission to view the issues in this project.
+           
           <button
             class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
             data-test-id="cf-ui-text-link"
