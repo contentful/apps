@@ -47,6 +47,11 @@ exports[`Gatsby App Sidebar should match snapshot 1`] = `
           </svg>
         </div>
       </div>
+      <p
+        class="HelpText__HelpText___uWbja"
+        data-test-id="cf-ui-help-text"
+        style="text-align: center; color: rgb(127, 124, 130);"
+      />
     </div>
   </div>
 </div>
