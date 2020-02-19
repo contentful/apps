@@ -1,6 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ExtensionUI } from '@gatsby-cloud-pkg/gatsby-cms-extension-base';
+import {
+  Spinner,
+  Paragraph,
+  HelpText,
+  Icon,
+  ValidationMessage
+} from '@contentful/forma-36-react-components';
+
+const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
+const ICON_STYLE = { marginBottom: '-4px' };
+
+const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-preview-update-source': 'contentful-sidebar-extension',
+    'x-preview-auth-token': authToken || ''
+  },
+  body: JSON.stringify({})
+});
 
 export default class Sidebar extends React.Component {
   static propTypes = {
@@ -9,63 +29,52 @@ export default class Sidebar extends React.Component {
 
   constructor(props) {
     super(props);
-    this.detachFn = props.sdk.entry.onSysChanged(this.onSysChanged);
-  }
 
-  componentDidMount() {
-    this.props.sdk.window.startAutoResizer();
+    this.state = {};
+    this.sdk = props.sdk;
+    this.sdk.entry.onSysChanged(this.onSysChanged);
   }
-
-  componentWillUnmount() {
-    this.detachFn();
-    if (this.debounceInterval) {
-      clearInterval(this.debounceInterval);
-    }
-  }
-
-  onError = error => {
-    this.props.sdk.notifier.error(error.message);
-  };
 
   onSysChanged = () => {
     if (this.debounceInterval) {
       clearInterval(this.debounceInterval);
     }
-    this.debounceInterval = setInterval(this.refreshGatsbyPreview, 1000);
+    this.debounceInterval = setInterval(this.refreshPreview, 1000);
   };
 
-  refreshGatsbyPreview = () => {
-    const {
-      parameters: { installation }
-    } = this.props.sdk;
+  componentDidMount() {
+    this.sdk.window.startAutoResizer();
+  }
 
+  refreshPreview = async () => {
     if (this.debounceInterval) {
       clearInterval(this.debounceInterval);
     }
 
-    const { webhookUrl, authToken } = installation;
+    const { webhookUrl, authToken } = this.sdk.parameters.installation;
 
-    fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-preview-update-source': 'contentful-sidebar-extension',
-        'x-preview-auth-token': authToken
-      },
-      body: JSON.stringify({})
-    }).then(
-      () => this.props.sdk.notifier.success('Gatsby Preview updated!'),
-      () => this.props.sdk.notifier.error('Updating Gatsby Preview failed.')
-    );
+    if (!webhookUrl) {
+      return;
+    }
+
+    this.setState({ busy: true })
+
+    const [res] = await Promise.all([
+      // Convert any errors thrown to non-2xx HTTP response
+      // (for uniform handling of errors).
+      callWebhook(webhookUrl, authToken).catch(() => ({ ok: false })),
+      // Make sure the spinner spins for at least a second
+      // (to avoid a blink of text).
+      new Promise(resolve => setTimeout(resolve, 1000))
+    ]);
+
+    this.setState({ busy: false, ok: res.ok });
   };
 
   render = () => {
-    const {
-      parameters: { installation },
-      entry
-    } = this.props.sdk;
-    const { previewUrl, authToken } = installation;
-    const { slug: contentSlug } = entry.fields;
+    const { webhookUrl, previewUrl, authToken } = this.sdk.parameters.installation;
+    const contentSlug = this.sdk.entry.fields.slug;
+
     return (
       <div className="extension">
         <div className="flexcontainer">
@@ -74,8 +83,36 @@ export default class Sidebar extends React.Component {
             previewInstanceUrl={previewUrl}
             authToken={authToken}
           />
+          {webhookUrl && this.renderRefreshStatus()}
         </div>
       </div>
+    );
+  };
+
+  renderRefreshStatus = () => {
+    const { busy, ok } = this.state;
+
+    return (
+      <HelpText style={STATUS_STYLE}>
+        {busy && (
+          <>
+            <Spinner />
+            {' '}Updating preview...
+          </>
+        )}
+        {!busy && (ok === true) && (
+          <>
+            <Icon icon="CheckCircle" color="positive" style={ICON_STYLE} />
+            {' '}Preview up to date!
+          </>
+        )}
+        {!busy && (ok === false) && (
+          <>
+            <Icon icon="Warning" color="negative" style={ICON_STYLE} />
+            {' '}Last update of the preview failed.
+          </>
+        )}
+      </HelpText>
     );
   };
 }
