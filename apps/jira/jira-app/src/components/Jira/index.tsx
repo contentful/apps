@@ -4,15 +4,18 @@ import { SidebarExtensionSDK } from 'contentful-ui-extensions-sdk';
 import IssueList from './IssueList';
 import Search from './Search';
 import JiraClient from '../../jiraClient';
+import ErrorMessage from './ErrorMessage';
 
 interface Props {
   sdk: SidebarExtensionSDK;
   client: JiraClient;
+  signOut: () => void;
 }
 
 interface State {
   loading: boolean;
   issues: FormattedIssue[];
+  error: IssuesResponse['error'];
 }
 /** The Jira sidebar component */
 export default class Jira extends React.Component<Props, State> {
@@ -23,7 +26,8 @@ export default class Jira extends React.Component<Props, State> {
 
     this.state = {
       loading: true,
-      issues: []
+      issues: [],
+      error: null
     };
   }
 
@@ -40,7 +44,7 @@ export default class Jira extends React.Component<Props, State> {
 
   clearIssueInterval() {
     if (this.issueInterval) {
-      clearInterval(this.issueInterval)
+      clearInterval(this.issueInterval);
     }
   }
 
@@ -86,7 +90,7 @@ export default class Jira extends React.Component<Props, State> {
       issues = this.sortIssues(res.issues);
     }
 
-    this.setState({ issues, loading: false });
+    this.setState({ issues, loading: false, error: res.error });
   };
 
   unlinkIssue = async (issueId: string) => {
@@ -125,6 +129,10 @@ export default class Jira extends React.Component<Props, State> {
   };
 
   render() {
+    if (this.state.error) {
+      return <ErrorMessage errorType={this.state.error} signOut={this.props.signOut} />;
+    }
+
     return (
       <div>
         <IssueList

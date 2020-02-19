@@ -7,12 +7,12 @@ import { formatLargeNumbers, DAY_IN_MS, getDateRangeInterval, getErrorNotificati
 import { RangeOption, AnalyticsProps, AnalyticsState, ChartData, GapiError } from './typings';
 
 const RANGE_OPTIONS: RangeOption[] = [
+  { label: 'Last 24 hours', startDaysAgo: 1, endDaysAgo: 0 },
   { label: 'Last 7 days', startDaysAgo: 7, endDaysAgo: 0 },
-  { label: 'Last 28 days', startDaysAgo: 28, endDaysAgo: 0 },
-  { label: 'Last 60 days', startDaysAgo: 60, endDaysAgo: 0 }
+  { label: 'Last 28 days', startDaysAgo: 28, endDaysAgo: 0 }
 ];
 
-const INITIAL_RANGE_INDEX = 0;
+const INITIAL_RANGE_INDEX = 1;
 
 function getRangeDates(rangeOptionIndex: number) {
   const range = RANGE_OPTIONS[rangeOptionIndex];
@@ -59,7 +59,7 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
       this.props.setHelpText(errorNotification)
     }
     else {
-      this.props.sdk.notifier.error(error.message)
+      this.props.sdk.notifier.error(`Google Analytics: ${error.message}`)
     }
 
     this.props.gapi.analytics.auth.signOut()

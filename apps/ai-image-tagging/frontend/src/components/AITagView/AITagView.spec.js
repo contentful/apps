@@ -37,17 +37,20 @@ describe('AITagView', () => {
   afterEach(cleanup);
 
   it('should disable everything if theres no image', async () => {
-    const { getByTestId } = renderComponent(sdk);
+    const appView = renderComponent(sdk);
+    const { getByTestId } = appView;
     await wait();
     expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
     expect(getByTestId('cf-ui-controlled-input').disabled).toBeTruthy();
     expect(getByTestId('image-tag').disabled).toBeTruthy();
+    expect(appView.container).toMatchSnapshot();
   });
 
   it('should enable everything if theres an image', async () => {
     const imgData = {
       url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png",
-      contentType: 'image/png'
+      contentType: 'image/png',
+      details: { size: 200, height: 100, width: 100 }
     };
     sdk.space.getAsset.mockImplementation(() => ({
       fields: {file: { 'en-US': imgData }}
@@ -58,11 +61,13 @@ describe('AITagView', () => {
       }
     }));
 
-    const { getByTestId } = renderComponent(sdk);
+    const appView = renderComponent(sdk);
+    const { getByTestId } = appView;
     await wait();
     expect(getByTestId('cf-ui-button').disabled).toBeFalsy();
     expect(getByTestId('cf-ui-controlled-input').disabled).toBeFalsy();
     expect(getByTestId('image-tag').disabled).toBeFalsy();
+    expect(appView.container).toMatchSnapshot();
   });
 
   it('should render image tags if available', async () => {
@@ -74,9 +79,11 @@ describe('AITagView', () => {
     }));
     sdk.entry.fields.imageTags.getValue.mockImplementation(() => tags);
 
-    const { getAllByTestId } = renderComponent(sdk);
+    const appView = renderComponent(sdk);
+    const { getAllByTestId } = appView;
     await wait();
     expect(getAllByTestId('cf-ui-pill')).toHaveLength(tags.length);
+    expect(appView.container).toMatchSnapshot();
   });
 
   it('should add image tags on Enter', async () => {
@@ -87,7 +94,8 @@ describe('AITagView', () => {
     }));
     sdk.entry.fields.imageTags.getValue.mockImplementation(() => []);
 
-    const { getByTestId, getAllByTestId } = renderComponent(sdk);
+    const appView = renderComponent(sdk);
+    const { getByTestId, getAllByTestId } = appView;
     await wait();
 
     const tagInput = getByTestId('image-tag');
@@ -96,6 +104,7 @@ describe('AITagView', () => {
     await wait();
 
     expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
+    expect(appView.container).toMatchSnapshot();
   });
 
   it('should ignore duplicate image tags', async () => {
@@ -106,7 +115,8 @@ describe('AITagView', () => {
     }));
     sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['tag1', 'tag2']);
 
-    const { getByTestId, getAllByTestId } = renderComponent(sdk);
+    const appView = renderComponent(sdk);
+    const { getByTestId, getAllByTestId } = appView;
     await wait();
 
     const tagInput = getByTestId('image-tag');
@@ -115,13 +125,15 @@ describe('AITagView', () => {
     await wait();
 
     expect(getAllByTestId('cf-ui-pill')).toHaveLength(2);
+    expect(appView.container).toMatchSnapshot();
   });
 
   describe('Calling AI Tags', () => {
     beforeEach(() => {
       const imgData = {
         url: '//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.jpeg',
-        contentType: 'image/png'
+        contentType: 'image/png',
+        details: { size: 200, height: 100, width: 100 }
       };
       const expectedPath = '/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.jpeg'
 
@@ -140,7 +152,8 @@ describe('AITagView', () => {
     afterEach(fetchMock.reset);
 
     it('should fetch tags and render them on btn click', async () => {
-      const { getByTestId, getAllByTestId } = renderComponent(sdk);
+      const appView = renderComponent(sdk);
+      const { getByTestId, getAllByTestId } = appView;
       await wait();
 
       getByTestId('image-tag').value = 'new tag';
@@ -148,11 +161,13 @@ describe('AITagView', () => {
       await wait();
 
       expect(getAllByTestId('cf-ui-pill')).toHaveLength(3);
+      expect(appView.container).toMatchSnapshot();
     });
 
     it('should fetch tags and overwrite current ones', async () => {
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['prior-tag']);
-      const { getByTestId, getAllByTestId } = renderComponent(sdk);
+      const appView = renderComponent(sdk);
+      const { getByTestId, getAllByTestId } = appView;
       await wait();
 
       expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
@@ -161,11 +176,13 @@ describe('AITagView', () => {
       await wait();
 
       expect(getAllByTestId('cf-ui-pill')).toHaveLength(3);
+      expect(appView.container).toMatchSnapshot();
     });
 
     it('should fetch tags and add them to current tags with overwrite option unchecked', async () => {
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['prior-tag']);
-      const { getByTestId, getAllByTestId } = renderComponent(sdk);
+      const appView = renderComponent(sdk);
+      const { getByTestId, getAllByTestId } = appView;
       await wait();
 
       expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
@@ -175,21 +192,61 @@ describe('AITagView', () => {
       await wait();
 
       expect(getAllByTestId('cf-ui-pill')).toHaveLength(4);
+      expect(appView.container).toMatchSnapshot();
     });
 
-    it('should disable btn if image is unsupported', async () => {
+    it('should disable btn if image type is unsupported', async () => {
       const imgData = {
         url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.gif",
-        contentType: 'image/gif'
+        contentType: 'image/gif',
+        details: { size: 200, height: 100, width: 100 }
       };
       sdk.space.getAsset.mockImplementation(() => ({
         fields: {file: { 'en-US': imgData }}
       }))
-      const { getByTestId } = renderComponent(sdk);
+      const appView = renderComponent(sdk);
+      const { getByTestId } = appView;
       await wait();
 
       expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
       expect(getByTestId('cf-ui-note')).toBeTruthy();
+      expect(appView.container).toMatchSnapshot();
+    });
+
+    it('should disable btn if image dimensions are invalid', async () => {
+      const imgData = {
+        url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png",
+        contentType: 'image/png',
+        details: { size: 2000, height: 70, width: 200 }
+      };
+      sdk.space.getAsset.mockImplementation(() => ({
+        fields: {file: { 'en-US': imgData }}
+      }))
+      const appView = renderComponent(sdk);
+      const { getByTestId } = appView;
+      await wait();
+
+      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
+      expect(getByTestId('cf-ui-note')).toBeTruthy();
+      expect(appView.container).toMatchSnapshot();
+    });
+
+    it('should disable btn if image is too big', async () => {
+      const imgData = {
+        url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png",
+        contentType: 'image/png',
+        details: { size: 6000000, height: 3000, width: 300 }
+      };
+      sdk.space.getAsset.mockImplementation(() => ({
+        fields: {file: { 'en-US': imgData }}
+      }))
+      const appView = renderComponent(sdk);
+      const { getByTestId } = appView;
+      await wait();
+
+      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
+      expect(getByTestId('cf-ui-note')).toBeTruthy();
+      expect(appView.container).toMatchSnapshot();
     });
   });
 });

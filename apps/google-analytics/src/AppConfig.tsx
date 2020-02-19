@@ -38,7 +38,39 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
       getAndUpdateSavedParams(sdk)
     ]);
 
+    const allContentTypes = sortBy(spaceContentTypes, 'name').reduce(
+      (acc: AllContentTypes, contentType) => {
+        const fields = sortBy(
+          // use only short text fields of content type
+          contentType.fields.filter(f => f.type === 'Symbol'),
+          // sort by field name
+          'name'
+        )
+
+        if (fields.length) {
+          acc[contentType.sys.id] = {
+            ...contentType,
+            fields
+          };
+        }
+
+        return acc;
+      },
+      {}
+    );
     const { contentTypes } = savedParams;
+
+    for (const [type, { slugField }] of Object.entries(contentTypes)) {
+      if (
+        // if the saved content type is no longer in the list of all available types
+        !(type in allContentTypes) ||
+        // or the saved slugField is no longer available
+        !allContentTypes[type].fields.some(f => f.id === slugField)
+      ) {
+        // remove the content type from the list
+        delete contentTypes[type]
+      }
+    }
 
     // add an incomplete contentType entry if there are none saved
     if (!Object.keys(contentTypes).length) {
@@ -48,27 +80,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
     // eslint-disable-next-line react/no-did-mount-set-state
     this.setState(
       {
-        // sort contentTypes by display name
-        allContentTypes: sortBy(spaceContentTypes, 'name').reduce(
-          (acc: AllContentTypes, contentType) => {
-            const fields = sortBy(
-              // use only short text fields of content type
-              contentType.fields.filter(f => f.type === 'Symbol'),
-                // sort by field name
-                'name'
-            )
-
-            if (fields.length) {
-              acc[contentType.sys.id] = {
-                ...contentType,
-                fields
-              };
-            }
-
-            return acc;
-          },
-          {}
-        ),
+        allContentTypes,
         contentTypes,
         clientId: savedParams.clientId || '',
         viewId: savedParams.viewId || ''
@@ -291,7 +303,6 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   name={'contentType-' + index}
                   id={'contentType-' + index}
                   value={key}
-                  hasError={!key}
                   onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
                     this.handleContentTypeChange(key, event.target.value)
                   }>

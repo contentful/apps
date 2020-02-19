@@ -6,7 +6,7 @@ export function formatDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-export async function getAndUpdateSavedParams(sdk: AppExtensionSDK) {
+export async function getAndUpdateSavedParams(sdk: AppExtensionSDK): Promise<SavedParams> {
   const { space, ids } = sdk;
   const [savedParams, eisResponse] = await Promise.all([
     sdk.app.getParameters() as Promise<SavedParams>,
@@ -67,7 +67,7 @@ export const DAY_IN_MS = 1000 * 60 * 60 * 24;
 const daysBreakpoints = [
   { lowerLimit: 29, interval: 'nthWeek' },
   { lowerLimit: 5, interval: 'date' },
-  { lowerLimit: -Infinity, interval: 'nthhour' }
+  { lowerLimit: -Infinity, interval: 'dateHour' }
 ];
 
 export function getDateRangeInterval(start: Date, end: Date) {
