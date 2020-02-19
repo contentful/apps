@@ -254,7 +254,7 @@ describe('The Jira App Components', () => {
     );
 
     it('should load the sidebar app and show linked issues', async () => {
-      const wrapper = render(<Jira sdk={mockSdk} client={jiraClient} />);
+      const wrapper = render(<Jira sdk={mockSdk} client={jiraClient} signOut={() => {}} />);
 
       await wait();
 
@@ -273,13 +273,13 @@ describe('The Jira App Components', () => {
       // overwrite the default mock value to return nothing
       fetchMock.get(
         'https://api.atlassian.com/ex/jira/cloud-id/rest/api/2/search?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22',
-        {},
+        { issues: [] },
         {
           overwriteRoutes: true
         }
       );
 
-      const wrapper = render(<Jira sdk={mockSdk} client={jiraClient} />);
+      const wrapper = render(<Jira sdk={mockSdk} client={jiraClient} signOut={() => {}} />);
 
       await wait();
 
@@ -287,7 +287,7 @@ describe('The Jira App Components', () => {
     });
 
     it('should search for entries and allow linking', async () => {
-      const wrapper = render(<Jira sdk={mockSdk} client={jiraClient} />);
+      const wrapper = render(<Jira sdk={mockSdk} client={jiraClient} signOut={() => {}} />);
 
       const search = wrapper.getByTestId('jira-issue-search');
 
@@ -302,6 +302,23 @@ describe('The Jira App Components', () => {
       expect(searchResult).toHaveLength(1);
 
       fireEvent.click(searchResult[0]);
+
+      await wait();
+
+      expect(wrapper).toMatchSnapshot();
+    });
+
+    it('should show an unauthorized message when given a 403', async () => {
+      // overwrite the default mock value to return nothing
+      fetchMock.get(
+        'https://api.atlassian.com/ex/jira/cloud-id/rest/api/2/search?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22',
+        403,
+        {
+          overwriteRoutes: true
+        }
+      );
+
+      const wrapper = render(<Jira sdk={mockSdk} client={jiraClient} signOut={() => {}} />);
 
       await wait();
 
