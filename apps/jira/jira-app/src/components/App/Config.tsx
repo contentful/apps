@@ -95,7 +95,7 @@ export default class Config extends React.Component<Props, State> {
         EditorInterface: selectedContentTypes.reduce(
           (acc, ct) => ({
             ...acc,
-            ...{ [ct]: { sidebar: { position: 0 } } }
+            ...{ [ct]: { sidebar: { position: 1 } } }
           }),
           {}
         )

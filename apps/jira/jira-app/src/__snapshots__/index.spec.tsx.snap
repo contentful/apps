@@ -352,7 +352,7 @@ Object {
     "EditorInterface": Object {
       "author": Object {
         "sidebar": Object {
-          "position": 0,
+          "position": 1,
         },
       },
     },
