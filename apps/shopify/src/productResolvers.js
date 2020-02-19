@@ -1,11 +1,11 @@
-import identity from "lodash/identity";
-import difference from "lodash/difference";
-import get from "lodash/get";
-import Client from "shopify-buy";
-import makePagination from "./Pagination";
+import identity from 'lodash/identity';
+import difference from 'lodash/difference';
+import get from 'lodash/get';
+import Client from 'shopify-buy';
+import makePagination from './Pagination';
 
-import { validateParameters } from ".";
-import { previewsToVariants } from "./dataTransformer";
+import { validateParameters } from '.';
+import { previewsToVariants } from './dataTransformer';
 
 export async function makeShopifyClient({ parameters: { installation } }) {
   const validationError = validateParameters(installation);
@@ -46,7 +46,7 @@ export const fetchProductPreviews = async (skus, config) => {
     .filter(sku => sku && /^gid.*ProductVariant/.test(sku.unencodedId))
     .map(({ sku }) => sku);
 
-  const queryIds = validIds.map(sku => `"${sku}"`).join(",");
+  const queryIds = validIds.map(sku => `"${sku}"`).join(',');
   const query = `
   {
     nodes (ids: [${queryIds}]) {
@@ -69,24 +69,24 @@ export const fetchProductPreviews = async (skus, config) => {
   const { apiEndpoint, storefrontAccessToken } = config;
 
   const res = await window.fetch(`https://${apiEndpoint}/api/2019-10/graphql`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      "x-shopify-storefront-access-token": storefrontAccessToken
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'x-shopify-storefront-access-token': storefrontAccessToken
     },
     body: JSON.stringify({ query })
   });
 
   const data = await res.json();
 
-  const nodes = get(data, ["data", "nodes"], []).filter(identity);
+  const nodes = get(data, ['data', 'nodes'], []).filter(identity);
 
   const variantPreviews = nodes.map(previewsToVariants(config));
   const missingVariants = difference(
     skus,
     variantPreviews.map(variant => variant.sku)
-  ).map(sku => ({ sku, isMissing: true, name: "", image: "" }));
+  ).map(sku => ({ sku, isMissing: true, name: '', image: '' }));
 
   return [...variantPreviews, ...missingVariants];
 };

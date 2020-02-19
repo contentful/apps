@@ -65,18 +65,18 @@ setup({
   color: '#212F3F',
   parameterDefinitions: [
     {
-      "id": "storefrontAccessToken",
-      "name": "Storefront Access Token",
-      "description": "The storefront access token to your Shopify store",
-      "type": "Symbol",
-      "required": true
+      id: 'storefrontAccessToken',
+      name: 'Storefront Access Token',
+      description: 'The storefront access token to your Shopify store',
+      type: 'Symbol',
+      required: true
     },
     {
-      "id": "apiEndpoint",
-      "name": "API Endpoint",
-      "description": "The Shopify API endpoint",
-      "type": "Symbol",
-      "required": true
+      id: 'apiEndpoint',
+      name: 'API Endpoint',
+      description: 'The Shopify API endpoint',
+      type: 'Symbol',
+      required: true
     }
   ],
   fetchProductPreviews,

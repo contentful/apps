@@ -1,14 +1,14 @@
-import get from "lodash/get";
-import last from "lodash/last";
-import flatten from "lodash/flatten";
+import get from 'lodash/get';
+import last from 'lodash/last';
+import flatten from 'lodash/flatten';
 
 /**
  * Transforms the API response of Shopify into
  * the product schema expected by the SkuPicker component
  */
 export const dataTransformer = product => {
-  const image = get(product, ["image", "src"], "");
-  const sku = get(product, ["sku"], "");
+  const image = get(product, ['image', 'src'], '');
+  const sku = get(product, ['sku'], '');
 
   return {
     id: product.id,
@@ -34,16 +34,10 @@ export const productsToVariantsTransformer = products =>
     })
   );
 
-export const previewsToVariants = ({ apiEndpoint }) => ({
-  sku,
-  id,
-  image,
-  product
-}) => {
+export const previewsToVariants = ({ apiEndpoint }) => ({ sku, id, image, product }) => {
   const productIdDecoded = atob(product.id);
   const productId =
-    productIdDecoded &&
-    productIdDecoded.slice(productIdDecoded.lastIndexOf("/") + 1);
+    productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
   return {
     id,
     image: image.src,
@@ -56,7 +50,7 @@ export const previewsToVariants = ({ apiEndpoint }) => ({
     ...(apiEndpoint &&
       productId && {
         externalLink: `https://${apiEndpoint}${
-          last(apiEndpoint) === "/" ? "" : "/"
+          last(apiEndpoint) === '/' ? '' : '/'
         }admin/products/${productId}`
       })
   };
