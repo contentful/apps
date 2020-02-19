@@ -103,17 +103,12 @@ exports[`SortableListItem should render successfully the error variation for mis
         data-test-id="cf-ui-text-container"
       >
         <h1
-          class="Heading__Heading___83D3K css-by3awh f36-margin-bottom--m"
+          class="Heading__Heading___83D3K css-k5fxdf f36-margin-bottom--m"
           data-test-id="cf-ui-heading"
         >
-          28a7442d
+          men-regular
         </h1>
-        <div
-          class="Tag__Tag___Y-myd Tag__Tag--negative___12luW"
-          data-test-id="cf-ui-tag"
-        >
-          Category missing
-        </div>
+        
       </div>
     </section>
     <div

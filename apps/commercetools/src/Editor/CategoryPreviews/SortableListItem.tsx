@@ -57,7 +57,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center'
   }),
-  heading: (category?: Category) =>
+  heading: (category: Category) =>
     css({
       fontSize: tokens.fontSizeL,
       marginBottom: category.isMissing || !category.name ? 0 : tokens.spacing2Xs,
