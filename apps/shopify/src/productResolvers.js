@@ -1,3 +1,6 @@
+import identity from 'lodash/identity';
+import difference from 'lodash/difference';
+import get from 'lodash/get';
 import Client from 'shopify-buy';
 import makePagination from './Pagination';
 
@@ -30,11 +33,23 @@ export const fetchProductPreviews = async (skus, config) => {
     return [];
   }
 
-  const ids = skus.map(sku => `"${sku}"`).join(',');
+  const validIds = skus
+    .map(sku => {
+      try {
+        // If not valid base64 window.atob will throw
+        const unencodedId = atob(sku);
+        return { unencodedId, sku };
+      } catch (error) {
+        return null;
+      }
+    })
+    .filter(sku => sku && /^gid.*ProductVariant/.test(sku.unencodedId))
+    .map(({ sku }) => sku);
 
+  const queryIds = validIds.map(sku => `"${sku}"`).join(',');
   const query = `
   {
-    nodes (ids: [${ids}]) {
+    nodes (ids: [${queryIds}]) {
       id,
       ...on ProductVariant {
         sku,
@@ -63,9 +78,17 @@ export const fetchProductPreviews = async (skus, config) => {
     body: JSON.stringify({ query })
   });
 
-  const { data } = await res.json();
+  const data = await res.json();
 
-  return data.nodes.map(previewsToVariants(config));
+  const nodes = get(data, ['data', 'nodes'], []).filter(identity);
+
+  const variantPreviews = nodes.map(previewsToVariants(config));
+  const missingVariants = difference(
+    skus,
+    variantPreviews.map(variant => variant.sku)
+  ).map(sku => ({ sku, isMissing: true, name: '', image: '' }));
+
+  return [...variantPreviews, ...missingVariants];
 };
 
 /**

@@ -17,6 +17,7 @@ export interface Category {
   id: string;
   name: string;
   externalLink?: string;
+  isMissing?: boolean;
 }
 
 export interface Product {
@@ -25,6 +26,7 @@ export interface Product {
   id: string;
   name: string;
   externalLink?: string;
+  isMissing?: boolean;
 }
 
 export type PreviewsFn = (skus: string[]) => Promise<Product[]>;

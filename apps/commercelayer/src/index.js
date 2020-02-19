@@ -1,4 +1,5 @@
 import CLayerAuth from '@commercelayer/js-auth';
+import difference from 'lodash/difference';
 import chunk from 'lodash/chunk';
 import flatMap from 'lodash/flatMap';
 
@@ -31,15 +32,17 @@ function validateParameters(parameters) {
 async function getAccessToken(clientId, endpoint) {
   if (!accessToken) {
     /* eslint-disable-next-line require-atomic-updates */
-    accessToken = (await CLayerAuth.getIntegrationToken({
-      clientId,
-      endpoint,
-      // The empty client secret is needed for legacy reasons, as the
-      // CLayerAuth SDK will throw if not present. By setting to empty
-      // string we prevent the SDK exception and the value is ignored
-      // by the Commerce Layer Auth API.
-      clientSecret: ''
-    })).accessToken;
+    accessToken = (
+      await CLayerAuth.getIntegrationToken({
+        clientId,
+        endpoint,
+        // The empty client secret is needed for legacy reasons, as the
+        // CLayerAuth SDK will throw if not present. By setting to empty
+        // string we prevent the SDK exception and the value is ignored
+        // by the Commerce Layer Auth API.
+        clientSecret: ''
+      })
+    ).accessToken;
   }
   return accessToken;
 }
@@ -107,7 +110,16 @@ const fetchProductPreviews = async function fetchProductPreviews(skus, config) {
 
   const results = await Promise.all(resultPromises);
 
-  return flatMap(results, ({ data }) => data.map(dataTransformer(config.apiEndpoint)));
+  const foundProducts = flatMap(results, ({ data }) =>
+    data.map(dataTransformer(config.apiEndpoint))
+  );
+
+  const missingProducts = difference(
+    skus,
+    foundProducts.map(product => product.sku)
+  ).map(sku => ({ sku, isMissing: true, image: '', name: '', id: '' }));
+
+  return [...foundProducts, ...missingProducts];
 };
 
 async function renderDialog(sdk) {
@@ -164,18 +176,18 @@ setup({
   color: '#212F3F',
   parameterDefinitions: [
     {
-      "id": "clientId",
-      "name": "Client ID",
-      "description": "The client ID",
-      "type": "Symbol",
-      "required": true
+      id: 'clientId',
+      name: 'Client ID',
+      description: 'The client ID',
+      type: 'Symbol',
+      required: true
     },
     {
-      "id": "apiEndpoint",
-      "name": "API Endpoint",
-      "description": "The Commerce Layer API endpoint",
-      "type": "Symbol",
-      "required": true
+      id: 'apiEndpoint',
+      name: 'API Endpoint',
+      description: 'The Commerce Layer API endpoint',
+      type: 'Symbol',
+      required: true
     }
   ],
   fetchProductPreviews,

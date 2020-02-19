@@ -78,13 +78,13 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center'
   }),
-  name: (name?: string) =>
+  heading: (product: Product) =>
     css({
       fontSize: tokens.fontSizeL,
-      marginBottom: tokens.spacing2Xs,
-      ...(name && { textTransform: 'capitalize' })
+      marginBottom: product.isMissing || !product.name ? 0 : tokens.spacing2Xs,
+      ...(product.name && { textTransform: 'capitalize' })
     }),
-  sku: css({
+  subheading: css({
     color: tokens.colorElementDarkest,
     fontSize: tokens.fontSizeS,
     marginBottom: 0
@@ -121,7 +121,6 @@ export const SortableListItem = SortableElement<Props>(
   ({ product, disabled, isSortable, onDelete }: Props) => {
     const [imageHasLoaded, setImageLoaded] = useState(false);
     const [imageHasErrored, setImageHasErrored] = useState(false);
-    const productIsMissing = !product.name;
 
     return (
       <Card className={styles.card}>
@@ -134,7 +133,7 @@ export const SortableListItem = SortableElement<Props>(
           )}
           {imageHasErrored && (
             <div className={styles.errorImage}>
-              <Icon icon={productIsMissing ? 'ErrorCircle' : 'Asset'} />
+              <Icon icon={product.isMissing ? 'ErrorCircle' : 'Asset'} />
             </div>
           )}
           {!imageHasErrored && (
@@ -151,13 +150,12 @@ export const SortableListItem = SortableElement<Props>(
           )}
           <section className={styles.description}>
             <Typography>
-              <Heading className={styles.name(product.name)}>
-                {productIsMissing ? product.sku : product.name}
+              <Heading className={styles.heading(product)}>
+                {product.isMissing || !product.name ? product.sku : product.name}
               </Heading>
-              {productIsMissing ? (
-                <Tag tagType="negative">Product missing</Tag>
-              ) : (
-                <Subheading className={styles.sku}>{product.sku}</Subheading>
+              {product.isMissing && <Tag tagType="negative">Product missing</Tag>}
+              {!product.isMissing && product.name && (
+                <Subheading className={styles.subheading}>{product.sku}</Subheading>
               )}
             </Typography>
           </section>

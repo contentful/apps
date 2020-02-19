@@ -1,6 +1,6 @@
-import React from "react";
-import { SortableElement, SortableHandle } from "react-sortable-hoc";
-import { css } from "emotion";
+import React from 'react';
+import { SortableElement, SortableHandle } from 'react-sortable-hoc';
+import { css } from 'emotion';
 import {
   Card,
   CardDragHandle as FormaCardDragHandle,
@@ -10,9 +10,9 @@ import {
   Subheading,
   Tag,
   Typography
-} from "@contentful/forma-36-react-components";
-import tokens from "@contentful/forma-36-tokens";
-import { Category } from "../../interfaces";
+} from '@contentful/forma-36-react-components';
+import tokens from '@contentful/forma-36-tokens';
+import { Category } from '../../interfaces';
 
 export interface Props {
   category: Category;
@@ -23,27 +23,27 @@ export interface Props {
 
 const styles = {
   card: css({
-    display: "flex",
+    display: 'flex',
     padding: 0,
-    position: "relative",
-    ":not(:first-of-type)": css({
+    position: 'relative',
+    ':not(:first-of-type)': css({
       marginTop: tokens.spacingXs
     })
   }),
   dragHandle: css({
-    height: "auto"
+    height: 'auto'
   }),
   actions: css({
-    position: "absolute",
+    position: 'absolute',
     top: tokens.spacingXs,
     right: tokens.spacingXs,
     a: css({
-      display: "inline-block",
+      display: 'inline-block',
       marginRight: tokens.spacingXs,
       svg: css({
         transition: `fill ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`
       }),
-      "&:hover": {
+      '&:hover': {
         svg: css({
           fill: tokens.colorContrastDark
         })
@@ -52,17 +52,22 @@ const styles = {
   }),
   description: css({
     padding: tokens.spacingM,
-    flex: "1 0 auto",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center"
+    flex: '1 0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center'
   }),
-  name: (name?: string) =>
+  heading: (category: Category) =>
     css({
       fontSize: tokens.fontSizeL,
-      marginBottom: tokens.spacing2Xs,
-      ...(name && { textTransform: "capitalize" })
+      marginBottom: category.isMissing || !category.name ? 0 : tokens.spacing2Xs,
+      ...(category.name && { textTransform: 'capitalize' })
     }),
+  subheading: css({
+    color: tokens.colorElementDarkest,
+    fontSize: tokens.fontSizeS,
+    marginBottom: 0
+  }),
   slug: css({
     color: tokens.colorElementDarkest,
     fontSize: tokens.fontSizeS,
@@ -71,28 +76,31 @@ const styles = {
 };
 
 const CardDragHandle = SortableHandle(() => (
-  <FormaCardDragHandle className={styles.dragHandle}>
-    Reorder category
-  </FormaCardDragHandle>
+  <FormaCardDragHandle className={styles.dragHandle}>Reorder category</FormaCardDragHandle>
 ));
+
+function getCategoryIdentifier(category: Category) {
+  return category.slug.length ? category.slug : category.id;
+}
 
 export const SortableListItem = SortableElement<Props>(
   ({ category, disabled, isSortable, onDelete }: Props) => {
-    const categoryIsMissing = !category.name;
-
     return (
       <Card className={styles.card}>
         <>
           {isSortable && <CardDragHandle />}
           <section className={styles.description}>
             <Typography>
-              <Heading className={styles.name(category.name)}>
-                {categoryIsMissing ? category.id : category.name}
+              <Heading className={styles.heading(category)}>
+                {category.isMissing || !category.name
+                  ? getCategoryIdentifier(category)
+                  : category.name}
               </Heading>
-              {categoryIsMissing ? (
-                <Tag tagType="negative">Category missing</Tag>
-              ) : (
-                <Subheading className={styles.slug}>{category.slug}</Subheading>
+              {category.isMissing && <Tag tagType="negative">Category missing</Tag>}
+              {!category.isMissing && category.name && (
+                <Subheading className={styles.subheading}>
+                  {getCategoryIdentifier(category)}
+                </Subheading>
               )}
             </Typography>
           </section>
@@ -100,19 +108,15 @@ export const SortableListItem = SortableElement<Props>(
         {!disabled && (
           <div className={styles.actions}>
             {category.externalLink && (
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href={category.externalLink}
-              >
+              <a target="_blank" rel="noopener noreferrer" href={category.externalLink}>
                 <Icon icon="ExternalLink" color="muted" />
               </a>
             )}
             <IconButton
               label="Delete"
-              iconProps={{ icon: "Close" }}
+              iconProps={{ icon: 'Close' }}
               {...{
-                buttonType: "muted",
+                buttonType: 'muted',
                 onClick: onDelete
               }}
             />

@@ -55,15 +55,15 @@ export const parameterDefinitions = [
   },
   {
     id: "apiEndpoint",
-    name: "API Endpoint",
-    description: "The commercetools API endpoint",
+    name: "API URL",
+    description: "The commercetools API URL",
     type: "Symbol",
     required: true
   },
   {
     id: "authApiEndpoint",
-    name: "Auth API Endpoint",
-    description: "The auth API endpoint",
+    name: "Auth URL",
+    description: "The auth API URL",
     type: "Symbol",
     required: true
   },
@@ -92,11 +92,11 @@ export function validateParameters(
   }
 
   if (get(parameters, ["apiEndpoint"], "").length < 1) {
-    return "Provide the commercetools API endpoint.";
+    return "Provide the commercetools API URL.";
   }
 
   if (get(parameters, ["authApiEndpoint"], "").length < 1) {
-    return "Provide the commercetools auth API endpoint.";
+    return "Provide the commercetools auth API URL.";
   }
 
   if (get(parameters, ["locale"], "").length < 1) {
