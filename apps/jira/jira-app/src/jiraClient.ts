@@ -84,9 +84,9 @@ export default class JiraClient {
       } else if (result.status === 401 || result.status === 403) {
         return {
           error: 'unauthorized_error',
-          issues: [],
+          issues: []
         };
-      } 
+      }
 
       return {
         error: 'general_error',

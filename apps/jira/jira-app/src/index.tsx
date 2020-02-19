@@ -35,7 +35,9 @@ if (window.location.search.includes('token')) {
         <Auth
           notifyError={sdk.notifier.error}
           parameters={sdk.parameters.installation as InstallationParameters}>
-          {(token, client: JiraClient, resetClient) => <Jira client={client} sdk={sdk as SidebarExtensionSDK} signOut={resetClient} />}
+          {(token, client: JiraClient, resetClient) => (
+            <Jira client={client} sdk={sdk as SidebarExtensionSDK} signOut={resetClient} />
+          )}
         </Auth>
       );
     }

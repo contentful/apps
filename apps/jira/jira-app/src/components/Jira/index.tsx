@@ -27,7 +27,7 @@ export default class Jira extends React.Component<Props, State> {
     this.state = {
       loading: true,
       issues: [],
-      error: null,
+      error: null
     };
   }
 
@@ -130,9 +130,7 @@ export default class Jira extends React.Component<Props, State> {
 
   render() {
     if (this.state.error) {
-      return (
-        <ErrorMessage errorType={this.state.error} signOut={this.props.signOut} />
-      );
+      return <ErrorMessage errorType={this.state.error} signOut={this.props.signOut} />;
     }
 
     return (
