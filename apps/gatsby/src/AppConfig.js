@@ -212,7 +212,7 @@ export default class AppConfig extends React.Component {
               onChange={this.updateWebhookUrl}
               onBlur={this.validateWebhookUrl}
               className={styles.input}
-              helpText="Optional Webhook URL for manually building sites."
+              helpText="Optional Webhook URL. If provided your site will be automatically rebuilt as you change content."
               validationMessage={
                 !this.state.validWebhook
                   ? 'Please provide a valid URL (It should start with http)'
