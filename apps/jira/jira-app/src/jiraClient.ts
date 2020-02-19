@@ -81,15 +81,15 @@ export default class JiraClient {
           error: null,
           issues: issues.map(this.formatIssue)
         };
-      } else if (result.status === 401) {
+      } else if (result.status === 401 || result.status === 403) {
         return {
           error: 'unauthorized_error',
           issues: [],
         };
-      }
+      } 
 
       return {
-        error: null,
+        error: 'general_error',
         issues: []
       };
     } catch (e) {
@@ -217,7 +217,8 @@ export default class JiraClient {
     ]);
 
     return {
-      issues: [...summaryData.issues, ...issueData.issues]
+      issues: [...summaryData.issues, ...issueData.issues],
+      error: summaryData.error || issueData.error
     };
   }
 

@@ -4,10 +4,12 @@ import { SidebarExtensionSDK } from 'contentful-ui-extensions-sdk';
 import IssueList from './IssueList';
 import Search from './Search';
 import JiraClient from '../../jiraClient';
+import ErrorMessage from './ErrorMessage';
 
 interface Props {
   sdk: SidebarExtensionSDK;
   client: JiraClient;
+  signOut: () => void;
 }
 
 interface State {
@@ -127,13 +129,18 @@ export default class Jira extends React.Component<Props, State> {
   };
 
   render() {
+    if (this.state.error) {
+      return (
+        <ErrorMessage errorType={this.state.error} signOut={this.props.signOut} />
+      );
+    }
+
     return (
       <div>
         <IssueList
           unlinkIssue={this.unlinkIssue}
           issues={this.state.issues}
           loading={this.state.loading}
-          error={this.state.error}
         />
         <Search
           entry={this.props.sdk.ids}

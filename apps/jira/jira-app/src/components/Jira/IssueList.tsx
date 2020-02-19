@@ -6,24 +6,16 @@ import {
   Typography
 } from '@contentful/forma-36-react-components';
 import IssueCard from './IssueCard';
-import ErrorMessage from './ErrorMessage';
 
 interface Props {
   issues: FormattedIssue[];
   loading: boolean;
   unlinkIssue: (issueId: string) => void;
-  error: IssuesResponse['error'];
 }
 
 export default class IssueList extends React.Component<Props> {
   render() {
-    const { issues, loading, unlinkIssue, error } = this.props;
-
-    if (error) {
-      return (
-        <ErrorMessage errorType={error} />
-      );
-    }
+    const { issues, loading, unlinkIssue } = this.props;
 
     if (loading) {
       return (

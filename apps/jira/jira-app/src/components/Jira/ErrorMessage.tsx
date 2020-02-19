@@ -1,16 +1,17 @@
 import React from 'react';
 
-import {Note} from '@contentful/forma-36-react-components'
+import {Note, TextLink} from '@contentful/forma-36-react-components'
 
 interface Props {
     errorType: IssuesResponse['error'];
+    signOut: () => void;
 }
 
-export default function ErrorMessage({errorType}: Props) {
+export default function ErrorMessage({errorType, signOut}: Props) {
     if (errorType === 'unauthorized_error') {
         return (
             <Note noteType="negative" title="Unauthorized">
-                Your Jira account does not have permission to view the issues in this project. Please contact your admin.
+                Your Jira account does not have permission to view the issues in this project. <TextLink onClick={signOut}>Sign out</TextLink>
             </Note>
         );
     }
