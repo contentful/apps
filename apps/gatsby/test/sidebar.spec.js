@@ -16,7 +16,7 @@ const mockSdk = {
     }
   },
   entry: {
-    onSysChanged: jest.fn(() => jest.fn()),
+    onSysChanged: jest.fn(),
     fields: {
       slug: {
         getValue: jest.fn(() => 'preview-slug')
@@ -25,10 +25,6 @@ const mockSdk = {
   },
   window: {
     startAutoResizer: jest.fn()
-  },
-  notifier: {
-    success: jest.fn(),
-    error: jest.fn()
   }
 };
 
@@ -45,7 +41,7 @@ describe('Gatsby App Sidebar', () => {
     const mockFetch = jest.fn(() => Promise.resolve());
     let timerComplete = false;
     global.fetch = mockFetch;
-    mockSdk.entry.onSysChanged = jest.fn(fn => {
+    mockSdk.entry.onSysChanged.mockImplementationOnce(fn => {
       fn();
       setTimeout(() => {
         timerComplete = true;
@@ -74,19 +70,5 @@ describe('Gatsby App Sidebar', () => {
       },
       method: 'POST'
     });
-  });
-
-  it('should detach the handler on unmount', async () => {
-    const mockDetach = jest.fn();
-    mockSdk.entry.onSysChanged = jest.fn(fn => {
-      fn();
-      return mockDetach;
-    });
-
-    const { unmount } = render(<Sidebar sdk={mockSdk} />);
-
-    unmount();
-
-    expect(mockDetach).toHaveBeenCalledTimes(1);
   });
 });
