@@ -1,4 +1,4 @@
-import { FieldsConfig } from "./AppConfig/fields";
+import { FieldsConfig } from './AppConfig/fields';
 
 export interface ConfigurationParameters {
   projectKey?: string;
@@ -17,6 +17,7 @@ export interface Category {
   id: string;
   name: string;
   externalLink?: string;
+  isMissing?: boolean;
 }
 
 export interface Product {
@@ -32,4 +33,4 @@ export type PreviewsFn = (skus: string[]) => Promise<Product[]>;
 
 export type DeleteFn = (index: number) => void;
 
-export type PickerMode = "product" | "category";
+export type PickerMode = 'product' | 'category';

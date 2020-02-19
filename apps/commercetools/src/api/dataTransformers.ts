@@ -39,6 +39,7 @@ export const categoryTransformer = ({
     id,
     name: get(item, ["name", locale], ""),
     slug: get(item, ["slug", locale], ""),
-    externalLink
+    isMissing: false,
+    externalLink,
   };
 };

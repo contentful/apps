@@ -43,7 +43,7 @@ export class CategoryPreviews extends React.Component<Props, State> {
       const categoryPreviewsUnsorted = shouldRefetch
         ? await fetchCategoryPreviews(categories)
         : this.state.categoryPreviews;
-      const categoryPreviews = mapSort(categoryPreviewsUnsorted, categories, 'sku');
+      const categoryPreviews = mapSort(categoryPreviewsUnsorted, categories, 'id');
       this.setState({ categoryPreviews });
     } catch {
       this.props.sdk.notifier.error(
