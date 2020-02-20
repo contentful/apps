@@ -16,7 +16,10 @@ const contentTypes = [
   {
     sys: { id: 'ct2' },
     name: 'CT2',
-    fields: [{ id: 'foo', name: 'FOO', type: 'Text' }]
+    fields: [
+      { id: 'foo', name: 'FOO', type: 'Text' },
+      { id: 'z', name: 'Z', type: 'Array', items: { type: 'Symbol' } }
+    ]
   },
   {
     sys: { id: 'ct3' },
