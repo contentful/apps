@@ -87,6 +87,8 @@ export class SidebarExtension extends React.Component<
 
     if (!isAuthorized) {
       const renderAuthButton = async (authButton: HTMLDivElement) => {
+        if (!authButton) { return }
+
         try {
           this.props.gapi.analytics.auth.authorize({
             container: authButton,
@@ -95,6 +97,23 @@ export class SidebarExtension extends React.Component<
         } catch (error) {
           notifier.error("The client ID set in this app's config is invalid");
         }
+
+        setTimeout(() => {
+          const gaButton = authButton.children[0]
+
+          // if the login button is still not displayed after some time, assume
+          // that the browser is blocking requests
+          if (
+            !this.state.isAuthorized &&
+            gaButton &&
+            window.getComputedStyle(gaButton).display === 'none' &&
+            !this.state.helpText
+          ) {
+            this.setState({ helpText: `Your browser seems to be blocking Google Analytics.
+                          Consider temporarily disabling any content blockers or tracking
+                          protection` })
+          }
+        }, 4000)
       };
 
       return (
