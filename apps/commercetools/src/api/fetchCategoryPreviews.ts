@@ -13,7 +13,7 @@ export async function fetchCategoryPreviews(
   const invalidIds = difference(ids, validIds);
 
   if (invalidIds.length && !validIds.length) {
-    return invalidIds.map(id => ({ id, name: '', slug: '' }));
+    return invalidIds.map(id => ({ id, name: '', slug: '', isMissing: true }));
   }
 
   const client = makeCommerceToolsClient({
