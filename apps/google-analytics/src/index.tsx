@@ -101,8 +101,8 @@ export class SidebarExtension extends React.Component<
         setTimeout(() => {
           const gaButton = authButton.children[0]
 
-          // if the the the login button is still not displayed after some
-          // time, assume that the browser is blocking requests
+          // if the login button is still not displayed after some time, assume
+          // that the browser is blocking requests
           if (
             !this.state.isAuthorized &&
             gaButton &&
