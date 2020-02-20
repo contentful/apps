@@ -6,8 +6,6 @@ After you’ve installed the [Brandfolder app](https://app.contentful.com/deepli
 
 The Brandfolder app is a widget that allows editors to select media from their Brandfolder account. Simply click `Select an asset on Brandfolder` and select the asset you want to be referenced from your entry.
 
-![Image of Yaktocat](yaktocat.png)
-
 The IDs and URLs of selected assets are then stored in Contentful. Inside your client application, you then fetch content from Contentful and resolve any additional details on assets by using the IDs to fetch more data from Brandfolder's API.
 
 ## Requirements
@@ -37,10 +35,10 @@ To reference an asset on Brandfolder from your entry:
 
 ![Submit API Key](images/enter-api-key.png)
 
+![Place Asset](images/place-asset.png)
+
 Previews of your assets will now appear in your entry.
 These can be reordered by dragging and dropping, or removed by clicking the `X` in the upper right corner.
-
-![Place Asset](images/place-asset.png)
 
 ![Editor View](images/editor-view.png)
 
