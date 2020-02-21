@@ -1,6 +1,6 @@
 import { setup } from 'shared-dam-app';
 
-const CTF_APP_URL = 'https://integration-contentful-app.brandfolder-svc.com'
+const CTF_APP_URL = 'https://brandfolder.ctfapps.net'
 const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=message&appName=Contentful&origin=${CTF_APP_URL}&initMsg=hi`
 
 
@@ -63,12 +63,24 @@ async function openDialog(sdk, _currentValue, config) {
     return [];
   }
 
+  // Example result:
+  // [{
+  //     "id": "pfbfh7-f4zem0-dpcdo2",
+  //     "type": "attachments",
+  //     "mimetype": "image/png",
+  //     "filename": "brandfolder-icon.png",
+  //     "size": 9252,
+  //     "width": 312,
+  //     "height": 294,
+  //     "url": "https://s3.amazonaws.com/bf.boulder.prod/pfbfh7-f4zem0-dpcdo2/original/brandfolder-icon.png",
+  //     "thumbnail_url": "https://assets.brandfolder.com/pfbfh7-f4zem0-dpcdo2/element.png?v=1555005228",
+  //     "position": 0,
+  //     "included": null,
+  //     "asset": {
+  //         "id": "6skcfbkq"
+  //     }
+  // }]
   return result
-
-  // return result.map(item => ({
-  //   ...item,
-  //   src: item.url
-  // }));
 }
 
 setup({
