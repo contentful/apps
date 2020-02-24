@@ -28,11 +28,10 @@ function renderDialog(sdk) {
     const { data, origin } = e
     if (origin === 'https://integration-panel-ui.brandfolder-svc.com'){
       const { event, payload } = data;
-      console.log('Brandfolder event', event)
       if (event === 'selectedAttachment') {
         sdk.close([payload]);
       }
-      else if (data.event === 'selectedAsset') {
+      else if (data.event === 'selectedAsset' && payload.attachments.length !== 0) {
         const att_id = payload.attachments[0].id
         const attachment = payload.included.find(att => att.id === att_id)
         if (attachment){
@@ -41,11 +40,6 @@ function renderDialog(sdk) {
       }
     }
   });
-
-  // TODO maybe figure out how to make this work
-  // document.addEventListener('message', e => {
-  //  ...
-  // });
 }
 
 async function openDialog(sdk, _currentValue, config) {
