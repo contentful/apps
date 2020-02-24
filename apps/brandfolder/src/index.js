@@ -29,7 +29,7 @@ function renderDialog(sdk) {
     if (origin === 'https://integration-panel-ui.brandfolder-svc.com'){
       const { event, payload } = data;
       console.log('Brandfolder event', event)
-      if (event == 'selectedAttachment') {
+      if (event === 'selectedAttachment') {
         sdk.close([payload]);
       }
       else if (data.event === 'selectedAsset') {
