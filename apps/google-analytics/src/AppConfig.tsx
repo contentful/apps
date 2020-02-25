@@ -253,7 +253,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 this.setState({ clientId: event.target.value.trim() })
               }
-              helpText="Client ID of the Google Cloud OAuth application."
+              helpText="Client ID of the Google Cloud OAuth application"
               className={styles.spaced}
               textInputProps={{
                 type: 'text',
@@ -269,7 +269,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 this.setState({ viewId: event.target.value.trim() })
               }
-              helpText="The ID of the Google Analytics view you want to query."
+              helpText="The ID of the Google Analytics view you want to query"
               textInputProps={{
                 type: 'text'
               }}
