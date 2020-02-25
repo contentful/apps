@@ -32,7 +32,7 @@ const makeContentType = (contentTypeId, contentTypeName) => ({
     },
     {
       id: 'imageTags',
-      name: 'Image Tags',
+      name: 'Image tags',
       required: true,
       "type": "Array",
       "items": { "type": "Symbol" }
