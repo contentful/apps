@@ -132,7 +132,7 @@ export default class AuthWrapper extends React.Component<Props, State> {
           <Typography>
             <Heading>Connect Jira</Heading>
             <Paragraph>
-              Connect your Jira instance to Contentful link Contentful entries to Jira issues.
+              Connect your Jira instance to Contentful to link Contentful entries to Jira issues.
             </Paragraph>
             <OAuth setToken={this.initialize} notifyError={this.props.notifyError} />
           </Typography>

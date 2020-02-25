@@ -391,7 +391,7 @@ Object {
                 class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
                 data-test-id="cf-ui-paragraph"
               >
-                Connect your Jira instance to Contentful link Contentful entries to Jira issues.
+                Connect your Jira instance to Contentful to link Contentful entries to Jira issues.
               </p>
               <div
                 data-test-id="oauth-content"
@@ -456,7 +456,7 @@ Object {
               class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
               data-test-id="cf-ui-paragraph"
             >
-              Connect your Jira instance to Contentful link Contentful entries to Jira issues.
+              Connect your Jira instance to Contentful to link Contentful entries to Jira issues.
             </p>
             <div
               data-test-id="oauth-content"
