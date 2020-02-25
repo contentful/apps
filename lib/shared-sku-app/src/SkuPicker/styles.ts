@@ -1,5 +1,5 @@
-import { css } from 'emotion';
-import tokens from '@contentful/forma-36-tokens';
+import { css } from "emotion";
+import tokens from "@contentful/forma-36-tokens";
 
 /**
  * Returns the target height of the modal window body in pixels.
@@ -13,9 +13,9 @@ function getBodyHeight() {
 
 export const styles = {
   header: css({
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: tokens.spacingL
+    display: "flex",
+    justifyContent: "space-between",
+    padding: tokens.spacingL,
   }),
   body: css({
     height: getBodyHeight(),
@@ -24,7 +24,7 @@ export const styles = {
   total: css({
     fontSize: tokens.fontSizeS,
     color: tokens.colorTextLight,
-    display: 'block',
+    display: "block",
     marginTop: tokens.spacingS
   }),
   saveBtn: css({
@@ -32,28 +32,28 @@ export const styles = {
   }),
   paginator: css({
     margin: `${tokens.spacingM} auto ${tokens.spacingL} auto`,
-    textAlign: 'center'
+    textAlign: "center"
   }),
   leftsideControls: css({
-    position: 'relative',
+    position: "relative",
     zIndex: 0,
     svg: css({
       zIndex: 1,
-      position: 'absolute',
-      top: '10px',
-      left: '10px'
+      position: "absolute",
+      top: "10px",
+      left: "10px"
     }),
     input: css({
-      paddingLeft: '35px'
+      paddingLeft: "35px"
     })
   }),
   rightsideControls: css({
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
     flexGrow: 1,
-    display: 'flex'
+    display: "flex"
   }),
   loadMoreButton: css({
-    width: '100%',
+    width: "100%",
     marginTop: tokens.spacingXs
   })
 };
