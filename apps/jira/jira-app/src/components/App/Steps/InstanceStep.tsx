@@ -27,7 +27,7 @@ const InstanceStep = ({
   return (
     <Typography>
       <Heading>Configure</Heading>
-      <Paragraph>Select the Jira site and project you want to connect with.</Paragraph>
+      <Paragraph>Select the Jira site and project you want to connect</Paragraph>
       <div className="jira-config" data-test-id="instance-step">
         <Select
           data-test-id="instance-selector"

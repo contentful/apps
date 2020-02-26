@@ -391,7 +391,7 @@ Object {
                 class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
                 data-test-id="cf-ui-paragraph"
               >
-                Connect your Jira instance to Contentful to enable you and your team to link Contentful entries to Jira issues.
+                Connect your Jira instance to Contentful to link Contentful entries to Jira issues.
               </p>
               <div
                 data-test-id="oauth-content"
@@ -456,7 +456,7 @@ Object {
               class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
               data-test-id="cf-ui-paragraph"
             >
-              Connect your Jira instance to Contentful to enable you and your team to link Contentful entries to Jira issues.
+              Connect your Jira instance to Contentful to link Contentful entries to Jira issues.
             </p>
             <div
               data-test-id="oauth-content"
@@ -582,7 +582,7 @@ Object {
                   class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
                   data-test-id="cf-ui-paragraph"
                 >
-                  Select the Jira site and project you want to connect with.
+                  Select the Jira site and project you want to connect
                 </p>
                 <div
                   class="jira-config"
@@ -769,7 +769,7 @@ Object {
                 class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
                 data-test-id="cf-ui-paragraph"
               >
-                Select the Jira site and project you want to connect with.
+                Select the Jira site and project you want to connect
               </p>
               <div
                 class="jira-config"
@@ -1715,7 +1715,7 @@ Object {
             class="Paragraph__Paragraph___2aO-9 paragraph-light f36-margin-bottom--m"
             data-test-id="cf-ui-paragraph"
           >
-            No Jira issues are linked to this entry.
+            No Jira issues are linked to this entry
           </p>
         </div>
         <div
@@ -1782,7 +1782,7 @@ Object {
           class="Paragraph__Paragraph___2aO-9 paragraph-light f36-margin-bottom--m"
           data-test-id="cf-ui-paragraph"
         >
-          No Jira issues are linked to this entry.
+          No Jira issues are linked to this entry
         </p>
       </div>
       <div
@@ -2297,7 +2297,7 @@ Object {
             class="Paragraph__Paragraph___2aO-9 paragraph-light f36-margin-bottom--m"
             data-test-id="cf-ui-paragraph"
           >
-            No Jira issues are linked to this entry.
+            No Jira issues are linked to this entry
           </p>
         </div>
         <div
@@ -2327,7 +2327,7 @@ Object {
           class="Paragraph__Paragraph___2aO-9 paragraph-light f36-margin-bottom--m"
           data-test-id="cf-ui-paragraph"
         >
-          No Jira issues are linked to this entry.
+          No Jira issues are linked to this entry
         </p>
       </div>
       <div
