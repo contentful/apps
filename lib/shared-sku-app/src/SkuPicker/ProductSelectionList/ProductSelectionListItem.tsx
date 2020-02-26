@@ -30,6 +30,7 @@ const styles = {
     flexDirection: 'column',
     height: '40px',
     width: '40px',
+    overflow: 'hidden',
     outline: 0,
     textAlign: 'center',
     transition: `all ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
@@ -49,7 +50,8 @@ const styles = {
       display: imageHasLoaded ? 'block' : 'none',
       margin: '0 auto',
       minWidth: 'auto',
-      height: '40px'
+      height: '40px',
+      overflow: 'hidden'
     }),
   removeIcon: css({
     backgroundColor: 'rgba(0,0,0,.65)',
