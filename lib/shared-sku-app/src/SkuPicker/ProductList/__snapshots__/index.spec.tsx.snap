@@ -6,7 +6,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
     class="css-almiqb"
   >
     <div
-      class="css-zkv16y"
+      class="css-jfu8ng"
     >
       <div
         aria-checked="false"
@@ -120,7 +120,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
       </div>
     </div>
     <div
-      class="css-zkv16y"
+      class="css-jfu8ng"
     >
       <div
         aria-checked="false"
@@ -234,7 +234,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
       </div>
     </div>
     <div
-      class="css-zkv16y"
+      class="css-jfu8ng"
     >
       <div
         aria-checked="false"
@@ -357,7 +357,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
     class="css-almiqb"
   >
     <div
-      class="css-zkv16y"
+      class="css-jfu8ng"
     >
       <div
         aria-checked="false"
@@ -471,7 +471,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
       </div>
     </div>
     <div
-      class="css-zkv16y"
+      class="css-jfu8ng"
     >
       <div
         aria-checked="true"
@@ -585,7 +585,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
       </div>
     </div>
     <div
-      class="css-zkv16y"
+      class="css-jfu8ng"
     >
       <div
         aria-checked="false"
