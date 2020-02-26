@@ -80,7 +80,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
       class="css-almiqb"
     >
       <div
-        class="css-zkv16y"
+        class="css-jfu8ng"
       >
         <div
           aria-checked="false"
@@ -118,7 +118,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
         </div>
       </div>
       <div
-        class="css-zkv16y"
+        class="css-jfu8ng"
       >
         <div
           aria-checked="false"
@@ -156,7 +156,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
         </div>
       </div>
       <div
-        class="css-zkv16y"
+        class="css-jfu8ng"
       >
         <div
           aria-checked="false"

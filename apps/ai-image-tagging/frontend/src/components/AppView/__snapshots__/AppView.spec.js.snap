@@ -59,7 +59,7 @@ exports[`AppView when the app is installed should render the app view with confi
           class="ListItem__ListItem___3S9Oc"
           data-test-id="cf-ui-list-item"
         >
-          Fill in the required fields and publish it
+          Fill in the required fields and publish
         </li>
       </ul>
       <p
@@ -76,7 +76,7 @@ exports[`AppView when the app is installed should render the app view with confi
           class="ListItem__ListItem___3S9Oc"
           data-test-id="cf-ui-list-item"
         >
-          Go to the "Content model" page
+          Go to the "content model" page
         </li>
         <li
           class="ListItem__ListItem___3S9Oc"
@@ -88,7 +88,7 @@ exports[`AppView when the app is installed should render the app view with confi
           class="ListItem__ListItem___3S9Oc"
           data-test-id="cf-ui-list-item"
         >
-          Create a new field of type "Reference"
+          Create a new field of type "reference"
         </li>
         <li
           class="ListItem__ListItem___3S9Oc"
@@ -100,13 +100,13 @@ exports[`AppView when the app is installed should render the app view with confi
           class="ListItem__ListItem___3S9Oc"
           data-test-id="cf-ui-list-item"
         >
-          Optionally set the appearance of the new reference field to "Entry Card" in its settings
+          Optionally set the appearance of the new reference field to "entry card" in its settings
         </li>
         <li
           class="ListItem__ListItem___3S9Oc"
           data-test-id="cf-ui-list-item"
         >
-          Go back to the "Content" page
+          Go back to the "content" page
         </li>
         <li
           class="ListItem__ListItem___3S9Oc"
@@ -144,7 +144,7 @@ exports[`AppView when the app is installed should render the app view with confi
           class="ListItem__ListItem___3S9Oc"
           data-test-id="cf-ui-list-item"
         >
-          Go to the "Content" page
+          Go to the "content" page
         </li>
         <li
           class="ListItem__ListItem___3S9Oc"
@@ -156,13 +156,13 @@ exports[`AppView when the app is installed should render the app view with confi
           class="ListItem__ListItem___3S9Oc"
           data-test-id="cf-ui-list-item"
         >
-          Go to the "Content model" page
+          Go to the "content model" page
         </li>
         <li
           class="ListItem__ListItem___3S9Oc"
           data-test-id="cf-ui-list-item"
         >
-          Edit the content type the app created, select "Actions" from the top menu and "Delete"
+          Edit the content type the app created, select "actions" from the top menu and "delete"
         </li>
       </ul>
     </div>

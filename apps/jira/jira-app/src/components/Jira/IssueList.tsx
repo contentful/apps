@@ -29,7 +29,7 @@ export default class IssueList extends React.Component<Props> {
       return (
         <Typography>
           <Paragraph className="paragraph-light">
-            No Jira issues are linked to this entry.
+            No Jira issues are linked to this entry
           </Paragraph>
         </Typography>
       );
