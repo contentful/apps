@@ -3,7 +3,7 @@
 exports[`SkuPicker should render successfully with no products selected 1`] = `
 <div>
   <header
-    class="css-60fp0v"
+    class="css-1irjrk3"
   >
     <div
       class="css-kpva4h"
@@ -71,7 +71,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
     </div>
   </header>
   <section
-    class="css-nf44ad"
+    class="css-1gzkqoh"
   >
     <div
       class="css-almiqb"

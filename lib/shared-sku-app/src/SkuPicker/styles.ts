@@ -3,7 +3,7 @@ import tokens from '@contentful/forma-36-tokens';
 
 const HEADER_HEIGHT = 114;
 
-const SHOULD_HAVE_STICKY_HEADER = window.outerHeight >= 900;
+const STICKY_HEADER_BREAKPOINT = 900;
 
 function makeBodyStyle() {
   // Modal window height dynamically calculated in pixels.
@@ -12,11 +12,14 @@ function makeBodyStyle() {
   const thirtyPerc = window.outerHeight * 0.3;
   const height = window.outerHeight - thirtyPerc - HEADER_HEIGHT;
 
-  const padding = SHOULD_HAVE_STICKY_HEADER
-    ? `calc(${tokens.spacingL} + ${HEADER_HEIGHT}px)  ${tokens.spacingL} 0 ${tokens.spacingL}`
-    : `${tokens.spacingL} ${tokens.spacingL} 0 ${tokens.spacingL}`;
+  return css({
+    height,
+    padding: `${tokens.spacingL} ${tokens.spacingL} 0 ${tokens.spacingL}`,
 
-  return css({ height, padding });
+    [`@media screen and (min-height: ${STICKY_HEADER_BREAKPOINT}px)`]: {
+      padding: `calc(${tokens.spacingL} + ${HEADER_HEIGHT}px)  ${tokens.spacingL} 0 ${tokens.spacingL}`
+    }
+  });
 }
 
 export const styles = {
@@ -26,7 +29,7 @@ export const styles = {
     justifyContent: 'space-between',
     padding: tokens.spacingL,
 
-    '@media screen and (min-height: 900px)': {
+    [`@media screen and (min-height: ${STICKY_HEADER_BREAKPOINT}px)`]: {
       backgroundColor: 'white',
       position: 'fixed',
       top: 0,
