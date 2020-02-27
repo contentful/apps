@@ -25,13 +25,14 @@ export const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     padding: tokens.spacingL,
-    ...(SHOULD_HAVE_STICKY_HEADER && {
+
+    '@media screen and (min-height: 900px)': {
       backgroundColor: 'white',
       position: 'fixed',
       top: 0,
       zIndex: 1,
       width: `calc(100% - 2rem)`
-    })
+    }
   }),
   body: makeBodyStyle(),
   total: css({
