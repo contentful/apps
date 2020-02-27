@@ -9,8 +9,8 @@ function makeBodyStyle() {
   // Modal window height dynamically calculated in pixels.
   // Usage of css relative units was causing a bug with
   // multiple resizings of the modal window.
-  const twentyPerc = window.outerHeight * 0.3;
-  const height = window.outerHeight - twentyPerc - HEADER_HEIGHT;
+  const thirtyPerc = window.outerHeight * 0.3;
+  const height = window.outerHeight - thirtyPerc - HEADER_HEIGHT;
 
   const padding = SHOULD_HAVE_STICKY_HEADER
     ? `calc(${tokens.spacingL} + ${HEADER_HEIGHT}px)  ${tokens.spacingL} 0 ${tokens.spacingL}`
