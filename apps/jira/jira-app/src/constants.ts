@@ -11,5 +11,5 @@ if (process.env.nodeEnv === 'development') {
 export default {
   OAUTH_REDIRECT_URI: `${LAMBDA_URI}/auth`,
   CONNECT_URL: `${LAMBDA_URI}/connect.json`,
-  CLIENT_ID,
+  CLIENT_ID
 };
