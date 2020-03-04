@@ -18,7 +18,7 @@ interface State {
   projects: CloudProject[];
   contentTypes: { name: string; id: string }[];
   checkedResource: string;
-  checkedProject: string;
+  checkedProject: CloudProject | null;
   selectedContentTypes: string[];
 }
 
@@ -31,7 +31,7 @@ export default class Config extends React.Component<Props, State> {
       projects: [],
       contentTypes: [],
       checkedResource: '',
-      checkedProject: '',
+      checkedProject: null,
       selectedContentTypes: []
     };
   }
@@ -52,7 +52,8 @@ export default class Config extends React.Component<Props, State> {
       const { resourceId = '', projectId = '' } = config;
 
       const configResourceExistsInResources = !!this.state.resources.find(r => r.id === resourceId);
-      await this.getProjects();
+      const { project } = await JiraClient.getProjectById(resourceId, this.props.token, projectId);
+
 
       // only use the saved config if the resource exists
       // we can assume the projectId is also invalid if it doesn't exist
@@ -60,7 +61,7 @@ export default class Config extends React.Component<Props, State> {
         // eslint-disable-next-line react/no-did-mount-set-state
         this.setState({
           checkedResource: resourceId,
-          checkedProject: projectId
+          checkedProject: project
         });
       }
 
@@ -87,7 +88,7 @@ export default class Config extends React.Component<Props, State> {
 
     return {
       parameters: {
-        projectId: checkedProject,
+        projectId: checkedProject.id,
         resourceId: checkedResource,
         resourceUrl: this.state.resources.find(r => r.id === checkedResource)!.url
       },
@@ -150,26 +151,15 @@ export default class Config extends React.Component<Props, State> {
     }
   };
 
-  componentDidUpdate(prevProps: Props, prevState: State) {
-    if (this.state.checkedResource !== prevState.checkedResource) {
-      this.getProjects();
-    }
-  }
-
-  getProjects = async () => {
+  getProjects = async (query: string = '') => {
     const resource = this.state.resources.find(r => r.id === this.state.checkedResource);
 
     if (resource) {
-      const data = await JiraClient.getProjects(resource.id, this.props.token);
+      const data = await JiraClient.getProjects(resource.id, this.props.token, query);
 
-      if (data.projects.length) {
-        this.setState(prevState => ({
-          // if there is only one project, automatically pick it and move on
-          checkedProject:
-            data.projects.length === 1 ? data.projects[0].id : prevState.checkedProject,
-          projects: data.projects
-        }));
-      }
+      this.setState(() => ({
+        projects: data.projects
+      }));
     }
   };
 
@@ -177,14 +167,14 @@ export default class Config extends React.Component<Props, State> {
     this.setState({ checkedResource: id });
   };
 
-  pickProject = (id: string) => {
-    this.setState({ checkedProject: id });
+  pickProject = (project: CloudProject) => {
+    this.setState({ checkedProject: project, projects: [] });
   };
 
   clearSelection = () => {
     this.setState({
       checkedResource: '',
-      checkedProject: '',
+      checkedProject: null,
       projects: [],
       selectedContentTypes: []
     });
@@ -209,6 +199,7 @@ export default class Config extends React.Component<Props, State> {
           pickResource={this.pickResource}
           resources={this.state.resources}
           selectedResource={this.state.checkedResource}
+          queryProjects={this.getProjects}
           pickProject={this.pickProject}
           projects={this.state.projects}
           selectedProject={this.state.checkedProject}
