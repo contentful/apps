@@ -136,15 +136,15 @@ describe('The Jira App Components', () => {
       });
 
       const instanceSelector = wrapper.getByTestId('instance-selector');
-      const projectSelector = wrapper.getByTestId('project-selector');
+      const projectSearchInput: HTMLInputElement = wrapper.getByTestId('cf-ui-text-input') as HTMLInputElement;
 
       // expect instance data to load into the first <select>
       expect(instanceSelector.textContent).toEqual(
         'Select a sitetest.atlassian.nettest2.atlassian.net'
       );
 
-      // expect project data to not have loaded yet in the next <select>
-      expect(projectSelector.textContent).toEqual('Pick a project');
+      // expect project data to not have loaded yet in the next <input>
+      expect(projectSearchInput.placeholder).toEqual('Search for a project');
 
       // pick an instance
       fireEvent.change(instanceSelector, {
@@ -153,13 +153,17 @@ describe('The Jira App Components', () => {
 
       await wait();
 
-      // expect project data to have loaded into the project <select>
-      expect(projectSelector.textContent).toEqual('Pick a projectProject name 2');
-
       // pick the extensibility project
-      fireEvent.change(projectSelector, {
-        target: { value: '10555' }
+      fireEvent.change(projectSearchInput, {
+        target: { value: 'extensibility' }
       });
+
+      console.log("SUP")
+
+      await wait();
+
+      // expect project data to have loaded into the project <input>'s placeholder
+      expect(projectSearchInput.placeholder).toEqual('Project name 2');
 
       const contentTypeList = wrapper.getByTestId('content-types');
 
