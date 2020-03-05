@@ -1,0 +1,6 @@
+/.serverless
+/static
+.openid
+built
+lambda/built
+lambda/.serverless
