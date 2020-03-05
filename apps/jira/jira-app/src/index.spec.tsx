@@ -106,6 +106,7 @@ describe('The Jira App Components', () => {
     it('should go through the installation flow successfully', async () => {
       const token = '123';
       const expires = Date.now() + 600000;
+      jest.useFakeTimers();
 
       Object.defineProperty(window, 'localStorage', {
         writable: true,
@@ -158,9 +159,13 @@ describe('The Jira App Components', () => {
         target: { value: 'extensibility' }
       });
 
-      console.log("SUP")
+      jest.advanceTimersByTime(1000);
 
-      await wait();
+      await wait(() => {
+        wrapper.getByTestId('search-result-project');
+      });
+
+      fireEvent.click(wrapper.getByTestId('search-result-project'));
 
       // expect project data to have loaded into the project <input>'s placeholder
       expect(projectSearchInput.placeholder).toEqual('Project name 2');

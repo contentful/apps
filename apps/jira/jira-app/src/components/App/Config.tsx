@@ -171,15 +171,6 @@ export default class Config extends React.Component<Props, State> {
     this.setState({ checkedProject: project, projects: [] });
   };
 
-  clearSelection = () => {
-    this.setState({
-      checkedResource: '',
-      checkedProject: null,
-      projects: [],
-      selectedContentTypes: []
-    });
-  };
-
   toggleCtSelection = (id: string) => {
     if (this.state.selectedContentTypes.includes(id)) {
       this.setState((prevState: State) => ({

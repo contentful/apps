@@ -141,6 +141,8 @@ header img {
 .search-projects-results {
   position: absolute;
   width: 100%;
+  max-height: 600px;
+  overflow: auto;
 }
 
 .search-projects-result {
