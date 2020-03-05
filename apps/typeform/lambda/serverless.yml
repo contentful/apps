@@ -10,7 +10,7 @@ plugins:
 custom:
   myStage: ${opt:stage, self:provider.stage}
   customDomain:
-    domainName: smartling.ctfapps.net
+    domainName: typeform.ctfapps.net
     stage: prd
     createRoute53Record: true
     endpointType: 'edge'
@@ -23,23 +23,23 @@ provider:
   region: 'us-east-1'
   deploymentBucket:
     name: cf-apps-serverless-deployment
-  deploymentPrefix: sls-apps-smartling
+  deploymentPrefix: sls-apps-typeform
 
 package:
   include:
-    - built/**
+    - build/**
   exclude:
     - .git/**
-    - "**/*.ts"
-    - node_modules/smartling-frontend/node_modules/**
+    - '**/*.ts'
+    - node_modules/typeform-frontend/node_modules/**
 
 functions:
   app:
     environment:
       CLIENT_ID: ${env:SMARTLING_CLIENT_ID}
       CLIENT_SECRET: ${env:SMARTLING_CLIENT_SECRET}
-    handler: built/index.api 
-    events: 
+    handler: built/index.api
+    events:
       - http:
           path: /
           method: GET

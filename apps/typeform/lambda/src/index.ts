@@ -11,7 +11,7 @@ export function makeApp(fetchFn: any) {
 
   app.get('/refresh', async (req, res) => {});
 
-  app.use('/frontend', express.static(path.dirname(require.resolve('smartling-frontend'))));
+  app.use('/frontend', express.static(path.dirname(require.resolve('typeform-frontend'))));
 
   app.use((_req, res) => res.status(404).send('Not found'));
 
