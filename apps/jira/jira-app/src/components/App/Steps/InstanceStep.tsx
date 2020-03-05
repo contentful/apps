@@ -1,5 +1,4 @@
 import React from 'react';
-import debounce from 'lodash.debounce';
 import {
   Typography,
   Heading,
@@ -9,6 +8,18 @@ import {
   TextInput,
   Card
 } from '@contentful/forma-36-react-components';
+
+// using lodash.debouce basically breaks test with infinite timers
+const debounce = function(fn: Function, timeout: number): Function {
+  let timer: any;
+
+  return function(...args: any[]) {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn(...args);
+    }, timeout);
+  }
+}
 
 interface State {
   inputValue: string
@@ -33,13 +44,13 @@ export default class InstanceStep extends React.Component<Props, State> {
     }
   }
 
-  handleInputChange = debounce((ev) => {
+  handleInputChange = debounce((ev: any) => {
     this.setState({
       inputValue: ev.target.value
     });
 
     this.props.queryProjects(ev.target.value);
-  }, 200)
+  }, 300)
 
   selectProject = (project: CloudProject) => {
     this.setState({
@@ -54,7 +65,7 @@ export default class InstanceStep extends React.Component<Props, State> {
       resources,
       pickResource,
       selectedResource,
-      projects = [],
+      projects,
       selectedProject
     } = this.props;
 

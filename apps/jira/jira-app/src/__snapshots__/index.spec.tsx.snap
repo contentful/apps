@@ -341,7 +341,24 @@ exports[`The Jira App Components Location: APP_CONFIG, Component: <App /> should
 </div>
 `;
 
-exports[`The Jira App Components Location: APP_CONFIG, Component: <App /> should go through the installation flow successfully 3`] = `false`;
+exports[`The Jira App Components Location: APP_CONFIG, Component: <App /> should go through the installation flow successfully 3`] = `
+Object {
+  "parameters": Object {
+    "projectId": "10555",
+    "resourceId": "11111111-1111-1111-1111-111111111112",
+    "resourceUrl": "https://test2.atlassian.net",
+  },
+  "targetState": Object {
+    "EditorInterface": Object {
+      "author": Object {
+        "sidebar": Object {
+          "position": 1,
+        },
+      },
+    },
+  },
+}
+`;
 
 exports[`The Jira App Components Location: APP_CONFIG, Component: <App /> should setReady and go through the oauth flow successfully 1`] = `
 Object {
