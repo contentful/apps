@@ -15,7 +15,7 @@ function rejectFetchOnHttpError(response) {
 
 export function fetchForms(workspaceId, accessToken) {
   return fetch(
-    `https://api.typeform.com/forms?page_size=200&search=${
+    `https://api.typeform.com/forms?page_size=200&${
       workspaceId ? `workspace_id=${workspaceId}` : ''
     }`,
     {

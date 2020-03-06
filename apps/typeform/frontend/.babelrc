@@ -1,20 +1,32 @@
 {
-  "env": {
-    "production": {
-      "presets": ["@babel/preset-env"]
-    },
-    "development": {
-      "presets": ["@babel/preset-env"]
-    },
-    "test": {
-      "presets": ["@babel/preset-react", [
-        "@babel/preset-env",
-        {
-          "targets": {
-            "node": 10
-          }
-        }
-      ]]
-    }
-  }
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": false
+      }
+    ],
+    [
+      "@babel/preset-react",
+      {
+        "useBuiltIns": true
+      }
+    ]
+  ],
+  "plugins": [
+    [
+      "@babel/plugin-proposal-class-properties",
+      {
+        "loose": true
+      }
+    ],
+    [
+      "@babel/plugin-transform-runtime",
+      {
+        "corejs": false,
+        "helpers": false,
+        "regenerator": true
+      }
+    ]
+  ]
 }

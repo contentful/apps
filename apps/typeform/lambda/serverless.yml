@@ -1,5 +1,5 @@
 service:
-  name: sls-apps-smartling
+  name: sls-apps-typeform
 
 frameworkVersion: '>=1.0.0 <2.0.0'
 
@@ -36,9 +36,7 @@ package:
 functions:
   app:
     environment:
-      CLIENT_ID: ${env:SMARTLING_CLIENT_ID}
-      CLIENT_SECRET: ${env:SMARTLING_CLIENT_SECRET}
-    handler: built/index.api
+    handler: build/index.api
     events:
       - http:
           path: /
