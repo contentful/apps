@@ -54,7 +54,7 @@ export default class InstanceStep extends React.Component<Props, State> {
 
   selectProject = (project: CloudProject) => {
     this.setState({
-      inputValue: ''
+      inputValue: project.name
     });
 
     this.props.pickProject(project)
@@ -97,6 +97,7 @@ export default class InstanceStep extends React.Component<Props, State> {
               value={ this.state.inputValue }
               onChange={ev => { ev.persist(); this.handleInputChange(ev) }}
               onFocus={() => {this.setState({inputValue: ''})}}
+              onBlur={() => {this.setState({inputValue: (selectedProject ? selectedProject.name : '')})}}
             />
             <div className="search-projects-results">
               {
