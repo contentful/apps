@@ -4,8 +4,6 @@ import {
   Heading,
   Paragraph,
   Typography,
-  FieldGroup,
-  CheckboxField,
   TextField,
   TextLink
 } from '@contentful/forma-36-react-components';
@@ -17,6 +15,11 @@ type TypeFormParameters = {
 
 interface Props {
   sdk: AppExtensionSDK;
+}
+
+interface NormalizedContentTypes {
+  name: string;
+  id: string;
 }
 
 interface State {
@@ -39,8 +42,7 @@ export class AppConfig extends React.Component<Props, State> {
 
     sdk.app.onConfigure(this.configure);
     const parameters: TypeFormParameters | null = await sdk.app.getParameters();
-
-    console.log('FETCHING APP PARAMS', parameters);
+    const contentTypes = sdk.space.getContentTypes();
 
     this.setState(
       { accessToken: parameters?.accessToken || '', workspaceId: parameters?.workspaceId || '' },
@@ -54,6 +56,10 @@ export class AppConfig extends React.Component<Props, State> {
 
   setAccessToken = (token: string) => {
     this.setState({ accessToken: token.trim() });
+  };
+
+  normalizeContentTypes = (contentTypes: ContentType[]): NormalizedContentTypes[] => {
+    return [];
   };
 
   configure = async () => {
@@ -130,7 +136,7 @@ export class AppConfig extends React.Component<Props, State> {
               </Typography>
               <Typography>
                 <Heading>Assign to content types</Heading>
-                <Paragraph>Select which content types to use with Typeform.</Paragraph>
+                <Paragraph>Select which content types to use with Typeform App.</Paragraph>
               </Typography>
             </div>
           </div>
