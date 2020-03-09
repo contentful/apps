@@ -5,16 +5,9 @@
     "node": true,
     "jest": true
   },
-  "plugins": ["@typescript-eslint"],
-  "parser": "@typescript-eslint/parser",
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": "eslint:recommended",
   "parserOptions": {
-    "ecmaVersion": 2018,
-    "project": "./tsconfig.json"
+    "ecmaVersion": 2018
   },
   "rules": {
     "semi": ["error", "always"],
