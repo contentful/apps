@@ -6,7 +6,7 @@ import {
   EditorInterface,
   SelectedFields,
   TypeFormParameters
-} from './interfaces';
+} from './typings';
 
 function isCompatibleField(field: Field): boolean {
   return field.type === 'Symbol';

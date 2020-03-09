@@ -17,13 +17,13 @@ import {
   EditorInterface,
   InstallationParameters,
   SelectedFields
-} from './interfaces';
+} from '../typings';
 import {
   getCompatibleFields,
   editorInterfacesToSelectedFields,
   selectedFieldsToTargetState,
   validateParamameters
-} from './utils';
+} from '../utils';
 
 import { styles } from './styles';
 

@@ -3,7 +3,7 @@ import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
 import { Form, Subheading, CheckboxField, Typography } from '@contentful/forma-36-react-components';
 
-import { ContentType, CompatibleFields, SelectedFields } from './interfaces';
+import { ContentType, CompatibleFields, SelectedFields } from '../typings';
 
 interface Props {
   contentTypes: ContentType[];
