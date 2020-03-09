@@ -1,11 +1,13 @@
 import React from 'react';
-import { AppExtensionSDK, ContentType } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK, ContentType, CollectionResponse } from 'contentful-ui-extensions-sdk';
 import {
   Heading,
   Paragraph,
   Typography,
   TextField,
-  TextLink
+  TextLink,
+  FieldGroup,
+  CheckboxField
 } from '@contentful/forma-36-react-components';
 
 type TypeFormParameters = {
@@ -25,7 +27,7 @@ interface NormalizedContentTypes {
 interface State {
   workspaceId: string;
   accessToken: string;
-  contentTypes: ContentType[];
+  contentTypes: NormalizedContentTypes[];
   selectedContentTypes: string[];
 }
 
@@ -37,15 +39,22 @@ export class AppConfig extends React.Component<Props, State> {
     accessToken: ''
   };
 
-  async componentDidMount() {
+  async componentWillMount() {
     const { sdk } = this.props;
 
     sdk.app.onConfigure(this.configure);
     const parameters: TypeFormParameters | null = await sdk.app.getParameters();
-    const contentTypes = sdk.space.getContentTypes();
+    const contentTypes = this.normalizeContentTypes(
+      (await sdk.space.getContentTypes()) as CollectionResponse<ContentType>
+    );
 
     this.setState(
-      { accessToken: parameters?.accessToken || '', workspaceId: parameters?.workspaceId || '' },
+      {
+        accessToken: parameters?.accessToken || '',
+        workspaceId: parameters?.workspaceId || '',
+        contentTypes
+      },
+
       () => sdk.app.setReady()
     );
   }
@@ -58,8 +67,13 @@ export class AppConfig extends React.Component<Props, State> {
     this.setState({ accessToken: token.trim() });
   };
 
-  normalizeContentTypes = (contentTypes: ContentType[]): NormalizedContentTypes[] => {
-    return [];
+  normalizeContentTypes = (
+    contentTypes: CollectionResponse<ContentType>
+  ): NormalizedContentTypes[] => {
+    return contentTypes.items.map(contentType => ({
+      name: contentType.name,
+      id: contentType.sys.id
+    }));
   };
 
   configure = async () => {
@@ -137,6 +151,20 @@ export class AppConfig extends React.Component<Props, State> {
               <Typography>
                 <Heading>Assign to content types</Heading>
                 <Paragraph>Select which content types to use with Typeform App.</Paragraph>
+                <FieldGroup>
+                  {this.state.contentTypes.map(cotentType => (
+                    <CheckboxField
+                      onChange={() => {}}
+                      labelText={cotentType.name}
+                      name={cotentType.name}
+                      checked={this.state.selectedContentTypes.includes(cotentType.id)}
+                      value={cotentType.id}
+                      id={cotentType.name}
+                      key={cotentType.id}
+                      data-test-id={`ct-item-${cotentType.id}`}
+                    />
+                  ))}
+                </FieldGroup>
               </Typography>
             </div>
           </div>
