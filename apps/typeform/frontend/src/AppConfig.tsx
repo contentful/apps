@@ -25,6 +25,11 @@ import {
   validateParamameters
 } from './utils';
 
+import { styles } from './styles';
+
+// @ts-ignore 2307
+import logo from './config-screen-logo.svg';
+
 interface Props {
   sdk: AppExtensionSDK;
 }
@@ -114,14 +119,14 @@ export class AppConfig extends React.Component<Props, State> {
     const { contentTypes, compatibleFields, selectedFields } = this.state;
 
     return (
-      <div className="app">
-        <div className="background" />
-        <div className="body">
-          <div className="config">
-            <div className="section">
+      <div>
+        <div className={styles.background('#F1ECE3')} />
+        <div className={styles.body}>
+          <div>
+            <div>
               <Typography>
                 <Heading>About Typeform</Heading>
-                <Paragraph className="about-p">
+                <Paragraph className={styles.aboutP}>
                   The{' '}
                   <TextLink
                     href="https://www.typeform.com/"
@@ -132,9 +137,9 @@ export class AppConfig extends React.Component<Props, State> {
                   app allows you to view your forms from Typeform without leaving Contentful.
                 </Paragraph>
               </Typography>
-              <hr />
+              <hr className={styles.splitter} />
             </div>
-            <div className="section">
+            <div>
               <Typography>
                 <Heading>Configuration</Heading>
                 <TextField
@@ -142,7 +147,6 @@ export class AppConfig extends React.Component<Props, State> {
                   testId="workspaceId"
                   name="workspaceId"
                   id="workspaceId"
-                  className="workspace-id"
                   labelText="Typeform workspace ID"
                   value={this.state.workspaceId}
                   // @ts-ignore 2339
@@ -154,7 +158,7 @@ export class AppConfig extends React.Component<Props, State> {
                   testId="accessToken"
                   name="accessToken"
                   id="accessToken"
-                  className="access-token"
+                  className={styles.accessToken}
                   labelText="Typeform access token"
                   value={this.state.accessToken}
                   // @ts-ignore 2339
@@ -162,6 +166,7 @@ export class AppConfig extends React.Component<Props, State> {
                   helpText="To get your access token go to your Typeform profile and create a new access token."
                 />
               </Typography>
+              <hr className={styles.splitter} />
               <Typography>
                 <Heading>Assign to content types</Heading>
                 {contentTypes.length > 0 ? (
@@ -183,7 +188,9 @@ export class AppConfig extends React.Component<Props, State> {
             </div>
           </div>
         </div>
-        <div className="logo"></div>
+        <div className={styles.icon}>
+          <img src={logo} alt="typeform logo" />
+        </div>
       </div>
     );
   }
