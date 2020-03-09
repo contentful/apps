@@ -1,63 +1,102 @@
 import React from 'react';
-import { AppExtensionSDK, ContentType, CollectionResponse } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import get from 'lodash/get';
 import {
   Heading,
   Paragraph,
   Typography,
   TextField,
-  TextLink,
-  FieldGroup,
-  CheckboxField
+  TextLink
 } from '@contentful/forma-36-react-components';
 
-type TypeFormParameters = {
-  workspaceId: string;
-  accessToken: string;
-};
+import FieldSelector from './FieldSelector';
+import {
+  CompatibleFields,
+  ContentType,
+  Hash,
+  EditorInterface,
+  InstallationParameters,
+  SelectedFields
+} from './interfaces';
+import {
+  getCompatibleFields,
+  editorInterfacesToSelectedFields,
+  selectedFieldsToTargetState,
+  validateParamameters
+} from './utils';
 
 interface Props {
   sdk: AppExtensionSDK;
 }
 
-interface NormalizedContentTypes {
-  name: string;
-  id: string;
-}
-
 interface State {
   workspaceId: string;
   accessToken: string;
-  contentTypes: NormalizedContentTypes[];
+  contentTypes: ContentType[];
   selectedContentTypes: string[];
+  selectedFields: SelectedFields;
+  compatibleFields: CompatibleFields;
 }
 
 export class AppConfig extends React.Component<Props, State> {
   state: State = {
     contentTypes: [],
+    compatibleFields: {},
     selectedContentTypes: [],
+    selectedFields: {},
     workspaceId: '',
     accessToken: ''
   };
 
-  async componentWillMount() {
+  async componentDidMount() {
     const { sdk } = this.props;
 
-    sdk.app.onConfigure(this.configure);
-    const parameters: TypeFormParameters | null = await sdk.app.getParameters();
-    const contentTypes = this.normalizeContentTypes(
-      (await sdk.space.getContentTypes()) as CollectionResponse<ContentType>
-    );
+    sdk.app.onConfigure(this.onAppConfigure);
+
+    const [contentTypesResponse, eisResponse, paramsResponse] = await Promise.all([
+      sdk.space.getContentTypes(),
+      sdk.space.getEditorInterfaces(),
+      sdk.app.getParameters()
+    ]);
+
+    const contentTypes = (contentTypesResponse as Hash).items as ContentType[];
+    const editorInterfaces = (eisResponse as Hash).items as EditorInterface[];
+
+    const compatibleFields = getCompatibleFields(contentTypes);
+    const filteredContentTypes = contentTypes.filter(ct => {
+      const fields = compatibleFields[ct.sys.id];
+      return fields && fields.length > 0;
+    });
+
+    const parameters: InstallationParameters = paramsResponse as InstallationParameters;
 
     this.setState(
       {
-        accessToken: parameters?.accessToken || '',
-        workspaceId: parameters?.workspaceId || '',
-        contentTypes
+        accessToken: get(parameters, ['accessToken'], ''),
+        workspaceId: get(parameters, ['workspaceId'], ''),
+        compatibleFields,
+        contentTypes: filteredContentTypes,
+        selectedFields: editorInterfacesToSelectedFields(editorInterfaces, sdk.ids.app)
       },
-
       () => sdk.app.setReady()
     );
   }
+
+  onAppConfigure = () => {
+    const { accessToken, workspaceId, contentTypes, selectedFields } = this.state;
+    const parameters = { accessToken, workspaceId };
+    const error = validateParamameters(parameters);
+
+    if (error) {
+      this.props.sdk.notifier.error(error);
+      return false;
+    }
+
+    return {
+      parameters: { accessToken, workspaceId },
+      targetState: selectedFieldsToTargetState(contentTypes, selectedFields)
+    };
+  };
 
   setWorkSpaceId = (id: string) => {
     this.setState({ workspaceId: id.trim() });
@@ -67,38 +106,13 @@ export class AppConfig extends React.Component<Props, State> {
     this.setState({ accessToken: token.trim() });
   };
 
-  normalizeContentTypes = (
-    contentTypes: CollectionResponse<ContentType>
-  ): NormalizedContentTypes[] => {
-    return contentTypes.items.map(contentType => ({
-      name: contentType.name,
-      id: contentType.sys.id
-    }));
-  };
-
-  configure = async () => {
-    const { sdk } = this.props;
-    const { workspaceId, accessToken } = this.state;
-    if (!this.state.workspaceId) {
-      sdk.notifier.error('You must provide a workspace ID');
-      return false;
-    }
-
-    if (!this.state.accessToken) {
-      sdk.notifier.error('You must provide an access token');
-      return false;
-    }
-
-    return {
-      parameters: {
-        workspaceId,
-        accessToken
-      },
-      tagetState: {}
-    };
+  onSelectedFieldsChange = (selectedFields: SelectedFields) => {
+    this.setState({ selectedFields });
   };
 
   render() {
+    const { contentTypes, compatibleFields, selectedFields } = this.state;
+
     return (
       <div className="app">
         <div className="background" />
@@ -125,10 +139,10 @@ export class AppConfig extends React.Component<Props, State> {
                 <Heading>Configuration</Heading>
                 <TextField
                   required
-                  testId="projectId"
-                  name="projectId"
-                  id="projectId"
-                  className="project-id"
+                  testId="workspaceId"
+                  name="workspaceId"
+                  id="workspaceId"
+                  className="workspace-id"
                   labelText="Typeform workspace ID"
                   value={this.state.workspaceId}
                   // @ts-ignore 2339
@@ -137,10 +151,10 @@ export class AppConfig extends React.Component<Props, State> {
                 />
                 <TextField
                   required
-                  testId="projectId"
-                  name="projectId"
-                  id="projectId"
-                  className="project-id"
+                  testId="accessToken"
+                  name="accessToken"
+                  id="accessToken"
+                  className="access-token"
                   labelText="Typeform access token"
                   value={this.state.accessToken}
                   // @ts-ignore 2339
@@ -150,21 +164,21 @@ export class AppConfig extends React.Component<Props, State> {
               </Typography>
               <Typography>
                 <Heading>Assign to content types</Heading>
-                <Paragraph>Select which content types to use with Typeform App.</Paragraph>
-                <FieldGroup>
-                  {this.state.contentTypes.map(cotentType => (
-                    <CheckboxField
-                      onChange={() => {}}
-                      labelText={cotentType.name}
-                      name={cotentType.name}
-                      checked={this.state.selectedContentTypes.includes(cotentType.id)}
-                      value={cotentType.id}
-                      id={cotentType.name}
-                      key={cotentType.id}
-                      data-test-id={`ct-item-${cotentType.id}`}
+                {contentTypes.length > 0 ? (
+                  <>
+                    <Paragraph>Select which content types to use with Typeform App.</Paragraph>
+                    <FieldSelector
+                      contentTypes={contentTypes}
+                      compatibleFields={compatibleFields}
+                      selectedFields={selectedFields}
+                      onSelectedFieldsChange={this.onSelectedFieldsChange}
                     />
-                  ))}
-                </FieldGroup>
+                  </>
+                ) : (
+                  <Paragraph>
+                    No content types with fields of type <strong>Short Text</strong> were found.
+                  </Paragraph>
+                )}
               </Typography>
             </div>
           </div>
