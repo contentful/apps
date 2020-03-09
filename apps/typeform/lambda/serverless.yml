@@ -26,8 +26,6 @@ provider:
   deploymentPrefix: sls-apps-typeform
 
 package:
-  include:
-    - build/**
   exclude:
     - .git/**
     - '**/*.ts'
@@ -36,7 +34,7 @@ package:
 functions:
   app:
     environment:
-    handler: build/index.api
+    handler: index.handler
     events:
       - http:
           path: /
@@ -45,4 +43,3 @@ functions:
       - http:
           path: /{proxy+}
           method: ANY
-          private: false

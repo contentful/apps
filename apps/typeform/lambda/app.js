@@ -2,14 +2,11 @@
 
 const path = require('path');
 const express = require('express');
-const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
-const rekog = new AWS.Rekognition();
 const handle = require('./handler');
 
 const deps = {
-  fetch,
-  rekog
+  fetch
 };
 
 const app = express();
@@ -22,6 +19,7 @@ app.use('/forms', async (req, res) => {
 });
 
 app.use('/frontend', express.static(FRONTEND));
+
 app.use((_req, res) => res.status(404).send('Not found'));
 
 module.exports = app;

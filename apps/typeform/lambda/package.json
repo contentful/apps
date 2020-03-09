@@ -8,12 +8,13 @@
     "lint": "eslint .",
     "test": "jest",
     "test:ci": "jest",
-    "serve": "node serve.js",
+    "serve:local": "nodemon serve.js",
     "deploy": "sls deploy --stage $STAGE"
   },
   "devDependencies": {
     "eslint": "6.8.0",
     "jest": "25.1.0",
+    "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
     "serverless": "1.63.0",
     "serverless-domain-manager": "3.3.1"
