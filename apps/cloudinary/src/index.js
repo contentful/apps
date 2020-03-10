@@ -46,10 +46,14 @@ function makeThumbnail(resource, config) {
 
   if (resource.resource_type === 'image' && VALID_IMAGE_FORMATS.includes(resource.format)) {
     url = cloudinary.url(resource.public_id, {
+      type: resource.type,
       rawTransformation: transformations
     });
   } else if (resource.resource_type === 'video') {
-    url = cloudinary.video_thumbnail_url(resource.public_id, transformations);
+    url = cloudinary.video_thumbnail_url(resource.public_id, {
+      type: resource.type,
+      rawTransformation: transformations
+    });
   }
 
   return [url, alt];
