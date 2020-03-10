@@ -5,13 +5,14 @@ import { Heading, Note, Form, SelectField, Option } from '@contentful/forma-36-r
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import { AppConfig } from './AppConfig';
+import { TypeFormField } from './TypeFromField';
 import './index.scss';
 
 init(sdk => {
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     render(<AppConfig sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
   } else {
-    render(<div>I should be the App</div>, document.getElementById('root'));
+    render(<TypeFormField sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
   }
 });
 

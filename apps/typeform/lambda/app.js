@@ -3,6 +3,7 @@
 const path = require('path');
 const express = require('express');
 const fetch = require('node-fetch');
+const cors = require('cors');
 const handle = require('./handler');
 
 const deps = {
@@ -12,6 +13,9 @@ const deps = {
 const app = express();
 
 const FRONTEND = path.dirname(require.resolve('typeform-frontend'));
+console.log(FRONTEND);
+
+app.use(cors());
 
 app.use('/forms', async (req, res) => {
   const { status, body } = await handle(req.method, req.path, deps);

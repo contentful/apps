@@ -2,6 +2,7 @@
   "name": "typeform-frontend",
   "version": "1.0.0",
   "private": true,
+  "main": "build/index.html",
   "devDependencies": {
     "@babel/core": "7.5.5",
     "@babel/plugin-proposal-class-properties": "7.5.5",
@@ -20,6 +21,7 @@
     "@contentful/forma-36-fcss": "0.0.31",
     "@contentful/forma-36-react-components": "^3.16.7",
     "@contentful/forma-36-tokens": "^0.4.5",
+    "@typeform/embed": "^0.16.0",
     "@types/lodash": "^4.14.149",
     "contentful-ui-extensions-sdk": "3.10.11",
     "core-js": "^3.2.1",
@@ -32,7 +34,7 @@
   "scripts": {
     "configure": "contentful space use && contentful space environment use",
     "start": "contentful-extension-scripts start --serve-only",
-    "build": "contentful-extension-scripts build",
+    "build": "contentful-extension-scripts build --no-inline",
     "deploy": "npm run build && contentful extension update --force",
     "login": "contentful login",
     "logout": "contentful logout",

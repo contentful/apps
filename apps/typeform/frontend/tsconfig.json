@@ -7,6 +7,7 @@
     "rootDir": "./src",
     "experimentalDecorators": true,
     "esModuleInterop": true,
+    // "typeRoots": ["./module.d.ts"],
     "lib": ["dom", "es2016"],
     "resolveJsonModule": true
   }
