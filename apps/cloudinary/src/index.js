@@ -20,6 +20,7 @@ const FIELDS_TO_PERSIST = [
   'version',
   'duration',
   'metadata',
+  'context',
   'public_id',
   'created_at',
   'secure_url',
