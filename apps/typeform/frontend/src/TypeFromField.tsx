@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { TextInput, Select, Option } from '@contentful/forma-36-react-components';
 import * as typeformEmbed from '@typeform/embed';
+import { TypeformPreviewWidget } from './TypeFormWidget';
 import { TypeFormResponse } from './interfaces';
 
 interface Props {
@@ -36,7 +37,9 @@ export function TypeFormField({ sdk }: Props) {
     fetchForms();
   }, []);
 
-  const onChange = () => {};
+  const onChange = (event: any) => {
+    setSelectedForm(event.currentTarget.value);
+  };
 
   const normalizeFormResponse = (typeFormResponse: TypeFormResponse): FormOption[] => {
     return typeFormResponse.forms.items.map(form => ({
@@ -48,7 +51,7 @@ export function TypeFormField({ sdk }: Props) {
 
   return (
     <React.Fragment>
-      <Select>
+      <Select onChange={onChange}>
         <Option key="" value="">
           Choose a typeform
         </Option>
@@ -58,7 +61,7 @@ export function TypeFormField({ sdk }: Props) {
           </Option>
         ))}
       </Select>
-      <div>I will be the rendered form</div>
+      <TypeformPreviewWidget src={selectedForm} />
     </React.Fragment>
   );
 }

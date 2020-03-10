@@ -1,1 +1,1 @@
-declare module '@typeform/embed' {}
+declare module '@typeform/embed';
