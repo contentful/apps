@@ -19,7 +19,7 @@ const FIELDS_TO_PERSIST = [
   'height',
   'version',
   'duration',
-  'meta_data',
+  'image_metadata',
   'public_id',
   'created_at',
   'secure_url',
