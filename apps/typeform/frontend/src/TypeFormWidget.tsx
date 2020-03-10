@@ -22,7 +22,7 @@ export function TypeformPreviewWidget({ src }: Props) {
       ref={el}
       style={{
         width: '100%',
-        height: 'auto'
+        height: 450
       }}
     />
   );

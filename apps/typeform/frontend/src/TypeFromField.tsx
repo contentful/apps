@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK, FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { TextInput, Select, Option } from '@contentful/forma-36-react-components';
 import * as typeformEmbed from '@typeform/embed';
 import { TypeformPreviewWidget } from './TypeFormWidget';
 import { TypeFormResponse } from './interfaces';
 
 interface Props {
-  sdk: AppExtensionSDK;
+  sdk: any;
 }
 
 interface InstallationParameters {
@@ -33,6 +33,7 @@ export function TypeFormField({ sdk }: Props) {
 
       const normalizedForms = normalizeFormResponse(response);
       setForms(normalizedForms);
+      sdk.window.updateHeight(500);
     };
     fetchForms();
   }, []);
