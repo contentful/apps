@@ -1,21 +1,23 @@
 import React, { useEffect, useRef } from 'react';
 import * as typeformEmbed from '@typeform/embed';
+import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
 
 interface Props {
-  src: string;
+  sdk: DialogExtensionSDK;
 }
 
-export function TypeformPreviewWidget({ src }: Props) {
+export function TypeformPreviewWidget({ sdk }: Props) {
   const el = useRef(null);
-
+  const { value } = sdk.parameters.invocation;
   useEffect(() => {
     let element = el.current;
-    typeformEmbed.makeWidget(element, src, {
+    typeformEmbed.makeWidget(element, value, {
       hideFooter: true,
       hideHeaders: true,
       opacity: 0
     });
-  }, [src]);
+    sdk.window.updateHeight(450);
+  }, [value]);
 
   return (
     <div

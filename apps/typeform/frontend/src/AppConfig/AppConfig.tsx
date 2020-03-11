@@ -120,7 +120,7 @@ export class AppConfig extends React.Component<Props, State> {
 
     return (
       <div>
-        <div className={styles.background('#F1ECE3')} />
+        <div className={styles.background('#262627')} />
         <div className={styles.body}>
           <div>
             <div>
@@ -134,7 +134,7 @@ export class AppConfig extends React.Component<Props, State> {
                     rel="noopener noreferrer">
                     Typeform
                   </TextLink>{' '}
-                  app allows you to view your forms from Typeform without leaving Contentful.
+                  app allows you to reference your forms from Typeform without leaving Contentful.
                 </Paragraph>
               </Typography>
               <hr className={styles.splitter} />

@@ -2,7 +2,7 @@
 
 const fetchForms = async (method, _path, { fetch }) => {
   const workspaceId = '4PMRpK';
-  const accessToken = '5oef91pmMPz6KC2Fuk7R3iuRXeX53pHjGrHESe24YGpF';
+  const accessToken = 'DXFjcm6jhyRZLYBiFwY7Pq9Q5wEmmueYNsYsHd9cyqQu';
   if (method !== 'GET') {
     return {
       status: 405,

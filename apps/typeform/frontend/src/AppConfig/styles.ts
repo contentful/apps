@@ -42,7 +42,7 @@ export const styles = {
     justifyContent: 'center',
     '> img': {
       display: 'block',
-      width: '70px',
+      width: '100px',
       margin: `${tokens.spacingXl} 0`
     }
   }),

@@ -51,6 +51,18 @@ interface TypeFormPayload {
   };
 }
 
+export interface InstallationParameters {
+  workspaceId: string;
+  accessToken: string;
+}
+
+export interface FormOption {
+  name: string;
+  href: string;
+  isPublic: boolean;
+  id: string;
+}
+
 export interface EditorInterface {
   sys: { contentType: { sys: { id: string } } };
   controls?: Control[];
