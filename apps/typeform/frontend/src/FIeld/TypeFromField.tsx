@@ -5,9 +5,6 @@ import { TypeFormResponse, FormOption, InstallationParameters } from '../interfa
 import { styles } from './styles';
 // @ts-ignore 2307
 import logo from './typeform-icon.svg';
-// @ts-ignore 2307
-import eye from './eye.svg';
-import { makeEyeIcon } from './makeEyeIcon';
 
 interface Props {
   sdk: FieldExtensionSDK;
@@ -143,10 +140,13 @@ export function TypeFormField({ sdk }: Props) {
   if (loading) {
     return null;
   }
-
   const PreviewButton = (
     <div className={styles.previewButton}>
-      <TextLink className={styles.previewButtonTextLink} onClick={openDialog} disabled={!selectedForm.isPublic}>
+      <TextLink onClick={openDialog} disabled={!selectedForm.isPublic}>
+        <svg width="16" height="16" viewBox="0 0 24 24">
+          <path d="M0 0h24v24H0z" fill="none" />
+          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+        </svg>
         Preview
       </TextLink>
     </div>
@@ -155,7 +155,7 @@ export function TypeFormField({ sdk }: Props) {
   return (
     <React.Fragment>
       <div className={styles.field}>
-        <img src={logo} />
+        <img src={logo} className={styles.logo} />
         <Select onChange={onChange} value={value}>
           <Option key="" value="">
             {forms.length === 0 ? 'No forms available' : 'Choose typeform'}
@@ -184,6 +184,7 @@ export function TypeFormField({ sdk }: Props) {
             target="_blank"
             icon="ExternalLink"
             rel="noopener noreferrer"
+            className={styles.editButton}
             disabled={!value}>
             Edit
           </TextLink>

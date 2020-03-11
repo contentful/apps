@@ -1,6 +1,5 @@
 import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
-import { makeEyeIcon } from './makeEyeIcon';
 
 export const styles = {
   field: css({
@@ -10,33 +9,39 @@ export const styles = {
     },
     marginBottom: `${tokens.spacingS}`
   }),
+  logo: css({
+    width: '40px',
+    height: '40px'
+  }),
   actionButtons: css({
     display: 'flex',
     alignItems: 'center',
-    marginLeft: `${tokens.spacingXl}`,
+    marginLeft: `${tokens.spacing2Xl}`,
     '> button': css({
       marginRight: `${tokens.spacingXl}`
     }),
-    marginBottom: tokens.spacingXs,
+    marginBottom: tokens.spacingXs
+  }),
+  editButton: css({
+    svg: {
+      width: '16px',
+      height: '16px'
+    }
   }),
   previewButton: css({
     marginRight: tokens.spacingL,
-  }),
-  previewButtonTextLink: css({
-    display: 'flex',
-    alignItems: 'center',
-    '&:before': {
-      content: `url('${makeEyeIcon('primary')}')`,
-      display: 'flex',
-      alignItems: 'center',
-      width: '18px',
-      height: '18px',
-      marginRight: tokens.spacingXs,
-      transform: 'scale(0.9)'
+    button: {
+      display: 'flex'
+    },
+    svg: {
+      fill: tokens.colorPrimary,
+      transition: `fill ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
+      overflow: 'visible',
+      marginRight: tokens.spacing2Xs
     },
     '&:hover': {
-      '&:before': {
-        content: `url('${makeEyeIcon('dark')}')`,
+      svg: {
+        fill: tokens.colorTextDark
       }
     }
   })
