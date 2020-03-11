@@ -141,7 +141,7 @@ export function TypeFormField({ sdk }: Props) {
     return null;
   }
   const PreviewButton = (
-    <div className={styles.previewButton}>
+    <div className={styles.previewButton(!selectedForm.isPublic)}>
       <TextLink onClick={openDialog} disabled={!selectedForm.isPublic}>
         <svg width="16" height="16" viewBox="0 0 24 24">
           <path d="M0 0h24v24H0z" fill="none" />

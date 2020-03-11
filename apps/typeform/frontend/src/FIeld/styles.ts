@@ -28,21 +28,22 @@ export const styles = {
       height: '16px'
     }
   }),
-  previewButton: css({
-    marginRight: tokens.spacingL,
-    button: {
-      display: 'flex'
-    },
-    svg: {
-      fill: tokens.colorPrimary,
-      transition: `fill ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
-      overflow: 'visible',
-      marginRight: tokens.spacing2Xs
-    },
-    '&:hover': {
+  previewButton: (disabled: boolean) =>
+    css({
+      marginRight: tokens.spacingL,
+      button: {
+        display: 'flex'
+      },
       svg: {
-        fill: tokens.colorTextDark
+        fill: tokens.colorPrimary,
+        transition: `fill ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
+        overflow: 'visible',
+        marginRight: tokens.spacing2Xs
+      },
+      '&:hover': {
+        svg: {
+          fill: disabled ? tokens.colorPrimary : tokens.colorTextDark
+        }
       }
-    }
-  })
+    })
 };
