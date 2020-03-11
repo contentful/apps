@@ -7,6 +7,7 @@ import { styles } from './styles';
 import logo from './typeform-icon.svg';
 // @ts-ignore 2307
 import eye from './eye.svg';
+import { makeEyeIcon } from './makeEyeIcon';
 
 interface Props {
   sdk: FieldExtensionSDK;
@@ -108,6 +109,9 @@ export function TypeFormField({ sdk }: Props) {
       });
     };
     fetchForms();
+
+    // Start auto resizer to adjust field height
+    sdk.window.startAutoResizer();
   }, []);
 
   const onChange = (event: any) => {
@@ -141,9 +145,8 @@ export function TypeFormField({ sdk }: Props) {
   }
 
   const PreviewButton = (
-    <div>
-      <img src={eye} />
-      <TextLink onClick={openDialog} disabled={!selectedForm.isPublic}>
+    <div className={styles.previewButton}>
+      <TextLink className={styles.previewButtonTextLink} onClick={openDialog} disabled={!selectedForm.isPublic}>
         Preview
       </TextLink>
     </div>
@@ -179,7 +182,7 @@ export function TypeFormField({ sdk }: Props) {
           <TextLink
             href={`https://admin.typeform.com/form/${selectedForm.id}/create`}
             target="_blank"
-            icon={'ExternalLink'}
+            icon="ExternalLink"
             rel="noopener noreferrer"
             disabled={!value}>
             Edit
