@@ -5,6 +5,8 @@ import { TypeFormResponse, FormOption, InstallationParameters } from '../interfa
 import { styles } from './styles';
 // @ts-ignore 2307
 import logo from './typeform-icon.svg';
+// @ts-ignore 2307
+import eye from './eye.svg';
 
 interface Props {
   sdk: FieldExtensionSDK;
@@ -139,9 +141,12 @@ export function TypeFormField({ sdk }: Props) {
   }
 
   const PreviewButton = (
-    <TextLink onClick={openDialog} disabled={!selectedForm.isPublic}>
-      Preview
-    </TextLink>
+    <div>
+      <img src={eye} />
+      <TextLink onClick={openDialog} disabled={!selectedForm.isPublic}>
+        Preview
+      </TextLink>
+    </div>
   );
 
   return (
@@ -174,6 +179,7 @@ export function TypeFormField({ sdk }: Props) {
           <TextLink
             href={`https://admin.typeform.com/form/${selectedForm.id}/create`}
             target="_blank"
+            icon={'ExternalLink'}
             rel="noopener noreferrer"
             disabled={!value}>
             Edit

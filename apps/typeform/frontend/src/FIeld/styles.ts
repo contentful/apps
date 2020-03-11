@@ -10,6 +10,8 @@ export const styles = {
     marginBottom: `${tokens.spacingS}`
   }),
   actionButtons: css({
+    display: 'flex',
+    alignItems: 'center',
     marginLeft: `${tokens.spacingXl}`,
     '> button': css({
       marginRight: `${tokens.spacingXl}`
