@@ -13,10 +13,12 @@ interface Props {
 enum ACTION_TYPES {
   INIT = 'INIT',
   UPDATE_VALUE = 'UPDATE_VALUE',
-  RESET = 'RESET'
+  RESET = 'RESET',
+  ERROR = 'ERROR'
 }
 
 const initialState = {
+  error: false,
   value: '',
   selectedForm: {
     name: '',
@@ -45,7 +47,7 @@ const getSelectedForm = (value: string, forms: FormOption[]) => {
 export function TypeFormField({ sdk }: Props) {
   const { workspaceId, accessToken } = sdk.parameters.installation as InstallationParameters;
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { loading, forms, value, hasStaleData, selectedForm } = state;
+  const { loading, forms, value, hasStaleData, selectedForm, error } = state;
 
   function reducer(
     state = initialState,
@@ -86,6 +88,9 @@ export function TypeFormField({ sdk }: Props) {
           selectedForm: initialState.selectedForm
         };
       }
+      case ACTION_TYPES.ERROR: {
+        return { ...state, loading: false, error: true };
+      }
       default:
         return state;
     }
@@ -93,20 +98,23 @@ export function TypeFormField({ sdk }: Props) {
 
   useEffect(() => {
     const fetchForms = async () => {
-      const response = (await (
-        await fetch('http://localhost:3000/forms')
-      ).json()) as TypeFormResponse;
-
-      const normalizedForms = normalizeFormResponse(response);
-      dispatch({
-        type: ACTION_TYPES.INIT,
-        payload: {
-          forms: normalizedForms
-        }
-      });
+      try {
+        const response = (await (
+          await fetch(`http://localhost:3000/forms/${workspaceId}/${accessToken}`)
+        ).json()) as TypeFormResponse;
+        const normalizedForms = normalizeFormResponse(response);
+        dispatch({
+          type: ACTION_TYPES.INIT,
+          payload: {
+            forms: normalizedForms
+          }
+        });
+      } catch (error) {
+        console.error(error);
+        dispatch({ type: ACTION_TYPES.ERROR });
+      }
     };
     fetchForms();
-
     // Start auto resizer to adjust field height
     sdk.window.startAutoResizer();
   }, []);
@@ -140,6 +148,16 @@ export function TypeFormField({ sdk }: Props) {
   if (loading) {
     return null;
   }
+
+  if (error) {
+    return (
+      <Note noteType="negative">
+        We could not fetch your typeforms. Please make sure you are using a valid workspace ID and
+        access token.
+      </Note>
+    );
+  }
+
   const PreviewButton = (
     <div className={styles.previewButton(!selectedForm.isPublic)}>
       <TextLink onClick={openDialog} disabled={!selectedForm.isPublic}>
@@ -174,7 +192,7 @@ export function TypeFormField({ sdk }: Props) {
           ) : (
             <Tooltip
               containerElement="span"
-              content="You can not preview this form because it is private"
+              content="You can not preview this typeform because it is private"
               place="right">
               {PreviewButton}
             </Tooltip>
@@ -191,9 +209,9 @@ export function TypeFormField({ sdk }: Props) {
         </div>
       )}
       {hasStaleData && (
-        <Note>
-          The form you have selected in Contentful no longer exists in Typeform.{' '}
-          <TextLink onClick={() => dispatch({ type: ACTION_TYPES.RESET })}>Clear</TextLink>
+        <Note noteType="negative">
+          The typeform you have selected in Contentful no longer exists in typeform.{' '}
+          <TextLink onClick={() => dispatch({ type: ACTION_TYPES.RESET })}>Clear field</TextLink>.
         </Note>
       )}
     </React.Fragment>

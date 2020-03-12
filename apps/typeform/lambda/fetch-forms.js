@@ -1,15 +1,15 @@
 'use strict';
 
-const fetchForms = async (method, _path, { fetch }) => {
-  const workspaceId = '4PMRpK';
-  const accessToken = 'DXFjcm6jhyRZLYBiFwY7Pq9Q5wEmmueYNsYsHd9cyqQu';
+const fetchForms = async (method, path, { fetch }) => {
+  // const workspaceId = '4PMRpK';
+  // const accessToken = 'DXFjcm6jhyRZLYBiFwY7Pq9Q5wEmmueYNsYsHd9cyqQu';
   if (method !== 'GET') {
     return {
       status: 405,
       body: { message: 'Method not allowed.' }
     };
   }
-
+  const [, workspaceId, accessToken] = path.split('/');
   const response = await fetch(
     `https://api.typeform.com/forms?page_size=200&workspace_id=${workspaceId}`,
     {
