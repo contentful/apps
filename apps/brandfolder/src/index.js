@@ -1,19 +1,35 @@
+import pick from 'lodash/pick';
 import { setup } from 'shared-dam-app';
 
-const CTF_APP_URL = 'https://brandfolder.ctfapps.net'
-const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=message&appName=Contentful&origin=${CTF_APP_URL}&initMsg=hi`
-
+const CTF_APP_URL = 'https://brandfolder.ctfapps.net';
+const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=message&appName=Contentful&origin=${CTF_APP_URL}&initMsg=hi`;
 
 const CTA = 'Select an asset on Brandfolder';
 
+const FIELDS_TO_PERSIST = [
+  'id',
+  'type',
+  'mimetype',
+  'extension',
+  'filename',
+  'size',
+  'width',
+  'height',
+  'url',
+  'thumbnail_url',
+  'position',
+  'relationships',
+  'included',
+  'asset.id'
+];
+
 function makeThumbnail(attachment) {
-  const thumbnail = attachment.thumbnail_url || attachment.url
-  const url = typeof thumbnail === 'string' ? thumbnail : undefined
-  const alt = attachment.filename
+  const thumbnail = attachment.thumbnail_url || attachment.url;
+  const url = typeof thumbnail === 'string' ? thumbnail : undefined;
+  const alt = attachment.filename;
 
   return [url, alt];
 }
-
 
 function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
@@ -25,17 +41,16 @@ function renderDialog(sdk) {
   sdk.window.startAutoResizer();
 
   window.addEventListener('message', e => {
-    const { data, origin } = e
-    if (origin === 'https://integration-panel-ui.brandfolder-svc.com'){
+    const { data, origin } = e;
+    if (origin === 'https://integration-panel-ui.brandfolder-svc.com') {
       const { event, payload } = data;
       if (event === 'selectedAttachment') {
         sdk.close([payload]);
-      }
-      else if (data.event === 'selectedAsset' && payload.attachments.length !== 0) {
-        const att_id = payload.attachments[0].id
-        const attachment = payload.included.find(att => att.id === att_id)
-        if (attachment){
-          sdk.close([attachment])
+      } else if (data.event === 'selectedAsset' && payload.attachments.length !== 0) {
+        const att_id = payload.attachments[0].id;
+        const attachment = payload.included.find(att => att.id === att_id);
+        if (attachment) {
+          sdk.close([attachment]);
         }
       }
     }
@@ -50,7 +65,7 @@ async function openDialog(sdk, _currentValue, config) {
     shouldCloseOnEscapePress: true,
     parameters: { ...config },
     width: 400,
-    allowHeightOverflow: true,
+    allowHeightOverflow: true
   });
 
   if (!Array.isArray(result)) {
@@ -74,14 +89,14 @@ async function openDialog(sdk, _currentValue, config) {
   //         "id": "6skcfbkq"
   //     }
   // }]
-  return result
+  return result.map(asset => pick(asset, FIELDS_TO_PERSIST));
 }
 
 setup({
   cta: CTA,
   name: 'Brandfolder',
   logo: 'https://cdn.brandfolder.io/YUHW9ZNT/at/pgec4f-cttweo-a5euhh/brandfolder-icon-favicon.svg',
-  color: '#0061ff',
+  color: '#40D1F5',
   description:
     'The Brandfolder app is a widget that allows editors to select media from their Brandfolder account. Select a file on Brandfolder and designate the assets that you want your entry to reference.',
   parameterDefinitions: [],
@@ -89,5 +104,7 @@ setup({
   makeThumbnail,
   renderDialog,
   openDialog,
-  isDisabled: () => {false},
+  isDisabled: () => {
+    false;
+  }
 });
