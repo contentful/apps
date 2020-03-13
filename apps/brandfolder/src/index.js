@@ -20,7 +20,8 @@ const FIELDS_TO_PERSIST = [
   'position',
   'relationships',
   'included',
-  'asset.id'
+  'asset.id',
+  'cdn_url'
 ];
 
 function makeThumbnail(attachment) {
