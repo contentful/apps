@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { Select, Option, TextLink, Note, Tooltip } from '@contentful/forma-36-react-components';
-import { TypeFormResponse, FormOption, InstallationParameters } from '../interfaces';
+import { TypeFormResponse, FormOption, InstallationParameters } from '../typings';
 import { styles } from './styles';
 // @ts-ignore 2307
 import logo from './typeform-icon.svg';

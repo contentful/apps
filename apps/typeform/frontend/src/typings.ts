@@ -51,6 +51,13 @@ interface TypeFormPayload {
   };
 }
 
+export interface FormOption {
+  name: string;
+  href: string;
+  isPublic: boolean;
+  id: string;
+}
+
 export interface EditorInterface {
   sys: { contentType: { sys: { id: string } } };
   controls?: Control[];
@@ -61,6 +68,6 @@ export interface TypeFormParameters {
   accessToken: string;
 }
 
-export type InstallationParameters = TypeFormParameters | null;
+export type InstallationParameters = TypeFormParameters;
 
 export type SelectedFields = Record<string, string[] | undefined>;
