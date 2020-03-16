@@ -10,6 +10,7 @@ import {
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import { AppConfig } from './AppConfig';
+import { AppAuthConfig } from './AppConfig/AppAuthConfig';
 import { TypeFormField } from './FIeld/TypeFromField';
 import { TypeformPreviewWidget } from './TypeFormWidget';
 import './index.scss';
