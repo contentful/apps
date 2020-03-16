@@ -11,7 +11,7 @@ import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import { AppConfig } from './AppConfig';
 import { AppAuthConfig } from './AppConfig/AppAuthConfig';
-import { TypeFormField } from './FIeld/TypeFromField';
+import { TypeFormField } from './FIeld/TypeFormField';
 import { TypeformPreviewWidget } from './TypeFormWidget';
 import './index.scss';
 
