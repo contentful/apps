@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as typeformEmbed from '@typeform/embed';
 import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { Hash } from './typings';
 
 interface Props {
   sdk: DialogExtensionSDK;
@@ -8,7 +9,7 @@ interface Props {
 
 export function TypeformPreviewWidget({ sdk }: Props) {
   const el = useRef(null);
-  const { value } = sdk.parameters.invocation;
+  const { value } = sdk.parameters.invocation as Hash;
   useEffect(() => {
     let element = el.current;
     typeformEmbed.makeWidget(element, value, {
