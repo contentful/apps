@@ -31,18 +31,27 @@ app.use('/callback', async (req, res) => {
     res.status(404).send('No Code was provided');
   }
 
-  const endpoint = `https://api.typeform.com/oauth/token?grant_type=authorization_code?code=${code}?client_id=${CLIENT_ID}?client_secret=${CLIENT_SECRET}?redirect_uri=${OAUTH_URL}`;
+  const endpoint = 'https://api.typeform.com/oauth/token';
+
+  const body =
+    `grant_type=authorization_code&code=${code}&client_id=${CLIENT_ID}&` +
+    `client_secret=${CLIENT_SECRET}&redirect_uri=${OAUTH_URL}`;
+
   const response = await fetch(endpoint, {
-    method: 'POST'
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body
   });
 
-  console.log(state);
-  console.log(response.json());
   if (response.status !== 200) {
     console.error('Typeform token exchange failed, got response:', response.status);
     throw new Error('Typeform token exchange failed');
   }
 
+  const result = await response.json();
+  const { access_token, refresh_token, expires_in } = result;
   res.sendStatus(200);
 });
 
