@@ -5,7 +5,7 @@ import { Form, Subheading, CheckboxField, Typography } from '@contentful/forma-3
 
 import { ContentType, CompatibleFields, SelectedFields } from '../typings';
 
-interface Props {
+export interface Props {
   contentTypes: ContentType[];
   compatibleFields: CompatibleFields;
   selectedFields: SelectedFields;
