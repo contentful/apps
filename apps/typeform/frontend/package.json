@@ -21,12 +21,15 @@
     "@contentful/forma-36-fcss": "0.0.31",
     "@contentful/forma-36-react-components": "^3.16.7",
     "@contentful/forma-36-tokens": "^0.4.5",
+    "@testing-library/react": "^10.0.1",
     "@typeform/embed": "^0.16.0",
     "@types/jest": "^25.1.4",
     "@types/lodash": "^4.14.149",
     "contentful-ui-extensions-sdk": "3.10.11",
     "core-js": "^3.2.1",
     "emotion": "^10.0.27",
+    "jest-environment-jsdom": "^25.1.0",
+    "jsdom": "^16.2.1",
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
@@ -40,9 +43,9 @@
     "login": "contentful login",
     "logout": "contentful logout",
     "help": "contentful-extension-scripts help",
-    "test": "contentful-extension-scripts test",
-    "test:watch": "contentful-extension-scripts test --watch",
-    "test:coverage": "contentful-extension-scripts test --coverage"
+    "test": "contentful-extension-scripts test --env=jsdom",
+    "test:watch": "contentful-extension-scripts test --watch --env=jsdom",
+    "test:coverage": "contentful-extension-scripts test --coverage --env=jsdom"
   },
   "browserslist": [
     "last 2 versions",

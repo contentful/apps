@@ -103,6 +103,7 @@ export function TypeFormField({ sdk }: Props) {
           await fetch(`http://localhost:3000/forms/${workspaceId}/${accessToken}`)
         ).json()) as TypeFormResponse;
         const normalizedForms = normalizeFormResponse(response);
+        console.log('got', response);
         dispatch({
           type: ACTION_TYPES.INIT,
           payload: {
@@ -174,7 +175,7 @@ export function TypeFormField({ sdk }: Props) {
     <React.Fragment>
       <div className={styles.field}>
         <img src={logo} className={styles.logo} />
-        <Select onChange={onChange} value={value}>
+        <Select onChange={onChange} value={value} data-test-id="typeform-select">
           <Option key="" value="">
             {forms.length === 0 ? 'No forms available' : 'Choose typeform'}
           </Option>
