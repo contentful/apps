@@ -1,0 +1,144 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldSelector should render successfully with no preselected fields 1`] = `
+<div>
+  <div
+    class="Typography__Typography___1ZUfE"
+    data-test-id="cf-ui-text-container"
+  >
+    <div
+      class="css-1w2p18d"
+    >
+      <h2
+        class="Subheading__Subheading___2mA9j f36-margin-bottom--m"
+        data-test-id="cf-ui-subheading"
+      >
+        CT1
+      </h2>
+      <form
+        class="Form__Form___2zwZf"
+        data-test-id="cf-ui-form"
+      >
+        <div
+          class="Form__Form__item___2qOZE Form__Form__item--default___1CHMK"
+        >
+          <div
+            class="ControlledInputField__ControlledInputField___2uIG9"
+            data-test-id="cf-ui-checkbox-field"
+          >
+            <input
+              aria-label="X"
+              class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+              data-test-id="cf-ui-controlled-input"
+              id="field-box-ct1-x"
+              type="checkbox"
+              value=""
+            />
+            <div>
+              <label
+                class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                data-test-id="cf-ui-form-label"
+                for="field-box-ct1-x"
+              >
+                X
+              </label>
+              <p
+                class="HelpText__HelpText___uWbja"
+                data-test-id="cf-ui-help-text"
+              >
+                Field ID: x
+              </p>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div
+      class="css-1w2p18d"
+    >
+      <h2
+        class="Subheading__Subheading___2mA9j f36-margin-bottom--m"
+        data-test-id="cf-ui-subheading"
+      >
+        CT2
+      </h2>
+      <form
+        class="Form__Form___2zwZf"
+        data-test-id="cf-ui-form"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FieldSelector should render successfully with preselected fields 1`] = `
+<div>
+  <div
+    class="Typography__Typography___1ZUfE"
+    data-test-id="cf-ui-text-container"
+  >
+    <div
+      class="css-1w2p18d"
+    >
+      <h2
+        class="Subheading__Subheading___2mA9j f36-margin-bottom--m"
+        data-test-id="cf-ui-subheading"
+      >
+        CT1
+      </h2>
+      <form
+        class="Form__Form___2zwZf"
+        data-test-id="cf-ui-form"
+      >
+        <div
+          class="Form__Form__item___2qOZE Form__Form__item--default___1CHMK"
+        >
+          <div
+            class="ControlledInputField__ControlledInputField___2uIG9"
+            data-test-id="cf-ui-checkbox-field"
+          >
+            <input
+              aria-label="X"
+              checked=""
+              class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
+              data-test-id="cf-ui-controlled-input"
+              id="field-box-ct1-x"
+              type="checkbox"
+              value=""
+            />
+            <div>
+              <label
+                class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                data-test-id="cf-ui-form-label"
+                for="field-box-ct1-x"
+              >
+                X
+              </label>
+              <p
+                class="HelpText__HelpText___uWbja"
+                data-test-id="cf-ui-help-text"
+              >
+                Field ID: x
+              </p>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div
+      class="css-1w2p18d"
+    >
+      <h2
+        class="Subheading__Subheading___2mA9j f36-margin-bottom--m"
+        data-test-id="cf-ui-subheading"
+      >
+        CT2
+      </h2>
+      <form
+        class="Form__Form___2zwZf"
+        data-test-id="cf-ui-form"
+      />
+    </div>
+  </div>
+</div>
+`;
