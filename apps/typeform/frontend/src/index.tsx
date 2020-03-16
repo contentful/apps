@@ -17,7 +17,7 @@ import './index.scss';
 
 init(sdk => {
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-    render(<AppConfig sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
+    render(<AppAuthConfig sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
   } else if (sdk.location.is(locations.LOCATION_DIALOG)) {
     render(
       <TypeformPreviewWidget sdk={sdk as DialogExtensionSDK} />,

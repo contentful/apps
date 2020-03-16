@@ -11,7 +11,8 @@ const deps = {
 };
 
 const CLIENT_ID = '8DAtABe5rFEnpJJw8Uco2e65ewrZq6kALSfCBe4N11LW';
-const CLIENT_SECRET = 'ByNjuGDXBrjLf38sJQ8B8cDrRMW4jGVYk15PfyemHt7H';
+const CLIENT_SECRET = 'Ded8DJgEQ4VE1R1bc4FriMpGhLuo3gsrVtS7raW5SdBc';
+const OAUTH_URL = 'http://localhost:3000/callback';
 
 const app = express();
 
@@ -25,24 +26,24 @@ app.use('/forms', async (req, res) => {
 });
 
 app.use('/callback', async (req, res) => {
-  const { code } = req.query;
+  const { code, state } = req.query;
   if (!code) {
     res.status(404).send('No Code was provided');
   }
 
-  console.log(code);
+  const endpoint = `https://api.typeform.com/oauth/token?grant_type=authorization_code?code=${code}?client_id=${CLIENT_ID}?client_secret=${CLIENT_SECRET}?redirect_uri=${OAUTH_URL}`;
+  const response = await fetch(endpoint, {
+    method: 'POST'
+  });
 
-  const response = await fetch(
-    `https://api.typeform.com/oauth/token?grant_type=authorization_code&code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&redirect_uri=http://localhost:1234/frontend`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }
-  );
-  const result = await response.json();
-  console.log(result);
+  console.log(state);
+  console.log(response.json());
+  if (response.status !== 200) {
+    console.error('Typeform token exchange failed, got response:', response.status);
+    throw new Error('Typeform token exchange failed');
+  }
+
+  res.sendStatus(200);
 });
 
 app.use('/frontend', express.static(FRONTEND));

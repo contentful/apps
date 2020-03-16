@@ -7,8 +7,7 @@ interface Props {
 }
 
 const CLIENT_ID = '8DAtABe5rFEnpJJw8Uco2e65ewrZq6kALSfCBe4N11LW';
-const OAUTH_REDIRECT_URI = 'http://www.localhost:1234/callback';
-const CLIENT_SECRET = 'ByNjuGDXBrjLf38sJQ8B8cDrRMW4jGVYk15PfyemHt7H';
+const OAUTH_REDIRECT_URI = 'http://localhost:3000/callback';
 
 export function AppAuthConfig({ sdk }: Props) {
   useEffect(() => {
@@ -16,9 +15,9 @@ export function AppAuthConfig({ sdk }: Props) {
   }, []);
 
   const executeOauth = () => {
-    const url = `https://api.typeform.com/oauth/authorize?state=1234&client_id=${CLIENT_ID}&redirect_uri=${OAUTH_REDIRECT_URI}&scope=forms:read`;
-
-    console.log(url);
+    const url = `https://api.typeform.com/oauth/authorize?&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
+      OAUTH_REDIRECT_URI
+    )}&scope=forms:read+offline&state=${encodeURIComponent(window.location.href)}`;
 
     const oauthWindow = window.open(
       url,
