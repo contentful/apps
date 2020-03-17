@@ -1,8 +1,6 @@
 'use strict';
 
 const fetchForms = async (method, path, { fetch }) => {
-  // const workspaceId = '4PMRpK';
-  // const accessToken = 'DXFjcm6jhyRZLYBiFwY7Pq9Q5wEmmueYNsYsHd9cyqQu';
   if (method !== 'GET') {
     return {
       status: 405,
