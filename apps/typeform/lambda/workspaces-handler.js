@@ -13,7 +13,7 @@ module.exports = async (method, path, { fetch }) => {
   try {
     return {
       status: 200,
-      body: { forms: await fetchWorkspaces(method, path, { fetch }) }
+      body: { workspaces: await fetchWorkspaces(method, path, { fetch }) }
     };
   } catch (err) {
     return {

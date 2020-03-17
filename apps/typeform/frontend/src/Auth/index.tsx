@@ -4,6 +4,9 @@ import { TypeformOAuth } from './TypeformOAuth';
 import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { AppConfig } from '../AppConfig';
 import { styles } from '../AppConfig/styles';
+// @ts-ignore 2307
+import logo from '../AppConfig/config-screen-logo.svg';
+import { Typography, Paragraph, Heading, TextLink } from '@contentful/forma-36-react-components';
 
 /** Gets the expireTime from local storage to determine if the token is expired */
 function tokenIsExpired() {
@@ -68,9 +71,27 @@ export default function AuthWrapper({ sdk }: Props) {
   } else {
     return (
       <div>
-        <div className={styles.background('#262627')}>
-          <div className={styles.body}>
-            <TypeformOAuth sdk={sdk} expireSoon={expireSoon} setToken={setToken} />
+        <div>
+          <div className={styles.background('#262627')}>
+            <div className={styles.body}>
+              <Typography>
+                <Heading>About Typeform</Heading>
+                <Paragraph className={styles.aboutP}>
+                  The{' '}
+                  <TextLink
+                    href="https://www.typeform.com/"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    Typeform
+                  </TextLink>{' '}
+                  app allows you to reference your forms from Typeform without leaving Contentful.
+                </Paragraph>
+              </Typography>
+              <TypeformOAuth sdk={sdk} expireSoon={expireSoon} setToken={setToken} />
+            </div>
+            <div className={styles.icon}>
+              <img src={logo} alt="typeform logo" />
+            </div>
           </div>
         </div>
       </div>

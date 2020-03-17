@@ -6,7 +6,10 @@ import {
   Paragraph,
   Typography,
   TextField,
-  TextLink
+  TextLink,
+  Select,
+  Option,
+  FormLabel
 } from '@contentful/forma-36-react-components';
 import TypeformAuth from '../Auth';
 import FieldSelector from './FieldSelector';
@@ -16,7 +19,9 @@ import {
   Hash,
   EditorInterface,
   InstallationParameters,
-  SelectedFields
+  SelectedFields,
+  WorkspaceOption,
+  WorkspacesResponse
 } from '../typings';
 import {
   getCompatibleFields,
@@ -36,7 +41,8 @@ interface Props {
 
 interface State {
   workspaceId: string;
-  accessToken: string;
+  accessToken: string | null;
+  workspaces: WorkspaceOption[];
   contentTypes: ContentType[];
   selectedContentTypes: string[];
   selectedFields: SelectedFields;
@@ -47,13 +53,14 @@ export class AppConfig extends React.Component<Props, State> {
   state: State = {
     contentTypes: [],
     compatibleFields: {},
+    workspaces: [],
     selectedContentTypes: [],
     selectedFields: {},
     workspaceId: '',
-    accessToken: ''
+    accessToken: window.localStorage.getItem('token') as string
   };
 
-  async componentDidMount() {
+  async componentWillMount() {
     const { sdk } = this.props;
 
     sdk.app.onConfigure(this.onAppConfigure);
@@ -61,12 +68,13 @@ export class AppConfig extends React.Component<Props, State> {
     const [contentTypesResponse, eisResponse, paramsResponse] = await Promise.all([
       sdk.space.getContentTypes(),
       sdk.space.getEditorInterfaces(),
-      sdk.app.getParameters()
+      sdk.app.getParameters(),
+      this.fetchWorkspaces()
     ]);
 
     const contentTypes = (contentTypesResponse as Hash).items as ContentType[];
     const editorInterfaces = (eisResponse as Hash).items as EditorInterface[];
-
+    console.log(this.state.workspaces);
     const compatibleFields = getCompatibleFields(contentTypes);
     const filteredContentTypes = contentTypes.filter(ct => {
       const fields = compatibleFields[ct.sys.id];
@@ -86,6 +94,24 @@ export class AppConfig extends React.Component<Props, State> {
       () => sdk.app.setReady()
     );
   }
+
+  fetchWorkspaces = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/workspaces/${this.state.accessToken}`);
+      const result: WorkspacesResponse = await response.json();
+      console.log(result);
+      this.setState({ workspaces: this.normalizeWorkspaceReponse(result) });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  normalizeWorkspaceReponse = (response: WorkspacesResponse) => {
+    return response.workspaces.items.map(workspace => ({
+      name: workspace.name,
+      id: workspace.id
+    }));
+  };
 
   onAppConfigure = () => {
     const { accessToken, workspaceId, contentTypes, selectedFields } = this.state;
@@ -143,17 +169,26 @@ export class AppConfig extends React.Component<Props, State> {
             <div>
               <Typography>
                 <Heading>Configuration</Heading>
-                <TextField
-                  required
-                  testId="workspaceId"
-                  name="workspaceId"
+                <FormLabel htmlFor="workspaceId" required>
+                  Select the Typeform workspace you want to connect
+                </FormLabel>
+                <Select
                   id="workspaceId"
-                  labelText="Typeform workspace ID"
+                  name="workspaceId"
+                  onChange={(event: any) => this.setWorkSpaceId(event.currentTarget.value)}
                   value={this.state.workspaceId}
-                  // @ts-ignore 2339
-                  onChange={e => this.setWorkSpaceId(e.target.value)}
-                  helpText="To get the workspace ID, go to your workspace in your Typeform Dashboard and copy the ID from the URL."
-                />
+                  data-test-id="typeform-select">
+                  <Option key="" value="">
+                    {this.state.workspaces.length === 0
+                      ? 'No workspaces available'
+                      : 'Choose workspace'}
+                  </Option>
+                  {this.state.workspaces.map(workspace => (
+                    <Option key={workspace.id} value={workspace.id}>
+                      {workspace.name}
+                    </Option>
+                  ))}
+                </Select>
               </Typography>
               <hr className={styles.splitter} />
               <Typography>

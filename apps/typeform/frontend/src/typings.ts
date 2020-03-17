@@ -33,6 +33,15 @@ export interface TypeFormResponse {
   };
 }
 
+export interface WorkspacesResponse {
+  workspaces: { items: WorkSpacePayload[]; page_count: number; total_items: number };
+}
+
+export interface WorkspaceOption {
+  name: string;
+  id: string;
+}
+
 interface TypeFormPayload {
   id: string;
   title: string;
@@ -49,6 +58,20 @@ interface TypeFormPayload {
   _links: {
     display: string;
   };
+}
+
+interface WorkSpacePayload {
+  default: boolean;
+  forms: {
+    count: 0;
+    href: string;
+  };
+  id: string;
+  name: string;
+  self: {
+    href: string;
+  };
+  shared: boolean;
 }
 
 export interface FormOption {
