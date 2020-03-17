@@ -5,6 +5,7 @@ const express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors');
 const handleForms = require('./forms-handler');
+const handleWorkspaces = require('./workspaces-handler');
 const fetchAccessToken = require('./fetch-access-token');
 
 const deps = {
@@ -19,6 +20,11 @@ app.use(cors());
 
 app.use('/forms', async (req, res) => {
   const { status, body } = await handleForms(req.method, req.path, deps);
+  res.status(status).send(body);
+});
+
+app.use('/workspaces', async (req, res) => {
+  const { status, body } = await handleWorkspaces(req.method, req.path, deps);
   res.status(status).send(body);
 });
 
