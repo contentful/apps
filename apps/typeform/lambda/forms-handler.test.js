@@ -10,4 +10,18 @@ describe('forms handler', () => {
     expect(status).toBe(405);
     expect(body).toEqual({ message: 'Method not allowed.' });
   });
+
+  test('returns 400 if fetching the forms fails', async () => {
+    const { status } = await handle(
+      'GET',
+      '/forms',
+      Object.assign({}, mocks, {
+        fetch: () => {
+          throw new Error('error');
+        }
+      })
+    );
+
+    expect(status).toBe(400);
+  });
 });
