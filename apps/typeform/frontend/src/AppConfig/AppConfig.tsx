@@ -8,7 +8,7 @@ import {
   TextField,
   TextLink
 } from '@contentful/forma-36-react-components';
-
+import TypeformAuth from '../Auth';
 import FieldSelector from './FieldSelector';
 import {
   CompatibleFields,
@@ -117,6 +117,7 @@ export class AppConfig extends React.Component<Props, State> {
 
   render() {
     const { contentTypes, compatibleFields, selectedFields } = this.state;
+    const { sdk } = this.props;
 
     return (
       <div>
@@ -152,18 +153,6 @@ export class AppConfig extends React.Component<Props, State> {
                   // @ts-ignore 2339
                   onChange={e => this.setWorkSpaceId(e.target.value)}
                   helpText="To get the workspace ID, go to your workspace in your Typeform Dashboard and copy the ID from the URL."
-                />
-                <TextField
-                  required
-                  testId="accessToken"
-                  name="accessToken"
-                  id="accessToken"
-                  className={styles.accessToken}
-                  labelText="Typeform access token"
-                  value={this.state.accessToken}
-                  // @ts-ignore 2339
-                  onChange={e => this.setAccessToken(e.target.value)}
-                  helpText="To get your access token go to your Typeform profile and create a new access token."
                 />
               </Typography>
               <hr className={styles.splitter} />

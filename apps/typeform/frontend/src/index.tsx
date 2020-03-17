@@ -9,8 +9,7 @@ import {
 } from 'contentful-ui-extensions-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
-import { AppConfig } from './AppConfig';
-import { AppAuthConfig } from './AppConfig/AppAuthConfig';
+import Authentication from './Auth';
 import { TypeFormField } from './FIeld/TypeFormField';
 import { TypeformPreviewWidget } from './TypeFormWidget';
 import './index.scss';
@@ -21,7 +20,7 @@ if (window.location.search.includes('token')) {
 } else {
   init(sdk => {
     if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-      render(<AppAuthConfig sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
+      render(<Authentication sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
     } else if (sdk.location.is(locations.LOCATION_DIALOG)) {
       render(
         <TypeformPreviewWidget sdk={sdk as DialogExtensionSDK} />,
