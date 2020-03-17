@@ -51,8 +51,11 @@ app.use('/callback', async (req, res) => {
   }
 
   const result = await response.json();
-  const { access_token, refresh_token, expires_in } = result;
-  res.sendStatus(200);
+  const { access_token, expires_in } = result;
+  res.set({
+    Location: `${state}?token=${access_token}&expiresIn=${expires_in}`
+  });
+  res.sendStatus(302);
 });
 
 app.use('/frontend', express.static(FRONTEND));

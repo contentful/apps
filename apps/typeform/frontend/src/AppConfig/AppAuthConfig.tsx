@@ -17,15 +17,17 @@ export function AppAuthConfig({ sdk }: Props) {
   const executeOauth = () => {
     const url = `https://api.typeform.com/oauth/authorize?&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
       OAUTH_REDIRECT_URI
-    )}&scope=forms:read+offline&state=${encodeURIComponent(window.location.href)}`;
+    )}&scope=forms:read&state=${encodeURIComponent(window.location.href)}`;
 
     const oauthWindow = window.open(
       url,
       'Typeform Contentful',
       'left=150,top=10,width=800,height=900'
     );
+
     window.addEventListener('message', ({ data }) => {
       const { token, error } = data;
+      console.log('HEY');
 
       if (error) {
         console.error('There was an error authenticating. Please refresh and try again.');
