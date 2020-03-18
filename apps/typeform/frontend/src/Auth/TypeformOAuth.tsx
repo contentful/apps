@@ -9,8 +9,12 @@ interface Props {
 }
 
 export function TypeformOAuth({ sdk, expireSoon, setToken }: Props) {
+  let oauthWindow: Window | null;
+
   useEffect(() => {
-    sdk.app.setReady();
+    sdk.app?.setReady();
+
+    return () => window.removeEventListener('message', handleTokenEvent);
   }, []);
 
   const executeOauth = () => {
@@ -20,30 +24,27 @@ export function TypeformOAuth({ sdk, expireSoon, setToken }: Props) {
       process.env.OAUTH_REDIRECT_URI as string
     )}&scope=forms:read+workspaces:read&state=${encodeURIComponent(window.location.href)}`;
 
-    const oauthWindow = window.open(
-      url,
-      'Typeform Contentful',
-      'left=150,top=10,width=800,height=900'
-    );
+    oauthWindow = window.open(url, 'Typeform Contentful', 'left=150,top=10,width=800,height=900');
 
-    window.addEventListener('message', ({ data }) => {
-      const { token, error } = data;
+    window.addEventListener('message', handleTokenEvent);
+  };
 
-      if (error) {
-        console.error('There was an error authenticating. Please refresh and try again.');
-      } else if (token) {
-        setToken(token);
-      }
+  const handleTokenEvent = ({ data }: any) => {
+    const { token, error } = data;
 
+    if (error) {
+      console.error('There was an error authenticating. Please refresh and try again.');
+    } else if (token) {
+      setToken(token);
       if (oauthWindow) {
         oauthWindow.close();
       }
-    });
+    }
   };
 
   return (
     <Button onClick={executeOauth} buttonType="primary">
-      {expireSoon ? 'Reauthenticate with Typeform' : 'Connect to Typeform'}
+      {expireSoon ? 'Reauthenticate with Typeform' : 'Sign in to Typeform'}
     </Button>
   );
 }

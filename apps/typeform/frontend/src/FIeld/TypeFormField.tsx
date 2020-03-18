@@ -1,18 +1,20 @@
 import React, { useEffect, useReducer } from 'react';
-import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { FieldExtensionSDK, AppExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { Select, Option, TextLink, Note, Tooltip } from '@contentful/forma-36-react-components';
 import { TypeFormResponse, FormOption, InstallationParameters } from '../typings';
+import { TypeformOAuth } from '../Auth/TypeformOAuth';
 import { styles } from './styles';
 // @ts-ignore 2307
 import logo from './typeform-icon.svg';
 
 interface Props {
-  sdk: FieldExtensionSDK;
+  sdk: FieldExtensionSDK & AppExtensionSDK;
 }
 
 enum ACTION_TYPES {
   INIT = 'INIT',
   UPDATE_VALUE = 'UPDATE_VALUE',
+  UPDATE_TOKEN = 'UPDATE_TOKEN',
   RESET = 'RESET',
   ERROR = 'ERROR'
 }
@@ -27,12 +29,18 @@ const initialState = {
     id: ''
   } as FormOption,
   hasStaleData: false,
+  token: window.localStorage.getItem('token'),
   forms: [] as FormOption[],
   loading: true
 };
 
 const isStaleData = (value: string, forms: FormOption[]): boolean => {
-  if (!value || forms.length === 0) {
+  if (value) {
+    if (forms.length === 0) {
+      return true;
+    }
+    return false;
+  } else {
     return false;
   }
   // If the currrent value was found in the fetched forms
@@ -44,10 +52,15 @@ const getSelectedForm = (value: string, forms: FormOption[]) => {
   return forms.find(form => form.href === value) || initialState.selectedForm;
 };
 
+const isUserAuthenticated = () => {
+  return window.localStorage.getItem('token') ? true : false;
+};
+
 export function TypeFormField({ sdk }: Props) {
-  const { workspaceId, accessToken } = sdk.parameters.installation as InstallationParameters;
+  const { workspaceId } = sdk.parameters.installation as InstallationParameters;
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { loading, forms, value, hasStaleData, selectedForm, error } = state;
+  const { loading, forms, value, hasStaleData, selectedForm, error, token } = state;
+  console.log(value);
 
   function reducer(
     state = initialState,
@@ -64,6 +77,7 @@ export function TypeFormField({ sdk }: Props) {
           selectedForm: getSelectedForm(currentFieldValue, forms),
           loading: false,
           forms,
+          error: false,
           hasStaleData
         };
       }
@@ -88,6 +102,15 @@ export function TypeFormField({ sdk }: Props) {
           selectedForm: initialState.selectedForm
         };
       }
+      case ACTION_TYPES.UPDATE_TOKEN: {
+        const { token } = action.payload;
+        return {
+          ...state,
+          loading: true,
+          error: false,
+          token
+        };
+      }
       case ACTION_TYPES.ERROR: {
         return { ...state, loading: false, error: true };
       }
@@ -100,7 +123,7 @@ export function TypeFormField({ sdk }: Props) {
     const fetchForms = async () => {
       try {
         const response = (await (
-          await fetch(`${process.env.LAMBDA_ENDPOINT}/forms/${workspaceId}/${accessToken}`)
+          await fetch(`${process.env.LAMBDA_ENDPOINT}/forms/${workspaceId}/${token}`)
         ).json()) as TypeFormResponse;
         const normalizedForms = normalizeFormResponse(response);
         dispatch({
@@ -114,10 +137,11 @@ export function TypeFormField({ sdk }: Props) {
         dispatch({ type: ACTION_TYPES.ERROR });
       }
     };
+    console.log('CALLING FETCH FORMS');
     fetchForms();
     // Start auto resizer to adjust field height
     sdk.window.startAutoResizer();
-  }, []);
+  }, [token]);
 
   const onChange = (event: any) => {
     const value = event.currentTarget.value;
@@ -144,6 +168,18 @@ export function TypeFormField({ sdk }: Props) {
       isPublic: form.settings.is_public
     }));
   };
+
+  if (!isUserAuthenticated()) {
+    return (
+      <TypeformOAuth
+        sdk={sdk as AppExtensionSDK}
+        expireSoon={false}
+        setToken={(token: string) =>
+          dispatch({ type: ACTION_TYPES.UPDATE_TOKEN, payload: { token } })
+        }
+      />
+    );
+  }
 
   if (loading) {
     return null;
@@ -210,7 +246,7 @@ export function TypeFormField({ sdk }: Props) {
       )}
       {hasStaleData && (
         <Note noteType="negative">
-          The typeform you have selected in Contentful no longer exists in typeform.{' '}
+          The typeform you have selected in Contentful no longer exists in your workspace.{' '}
           <TextLink onClick={() => dispatch({ type: ACTION_TYPES.RESET })}>Clear field</TextLink>.
         </Note>
       )}
