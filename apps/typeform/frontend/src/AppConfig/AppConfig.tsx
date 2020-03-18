@@ -59,7 +59,7 @@ export class AppConfig extends React.Component<Props, State> {
     accessToken: (window.localStorage.getItem('token') as string) || ''
   };
 
-  async componentWillMount() {
+  async componentDidMount() {
     const { sdk } = this.props;
 
     sdk.app.onConfigure(this.onAppConfigure);
@@ -99,7 +99,6 @@ export class AppConfig extends React.Component<Props, State> {
         `${process.env.LAMBDA_ENDPOINT}/workspaces/${this.state.accessToken}`
       );
       const result: WorkspacesResponse = await response.json();
-      console.log('SPACES', result);
       this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
     } catch (error) {
       this.props.sdk.notifier.error(error);
@@ -117,9 +116,15 @@ export class AppConfig extends React.Component<Props, State> {
     const { accessToken, workspaceId, contentTypes, selectedFields } = this.state;
     const parameters = { accessToken, workspaceId };
     const error = validateParameters(parameters);
+    const hasStaleWorkspaceIdSelected = !this.selectedWorkspaceIdIsValid();
 
     if (error) {
       this.props.sdk.notifier.error(error);
+      return false;
+    }
+
+    if (hasStaleWorkspaceIdSelected) {
+      this.props.sdk.notifier.error('Select a valid workspace.');
       return false;
     }
 
@@ -127,6 +132,10 @@ export class AppConfig extends React.Component<Props, State> {
       parameters: { accessToken, workspaceId },
       targetState: selectedFieldsToTargetState(contentTypes, selectedFields)
     };
+  };
+
+  selectedWorkspaceIdIsValid = (): boolean => {
+    return !!this.state.workspaces.find(workspace => workspace.id === this.state.workspaceId);
   };
 
   setWorkSpaceId = (id: string) => {
@@ -176,6 +185,7 @@ export class AppConfig extends React.Component<Props, State> {
                   id="workspaceId"
                   name="workspaceId"
                   onChange={(event: any) => this.setWorkSpaceId(event.currentTarget.value)}
+                  hasError={this.state.workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
                   value={this.state.workspaceId}
                   data-test-id="typeform-select">
                   <Option key="" value="">
