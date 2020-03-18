@@ -38,14 +38,16 @@ const isStaleData = (value: string, forms: FormOption[]): boolean => {
   if (value) {
     if (forms.length === 0) {
       return true;
+    } else {
+      if (forms.find(form => form.href === value)) {
+        return false;
+      } else {
+        return true;
+      }
     }
-    return false;
   } else {
     return false;
   }
-  // If the currrent value was found in the fetched forms
-  // we do not have stale data
-  return !forms.find(form => form.href === value);
 };
 
 const getSelectedForm = (value: string, forms: FormOption[]) => {
