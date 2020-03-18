@@ -10,7 +10,6 @@ import {
   Option,
   FormLabel
 } from '@contentful/forma-36-react-components';
-import TypeformAuth from '../Auth';
 import FieldSelector from './FieldSelector';
 import {
   CompatibleFields,
@@ -26,7 +25,7 @@ import {
   getCompatibleFields,
   editorInterfacesToSelectedFields,
   selectedFieldsToTargetState,
-  validateParamameters
+  validateParameters
 } from '../utils';
 
 import { styles } from './styles';
@@ -41,7 +40,7 @@ interface Props {
 
 interface State {
   workspaceId: string;
-  accessToken: string | null;
+  accessToken: string;
   workspaces: WorkspaceOption[];
   contentTypes: ContentType[];
   selectedContentTypes: string[];
@@ -57,10 +56,10 @@ export class AppConfig extends React.Component<Props, State> {
     selectedContentTypes: [],
     selectedFields: {},
     workspaceId: '',
-    accessToken: window.localStorage.getItem('token') as string
+    accessToken: (window.localStorage.getItem('token') as string) || ''
   };
 
-  async componentWillMount() {
+  async componentDidMount() {
     const { sdk } = this.props;
 
     sdk.app.onConfigure(this.onAppConfigure);
@@ -74,7 +73,6 @@ export class AppConfig extends React.Component<Props, State> {
 
     const contentTypes = (contentTypesResponse as Hash).items as ContentType[];
     const editorInterfaces = (eisResponse as Hash).items as EditorInterface[];
-    console.log(this.state.workspaces);
     const compatibleFields = getCompatibleFields(contentTypes);
     const filteredContentTypes = contentTypes.filter(ct => {
       const fields = compatibleFields[ct.sys.id];
@@ -101,14 +99,13 @@ export class AppConfig extends React.Component<Props, State> {
         `${process.env.LAMBDA_ENDPOINT}/workspaces/${this.state.accessToken}`
       );
       const result: WorkspacesResponse = await response.json();
-      console.log(result);
-      this.setState({ workspaces: this.normalizeWorkspaceReponse(result) });
+      this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
     } catch (error) {
-      console.error(error);
+      this.props.sdk.notifier.error(error);
     }
   };
 
-  normalizeWorkspaceReponse = (response: WorkspacesResponse) => {
+  normalizeWorkspaceResponse = (response: WorkspacesResponse) => {
     return response.workspaces.items.map(workspace => ({
       name: workspace.name,
       id: workspace.id
@@ -118,10 +115,16 @@ export class AppConfig extends React.Component<Props, State> {
   onAppConfigure = () => {
     const { accessToken, workspaceId, contentTypes, selectedFields } = this.state;
     const parameters = { accessToken, workspaceId };
-    const error = validateParamameters(parameters);
+    const error = validateParameters(parameters);
+    const hasStaleWorkspaceIdSelected = !this.selectedWorkspaceIdIsValid();
 
     if (error) {
       this.props.sdk.notifier.error(error);
+      return false;
+    }
+
+    if (hasStaleWorkspaceIdSelected) {
+      this.props.sdk.notifier.error('Select a valid workspace.');
       return false;
     }
 
@@ -129,6 +132,10 @@ export class AppConfig extends React.Component<Props, State> {
       parameters: { accessToken, workspaceId },
       targetState: selectedFieldsToTargetState(contentTypes, selectedFields)
     };
+  };
+
+  selectedWorkspaceIdIsValid = (): boolean => {
+    return !!this.state.workspaces.find(workspace => workspace.id === this.state.workspaceId);
   };
 
   setWorkSpaceId = (id: string) => {
@@ -145,7 +152,6 @@ export class AppConfig extends React.Component<Props, State> {
 
   render() {
     const { contentTypes, compatibleFields, selectedFields } = this.state;
-    const { sdk, expireSoon } = this.props;
 
     return (
       <div>
@@ -179,6 +185,7 @@ export class AppConfig extends React.Component<Props, State> {
                   id="workspaceId"
                   name="workspaceId"
                   onChange={(event: any) => this.setWorkSpaceId(event.currentTarget.value)}
+                  hasError={this.state.workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
                   value={this.state.workspaceId}
                   data-test-id="typeform-select">
                   <Option key="" value="">
