@@ -10,7 +10,7 @@ import {
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import Authentication from './Auth';
-import { TypeFormField } from './FIeld/TypeFormField';
+import { TypeFormField } from './Field/TypeFormField';
 import { TypeformPreviewWidget } from './TypeFormWidget';
 import './index.scss';
 import processTokenCallback from './processTokenCallback';
