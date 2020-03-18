@@ -46,6 +46,10 @@ export const styles = {
       margin: `${tokens.spacingXl} 0`
     }
   }),
+  authConfig: css({
+    marginLeft: tokens.spacing4Xl,
+    marginRight: tokens.spacing4Xl
+  }),
   accessToken: css({
     marginTop: tokens.spacingL
   })
