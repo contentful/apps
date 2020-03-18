@@ -1,7 +1,7 @@
 'use strict';
 
-const fetchAccessToken = require('./fetch-access-token');
-const mocks = require('./mocks');
+const fetchAccessToken = require('../fetch-access-token');
+const mocks = require('../mocks');
 
 describe('auth handler', () => {
   test('throws when token exchange fails', async () => {

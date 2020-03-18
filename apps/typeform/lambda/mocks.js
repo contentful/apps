@@ -5,17 +5,6 @@ const fetch = jest.fn().mockResolvedValue({
   arrayBuffer: jest.fn().mockResolvedValue('SOME_ARR_BUFF')
 });
 
-const documentClient = {
-  update: jest.fn().mockReturnValue({
-    promise: jest.fn().mockResolvedValue({
-      Attributes: {
-        reqs: 7
-      }
-    })
-  })
-};
-
 module.exports = {
-  fetch,
-  documentClient
+  fetch
 };

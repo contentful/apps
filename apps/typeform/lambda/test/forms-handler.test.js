@@ -1,7 +1,7 @@
 'use strict';
 
-const handle = require('./forms-handler');
-const mocks = require('./mocks');
+const handle = require('../forms-handler');
+const mocks = require('../mocks');
 
 describe('forms handler', () => {
   test('expects HTTP GET', async () => {
