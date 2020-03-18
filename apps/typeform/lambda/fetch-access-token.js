@@ -1,15 +1,11 @@
-
 'use strict';
 
-const CLIENT_ID = '8DAtABe5rFEnpJJw8Uco2e65ewrZq6kALSfCBe4N11LW';
-const CLIENT_SECRET = 'Ded8DJgEQ4VE1R1bc4FriMpGhLuo3gsrVtS7raW5SdBc';
-const OAUTH_URL = 'http://localhost:3000/callback';
 const ENDPOINT = 'https://api.typeform.com/oauth/token';
 
 module.exports = async (code, { fetch }) => {
   const body =
-    `grant_type=authorization_code&code=${code}&client_id=${CLIENT_ID}&` +
-    `client_secret=${CLIENT_SECRET}&redirect_uri=${OAUTH_URL}`;
+    `grant_type=authorization_code&code=${code}&client_id=${process.env.CLIENT_ID}&` +
+    `client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${process.env.OAUTH_REDIRECT_URI}`;
 
   const response = await fetch(ENDPOINT, {
     method: 'POST',

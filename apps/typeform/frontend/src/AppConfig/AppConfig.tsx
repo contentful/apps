@@ -5,7 +5,6 @@ import {
   Heading,
   Paragraph,
   Typography,
-  TextField,
   TextLink,
   Select,
   Option,
@@ -37,6 +36,7 @@ import logo from './config-screen-logo.svg';
 
 interface Props {
   sdk: AppExtensionSDK;
+  expireSoon: boolean;
 }
 
 interface State {
@@ -97,7 +97,9 @@ export class AppConfig extends React.Component<Props, State> {
 
   fetchWorkspaces = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/workspaces/${this.state.accessToken}`);
+      const response = await fetch(
+        `${process.env.LAMBDA_ENDPOINT}/workspaces/${this.state.accessToken}`
+      );
       const result: WorkspacesResponse = await response.json();
       console.log(result);
       this.setState({ workspaces: this.normalizeWorkspaceReponse(result) });
@@ -143,7 +145,7 @@ export class AppConfig extends React.Component<Props, State> {
 
   render() {
     const { contentTypes, compatibleFields, selectedFields } = this.state;
-    const { sdk } = this.props;
+    const { sdk, expireSoon } = this.props;
 
     return (
       <div>
@@ -151,6 +153,7 @@ export class AppConfig extends React.Component<Props, State> {
         <div className={styles.body}>
           <div>
             <div>
+              {}
               <Typography>
                 <Heading>About Typeform</Heading>
                 <Paragraph className={styles.aboutP}>

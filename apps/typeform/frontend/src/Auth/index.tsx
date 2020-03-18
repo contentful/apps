@@ -67,7 +67,7 @@ export default function AuthWrapper({ sdk }: Props) {
   };
 
   if (token) {
-    return <AppConfig sdk={sdk} />;
+    return <AppConfig sdk={sdk} expireSoon={expireSoon} />;
   } else {
     return (
       <div>
@@ -75,7 +75,7 @@ export default function AuthWrapper({ sdk }: Props) {
           <div className={styles.background('#262627')}>
             <div className={styles.body}>
               <Typography>
-                <Heading>About Typeform</Heading>
+                <Heading>Connect to Typeform</Heading>
                 <Paragraph className={styles.aboutP}>
                   The{' '}
                   <TextLink

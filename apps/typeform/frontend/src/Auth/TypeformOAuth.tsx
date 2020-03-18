@@ -8,17 +8,16 @@ interface Props {
   setToken: (token: string) => void;
 }
 
-const CLIENT_ID = '8DAtABe5rFEnpJJw8Uco2e65ewrZq6kALSfCBe4N11LW';
-const OAUTH_REDIRECT_URI = 'http://localhost:3000/callback';
-
 export function TypeformOAuth({ sdk, expireSoon, setToken }: Props) {
   useEffect(() => {
     sdk.app.setReady();
   }, []);
 
   const executeOauth = () => {
-    const url = `https://api.typeform.com/oauth/authorize?&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
-      OAUTH_REDIRECT_URI
+    const url = `https://api.typeform.com/oauth/authorize?&client_id=${
+      process.env.CLIENT_ID
+    }&redirect_uri=${encodeURIComponent(
+      process.env.OAUTH_REDIRECT_URI as string
     )}&scope=forms:read+workspaces:read&state=${encodeURIComponent(window.location.href)}`;
 
     const oauthWindow = window.open(

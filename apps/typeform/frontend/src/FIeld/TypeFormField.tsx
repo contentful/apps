@@ -100,10 +100,9 @@ export function TypeFormField({ sdk }: Props) {
     const fetchForms = async () => {
       try {
         const response = (await (
-          await fetch(`http://localhost:3000/forms/${workspaceId}/${accessToken}`)
+          await fetch(`${process.env.LAMBDA_ENDPOINT}/forms/${workspaceId}/${accessToken}`)
         ).json()) as TypeFormResponse;
         const normalizedForms = normalizeFormResponse(response);
-        console.log('got', response);
         dispatch({
           type: ACTION_TYPES.INIT,
           payload: {
