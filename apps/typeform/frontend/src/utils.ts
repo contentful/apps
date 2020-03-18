@@ -56,7 +56,7 @@ export function selectedFieldsToTargetState(
   };
 }
 
-export function validateParamameters({
+export function validateParameters({
   workspaceId,
   accessToken
 }: TypeFormParameters): string | null {
