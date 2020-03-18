@@ -59,7 +59,7 @@ export class AppConfig extends React.Component<Props, State> {
     accessToken: (window.localStorage.getItem('token') as string) || ''
   };
 
-  async componentDidMount() {
+  async componentWillMount() {
     const { sdk } = this.props;
 
     sdk.app.onConfigure(this.onAppConfigure);
