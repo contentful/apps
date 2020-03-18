@@ -56,6 +56,10 @@ export function selectedFieldsToTargetState(
   };
 }
 
+export const isUserAuthenticated = () => {
+  return window.localStorage.getItem('token') ? true : false;
+};
+
 export function validateParameters({
   workspaceId,
   accessToken

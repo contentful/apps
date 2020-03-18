@@ -4,11 +4,11 @@ import { Button } from '@contentful/forma-36-react-components';
 
 interface Props {
   sdk: AppExtensionSDK;
-  expireSoon: boolean;
+  expireSoon?: boolean;
   setToken: (token: string) => void;
 }
 
-export function TypeformOAuth({ sdk, expireSoon, setToken }: Props) {
+export function TypeformOAuth({ sdk, expireSoon, setToken, ...rest }: Props) {
   let oauthWindow: Window | null;
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export function TypeformOAuth({ sdk, expireSoon, setToken }: Props) {
   };
 
   return (
-    <Button onClick={executeOauth} buttonType="primary">
+    <Button onClick={executeOauth} buttonType="primary" {...rest}>
       {expireSoon ? 'Reauthenticate with Typeform' : 'Sign in to Typeform'}
     </Button>
   );

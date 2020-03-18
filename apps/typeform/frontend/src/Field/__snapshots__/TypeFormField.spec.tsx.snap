@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TypeFormField should render successfully 1`] = `
+exports[`TypeFormField should render successfully when the user is signed in 1`] = `
 <div>
   <div
     class="css-1cimf61"
@@ -79,7 +79,7 @@ exports[`TypeFormField should render successfully 1`] = `
     </div>
     <div>
       <div>
-        The typeform you have selected in Contentful no longer exists in typeform.
+        The typeform you have selected in Contentful no longer exists in your workspace.
          
         <button
           class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
@@ -97,6 +97,27 @@ exports[`TypeFormField should render successfully 1`] = `
       </div>
     </div>
   </div>
+</div>
+`;
+
+exports[`TypeFormField should render the auth button when the user is not authenticated 1`] = `
+<div>
+  <button
+    class="Button__Button___1ZfFj a11y__focus-border--default___60AXp Button__Button--primary___JImeO"
+    data-test-id="typeform-auth"
+    type="button"
+  >
+    <span
+      class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+      tabindex="-1"
+    >
+      <span
+        class="Button__Button__label___3tcOj"
+      >
+        Sign in to Typeform
+      </span>
+    </span>
+  </button>
 </div>
 `;
 

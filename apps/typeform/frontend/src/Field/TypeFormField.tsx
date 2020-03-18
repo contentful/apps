@@ -6,6 +6,7 @@ import { TypeformOAuth } from '../Auth/TypeformOAuth';
 import { styles } from './styles';
 // @ts-ignore 2307
 import logo from './typeform-icon.svg';
+import { isUserAuthenticated } from '../utils';
 
 interface Props {
   sdk: FieldExtensionSDK & AppExtensionSDK;
@@ -52,10 +53,6 @@ const isStaleData = (value: string, forms: FormOption[]): boolean => {
 
 const getSelectedForm = (value: string, forms: FormOption[]) => {
   return forms.find(form => form.href === value) || initialState.selectedForm;
-};
-
-const isUserAuthenticated = () => {
-  return window.localStorage.getItem('token') ? true : false;
 };
 
 export function TypeFormField({ sdk }: Props) {
@@ -139,7 +136,6 @@ export function TypeFormField({ sdk }: Props) {
         dispatch({ type: ACTION_TYPES.ERROR });
       }
     };
-    console.log('CALLING FETCH FORMS');
     fetchForms();
     // Start auto resizer to adjust field height
     sdk.window.startAutoResizer();
@@ -174,6 +170,7 @@ export function TypeFormField({ sdk }: Props) {
   if (!isUserAuthenticated()) {
     return (
       <TypeformOAuth
+        data-test-id="typeform-auth"
         sdk={sdk as AppExtensionSDK}
         expireSoon={false}
         setToken={(token: string) =>

@@ -27,7 +27,10 @@ if (window.location.search.includes('token')) {
         document.getElementById('root')
       );
     } else {
-      render(<TypeFormField sdk={sdk as FieldExtensionSDK} />, document.getElementById('root'));
+      render(
+        <TypeFormField sdk={sdk as AppExtensionSDK & FieldExtensionSDK} />,
+        document.getElementById('root')
+      );
     }
   });
 }
