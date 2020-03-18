@@ -133,6 +133,22 @@ header img {
   }
 }
 
+.search-projects {
+  position: relative;
+  width: 50%;
+}
+
+.search-projects-results {
+  position: absolute;
+  width: 100%;
+  max-height: 600px;
+  overflow: auto;
+}
+
+.search-projects-result {
+  padding: 10px 8px;
+}
+
 .app {
   .body {
     height: auto;
