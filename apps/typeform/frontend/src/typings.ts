@@ -87,7 +87,7 @@ export interface EditorInterface {
 }
 
 export interface TypeFormParameters {
-  workspaceId: string;
+  selectedWorkspaceId: string;
   accessToken: string;
 }
 

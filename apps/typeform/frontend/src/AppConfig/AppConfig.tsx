@@ -39,7 +39,7 @@ interface Props {
 }
 
 interface State {
-  workspaceId: string;
+  selectedWorkspaceId: string;
   accessToken: string;
   workspaces: WorkspaceOption[];
   contentTypes: ContentType[];
@@ -55,7 +55,7 @@ export class AppConfig extends React.Component<Props, State> {
     workspaces: [],
     selectedContentTypes: [],
     selectedFields: {},
-    workspaceId: '',
+    selectedWorkspaceId: '',
     accessToken: (window.localStorage.getItem('token') as string) || ''
   };
 
@@ -83,8 +83,7 @@ export class AppConfig extends React.Component<Props, State> {
 
     this.setState(
       {
-        accessToken: get(parameters, ['accessToken'], ''),
-        workspaceId: get(parameters, ['workspaceId'], ''),
+        selectedWorkspaceId: get(parameters, ['selectedWorkspaceId'], ''),
         compatibleFields,
         contentTypes: filteredContentTypes,
         selectedFields: editorInterfacesToSelectedFields(editorInterfaces, sdk.ids.app)
@@ -113,8 +112,8 @@ export class AppConfig extends React.Component<Props, State> {
   };
 
   onAppConfigure = () => {
-    const { accessToken, workspaceId, contentTypes, selectedFields } = this.state;
-    const parameters = { accessToken, workspaceId };
+    const { accessToken, selectedWorkspaceId, contentTypes, selectedFields } = this.state;
+    const parameters = { selectedWorkspaceId, accessToken };
     const error = validateParameters(parameters);
     const hasStaleWorkspaceIdSelected = !this.selectedWorkspaceIdIsValid();
 
@@ -129,17 +128,19 @@ export class AppConfig extends React.Component<Props, State> {
     }
 
     return {
-      parameters: { workspaceId },
+      parameters: { selectedWorkspaceId },
       targetState: selectedFieldsToTargetState(contentTypes, selectedFields)
     };
   };
 
   selectedWorkspaceIdIsValid = (): boolean => {
-    return !!this.state.workspaces.find(workspace => workspace.id === this.state.workspaceId);
+    return !!this.state.workspaces.find(
+      workspace => workspace.id === this.state.selectedWorkspaceId
+    );
   };
 
   setWorkSpaceId = (id: string) => {
-    this.setState({ workspaceId: id.trim() });
+    this.setState({ selectedWorkspaceId: id.trim() });
   };
 
   setAccessToken = (token: string) => {
@@ -151,7 +152,13 @@ export class AppConfig extends React.Component<Props, State> {
   };
 
   render() {
-    const { contentTypes, compatibleFields, selectedFields } = this.state;
+    const {
+      contentTypes,
+      compatibleFields,
+      selectedFields,
+      selectedWorkspaceId,
+      workspaces
+    } = this.state;
 
     return (
       <div>
@@ -185,8 +192,8 @@ export class AppConfig extends React.Component<Props, State> {
                   id="workspaceId"
                   name="workspaceId"
                   onChange={(event: any) => this.setWorkSpaceId(event.currentTarget.value)}
-                  hasError={this.state.workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
-                  value={this.state.workspaceId}
+                  hasError={workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
+                  value={selectedWorkspaceId}
                   data-test-id="typeform-select">
                   <Option key="" value="">
                     {this.state.workspaces.length === 0

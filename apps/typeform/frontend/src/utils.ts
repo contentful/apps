@@ -85,10 +85,10 @@ export const isUserAuthenticated = () => {
 };
 
 export function validateParameters({
-  workspaceId,
+  selectedWorkspaceId,
   accessToken
 }: TypeFormParameters): string | null {
-  if (!workspaceId.length || typeof workspaceId !== 'string') {
+  if (!selectedWorkspaceId.length || typeof selectedWorkspaceId !== 'string') {
     return 'Workspace ID is invalid!';
   }
   if (!accessToken.length || typeof accessToken !== 'string') {

@@ -56,10 +56,9 @@ const getSelectedForm = (value: string, forms: FormOption[]) => {
 };
 
 export function TypeFormField({ sdk }: Props) {
-  const { workspaceId } = sdk.parameters.installation as InstallationParameters;
+  const { selectedWorkspaceId } = sdk.parameters.installation as InstallationParameters;
   const [state, dispatch] = useReducer(reducer, initialState);
   const { loading, forms, value, hasStaleData, selectedForm, error, token } = state;
-  console.log(value);
 
   function reducer(
     state = initialState,
@@ -122,7 +121,7 @@ export function TypeFormField({ sdk }: Props) {
     const fetchForms = async () => {
       try {
         const response = (await (
-          await fetch(`${process.env.LAMBDA_ENDPOINT}/forms/${workspaceId}/${token}`)
+          await fetch(`${process.env.LAMBDA_ENDPOINT}/forms/${selectedWorkspaceId}/${token}`)
         ).json()) as TypeFormResponse;
         const normalizedForms = normalizeFormResponse(response);
         dispatch({
