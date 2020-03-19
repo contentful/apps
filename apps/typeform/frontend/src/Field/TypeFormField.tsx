@@ -120,14 +120,17 @@ export function TypeFormField({ sdk }: Props) {
   useEffect(() => {
     const fetchForms = async () => {
       try {
-        const response = (await (
-          await fetch(`${process.env.LAMBDA_ENDPOINT}/forms/${selectedWorkspaceId}/${token}`, {
+        const response = await fetch(
+          `${process.env.LAMBDA_ENDPOINT}/forms/${selectedWorkspaceId}`,
+          {
             headers: {
               Authorization: `Bearer ${token}`
             }
-          })
-        ).json()) as TypeFormResponse;
-        const normalizedForms = normalizeFormResponse(response);
+          }
+        );
+
+        const result = (await response.json()) as TypeFormResponse;
+        const normalizedForms = normalizeFormResponse(result);
         dispatch({
           type: ACTION_TYPES.INIT,
           payload: {
