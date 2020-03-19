@@ -4,6 +4,7 @@ import { AppExtensionSDK, CollectionResponse } from 'contentful-ui-extensions-sd
 import {
   Heading,
   Paragraph,
+  Note,
   Typography,
   TextField,
   Form
@@ -227,10 +228,10 @@ export default class AppConfig extends React.Component<Props, State> {
                 This app can only be used with <strong>Short text</strong> or{' '}
                 <strong>Short text, list</strong> fields.
               </Paragraph>
-              <Paragraph>
+              <Note noteType="warning">
                 There are <strong>no content types with Short text or Short text, list</strong>{' '}
-                fields in this environment. You can add one here later.
-              </Paragraph>
+                fields in this environment. You can add one in your content model and assign it to the app here.
+              </Note>
             </>
           )}
           <FieldSelector
