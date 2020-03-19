@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { Button } from '@contentful/forma-36-react-components';
+import { BASE_URL } from '../constants';
 
 interface Props {
-  sdk: AppExtensionSDK;
+  sdk?: AppExtensionSDK;
   expireSoon?: boolean;
   setToken: (token: string) => void;
 }
@@ -12,13 +13,16 @@ export function TypeformOAuth({ sdk, expireSoon, setToken, ...rest }: Props) {
   let oauthWindow: Window | null;
 
   useEffect(() => {
-    sdk.app?.setReady();
+    if (sdk) {
+      // we are on the config screen
+      sdk.app.setReady();
+    }
 
     return () => window.removeEventListener('message', handleTokenEvent);
   }, []);
 
   const executeOauth = () => {
-    const url = `https://api.typeform.com/oauth/authorize?&client_id=${
+    const url = `${BASE_URL}/oauth/authorize?&client_id=${
       process.env.CLIENT_ID
     }&redirect_uri=${encodeURIComponent(
       process.env.OAUTH_REDIRECT_URI as string

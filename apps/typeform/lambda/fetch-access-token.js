@@ -16,12 +16,10 @@ module.exports = async (code, { fetch }) => {
     body
   });
 
-  if (response.status !== 200) {
+  if (!response.ok) {
     console.error('Typeform token exchange failed, got response:', response.status);
     throw new Error('Typeform token exchange failed');
   }
 
-  const result = await response.json();
-
-  return result;
+  return response.json();
 };

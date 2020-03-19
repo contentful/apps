@@ -177,8 +177,6 @@ export function TypeFormField({ sdk }: Props) {
     return (
       <TypeformOAuth
         data-test-id="typeform-auth"
-        sdk={sdk as AppExtensionSDK}
-        expireSoon={false}
         setToken={(token: string) =>
           dispatch({ type: ACTION_TYPES.UPDATE_TOKEN, payload: { token } })
         }
@@ -217,7 +215,7 @@ export function TypeFormField({ sdk }: Props) {
         <img src={logo} className={styles.logo} />
         <Select onChange={onChange} value={value} data-test-id="typeform-select">
           <Option key="" value="">
-            {forms.length === 0 ? 'No forms available' : 'Choose typeform'}
+            {forms.length === 0 ? 'No forms available' : 'Choose a typeform'}
           </Option>
           {forms.map(form => (
             <Option key={form.id} value={form.href}>

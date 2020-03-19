@@ -85,7 +85,7 @@ export const isUserAuthenticated = () => {
 };
 
 export function validateParameters({ selectedWorkspaceId }: TypeFormParameters): string | null {
-  if (!selectedWorkspaceId.length || typeof selectedWorkspaceId !== 'string') {
+  if (typeof selectedWorkspaceId !== 'string' || !selectedWorkspaceId.length) {
     return 'Please select a valid Typeform workspace';
   }
   return null;

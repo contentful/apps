@@ -27,7 +27,6 @@ import {
   selectedFieldsToTargetState,
   validateParameters
 } from '../utils';
-
 import { styles } from './styles';
 
 // @ts-ignore 2307
@@ -200,9 +199,7 @@ export class AppConfig extends React.Component<Props, State> {
                   value={selectedWorkspaceId}
                   data-test-id="typeform-select">
                   <Option key="" value="">
-                    {this.state.workspaces.length === 0
-                      ? 'No workspaces available'
-                      : 'Choose workspace'}
+                    {workspaces.length === 0 ? 'No workspaces available' : 'Choose workspace'}
                   </Option>
                   {workspaces.map(workspace => (
                     <Option key={workspace.id} value={workspace.id}>
