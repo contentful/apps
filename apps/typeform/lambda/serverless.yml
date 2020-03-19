@@ -28,12 +28,13 @@ provider:
 package:
   exclude:
     - .git/**
-    - '**/*.ts'
     - node_modules/typeform-frontend/node_modules/**
 
 functions:
   app:
     environment:
+      CLIENT_ID: ${env:TYPEFORM_CLIENT_ID}
+      CLIENT_SECRET: ${env:TYPEFORM_CLIENT_SECRET}
     handler: index.handler
     events:
       - http:
