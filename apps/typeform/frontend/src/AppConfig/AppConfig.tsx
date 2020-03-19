@@ -93,7 +93,7 @@ export class AppConfig extends React.Component<Props, State> {
 
   fetchWorkspaces = async () => {
     try {
-      const response = await fetch(`${process.env.LAMBDA_ENDPOINT}/workspaces`, {
+      const response = await fetch(`/workspaces`, {
         headers: {
           Authorization: `Bearer ${this.state.accessToken}`
         }

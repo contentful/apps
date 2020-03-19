@@ -34,8 +34,8 @@ export function TypeformOAuth({
     const url = `${BASE_URL}/oauth/authorize?&client_id=${
       process.env.CLIENT_ID
     }&redirect_uri=${encodeURIComponent(
-      process.env.OAUTH_REDIRECT_URI as string
-    )}&scope=forms:read+workspaces:read&state=${encodeURIComponent(window.location.href)}`;
+      `${window.location.origin}/callback`
+    )}&scope=forms:read+workspaces:read`;
 
     oauthWindow = window.open(url, 'Typeform Contentful', 'left=150,top=10,width=800,height=900');
 

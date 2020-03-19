@@ -3,10 +3,10 @@
 const { BASE_URL } = require('./constants');
 const ENDPOINT = `${BASE_URL}/oauth/token`;
 
-module.exports = async (code, { fetch }) => {
+module.exports = async (code, origin, { fetch }) => {
   const body =
     `grant_type=authorization_code&code=${code}&client_id=${process.env.CLIENT_ID}&` +
-    `client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${process.env.OAUTH_REDIRECT_URI}`;
+    `client_secret=${process.env.CLIENT_SECRET}&redirect_uri=${origin}/callback`;
 
   const response = await fetch(ENDPOINT, {
     method: 'POST',
