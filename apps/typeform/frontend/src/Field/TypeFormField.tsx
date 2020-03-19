@@ -186,8 +186,8 @@ export function TypeFormField({ sdk }: Props) {
   if (error) {
     return (
       <Note noteType="negative">
-        We could not fetch your typeforms. Please make sure you are using a valid workspace ID and
-        access token.
+        We could not fetch your typeforms. Please make sure you have selected a valid Typeform
+        workspace.
       </Note>
     );
   }

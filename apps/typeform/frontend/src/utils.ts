@@ -84,15 +84,9 @@ export const isUserAuthenticated = () => {
   return window.localStorage.getItem('token') ? true : false;
 };
 
-export function validateParameters({
-  selectedWorkspaceId,
-  accessToken
-}: TypeFormParameters): string | null {
+export function validateParameters({ selectedWorkspaceId }: TypeFormParameters): string | null {
   if (!selectedWorkspaceId.length || typeof selectedWorkspaceId !== 'string') {
-    return 'Workspace ID is invalid!';
-  }
-  if (!accessToken.length || typeof accessToken !== 'string') {
-    return 'Access token is invalid!';
+    return 'Please select a valid Typeform workspace';
   }
   return null;
 }

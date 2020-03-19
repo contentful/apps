@@ -186,7 +186,7 @@ export class AppConfig extends React.Component<Props, State> {
               <Typography>
                 <Heading>Configuration</Heading>
                 <FormLabel htmlFor="workspaceId" required>
-                  Select the Typeform workspace you want to connect
+                  Typeform workspace
                 </FormLabel>
                 <Select
                   id="workspaceId"
