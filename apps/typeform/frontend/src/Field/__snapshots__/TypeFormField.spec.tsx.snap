@@ -20,7 +20,7 @@ exports[`TypeFormField should render successfully when the user is signed in 1`]
           data-test-id="cf-ui-select-option"
           value=""
         >
-          Choose typeform
+          Choose a typeform
         </option>
         <option
           data-test-id="cf-ui-select-option"
@@ -149,7 +149,7 @@ exports[`TypeFormField should render the error screen if something goes wrong 1`
     </div>
     <div>
       <div>
-        We could not fetch your typeforms. Please make sure you are using a valid workspace ID and access token.
+        We could not fetch your typeforms. Please make sure you have selected a valid Typeform workspace and are logged in.
       </div>
     </div>
   </div>
