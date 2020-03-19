@@ -101,8 +101,10 @@ export class AppConfig extends React.Component<Props, State> {
       });
       const result: WorkspacesResponse = await response.json();
       this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
-    } catch (error) {
-      this.props.sdk.notifier.error(error);
+    } catch (_error) {
+      this.props.sdk.notifier.error(
+        'There was a problem while fetching your Typeform workspaces. Please try again.'
+      );
     }
   };
 
@@ -202,7 +204,7 @@ export class AppConfig extends React.Component<Props, State> {
                       ? 'No workspaces available'
                       : 'Choose workspace'}
                   </Option>
-                  {this.state.workspaces.map(workspace => (
+                  {workspaces.map(workspace => (
                     <Option key={workspace.id} value={workspace.id}>
                       {workspace.name}
                     </Option>
