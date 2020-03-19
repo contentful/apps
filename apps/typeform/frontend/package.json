@@ -36,21 +36,13 @@
     "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
-    "configure": "contentful space use && contentful space environment use",
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
-    "deploy": "npm run build && contentful extension update --force",
-    "login": "contentful login",
-    "logout": "contentful logout",
-    "help": "contentful-extension-scripts help",
     "test": "contentful-extension-scripts test --env=jsdom",
-    "test:watch": "contentful-extension-scripts test --watch --env=jsdom",
-    "test:coverage": "contentful-extension-scripts test --coverage --env=jsdom"
+    "test:watch": "contentful-extension-scripts test --watch --env=jsdom"
   },
   "browserslist": [
-    "last 2 versions",
-    "IE >= 11",
-    "not IE 10"
+    "last 2 versions"
   ],
   "jest": {
     "collectCoverageFrom": [
