@@ -135,7 +135,6 @@ export function TypeFormField({ sdk }: Props) {
           }
         });
       } catch (error) {
-        console.error(error);
         dispatch({ type: ACTION_TYPES.ERROR });
       }
     };
