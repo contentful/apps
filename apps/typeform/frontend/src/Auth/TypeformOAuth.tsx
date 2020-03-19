@@ -43,7 +43,7 @@ export function TypeformOAuth({ sdk, expireSoon, setToken, ...rest }: Props) {
   };
 
   return (
-    <Button onClick={executeOauth} buttonType="primary" {...rest} isFullWidth>
+    <Button onClick={executeOauth} buttonType="primary" {...rest}>
       {expireSoon ? 'Reauthenticate with Typeform' : 'Sign in to Typeform'}
     </Button>
   );

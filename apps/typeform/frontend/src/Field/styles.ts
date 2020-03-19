@@ -30,7 +30,7 @@ export const styles = {
   }),
   previewButton: (disabled: boolean) =>
     css({
-      marginRight: tokens.spacingL,
+      marginRight: tokens.spacingS,
       button: {
         display: 'flex'
       },
