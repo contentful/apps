@@ -1,16 +1,17 @@
 'use strict';
 
-const fetchWorkspaces = async (method, path, { fetch }) => {
+const { BASE_URL } = require('./constants');
+
+const fetchWorkspaces = async (method, _path, token, { fetch }) => {
   if (method !== 'GET') {
     return {
       status: 405,
       body: { message: 'Method not allowed.' }
     };
   }
-  const [, accessToken] = path.split('/');
-  const response = await fetch('https://api.typeform.com/workspaces', {
+  const response = await fetch(`${BASE_URL}/workspaces`, {
     headers: {
-      Authorization: 'Bearer ' + accessToken
+      Authorization: 'Bearer ' + token
     }
   });
 

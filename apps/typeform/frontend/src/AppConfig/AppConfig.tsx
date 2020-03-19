@@ -94,9 +94,11 @@ export class AppConfig extends React.Component<Props, State> {
 
   fetchWorkspaces = async () => {
     try {
-      const response = await fetch(
-        `${process.env.LAMBDA_ENDPOINT}/workspaces/${this.state.accessToken}`
-      );
+      const response = await fetch(`${process.env.LAMBDA_ENDPOINT}/workspaces`, {
+        headers: {
+          Authorization: `Bearer ${this.state.accessToken}`
+        }
+      });
       const result: WorkspacesResponse = await response.json();
       this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
     } catch (error) {

@@ -19,12 +19,22 @@ const FRONTEND = path.dirname(require.resolve('typeform-frontend'));
 app.use(cors());
 
 app.use('/forms', async (req, res) => {
-  const { status, body } = await handleForms(req.method, req.path, deps);
+  const { authorization } = req.headers;
+  if (!authorization) {
+    res.status(401).send('Unauthorized');
+  }
+  const [, token] = authorization.split(' ');
+  const { status, body } = await handleForms(req.method, req.path, token, deps);
   res.status(status).send(body);
 });
 
 app.use('/workspaces', async (req, res) => {
-  const { status, body } = await handleWorkspaces(req.method, req.path, deps);
+  const { authorization } = req.headers;
+  if (!authorization) {
+    res.status(401).send('Unauthorized');
+  }
+  const [, token] = authorization.split(' ');
+  const { status, body } = await handleWorkspaces(req.method, req.path, token, deps);
   res.status(status).send(body);
 });
 

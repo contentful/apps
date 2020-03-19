@@ -1,6 +1,7 @@
 'use strict';
 
-const ENDPOINT = 'https://api.typeform.com/oauth/token';
+const { BASE_URL } = require('./constants');
+const ENDPOINT = `${BASE_URL}/oauth/token`;
 
 module.exports = async (code, { fetch }) => {
   const body =
