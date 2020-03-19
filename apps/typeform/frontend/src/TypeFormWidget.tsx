@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as typeformEmbed from '@typeform/embed';
 import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { Hash } from './typings';
+import { SDK_WINDOW_HEIGHT } from './constants';
 
 interface Props {
   sdk: DialogExtensionSDK;
@@ -17,7 +18,7 @@ export function TypeformPreviewWidget({ sdk }: Props) {
       hideHeaders: true,
       opacity: 0
     });
-    sdk.window.updateHeight(450);
+    sdk.window.updateHeight(SDK_WINDOW_HEIGHT);
   }, [value]);
 
   return (
@@ -25,7 +26,7 @@ export function TypeformPreviewWidget({ sdk }: Props) {
       ref={el}
       style={{
         width: '100%',
-        height: 450
+        height: SDK_WINDOW_HEIGHT
       }}
     />
   );

@@ -8,7 +8,31 @@ import {
   TypeFormParameters
 } from './typings';
 
-function isCompatibleField(field: Field): boolean {
+/** Gets the expireTime from local storage to determine if the token is expired */
+export function tokenIsExpired() {
+  const token = window.localStorage.getItem('token') || '';
+  const expires = window.localStorage.getItem('expireTime') || '0';
+
+  return !token || !expires || Date.now() > parseInt(expires, 10);
+}
+
+export function tokenWillExpireSoon() {
+  const expires = window.localStorage.getItem('expireTime') || '0';
+  const _10Minutes = 600000;
+
+  return !expires || parseInt(expires, 10) - Date.now() <= _10Minutes;
+}
+
+export function resetLocalStorage() {
+  window.localStorage.removeItem('token');
+  window.localStorage.removeItem('expireTime');
+}
+
+export function geToken() {
+  return window.localStorage.getItem('token') || '';
+}
+
+export function isCompatibleField(field: Field): boolean {
   return field.type === 'Symbol';
 }
 

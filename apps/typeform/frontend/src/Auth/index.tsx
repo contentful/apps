@@ -7,30 +7,7 @@ import { styles } from '../AppConfig/styles';
 // @ts-ignore 2307
 import logo from '../AppConfig/config-screen-logo.svg';
 import { Typography, Paragraph, Heading, TextLink } from '@contentful/forma-36-react-components';
-
-/** Gets the expireTime from local storage to determine if the token is expired */
-function tokenIsExpired() {
-  const token = window.localStorage.getItem('token') || '';
-  const expires = window.localStorage.getItem('expireTime') || '0';
-
-  return !token || !expires || Date.now() > parseInt(expires, 10);
-}
-
-function tokenWillExpireSoon() {
-  const expires = window.localStorage.getItem('expireTime') || '0';
-  const _10Minutes = 600000;
-
-  return !expires || parseInt(expires, 10) - Date.now() <= _10Minutes;
-}
-
-function resetLocalStorage() {
-  window.localStorage.removeItem('token');
-  window.localStorage.removeItem('expireTime');
-}
-
-function geToken() {
-  return window.localStorage.getItem('token') || '';
-}
+import { geToken, tokenIsExpired, tokenWillExpireSoon, resetLocalStorage } from '../utils';
 
 interface Props {
   sdk: AppExtensionSDK;

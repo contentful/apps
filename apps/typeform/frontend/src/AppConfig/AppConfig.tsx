@@ -59,7 +59,7 @@ export class AppConfig extends React.Component<Props, State> {
     accessToken: (window.localStorage.getItem('token') as string) || ''
   };
 
-  async componentWillMount() {
+  async componentDidMount() {
     const { sdk } = this.props;
 
     sdk.app.onConfigure(this.onAppConfigure);
@@ -129,7 +129,7 @@ export class AppConfig extends React.Component<Props, State> {
     }
 
     return {
-      parameters: { accessToken, workspaceId },
+      parameters: { workspaceId },
       targetState: selectedFieldsToTargetState(contentTypes, selectedFields)
     };
   };
