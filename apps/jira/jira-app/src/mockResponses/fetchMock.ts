@@ -26,7 +26,7 @@ fetchMock.get(
 );
 
 fetchMock.get(
-  'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search',
+  'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search?query=extensibility',
   {
     self:
       'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search?maxResults=50&startAt=0',

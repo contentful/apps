@@ -620,36 +620,21 @@ Object {
                     </svg>
                   </div>
                   <div
-                    class="Select__Select__wrapper___2pBIz Select__Select--full___7ei7d selector disabled"
+                    class="search-projects"
                   >
-                    <select
-                      class="Select__Select___31Z46 a11y__focus-border--default___60AXp Select__Select--disabled___3n58N"
-                      data-test-id="project-selector"
-                      disabled=""
+                    <div
+                      class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
                     >
-                      <option
-                        data-test-id="cf-ui-select-option"
+                      <input
+                        class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
+                        data-test-id="cf-ui-text-input"
+                        placeholder="Search for a project"
                         value=""
-                      >
-                        Pick a project
-                      </option>
-                    </select>
-                    <svg
-                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___boRAZ"
-                      data-test-id="cf-ui-icon"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M7 10l5 5 5-5z"
                       />
-                      <path
-                        d="M0 0h24v24H0z"
-                        fill="none"
-                      />
-                    </svg>
+                    </div>
+                    <div
+                      class="search-projects-results"
+                    />
                   </div>
                 </div>
               </div>
@@ -807,36 +792,21 @@ Object {
                   </svg>
                 </div>
                 <div
-                  class="Select__Select__wrapper___2pBIz Select__Select--full___7ei7d selector disabled"
+                  class="search-projects"
                 >
-                  <select
-                    class="Select__Select___31Z46 a11y__focus-border--default___60AXp Select__Select--disabled___3n58N"
-                    data-test-id="project-selector"
-                    disabled=""
+                  <div
+                    class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
                   >
-                    <option
-                      data-test-id="cf-ui-select-option"
+                    <input
+                      class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
+                      data-test-id="cf-ui-text-input"
+                      placeholder="Search for a project"
                       value=""
-                    >
-                      Pick a project
-                    </option>
-                  </select>
-                  <svg
-                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___boRAZ"
-                    data-test-id="cf-ui-icon"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M7 10l5 5 5-5z"
                     />
-                    <path
-                      d="M0 0h24v24H0z"
-                      fill="none"
-                    />
-                  </svg>
+                  </div>
+                  <div
+                    class="search-projects-results"
+                  />
                 </div>
               </div>
             </div>

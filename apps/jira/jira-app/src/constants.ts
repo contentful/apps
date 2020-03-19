@@ -5,7 +5,7 @@ let CLIENT_ID = 'XD9k9QU9VT4Rt26u6lbO3NM0fOqvvXan';
 
 if (process.env.nodeEnv === 'development') {
   LAMBDA_URI = 'https://3stl3nxvfh.execute-api.us-east-1.amazonaws.com/dev';
-  CLIENT_ID = 'WU0EYJMcTeeFdJRVNABy3h7adB576hDW';
+  CLIENT_ID = 'GKVe4vnzgCEUCv23qKhznrv0spuHvIOL';
 }
 
 export default {
