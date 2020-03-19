@@ -177,6 +177,7 @@ export function TypeFormField({ sdk }: Props) {
     return (
       <TypeformOAuth
         data-test-id="typeform-auth"
+        isFullWidth={false}
         setToken={(token: string) =>
           dispatch({ type: ACTION_TYPES.UPDATE_TOKEN, payload: { token } })
         }
@@ -192,7 +193,7 @@ export function TypeFormField({ sdk }: Props) {
     return (
       <Note noteType="negative">
         We could not fetch your typeforms. Please make sure you have selected a valid Typeform
-        workspace.
+        workspace and are logged in.
       </Note>
     );
   }

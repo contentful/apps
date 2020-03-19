@@ -1,3 +1,5 @@
+const DEFAULT_TOKEN_EXPIRATION_TIME = 604800;
+
 export default (window: Window) => {
   const { searchParams, search } = new URL(window.location.href);
 
@@ -10,7 +12,8 @@ export default (window: Window) => {
     }
 
     const token = searchParams.get('token') || '';
-    const expiresIn = parseInt(searchParams.get('expiresIn') || '', 10) || 3200;
+    const expiresIn =
+      parseInt(searchParams.get('expiresIn') || '', 10) || DEFAULT_TOKEN_EXPIRATION_TIME;
 
     const expireTime = Date.now() + expiresIn * 1000;
 

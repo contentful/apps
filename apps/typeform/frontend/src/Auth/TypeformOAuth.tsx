@@ -6,10 +6,19 @@ import { BASE_URL } from '../constants';
 interface Props {
   sdk?: AppExtensionSDK;
   expireSoon?: boolean;
+  isFullWidth: boolean;
+  buttonType?: 'primary' | 'positive' | 'negative' | 'muted' | 'naked' | undefined;
   setToken: (token: string) => void;
 }
 
-export function TypeformOAuth({ sdk, expireSoon, setToken, ...rest }: Props) {
+export function TypeformOAuth({
+  sdk,
+  expireSoon,
+  setToken,
+  buttonType,
+  isFullWidth,
+  ...rest
+}: Props) {
   let oauthWindow: Window | null;
 
   useEffect(() => {
@@ -37,7 +46,7 @@ export function TypeformOAuth({ sdk, expireSoon, setToken, ...rest }: Props) {
     const { token, error } = data;
 
     if (error) {
-      console.error('There was an error authenticating. Please refresh and try again.');
+      console.error('There was an error authenticating. Please try again.');
     } else if (token) {
       setToken(token);
       if (oauthWindow) {
@@ -47,7 +56,7 @@ export function TypeformOAuth({ sdk, expireSoon, setToken, ...rest }: Props) {
   };
 
   return (
-    <Button onClick={executeOauth} buttonType="primary" {...rest}>
+    <Button onClick={executeOauth} isFullWidth={isFullWidth} buttonType={buttonType} {...rest}>
       {expireSoon ? 'Reauthenticate with Typeform' : 'Sign in to Typeform'}
     </Button>
   );

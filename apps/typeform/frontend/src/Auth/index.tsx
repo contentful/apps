@@ -7,7 +7,7 @@ import { styles } from '../AppConfig/styles';
 // @ts-ignore 2307
 import logo from '../AppConfig/config-screen-logo.svg';
 import { Typography, Paragraph, Heading, TextLink } from '@contentful/forma-36-react-components';
-import { geToken, tokenIsExpired, tokenWillExpireSoon, resetLocalStorage } from '../utils';
+import { getToken, tokenIsExpired, tokenWillExpireSoon, resetLocalStorage } from '../utils';
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -15,7 +15,7 @@ interface Props {
 
 export default function AuthWrapper({ sdk }: Props) {
   let expirationWatchInterval: NodeJS.Timeout | undefined;
-  const [token, setToken] = useState(geToken());
+  const [token, setToken] = useState(getToken());
   const [expireSoon, setExpireSoon] = useState(false);
 
   useEffect(() => {
@@ -65,7 +65,13 @@ export default function AuthWrapper({ sdk }: Props) {
                     app allows you to reference your forms from Typeform without leaving Contentful.
                   </Paragraph>
                 </Typography>
-                <TypeformOAuth sdk={sdk} expireSoon={expireSoon} setToken={setToken} />
+                <TypeformOAuth
+                  buttonType="primary"
+                  sdk={sdk}
+                  isFullWidth
+                  expireSoon={expireSoon}
+                  setToken={setToken}
+                />
               </div>
             </div>
             <div className={styles.icon}>

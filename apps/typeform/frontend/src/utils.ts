@@ -28,7 +28,7 @@ export function resetLocalStorage() {
   window.localStorage.removeItem('expireTime');
 }
 
-export function geToken() {
+export function getToken() {
   return window.localStorage.getItem('token') || '';
 }
 

@@ -18,7 +18,6 @@ const fetchWorkspaces = async (method, _path, token, { fetch }) => {
   if (!response.ok) {
     throw new Error(`Non-200 (${response.status}) response for GET Request`);
   }
-
   return await response.json();
 };
 
