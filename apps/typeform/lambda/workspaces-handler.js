@@ -16,9 +16,10 @@ module.exports = async (method, path, token, { fetch }) => {
       body: { workspaces: await fetchWorkspaces(method, path, token, { fetch }) }
     };
   } catch (err) {
+    const { message, code } = err;
     return {
-      status: 400,
-      body: { message: err.message || err.errorMessage }
+      status: code,
+      body: { message }
     };
   }
 };
