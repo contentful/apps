@@ -43,11 +43,5 @@
   },
   "browserslist": [
     "last 2 versions"
-  ],
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.js"
-    ],
-    "testEnvironment": "node"
-  }
+  ]
 }
