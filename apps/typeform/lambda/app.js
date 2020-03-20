@@ -40,7 +40,7 @@ app.use('/callback', async (req, res) => {
   const { host } = req.headers;
 
   if (!code) {
-    res.sendStatus(401);
+    res.status(400).send('No code was provided');
   }
 
   const protocol = process.env.LOCAL_DEV === 'true' ? 'http' : 'https';
