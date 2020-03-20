@@ -11,18 +11,21 @@ describe('forms handler', () => {
     expect(body).toEqual({ message: 'Method not allowed.' });
   });
 
-  test('returns 400 if fetching the forms fails', async () => {
+  test('returns the appropriate error code if fetching the forms fails', async () => {
+    const errorCode = 401;
     const { status } = await handle(
       'GET',
       '/forms',
       'some token',
       Object.assign({}, mocks, {
         fetch: () => {
-          throw new Error('error');
+          const error = new Error('Some error happened');
+          error.code = errorCode;
+          throw error;
         }
       })
     );
 
-    expect(status).toBe(400);
+    expect(status).toBe(errorCode);
   });
 });
