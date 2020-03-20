@@ -5,7 +5,6 @@ frameworkVersion: '>=1.0.0 <2.0.0'
 
 plugins:
   - serverless-domain-manager
-  - serverless-express
 
 custom:
   myStage: ${opt:stage, self:provider.stage}
