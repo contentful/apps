@@ -102,7 +102,7 @@ export class AppConfig extends React.Component<Props, State> {
       this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
     } catch (_error) {
       this.props.sdk.notifier.error(
-        'There was a problem while fetching your Typeform workspaces. Please try again.'
+        'There was a problem fetching your Typeform workspaces. Please try again.'
       );
     }
   };
@@ -169,7 +169,6 @@ export class AppConfig extends React.Component<Props, State> {
         <div className={styles.body}>
           <div>
             <div>
-              {}
               <Typography>
                 <Heading>About Typeform</Heading>
                 <Paragraph className={styles.aboutP}>
