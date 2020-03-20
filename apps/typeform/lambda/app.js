@@ -43,7 +43,8 @@ app.use('/callback', async (req, res) => {
     res.status(404).send('No Code was provided');
   }
 
-  const origin = `${req.protocol}://${host}`;
+  const protocol = process.env.LOCAL_DEV === 'true' ? 'http' : 'https';
+  const origin = `${protocol}://${host}`;
 
   const { access_token, expires_in } = await fetchAccessToken(code, origin, deps);
 
