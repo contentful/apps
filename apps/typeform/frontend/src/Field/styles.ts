@@ -23,6 +23,7 @@ export const styles = {
     marginBottom: tokens.spacingXs
   }),
   editButton: css({
+    marginRight: tokens.spacingL,
     svg: {
       width: '16px',
       height: '16px'
@@ -30,7 +31,7 @@ export const styles = {
   }),
   previewButton: (disabled: boolean) =>
     css({
-      marginRight: tokens.spacingS,
+      marginRight: tokens.spacingL,
       button: {
         display: 'flex'
       },

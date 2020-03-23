@@ -223,6 +223,15 @@ export function TypeFormField({ sdk }: Props) {
       </div>
       {value && !hasStaleData && (
         <div className={styles.actionButtons}>
+          <TextLink
+            href={`https://admin.typeform.com/form/${selectedForm.id}/create`}
+            target="_blank"
+            icon="Edit"
+            rel="noopener noreferrer"
+            className={styles.editButton}
+            disabled={!value}>
+            Edit
+          </TextLink>
           {selectedForm.isPublic ? (
             PreviewButton
           ) : (
@@ -234,21 +243,11 @@ export function TypeFormField({ sdk }: Props) {
             </Tooltip>
           )}
           <TextLink
-            href={`https://admin.typeform.com/form/${selectedForm.id}/create`}
-            target="_blank"
-            icon="ExternalLink"
-            rel="noopener noreferrer"
-            className={styles.editButton}
-            disabled={!value}>
-            Edit
-          </TextLink>
-          <TextLink
             href={`https://admin.typeform.com/form/${selectedForm.id}/results`}
             target="_blank"
-            icon="ExternalLink"
+            icon="Entry"
             rel="noopener noreferrer"
-            className={styles.editButton}
-            disabled={!value}>
+            className={styles.editButton}>
             Results
           </TextLink>
         </div>
