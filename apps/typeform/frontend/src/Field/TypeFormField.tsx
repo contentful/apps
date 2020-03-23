@@ -6,7 +6,7 @@ import { TypeformOAuth } from '../Auth/TypeformOAuth';
 import { styles } from './styles';
 // @ts-ignore 2307
 import logo from './typeform-icon.svg';
-import { isUserAuthenticated } from '../utils';
+import { isUserAuthenticated, getToken } from '../utils';
 
 interface Props {
   sdk: FieldExtensionSDK & AppExtensionSDK;
@@ -30,7 +30,7 @@ const initialState = {
     id: ''
   } as FormOption,
   hasStaleData: false,
-  token: window.localStorage.getItem('token'),
+  token: getToken(),
   forms: [] as FormOption[],
   loading: true
 };
@@ -241,6 +241,15 @@ export function TypeFormField({ sdk }: Props) {
             className={styles.editButton}
             disabled={!value}>
             Edit
+          </TextLink>
+          <TextLink
+            href={`https://admin.typeform.com/form/${selectedForm.id}/results`}
+            target="_blank"
+            icon="ExternalLink"
+            rel="noopener noreferrer"
+            className={styles.editButton}
+            disabled={!value}>
+            Results
           </TextLink>
         </div>
       )}

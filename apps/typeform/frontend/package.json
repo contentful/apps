@@ -38,8 +38,8 @@
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
-    "test": "contentful-extension-scripts test --env=jsdom",
-    "test:watch": "contentful-extension-scripts test --watch --env=jsdom"
+    "test": "contentful-extension-scripts test --watch --env=jsdom",
+    "test:ci": "contentful-extension-scripts test --env=jsdom"
   },
   "browserslist": [
     "last 2 versions"

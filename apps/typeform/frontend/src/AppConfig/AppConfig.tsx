@@ -25,7 +25,8 @@ import {
   getCompatibleFields,
   editorInterfacesToSelectedFields,
   selectedFieldsToTargetState,
-  validateParameters
+  validateParameters,
+  getToken
 } from '../utils';
 import { styles } from './styles';
 
@@ -55,7 +56,7 @@ export class AppConfig extends React.Component<Props, State> {
     selectedContentTypes: [],
     selectedFields: {},
     selectedWorkspaceId: '',
-    accessToken: (window.localStorage.getItem('token') as string) || ''
+    accessToken: getToken() 
   };
 
   async componentDidMount() {
