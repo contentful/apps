@@ -4,6 +4,7 @@ import { AppExtensionSDK, CollectionResponse } from 'contentful-ui-extensions-sd
 import {
   Heading,
   Paragraph,
+  Note,
   Typography,
   TextField,
   Form
@@ -226,10 +227,10 @@ export default class AppConfig extends React.Component<Props, State> {
               <Paragraph>
                 This app can be used only with <strong>JSON object</strong> fields.
               </Paragraph>
-              <Paragraph>
+              <Note noteType="warning">
                 There are <strong>no content types with JSON object</strong> fields in this
-                environment. You can add one here later.
-              </Paragraph>
+                environment. You can add one in your content model and assign it to the app here.
+              </Note>
             </>
           )}
           <FieldSelector
