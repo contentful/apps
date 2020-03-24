@@ -1,0 +1,47 @@
+{
+  "name": "typeform-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "build/index.html",
+  "devDependencies": {
+    "@babel/core": "7.5.5",
+    "@babel/plugin-proposal-class-properties": "7.5.5",
+    "@babel/plugin-transform-runtime": "7.5.5",
+    "@babel/preset-env": "7.5.5",
+    "@babel/preset-react": "7.0.0",
+    "@contentful/contentful-extension-scripts": "0.15.1",
+    "@types/react": "^16.9.23",
+    "@types/react-dom": "^16.9.5",
+    "contentful-cli": "^0.36.2",
+    "react-test-renderer": "^16.9.0",
+    "sass": "^1.26.2",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "@contentful/forma-36-fcss": "0.0.31",
+    "@contentful/forma-36-react-components": "^3.16.7",
+    "@contentful/forma-36-tokens": "^0.4.5",
+    "@testing-library/react": "^10.0.1",
+    "@typeform/embed": "^0.16.0",
+    "@types/jest": "^25.1.4",
+    "@types/lodash": "^4.14.149",
+    "contentful-ui-extensions-sdk": "3.10.11",
+    "core-js": "^3.2.1",
+    "emotion": "^10.0.27",
+    "jest-environment-jsdom": "^25.1.0",
+    "jsdom": "^16.2.1",
+    "prop-types": "^15.7.2",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "whatwg-fetch": "^3.0.0"
+  },
+  "scripts": {
+    "start": "contentful-extension-scripts start --serve-only",
+    "build": "contentful-extension-scripts build --no-inline",
+    "test": "contentful-extension-scripts test --watch --env=jsdom",
+    "test:ci": "contentful-extension-scripts test --env=jsdom"
+  },
+  "browserslist": [
+    "last 2 versions"
+  ]
+}

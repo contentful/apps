@@ -1,0 +1,157 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TypeFormField should render successfully when the user is signed in 1`] = `
+<div>
+  <div
+    class="css-1cimf61"
+  >
+    <img
+      class="css-1ngw63v"
+      src="typeform-icon.svg"
+    />
+    <div
+      class="Select__Select__wrapper___2pBIz Select__Select--full___7ei7d"
+    >
+      <select
+        class="Select__Select___31Z46 a11y__focus-border--default___60AXp"
+        data-test-id="typeform-select"
+      >
+        <option
+          data-test-id="cf-ui-select-option"
+          value=""
+        >
+          Choose a typeform
+        </option>
+        <option
+          data-test-id="cf-ui-select-option"
+          value="https://user.typeform.com/to/dsako"
+        >
+          Customer Feedback Survey (copy)
+        </option>
+        <option
+          data-test-id="cf-ui-select-option"
+          value="https://user.typeform.com/to/sjao"
+        >
+          Personality Quiz - Quick Start - FINAL (copy)
+        </option>
+      </select>
+      <svg
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___boRAZ"
+        data-test-id="cf-ui-icon"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M7 10l5 5 5-5z"
+        />
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+      </svg>
+    </div>
+  </div>
+  <div
+    class="Note__Note___2eSKN Note__Note--negative___3fkwL"
+    data-test-id="cf-ui-note"
+  >
+    <div
+      class="Note__Note__icon___20RqC"
+    >
+      <svg
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
+        data-test-id="cf-ui-icon"
+        height="18"
+        viewBox="0 0 24 24"
+        width="18"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+        <path
+          d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+        />
+      </svg>
+    </div>
+    <div>
+      <div>
+        The typeform you have selected in Contentful no longer exists in your workspace.
+         
+        <button
+          class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+          data-test-id="cf-ui-text-link"
+          type="button"
+        >
+          <span
+            class="TabFocusTrap__TabFocusTrap___39Vty"
+            tabindex="-1"
+          >
+            Clear field
+          </span>
+        </button>
+        .
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TypeFormField should render the auth button when the user is not authenticated 1`] = `
+<div>
+  <button
+    class="Button__Button___1ZfFj a11y__focus-border--default___60AXp Button__Button--primary___JImeO"
+    data-test-id="typeform-auth"
+    type="button"
+  >
+    <span
+      class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+      tabindex="-1"
+    >
+      <span
+        class="Button__Button__label___3tcOj"
+      >
+        Sign in to Typeform
+      </span>
+    </span>
+  </button>
+</div>
+`;
+
+exports[`TypeFormField should render the error screen if something goes wrong 1`] = `
+<div>
+  <div
+    class="Note__Note___2eSKN Note__Note--negative___3fkwL"
+    data-test-id="cf-ui-note"
+  >
+    <div
+      class="Note__Note__icon___20RqC"
+    >
+      <svg
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
+        data-test-id="cf-ui-icon"
+        height="18"
+        viewBox="0 0 24 24"
+        width="18"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+        <path
+          d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+        />
+      </svg>
+    </div>
+    <div>
+      <div>
+        We could not fetch your typeforms. Please make sure you have selected a valid Typeform workspace and are logged in.
+      </div>
+    </div>
+  </div>
+</div>
+`;
