@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { Button } from '@contentful/forma-36-react-components';
-import { BASE_URL } from '../constants';
+import { BASE_URL, CLIENT_ID } from '../constants';
 
 interface Props {
   sdk?: AppExtensionSDK;
@@ -32,7 +32,7 @@ export function TypeformOAuth({
 
   const executeOauth = () => {
     const url = `${BASE_URL}/oauth/authorize?&client_id=${
-      process.env.CLIENT_ID
+      CLIENT_ID
     }&redirect_uri=${encodeURIComponent(
       `${window.location.origin}/callback`
     )}&scope=forms:read+workspaces:read`;
