@@ -26,44 +26,44 @@ const NoContentTypes = () => (
   </Note>
 );
 
-const ContentTypesPanel = ({ contentTypes, enabledContentTypes, onContentTypeToggle }) => {
-  const ContentTypesList = () => {
-    if (!contentTypes) {
-      return <ContentTypesSkeleton/>;
-    }
+export const ContentTypesList = ({ contentTypes, enabledContentTypes, onContentTypeToggle }) => {
+  if (!contentTypes) {
+    return <ContentTypesSkeleton/>;
+  }
 
-    if (0 === contentTypes.length) {
-      return <NoContentTypes/>;
-    }
+  if (0 === contentTypes.length) {
+    return <NoContentTypes/>;
+  }
 
-    return contentTypes.map(({ sys, name }) => (
-      <CheckboxField
-        key={sys.id}
-        labelIsLight
-        labelText={name}
-        name={name}
-        checked={enabledContentTypes.includes(sys.id)}
-        value={sys.id}
-        onChange={() => onContentTypeToggle(sys.id)}
-        id={sys.id}
-      />
-    ));
-  };
-
-  return (
-    <Typography>
-      <Heading>Content Types</Heading>
-      <Paragraph>
-        Select content types that will show the Gatsby Cloud functionality in the sidebar.
-      </Paragraph>
-      <div className={styles.checks}>
-        <FieldGroup>
-          <ContentTypesList/>
-        </FieldGroup>
-      </div>
-
-    </Typography>
-  );
+  return contentTypes.map(({ sys, name }) => (
+    <CheckboxField
+      key={sys.id}
+      labelIsLight
+      labelText={name}
+      name={name}
+      checked={enabledContentTypes.includes(sys.id)}
+      value={sys.id}
+      onChange={() => onContentTypeToggle(sys.id)}
+      id={sys.id}
+    />
+  ));
 };
+
+const ContentTypesPanel = ({ contentTypes, enabledContentTypes, onContentTypeToggle }) => (
+  <Typography>
+    <Heading>Content Types</Heading>
+    <Paragraph>
+      Select content types that will show the Gatsby Cloud functionality in the sidebar.
+    </Paragraph>
+    <div className={styles.checks}>
+      <FieldGroup>
+        <ContentTypesList contentTypes={contentTypes}
+                          enabledContentTypes={enabledContentTypes}
+                          onContentTypeToggle={onContentTypeToggle}/>
+      </FieldGroup>
+    </div>
+
+  </Typography>
+);
 
 export default ContentTypesPanel;
