@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, cleanup, wait } from '@testing-library/react';
 
-import Sidebar from '../src/Sidebar';
+import Sidebar from './Sidebar';
 
 const mockSdk = {
   location: {

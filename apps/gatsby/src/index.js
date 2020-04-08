@@ -4,7 +4,7 @@ import { render } from 'react-dom';
 import { init, locations } from 'contentful-ui-extensions-sdk';
 
 import Sidebar from './Sidebar';
-import AppConfig from './AppConfig';
+import { AppConfig } from './AppConfig';
 
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';

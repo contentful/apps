@@ -1,0 +1,1 @@
+export { AppConfig } from './AppConfig';

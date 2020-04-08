@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ContentTypesList should show Skeleton on nil values 1`] = `
+<div>
+  <svg
+    aria-label="Loading component..."
+    class="SkeletonContainer__SkeletonContainer___23jiu"
+    data-test-id="cf-ui-skeleton-form"
+    height="100%"
+    preserveAspectRatio="xMidYMid meet"
+    role="img"
+    width="100%"
+  >
+    <title>
+      Loading component...
+    </title>
+    <rect
+      clip-path="url(#cf-ui-skeleton-clip-id)"
+      height="100%"
+      style="fill: url(#cf-ui-skeleton-clip-gradient);"
+      width="100%"
+      x="0"
+      y="0"
+    />
+    <defs>
+      <clippath
+        id="cf-ui-skeleton-clip-id"
+      >
+        <rect
+          height="16"
+          rx="0"
+          ry="0"
+          width="100%"
+          x="0"
+          y="0"
+        />
+        <rect
+          height="16"
+          rx="0"
+          ry="0"
+          width="100%"
+          x="0"
+          y="24"
+        />
+        <rect
+          height="16"
+          rx="0"
+          ry="0"
+          width="80%"
+          x="0"
+          y="48"
+        />
+      </clippath>
+      <lineargradient
+        id="cf-ui-skeleton-clip-gradient"
+      >
+        <stop
+          offset="0%"
+          stop-color="#e5ebed"
+          stop-opacity="1"
+        >
+          <animate
+            attributeName="stop-color"
+            dur="2s"
+            id="animation1"
+            repeatCount="indefinite"
+            values="#e5ebed; #f7f9fa; #e5ebed"
+          />
+        </stop>
+        <stop
+          offset="50%"
+          stop-color="#f7f9fa"
+          stop-opacity="1"
+        >
+          <animate
+            attributeName="stop-color"
+            begin="animation1.begin+0.25s"
+            dur="2s"
+            repeatCount="indefinite"
+            values="#e5ebed; #f7f9fa; #e5ebed"
+          />
+        </stop>
+        <stop
+          offset="100%"
+          stop-color="#e5ebed"
+          stop-opacity="1"
+        >
+          <animate
+            attributeName="stop-color"
+            begin="animation1.begin+0.5s"
+            dur="2s"
+            repeatCount="indefinite"
+            values="#e5ebed; #f7f9fa; #e5ebed"
+          />
+        </stop>
+      </lineargradient>
+    </defs>
+  </svg>
+</div>
+`;
+
+exports[`ContentTypesList should show a Note if there are no content types 1`] = `
+<div>
+  <div
+    class="Note__Note___2eSKN Note__Note--warning___3X53I"
+    data-test-id="cf-ui-note"
+  >
+    <div
+      class="Note__Note__icon___20RqC"
+    >
+      <svg
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--warning___39Bnz"
+        data-test-id="cf-ui-icon"
+        height="18"
+        viewBox="0 0 24 24"
+        width="18"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+        <path
+          d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+        />
+      </svg>
+    </div>
+    <div>
+      <div>
+        There are no content types available in this environment. 
+        <a
+          class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+          data-test-id="cf-ui-text-link"
+          href="https://www.contentful.com/faq/basics/#how-do-i-add-a-new-content-type"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <span
+            class="TabFocusTrap__TabFocusTrap___39Vty"
+            tabindex="-1"
+          >
+            How do I add a new content type?
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+`;
