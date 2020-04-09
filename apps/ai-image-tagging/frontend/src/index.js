@@ -39,7 +39,7 @@ export class App extends React.Component {
 init(sdk => {
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     render(<AppView sdk={sdk} />, document.getElementById('root'));
-  } else {
+  } else if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
     render(<App sdk={sdk} />, document.getElementById('root'));
   }
 });
