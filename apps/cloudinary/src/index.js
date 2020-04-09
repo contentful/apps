@@ -76,9 +76,9 @@ function renderDialog(sdk) {
   const instance = cloudinary.createMediaLibrary(options, {
     insertHandler: data => sdk.close(data)
   });
-  const show_options={};
+  const showOptions = {};
 
-  if (typeof(config.startFolder) !== 'undefined' && config.startFolder != "") {
+  if (typeof config.startFolder === 'string' && config.startFolder.length) {
     show_options.folder = {path: config.startFolder};
   }
   
