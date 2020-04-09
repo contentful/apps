@@ -163,7 +163,7 @@ export class SidebarExtension extends React.Component<
 init(sdk => {
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     render(<AppConfig sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
-  } else {
+  } else if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
     render(
       <SidebarExtension
         sdk={sdk as SidebarExtensionSDK}

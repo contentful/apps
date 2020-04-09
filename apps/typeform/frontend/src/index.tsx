@@ -26,7 +26,7 @@ if (window.location.search.includes('token')) {
         <TypeformPreviewWidget sdk={sdk as DialogExtensionSDK} />,
         document.getElementById('root')
       );
-    } else {
+    } else if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
       render(
         <TypeFormField sdk={sdk as AppExtensionSDK & FieldExtensionSDK} />,
         document.getElementById('root')
