@@ -79,10 +79,10 @@ function renderDialog(sdk) {
   const showOptions = {};
 
   if (typeof config.startFolder === 'string' && config.startFolder.length) {
-    show_options.folder = {path: config.startFolder};
+    showOptions.folder = {path: config.startFolder};
   }
   
-  instance.show(show_options);
+  instance.show(showOptions);
 
   sdk.window.updateHeight(window.outerHeight);
 }
