@@ -11,7 +11,7 @@ export default class App extends React.Component<Props> {
   render() {
     const { sdk } = this.props;
 
-    if (sdk.location.is(locations.LOCATION_APP)) {
+    if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
       return <AppConfig sdk={sdk as AppExtensionSDK} />;
     } else if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
       return (
