@@ -1,0 +1,7 @@
+.form-wrapper form {
+  width: 50%;
+  min-width: 400px;
+  margin: 40px auto;
+  border: 1px solid #ccc;
+  padding: 40px;
+}

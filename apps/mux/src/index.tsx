@@ -6,11 +6,12 @@ import {
   Spinner,
   Button,
 } from '@contentful/forma-36-react-components';
-import { init, FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { init, locations, FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { createUpload } from '@mux/upchunk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
+import Config from './config';
 import Player from './player';
 import DeleteButton from './deleteButton';
 
@@ -389,11 +390,10 @@ export class App extends React.Component<AppProps, AppState> {
   };
 }
 
-console.log('debug init 1');
 init(sdk => {
-  console.log('debug init 2');
+  const Component = sdk.location.is(locations.LOCATION_APP_CONFIG) ? Config : App;
   render(
-    <App sdk={sdk as FieldExtensionSDK} />,
+    <Component sdk={sdk as FieldExtensionSDK} />,
     document.getElementById('root')
   );
 });
