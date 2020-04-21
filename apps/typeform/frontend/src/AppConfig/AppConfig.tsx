@@ -215,7 +215,7 @@ export class AppConfig extends React.Component<Props, State> {
                   <>
                     <Paragraph>
                       This app can only be used with <strong>Short text</strong> fields. Select
-                      which content types to use with Typeform App.
+                      which content types to use with the Typeform App.
                     </Paragraph>
                     <FieldSelector
                       contentTypes={contentTypes}
