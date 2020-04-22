@@ -29,18 +29,20 @@ export default function Dashboard({ sdk, contentTypes }: DashboardProps) {
   useEffect(() => {
     async function fetchData() {
       // Fetch some basic statistics.
-      const total = await sdk.space
-        .getEntries()
-        .then(entries => entries.total)
-        .catch(() => 0);
-      const published = await sdk.space
-        .getPublishedEntries()
-        .then(entries => entries.total)
-        .catch(() => 0);
-      const scheduled = await sdk.space
-        .getAllScheduledActions()
-        .then(entries => entries.length)
-        .catch(() => 0);
+      const [total, published, scheduled] = await Promise.all([
+        sdk.space
+          .getEntries()
+          .then((entries) => entries.total)
+          .catch(() => 0),
+        sdk.space
+          .getPublishedEntries()
+          .then((entries) => entries.total)
+          .catch(() => 0),
+        sdk.space
+          .getAllScheduledActions()
+          .then((entries) => entries.length)
+          .catch(() => 0),
+      ]);
 
       setData({ ...data, total, published, scheduled });
 

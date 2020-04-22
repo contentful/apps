@@ -33,8 +33,6 @@ export default class Page extends Component<PageProps, { contentTypes: ContentTy
     });
 
     this.history.listen((location) => {
-      console.log(location);
-
       this.props.sdk.navigator.openCurrentAppPage({ path: location.pathname });
     });
 
