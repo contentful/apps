@@ -23,7 +23,7 @@ interface CollectionListProps {
 export default function CollectionList({
   contentTypes,
   entries,
-  onClickItem
+  onClickItem,
 }: CollectionListProps) {
   // Loading state.
   if (!entries) {
@@ -44,7 +44,7 @@ export default function CollectionList({
         {entries.map((entry: any) => {
           const contentType =
             contentTypes.length &&
-            contentTypes.find(ct => ct.sys.id === entry.sys.contentType.sys.id);
+            contentTypes.find((ct) => ct.sys.id === entry.sys.contentType.sys.id);
           return (
             <EntityListItem
               className="cr-pointer"

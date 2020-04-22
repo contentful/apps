@@ -23,7 +23,7 @@ export default function Dashboard({ sdk, contentTypes }: DashboardProps) {
     total: null,
     published: null,
     scheduled: null,
-    recent: null
+    recent: null,
   });
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function Dashboard({ sdk, contentTypes }: DashboardProps) {
       // Fetch some entries were last updated by the current user.
       const recent = await sdk.space
         .getEntries({ 'sys.updatedBy.sys.id': sdk.user.sys.id, limit: 3 })
-        .then(entries => entries.items)
+        .then((entries) => entries.items)
         .catch(() => []);
 
       // Set the final data. Loading complete.
@@ -73,7 +73,7 @@ export default function Dashboard({ sdk, contentTypes }: DashboardProps) {
         <CollectionList
           contentTypes={contentTypes}
           entries={data.recent}
-          onClickItem={entryId => sdk.navigator.openEntry(entryId)}
+          onClickItem={(entryId) => sdk.navigator.openEntry(entryId)}
         />
       </div>
     </TabPanel>

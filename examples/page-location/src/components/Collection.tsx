@@ -5,7 +5,7 @@ import {
   DisplayText,
   Paragraph,
   SkeletonDisplayText,
-  SkeletonContainer
+  SkeletonContainer,
 } from '@contentful/forma-36-react-components';
 
 interface CollectionProps {

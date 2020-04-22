@@ -23,7 +23,8 @@
   },
   "scripts": {
     "start": "parcel src/index.html",
-    "build": "parcel build src/index.html"
+    "build": "parcel build src/index.html",
+    "format": "prettier --config ./.prettierrc --write src/**/*.tsx"
   },
   "dependencies": {
     "@contentful/forma-36-fcss": "^0.0.20",

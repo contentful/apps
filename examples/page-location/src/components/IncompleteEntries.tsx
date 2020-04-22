@@ -24,9 +24,9 @@ export default function IncompleteEntries({ contentTypes, sdk }: IncompleteEntri
         .getEntries({
           [`fields.${INCOMPLETE_CHECK_REQUIRED_FIELD}[exists]`]: false,
           content_type: INCOMPLETE_CHECK_CONTENT_TYPE,
-          limit: 3
+          limit: 3,
         })
-        .then(entries => entries.items)
+        .then((entries) => entries.items)
         .catch(() => []);
 
       setIncompleteEntries(entries);
@@ -41,7 +41,7 @@ export default function IncompleteEntries({ contentTypes, sdk }: IncompleteEntri
       <CollectionList
         contentTypes={contentTypes}
         entries={incompleteEntries}
-        onClickItem={entryId => sdk.navigator.openEntry(entryId)}
+        onClickItem={(entryId) => sdk.navigator.openEntry(entryId)}
       />
     </TabPanel>
   );
