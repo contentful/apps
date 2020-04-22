@@ -4,7 +4,8 @@ import { Hash } from './interfaces';
 import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
 
 export async function renderDialog(sdk: DialogExtensionSDK) {
-  const { projectKey, locale, clientId, clientSecret } = sdk.parameters.installation as Hash;
+  const { projectKey, locale, clientId, clientSecret, apiEndpoint, authApiEndpoint } = sdk
+    .parameters.installation as Hash;
 
   const ID = 'dialog-root';
   const container = document.createElement('div');
@@ -18,6 +19,12 @@ export async function renderDialog(sdk: DialogExtensionSDK) {
   const pickerModeIsCategory = get(sdk, ['parameters', 'invocation', 'pickerMode']) === 'category';
 
   const pickerOptions = {
+    platform: {
+      authUri: authApiEndpoint,
+      apiUri: apiEndpoint,
+      graphQLUri: apiEndpoint,
+      mcUri: apiEndpoint.replace('https://api', 'https://mc')
+    },
     project: {
       projectKey,
       credentials: {
