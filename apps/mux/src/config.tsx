@@ -11,7 +11,6 @@ interface ConfigProps {
   sdk: FieldExtensionSDK;
 }
 
-const DEFAULT_ANIMAL = 'yooo';
 
 class Config extends React.Component<ConfigProps, {}> {
   constructor (props: ConfigProps) {
