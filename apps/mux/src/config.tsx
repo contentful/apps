@@ -76,12 +76,6 @@ class Config extends React.Component<ConfigProps, {}> {
     );
   }
 
-  // This method will be called when a user clicks on "Install"
-  // or "Save" in the configuration screen.
-  //
-  // We want to do two things in here:
-  // 1. Persist selected animal as a parameter
-  // 2. Put the app to sidebars of all Content Types
   async onConfigure () {
     // Get IDs of all content types in an environment.
     const { items: contentTypes } = await this.props.sdk.space.getContentTypes();
