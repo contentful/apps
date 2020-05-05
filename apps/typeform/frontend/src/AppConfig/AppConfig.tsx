@@ -56,7 +56,7 @@ export class AppConfig extends React.Component<Props, State> {
     selectedContentTypes: [],
     selectedFields: {},
     selectedWorkspaceId: '',
-    accessToken: getToken() 
+    accessToken: getToken()
   };
 
   async componentDidMount() {
@@ -213,7 +213,10 @@ export class AppConfig extends React.Component<Props, State> {
                 <Heading>Assign to content types</Heading>
                 {contentTypes.length > 0 ? (
                   <>
-                    <Paragraph>Select which content types to use with Typeform App.</Paragraph>
+                    <Paragraph>
+                      This app can only be used with <strong>Short text</strong> fields. Select
+                      which content types to use with the Typeform App.
+                    </Paragraph>
                     <FieldSelector
                       contentTypes={contentTypes}
                       compatibleFields={compatibleFields}
