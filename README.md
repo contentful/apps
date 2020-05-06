@@ -10,7 +10,7 @@ Head over to the [marketplace](https://www.contentful.com/marketplace/) and foll
 
 ## Building your own app
 
-The best way to get started on app development is with our [tutorial](https://www.contentful.com/developers/docs/extensibility/apps/building-apps/). After the tutorial, this repository contains great examples of different use cases that can be implemented with apps. You can follow their structure to develop similar integration patterns. If you want to start from scratch, check out our [hello-world example](examples/hello-world).
+The best way to get started on app development is with our [tutorial](https://www.contentful.com/developers/docs/extensibility/apps/building-apps/). After the tutorial, this repository contains great examples of different use cases that can be implemented with apps. You can follow their structure to develop similar integration patterns. If you want to start from scratch, check out our [`hello-world-react` example](examples/hello-world-react).
 
 Detailed documentation can be found in the [App SDK documentation](https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/) and the [Management HTTP API reference documentation](https://www.contentful.com/developers/docs/references/content-management-api/). 
 
