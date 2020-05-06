@@ -24,17 +24,9 @@
   border-radius: 2px;
 }
 
-.config-splitter {
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
-  height: 1px;
-  background-color: #d3dce0;
-  border-width: 0;
-}
-
-.config-logo-bottom img {
-  width: 150px;
-  height: 150px;
-  margin: 0 auto 80px;
+.config-logo img {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 200px;
   display: block;
 }
