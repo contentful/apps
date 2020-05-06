@@ -6,7 +6,7 @@ import {
   Spinner,
   Button,
 } from '@contentful/forma-36-react-components';
-import { init, locations, FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { init, locations, BaseExtensionSDK, FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { createUpload } from '@mux/upchunk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
@@ -391,11 +391,17 @@ export class App extends React.Component<AppProps, AppState> {
 }
 
 init(sdk => {
-  const Component = sdk.location.is(locations.LOCATION_APP_CONFIG) ? Config : App;
-  render(
-    <Component sdk={sdk as FieldExtensionSDK} />,
-    document.getElementById('root')
-  );
+  if (sdk.location.is(locations.LOCATION_APP_CONFIG) {
+    render(
+      <Config sdk={sdk as BaseExtensionSDK} />,
+      document.getElementById('root')
+    );
+  } else {
+    render(
+      <App sdk={sdk as FieldExtensionSDK} />,
+      document.getElementById('root')
+    );
+  }
 });
 
 // Enabling hot reload

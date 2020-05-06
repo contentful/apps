@@ -5,11 +5,12 @@ import React from 'react';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import { Heading, Note, Form, TextField, Paragraph, Typography } from '@contentful/forma-36-react-components';
+import { BaseExtensionSDK } from 'contentful-ui-extensions-sdk';
 import MuxLogoSvg from './mux-logo.svg';
 import './config.css';
 
 interface ConfigProps {
-  sdk: FieldExtensionSDK;
+  sdk: BaseExtensionSDK;
 }
 
 class Config extends React.Component<ConfigProps, {}> {
@@ -97,25 +98,26 @@ class Config extends React.Component<ConfigProps, {}> {
   }
 
   async onConfigure () {
-    // Get IDs of all content types in an environment.
-    const { items: contentTypes } = await this.props.sdk.space.getContentTypes();
-    const contentTypeIds = contentTypes.map(ct => ct.sys.id)
+    const { parameters } = this.state;
+    let valid = true;
+    if (!(parameters.muxAccessTokenId && parameters.muxAccessTokenId.trim())) {
+      valid = false;
+    }
+    if (!(parameters.muxAccessTokenSecret && parameters.muxAccessTokenSecret.trim())) {
+      valid = false;
+    }
+
+    if (!valid) {
+      this.props.sdk.notifier.error('Please enter a valid access token and secret.');
+      return false;
+    }
 
     // Return value of `onConfigure` is used to install
     // or update the configuration.
     return {
       // Parameters to be persisted as the app configuration.
       parameters: this.state.parameters,
-      // Transformation of an environment performed in the
-      // installation process.
-      targetState: {
-        EditorInterface: contentTypeIds.reduce((acc, id) => {
-          // Insert the app as the first item in sidebars
-          // of all content types.
-          return { ...acc, [id]: { sidebar: { position: 0 } } }
-        }, {})
-      }
-    };
+    }
   }
 }
 
