@@ -1,7 +1,9 @@
-# Hello World example
-Start building an app for Contentful with this hello-world boilerplate. It comes with the [App SDK](https://ctfl.io/app-sdk), our design system [Forma 36](https://ctfl.io/f36), and all the code you need to run a basic app. It will render a simple "Hello World!" in the [app configuration screen](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/#app-configuration):
+# `hello-world-react` example
+Start building an app for Contentful with this hello-world-react boilerplate. It comes with React, the [App SDK](https://ctfl.io/app-sdk), our design system [Forma 36](https://ctfl.io/f36), and all the code you need to run a basic app. It will render a simple "Hello World!" in the [app configuration screen](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/#app-configuration):
 
 ![Screenshot](https://images.ctfassets.net/tz3n7fnw4ujc/2xWhCSYIJmGCJVVRHXw2Yb/0aa067e4f3d993e886031059cd5aabb6/hello-world-app.png)
+
+> Keep in mind that using React is not required to build a Contentful app.
 
 ## How to use
 
