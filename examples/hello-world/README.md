@@ -15,7 +15,11 @@ yarn
 yarn start
 ```
 
-To test, you can create an app definition in your Contentful organization settings pointing to `http://localhost:1234` and registering the `app-config` location.
+To test, you can create an app definition in your Contentful organization settings pointing to `http://localhost:1234` and registering the `app-config` location:
+
+![App definition](https://images.ctfassets.net/tz3n7fnw4ujc/6jjsBToDLY7OP9Yy4KXWGx/14813081b1ab56cf11aee903e474054e/Screenshot_2020-05-06_at_11.35.40.png?w=1800)
+
+> Keep in mind that when you serve an app locally over `http`, you will get a warning about insecure content. You can ignore this during development.
 
 ## What's included?
 
