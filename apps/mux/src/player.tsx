@@ -51,7 +51,9 @@ class Player extends React.Component<PlayerProps, {}> {
     `https://image.mux.com/${this.props.playbackId}/thumbnail.jpg`;
 
   convertRatio = () => {
-    const [width, height] = this.props.ratio.split(':').map(n => parseFloat(n));
+    const [width, height] = this.props.ratio
+      .split(':')
+      .map((n) => parseFloat(n));
     return height / width;
   };
 

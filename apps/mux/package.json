@@ -52,7 +52,8 @@
     "tsc": "tsc -p ./ --noEmit",
     "test": "contentful-extension-scripts test --env=jsdom --watch",
     "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage",
-    "contentful": "contentful"
+    "contentful": "contentful",
+    "lint": "prettier --write src/**/*.tsx"
   },
   "prettier": {
     "trailingComma": "es5",

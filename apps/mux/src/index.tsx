@@ -6,7 +6,12 @@ import {
   Spinner,
   Button,
 } from '@contentful/forma-36-react-components';
-import { init, locations, BaseExtensionSDK, FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
+import {
+  init,
+  locations,
+  BaseExtensionSDK,
+  FieldExtensionSDK,
+} from 'contentful-ui-extensions-sdk';
 import { createUpload } from '@mux/upchunk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
@@ -15,7 +20,7 @@ import Config from './config';
 import Player from './player';
 import DeleteButton from './deleteButton';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface InstallationParams {
   muxAccessTokenId: string;
@@ -390,8 +395,8 @@ export class App extends React.Component<AppProps, AppState> {
   };
 }
 
-init(sdk => {
-  if (sdk.location.is(locations.LOCATION_APP_CONFIG) {
+init((sdk) => {
+  if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     render(
       <Config sdk={sdk as BaseExtensionSDK} />,
       document.getElementById('root')
