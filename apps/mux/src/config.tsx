@@ -262,7 +262,9 @@ class Config extends React.Component<ConfigProps, {}> {
     return {
       // Parameters to be persisted as the app configuration.
       parameters: this.state.parameters,
-      EditorInterface: editorInterface,
+      targetState: {
+        EditorInterface: editorInterface,
+      },
     };
   }
 }
