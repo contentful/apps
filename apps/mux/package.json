@@ -9,7 +9,7 @@
     "@babel/preset-env": "^7.3.4",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "^7.3.3",
-    "@contentful/contentful-extension-scripts": "0.12.0",
+    "@contentful/contentful-extension-scripts": "0.16.0",
     "@types/enzyme": "^3.9.1",
     "@types/enzyme-adapter-react-16": "^1.0.5",
     "@types/jest": "^24.0.15",
@@ -33,7 +33,7 @@
     "@contentful/forma-36-tokens": "^0.4.1",
     "@mux/upchunk": "^1.0.6",
     "@types/hls.js": "^0.12.3",
-    "contentful-ui-extensions-sdk": "^3.10.6",
+    "contentful-ui-extensions-sdk": "^3.14.x",
     "core-js": "^3.0.1",
     "hls.js": "^0.12.4",
     "prop-types": "^15.7.2",
@@ -41,7 +41,6 @@
     "react-dom": "^16.8.6"
   },
   "scripts": {
-    "prestart": "contentful extension update --src http://localhost:1234 --force",
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build",
     "deploy": "npm run build && contentful extension update --force",
