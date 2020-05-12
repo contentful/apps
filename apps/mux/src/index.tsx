@@ -9,7 +9,7 @@ import {
 import {
   init,
   locations,
-  BaseExtensionSDK,
+  AppExtensionSDK,
   FieldExtensionSDK,
 } from 'contentful-ui-extensions-sdk';
 import { createUpload } from '@mux/upchunk';
@@ -398,7 +398,7 @@ export class App extends React.Component<AppProps, AppState> {
 init((sdk) => {
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     render(
-      <Config sdk={sdk as BaseExtensionSDK} />,
+      <Config sdk={sdk as AppExtensionSDK} />,
       document.getElementById('root')
     );
   } else {

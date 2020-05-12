@@ -15,18 +15,27 @@ import {
   Typography,
   FieldGroup,
 } from '@contentful/forma-36-react-components';
-import { BaseExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { EditorInterface, AppExtensionSDK, AppConfigAPI, SpaceAPI, BaseExtensionSDK } from 'contentful-ui-extensions-sdk';
 import MuxLogoSvg from './mux-logo.svg';
 import './config.css';
 
 interface ConfigProps {
-  sdk: BaseExtensionSDK;
+  sdk: AppExtensionSDK;
 }
 
-class Config extends React.Component<ConfigProps, {}> {
+interface IState {
+  editorInterface: EditorInterface;
+  parameters: any;
+  contentTypes: [any?];
+}
+
+class Config extends React.Component<ConfigProps, IState> {
+  app: AppConfigAPI;
+  space: SpaceAPI;
+
   constructor(props: ConfigProps) {
     super(props);
-    this.state = { parameters: {}, contentTypes: [], editorInterface: {} };
+    this.state = { parameters: {}, contentTypes: [], editorInterface: {sys: {}} };
 
     // `sdk.app` exposes all app-related methods.
     this.app = this.props.sdk.app;
