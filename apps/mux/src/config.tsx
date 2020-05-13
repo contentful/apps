@@ -16,11 +16,9 @@ import {
   FieldGroup,
 } from '@contentful/forma-36-react-components';
 import { EditorInterface, AppExtensionSDK, AppConfigAPI, SpaceAPI, BaseExtensionSDK } from 'contentful-ui-extensions-sdk';
-import * as sda from 'shared-dam-app';
+import { editorInterfaceToSelectedFields, getCompatibleFields, selectedFieldsToTargetState } from 'shared-dam-app';
 import MuxLogoSvg from './mux-logo.svg';
 import './config.css';
-
-console.log('debug sda', sda);
 
 interface ConfigProps {
   sdk: AppExtensionSDK;
@@ -64,6 +62,8 @@ class Config extends React.Component<ConfigProps, IState> {
       ({ fields }) => fields.filter(({ type }) => type === 'Object').length
     );
 
+    const compatibleFields = getCompatibleFields(contentTypesRes.items);
+
     const editorInterface = {};
     contentTypesWithJSONFields.forEach(({ sys, fields }) => {
       const contentTypeId = sys.id;
@@ -90,7 +90,8 @@ class Config extends React.Component<ConfigProps, IState> {
       // We default to an empty object in this case.
       {
         parameters: parameters || {},
-        contentTypes: contentTypesWithJSONFields,
+        compatibleFields,
+        contentTypes: contentTypesRes.items,
         editorInterface,
       },
       () => {
@@ -128,6 +129,7 @@ class Config extends React.Component<ConfigProps, IState> {
     const {
       parameters: { muxAccessTokenId, muxAccessTokenSecret },
       contentTypes,
+      compatibleFields,
       editorInterface,
     } = this.state;
 
@@ -196,22 +198,20 @@ class Config extends React.Component<ConfigProps, IState> {
                 fields. Select which JSON fields you'd like to enable for this
                 app.
               </Paragraph>
-              {(contentTypes || []).map(
-                ({ name: contentTypeName, sys, fields, displayField }) => {
-                  const contentTypeId = sys.id;
+              {Object.keys(compatibleFields || {}).filter(contentTypeId => compatibleFields[contentTypeId].length).map(contentTypeId => {
+                  const contentType = contentTypes.find(({ sys }) => sys.id === contentTypeId);
                   return (
                     <div key={contentTypeId}>
-                      <Subheading>{contentTypeName}</Subheading>
-                      {fields &&
-                        fields
-                          .filter(({ type }) => type === 'Object')
+                      <Subheading>{contentType && contentType.name}</Subheading>
+                      {compatibleFields[contentTypeId].length &&
+                        compatibleFields[contentTypeId]
                           .map(({ id: fieldId, name: fieldName }) => {
                             return (
                               <FieldGroup key={fieldId}>
                                 <CheckboxField
                                   labelText={fieldName}
                                   helpText={`Field ID: ${fieldId}`}
-                                  name={`${contentTypeName}-${fieldName}`}
+                                  name={`${contentTypeId}-${fieldName}`}
                                   value={fieldId}
                                   id={fieldId}
                                   checked={this.isChecked(
