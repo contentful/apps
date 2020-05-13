@@ -16,8 +16,11 @@ import {
   FieldGroup,
 } from '@contentful/forma-36-react-components';
 import { EditorInterface, AppExtensionSDK, AppConfigAPI, SpaceAPI, BaseExtensionSDK } from 'contentful-ui-extensions-sdk';
+import * as sda from 'shared-dam-app';
 import MuxLogoSvg from './mux-logo.svg';
 import './config.css';
+
+console.log('debug sda', sda);
 
 interface ConfigProps {
   sdk: AppExtensionSDK;
