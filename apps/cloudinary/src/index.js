@@ -24,7 +24,10 @@ const FIELDS_TO_PERSIST = [
   'public_id',
   'created_at',
   'secure_url',
-  'resource_type'
+  'resource_type',
+  'original_url',
+  'original_secure_url',
+  'raw_transformation' 
 ];
 
 function makeThumbnail(resource, config) {
@@ -35,20 +38,12 @@ function makeThumbnail(resource, config) {
 
   let url;
   const alt = [resource.public_id, ...(resource.tags || [])].join(', ');
-  let transformations = 'w_150,h_100,c_fill';
-
-  if (
-    Array.isArray(resource.derived) &&
-    resource.derived[0] &&
-    resource.derived[0].raw_transformation
-  ) {
-    transformations = resource.derived[0].raw_transformation + '/' + transformations;
-  }
+  let transformations = `${resource.raw_transformation}/w_150,h_100,c_fill`;
 
   if (resource.resource_type === 'image' && VALID_IMAGE_FORMATS.includes(resource.format)) {
     url = cloudinary.url(resource.public_id, {
       type: resource.type,
-      rawTransformation: transformations
+      rawTransformation: transformations 
     });
   } else if (resource.resource_type === 'video') {
     url = cloudinary.video_thumbnail_url(resource.public_id, {
@@ -63,6 +58,18 @@ function makeThumbnail(resource, config) {
 function renderDialog(sdk) {
   const { cloudinary } = window;
   const config = sdk.parameters.invocation;
+  let default_transformations = {};
+  
+
+  // Handle format
+  if(config.format!=='none'){
+    default_transformations.fetch_format = config.format;
+  }
+
+  // Handle quality
+  if(config.quality!=='none'){
+    default_transformations.quality = config.quality;
+  }
 
   const options = {
     cloud_name: config.cloudName,
@@ -70,8 +77,10 @@ function renderDialog(sdk) {
     max_files: config.maxFiles,
     multiple: config.maxFiles > 1,
     inline_container: '#root',
-    remove_header: true
+    remove_header: true,
+    default_transformations: [default_transformations]
   };
+  
 
   const instance = cloudinary.createMediaLibrary(options, {
     insertHandler: data => sdk.close(data)
@@ -100,10 +109,26 @@ async function openDialog(sdk, currentValue, config) {
   });
 
   if (result && Array.isArray(result.assets)) {
-    return result.assets.map(asset => pick(asset, FIELDS_TO_PERSIST));
+    return result.assets.map(asset => extractAsset(asset));
   } else {
     return [];
   }
+}
+
+function extractAsset(asset){
+  let res = pick(asset,FIELDS_TO_PERSIST);
+  // if we have a derived images, we replace the URL with the derived URL and store the origianl URL seperatly
+  if(asset.derived){
+    res = {
+      ...res,
+      original_url: res.url,
+      original_secure_url: res.secure_url,
+      url: asset.derived[0].url,
+      secure_url: asset.derived[0].secure_url,
+      raw_transformation: asset.derived[0].raw_transformation
+    }
+  }
+  return res;
 }
 
 function isDisabled(currentValue, config) {
@@ -134,20 +159,20 @@ setup({
   name: 'Cloudinary',
   logo,
   description:
-    'The Cloudinary app is a widget that allows editors to select media from their Cloudinary account. Select or upload a file on Cloudinary and designate the assets that you want your entry to reference.',
+    'The Cloudinary app allows editors selecting media from their Cloudinary account. Select the asset from Cloudinary that you want your entry to reference.',
   color: '#F4B21B',
   parameterDefinitions: [
     {
       "id": "cloudName",
       "name": "Cloud name",
-      "description": "The cloud name of the account to access.",
+      "description": "The Cloudinary cloud name that the app will connect to",
       "type": "Symbol",
       "required": true
     },
     {
       "id": "apiKey",
       "name": "API key",
-      "description": "The account API key.",
+      "description": "The Cloduinary API Key as can be found in your Cloudinary console",
       "type": "Symbol",
       "required": true
     },
@@ -162,10 +187,28 @@ setup({
     {
       "id": "startFolder",
       "name": "Starting folder",
-      "description": "Path to starting folder for the media library dialog",
+      "description": "A path to a folder, which the Cloudinary Media Library will automatically browse to on load",
       "type": "Symbol",
       "required": false,
       "default": ""
+    },
+    {
+      "id": "quality",
+      "name": "Media Quality",
+      "description": "The quality level of your assets. This can be a fixed number ranging from 1-100, or you can get Cloudinary to decide the most optimized level by setting to 'auto'. More available options are auto:low/auto:eco/auto:good/auto:best. If you wish to use the original level, set to 'none'",
+      "type": "List",
+      "value": "auto,none,auto:low,auto:eco,auto:good,auto:best,10,20,30,40,50,60,70,80,90,100",
+      "required": true,
+      "default": "auto"
+    },
+    {
+      "id": "format",
+      "name": "Format",
+      "description": "The format of the assets. This can be set manually to a specific format - 'jpg' as an example (all supported formats can be foudn here - https://cloudinary.com/documentation/image_transformations#supported_image_formats. By setting to 'auto' Cloudinary will decide on the most optimized format for your users. If you wish to keep the original format, set to 'none'", 
+      "type": "List",
+      "value":"auto,none,gif,webp,bmp,flif,heif,heic,ico,jpg,jpe,jpeg,jp2,wdp,jxr,hdp,png,psd,arw,cr2,svg,tga,tif,tiff",
+      "required": true,
+      "default": "auto"
     }
   ],
   makeThumbnail,

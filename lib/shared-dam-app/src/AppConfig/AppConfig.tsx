@@ -7,7 +7,9 @@ import {
   Note,
   Typography,
   TextField,
-  Form
+  Form,
+  SelectField,
+  Option
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
@@ -179,11 +181,28 @@ export default class AppConfig extends React.Component<Props, State> {
     this.setState({ selectedFields });
   };
 
+  buildSelectField = (key: string, def: Record<string, any>) =>{
+    const values = def.value.split(',');
+    return (
+      <SelectField
+          labelText={def.name}
+          id={key}
+          name={key}
+          required={def.required}
+          helpText={def.description}
+          key={key}
+          onChange={this.onParameterChange.bind(this, def.id)}
+          value={this.state.parameters[def.id]}
+          >
+            {values.map((currValue: string) => <Option value={currValue} key={currValue}>{currValue}</Option>)}
+      </SelectField>
+    )
+  }
+
   renderApp() {
     const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
     const { parameterDefinitions } = this.props;
     const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
-
     return (
       <>
         {hasConfigurationOptions && (
@@ -192,24 +211,27 @@ export default class AppConfig extends React.Component<Props, State> {
             <Form>
               {parameterDefinitions.map(def => {
                 const key = `config-input-${def.id}`;
-
-                return (
-                  <TextField
-                    required={def.required}
-                    key={key}
-                    id={key}
-                    name={key}
-                    labelText={def.name}
-                    textInputProps={{
-                      width: def.type === 'Symbol' ? 'large' : 'medium',
-                      type: def.type === 'Symbol' ? 'text' : 'number',
-                      maxLength: 255
-                    }}
-                    helpText={def.description}
-                    value={parameters[def.id]}
-                    onChange={this.onParameterChange.bind(this, def.id)}
-                  />
-                );
+                if (def.type==="List"){
+                  return this.buildSelectField(key, def);
+                }else {
+                    return (
+                      <TextField
+                        required={def.required}
+                        key={key}
+                        id={key}
+                        name={key}
+                        labelText={def.name}
+                        textInputProps={{
+                          width: def.type === 'Symbol' ? 'large' : 'medium',
+                          type: def.type === 'Symbol' ? 'text' : 'number',
+                          maxLength: 255
+                        }}
+                        helpText={def.description}
+                        value={parameters[def.id]}
+                        onChange={this.onParameterChange.bind(this, def.id)}
+                      />
+                    );
+                  }
               })}
             </Form>
             <hr className={styles.splitter} />
