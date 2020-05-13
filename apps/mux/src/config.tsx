@@ -16,7 +16,7 @@ import {
   FieldGroup,
 } from '@contentful/forma-36-react-components';
 import { EditorInterface, AppExtensionSDK, AppConfigAPI, SpaceAPI, BaseExtensionSDK } from 'contentful-ui-extensions-sdk';
-import { editorInterfaceToSelectedFields, getCompatibleFields, selectedFieldsToTargetState } from 'shared-dam-app';
+import { editorInterfacesToSelectedFields, getCompatibleFields, selectedFieldsToTargetState } from 'shared-dam-app';
 import MuxLogoSvg from './mux-logo.svg';
 import './config.css';
 
@@ -25,7 +25,6 @@ interface ConfigProps {
 }
 
 interface IState {
-  editorInterface: EditorInterface;
   parameters: any;
   contentTypes: [any?];
 }
@@ -36,7 +35,7 @@ class Config extends React.Component<ConfigProps, IState> {
 
   constructor(props: ConfigProps) {
     super(props);
-    this.state = { parameters: {}, contentTypes: [], editorInterface: {sys: {}} };
+    this.state = { parameters: {}, contentTypes: [] };
 
     // `sdk.app` exposes all app-related methods.
     this.app = this.props.sdk.app;
@@ -63,28 +62,9 @@ class Config extends React.Component<ConfigProps, IState> {
     );
 
     const compatibleFields = getCompatibleFields(contentTypesRes.items);
+    const selectedFields = editorInterfacesToSelectedFields(eisRes.items, ids.app);
 
-    const editorInterface = {};
-    contentTypesWithJSONFields.forEach(({ sys, fields }) => {
-      const contentTypeId = sys.id;
-      editorInterface[contentTypeId] = {
-        controls: fields
-          .filter(({ type }) => type === 'Object')
-          .map(({ id }) => {
-            const contentType = eisRes.items.find(
-              ({ sys }) => sys.contentType.sys.id === contentTypeId
-            );
-            const field = contentType.controls.find(
-              ({ fieldId }) => fieldId === id
-            );
-            if (field.widgetId === ids.app) {
-              return { fieldId: id };
-            }
-          })
-          .filter((obj) => !!obj),
-      };
-    });
-
+    console.log('debug parameters', parameters);
     this.setState(
       // If the app is not installed, `parameters` will be `null`.
       // We default to an empty object in this case.
@@ -92,7 +72,7 @@ class Config extends React.Component<ConfigProps, IState> {
         parameters: parameters || {},
         compatibleFields,
         contentTypes: contentTypesRes.items,
-        editorInterface,
+        selectedFields,
       },
       () => {
         // Once preparation has finished, call `setReady` to hide
@@ -103,25 +83,19 @@ class Config extends React.Component<ConfigProps, IState> {
   }
 
   assignToField(contentTypeId: string, fieldId: string, enabled: boolean) {
-    const { editorInterface } = this.state;
-    editorInterface[contentTypeId] = editorInterface[contentTypeId] || {};
-    editorInterface[contentTypeId].controls =
-      editorInterface[contentTypeId].controls || [];
+    const { selectedFields } = this.state;
+    selectedFields[contentTypeId] = [...(selectedFields[contentTypeId] || [])];
     if (enabled) {
-      editorInterface[contentTypeId].controls.push({ fieldId });
+      selectedFields[contentTypeId].push(fieldId);
     } else {
-      editorInterface[contentTypeId].controls = editorInterface[
-        contentTypeId
-      ].controls.filter(({ fieldId: id }) => id !== fieldId);
+      selectedFields[contentTypeId] = selectedFields[contentTypeId].filter(id => id !== fieldId);
     }
-    this.setState({ editorInterface: { ...editorInterface } });
+    if (!selectedFields[contentTypeId].length) delete selectedFields[contentTypeId]
+    this.setState({ selectedFields: {...selectedFields} })
   }
 
   isChecked(contentTypeId: string, fieldId: string) {
-    const { editorInterface } = this.state;
-    return !!(
-      editorInterface[contentTypeId] && editorInterface[contentTypeId].controls
-    ).find(({ fieldId: id }) => id === fieldId);
+    return this.state.selectedFields[contentTypeId] && this.state.selectedFields[contentTypeId].includes(fieldId);
   }
 
   // Renders the UI of the app.
@@ -130,7 +104,6 @@ class Config extends React.Component<ConfigProps, IState> {
       parameters: { muxAccessTokenId, muxAccessTokenSecret },
       contentTypes,
       compatibleFields,
-      editorInterface,
     } = this.state;
 
     return (
@@ -248,7 +221,7 @@ class Config extends React.Component<ConfigProps, IState> {
   }
 
   async onConfigure() {
-    const { parameters, editorInterface } = this.state;
+    const { parameters } = this.state;
     let valid = true;
     if (!(parameters.muxAccessTokenId && parameters.muxAccessTokenId.trim())) {
       valid = false;
@@ -269,14 +242,13 @@ class Config extends React.Component<ConfigProps, IState> {
       return false;
     }
 
-    // Return value of `onConfigure` is used to install
-    // or update the configuration.
+    const targetState = selectedFieldsToTargetState(this.state.contentTypes, this.state.selectedFields);
+
+    console.log('debug onConfigure parameters', parameters);
+    console.log('debug onConfigure targetState', targetState);
     return {
-      // Parameters to be persisted as the app configuration.
-      parameters: this.state.parameters,
-      targetState: {
-        EditorInterface: editorInterface,
-      },
+      parameters,
+      targetState,
     };
   }
 }

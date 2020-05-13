@@ -59,6 +59,7 @@ export class App extends React.Component<AppProps, AppState> {
     const { muxAccessTokenId, muxAccessTokenSecret } = this.props.sdk.parameters
       .installation as InstallationParams;
 
+    console.log('debug parameters', muxAccessTokenId, muxAccessTokenSecret);
     this.muxBaseReqOptions = {
       mode: 'cors',
       headers: this.requestHeaders(muxAccessTokenId, muxAccessTokenSecret),
@@ -83,6 +84,8 @@ export class App extends React.Component<AppProps, AppState> {
     this.detachExternalChangeHandler = this.props.sdk.field.onValueChanged(
       this.onExternalChange
     );
+
+    if (this.state.error) return;
 
     // Just in case someone left an asset in a bad place, we'll do some additional checks first just to see if
     // we can clean up.
