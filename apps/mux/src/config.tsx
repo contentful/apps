@@ -15,8 +15,21 @@ import {
   Typography,
   FieldGroup,
 } from '@contentful/forma-36-react-components';
-import { EditorInterface, AppExtensionSDK, AppConfigAPI, SpaceAPI, BaseExtensionSDK } from 'contentful-ui-extensions-sdk';
-import { editorInterfacesToSelectedFields, getCompatibleFields, selectedFieldsToTargetState } from 'shared-dam-app';
+import {
+  EditorInterface,
+  AppExtensionSDK,
+  AppConfigAPI,
+  SpaceAPI,
+  BaseExtensionSDK,
+} from 'contentful-ui-extensions-sdk';
+import {
+  editorInterfacesToSelectedFields,
+  getCompatibleFields,
+  selectedFieldsToTargetState,
+  ContentType,
+  CompatibleFields,
+  SelectedFields,
+} from 'shared-dam-app';
 import MuxLogoSvg from './mux-logo.svg';
 import './config.css';
 
@@ -26,7 +39,9 @@ interface ConfigProps {
 
 interface IState {
   parameters: any;
-  contentTypes: [any?];
+  contentTypes: ContentType[];
+  compatibleFields: CompatibleFields;
+  selectedFields: SelectedFields;
 }
 
 class Config extends React.Component<ConfigProps, IState> {
@@ -35,7 +50,12 @@ class Config extends React.Component<ConfigProps, IState> {
 
   constructor(props: ConfigProps) {
     super(props);
-    this.state = { parameters: {}, contentTypes: [] };
+    this.state = {
+      parameters: {},
+      contentTypes: [],
+      compatibleFields: {},
+      selectedFields: {},
+    };
 
     // `sdk.app` exposes all app-related methods.
     this.app = this.props.sdk.app;
@@ -57,12 +77,11 @@ class Config extends React.Component<ConfigProps, IState> {
 
     const { ids } = this.props.sdk;
 
-    const contentTypesWithJSONFields = contentTypesRes.items.filter(
-      ({ fields }) => fields.filter(({ type }) => type === 'Object').length
-    );
-
     const compatibleFields = getCompatibleFields(contentTypesRes.items);
-    const selectedFields = editorInterfacesToSelectedFields(eisRes.items, ids.app);
+    const selectedFields = editorInterfacesToSelectedFields(
+      eisRes.items,
+      ids.app
+    );
 
     this.setState(
       // If the app is not installed, `parameters` will be `null`.
@@ -87,14 +106,20 @@ class Config extends React.Component<ConfigProps, IState> {
     if (enabled) {
       selectedFields[contentTypeId].push(fieldId);
     } else {
-      selectedFields[contentTypeId] = selectedFields[contentTypeId].filter(id => id !== fieldId);
+      selectedFields[contentTypeId] = selectedFields[contentTypeId].filter(
+        (id) => id !== fieldId
+      );
     }
-    if (!selectedFields[contentTypeId].length) delete selectedFields[contentTypeId]
-    this.setState({ selectedFields: {...selectedFields} })
+    if (!selectedFields[contentTypeId].length)
+      delete selectedFields[contentTypeId];
+    this.setState({ selectedFields: { ...selectedFields } });
   }
 
   isChecked(contentTypeId: string, fieldId: string) {
-    return this.state.selectedFields[contentTypeId] && this.state.selectedFields[contentTypeId].includes(fieldId);
+    return (
+      this.state.selectedFields[contentTypeId] &&
+      this.state.selectedFields[contentTypeId].includes(fieldId)
+    );
   }
 
   // Renders the UI of the app.
@@ -170,14 +195,20 @@ class Config extends React.Component<ConfigProps, IState> {
                 fields. Select which JSON fields you'd like to enable for this
                 app.
               </Paragraph>
-              {Object.keys(compatibleFields || {}).filter(contentTypeId => compatibleFields[contentTypeId].length).map(contentTypeId => {
-                  const contentType = contentTypes.find(({ sys }) => sys.id === contentTypeId);
+              {Object.keys(compatibleFields || {})
+                .filter(
+                  (contentTypeId) => compatibleFields[contentTypeId].length
+                )
+                .map((contentTypeId) => {
+                  const contentType = contentTypes.find(
+                    ({ sys }) => sys.id === contentTypeId
+                  );
                   return (
                     <div key={contentTypeId}>
                       <Subheading>{contentType && contentType.name}</Subheading>
                       {compatibleFields[contentTypeId].length &&
-                        compatibleFields[contentTypeId]
-                          .map(({ id: fieldId, name: fieldName }) => {
+                        compatibleFields[contentTypeId].map(
+                          ({ id: fieldId, name: fieldName }) => {
                             return (
                               <FieldGroup key={fieldId}>
                                 <CheckboxField
@@ -200,11 +231,11 @@ class Config extends React.Component<ConfigProps, IState> {
                                 />
                               </FieldGroup>
                             );
-                          })}
+                          }
+                        )}
                     </div>
                   );
-                }
-              )}
+                })}
             </Form>
           </Typography>
           <hr className="config-splitter" />
@@ -241,7 +272,10 @@ class Config extends React.Component<ConfigProps, IState> {
       return false;
     }
 
-    const targetState = selectedFieldsToTargetState(this.state.contentTypes, this.state.selectedFields);
+    const targetState = selectedFieldsToTargetState(
+      this.state.contentTypes,
+      this.state.selectedFields
+    );
 
     return {
       parameters,
