@@ -59,7 +59,6 @@ export class App extends React.Component<AppProps, AppState> {
     const { muxAccessTokenId, muxAccessTokenSecret } = this.props.sdk.parameters
       .installation as InstallationParams;
 
-    console.log('debug parameters', muxAccessTokenId, muxAccessTokenSecret);
     this.muxBaseReqOptions = {
       mode: 'cors',
       headers: this.requestHeaders(muxAccessTokenId, muxAccessTokenSecret),
@@ -261,7 +260,7 @@ export class App extends React.Component<AppProps, AppState> {
 
     const { data: muxUpload } = await res.json();
 
-    if (muxUpload['asset_id']) {
+    if (muxUpload && muxUpload['asset_id']) {
       await this.props.sdk.field.setValue({
         uploadId: muxUpload.id,
         assetId: muxUpload['asset_id'],

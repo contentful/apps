@@ -16,7 +16,6 @@ import {
   FieldGroup,
 } from '@contentful/forma-36-react-components';
 import {
-  EditorInterface,
   AppExtensionSDK,
   AppConfigAPI,
   SpaceAPI,
@@ -26,6 +25,7 @@ import {
   editorInterfacesToSelectedFields,
   getCompatibleFields,
   selectedFieldsToTargetState,
+  EditorInterface,
   ContentType,
   CompatibleFields,
   SelectedFields,
@@ -37,8 +37,13 @@ interface ConfigProps {
   sdk: AppExtensionSDK;
 }
 
+interface IParameters {
+  muxAccessTokenId?: string;
+  muxAccessTokenSecret?: string;
+}
+
 interface IState {
-  parameters: any;
+  parameters: IParameters;
   contentTypes: ContentType[];
   compatibleFields: CompatibleFields;
   selectedFields: SelectedFields;
@@ -77,9 +82,11 @@ class Config extends React.Component<ConfigProps, IState> {
 
     const { ids } = this.props.sdk;
 
-    const compatibleFields = getCompatibleFields(contentTypesRes.items);
+    const compatibleFields = getCompatibleFields(
+      contentTypesRes.items as ContentType[]
+    );
     const selectedFields = editorInterfacesToSelectedFields(
-      eisRes.items,
+      eisRes.items as EditorInterface[],
       ids.app
     );
 
@@ -89,7 +96,7 @@ class Config extends React.Component<ConfigProps, IState> {
       {
         parameters: parameters || {},
         compatibleFields,
-        contentTypes: contentTypesRes.items,
+        contentTypes: contentTypesRes.items as ContentType[],
         selectedFields,
       },
       () => {
@@ -104,13 +111,13 @@ class Config extends React.Component<ConfigProps, IState> {
     const { selectedFields } = this.state;
     selectedFields[contentTypeId] = [...(selectedFields[contentTypeId] || [])];
     if (enabled) {
-      selectedFields[contentTypeId].push(fieldId);
+      selectedFields[contentTypeId]!.push(fieldId);
     } else {
-      selectedFields[contentTypeId] = selectedFields[contentTypeId].filter(
+      selectedFields[contentTypeId] = selectedFields[contentTypeId]!.filter(
         (id) => id !== fieldId
       );
     }
-    if (!selectedFields[contentTypeId].length)
+    if (!selectedFields[contentTypeId]!.length)
       delete selectedFields[contentTypeId];
     this.setState({ selectedFields: { ...selectedFields } });
   }
@@ -118,7 +125,7 @@ class Config extends React.Component<ConfigProps, IState> {
   isChecked(contentTypeId: string, fieldId: string) {
     return (
       this.state.selectedFields[contentTypeId] &&
-      this.state.selectedFields[contentTypeId].includes(fieldId)
+      this.state.selectedFields[contentTypeId]!.includes(fieldId)
     );
   }
 
@@ -148,7 +155,7 @@ class Config extends React.Component<ConfigProps, IState> {
           </Typography>
           <hr className="config-splitter" />
           <Typography>
-            <Form id="app-config" spacing="default">
+            <Form spacing="default">
               <Heading>API credentials</Heading>
               <Paragraph>
                 These can be obtained by clicking 'Generate new token' in the{' '}
@@ -166,7 +173,7 @@ class Config extends React.Component<ConfigProps, IState> {
                 onChange={(e) =>
                   this.setState({
                     parameters: {
-                      muxAccessTokenId: e.target.value,
+                      muxAccessTokenId: (e.target as HTMLTextAreaElement).value,
                       muxAccessTokenSecret,
                     },
                   })
@@ -182,7 +189,8 @@ class Config extends React.Component<ConfigProps, IState> {
                   this.setState({
                     parameters: {
                       muxAccessTokenId,
-                      muxAccessTokenSecret: e.target.value,
+                      muxAccessTokenSecret: (e.target as HTMLTextAreaElement)
+                        .value,
                     },
                   })
                 }
@@ -225,7 +233,7 @@ class Config extends React.Component<ConfigProps, IState> {
                                     this.assignToField(
                                       contentTypeId,
                                       fieldId,
-                                      e.target.checked
+                                      (e.target as HTMLInputElement).checked
                                     )
                                   }
                                 />
