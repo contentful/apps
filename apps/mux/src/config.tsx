@@ -64,7 +64,6 @@ class Config extends React.Component<ConfigProps, IState> {
     const compatibleFields = getCompatibleFields(contentTypesRes.items);
     const selectedFields = editorInterfacesToSelectedFields(eisRes.items, ids.app);
 
-    console.log('debug parameters', parameters);
     this.setState(
       // If the app is not installed, `parameters` will be `null`.
       // We default to an empty object in this case.
@@ -244,8 +243,6 @@ class Config extends React.Component<ConfigProps, IState> {
 
     const targetState = selectedFieldsToTargetState(this.state.contentTypes, this.state.selectedFields);
 
-    console.log('debug onConfigure parameters', parameters);
-    console.log('debug onConfigure targetState', targetState);
     return {
       parameters,
       targetState,
