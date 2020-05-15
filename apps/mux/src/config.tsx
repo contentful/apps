@@ -150,7 +150,7 @@ class Config extends React.Component<ConfigProps, IState> {
               configure for Mux Video. For those configured fields you'll get a
               video uploader in the Contentful UI. Your videos will be
               transcoded, stored and delivered by{' '}
-              <a href="https://mux.com">Mux</a>.
+              <TextLink href="https://mux.com" rel="noopener noreferrer" target="_blank">Mux</TextLink>.
             </Paragraph>
           </Typography>
           <hr className="config-splitter" />
