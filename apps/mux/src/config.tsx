@@ -14,6 +14,7 @@ import {
   Paragraph,
   Typography,
   FieldGroup,
+  TextLink,
 } from '@contentful/forma-36-react-components';
 import {
   AppExtensionSDK,
