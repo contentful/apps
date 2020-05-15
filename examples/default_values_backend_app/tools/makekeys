@@ -1,0 +1,6 @@
+#!/bin/bash
+mkdir -p ../keys
+rm -rf ../keys/*
+
+openssl genrsa -out ./keys/key.pem 4096
+openssl rsa -in ./keys/key.pem -pubout -outform DER -out ./keys/key.der.pub
