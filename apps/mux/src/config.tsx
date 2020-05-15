@@ -159,9 +159,9 @@ class Config extends React.Component<ConfigProps, IState> {
               <Heading>API credentials</Heading>
               <Paragraph>
                 These can be obtained by clicking 'Generate new token' in the{' '}
-                <a href="https://dashboard.mux.com/settings/access-tokens">
+                <TextLink href="https://dashboard.mux.com/settings/access-tokens" rel="noopener noreferrer" target="_blank">
                   settings on your dashboard
-                </a>
+                </TextLink>
                 . Note that you must be an admin in your Mux account.
               </Paragraph>
               <TextField
