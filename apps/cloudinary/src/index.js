@@ -165,7 +165,7 @@ setup({
     {
       "id": "cloudName",
       "name": "Cloud name",
-      "description": "The Cloudinary cloud name that the app will connect to",
+      "description": "The Cloudinary cloud name that the app will connect to.",
       "type": "Symbol",
       "required": true
     },
