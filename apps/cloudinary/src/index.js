@@ -187,7 +187,7 @@ setup({
     {
       "id": "startFolder",
       "name": "Starting folder",
-      "description": "A path to a folder, which the Cloudinary Media Library will automatically browse to on load",
+      "description": "A path to a folder which the Cloudinary Media Library will automatically browse to on load",
       "type": "Symbol",
       "required": false,
       "default": ""
