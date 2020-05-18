@@ -24,9 +24,10 @@ async function main() {
     await installApp(APP_ID);
     await createAppKey(APP_ID);
     const contentTypeId = await createContentType();
-    await createWebHook(APP_ID, contentTypeId);
+    await createAppEvent(APP_ID);
 
-    fs.appendFileSync(path.join(__dirname, "../..", ".env"), `APP_ID=${APP_ID}`);
+    fs.appendFileSync(path.join(__dirname, "../..", ".env"), `APP_ID=${APP_ID}\n`);
+    fs.appendFileSync(path.join(__dirname, "../..", ".env"), `CONTENT_TYPE_ID=${contentTypeId}\n`);
 
     console.log(`Created new APP APP_ID=${APP_ID}`);
   } catch (e) {
@@ -182,38 +183,28 @@ async function createContentType() {
   }
 }
 
-async function createWebHook(APP_ID: string, contentTypeId: string) {
-  const pubKey = getPublicKey();
-  const keyId = getKeyId();
 
+async function createAppEvent(APP_ID: string) {
   const body = {
-    url: `${APP_LOCATION}/create`,
-    name: "on content create",
+    targetUrl: `${APP_LOCATION}/create`,
     topics: ["Entry.create"],
-    filters: [
-      {
-        equals: [
-          {
-            doc: "sys.contentType.sys.id",
-          },
-          contentTypeId,
-        ],
-      },
-    ],
   };
 
-  const response = await nodeFetch(`${BASE_URL}/spaces/${SPACE_ID}/webhook_definitions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/vnd.contentful.management.v1+json",
-      Authorization: `Bearer ${process.env.CMA_TOKEN}`,
-    },
-    body: JSON.stringify(body),
-  });
+  const response = await nodeFetch(
+    `${BASE_URL}/organizations/${ORG_ID}/app_definitions/${APP_ID}/event_subscription`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/vnd.contentful.management.v1+json",
+        Authorization: `Bearer ${process.env.CMA_TOKEN}`,
+      },
+      body: JSON.stringify(body),
+    }
+  );
 
   if (isOk(response.status)) {
-    console.log("Set up webhook!");
+    console.log("Set up App Event!");
   } else {
-    console.log("Webhook setup failed: " + (await response.text()));
+    console.log("App event setup failed: " + (await response.text()));
   }
 }
