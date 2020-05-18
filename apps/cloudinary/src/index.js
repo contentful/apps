@@ -204,7 +204,7 @@ setup({
     {
       "id": "format",
       "name": "Format",
-      "description": "The format of the assets. This can be set manually to a specific format - 'jpg' as an example (all supported formats can be foudn here - https://cloudinary.com/documentation/image_transformations#supported_image_formats. By setting to 'auto' Cloudinary will decide on the most optimized format for your users. If you wish to keep the original format, set to 'none'", 
+      "description": "The format of the assets. This can be set manually to a specific format - 'jpg' as an example (all supported formats can be found here - https://cloudinary.com/documentation/image_transformations#supported_image_formats. By setting it to 'auto', Cloudinary will decide on the most optimized format for your users. If you wish to keep the original format, set it to 'none'.", 
       "type": "List",
       "value":"auto,none,gif,webp,bmp,flif,heif,heic,ico,jpg,jpe,jpeg,jp2,wdp,jxr,hdp,png,psd,arw,cr2,svg,tga,tif,tiff",
       "required": true,
