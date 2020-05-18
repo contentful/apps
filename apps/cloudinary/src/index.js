@@ -195,7 +195,7 @@ setup({
     {
       "id": "quality",
       "name": "Media Quality",
-      "description": "The quality level of your assets. This can be a fixed number ranging from 1-100, or you can get Cloudinary to decide the most optimized level by setting to 'auto'. More available options are auto:low/auto:eco/auto:good/auto:best. If you wish to use the original level, set to 'none'",
+      "description": "The quality level of your assets. This can be a fixed number ranging from 1-100, or you can get Cloudinary to decide the most optimized level by setting it to 'auto'. More options are available such as: auto:low/auto:eco/auto:good/auto:best. If you wish to use the original level, set it to 'none'.",
       "type": "List",
       "value": "auto,none,auto:low,auto:eco,auto:good,auto:best,10,20,30,40,50,60,70,80,90,100",
       "required": true,
