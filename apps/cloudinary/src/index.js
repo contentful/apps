@@ -172,7 +172,7 @@ setup({
     {
       "id": "apiKey",
       "name": "API key",
-      "description": "The Cloduinary API Key as can be found in your Cloudinary console",
+      "description": "The Cloduinary API Key that can be found in your Cloudinary console.",
       "type": "Symbol",
       "required": true
     },
