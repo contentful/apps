@@ -6,6 +6,10 @@ import dotenv from "dotenv";
 dotenv.config();
 const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, APP_LOCATION, BASE_URL } = process.env;
 
+/* The code in this file uses the information that you should have added to the
+ * .env file to set up your enviornment for the backend App to work correctly.
+ */
+
 // ---------------------------------------
 // Main setup flow
 // ---------------------------------------

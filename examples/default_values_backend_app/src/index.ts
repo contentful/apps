@@ -6,12 +6,21 @@ dotenv.config();
 
 const { APP_ID, SPACE_ID, ENVIRONMENT_ID, BASE_URL } = process.env;
 
+/* This file is our backend App. It's a very straight forward Hapi server that
+ * listens for calls from a webhook, and then uses an AppToken to interact
+ * with the Content Management Api (CMA).
+ */ 
+
 // -------------------
 // MAIN SERVER
 // -------------------
 
-const init = async () => {
+const startServer = async () => {
+  // First we create a JWT token based on our private key, and the App's id
   const appToken = makeAppToken(APP_ID, getPrivateKey(), getKeyId());
+
+  // We then use that token to get a token from Contentful which our App can use
+  // to interact with the CMA
   const accessToken = await getAppAccessToken(appToken, SPACE_ID, ENVIRONMENT_ID, APP_ID);
 
   const server = Hapi.server({
@@ -19,6 +28,7 @@ const init = async () => {
     host: "localhost",
   });
 
+  // Here we are attaching the webook handler to our Server
   server.route(addDefaultData(accessToken));
 
   await server.start();
@@ -33,14 +43,14 @@ process.on("unhandledRejection", err => {
   process.exit(1);
 });
 
-init();
-
 process.on("uncaughtException", error => {
   console.error("[Uncaught Exception]");
   console.error(error);
 
   process.exit(1);
 });
+
+startServer();
 
 // -------------------
 // HANDLER FOR WEBHOOK
