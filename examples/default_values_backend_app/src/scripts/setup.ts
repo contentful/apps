@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 import dotenv from "dotenv";
 dotenv.config();
-const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, APP_LOCATION } = process.env;
+const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, APP_LOCATION, BASE_URL } = process.env;
 
 // ---------------------------------------
 // Main setup flow
@@ -49,20 +49,17 @@ async function createAppDefinition() {
     ],
   };
 
-  const response = await nodeFetch(
-    `https://api.flinkly.com/organizations/${ORG_ID}/app_definitions`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/vnd.contentful.management.v1+json",
-        Authorization: `Bearer ${process.env.CMA_TOKEN}`,
-      },
-      body: JSON.stringify(body),
-    }
-  );
+  const response = await nodeFetch(`${BASE_URL}/organizations/${ORG_ID}/app_definitions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/vnd.contentful.management.v1+json",
+      Authorization: `Bearer ${process.env.CMA_TOKEN}`,
+    },
+    body: JSON.stringify(body),
+  });
 
-  const j = await response.json();
   if (isOk(response.status)) {
+    const j = await response.json();
     console.log(`Created app definition. APP_ID is ${j.sys.id}`);
     return j.sys.id;
   } else {
@@ -86,7 +83,7 @@ async function createAppKey(APP_ID: string) {
   };
 
   const response = await nodeFetch(
-    `https://api.flinkly.com/organizations/${ORG_ID}/app_definitions/${APP_ID}/keys`,
+    `${BASE_URL}/organizations/${ORG_ID}/app_definitions/${APP_ID}/keys`,
     {
       method: "POST",
       headers: {
@@ -108,7 +105,7 @@ async function installApp(APP_ID: string) {
   const body = {};
 
   const response = await nodeFetch(
-    `https://api.flinkly.com/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/app_installations/${APP_ID}`,
+    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/app_installations/${APP_ID}`,
     {
       method: "PUT",
       headers: {
@@ -141,7 +138,7 @@ async function createContentType() {
   };
 
   const response = await nodeFetch(
-    `https://api.flinkly.com/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types`,
+    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types`,
     {
       method: "POST",
       headers: {
@@ -161,7 +158,7 @@ async function createContentType() {
   const responseBody = await response.json();
 
   const publishResponse = await nodeFetch(
-    `https://api.flinkly.com/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types/${responseBody.sys.id}/published`,
+    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types/${responseBody.sys.id}/published`,
     {
       method: "PUT",
       headers: {
@@ -177,7 +174,7 @@ async function createContentType() {
     console.log("Published example content type!");
     return responseBody.sys.id;
   } else {
-    return console.log("Publish content type failed: " + (await publishResponse.text()));
+    return console.log("Publish content type failed: " + responseBody);
   }
 }
 
@@ -201,17 +198,14 @@ async function createWebHook(APP_ID: string, contentTypeId: string) {
     ],
   };
 
-  const response = await nodeFetch(
-    `https://api.flinkly.com/spaces/${SPACE_ID}/webhook_definitions`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/vnd.contentful.management.v1+json",
-        Authorization: `Bearer ${process.env.CMA_TOKEN}`,
-      },
-      body: JSON.stringify(body),
-    }
-  );
+  const response = await nodeFetch(`${BASE_URL}/spaces/${SPACE_ID}/webhook_definitions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/vnd.contentful.management.v1+json",
+      Authorization: `Bearer ${process.env.CMA_TOKEN}`,
+    },
+    body: JSON.stringify(body),
+  });
 
   if (isOk(response.status)) {
     console.log("Set up webhook!");
