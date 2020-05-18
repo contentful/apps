@@ -4,7 +4,7 @@ import { makeAppToken, getAppAccessToken, getPrivateKey, getKeyId } from "./util
 import dotenv from "dotenv";
 dotenv.config();
 
-const { APP_ID, SPACE_ID, ENVIRONMENT_ID } = process.env;
+const { APP_ID, SPACE_ID, ENVIRONMENT_ID, BASE_URL } = process.env;
 
 // -------------------
 // MAIN SERVER
@@ -72,7 +72,7 @@ const addDefaultData = (appAccessToken: string) => ({
     // Then we make a request to contentful's CMA to update the Entry with our
     // default values
     const res = await fetch(
-      `https://api.flinkly.com/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/entries/${id}`,
+      `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/entries/${id}`,
       {
         method: "PUT",
         headers: {

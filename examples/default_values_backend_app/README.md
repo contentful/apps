@@ -64,8 +64,3 @@ yarn start
 7. Test it by going to the contentful web app and creating a new entry of the
    `Example` content type. You should see a prefilled title field!
 
-
-
-## TODOS
-
-put the api path in config

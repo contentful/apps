@@ -1,8 +1,11 @@
 const fetch = require("node-fetch");
+import dotenv from "dotenv";
+dotenv.config();
+const { BASE_URL } = process.env;
 
 const getAppAccessToken = async (appToken, spaceId, environmentId, appId) => {
   const response = await fetch(
-    `https://api.flinkly.com/spaces/${spaceId}/environments/${environmentId}/app_installations/${appId}/access_tokens`,
+    `${BASE_URL}/spaces/${spaceId}/environments/${environmentId}/app_installations/${appId}/access_tokens`,
     {
       method: "POST",
       headers: {
