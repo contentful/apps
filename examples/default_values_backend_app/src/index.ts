@@ -4,12 +4,12 @@ import { makeAppToken, getAppAccessToken, getPrivateKey, getKeyId } from "./util
 import dotenv from "dotenv";
 dotenv.config();
 
-const { APP_ID, SPACE_ID, ENVIRONMENT_ID, BASE_URL } = process.env;
+const { APP_ID, CONTENT_TYPE_ID, SPACE_ID, ENVIRONMENT_ID, BASE_URL } = process.env;
 
 /* This file is our backend App. It's a very straight forward Hapi server that
  * listens for calls from a webhook, and then uses an AppToken to interact
  * with the Content Management Api (CMA).
- */ 
+ */
 
 // -------------------
 // MAIN SERVER
@@ -77,6 +77,15 @@ const addDefaultData = (appAccessToken: string) => ({
     };
     const { id, version, contentType } = payload.sys;
     console.log(`Received webhook request because Entry ${id} was created`);
+
+    if (contentType.sys.id !== CONTENT_TYPE_ID) {
+      // If the content type does not match the one we created in setup, we just
+      // ignore the event
+      console.log(
+        `Entry's content type: ${contentType.sys.id} did not match the content type created for the App, ignoring`
+      );
+      return h.response("success").code(204);
+    }
 
     // Then we make a request to contentful's CMA to update the Entry with our
     // default values
