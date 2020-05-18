@@ -159,7 +159,7 @@ setup({
   name: 'Cloudinary',
   logo,
   description:
-    'The Cloudinary app allows editors selecting media from their Cloudinary account. Select the asset from Cloudinary that you want your entry to reference.',
+    'The Cloudinary app allows editors to select media from their Cloudinary account. Select the asset from Cloudinary that you want your entry to reference.',
   color: '#F4B21B',
   parameterDefinitions: [
     {
