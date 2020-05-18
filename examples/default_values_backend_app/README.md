@@ -16,8 +16,8 @@ available to contentful. For local development it is easiest to use
 shell```
 ngrok http 3543
 ```
-
-Take note of the url provided by NGROK
+Take note of the url provided by NGROK. This step is only necessary when running
+the app locally.
 
 2. Update `.env` with
 shell```
@@ -45,22 +45,27 @@ export CMA_TOKEN=${a valid CMA token}
 ./tools/makekeys
 ```
 
-5. Run the app's setup script
+5. Install the required node dependencies
+```shell
+yarn
+```
+
+6. Run the app's setup script
 
 ```shell
 yarn setup
 ```
-This step will 
+This step will
 * Create an app definition in your contentful organization
 * Install the app to the space and enviornment you specified
 * Setup a webhook that listens for new entries
 
 
-6. Run the backend App!
+7. Run the backend App!
 ```shell
 yarn start
 ```
 
-7. Test it by going to the contentful web app and creating a new entry of the
+8. Test it by going to the contentful web app and creating a new entry of the
    `Example` content type. You should see a prefilled title field!
 

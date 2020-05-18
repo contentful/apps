@@ -76,7 +76,6 @@ const addDefaultData = (appAccessToken: string) => ({
       sys: { id: string; version: string; contentType: { sys: { id: string } } };
     };
     const { id, version, contentType } = payload.sys;
-    console.log(payload.sys);
     console.log(`Received webhook request because Entry ${id} was created`);
 
     // Then we make a request to contentful's CMA to update the Entry with our
