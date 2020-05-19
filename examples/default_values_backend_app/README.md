@@ -19,12 +19,15 @@ ngrok http 3543
 Take note of the url provided by NGROK. This step is only necessary when running
 the app locally.
 
+Although we are running the `http` command - ngrok will provide a https address.
+We will need to use this secure URL for our app setup to work correctly.
+
 2. Update `.env` with
 shell```
 ORG_ID= # Your contentful organisation id
 SPACE_ID= # Your contentful spaece id
 ENVIRONMENT_ID= # Your contentul enviornment name
-APP_LOCATION=the ngrok URL from step 1
+HOSTED_APP_URL= # The ngrok URL from step 1 - this must a https URL
 ```
 
 ### Warning!
