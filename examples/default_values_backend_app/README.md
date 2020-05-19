@@ -6,9 +6,13 @@ The purpose of this demo is to show how backend Apps can be setup and used.
 
 
 ## Prerequisites
-This demo requires node.js, yarn, and some way of making the running server
-available to contentful. For local development it is easiest to use
-[ngrok](https://ngrok.com/)
+This demo requires an up to date version of node.js and yarn.
+
+In addition you will need a way to make the running app accessible over http, so
+that it can receive events from contentful. If you want to run the App locally, 
+we suggest using [ngrok](https://ngrok.com/) for this. It is a tool that allows 
+you to easily create a url that allows access to applications served from
+localhost.
 
 ## Setup instructions
 
