@@ -30,7 +30,7 @@ import {
   ContentType,
   CompatibleFields,
   SelectedFields,
-} from 'shared-dam-app';
+} from 'shared-dam-app/src/utils';
 import MuxLogoSvg from './mux-logo.svg';
 import './config.css';
 
