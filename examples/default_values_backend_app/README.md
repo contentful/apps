@@ -39,33 +39,28 @@ not use your production environment for testing this App.
 export CMA_TOKEN=${a valid CMA token}
 ```
 
-4. create key pair
-```shell
-# Creates a local key pair
-./tools/makekeys
-```
-
-5. Install the required node dependencies
+4. Install the required node dependencies
 ```shell
 yarn
 ```
 
-6. Run the app's setup script
+5. Run the app's setup script
 
 ```shell
-yarn setup
+make setup
 ```
 This step will
+* Generate public and private keys for your app
 * Create an app definition in your contentful organization
 * Install the app to the space and enviornment you specified
 * Setup a webhook that listens for new entries
 
-
-7. Run the backend App!
+6. Run the backend App!
 ```shell
-yarn start
+make start
 ```
 
-8. Test it by going to the contentful web app and creating a new entry of the
+7. Test it by going to the contentful web app and creating a new entry of the
    `Example` content type. You should see a prefilled title field!
+
 
