@@ -1,43 +1,20 @@
-![Contentful + Mux](https://banner.mux.dev/Contentful.svg)
+# Development
 
-# Contentful Video Streaming Plugin
+## Local env setup
 
-A Contentful UI extension that makes it simple to add beautiful streaming via [Mux](https://https://mux.com) to your [Contentful](https://contentful.com) project. Just install the app, add the component to your content model, and you're good to go! 🙌🏾
+1. From root directory: `npm install`
+1. From root directory: `npm run bootstrap` (if this fails because of something related to `typeform-frontend` then `rm -rf apps/typeform`)
+1. Go to this project: `cd apps/mux` (no need to npm install again, because bootstrap already did that via lerna)
+1. `npm start` - now the mux app is running on http://localhost:1234
 
-Before getting started, make sure to generate a new [Access Token](https://dashboard.mux.com/settings/access-tokens). 
+**Notes**: `shared-dam-app` gets installed by lerna when running `npm run bootstrap` from the root directory. If you're getting errors related to this you should probably `rm -rf node_modules` from this project, cd back into the root and run `npm i && npm run bootstrap` again.
 
-## Install via the Contentful interface
+## Contentful app setup
 
-TODO - add installation instructions
+* Use the Mux (dev) contentful app and make sure it is pointed to http://localhost:1234 for development
+* You will have to go into your browser settings and disable mixed content warnings for this to work
 
-## Setting up your content model
+## Deploy
 
-Create a new JSON field in the model you'd like to add Video to. Name the field something useful and descriptive like, for example "Mux Asset".
+* This gets deployed and hosted by Contentful
 
-Click on the "Appearance" tab.
-
-Select "Mux Contentful Uploader"
-
-![Uploader Appearance](screenshots/contentful-appearance.png)
-
-Congratulations, now you've got the upload side of your very own best-in-class video platform! 🤘🏻
-
-## Using your new Video field in clients
-
-The Mux Asset JSON object you'll get in your clients will look like this:
-
-```
-{
-  "uploadId": "some-upload-id",
-  "assetId": "some-asset-id",
-  "playbackId": "a-public-playback-id"
-  "ready": true,
-  "ratio": "16:9",
-}
-```
-
-Both `uploadId` and `assetId` are things we need to manage the asset in the Mux API. `playbackId` is what you'll use in your player. If you want help setting up a player, we have a set of [guides](https://docs.mux.com/docs/playback) to help you get started.
-
-## Talk to us!
-
-This extension was made with 💖 by the folks from [Mux](https://mux.com). If you have any questions or feedback, [let us know](mailto:help@mux.com)!
