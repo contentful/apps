@@ -33,7 +33,7 @@ class Player extends React.Component<PlayerProps, {}> {
 
   componentDidMount() {
     if (!this.playerRef.current) {
-      throw Error('No reference to an existing video element found.');
+      throw new Error('No reference to an existing video element found.');
     }
 
     if (Hls.isSupported()) {
