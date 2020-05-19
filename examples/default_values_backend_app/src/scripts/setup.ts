@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 import dotenv from "dotenv";
 dotenv.config();
-const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, HOSTED_APP_URL, BASE_URL } = process.env;
+const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, HOSTED_APP_URL, BASE_URL, CMA_TOKEN } = process.env;
 
 /* The code in this file uses the information that you should have added to the
  * .env file to set up your enviornment for the backend App to work correctly.
@@ -16,10 +16,6 @@ const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, HOSTED_APP_URL, BASE_URL } = process.e
 
 async function main() {
   try {
-    if (!process.env.CMA_TOKEN) {
-      throw new Error("no CMA_TOKEN defined");
-    }
-
     let APP_ID;
     if (process.env.APP_ID) {
       APP_ID = process.env.APP_ID;
@@ -77,7 +73,7 @@ async function createAppDefinition() {
     method: "POST",
     headers: {
       "Content-Type": "application/vnd.contentful.management.v1+json",
-      Authorization: `Bearer ${process.env.CMA_TOKEN}`,
+      Authorization: `Bearer ${CMA_TOKEN}`,
     },
     body: JSON.stringify(body),
   });
@@ -112,7 +108,7 @@ async function createAppKey(APP_ID: string) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.CMA_TOKEN}`,
+        Authorization: `Bearer ${CMA_TOKEN}`,
       },
       body: JSON.stringify(body),
     }
@@ -132,7 +128,7 @@ async function installApp(APP_ID: string) {
       method: "PUT",
       headers: {
         "Content-Type": "application/vnd.contentful.management.v1+json",
-        Authorization: `Bearer ${process.env.CMA_TOKEN}`,
+        Authorization: `Bearer ${CMA_TOKEN}`,
       },
       body: JSON.stringify({}),
     }
@@ -165,7 +161,7 @@ async function createContentType() {
       method: "POST",
       headers: {
         "Content-Type": "application/vnd.contentful.management.v1+json",
-        Authorization: `Bearer ${process.env.CMA_TOKEN}`,
+        Authorization: `Bearer ${CMA_TOKEN}`,
       },
       body: JSON.stringify(body),
     }
@@ -185,7 +181,7 @@ async function createContentType() {
       method: "PUT",
       headers: {
         "Content-Type": "application/vnd.contentful.management.v1+json",
-        Authorization: `Bearer ${process.env.CMA_TOKEN}`,
+        Authorization: `Bearer ${CMA_TOKEN}`,
         "X-Contentful-Version": responseBody.sys.version,
       },
       body: {},
@@ -212,7 +208,7 @@ async function createAppEvent(APP_ID: string) {
       method: "PUT",
       headers: {
         "Content-Type": "application/vnd.contentful.management.v1+json",
-        Authorization: `Bearer ${process.env.CMA_TOKEN}`,
+        Authorization: `Bearer ${CMA_TOKEN}`,
       },
       body: JSON.stringify(body),
     }

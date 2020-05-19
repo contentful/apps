@@ -24,6 +24,7 @@ We will need to use this secure URL for our app setup to work correctly.
 
 2. Update `.env` with
 shell```
+CMA_TOKEN= # You can obtain this token from the contentful web app
 ORG_ID= # Your contentful organisation id
 SPACE_ID= # Your contentful spaece id
 ENVIRONMENT_ID= # Your contentul enviornment name
@@ -35,19 +36,13 @@ The setup for this demo will make install an app, and create a content type in
 whatever orgnization/space/environment you use. We highly recommend that you do
 not use your production environment for testing this App.
 
-3. Add a valid CMA token to the environment variables, you can obtain this token
-   from the contentful web app
 
-```shell
-export CMA_TOKEN=${a valid CMA token}
-```
-
-4. Install the required node dependencies
+3. Install the required node dependencies
 ```shell
 yarn
 ```
 
-5. Run the app's setup script
+4. Run the app's setup script
 
 ```shell
 make setup
@@ -58,12 +53,12 @@ This step will
 * Install the app to the space and enviornment you specified
 * Setup a webhook that listens for new entries
 
-6. Run the backend App!
+5. Run the backend App!
 ```shell
 make start
 ```
 
-7. Test it by going to the contentful web app and creating a new entry of the
+6. Test it by going to the contentful web app and creating a new entry of the
    `Example` content type. You should see a prefilled title field!
 
 
