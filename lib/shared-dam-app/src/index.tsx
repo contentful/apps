@@ -19,8 +19,6 @@ import AppConfig from './AppConfig/AppConfig';
 
 import { Integration } from './interfaces';
 
-export * from './AppConfig/fields';
-
 export function setup(integration: Integration) {
   init(sdk => {
     const root = document.getElementById('root');
