@@ -20,14 +20,33 @@ async function main() {
       throw new Error("no CMA_TOKEN defined");
     }
 
-    const APP_ID = await createAppDefinition();
+    let APP_ID;
+    if (process.env.APP_ID) {
+      APP_ID = process.env.APP_ID;
+      console.log(
+        "Found an existing APP_ID in .env, re-using it. If you want to set up a new app, remove APP_ID from .env"
+      );
+    } else {
+      APP_ID = await createAppDefinition();
+      fs.appendFileSync(path.join(__dirname, "../..", ".env"), `APP_ID=${APP_ID}\n`);
+    }
+
     await installApp(APP_ID);
     await createAppKey(APP_ID);
-    const contentTypeId = await createContentType();
-    await createAppEvent(APP_ID);
 
-    fs.appendFileSync(path.join(__dirname, "../..", ".env"), `APP_ID=${APP_ID}\n`);
-    fs.appendFileSync(path.join(__dirname, "../..", ".env"), `CONTENT_TYPE_ID=${contentTypeId}\n`);
+    if (process.env.CONTENT_TYPE_ID) {
+      console.log(
+        "Found an existing CONTENT_TYPE_ID in .env, re-using it. If you want to set up a new content type, remove CONTENT_TYPE_ID from .env"
+      );
+    } else {
+      const CONTENT_TYPE_ID = await createContentType();
+      fs.appendFileSync(
+        path.join(__dirname, "../..", ".env"),
+        `CONTENT_TYPE_ID=${CONTENT_TYPE_ID}\n`
+      );
+    }
+
+    await createAppEvent(APP_ID);
 
     console.log(`Created new APP APP_ID=${APP_ID}`);
   } catch (e) {
@@ -182,7 +201,6 @@ async function createContentType() {
     return console.log("Publish content type failed: " + responseBody);
   }
 }
-
 
 async function createAppEvent(APP_ID: string) {
   const body = {
