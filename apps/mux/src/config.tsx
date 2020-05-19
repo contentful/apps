@@ -21,7 +21,7 @@ import {
   AppConfigAPI,
   SpaceAPI,
   BaseExtensionSDK,
-} from 'contentful-ui-extensions-sdk';
+} from 'contentful-ui-extensions-sdk/lib/types';
 import {
   editorInterfacesToSelectedFields,
   getCompatibleFields,
