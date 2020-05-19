@@ -121,7 +121,7 @@ async function createAppKey(APP_ID: string) {
   if (isOk(response.status)) {
     console.log(`New public key ${keyId} created for app ${APP_ID}`);
   } else {
-    console.log("Key creation failed: " + (await response.text()));
+    throw new Error("Key creation failed: " + (await response.text()));
   }
 }
 
@@ -143,7 +143,7 @@ async function installApp(APP_ID: string) {
   if (isOk(response.status)) {
     console.log(`Installed app!`);
   } else {
-    console.log("App installation failed: " + (await response.text()));
+    throw new Error("App installation failed: " + (await response.text()));
   }
 }
 
@@ -176,7 +176,7 @@ async function createContentType() {
   if (isOk(response.status)) {
     console.log("Set up example content type!");
   } else {
-    return console.log("Content type setup failed: " + (await response.text()));
+    throw new Error("Content type setup failed: " + (await response.text()));
   }
 
   const responseBody = await response.json();
@@ -198,7 +198,7 @@ async function createContentType() {
     console.log("Published example content type!");
     return responseBody.sys.id;
   } else {
-    return console.log("Publish content type failed: " + responseBody);
+    throw new Error("Publish content type failed: " + responseBody);
   }
 }
 
@@ -223,6 +223,6 @@ async function createAppEvent(APP_ID: string) {
   if (isOk(response.status)) {
     console.log("Set up App Event!");
   } else {
-    console.log("App event setup failed: " + (await response.text()));
+    throw new Error("App event setup failed: " + (await response.text()));
   }
 }
