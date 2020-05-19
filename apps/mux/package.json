@@ -51,8 +51,6 @@
     "test": "contentful-extension-scripts test --env=jsdom --watch",
     "test:ci": "contentful-extension-scripts test --env=jsdom",
     "test:dev": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
-    "test:coverage": "contentful-extension-scripts test --env=jsdom --coverage",
-    "contentful": "contentful",
     "lint": "prettier --write src/**/*.tsx"
   },
   "prettier": {
