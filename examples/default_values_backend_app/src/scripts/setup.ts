@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 import dotenv from "dotenv";
 dotenv.config();
-const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, APP_LOCATION, BASE_URL } = process.env;
+const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, HOSTED_APP_URL, BASE_URL } = process.env;
 
 /* The code in this file uses the information that you should have added to the
  * .env file to set up your enviornment for the backend App to work correctly.
@@ -126,8 +126,6 @@ async function createAppKey(APP_ID: string) {
 }
 
 async function installApp(APP_ID: string) {
-  const body = {};
-
   const response = await nodeFetch(
     `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/app_installations/${APP_ID}`,
     {
@@ -136,7 +134,7 @@ async function installApp(APP_ID: string) {
         "Content-Type": "application/vnd.contentful.management.v1+json",
         Authorization: `Bearer ${process.env.CMA_TOKEN}`,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({}),
     }
   );
 
@@ -204,7 +202,7 @@ async function createContentType() {
 
 async function createAppEvent(APP_ID: string) {
   const body = {
-    targetUrl: `${APP_LOCATION}/create`,
+    targetUrl: `${HOSTED_APP_URL}/create`,
     topics: ["Entry.create"],
   };
 
