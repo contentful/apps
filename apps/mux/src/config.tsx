@@ -257,20 +257,9 @@ class Config extends React.Component<ConfigProps, IState> {
 
   async onConfigure() {
     const { parameters } = this.state;
-    let valid = true;
-    if (!(parameters.muxAccessTokenId && parameters.muxAccessTokenId.trim())) {
-      valid = false;
-    }
-    if (
-      !(
-        parameters.muxAccessTokenSecret &&
-        parameters.muxAccessTokenSecret.trim()
-      )
-    ) {
-      valid = false;
-    }
+    const isParamValid = (value?: string) => (value || '').trim().length > 0
 
-    if (!valid) {
+    if (!isParamValid(parameters.muxAccessTokenId) || !isParamValid(parameters.muxAccessTokenSecret)) {
       this.props.sdk.notifier.error(
         'Please enter a valid access token and secret.'
       );
