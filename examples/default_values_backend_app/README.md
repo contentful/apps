@@ -41,28 +41,24 @@ whatever orgnization/space/environment you use. We highly recommend that you do
 not use your production environment for testing this App.
 
 
-3. Install the required node dependencies
-```shell
-yarn
-```
-
-4. Run the app's setup script
+3. Run the app's setup script
 
 ```shell
 make setup
 ```
 This step will
+* Install dependencies
 * Generate public and private keys for your app
 * Create an app definition in your contentful organization
 * Install the app to the space and enviornment you specified
 * Setup a webhook that listens for new entries
 
-5. Run the backend App!
+4. Run the backend App!
 ```shell
 make start
 ```
 
-6. Test it by going to the contentful web app and creating a new entry of the
+5. Test it by going to the contentful web app and creating a new entry of the
    `Example` content type. You should see a prefilled title field!
 
 
