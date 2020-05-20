@@ -4,4 +4,5 @@ setup:
 	yarn setup
 
 start:
+	yarn buildFrontend
 	yarn start
