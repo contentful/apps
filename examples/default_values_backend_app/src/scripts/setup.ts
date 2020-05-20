@@ -61,7 +61,7 @@ main().catch(e => {
 async function createAppDefinition() {
   const body = {
     name: "Backend demo app",
-    src: "http://localhost:3666",
+    src: `${HOSTED_APP_URL}/frontend`,
     locations: [
       {
         location: "app-config",

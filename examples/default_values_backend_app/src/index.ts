@@ -1,6 +1,7 @@
 import * as Hapi from "@hapi/hapi";
 import fetch from "node-fetch";
 import { makeAppToken, getAppAccessToken, getPrivateKey, getKeyId } from "./utils";
+import Path from "path";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -10,6 +11,10 @@ const { APP_ID, CONTENT_TYPE_ID, SPACE_ID, ENVIRONMENT_ID, BASE_URL } = process.
  * listens for calls from a webhook, and then uses an AppToken to interact
  * with the Content Management Api (CMA).
  */
+
+// This is currently stored in memory, because App's are not able to access
+// their own installation parameters. EXT-1949
+let defaultValue = "default value";
 
 // -------------------
 // MAIN SERVER
@@ -26,10 +31,37 @@ const startServer = async () => {
   const server = Hapi.server({
     port: 3543,
     host: "localhost",
+    routes: {
+      files: {
+        relativeTo: Path.join(__dirname, "../../dist"),
+      },
+    },
   });
+
+  await server.register(require("@hapi/inert"));
 
   // Here we are attaching the webook handler to our Server
   server.route(addDefaultData(accessToken));
+
+  server.route(updateDefaultValue);
+
+  server.route({
+    method: "GET",
+    path: "/frontend",
+    handler: function (request, h: any) {
+      return h.file("index.html");
+    },
+  });
+
+  server.route({
+    method: "GET",
+    path: "/{param*}",
+    handler: {
+      directory: {
+        path: "./",
+      },
+    },
+  });
 
   await server.start();
 
@@ -53,17 +85,28 @@ process.on("uncaughtException", error => {
 startServer();
 
 // -------------------
-// HANDLER FOR WEBHOOK
+// HANDLER FOR UPDATING DEFAULT VALUE
 // -------------------
+const updateDefaultValue = {
+  method: "POST",
+  path: "/update_default",
+  handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
+    // First we extract the Entry id and version from the payload
+    const payload = JSON.parse(request.payload as string) as {
+      newDefault: string;
+    };
 
-const contentType = "example";
-const defaultValues = {
-  fields: {
-    title: {
-      "en-US": "All my blog posts start with this title",
-    },
+    console.log(`Received new default value ${payload.newDefault}`);
+
+    defaultValue = payload.newDefault;
+
+    return h.response("success").code(204);
   },
 };
+
+// -------------------
+// HANDLER FOR WEBHOOK
+// -------------------
 
 // This route is listening to a webhook that is setup to call whenever an
 // Entry of our example content type is created
@@ -99,7 +142,7 @@ const addDefaultData = (appAccessToken: string) => ({
           "Content-Type": "application/json",
           "X-Contentful-Version": version,
         },
-        body: JSON.stringify(defaultValues),
+        body: JSON.stringify({ fields: { title: { "en-US": defaultValue } } }),
       }
     );
 

@@ -3,25 +3,36 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {
-    "start": "tsc && node --insecure-http-parser dist/index.js",
+    "start": "tsc && node --insecure-http-parser built/src/index.js",
+    "buildFrontend": "parcel build public/index.html",
     "setup": "NODE_OPTIONS=--insecure-http-parser ts-node src/scripts/setup.ts"
   },
   "author": "<john.whiles@contentful.com>",
   "license": "MIT",
   "dependencies": {
+    "@contentful/forma-36-fcss": "^0.0.35",
+    "@contentful/forma-36-react-components": "^3.39.0",
     "@hapi/hapi": "^19.1.1",
+    "@hapi/inert": "^6.0.1",
     "@types/hapi__hapi": "^19.0.3",
     "@types/node-fetch": "^2.5.7",
     "base64url": "^3.0.1",
+    "contentful-ui-extensions-sdk": "^3.14.3",
     "dotenv": "^8.2.0",
     "hapi": "^18.1.0",
     "jsonwebtoken": "^8.5.1",
     "node-fetch": "^2.6.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "tslint": "^6.1.2",
     "typescript": "^3.9.2"
   },
   "devDependencies": {
+    "parcel-bundler": "^1.12.4",
     "prettier": "^2.0.5",
     "ts-node": "^8.10.1"
-  }
+  },
+  "browserslist": [
+    "last 1 Chrome versions"
+  ]
 }
