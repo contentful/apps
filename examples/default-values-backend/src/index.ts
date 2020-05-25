@@ -91,7 +91,6 @@ const updateDefaultValue = {
   method: "POST",
   path: "/update_default",
   handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
-    // First we extract the Entry id and version from the payload
     const payload = JSON.parse(request.payload as string) as {
       newDefault: string;
     };
