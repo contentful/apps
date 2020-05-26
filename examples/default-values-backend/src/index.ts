@@ -24,10 +24,6 @@ const startServer = async () => {
   // First we create a JWT token based on our private key, and the App's id
   const appToken = makeAppToken(APP_ID, getPrivateKey(), getKeyId());
 
-  // We then use that token to get a token from Contentful which our App can use
-  // to interact with the CMA
-  const accessToken = await getAppAccessToken(appToken, SPACE_ID, ENVIRONMENT_ID, APP_ID);
-
   const server = Hapi.server({
     port: 3543,
     host: "localhost",
@@ -41,7 +37,7 @@ const startServer = async () => {
   await server.register(require("@hapi/inert"));
 
   // Here we are attaching the webook handler to our Server
-  server.route(addDefaultData(accessToken));
+  server.route(addDefaultData(appToken));
 
   server.route(updateDefaultValue);
 
@@ -109,47 +105,55 @@ const updateDefaultValue = {
 
 // This route is listening to a webhook that is setup to call whenever an
 // Entry of our example content type is created
-const addDefaultData = (appAccessToken: string) => ({
+const addDefaultData = (appToken: string) => ({
   method: "POST",
   path: "/create",
   handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
-    // First we extract the Entry id and version from the payload
-    const payload = request.payload as {
-      sys: { id: string; version: string; contentType: { sys: { id: string } } };
-    };
-    const { id, version, contentType } = payload.sys;
-    console.log(`Received webhook request because Entry ${id} was created`);
+    try {
+      // We then use that token to get a token from Contentful which our App can use
+      // to interact with the CMA
+      const appAccessToken = await getAppAccessToken(appToken, SPACE_ID, ENVIRONMENT_ID, APP_ID);
 
-    if (contentType.sys.id !== CONTENT_TYPE_ID) {
-      // If the content type does not match the one we created in setup, we just
-      // ignore the event
-      console.log(
-        `Entry's content type: ${contentType.sys.id} did not match the content type created for the App, ignoring`
-      );
-      return h.response("success").code(204);
-    }
+      // First we extract the Entry id and version from the payload
+      const payload = request.payload as {
+        sys: { id: string; version: string; contentType: { sys: { id: string } } };
+      };
+      const { id, version, contentType } = payload.sys;
+      console.log(`Received webhook request because Entry ${id} was created`);
 
-    // Then we make a request to contentful's CMA to update the Entry with our
-    // default values
-    const res = await fetch(
-      `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/entries/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${appAccessToken}`,
-          "X-Contentful-Content-Type": contentType.sys.id,
-          "Content-Type": "application/json",
-          "X-Contentful-Version": version,
-        },
-        body: JSON.stringify({ fields: { title: { "en-US": defaultValue } } }),
+      if (contentType.sys.id !== CONTENT_TYPE_ID) {
+        // If the content type does not match the one we created in setup, we just
+        // ignore the event
+        console.log(
+          `Entry's content type: ${contentType.sys.id} did not match the content type created for the App, ignoring`
+        );
+        return h.response("success").code(204);
       }
-    );
 
-    if (res.status === 200) {
-      console.log(`Set default values for Entry ${id}`);
-      return h.response("success").code(204);
-    } else {
-      throw new Error("failed to set default values");
+      // Then we make a request to contentful's CMA to update the Entry with our
+      // default values
+      const res = await fetch(
+        `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/entries/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${appAccessToken}`,
+            "X-Contentful-Content-Type": contentType.sys.id,
+            "Content-Type": "application/json",
+            "X-Contentful-Version": version,
+          },
+          body: JSON.stringify({ fields: { title: { "en-US": defaultValue } } }),
+        }
+      );
+      if (res.status === 200) {
+        console.log(`Set default values for Entry ${id}`);
+        return h.response("success").code(204);
+      } else {
+        throw new Error("failed to set default values" + (await res.text()));
+      }
+    } catch (e) {
+      console.error(e);
+      throw new Error(e);
     }
   },
 });
