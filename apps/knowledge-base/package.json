@@ -1,0 +1,73 @@
+{
+  "name": "help-center-marketplace-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "TZ=UTC contentful-extension-scripts test --watch --setupFilesAfterEnv=./jest.setup.js --env=jsdom",
+    "start": "contentful-extension-scripts start --serve-only",
+    "build": "contentful-extension-scripts build --no-inline",
+    "check-types": "tsc --noEmit",
+    "eslint": "eslint 'src/**/*.{js,jsx,ts,tsx}' --max-warnings=0",
+    "format": "prettier --write \"src/**/*.+(js|jsx|ts|tsx|json|yml|yaml|css|md)\"",
+    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/knowledge-base --acl public-read"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --max-warnings=0"
+    ],
+    "*.{js,jsx,ts,tsx,json,yml,yaml,css,md}": [
+      "prettier --write"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/contentful/help-center-marketplace-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/contentful/help-center-marketplace-app/issues"
+  },
+  "homepage": "https://github.com/contentful/help-center-marketplace-app#readme",
+  "dependencies": {
+    "@contentful/forma-36-fcss": "0.0.35",
+    "@contentful/forma-36-react-components": "^3.37.0",
+    "@contentful/forma-36-tokens": "^0.5.2",
+    "@emotion/core": "^10.0.28",
+    "@emotion/styled": "^10.0.27",
+    "@testing-library/react": "^10.0.4",
+    "async-sema": "^3.1.0",
+    "contentful-ui-extensions-sdk": "^3.14.1",
+    "emotion": "^10.0.27",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
+    "@contentful/contentful-extension-scripts": "^0.16.0",
+    "@testing-library/jest-dom": "^5.8.0",
+    "@types/jest": "^25.2.3",
+    "@types/react": "^16.9.34",
+    "@types/react-dom": "^16.9.7",
+    "@typescript-eslint/eslint-plugin": "^3.0.1",
+    "@typescript-eslint/parser": "^3.0.1",
+    "eslint": "^7.1.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-react": "^7.20.0",
+    "husky": "^4.2.5",
+    "jest-fetch-mock": "^3.0.3",
+    "lint-staged": "^10.2.6",
+    "prettier": "^2.0.5",
+    "typescript": "^3.8.3"
+  }
+}

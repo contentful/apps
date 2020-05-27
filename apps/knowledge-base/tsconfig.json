@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "~/*": ["./*"]
+    },
+    "jsx": "react",
+    "esModuleInterop": true,
+    "lib": ["ES2018", "DOM"],
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*", "declaration.d.ts"],
+  "exclude": ["node_modules"]
+}
