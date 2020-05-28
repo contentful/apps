@@ -1,9 +1,8 @@
 {
-  "name": "help-center-marketplace-app",
+  "name": "knowledge-base",
   "version": "1.0.0",
   "private": true,
-  "description": "",
-  "main": "index.js",
+  "main": "build/index.html",
   "scripts": {
     "test": "TZ=UTC contentful-extension-scripts test --watch --setupFilesAfterEnv=./jest.setup.js --env=jsdom",
     "start": "contentful-extension-scripts start --serve-only",
@@ -29,15 +28,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/contentful/help-center-marketplace-app.git"
+    "url": "git+https://github.com/contentful/apps.git"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Contentful",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/contentful/help-center-marketplace-app/issues"
+    "url": "https://github.com/contentful/apps/issues"
   },
-  "homepage": "https://github.com/contentful/help-center-marketplace-app#readme",
+  "homepage": "https://github.com/contentful/apps/apps/knowledge-base#readme",
   "dependencies": {
     "@contentful/forma-36-fcss": "0.0.35",
     "@contentful/forma-36-react-components": "^3.37.0",
