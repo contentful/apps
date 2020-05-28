@@ -7,6 +7,7 @@ import { RateLimit } from 'async-sema';
 
 interface SdkContextProps {
   getContentType?: (id: string) => Promise<Record<string, any>>;
+  getContentTypes?: () => Promise<Record<string, any>>;
   updateContentType?: (
     contentType: Record<string, any>
   ) => Promise<Record<string, any>>;
@@ -47,6 +48,7 @@ const waitForRateLimit = RateLimit(8); // rate limit is 10/s, using 8 just to co
 export const SdkProvider: React.FC<SdkProviderProps> = (props) => {
   const transformedSpaceMethods = [
     'getContentType',
+    'getContentTypes',
     'updateContentType',
     'createContentType',
     'createContentType',

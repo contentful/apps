@@ -60,31 +60,30 @@ const Config: React.FC<ConfigProps> = (props) => {
   }
 
   async function createContentTypes(contentTypes) {
+    const allExistingContentTypes = await sdk.getContentTypes();
+
     const createdTypes = contentTypes.map(async (contentType) => {
-      try {
-        const existingContentType: Record<
-          string,
-          any
-        > = await sdk.getContentType(contentType.sys.id);
+      const existingContentType: Record<
+        string,
+        any
+      > = allExistingContentTypes?.items?.find(
+        (item) => contentType.sys.id === item.sys.id
+      );
 
-        // Content type exists but it's a "Draft"
-        if (existingContentType.sys.publishedCounter === 0) {
-          // Update to "Published"
-          await sdk.updateContentType(existingContentType);
-        }
-      } catch (err) {
-        // A 404 is thrown in case the content type does not exist, we catch it here
-        try {
-          // If not exist, create
-          const newContentType = await sdk.createContentType(
-            getContentTypeSchemaById(contentType.sys.id, template.contentTypes)
-          );
+      if (!existingContentType) {
+        // If not exist, create
+        const newContentType = await sdk.createContentType(
+          getContentTypeSchemaById(contentType.sys.id, contentTypes)
+        );
 
-          // Update to "Published"
-          await sdk.updateContentType(newContentType);
-        } catch (err) {
-          // Error creation, do something...
-        }
+        // Update to "Published"
+        await sdk.updateContentType(newContentType);
+      }
+
+      // Content type exists but it's a "Draft"
+      if (existingContentType.sys.publishedCounter === 0) {
+        // Update to "Published"
+        await sdk.updateContentType(existingContentType);
       }
     });
 
