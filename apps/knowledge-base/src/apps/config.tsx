@@ -61,7 +61,6 @@ const Config: React.FC<ConfigProps> = (props) => {
 
   async function createContentTypes(contentTypes) {
     const allExistingContentTypes = await sdk.getContentTypes();
-
     const createdTypes = contentTypes.map(async (contentType) => {
       const existingContentType: Record<
         string,
@@ -122,21 +121,19 @@ const Config: React.FC<ConfigProps> = (props) => {
     return Promise.all(createdEntries);
   }
 
-  function createAssets(assets) {
+  async function createAssets(assets) {
+    const allExistingAssets = await sdk.getAssets({ limit: 1000 });
     const createdAssets = assets
       .map((asset) => sdk.prepareAsset(asset, defaultLocale))
       .map(async (asset) => {
-        try {
-          const existingAsset: Record<string, any> = await sdk.getAsset(
-            asset.sys.id
-          );
+        const existingAsset: Record<
+          string,
+          any
+        > = allExistingAssets?.items?.find(
+          (item) => item.sys.id === asset.sys.id
+        );
 
-          // exists but it's a "Draft"
-          if (existingAsset.sys.publishedCounter === 0) {
-            // Update to "Published"
-            await sdk.publishAsset(existingAsset);
-          }
-        } catch (err) {
+        if (!existingAsset) {
           await sdk.createAsset(asset);
           await sdk.processAsset(asset, defaultLocale);
           const processedAsset = await sdk.waitUntilAssetProcessed(
@@ -144,6 +141,12 @@ const Config: React.FC<ConfigProps> = (props) => {
             defaultLocale
           );
           await sdk.publishAsset(processedAsset);
+        }
+
+        // exists but it's a "Draft"
+        if (existingAsset?.sys?.publishedCounter === 0) {
+          // Update to "Published"
+          await sdk.publishAsset(existingAsset);
         }
       });
 

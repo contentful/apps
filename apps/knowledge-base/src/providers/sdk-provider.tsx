@@ -23,6 +23,7 @@ interface SdkContextProps {
     entryData: Record<string, any>
   ) => Promise<any>;
   getAsset?: (id: string) => Promise<Record<string, any>>;
+  getAssets?: (query?: SearchQuery) => Promise<Record<string, any>>;
   publishAsset?: (asset: Record<string, any>) => Promise<Record<string, any>>;
   createAsset?: (asset: Record<string, any>) => Promise<Record<string, any>>;
   processAsset?: (
@@ -59,6 +60,7 @@ export const SdkProvider: React.FC<SdkProviderProps> = (props) => {
     'publishEntry',
     'createEntry',
     'getAsset',
+    'getAssets',
     'publishAsset',
     'createAsset',
     'processAsset',
