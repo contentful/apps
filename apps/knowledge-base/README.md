@@ -22,11 +22,13 @@
 1. The `.env.example` file contains the environment variables the project needs
 1. Create the `.env.development` and `.env.production` files, one for each environment respectively, and fill up the environment variables
 1. Note: The env variable `NETLIFY_OAUTH_APP_REDIRECT_URI` must end with `/auth`
-1. [Add the `Knowledge Base` app to a Contentful organization](#installing-the-app)
+1. [Add the `Knowledge Base` app to a Contentful organization](#adding-the-app-to-your-organization)
 1. Install the dependencies by running `npm ci`
 1. `npm start`
 
-## Installing the app
+### Adding the app to your organization
+
+You need to add the app into a organization to be able to run it locally. This command below can help you out:
 
 ```curl
 curl -X POST \
