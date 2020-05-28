@@ -84,8 +84,8 @@ If you have other problems with Contentful not related to this project, you can 
 
 ## Screenshots
 
-![Welcome Screen](https://user-images.githubusercontent.com/954889/83034978-26a2b980-a039-11ea-8bd7-2cf0315b6e33.png)
-![Knowledge Base App](https://user-images.githubusercontent.com/954889/83035055-46d27880-a039-11ea-98fe-90cc5c7669eb.png)
+![Welcome Screen](docs/screenshot-welcome-screen.png)
+![Knowledge Base App](docs/screenshot-kb-app.png)
 
 ## License
 
