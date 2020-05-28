@@ -81,7 +81,7 @@ const Config: React.FC<ConfigProps> = (props) => {
       }
 
       // Content type exists but it's a "Draft"
-      if (existingContentType.sys.publishedCounter === 0) {
+      if (existingContentType?.sys?.publishedCounter === 0) {
         // Update to "Published"
         await sdk.updateContentType(existingContentType);
       }
@@ -91,23 +91,31 @@ const Config: React.FC<ConfigProps> = (props) => {
   }
 
   async function createEntries(entries) {
+    const allExistingEntries = await sdk.getEntries({
+      limit: 1000,
+    });
     const createdEntries = entries.map(async (entry) => {
-      try {
-        const existingEntry: Record<string, any> = await sdk.getEntry(
-          entry.sys.id
-        );
+      const existingEntry: Record<
+        string,
+        any
+      > = allExistingEntries?.items?.find(
+        (item) => item.sys.id === entry.sys.id
+      );
 
-        // exists but it's a "Draft"
-        if (existingEntry.sys.publishedCounter === 0) {
-          // Update to "Published"
-          await sdk.publishEntry(existingEntry);
-        }
-      } catch (err) {
+      if (!existingEntry) {
+        // Create if not exist...
         const newEntry = await sdk.createEntry(
           entry.sys.contentType.sys.id,
           entry
         );
+
         await sdk.publishEntry(newEntry);
+      }
+
+      // Entry exists but it's a "Draft"
+      if (existingEntry?.sys?.publishedCounter === 0) {
+        // Update to "Published"
+        await sdk.publishEntry(existingEntry);
       }
     });
 

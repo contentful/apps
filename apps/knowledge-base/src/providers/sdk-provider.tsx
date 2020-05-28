@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   AppExtensionSDK,
   SidebarExtensionSDK,
+  SearchQuery,
 } from 'contentful-ui-extensions-sdk';
 import { RateLimit } from 'async-sema';
 
@@ -15,6 +16,7 @@ interface SdkContextProps {
     contentType: Record<string, any>
   ) => Promise<Record<string, any>>;
   getEntry?: (id: string) => Promise<Record<string, any>>;
+  getEntries?: (query?: SearchQuery) => Promise<Record<string, any>>;
   publishEntry?: (entry: Record<string, any>) => Promise<Record<string, any>>;
   createEntry?: (
     entryId: string,
@@ -53,6 +55,7 @@ export const SdkProvider: React.FC<SdkProviderProps> = (props) => {
     'createContentType',
     'createContentType',
     'getEntry',
+    'getEntries',
     'publishEntry',
     'createEntry',
     'getAsset',
