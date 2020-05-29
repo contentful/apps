@@ -33,7 +33,7 @@ const Sidebar: React.FC = () => {
   const sdk = useSdk();
   const netlify = useNetlify();
   const params: Record<string, any> = sdk.instance.parameters.installation;
-  const { id: entryId } = sdk.instance.entry.getSys();
+  const { id: entryId, contentType } = sdk.instance.entry.getSys();
   const buildHookUrl = params.netlifySelectedSiteBuildHookUrl;
   const siteUrl = params.netlifySelectedSiteUrl;
   const siteId = params.netlifySelectedSiteId;
@@ -43,6 +43,8 @@ const Sidebar: React.FC = () => {
   const lastBuildDate = isBuilding
     ? currentBuild?.created_at
     : lastReadyBuild?.created_at;
+  const shouldShowPreviewButton =
+    !!siteUrl && contentType.sys.id === 'kbAppArticle';
 
   useEffect(() => {
     sdk.instance.window.startAutoResizer();
@@ -105,7 +107,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <div>
-      {siteUrl && (
+      {shouldShowPreviewButton && (
         <Button
           href={`${siteUrl}/preview?entry=${entryId}`}
           target="_blank"
