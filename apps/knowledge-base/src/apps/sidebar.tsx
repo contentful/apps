@@ -142,9 +142,7 @@ const Sidebar: React.FC = () => {
     return (
       <ErrorText>
         <Icon icon="InfoCircle" color="negative" />
-        <span>
-          No website was found. Please, go to the app settings to set one.
-        </span>
+        <span>No website was found. Go to the app settings to add one.</span>
       </ErrorText>
     );
   }
