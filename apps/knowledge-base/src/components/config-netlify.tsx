@@ -32,7 +32,7 @@ const ConfigNetlify: React.FC = () => {
       </Note>
 
       <Typography>
-        <Heading>Connect account</Heading>
+        <Heading>1. Connect account</Heading>
         {!netlify.isReady && (
           <Paragraph>Connect your Netlify account to make changes.</Paragraph>
         )}

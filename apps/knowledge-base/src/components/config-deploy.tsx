@@ -34,7 +34,7 @@ const ConfigDeploy: React.FC = () => {
   return (
     <Section isDisabled={!netlify.isReady}>
       <Typography>
-        <Heading>Deploy website</Heading>
+        <Heading>2. Deploy website</Heading>
         <Paragraph>You’ll need the following to deploy:</Paragraph>
       </Typography>
       <DeployInfoItem>
