@@ -3,6 +3,7 @@ import {
   Paragraph,
   Button as FormaButton,
   Spinner,
+  Icon,
 } from '@contentful/forma-36-react-components';
 import styled from '@emotion/styled';
 import { useNetlify } from '../providers/netlify-provider';
@@ -17,6 +18,8 @@ const Button = styled(FormaButton)<{
 `;
 
 const Text = styled(Paragraph)`
+  margin: 8px 0;
+
   color: #888;
   font-size: 12px;
 `;
@@ -27,6 +30,25 @@ const SpinnerContainer = styled.div`
 
 const BuildButtonContainer = styled.div`
   margin-bottom: 16px;
+`;
+
+const TextWithIcon = styled(Text)`
+  display: grid;
+  grid-template-columns: 18px auto;
+  column-gap: 4px;
+  align-items: start;
+
+  & > svg {
+    margin-right: 4px;
+  }
+`;
+
+const ErrorText = styled(TextWithIcon)`
+  color: #d9453f;
+`;
+
+const SuccessText = styled(TextWithIcon)`
+  color: #0eb87f;
 `;
 
 const Sidebar: React.FC = () => {
@@ -40,11 +62,18 @@ const Sidebar: React.FC = () => {
   const [lastReadyBuild, setLastReadyBuild] = useState<Record<string, any>>({});
   const [currentBuild, setCurrentBuild] = useState<Record<string, any>>({});
   const [isBuilding, setIsBuilding] = useState(false);
+  const [hasBuildFailed, setHasBuildFailed] = useState(false);
+  const [isLoadingDeployInfo, setIsLoadingDeployInfo] = useState(false);
+  const [deployInfoFailed, setDeployInfoFailed] = useState(false);
+  const [failedBuildReason, setFailedBuildReason] = useState();
   const lastBuildDate = isBuilding
     ? currentBuild?.created_at
     : lastReadyBuild?.created_at;
   const shouldShowPreviewButton =
     !!siteUrl && contentType.sys.id === 'kbAppArticle';
+  const hasWebsiteBeenBuilt =
+    !deployInfoFailed && !isLoadingDeployInfo && !hasBuildFailed && !isBuilding;
+  const hasBuildBeenFailed = hasBuildFailed && !isBuilding;
 
   useEffect(() => {
     sdk.instance.window.startAutoResizer();
@@ -72,17 +101,29 @@ const Sidebar: React.FC = () => {
   }
 
   async function loadDeploys() {
-    const deploys = await netlify.getDeploysBySiteId(siteId);
-    const ready = deploys.find((deploy) => deploy.state === 'ready');
-    const build = deploys.find((deploy) =>
-      ['enqueued', 'building', 'uploading'].some(
-        (status) => status === deploy.state
-      )
-    );
+    try {
+      setIsLoadingDeployInfo(true);
+      setDeployInfoFailed(false);
 
-    setLastReadyBuild(ready);
-    setCurrentBuild(build);
-    setIsBuilding(!!build);
+      const deploys = await netlify.getDeploysBySiteId(siteId);
+      const hasBuildFailed = deploys[0].state === 'error';
+      const ready = deploys.find((deploy) => deploy.state === 'ready');
+      const build = deploys.find((deploy) =>
+        ['enqueued', 'building', 'uploading'].some(
+          (status) => status === deploy.state
+        )
+      );
+
+      setHasBuildFailed(hasBuildFailed);
+      setFailedBuildReason(hasBuildFailed ? deploys[0].summary.status : '');
+      setLastReadyBuild(ready);
+      setCurrentBuild(build);
+      setIsBuilding(!!build);
+    } catch (err) {
+      setDeployInfoFailed(true);
+    } finally {
+      setIsLoadingDeployInfo(false);
+    }
   }
 
   function formatDate(date) {
@@ -99,9 +140,12 @@ const Sidebar: React.FC = () => {
 
   if (!siteUrl && !buildHookUrl) {
     return (
-      <Paragraph>
-        No website was found. Please, go to the app settings to set one.
-      </Paragraph>
+      <ErrorText>
+        <Icon icon="InfoCircle" color="negative" />
+        <span>
+          No website was found. Please, go to the app settings to set one.
+        </span>
+      </ErrorText>
     );
   }
 
@@ -136,19 +180,44 @@ const Sidebar: React.FC = () => {
             )}
           </Button>
         )}
-        {!buildHookUrl && (
-          <Text>
-            We couldn&apos;t find your build url. Please, make sure you have
-            selected and saved your website on the app settings and your website
-            has a Build Hook named <b>Contentful</b> on Netlify.
-          </Text>
-        )}
-        {lastBuildDate ? (
-          <Text>Last build triggered on {formatDate(lastBuildDate)}.</Text>
-        ) : (
+        {isLoadingDeployInfo && (
           <SpinnerContainer>
             <Spinner size="small" />
           </SpinnerContainer>
+        )}
+        {deployInfoFailed && (
+          <ErrorText>
+            <Icon icon="ErrorCircle" color="negative" />
+            <span>
+              We can&apos;t load your website deploy information, please make
+              sure a Netlify account is connected to the app settings.
+            </span>
+          </ErrorText>
+        )}
+        {!buildHookUrl && (
+          <ErrorText>
+            <Icon icon="ErrorCircle" color="negative" />
+            <span>
+              We couldn&apos;t find your build url. Please, make sure you have
+              selected and saved your website on the app settings and your
+              website has a Build Hook named <b>Contentful</b> on Netlify.
+            </span>
+          </ErrorText>
+        )}
+        {lastBuildDate && (
+          <Text>Last build triggered on {formatDate(lastBuildDate)}.</Text>
+        )}
+        {hasBuildBeenFailed && (
+          <ErrorText>
+            <Icon icon="ErrorCircle" color="negative" />{' '}
+            <span>Build failed. Netlify reason: {failedBuildReason}.</span>
+          </ErrorText>
+        )}
+        {hasWebsiteBeenBuilt && (
+          <SuccessText>
+            <Icon icon="CheckCircle" color="positive" />{' '}
+            <span>Success! Your website has finished building.</span>
+          </SuccessText>
         )}
       </BuildButtonContainer>
 
