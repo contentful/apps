@@ -13,12 +13,20 @@ const { useEffect, useState } = React;
 const Button = styled(FormaButton)<{
   target?: string;
 }>`
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 `;
 
 const Text = styled(Paragraph)`
   color: #888;
   font-size: 12px;
+`;
+
+const SpinnerContainer = styled.div`
+  text-align: center;
+`;
+
+const BuildButtonContainer = styled.div`
+  margin-bottom: 16px;
 `;
 
 const Sidebar: React.FC = () => {
@@ -109,31 +117,49 @@ const Sidebar: React.FC = () => {
         </Button>
       )}
 
-      {buildHookUrl && (
+      <BuildButtonContainer>
+        {buildHookUrl && (
+          <Button
+            onClick={handleOnBuildWebsite}
+            type="button"
+            disabled={isBuilding}
+            isFullWidth={true}
+          >
+            {isBuilding ? (
+              <span>
+                Building... <Spinner color="white" size="small" />
+              </span>
+            ) : (
+              'Build website'
+            )}
+          </Button>
+        )}
+        {!buildHookUrl && (
+          <Text>
+            We couldn&apos;t find your build url. Please, make sure you have
+            selected and saved your website on the app settings and your website
+            has a Build Hook named <b>Contentful</b> on Netlify.
+          </Text>
+        )}
+        {lastBuildDate ? (
+          <Text>Last build triggered on {formatDate(lastBuildDate)}.</Text>
+        ) : (
+          <SpinnerContainer>
+            <Spinner size="small" />
+          </SpinnerContainer>
+        )}
+      </BuildButtonContainer>
+
+      {siteUrl && (
         <Button
-          onClick={handleOnBuildWebsite}
-          type="button"
-          disabled={isBuilding}
+          href={siteUrl}
+          target="_blank"
+          icon="ExternalLink"
           isFullWidth={true}
+          buttonType="muted"
         >
-          {isBuilding ? (
-            <span>
-              Building... <Spinner color="white" size="small" />
-            </span>
-          ) : (
-            'Build website'
-          )}
+          Open website
         </Button>
-      )}
-      {!buildHookUrl && (
-        <Text>
-          We couldn&apos;t find your build url. Please, make sure you have
-          selected and saved your website on the app settings and your website
-          has a Build Hook named <b>Contentful</b> on Netlify.
-        </Text>
-      )}
-      {lastBuildDate && (
-        <Text>Last build triggered on {formatDate(lastBuildDate)}.</Text>
       )}
     </div>
   );
