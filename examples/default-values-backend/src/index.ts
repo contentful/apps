@@ -12,10 +12,6 @@ const { APP_ID, CONTENT_TYPE_ID, SPACE_ID, ENVIRONMENT_ID, BASE_URL } = process.
  * with the Content Management Api (CMA).
  */
 
-// This is currently stored in memory, because App's are not able to access
-// their own installation parameters. EXT-1949
-let defaultValue = "default value";
-
 // -------------------
 // MAIN SERVER
 // -------------------
@@ -38,8 +34,6 @@ const startServer = async () => {
 
   // Here we are attaching the webook handler to our Server
   server.route(addDefaultData(appToken));
-
-  server.route(updateDefaultValue);
 
   server.route({
     method: "GET",
@@ -81,25 +75,6 @@ process.on("uncaughtException", error => {
 startServer();
 
 // -------------------
-// HANDLER FOR UPDATING DEFAULT VALUE
-// -------------------
-const updateDefaultValue = {
-  method: "POST",
-  path: "/update_default",
-  handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
-    const payload = JSON.parse(request.payload as string) as {
-      newDefault: string;
-    };
-
-    console.log(`Received new default value ${payload.newDefault}`);
-
-    defaultValue = payload.newDefault;
-
-    return h.response("success").code(204);
-  },
-};
-
-// -------------------
 // HANDLER FOR WEBHOOK
 // -------------------
 
@@ -113,6 +88,19 @@ const addDefaultData = (appToken: string) => ({
       // We then use that token to get a token from Contentful which our App can use
       // to interact with the CMA
       const appAccessToken = await getAppAccessToken(appToken, SPACE_ID, ENVIRONMENT_ID, APP_ID);
+
+      const appInstallation = await fetch(
+        `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/app_installations/${APP_ID}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${appAccessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      ).then(r => r.json());
+
+      const defaultValue = appInstallation?.parameters?.defaultValue;
 
       // First we extract the Entry id and version from the payload
       const payload = request.payload as {

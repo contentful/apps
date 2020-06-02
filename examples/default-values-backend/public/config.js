@@ -40,15 +40,6 @@ class Config extends Component {
 
   async onConfigure() {
     const { items: contentTypes } = await this.props.sdk.space.getContentTypes();
-    const contentTypeIds = contentTypes.map(ct => ct.sys.id);
-
-    // Currently we have to send these changes directly to the backend App, as
-    // it cannot currently access it's own parameters. 
-    fetch(`${location.origin}/update_default`, {
-      method: "POST",
-      body: JSON.stringify({ newDefault: this.state.parameters.defaultValue }),
-      headers: new Headers(),
-    });
 
     return {
       parameters: this.state.parameters,
