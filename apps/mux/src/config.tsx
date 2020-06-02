@@ -147,7 +147,14 @@ class Config extends React.Component<ConfigProps, IState> {
               configure for Mux Video. For those configured fields you'll get a
               video uploader in the Contentful UI. Your videos will be
               transcoded, stored and delivered by{' '}
-              <TextLink href="https://mux.com" rel="noopener noreferrer" target="_blank">Mux</TextLink>.
+              <TextLink
+                href="https://mux.com"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Mux
+              </TextLink>
+              .
             </Paragraph>
           </Typography>
           <hr className="config-splitter" />
@@ -156,7 +163,11 @@ class Config extends React.Component<ConfigProps, IState> {
               <Heading>API credentials</Heading>
               <Paragraph>
                 These can be obtained by clicking 'Generate new token' in the{' '}
-                <TextLink href="https://dashboard.mux.com/settings/access-tokens" rel="noopener noreferrer" target="_blank">
+                <TextLink
+                  href="https://dashboard.mux.com/settings/access-tokens"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
                   settings on your dashboard
                 </TextLink>
                 . Note that you must be an admin in your Mux account.
@@ -257,9 +268,12 @@ class Config extends React.Component<ConfigProps, IState> {
 
   async onConfigure() {
     const { parameters } = this.state;
-    const isParamValid = (value?: string) => (value || '').trim().length > 0
+    const isParamValid = (value?: string) => (value || '').trim().length > 0;
 
-    if (!isParamValid(parameters.muxAccessTokenId) || !isParamValid(parameters.muxAccessTokenSecret)) {
+    if (
+      !isParamValid(parameters.muxAccessTokenId) ||
+      !isParamValid(parameters.muxAccessTokenSecret)
+    ) {
       this.props.sdk.notifier.error(
         'Please enter a valid access token and secret.'
       );
