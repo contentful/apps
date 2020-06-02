@@ -12,6 +12,7 @@ import ConfigHeader from '~/components/config-header';
 import ConfigNetlify from '~/components/config-netlify';
 import ConfigDeploy from '~/components/config-deploy';
 import ConfigSiteSettings from '~/components/config-site-settings';
+import ConfigInstallation from '~/components/config-installation';
 
 const { useEffect, useState, useMemo } = React;
 
@@ -250,6 +251,8 @@ const Config: React.FC<ConfigProps> = (props) => {
   return (
     <Layout>
       <ConfigHeader />
+
+      <ConfigInstallation />
 
       <ConfigNetlify />
 

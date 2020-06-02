@@ -42,7 +42,7 @@ const ConfigSiteSettings: React.FC<ConfigSiteSettingsProps> = (props) => {
   return (
     <Section isDisabled={!netlify.isReady}>
       <Typography>
-        <Heading>3. Enable preview and manual deploys</Heading>
+        <Heading>4. Enable preview and manual deploys</Heading>
         <Paragraph>
           Select a Netlify site from the list to enable content preview and
           manual deploys.
