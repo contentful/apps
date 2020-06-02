@@ -100,7 +100,9 @@ const addDefaultData = (appToken: string) => ({
         }
       ).then(r => r.json());
 
-      const defaultValue = appInstallation?.parameters?.defaultValue;
+      const defaultValue = appInstallation?.parameters?.defaultValue
+        ? appInstallation.parameters.defaultValue
+        : "Default value";
 
       // First we extract the Entry id and version from the payload
       const payload = request.payload as {
