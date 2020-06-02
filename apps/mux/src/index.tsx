@@ -37,6 +37,7 @@ interface MuxContentfulObject {
   playbackId: string;
   ready: boolean;
   ratio: string;
+  error: string;
 }
 
 interface AppState {
@@ -89,6 +90,11 @@ export class App extends React.Component<AppProps, AppState> {
     // Just in case someone left an asset in a bad place, we'll do some additional checks first just to see if
     // we can clean up.
     if (this.state.value) {
+      if (this.state.value.error) {
+        // eslint-disable-next-line react/no-did-mount-set-state
+        this.setAssetError(this.state.value.error);
+      }
+
       if (this.state.value.ready) {
         const asset = await this.getAsset();
         if (!asset) {
@@ -244,6 +250,13 @@ export class App extends React.Component<AppProps, AppState> {
     await this.pollForUploadDetails();
   };
 
+  setAssetError = (errorMessage: string) => {
+    this.setState({
+      error: `Error with this video file ${errorMessage}`,
+      errorShowResetAction: true,
+    });
+  };
+
   pollForUploadDetails = async () => {
     if (!this.state.value || !this.state.value.uploadId) {
       throw Error(
@@ -299,6 +312,12 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     const asset = await this.getAsset();
+    let assetError;
+    if (asset.status === 'errored') {
+      assetError =
+        (asset.errors && asset.errors.messages && asset.errors.messages[0]) ||
+        'Unknown error';
+    }
 
     if (!asset) {
       throw Error('Something went wrong, we were not able to get the asset.');
@@ -310,9 +329,14 @@ export class App extends React.Component<AppProps, AppState> {
       playbackId: asset['playback_ids'][0].id,
       ready: asset.status === 'ready',
       ratio: asset.ratio,
+      error: assetError,
     });
 
-    if (asset.status !== 'ready') {
+    if (assetError) {
+      this.setAssetError(assetError);
+    }
+
+    if (asset.status === 'preparing') {
       await delay(500);
       await this.pollForAssetDetails();
     }
