@@ -204,7 +204,7 @@ const Sidebar: React.FC = () => {
           <Button
             href={siteUrl}
             target="_blank"
-            icon="ExternalLink"
+            icon="Link"
             isFullWidth={true}
             buttonType="naked"
           >
