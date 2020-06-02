@@ -67,7 +67,6 @@ export const NetlifyProvider: React.FC = (props) => {
         console.log({ err });
         // in case the token is expired
         window.localStorage.removeItem('netlify-access-token');
-        window.localStorage.removeItem('netlify-access-token-type');
       })
       .finally(() => {
         setIsLoading(false);
