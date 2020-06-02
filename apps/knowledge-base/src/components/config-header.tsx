@@ -27,6 +27,13 @@ const ConfigHeader: React.FC = () => {
             <TextLink target="blank" href="https://forms.gle/SuV276jagXF6e2DM7">
               Early Access Program (EAP)
             </TextLink>
+            .{' '}
+            <TextLink
+              target="blank"
+              href="https://www.contentful.com/marketplace/app/knowledge-base/"
+            >
+              Learn more about the Knowledge Base app.
+            </TextLink>
           </Paragraph>
         </Typography>
       </Section>
