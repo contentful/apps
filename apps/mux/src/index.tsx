@@ -178,6 +178,7 @@ export class App extends React.Component<AppProps, AppState> {
       playbackId: undefined,
       ready: undefined,
       ratio: undefined,
+      error: undefined,
     });
     this.setState({ error: false, errorShowResetAction: false });
   };
