@@ -175,6 +175,7 @@ const Config: React.FC<ConfigProps> = (props) => {
       sdk.instance.notifier.error(
         'There was an issue when trying to install the content types. Please, try to re-install the app.'
       );
+      return false;
     }
 
     if (netlify.isLoadingBuildHooks) {
