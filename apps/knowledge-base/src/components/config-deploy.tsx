@@ -7,7 +7,6 @@ import {
   TextLink,
 } from '@contentful/forma-36-react-components';
 import Section from './section';
-import { useNetlify } from '~/providers/netlify-provider';
 import { useSdk } from '~/providers/sdk-provider';
 
 const DeployInfoItem = styled(Paragraph)`
@@ -27,12 +26,22 @@ const DeployInfoItem = styled(Paragraph)`
   }
 `;
 
-const ConfigDeploy: React.FC = () => {
-  const netlify = useNetlify();
+const AlreadyDeployedText = styled(Paragraph)`
+  margin-top: 32px;
+
+  font-size: 14px;
+`;
+
+interface ConfigDeployProps {
+  onClickDeploy: React.MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
+  isEnabled: boolean;
+}
+
+const ConfigDeploy: React.FC<ConfigDeployProps> = (props) => {
   const sdk = useSdk();
 
   return (
-    <Section isDisabled={!netlify.isReady}>
+    <Section isEnabled={props.isEnabled}>
       <Typography>
         <Heading>3. Deploy website</Heading>
         <Paragraph>You’ll need the following to deploy:</Paragraph>
@@ -64,12 +73,26 @@ const ConfigDeploy: React.FC = () => {
         href="https://app.netlify.com/start/deploy?repository=https://github.com/contentful-labs/gatsby-starter-contentful-knowledge-base"
         target="_blank"
         rel="noopener noreferrer"
+        onClick={props.onClickDeploy}
       >
         <img
           src="https://www.netlify.com/img/deploy/button.svg"
           alt="Deploy to Netlify"
         />
       </a>
+
+      <AlreadyDeployedText>
+        <TextLink
+          href="#"
+          onClick={(event) => {
+            event.preventDefault();
+
+            props.onClickDeploy(event);
+          }}
+        >
+          Already deployed?
+        </TextLink>
+      </AlreadyDeployedText>
     </Section>
   );
 };

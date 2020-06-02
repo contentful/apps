@@ -26,6 +26,7 @@ const HelpText = styled(FormaHelpText)`
 interface ConfigSiteSettingsProps {
   netlifySelectedSiteId: string;
   onChangeNetlifySite: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  isEnabled: boolean;
 }
 
 const ConfigSiteSettings: React.FC<ConfigSiteSettingsProps> = (props) => {
@@ -40,7 +41,7 @@ const ConfigSiteSettings: React.FC<ConfigSiteSettingsProps> = (props) => {
   }
 
   return (
-    <Section isDisabled={!netlify.isReady}>
+    <Section isEnabled={props.isEnabled}>
       <Typography>
         <Heading>4. Enable preview and manual deploys</Heading>
         <Paragraph>

@@ -17,7 +17,7 @@ const Note = styled(FormaNote)`
 const ConfigHeader: React.FC = () => {
   return (
     <>
-      <Section isDisabled={false}>
+      <Section isEnabled={true}>
         <Typography>
           <Heading>About Knowledge Base (EAP)</Heading>
           <Paragraph>

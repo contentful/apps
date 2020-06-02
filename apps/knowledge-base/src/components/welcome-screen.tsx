@@ -47,7 +47,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 }) => {
   return (
     <Layout>
-      <Section isDisabled={false}>
+      <Section isEnabled={true}>
         <Typography>
           <Heading>A knowledge base that&apos;s ready to use</Heading>
         </Typography>

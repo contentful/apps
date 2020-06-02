@@ -8,10 +8,10 @@ import Section from './section';
 
 const ConfigInstallation: React.FC = () => {
   return (
-    <Section isDisabled={false}>
+    <Section isEnabled={true}>
       <Typography>
         <Heading>1. App is installed 🎉</Heading>
-        <Paragraph>Content model and sample content were created. </Paragraph>
+        <Paragraph>Content model and sample content were created.</Paragraph>
       </Typography>
     </Section>
   );

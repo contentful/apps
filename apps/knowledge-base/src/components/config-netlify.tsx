@@ -13,7 +13,7 @@ const ConfigNetlify: React.FC = () => {
   const netlify = useNetlify();
 
   return (
-    <Section isDisabled={false}>
+    <Section isEnabled={true}>
       <Typography>
         <Heading>2. Connect account</Heading>
         {!netlify.isReady && (

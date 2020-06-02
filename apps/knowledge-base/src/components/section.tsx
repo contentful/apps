@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-const Section = styled.section<{ isDisabled: boolean }>`
+const Section = styled.section<{ isEnabled: boolean }>`
   &:not(:last-child) {
     padding-bottom: 24px;
     margin-bottom: 24px;
@@ -9,7 +9,7 @@ const Section = styled.section<{ isDisabled: boolean }>`
   }
 
   ${(props) =>
-    props.isDisabled &&
+    !props.isEnabled &&
     `
     position: relative;
     pointer-events: none;

@@ -13,6 +13,7 @@ import ConfigNetlify from '~/components/config-netlify';
 import ConfigDeploy from '~/components/config-deploy';
 import ConfigSiteSettings from '~/components/config-site-settings';
 import ConfigInstallation from '~/components/config-installation';
+import ConfigDone from '~/components/config-done';
 
 const { useEffect, useState, useMemo } = React;
 
@@ -36,6 +37,7 @@ const Config: React.FC<ConfigProps> = (props) => {
     setNetlifySelectedSiteBuildHookUrl,
   ] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [hadDeployed, setHadDeployed] = useState(false);
 
   useEffect(() => {
     sdk.instance.app.isInstalled().then(setIsAppInstalled);
@@ -44,8 +46,7 @@ const Config: React.FC<ConfigProps> = (props) => {
   });
 
   useEffect(() => {
-    sdk.instance.app.setReady();
-    loadInitialParams();
+    loadInitialParams().then(() => sdk.instance.app.setReady());
   }, []);
 
   async function loadInitialParams() {
@@ -54,6 +55,7 @@ const Config: React.FC<ConfigProps> = (props) => {
     setNetlifySelectedSiteUrl(params?.netlifySelectedSiteUrl);
     setNetlifySelectedSiteId(params?.netlifySelectedSiteId);
     setNetlifySelectedSiteBuildHookUrl(params?.netlifySelectedSiteBuildHookUrl);
+    setHadDeployed(!!params?.hadDeployed);
   }
 
   async function onFinishSavingOrInstalling() {
@@ -199,6 +201,7 @@ const Config: React.FC<ConfigProps> = (props) => {
         netlifySelectedSiteUrl,
         netlifySelectedSiteId,
         netlifySelectedSiteBuildHookUrl,
+        hadDeployed,
       },
       targetState: {
         EditorInterface: {
@@ -240,6 +243,10 @@ const Config: React.FC<ConfigProps> = (props) => {
     }
   }
 
+  function handleOnClickDeploy(): void {
+    setHadDeployed(true);
+  }
+
   if (!isAppInstalled) {
     return (
       <WelcomeScreen
@@ -257,12 +264,18 @@ const Config: React.FC<ConfigProps> = (props) => {
 
       <ConfigNetlify />
 
-      <ConfigDeploy />
+      <ConfigDeploy
+        onClickDeploy={handleOnClickDeploy}
+        isEnabled={netlify.isReady}
+      />
 
       <ConfigSiteSettings
         netlifySelectedSiteId={netlifySelectedSiteId}
         onChangeNetlifySite={handleOnChangeNetlifySite}
+        isEnabled={hadDeployed}
       />
+
+      <ConfigDone isEnabled={!!netlifySelectedSiteId} />
     </Layout>
   );
 };
