@@ -32,6 +32,10 @@ const Text = styled(Paragraph)`
   margin-bottom: 36px;
 `;
 
+const InstallNowText = styled(Paragraph)`
+  margin-top: 8px;
+`;
+
 interface WelcomeScreenProps {
   termsAccepted: boolean;
   setTermsAccepted(boolean);
@@ -96,12 +100,18 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         <CheckboxField
           labelText="I accept the Early Access Program terms."
           checked={termsAccepted}
-          onChange={(e) =>
-            setTermsAccepted((e.target as HTMLInputElement).checked)
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setTermsAccepted(e.target.checked)
           }
           id="terms-checkbox"
         />
       </Note>
+
+      {termsAccepted && (
+        <InstallNowText>
+          You can now install the app from the top right.
+        </InstallNowText>
+      )}
     </Layout>
   );
 };
