@@ -6,7 +6,6 @@ import {
   Heading,
   Paragraph,
   SelectField,
-  HelpText as FormaHelpText,
   Spinner,
   TextLink,
 } from '@contentful/forma-36-react-components';
@@ -19,8 +18,8 @@ const SelectContainer = styled.div`
   align-items: end;
 `;
 
-const HelpText = styled(FormaHelpText)`
-  margin-top: 8px;
+const HelpText = styled(Paragraph)`
+  margin-bottom: 16px;
 `;
 
 interface ConfigSiteSettingsProps {
@@ -49,6 +48,13 @@ const ConfigSiteSettings: React.FC<ConfigSiteSettingsProps> = (props) => {
           manual deploys.
         </Paragraph>
       </Typography>
+
+      <HelpText>
+        Don&apos;t see your site?{' '}
+        <TextLink onClick={handleOnRefreshWebsitesList}>Refresh</TextLink>{' '}
+        {netlify.isLoadingSites && <Spinner size="small" />}
+      </HelpText>
+
       <SelectContainer>
         <div>
           <SelectField
@@ -74,14 +80,12 @@ const ConfigSiteSettings: React.FC<ConfigSiteSettingsProps> = (props) => {
           </SelectField>
         </div>
 
-        <div>{netlify.isLoadingBuildHooks && <Spinner />}</div>
+        <div>
+          {(netlify.isLoadingBuildHooks || netlify.isLoadingSites) && (
+            <Spinner />
+          )}
+        </div>
       </SelectContainer>
-
-      <HelpText>
-        Don&apos;t see your site?{' '}
-        <TextLink onClick={handleOnRefreshWebsitesList}>Refresh</TextLink>{' '}
-        {netlify.isLoadingSites && <Spinner size="small" />}
-      </HelpText>
     </Section>
   );
 };
