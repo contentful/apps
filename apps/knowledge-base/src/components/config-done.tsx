@@ -14,7 +14,7 @@ const ConfigDone: React.FC<ConfigDoneProps> = (props) => {
   return (
     <Section isEnabled={props.isEnabled}>
       <Typography>
-        <Heading>5. You’re ready to start</Heading>
+        <Heading>4. You’re ready to start</Heading>
         <Paragraph>
           You can save and start adding content or customize your site.
         </Paragraph>

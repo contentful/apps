@@ -43,7 +43,7 @@ const ConfigDeploy: React.FC<ConfigDeployProps> = (props) => {
   return (
     <Section isEnabled={props.isEnabled}>
       <Typography>
-        <Heading>3. Deploy website</Heading>
+        <Heading>2. Deploy website</Heading>
         <Paragraph>You’ll need the following to deploy:</Paragraph>
       </Typography>
       <DeployInfoItem>

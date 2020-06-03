@@ -8,6 +8,7 @@ import {
   SelectField,
   Spinner,
   TextLink,
+  Button,
 } from '@contentful/forma-36-react-components';
 import { useNetlify } from '~/providers/netlify-provider';
 
@@ -42,50 +43,63 @@ const ConfigSiteSettings: React.FC<ConfigSiteSettingsProps> = (props) => {
   return (
     <Section isEnabled={props.isEnabled}>
       <Typography>
-        <Heading>4. Enable preview and manual deploys</Heading>
+        <Heading>3. Enable preview and manual deploys</Heading>
         <Paragraph>
           Select a Netlify site from the list to enable content preview and
           manual deploys.
         </Paragraph>
       </Typography>
 
-      <HelpText>
-        Don&apos;t see your site?{' '}
-        <TextLink onClick={handleOnRefreshWebsitesList}>Refresh</TextLink>{' '}
-        {netlify.isLoadingSites && <Spinner size="small" />}
-      </HelpText>
+      {!netlify.isReady && (
+        <Button
+          onClick={() => netlify.authorize()}
+          disabled={netlify.isLoading || netlify.isReady}
+        >
+          {netlify.isLoading && <Spinner color="white" />} Connect to Netlify
+        </Button>
+      )}
 
-      <SelectContainer>
-        <div>
-          <SelectField
-            id="netlify-websites"
-            name="netlify-websites"
-            labelText="Select Netlify site"
-            required
-            value={props.netlifySelectedSiteId}
-            onChange={props.onChangeNetlifySite}
-          >
-            <option disabled={true} value="">
-              Select site
-            </option>
-            {netlify.sites.map((site, index) => (
-              <option
-                key={index}
-                value={site.site_id}
-                disabled={netlify.isLoadingBuildHooks}
-              >
-                {site.name}
+      {netlify.isReady && (
+        <HelpText>
+          Don&apos;t see your site?{' '}
+          <TextLink onClick={handleOnRefreshWebsitesList}>Refresh</TextLink>{' '}
+          {netlify.isLoadingSites && <Spinner size="small" />}
+        </HelpText>
+      )}
+
+      {netlify.isReady && (
+        <SelectContainer>
+          <div>
+            <SelectField
+              id="netlify-websites"
+              name="netlify-websites"
+              labelText="Select Netlify site"
+              required
+              value={props.netlifySelectedSiteId ?? '0'}
+              onChange={props.onChangeNetlifySite}
+            >
+              <option disabled={true} value="0">
+                Select site
               </option>
-            ))}
-          </SelectField>
-        </div>
+              {netlify.sites.map((site, index) => (
+                <option
+                  key={index}
+                  value={site.site_id}
+                  disabled={netlify.isLoadingBuildHooks}
+                >
+                  {site.name}
+                </option>
+              ))}
+            </SelectField>
+          </div>
 
-        <div>
-          {(netlify.isLoadingBuildHooks || netlify.isLoadingSites) && (
-            <Spinner />
-          )}
-        </div>
-      </SelectContainer>
+          <div>
+            {(netlify.isLoadingBuildHooks || netlify.isLoadingSites) && (
+              <Spinner />
+            )}
+          </div>
+        </SelectContainer>
+      )}
     </Section>
   );
 };

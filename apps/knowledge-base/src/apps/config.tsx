@@ -9,7 +9,7 @@ import {
   getContentTypeSchemaById,
 } from '~/utils/utils';
 import ConfigHeader from '~/components/config-header';
-import ConfigNetlify from '~/components/config-netlify';
+// import ConfigNetlify from '~/components/config-netlify';
 import ConfigDeploy from '~/components/config-deploy';
 import ConfigSiteSettings from '~/components/config-site-settings';
 import ConfigInstallation from '~/components/config-installation';
@@ -262,12 +262,9 @@ const Config: React.FC<ConfigProps> = (props) => {
 
       <ConfigInstallation />
 
-      <ConfigNetlify />
+      {/* <ConfigNetlify /> */}
 
-      <ConfigDeploy
-        onClickDeploy={handleOnClickDeploy}
-        isEnabled={netlify.isReady}
-      />
+      <ConfigDeploy onClickDeploy={handleOnClickDeploy} isEnabled={true} />
 
       <ConfigSiteSettings
         netlifySelectedSiteId={netlifySelectedSiteId}
