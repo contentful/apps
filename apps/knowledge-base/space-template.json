@@ -12,7 +12,7 @@
         "id": "kbAppArticle",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.788Z",
-        "updatedAt": "2020-05-20T15:19:44.751Z",
+        "updatedAt": "2020-06-03T13:27:12.127Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -20,8 +20,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 2,
-        "publishedAt": "2020-05-20T15:19:44.751Z",
+        "publishedVersion": 12,
+        "publishedAt": "2020-06-03T13:27:12.127Z",
         "firstPublishedAt": "2020-05-20T15:19:44.751Z",
         "createdBy": {
           "sys": {
@@ -34,16 +34,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 3,
+        "publishedCounter": 6,
+        "version": 13,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         }
       },
@@ -79,20 +79,20 @@
               "regexp": {
                 "pattern": "^[a-z0-9_\\/\\-]+$",
                 "flags": null
-              }
+              },
+              "message": "Slug url must be in kebab case (e.g., title-of-article)"
             }
           ],
           "disabled": false,
           "omitted": false
         },
         {
-          "id": "description",
-          "name": "Description",
-          "type": "Text",
+          "id": "metaDescription",
+          "name": "Meta description",
+          "type": "Symbol",
           "localized": false,
           "required": true,
-          "validations": [
-          ],
+          "validations": [],
           "disabled": false,
           "omitted": false
         },
@@ -107,10 +107,7 @@
               "nodes": {
                 "entry-hyperlink": [
                   {
-                    "linkContentType": [
-                      "kbAppArticle",
-                      "kbAppCategory"
-                    ]
+                    "linkContentType": ["kbAppArticle", "kbAppCategory"]
                   }
                 ]
               }
@@ -146,9 +143,7 @@
           "required": true,
           "validations": [
             {
-              "linkContentType": [
-                "kbAppCategory"
-              ]
+              "linkContentType": ["kbAppCategory"]
             }
           ],
           "disabled": false,
@@ -169,7 +164,7 @@
         "id": "kbAppSiteSettings",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.788Z",
-        "updatedAt": "2020-05-20T15:19:44.738Z",
+        "updatedAt": "2020-06-03T13:46:58.686Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -177,8 +172,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 2,
-        "publishedAt": "2020-05-20T15:19:44.738Z",
+        "publishedVersion": 10,
+        "publishedAt": "2020-06-03T13:46:58.686Z",
         "firstPublishedAt": "2020-05-20T15:19:44.738Z",
         "createdBy": {
           "sys": {
@@ -194,8 +189,8 @@
             "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         },
-        "publishedCounter": 1,
-        "version": 3,
+        "publishedCounter": 5,
+        "version": 11,
         "publishedBy": {
           "sys": {
             "type": "Link",
@@ -210,7 +205,7 @@
       "fields": [
         {
           "id": "siteName",
-          "name": "Site name",
+          "name": "Site name (SEO)",
           "type": "Symbol",
           "localized": false,
           "required": true,
@@ -223,13 +218,12 @@
           "omitted": false
         },
         {
-          "id": "siteDescription",
-          "name": "Site description",
-          "type": "Text",
+          "id": "siteDescriptionSeo",
+          "name": "Site description (SEO)",
+          "type": "Symbol",
           "localized": false,
           "required": true,
-          "validations": [
-          ],
+          "validations": [],
           "disabled": false,
           "omitted": false
         },
@@ -241,9 +235,7 @@
           "required": true,
           "validations": [
             {
-              "linkMimetypeGroup": [
-                "image"
-              ]
+              "linkMimetypeGroup": ["image"]
             }
           ],
           "disabled": false,
@@ -256,8 +248,7 @@
           "type": "Symbol",
           "localized": false,
           "required": true,
-          "validations": [
-          ],
+          "validations": [],
           "disabled": false,
           "omitted": false
         },
@@ -267,8 +258,7 @@
           "type": "Symbol",
           "localized": false,
           "required": true,
-          "validations": [
-          ],
+          "validations": [],
           "disabled": false,
           "omitted": false
         },
@@ -283,7 +273,8 @@
               "size": {
                 "min": 0,
                 "max": 3
-              }
+              },
+              "message": "Maximum of 3 links can be added."
             }
           ],
           "disabled": false,
@@ -292,9 +283,8 @@
             "type": "Link",
             "validations": [
               {
-                "linkContentType": [
-                  "kbAppLink"
-                ]
+                "linkContentType": ["kbAppLink"],
+                "message": "You can only add Link entries."
               }
             ],
             "linkType": "Entry"
@@ -306,8 +296,7 @@
           "type": "Symbol",
           "localized": false,
           "required": true,
-          "validations": [
-          ],
+          "validations": [],
           "disabled": false,
           "omitted": false
         }
@@ -325,7 +314,7 @@
         "id": "kbAppCategory",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.795Z",
-        "updatedAt": "2020-05-22T12:12:10.183Z",
+        "updatedAt": "2020-06-03T13:46:41.871Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -333,8 +322,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 10,
-        "publishedAt": "2020-05-22T12:12:10.183Z",
+        "publishedVersion": 24,
+        "publishedAt": "2020-06-03T13:46:41.870Z",
         "firstPublishedAt": "2020-05-20T15:19:44.736Z",
         "createdBy": {
           "sys": {
@@ -347,16 +336,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "7p1NcB9L38naqAMcLSyzxw"
+            "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         },
-        "publishedCounter": 5,
-        "version": 11,
+        "publishedCounter": 12,
+        "version": 25,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "7p1NcB9L38naqAMcLSyzxw"
+            "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         }
       },
@@ -399,13 +388,12 @@
           "omitted": false
         },
         {
-          "id": "description",
-          "name": "Description",
-          "type": "Text",
+          "id": "previewDescription",
+          "name": "Preview description",
+          "type": "Symbol",
           "localized": false,
           "required": true,
-          "validations": [
-          ],
+          "validations": [],
           "disabled": false,
           "omitted": false
         }
@@ -468,8 +456,7 @@
           "type": "Symbol",
           "localized": false,
           "required": true,
-          "validations": [
-          ],
+          "validations": [],
           "disabled": false,
           "omitted": false
         },
@@ -479,8 +466,7 @@
           "type": "Symbol",
           "localized": false,
           "required": true,
-          "validations": [
-          ],
+          "validations": [],
           "disabled": false,
           "omitted": false
         }
@@ -499,7 +485,7 @@
             "linkType": "Space"
           }
         },
-        "version": 3,
+        "version": 13,
         "createdAt": "2020-05-20T15:19:44.827Z",
         "createdBy": {
           "sys": {
@@ -508,10 +494,10 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-05-20T15:21:34.074Z",
+        "updatedAt": "2020-06-03T13:27:12.617Z",
         "updatedBy": {
           "sys": {
-            "id": "1n6JeO5hWTbMwlazefu4ux",
+            "id": "1qZRFE2T0YMRkCSPigLrFz",
             "type": "Link",
             "linkType": "User"
           }
@@ -563,19 +549,38 @@
       ],
       "controls": [
         {
-          "fieldId": "title"
+          "fieldId": "title",
+          "settings": {
+            "helpText": "Title of your article. Will be displayed at the top of the page."
+          },
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "slug"
+          "fieldId": "slug",
+          "settings": {
+            "helpText": "Will appear in the page url (for example, http://websitename.com/title-of-article). Add hyphens between each word."
+          },
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "description"
+          "fieldId": "metaDescription",
+          "settings": {
+            "helpText": "Short description of article contents. Will be seen in search results, social media posts, Slack messages, etc."
+          },
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "body"
+          "fieldId": "body",
+          "widgetId": "richTextEditor",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "kbAppCategory"
+          "fieldId": "kbAppCategory",
+          "widgetId": "entryLinkEditor",
+          "widgetNamespace": "builtin"
         }
       ]
     },
@@ -590,7 +595,7 @@
             "linkType": "Space"
           }
         },
-        "version": 3,
+        "version": 11,
         "createdAt": "2020-05-20T15:19:44.816Z",
         "createdBy": {
           "sys": {
@@ -599,7 +604,7 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-05-20T15:21:34.074Z",
+        "updatedAt": "2020-06-03T13:46:59.186Z",
         "updatedBy": {
           "sys": {
             "id": "1n6JeO5hWTbMwlazefu4ux",
@@ -654,25 +659,54 @@
       ],
       "controls": [
         {
-          "fieldId": "siteName"
+          "fieldId": "siteName",
+          "settings": {
+            "helpText": "Name of your site as you want it to appear in search results. Will not be displayed on the website hompage."
+          },
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "siteDescription"
+          "fieldId": "siteDescriptionSeo",
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "logo"
+          "fieldId": "logo",
+          "widgetId": "assetLinkEditor",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "heading"
+          "fieldId": "heading",
+          "settings": {
+            "helpText": "Name of your site as you want it to appear on your homepage."
+          },
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "subheading"
+          "fieldId": "subheading",
+          "settings": {
+            "helpText": "Subheading that you want displayed below the site name on your homepage."
+          },
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "headerLinks"
+          "fieldId": "headerLinks",
+          "settings": {
+            "helpText": "Navigation links at the top of the homepage (max 3). ",
+            "bulkEditing": false,
+            "showLinkEntityAction": true,
+            "showCreateEntityAction": true
+          },
+          "widgetId": "entryLinksEditor",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "googleAnalyticsId"
+          "fieldId": "googleAnalyticsId",
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         }
       ]
     },
@@ -687,7 +721,7 @@
             "linkType": "Space"
           }
         },
-        "version": 11,
+        "version": 25,
         "createdAt": "2020-05-20T15:19:44.825Z",
         "createdBy": {
           "sys": {
@@ -696,10 +730,10 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-05-22T12:12:10.957Z",
+        "updatedAt": "2020-06-03T13:46:42.346Z",
         "updatedBy": {
           "sys": {
-            "id": "7p1NcB9L38naqAMcLSyzxw",
+            "id": "1n6JeO5hWTbMwlazefu4ux",
             "type": "Link",
             "linkType": "User"
           }
@@ -761,8 +795,11 @@
           "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "description",
-          "widgetId": "markdown",
+          "fieldId": "previewDescription",
+          "settings": {
+            "helpText": "1 - 2 sentence description of article topics this category covers."
+          },
+          "widgetId": "singleLine",
           "widgetNamespace": "builtin"
         }
       ]
@@ -863,7 +900,7 @@
         "id": "14VV8DioigjGqfMXo5x55f",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:52.453Z",
-        "updatedAt": "2020-05-20T15:19:56.616Z",
+        "updatedAt": "2020-06-03T13:55:46.444Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -871,8 +908,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:19:56.616Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:55:46.444Z",
         "firstPublishedAt": "2020-05-20T15:19:56.616Z",
         "createdBy": {
           "sys": {
@@ -885,16 +922,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -912,8 +949,8 @@
         "slug": {
           "en-US": "getting-started"
         },
-        "description": {
-          "en-US": "Everything you need to get started"
+        "previewDescription": {
+          "en-US": "Articles on getting started."
         }
       }
     },
@@ -929,7 +966,7 @@
         "id": "6qxUkDsTy99EEGjzmsju27",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:52.456Z",
-        "updatedAt": "2020-05-20T15:19:56.632Z",
+        "updatedAt": "2020-06-03T13:55:20.068Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -937,8 +974,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:19:56.632Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:55:20.068Z",
         "firstPublishedAt": "2020-05-20T15:19:56.632Z",
         "createdBy": {
           "sys": {
@@ -951,16 +988,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -978,8 +1015,8 @@
         "slug": {
           "en-US": "tips-and-tricks"
         },
-        "description": {
-          "en-US": "Everything you need to get started"
+        "previewDescription": {
+          "en-US": "Tips and tricks to get started."
         }
       }
     },
@@ -995,7 +1032,7 @@
         "id": "4xkV4vqcX9WpBK132tge1L",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:52.464Z",
-        "updatedAt": "2020-05-20T15:19:56.596Z",
+        "updatedAt": "2020-06-03T13:55:58.053Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -1003,8 +1040,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:19:56.596Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:55:58.053Z",
         "firstPublishedAt": "2020-05-20T15:19:56.596Z",
         "createdBy": {
           "sys": {
@@ -1017,16 +1054,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -1044,8 +1081,8 @@
         "slug": {
           "en-US": "billing-and-administration"
         },
-        "description": {
-          "en-US": "Everything you need to get started"
+        "previewDescription": {
+          "en-US": "Billing and administration articles."
         }
       }
     },
@@ -1061,7 +1098,7 @@
         "id": "4u14zqqxzwjHiR7SByyCBp",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:52.470Z",
-        "updatedAt": "2020-05-20T15:19:56.628Z",
+        "updatedAt": "2020-06-03T13:55:32.713Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -1069,8 +1106,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:19:56.628Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:55:32.713Z",
         "firstPublishedAt": "2020-05-20T15:19:56.628Z",
         "createdBy": {
           "sys": {
@@ -1083,16 +1120,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -1110,8 +1147,8 @@
         "slug": {
           "en-US": "troubleshooting"
         },
-        "description": {
-          "en-US": "Everything you need to get started"
+        "previewDescription": {
+          "en-US": "Troubleshooting topics"
         }
       }
     },
@@ -1127,7 +1164,7 @@
         "id": "3LkygnpMIuMUUOaYOczDji",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:52.489Z",
-        "updatedAt": "2020-05-20T15:19:56.637Z",
+        "updatedAt": "2020-06-03T13:55:03.033Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -1135,8 +1172,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:19:56.637Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:55:03.033Z",
         "firstPublishedAt": "2020-05-20T15:19:56.637Z",
         "createdBy": {
           "sys": {
@@ -1149,16 +1186,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -1176,8 +1213,8 @@
         "slug": {
           "en-US": "logging-in"
         },
-        "description": {
-          "en-US": "Everything you need to get started"
+        "previewDescription": {
+          "en-US": "Logging in"
         }
       }
     },
@@ -1193,7 +1230,7 @@
         "id": "3zVgQ0kRgmvo2kQn6HpsMx",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:52.563Z",
-        "updatedAt": "2020-05-20T15:19:56.894Z",
+        "updatedAt": "2020-06-03T13:54:51.643Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -1201,8 +1238,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:19:56.894Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:54:51.643Z",
         "firstPublishedAt": "2020-05-20T15:19:56.894Z",
         "createdBy": {
           "sys": {
@@ -1215,16 +1252,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -1242,8 +1279,8 @@
         "slug": {
           "en-US": "account-settings"
         },
-        "description": {
-          "en-US": "Everything you need to get started"
+        "previewDescription": {
+          "en-US": "Account settings"
         }
       }
     },
@@ -1259,7 +1296,7 @@
         "id": "17faFp5UY1vwA7HvcWnfNl",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:53.458Z",
-        "updatedAt": "2020-05-20T15:19:57.582Z",
+        "updatedAt": "2020-06-03T13:45:48.297Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -1267,8 +1304,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:19:57.582Z",
+        "publishedVersion": 7,
+        "publishedAt": "2020-06-03T13:45:48.297Z",
         "firstPublishedAt": "2020-05-20T15:19:57.582Z",
         "createdBy": {
           "sys": {
@@ -1284,8 +1321,8 @@
             "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 8,
         "publishedBy": {
           "sys": {
             "type": "Link",
@@ -1305,7 +1342,7 @@
         "siteName": {
           "en-US": "Contentful help center"
         },
-        "siteDescription": {
+        "siteDescriptionSeo": {
           "en-US": "All of your questions answered."
         },
         "logo": {
@@ -1414,7 +1451,7 @@
         "id": "6MK78LQY20vdFA7q5dqVfg",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:55.491Z",
-        "updatedAt": "2020-05-20T15:19:59.578Z",
+        "updatedAt": "2020-06-03T13:54:38.910Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -1422,8 +1459,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:19:59.578Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:54:38.910Z",
         "firstPublishedAt": "2020-05-20T15:19:59.578Z",
         "createdBy": {
           "sys": {
@@ -1436,16 +1473,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -1463,8 +1500,8 @@
         "slug": {
           "en-US": "content-model-overview"
         },
-        "description": {
-          "en-US": "An explanation of the content model included with this app"
+        "previewDescription": {
+          "en-US": "Content model overview"
         }
       }
     },
@@ -1480,7 +1517,7 @@
         "id": "6Pna4OrC1gL9f1idJpegEi",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:55.550Z",
-        "updatedAt": "2020-05-20T15:19:59.580Z",
+        "updatedAt": "2020-06-03T13:49:30.347Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -1488,8 +1525,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:19:59.580Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:49:30.347Z",
         "firstPublishedAt": "2020-05-20T15:19:59.580Z",
         "createdBy": {
           "sys": {
@@ -1502,16 +1539,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -1529,23 +1566,19 @@
         "slug": {
           "en-US": "kb-app-content-model-overview"
         },
-        "description": {
-          "en-US": "An explanation of how the content model for this app works. "
+        "metaDescription": {
+          "en-US": "Content model overview."
         },
         "body": {
           "en-US": {
-            "data": {
-            },
+            "data": {},
             "content": [
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "In the Content Model tab, you’ll find a sample content model already created for your use. This content model is the basic structure of your knowledge base. You can edit the content model as desired, but note that any changes will require additional engineering support. The content model for this app is as follows:",
                     "nodeType": "text"
                   }
@@ -1553,14 +1586,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "",
                     "nodeType": "text"
                   }
@@ -1568,12 +1598,10 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "marks": [
                       {
                         "type": "bold"
@@ -1586,20 +1614,16 @@
                 "nodeType": "heading-2"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "The Site settings content type is where the master settings for your knowledge base are located. All changes made to this content type are reflected globally. There must only be ",
                     "nodeType": "text"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "marks": [
                       {
                         "type": "bold"
@@ -1609,10 +1633,8 @@
                     "nodeType": "text"
                   },
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": " Site settings entry in your space. \n",
                     "nodeType": "text"
                   }
@@ -1620,14 +1642,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "The Site settings content type contains the following fields:",
                     "nodeType": "text"
                   }
@@ -1635,22 +1654,17 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Name (short text): The name of your website",
                             "nodeType": "text"
                           }
@@ -1661,18 +1675,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Logo (media): The logo you want displayed in the knowledge base header. Maximum width is 160 px (height is proportional). Maximum size is 2 GB.",
                             "nodeType": "text"
                           }
@@ -1683,18 +1693,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Heading (short text): The heading to be displayed on your knowledge base home page",
                             "nodeType": "text"
                           }
@@ -1705,18 +1711,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Subheading (short text): Subheading to be displayed beneath the home page heading",
                             "nodeType": "text"
                           }
@@ -1727,18 +1729,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Header links (Reference): See the Link section",
                             "nodeType": "text"
                           }
@@ -1749,18 +1747,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Footer links (Reference): See the Link section",
                             "nodeType": "text"
                           }
@@ -1771,18 +1765,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Social (Reference): See the Link section",
                             "nodeType": "text"
                           }
@@ -1793,18 +1783,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Google Analytics ID (short text): Enter the Google Analytics ID for your project to track audience metrics",
                             "nodeType": "text"
                           }
@@ -1818,14 +1804,11 @@
                 "nodeType": "unordered-list"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "\n",
                     "nodeType": "text"
                   }
@@ -1833,12 +1816,10 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "marks": [
                       {
                         "type": "bold"
@@ -1851,14 +1832,11 @@
                 "nodeType": "heading-2"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "The Link content type creates links for your knowledge base. These can be used for social media links in the footer, for example. You can customize the display text, set the destination URL and set the icon to one of your choosing. Reference this entry type in your Site settings content type to make global changes.",
                     "nodeType": "text"
                   }
@@ -1866,14 +1844,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "The Link content type contains the following fields:",
                     "nodeType": "text"
                   }
@@ -1881,22 +1856,17 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Display text: The text you want to link",
                             "nodeType": "text"
                           }
@@ -1907,18 +1877,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Href: The url you want to link to",
                             "nodeType": "text"
                           }
@@ -1929,18 +1895,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Icon: The icon you wish to use. Maximum width is 160 px (height is proportional). Maximum size is 2 GB.",
                             "nodeType": "text"
                           }
@@ -1954,14 +1916,11 @@
                 "nodeType": "unordered-list"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "\n",
                     "nodeType": "text"
                   }
@@ -1969,12 +1928,10 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "marks": [
                       {
                         "type": "bold"
@@ -1987,14 +1944,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "The Category content type organizes entries by topic. Your app space comes with five pre-existing categories called “Getting started”, “Account settings”, “Billing and administration”, “Troubleshooting” and “Tips and tricks”. These categories can be edited or removed. You can also create your own categories. Link Articles to a Category to group them as desired. By default, Categories will be displayed as an alphabetical list on your home page.\n",
                     "nodeType": "text"
                   }
@@ -2002,14 +1956,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "The Category content type contains the following fields:",
                     "nodeType": "text"
                   }
@@ -2017,22 +1968,17 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Name (short text): The desired name of your category",
                             "nodeType": "text"
                           }
@@ -2043,18 +1989,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Slug (short text): The desired URL for your category. Once a category is published, this should not be changed",
                             "nodeType": "text"
                           }
@@ -2065,18 +2007,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Description (Long text): A description of what the category contains\n",
                             "nodeType": "text"
                           }
@@ -2090,12 +2028,10 @@
                 "nodeType": "unordered-list"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "marks": [
                       {
                         "type": "bold"
@@ -2108,14 +2044,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "The Article content type creates entries for knowledge base articles. Articles can be in three states: draft, published or changed:",
                     "nodeType": "text"
                   }
@@ -2123,22 +2056,17 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Draft articles can only be accessed within Contentful",
                             "nodeType": "text"
                           }
@@ -2149,18 +2077,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": " Published articles are “live” and publicly available in the knowledge base",
                             "nodeType": "text"
                           }
@@ -2171,18 +2095,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Changed articles are published articles that have been edited, but those changes are not yet published. These changes are not visible outside of Contentful until the article is published again",
                             "nodeType": "text"
                           }
@@ -2196,14 +2116,11 @@
                 "nodeType": "unordered-list"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "Articles can be formatted with any of the options available in RichText. Sidebar links are automatically generated based on the heading size you use (H1, H2, etc.). ",
                     "nodeType": "text"
                   }
@@ -2211,14 +2128,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "The Article content type contains the following fields:",
                     "nodeType": "text"
                   }
@@ -2226,22 +2140,17 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Title (short text): The title of your article",
                             "nodeType": "text"
                           }
@@ -2252,18 +2161,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Slug (short text): The URL for your article. Once an article is published, this should not be changed",
                             "nodeType": "text"
                           }
@@ -2274,18 +2179,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Description (long text): An SEO description for your article. Will be displayed in link previews and in search results",
                             "nodeType": "text"
                           }
@@ -2296,18 +2197,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Body (RichText field): The main body for your article. All standard RichText formatting options are available",
                             "nodeType": "text"
                           }
@@ -2318,18 +2215,14 @@
                     "nodeType": "list-item"
                   },
                   {
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "data": {
-                            },
-                            "marks": [
-                            ],
+                            "data": {},
+                            "marks": [],
                             "value": "Category (Reference): Before an article can be published, it must be linked to a Category",
                             "nodeType": "text"
                           }
@@ -2343,14 +2236,11 @@
                 "nodeType": "unordered-list"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "",
                     "nodeType": "text"
                   }
@@ -2384,7 +2274,7 @@
         "id": "34bGQMuTqqpJ7MGgqbTeIo",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:56.079Z",
-        "updatedAt": "2020-05-20T15:20:00.621Z",
+        "updatedAt": "2020-06-03T13:48:49.398Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -2392,8 +2282,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:20:00.621Z",
+        "publishedVersion": 4,
+        "publishedAt": "2020-06-03T13:48:49.398Z",
         "firstPublishedAt": "2020-05-20T15:20:00.621Z",
         "createdBy": {
           "sys": {
@@ -2406,16 +2296,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 5,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -2433,23 +2323,19 @@
         "slug": {
           "en-US": "overview"
         },
-        "description": {
-          "en-US": "An explanation of what's included in this app"
+        "metaDescription": {
+          "en-US": "How to use the Knowledge base app."
         },
         "body": {
           "en-US": {
-            "data": {
-            },
+            "data": {},
             "content": [
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "Welcome to the Contentful Knowledge Base app! This app will enable you to get a knowledge base up and running within 10 minutes. ",
                     "nodeType": "text"
                   }
@@ -2457,14 +2343,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "Here’s what’s included with the app:\n",
                     "nodeType": "text"
                   }
@@ -2472,37 +2355,21 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "Content model. An explanation of the content types and how they work can be found ",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           },
                           {
-                            "nodeType": "entry-hyperlink",
-                            "content": [
-                              {
-                                "nodeType": "text",
-                                "value": "here",
-                                "marks": [
-                                ],
-                                "data": {
-                                }
-                              }
-                            ],
                             "data": {
                               "target": {
                                 "sys": {
@@ -2511,115 +2378,104 @@
                                   "linkType": "Entry"
                                 }
                               }
-                            }
+                            },
+                            "content": [
+                              {
+                                "data": {},
+                                "marks": [],
+                                "value": "here",
+                                "nodeType": "text"
+                              }
+                            ],
+                            "nodeType": "entry-hyperlink"
                           },
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
-                    ]
+                    ],
+                    "nodeType": "list-item"
                   },
                   {
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "Sample articles (including this one!) that will quickly get you up to speed on the different aspects of the app",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
                     ],
-                    "data": {
-                    }
+                    "nodeType": "list-item"
                   },
                   {
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "Sample categories, allowing you to preview how your knowledge base will look to customers",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
                     ],
-                    "data": {
-                    }
+                    "nodeType": "list-item"
                   },
                   {
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "Sample media assets, so you can see how embedding assets works",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
                     ],
-                    "data": {
-                    }
+                    "nodeType": "list-item"
                   }
                 ],
                 "nodeType": "unordered-list"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "\n",
-                    "marks": [
-                    ]
+                    "nodeType": "text"
                   }
                 ],
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "What this app does",
                     "nodeType": "text"
                   }
@@ -2627,14 +2483,11 @@
                 "nodeType": "heading-2"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "This app will allow you to set up and start publishing articles for a knowledge base. It’s been created with support agents and content editors in mind, allowing them to quickly publish content that answers commonly asked questions regarding your product. ",
                     "nodeType": "text"
                   }
@@ -2642,14 +2495,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "",
                     "nodeType": "text"
                   }
@@ -2657,14 +2507,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "Basic customizations (such as creating categories, embedding images in articles, changing logos, editing links, customizing the footer, and adding social media) are all included in this app.",
                     "nodeType": "text"
                   }
@@ -2672,14 +2519,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "",
                     "nodeType": "text"
                   }
@@ -2687,48 +2531,39 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "What’s ",
                     "nodeType": "text"
                   },
                   {
-                    "nodeType": "text",
-                    "value": "not ",
+                    "data": {},
                     "marks": [
                       {
                         "type": "bold"
                       }
                     ],
-                    "data": {
-                    }
+                    "value": "not ",
+                    "nodeType": "text"
                   },
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "included",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
                 "nodeType": "heading-2"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "Any changes made to the content model, or extensive customizations are beyond the scope of this app and will require additional engineering resources from your organization. ",
                     "nodeType": "text"
                   }
@@ -2736,14 +2571,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "I’m confused by some Contentful features",
                     "nodeType": "text"
                   }
@@ -2751,29 +2583,15 @@
                 "nodeType": "heading-2"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "You can read the ",
                     "nodeType": "text"
                   },
                   {
-                    "nodeType": "entry-hyperlink",
-                    "content": [
-                      {
-                        "nodeType": "text",
-                        "value": "KB App FAQ",
-                        "marks": [
-                        ],
-                        "data": {
-                        }
-                      }
-                    ],
                     "data": {
                       "target": {
                         "sys": {
@@ -2782,39 +2600,42 @@
                           "linkType": "Entry"
                         }
                       }
-                    }
-                  },
-                  {
-                    "nodeType": "text",
-                    "value": ", or visit our ",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
-                  },
-                  {
-                    "nodeType": "hyperlink",
+                    },
                     "content": [
                       {
-                        "nodeType": "text",
-                        "value": "Help Center",
-                        "marks": [
-                        ],
-                        "data": {
-                        }
+                        "data": {},
+                        "marks": [],
+                        "value": "KB App FAQ",
+                        "nodeType": "text"
                       }
                     ],
-                    "data": {
-                      "uri": "https://www.contentful.com/help"
-                    }
+                    "nodeType": "entry-hyperlink"
                   },
                   {
-                    "nodeType": "text",
-                    "value": " for questions about using Contentful.",
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
+                    "value": ", or visit our ",
+                    "nodeType": "text"
+                  },
+                  {
                     "data": {
-                    }
+                      "uri": "https://www.contentful.com/help"
+                    },
+                    "content": [
+                      {
+                        "data": {},
+                        "marks": [],
+                        "value": "Help Center",
+                        "nodeType": "text"
+                      }
+                    ],
+                    "nodeType": "hyperlink"
+                  },
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": " for questions about using Contentful.",
+                    "nodeType": "text"
                   }
                 ],
                 "nodeType": "paragraph"
@@ -2846,7 +2667,7 @@
         "id": "3FT5VN8QGd0BhqVVdcOK95",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:56.475Z",
-        "updatedAt": "2020-05-20T15:20:00.616Z",
+        "updatedAt": "2020-06-03T13:49:18.458Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -2854,8 +2675,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:20:00.616Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:49:18.458Z",
         "firstPublishedAt": "2020-05-20T15:20:00.616Z",
         "createdBy": {
           "sys": {
@@ -2868,16 +2689,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -2895,788 +2716,659 @@
         "slug": {
           "en-US": "frequently-asked-questions"
         },
-        "description": {
-          "en-US": "Answers to frequently asked questions about getting started building a knowledge base with the app. "
+        "metaDescription": {
+          "en-US": "FAQs about the app."
         },
         "body": {
           "en-US": {
-            "nodeType": "document",
-            "data": {
-            },
+            "data": {},
             "content": [
               {
-                "nodeType": "heading-2",
+                "data": {},
                 "content": [
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "Can I import content from other platforms?",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
-                "data": {
-                }
+                "nodeType": "heading-2"
               },
               {
-                "nodeType": "paragraph",
+                "data": {},
                 "content": [
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "\nContentful allows for the importing, exporting and migration of content from other platforms. This is done with the Contentful CLI tool.  After installation, you can set a variety of configurations in a JSON file and then use the command line to import your content.  ",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   },
                   {
-                    "nodeType": "hyperlink",
+                    "data": {
+                      "uri": "https://www.contentful.com/developers/docs/tutorials/cli/import-and-export/"
+                    },
                     "content": [
                       {
-                        "nodeType": "text",
-                        "value": "Find out more about importing and exporting content",
+                        "data": {},
                         "marks": [
                           {
                             "type": "underline"
                           }
                         ],
-                        "data": {
-                        }
+                        "value": "Find out more about importing and exporting content",
+                        "nodeType": "text"
                       }
                     ],
-                    "data": {
-                      "uri": "https://www.contentful.com/developers/docs/tutorials/cli/import-and-export/"
-                    }
+                    "nodeType": "hyperlink"
                   },
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": ".",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
-                "data": {
-                }
+                "nodeType": "paragraph"
               },
               {
-                "nodeType": "paragraph",
+                "data": {},
                 "content": [
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "\n",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
-                "data": {
-                }
+                "nodeType": "paragraph"
               },
               {
-                "nodeType": "heading-2",
+                "data": {},
                 "content": [
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "How can I localize my content?\n",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
-                "data": {
-                }
+                "nodeType": "heading-2"
               },
               {
-                "nodeType": "paragraph",
+                "data": {},
                 "content": [
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "To localize content in Contentful, you need to set up locales for your space. Navigate to ",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   },
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
                     "value": "Settings > Locales ",
-                    "marks": [
-                      {
-                        "type": "bold"
-                      }
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   },
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "and click ",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   },
                   {
-                    "nodeType": "text",
-                    "value": "Add locale",
+                    "data": {},
                     "marks": [
                       {
                         "type": "bold"
                       }
                     ],
-                    "data": {
-                    }
+                    "value": "Add locale",
+                    "nodeType": "text"
                   },
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": ". From there, you can configure as desired. ",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
-                "data": {
-                }
+                "nodeType": "paragraph"
               },
               {
-                "nodeType": "paragraph",
+                "data": {},
                 "content": [
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "For more complex translation workflows or localization needs, you can ",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   },
                   {
-                    "nodeType": "hyperlink",
                     "data": {
                       "uri": "https://www.contentful.com/developers/docs/concepts/locales/"
                     },
                     "content": [
                       {
-                        "nodeType": "text",
-                        "value": "read more about field vs entry level localization patterns",
+                        "data": {},
                         "marks": [
                           {
                             "type": "underline"
                           }
                         ],
-                        "data": {
-                        }
+                        "value": "read more about field vs entry level localization patterns",
+                        "nodeType": "text"
                       }
-                    ]
-                  },
-                  {
-                    "nodeType": "text",
-                    "value": ".  Once localization has been set up, it’s time for ",
-                    "marks": [
                     ],
-                    "data": {
-                    }
+                    "nodeType": "hyperlink"
                   },
                   {
-                    "nodeType": "hyperlink",
+                    "data": {},
+                    "marks": [],
+                    "value": ".  Once localization has been set up, it’s time for ",
+                    "nodeType": "text"
+                  },
+                  {
                     "data": {
                       "uri": "https://www.contentful.com/help/working-with-translations/"
                     },
                     "content": [
                       {
-                        "nodeType": "text",
+                        "data": {},
+                        "marks": [
+                          {
+                            "type": "underline"
+                          }
+                        ],
                         "value": "working with translations in Contentful.",
-                        "marks": [
-                          {
-                            "type": "underline"
-                          }
-                        ],
-                        "data": {
-                        }
+                        "nodeType": "text"
                       }
-                    ]
+                    ],
+                    "nodeType": "hyperlink"
                   },
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
-                "data": {
-                }
+                "nodeType": "paragraph"
               },
               {
-                "nodeType": "paragraph",
+                "data": {},
                 "content": [
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "\n",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
-                "data": {
-                }
+                "nodeType": "paragraph"
               },
               {
-                "nodeType": "heading-2",
+                "data": {},
                 "content": [
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "How can I set up an approval workflow?",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
-                "data": {
-                }
+                "nodeType": "heading-2"
               },
               {
-                "nodeType": "paragraph",
+                "data": {},
                 "content": [
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "You can use ",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   },
                   {
-                    "nodeType": "hyperlink",
-                    "content": [
-                      {
-                        "nodeType": "text",
-                        "value": "space roles and permissions",
-                        "marks": [
-                          {
-                            "type": "underline"
-                          }
-                        ],
-                        "data": {
-                        }
-                      }
-                    ],
                     "data": {
                       "uri": "https://www.contentful.com/help/space-roles-and-permissions/"
-                    }
-                  },
-                  {
-                    "nodeType": "text",
-                    "value": " to set up an approval workflow.",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "unordered-list",
-                "content": [
-                  {
-                    "nodeType": "list-item",
-                    "data": {
                     },
                     "content": [
                       {
-                        "nodeType": "paragraph",
-                        "content": [
-                          {
-                            "nodeType": "text",
-                            "value": "Editor: Can view, create, edit and delete content, is the only one who can publish it",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
-                          }
-                        ],
-                        "data": {
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "nodeType": "list-item",
-                    "content": [
-                      {
-                        "nodeType": "paragraph",
-                        "data": {
-                        },
-                        "content": [
-                          {
-                            "nodeType": "text",
-                            "value": "Author: Can create content, but not publish or delete it",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
-                          }
-                        ]
-                      }
-                    ],
-                    "data": {
-                    }
-                  },
-                  {
-                    "nodeType": "list-item",
-                    "data": {
-                    },
-                    "content": [
-                      {
-                        "nodeType": "paragraph",
-                        "content": [
-                          {
-                            "nodeType": "text",
-                            "value": "Translator: Can edit content for the language they are assigned to, but not modify the original",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
-                          }
-                        ],
-                        "data": {
-                        }
-                      }
-                    ]
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "paragraph",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "data": {
-                    },
-                    "value": "After roles are assigned, you can use ",
-                    "marks": [
-                    ]
-                  },
-                  {
-                    "nodeType": "hyperlink",
-                    "content": [
-                      {
-                        "nodeType": "text",
-                        "data": {
-                        },
-                        "value": "tasks ",
+                        "data": {},
                         "marks": [
                           {
                             "type": "underline"
                           }
-                        ]
+                        ],
+                        "value": "space roles and permissions",
+                        "nodeType": "text"
                       }
                     ],
+                    "nodeType": "hyperlink"
+                  },
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": " to set up an approval workflow.",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "paragraph"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "content": [
+                      {
+                        "data": {},
+                        "content": [
+                          {
+                            "data": {},
+                            "marks": [],
+                            "value": "Editor: Can view, create, edit and delete content, is the only one who can publish it",
+                            "nodeType": "text"
+                          }
+                        ],
+                        "nodeType": "paragraph"
+                      }
+                    ],
+                    "nodeType": "list-item"
+                  },
+                  {
+                    "data": {},
+                    "content": [
+                      {
+                        "data": {},
+                        "content": [
+                          {
+                            "data": {},
+                            "marks": [],
+                            "value": "Author: Can create content, but not publish or delete it",
+                            "nodeType": "text"
+                          }
+                        ],
+                        "nodeType": "paragraph"
+                      }
+                    ],
+                    "nodeType": "list-item"
+                  },
+                  {
+                    "data": {},
+                    "content": [
+                      {
+                        "data": {},
+                        "content": [
+                          {
+                            "data": {},
+                            "marks": [],
+                            "value": "Translator: Can edit content for the language they are assigned to, but not modify the original",
+                            "nodeType": "text"
+                          }
+                        ],
+                        "nodeType": "paragraph"
+                      }
+                    ],
+                    "nodeType": "list-item"
+                  }
+                ],
+                "nodeType": "unordered-list"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "After roles are assigned, you can use ",
+                    "nodeType": "text"
+                  },
+                  {
                     "data": {
                       "uri": "https://www.contentful.com/help/tasks/"
-                    }
-                  },
-                  {
-                    "nodeType": "text",
-                    "data": {
                     },
-                    "value": "and ",
-                    "marks": [
-                    ]
-                  },
-                  {
-                    "nodeType": "hyperlink",
                     "content": [
                       {
-                        "nodeType": "text",
-                        "value": "scheduled publishing",
+                        "data": {},
                         "marks": [
                           {
                             "type": "underline"
                           }
                         ],
-                        "data": {
-                        }
+                        "value": "tasks ",
+                        "nodeType": "text"
                       }
                     ],
+                    "nodeType": "hyperlink"
+                  },
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "and ",
+                    "nodeType": "text"
+                  },
+                  {
                     "data": {
                       "uri": "https://www.contentful.com/developers/docs/tutorials/general/scheduled-publishing/"
-                    }
-                  },
-                  {
-                    "nodeType": "text",
-                    "value": " to ensure content is reviewed and published according to schedule.",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "paragraph",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "data": {
-                    },
-                    "value": "",
-                    "marks": [
-                    ]
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "heading-2",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "data": {
-                    },
-                    "value": "I want sub-categories. How can I set them up?",
-                    "marks": [
-                    ]
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "paragraph",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "data": {
-                    },
-                    "value": "Sub-categories can be easily created by adding them to the content model. Navigate to ",
-                    "marks": [
-                    ]
-                  },
-                  {
-                    "nodeType": "text",
-                    "value": "Content model > Add content type",
-                    "marks": [
-                      {
-                        "type": "bold"
-                      }
-                    ],
-                    "data": {
-                    }
-                  },
-                  {
-                    "nodeType": "text",
-                    "value": " and add the relevant fields, then save the new content type.",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "paragraph",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "value": "Once the content type is created, engineering support will be needed to enable editors to use it. ",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "paragraph",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "value": "",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "heading-2",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "value": "How do I add images to an article?",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "paragraph",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "data": {
-                    },
-                    "value": "\nImages are added to articles by uploading them as assets to Contentful, and then embedding them in the relevant entry.  ",
-                    "marks": [
-                    ]
-                  },
-                  {
-                    "nodeType": "text",
-                    "data": {
-                    },
-                    "value": "Only 1 image can be added to an article",
-                    "marks": [
-                      {
-                        "type": "bold"
-                      }
-                    ]
-                  },
-                  {
-                    "nodeType": "text",
-                    "data": {
-                    },
-                    "value": ".",
-                    "marks": [
-                    ]
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "ordered-list",
-                "content": [
-                  {
-                    "nodeType": "list-item",
-                    "data": {
                     },
                     "content": [
                       {
-                        "nodeType": "paragraph",
-                        "content": [
+                        "data": {},
+                        "marks": [
                           {
-                            "nodeType": "text",
-                            "value": "Open or create the entry for the article you want to add images to.",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "type": "underline"
                           }
                         ],
-                        "data": {
-                        }
+                        "value": "scheduled publishing",
+                        "nodeType": "text"
                       }
-                    ]
+                    ],
+                    "nodeType": "hyperlink"
                   },
                   {
-                    "nodeType": "list-item",
+                    "data": {},
+                    "marks": [],
+                    "value": " to ensure content is reviewed and published according to schedule.",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "paragraph"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "paragraph"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "I want sub-categories. How can I set them up?",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "heading-2"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "Sub-categories can be easily created by adding them to the content model. Navigate to ",
+                    "nodeType": "text"
+                  },
+                  {
+                    "data": {},
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "value": "Content model > Add content type",
+                    "nodeType": "text"
+                  },
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": " and add the relevant fields, then save the new content type.",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "paragraph"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "Once the content type is created, engineering support will be needed to enable editors to use it. ",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "paragraph"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "paragraph"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "How do I add images to an article?",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "heading-2"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "\nImages are added to articles by uploading them as assets to Contentful, and then embedding them in the relevant entry.  ",
+                    "nodeType": "text"
+                  },
+                  {
+                    "data": {},
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "value": "Only 1 image can be added to an article",
+                    "nodeType": "text"
+                  },
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": ".",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "paragraph"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
-                        "data": {
-                        },
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
+                            "value": "Open or create the entry for the article you want to add images to.",
+                            "nodeType": "text"
+                          }
+                        ],
+                        "nodeType": "paragraph"
+                      }
+                    ],
+                    "nodeType": "list-item"
+                  },
+                  {
+                    "data": {},
+                    "content": [
+                      {
+                        "data": {},
+                        "content": [
+                          {
+                            "data": {},
+                            "marks": [],
                             "value": "In the editor entry, click the ",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           },
                           {
-                            "nodeType": "text",
-                            "value": "Embed asset ",
+                            "data": {},
                             "marks": [
                               {
                                 "type": "bold"
                               }
                             ],
-                            "data": {
-                            }
+                            "value": "Embed asset ",
+                            "nodeType": "text"
                           },
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "button. ",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
-                        ]
+                        ],
+                        "nodeType": "paragraph"
                       }
                     ],
-                    "data": {
-                    }
+                    "nodeType": "list-item"
                   },
                   {
-                    "nodeType": "list-item",
-                    "data": {
-                    },
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "Select the asset you’d like to embed.",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
-                      }
-                    ]
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "paragraph",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "data": {
-                    },
-                    "value": "For more detailed instructions, read about ",
-                    "marks": [
-                    ]
-                  },
-                  {
-                    "nodeType": "hyperlink",
-                    "content": [
-                      {
-                        "nodeType": "text",
-                        "value": "working with media in Contentful",
-                        "marks": [
-                          {
-                            "type": "underline"
-                          }
-                        ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
                     ],
+                    "nodeType": "list-item"
+                  }
+                ],
+                "nodeType": "ordered-list"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "For more detailed instructions, read about ",
+                    "nodeType": "text"
+                  },
+                  {
                     "data": {
                       "uri": "https://www.contentful.com/help/working-with-media/"
-                    }
-                  },
-                  {
-                    "nodeType": "text",
-                    "value": ".",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "paragraph",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "data": {
                     },
-                    "value": "",
-                    "marks": [
-                    ]
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "heading-2",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "data": {
-                    },
-                    "value": "Where can I see changes people have made to an article?",
-                    "marks": [
-                    ]
-                  }
-                ],
-                "data": {
-                }
-              },
-              {
-                "nodeType": "paragraph",
-                "content": [
-                  {
-                    "nodeType": "text",
-                    "value": "As changes are made to each entry, Contentful autosaves these entries. After an entry is published, a snapshot is taken. When a published entry is edited and these subsequent changes are published, another snapshot is taken. In the Versions section of the entry editor, you can compare these snapshots to each other to see what changes have been made over time.  ",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
-                  },
-                  {
-                    "nodeType": "hyperlink",
                     "content": [
                       {
-                        "nodeType": "text",
-                        "value": "Read about versions in our Help Center",
+                        "data": {},
                         "marks": [
                           {
                             "type": "underline"
                           }
                         ],
-                        "data": {
-                        }
+                        "value": "working with media in Contentful",
+                        "nodeType": "text"
                       }
                     ],
-                    "data": {
-                      "uri": "https://www.contentful.com/help/versions/"
-                    }
+                    "nodeType": "hyperlink"
                   },
                   {
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": ".",
-                    "marks": [
-                    ],
-                    "data": {
-                    }
+                    "nodeType": "text"
                   }
                 ],
-                "data": {
-                }
+                "nodeType": "paragraph"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "paragraph"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "Where can I see changes people have made to an article?",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "heading-2"
+              },
+              {
+                "data": {},
+                "content": [
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": "As changes are made to each entry, Contentful autosaves these entries. After an entry is published, a snapshot is taken. When a published entry is edited and these subsequent changes are published, another snapshot is taken. In the Versions section of the entry editor, you can compare these snapshots to each other to see what changes have been made over time.  ",
+                    "nodeType": "text"
+                  },
+                  {
+                    "data": {
+                      "uri": "https://www.contentful.com/help/versions/"
+                    },
+                    "content": [
+                      {
+                        "data": {},
+                        "marks": [
+                          {
+                            "type": "underline"
+                          }
+                        ],
+                        "value": "Read about versions in our Help Center",
+                        "nodeType": "text"
+                      }
+                    ],
+                    "nodeType": "hyperlink"
+                  },
+                  {
+                    "data": {},
+                    "marks": [],
+                    "value": ".",
+                    "nodeType": "text"
+                  }
+                ],
+                "nodeType": "paragraph"
               }
-            ]
+            ],
+            "nodeType": "document"
           }
         },
         "kbAppCategory": {
@@ -3702,7 +3394,7 @@
         "id": "1mmuU3OfwCRR3Icp5uVBwe",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:57.455Z",
-        "updatedAt": "2020-05-20T15:20:00.618Z",
+        "updatedAt": "2020-06-03T13:49:01.432Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -3710,8 +3402,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 1,
-        "publishedAt": "2020-05-20T15:20:00.618Z",
+        "publishedVersion": 3,
+        "publishedAt": "2020-06-03T13:49:01.432Z",
         "firstPublishedAt": "2020-05-20T15:20:00.618Z",
         "createdBy": {
           "sys": {
@@ -3724,16 +3416,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 2,
+        "publishedCounter": 2,
+        "version": 4,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
         "contentType": {
@@ -3751,23 +3443,19 @@
         "slug": {
           "en-US": "embed-assets"
         },
-        "description": {
-          "en-US": "How to embed assets in an entry."
+        "metaDescription": {
+          "en-US": "How to embed assets."
         },
         "body": {
           "en-US": {
-            "data": {
-            },
+            "data": {},
             "content": [
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "Embed Assets",
                     "nodeType": "text"
                   }
@@ -3775,14 +3463,11 @@
                 "nodeType": "heading-2"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "Embedding assets is straightforward. First, upload your media to Contentful. You can do it through the Media tab, or directly in the editor of an entry. Then, select the asset you’d like to add to your entry, and link. ",
                     "nodeType": "text"
                   }
@@ -3790,14 +3475,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "Through the Media tab:",
                     "nodeType": "text"
                   }
@@ -3805,102 +3487,83 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "Click the Media tab in the top navigation bar.",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
-                    ]
+                    ],
+                    "nodeType": "list-item"
                   },
                   {
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "Click the Add asset button.",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
                     ],
-                    "data": {
-                    }
+                    "nodeType": "list-item"
                   },
                   {
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "Select whether you want to upload a single asset or multiple assets.\n",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
                     ],
-                    "data": {
-                    }
+                    "nodeType": "list-item"
                   }
                 ],
                 "nodeType": "ordered-list"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "You can either drag and drop your media file into the window or select it from your computer.",
-                    "marks": [
-                    ]
+                    "nodeType": "text"
                   }
                 ],
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "In the Editor:\n",
                     "nodeType": "text"
                   }
@@ -3908,108 +3571,89 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "Navigate to the entry you want to embed an asset in. Click the + ",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           },
                           {
-                            "nodeType": "text",
-                            "value": "Embed ",
+                            "data": {},
                             "marks": [
                               {
                                 "type": "bold"
                               }
                             ],
-                            "data": {
-                            }
+                            "value": "Embed ",
+                            "nodeType": "text"
                           },
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": " button and select Asset.",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
-                    ]
+                    ],
+                    "nodeType": "list-item"
                   },
                   {
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "If your asset has already been added, you can select it from the dialog that appears. If not, click “+ Create new asset” and upload your file. ",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
                     ],
-                    "data": {
-                    }
+                    "nodeType": "list-item"
                   },
                   {
-                    "nodeType": "list-item",
+                    "data": {},
                     "content": [
                       {
-                        "nodeType": "paragraph",
+                        "data": {},
                         "content": [
                           {
-                            "nodeType": "text",
+                            "data": {},
+                            "marks": [],
                             "value": "When finished, the asset will appear in the body of your entry.",
-                            "marks": [
-                            ],
-                            "data": {
-                            }
+                            "nodeType": "text"
                           }
                         ],
-                        "data": {
-                        }
+                        "nodeType": "paragraph"
                       }
                     ],
-                    "data": {
-                    }
+                    "nodeType": "list-item"
                   }
                 ],
                 "nodeType": "ordered-list"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "nodeType": "text",
+                    "data": {},
+                    "marks": [],
                     "value": "",
-                    "marks": [
-                    ]
+                    "nodeType": "text"
                   }
                 ],
                 "nodeType": "paragraph"
@@ -4041,7 +3685,7 @@
         "id": "7LcIKhZdSS2FYPeZhr8HD8",
         "type": "Entry",
         "createdAt": "2020-05-20T16:42:48.124Z",
-        "updatedAt": "2020-05-20T16:43:39.716Z",
+        "updatedAt": "2020-06-03T13:48:23.288Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -4049,8 +3693,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 30,
-        "publishedAt": "2020-05-20T16:43:39.716Z",
+        "publishedVersion": 40,
+        "publishedAt": "2020-06-03T13:48:23.288Z",
         "firstPublishedAt": "2020-05-20T16:43:39.716Z",
         "createdBy": {
           "sys": {
@@ -4066,8 +3710,8 @@
             "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 31,
+        "publishedCounter": 2,
+        "version": 41,
         "publishedBy": {
           "sys": {
             "type": "Link",
@@ -4090,23 +3734,19 @@
         "slug": {
           "en-US": "using-references"
         },
-        "description": {
-          "en-US": "How references are used to structure content."
+        "metaDescription": {
+          "en-US": "How to use references in Contentful."
         },
         "body": {
           "en-US": {
-            "data": {
-            },
+            "data": {},
             "content": [
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "Using references with the content model",
                     "nodeType": "text"
                   }
@@ -4114,14 +3754,11 @@
                 "nodeType": "heading-2"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "References in this app are used to create the navigation, the header links, the footer links, and to add articles to categories.  This structure allows for changes to be reflected globally, and enables you to re-use these linked entries throughout your content space. ",
                     "nodeType": "text"
                   }
@@ -4129,14 +3766,11 @@
                 "nodeType": "paragraph"
               },
               {
-                "data": {
-                },
+                "data": {},
                 "content": [
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "For a detailed guide on adding references to your content, see our ",
                     "nodeType": "text"
                   },
@@ -4146,10 +3780,8 @@
                     },
                     "content": [
                       {
-                        "data": {
-                        },
-                        "marks": [
-                        ],
+                        "data": {},
+                        "marks": [],
                         "value": "help center article.",
                         "nodeType": "text"
                       }
@@ -4157,10 +3789,8 @@
                     "nodeType": "hyperlink"
                   },
                   {
-                    "data": {
-                    },
-                    "marks": [
-                    ],
+                    "data": {},
+                    "marks": [],
                     "value": "",
                     "nodeType": "text"
                   }
