@@ -82,7 +82,7 @@ startServer();
 // Entry of our example content type is created
 const addDefaultData = (appToken: string) => ({
   method: "POST",
-  path: "/create",
+  path: "/",
   handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
     try {
       // We then use that token to get a token from Contentful which our App can use
