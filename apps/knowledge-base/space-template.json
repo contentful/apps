@@ -12,7 +12,7 @@
         "id": "kbAppArticle",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.788Z",
-        "updatedAt": "2020-06-03T13:27:12.127Z",
+        "updatedAt": "2020-06-04T10:32:22.352Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -20,8 +20,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 12,
-        "publishedAt": "2020-06-03T13:27:12.127Z",
+        "publishedVersion": 18,
+        "publishedAt": "2020-06-04T10:32:22.352Z",
         "firstPublishedAt": "2020-05-20T15:19:44.751Z",
         "createdBy": {
           "sys": {
@@ -37,8 +37,8 @@
             "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 6,
-        "version": 13,
+        "publishedCounter": 9,
+        "version": 19,
         "publishedBy": {
           "sys": {
             "type": "Link",
@@ -49,7 +49,7 @@
       },
       "displayField": "title",
       "name": "Article",
-      "description": "",
+      "description": "Create support articles for your help center site.",
       "fields": [
         {
           "id": "title",
@@ -164,7 +164,7 @@
         "id": "kbAppSiteSettings",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.788Z",
-        "updatedAt": "2020-06-03T13:46:58.686Z",
+        "updatedAt": "2020-06-04T13:10:42.301Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -172,8 +172,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 10,
-        "publishedAt": "2020-06-03T13:46:58.686Z",
+        "publishedVersion": 32,
+        "publishedAt": "2020-06-04T13:10:42.301Z",
         "firstPublishedAt": "2020-05-20T15:19:44.738Z",
         "createdBy": {
           "sys": {
@@ -189,8 +189,8 @@
             "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         },
-        "publishedCounter": 5,
-        "version": 11,
+        "publishedCounter": 16,
+        "version": 33,
         "publishedBy": {
           "sys": {
             "type": "Link",
@@ -201,41 +201,18 @@
       },
       "displayField": "siteName",
       "name": "Site settings",
-      "description": "",
+      "description": "Customize the look of the help center site included with this app.",
       "fields": [
         {
-          "id": "siteName",
-          "name": "Site name (SEO)",
-          "type": "Symbol",
-          "localized": false,
-          "required": true,
-          "validations": [
-            {
-              "unique": true
-            }
-          ],
-          "disabled": false,
-          "omitted": false
-        },
-        {
-          "id": "siteDescriptionSeo",
-          "name": "Site description (SEO)",
-          "type": "Symbol",
-          "localized": false,
-          "required": true,
-          "validations": [],
-          "disabled": false,
-          "omitted": false
-        },
-        {
           "id": "logo",
-          "name": "Logo",
+          "name": "Logo (JPG or PNG)",
           "type": "Link",
           "localized": false,
           "required": true,
           "validations": [
             {
-              "linkMimetypeGroup": ["image"]
+              "linkMimetypeGroup": ["image"],
+              "message": "Only JPG or PNG images are supported."
             }
           ],
           "disabled": false,
@@ -291,6 +268,30 @@
           }
         },
         {
+          "id": "siteName",
+          "name": "Site name (SEO)",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "unique": true
+            }
+          ],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "siteDescriptionSeo",
+          "name": "Site description (SEO)",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
           "id": "googleAnalyticsId",
           "name": "Google analytics ID",
           "type": "Symbol",
@@ -314,7 +315,7 @@
         "id": "kbAppCategory",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.795Z",
-        "updatedAt": "2020-06-03T13:46:41.871Z",
+        "updatedAt": "2020-06-04T09:13:15.779Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -322,8 +323,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 24,
-        "publishedAt": "2020-06-03T13:46:41.870Z",
+        "publishedVersion": 26,
+        "publishedAt": "2020-06-04T09:13:15.779Z",
         "firstPublishedAt": "2020-05-20T15:19:44.736Z",
         "createdBy": {
           "sys": {
@@ -336,22 +337,22 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 12,
-        "version": 25,
+        "publishedCounter": 13,
+        "version": 27,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         }
       },
       "displayField": "name",
       "name": "Category",
-      "description": "",
+      "description": "Create categories for organizing support articles.",
       "fields": [
         {
           "id": "name",
@@ -411,7 +412,7 @@
         "id": "kbAppLink",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.796Z",
-        "updatedAt": "2020-05-20T15:19:44.748Z",
+        "updatedAt": "2020-06-04T10:26:05.193Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -419,8 +420,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 2,
-        "publishedAt": "2020-05-20T15:19:44.748Z",
+        "publishedVersion": 10,
+        "publishedAt": "2020-06-04T10:26:05.193Z",
         "firstPublishedAt": "2020-05-20T15:19:44.748Z",
         "createdBy": {
           "sys": {
@@ -433,22 +434,22 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 1,
-        "version": 3,
+        "publishedCounter": 5,
+        "version": 11,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
+            "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         }
       },
       "displayField": "text",
       "name": "Link",
-      "description": "",
+      "description": "Add links throughout your site.",
       "fields": [
         {
           "id": "text",
@@ -485,7 +486,7 @@
             "linkType": "Space"
           }
         },
-        "version": 13,
+        "version": 19,
         "createdAt": "2020-05-20T15:19:44.827Z",
         "createdBy": {
           "sys": {
@@ -494,7 +495,7 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-06-03T13:27:12.617Z",
+        "updatedAt": "2020-06-04T10:32:22.933Z",
         "updatedBy": {
           "sys": {
             "id": "1qZRFE2T0YMRkCSPigLrFz",
@@ -595,7 +596,7 @@
             "linkType": "Space"
           }
         },
-        "version": 11,
+        "version": 33,
         "createdAt": "2020-05-20T15:19:44.816Z",
         "createdBy": {
           "sys": {
@@ -604,7 +605,7 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-06-03T13:46:59.186Z",
+        "updatedAt": "2020-06-04T13:10:42.755Z",
         "updatedBy": {
           "sys": {
             "id": "1n6JeO5hWTbMwlazefu4ux",
@@ -629,50 +630,54 @@
       },
       "sidebar": [
         {
+          "settings": {},
           "widgetId": "publication-widget",
           "widgetNamespace": "sidebar-builtin"
         },
         {
+          "settings": {},
           "widgetId": "content-workflows-tasks-widget",
           "widgetNamespace": "sidebar-builtin"
         },
         {
+          "settings": {},
           "widgetId": "content-preview-widget",
           "widgetNamespace": "sidebar-builtin"
         },
         {
+          "settings": {},
           "widgetId": "incoming-links-widget",
           "widgetNamespace": "sidebar-builtin"
         },
         {
+          "settings": {},
           "widgetId": "translation-widget",
           "widgetNamespace": "sidebar-builtin"
         },
         {
+          "settings": {},
           "widgetId": "versions-widget",
           "widgetNamespace": "sidebar-builtin"
         },
         {
+          "settings": {},
           "widgetId": "users-widget",
+          "widgetNamespace": "sidebar-builtin"
+        },
+        {
+          "disabled": true,
+          "widgetId": "releases-widget",
           "widgetNamespace": "sidebar-builtin"
         }
       ],
       "controls": [
         {
-          "fieldId": "siteName",
-          "settings": {
-            "helpText": "Name of your site as you want it to appear in search results. Will not be displayed on the website hompage."
-          },
-          "widgetId": "singleLine",
-          "widgetNamespace": "builtin"
-        },
-        {
-          "fieldId": "siteDescriptionSeo",
-          "widgetId": "singleLine",
-          "widgetNamespace": "builtin"
-        },
-        {
           "fieldId": "logo",
+          "settings": {
+            "helpText": "Logo to appear in the site header. Only JPG or PNG images are supported.",
+            "showLinkEntityAction": true,
+            "showCreateEntityAction": true
+          },
           "widgetId": "assetLinkEditor",
           "widgetNamespace": "builtin"
         },
@@ -704,6 +709,19 @@
           "widgetNamespace": "builtin"
         },
         {
+          "fieldId": "siteName",
+          "settings": {
+            "helpText": "Name of your site as you want it to appear in search results. Will not be displayed on the website hompage."
+          },
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
+        },
+        {
+          "fieldId": "siteDescriptionSeo",
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
+        },
+        {
           "fieldId": "googleAnalyticsId",
           "widgetId": "singleLine",
           "widgetNamespace": "builtin"
@@ -721,7 +739,7 @@
             "linkType": "Space"
           }
         },
-        "version": 25,
+        "version": 27,
         "createdAt": "2020-05-20T15:19:44.825Z",
         "createdBy": {
           "sys": {
@@ -730,10 +748,10 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-06-03T13:46:42.346Z",
+        "updatedAt": "2020-06-04T09:13:16.660Z",
         "updatedBy": {
           "sys": {
-            "id": "1n6JeO5hWTbMwlazefu4ux",
+            "id": "1qZRFE2T0YMRkCSPigLrFz",
             "type": "Link",
             "linkType": "User"
           }
@@ -815,7 +833,7 @@
             "linkType": "Space"
           }
         },
-        "version": 3,
+        "version": 11,
         "createdAt": "2020-05-20T15:19:44.825Z",
         "createdBy": {
           "sys": {
@@ -824,10 +842,10 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-05-20T15:21:34.075Z",
+        "updatedAt": "2020-06-04T10:26:05.648Z",
         "updatedBy": {
           "sys": {
-            "id": "1n6JeO5hWTbMwlazefu4ux",
+            "id": "1qZRFE2T0YMRkCSPigLrFz",
             "type": "Link",
             "linkType": "User"
           }
@@ -879,10 +897,14 @@
       ],
       "controls": [
         {
-          "fieldId": "text"
+          "fieldId": "text",
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         },
         {
-          "fieldId": "url"
+          "fieldId": "url",
+          "widgetId": "singleLine",
+          "widgetNamespace": "builtin"
         }
       ]
     }
@@ -963,340 +985,10 @@
             "id": "2fyan6uo0t86"
           }
         },
-        "id": "6qxUkDsTy99EEGjzmsju27",
-        "type": "Entry",
-        "createdAt": "2020-05-20T15:19:52.456Z",
-        "updatedAt": "2020-06-03T13:55:20.068Z",
-        "environment": {
-          "sys": {
-            "id": "master",
-            "type": "Link",
-            "linkType": "Environment"
-          }
-        },
-        "publishedVersion": 3,
-        "publishedAt": "2020-06-03T13:55:20.068Z",
-        "firstPublishedAt": "2020-05-20T15:19:56.632Z",
-        "createdBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
-          }
-        },
-        "updatedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "publishedCounter": 2,
-        "version": 4,
-        "publishedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "contentType": {
-          "sys": {
-            "type": "Link",
-            "linkType": "ContentType",
-            "id": "kbAppCategory"
-          }
-        }
-      },
-      "fields": {
-        "name": {
-          "en-US": "Tips and tricks"
-        },
-        "slug": {
-          "en-US": "tips-and-tricks"
-        },
-        "previewDescription": {
-          "en-US": "Tips and tricks to get started."
-        }
-      }
-    },
-    {
-      "sys": {
-        "space": {
-          "sys": {
-            "type": "Link",
-            "linkType": "Space",
-            "id": "2fyan6uo0t86"
-          }
-        },
-        "id": "4xkV4vqcX9WpBK132tge1L",
-        "type": "Entry",
-        "createdAt": "2020-05-20T15:19:52.464Z",
-        "updatedAt": "2020-06-03T13:55:58.053Z",
-        "environment": {
-          "sys": {
-            "id": "master",
-            "type": "Link",
-            "linkType": "Environment"
-          }
-        },
-        "publishedVersion": 3,
-        "publishedAt": "2020-06-03T13:55:58.053Z",
-        "firstPublishedAt": "2020-05-20T15:19:56.596Z",
-        "createdBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
-          }
-        },
-        "updatedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "publishedCounter": 2,
-        "version": 4,
-        "publishedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "contentType": {
-          "sys": {
-            "type": "Link",
-            "linkType": "ContentType",
-            "id": "kbAppCategory"
-          }
-        }
-      },
-      "fields": {
-        "name": {
-          "en-US": "Billing and administration"
-        },
-        "slug": {
-          "en-US": "billing-and-administration"
-        },
-        "previewDescription": {
-          "en-US": "Billing and administration articles."
-        }
-      }
-    },
-    {
-      "sys": {
-        "space": {
-          "sys": {
-            "type": "Link",
-            "linkType": "Space",
-            "id": "2fyan6uo0t86"
-          }
-        },
-        "id": "4u14zqqxzwjHiR7SByyCBp",
-        "type": "Entry",
-        "createdAt": "2020-05-20T15:19:52.470Z",
-        "updatedAt": "2020-06-03T13:55:32.713Z",
-        "environment": {
-          "sys": {
-            "id": "master",
-            "type": "Link",
-            "linkType": "Environment"
-          }
-        },
-        "publishedVersion": 3,
-        "publishedAt": "2020-06-03T13:55:32.713Z",
-        "firstPublishedAt": "2020-05-20T15:19:56.628Z",
-        "createdBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
-          }
-        },
-        "updatedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "publishedCounter": 2,
-        "version": 4,
-        "publishedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "contentType": {
-          "sys": {
-            "type": "Link",
-            "linkType": "ContentType",
-            "id": "kbAppCategory"
-          }
-        }
-      },
-      "fields": {
-        "name": {
-          "en-US": "Troubleshooting"
-        },
-        "slug": {
-          "en-US": "troubleshooting"
-        },
-        "previewDescription": {
-          "en-US": "Troubleshooting topics"
-        }
-      }
-    },
-    {
-      "sys": {
-        "space": {
-          "sys": {
-            "type": "Link",
-            "linkType": "Space",
-            "id": "2fyan6uo0t86"
-          }
-        },
-        "id": "3LkygnpMIuMUUOaYOczDji",
-        "type": "Entry",
-        "createdAt": "2020-05-20T15:19:52.489Z",
-        "updatedAt": "2020-06-03T13:55:03.033Z",
-        "environment": {
-          "sys": {
-            "id": "master",
-            "type": "Link",
-            "linkType": "Environment"
-          }
-        },
-        "publishedVersion": 3,
-        "publishedAt": "2020-06-03T13:55:03.033Z",
-        "firstPublishedAt": "2020-05-20T15:19:56.637Z",
-        "createdBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
-          }
-        },
-        "updatedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "publishedCounter": 2,
-        "version": 4,
-        "publishedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "contentType": {
-          "sys": {
-            "type": "Link",
-            "linkType": "ContentType",
-            "id": "kbAppCategory"
-          }
-        }
-      },
-      "fields": {
-        "name": {
-          "en-US": "Logging in"
-        },
-        "slug": {
-          "en-US": "logging-in"
-        },
-        "previewDescription": {
-          "en-US": "Logging in"
-        }
-      }
-    },
-    {
-      "sys": {
-        "space": {
-          "sys": {
-            "type": "Link",
-            "linkType": "Space",
-            "id": "2fyan6uo0t86"
-          }
-        },
-        "id": "3zVgQ0kRgmvo2kQn6HpsMx",
-        "type": "Entry",
-        "createdAt": "2020-05-20T15:19:52.563Z",
-        "updatedAt": "2020-06-03T13:54:51.643Z",
-        "environment": {
-          "sys": {
-            "id": "master",
-            "type": "Link",
-            "linkType": "Environment"
-          }
-        },
-        "publishedVersion": 3,
-        "publishedAt": "2020-06-03T13:54:51.643Z",
-        "firstPublishedAt": "2020-05-20T15:19:56.894Z",
-        "createdBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
-          }
-        },
-        "updatedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "publishedCounter": 2,
-        "version": 4,
-        "publishedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
-          }
-        },
-        "contentType": {
-          "sys": {
-            "type": "Link",
-            "linkType": "ContentType",
-            "id": "kbAppCategory"
-          }
-        }
-      },
-      "fields": {
-        "name": {
-          "en-US": "Account settings"
-        },
-        "slug": {
-          "en-US": "account-settings"
-        },
-        "previewDescription": {
-          "en-US": "Account settings"
-        }
-      }
-    },
-    {
-      "sys": {
-        "space": {
-          "sys": {
-            "type": "Link",
-            "linkType": "Space",
-            "id": "2fyan6uo0t86"
-          }
-        },
         "id": "17faFp5UY1vwA7HvcWnfNl",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:53.458Z",
-        "updatedAt": "2020-06-03T13:45:48.297Z",
+        "updatedAt": "2020-06-04T13:00:42.834Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -1304,8 +996,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 7,
-        "publishedAt": "2020-06-03T13:45:48.297Z",
+        "publishedVersion": 9,
+        "publishedAt": "2020-06-04T13:00:42.834Z",
         "firstPublishedAt": "2020-05-20T15:19:57.582Z",
         "createdBy": {
           "sys": {
@@ -1321,8 +1013,8 @@
             "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         },
-        "publishedCounter": 2,
-        "version": 8,
+        "publishedCounter": 3,
+        "version": 10,
         "publishedBy": {
           "sys": {
             "type": "Link",
@@ -1339,18 +1031,12 @@
         }
       },
       "fields": {
-        "siteName": {
-          "en-US": "Contentful help center"
-        },
-        "siteDescriptionSeo": {
-          "en-US": "All of your questions answered."
-        },
         "logo": {
           "en-US": {
             "sys": {
               "type": "Link",
               "linkType": "Asset",
-              "id": "hrTxEnry4OcLv4EDTVGO3"
+              "id": "617qDs1u983leRNfv31tQu"
             }
           }
         },
@@ -1370,6 +1056,12 @@
               }
             }
           ]
+        },
+        "siteName": {
+          "en-US": "Contentful help center"
+        },
+        "siteDescriptionSeo": {
+          "en-US": "All of your questions answered."
         },
         "googleAnalyticsId": {
           "en-US": "UA-0000-0"
@@ -1517,7 +1209,7 @@
         "id": "6Pna4OrC1gL9f1idJpegEi",
         "type": "Entry",
         "createdAt": "2020-05-20T15:19:55.550Z",
-        "updatedAt": "2020-06-03T13:49:30.347Z",
+        "updatedAt": "2020-06-04T10:31:34.378Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -1525,8 +1217,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 3,
-        "publishedAt": "2020-06-03T13:49:30.347Z",
+        "publishedVersion": 47,
+        "publishedAt": "2020-06-04T10:31:34.378Z",
         "firstPublishedAt": "2020-05-20T15:19:59.580Z",
         "createdBy": {
           "sys": {
@@ -1542,8 +1234,8 @@
             "id": "1qZRFE2T0YMRkCSPigLrFz"
           }
         },
-        "publishedCounter": 2,
-        "version": 4,
+        "publishedCounter": 5,
+        "version": 48,
         "publishedBy": {
           "sys": {
             "type": "Link",
@@ -1571,684 +1263,648 @@
         },
         "body": {
           "en-US": {
+            "nodeType": "document",
             "data": {},
             "content": [
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": "In the Content Model tab, you’ll find a sample content model already created for your use. This content model is the basic structure of your knowledge base. You can edit the content model as desired, but note that any changes will require additional engineering support. The content model for this app is as follows:",
-                    "nodeType": "text"
-                  }
-                ],
-                "nodeType": "paragraph"
-              },
-              {
-                "data": {},
-                "content": [
-                  {
-                    "data": {},
                     "marks": [],
-                    "value": "",
-                    "nodeType": "text"
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [
-                      {
-                        "type": "bold"
-                      }
-                    ],
+                    "nodeType": "text",
+                    "value": "",
+                    "marks": [],
+                    "data": {}
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "nodeType": "heading-2",
+                "content": [
+                  {
+                    "nodeType": "text",
                     "value": "Site settings",
-                    "nodeType": "text"
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "data": {}
                   }
                 ],
-                "nodeType": "heading-2"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": "The Site settings content type is where the master settings for your knowledge base are located. All changes made to this content type are reflected globally. There must only be ",
-                    "nodeType": "text"
+                    "marks": [],
+                    "data": {}
                   },
                   {
-                    "data": {},
-                    "marks": [
-                      {
-                        "type": "bold"
-                      }
-                    ],
+                    "nodeType": "text",
                     "value": "one",
-                    "nodeType": "text"
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "data": {}
                   },
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": " Site settings entry in your space. \n",
-                    "nodeType": "text"
+                    "marks": [],
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": "The Site settings content type contains the following fields:",
-                    "nodeType": "text"
+                    "marks": [],
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "unordered-list",
                 "content": [
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
+                            "nodeType": "text",
+                            "value": "Site name (SEO) (short text): The name of your website as it will appear in search results.",
                             "marks": [],
-                            "value": "Name (short text): The name of your website",
-                            "nodeType": "text"
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   },
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
+                            "nodeType": "text",
+                            "value": "Site description (SEO) (short text): A description of your website as it will appear in search results.",
                             "marks": [],
-                            "value": "Logo (media): The logo you want displayed in the knowledge base header. Maximum width is 160 px (height is proportional). Maximum size is 2 GB.",
-                            "nodeType": "text"
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   },
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
+                            "nodeType": "text",
+                            "value": "Logo (media): The logo you want displayed in the help center site header. Maximum width is 160 px (height is proportional). Maximum size is 2 GB.",
                             "marks": [],
-                            "value": "Heading (short text): The heading to be displayed on your knowledge base home page",
-                            "nodeType": "text"
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   },
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
+                            "nodeType": "text",
+                            "value": "Heading (short text): The heading to be displayed on your help center home page",
                             "marks": [],
+                            "data": {}
+                          }
+                        ],
+                        "data": {}
+                      }
+                    ],
+                    "data": {}
+                  },
+                  {
+                    "nodeType": "list-item",
+                    "content": [
+                      {
+                        "nodeType": "paragraph",
+                        "content": [
+                          {
+                            "nodeType": "text",
                             "value": "Subheading (short text): Subheading to be displayed beneath the home page heading",
-                            "nodeType": "text"
+                            "marks": [],
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   },
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
+                            "nodeType": "text",
+                            "value": "Navigation links (references): Links to be displayed in the site header. Maximum of 3. See Links section below for more information.",
                             "marks": [],
-                            "value": "Header links (Reference): See the Link section",
-                            "nodeType": "text"
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   },
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
-                            "marks": [],
-                            "value": "Footer links (Reference): See the Link section",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  },
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
-                            "value": "Social (Reference): See the Link section",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  },
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
+                            "nodeType": "text",
                             "value": "Google Analytics ID (short text): Enter the Google Analytics ID for your project to track audience metrics",
-                            "nodeType": "text"
+                            "marks": [],
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   }
                 ],
-                "nodeType": "unordered-list"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": "\n",
-                    "nodeType": "text"
+                    "marks": [],
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "heading-2",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [
-                      {
-                        "type": "bold"
-                      }
-                    ],
+                    "nodeType": "text",
                     "value": "Link",
-                    "nodeType": "text"
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "data": {}
                   }
                 ],
-                "nodeType": "heading-2"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
+                    "nodeType": "text",
+                    "value": "The Link content type creates links for your knowledge base. These can be used for navigation links in the header, for example. You can customize the display text, set the destination URL and set the icon to one of your choosing. Reference this entry type in your Site settings content type to make global changes.",
                     "marks": [],
-                    "value": "The Link content type creates links for your knowledge base. These can be used for social media links in the footer, for example. You can customize the display text, set the destination URL and set the icon to one of your choosing. Reference this entry type in your Site settings content type to make global changes.",
-                    "nodeType": "text"
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": "The Link content type contains the following fields:",
-                    "nodeType": "text"
+                    "marks": [],
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "unordered-list",
                 "content": [
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
-                            "marks": [],
+                            "nodeType": "text",
                             "value": "Display text: The text you want to link",
-                            "nodeType": "text"
+                            "marks": [],
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   },
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
-                            "marks": [],
+                            "nodeType": "text",
                             "value": "Href: The url you want to link to",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  },
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
                             "marks": [],
-                            "value": "Icon: The icon you wish to use. Maximum width is 160 px (height is proportional). Maximum size is 2 GB.",
-                            "nodeType": "text"
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   }
                 ],
-                "nodeType": "unordered-list"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": "\n",
-                    "nodeType": "text"
+                    "marks": [],
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [
-                      {
-                        "type": "bold"
-                      }
-                    ],
+                    "nodeType": "text",
                     "value": "Category",
-                    "nodeType": "text"
-                  }
-                ],
-                "nodeType": "paragraph"
-              },
-              {
-                "data": {},
-                "content": [
-                  {
-                    "data": {},
-                    "marks": [],
-                    "value": "The Category content type organizes entries by topic. Your app space comes with five pre-existing categories called “Getting started”, “Account settings”, “Billing and administration”, “Troubleshooting” and “Tips and tricks”. These categories can be edited or removed. You can also create your own categories. Link Articles to a Category to group them as desired. By default, Categories will be displayed as an alphabetical list on your home page.\n",
-                    "nodeType": "text"
-                  }
-                ],
-                "nodeType": "paragraph"
-              },
-              {
-                "data": {},
-                "content": [
-                  {
-                    "data": {},
-                    "marks": [],
-                    "value": "The Category content type contains the following fields:",
-                    "nodeType": "text"
-                  }
-                ],
-                "nodeType": "paragraph"
-              },
-              {
-                "data": {},
-                "content": [
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
-                            "value": "Name (short text): The desired name of your category",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  },
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
-                            "value": "Slug (short text): The desired URL for your category. Once a category is published, this should not be changed",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  },
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
-                            "value": "Description (Long text): A description of what the category contains\n",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  }
-                ],
-                "nodeType": "unordered-list"
-              },
-              {
-                "data": {},
-                "content": [
-                  {
-                    "data": {},
                     "marks": [
                       {
                         "type": "bold"
                       }
                     ],
+                    "data": {}
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "nodeType": "paragraph",
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "The Category content type organizes entries by topic. Your app space comes with two pre-existing categories called “Getting Started” and \"Content Model Overview\". These categories can be edited or removed. You can also create your own categories. Articles can be linked to a Category to group them as desired. By default, Categories will be displayed as an alphabetical list on your home page.\n",
+                    "marks": [],
+                    "data": {}
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "nodeType": "paragraph",
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "The Category content type contains the following fields:",
+                    "marks": [],
+                    "data": {}
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "nodeType": "unordered-list",
+                "content": [
+                  {
+                    "nodeType": "list-item",
+                    "content": [
+                      {
+                        "nodeType": "paragraph",
+                        "content": [
+                          {
+                            "nodeType": "text",
+                            "value": "Name (short text): The desired name of your category",
+                            "marks": [],
+                            "data": {}
+                          }
+                        ],
+                        "data": {}
+                      }
+                    ],
+                    "data": {}
+                  },
+                  {
+                    "nodeType": "list-item",
+                    "content": [
+                      {
+                        "nodeType": "paragraph",
+                        "content": [
+                          {
+                            "nodeType": "text",
+                            "value": "Slug (short text): The desired URL for your category. Once a category is published, this should not be changed",
+                            "marks": [],
+                            "data": {}
+                          }
+                        ],
+                        "data": {}
+                      }
+                    ],
+                    "data": {}
+                  },
+                  {
+                    "nodeType": "list-item",
+                    "content": [
+                      {
+                        "nodeType": "paragraph",
+                        "content": [
+                          {
+                            "nodeType": "text",
+                            "value": "Description (Long text): A description of what the category contains\n",
+                            "marks": [],
+                            "data": {}
+                          }
+                        ],
+                        "data": {}
+                      }
+                    ],
+                    "data": {}
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "nodeType": "paragraph",
+                "content": [
+                  {
+                    "nodeType": "text",
                     "value": "Article",
-                    "nodeType": "text"
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ],
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": "The Article content type creates entries for knowledge base articles. Articles can be in three states: draft, published or changed:",
-                    "nodeType": "text"
+                    "marks": [],
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "unordered-list",
                 "content": [
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
-                            "marks": [],
+                            "nodeType": "text",
                             "value": "Draft articles can only be accessed within Contentful",
-                            "nodeType": "text"
+                            "marks": [],
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   },
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
+                            "nodeType": "text",
+                            "value": "Published articles are “live” and publicly available in the knowledge base",
                             "marks": [],
-                            "value": " Published articles are “live” and publicly available in the knowledge base",
-                            "nodeType": "text"
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   },
                   {
-                    "data": {},
+                    "nodeType": "list-item",
                     "content": [
                       {
-                        "data": {},
+                        "nodeType": "paragraph",
                         "content": [
                           {
-                            "data": {},
-                            "marks": [],
+                            "nodeType": "text",
                             "value": "Changed articles are published articles that have been edited, but those changes are not yet published. These changes are not visible outside of Contentful until the article is published again",
-                            "nodeType": "text"
+                            "marks": [],
+                            "data": {}
                           }
                         ],
-                        "nodeType": "paragraph"
+                        "data": {}
                       }
                     ],
-                    "nodeType": "list-item"
+                    "data": {}
                   }
                 ],
-                "nodeType": "unordered-list"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": "Articles can be formatted with any of the options available in RichText. Sidebar links are automatically generated based on the heading size you use (H1, H2, etc.). ",
-                    "nodeType": "text"
+                    "marks": [],
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
               },
               {
-                "data": {},
+                "nodeType": "paragraph",
                 "content": [
                   {
-                    "data": {},
-                    "marks": [],
+                    "nodeType": "text",
                     "value": "The Article content type contains the following fields:",
-                    "nodeType": "text"
-                  }
-                ],
-                "nodeType": "paragraph"
-              },
-              {
-                "data": {},
-                "content": [
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
-                            "value": "Title (short text): The title of your article",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  },
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
-                            "value": "Slug (short text): The URL for your article. Once an article is published, this should not be changed",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  },
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
-                            "value": "Description (long text): An SEO description for your article. Will be displayed in link previews and in search results",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  },
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
-                            "value": "Body (RichText field): The main body for your article. All standard RichText formatting options are available",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  },
-                  {
-                    "data": {},
-                    "content": [
-                      {
-                        "data": {},
-                        "content": [
-                          {
-                            "data": {},
-                            "marks": [],
-                            "value": "Category (Reference): Before an article can be published, it must be linked to a Category",
-                            "nodeType": "text"
-                          }
-                        ],
-                        "nodeType": "paragraph"
-                      }
-                    ],
-                    "nodeType": "list-item"
-                  }
-                ],
-                "nodeType": "unordered-list"
-              },
-              {
-                "data": {},
-                "content": [
-                  {
-                    "data": {},
                     "marks": [],
-                    "value": "",
-                    "nodeType": "text"
+                    "data": {}
                   }
                 ],
-                "nodeType": "paragraph"
+                "data": {}
+              },
+              {
+                "nodeType": "unordered-list",
+                "content": [
+                  {
+                    "nodeType": "list-item",
+                    "content": [
+                      {
+                        "nodeType": "paragraph",
+                        "content": [
+                          {
+                            "nodeType": "text",
+                            "value": "Title (short text): Title of your article. Will be displayed at the top of the page.",
+                            "marks": [],
+                            "data": {}
+                          }
+                        ],
+                        "data": {}
+                      }
+                    ],
+                    "data": {}
+                  },
+                  {
+                    "nodeType": "list-item",
+                    "content": [
+                      {
+                        "nodeType": "paragraph",
+                        "content": [
+                          {
+                            "nodeType": "text",
+                            "value": "Slug (short text): The URL for your article. Once an article is published, this should not be changed",
+                            "marks": [],
+                            "data": {}
+                          }
+                        ],
+                        "data": {}
+                      }
+                    ],
+                    "data": {}
+                  },
+                  {
+                    "nodeType": "list-item",
+                    "content": [
+                      {
+                        "nodeType": "paragraph",
+                        "content": [
+                          {
+                            "nodeType": "text",
+                            "value": "Meta Description (long text): Short description of article contents. Will be seen in search results, social media posts, Slack messages, etc.",
+                            "marks": [],
+                            "data": {}
+                          }
+                        ],
+                        "data": {}
+                      }
+                    ],
+                    "data": {}
+                  },
+                  {
+                    "nodeType": "list-item",
+                    "content": [
+                      {
+                        "nodeType": "paragraph",
+                        "content": [
+                          {
+                            "nodeType": "text",
+                            "value": "Body (RichText field): The main body for your article. All standard RichText formatting options are available",
+                            "marks": [],
+                            "data": {}
+                          }
+                        ],
+                        "data": {}
+                      }
+                    ],
+                    "data": {}
+                  },
+                  {
+                    "nodeType": "list-item",
+                    "content": [
+                      {
+                        "nodeType": "paragraph",
+                        "content": [
+                          {
+                            "nodeType": "text",
+                            "value": "Category (Reference): Before an article can be published, it must be linked to a Category",
+                            "marks": [],
+                            "data": {}
+                          }
+                        ],
+                        "data": {}
+                      }
+                    ],
+                    "data": {}
+                  }
+                ],
+                "data": {}
+              },
+              {
+                "nodeType": "paragraph",
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "",
+                    "marks": [],
+                    "data": {}
+                  }
+                ],
+                "data": {}
               }
-            ],
-            "nodeType": "document"
+            ]
           }
         },
         "kbAppCategory": {
@@ -4024,73 +3680,6 @@
             "id": "2fyan6uo0t86"
           }
         },
-        "id": "hrTxEnry4OcLv4EDTVGO3",
-        "type": "Asset",
-        "createdAt": "2020-05-20T15:19:46.095Z",
-        "updatedAt": "2020-05-20T15:19:48.164Z",
-        "environment": {
-          "sys": {
-            "id": "master",
-            "type": "Link",
-            "linkType": "Environment"
-          }
-        },
-        "publishedVersion": 2,
-        "publishedAt": "2020-05-20T15:19:48.164Z",
-        "firstPublishedAt": "2020-05-20T15:19:48.164Z",
-        "createdBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
-          }
-        },
-        "updatedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
-          }
-        },
-        "publishedCounter": 1,
-        "version": 3,
-        "publishedBy": {
-          "sys": {
-            "type": "Link",
-            "linkType": "User",
-            "id": "1n6JeO5hWTbMwlazefu4ux"
-          }
-        }
-      },
-      "fields": {
-        "title": {
-          "en-US": "Contentful"
-        },
-        "file": {
-          "en-US": {
-            "url": "//images.ctfassets.net/2fyan6uo0t86/hrTxEnry4OcLv4EDTVGO3/68e8aa2da4a61140dbd3a07faa79e07b/347966-contentful-logo-wordmark-dark__1_-4cd185-original-1582664935.png",
-            "details": {
-              "size": 25053,
-              "image": {
-                "width": 1646,
-                "height": 338
-              }
-            },
-            "fileName": "347966-contentful-logo-wordmark-dark (1)-4cd185-original-1582664935.png",
-            "contentType": "image/png"
-          }
-        }
-      }
-    },
-    {
-      "sys": {
-        "space": {
-          "sys": {
-            "type": "Link",
-            "linkType": "Space",
-            "id": "2fyan6uo0t86"
-          }
-        },
         "id": "5ZRfx29TBuZSG6NIIc4LgF",
         "type": "Asset",
         "createdAt": "2020-05-20T15:19:46.097Z",
@@ -4144,6 +3733,73 @@
               }
             },
             "fileName": "new-entry.png",
+            "contentType": "image/png"
+          }
+        }
+      }
+    },
+    {
+      "sys": {
+        "space": {
+          "sys": {
+            "type": "Link",
+            "linkType": "Space",
+            "id": "2fyan6uo0t86"
+          }
+        },
+        "id": "617qDs1u983leRNfv31tQu",
+        "type": "Asset",
+        "createdAt": "2020-06-04T13:00:03.493Z",
+        "updatedAt": "2020-06-04T13:00:14.330Z",
+        "environment": {
+          "sys": {
+            "id": "master",
+            "type": "Link",
+            "linkType": "Environment"
+          }
+        },
+        "publishedVersion": 4,
+        "publishedAt": "2020-06-04T13:00:14.330Z",
+        "firstPublishedAt": "2020-06-04T13:00:14.330Z",
+        "createdBy": {
+          "sys": {
+            "type": "Link",
+            "linkType": "User",
+            "id": "1n6JeO5hWTbMwlazefu4ux"
+          }
+        },
+        "updatedBy": {
+          "sys": {
+            "type": "Link",
+            "linkType": "User",
+            "id": "1n6JeO5hWTbMwlazefu4ux"
+          }
+        },
+        "publishedCounter": 1,
+        "version": 5,
+        "publishedBy": {
+          "sys": {
+            "type": "Link",
+            "linkType": "User",
+            "id": "1n6JeO5hWTbMwlazefu4ux"
+          }
+        }
+      },
+      "fields": {
+        "title": {
+          "en-US": "Contentful"
+        },
+        "file": {
+          "en-US": {
+            "url": "//images.ctfassets.net/2fyan6uo0t86/617qDs1u983leRNfv31tQu/c3e6169dffb5c1af24ae61772f4e10dd/contentful-logo.png",
+            "details": {
+              "size": 17476,
+              "image": {
+                "width": 600,
+                "height": 124
+              }
+            },
+            "fileName": "contentful-logo.png",
             "contentType": "image/png"
           }
         }
