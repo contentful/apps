@@ -12,7 +12,7 @@
         "id": "kbAppArticle",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.788Z",
-        "updatedAt": "2020-06-04T10:32:22.352Z",
+        "updatedAt": "2020-06-04T13:34:49.821Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -20,8 +20,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 18,
-        "publishedAt": "2020-06-04T10:32:22.352Z",
+        "publishedVersion": 24,
+        "publishedAt": "2020-06-04T13:34:49.821Z",
         "firstPublishedAt": "2020-05-20T15:19:44.751Z",
         "createdBy": {
           "sys": {
@@ -34,16 +34,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
+            "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         },
-        "publishedCounter": 9,
-        "version": 19,
+        "publishedCounter": 12,
+        "version": 25,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
+            "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         }
       },
@@ -315,7 +315,7 @@
         "id": "kbAppCategory",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.795Z",
-        "updatedAt": "2020-06-04T09:13:15.779Z",
+        "updatedAt": "2020-06-04T13:35:18.033Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -323,8 +323,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 26,
-        "publishedAt": "2020-06-04T09:13:15.779Z",
+        "publishedVersion": 30,
+        "publishedAt": "2020-06-04T13:35:18.033Z",
         "firstPublishedAt": "2020-05-20T15:19:44.736Z",
         "createdBy": {
           "sys": {
@@ -337,16 +337,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
+            "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         },
-        "publishedCounter": 13,
-        "version": 27,
+        "publishedCounter": 15,
+        "version": 31,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
+            "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         }
       },
@@ -412,7 +412,7 @@
         "id": "kbAppLink",
         "type": "ContentType",
         "createdAt": "2020-05-20T15:19:43.796Z",
-        "updatedAt": "2020-06-04T10:26:05.193Z",
+        "updatedAt": "2020-06-04T13:35:35.282Z",
         "environment": {
           "sys": {
             "id": "master",
@@ -420,8 +420,8 @@
             "linkType": "Environment"
           }
         },
-        "publishedVersion": 10,
-        "publishedAt": "2020-06-04T10:26:05.193Z",
+        "publishedVersion": 12,
+        "publishedAt": "2020-06-04T13:35:35.282Z",
         "firstPublishedAt": "2020-05-20T15:19:44.748Z",
         "createdBy": {
           "sys": {
@@ -434,16 +434,16 @@
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
+            "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         },
-        "publishedCounter": 5,
-        "version": 11,
+        "publishedCounter": 6,
+        "version": 13,
         "publishedBy": {
           "sys": {
             "type": "Link",
             "linkType": "User",
-            "id": "1qZRFE2T0YMRkCSPigLrFz"
+            "id": "1n6JeO5hWTbMwlazefu4ux"
           }
         }
       },
@@ -486,7 +486,7 @@
             "linkType": "Space"
           }
         },
-        "version": 19,
+        "version": 25,
         "createdAt": "2020-05-20T15:19:44.827Z",
         "createdBy": {
           "sys": {
@@ -495,10 +495,10 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-06-04T10:32:22.933Z",
+        "updatedAt": "2020-06-04T13:34:50.571Z",
         "updatedBy": {
           "sys": {
-            "id": "1qZRFE2T0YMRkCSPigLrFz",
+            "id": "1n6JeO5hWTbMwlazefu4ux",
             "type": "Link",
             "linkType": "User"
           }
@@ -560,9 +560,9 @@
         {
           "fieldId": "slug",
           "settings": {
-            "helpText": "Will appear in the page url (for example, http://websitename.com/title-of-article). Add hyphens between each word."
+            "helpText": "Will appear in the page url (for example, http://websitename.com/category-slug/title-of-article). Add hyphens between each word."
           },
-          "widgetId": "singleLine",
+          "widgetId": "slugEditor",
           "widgetNamespace": "builtin"
         },
         {
@@ -739,7 +739,7 @@
             "linkType": "Space"
           }
         },
-        "version": 27,
+        "version": 31,
         "createdAt": "2020-05-20T15:19:44.825Z",
         "createdBy": {
           "sys": {
@@ -748,10 +748,10 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-06-04T09:13:16.660Z",
+        "updatedAt": "2020-06-04T13:35:18.522Z",
         "updatedBy": {
           "sys": {
-            "id": "1qZRFE2T0YMRkCSPigLrFz",
+            "id": "1n6JeO5hWTbMwlazefu4ux",
             "type": "Link",
             "linkType": "User"
           }
@@ -809,7 +809,10 @@
         },
         {
           "fieldId": "slug",
-          "widgetId": "singleLine",
+          "settings": {
+            "helpText": "Will appear in the page url (for example, http://websitename.com/category-slug/). Add hyphens between each word."
+          },
+          "widgetId": "slugEditor",
           "widgetNamespace": "builtin"
         },
         {
@@ -833,7 +836,7 @@
             "linkType": "Space"
           }
         },
-        "version": 11,
+        "version": 13,
         "createdAt": "2020-05-20T15:19:44.825Z",
         "createdBy": {
           "sys": {
@@ -842,10 +845,10 @@
             "linkType": "User"
           }
         },
-        "updatedAt": "2020-06-04T10:26:05.648Z",
+        "updatedAt": "2020-06-04T13:35:35.828Z",
         "updatedBy": {
           "sys": {
-            "id": "1qZRFE2T0YMRkCSPigLrFz",
+            "id": "1n6JeO5hWTbMwlazefu4ux",
             "type": "Link",
             "linkType": "User"
           }
@@ -903,7 +906,7 @@
         },
         {
           "fieldId": "url",
-          "widgetId": "singleLine",
+          "widgetId": "urlEditor",
           "widgetNamespace": "builtin"
         }
       ]
