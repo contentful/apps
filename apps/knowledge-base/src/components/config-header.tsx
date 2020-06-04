@@ -19,10 +19,10 @@ const ConfigHeader: React.FC = () => {
     <>
       <Section isEnabled={true}>
         <Typography>
-          <Heading>About Knowledge Base (EAP)</Heading>
+          <Heading>About Knowledge base (early access)</Heading>
           <Paragraph>
-            With this app you can create and deploy a knowledge base for your
-            support team. We&apos;ve prepared the foundation, so you can get
+            With this app, you can create and deploy a knowledge base for your
+            support team. We&apos;ve prepared the foundation so that you can get
             started. The app is in the{' '}
             <TextLink target="blank" href="https://forms.gle/SuV276jagXF6e2DM7">
               Early Access Program (EAP)
@@ -32,7 +32,7 @@ const ConfigHeader: React.FC = () => {
               target="blank"
               href="https://www.contentful.com/marketplace/app/knowledge-base/"
             >
-              Learn more about the Knowledge Base app.
+              Learn more about the Knowledge base app.
             </TextLink>
           </Paragraph>
         </Typography>

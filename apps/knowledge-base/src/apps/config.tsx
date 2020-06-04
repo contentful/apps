@@ -162,7 +162,7 @@ const Config: React.FC<ConfigProps> = (props) => {
 
     if (!isInstalled && termsAccepted === false) {
       sdk.instance.notifier.error(
-        'You need to accept the terms of the Early Access Program.'
+        'You need to accept the terms to install this app'
       );
       return false;
     }
@@ -175,7 +175,7 @@ const Config: React.FC<ConfigProps> = (props) => {
       }
     } catch (err) {
       sdk.instance.notifier.error(
-        'There was an issue when trying to install the content types. Please, try to re-install the app.'
+        'A problem occurred while installing content types. Re-install the app and try again.'
       );
       return false;
     }
@@ -261,8 +261,6 @@ const Config: React.FC<ConfigProps> = (props) => {
       <ConfigHeader />
 
       <ConfigInstallation />
-
-      {/* <ConfigNetlify /> */}
 
       <ConfigDeploy onClickDeploy={handleOnClickDeploy} isEnabled={true} />
 

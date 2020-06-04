@@ -1,4 +1,4 @@
-# Contentful Knowledge Base App
+# Contentful Knowledge base app
 
 > A Contentful Marketplace app to create new knowledge base websites within a few minutes.
 
@@ -13,7 +13,7 @@
 ## Easiest way to get started
 
 1. Create an account on [contentful.com](https://www.contentful.com/get-started/)
-1. Install the [Knowledge Base App](https://www.contentful.com/marketplace/) from Contentful Marketplace
+1. Install the [Knowledge base app](https://www.contentful.com/marketplace/) from Contentful Marketplace
 1. Done!
 
 ## Making changes locally
@@ -22,7 +22,7 @@
 1. The `.env.example` file contains the environment variables the project needs
 1. Create the `.env.development` and `.env.production` files, one for each environment respectively, and fill up the environment variables
 1. Note: The env variable `NETLIFY_OAUTH_APP_REDIRECT_URI` must end with `/auth`
-1. [Add the `Knowledge Base` app to a Contentful organization](#adding-the-app-to-your-organization)
+1. [Add the `Knowledge base` app to a Contentful organization](#adding-the-app-to-your-organization)
 1. Install the dependencies by running `npm ci`
 1. `npm start`
 
@@ -34,7 +34,7 @@ You need to add the app into a organization to be able to run it locally. This c
 curl -X POST \
   -H'Content-Type: application/json' \
   -H'Authorization: Bearer <MANAGEMENT_TOKEN_API>' \
-  -d'{"name": "Knowledge Base", "src": "http://localhost:1234/index.html", "locations": [{"location": "app-config"}, {"location": "entry-sidebar"}]}' \
+  -d'{"name": "Knowledge base", "src": "http://localhost:1234/index.html", "locations": [{"location": "app-config"}, {"location": "entry-sidebar"}]}' \
   https://api.contentful.com/organizations/<ORGANIZATION_ID>/app_definitions
 ```
 
@@ -85,7 +85,7 @@ If you have other problems with Contentful not related to this project, you can 
 ## Screenshots
 
 ![Welcome Screen](docs/screenshot-welcome-screen.png)
-![Knowledge Base App](docs/screenshot-kb-app.png)
+![Knowledge base app](docs/screenshot-kb-app.png)
 
 ## License
 

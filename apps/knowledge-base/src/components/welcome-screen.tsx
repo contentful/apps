@@ -45,6 +45,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   termsAccepted,
   setTermsAccepted,
 }) => {
+  function handleOnChangeTerms(e: React.ChangeEvent<HTMLInputElement>): void {
+    setTermsAccepted(e.target.checked);
+  }
+
   return (
     <Layout>
       <Section isEnabled={true}>
@@ -83,7 +87,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <div>
             <Screenshot
               src={appScreenShot}
-              alt="A screeshot of the Knowledge Base Website after installing this app"
+              alt="A screeshot of the Knowledge base Website after installing this app"
             />
           </div>
         </Container>
@@ -100,16 +104,14 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         <CheckboxField
           labelText="I accept the Early Access Program terms."
           checked={termsAccepted}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setTermsAccepted(e.target.checked)
-          }
+          onChange={handleOnChangeTerms}
           id="terms-checkbox"
         />
       </Note>
 
       {termsAccepted && (
         <InstallNowText>
-          You can now install the app from the top right.
+          Click &quot;Install&quot; in the top-right corner to proceed.
         </InstallNowText>
       )}
     </Layout>

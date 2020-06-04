@@ -151,7 +151,7 @@ const Sidebar: React.FC = () => {
           isFullWidth={true}
           buttonType="muted"
         >
-          Preview article
+          Preview
         </Button>
       )}
 
@@ -188,7 +188,7 @@ const Sidebar: React.FC = () => {
         )}
         {hasBuildBeenFailed && (
           <ErrorText>
-            Build failed on {formatDate(currentBuild.created_at)} Netlify
+            Build failed on {formatDate(currentBuild.created_at)}. Netlify
             reason: {failedBuildReason}.
           </ErrorText>
         )}
@@ -208,7 +208,7 @@ const Sidebar: React.FC = () => {
             isFullWidth={true}
             buttonType="naked"
           >
-            Open website
+            Live site
           </Button>
 
           <Button
