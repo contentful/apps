@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { css } from 'emotion';
+import styled from '@emotion/styled';
+import Logo from '~/components/logo';
 
-const layout = css`
+const Container = styled.section`
   height: auto;
   min-height: 65vh;
   max-width: 768px;
@@ -25,8 +26,23 @@ const layout = css`
   }
 `;
 
+const Footer = styled.footer`
+  margin: 32px auto;
+  max-width: 768px;
+
+  text-align: center;
+`;
+
 const Layout: React.FC = (props) => {
-  return <section className={layout}>{props.children}</section>;
+  return (
+    <div>
+      <Container>{props.children}</Container>
+
+      <Footer>
+        <Logo />
+      </Footer>
+    </div>
+  );
 };
 
 export default Layout;
