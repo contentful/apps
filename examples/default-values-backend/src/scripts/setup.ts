@@ -198,7 +198,7 @@ async function createContentType() {
 
 async function createAppEvent(APP_ID: string) {
   const body = {
-    targetUrl: `${HOSTED_APP_URL}/`,
+    targetUrl: `${HOSTED_APP_URL}/event-handler`,
     topics: ["Entry.create"],
   };
 
