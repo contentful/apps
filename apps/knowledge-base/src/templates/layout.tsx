@@ -14,7 +14,7 @@ const Container = styled.section`
 
   &:before {
     content: '';
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     z-index: -1;
