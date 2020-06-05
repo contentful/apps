@@ -82,7 +82,7 @@ startServer();
 // Entry of our example content type is created
 const addDefaultData = (appToken: string) => ({
   method: "POST",
-  path: "/",
+  path: "/event-handler",
   handler: async (request: Hapi.Request, h: Hapi.ResponseToolkit) => {
     try {
       const payload = request.payload as {
