@@ -1,4 +1,10 @@
 import * as React from 'react';
+import {
+  NETLIFY_CLIENT_ID,
+  NETLIFY_REDIRECT_URI,
+  NETLIFY_API_URL,
+  NETLIFY_AUTH_URL,
+} from '../constants';
 
 interface NetlifyContextProps {
   isReady: boolean;
@@ -27,8 +33,6 @@ const NetlifyContext = createContext<NetlifyContextProps>({
   sites: [],
   userInfo: {},
 });
-
-const netlifyApiUrl = 'https://api.netlify.com/api/v1';
 
 export const NetlifyProvider: React.FC = (props) => {
   const [token, setToken] = useState(
@@ -77,7 +81,7 @@ export const NetlifyProvider: React.FC = (props) => {
     setIsLoading(true);
 
     const authWindow = window.open(
-      `https://app.netlify.com/authorize?response_type=token&client_id=${process.env.NETLIFY_OAUTH_APP_ID}f&redirect_uri=${process.env.NETLIFY_OAUTH_APP_REDIRECT_URI}`,
+      `${NETLIFY_AUTH_URL}?response_type=token&client_id=${NETLIFY_CLIENT_ID}f&redirect_uri=${NETLIFY_REDIRECT_URI}`,
       '',
       'width=600, height=550'
     );
@@ -112,7 +116,7 @@ export const NetlifyProvider: React.FC = (props) => {
     setIsLoadingSites(true);
 
     try {
-      const request = await fetch(`${netlifyApiUrl}/sites`, {
+      const request = await fetch(`${NETLIFY_API_URL}/sites`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -140,7 +144,7 @@ export const NetlifyProvider: React.FC = (props) => {
     setIsLoadingUserInfo(true);
 
     try {
-      const request = await fetch(`${netlifyApiUrl}/user`, {
+      const request = await fetch(`${NETLIFY_API_URL}/user`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -166,7 +170,7 @@ export const NetlifyProvider: React.FC = (props) => {
 
     try {
       const request = await fetch(
-        `${netlifyApiUrl}/sites/${siteId}/build_hooks`,
+        `${NETLIFY_API_URL}/sites/${siteId}/build_hooks`,
         {
           method: 'GET',
           headers: {
@@ -188,7 +192,7 @@ export const NetlifyProvider: React.FC = (props) => {
   }
 
   async function getDeploysBySiteId({ token, siteId }) {
-    const request = await fetch(`${netlifyApiUrl}/sites/${siteId}/deploys`, {
+    const request = await fetch(`${NETLIFY_API_URL}/sites/${siteId}/deploys`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
