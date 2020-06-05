@@ -28,6 +28,8 @@
 
 ### Adding the app to your organization
 
+#### Using cURL
+
 You need to add the app into a organization to be able to run it locally. This command below can help you out:
 
 ```curl
@@ -37,6 +39,16 @@ curl -X POST \
   -d'{"name": "Knowledge base", "src": "http://localhost:1234/index.html", "locations": [{"location": "app-config"}, {"location": "entry-sidebar"}]}' \
   https://api.contentful.com/organizations/<ORGANIZATION_ID>/app_definitions
 ```
+
+#### Through organization settings
+
+You can also create the app definition through the Contentful Webapp.
+
+Go to your Organization Settings > Apps > Create App.
+
+Add `http://localhost:1234/index.html` for the `App URL` field and make sure you have selected `app-config` and `entry-sidebar` on `Locations`.
+
+Then click `Create app`.
 
 ## Testing
 
