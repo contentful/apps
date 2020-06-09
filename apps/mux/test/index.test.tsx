@@ -65,6 +65,23 @@ test('displays a player when the asset is ready', () => {
   expect(wrapper.find('Player')).toHaveLength(1);
 });
 
+test('displays an error if the asset is errored', () => {
+  const mockedSdk = {
+    ...SDK_MOCK,
+    field: {
+      ...SDK_MOCK.field,
+      getValue: () => ({
+        error: 'Input file does not contain a duration'
+      }),
+    },
+  };
+
+  const wrapper = mount(<App sdk={mockedSdk as any} />);
+  const note = wrapper.find('Note');
+  expect(note.prop('noteType')).toBe('negative');
+  expect(note.text()).toContain('Input file does not contain a duration');
+});
+
 test('displays a loading state between the asset getting created and waiting for it to be ready', () => {
   const mockedSdk = {
     ...SDK_MOCK,
