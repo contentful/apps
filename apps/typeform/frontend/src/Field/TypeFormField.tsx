@@ -6,7 +6,8 @@ import { TypeformOAuth } from '../Auth/TypeformOAuth';
 import { styles } from './styles';
 // @ts-ignore 2307
 import logo from './typeform-icon.svg';
-import { isUserAuthenticated, getToken } from '../utils';
+import { isUserAuthenticated, getToken, resetLocalStorage } from '../utils';
+
 
 interface Props {
   sdk: FieldExtensionSDK & AppExtensionSDK;
@@ -34,6 +35,7 @@ const initialState = {
   forms: [] as FormOption[],
   loading: true
 };
+const AUTH_ERROR_CODES = [401, 403];
 
 const isStaleData = (value: string, forms: FormOption[]): boolean => {
   if (value) {
@@ -126,16 +128,25 @@ export function TypeFormField({ sdk }: Props) {
           }
         });
 
-        const result = (await response.json()) as TypeFormResponse;
-        const normalizedForms = normalizeFormResponse(result);
-        dispatch({
-          type: ACTION_TYPES.INIT,
-          payload: {
-            forms: normalizedForms
-          }
-        });
+        if (AUTH_ERROR_CODES.includes(response.status)) {
+          // clear everything in case token is expired
+          resetLocalStorage();
+          dispatch({ type: ACTION_TYPES.RESET });
+        } else {
+          const result = (await response.json()) as TypeFormResponse;
+          const normalizedForms = normalizeFormResponse(result);
+          dispatch({
+            type: ACTION_TYPES.INIT,
+            payload: {
+              forms: normalizedForms
+            }
+          });
+        }
       } catch (error) {
-        dispatch({ type: ACTION_TYPES.ERROR });
+        // only show error dialog is the user is logged in
+        if (isUserAuthenticated()) {
+          dispatch({ type: ACTION_TYPES.ERROR });
+        }
       }
     };
     fetchForms();
