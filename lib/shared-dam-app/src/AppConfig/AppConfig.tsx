@@ -228,13 +228,8 @@ export default class AppConfig extends React.Component<Props, State> {
       parameters,
     } = this.state;
     const { parameterDefinitions, sdk } = this.props;
-    const {
-      user: {
-        spaceMembership: {
-          sys: { id },
-        },
-      },
-    } = sdk;
+    const { ids } = sdk;
+    const { space, environment } = ids;
 
     const hasConfigurationOptions =
       parameterDefinitions && parameterDefinitions.length > 0;
@@ -292,9 +287,11 @@ export default class AppConfig extends React.Component<Props, State> {
                 <TextLink
                   linkType="primary"
                   target="_blank"
-                  href={`https://app.contentful.com/spaces/${
-                    id.split("-")[0]
-                  }/content_types`}
+                  href={
+                    environment === "master"
+                      ? `https://app.contentful.com/spaces/${space}/content_types`
+                      : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+                  }
                 >
                   content model
                 </TextLink>{" "}
