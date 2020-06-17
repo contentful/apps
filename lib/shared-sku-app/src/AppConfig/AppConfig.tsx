@@ -238,6 +238,7 @@ export default class AppConfig extends React.Component<Props, State> {
                 <TextLink
                   linkType="primary"
                   target="_blank"
+                  rel="noopener noreferrer"
                   href={
                     environment === 'master'
                       ? `https://app.contentful.com/spaces/${space}/content_types`
