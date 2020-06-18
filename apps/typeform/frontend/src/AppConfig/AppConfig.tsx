@@ -8,7 +8,8 @@ import {
   TextLink,
   Select,
   Option,
-  FormLabel
+  FormLabel,
+  Note
 } from '@contentful/forma-36-react-components';
 import FieldSelector from './FieldSelector';
 import {
@@ -164,6 +165,11 @@ export class AppConfig extends React.Component<Props, State> {
       workspaces
     } = this.state;
 
+    const { sdk } = this.props;
+    const {
+      ids: { space, environment }
+    } = sdk;
+
     return (
       <div>
         <div className={styles.background('#262627')} />
@@ -225,9 +231,22 @@ export class AppConfig extends React.Component<Props, State> {
                     />
                   </>
                 ) : (
-                  <Paragraph>
-                    No content types with fields of type <strong>Short Text</strong> were found.
-                  </Paragraph>
+                  <Note noteType="warning">
+                    There are <strong>no content types with fields of type Short Text</strong>{' '}
+                    fields in this environment. You can add one in your{' '}
+                    <TextLink
+                      linkType="primary"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={
+                        environment === 'master'
+                          ? `https://app.contentful.com/spaces/${space}/content_types`
+                          : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+                      }>
+                      content model
+                    </TextLink>{' '}
+                    and assign it to the app from this screen.
+                  </Note>
                 )}
               </Typography>
             </div>

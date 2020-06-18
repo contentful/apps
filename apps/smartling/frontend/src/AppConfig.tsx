@@ -7,7 +7,8 @@ import {
   FieldGroup,
   CheckboxField,
   TextField,
-  TextLink
+  TextLink,
+  Note
 } from '@contentful/forma-36-react-components';
 import get from 'lodash.get';
 // @ts-ignore 2307
@@ -106,6 +107,10 @@ export default class AppConfig extends React.Component<Props, State> {
   }
 
   render() {
+    const { sdk } = this.props;
+    const {
+      ids: { space, environment }
+    } = sdk;
     return (
       <div className="app">
         <div className="background" />
@@ -115,7 +120,14 @@ export default class AppConfig extends React.Component<Props, State> {
               <Typography>
                 <Heading>About Smartling</Heading>
                 <Paragraph className="about-p">
-                  The <TextLink href="https://dashboard.smartling.com" target="_blank" rel="noopener noreferrer">Smartling</TextLink> app allows you to view the status of your translation without leaving Contentful.
+                  The{' '}
+                  <TextLink
+                    href="https://dashboard.smartling.com"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    Smartling
+                  </TextLink>{' '}
+                  app allows you to view the status of your translation without leaving Contentful.
                 </Paragraph>
               </Typography>
               <hr />
@@ -138,24 +150,40 @@ export default class AppConfig extends React.Component<Props, State> {
               />
               <Typography>
                 <Heading>Assign to content types</Heading>
-                <Paragraph>
-                  Select which content types to use with Smartling.
-                </Paragraph>
+                <Paragraph>Select which content types to use with Smartling.</Paragraph>
               </Typography>
-              <FieldGroup>
-                {this.state.contentTypes.map(ct => (
-                  <CheckboxField
-                    onChange={() => this.toggleCt(ct.id)}
-                    labelText={ct.name}
-                    name={ct.name}
-                    checked={this.state.selectedContentTypes.includes(ct.id)}
-                    value={ct.id}
-                    id={ct.name}
-                    key={ct.id}
-                    data-test-id={`ct-item-${ct.id}`}
-                  />
-                ))}
-              </FieldGroup>
+              {this.state.contentTypes.length === 0 ? (
+                <Note noteType="warning">
+                  There are <strong>no content types</strong> in this environment. You can add one{' '}
+                  <TextLink
+                    linkType="primary"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={
+                      environment === 'master'
+                        ? `https://app.contentful.com/spaces/${space}/content_types`
+                        : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+                    }>
+                    content type
+                  </TextLink>{' '}
+                  and assign it to the app from this screen.
+                </Note>
+              ) : (
+                <FieldGroup>
+                  {this.state.contentTypes.map(ct => (
+                    <CheckboxField
+                      onChange={() => this.toggleCt(ct.id)}
+                      labelText={ct.name}
+                      name={ct.name}
+                      checked={this.state.selectedContentTypes.includes(ct.id)}
+                      value={ct.id}
+                      id={ct.name}
+                      key={ct.id}
+                      data-test-id={`ct-item-${ct.id}`}
+                    />
+                  ))}
+                </FieldGroup>
+              )}
             </div>
           </div>
         </div>
