@@ -20,8 +20,7 @@ const ContentTypesSkeleton = () => (
 
 const NoContentTypes = ({ space, environment }) => (
   <Note noteType="warning">
-    There are no content types available in this environment. You can add one in
-    your{" "}
+    There are no content types available in this environment. You can add one{" "}
     <TextLink
       target="_blank"
       href={
@@ -31,7 +30,7 @@ const NoContentTypes = ({ space, environment }) => (
       }
       rel="noopener noreferrer"
     >
-      content model
+      content type
     </TextLink>{" "}
     and assign it to the app from this screen.
   </Note>
