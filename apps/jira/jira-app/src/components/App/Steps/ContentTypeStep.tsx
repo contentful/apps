@@ -49,7 +49,7 @@ export default ({ contentTypes, selectCt, selectedContentTypes, space, environme
                   ? `https://app.contentful.com/spaces/${space}/content_types`
                   : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
               }>
-              content model
+              content type
             </TextLink>{' '}
             and assign it to the app from this screen.
           </Note>
