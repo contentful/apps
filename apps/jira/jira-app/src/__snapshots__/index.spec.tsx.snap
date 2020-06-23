@@ -589,10 +589,10 @@ Object {
                   data-test-id="instance-step"
                 >
                   <div
-                    class="Select__Select__wrapper___2pBIz Select__Select--full___7ei7d selector"
+                    class="Select__Select__wrapper___2mbYV Select__Select--full___AENS4 selector"
                   >
                     <select
-                      class="Select__Select___31Z46 a11y__focus-border--default___60AXp"
+                      class="Select__Select___2Gi9N a11y__focus-border--default___60AXp"
                       data-test-id="instance-selector"
                     >
                       <option
@@ -603,7 +603,7 @@ Object {
                       </option>
                     </select>
                     <svg
-                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___boRAZ"
+                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___OBmvS"
                       data-test-id="cf-ui-icon"
                       height="24"
                       viewBox="0 0 24 24"
@@ -702,9 +702,56 @@ Object {
                   data-test-id="content-types"
                 >
                   <div
-                    class="FieldGroup__FieldGroup___2mLmO"
-                    data-test-id="cf-ui-field-group"
-                  />
+                    class="Note__Note___2eSKN Note__Note--warning___3X53I"
+                    data-test-id="cf-ui-note"
+                  >
+                    <div
+                      class="Note__Note__icon___20RqC"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--warning___39Bnz"
+                        data-test-id="cf-ui-icon"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        width="18"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0 0h24v24H0z"
+                          fill="none"
+                        />
+                        <path
+                          d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <div>
+                        There are 
+                        <strong>
+                          no content types
+                        </strong>
+                         in this environment. You can add a
+                         
+                        <a
+                          class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+                          data-test-id="cf-ui-text-link"
+                          href="https://app.contentful.com/spaces/test-space/content_types"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          <span
+                            class="TabFocusTrap__TabFocusTrap___39Vty"
+                            tabindex="-1"
+                          >
+                            content type
+                          </span>
+                        </a>
+                         
+                        and assign it to the app from this screen.
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -761,10 +808,10 @@ Object {
                 data-test-id="instance-step"
               >
                 <div
-                  class="Select__Select__wrapper___2pBIz Select__Select--full___7ei7d selector"
+                  class="Select__Select__wrapper___2mbYV Select__Select--full___AENS4 selector"
                 >
                   <select
-                    class="Select__Select___31Z46 a11y__focus-border--default___60AXp"
+                    class="Select__Select___2Gi9N a11y__focus-border--default___60AXp"
                     data-test-id="instance-selector"
                   >
                     <option
@@ -775,7 +822,7 @@ Object {
                     </option>
                   </select>
                   <svg
-                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___boRAZ"
+                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___OBmvS"
                     data-test-id="cf-ui-icon"
                     height="24"
                     viewBox="0 0 24 24"
@@ -874,9 +921,56 @@ Object {
                 data-test-id="content-types"
               >
                 <div
-                  class="FieldGroup__FieldGroup___2mLmO"
-                  data-test-id="cf-ui-field-group"
-                />
+                  class="Note__Note___2eSKN Note__Note--warning___3X53I"
+                  data-test-id="cf-ui-note"
+                >
+                  <div
+                    class="Note__Note__icon___20RqC"
+                  >
+                    <svg
+                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--warning___39Bnz"
+                      data-test-id="cf-ui-icon"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      width="18"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0 0h24v24H0z"
+                        fill="none"
+                      />
+                      <path
+                        d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <div>
+                      There are 
+                      <strong>
+                        no content types
+                      </strong>
+                       in this environment. You can add a
+                       
+                      <a
+                        class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+                        data-test-id="cf-ui-text-link"
+                        href="https://app.contentful.com/spaces/test-space/content_types"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        <span
+                          class="TabFocusTrap__TabFocusTrap___39Vty"
+                          tabindex="-1"
+                        >
+                          content type
+                        </span>
+                      </a>
+                       
+                      and assign it to the app from this screen.
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -955,7 +1049,7 @@ Object {
     <div>
       <div>
         <div
-          class="Card__Card___xXJsT jira-ticket Card__Card--padding-default___b6Brl"
+          class="Card__Card___1_26G jira-ticket Card__Card--padding-default___xgDF9"
           data-test-id="cf-ui-card"
         >
           <div
@@ -971,11 +1065,13 @@ Object {
                 To Do
               </div>
               <div
-                class="Dropdown__Dropdown___1qyn8"
-                data-test-id="cf-ui-dropdown"
+                class="Dropdown__Dropdown___nAsJ-"
+                data-test-id="cf-ui-card-actions"
                 position="bottom-right"
               >
                 <button
+                  aria-expanded="false"
+                  aria-haspopup="menu"
                   class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--secondary___3Gc3d"
                   data-test-id="cf-ui-icon-button"
                   type="button"
@@ -1085,7 +1181,7 @@ Object {
           </div>
         </div>
         <div
-          class="Card__Card___xXJsT jira-ticket Card__Card--padding-default___b6Brl"
+          class="Card__Card___1_26G jira-ticket Card__Card--padding-default___xgDF9"
           data-test-id="cf-ui-card"
         >
           <div
@@ -1101,11 +1197,13 @@ Object {
                 To Do
               </div>
               <div
-                class="Dropdown__Dropdown___1qyn8"
-                data-test-id="cf-ui-dropdown"
+                class="Dropdown__Dropdown___nAsJ-"
+                data-test-id="cf-ui-card-actions"
                 position="bottom-right"
               >
                 <button
+                  aria-expanded="false"
+                  aria-haspopup="menu"
                   class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--secondary___3Gc3d"
                   data-test-id="cf-ui-icon-button"
                   type="button"
@@ -1230,119 +1328,17 @@ Object {
         </div>
       </div>
     </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-right___H8LiN Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Task
-        </div>
-      </div>
-    </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-right___H8LiN Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Medium priority
-        </div>
-      </div>
-    </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-left___1_Rl2 Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Assignee: Dean Anderson
-        </div>
-      </div>
-    </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-right___H8LiN Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Story
-        </div>
-      </div>
-    </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-right___H8LiN Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Medium priority
-        </div>
-      </div>
-    </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-left___1_Rl2 Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Assignee: Fabian Schultz
-        </div>
-      </div>
-    </div>
+    <div />
+    <div />
+    <div />
+    <div />
+    <div />
+    <div />
   </body>,
   "container": <div>
     <div>
       <div
-        class="Card__Card___xXJsT jira-ticket Card__Card--padding-default___b6Brl"
+        class="Card__Card___1_26G jira-ticket Card__Card--padding-default___xgDF9"
         data-test-id="cf-ui-card"
       >
         <div
@@ -1358,11 +1354,13 @@ Object {
               To Do
             </div>
             <div
-              class="Dropdown__Dropdown___1qyn8"
-              data-test-id="cf-ui-dropdown"
+              class="Dropdown__Dropdown___nAsJ-"
+              data-test-id="cf-ui-card-actions"
               position="bottom-right"
             >
               <button
+                aria-expanded="false"
+                aria-haspopup="menu"
                 class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--secondary___3Gc3d"
                 data-test-id="cf-ui-icon-button"
                 type="button"
@@ -1472,7 +1470,7 @@ Object {
         </div>
       </div>
       <div
-        class="Card__Card___xXJsT jira-ticket Card__Card--padding-default___b6Brl"
+        class="Card__Card___1_26G jira-ticket Card__Card--padding-default___xgDF9"
         data-test-id="cf-ui-card"
       >
         <div
@@ -1488,11 +1486,13 @@ Object {
               To Do
             </div>
             <div
-              class="Dropdown__Dropdown___1qyn8"
-              data-test-id="cf-ui-dropdown"
+              class="Dropdown__Dropdown___nAsJ-"
+              data-test-id="cf-ui-card-actions"
               position="bottom-right"
             >
               <button
+                aria-expanded="false"
+                aria-haspopup="menu"
                 class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--secondary___3Gc3d"
                 data-test-id="cf-ui-icon-button"
                 type="button"
@@ -1702,7 +1702,7 @@ Object {
             />
           </div>
           <div
-            class="Card__Card___xXJsT search-card Card__Card--padding-none___1Jrxi Card__Card--is-interactive___dMQtf"
+            class="Card__Card___1_26G search-card Card__Card--padding-none___1_Xu1 Card__Card--is-interactive___3nFqr"
             data-test-id="search-result-issue"
           >
             <div>
@@ -1723,24 +1723,7 @@ Object {
         </div>
       </div>
     </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-bottom___3qAh6 Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Story: MKE-1389
-        </div>
-      </div>
-    </div>
+    <div />
   </body>,
   "container": <div>
     <div>
@@ -1769,7 +1752,7 @@ Object {
           />
         </div>
         <div
-          class="Card__Card___xXJsT search-card Card__Card--padding-none___1Jrxi Card__Card--is-interactive___dMQtf"
+          class="Card__Card___1_26G search-card Card__Card--padding-none___1_Xu1 Card__Card--is-interactive___3nFqr"
           data-test-id="search-result-issue"
         >
           <div>
@@ -1851,7 +1834,7 @@ Object {
     <div>
       <div>
         <div
-          class="Card__Card___xXJsT jira-ticket Card__Card--padding-default___b6Brl"
+          class="Card__Card___1_26G jira-ticket Card__Card--padding-default___xgDF9"
           data-test-id="cf-ui-card"
         >
           <div
@@ -1867,11 +1850,13 @@ Object {
                 In progress
               </div>
               <div
-                class="Dropdown__Dropdown___1qyn8"
-                data-test-id="cf-ui-dropdown"
+                class="Dropdown__Dropdown___nAsJ-"
+                data-test-id="cf-ui-card-actions"
                 position="bottom-right"
               >
                 <button
+                  aria-expanded="false"
+                  aria-haspopup="menu"
                   class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--secondary___3Gc3d"
                   data-test-id="cf-ui-icon-button"
                   type="button"
@@ -1996,65 +1981,14 @@ Object {
         </div>
       </div>
     </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-right___H8LiN Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Story
-        </div>
-      </div>
-    </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-right___H8LiN Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Medium priority
-        </div>
-      </div>
-    </div>
-    <div>
-      <div
-        aria-hidden="true"
-        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-left___1_Rl2 Tooltip__Tooltip--hidden___3uqEe"
-        contenteditable="false"
-        data-test-id="cf-ui-tooltip"
-        role="tooltip"
-        style="max-width: 360px;"
-      >
-        <div
-          class="InViewport__InViewport___2o6g4"
-          data-test-id="cf-ui-in-viewport"
-          offset="0"
-        >
-          Assignee: Dean Anderson
-        </div>
-      </div>
-    </div>
+    <div />
+    <div />
+    <div />
   </body>,
   "container": <div>
     <div>
       <div
-        class="Card__Card___xXJsT jira-ticket Card__Card--padding-default___b6Brl"
+        class="Card__Card___1_26G jira-ticket Card__Card--padding-default___xgDF9"
         data-test-id="cf-ui-card"
       >
         <div
@@ -2070,11 +2004,13 @@ Object {
               In progress
             </div>
             <div
-              class="Dropdown__Dropdown___1qyn8"
-              data-test-id="cf-ui-dropdown"
+              class="Dropdown__Dropdown___nAsJ-"
+              data-test-id="cf-ui-card-actions"
               position="bottom-right"
             >
               <button
+                aria-expanded="false"
+                aria-haspopup="menu"
                 class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--secondary___3Gc3d"
                 data-test-id="cf-ui-icon-button"
                 type="button"
