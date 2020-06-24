@@ -3,7 +3,7 @@
 exports[`SortableListItem should render successfully 1`] = `
 <div>
   <div
-    class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+    class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
     data-test-id="cf-ui-card"
   >
     <section
@@ -28,7 +28,7 @@ exports[`SortableListItem should render successfully 1`] = `
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/categories/28a7442d/general"
@@ -92,7 +92,7 @@ exports[`SortableListItem should render successfully 1`] = `
 exports[`SortableListItem should render successfully the error variation for missing slug 1`] = `
 <div>
   <div
-    class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+    class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
     data-test-id="cf-ui-card"
   >
     <section
@@ -112,7 +112,7 @@ exports[`SortableListItem should render successfully the error variation for mis
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/categories/28a7442d/general"
