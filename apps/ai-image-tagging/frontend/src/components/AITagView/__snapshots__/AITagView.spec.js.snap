@@ -307,7 +307,6 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         <span
           aria-label="ai-tag-1"
           class="Pill__Pill__label____EsBZ"
-          title="ai-tag-1"
         >
           ai-tag-1
         </span>
@@ -345,7 +344,6 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         <span
           aria-label="ai-tag-2"
           class="Pill__Pill__label____EsBZ"
-          title="ai-tag-2"
         >
           ai-tag-2
         </span>
@@ -383,7 +381,6 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         <span
           aria-label="ai-tag-3"
           class="Pill__Pill__label____EsBZ"
-          title="ai-tag-3"
         >
           ai-tag-3
         </span>
@@ -421,7 +418,6 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         <span
           aria-label="prior-tag"
           class="Pill__Pill__label____EsBZ"
-          title="prior-tag"
         >
           prior-tag
         </span>
@@ -539,7 +535,6 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
         <span
           aria-label="ai-tag-1"
           class="Pill__Pill__label____EsBZ"
-          title="ai-tag-1"
         >
           ai-tag-1
         </span>
@@ -577,7 +572,6 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
         <span
           aria-label="ai-tag-2"
           class="Pill__Pill__label____EsBZ"
-          title="ai-tag-2"
         >
           ai-tag-2
         </span>
@@ -615,7 +609,6 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
         <span
           aria-label="ai-tag-3"
           class="Pill__Pill__label____EsBZ"
-          title="ai-tag-3"
         >
           ai-tag-3
         </span>
@@ -733,7 +726,6 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
         <span
           aria-label="ai-tag-1"
           class="Pill__Pill__label____EsBZ"
-          title="ai-tag-1"
         >
           ai-tag-1
         </span>
@@ -771,7 +763,6 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
         <span
           aria-label="ai-tag-2"
           class="Pill__Pill__label____EsBZ"
-          title="ai-tag-2"
         >
           ai-tag-2
         </span>
@@ -809,7 +800,6 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
         <span
           aria-label="ai-tag-3"
           class="Pill__Pill__label____EsBZ"
-          title="ai-tag-3"
         >
           ai-tag-3
         </span>
@@ -927,7 +917,6 @@ exports[`AITagView should add image tags on Enter 1`] = `
         <span
           aria-label="new tag"
           class="Pill__Pill__label____EsBZ"
-          title="new tag"
         >
           new tag
         </span>
@@ -1155,7 +1144,6 @@ exports[`AITagView should ignore duplicate image tags 1`] = `
         <span
           aria-label="tag1"
           class="Pill__Pill__label____EsBZ"
-          title="tag1"
         >
           tag1
         </span>
@@ -1193,7 +1181,6 @@ exports[`AITagView should ignore duplicate image tags 1`] = `
         <span
           aria-label="tag2"
           class="Pill__Pill__label____EsBZ"
-          title="tag2"
         >
           tag2
         </span>
@@ -1294,7 +1281,6 @@ exports[`AITagView should render image tags if available 1`] = `
         <span
           aria-label="tag1"
           class="Pill__Pill__label____EsBZ"
-          title="tag1"
         >
           tag1
         </span>
@@ -1332,7 +1318,6 @@ exports[`AITagView should render image tags if available 1`] = `
         <span
           aria-label="tag2"
           class="Pill__Pill__label____EsBZ"
-          title="tag2"
         >
           tag2
         </span>

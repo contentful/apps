@@ -15,16 +15,16 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
       Loading component...
     </title>
     <rect
-      clip-path="url(#cf-ui-skeleton-clip-0)"
+      clip-path="url(#cf-ui-skeleton-clip-id)"
       height="100%"
-      style="fill: url(#cf-ui-skeleton-clip-gradient-1);"
+      style="fill: url(#cf-ui-skeleton-clip-gradient);"
       width="100%"
       x="0"
       y="0"
     />
     <defs>
       <clippath
-        id="cf-ui-skeleton-clip-0"
+        id="cf-ui-skeleton-clip-id"
       >
         <rect
           height="16"
@@ -52,7 +52,7 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
         />
       </clippath>
       <lineargradient
-        id="cf-ui-skeleton-clip-gradient-1"
+        id="cf-ui-skeleton-clip-gradient"
       >
         <stop
           offset="0%"
@@ -62,7 +62,7 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
           <animate
             attributeName="stop-color"
             dur="2s"
-            id="animation-2"
+            id="animation1"
             repeatCount="indefinite"
             values="#e5ebed; #f7f9fa; #e5ebed"
           />
@@ -74,7 +74,7 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
         >
           <animate
             attributeName="stop-color"
-            begin="animation-2.begin+0.25s"
+            begin="animation1.begin+0.25s"
             dur="2s"
             repeatCount="indefinite"
             values="#e5ebed; #f7f9fa; #e5ebed"
@@ -87,7 +87,7 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
         >
           <animate
             attributeName="stop-color"
-            begin="animation-2.begin+0.5s"
+            begin="animation1.begin+0.5s"
             dur="2s"
             repeatCount="indefinite"
             values="#e5ebed; #f7f9fa; #e5ebed"
