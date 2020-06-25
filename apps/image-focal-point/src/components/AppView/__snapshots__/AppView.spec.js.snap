@@ -40,7 +40,7 @@ exports[`AppView when the app is installed should render the app view with confi
         Follow the next steps to create a new image entry with focal point data:
       </p>
       <ul
-        class="List__List___1awv4 css-qslnu8"
+        class="List__List___1YcFy css-qslnu8"
         data-test-id="cf-ui-list"
       >
         <li
@@ -69,7 +69,7 @@ exports[`AppView when the app is installed should render the app view with confi
         Follow the next steps to reference the newly created image with focal point entry in another content type:
       </p>
       <ul
-        class="List__List___1awv4 css-qslnu8"
+        class="List__List___1YcFy css-qslnu8"
         data-test-id="cf-ui-list"
       >
         <li
@@ -137,7 +137,7 @@ exports[`AppView when the app is installed should render the app view with confi
         If you uninstall the Image Focal Point app you will have to manually clean up the content type we created for you during the installation. To do that follow the next steps:
       </p>
       <ul
-        class="List__List___1awv4 css-qslnu8"
+        class="List__List___1YcFy css-qslnu8"
         data-test-id="cf-ui-list"
       >
         <li
@@ -180,7 +180,7 @@ exports[`AppView when the app is installed should render the app view with confi
 
 exports[`AppView when the app is not installed should render inline validation if the content type id is taken 1`] = `
 <div
-  class="TextField__TextField___Sf6eo css-15g2oxy"
+  class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK css-15g2oxy"
   data-test-id="content-type-name"
 >
   <div
@@ -220,7 +220,7 @@ exports[`AppView when the app is not installed should render inline validation i
     data-test-id="cf-ui-validation-message"
   >
     <svg
-      class="Icon__Icon___38Epv ValidationMessage__ValidationMessage__icon___3HPCh Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
+      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled ValidationMessage__ValidationMessage__icon___3HPCh"
       data-test-id="cf-ui-icon"
       height="18"
       viewBox="0 0 24 24"
@@ -256,7 +256,7 @@ exports[`AppView when the app is not installed should render inline validation i
 
 exports[`AppView when the app is not installed should render inline validation if the content type id is taken 2`] = `
 <div
-  class="TextField__TextField___Sf6eo css-15g2oxy"
+  class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK css-15g2oxy"
   data-test-id="content-type-id"
 >
   <div
@@ -295,7 +295,7 @@ exports[`AppView when the app is not installed should render inline validation i
     data-test-id="cf-ui-validation-message"
   >
     <svg
-      class="Icon__Icon___38Epv ValidationMessage__ValidationMessage__icon___3HPCh Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
+      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled ValidationMessage__ValidationMessage__icon___3HPCh"
       data-test-id="cf-ui-icon"
       height="18"
       viewBox="0 0 24 24"
@@ -369,7 +369,7 @@ exports[`AppView when the app is not installed should render the app view with i
         To help you get started, we are going to create a content type for you with a title field, an image field and a focal point field.
       </p>
       <div
-        class="TextField__TextField___Sf6eo css-15g2oxy"
+        class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK css-15g2oxy"
         data-test-id="content-type-name"
       >
         <div
@@ -416,7 +416,7 @@ exports[`AppView when the app is not installed should render the app view with i
         </div>
       </div>
       <div
-        class="TextField__TextField___Sf6eo css-15g2oxy"
+        class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK css-15g2oxy"
         data-test-id="content-type-id"
       >
         <div
