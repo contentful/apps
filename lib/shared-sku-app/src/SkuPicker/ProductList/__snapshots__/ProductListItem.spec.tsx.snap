@@ -34,7 +34,7 @@ exports[`ProductListItem should render successfully 1`] = `
         Dress Twin-Set rose
       </p>
       <p
-        class="css-1r43xm2"
+        class="css-1tx1iym"
       >
         M0E20130820E90Z
       </p>
@@ -56,7 +56,7 @@ exports[`ProductListItem should render successfully the error variation 1`] = `
       tabindex="-1"
     >
       <div
-        class="css-b0u051"
+        class="css-37z5d9"
       >
         <svg
           class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined"
@@ -86,7 +86,7 @@ exports[`ProductListItem should render successfully the error variation 1`] = `
         Dress Twin-Set rose
       </p>
       <p
-        class="css-1r43xm2"
+        class="css-1tx1iym"
       >
         M0E20130820E90Z
       </p>
@@ -129,7 +129,7 @@ exports[`ProductListItem should render successfully the isSelected variation 1`]
         Dress Twin-Set rose
       </p>
       <p
-        class="css-1r43xm2"
+        class="css-1tx1iym"
       >
         M0E20130820E90Z
       </p>
@@ -163,16 +163,16 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
           Loading component...
         </title>
         <rect
-          clip-path="url(#cf-ui-skeleton-clip-6)"
+          clip-path="url(#cf-ui-skeleton-clip-id)"
           height="100%"
-          style="fill: url(#cf-ui-skeleton-clip-gradient-7);"
+          style="fill: url(#cf-ui-skeleton-clip-gradient);"
           width="100%"
           x="0"
           y="0"
         />
         <defs>
           <clippath
-            id="cf-ui-skeleton-clip-6"
+            id="cf-ui-skeleton-clip-id"
           >
             <rect
               height="290"
@@ -182,7 +182,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
             />
           </clippath>
           <lineargradient
-            id="cf-ui-skeleton-clip-gradient-7"
+            id="cf-ui-skeleton-clip-gradient"
           >
             <stop
               offset="0%"
@@ -192,7 +192,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
               <animate
                 attributeName="stop-color"
                 dur="2s"
-                id="animation-8"
+                id="animation1"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
               />
@@ -204,7 +204,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-8.begin+0.25s"
+                begin="animation1.begin+0.25s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -217,7 +217,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-8.begin+0.5s"
+                begin="animation1.begin+0.5s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -248,7 +248,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
         Dress Twin-Set rose
       </p>
       <p
-        class="css-1r43xm2"
+        class="css-1tx1iym"
       >
         M0E20130820E90Z
       </p>
