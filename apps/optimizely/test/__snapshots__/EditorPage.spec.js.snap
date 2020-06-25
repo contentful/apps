@@ -13,7 +13,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         class="css-xieh1a"
       >
         <svg
-          class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP css-uoder"
           data-test-id="cf-ui-icon"
           height="18"
           viewBox="0 0 24 24"
@@ -33,7 +33,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         </span>
       </div>
       <svg
-        class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
         data-test-id="cf-ui-icon"
         height="18"
         viewBox="0 0 24 24"
@@ -52,7 +52,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         class="css-xieh1a"
       >
         <svg
-          class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
           data-test-id="cf-ui-icon"
           height="18"
           viewBox="0 0 24 24"
@@ -72,7 +72,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         </span>
       </div>
       <svg
-        class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
         data-test-id="cf-ui-icon"
         height="18"
         viewBox="0 0 24 24"
@@ -91,7 +91,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         class="css-xieh1a"
       >
         <svg
-          class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
           data-test-id="cf-ui-icon"
           height="18"
           viewBox="0 0 24 24"
@@ -111,7 +111,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         </span>
       </div>
       <svg
-        class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
         data-test-id="cf-ui-icon"
         height="18"
         viewBox="0 0 24 24"
@@ -130,7 +130,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         class="css-xieh1a"
       >
         <svg
-          class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP css-uoder"
           data-test-id="cf-ui-icon"
           height="18"
           viewBox="0 0 24 24"
@@ -201,11 +201,11 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         </label>
       </div>
       <div
-        class="Select__Select__wrapper___2pBIz Select__Select--large___1PgJW"
+        class="Select__Select__wrapper___2mbYV Select__Select--large___1HaJb"
       >
         <select
           aria-label="experiment"
-          class="Select__Select___31Z46 a11y__focus-border--default___60AXp"
+          class="Select__Select___2Gi9N a11y__focus-border--default___60AXp"
           data-test-id="cf-ui-select"
           id="experiment"
           name="experiment"
@@ -225,7 +225,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
           </option>
         </select>
         <svg
-          class="Icon__Icon___38Epv Select__Select__icon___boRAZ Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___OBmvS"
           data-test-id="cf-ui-icon"
           height="24"
           viewBox="0 0 24 24"
@@ -265,7 +265,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         class="css-i51og3"
       >
         <h2
-          class="Subheading__Subheading___2mA9j css-1ih9qgr"
+          class="Subheading__Subheading___2mA9j css-3wv18o"
           data-test-id="cf-ui-subheading"
         >
           variation_1
@@ -283,11 +283,13 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
             class="css-cet0rr"
           >
             <div
-              class="Dropdown__Dropdown___1qyn8"
+              class="Dropdown__Dropdown___nAsJ-"
               data-test-id="cf-ui-dropdown"
               position="bottom-left"
             >
               <button
+                aria-expanded="false"
+                aria-haspopup="menu"
                 class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
                 data-test-id="cf-ui-text-link"
                 type="button"
@@ -300,7 +302,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                     class="TextLink__TextLink__icon-wrapper___25_tI"
                   >
                     <svg
-                      class="Icon__Icon___38Epv TextLink__TextLink__icon___3ggiB Icon__Icon--small___1yGZK undefined"
+                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
                       data-test-id="cf-ui-icon"
                       height="18"
                       viewBox="0 0 24 24"
@@ -337,7 +339,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                   class="TextLink__TextLink__icon-wrapper___25_tI"
                 >
                   <svg
-                    class="Icon__Icon___38Epv TextLink__TextLink__icon___3ggiB Icon__Icon--small___1yGZK undefined"
+                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
                     data-test-id="cf-ui-icon"
                     height="18"
                     viewBox="0 0 24 24"
@@ -363,7 +365,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         class="css-i51og3"
       >
         <h2
-          class="Subheading__Subheading___2mA9j css-1ih9qgr"
+          class="Subheading__Subheading___2mA9j css-3wv18o"
           data-test-id="cf-ui-subheading"
         >
           variation_2
@@ -381,11 +383,13 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
             class="css-cet0rr"
           >
             <div
-              class="Dropdown__Dropdown___1qyn8"
+              class="Dropdown__Dropdown___nAsJ-"
               data-test-id="cf-ui-dropdown"
               position="bottom-left"
             >
               <button
+                aria-expanded="false"
+                aria-haspopup="menu"
                 class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
                 data-test-id="cf-ui-text-link"
                 type="button"
@@ -398,7 +402,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                     class="TextLink__TextLink__icon-wrapper___25_tI"
                   >
                     <svg
-                      class="Icon__Icon___38Epv TextLink__TextLink__icon___3ggiB Icon__Icon--small___1yGZK undefined"
+                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
                       data-test-id="cf-ui-icon"
                       height="18"
                       viewBox="0 0 24 24"
@@ -435,7 +439,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                   class="TextLink__TextLink__icon-wrapper___25_tI"
                 >
                   <svg
-                    class="Icon__Icon___38Epv TextLink__TextLink__icon___3ggiB Icon__Icon--small___1yGZK undefined"
+                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
                     data-test-id="cf-ui-icon"
                     height="18"
                     viewBox="0 0 24 24"
