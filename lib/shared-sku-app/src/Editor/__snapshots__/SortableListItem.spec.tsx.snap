@@ -3,7 +3,7 @@
 exports[`SortableListItem should render successfully 1`] = `
 <div>
   <div
-    class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+    class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
     data-test-id="cf-ui-card"
   >
     <div
@@ -38,7 +38,7 @@ exports[`SortableListItem should render successfully 1`] = `
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -102,7 +102,7 @@ exports[`SortableListItem should render successfully 1`] = `
 exports[`SortableListItem should render successfully the error variation for missing image 1`] = `
 <div>
   <div
-    class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+    class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
     data-test-id="cf-ui-card"
   >
     <div
@@ -132,7 +132,7 @@ exports[`SortableListItem should render successfully the error variation for mis
       </span>
     </div>
     <div
-      class="css-1rmpyga"
+      class="css-14lnkev"
     >
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined"
@@ -178,7 +178,7 @@ exports[`SortableListItem should render successfully the error variation for mis
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -242,11 +242,11 @@ exports[`SortableListItem should render successfully the error variation for mis
 exports[`SortableListItem should render successfully the error variation for missing product 1`] = `
 <div>
   <div
-    class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+    class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
     data-test-id="cf-ui-card"
   >
     <div
-      class="css-1rmpyga"
+      class="css-14lnkev"
     >
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined"
@@ -287,7 +287,7 @@ exports[`SortableListItem should render successfully the error variation for mis
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -351,7 +351,7 @@ exports[`SortableListItem should render successfully the error variation for mis
 exports[`SortableListItem should render successfully the loading variation 1`] = `
 <div>
   <div
-    class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+    class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
     data-test-id="cf-ui-card"
   >
     <svg
@@ -367,16 +367,16 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
         Loading component...
       </title>
       <rect
-        clip-path="url(#cf-ui-skeleton-clip-id)"
+        clip-path="url(#cf-ui-skeleton-clip-6)"
         height="100%"
-        style="fill: url(#cf-ui-skeleton-clip-gradient);"
+        style="fill: url(#cf-ui-skeleton-clip-gradient-7);"
         width="100%"
         x="0"
         y="0"
       />
       <defs>
         <clippath
-          id="cf-ui-skeleton-clip-id"
+          id="cf-ui-skeleton-clip-6"
         >
           <rect
             height="48"
@@ -386,7 +386,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
           />
         </clippath>
         <lineargradient
-          id="cf-ui-skeleton-clip-gradient"
+          id="cf-ui-skeleton-clip-gradient-7"
         >
           <stop
             offset="0%"
@@ -396,7 +396,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
             <animate
               attributeName="stop-color"
               dur="2s"
-              id="animation1"
+              id="animation-8"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
             />
@@ -408,7 +408,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
           >
             <animate
               attributeName="stop-color"
-              begin="animation1.begin+0.25s"
+              begin="animation-8.begin+0.25s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -421,7 +421,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
           >
             <animate
               attributeName="stop-color"
-              begin="animation1.begin+0.5s"
+              begin="animation-8.begin+0.5s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -462,7 +462,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -526,7 +526,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
 exports[`SortableListItem should render successfully the sortable variation 1`] = `
 <div>
   <div
-    class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+    class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
     data-test-id="cf-ui-card"
   >
     <div
@@ -587,7 +587,7 @@ exports[`SortableListItem should render successfully the sortable variation 1`] 
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
