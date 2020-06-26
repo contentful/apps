@@ -70,7 +70,7 @@ Object {
             Translation submissions
           </p>
           <div
-            class="Card__Card___1_26G submission Card__Card--padding-default___xgDF9 Card__Card--is-interactive___3nFqr"
+            class="Card__Card___xXJsT submission Card__Card--padding-default___b6Brl Card__Card--is-interactive___dMQtf"
             data-test-id="cf-ui-card"
           >
             <div
@@ -112,7 +112,7 @@ Object {
             </div>
           </div>
           <div
-            class="Card__Card___1_26G submission Card__Card--padding-default___xgDF9 Card__Card--is-interactive___3nFqr"
+            class="Card__Card___xXJsT submission Card__Card--padding-default___b6Brl Card__Card--is-interactive___dMQtf"
             data-test-id="cf-ui-card"
           >
             <div
@@ -139,7 +139,24 @@ Object {
         </div>
       </div>
     </div>
-    <div />
+    <div>
+      <div
+        aria-hidden="true"
+        class="Tooltip__Tooltip___32xAi Tooltip__Tooltip--place-top___1_DNW Tooltip__Tooltip--hidden___3uqEe"
+        contenteditable="false"
+        data-test-id="cf-ui-tooltip"
+        role="tooltip"
+        style="max-width: 360px;"
+      >
+        <div
+          class="InViewport__InViewport___2o6g4"
+          data-test-id="cf-ui-in-viewport"
+          offset="0"
+        >
+          0%
+        </div>
+      </div>
+    </div>
   </body>,
   "container": <div>
     <div
@@ -207,7 +224,7 @@ Object {
           Translation submissions
         </p>
         <div
-          class="Card__Card___1_26G submission Card__Card--padding-default___xgDF9 Card__Card--is-interactive___3nFqr"
+          class="Card__Card___xXJsT submission Card__Card--padding-default___b6Brl Card__Card--is-interactive___dMQtf"
           data-test-id="cf-ui-card"
         >
           <div
@@ -249,7 +266,7 @@ Object {
           </div>
         </div>
         <div
-          class="Card__Card___1_26G submission Card__Card--padding-default___xgDF9 Card__Card--is-interactive___3nFqr"
+          class="Card__Card___xXJsT submission Card__Card--padding-default___b6Brl Card__Card--is-interactive___dMQtf"
           data-test-id="cf-ui-card"
         >
           <div

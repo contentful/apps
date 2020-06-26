@@ -4,7 +4,7 @@ exports[`SortableList should render successfully 1`] = `
 <div>
   <div>
     <div
-      class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
+      class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
       data-test-id="cf-ui-card"
     >
       <div
@@ -55,7 +55,7 @@ exports[`SortableList should render successfully 1`] = `
         </div>
       </section>
       <div
-        class="css-mfolfb"
+        class="css-zdzpuy"
       >
         <a
           href="https://mc.commercetools.com/example-project/categories/28a7442d/general"
@@ -114,7 +114,7 @@ exports[`SortableList should render successfully 1`] = `
       </div>
     </div>
     <div
-      class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
+      class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
       data-test-id="cf-ui-card"
     >
       <div
@@ -165,7 +165,7 @@ exports[`SortableList should render successfully 1`] = `
         </div>
       </section>
       <div
-        class="css-mfolfb"
+        class="css-zdzpuy"
       >
         <a
           href="https://mc.commercetools.com/example-project/categories/38a7442d/general"
@@ -224,7 +224,7 @@ exports[`SortableList should render successfully 1`] = `
       </div>
     </div>
     <div
-      class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
+      class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
       data-test-id="cf-ui-card"
     >
       <div
@@ -275,7 +275,7 @@ exports[`SortableList should render successfully 1`] = `
         </div>
       </section>
       <div
-        class="css-mfolfb"
+        class="css-zdzpuy"
       >
         <a
           href="https://mc.commercetools.com/example-project/categories/48a7442d/general"

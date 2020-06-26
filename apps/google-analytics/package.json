@@ -8,7 +8,7 @@
     "@babel/plugin-transform-runtime": "7.3.4",
     "@babel/preset-env": "7.3.4",
     "@babel/preset-react": "7.0.0",
-    "@contentful/contentful-extension-scripts": "^0.19.0",
+    "@contentful/contentful-extension-scripts": "^0.15.1",
     "@contentful/eslint-config-extension": "0.2.0",
     "@testing-library/react": "8.0.4",
     "@types/jest": "24.0.15",
@@ -29,10 +29,10 @@
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/google-analytics --acl public-read"
   },
   "dependencies": {
-    "@contentful/forma-36-fcss": "^0.2.1",
-    "@contentful/forma-36-react-components": "^3.40.1",
-    "@contentful/forma-36-tokens": "^0.7.1",
-    "contentful-ui-extensions-sdk": "^3.15.0",
+    "@contentful/forma-36-fcss": "^0.0.20",
+    "@contentful/forma-36-react-components": "^3.28.9",
+    "@contentful/forma-36-tokens": "^0.3.0",
+    "contentful-ui-extensions-sdk": "^3.10.10",
     "emotion": "^10.0.27",
     "lodash": "^4.17.15",
     "prop-types": "^15.7.2",
