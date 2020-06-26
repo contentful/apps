@@ -28,16 +28,16 @@ exports[`ProductList should render successfully with no items selected 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-0)"
+            clip-path="url(#cf-ui-skeleton-clip-id)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient-1);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-0"
+              id="cf-ui-skeleton-clip-id"
             >
               <rect
                 height="290"
@@ -47,7 +47,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient-1"
+              id="cf-ui-skeleton-clip-gradient"
             >
               <stop
                 offset="0%"
@@ -57,7 +57,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation-2"
+                  id="animation1"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -69,7 +69,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-2.begin+0.25s"
+                  begin="animation1.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -82,7 +82,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-2.begin+0.5s"
+                  begin="animation1.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -113,7 +113,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
           Dress Twin-Set rose
         </p>
         <p
-          class="css-1r43xm2"
+          class="css-1tx1iym"
         >
           M0E20130820E90Z
         </p>
@@ -142,16 +142,16 @@ exports[`ProductList should render successfully with no items selected 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-3)"
+            clip-path="url(#cf-ui-skeleton-clip-id)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient-4);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-3"
+              id="cf-ui-skeleton-clip-id"
             >
               <rect
                 height="290"
@@ -161,7 +161,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient-4"
+              id="cf-ui-skeleton-clip-gradient"
             >
               <stop
                 offset="0%"
@@ -171,7 +171,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation-5"
+                  id="animation1"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -183,7 +183,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-5.begin+0.25s"
+                  begin="animation1.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -196,7 +196,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-5.begin+0.5s"
+                  begin="animation1.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -227,7 +227,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
           Michael Kors – Shopper “Jet Set Travel”
         </p>
         <p
-          class="css-1r43xm2"
+          class="css-1tx1iym"
         >
           A0E2300FX102203
         </p>
@@ -256,16 +256,16 @@ exports[`ProductList should render successfully with no items selected 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-6)"
+            clip-path="url(#cf-ui-skeleton-clip-id)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient-7);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-6"
+              id="cf-ui-skeleton-clip-id"
             >
               <rect
                 height="290"
@@ -275,7 +275,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient-7"
+              id="cf-ui-skeleton-clip-gradient"
             >
               <stop
                 offset="0%"
@@ -285,7 +285,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation-8"
+                  id="animation1"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -297,7 +297,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-8.begin+0.25s"
+                  begin="animation1.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -310,7 +310,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-8.begin+0.5s"
+                  begin="animation1.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -341,7 +341,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
           Shirt “Jenny“ Polo Ralph Lauren white
         </p>
         <p
-          class="css-1r43xm2"
+          class="css-1tx1iym"
         >
           M0E21300900DZN7
         </p>
@@ -379,16 +379,16 @@ exports[`ProductList should render successfully with selected items 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-9)"
+            clip-path="url(#cf-ui-skeleton-clip-id)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient-10);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-9"
+              id="cf-ui-skeleton-clip-id"
             >
               <rect
                 height="290"
@@ -398,7 +398,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient-10"
+              id="cf-ui-skeleton-clip-gradient"
             >
               <stop
                 offset="0%"
@@ -408,7 +408,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation-11"
+                  id="animation1"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -420,7 +420,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-11.begin+0.25s"
+                  begin="animation1.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -433,7 +433,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-11.begin+0.5s"
+                  begin="animation1.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -464,7 +464,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
           Dress Twin-Set rose
         </p>
         <p
-          class="css-1r43xm2"
+          class="css-1tx1iym"
         >
           M0E20130820E90Z
         </p>
@@ -493,16 +493,16 @@ exports[`ProductList should render successfully with selected items 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-12)"
+            clip-path="url(#cf-ui-skeleton-clip-id)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient-13);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-12"
+              id="cf-ui-skeleton-clip-id"
             >
               <rect
                 height="290"
@@ -512,7 +512,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient-13"
+              id="cf-ui-skeleton-clip-gradient"
             >
               <stop
                 offset="0%"
@@ -522,7 +522,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation-14"
+                  id="animation1"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -534,7 +534,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-14.begin+0.25s"
+                  begin="animation1.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -547,7 +547,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-14.begin+0.5s"
+                  begin="animation1.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -578,7 +578,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
           Michael Kors – Shopper “Jet Set Travel”
         </p>
         <p
-          class="css-1r43xm2"
+          class="css-1tx1iym"
         >
           A0E2300FX102203
         </p>
@@ -607,16 +607,16 @@ exports[`ProductList should render successfully with selected items 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-15)"
+            clip-path="url(#cf-ui-skeleton-clip-id)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient-16);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-15"
+              id="cf-ui-skeleton-clip-id"
             >
               <rect
                 height="290"
@@ -626,7 +626,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient-16"
+              id="cf-ui-skeleton-clip-gradient"
             >
               <stop
                 offset="0%"
@@ -636,7 +636,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation-17"
+                  id="animation1"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -648,7 +648,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-17.begin+0.25s"
+                  begin="animation1.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -661,7 +661,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation-17.begin+0.5s"
+                  begin="animation1.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -692,7 +692,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
           Shirt “Jenny“ Polo Ralph Lauren white
         </p>
         <p
-          class="css-1r43xm2"
+          class="css-1tx1iym"
         >
           M0E21300900DZN7
         </p>

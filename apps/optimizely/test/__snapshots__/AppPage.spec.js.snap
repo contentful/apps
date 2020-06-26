@@ -26,7 +26,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
           You’re currently connected to Optimizely.
         </p>
         <p
-          class="Paragraph__Paragraph___2aO-9 css-1o1ud9d f36-margin-bottom--m"
+          class="Paragraph__Paragraph___2aO-9 css-1ntki7d f36-margin-bottom--m"
           data-test-id="cf-ui-paragraph"
         >
           This access token is valid for 2 hours – after this you must reauthorize with Optimizely.
@@ -50,16 +50,16 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
           Loading component...
         </title>
         <rect
-          clip-path="url(#cf-ui-skeleton-clip-12)"
+          clip-path="url(#cf-ui-skeleton-clip-id)"
           height="100%"
-          style="fill: url(#cf-ui-skeleton-clip-gradient-13);"
+          style="fill: url(#cf-ui-skeleton-clip-gradient);"
           width="100%"
           x="0"
           y="0"
         />
         <defs>
           <clippath
-            id="cf-ui-skeleton-clip-12"
+            id="cf-ui-skeleton-clip-id"
           >
             <rect
               height="16"
@@ -87,7 +87,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
             />
           </clippath>
           <lineargradient
-            id="cf-ui-skeleton-clip-gradient-13"
+            id="cf-ui-skeleton-clip-gradient"
           >
             <stop
               offset="0%"
@@ -97,7 +97,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
               <animate
                 attributeName="stop-color"
                 dur="2s"
-                id="animation-14"
+                id="animation1"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
               />
@@ -109,7 +109,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-14.begin+0.25s"
+                begin="animation1.begin+0.25s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -122,7 +122,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-14.begin+0.5s"
+                begin="animation1.begin+0.5s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -149,16 +149,16 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
           Loading component...
         </title>
         <rect
-          clip-path="url(#cf-ui-skeleton-clip-15)"
+          clip-path="url(#cf-ui-skeleton-clip-id)"
           height="100%"
-          style="fill: url(#cf-ui-skeleton-clip-gradient-16);"
+          style="fill: url(#cf-ui-skeleton-clip-gradient);"
           width="100%"
           x="0"
           y="0"
         />
         <defs>
           <clippath
-            id="cf-ui-skeleton-clip-15"
+            id="cf-ui-skeleton-clip-id"
           >
             <rect
               height="16"
@@ -186,7 +186,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
             />
           </clippath>
           <lineargradient
-            id="cf-ui-skeleton-clip-gradient-16"
+            id="cf-ui-skeleton-clip-gradient"
           >
             <stop
               offset="0%"
@@ -196,7 +196,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
               <animate
                 attributeName="stop-color"
                 dur="2s"
-                id="animation-17"
+                id="animation1"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
               />
@@ -208,7 +208,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-17.begin+0.25s"
+                begin="animation1.begin+0.25s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -221,7 +221,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-17.begin+0.5s"
+                begin="animation1.begin+0.5s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -301,7 +301,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
           You’re currently connected to Optimizely.
         </p>
         <p
-          class="Paragraph__Paragraph___2aO-9 css-1o1ud9d f36-margin-bottom--m"
+          class="Paragraph__Paragraph___2aO-9 css-1ntki7d f36-margin-bottom--m"
           data-test-id="cf-ui-paragraph"
         >
           This access token is valid for 2 hours – after this you must reauthorize with Optimizely.
@@ -325,16 +325,16 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
           Loading component...
         </title>
         <rect
-          clip-path="url(#cf-ui-skeleton-clip-6)"
+          clip-path="url(#cf-ui-skeleton-clip-id)"
           height="100%"
-          style="fill: url(#cf-ui-skeleton-clip-gradient-7);"
+          style="fill: url(#cf-ui-skeleton-clip-gradient);"
           width="100%"
           x="0"
           y="0"
         />
         <defs>
           <clippath
-            id="cf-ui-skeleton-clip-6"
+            id="cf-ui-skeleton-clip-id"
           >
             <rect
               height="16"
@@ -362,7 +362,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
             />
           </clippath>
           <lineargradient
-            id="cf-ui-skeleton-clip-gradient-7"
+            id="cf-ui-skeleton-clip-gradient"
           >
             <stop
               offset="0%"
@@ -372,7 +372,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
               <animate
                 attributeName="stop-color"
                 dur="2s"
-                id="animation-8"
+                id="animation1"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
               />
@@ -384,7 +384,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-8.begin+0.25s"
+                begin="animation1.begin+0.25s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -397,7 +397,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-8.begin+0.5s"
+                begin="animation1.begin+0.5s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -424,16 +424,16 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
           Loading component...
         </title>
         <rect
-          clip-path="url(#cf-ui-skeleton-clip-9)"
+          clip-path="url(#cf-ui-skeleton-clip-id)"
           height="100%"
-          style="fill: url(#cf-ui-skeleton-clip-gradient-10);"
+          style="fill: url(#cf-ui-skeleton-clip-gradient);"
           width="100%"
           x="0"
           y="0"
         />
         <defs>
           <clippath
-            id="cf-ui-skeleton-clip-9"
+            id="cf-ui-skeleton-clip-id"
           >
             <rect
               height="16"
@@ -461,7 +461,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
             />
           </clippath>
           <lineargradient
-            id="cf-ui-skeleton-clip-gradient-10"
+            id="cf-ui-skeleton-clip-gradient"
           >
             <stop
               offset="0%"
@@ -471,7 +471,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
               <animate
                 attributeName="stop-color"
                 dur="2s"
-                id="animation-11"
+                id="animation1"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
               />
@@ -483,7 +483,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-11.begin+0.25s"
+                begin="animation1.begin+0.25s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -496,7 +496,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-11.begin+0.5s"
+                begin="animation1.begin+0.5s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -576,7 +576,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
           You’re currently connected to Optimizely.
         </p>
         <p
-          class="Paragraph__Paragraph___2aO-9 css-1o1ud9d f36-margin-bottom--m"
+          class="Paragraph__Paragraph___2aO-9 css-1ntki7d f36-margin-bottom--m"
           data-test-id="cf-ui-paragraph"
         >
           This access token is valid for 2 hours – after this you must reauthorize with Optimizely.
@@ -626,11 +626,11 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
           </label>
         </div>
         <div
-          class="Select__Select__wrapper___2mbYV Select__Select--full___AENS4"
+          class="Select__Select__wrapper___2pBIz Select__Select--full___7ei7d"
         >
           <select
             aria-label="project"
-            class="Select__Select___2Gi9N a11y__focus-border--default___60AXp"
+            class="Select__Select___31Z46 a11y__focus-border--default___60AXp"
             data-test-id="cf-ui-select"
             id="project"
             name="project"
@@ -656,7 +656,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
             </option>
           </select>
           <svg
-            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___OBmvS"
+            class="Icon__Icon___38Epv Select__Select__icon___boRAZ Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
             data-test-id="cf-ui-icon"
             height="24"
             viewBox="0 0 24 24"
@@ -712,7 +712,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
       <table
         cellpadding="0"
         cellspacing="0"
-        class="css-1w2p18d Table__Table___3vKIR"
+        class="css-1w2p18d Table__Table___2x3zV"
         data-test-id="cf-ui-table"
       >
         <tbody>
@@ -913,11 +913,11 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
     </label>
   </div>
   <div
-    class="Select__Select__wrapper___2mbYV Select__Select--medium___1QRqZ"
+    class="Select__Select__wrapper___2pBIz Select__Select--medium___1Hmlq"
   >
     <select
       aria-label="content-types"
-      class="Select__Select___2Gi9N a11y__focus-border--default___60AXp"
+      class="Select__Select___31Z46 a11y__focus-border--default___60AXp"
       data-test-id="cf-ui-select"
       id="content-types"
       name="content-types"
@@ -938,7 +938,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
       </option>
     </select>
     <svg
-      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___OBmvS"
+      class="Icon__Icon___38Epv Select__Select__icon___boRAZ Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
       data-test-id="cf-ui-icon"
       height="24"
       viewBox="0 0 24 24"

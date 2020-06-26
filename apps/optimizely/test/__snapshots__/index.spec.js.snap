@@ -12,7 +12,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       class="css-xieh1a"
     >
       <svg
-        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
+        class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
         data-test-id="cf-ui-icon"
         height="18"
         viewBox="0 0 24 24"
@@ -32,7 +32,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       </span>
     </div>
     <svg
-      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
+      class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
       data-test-id="cf-ui-icon"
       height="18"
       viewBox="0 0 24 24"
@@ -51,7 +51,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       class="css-xieh1a"
     >
       <svg
-        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
+        class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
         data-test-id="cf-ui-icon"
         height="18"
         viewBox="0 0 24 24"
@@ -71,7 +71,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       </span>
     </div>
     <svg
-      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
+      class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
       data-test-id="cf-ui-icon"
       height="18"
       viewBox="0 0 24 24"
@@ -90,7 +90,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       class="css-xieh1a"
     >
       <svg
-        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
+        class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
         data-test-id="cf-ui-icon"
         height="18"
         viewBox="0 0 24 24"
@@ -110,7 +110,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       </span>
     </div>
     <svg
-      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
+      class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
       data-test-id="cf-ui-icon"
       height="18"
       viewBox="0 0 24 24"
@@ -129,7 +129,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       class="css-xieh1a"
     >
       <svg
-        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
+        class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
         data-test-id="cf-ui-icon"
         height="18"
         viewBox="0 0 24 24"
@@ -176,7 +176,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       <rect
         clip-path="url(#references-section)"
         height="100%"
-        style="fill: url(#cf-ui-skeleton-clip-gradient-0);"
+        style="fill: url(#cf-ui-skeleton-clip-gradient);"
         width="100%"
         x="0"
         y="0"
@@ -195,7 +195,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           />
         </clippath>
         <lineargradient
-          id="cf-ui-skeleton-clip-gradient-0"
+          id="cf-ui-skeleton-clip-gradient"
         >
           <stop
             offset="0%"
@@ -205,7 +205,7 @@ exports[`Optimizely App should render the editor page 1`] = `
             <animate
               attributeName="stop-color"
               dur="2s"
-              id="animation-1"
+              id="animation1"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
             />
@@ -217,7 +217,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           >
             <animate
               attributeName="stop-color"
-              begin="animation-1.begin+0.25s"
+              begin="animation1.begin+0.25s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -230,7 +230,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           >
             <animate
               attributeName="stop-color"
-              begin="animation-1.begin+0.5s"
+              begin="animation1.begin+0.5s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -272,11 +272,11 @@ exports[`Optimizely App should render the editor page 1`] = `
       </label>
     </div>
     <div
-      class="Select__Select__wrapper___2mbYV Select__Select--large___1HaJb"
+      class="Select__Select__wrapper___2pBIz Select__Select--large___1PgJW"
     >
       <select
         aria-label="experiment"
-        class="Select__Select___2Gi9N a11y__focus-border--default___60AXp Select__Select--disabled___156vR"
+        class="Select__Select___31Z46 a11y__focus-border--default___60AXp Select__Select--disabled___3n58N"
         data-test-id="cf-ui-select"
         disabled=""
         id="experiment"
@@ -291,7 +291,7 @@ exports[`Optimizely App should render the editor page 1`] = `
         </option>
       </select>
       <svg
-        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___OBmvS"
+        class="Icon__Icon___38Epv Select__Select__icon___boRAZ Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
         data-test-id="cf-ui-icon"
         height="24"
         viewBox="0 0 24 24"
@@ -335,7 +335,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       <rect
         clip-path="url(#variations-section)"
         height="100%"
-        style="fill: url(#cf-ui-skeleton-clip-gradient-2);"
+        style="fill: url(#cf-ui-skeleton-clip-gradient);"
         width="100%"
         x="0"
         y="0"
@@ -370,7 +370,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           />
         </clippath>
         <lineargradient
-          id="cf-ui-skeleton-clip-gradient-2"
+          id="cf-ui-skeleton-clip-gradient"
         >
           <stop
             offset="0%"
@@ -380,7 +380,7 @@ exports[`Optimizely App should render the editor page 1`] = `
             <animate
               attributeName="stop-color"
               dur="2s"
-              id="animation-3"
+              id="animation1"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
             />
@@ -392,7 +392,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           >
             <animate
               attributeName="stop-color"
-              begin="animation-3.begin+0.25s"
+              begin="animation1.begin+0.25s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -405,7 +405,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           >
             <animate
               attributeName="stop-color"
-              begin="animation-3.begin+0.5s"
+              begin="animation1.begin+0.5s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
