@@ -4,7 +4,7 @@ exports[`SortableList should render successfully 1`] = `
 <div>
   <div>
     <div
-      class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+      class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
       data-test-id="cf-ui-card"
     >
       <div
@@ -46,16 +46,16 @@ exports[`SortableList should render successfully 1`] = `
           Loading component...
         </title>
         <rect
-          clip-path="url(#cf-ui-skeleton-clip-id)"
+          clip-path="url(#cf-ui-skeleton-clip-0)"
           height="100%"
-          style="fill: url(#cf-ui-skeleton-clip-gradient);"
+          style="fill: url(#cf-ui-skeleton-clip-gradient-1);"
           width="100%"
           x="0"
           y="0"
         />
         <defs>
           <clippath
-            id="cf-ui-skeleton-clip-id"
+            id="cf-ui-skeleton-clip-0"
           >
             <rect
               height="48"
@@ -65,7 +65,7 @@ exports[`SortableList should render successfully 1`] = `
             />
           </clippath>
           <lineargradient
-            id="cf-ui-skeleton-clip-gradient"
+            id="cf-ui-skeleton-clip-gradient-1"
           >
             <stop
               offset="0%"
@@ -75,7 +75,7 @@ exports[`SortableList should render successfully 1`] = `
               <animate
                 attributeName="stop-color"
                 dur="2s"
-                id="animation1"
+                id="animation-2"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
               />
@@ -87,7 +87,7 @@ exports[`SortableList should render successfully 1`] = `
             >
               <animate
                 attributeName="stop-color"
-                begin="animation1.begin+0.25s"
+                begin="animation-2.begin+0.25s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -100,7 +100,7 @@ exports[`SortableList should render successfully 1`] = `
             >
               <animate
                 attributeName="stop-color"
-                begin="animation1.begin+0.5s"
+                begin="animation-2.begin+0.5s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -141,7 +141,7 @@ exports[`SortableList should render successfully 1`] = `
         </div>
       </section>
       <div
-        class="css-zdzpuy"
+        class="css-mfolfb"
       >
         <a
           href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -200,7 +200,7 @@ exports[`SortableList should render successfully 1`] = `
       </div>
     </div>
     <div
-      class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+      class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
       data-test-id="cf-ui-card"
     >
       <div
@@ -242,16 +242,16 @@ exports[`SortableList should render successfully 1`] = `
           Loading component...
         </title>
         <rect
-          clip-path="url(#cf-ui-skeleton-clip-id)"
+          clip-path="url(#cf-ui-skeleton-clip-3)"
           height="100%"
-          style="fill: url(#cf-ui-skeleton-clip-gradient);"
+          style="fill: url(#cf-ui-skeleton-clip-gradient-4);"
           width="100%"
           x="0"
           y="0"
         />
         <defs>
           <clippath
-            id="cf-ui-skeleton-clip-id"
+            id="cf-ui-skeleton-clip-3"
           >
             <rect
               height="48"
@@ -261,7 +261,7 @@ exports[`SortableList should render successfully 1`] = `
             />
           </clippath>
           <lineargradient
-            id="cf-ui-skeleton-clip-gradient"
+            id="cf-ui-skeleton-clip-gradient-4"
           >
             <stop
               offset="0%"
@@ -271,7 +271,7 @@ exports[`SortableList should render successfully 1`] = `
               <animate
                 attributeName="stop-color"
                 dur="2s"
-                id="animation1"
+                id="animation-5"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
               />
@@ -283,7 +283,7 @@ exports[`SortableList should render successfully 1`] = `
             >
               <animate
                 attributeName="stop-color"
-                begin="animation1.begin+0.25s"
+                begin="animation-5.begin+0.25s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -296,7 +296,7 @@ exports[`SortableList should render successfully 1`] = `
             >
               <animate
                 attributeName="stop-color"
-                begin="animation1.begin+0.5s"
+                begin="animation-5.begin+0.5s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -337,7 +337,7 @@ exports[`SortableList should render successfully 1`] = `
         </div>
       </section>
       <div
-        class="css-zdzpuy"
+        class="css-mfolfb"
       >
         <a
           href="https://mc.commercetools.com/example-project/products/4e5446e8/general"
@@ -396,7 +396,7 @@ exports[`SortableList should render successfully 1`] = `
       </div>
     </div>
     <div
-      class="Card__Card___xXJsT css-pivbrd Card__Card--padding-default___b6Brl"
+      class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
       data-test-id="cf-ui-card"
     >
       <div
@@ -438,16 +438,16 @@ exports[`SortableList should render successfully 1`] = `
           Loading component...
         </title>
         <rect
-          clip-path="url(#cf-ui-skeleton-clip-id)"
+          clip-path="url(#cf-ui-skeleton-clip-6)"
           height="100%"
-          style="fill: url(#cf-ui-skeleton-clip-gradient);"
+          style="fill: url(#cf-ui-skeleton-clip-gradient-7);"
           width="100%"
           x="0"
           y="0"
         />
         <defs>
           <clippath
-            id="cf-ui-skeleton-clip-id"
+            id="cf-ui-skeleton-clip-6"
           >
             <rect
               height="48"
@@ -457,7 +457,7 @@ exports[`SortableList should render successfully 1`] = `
             />
           </clippath>
           <lineargradient
-            id="cf-ui-skeleton-clip-gradient"
+            id="cf-ui-skeleton-clip-gradient-7"
           >
             <stop
               offset="0%"
@@ -467,7 +467,7 @@ exports[`SortableList should render successfully 1`] = `
               <animate
                 attributeName="stop-color"
                 dur="2s"
-                id="animation1"
+                id="animation-8"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
               />
@@ -479,7 +479,7 @@ exports[`SortableList should render successfully 1`] = `
             >
               <animate
                 attributeName="stop-color"
-                begin="animation1.begin+0.25s"
+                begin="animation-8.begin+0.25s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -492,7 +492,7 @@ exports[`SortableList should render successfully 1`] = `
             >
               <animate
                 attributeName="stop-color"
-                begin="animation1.begin+0.5s"
+                begin="animation-8.begin+0.5s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -533,7 +533,7 @@ exports[`SortableList should render successfully 1`] = `
         </div>
       </section>
       <div
-        class="css-zdzpuy"
+        class="css-mfolfb"
       >
         <a
           href="https://mc.commercetools.com/example-project/products/db3c234l/general"

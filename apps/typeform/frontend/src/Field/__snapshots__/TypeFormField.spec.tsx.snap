@@ -10,10 +10,10 @@ exports[`TypeFormField should render successfully when the user is signed in 1`]
       src="typeform-icon.svg"
     />
     <div
-      class="Select__Select__wrapper___2pBIz Select__Select--full___7ei7d"
+      class="Select__Select__wrapper___2mbYV Select__Select--full___AENS4"
     >
       <select
-        class="Select__Select___31Z46 a11y__focus-border--default___60AXp"
+        class="Select__Select___2Gi9N a11y__focus-border--default___60AXp"
         data-test-id="typeform-select"
       >
         <option
@@ -36,7 +36,7 @@ exports[`TypeFormField should render successfully when the user is signed in 1`]
         </option>
       </select>
       <svg
-        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___boRAZ"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___OBmvS"
         data-test-id="cf-ui-icon"
         height="24"
         viewBox="0 0 24 24"
