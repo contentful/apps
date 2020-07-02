@@ -143,7 +143,7 @@ async function installApp(APP_ID: string) {
 
 async function createContentType() {
   const body = {
-    name: "example",
+    name: "ArticleWithDefaultTitle",
     fields: [
       {
         id: "title",
@@ -156,9 +156,9 @@ async function createContentType() {
   };
 
   const response = await nodeFetch(
-    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types`,
+    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types/ArticleWithDefaultTitle`,
     {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/vnd.contentful.management.v1+json",
         Authorization: `Bearer ${CMA_TOKEN}`,
