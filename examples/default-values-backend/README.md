@@ -35,16 +35,22 @@ ENVIRONMENT_ID= # Your contentul enviornment name
 HOSTED_APP_URL= # The ngrok URL from step 1 - this must a https URL
 ```
 
+3. Generate a public and private key pair
+```shell
+./tools/makekeys
+```
+
 ### Warning!
 The setup for this demo will make install an app, and create a content type in
 whatever orgnization/space/environment you use. We highly recommend that you do
 not use your production environment for testing this App.
 
 
-3. Run the app's setup script
+4. Run the app's setup script
 
 ```shell
-make setup
+yarn
+yarn setup
 ```
 This step will
 * Install dependencies
@@ -53,12 +59,12 @@ This step will
 * Install the app to the space and enviornment you specified
 * Setup a webhook that listens for new entries
 
-4. Run the backend App!
+5. Run the backend App!
 ```shell
-make start
+yarn start
 ```
 
-5. Test it by going to the contentful web app and creating a new entry of the
+6. Test it by going to the contentful web app and creating a new entry of the
    `Example` content type. You should see a prefilled title field!
 
 
