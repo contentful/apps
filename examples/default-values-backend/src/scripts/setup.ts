@@ -60,7 +60,7 @@ main().catch(e => {
 
 async function createAppDefinition() {
   const body = {
-    name: "Backend demo app",
+    name: "Default field values",
     src: `${HOSTED_APP_URL}/frontend`,
     locations: [
       {
