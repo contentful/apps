@@ -144,6 +144,7 @@ async function installApp(APP_ID: string) {
 async function createContentType() {
   const body = {
     name: "ArticleWithDefaultTitle",
+    displayField: 'title',
     fields: [
       {
         id: "title",
