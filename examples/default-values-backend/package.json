@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {
-    "start": "tsc && node --insecure-http-parser built/src/index.js",
+    "start": "yarn buildFrontend && tsc && node --insecure-http-parser built/src/index.js",
     "buildFrontend": "parcel build public/index.html",
     "setup": "NODE_OPTIONS=--insecure-http-parser ts-node src/scripts/setup.ts"
   },
