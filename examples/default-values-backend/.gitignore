@@ -3,4 +3,4 @@ built
 yarn-error.log
 node_modules
 keys
-
+.env
