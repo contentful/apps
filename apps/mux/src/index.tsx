@@ -19,12 +19,14 @@ import './index.css';
 import Config from './config';
 import Player from './player';
 import DeleteButton from './deleteButton';
+import { fetchTokens } from './signedUrlEndpoint';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface InstallationParams {
   muxAccessTokenId: string;
   muxAccessTokenSecret: string;
+  muxSignedUrlEndpoint?: string;
 }
 
 interface AppProps {
@@ -46,6 +48,8 @@ interface AppState {
   error: string | false;
   errorShowResetAction: boolean | false;
   isDeleting: boolean | false;
+  playbackUrl?: string;
+  posterUrl?: string;
 }
 
 export class App extends React.Component<AppProps, AppState> {
@@ -57,8 +61,11 @@ export class App extends React.Component<AppProps, AppState> {
   constructor(props: AppProps) {
     super(props);
 
-    const { muxAccessTokenId, muxAccessTokenSecret } = this.props.sdk.parameters
-      .installation as InstallationParams;
+    const {
+      muxAccessTokenId,
+      muxAccessTokenSecret,
+      muxSignedUrlEndpoint,
+    } = this.props.sdk.parameters.installation as InstallationParams;
 
     this.muxBaseReqOptions = {
       mode: 'cors',
@@ -73,6 +80,11 @@ export class App extends React.Component<AppProps, AppState> {
         "It doesn't look like you've specified your Mux Access Token ID or Secret in the extension configuration.",
       errorShowResetAction: false,
     };
+  }
+
+  getSignedUrlEndpoint() {
+    return (this.props.sdk.parameters.installation as InstallationParams)
+      .muxSignedUrlEndpoint;
   }
 
   detachExternalChangeHandler: Function | null = null;
@@ -97,7 +109,12 @@ export class App extends React.Component<AppProps, AppState> {
 
       if (this.state.value.ready) {
         const asset = await this.getAsset();
-        if (!asset) {
+        if (asset && asset.playback_ids[0]) {
+          await this.setPlaybackAndPosterValues(
+            asset.playback_ids[0].id,
+            asset.playback_ids[0].policy === 'signed'
+          );
+        } else {
           // eslint-disable-next-line react/no-did-mount-set-state
           this.setState({
             error: 'Error: it appears that this asset has been deleted',
@@ -109,6 +126,7 @@ export class App extends React.Component<AppProps, AppState> {
 
       if (this.state.value.uploadId && !this.state.value.ready) {
         await this.pollForUploadDetails();
+        return;
       }
     }
   }
@@ -192,7 +210,7 @@ export class App extends React.Component<AppProps, AppState> {
         cors_origin: window.location.origin,
         new_asset_settings: {
           passthrough: passthroughId,
-          playback_policy: 'public',
+          playback_policy: this.getSignedUrlEndpoint() ? 'signed' : 'public',
         },
       }),
       method: 'POST',
@@ -287,6 +305,29 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
+  setPlaybackAndPosterValues = async (
+    playbackId: string,
+    isPlaybackIdSigned: boolean
+  ) => {
+    const { muxSignedUrlEndpoint } = this.props.sdk.parameters
+      .installation as InstallationParams;
+    if (isPlaybackIdSigned && muxSignedUrlEndpoint) {
+      const { playbackToken, thumbnailToken } = await fetchTokens(
+        playbackId,
+        muxSignedUrlEndpoint
+      );
+      this.setState({
+        playbackUrl: `https://stream.mux.com/${playbackId}.m3u8?token=${playbackToken}`,
+        posterUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg?token=${thumbnailToken}`,
+      });
+    } else {
+      this.setState({
+        playbackUrl: `https://stream.mux.com/${playbackId}.m3u8`,
+        posterUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg`,
+      });
+    }
+  };
+
   getAsset = async () => {
     if (!this.state.value || !this.state.value.assetId) {
       throw Error(
@@ -332,6 +373,11 @@ export class App extends React.Component<AppProps, AppState> {
       ratio: asset.ratio,
       error: assetError,
     });
+
+    await this.setPlaybackAndPosterValues(
+      asset['playback_ids'][0].id,
+      asset.playback_ids[0].policy === 'signed'
+    );
 
     if (assetError) {
       this.setAssetError(assetError);
@@ -383,11 +429,16 @@ export class App extends React.Component<AppProps, AppState> {
         );
       }
 
-      if (this.state.value.ready) {
+      if (
+        this.state.value.ready &&
+        this.state.playbackUrl &&
+        this.state.posterUrl
+      ) {
         return (
           <div>
             <Player
-              playbackId={this.state.value.playbackId}
+              playbackUrl={this.state.playbackUrl}
+              posterUrl={this.state.posterUrl}
               ratio={this.state.value.ratio}
               onReady={this.onPlayerReady}
             />

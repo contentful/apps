@@ -32,6 +32,7 @@ import {
   SelectedFields,
 } from 'shared-dam-app/src/utils';
 import MuxLogoSvg from './mux-logo.svg';
+import { fetchTokens } from './signedUrlEndpoint';
 import './config.css';
 
 interface ConfigProps {
@@ -41,6 +42,7 @@ interface ConfigProps {
 interface IParameters {
   muxAccessTokenId?: string;
   muxAccessTokenSecret?: string;
+  muxSignedUrlEndpoint?: string;
 }
 
 interface IState {
@@ -129,7 +131,11 @@ class Config extends React.Component<ConfigProps, IState> {
   // Renders the UI of the app.
   render() {
     const {
-      parameters: { muxAccessTokenId, muxAccessTokenSecret },
+      parameters: {
+        muxAccessTokenId,
+        muxAccessTokenSecret,
+        muxSignedUrlEndpoint,
+      },
       contentTypes,
       compatibleFields,
     } = this.state;
@@ -181,6 +187,7 @@ class Config extends React.Component<ConfigProps, IState> {
                 onChange={(e) =>
                   this.setState({
                     parameters: {
+                      muxSignedUrlEndpoint,
                       muxAccessTokenId: (e.target as HTMLTextAreaElement).value,
                       muxAccessTokenSecret,
                     },
@@ -196,6 +203,7 @@ class Config extends React.Component<ConfigProps, IState> {
                 onChange={(e) =>
                   this.setState({
                     parameters: {
+                      muxSignedUrlEndpoint,
                       muxAccessTokenId,
                       muxAccessTokenSecret: (e.target as HTMLTextAreaElement)
                         .value,
@@ -255,6 +263,38 @@ class Config extends React.Component<ConfigProps, IState> {
             </Form>
           </Typography>
           <hr className="config-splitter" />
+          <Form spacing="default">
+            <Heading>Advanced: Signed URLs</Heading>
+            <Paragraph>
+              This is an advanced feature if you want to support signed urls. If
+              you use this feature you must read and understand this guide. The
+              Mux App will use this endpoint with a query parameter
+              `playbackId=` and your endpoint should return a valid signature
+              that can be used in Contentful for previewing content that is
+              uploaded.
+            </Paragraph>
+            <TextField
+              name="mux-signed-url-endpoint"
+              id="mux-signed-url-endpoint"
+              labelText="Mux signed URL endpoint"
+              value={muxSignedUrlEndpoint || ''}
+              onChange={(e) =>
+                this.setState({
+                  parameters: {
+                    muxAccessTokenId,
+                    muxAccessTokenSecret,
+                    muxSignedUrlEndpoint: (e.target as HTMLTextAreaElement)
+                      .value,
+                  },
+                })
+              }
+              textInputProps={{
+                placeholder:
+                  'https://user:password@api.exampleapp.com/signed-url',
+              }}
+            />
+          </Form>
+          <hr className="config-splitter" />
           <Paragraph>
             After entering your API credentials, click 'Install' above.
           </Paragraph>
@@ -278,6 +318,20 @@ class Config extends React.Component<ConfigProps, IState> {
         'Please enter a valid access token and secret.'
       );
       return false;
+    }
+
+    if (isParamValid(parameters.muxSignedUrlEndpoint)) {
+      try {
+        await fetchTokens(
+          'config-playback-id-for-validation-purposes',
+          parameters.muxSignedUrlEndpoint!
+        );
+      } catch (e) {
+        this.props.sdk.notifier.error(
+          `Error with signed URL endpoint: ${e.message}`
+        );
+        return false;
+      }
     }
 
     const targetState = selectedFieldsToTargetState(
