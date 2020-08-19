@@ -15,9 +15,15 @@ export interface Props {
 const styles = {
   productWrapper: css({
     display: 'flex',
-    flex: `0 0 calc(25% - ${parseFloat(tokens.spacingS) * 2}rem)`,
+    flex: `0 0 calc(50% - ${parseFloat(tokens.spacingS) * 2}rem)`,
     padding: tokens.spacingS,
-    position: 'relative'
+    position: 'relative',
+    '@media screen and (min-width: 767px)': {
+      flex: `0 0 calc(33.3% - ${parseFloat(tokens.spacingS) * 2}rem)`
+    },
+    '@media screen and (min-width: 992px)': {
+      flex: `0 0 calc(25% - ${parseFloat(tokens.spacingS) * 2}rem)`
+    }
   }),
   product: css({
     border: '1px solid',

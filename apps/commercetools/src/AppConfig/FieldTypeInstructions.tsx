@@ -1,11 +1,13 @@
 import * as React from 'react';
-import { Heading, Paragraph } from '@contentful/forma-36-react-components';
+import { Heading, Paragraph, TextLink } from '@contentful/forma-36-react-components';
 
 interface Props {
   contentTypesFound: boolean;
+  space: string;
+  environment: string;
 }
 
-export const FieldTypeInstructions = ({ contentTypesFound }: Props) => (
+export const FieldTypeInstructions = ({ contentTypesFound, space, environment }: Props) => (
   <>
     <Heading>Assign to fields</Heading>
     {contentTypesFound ? (
@@ -20,7 +22,18 @@ export const FieldTypeInstructions = ({ contentTypesFound }: Props) => (
         </Paragraph>
         <Paragraph>
           There are <strong>no content types with Short text</strong> fields in this environment.
-          You can add one here later.
+          You can add one in your{' '}
+          <TextLink
+            linkType="primary"
+            target="_blank"
+            href={
+              environment === 'master'
+                ? `https://app.contentful.com/spaces/${space}/content_types`
+                : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+            }>
+            content model
+          </TextLink>{' '}
+          and assign it to the app from this screen.
         </Paragraph>
       </>
     )}

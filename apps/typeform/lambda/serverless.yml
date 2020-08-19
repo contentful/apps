@@ -1,0 +1,45 @@
+service:
+  name: sls-apps-typeform
+
+frameworkVersion: '>=1.0.0 <2.0.0'
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  myStage: ${opt:stage, self:provider.stage}
+  customDomain:
+    domainName: typeform.ctfapps.net
+    stage: prd
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: ${opt:stage, 'dev'}
+  region: 'us-east-1'
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: sls-apps-typeform
+
+package:
+  exclude:
+    - .git/**
+    - node_modules/typeform-frontend/node_modules/**
+
+functions:
+  app:
+    environment:
+      CLIENT_ID: ${env:TYPEFORM_CLIENT_ID}
+      CLIENT_SECRET: ${env:TYPEFORM_CLIENT_SECRET}
+    handler: index.handler
+    events:
+      - http:
+          path: /
+          method: GET
+          private: false
+      - http:
+          path: /{proxy+}
+          method: ANY

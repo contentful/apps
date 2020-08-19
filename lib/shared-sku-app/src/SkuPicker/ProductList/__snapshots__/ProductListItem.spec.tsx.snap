@@ -3,7 +3,7 @@
 exports[`ProductListItem should render successfully 1`] = `
 <div>
   <div
-    class="css-zkv16y"
+    class="css-jfu8ng"
   >
     <div
       aria-checked="false"
@@ -46,7 +46,7 @@ exports[`ProductListItem should render successfully 1`] = `
 exports[`ProductListItem should render successfully the error variation 1`] = `
 <div>
   <div
-    class="css-zkv16y"
+    class="css-jfu8ng"
   >
     <div
       aria-checked="true"
@@ -98,7 +98,7 @@ exports[`ProductListItem should render successfully the error variation 1`] = `
 exports[`ProductListItem should render successfully the isSelected variation 1`] = `
 <div>
   <div
-    class="css-zkv16y"
+    class="css-jfu8ng"
   >
     <div
       aria-checked="true"
@@ -141,7 +141,7 @@ exports[`ProductListItem should render successfully the isSelected variation 1`]
 exports[`ProductListItem should render successfully the loading variation 1`] = `
 <div>
   <div
-    class="css-zkv16y"
+    class="css-jfu8ng"
   >
     <div
       aria-checked="false"

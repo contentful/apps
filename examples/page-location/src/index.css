@@ -1,0 +1,35 @@
+html,
+body,
+div {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+}
+
+.page {
+  width: 100%;
+  max-width: 690px;
+}
+
+#collections {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.cr-pointer {
+  cursor: pointer;
+}
+
+/* Fix skeleton height */
+#collections svg {
+  height: 43px;
+}

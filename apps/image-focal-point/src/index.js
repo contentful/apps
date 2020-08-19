@@ -165,7 +165,7 @@ init(sdk => {
     renderDialog(sdk);
   } else if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     ReactDOM.render(<AppView sdk={sdk} />, document.getElementById('root'));
-  } else {
+  } else if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
     ReactDOM.render(<App sdk={sdk} />, document.getElementById('root'));
   }
 });

@@ -4,9 +4,11 @@ import { AppExtensionSDK, CollectionResponse } from 'contentful-ui-extensions-sd
 import {
   Heading,
   Paragraph,
+  Note,
   Typography,
   TextField,
-  Form
+  Form,
+  TextLink
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
@@ -111,8 +113,8 @@ export default class AppConfig extends React.Component<Props, State> {
       app.getParameters()
     ]);
 
-    const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items
-    const editorInterfaces = (eisResponse as CollectionResponse<EditorInterface>).items
+    const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items;
+    const editorInterfaces = (eisResponse as CollectionResponse<EditorInterface>).items;
 
     const compatibleFields = getCompatibleFields(contentTypes);
     const filteredContentTypes = contentTypes.filter(ct => {
@@ -179,7 +181,10 @@ export default class AppConfig extends React.Component<Props, State> {
 
   renderApp() {
     const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
-    const { parameterDefinitions } = this.props;
+    const { parameterDefinitions, sdk } = this.props;
+    const {
+      ids: { space, environment }
+    } = sdk;
     const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
 
     return (
@@ -227,10 +232,22 @@ export default class AppConfig extends React.Component<Props, State> {
                 This app can only be used with <strong>Short text</strong> or{' '}
                 <strong>Short text, list</strong> fields.
               </Paragraph>
-              <Paragraph>
+              <Note noteType="warning">
                 There are <strong>no content types with Short text or Short text, list</strong>{' '}
-                fields in this environment. You can add one here later.
-              </Paragraph>
+                fields in this environment. You can add one in your{' '}
+                <TextLink
+                  linkType="primary"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={
+                    environment === 'master'
+                      ? `https://app.contentful.com/spaces/${space}/content_types`
+                      : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+                  }>
+                  content model
+                </TextLink>{' '}
+                and assign it to the app from this screen.
+              </Note>
             </>
           )}
           <FieldSelector

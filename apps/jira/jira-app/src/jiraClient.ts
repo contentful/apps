@@ -255,15 +255,48 @@ export default class JiraClient {
       };
     }
   }
+  /**Get projects for the given cloud instance.
+   * @param projectId The id of the cloud instance to find projects in.
+   * @param token oauth token.
+   */
+  public static async getProjectById(cloudId: string, token: string, id: string = ''): Promise<CloudProjectResponse> {
+    try {
+      const result = await window.fetch(
+        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/2/project/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!result.ok) {
+        throw void null;
+      }
+
+      const res: CloudProject = await result.json();
+
+      return {
+        error: false,
+        project: res
+      };
+    } catch (e) {
+      return {
+        error: true,
+        project: null
+      };
+    }
+  }
 
   /**Get projects for the given cloud instance.
    * @param cloudId The id of the cloud instance to find projects in.
    * @param token oauth token.
    */
-  public static async getProjects(cloudId: string, token: string): Promise<CloudProjectResponse> {
+  public static async getProjects(cloudId: string, token: string, query: string = ''): Promise<CloudProjectsResponse> {
     try {
       const result = await window.fetch(
-        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/2/project/search`,
+        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/2/project/search?query=${query}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
