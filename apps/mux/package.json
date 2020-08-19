@@ -34,6 +34,7 @@
     "@contentful/forma-36-tokens": "^0.5.2",
     "@mux/upchunk": "^1.0.6",
     "@types/hls.js": "^0.12.3",
+    "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash.get": "^4.4.6",
     "contentful-ui-extensions-sdk": "^3.14.x",
     "core-js": "^3.0.1",

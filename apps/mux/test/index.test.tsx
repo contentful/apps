@@ -57,11 +57,14 @@ test('displays a player when the asset is ready', () => {
       ...SDK_MOCK.field,
       getValue: () => ({
         ready: true,
+        assetId: 'test-assetId123',
+        playbackId: 'test-playbackId123',
       }),
     },
   };
 
   const wrapper = mount(<App sdk={mockedSdk as any} />);
+  expect(wrapper.state('playbackUrl')).toEqual('ssss')
   expect(wrapper.find('Player')).toHaveLength(1);
 });
 

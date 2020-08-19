@@ -36,7 +36,8 @@ interface AppProps {
 interface MuxContentfulObject {
   uploadId: string;
   assetId: string;
-  playbackId: string;
+  playbackId?: string;
+  signedPlaybackId?: string;
   ready: boolean;
   ratio: string;
   error: string;
@@ -109,17 +110,19 @@ export class App extends React.Component<AppProps, AppState> {
 
       if (this.state.value.ready) {
         const asset = await this.getAsset();
-        if (asset && asset.playback_ids[0]) {
-          await this.setPlaybackAndPosterValues(
-            asset.playback_ids[0].id,
-            asset.playback_ids[0].policy === 'signed'
-          );
-        } else {
+        if (!asset) {
           // eslint-disable-next-line react/no-did-mount-set-state
           this.setState({
             error: 'Error: it appears that this asset has been deleted',
             errorShowResetAction: true,
           });
+          return
+        }
+        if (this.state.value.playbackId) {
+          await this.setPlaybackAndPosterValues(this.state.value.playbackId, false)
+        }
+        if (this.state.value.signedPlaybackId) {
+          await this.setPlaybackAndPosterValues(this.state.value.signedPlaybackId, true)
         }
         return;
       }
@@ -311,6 +314,7 @@ export class App extends React.Component<AppProps, AppState> {
   ) => {
     const { muxSignedUrlEndpoint } = this.props.sdk.parameters
       .installation as InstallationParams;
+    console.log('debug setPlaybackAndPosterValues')
     if (isPlaybackIdSigned && muxSignedUrlEndpoint) {
       const { playbackToken, thumbnailToken } = await fetchTokens(
         playbackId,
@@ -329,6 +333,7 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   getAsset = async () => {
+    console.log('debug this.state.value', this.state.value)
     if (!this.state.value || !this.state.value.assetId) {
       throw Error(
         'Something went wrong, we cannot getAsset without an assetId.'
@@ -365,19 +370,20 @@ export class App extends React.Component<AppProps, AppState> {
       throw Error('Something went wrong, we were not able to get the asset.');
     }
 
+    const playbackId = asset.playback_ids.find(({ policy } : {policy:string}) => policy === 'public').id;
+    const signedPlaybackId = asset.playback_ids.find(({ policy } : { policy:string }) => policy === 'signed').id;
+
     await this.props.sdk.field.setValue({
       uploadId: this.state.value.uploadId,
       assetId: this.state.value.assetId,
-      playbackId: asset['playback_ids'][0].id,
+      playbackId,
+      signedPlaybackId,
       ready: asset.status === 'ready',
       ratio: asset.ratio,
       error: assetError,
     });
 
-    await this.setPlaybackAndPosterValues(
-      asset['playback_ids'][0].id,
-      asset.playback_ids[0].policy === 'signed'
-    );
+    await this.setPlaybackAndPosterValues(playbackId || signedPlaybackId, !!playbackId);
 
     if (assetError) {
       this.setAssetError(assetError);

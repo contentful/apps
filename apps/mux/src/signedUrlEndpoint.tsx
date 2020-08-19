@@ -1,4 +1,14 @@
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
+
+interface DecodedResp {
+  aud?: string;
+  sub?: string;
+  exp?: number;
+}
+
+interface FetchHeaders {
+  Authorization?: string;
+}
 
 const validateSignatures = (
   token: string,
@@ -8,7 +18,10 @@ const validateSignatures = (
   // we are not *verifying* signatures here -- that can only be done on a server
   // all we want to do is decode and make sure the 'aud', 'sub' and timestamp values
   // are what we expect
-  const decoded = jwt.decode(token);
+  const decoded = jwt.decode(token) as DecodedResp;
+  if (!decoded) {
+    throw new Error(`Error decoding this token`);
+  }
   if (decoded.aud !== expectedAud) {
     throw new Error(
       `Expected token to have aud param ${expectedAud} but had ${decoded.aud}`
@@ -30,11 +43,11 @@ const validateSignatures = (
 export const fetchTokens = async (playbackId: string, endpoint: string) => {
   const url = new URL(endpoint);
   url.searchParams.set('playbackId', playbackId);
-  const urlStringWithoutAuth = `${url.origin}${url.pathname}${url.search}`;
   const headers = {};
+  const urlStringWithoutAuth = `${url.origin}${url.pathname}${url.search}`;
   if (url.username || url.password) {
     const basicAuth = btoa(`${url.username}:${url.password}`);
-    headers['Authorization'] = `Basic ${basicAuth}`;
+    (headers as FetchHeaders)['Authorization'] = `Basic ${basicAuth}`;
   }
   const resp = await fetch(urlStringWithoutAuth, { method: 'GET', headers });
   if (resp.ok) {
