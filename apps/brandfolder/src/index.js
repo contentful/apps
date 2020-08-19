@@ -7,21 +7,21 @@ const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=m
 const CTA = 'Select an asset on Brandfolder';
 
 const FIELDS_TO_PERSIST = [
-  'id',
-  'type',
-  'mimetype',
-  'extension',
-  'filename',
-  'size',
-  'width',
-  'height',
-  'url',
-  'thumbnail_url',
-  'position',
-  'relationships',
-  'included',
-  'asset.id',
-  'cdn_url'
+        'asset',
+        'cdn_url',
+        'extension',
+        'filename',
+        'height',
+        'id',
+        'included',
+        'mimetype',
+        'position',
+        'relationships',
+        'size',
+        'thumbnail_url',
+        'type',
+        'url',
+        'width',
 ];
 
 function makeThumbnail(attachment) {
@@ -75,20 +75,21 @@ async function openDialog(sdk, _currentValue, config) {
 
   // Example result:
   // [{
-  //     "id": "pfbfh7-f4zem0-dpcdo2",
-  //     "type": "attachments",
-  //     "mimetype": "image/png",
-  //     "filename": "brandfolder-icon.png",
-  //     "size": 9252,
-  //     "width": 312,
-  //     "height": 294,
-  //     "url": "https://s3.amazonaws.com/bf.boulder.prod/pfbfh7-f4zem0-dpcdo2/original/brandfolder-icon.png",
-  //     "thumbnail_url": "https://assets.brandfolder.com/pfbfh7-f4zem0-dpcdo2/element.png?v=1555005228",
-  //     "position": 0,
-  //     "included": null,
-  //     "asset": {
-  //         "id": "6skcfbkq"
-  //     }
+  //       asset: {id: "6skcfbkq"}
+  //       cdn_url: "https://cdn.brandfolder.io/YUHW9ZNT/at/pfbfh7-f4zem0-dpcdo2/orig.png"
+  //       extension: "png"
+  //       filename: "brandfolder-icon.png"
+  //       height: 294
+  //       id: "pfbfh7-f4zem0-dpcdo2"
+  //       included: null
+  //       mimetype: "image/png"
+  //       position: 0
+  //       relationships: undefined
+  //       size: 9252
+  //       thumbnail_url: "https://assets.brandfolder.com/pfbfh7-f4zem0-dpcdo2/v/3549487/element.png?v=1592396058"
+  //       type: "attachments"
+  //       url: "https://s3.amazonaws.com/bf.boulder.prod/pfbfh7-f4zem0-dpcdo2/original/brandfolder-icon.png"
+  //       width: 312
   // }]
   return result.map(asset => pick(asset, FIELDS_TO_PERSIST));
 }
