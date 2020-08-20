@@ -19,14 +19,17 @@ import './index.css';
 import Config from './config';
 import Player from './player';
 import DeleteButton from './deleteButton';
-import { fetchTokens } from './signedUrlEndpoint';
+import ApiClient from './apiClient';
+import { createSignedPlaybackUrl, createSignedThumbnailUrl} from './signingTokens'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface InstallationParams {
   muxAccessTokenId: string;
   muxAccessTokenSecret: string;
-  muxSignedUrlEndpoint?: string;
+  muxEnableSignedUrls: boolean;
+  muxSigningKeyId?: string;
+  muxsigningKeyPrivate?: string;
 }
 
 interface AppProps {
@@ -54,6 +57,7 @@ interface AppState {
 }
 
 export class App extends React.Component<AppProps, AppState> {
+  apiClient: ApiClient;
   muxBaseReqOptions: {
     mode: 'cors' | 'no-cors';
     headers: Headers;
@@ -65,8 +69,8 @@ export class App extends React.Component<AppProps, AppState> {
     const {
       muxAccessTokenId,
       muxAccessTokenSecret,
-      muxSignedUrlEndpoint,
     } = this.props.sdk.parameters.installation as InstallationParams;
+    this.apiClient = new ApiClient(muxAccessTokenSecret, muxAccessTokenSecret);
 
     this.muxBaseReqOptions = {
       mode: 'cors',
@@ -81,11 +85,6 @@ export class App extends React.Component<AppProps, AppState> {
         "It doesn't look like you've specified your Mux Access Token ID or Secret in the extension configuration.",
       errorShowResetAction: false,
     };
-  }
-
-  getSignedUrlEndpoint() {
-    return (this.props.sdk.parameters.installation as InstallationParams)
-      .muxSignedUrlEndpoint;
   }
 
   detachExternalChangeHandler: Function | null = null;
@@ -119,10 +118,10 @@ export class App extends React.Component<AppProps, AppState> {
           return
         }
         if (this.state.value.playbackId) {
-          await this.setPlaybackAndPosterValues(this.state.value.playbackId, false)
+          this.setPublicPlayback(this.state.value.playbackId)
         }
         if (this.state.value.signedPlaybackId) {
-          await this.setPlaybackAndPosterValues(this.state.value.signedPlaybackId, true)
+          await this.setSignedPlayback(this.state.value.signedPlaybackId)
         }
         return;
       }
@@ -213,7 +212,7 @@ export class App extends React.Component<AppProps, AppState> {
         cors_origin: window.location.origin,
         new_asset_settings: {
           passthrough: passthroughId,
-          playback_policy: this.getSignedUrlEndpoint() ? 'signed' : 'public',
+          playback_policy: (this.props.sdk.parameters.installation as InstallationParams).muxEnableSignedUrls ? 'signed' : 'public',
         },
       }),
       method: 'POST',
@@ -308,32 +307,22 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  setPlaybackAndPosterValues = async (
-    playbackId: string,
-    isPlaybackIdSigned: boolean
-  ) => {
-    const { muxSignedUrlEndpoint } = this.props.sdk.parameters
-      .installation as InstallationParams;
-    console.log('debug setPlaybackAndPosterValues')
-    if (isPlaybackIdSigned && muxSignedUrlEndpoint) {
-      const { playbackToken, thumbnailToken } = await fetchTokens(
-        playbackId,
-        muxSignedUrlEndpoint
-      );
-      this.setState({
-        playbackUrl: `https://stream.mux.com/${playbackId}.m3u8?token=${playbackToken}`,
-        posterUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg?token=${thumbnailToken}`,
-      });
-    } else {
-      this.setState({
-        playbackUrl: `https://stream.mux.com/${playbackId}.m3u8`,
-        posterUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg`,
-      });
-    }
-  };
+  setPublicPlayback = (playbackId: string) => {
+    this.setState({
+      playbackUrl: `https://stream.mux.com/${playbackId}.m3u8`,
+      posterUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg`,
+    });
+  }
+
+  setSignedPlayback = async (signedPlaybackId: string) => {
+    const { muxSigningKeyId, muxsigningKeyPrivate } = this.props.sdk.parameters.installation as InstallationParams;
+    this.setState({
+      playbackUrl: createSignedPlaybackUrl(signedPlaybackId, muxSigningKeyId!, muxsigningKeyPrivate!),
+      posterUrl: createSignedThumbnailUrl(signedPlaybackId, muxSigningKeyId!, muxsigningKeyPrivate!),
+    });
+  }
 
   getAsset = async () => {
-    console.log('debug this.state.value', this.state.value)
     if (!this.state.value || !this.state.value.assetId) {
       throw Error(
         'Something went wrong, we cannot getAsset without an assetId.'
@@ -370,20 +359,25 @@ export class App extends React.Component<AppProps, AppState> {
       throw Error('Something went wrong, we were not able to get the asset.');
     }
 
-    const playbackId = asset.playback_ids.find(({ policy } : {policy:string}) => policy === 'public').id;
-    const signedPlaybackId = asset.playback_ids.find(({ policy } : { policy:string }) => policy === 'signed').id;
+    console.log('debug asset', asset);
+    const publicPlayback = asset.playback_ids.find(({ policy } : {policy:string}) => policy === 'public')
+    const signedPlayback = asset.playback_ids.find(({ policy } : {policy:string}) => policy === 'signed')
 
     await this.props.sdk.field.setValue({
       uploadId: this.state.value.uploadId,
       assetId: this.state.value.assetId,
-      playbackId,
-      signedPlaybackId,
+      playbackId: publicPlayback && publicPlayback.id || undefined,
+      signedPlaybackId: signedPlayback && signedPlayback.id || undefined,
       ready: asset.status === 'ready',
       ratio: asset.ratio,
       error: assetError,
     });
 
-    await this.setPlaybackAndPosterValues(playbackId || signedPlaybackId, !!playbackId);
+    if (publicPlayback) {
+      this.setPublicPlayback(publicPlayback.id)
+    } else if (signedPlayback) {
+      this.setSignedPlayback(signedPlayback.id)
+    }
 
     if (assetError) {
       this.setAssetError(assetError);
@@ -442,6 +436,7 @@ export class App extends React.Component<AppProps, AppState> {
       ) {
         return (
           <div>
+            {this.state.value.signedPlaybackId && <Paragraph>Note: this mux asset is using a signedPlaybackId</Paragraph>}
             <Player
               playbackUrl={this.state.playbackUrl}
               posterUrl={this.state.posterUrl}

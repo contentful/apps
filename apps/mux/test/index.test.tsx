@@ -50,7 +50,7 @@ test('displays an upload form before the user does anything', () => {
   expect(wrapper.find('input').prop('type')).toBe('file');
 });
 
-test('displays a player when the asset is ready', () => {
+test('displays a player when the asset is ready', async () => {
   const mockedSdk = {
     ...SDK_MOCK,
     field: {
@@ -63,8 +63,12 @@ test('displays a player when the asset is ready', () => {
     },
   };
 
-  const wrapper = mount(<App sdk={mockedSdk as any} />);
-  expect(wrapper.state('playbackUrl')).toEqual('ssss')
+  const wrapper = await mount(<App sdk={mockedSdk as any} />);
+  (wrapper.instance() as App).getAsset = () => Promise.resolve();
+  // await wrapper.update()
+  console.log('debug wrapper', wrapper.state())
+  expect(wrapper.state('playbackUrl')).toEqual('https://stream.mux.com/test-playbackId123.m3u8')
+  expect(wrapper.state('posterUrl')).toEqual('https://image.mux.com/test-playbackId123/thumbnail.jpg')
   expect(wrapper.find('Player')).toHaveLength(1);
 });
 
