@@ -96,7 +96,7 @@ async function openDialog(sdk, _currentValue, config) {
 setup({
   cta: CTA,
   name: 'Brandfolder',
-  logo: 'https://cdn.brandfolder.io/YUHW9ZNT/at/pgec4f-cttweo-a5euhh/brandfolder-icon-favicon.svg',
+  logo: 'https://cdn.brandfolder.io/YUHW9ZNT/at/pgec4f-cttweo-a5euhh/brandfolder-icon-favicon.png',
   color: '#40D1F5',
   description:
     'The Brandfolder app is a widget that allows editors to select media from their Brandfolder account. Select a file on Brandfolder and designate the assets that you want your entry to reference.',
