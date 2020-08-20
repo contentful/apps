@@ -339,6 +339,13 @@ export class App extends React.Component<AppProps, AppState> {
   setSignedPlayback = async (signedPlaybackId: string) => {
     const { muxSigningKeyId, muxsigningKeyPrivate } = this.props.sdk.parameters
       .installation as InstallationParams;
+    if (!(muxSigningKeyId && muxsigningKeyPrivate)) {
+      this.setState({
+        error: 'Error: this asset was created with a signed playback ID, but signing keys do not exist for your account',
+        errorShowResetAction: true,
+      });
+      return
+    }
     this.setState({
       playbackUrl: createSignedPlaybackUrl(
         signedPlaybackId,
