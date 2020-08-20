@@ -32,7 +32,7 @@
     "@contentful/forma-36-fcss": "^0.0.35",
     "@contentful/forma-36-react-components": "^3.37.2",
     "@contentful/forma-36-tokens": "^0.5.2",
-    "@mux/upchunk": "^1.0.6",
+    "@mux/upchunk": "^2.0.0",
     "@types/hls.js": "^0.12.3",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash.get": "^4.4.6",

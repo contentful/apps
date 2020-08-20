@@ -1,27 +1,36 @@
 import * as jwt from 'jsonwebtoken';
 
-const getPrivateKey = (key: string) => Buffer.from(key, 'base64')
+const getPrivateKey = (key: string) => Buffer.from(key, 'base64');
 
-export const createSignedPlaybackUrl = (playbackId: string, signingKeyId: string, signingKeyPrivate: string) => {
-  const token = jwt.sign({}, getPrivateKey(signingKeyPrivate), {
+const sign = (
+  playbackId: string,
+  signingKeyId: string,
+  signingKeyPrivate: string,
+  aud: string
+) =>
+  jwt.sign({}, getPrivateKey(signingKeyPrivate), {
     algorithm: 'RS256',
     keyid: signingKeyId,
-    audience: 'v',
+    audience: aud,
     subject: playbackId,
     noTimestamp: true,
-    expiresIn: '12h'
+    expiresIn: '12h',
   });
-  return `https://stream.mux.com/${playbackId}.m3u8?token=${token}`
-}
 
-export const createSignedThumbnailUrl = (playbackId: string, signingKeyId: string, signingKeyPrivate: string) => {
-  const token = jwt.sign({}, getPrivateKey(signingKeyPrivate), {
-    algorithm: 'RS256',
-    keyid: signingKeyId,
-    audience: 't',
-    subject: playbackId,
-    noTimestamp: true,
-    expiresIn: '12h'
-  });
-  return `https://image.mux.com/${playbackId}/thumbnail.jpg?token=${token}`
-}
+export const createSignedPlaybackUrl = (
+  playbackId: string,
+  signingKeyId: string,
+  signingKeyPrivate: string
+) => {
+  const token = sign(playbackId, signingKeyId, signingKeyPrivate, 'v');
+  return `https://stream.mux.com/${playbackId}.m3u8?token=${token}`;
+};
+
+export const createSignedThumbnailUrl = (
+  playbackId: string,
+  signingKeyId: string,
+  signingKeyPrivate: string
+) => {
+  const token = sign(playbackId, signingKeyId, signingKeyPrivate, 't');
+  return `https://image.mux.com/${playbackId}/thumbnail.jpg?token=${token}`;
+};
