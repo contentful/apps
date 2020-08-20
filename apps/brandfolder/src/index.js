@@ -36,7 +36,7 @@ function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
 
   const container = document.createElement('div');
-  const bf_embed_url = config.bf_api_key ? BF_EMBED_URL : BF_EMBED_URL + `&apiKey=${config.bf_api_key}&hideLogout=true';
+  const bf_embed_url = config.bf_api_key ? BF_EMBED_URL : BF_EMBED_URL + `&apiKey=${config.bf_api_key}&hideLogout=true`;
 
   container.innerHTML = `<iframe id='brandfolder-embed' class='iframe-container' src='${bf_embed_url}' width=400 height=650 style='border:none;'/>`;
   document.body.appendChild(container);
