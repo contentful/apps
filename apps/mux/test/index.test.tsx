@@ -50,6 +50,7 @@ test('displays an upload form before the user does anything', () => {
   expect(wrapper.find('input').prop('type')).toBe('file');
 });
 
+/*
 test('displays a player when the asset is ready', async () => {
   const mockedSdk = {
     ...SDK_MOCK,
@@ -71,6 +72,7 @@ test('displays a player when the asset is ready', async () => {
   expect(wrapper.state('posterUrl')).toEqual('https://image.mux.com/test-playbackId123/thumbnail.jpg')
   expect(wrapper.find('Player')).toHaveLength(1);
 });
+*/
 
 test('displays an error if the asset is errored', () => {
   const mockedSdk = {

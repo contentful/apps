@@ -30,9 +30,25 @@ class ApiClient {
     return this.request('POST', '/video/v1/signing-keys')
   }
 
+  get = async (path: string) => {
+    return this.request('GET', path);
+  }
+
+  post = async (path: string) => {
+    return this.request('POST', path);
+  }
+
+  put = async (path: string) => {
+    return this.request('PUT', path);
+  }
+
+  del = async (path: string) => {
+    return this.request('DELETE', path);
+  }
+
   request = async (method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string) => {
     const resp = await fetch(
-      `https://api.mux.com/${path}`,
+      `https://api.mux.com${path}`,
       {
         ...this.baseOptions,
         method,
