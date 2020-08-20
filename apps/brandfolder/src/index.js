@@ -36,7 +36,9 @@ function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
 
   const container = document.createElement('div');
-  container.innerHTML = `<iframe id='brandfolder-embed' class='iframe-container' src='${BF_EMBED_URL}' width=400 height=650 style='border:none;'/>`;
+  const bf_embed_url = config.bf_api_key ? BF_EMBED_URL : BF_EMBED_URL + `&apiKey=${config.bf_api_key}&hideLogout=true';
+
+  container.innerHTML = `<iframe id='brandfolder-embed' class='iframe-container' src='${bf_embed_url}' width=400 height=650 style='border:none;'/>`;
   document.body.appendChild(container);
 
   sdk.window.startAutoResizer();
@@ -101,7 +103,15 @@ setup({
   color: '#40D1F5',
   description:
     'The Brandfolder app is a widget that allows editors to select media from their Brandfolder account. Select a file on Brandfolder and designate the assets that you want your entry to reference.',
-  parameterDefinitions: [],
+  parameterDefinitions: [
+    {
+      "id": "bf_api_key",
+      "type": "Symbol",
+      "name": "Brandfolder API key",
+      "description": "If you want to use just one API key (https://brandfolder.com/profile#integrations) for all users, enter it here.",
+      "required": false
+    }
+  ],
   validateParameters: () => {},
   makeThumbnail,
   renderDialog,
