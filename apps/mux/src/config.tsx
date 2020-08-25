@@ -195,7 +195,7 @@ class Config extends React.Component<ConfigProps, IState> {
     }
     if (res.status === 401) {
       this.props.sdk.notifier.error(
-        'It ooks like your access token or secret is incorrect'
+        'It looks like your access token or secret is incorrect'
       );
     }
     const json = await res.json();
