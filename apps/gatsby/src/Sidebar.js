@@ -97,19 +97,19 @@ export default class Sidebar extends React.Component {
         {busy && (
           <>
             <Spinner />
-            {' '}Updating preview...
+            {' '}Sending entry data...
           </>
         )}
         {!busy && (ok === true) && (
           <>
             <Icon icon="CheckCircle" color="positive" style={ICON_STYLE} />
-            {' '}Preview up to date!
+            {' '}Entry data in Gatsby up to date!
           </>
         )}
         {!busy && (ok === false) && (
           <>
             <Icon icon="Warning" color="negative" style={ICON_STYLE} />
-            {' '}Last update of the preview failed.
+            {' '}Last update failed.
           </>
         )}
       </HelpText>
