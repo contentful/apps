@@ -5,6 +5,7 @@ import {
   Paragraph,
   Spinner,
   Button,
+  TextLink,
 } from '@contentful/forma-36-react-components';
 import {
   init,
@@ -465,7 +466,15 @@ export class App extends React.Component<AppProps, AppState> {
         return (
           <div>
             {this.isUsingSigned() && (
-              <Note>Note: this mux asset is using a signedPlaybackId</Note>
+              <Note>
+                Note: this mux asset is using a{' '}
+                <TextLink
+                  href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
+                  target="_blank"
+                >
+                  signedPlaybackId
+                </TextLink>
+              </Note>
             )}
             <Player
               playbackUrl={this.state.playbackUrl}

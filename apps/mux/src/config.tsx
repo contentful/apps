@@ -197,6 +197,7 @@ class Config extends React.Component<ConfigProps, IState> {
       this.props.sdk.notifier.error(
         'It looks like your access token or secret is incorrect'
       );
+      return;
     }
     const json = await res.json();
     const { data: signingKey } = json;
@@ -348,12 +349,17 @@ class Config extends React.Component<ConfigProps, IState> {
           <hr className="config-splitter" />
           <Form spacing="default">
             <Heading>Advanced: Signed URLs</Heading>
-            <Paragraph>
-              This is an advanced feature if you want to support signed urls. If
-              you use this feature you must read and understand this guide. To
-              use signed URLs in your application you will have to generate
-              valid signatures on your server.
-            </Paragraph>
+            <Note noteType="warning" title="This is an advanced feature">
+              If you want to support signed urls you must read and understand{' '}
+              <TextLink
+                href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
+                target="_blank"
+              >
+                this guide
+              </TextLink>
+              . To use signed URLs in your application you will have to generate
+              valid JSON web tokens (JWT) on your server.
+            </Note>
             <CheckboxField
               labelText="Enable signed URLs"
               helpText=""
