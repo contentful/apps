@@ -475,9 +475,7 @@ export class App extends React.Component<AppProps, AppState> {
         return (
           <div>
             {this.isUsingSigned() && (
-              <Paragraph>
-                Note: this mux asset is using a signedPlaybackId
-              </Paragraph>
+              <Note>Note: this mux asset is using a signedPlaybackId</Note>
             )}
             <Player
               playbackUrl={this.state.playbackUrl}
