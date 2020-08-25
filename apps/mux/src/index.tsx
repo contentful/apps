@@ -32,7 +32,7 @@ interface InstallationParams {
   muxAccessTokenSecret: string;
   muxEnableSignedUrls: boolean;
   muxSigningKeyId?: string;
-  muxsigningKeyPrivate?: string;
+  muxSigningKeyPrivate?: string;
 }
 
 interface AppProps {
@@ -61,10 +61,6 @@ interface AppState {
 
 export class App extends React.Component<AppProps, AppState> {
   apiClient: ApiClient;
-  muxBaseReqOptions: {
-    mode: 'cors' | 'no-cors';
-    headers: Headers;
-  };
 
   constructor(props: AppProps) {
     super(props);
@@ -72,11 +68,6 @@ export class App extends React.Component<AppProps, AppState> {
     const { muxAccessTokenId, muxAccessTokenSecret } = this.props.sdk.parameters
       .installation as InstallationParams;
     this.apiClient = new ApiClient(muxAccessTokenId, muxAccessTokenSecret);
-
-    this.muxBaseReqOptions = {
-      mode: 'cors',
-      headers: this.requestHeaders(muxAccessTokenId, muxAccessTokenSecret),
-    };
 
     this.state = {
       value: props.sdk.field.getValue(),
@@ -89,6 +80,38 @@ export class App extends React.Component<AppProps, AppState> {
   }
 
   detachExternalChangeHandler: Function | null = null;
+
+  checkForValidAsset = async () => {
+    if (!(this.state.value && this.state.value.assetId)) return false;
+    const res = await this.apiClient.get(
+      `/video/v1/assets/${this.state.value.assetId}`
+    );
+    if (res.status === 400) {
+      const json = await res.json();
+      if (json.error.messages[0].match(/mismatching environment/)) {
+        this.setState({
+          error:
+            'Error: it looks like your api keys are for the wrong environment',
+        });
+        return false;
+      }
+      if (json.error.type === 'invalid_parameters') {
+        this.setState({
+          error: 'Error: it appears that this asset has been deleted',
+          errorShowResetAction: true,
+        });
+        return false;
+      }
+    }
+    if (res.status === 401) {
+      this.setState({
+        error:
+          'Error: it looks like your api keys are not configured properly. Check App configuration.',
+      });
+      return false;
+    }
+    return true;
+  };
 
   async componentDidMount() {
     this.props.sdk.window.startAutoResizer();
@@ -106,37 +129,11 @@ export class App extends React.Component<AppProps, AppState> {
       if (this.state.value.error) {
         // eslint-disable-next-line react/no-did-mount-set-state
         this.setAssetError(this.state.value.error);
+        return;
       }
 
       if (this.state.value.ready) {
-        const res = await this.apiClient.get(
-          `/video/v1/assets/${this.state.value.assetId}`
-        );
-        if (res.status === 400) {
-          const json = await res.json();
-          if (json.error.messages[0].match(/mismatching environment/)) {
-            this.setState({
-              error:
-                'Error: it looks like your api keys are for the wrong environment',
-            });
-            return;
-          }
-          if (json.error.type === 'invalid_parameters') {
-            this.setState({
-              error: 'Error: it appears that this asset has been deleted',
-              errorShowResetAction: true,
-            });
-            return;
-          }
-        }
-        if (res.status === 401) {
-          this.setState({
-            error:
-              'Error: it looks like your api keys are not configured properly. Check App configuration.',
-          });
-          return;
-        }
-        const { data: asset } = await res.json();
+        const isValid = await this.checkForValidAsset();
         if (this.state.value.playbackId) {
           this.setPublicPlayback(this.state.value.playbackId);
         }
@@ -169,14 +166,6 @@ export class App extends React.Component<AppProps, AppState> {
       !this.state.value.playbackId &&
       this.state.value.signedPlaybackId
     );
-  };
-
-  requestHeaders = (tokenId: string, tokenSecret: string) => {
-    let headers = new Headers();
-    headers.set('Authorization', 'Basic ' + btoa(`${tokenId}:${tokenSecret}`));
-    headers.set('Content-Type', 'application/json');
-
-    return headers;
   };
 
   requestDeleteAsset = async () => {
@@ -337,25 +326,26 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   setSignedPlayback = async (signedPlaybackId: string) => {
-    const { muxSigningKeyId, muxsigningKeyPrivate } = this.props.sdk.parameters
+    const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
       .installation as InstallationParams;
-    if (!(muxSigningKeyId && muxsigningKeyPrivate)) {
+    if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
       this.setState({
-        error: 'Error: this asset was created with a signed playback ID, but signing keys do not exist for your account',
+        error:
+          'Error: this asset was created with a signed playback ID, but signing keys do not exist for your account',
         errorShowResetAction: true,
       });
-      return
+      return;
     }
     this.setState({
       playbackUrl: createSignedPlaybackUrl(
         signedPlaybackId,
         muxSigningKeyId!,
-        muxsigningKeyPrivate!
+        muxSigningKeyPrivate!
       ),
       posterUrl: createSignedThumbnailUrl(
         signedPlaybackId,
         muxSigningKeyId!,
-        muxsigningKeyPrivate!
+        muxSigningKeyPrivate!
       ),
     });
   };
@@ -412,9 +402,9 @@ export class App extends React.Component<AppProps, AppState> {
     });
 
     if (publicPlayback) {
-      this.setPublicPlayback(publicPlayback.id)
+      this.setPublicPlayback(publicPlayback.id);
     } else if (signedPlayback) {
-      this.setSignedPlayback(signedPlayback.id)
+      this.setSignedPlayback(signedPlayback.id);
     }
 
     if (assetError) {

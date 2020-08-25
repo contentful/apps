@@ -45,7 +45,7 @@ interface IParameters {
   muxAccessTokenSecret?: string;
   muxEnableSignedUrls?: boolean;
   muxSigningKeyId?: string;
-  muxsigningKeyPrivate?: string;
+  muxSigningKeyPrivate?: string;
 }
 
 interface IState {
@@ -137,7 +137,7 @@ class Config extends React.Component<ConfigProps, IState> {
     if (
       !(
         this.state.parameters.muxSigningKeyId &&
-        this.state.parameters.muxsigningKeyPrivate
+        this.state.parameters.muxSigningKeyPrivate
       )
     )
       return;
@@ -205,7 +205,7 @@ class Config extends React.Component<ConfigProps, IState> {
       parameters: {
         ...this.state.parameters,
         muxSigningKeyId: signingKey.id,
-        muxsigningKeyPrivate: signingKey.private_key,
+        muxSigningKeyPrivate: signingKey.private_key,
         muxEnableSignedUrls: true,
       },
     });
@@ -219,7 +219,7 @@ class Config extends React.Component<ConfigProps, IState> {
         muxAccessTokenSecret,
         muxEnableSignedUrls,
         muxSigningKeyId,
-        muxsigningKeyPrivate,
+        muxSigningKeyPrivate,
       },
       contentTypes,
       compatibleFields,

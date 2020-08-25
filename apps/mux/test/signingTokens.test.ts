@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSignedThumbnailUrl, createSignedPlaybackUrl } from './signingTokens'
+import { createSignedThumbnailUrl, createSignedPlaybackUrl } from '../src/signingTokens'
 
 /*
  * This was a valid private key, but it has since been revoked

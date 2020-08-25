@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'isomorphic-fetch';
 import nock from 'nock';
-import ApiClient from './apiClient'
+import ApiClient from '../src/apiClient'
 
 test('GET request', async () => {
   const assetId = 'asset-id-1'
