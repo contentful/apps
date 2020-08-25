@@ -411,6 +411,16 @@ export class App extends React.Component<AppProps, AppState> {
       error: assetError,
     });
 
+    if (publicPlayback) {
+      this.setPublicPlayback(publicPlayback.id)
+    } else if (signedPlayback) {
+      this.setSignedPlayback(signedPlayback.id)
+    }
+
+    if (assetError) {
+      this.setAssetError(assetError);
+    }
+
     if (asset.status === 'preparing') {
       await delay(500);
       await this.pollForAssetDetails();
