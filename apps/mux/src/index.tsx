@@ -471,6 +471,7 @@ export class App extends React.Component<AppProps, AppState> {
                 <TextLink
                   href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   signedPlaybackId
                 </TextLink>

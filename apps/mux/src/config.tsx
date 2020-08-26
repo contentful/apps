@@ -353,6 +353,7 @@ class Config extends React.Component<ConfigProps, IState> {
               If you want to support signed urls you must read and understand{' '}
               <TextLink
                 href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 this guide
