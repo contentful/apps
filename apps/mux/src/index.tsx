@@ -210,6 +210,7 @@ export class App extends React.Component<AppProps, AppState> {
       uploadId: undefined,
       assetId: undefined,
       playbackId: undefined,
+      signedPlaybackId: undefined,
       ready: undefined,
       ratio: undefined,
       error: undefined,
@@ -398,7 +399,7 @@ export class App extends React.Component<AppProps, AppState> {
       playbackId: (publicPlayback && publicPlayback.id) || undefined,
       signedPlaybackId: (signedPlayback && signedPlayback.id) || undefined,
       ready: asset.status === 'ready',
-      ratio: asset.ratio,
+      ratio: asset.aspect_ratio,
       error: assetError,
     });
 
