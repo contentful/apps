@@ -47,7 +47,7 @@ function prepareBynderHTML({ bynderURL, assetTypes }) {
     // We deault to just images in this fallback since this is the behavior the App had in its initial release
     types = 'image';
   } else {
-    types = assetTypes.trim().split(',').map(type => type.trim()).join('');
+    types = assetTypes.trim().split(',').map(type => type.trim()).join(',');
   }
 
   return `
