@@ -47,7 +47,7 @@ function prepareBynderHTML({ bynderURL, assetTypes }) {
     // We deault to just images in this fallback since this is the behavior the App had in its initial release
     types = 'image';
   } else {
-    types = assetType.trim().split(',').map(type => type.trim()).join('');
+    types = assetTypes.trim().split(',').map(type => type.trim()).join('');
   }
 
   return `
@@ -121,8 +121,7 @@ function validateParameters({ bynderURL, assetTypes }) {
     return 'Provide a valid Bynder URL.';
   }
 
-
-  const types = assetType.trim().split(',').map(type => type.trim());
+  const types = assetTypes.trim().split(',').map(type => type.trim());
   const isAssetTypesValid = types.every(type => validAssetTypes.includes(type));
 
   if (!isAssetTypesValid) {
