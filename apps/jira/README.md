@@ -3,15 +3,16 @@ Jira App
 
 ## Local Development
 
-In order to develop locally Jira App you need to run locally both the Contentful Application,
-and the Lambda function which handles 
+In order to develop locally Jira App you need to run locally both the Jira Contentful 
+Application (living in `jira-app`), and the Lambda functions (in `functions`) which handle 
 [Atlassian's OAuth Flow](https://developer.atlassian.com/server/jira/platform/oauth/).
 
 Technologies involved are:
-* [serverless](https://github.com/serverless/serverless)
-To run the Lambda function on your machine by means of the [offline plugin](https://github.com/dherault/serverless-offline)
-* [ngrok](https://ngrok.com/)
-To create a public URL to be used as OAUTH URI
+* [serverless](https://github.com/serverless/serverless):
+to run the Lambda function on your machine by means of the 
+[offline plugin](https://github.com/dherault/serverless-offline)
+* [ngrok](https://ngrok.com/):
+to create a public URL to be used as OAUTH URI
 
 
 ### Launching the script
@@ -29,8 +30,8 @@ This script expects the following environment variables to be set
 | `ATLASSIAN_APP_CLIENT_ID`     | Client Id of the Atlassian Application you will use for local development |
 | `ATLASSIAN_APP_CLIENT_SECRET` | Client Secret of the same Atlassian Application                           |
 
-Parameters below can be retrieved from Atlassian Developer WebApp after setting 
-up an Atlassian Application (see following section).
+Parameters above can be retrieved from Atlassian Developer Portal after setting 
+up an Atlassian Application as per the following section.
 
 ### Setting up an Atlassian Application
 
