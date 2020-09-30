@@ -3,9 +3,9 @@
 let LAMBDA_URI = 'https://api.jira.ctfapps.net';
 let CLIENT_ID = 'XD9k9QU9VT4Rt26u6lbO3NM0fOqvvXan';
 
-if (process.env.nodeEnv === 'development') {
-  LAMBDA_URI = 'https://3stl3nxvfh.execute-api.us-east-1.amazonaws.com/dev';
-  CLIENT_ID = 'GKVe4vnzgCEUCv23qKhznrv0spuHvIOL';
+if (process.env.NODE_ENV === 'development') {
+  LAMBDA_URI = `${process.env.NGROK_URL}/dev`;
+  CLIENT_ID = process.env.ATLASSIAN_APP_CLIENT_ID || '';
 }
 
 export default {
