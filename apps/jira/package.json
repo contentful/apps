@@ -1,0 +1,16 @@
+{
+  "name": "jira",
+  "version": "1.0.0",
+  "devDependencies": {
+    "concurrently": "^5.3.0",
+    "js-yaml": "^3.14.0",
+    "ngrok": "^3.3.0",
+    "npm": "^6.14.8"
+  },
+  "scripts": {
+    "start:lambda": "npm run --prefix functions start",
+    "start:app": "npm run --prefix jira-app start",
+    "start": "concurrently -n lambda,app \"npm run start:lambda\" \"npm run start:app\"",
+    "dev": "node ./scripts/dev.js"
+  }
+}
