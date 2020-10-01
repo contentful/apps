@@ -38,7 +38,7 @@ function makeThumbnail(resource, config) {
 
   let url;
   const alt = [resource.public_id, ...(resource.tags || [])].join(', ');
-  let transformations = `${resource.raw_transformation}/w_150,h_100,c_fill`;
+  let transformations = `${resource.raw_transformation}/c_fill,h_100,w_150`;
 
   if (resource.resource_type === 'image' && VALID_IMAGE_FORMATS.includes(resource.format)) {
     url = cloudinary.url(resource.public_id, {
