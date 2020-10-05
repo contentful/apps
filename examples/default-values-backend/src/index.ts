@@ -8,18 +8,16 @@
 import * as Hapi from "@hapi/hapi";
 import fetch from "node-fetch";
 import { getManagementToken } from "@contentful/node-apps-toolkit";
-import Path from "path";
+import path from "path";
 import dotenv from "dotenv";
-import fs from 'fs'
+import fs from "fs";
 dotenv.config();
 
 const { APP_ID, CONTENT_TYPE_ID, BASE_URL, PRIVATE_APP_KEY } = process.env;
-
-if (!APP_ID) {
-  throw new Error("APP ID not specified. Make sure to run app setup first.");
-}
-if (!PRIVATE_APP_KEY || !fs.existsSync(PRIVATE_APP_KEY)) {
-  throw new Error("Private key not found. Make sure to run app setup first.");
+if (!APP_ID || !PRIVATE_APP_KEY) {
+  throw new Error(
+    "APP ID or private key not specified. Make sure to run app setup first."
+  );
 }
 
 // -------------------
@@ -32,7 +30,7 @@ const startServer = async () => {
     host: "localhost",
     routes: {
       files: {
-        relativeTo: Path.join(__dirname, "../../dist"),
+        relativeTo: path.join(__dirname, "../../dist"),
       },
     },
   });
@@ -123,15 +121,15 @@ const addDefaultDataOnEntryCreation = async (
     // We generate an AppToken based on our RSA keypair
     const spaceId = space.sys.id;
     const environmentId = environment.sys.id;
-    const privateKey = fs.readFileSync(PRIVATE_APP_KEY, {encoding: 'utf8'});
-    const appAccessToken = await getManagementToken(
-      privateKey,
-      {
-        appInstallationId: APP_ID,
-        spaceId,
-        environmentId,
-      }
+    const privateKey = fs.readFileSync(
+      path.join(__dirname, "../../", PRIVATE_APP_KEY),
+      { encoding: "utf8" }
     );
+    const appAccessToken = await getManagementToken(privateKey, {
+      appInstallationId: APP_ID,
+      spaceId,
+      environmentId,
+    });
 
     // We get the app installation to read out the custom parameters set in the app settings
     const appInstallation = await fetch(

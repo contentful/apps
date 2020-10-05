@@ -8,11 +8,10 @@
  * + Set up a webhook that reacts to new Entries
  */
 
-import nodeFetch from 'node-fetch'
-import fs from 'fs'
-import path from 'path'
-require('dotenv').config()
-fs.mkdirSync('./keys')
+import nodeFetch from "node-fetch";
+import fs from "fs";
+import path from "path";
+require("dotenv").config();
 const {
   ORG_ID,
   SPACE_ID,
@@ -20,7 +19,7 @@ const {
   HOSTED_APP_URL,
   BASE_URL,
   CMA_TOKEN,
-  PRIVATE_APP_KEY
+  PRIVATE_APP_KEY,
 } = process.env;
 
 // ---------------------------------------
@@ -28,51 +27,55 @@ const {
 // ---------------------------------------
 
 async function main() {
-  try {
-    let APP_ID;
-    if (process.env.APP_ID) {
-      APP_ID = process.env.APP_ID;
-      console.log(
-        "Found an existing APP_ID in .env, re-using it. If you want to set up a new app, remove APP_ID from .env"
-      );
-    } else {
-      APP_ID = await createAppDefinition();
-      fs.appendFileSync(
-        path.join(__dirname, "../..", ".env"),
-        `APP_ID=${APP_ID}\n`
-      );
-    }
-
-    await installApp(APP_ID);
-
-    if (fs.existsSync(PRIVATE_APP_KEY as string)) {
-      console.log("Found an existing private key under %s", PRIVATE_APP_KEY);
-    } else {
-      await createAppKey(APP_ID);
-    }
-
-    if (process.env.CONTENT_TYPE_ID) {
-      console.log(
-        "Found an existing CONTENT_TYPE_ID in .env, re-using it. If you want to set up a new content type, remove CONTENT_TYPE_ID from .env"
-      );
-    } else {
-      const CONTENT_TYPE_ID = await createContentType();
-      fs.appendFileSync(
-        path.join(__dirname, "../..", ".env"),
-        `CONTENT_TYPE_ID=${CONTENT_TYPE_ID}\n`
-      );
-    }
-
-    await createAppEvent(APP_ID);
-
-    console.log(`Created new APP APP_ID=${APP_ID}`);
-  } catch (e) {
-    console.log(e);
+  // Create App
+  let APP_ID;
+  if (process.env.APP_ID) {
+    APP_ID = process.env.APP_ID;
+    console.log(
+      "Found an existing APP_ID in .env, re-using it. If you want to set up a new app, remove APP_ID from .env"
+    );
+  } else {
+    APP_ID = await createAppDefinition();
+    fs.appendFileSync(path.join(__dirname, "..", ".env"), `APP_ID=${APP_ID}\n`);
   }
+
+  // Install App into space/environment
+  await installApp(APP_ID, {
+    // Here you are able to pass installation-specific configuration variables
+    defaultValue: "This is the default value set by your app",
+  });
+
+  // Create an App Key
+  if (fs.existsSync(path.join(__dirname, "..", PRIVATE_APP_KEY as string))) {
+    console.log(
+      "Found an existing private key under %s, re-using it.",
+      PRIVATE_APP_KEY
+    );
+  } else {
+    await createAppKey(APP_ID);
+  }
+
+  // Create an example Content Type
+  if (process.env.CONTENT_TYPE_ID) {
+    console.log(
+      "Found an existing CONTENT_TYPE_ID in .env, re-using it. If you want to set up a new content type, remove CONTENT_TYPE_ID from .env"
+    );
+  } else {
+    const CONTENT_TYPE_ID = await createContentType();
+    fs.appendFileSync(
+      path.join(__dirname, "..", ".env"),
+      `CONTENT_TYPE_ID=${CONTENT_TYPE_ID}\n`
+    );
+  }
+
+  // Add event webhook
+  await createAppEvent(APP_ID);
+
+  console.log(`Created new APP APP_ID=${APP_ID}`);
 }
 
 main().catch((e) => {
-  console.log(e);
+  console.error(e);
 });
 
 // ---------------------------------------
@@ -117,7 +120,7 @@ async function createAppDefinition() {
   }
 }
 
-async function installApp(APP_ID: string) {
+async function installApp(APP_ID: string, parameters: any) {
   const response = await nodeFetch(
     `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/app_installations/${APP_ID}`,
     {
@@ -127,11 +130,7 @@ async function installApp(APP_ID: string) {
         Authorization: `Bearer ${CMA_TOKEN}`,
       },
       body: JSON.stringify({
-        parameters: {
-          // Here you are able to pass installation-specific configuration variables that
-          // your app has access to when running
-          defaultValue: "This is the default value set by your app",
-        },
+        parameters,
       }),
     }
   );
@@ -167,7 +166,10 @@ async function createAppKey(APP_ID: string) {
   const { generated, jwk } = await response.json();
   const { privateKey } = generated;
 
-  fs.writeFileSync(PRIVATE_APP_KEY as string, privateKey);
+  fs.writeFileSync(
+    path.join(__dirname, "..", PRIVATE_APP_KEY as string),
+    privateKey
+  );
   console.log(
     `New key pair created for app ${APP_ID} and stored under "./keys"`
   );
@@ -218,7 +220,7 @@ async function createContentType() {
         Authorization: `Bearer ${CMA_TOKEN}`,
         "X-Contentful-Version": responseBody.sys.version,
       },
-      body: '{}',
+      body: "{}",
     }
   );
 
