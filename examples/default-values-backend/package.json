@@ -5,7 +5,7 @@
   "scripts": {
     "start": "yarn buildFrontend && tsc && node --insecure-http-parser built/src/index.js",
     "buildFrontend": "parcel build public/index.html",
-    "setup": "NODE_OPTIONS=--insecure-http-parser ts-node src/scripts/setup.ts"
+    "setup": "NODE_OPTIONS=--insecure-http-parser ts-node src/setup.ts"
   },
   "author": "<john.whiles@contentful.com>",
   "license": "MIT",
