@@ -1,14 +1,27 @@
-const nodeFetch = require("node-fetch");
-const { getPublicKey, getKeyId, isOk } = require("../utils");
-const fs = require("fs");
-const path = require("path");
-import dotenv from "dotenv";
-dotenv.config();
-const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, HOSTED_APP_URL, BASE_URL, CMA_TOKEN } = process.env;
-
-/* The code in this file uses the information that you should have added to the
- * .env file to set up your enviornment for the backend App to work correctly.
+/*
+ * This file is a setup script that uses your Content Management API (CMA) token
+ * and the variables you specify in the ".env" file to:
+ * + Create a new App
+ * + Add the app to your Space
+ * + Create a RSA key pair and use it to authenticate your app
+ * + Create an example Content Type
+ * + Set up a webhook that reacts to new Entries
  */
+
+import nodeFetch from 'node-fetch'
+import fs from 'fs'
+import path from 'path'
+require('dotenv').config()
+fs.mkdirSync('./keys')
+const {
+  ORG_ID,
+  SPACE_ID,
+  ENVIRONMENT_ID,
+  HOSTED_APP_URL,
+  BASE_URL,
+  CMA_TOKEN,
+  PRIVATE_APP_KEY
+} = process.env;
 
 // ---------------------------------------
 // Main setup flow
@@ -24,11 +37,19 @@ async function main() {
       );
     } else {
       APP_ID = await createAppDefinition();
-      fs.appendFileSync(path.join(__dirname, "../..", ".env"), `APP_ID=${APP_ID}\n`);
+      fs.appendFileSync(
+        path.join(__dirname, "../..", ".env"),
+        `APP_ID=${APP_ID}\n`
+      );
     }
 
     await installApp(APP_ID);
-    await createAppKey(APP_ID);
+
+    if (fs.existsSync(PRIVATE_APP_KEY as string)) {
+      console.log("Found an existing private key under %s", PRIVATE_APP_KEY);
+    } else {
+      await createAppKey(APP_ID);
+    }
 
     if (process.env.CONTENT_TYPE_ID) {
       console.log(
@@ -50,13 +71,17 @@ async function main() {
   }
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.log(e);
 });
 
 // ---------------------------------------
 // Helper functions
 // ---------------------------------------
+
+const isOk = (status: number) => {
+  return status < 400 && status > 99;
+};
 
 async function createAppDefinition() {
   const body = {
@@ -69,37 +94,58 @@ async function createAppDefinition() {
     ],
   };
 
-  const response = await nodeFetch(`${BASE_URL}/organizations/${ORG_ID}/app_definitions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/vnd.contentful.management.v1+json",
-      Authorization: `Bearer ${CMA_TOKEN}`,
-    },
-    body: JSON.stringify(body),
-  });
+  const response = await nodeFetch(
+    `${BASE_URL}/organizations/${ORG_ID}/app_definitions`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/vnd.contentful.management.v1+json",
+        Authorization: `Bearer ${CMA_TOKEN}`,
+      },
+      body: JSON.stringify(body),
+    }
+  );
 
   if (isOk(response.status)) {
     const j = await response.json();
     console.log(`Created app definition. APP_ID is ${j.sys.id}`);
     return j.sys.id;
   } else {
-    throw new Error("App definition creation failed: " + (await response.text()));
+    throw new Error(
+      "App definition creation failed: " + (await response.text())
+    );
+  }
+}
+
+async function installApp(APP_ID: string) {
+  const response = await nodeFetch(
+    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/app_installations/${APP_ID}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/vnd.contentful.management.v1+json",
+        Authorization: `Bearer ${CMA_TOKEN}`,
+      },
+      body: JSON.stringify({
+        parameters: {
+          // Here you are able to pass installation-specific configuration variables that
+          // your app has access to when running
+          defaultValue: "This is the default value set by your app",
+        },
+      }),
+    }
+  );
+
+  if (isOk(response.status)) {
+    console.log(`Installed app!`);
+  } else {
+    throw new Error("App installation failed: " + (await response.text()));
   }
 }
 
 async function createAppKey(APP_ID: string) {
-  const pubKey = getPublicKey();
-  const keyId = getKeyId();
-
   const body = {
-    jwk: {
-      kty: "RSA",
-      use: "sig",
-      alg: "RS256",
-      x5c: [pubKey.toString("base64")],
-      kid: keyId,
-      x5t: keyId,
-    },
+    generate: true,
   };
 
   const response = await nodeFetch(
@@ -114,37 +160,24 @@ async function createAppKey(APP_ID: string) {
     }
   );
 
-  if (isOk(response.status)) {
-    console.log(`New public key ${keyId} created for app ${APP_ID}`);
-  } else {
+  if (!isOk(response.status)) {
     throw new Error("Key creation failed: " + (await response.text()));
   }
-}
 
-async function installApp(APP_ID: string) {
-  const response = await nodeFetch(
-    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/app_installations/${APP_ID}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/vnd.contentful.management.v1+json",
-        Authorization: `Bearer ${CMA_TOKEN}`,
-      },
-      body: JSON.stringify({}),
-    }
+  const { generated, jwk } = await response.json();
+  const { privateKey } = generated;
+
+  fs.writeFileSync(PRIVATE_APP_KEY as string, privateKey);
+  console.log(
+    `New key pair created for app ${APP_ID} and stored under "./keys"`
   );
-
-  if (isOk(response.status)) {
-    console.log(`Installed app!`);
-  } else {
-    throw new Error("App installation failed: " + (await response.text()));
-  }
+  return { jwk, privateKey };
 }
 
 async function createContentType() {
   const body = {
     name: "ArticleWithDefaultTitle",
-    displayField: 'title',
+    displayField: "title",
     fields: [
       {
         id: "title",
@@ -185,7 +218,7 @@ async function createContentType() {
         Authorization: `Bearer ${CMA_TOKEN}`,
         "X-Contentful-Version": responseBody.sys.version,
       },
-      body: {},
+      body: '{}',
     }
   );
 
