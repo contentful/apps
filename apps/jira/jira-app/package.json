@@ -20,7 +20,7 @@
     "cssnano": "4.1.10",
     "eslint": "^6.0.1",
     "fetch-mock": "^8.3.2",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "prettier": "1.19.1",
     "sass": "^1.23.7",
     "typescript": "3.5.2"
