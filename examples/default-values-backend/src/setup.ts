@@ -178,7 +178,7 @@ async function createAppKey(APP_ID: string) {
 
 async function createContentType() {
   const body = {
-    name: "ArticleWithDefaultTitle",
+    name: "ExampleWithDefaultTitle",
     displayField: "title",
     fields: [
       {
@@ -192,7 +192,7 @@ async function createContentType() {
   };
 
   const response = await nodeFetch(
-    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types/ArticleWithDefaultTitle`,
+    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types/${body.name}`,
     {
       method: "PUT",
       headers: {
