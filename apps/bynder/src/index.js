@@ -6,7 +6,7 @@ import logo from './logo.svg';
 const BYNDER_SDK_URL =
   'https://d8ejoa1fys2rk.cloudfront.net/modules/compactview/includes/js/client-1.5.0.min.js';
 
-const CTA = 'Select or upload a file on Bynder';
+const CTA = 'Select a file on Bynder';
 
 const FIELDS_TO_PERSIST = [
   'archive',
