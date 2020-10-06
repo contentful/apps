@@ -51,14 +51,13 @@ yarn setup
 ```
 
 This step will
-
 - Install dependencies
-- Generate public and private keys for your app
 - Create an app definition in your contentful organization
+- Generate public and private keys for your app
 - Install the app to the space and environment you specified
 - Setup a webhook that listens for new entries
 
-This step puts a new public and private key pair under `./keys`.
+This new private RSA key generated will be stored under `./keys`.
 
 5. Run the backend App!
 
@@ -67,4 +66,16 @@ yarn start
 ```
 
 6. Test it by going to the contentful web app and creating a new entry of the
-   `Example` content type. You should see a prefilled title field!
+   `ExampleWithDefaultTitle` content type. You should see a prefilled title field!
+
+## Concepts
+
+The code for the example App is split into two parts.
+- The **setup script**, which is provided for convenience.
+- The **server code**, which contains all the application logic for the App.
+
+Both files have comments explaining the individual steps.
+
+All the steps that the setup script goes through can also be carried out in the Contentful web app. This includes creating Apps in your organization, generating a private/public RSA key pair <!-- via the App Key API -->, setting up webhooks <!-- via the App events API --> and installing the App into a space.
+
+Once the App is installed, the application logic is quite simple. When the previously defined webhook gets called, the handler in the server code is executed with information about the event. It then uses code from Contentfuls [node-apps-toolkit](https://github.com/contentful/node-apps-toolkit) to generate a temporary AppToken by authenticating with the private key. This can be used to freely access the API to make changes to the specified space and environment. In this case, new Entries for a certain Content Type are pre-filled with data.
