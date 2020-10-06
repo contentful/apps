@@ -14,7 +14,7 @@
   "dependencies": {
     "@types/express": "^4.17.2",
     "@types/jest": "^25.1.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "openid-client": "^3.11.0",
     "rimraf": "^3.0.1",
     "serverless": "^1.61.3",
