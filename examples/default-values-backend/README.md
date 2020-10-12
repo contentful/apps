@@ -9,7 +9,7 @@ The purpose of this demo is to show how backend Apps can be setup and used.
 This demo requires an up to date version of node.js and yarn.
 
 In addition you will need a way to make the running app accessible over http, so
-that it can receive events from contentful. If you want to run the App locally,
+that it can receive events from Contentful. If you want to run the App locally,
 we suggest using [ngrok](https://ngrok.com/) for this. It is a free tool that
 allows you to easily create a url that allows access to applications served from localhost.
 
@@ -30,9 +30,9 @@ We will need to use this secure URL for our app setup to work correctly.
 2. Update `.env` with
 
 ```shell
-CMA_TOKEN= # You can obtain this token from the contentful web app
-ORG_ID= # Your contentful organisation id
-SPACE_ID= # Your contentful spaece id
+CMA_TOKEN= # You can obtain this token from the Contentful web app
+ORG_ID= # Your Contentful organisation id
+SPACE_ID= # Your Contentful spaece id
 ENVIRONMENT_ID= # Your contentul enviornment name
 HOSTED_APP_URL= # The ngrok URL from step 1 - this must a https URL
 ```
@@ -48,14 +48,17 @@ We highly recommend that you do not use your production environment for testing 
 ```shell
 yarn
 yarn setup
+# or
+npm install
+npm run setup
 ```
 
 This step will
 - Install dependencies
-- Create an app definition in your contentful organization
+- Create an app definition in your Contentful organization
 - Generate public and private keys for your app
 - Install the app to the space and environment you specified
-- Setup a webhook that listens for new entries
+- Setup an event listener for new entries
 
 This new private RSA key generated will be stored under `./keys`.
 
@@ -65,7 +68,7 @@ This new private RSA key generated will be stored under `./keys`.
 yarn start
 ```
 
-6. Test it by going to the contentful web app and creating a new entry of the
+6. Test it by going to the Contentful web app and creating a new entry of the
    `ExampleWithDefaultTitle` content type. You should see a prefilled title field!
 
 ## Concepts
@@ -76,6 +79,16 @@ The code for the example App is split into two parts.
 
 Both files have comments explaining the individual steps.
 
-All the steps that the setup script goes through can also be carried out in the Contentful web app. This includes creating Apps in your organization, generating a private/public RSA key pair <!-- via the App Key API -->, setting up webhooks <!-- via the App events API --> and installing the App into a space.
+All the steps that the setup script goes through can also be carried out in the Contentful web app.
+This includes creating Apps in your organization,
+generating a private/public RSA key pair via the App Key API,
+setting up event listeners via the App events API
+and installing the App into a space.
 
-Once the App is installed, the application logic is quite simple. When the previously defined webhook gets called, the handler in the server code is executed with information about the event. It then uses code from Contentfuls [node-apps-toolkit](https://github.com/contentful/node-apps-toolkit) to generate a temporary AppToken by authenticating with the private key. This can be used to freely access the API to make changes to the specified space and environment. In this case, new Entries for a certain Content Type are pre-filled with data.
+Once the App is installed, the application logic is quite simple.
+When the previously defined event gets triggered,
+the handler in the server code is executed with information about the event.
+It then uses code from Contentfuls [node-apps-toolkit](https://github.com/contentful/node-apps-toolkit) to generate
+a temporary AppToken by authenticating with the private key.
+This can be used to freely access the API to make changes to the specified space and environment.
+In this case, new Entries for a certain Content Type are pre-filled with data.
