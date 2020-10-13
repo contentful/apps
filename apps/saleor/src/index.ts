@@ -1,5 +1,6 @@
 import { DialogExtensionSDK, FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { setup, renderSkuPicker } from 'shared-sku-app';
+import { Integration } from 'shared-sku-app/src/interfaces';
 import { dialogConfig, DIALOG_ID, SKUPickerConfig, strings } from './constants';
 
 import PaginatedFetcher from './PaginatedFetcher';
@@ -32,7 +33,7 @@ const renderDialog = async (sdk: DialogExtensionSDK) => {
   renderSkuPicker(DIALOG_ID, {
     sdk,
     fetchProductPreviews: fetcher.getProductsAndVariantsByIdOrSKU,
-    fetchProducts: fetcher.getVariantsWithProducts
+    fetchProducts: fetcher.getVariantsWithProducts,
   });
 
   sdk.window.startAutoResizer();
@@ -42,7 +43,7 @@ const openDialog = async (sdk: FieldExtensionSDK, currentValue: any, parameters:
   const skus = await sdk.dialogs.openCurrentApp({
     title: makeCTA(sdk.field.type),
     parameters,
-    ...dialogConfig
+    ...dialogConfig,
   });
 
   return Array.isArray(skus) ? skus : [];
@@ -58,9 +59,8 @@ const config = {
   fetchProductPreviews,
   renderDialog,
   openDialog,
-  validateParameters
+  validateParameters,
 };
 
-// @ts-ignore because the sku shared app wants the config as
-// Record<string, string> and we want it specified like ClientConfig
+// @ts-ignore in order to keep ClientConfig type instead of sku apps' Record<string, string>
 setup(config);
