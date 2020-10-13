@@ -30,12 +30,17 @@ We will need to use this secure URL for our app setup to work correctly.
 2. Update `.env` with
 
 ```shell
-CMA_TOKEN= # You can obtain this token from the Contentful web app
+CMA_TOKEN= # Obtained through the Contentful web app, see steps below
 ORG_ID= # Your Contentful organisation id
 SPACE_ID= # Your Contentful spaece id
 ENVIRONMENT_ID= # Your contentul enviornment name
 HOSTED_APP_URL= # The ngrok URL from step 1 - this must a https URL
 ```
+
+The Content Management API (CMA) token can be obtained through the Contentful web app.
+To do this, open the web app in your browser and navigate to the desired space,
+then navigate to **Settings -> API Keys -> Content management tokens -> Generate personal token**.
+This token has all the access rights as the account you create it for, but it is only used to set up the example App in your space. The actual backend code will not use it.
 
 ### Warning!
 
