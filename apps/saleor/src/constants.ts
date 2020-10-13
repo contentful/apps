@@ -3,7 +3,7 @@ import { Pagination } from 'shared-sku-app/src/interfaces';
 import logo from './static/logo.svg';
 
 export const DIALOG_ID = 'sku-picker-root';
-export const ITEMS_OFFSET = 100;
+export const ITEMS_OFFSET = 4;
 export const SALEOR_COLOR = '#3a3944';
 
 export const defaultPagination: Pagination = {

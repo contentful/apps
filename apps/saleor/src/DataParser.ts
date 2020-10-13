@@ -47,13 +47,11 @@ class DataParser {
     ...this.getParsedItems(),
   ];
 
-  getFilteredItems = (data: Product[]) => data.filter(this.shouldDisplayProduct);
-
   getParsedItems = (): Product[] => this.data.edges.map(DataParser.getParsedItem);
 
-  getProductOfVariantsIds = (): string[] => this.getParsedProductsOfVariants().map(({ id }) => id);
-
   private shouldDisplayProduct = ({ id }: Product): boolean => !this.productsIds.includes(id);
+
+  getProductOfVariantsIds = (): string[] => this.getParsedProductsOfVariants().map(({ id }) => id);
 
   private static getDisplayLabel = (id: string, sku?: string) =>
     sku ? `${DisplayLabelPrefix.variantSKU}: ${sku}` : `${DisplayLabelPrefix.productID}: ${id}`;
