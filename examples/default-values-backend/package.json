@@ -7,7 +7,7 @@
     "buildFrontend": "parcel build public/index.html",
     "setup": "NODE_OPTIONS=--insecure-http-parser ts-node src/setup.ts"
   },
-  "author": "<john.whiles@contentful.com>",
+  "author": "Contentful GmbH",
   "license": "MIT",
   "dependencies": {
     "@contentful/forma-36-fcss": "^0.0.35",
