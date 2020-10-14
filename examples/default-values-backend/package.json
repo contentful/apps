@@ -1,0 +1,36 @@
+{
+  "name": "backend_app_demo",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "yarn buildFrontend && tsc && node --insecure-http-parser built/src/index.js",
+    "buildFrontend": "parcel build public/index.html",
+    "setup": "NODE_OPTIONS=--insecure-http-parser ts-node src/setup.ts"
+  },
+  "author": "Contentful GmbH",
+  "license": "MIT",
+  "dependencies": {
+    "@contentful/forma-36-fcss": "^0.0.35",
+    "@contentful/forma-36-react-components": "^3.39.0",
+    "@hapi/hapi": "^19.1.1",
+    "@hapi/inert": "^6.0.1",
+    "@types/hapi__hapi": "^19.0.3",
+    "@types/node-fetch": "^2.5.7",
+    "contentful-ui-extensions-sdk": "^3.14.3",
+    "dotenv": "^8.2.0",
+    "hapi": "^18.1.0",
+    "node-fetch": "^2.6.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.2"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "prettier": "^2.0.5",
+    "ts-node": "^8.10.1"
+  },
+  "browserslist": [
+    "last 1 Chrome versions"
+  ]
+}
