@@ -1,6 +1,6 @@
 /*
  * This file is the application backend that would run on your servers.
- * It's a very straight forward Hapi server that listens for calls
+ * It is a simple Hapi server that listens for calls
  * from a webhook, and then uses an AppToken to interact
  * with the Content Management API (CMA).
  */
@@ -37,7 +37,7 @@ const startServer = async () => {
 
   await server.register(require("@hapi/inert"));
 
-  // Here we are attaching the webook handler to our Server
+  // Here we attach the webook handler to our server
   server.route({
     method: "POST",
     path: "/event-handler",
@@ -88,8 +88,8 @@ startServer();
 // HANDLER FOR WEBHOOK
 // -------------------
 
-// This route is listening to a webhook that is setup to call whenever an
-// Entry of our example content type is created
+// This route is listening to a webhook that is setup to be called
+// whenever an Entry of our example content type is created
 const addDefaultDataOnEntryCreation = async (
   request: Hapi.Request,
   h: Hapi.ResponseToolkit
