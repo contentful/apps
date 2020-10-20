@@ -5,7 +5,7 @@ import { setup } from 'shared-dam-app';
 
 import logo from './logo.svg';
 
-const VALID_IMAGE_FORMATS = ['svg', 'jpg', 'png', 'gif', 'jpeg'];
+const VALID_IMAGE_FORMATS = ['svg', 'jpg', 'png', 'gif', 'jpeg', 'tiff'];
 const MAX_FILES_UPPER_LIMIT = 25;
 const CTA = 'Select or upload a file on Cloudinary';
 
