@@ -59,3 +59,4 @@ export function setup(integration: Integration) {
 }
 
 export { renderSkuPicker } from './SkuPicker/renderSkuPicker';
+export type { Product, Pagination  } from './interfaces';

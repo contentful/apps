@@ -1,6 +1,6 @@
 import { OpenCustomWidgetOptions } from 'contentful-ui-extensions-sdk';
-import { Pagination } from 'shared-sku-app/src/interfaces';
-import logo from './static/logo.svg';
+import { Pagination } from 'shared-sku-app';
+import logo from './app-logo.svg';
 
 export const DIALOG_ID = 'sku-picker-root';
 export const ITEMS_OFFSET = 100;

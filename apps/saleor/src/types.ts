@@ -1,4 +1,4 @@
-import { Pagination, Product } from 'shared-sku-app/src/interfaces';
+import { Pagination, Product } from 'shared-sku-app';
 
 export interface ClientConfig {
   apiEndpoint: string;

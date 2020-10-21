@@ -1,6 +1,6 @@
 import { uniq } from 'lodash';
 import { ClientConfig, Identifiers, ProductVariantsData } from './types';
-import { Pagination, Product } from 'shared-sku-app/src/interfaces';
+import { Pagination, Product } from 'shared-sku-app';
 import DataParser from './DataParser';
 import ApiClient from './ApiClient';
 import { extractProductsAndVariantsIdentifiers } from './utils';
