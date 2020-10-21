@@ -1,6 +1,5 @@
 import { DialogExtensionSDK, FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { setup, renderSkuPicker } from 'shared-sku-app';
-import { Integration } from 'shared-sku-app/src/interfaces';
 import { dialogConfig, DIALOG_ID, SKUPickerConfig, strings } from './constants';
 
 import PaginatedFetcher from './PaginatedFetcher';
