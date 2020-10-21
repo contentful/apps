@@ -12,6 +12,7 @@
   "dependencies": {
     "@contentful/forma-36-fcss": "^0.0.35",
     "@contentful/forma-36-react-components": "^3.39.0",
+    "@contentful/node-apps-toolkit": "^1.0.1",
     "@hapi/hapi": "^19.1.1",
     "@hapi/inert": "^6.0.1",
     "@types/hapi__hapi": "^19.0.3",
