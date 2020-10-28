@@ -25,6 +25,7 @@
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
+    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/saleor --acl public-read",
     "typecheck": "tsc"
   },
   "browserslist": [
