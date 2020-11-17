@@ -49,4 +49,7 @@ workflows:
   version: 2
   test-deploy:
     jobs:
-      - all
+      - all:
+          context:
+            - docker-hub-auth
+
