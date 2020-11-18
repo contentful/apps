@@ -28,3 +28,9 @@ Please note that each app has its individual source code license associated with
 * [App documentation](https://www.contentful.com/developers/docs/extensibility/apps/)
 * [Contentful Changelog](https://www.contentful.com/developers/changelog/)
 * [Forma 36: The Contentful Design System](https://f36.contentful.com/)
+
+## Support and feature requests
+If you require support, or want to request a new feature then please
+use the appropriate support channel which will be listed with the app on our [app
+marketplace](https://www.contentful.com/marketplace/).
+
