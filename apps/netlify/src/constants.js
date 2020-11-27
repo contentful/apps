@@ -25,4 +25,4 @@ export const NETLIFY_AUTHORIZE_ENDPOINT = 'https://app.netlify.com/authorize';
 export const NETLIFY_AUTH_WINDOW_OPTS = 'left=150,top=150,width=700,height=700';
 export const NETLIFY_AUTH_POLL_INTERVAL = 1000;
 
-export const MAX_CONFIGS = 3;
+export const MAX_CONFIGS = 10;
