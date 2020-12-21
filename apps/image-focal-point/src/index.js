@@ -66,6 +66,10 @@ export class App extends React.Component {
     return this.props.sdk.field.locale;
   }
 
+  resetFocalPoint = () => {
+    this.setFocalPoint(null);
+  };
+
   setFocalPoint = focalPoint => {
     this.setState(
       oldState => ({
@@ -127,6 +131,7 @@ export class App extends React.Component {
         <FocalPointView
           showFocalPointDialog={this.showFocalPointDialog}
           focalPoint={this.state.value.focalPoint}
+          resetFocalPoint={this.resetFocalPoint}
         />
       );
     }
