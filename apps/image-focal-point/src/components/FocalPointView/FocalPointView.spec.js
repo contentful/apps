@@ -8,7 +8,8 @@ const props = {
     x: 10,
     y: 30
   },
-  showFocalPointDialog: jest.fn()
+  showFocalPointDialog: jest.fn(),
+  resetFocalPoint: jest.fn()
 };
 
 describe('FocalPointView', () => {
