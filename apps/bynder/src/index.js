@@ -1,5 +1,5 @@
 import pick from 'lodash/pick';
-import { setup } from 'shared-dam-app';
+import { setup } from '@contentful/dam-app-base';
 
 import logo from './logo.svg';
 

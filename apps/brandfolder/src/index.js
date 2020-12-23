@@ -1,5 +1,5 @@
 import pick from 'lodash/pick';
-import { setup } from 'shared-dam-app';
+import { setup } from '@contentful/dam-app-base';
 
 const CTF_APP_URL = 'https://brandfolder.ctfapps.net';
 const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=message&appName=Contentful&origin=${CTF_APP_URL}&initMsg=hi`;
