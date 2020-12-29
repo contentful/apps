@@ -1,7 +1,7 @@
 {
   "name": "@contentful/sku-app-base",
   "version": "1.0.0",
-  "main": "src/",
+  "main": "lib/",
   "devDependencies": {
     "@babel/core": "7.8.4",
     "@babel/plugin-proposal-class-properties": "7.8.3",
@@ -19,6 +19,7 @@
     "@types/webpack-env": "1.15.1",
     "contentful-cli": "^1.2.12",
     "cssnano": "4.1.10",
+    "rimraf": "3.0.2",
     "typescript": "^4.0.3"
   },
   "dependencies": {
@@ -37,7 +38,8 @@
     "react-sortable-hoc": "1.11.0"
   },
   "scripts": {
-    "tsc": "tsc -p ./ --noEmit",
+    "build": "rimraf lib && tsc",
+    "prepublishOnly": "npm run build",
     "test": "contentful-extension-scripts test --env=jsdom --watch",
     "test:ci": "contentful-extension-scripts test --env=jsdom"
   },

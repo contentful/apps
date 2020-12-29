@@ -1,6 +1,6 @@
 import get from 'lodash.get';
 
-interface Field {
+export interface Field {
   id: string;
   name: string;
   type: string;
