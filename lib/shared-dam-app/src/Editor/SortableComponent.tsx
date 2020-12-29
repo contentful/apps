@@ -1,9 +1,13 @@
-import * as React from 'react';
-import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
-import { css } from 'emotion';
-import arrayMove from 'array-move';
-import { IconButton, Card } from '@contentful/forma-36-react-components';
-import { Hash, ThumbnailFn, DeleteFn } from '../interfaces';
+import * as React from "react";
+import {
+  SortableContainer,
+  SortableElement,
+  SortableHandle,
+} from "react-sortable-hoc";
+import { css } from "emotion";
+import arrayMove from "array-move";
+import { IconButton, Card } from "@contentful/forma-36-react-components";
+import { Hash, ThumbnailFn, DeleteFn } from "../interfaces";
 
 interface Props {
   disabled: boolean;
@@ -31,106 +35,132 @@ interface SortableElementProps extends DragHandleProps {
   onDelete: () => void;
 }
 
-const DragHandle = SortableHandle<DragHandleProps>(({ url, alt }: DragHandleProps) =>
-  url ? <img src={url} alt={alt} /> : <div>Asset not available</div>
+const DragHandle = SortableHandle<DragHandleProps>(
+  ({ url, alt }: DragHandleProps) =>
+    url ? (
+      <div>
+        <img src={url} alt={alt} />
+      </div>
+    ) : (
+      <div>Asset not available</div>
+    )
 );
 
 const styles = {
   container: css({
-    maxWidth: '600px'
+    maxWidth: "600px",
   }),
   grid: css({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)'
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
   }),
   card: (disabled: boolean) =>
     css({
-      margin: '10px',
-      position: 'relative',
-      width: '150px',
-      height: '100px',
-      '> img': {
-        cursor: disabled ? 'move' : 'pointer',
-        display: 'block',
-        maxWidth: '150px',
-        maxHeight: '100px',
-        margin: 'auto',
-        userSelect: 'none' // Image selection sometimes makes drag and drop ugly.
-      }
+      margin: "10px",
+      position: "relative",
+      width: "150px",
+      height: "100px",
+      "> div": {
+        // Making the card draggable instead of just the image, as the image may be very small and not occupy the full size of the card
+        cursor: disabled ? "move" : "pointer",
+        userSelect: "none", // Image selection sometimes makes drag and drop ugly.
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        margin: "auto",
+        alignItems: "center",
+        justifyContent: "center",
+      },
+      "> img": {
+        display: "block",
+        maxWidth: "150px",
+        maxHeight: "100px",
+        margin: "auto",
+      },
     }),
   remove: css({
-    position: 'absolute',
-    top: '-10px',
-    right: '-10px',
-    backgroundColor: 'white'
-  })
+    position: "absolute",
+    top: "-10px",
+    right: "-10px",
+    backgroundColor: "white",
+  }),
 };
 
-const SortableItem = SortableElement<SortableElementProps>((props: SortableElementProps) => {
-  return (
-    <Card className={styles.card(props.disabled)}>
-      <DragHandle url={props.url} alt={props.alt} />
-      {!props.disabled && (
-        <IconButton
-          label="Close"
-          onClick={props.onDelete}
-          className={styles.remove}
-          iconProps={{ icon: 'Close' }}
-          buttonType="muted"
-        />
-      )}
-    </Card>
-  );
-});
+const SortableItem = SortableElement<SortableElementProps>(
+  (props: SortableElementProps) => {
+    return (
+      <Card className={styles.card(props.disabled)}>
+        <DragHandle url={props.url} alt={props.alt} />
+        {!props.disabled && (
+          <IconButton
+            label="Close"
+            onClick={props.onDelete}
+            className={styles.remove}
+            iconProps={{ icon: "Close" }}
+            buttonType="muted"
+          />
+        )}
+      </Card>
+    );
+  }
+);
 
-const SortableList = SortableContainer<SortableContainerProps>((props: SortableContainerProps) => {
-  // Provide stable keys for all resources so images don't blink.
-  const { list } = props.resources.reduce(
-    (acc, resource, index) => {
-      const [url, alt] = props.makeThumbnail(resource, props.config);
-      const item = { url, alt, key: `url-unknown-${index}` };
-      const counts = { ...acc.counts };
+const SortableList = SortableContainer<SortableContainerProps>(
+  (props: SortableContainerProps) => {
+    // Provide stable keys for all resources so images don't blink.
+    const { list } = props.resources.reduce(
+      (acc, resource, index) => {
+        const [url, alt] = props.makeThumbnail(resource, props.config);
+        const item = { url, alt, key: `url-unknown-${index}` };
+        const counts = { ...acc.counts };
 
-      // URLs are used as keys.
-      // It is possible to include the same image more than once.
-      // We count usages of the same URL and use the count in keys.
-      // This can be considered an edge-case but still - should be covered.
-      if (url) {
-        counts[url] = counts[url] || 1;
-        item.key = [url, counts[url]].join('-');
-        counts[url] += 1;
-      }
+        // URLs are used as keys.
+        // It is possible to include the same image more than once.
+        // We count usages of the same URL and use the count in keys.
+        // This can be considered an edge-case but still - should be covered.
+        if (url) {
+          counts[url] = counts[url] || 1;
+          item.key = [url, counts[url]].join("-");
+          counts[url] += 1;
+        }
 
-      return {
-        counts,
-        list: [...acc.list, item]
-      };
-    },
-    { counts: {}, list: [] }
-  ) as { list: Hash[] };
+        return {
+          counts,
+          list: [...acc.list, item],
+        };
+      },
+      { counts: {}, list: [] }
+    ) as { list: Hash[] };
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.grid}>
-        {list.map(({ url, alt, key }, index) => {
-          return (
-            <SortableItem
-              disabled={props.disabled}
-              key={key}
-              url={url}
-              alt={alt}
-              index={index}
-              onDelete={() => props.deleteFn(index)}
-            />
-          );
-        })}
+    return (
+      <div className={styles.container}>
+        <div className={styles.grid}>
+          {list.map(({ url, alt, key }, index) => {
+            return (
+              <SortableItem
+                disabled={props.disabled}
+                key={key}
+                url={url}
+                alt={alt}
+                index={index}
+                onDelete={() => props.deleteFn(index)}
+              />
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export class SortableComponent extends React.Component<Props> {
-  onSortEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+  onSortEnd = ({
+    oldIndex,
+    newIndex,
+  }: {
+    oldIndex: number;
+    newIndex: number;
+  }) => {
     const resources = arrayMove(this.props.resources, oldIndex, newIndex);
     this.props.onChange(resources);
   };

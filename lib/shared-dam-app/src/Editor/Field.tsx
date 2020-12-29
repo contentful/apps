@@ -1,10 +1,15 @@
-import * as React from 'react';
-import { Button, Note, TextLink } from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
-import { css } from 'emotion';
-import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
-import { SortableComponent } from './SortableComponent';
-import { ThumbnailFn, OpenDialogFn, DisabledPredicateFn, Hash } from '../interfaces';
+import * as React from "react";
+import { Button, Note, TextLink } from "@contentful/forma-36-react-components";
+import tokens from "@contentful/forma-36-tokens";
+import { css } from "emotion";
+import { FieldExtensionSDK } from "contentful-ui-extensions-sdk";
+import { SortableComponent } from "./SortableComponent";
+import {
+  ThumbnailFn,
+  OpenDialogFn,
+  DisabledPredicateFn,
+  Hash,
+} from "../interfaces";
 
 interface Props {
   sdk: FieldExtensionSDK;
@@ -23,20 +28,21 @@ interface State {
 
 const styles = {
   sortable: css({
-    marginBottom: tokens.spacingM
+    marginBottom: tokens.spacingM,
   }),
   container: css({
-    display: 'flex'
+    display: "flex",
   }),
   logo: css({
-    display: 'block',
-    width: '30px',
-    height: '30px',
-    marginRight: tokens.spacingM
-  })
+    display: "block",
+    width: "30px",
+    height: "30px",
+    marginRight: tokens.spacingM,
+  }),
 };
 
-const isObject = (o: any) => typeof o === 'object' && o !== null && !Array.isArray(o);
+const isObject = (o: any) =>
+  typeof o === "object" && o !== null && !Array.isArray(o);
 
 export default class Field extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -48,12 +54,13 @@ export default class Field extends React.Component<Props, State> {
     // `valid` is `true` if the app can render/write the value safely.
     // If for example there is an object stored we don't want to override
     // it without a user explicitly telling us to do so.
-    const valid = typeof value === 'undefined' || value === null || validListOfObjects;
+    const valid =
+      typeof value === "undefined" || value === null || validListOfObjects;
 
     this.state = {
       value: Array.isArray(value) ? value : [],
       valid,
-      editingDisabled: false
+      editingDisabled: false,
     };
   }
 
@@ -82,8 +89,15 @@ export default class Field extends React.Component<Props, State> {
 
   onDialogOpen = async () => {
     const currentValue = this.state.value;
-    const config = this.props.sdk.parameters.installation;
-    const result = await this.props.openDialog(this.props.sdk, currentValue, config);
+    const config = {
+      ...this.props.sdk.parameters.installation,
+      ...(this.props.sdk.parameters.instance || {}),
+    };
+    const result = await this.props.openDialog(
+      this.props.sdk,
+      currentValue,
+      config
+    );
 
     if (result.length > 0) {
       const newValue = [...(this.state.value || []), ...result];
@@ -108,7 +122,10 @@ export default class Field extends React.Component<Props, State> {
     }
 
     const hasItems = value.length > 0;
-    const config = this.props.sdk.parameters.installation;
+    const config = {
+      ...this.props.sdk.parameters.installation,
+      ...(this.props.sdk.parameters.instance || {}),
+    };
     const isDisabled = editingDisabled || this.props.isDisabled(value, config);
 
     return (
@@ -131,7 +148,8 @@ export default class Field extends React.Component<Props, State> {
             buttonType="muted"
             size="small"
             onClick={this.onDialogOpen}
-            disabled={isDisabled}>
+            disabled={isDisabled}
+          >
             {this.props.cta}
           </Button>
         </div>
