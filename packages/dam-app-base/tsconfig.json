@@ -12,5 +12,5 @@
     "resolveJsonModule": true,
     "declaration": true
   },
-  "exclude": ["./src/**/*.spec.*"]
+  "exclude": ["./src/**/*.spec.*", "./lib/**/*.*"]
 }

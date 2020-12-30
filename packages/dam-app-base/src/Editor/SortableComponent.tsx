@@ -3,20 +3,20 @@ import { SortableContainer, SortableElement, SortableHandle } from 'react-sortab
 import { css } from 'emotion';
 import arrayMove from 'array-move';
 import { IconButton, Card } from '@contentful/forma-36-react-components';
-import { Hash, ThumbnailFn, DeleteFn } from '../interfaces';
+import { ThumbnailFn, DeleteFn, Asset, Config } from '../interfaces';
 
 interface Props {
   disabled: boolean;
-  onChange: (data: Hash[]) => void;
-  config: Hash;
-  resources: Hash[];
+  onChange: (data: Asset[]) => void;
+  config: Config;
+  resources: Asset[];
   makeThumbnail: ThumbnailFn;
 }
 
 interface SortableContainerProps {
   disabled: boolean;
-  config: Hash;
-  resources: Hash[];
+  config: Config;
+  resources: Asset[];
   deleteFn: DeleteFn;
   makeThumbnail: ThumbnailFn;
 }
@@ -107,7 +107,7 @@ const SortableList = SortableContainer<SortableContainerProps>((props: SortableC
       };
     },
     { counts: {}, list: [] }
-  ) as { list: Hash[] };
+  ) as { list: Asset[] };
 
   return (
     <div className={styles.container}>

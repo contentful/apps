@@ -4,7 +4,7 @@ import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { SortableComponent } from './SortableComponent';
-import { ThumbnailFn, OpenDialogFn, DisabledPredicateFn, Hash } from '../interfaces';
+import { ThumbnailFn, OpenDialogFn, DisabledPredicateFn, Asset } from '../interfaces';
 
 interface Props {
   sdk: FieldExtensionSDK;
@@ -16,7 +16,7 @@ interface Props {
 }
 
 interface State {
-  value: Hash[];
+  value: Asset[];
   valid: boolean;
   editingDisabled: boolean;
 }
@@ -61,7 +61,7 @@ export default class Field extends React.Component<Props, State> {
     this.props.sdk.window.startAutoResizer();
 
     // Handle external changes (e.g. when multiple authors are working on the same entry).
-    this.props.sdk.field.onValueChanged((value?: Hash[]) => {
+    this.props.sdk.field.onValueChanged((value?: Asset[]) => {
       this.setState({ value: Array.isArray(value) ? value : [] });
     });
 
@@ -71,7 +71,7 @@ export default class Field extends React.Component<Props, State> {
     });
   }
 
-  updateStateValue = async (value: Hash[]) => {
+  updateStateValue = async (value: Asset[]) => {
     this.setState({ value });
     if (value.length > 0) {
       await this.props.sdk.field.setValue(value);

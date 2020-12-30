@@ -20,7 +20,9 @@
     "contentful-cli": "^1.2.12",
     "cssnano": "4.1.10",
     "rimraf": "3.0.2",
-    "typescript": "^3.7.5"
+    "typedoc": "0.20.4",
+    "typedoc-plugin-markdown": "3.2.1",
+    "typescript": "3.9.7"
   },
   "dependencies": {
     "@contentful/forma-36-fcss": "^0.0.34",
@@ -38,7 +40,8 @@
   },
   "scripts": {
     "build": "rimraf lib && tsc",
-    "prepublishOnly": "npm run build",
+    "build:docs": "rimraf docs && typedoc",
+    "prepublishOnly": "npm run build && npm run build:docs",
     "test": "contentful-extension-scripts test --env=jsdom --watch",
     "test:ci": "contentful-extension-scripts test --env=jsdom"
   },
