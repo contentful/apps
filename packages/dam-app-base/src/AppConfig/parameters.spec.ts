@@ -1,6 +1,7 @@
+import { ParameterDefinition } from '../interfaces';
 import { toInputParameters, toExtensionParameters } from './parameters';
 
-export const definitions = [
+export const definitions: ParameterDefinition[] = [
   {
     id: 'cloudName',
     name: 'Cloud name',

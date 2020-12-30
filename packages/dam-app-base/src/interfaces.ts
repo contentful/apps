@@ -35,7 +35,7 @@ export interface ParameterDefinition {
   /**
    * Default value
    */
-  default: any;
+  default?: any;
 
   /**
    * Parameter type

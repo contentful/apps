@@ -1,6 +1,7 @@
+import { ParameterDefinition } from '../interfaces';
 import { toInputParameters, toAppParameters } from './parameters';
 
-export const definitions = [
+export const definitions: ParameterDefinition[] = [
   {
     id: 'projectKey',
     name: 'Commercetools Project Key',
