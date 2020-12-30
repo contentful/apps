@@ -204,7 +204,7 @@ export interface Integration {
    *
    * @example
    * ```javascript
-   * function openDialog(sdk, currentValue, config) {
+   * async function openDialog(sdk, currentValue, config) {
    *   return await sdk.dialogs.openCurrentApp({
    *     parameters: { config, currentValue },
    *   });

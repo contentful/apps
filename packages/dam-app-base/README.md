@@ -9,7 +9,6 @@
 ```javascript
 import { setup } from '@contentful/dam-app-base';
 
-
 setup({
   cta: 'Select assets',
   name: 'My DAM App',
@@ -26,8 +25,8 @@ setup({
     }
   ],
   validateParameters: () => null,
-  makeThumbnail,
-  renderDialog: (sdk) => {
+  makeThumbnail: asset => asset.thumbnailUrl,
+  renderDialog: async (sdk) => {
     const config = sdk.parameters.invocation;
 
     const container = document.createElement('div');
