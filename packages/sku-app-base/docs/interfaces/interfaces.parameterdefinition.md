@@ -23,7 +23,7 @@ Definition of app configuration parameters
 
 ### default
 
-• **default**: *any*
+• `Optional` **default**: *any*
 
 Default value
 

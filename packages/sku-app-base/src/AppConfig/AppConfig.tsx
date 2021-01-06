@@ -27,11 +27,11 @@ import {
   SelectedFields
 } from './fields';
 
-import { Hash, ValidateParametersFn } from '../interfaces';
+import { Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
 
 interface Props {
   sdk: AppExtensionSDK;
-  parameterDefinitions: Hash[];
+  parameterDefinitions: ParameterDefinition[];
   validateParameters: ValidateParametersFn;
   logo: string;
   name: string;
@@ -43,7 +43,7 @@ interface State {
   contentTypes: ContentType[];
   compatibleFields: CompatibleFields;
   selectedFields: SelectedFields;
-  parameters: Hash;
+  parameters: Config;
 }
 
 const styles = {

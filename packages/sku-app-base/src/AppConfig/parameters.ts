@@ -1,10 +1,10 @@
 import get from 'lodash.get';
 
-import { Hash } from '../interfaces';
+import { Config, ParameterDefinition } from '../interfaces';
 
 export function toInputParameters(
-  parameterDefinitions: Hash[],
-  parameterValues: Hash | null
+  parameterDefinitions: ParameterDefinition[],
+  parameterValues: Config | null
 ): Record<string, string> {
   return parameterDefinitions.reduce((acc, def) => {
     const defaultValue = typeof def.default === 'undefined' ? '' : `${def.default}`;
@@ -16,9 +16,9 @@ export function toInputParameters(
 }
 
 export function toAppParameters(
-  parameterDefinitions: Hash[],
+  parameterDefinitions: ParameterDefinition[],
   inputValues: Record<string, string>
-): Hash {
+): Config {
   return parameterDefinitions.reduce((acc, def) => {
     const value = inputValues[def.id];
     return {

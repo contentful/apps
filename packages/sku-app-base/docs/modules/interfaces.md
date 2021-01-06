@@ -16,7 +16,6 @@
 * [Config](interfaces.md#config)
 * [DeleteFn](interfaces.md#deletefn)
 * [DisabledPredicateFn](interfaces.md#disabledpredicatefn)
-* [Hash](interfaces.md#hash)
 * [MakeCTAFn](interfaces.md#makectafn)
 * [OpenDialogFn](interfaces.md#opendialogfn)
 * [ProductPreviewsFn](interfaces.md#productpreviewsfn)
@@ -51,12 +50,6 @@ Function that should return true when the button should be disabled.
 **`param`** App configuration
 
 **`returns`** true, if the button in the field location should be disabled. false, if the button should be enabled
-
-___
-
-### Hash
-
-Ƭ **Hash**: *Record*<*string*, *any*\>
 
 ___
 

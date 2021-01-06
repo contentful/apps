@@ -6,7 +6,7 @@ import { Button, TextInput, Icon } from '@contentful/forma-36-react-components';
 import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { ProductList } from './ProductList';
 import { Paginator } from './Paginator';
-import { Pagination, Product, Hash, ProductPreviewsFn, ProductsFn } from '../interfaces';
+import { Pagination, Product, ProductPreviewsFn, ProductsFn } from '../interfaces';
 import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
 import { mapSort } from '../utils';
@@ -111,7 +111,7 @@ export class SkuPicker extends Component<Props, State> {
   };
 
   selectProduct = (sku: string) => {
-    const { fieldType } = this.props.sdk.parameters.invocation as Hash;
+    const { fieldType } = this.props.sdk.parameters.invocation as Record<string, any>;
     const onlyOneProductCanBeSelected = fieldType === 'Symbol';
 
     if (this.state.selectedSKUs.includes(sku)) {

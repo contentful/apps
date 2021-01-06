@@ -5,8 +5,6 @@ import { DialogExtensionSDK, FieldExtensionSDK } from 'contentful-ui-extensions-
  */
 export type Config = Record<string, any>;
 
-export type Hash = Record<string, any>;
-
 /**
  * Definition of app configuration parameters
  */

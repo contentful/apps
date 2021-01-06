@@ -5,13 +5,13 @@ import difference from 'lodash/difference';
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
 import { mapSort } from '../utils';
 import { SortableList } from './SortableList';
-import { Hash, ProductPreviewsFn, Product } from '../interfaces';
+import { ProductPreviewsFn, Product, Config } from '../interfaces';
 
 interface Props {
   sdk: FieldExtensionSDK;
   disabled: boolean;
   onChange: (skus: string[]) => void;
-  config: Hash;
+  config: Config;
   skus: string[];
   fetchProductPreviews: ProductPreviewsFn;
 }
