@@ -1,4 +1,4 @@
-[@contentful/dam-app-base](../README.md) / [utils](../modules/utils.md) / Field
+[@contentful/dam-app-base](../README.md) / Field
 
 # Interface: Field
 
@@ -10,9 +10,9 @@
 
 ### Properties
 
-* [id](utils.field.md#id)
-* [name](utils.field.md#name)
-* [type](utils.field.md#type)
+* [id](field.md#id)
+* [name](field.md#name)
+* [type](field.md#type)
 
 ## Properties
 

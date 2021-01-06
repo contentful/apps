@@ -1,4 +1,4 @@
-[@contentful/dam-app-base](../README.md) / [interfaces](../modules/interfaces.md) / Integration
+[@contentful/dam-app-base](../README.md) / Integration
 
 # Interface: Integration
 
@@ -10,17 +10,17 @@
 
 ### Properties
 
-* [color](interfaces.integration.md#color)
-* [cta](interfaces.integration.md#cta)
-* [description](interfaces.integration.md#description)
-* [isDisabled](interfaces.integration.md#isdisabled)
-* [logo](interfaces.integration.md#logo)
-* [makeThumbnail](interfaces.integration.md#makethumbnail)
-* [name](interfaces.integration.md#name)
-* [openDialog](interfaces.integration.md#opendialog)
-* [parameterDefinitions](interfaces.integration.md#parameterdefinitions)
-* [renderDialog](interfaces.integration.md#renderdialog)
-* [validateParameters](interfaces.integration.md#validateparameters)
+* [color](integration.md#color)
+* [cta](integration.md#cta)
+* [description](integration.md#description)
+* [isDisabled](integration.md#isdisabled)
+* [logo](integration.md#logo)
+* [makeThumbnail](integration.md#makethumbnail)
+* [name](integration.md#name)
+* [openDialog](integration.md#opendialog)
+* [parameterDefinitions](integration.md#parameterdefinitions)
+* [renderDialog](integration.md#renderdialog)
+* [validateParameters](integration.md#validateparameters)
 
 ## Properties
 
@@ -50,7 +50,7 @@ ___
 
 ### isDisabled
 
-• **isDisabled**: [*DisabledPredicateFn*](../modules/interfaces.md#disabledpredicatefn)
+• **isDisabled**: [*DisabledPredicateFn*](../README.md#disabledpredicatefn)
 
 Function that should return true when the button should be disabled.
 
@@ -72,7 +72,7 @@ ___
 
 ### makeThumbnail
 
-• **makeThumbnail**: [*ThumbnailFn*](../modules/interfaces.md#thumbnailfn)
+• **makeThumbnail**: [*ThumbnailFn*](../README.md#thumbnailfn)
 
 Returns the url of the thumbnail of an asset.
 
@@ -94,7 +94,7 @@ ___
 
 ### openDialog
 
-• **openDialog**: [*OpenDialogFn*](../modules/interfaces.md#opendialogfn)
+• **openDialog**: [*OpenDialogFn*](../README.md#opendialogfn)
 
 Function that gets called when app wants to open a dialog. Should return an updated list of assets as a Promise.
 
@@ -122,7 +122,7 @@ ___
 
 ### parameterDefinitions
 
-• **parameterDefinitions**: [*ParameterDefinition*](interfaces.parameterdefinition.md)[]
+• **parameterDefinitions**: [*ParameterDefinition*](parameterdefinition.md)[]
 
 Parameter definition which can be customized on the app configuration page and used in the callback functions.
 
@@ -130,7 +130,7 @@ ___
 
 ### renderDialog
 
-• **renderDialog**: [*RenderDialogFn*](../modules/interfaces.md#renderdialogfn)
+• **renderDialog**: [*RenderDialogFn*](../README.md#renderdialogfn)
 
 Function that gets called within the Iframe when the app is rendered in a dialog location.
 
@@ -151,7 +151,7 @@ ___
 
 ### validateParameters
 
-• **validateParameters**: [*ValidateParametersFn*](../modules/interfaces.md#validateparametersfn)
+• **validateParameters**: [*ValidateParametersFn*](../README.md#validateparametersfn)
 
 Custom code that validates installation parameters that is run before saving.
 

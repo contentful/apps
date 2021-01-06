@@ -1,4 +1,4 @@
-[@contentful/sku-app-base](../README.md) / [interfaces](../modules/interfaces.md) / Product
+[@contentful/sku-app-base](../README.md) / Product
 
 # Interface: Product
 
@@ -10,11 +10,11 @@
 
 ### Properties
 
-* [externalLink](interfaces.product.md#externallink)
-* [id](interfaces.product.md#id)
-* [image](interfaces.product.md#image)
-* [name](interfaces.product.md#name)
-* [sku](interfaces.product.md#sku)
+* [externalLink](product.md#externallink)
+* [id](product.md#id)
+* [image](product.md#image)
+* [name](product.md#name)
+* [sku](product.md#sku)
 
 ## Properties
 

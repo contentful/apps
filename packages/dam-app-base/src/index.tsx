@@ -55,3 +55,6 @@ export function setup(integration: Integration) {
     }
   });
 }
+
+export * from './AppConfig/fields';
+export * from './interfaces';

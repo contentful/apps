@@ -1,4 +1,4 @@
-[@contentful/sku-app-base](../README.md) / [interfaces](../modules/interfaces.md) / Integration
+[@contentful/sku-app-base](../README.md) / Integration
 
 # Interface: Integration
 
@@ -10,17 +10,17 @@
 
 ### Properties
 
-* [color](interfaces.integration.md#color)
-* [description](interfaces.integration.md#description)
-* [fetchProductPreviews](interfaces.integration.md#fetchproductpreviews)
-* [isDisabled](interfaces.integration.md#isdisabled)
-* [logo](interfaces.integration.md#logo)
-* [makeCTA](interfaces.integration.md#makecta)
-* [name](interfaces.integration.md#name)
-* [openDialog](interfaces.integration.md#opendialog)
-* [parameterDefinitions](interfaces.integration.md#parameterdefinitions)
-* [renderDialog](interfaces.integration.md#renderdialog)
-* [validateParameters](interfaces.integration.md#validateparameters)
+* [color](integration.md#color)
+* [description](integration.md#description)
+* [fetchProductPreviews](integration.md#fetchproductpreviews)
+* [isDisabled](integration.md#isdisabled)
+* [logo](integration.md#logo)
+* [makeCTA](integration.md#makecta)
+* [name](integration.md#name)
+* [openDialog](integration.md#opendialog)
+* [parameterDefinitions](integration.md#parameterdefinitions)
+* [renderDialog](integration.md#renderdialog)
+* [validateParameters](integration.md#validateparameters)
 
 ## Properties
 
@@ -42,7 +42,7 @@ ___
 
 ### fetchProductPreviews
 
-• **fetchProductPreviews**: [*ProductPreviewsFn*](../modules/interfaces.md#productpreviewsfn)
+• **fetchProductPreviews**: [*ProductPreviewsFn*](../README.md#productpreviewsfn)
 
 Function that returns a list for a given list of skus. The returned value is used to render a product preview.
 
@@ -56,7 +56,7 @@ ___
 
 ### isDisabled
 
-• **isDisabled**: [*DisabledPredicateFn*](../modules/interfaces.md#disabledpredicatefn)
+• **isDisabled**: [*DisabledPredicateFn*](../README.md#disabledpredicatefn)
 
 Function that should return true when the button should be disabled.
 
@@ -78,7 +78,7 @@ ___
 
 ### makeCTA
 
-• **makeCTA**: [*MakeCTAFn*](../modules/interfaces.md#makectafn)
+• **makeCTA**: [*MakeCTAFn*](../README.md#makectafn)
 
 Returns the text that is displayed on the button in the field location.
 
@@ -98,7 +98,7 @@ ___
 
 ### openDialog
 
-• **openDialog**: [*OpenDialogFn*](../modules/interfaces.md#opendialogfn)
+• **openDialog**: [*OpenDialogFn*](../README.md#opendialogfn)
 
 Function that gets called when app wants to open a dialog. Should return an updated list of assets as a Promise.
 
@@ -125,7 +125,7 @@ ___
 
 ### parameterDefinitions
 
-• **parameterDefinitions**: [*ParameterDefinition*](interfaces.parameterdefinition.md)[]
+• **parameterDefinitions**: [*ParameterDefinition*](parameterdefinition.md)[]
 
 Parameter definition which can be customized on the app configuration page and used in the callback functions.
 
@@ -133,7 +133,7 @@ ___
 
 ### renderDialog
 
-• **renderDialog**: [*RenderDialogFn*](../modules/interfaces.md#renderdialogfn)
+• **renderDialog**: [*RenderDialogFn*](../README.md#renderdialogfn)
 
 Function that gets called within the Iframe when the app is rendered in a dialog location.
 
@@ -154,7 +154,7 @@ ___
 
 ### validateParameters
 
-• **validateParameters**: [*ValidateParametersFn*](../modules/interfaces.md#validateparametersfn)
+• **validateParameters**: [*ValidateParametersFn*](../README.md#validateparametersfn)
 
 Custom code that validates installation parameters that is run before saving.
 

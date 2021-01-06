@@ -1,4 +1,4 @@
-[@contentful/dam-app-base](../README.md) / [utils](../modules/utils.md) / EditorInterface
+[@contentful/dam-app-base](../README.md) / EditorInterface
 
 # Interface: EditorInterface
 
@@ -10,8 +10,8 @@
 
 ### Properties
 
-* [controls](utils.editorinterface.md#controls)
-* [sys](utils.editorinterface.md#sys)
+* [controls](editorinterface.md#controls)
+* [sys](editorinterface.md#sys)
 
 ## Properties
 

@@ -1,4 +1,4 @@
-[@contentful/sku-app-base](../README.md) / [interfaces](../modules/interfaces.md) / ParameterDefinition
+[@contentful/sku-app-base](../README.md) / ParameterDefinition
 
 # Interface: ParameterDefinition
 
@@ -12,12 +12,12 @@ Definition of app configuration parameters
 
 ### Properties
 
-* [default](interfaces.parameterdefinition.md#default)
-* [description](interfaces.parameterdefinition.md#description)
-* [id](interfaces.parameterdefinition.md#id)
-* [name](interfaces.parameterdefinition.md#name)
-* [required](interfaces.parameterdefinition.md#required)
-* [type](interfaces.parameterdefinition.md#type)
+* [default](parameterdefinition.md#default)
+* [description](parameterdefinition.md#description)
+* [id](parameterdefinition.md#id)
+* [name](parameterdefinition.md#name)
+* [required](parameterdefinition.md#required)
+* [type](parameterdefinition.md#type)
 
 ## Properties
 

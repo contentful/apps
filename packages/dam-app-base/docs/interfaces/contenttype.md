@@ -1,4 +1,4 @@
-[@contentful/dam-app-base](../README.md) / [utils](../modules/utils.md) / ContentType
+[@contentful/dam-app-base](../README.md) / ContentType
 
 # Interface: ContentType
 
@@ -10,15 +10,15 @@
 
 ### Properties
 
-* [fields](utils.contenttype.md#fields)
-* [name](utils.contenttype.md#name)
-* [sys](utils.contenttype.md#sys)
+* [fields](contenttype.md#fields)
+* [name](contenttype.md#name)
+* [sys](contenttype.md#sys)
 
 ## Properties
 
 ### fields
 
-• `Optional` **fields**: [*Field*](utils.field.md)[]
+• `Optional` **fields**: [*Field*](field.md)[]
 
 ___
 

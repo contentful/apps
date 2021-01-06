@@ -1,4 +1,4 @@
-[@contentful/sku-app-base](../README.md) / [interfaces](../modules/interfaces.md) / Pagination
+[@contentful/sku-app-base](../README.md) / Pagination
 
 # Interface: Pagination
 
@@ -10,11 +10,11 @@
 
 ### Properties
 
-* [count](interfaces.pagination.md#count)
-* [hasNextPage](interfaces.pagination.md#hasnextpage)
-* [limit](interfaces.pagination.md#limit)
-* [offset](interfaces.pagination.md#offset)
-* [total](interfaces.pagination.md#total)
+* [count](pagination.md#count)
+* [hasNextPage](pagination.md#hasnextpage)
+* [limit](pagination.md#limit)
+* [offset](pagination.md#offset)
+* [total](pagination.md#total)
 
 ## Properties
 
