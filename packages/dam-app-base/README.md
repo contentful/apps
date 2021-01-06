@@ -33,7 +33,7 @@ setup({
     container.innerHTML = `<iframe src="https://example.com/dam?folder=${config.folder}" />`;
     document.body.appendChild(container);
   },
-  openDialog: (sdk, currentValue, config) => {
+  openDialog: async (sdk, currentValue, config) => {
     return await sdk.dialogs.openCurrentApp({
       parameters: { config, currentValue },
     });
