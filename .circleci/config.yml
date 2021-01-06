@@ -36,7 +36,7 @@ commands:
 jobs:
   all:
     docker:
-      - image: circleci/node:10-stretch
+      - image: circleci/node:12-stretch
     steps:
       - checkout
       - run:
