@@ -1,7 +1,7 @@
 import pick from 'lodash/pick';
 import { Cloudinary as cloudinaryCore } from 'cloudinary-core';
 
-import { setup } from 'shared-dam-app';
+import { setup } from '@contentful/dam-app-base';
 
 import logo from './logo.svg';
 

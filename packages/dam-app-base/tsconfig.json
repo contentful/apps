@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib",
+    "target": "es5",
+    "module": "commonjs",
+    "strict": true,
+    "jsx": "react",
+    "rootDir": "./src",
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "lib": ["dom", "es2015"],
+    "resolveJsonModule": true,
+    "declaration": true
+  },
+  "exclude": ["./src/**/*.spec.*", "./lib/**/*.*"]
+}

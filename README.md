@@ -4,6 +4,10 @@
 
 This repository contains the source code for most apps on the [marketplace](https://www.contentful.com/marketplace/) and helpful resources to build your own apps for Contentful.
 
+This repository also includes two packages that help you developing your own apps:
+* [dam-app-base](packages/dam-app-base)
+* [sku-app-base](packages/sku-app-base)
+
 ## Installing an app
 
 Head over to the [marketplace](https://www.contentful.com/marketplace/) and follow the installation flow to set up any of the apps in your Contentful space.
