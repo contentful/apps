@@ -1,14 +1,28 @@
 import pick from 'lodash/pick';
 import { Cloudinary as cloudinaryCore } from 'cloudinary-core';
 
-import { setup } from 'shared-dam-app';
+import { setup } from '@contentful/dam-app-base';
 
 import logo from './logo.svg';
 
-const VALID_IMAGE_FORMATS = ['svg', 'jpg', 'png', 'gif', 'jpeg'];
 const MAX_FILES_UPPER_LIMIT = 25;
 const CTA = 'Select or upload a file on Cloudinary';
-
+const VALID_IMAGE_FORMATS = [
+  'svg',
+  'jpg',
+  'png',
+  'gif',
+  'jpeg',
+  'tiff',
+  'ico',
+  'webp',
+  'pdf',
+  'bmp',
+  'psd',
+  'eps',
+  'jxr',
+  'wdp',
+];
 const FIELDS_TO_PERSIST = [
   'url',
   'tags',
@@ -38,7 +52,7 @@ function makeThumbnail(resource, config) {
 
   let url;
   const alt = [resource.public_id, ...(resource.tags || [])].join(', ');
-  let transformations = `${resource.raw_transformation}/w_150,h_100,c_fill`;
+  let transformations = `${resource.raw_transformation}/c_fill,h_100,w_150`;
 
   if (resource.resource_type === 'image' && VALID_IMAGE_FORMATS.includes(resource.format)) {
     url = cloudinary.url(resource.public_id, {

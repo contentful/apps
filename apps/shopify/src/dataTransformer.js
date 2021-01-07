@@ -41,7 +41,7 @@ export const previewsToVariants = ({ apiEndpoint }) => ({ sku, id, image, produc
   return {
     id,
     image: get(image, ['src'], ''),
-    // TODO: Remove sku:id when shared-sku-app supports internal IDs
+    // TODO: Remove sku:id when @contentful/sku-app-base supports internal IDs
     // as an alternative piece of info to persist instead of the SKU.
     // For now this is a temporary hack.
     sku: id,

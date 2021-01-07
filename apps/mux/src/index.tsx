@@ -5,6 +5,7 @@ import {
   Paragraph,
   Spinner,
   Button,
+  TextLink,
 } from '@contentful/forma-36-react-components';
 import {
   init,
@@ -19,12 +20,20 @@ import './index.css';
 import Config from './config';
 import Player from './player';
 import DeleteButton from './deleteButton';
+import ApiClient from './apiClient';
+import {
+  createSignedPlaybackUrl,
+  createSignedThumbnailUrl,
+} from './signingTokens';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface InstallationParams {
   muxAccessTokenId: string;
   muxAccessTokenSecret: string;
+  muxEnableSignedUrls: boolean;
+  muxSigningKeyId?: string;
+  muxSigningKeyPrivate?: string;
 }
 
 interface AppProps {
@@ -34,7 +43,8 @@ interface AppProps {
 interface MuxContentfulObject {
   uploadId: string;
   assetId: string;
-  playbackId: string;
+  playbackId?: string;
+  signedPlaybackId?: string;
   ready: boolean;
   ratio: string;
   error: string;
@@ -46,24 +56,19 @@ interface AppState {
   error: string | false;
   errorShowResetAction: boolean | false;
   isDeleting: boolean | false;
+  playbackUrl?: string;
+  posterUrl?: string;
 }
 
 export class App extends React.Component<AppProps, AppState> {
-  muxBaseReqOptions: {
-    mode: 'cors' | 'no-cors';
-    headers: Headers;
-  };
+  apiClient: ApiClient;
 
   constructor(props: AppProps) {
     super(props);
 
     const { muxAccessTokenId, muxAccessTokenSecret } = this.props.sdk.parameters
       .installation as InstallationParams;
-
-    this.muxBaseReqOptions = {
-      mode: 'cors',
-      headers: this.requestHeaders(muxAccessTokenId, muxAccessTokenSecret),
-    };
+    this.apiClient = new ApiClient(muxAccessTokenId, muxAccessTokenSecret);
 
     this.state = {
       value: props.sdk.field.getValue(),
@@ -76,6 +81,38 @@ export class App extends React.Component<AppProps, AppState> {
   }
 
   detachExternalChangeHandler: Function | null = null;
+
+  checkForValidAsset = async () => {
+    if (!(this.state.value && this.state.value.assetId)) return false;
+    const res = await this.apiClient.get(
+      `/video/v1/assets/${this.state.value.assetId}`
+    );
+    if (res.status === 400) {
+      const json = await res.json();
+      if (json.error.messages[0].match(/mismatching environment/)) {
+        this.setState({
+          error:
+            'Error: it looks like your api keys are for the wrong environment',
+        });
+        return false;
+      }
+      if (json.error.type === 'invalid_parameters') {
+        this.setState({
+          error: 'Error: it appears that this asset has been deleted',
+          errorShowResetAction: true,
+        });
+        return false;
+      }
+    }
+    if (res.status === 401) {
+      this.setState({
+        error:
+          'Error: it looks like your api keys are not configured properly. Check App configuration.',
+      });
+      return false;
+    }
+    return true;
+  };
 
   async componentDidMount() {
     this.props.sdk.window.startAutoResizer();
@@ -93,22 +130,23 @@ export class App extends React.Component<AppProps, AppState> {
       if (this.state.value.error) {
         // eslint-disable-next-line react/no-did-mount-set-state
         this.setAssetError(this.state.value.error);
+        return;
       }
 
       if (this.state.value.ready) {
-        const asset = await this.getAsset();
-        if (!asset) {
-          // eslint-disable-next-line react/no-did-mount-set-state
-          this.setState({
-            error: 'Error: it appears that this asset has been deleted',
-            errorShowResetAction: true,
-          });
+        const isValid = await this.checkForValidAsset();
+        if (this.state.value.playbackId) {
+          this.setPublicPlayback(this.state.value.playbackId);
+        }
+        if (this.state.value.signedPlaybackId) {
+          await this.setSignedPlayback(this.state.value.signedPlaybackId);
         }
         return;
       }
 
       if (this.state.value.uploadId && !this.state.value.ready) {
         await this.pollForUploadDetails();
+        return;
       }
     }
   }
@@ -123,12 +161,12 @@ export class App extends React.Component<AppProps, AppState> {
     this.setState({ value });
   };
 
-  requestHeaders = (tokenId: string, tokenSecret: string) => {
-    let headers = new Headers();
-    headers.set('Authorization', 'Basic ' + btoa(`${tokenId}:${tokenSecret}`));
-    headers.set('Content-Type', 'application/json');
-
-    return headers;
+  isUsingSigned = () => {
+    return (
+      this.state.value &&
+      !this.state.value.playbackId &&
+      this.state.value.signedPlaybackId
+    );
   };
 
   requestDeleteAsset = async () => {
@@ -153,12 +191,8 @@ export class App extends React.Component<AppProps, AppState> {
     }
     this.setState({ isDeleting: true });
 
-    const res = await fetch(
-      `https://api.mux.com/video/v1/assets/${this.state.value.assetId}`,
-      {
-        ...this.muxBaseReqOptions,
-        method: 'DELETE',
-      }
+    const res = await this.apiClient.get(
+      `/video/v1/assets/${this.state.value.assetId}`
     );
 
     if (res.status === 401) {
@@ -176,6 +210,7 @@ export class App extends React.Component<AppProps, AppState> {
       uploadId: undefined,
       assetId: undefined,
       playbackId: undefined,
+      signedPlaybackId: undefined,
       ready: undefined,
       ratio: undefined,
       error: undefined,
@@ -186,17 +221,19 @@ export class App extends React.Component<AppProps, AppState> {
   getUploadUrl = async () => {
     const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
 
-    const res = await fetch('https://api.mux.com/video/v1/uploads', {
-      ...this.muxBaseReqOptions,
-      body: JSON.stringify({
+    const res = await this.apiClient.post(
+      '/video/v1/uploads',
+      JSON.stringify({
         cors_origin: window.location.origin,
         new_asset_settings: {
           passthrough: passthroughId,
-          playback_policy: 'public',
+          playback_policy: (this.props.sdk.parameters
+            .installation as InstallationParams).muxEnableSignedUrls
+            ? 'signed'
+            : 'public',
         },
-      }),
-      method: 'POST',
-    });
+      })
+    );
 
     if (res.status === 401) {
       throw Error(
@@ -265,13 +302,9 @@ export class App extends React.Component<AppProps, AppState> {
       );
     }
 
-    const res = await fetch(
-      `https://api.mux.com/video/v1/uploads/${this.state.value.uploadId}`,
-      {
-        ...this.muxBaseReqOptions,
-      }
+    const res = await this.apiClient.get(
+      `/video/v1/uploads/${this.state.value.uploadId}`
     );
-
     const { data: muxUpload } = await res.json();
 
     if (muxUpload && muxUpload['asset_id']) {
@@ -287,6 +320,38 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
+  setPublicPlayback = (playbackId: string) => {
+    this.setState({
+      playbackUrl: `https://stream.mux.com/${playbackId}.m3u8`,
+      posterUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg`,
+    });
+  };
+
+  setSignedPlayback = async (signedPlaybackId: string) => {
+    const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
+      .installation as InstallationParams;
+    if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
+      this.setState({
+        error:
+          'Error: this asset was created with a signed playback ID, but signing keys do not exist for your account',
+        errorShowResetAction: true,
+      });
+      return;
+    }
+    this.setState({
+      playbackUrl: createSignedPlaybackUrl(
+        signedPlaybackId,
+        muxSigningKeyId!,
+        muxSigningKeyPrivate!
+      ),
+      posterUrl: createSignedThumbnailUrl(
+        signedPlaybackId,
+        muxSigningKeyId!,
+        muxSigningKeyPrivate!
+      ),
+    });
+  };
+
   getAsset = async () => {
     if (!this.state.value || !this.state.value.assetId) {
       throw Error(
@@ -294,11 +359,8 @@ export class App extends React.Component<AppProps, AppState> {
       );
     }
 
-    const res = await fetch(
-      `https://api.mux.com/video/v1/assets/${this.state.value.assetId}`,
-      {
-        ...this.muxBaseReqOptions,
-      }
+    const res = await this.apiClient.get(
+      `/video/v1/assets/${this.state.value.assetId}`
     );
     const { data: asset } = await res.json();
 
@@ -324,14 +386,28 @@ export class App extends React.Component<AppProps, AppState> {
       throw Error('Something went wrong, we were not able to get the asset.');
     }
 
+    const publicPlayback = asset.playback_ids.find(
+      ({ policy }: { policy: string }) => policy === 'public'
+    );
+    const signedPlayback = asset.playback_ids.find(
+      ({ policy }: { policy: string }) => policy === 'signed'
+    );
+
     await this.props.sdk.field.setValue({
       uploadId: this.state.value.uploadId,
       assetId: this.state.value.assetId,
-      playbackId: asset['playback_ids'][0].id,
+      playbackId: (publicPlayback && publicPlayback.id) || undefined,
+      signedPlaybackId: (signedPlayback && signedPlayback.id) || undefined,
       ready: asset.status === 'ready',
-      ratio: asset.ratio,
+      ratio: asset.aspect_ratio,
       error: assetError,
     });
+
+    if (publicPlayback) {
+      this.setPublicPlayback(publicPlayback.id);
+    } else if (signedPlayback) {
+      this.setSignedPlayback(signedPlayback.id);
+    }
 
     if (assetError) {
       this.setAssetError(assetError);
@@ -383,11 +459,28 @@ export class App extends React.Component<AppProps, AppState> {
         );
       }
 
-      if (this.state.value.ready) {
+      if (
+        this.state.value.ready &&
+        this.state.playbackUrl &&
+        this.state.posterUrl
+      ) {
         return (
           <div>
+            {this.isUsingSigned() && (
+              <Note>
+                Note: this mux asset is using a{' '}
+                <TextLink
+                  href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  signedPlaybackId
+                </TextLink>
+              </Note>
+            )}
             <Player
-              playbackId={this.state.value.playbackId}
+              playbackUrl={this.state.playbackUrl}
+              posterUrl={this.state.posterUrl}
               ratio={this.state.value.ratio}
               onReady={this.onPlayerReady}
             />
