@@ -33,7 +33,8 @@ const styles = {
   }),
   refList: css({
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    flexWrap: 'wrap'
   }),
   sectionHeading: css({
     marginTop: tokens.spacingL,

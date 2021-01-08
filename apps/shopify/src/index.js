@@ -1,4 +1,4 @@
-import { setup, renderSkuPicker } from 'shared-sku-app';
+import { setup, renderSkuPicker } from '@contentful/sku-app-base';
 import { fetchProductPreviews, makeProductSearchResolver } from './productResolvers';
 
 import logo from './logo.svg';

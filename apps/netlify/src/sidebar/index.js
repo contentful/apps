@@ -79,7 +79,7 @@ export default class NetlifySidebar extends React.Component {
           rel="noopener noreferrer"
           buttonType="muted"
           isFullWidth>
-          <div className={styles.previewContent}>Open preview</div>
+          <div className={styles.previewContent}>Open site</div>
         </Button>
       </>
     );

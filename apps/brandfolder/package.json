@@ -12,7 +12,7 @@
     "contentful-cli": "1.2.12"
   },
   "dependencies": {
-    "shared-dam-app": "^1.0.0"
+    "@contentful/dam-app-base": "1.0.1"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",

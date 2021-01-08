@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["src/index.tsx"],
+  "out": "docs",
+  "plugin": "typedoc-plugin-markdown",
+  "readme": "none",
+  "disableSources": true
+}

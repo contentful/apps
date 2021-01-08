@@ -1,7 +1,11 @@
 {
   "packages": [
     "apps/**/*",
-    "lib/*"
+    "packages/*"
   ],
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "publish": {
+    "message": "chore: publish %s [skip ci]",
+    "conventionalCommits": true
+  }
 }

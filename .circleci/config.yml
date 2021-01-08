@@ -1,4 +1,37 @@
-version: 2
+version: 2.1
+
+commands:
+  publish:
+    steps:
+      - run:
+          name: Setup NPM
+          command: |
+            echo $'@contentful:registry=https://registry.npmjs.org/
+            //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+      - run:
+          name: Publish packages
+          command: npm run publish-packages -- --yes
+
+  deploy:
+    steps:
+      - run:
+          name: Install pip
+          command: sudo apt-get install python-pip python-dev
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      - run:
+          name: Deploy apps to test
+          command: |
+            STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
+                STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
+                STAGE='test' npm run deploy
+      - run:
+          name: Deploy apps to prod
+          command: |
+            STATIC_S3_BASE="s3://cf-apps-static/apps" \
+                STATIC_JIRA_S3_BASE="s3://cf-apps-jira" \
+                STAGE='prd' npm run deploy
 
 jobs:
   all:
@@ -26,24 +59,8 @@ jobs:
             if [ "$CIRCLE_BRANCH" != "master" ]; then
                 circleci-agent step halt
             fi
-      - run:
-          name: Install pip
-          command: sudo apt-get install python-pip python-dev
-      - run:
-          name: Install awscli
-          command: sudo pip install awscli
-      - run:
-          name: Deploy apps to test
-          command: |
-            STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
-                STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
-                STAGE='test' npm run deploy
-      - run:
-          name: Deploy apps to prod
-          command: |
-            STATIC_S3_BASE="s3://cf-apps-static/apps" \
-                STATIC_JIRA_S3_BASE="s3://cf-apps-jira" \
-                STAGE='prd' npm run deploy
+      - publish
+      - deploy
 
 workflows:
   version: 2

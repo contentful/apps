@@ -54,7 +54,6 @@ export default class Config extends React.Component<Props, State> {
       const configResourceExistsInResources = !!this.state.resources.find(r => r.id === resourceId);
       const { project } = await JiraClient.getProjectById(resourceId, this.props.token, projectId);
 
-
       // only use the saved config if the resource exists
       // we can assume the projectId is also invalid if it doesn't exist
       if (configResourceExistsInResources) {
@@ -184,6 +183,10 @@ export default class Config extends React.Component<Props, State> {
   };
 
   render() {
+    const { sdk } = this.props;
+    const {
+      ids: { space, environment }
+    } = sdk;
     return (
       <div className="configuration" data-test-id="configuration">
         <InstanceStep
@@ -197,6 +200,8 @@ export default class Config extends React.Component<Props, State> {
         />
         <JiraStep />
         <ContentTypeStep
+          space={space}
+          environment={environment}
           contentTypes={this.state.contentTypes}
           selectCt={this.toggleCtSelection}
           selectedContentTypes={this.state.selectedContentTypes}

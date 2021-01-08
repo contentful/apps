@@ -1,24 +1,25 @@
-import get from 'lodash.get';
-import React from 'react';
-import PropTypes from 'prop-types';
+import get from "lodash.get";
+import React from "react";
+import PropTypes from "prop-types";
 import {
   Heading,
   Typography,
   Paragraph,
   TextField,
   TextLink,
-} from '@contentful/forma-36-react-components';
-import GatsbyIcon from '../GatsbyIcon';
-import ContentTypesPanel from './ContentTypesPanel';
-import styles from '../styles';
+} from "@contentful/forma-36-react-components";
+import GatsbyIcon from "../GatsbyIcon";
+import ContentTypesPanel from "./ContentTypesPanel";
+import styles from "../styles";
 
 function editorInterfacesToEnabledContentTypes(eis, appId) {
-  const findAppWidget = item => item.widgetNamespace === 'app' && item.widgetId === appId;
+  const findAppWidget = (item) =>
+    item.widgetNamespace === "app" && item.widgetId === appId;
 
   return eis
-    .filter(ei => !!get(ei, ['sidebar'], []).find(findAppWidget))
-    .map(ei => get(ei, ['sys', 'contentType', 'sys', 'id']))
-    .filter(ctId => typeof ctId === 'string' && ctId.length > 0);
+    .filter((ei) => !!get(ei, ["sidebar"], []).find(findAppWidget))
+    .map((ei) => get(ei, ["sys", "contentType", "sys", "id"]))
+    .filter((ctId) => typeof ctId === "string" && ctId.length > 0);
 }
 
 function enabledContentTypesToTargetState(contentTypes, enabledContentTypes) {
@@ -26,25 +27,27 @@ function enabledContentTypesToTargetState(contentTypes, enabledContentTypes) {
     EditorInterface: contentTypes.reduce((acc, ct) => {
       return {
         ...acc,
-        [ct.sys.id]: enabledContentTypes.includes(ct.sys.id) ? { sidebar: { position: 3 } } : {}
+        [ct.sys.id]: enabledContentTypes.includes(ct.sys.id)
+          ? { sidebar: { position: 3 } }
+          : {},
       };
-    }, {})
+    }, {}),
   };
 }
 
 export class AppConfig extends React.Component {
   static propTypes = {
-    sdk: PropTypes.object.isRequired
+    sdk: PropTypes.object.isRequired,
   };
 
   state = {
     contentTypes: null,
     enabledContentTypes: {},
-    previewUrl: '',
-    webhookUrl: '',
-    authToken: '',
+    previewUrl: "",
+    webhookUrl: "",
+    authToken: "",
     validPreview: true,
-    validWebhook: true
+    validWebhook: true,
   };
 
   async componentDidMount() {
@@ -53,7 +56,7 @@ export class AppConfig extends React.Component {
     const [installationParams, eisRes, contentTypesRes] = await Promise.all([
       app.getParameters(),
       space.getEditorInterfaces(),
-      space.getContentTypes()
+      space.getContentTypes(),
     ]);
 
     const params = installationParams || {};
@@ -62,10 +65,13 @@ export class AppConfig extends React.Component {
     this.setState(
       {
         contentTypes: contentTypesRes.items,
-        enabledContentTypes: editorInterfacesToEnabledContentTypes(eisRes.items, ids.app),
-        previewUrl: params.previewUrl || '',
-        webhookUrl: params.webhookUrl || '',
-        authToken: params.authToken || ''
+        enabledContentTypes: editorInterfacesToEnabledContentTypes(
+          eisRes.items,
+          ids.app
+        ),
+        previewUrl: params.previewUrl || "",
+        webhookUrl: params.webhookUrl || "",
+        authToken: params.authToken || "",
       },
       () => app.setReady()
     );
@@ -74,7 +80,13 @@ export class AppConfig extends React.Component {
   }
 
   configureApp = async () => {
-    const { contentTypes, enabledContentTypes, previewUrl, webhookUrl, authToken } = this.state;
+    const {
+      contentTypes,
+      enabledContentTypes,
+      previewUrl,
+      webhookUrl,
+      authToken,
+    } = this.state;
 
     this.setState({ validPreview: true, validWebhook: true });
 
@@ -85,19 +97,19 @@ export class AppConfig extends React.Component {
       valid = false;
     }
 
-    if (!previewUrl.startsWith('http')) {
+    if (!previewUrl.startsWith("http")) {
       this.setState({ validPreview: false });
       valid = false;
     }
 
     // the webhookUrl is optional but if it is passed, check that it is valid
-    if (webhookUrl && !webhookUrl.startsWith('http')) {
+    if (webhookUrl && !webhookUrl.startsWith("http")) {
       this.setState({ validWebhook: false });
       valid = false;
     }
 
     if (!valid) {
-      this.props.sdk.notifier.error('Please review the errors in the form.');
+      this.props.sdk.notifier.error("Please review the errors in the form.");
       return false;
     }
 
@@ -105,53 +117,63 @@ export class AppConfig extends React.Component {
       parameters: {
         previewUrl,
         webhookUrl,
-        authToken
+        authToken,
       },
-      targetState: enabledContentTypesToTargetState(contentTypes, enabledContentTypes)
+      targetState: enabledContentTypesToTargetState(
+        contentTypes,
+        enabledContentTypes
+      ),
     };
   };
 
-  updatePreviewUrl = e => {
+  updatePreviewUrl = (e) => {
     this.setState({ previewUrl: e.target.value, validPreview: true });
   };
 
-  updateWebhookUrl = e => {
+  updateWebhookUrl = (e) => {
     this.setState({ webhookUrl: e.target.value, validWebhook: true });
   };
 
-  updateAuthToken = e => {
+  updateAuthToken = (e) => {
     this.setState({ authToken: e.target.value });
   };
 
   validatePreviewUrl = () => {
-    if (!this.state.previewUrl.startsWith('http')) {
+    if (!this.state.previewUrl.startsWith("http")) {
       this.setState({ validPreview: false });
     }
   };
 
   validateWebhookUrl = () => {
-    if (this.state.webhookUrl && !this.state.webhookUrl.startsWith('http')) {
+    if (this.state.webhookUrl && !this.state.webhookUrl.startsWith("http")) {
       this.setState({ validWebhook: false });
     }
   };
 
   toggleContentType = (enabledContentTypes, ctId) => {
     if (enabledContentTypes.includes(ctId)) {
-      return enabledContentTypes.filter(cur => cur !== ctId);
+      return enabledContentTypes.filter((cur) => cur !== ctId);
     } else {
       return enabledContentTypes.concat([ctId]);
     }
   };
 
-  onContentTypeToggle = ctId => {
-    this.setState(prevState => ({
+  onContentTypeToggle = (ctId) => {
+    this.setState((prevState) => ({
       ...prevState,
-      enabledContentTypes: this.toggleContentType(prevState.enabledContentTypes, ctId)
+      enabledContentTypes: this.toggleContentType(
+        prevState.enabledContentTypes,
+        ctId
+      ),
     }));
   };
 
   render() {
     const { contentTypes, enabledContentTypes } = this.state;
+    const { sdk } = this.props;
+    const {
+      ids: { space, environment },
+    } = sdk;
 
     return (
       <>
@@ -161,16 +183,19 @@ export class AppConfig extends React.Component {
             <Typography>
               <Heading>About Gatsby Cloud</Heading>
               <Paragraph>
-                This app connects to Gatsby Cloud which lets you see updates to your Gatsby site as
-                soon as you change content in Contentful. This makes it easy for content creators to
-                see changes they make to the website before going live.
+                This app connects to Gatsby Cloud which lets you see updates to
+                your Gatsby site as soon as you change content in Contentful.
+                This makes it easy for content creators to see changes they make
+                to the website before going live.
               </Paragraph>
             </Typography>
           </div>
           <hr className={styles.splitter} />
           <Typography>
             <Heading>Account Details</Heading>
-            <Paragraph>Gatsby Cloud needs a Site URL in order to preview projects.</Paragraph>
+            <Paragraph>
+              Gatsby Cloud needs a Site URL in order to preview projects.
+            </Paragraph>
             <TextField
               name="previewUrl"
               id="previewUrl"
@@ -182,11 +207,12 @@ export class AppConfig extends React.Component {
               className={styles.input}
               helpText={
                 <span>
-                  To get your Site URL, see your{' '}
+                  To get your Site URL, see your{" "}
                   <TextLink
                     href="https://www.gatsbyjs.com/dashboard/sites"
                     target="_blank"
-                    rel="noopener noreferrer">
+                    rel="noopener noreferrer"
+                  >
                     Gatsby dashboard
                   </TextLink>
                   .
@@ -194,11 +220,11 @@ export class AppConfig extends React.Component {
               }
               validationMessage={
                 !this.state.validPreview
-                  ? 'Please provide a valid URL (It should start with http)'
-                  : ''
+                  ? "Please provide a valid URL (It should start with http)"
+                  : ""
               }
               textInputProps={{
-                type: 'text'
+                type: "text",
               }}
             />
             <TextField
@@ -212,11 +238,11 @@ export class AppConfig extends React.Component {
               helpText="Optional Webhook URL. If provided, your site will be automatically rebuilt as you change content."
               validationMessage={
                 !this.state.validWebhook
-                  ? 'Please provide a valid URL (It should start with http)'
-                  : ''
+                  ? "Please provide a valid URL (It should start with http)"
+                  : ""
               }
               textInputProps={{
-                type: 'text'
+                type: "text",
               }}
             />
             <TextField
@@ -228,12 +254,18 @@ export class AppConfig extends React.Component {
               className={styles.input}
               helpText="Optional Authentication token for private Gatsby Cloud sites."
               textInputProps={{
-                type: 'password'
+                type: "password",
               }}
             />
           </Typography>
           <hr className={styles.splitter} />
-          <ContentTypesPanel contentTypes={contentTypes} enabledContentTypes={enabledContentTypes} onContentTypeToggle={this.onContentTypeToggle} />
+          <ContentTypesPanel
+            space={space}
+            environment={environment}
+            contentTypes={contentTypes}
+            enabledContentTypes={enabledContentTypes}
+            onContentTypeToggle={this.onContentTypeToggle}
+          />
         </div>
         <div className={styles.icon}>
           <GatsbyIcon />

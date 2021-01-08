@@ -13,11 +13,11 @@ custom:
       prd: "https://app.jira.ctfapps.net"
       dev: "http://localhost:1234"
     OAUTH_REDIRECT_URI:
-      prd: https://api.jira.ctfapps.net/auth
-      dev: https://${env:JIRA_DEV_API_ID}.execute-api.us-east-1.amazonaws.com/dev/auth
+      prd: "https://api.jira.ctfapps.net/auth"
+      dev: "${env:NGROK_URL}/dev/auth"
     BASE_URL:
-      prd: https://api.jira.ctfapps.net
-      dev: https://${env:JIRA_DEV_API_ID}.execute-api.us-east-1.amazonaws.com/dev
+      prd: "https://api.jira.ctfapps.net"
+      dev: "${env:NGROK_URL}/dev"
   customDomain:
     domainName: api.jira.ctfapps.net
     stage: prd
