@@ -1,6 +1,7 @@
 {
   "name": "jira",
   "version": "1.0.0",
+  "private": true,
   "devDependencies": {
     "concurrently": "^5.3.0",
     "js-yaml": "^3.14.0",
