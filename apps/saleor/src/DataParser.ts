@@ -1,5 +1,5 @@
 import { uniqBy } from 'lodash';
-import { Product } from '@contentful/sku-app-base';
+import { Product } from '@contentful/ecommerce-app-base';
 import { ITEMS_OFFSET } from './constants';
 import {
   ApiData,

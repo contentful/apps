@@ -1,4 +1,4 @@
-[@contentful/sku-app-base](../README.md) / ParameterDefinition
+[@contentful/ecommerce-app-base](../README.md) / ParameterDefinition
 
 # Interface: ParameterDefinition
 

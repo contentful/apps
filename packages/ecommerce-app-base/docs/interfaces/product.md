@@ -1,4 +1,4 @@
-[@contentful/sku-app-base](../README.md) / Product
+[@contentful/ecommerce-app-base](../README.md) / Product
 
 # Interface: Product
 

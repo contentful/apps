@@ -1,4 +1,4 @@
-[@contentful/sku-app-base](../README.md) / Integration
+[@contentful/ecommerce-app-base](../README.md) / Integration
 
 # Interface: Integration
 
