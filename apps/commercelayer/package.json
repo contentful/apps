@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@commercelayer/js-auth": "2.0.1",
-    "core-js": "3.4.1",
-    "@contentful/sku-app-base": "1.0.0"
+    "@contentful/sku-app-base": "^1.0.0",
+    "core-js": "3.4.1"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",

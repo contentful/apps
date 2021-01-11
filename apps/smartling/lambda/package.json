@@ -19,8 +19,8 @@
     "rimraf": "^3.0.1",
     "serverless": "^1.61.3",
     "serverless-express": "^2.0.11",
-    "typescript": "^3.7.5",
-    "smartling-frontend": "^1.0.0"
+    "smartling-frontend": "^1.0.0",
+    "typescript": "^3.7.5"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.36",

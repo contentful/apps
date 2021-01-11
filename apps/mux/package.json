@@ -29,6 +29,7 @@
     "typescript": "^3.5.2"
   },
   "dependencies": {
+    "@contentful/dam-app-base": "^1.0.0",
     "@contentful/forma-36-fcss": "^0.0.35",
     "@contentful/forma-36-react-components": "^3.37.2",
     "@contentful/forma-36-tokens": "^0.5.2",
@@ -43,8 +44,7 @@
     "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "@contentful/dam-app-base": "1.0.1"
+    "react-dom": "^16.13.1"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
