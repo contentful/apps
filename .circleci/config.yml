@@ -10,7 +10,7 @@ commands:
             //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
       - run:
           name: Publish packages
-          command: npm run publish-packages -- --yes
+          command: npm run publish-packages
 
   deploy:
     steps:
