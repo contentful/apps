@@ -3,7 +3,7 @@
     "apps/**/*",
     "packages/*"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publish": {
     "message": "chore: publish %s [skip ci]",
     "conventionalCommits": true

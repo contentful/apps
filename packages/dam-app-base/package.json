@@ -1,7 +1,14 @@
 {
   "name": "@contentful/dam-app-base",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/",
+  "author": "Contentful GmbH",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/contentful/apps.git",
+    "directory": "packages/dam-app-base"
+  },
   "devDependencies": {
     "@babel/core": "7.8.4",
     "@babel/plugin-proposal-class-properties": "7.8.3",
