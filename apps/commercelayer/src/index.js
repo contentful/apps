@@ -3,7 +3,7 @@ import difference from 'lodash/difference';
 import chunk from 'lodash/chunk';
 import flatMap from 'lodash/flatMap';
 
-import { setup, renderSkuPicker } from '@contentful/sku-app-base';
+import { setup, renderSkuPicker } from '@contentful/ecommerce-app-base';
 
 import logo from './logo.svg';
 import { dataTransformer } from './dataTransformer';
@@ -49,7 +49,7 @@ async function getAccessToken(clientId, endpoint) {
 
 /**
  * This function is needed to make the pagination of Commerce Layer work with the
- * @contentful/sku-app-base library.
+ * @contentful/ecommerce-app-base library.
  *
  * When fetching the SKUs via the Commerce Layer JS SDK the metadata object which
  * includes the total count of records needed by the shared-sku-picker paginator

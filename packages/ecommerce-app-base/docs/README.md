@@ -1,6 +1,6 @@
-@contentful/sku-app-base
+@contentful/ecommerce-app-base
 
-# @contentful/sku-app-base
+# @contentful/ecommerce-app-base
 
 ## Index
 

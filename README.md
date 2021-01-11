@@ -6,7 +6,7 @@ This repository contains the source code for most apps on the [marketplace](http
 
 This repository also includes two packages that help you developing your own apps:
 * [dam-app-base](packages/dam-app-base)
-* [sku-app-base](packages/sku-app-base)
+* [ecommerce-app-base](packages/ecommerce-app-base)
 
 ## Installing an app
 

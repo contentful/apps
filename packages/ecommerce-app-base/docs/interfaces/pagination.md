@@ -1,4 +1,4 @@
-[@contentful/sku-app-base](../README.md) / Pagination
+[@contentful/ecommerce-app-base](../README.md) / Pagination
 
 # Interface: Pagination
 

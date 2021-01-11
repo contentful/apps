@@ -1,4 +1,4 @@
-import { Pagination, Product } from '@contentful/sku-app-base';
+import { Pagination, Product } from '@contentful/ecommerce-app-base';
 
 export interface ClientConfig {
   apiEndpoint: string;

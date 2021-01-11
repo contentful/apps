@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@commercelayer/js-auth": "2.0.1",
-    "@contentful/sku-app-base": "^1.0.0",
+    "@contentful/ecommerce-app-base": "^1.0.0",
     "core-js": "3.4.1"
   },
   "scripts": {

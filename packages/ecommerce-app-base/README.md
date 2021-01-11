@@ -1,13 +1,13 @@
 [![CircleCI](https://circleci.com/gh/contentful/apps.svg?style=svg&circle-token=913f0d4852062fbed644fca927d059d5e3e72908)](https://circleci.com/gh/contentful/apps)
 
-# sku-app-base
+# ecommerce-app-base
 
-`@contentful/sku-app-base` is a library that helps you to quickly build an app to integrate your commerce system of choice with Contentful. Many commerce integrations are very similar, therefore this library provides the boilerplate for your app and you only need to add the code for your specific service.
+`@contentful/ecommerce-app-base` is a library that helps you to quickly build an app to integrate your e-commerce system of choice with Contentful. Many e-commerce integrations are very similar, therefore this library provides the boilerplate for your app and you only need to add the code for your specific service.
 
 ## Usage
 
 ```javascript
-import { setup } from '@contentful/sku-app-base';
+import { setup } from '@contentful/ecommerce-app-base';
 
 setup({
   makeCTA: () => 'Select products',
@@ -51,7 +51,7 @@ setup({
 
 ## Apps
 
-These Contentful apps use `@contentful/sku-app-base`. Look at there source code to learn how they utilize this library:
+These Contentful apps use `@contentful/ecommerce-app-base`. Look at there source code to learn how they utilize this library:
 
 - [Commerce Layer](../apps/commercelayer)
 - [Saleor](../apps/saleor)

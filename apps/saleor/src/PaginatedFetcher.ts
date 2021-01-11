@@ -1,6 +1,6 @@
 import { uniq } from 'lodash';
 import { ClientConfig, Identifiers, ProductVariantsData } from './types';
-import { Pagination, Product } from '@contentful/sku-app-base';
+import { Pagination, Product } from '@contentful/ecommerce-app-base';
 import DataParser from './DataParser';
 import ApiClient from './ApiClient';
 import { extractProductsAndVariantsIdentifiers } from './utils';
