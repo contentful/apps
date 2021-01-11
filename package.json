@@ -8,7 +8,7 @@
     "build": "lerna run build --concurrency=1",
     "test": "lerna run test:ci --concurrency=2",
     "deploy": "lerna run deploy --concurrency=2",
-    "publish-packages": "lerna publish --concurrency=2"
+    "publish-packages": "lerna publish"
   },
   "dependencies": {
     "lerna": "^3.20.2"
