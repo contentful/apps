@@ -100,7 +100,7 @@ export type RenderDialogFn = (sdk: DialogExtensionSDK) => void;
  *
  * @example
  * ```javascript
- * function openDialog(sdk, currentValue, config) {
+ * async function openDialog(sdk, currentValue, config) {
  *   return await sdk.dialogs.openCurrentApp({
  *     parameters: { config, currentValue },
  *   });

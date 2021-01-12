@@ -86,7 +86,7 @@ You probably want to call [`sdk.openCurrentApp`](https://www.contentful.com/deve
 
 **`example`** 
 ```javascript
-function openDialog(sdk, currentValue, config) {
+async function openDialog(sdk, currentValue, config) {
   return await sdk.dialogs.openCurrentApp({
     parameters: { config, currentValue },
   });

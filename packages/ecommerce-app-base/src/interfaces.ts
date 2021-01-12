@@ -114,13 +114,13 @@ export type DeleteFn = (index: number) => void;
 export type RenderDialogFn = (sdk: DialogExtensionSDK) => void;
 
 /**
- * Function that gets called when app wants to open a dialog. Should return an updated list of assets as a Promise.
+ * Function that gets called when app wants to open a dialog. Should return an updated list of skus as a Promise.
  *
  * You probably want to call [`sdk.openCurrentApp`](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#open-the-current-app-in-a-dialog).
  *
  * @example
  * ```javascript
- * function openDialog(sdk, currentValue, config) {
+ * async function openDialog(sdk, currentValue, config) {
  *   return await sdk.dialogs.openCurrentApp({
  *     parameters: { config, currentValue },
  *   });
@@ -129,9 +129,9 @@ export type RenderDialogFn = (sdk: DialogExtensionSDK) => void;
  * ```
  *
  * @param sdk [FieldExtensionSDK](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/)
- * @param currentValue List of currently selected assets
+ * @param currentValue List of currently selected akus
  * @param config App configuration
- * @returns Promise containing a list of selected assets
+ * @returns Promise containing a list of selected skus
  */
 export type OpenDialogFn = (
   sdk: FieldExtensionSDK,
@@ -142,7 +142,7 @@ export type OpenDialogFn = (
 /**
  * Function that should return true when the button should be disabled.
  *
- * @param currentValue Currently selected assets
+ * @param currentValue Currently selected skus
  * @param config App configuration
  * @returns true, if the button in the field location should be disabled. false, if the button should be enabled
  */
@@ -218,13 +218,13 @@ export interface Integration {
   renderDialog: RenderDialogFn;
 
   /**
-   * Function that gets called when app wants to open a dialog. Should return an updated list of assets as a Promise.
+   * Function that gets called when app wants to open a dialog. Should return an updated list of skus as a Promise.
    *
    * You probably want to call [`sdk.openCurrentApp`](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#open-the-current-app-in-a-dialog).
    *
    * @example
    * ```javascript
-   * function openDialog(sdk, currentValue, config) {
+   * async function openDialog(sdk, currentValue, config) {
    *   return await sdk.dialogs.openCurrentApp({
    *     parameters: { config, currentValue },
    *   });
