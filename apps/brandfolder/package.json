@@ -1,6 +1,6 @@
 {
   "name": "brandfolder-assets",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.3.4",
@@ -12,7 +12,7 @@
     "contentful-cli": "1.2.12"
   },
   "dependencies": {
-    "@contentful/dam-app-base": "1.0.1"
+    "@contentful/dam-app-base": "^1.0.2"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
