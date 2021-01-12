@@ -1,9 +1,13 @@
 {
   "name": "@contentful/dam-app-base",
   "version": "1.0.1",
-  "main": "src/",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
   "license": "MIT",
+  "files": [
+    "lib"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/contentful/apps.git",
