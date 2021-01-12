@@ -8,6 +8,8 @@ commands:
           command: |
             echo $'@contentful:registry=https://registry.npmjs.org/
             //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+      - run: git config --global user.email "prd-dev-workflows+ecosystem-bot@contentful.com"
+      - run: git config --global user.name "contentful-ecosystem-bot"
       - run:
           name: Publish packages
           command: npm run publish-packages
