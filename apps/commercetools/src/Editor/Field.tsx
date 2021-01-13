@@ -3,7 +3,7 @@ import { Button } from "@contentful/forma-36-react-components";
 import tokens from "@contentful/forma-36-tokens";
 import get from "lodash/get";
 import { css } from "emotion";
-import { FieldExtensionSDK } from "contentful-ui-extensions-sdk";
+import { FieldExtensionSDK } from "@contentful/app-sdk";
 import { ProductPreviews } from "./ProductPreviews/ProductPreviews";
 import { CategoryPreviews } from "./CategoryPreviews/CategoryPreviews";
 import { fetchProductPreviews } from "../api/fetchProductPreviews";

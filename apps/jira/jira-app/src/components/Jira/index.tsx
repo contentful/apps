@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React from 'react';
-import { SidebarExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { SidebarExtensionSDK } from '@contentful/app-sdk';
 import IssueList from './IssueList';
 import Search from './Search';
 import JiraClient from '../../jiraClient';

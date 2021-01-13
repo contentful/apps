@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppExtensionSDK, CollectionResponse, EditorInterface } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK, CollectionResponse, EditorInterface } from '@contentful/app-sdk';
 import {
   Heading,
   Paragraph,

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { render } from 'react-dom';
-import { init, locations } from 'contentful-ui-extensions-sdk';
+import { init, locations } from '@contentful/app-sdk';
 import './index.css';
 import EditorPage from './EditorPage';
 import Sidebar from './Sidebar';

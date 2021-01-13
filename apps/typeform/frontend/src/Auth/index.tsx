@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useState, useEffect } from 'react';
 import { TypeformOAuth } from './TypeformOAuth';
-import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK } from '@contentful/app-sdk';
 import { AppConfig } from '../AppConfig';
 import { styles } from '../AppConfig/styles';
 // @ts-ignore 2307

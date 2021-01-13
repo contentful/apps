@@ -792,6 +792,11 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@contentful/app-sdk@3.31.0":
+  version "3.31.0"
+  resolved "https://registry.yarnpkg.com/@contentful/app-sdk/-/app-sdk-3.31.0.tgz#e548d72c73650e174b19707111c4dbb5f9588933"
+  integrity sha512-f1rbHSKaCEp8xUwfFgFQZFo7Plajv7mJzbOSiM0gvsxxlybU91zYzbG4xfgbQnPh/a5ko1pp5Oi4Z0MyLRwN+Q==
+
 "@contentful/forma-36-fcss@^0.0.35":
   version "0.0.35"
   resolved "https://registry.yarnpkg.com/@contentful/forma-36-fcss/-/forma-36-fcss-0.0.35.tgz#a6803307b029161a0bffc17ef787e20af04a1c8a"
@@ -2059,13 +2064,6 @@ content@4.x.x:
   dependencies:
     boom "7.x.x"
 
-contentful-ui-extensions-sdk@^3.14.3:
-  version "3.14.3"
-  resolved "https://registry.yarnpkg.com/contentful-ui-extensions-sdk/-/contentful-ui-extensions-sdk-3.14.3.tgz#cc95d5c2a2576e5863878868b0d16f2e34f729c7"
-  integrity sha512-Qu5BLtv08YfxhoserC4qAZ+vOGYG0cqCCpldO+QOwtZEsjUGF/12i9+Pfw+jQJSyOmPJzfz7TkNIoUbZFcxpaw==
-  dependencies:
-    es6-promise "^4.2.8"
-
 convert-source-map@^1.5.1, convert-source-map@^1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.7.0.tgz#17a2cb882d7f77d3490585e2ce6c524424a3a442"
@@ -2669,11 +2667,6 @@ es-to-primitive@^1.2.1:
     is-callable "^1.1.4"
     is-date-object "^1.0.1"
     is-symbol "^1.0.2"
-
-es6-promise@^4.2.8:
-  version "4.2.8"
-  resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"
-  integrity sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==
 
 escape-html@~1.0.3:
   version "1.0.3"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { locations, AppExtensionSDK, SidebarExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { locations, AppExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
 import AppConfig from './AppConfig';
 import Sidebar from './Sidebar';
 

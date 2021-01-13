@@ -44,7 +44,7 @@ const mockSdk = {
 };
 
 function doSdkMock() {
-  jest.doMock('contentful-ui-extensions-sdk', () => {
+  jest.doMock('@contentful/app-sdk', () => {
     return {
       __esModule: true,
       init: jest.fn(fn => fn(mockSdk)),
@@ -61,7 +61,7 @@ describe('Gatsby Preview entry point', () => {
   });
   afterEach(() => {
     render.mockClear();
-    jest.unmock('contentful-ui-extensions-sdk');
+    jest.unmock('@contentful/app-sdk');
   });
 
   it('should initialize the app', () => {

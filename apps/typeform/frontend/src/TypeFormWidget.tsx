@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as typeformEmbed from '@typeform/embed';
-import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { Hash } from './typings';
 import { SDK_WINDOW_HEIGHT } from './constants';
 

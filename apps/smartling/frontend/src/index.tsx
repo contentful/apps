@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import { init, locations, AppExtensionSDK, SidebarExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { init, locations, AppExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.scss';
 import App from './App';

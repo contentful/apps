@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { EntrySys, ContentType } from 'contentful-ui-extensions-sdk';
+import { EntrySys, ContentType } from '@contentful/app-sdk';
 import { EntityList, EntityListItem, HelpText } from '@contentful/forma-36-react-components';
 
 function getEntryStatus(entrySys: EntrySys) {

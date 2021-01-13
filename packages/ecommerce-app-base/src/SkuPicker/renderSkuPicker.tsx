@@ -1,5 +1,5 @@
 import React from 'react';
-import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { render } from 'react-dom';
 import { SkuPicker } from './SkuPicker';
 import { ProductPreviewsFn, ProductsFn } from '../interfaces';

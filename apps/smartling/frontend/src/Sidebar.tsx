@@ -1,5 +1,5 @@
 import React from 'react';
-import { SidebarExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { SidebarExtensionSDK } from '@contentful/app-sdk';
 import {
   Icon,
   Button,

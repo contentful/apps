@@ -6,7 +6,7 @@ import {
   AppExtensionSDK,
   FieldExtensionSDK,
   DialogExtensionSDK
-} from 'contentful-ui-extensions-sdk';
+} from '@contentful/app-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import Authentication from './Auth';

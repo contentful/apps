@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
 
-import { init, locations } from "contentful-ui-extensions-sdk";
+import { init, locations } from "@contentful/app-sdk";
 import "@contentful/forma-36-react-components/dist/styles.css";
 import "@contentful/forma-36-fcss/dist/styles.css";
 import { Heading, Note, Form, TextField, Option } from "@contentful/forma-36-react-components";

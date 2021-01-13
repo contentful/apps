@@ -36,10 +36,10 @@
     "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'"
   },
   "dependencies": {
+    "@contentful/app-sdk": "3.31.0",
     "@contentful/forma-36-fcss": "^0.0.20",
     "@contentful/forma-36-react-components": "^3.39.7",
     "@contentful/forma-36-tokens": "^0.3.3",
-    "contentful-ui-extensions-sdk": "^3.10.6",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",

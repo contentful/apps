@@ -5,7 +5,7 @@ import {
   locations,
   AppExtensionSDK,
   SidebarExtensionSDK
-} from 'contentful-ui-extensions-sdk';
+} from '@contentful/app-sdk';
 import standalone from './standalone';
 import App from './components/App';
 import Jira from './components/Jira';
