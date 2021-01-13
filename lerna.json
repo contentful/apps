@@ -4,8 +4,10 @@
     "packages/*"
   ],
   "version": "independent",
-  "publish": {
-    "message": "chore: publish %s [skip ci]",
-    "conventionalCommits": true
+  "command": {
+    "publish": {
+      "message": "chore: publish [skip ci]",
+      "conventionalCommits": true
+    }
   }
 }
