@@ -1,6 +1,6 @@
 {
   "name": "saleor",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.7.2",
@@ -13,7 +13,7 @@
     "cssnano": "4.1.10"
   },
   "dependencies": {
-    "@contentful/ecommerce-app-base": "1.0.1",
+    "@contentful/ecommerce-app-base": "^1.0.2",
     "@types/lodash": "^4.14.161",
     "contentful-ui-extensions-sdk": "^3.23.2",
     "core-js": "3.4.1",

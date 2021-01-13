@@ -1,6 +1,6 @@
 {
   "name": "@contentful/dam-app-base",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
