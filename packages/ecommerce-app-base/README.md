@@ -30,7 +30,7 @@ setup({
           skus.map(sku => fetch(`https://example.com/products/${sku}`))
       );
       return responses.map(response => response.json());
-  }
+  },
   renderDialog: (sdk) => {
     const config = sdk.parameters.invocation;
 
