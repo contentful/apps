@@ -4,6 +4,8 @@
 
 `@contentful/dam-app-base` is a library that helps you to quickly build an app to integrate your DAM (Digital Asset Management) system of choice with Contentful. Many DAM integrations are very similar, therefore this library provides the boilerplate for your app and you only need to add the code for your specific service.
 
+This library creates an app that can be used in the entry field location to select assets from your DAM service. The library also provides a configuration screen for easy customization.
+
 ## Usage
 
 ```javascript

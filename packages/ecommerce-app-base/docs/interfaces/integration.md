@@ -100,13 +100,13 @@ ___
 
 • **openDialog**: [*OpenDialogFn*](../README.md#opendialogfn)
 
-Function that gets called when app wants to open a dialog. Should return an updated list of assets as a Promise.
+Function that gets called when app wants to open a dialog. Should return an updated list of skus as a Promise.
 
 You probably want to call [`sdk.openCurrentApp`](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#open-the-current-app-in-a-dialog).
 
 **`example`** 
 ```javascript
-function openDialog(sdk, currentValue, config) {
+async function openDialog(sdk, currentValue, config) {
   return await sdk.dialogs.openCurrentApp({
     parameters: { config, currentValue },
   });

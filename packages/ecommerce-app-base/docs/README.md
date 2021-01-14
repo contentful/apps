@@ -50,7 +50,7 @@ ___
 
 Function that should return true when the button should be disabled.
 
-**`param`** Currently selected assets
+**`param`** Currently selected skus
 
 **`param`** App configuration
 
@@ -74,13 +74,13 @@ ___
 
 Ƭ **OpenDialogFn**: (`sdk`: FieldExtensionSDK, `currentValue`: *string*[] \| *string*, `config`: [*Config*](README.md#config)) => *Promise*<*string*[]\>
 
-Function that gets called when app wants to open a dialog. Should return an updated list of assets as a Promise.
+Function that gets called when app wants to open a dialog. Should return an updated list of skus as a Promise.
 
 You probably want to call [`sdk.openCurrentApp`](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#open-the-current-app-in-a-dialog).
 
 **`example`** 
 ```javascript
-function openDialog(sdk, currentValue, config) {
+async function openDialog(sdk, currentValue, config) {
   return await sdk.dialogs.openCurrentApp({
     parameters: { config, currentValue },
   });
@@ -90,11 +90,11 @@ function openDialog(sdk, currentValue, config) {
 
 **`param`** (https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/)
 
-**`param`** List of currently selected assets
+**`param`** List of currently selected akus
 
 **`param`** App configuration
 
-**`returns`** Promise containing a list of selected assets
+**`returns`** Promise containing a list of selected skus
 
 ___
 
