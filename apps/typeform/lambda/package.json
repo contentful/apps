@@ -1,7 +1,7 @@
 {
   "name": "typeform-lambda",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Contentful GmbH",
   "license": "MIT",
   "scripts": {
@@ -24,6 +24,6 @@
     "express": "4.17.1",
     "luxon": "1.22.0",
     "node-fetch": "2.6.0",
-    "typeform-frontend": "^1.0.0"
+    "typeform-frontend": "^1.1.0"
   }
 }

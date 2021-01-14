@@ -3,19 +3,7 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [1.0.2](https://github.com/contentful/apps/compare/smartling-lambda@1.0.1...smartling-lambda@1.0.2) (2021-01-14)
-
-**Note:** Version bump only for package smartling-lambda
-
-
-
-
-
-## 1.0.1 (2021-01-12)
-
-
-
-## 1.0.1 (2021-01-11)
+# 1.1.0 (2021-01-14)
 
 
 
@@ -25,3 +13,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Bug Fixes
 
 * make bootstrap work ([15b3298](https://github.com/contentful/apps/commit/15b32984a3c96e3455cc13705e0347951a90bac6))
+
+
+### Features
+
+* add typeform app ([#65](https://github.com/contentful/apps/issues/65)) ([77d5bd2](https://github.com/contentful/apps/commit/77d5bd21f28809cbc52575ea4c32c02cbf9805cf))

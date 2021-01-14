@@ -1,6 +1,6 @@
 {
   "name": "dropbox-assets",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.3.4",
@@ -12,7 +12,7 @@
     "contentful-cli": "1.2.12"
   },
   "dependencies": {
-    "@contentful/dam-app-base": "^1.0.3"
+    "@contentful/dam-app-base": "^1.0.4"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
