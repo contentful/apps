@@ -1,7 +1,7 @@
-# Assigning an app to ContentTypes
+# Assigning an app to Content Types
 
 We recommend using Target State to assign apps to specific content types in your app's config location. Doing this simplifies the process of installing an app.
-The code in `./set-editors.tsx` offers an example of how to use Target State to
+The code in [set-editors.tsx](./set-editors.tsx) offers an example of how to use Target State to
 enable an app for the EntryEditor location of selected content types.
 
 ![Content type selection in config location](./config-screenshot.png)

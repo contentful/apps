@@ -103,7 +103,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
   render() {
     return (
       <>
-        <Heading>Select which ContentTypes will use app as an Editor</Heading>
+        <Heading>Select which Content Types will use the app as an Editor</Heading>
         <List>
           {this.state.data.map(({ active, contentType }, index) => (
             <ListItem key={contentType.sys.id}>
