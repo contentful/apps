@@ -18,6 +18,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@contentful/app-sdk": "3.31.0",
     "@contentful/forma-36-fcss": "0.0.31",
     "@contentful/forma-36-react-components": "^3.16.7",
     "@contentful/forma-36-tokens": "^0.4.5",
@@ -25,7 +26,6 @@
     "@typeform/embed": "^0.16.0",
     "@types/jest": "^25.1.4",
     "@types/lodash": "^4.14.149",
-    "contentful-ui-extensions-sdk": "3.10.11",
     "core-js": "^3.2.1",
     "emotion": "^10.0.27",
     "jest-environment-jsdom": "^25.1.0",

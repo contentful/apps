@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, cleanup, wait, fireEvent } from '@testing-library/react';
 
-import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK } from '@contentful/app-sdk';
 
 import AppConfig from './AppConfig';
 import { definitions } from './parameters.spec';

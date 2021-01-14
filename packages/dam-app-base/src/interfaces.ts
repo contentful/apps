@@ -1,7 +1,7 @@
 import {
   DialogExtensionSDK,
   FieldExtensionSDK,
-} from "contentful-ui-extensions-sdk";
+} from "@contentful/app-sdk";
 
 /**
  * Object containing all information configured on the app configuration page.

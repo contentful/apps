@@ -12,7 +12,7 @@ import {
   locations,
   AppExtensionSDK,
   FieldExtensionSDK,
-} from 'contentful-ui-extensions-sdk';
+} from '@contentful/app-sdk';
 import { createUpload } from '@mux/upchunk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';

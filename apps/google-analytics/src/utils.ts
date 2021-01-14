@@ -1,5 +1,5 @@
 import get from 'lodash/get';
-import { CollectionResponse, EditorInterface, AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { CollectionResponse, EditorInterface, AppExtensionSDK } from '@contentful/app-sdk';
 import { SavedParams, GapiError } from './typings';
 
 export function formatDate(date: Date) {

@@ -36,11 +36,11 @@
     "typescript": "^4.0.3"
   },
   "dependencies": {
+    "@contentful/app-sdk": "^3.31.0",
     "@contentful/forma-36-fcss": "^0.0.34",
     "@contentful/forma-36-react-components": "^3.30.2",
     "@contentful/forma-36-tokens": "^0.5.1",
     "array-move": "2.2.1",
-    "contentful-ui-extensions-sdk": "^3.10.7",
     "core-js": "3.6.4",
     "emotion": "^10.0.27",
     "lodash.get": "^4.4.2",

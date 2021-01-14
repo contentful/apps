@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import { init, locations } from 'contentful-ui-extensions-sdk';
+import { init, locations } from '@contentful/app-sdk';
 
 import Sidebar from './Sidebar';
 import { AppConfig } from './AppConfig';

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { render, fireEvent, cleanup, configure, wait } from '@testing-library/react';
-import { locations, AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { locations, AppExtensionSDK } from '@contentful/app-sdk';
 import 'whatwg-fetch';
 import fetchMock from 'fetch-mock';
 import App from './App';

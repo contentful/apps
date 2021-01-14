@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Button } from '@contentful/forma-36-react-components';
 import { BASE_URL, CLIENT_ID } from '../constants';
 

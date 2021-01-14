@@ -29,6 +29,7 @@
     "typescript": "^3.5.2"
   },
   "dependencies": {
+    "@contentful/app-sdk": "3.31.0",
     "@contentful/dam-app-base": "^1.0.3",
     "@contentful/forma-36-fcss": "^0.0.35",
     "@contentful/forma-36-react-components": "^3.37.2",
@@ -37,7 +38,6 @@
     "@types/hls.js": "^0.12.3",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash.get": "^4.4.6",
-    "contentful-ui-extensions-sdk": "^3.14.x",
     "core-js": "^3.0.1",
     "hls.js": "^0.13.2",
     "jsonwebtoken": "^8.5.1",

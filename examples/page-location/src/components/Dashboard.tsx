@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { ContentType, PageExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { ContentType, PageExtensionSDK } from '@contentful/app-sdk';
 import { TabPanel, Heading, Paragraph } from '@contentful/forma-36-react-components';
 
 import Collection from './Collection';

@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer } from 'react';
-import { FieldExtensionSDK, AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { FieldExtensionSDK, AppExtensionSDK } from '@contentful/app-sdk';
 import { Select, Option, TextLink, Note, Tooltip } from '@contentful/forma-36-react-components';
 import { TypeFormResponse, FormOption, InstallationParameters } from '../typings';
 import { TypeformOAuth } from '../Auth/TypeformOAuth';

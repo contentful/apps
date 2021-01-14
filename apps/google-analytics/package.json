@@ -29,10 +29,10 @@
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/google-analytics --acl public-read"
   },
   "dependencies": {
+    "@contentful/app-sdk": "3.31.0",
     "@contentful/forma-36-fcss": "^0.0.20",
     "@contentful/forma-36-react-components": "^3.28.9",
     "@contentful/forma-36-tokens": "^0.3.0",
-    "contentful-ui-extensions-sdk": "^3.10.10",
     "emotion": "^10.0.27",
     "lodash": "^4.17.15",
     "prop-types": "^15.7.2",

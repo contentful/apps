@@ -2,7 +2,7 @@ import * as React from 'react';
 import arrayMove from 'array-move';
 import isEqual from 'lodash/isEqual';
 import difference from 'lodash/difference';
-import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { mapSort } from '../utils';
 import { SortableList } from './SortableList';
 import { ProductPreviewsFn, Product, Config } from '../interfaces';

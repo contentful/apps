@@ -3,7 +3,7 @@ import * as React from "react";
 import {
   AppExtensionSDK,
   CollectionResponse,
-} from "contentful-ui-extensions-sdk";
+} from "@contentful/app-sdk";
 import {
   Heading,
   Paragraph,

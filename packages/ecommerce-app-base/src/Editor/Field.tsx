@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
-import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { SortableComponent } from './SortableComponent';
 import { ProductPreviewsFn, OpenDialogFn, DisabledPredicateFn, MakeCTAFn } from '../interfaces';
 

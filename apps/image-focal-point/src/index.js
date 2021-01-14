@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { Note } from '@contentful/forma-36-react-components';
-import { init, locations } from 'contentful-ui-extensions-sdk';
+import { init, locations } from '@contentful/app-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 

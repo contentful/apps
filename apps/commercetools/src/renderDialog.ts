@@ -1,7 +1,7 @@
 import uniq from 'lodash/uniq';
 import get from 'lodash/get';
 import { Hash } from './interfaces';
-import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { DialogExtensionSDK } from '@contentful/app-sdk';
 
 export async function renderDialog(sdk: DialogExtensionSDK) {
   const { projectKey, locale, clientId, clientSecret, apiEndpoint, authApiEndpoint } = sdk

@@ -1,4 +1,4 @@
-import { AppExtensionSDK, SidebarExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
 
 // eslint-disable-next-line no-undef, @typescript-eslint/no-use-before-define
 export interface AppConfigParams {

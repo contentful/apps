@@ -18,7 +18,7 @@ import {
   ContentType,
   EditorInterface,
   CollectionResponse
-} from 'contentful-ui-extensions-sdk';
+} from '@contentful/app-sdk';
 
 export default class AppConfig extends React.Component<AppConfigParams, AppConfigState> {
   state: AppConfigState = {

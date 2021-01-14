@@ -24,10 +24,10 @@
     "test:ci": "contentful-extension-scripts test --env=jsdom"
   },
   "dependencies": {
+    "@contentful/app-sdk": "3.31.0",
     "@contentful/forma-36-fcss": "0.0.31",
     "@contentful/forma-36-react-components": "^3.18.4",
     "@contentful/forma-36-tokens": "^0.4.5",
-    "contentful-ui-extensions-sdk": "^3.10.6",
     "emotion": "^10.0.17",
     "hex-rgb": "^4.1.0",
     "lodash.camelcase": "^4.3.0",

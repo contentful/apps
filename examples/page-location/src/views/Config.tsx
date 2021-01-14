@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Note } from '@contentful/forma-36-react-components';
 
 interface ConfigProps {

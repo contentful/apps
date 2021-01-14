@@ -4,7 +4,7 @@ import merge from 'lodash/merge';
 import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, SkuPicker } from './SkuPicker';
 import productPreviews from '../__mocks__/productPreviews';
-import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { DialogExtensionSDK } from '@contentful/app-sdk';
 
 configure({
   testIdAttribute: 'data-test-id'

@@ -3,7 +3,7 @@ import get from 'lodash/get';
 import clamp from 'lodash/clamp';
 import debounce from 'lodash/debounce';
 import { Button, TextInput, Icon } from '@contentful/forma-36-react-components';
-import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { Paginator } from './Paginator';
 import { Pagination, Product, ProductPreviewsFn, ProductsFn } from '../interfaces';

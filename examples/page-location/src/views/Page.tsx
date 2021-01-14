@@ -3,7 +3,7 @@ import { Router, Switch, Route } from 'react-router-dom';
 import { MemoryHistory, createMemoryHistory } from 'history';
 
 import { Tab, Tabs, Heading } from '@contentful/forma-36-react-components';
-import { PageExtensionSDK, CollectionResponse, ContentType } from 'contentful-ui-extensions-sdk';
+import { PageExtensionSDK, CollectionResponse, ContentType } from '@contentful/app-sdk';
 
 import Dashboard from '../components/Dashboard';
 import IncompleteEntries from '../components/IncompleteEntries';

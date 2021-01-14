@@ -6,7 +6,7 @@ import {
   locations,
   AppExtensionSDK,
   SidebarExtensionSDK
-} from 'contentful-ui-extensions-sdk';
+} from '@contentful/app-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 import AppConfig from './AppConfig';
