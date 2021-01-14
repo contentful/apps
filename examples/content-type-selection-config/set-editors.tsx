@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { AppExtensionSDK } from "contentful-ui-extensions-sdk";
+import { AppExtensionSDK } from "@contentful/app-sdk";
 import { Heading, List, ListItem, Switch } from "@contentful/forma-36-react-components";
 
 interface ConfigProps {
@@ -23,11 +23,11 @@ export default class Config extends Component<ConfigProps, ConfigState> {
 
   onConfigure = async () => {
     // This method will be called when a user clicks on "Install"
-    // or "Save" in the configuration screen.
-    // for more details see https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/#register-an-app-configuration-hook
+    // or "Save" on the configuration screen.
+    // For more details see https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/#register-an-app-configuration-hook
 
     // Generate a new target state with the App assigned to the selected
-    // ContentTypes
+    // content types
     const targetState = await this.createTargetState();
 
     return {
