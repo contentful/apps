@@ -9,5 +9,11 @@
       "message": "chore: publish [skip ci]",
       "conventionalCommits": true
     }
-  }
+  },
+  "ignoreChanges": [
+    "**/*.md",
+    "**/*.spec.*",
+    "**/test/**",
+    "packages/*/package-lock.json"
+  ]
 }
