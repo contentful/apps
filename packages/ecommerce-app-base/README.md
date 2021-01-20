@@ -53,7 +53,7 @@ setup({
 
 ## Apps
 
-These Contentful apps use `@contentful/ecommerce-app-base`. Look at there source code to learn how they utilize this library:
+These Contentful apps use `@contentful/ecommerce-app-base`. Look at their source code to learn how they utilize this library:
 
 - [Commerce Layer](../apps/commercelayer)
 - [Saleor](../apps/saleor)

@@ -48,7 +48,7 @@ setup({
 
 ## Apps
 
-These Contentful apps use `@contentful/dam-app-base`. Look at there source code to learn how they utilize this library:
+These Contentful apps use `@contentful/dam-app-base`. Look at their source code to learn how they utilize this library:
 
 - [Brandfolder](../apps/brandfolder)
 - [Bynder](../apps/brandfolder)
