@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paragraph } from '@contentful/forma-36-react-components';
-import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
 
 interface FieldProps {
   sdk: FieldExtensionSDK;

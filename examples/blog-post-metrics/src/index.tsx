@@ -10,7 +10,7 @@ import {
   PageExtensionSDK,
   init,
   locations,
-} from 'contentful-ui-extensions-sdk';
+} from '@contentful/app-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import '@contentful/forma-36-tokens/dist/css/index.css';

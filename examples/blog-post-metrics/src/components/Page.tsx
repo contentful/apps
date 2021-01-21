@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paragraph } from '@contentful/forma-36-react-components';
-import { PageExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { PageExtensionSDK } from '@contentful/app-sdk';
 
 interface PageProps {
   sdk: PageExtensionSDK;

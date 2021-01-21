@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@contentful/app-sdk": "^3.31.0",
     "@contentful/field-editor-single-line": "^0.11.4",
     "@contentful/field-editor-test-utils": "^0.8.4",
     "@contentful/forma-36-fcss": "^0.2.14",
@@ -15,7 +16,6 @@
     "@types/node": "^14.14.22",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "contentful-ui-extensions-sdk": "^3.31.0",
     "cross-env": "^7.0.3",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
