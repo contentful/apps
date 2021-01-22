@@ -1,6 +1,6 @@
-import React from 'react';
-import { Paragraph } from '@contentful/forma-36-react-components';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import React from "react";
+import { Paragraph } from "@contentful/forma-36-react-components";
+import { DialogExtensionSDK } from "@contentful/app-sdk";
 
 interface DialogProps {
   sdk: DialogExtensionSDK;
