@@ -46,15 +46,15 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     // or "Save" in the configuration screen.
     // for more details see https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/#register-an-app-configuration-hook
 
-    // Get current the state of EditorInterface and other entities
+    // Get the current the state of EditorInterface and other entities
     // related to this app installation
     const currentState = await this.props.sdk.app.getCurrentState();
 
     return {
       // Parameters to be persisted as the app configuration.
       parameters: this.state.parameters,
-      // In case you don't want to submit any update to app
-      // locations, you can just pass the currentState as is
+      // If you don't need to update the app locations,
+      // you can just pass the currentState as is
       targetState: currentState,
     };
   };
@@ -64,9 +64,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
       <Workbench className={css({ margin: "80px" })}>
         <Form>
           <Heading>Blog Post Metrics Config</Heading>
-          <Paragraph>
-            Welcome to your contentful app. This is your config page.
-          </Paragraph>
+          <Paragraph>Welcome to your app. This is your config page.</Paragraph>
         </Form>
       </Workbench>
     );
