@@ -80,7 +80,7 @@ export default class Sidebar extends React.Component {
         <div className="flexcontainer">
           <ExtensionUI
             contentSlug={contentSlug && contentSlug.getValue()}
-            previewInstanceUrl={previewUrl}
+            previewUrl={previewUrl}
             authToken={authToken}
           />
           {webhookUrl && this.renderRefreshStatus()}
