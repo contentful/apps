@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
-    "@contentful/forma-36-fcss": "0.0.27",
-    "@contentful/forma-36-react-components": "^3.76.0",
+    "@contentful/forma-36-fcss": "^0.0.27",
+    "@contentful/forma-36-react-components": "^3.77.1",
     "@contentful/forma-36-tokens": "^0.4.5",
     "@testing-library/react": "^8.0.7",
     "@use-it/interval": "0.1.3",
