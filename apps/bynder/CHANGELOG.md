@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/contentful/apps/compare/bynder-assets@1.0.3...bynder-assets@1.1.0) (2021-02-01)
+
+
+### Features
+
+* [EXT-2488] save videoPreviewsURLs field in bynder app ([#191](https://github.com/contentful/apps/issues/191)) ([62bd9ac](https://github.com/contentful/apps/commit/62bd9ac3457ec9727aea6c68ac91002286e962fd))
+
+
+
+
+
 ## [1.0.3](https://github.com/contentful/apps/compare/bynder-assets@1.0.2...bynder-assets@1.0.3) (2021-01-14)
 
 **Note:** Version bump only for package bynder-assets
