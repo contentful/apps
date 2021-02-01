@@ -28,7 +28,8 @@ const FIELDS_TO_PERSIST = [
   'thumbnails',
   'type',
   'watermarked',
-  'width'
+  'width',
+  "videoPreviewURLs"
 ];
 
 const validAssetTypes = ['image', 'audio', 'document', 'video'];
