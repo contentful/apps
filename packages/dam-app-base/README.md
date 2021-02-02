@@ -50,9 +50,9 @@ setup({
 
 These Contentful apps use `@contentful/dam-app-base`. Look at their source code to learn how they utilize this library:
 
-- [Brandfolder](../apps/brandfolder)
-- [Bynder](../apps/brandfolder)
-- [Cloudinary](../apps/cloudinary)
-- [Dropbox](../apps/dropbox)
-- [Frontify](../apps/frontify)
-- [Mux](../apps/mux)
+- [Brandfolder](../../apps/brandfolder)
+- [Bynder](../../apps/brandfolder)
+- [Cloudinary](../../apps/cloudinary)
+- [Dropbox](../../apps/dropbox)
+- [Frontify](../../apps/frontify)
+- [Mux](../../apps/mux)

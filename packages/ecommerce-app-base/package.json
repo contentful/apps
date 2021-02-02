@@ -1,5 +1,6 @@
 {
   "name": "@contentful/ecommerce-app-base",
+  "description": "Library to quickly build an app to integrate your e-commerce system of choice with Contentful",
   "version": "1.0.4",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
