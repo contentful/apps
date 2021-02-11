@@ -1,4 +1,4 @@
-import get from "lodash.get";
+import { get } from "lodash";
 import React from "react";
 import PropTypes from "prop-types";
 import {
@@ -59,6 +59,7 @@ export class AppConfig extends React.Component {
       space.getContentTypes(),
     ]);
 
+
     const params = installationParams || {};
 
     // eslint-disable-next-line react/no-did-mount-set-state
@@ -78,6 +79,7 @@ export class AppConfig extends React.Component {
 
     app.onConfigure(this.configureApp);
   }
+
 
   configureApp = async () => {
     const {
@@ -174,6 +176,8 @@ export class AppConfig extends React.Component {
     const {
       ids: { space, environment },
     } = sdk;
+
+    console.log(this.state.enabledContentTypes)
 
     return (
       <>
