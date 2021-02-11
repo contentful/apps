@@ -1,14 +1,11 @@
 import {
   CheckboxField,
-  Flex,
   FieldGroup,
   Heading,
   Note,
-  Option,
   Paragraph,
   SkeletonBodyText,
   SkeletonContainer,
-  Select,
   TextLink,
   Typography,
 } from "@contentful/forma-36-react-components";
@@ -54,35 +51,18 @@ export const ContentTypesList = ({
     return <NoContentTypes space={space} environment={environment} />;
   }
 
-
-  return (
-    <>
-      <>
-        { enabledContentTypes.map(({ sys, name }) => (
-          <Flex>
-            <Select
-              key={sys.id}
-              labelIsLight
-              labelText={name}
-              name={name}
-              value={sys.id}
-              onChange={() => onContentTypeToggle(sys.id)}
-              id={sys.id}>
-                {contentTypes.map(type => <Option value={type.sys.id}>{type.name}</Option>)}
-            </Select>
-          </Flex>
-        ))}
-      </>
-      <>
-        <Flex>
-          <Select onChange={(event) => onContentTypeToggle(event.target.value)}>
-            {contentTypes.map(type => <Option value={type.sys.id}>{type.name}</Option>)}
-          </Select>
-        </Flex>
-      </>
-    </>
-  
-  )
+  return contentTypes.map(({ sys, name }) => (
+    <CheckboxField
+      key={sys.id}
+      labelIsLight
+      labelText={name}
+      name={name}
+      checked={enabledContentTypes.includes(sys.id)}
+      value={sys.id}
+      onChange={() => onContentTypeToggle(sys.id)}
+      id={sys.id}
+    />
+  ));
 };
 
 const ContentTypesPanel = ({
