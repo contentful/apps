@@ -4,6 +4,7 @@
     "module": "commonjs",
     "strict": true,
     "jsx": "react",
+    "noImplicitAny": false,
     "rootDir": "./src",
     "esModuleInterop": true,
     "lib": ["dom", "es2015"],
