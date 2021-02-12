@@ -71,9 +71,31 @@ export default class Sidebar extends React.Component {
     this.setState({ busy: false, ok: res.ok });
   };
 
-  render = () => {
-    const { webhookUrl, previewUrl, authToken } = this.sdk.parameters.installation;
+  render = async () => {
+    const { webhookUrl, previewUrl, authToken, urlConstructors } = this.sdk.parameters.installation;
     const contentSlug = this.sdk.entry.fields.slug;
+    const constructor = urlConstructors.find(
+      constructor => constructor.id === this.sdk.contentType.sys.id
+    )
+    console.log(this.sdk)
+    // Seperate fields
+    const parentFields = constructor.slug.split("/")
+    const subFields = parentFields.map(parent => parent.split("."))
+
+    const slug = await Promise.all(subFields.map(async fieldArray => {
+      const parentFieldId = this.sdk.entry.fields[fieldArray[0]].getValue().sys.id
+      // this.sdk
+      const parentEntry = await this.sdk.space.getEntry(parentFieldId)
+      const slugPiece = parentEntry.fields[fieldArray[1]][this.sdk.locales.default]
+      console.log(slugPiece)
+      return slugPiece
+    })).toString().replace(/,/i, "/")
+
+    const fullUrl = `${previewUrl}${slug}`
+    console.log(fullUrl)
+
+
+
 
     return (
       <div className="extension">
