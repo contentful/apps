@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.7](https://github.com/contentful/apps/compare/shopify-sku@1.0.6...shopify-sku@1.0.7) (2021-02-16)
+
+
+### Bug Fixes
+
+* pin version for ecommerce base app ([#193](https://github.com/contentful/apps/issues/193)) ([0984a04](https://github.com/contentful/apps/commit/0984a044244df77d90190a8f110af7825a676628))
+
+
+
+
+
 ## [1.0.6](https://github.com/contentful/apps/compare/shopify-sku@1.0.5...shopify-sku@1.0.6) (2021-02-16)
 
 **Note:** Version bump only for package shopify-sku
