@@ -52,16 +52,18 @@ export const ContentTypesList = ({
   }
 
   return contentTypes.map(({ sys, name }) => (
-    <CheckboxField
-      key={sys.id}
-      labelIsLight
-      labelText={name}
-      name={name}
-      checked={enabledContentTypes.includes(sys.id)}
-      value={sys.id}
-      onChange={() => onContentTypeToggle(sys.id)}
-      id={sys.id}
-    />
+    <div>
+      <CheckboxField
+        key={sys.id}
+        labelIsLight
+        labelText={name}
+        name={name}
+        checked={enabledContentTypes.includes(sys.id)}
+        value={sys.id}
+        onChange={() => onContentTypeToggle(sys.id)}
+        id={sys.id}
+      />
+    </div>
   ));
 };
 

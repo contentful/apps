@@ -28,18 +28,19 @@ exports[`ProductList should render successfully with no items selected 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-id)"
+            clip-path="url(#cf-ui-skeleton-clip-0)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient-1);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-id"
+              id="cf-ui-skeleton-clip-0"
             >
               <rect
+                data-test-id="cf-ui-skeleton-image"
                 height="290"
                 rx="0"
                 ry="0"
@@ -47,7 +48,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient"
+              id="cf-ui-skeleton-clip-gradient-1"
             >
               <stop
                 offset="0%"
@@ -57,7 +58,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation1"
+                  id="animation-2"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -69,7 +70,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.25s"
+                  begin="animation-2.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -82,7 +83,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.5s"
+                  begin="animation-2.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -142,18 +143,19 @@ exports[`ProductList should render successfully with no items selected 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-id)"
+            clip-path="url(#cf-ui-skeleton-clip-3)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient-4);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-id"
+              id="cf-ui-skeleton-clip-3"
             >
               <rect
+                data-test-id="cf-ui-skeleton-image"
                 height="290"
                 rx="0"
                 ry="0"
@@ -161,7 +163,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient"
+              id="cf-ui-skeleton-clip-gradient-4"
             >
               <stop
                 offset="0%"
@@ -171,7 +173,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation1"
+                  id="animation-5"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -183,7 +185,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.25s"
+                  begin="animation-5.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -196,7 +198,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.5s"
+                  begin="animation-5.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -256,18 +258,19 @@ exports[`ProductList should render successfully with no items selected 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-id)"
+            clip-path="url(#cf-ui-skeleton-clip-6)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient-7);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-id"
+              id="cf-ui-skeleton-clip-6"
             >
               <rect
+                data-test-id="cf-ui-skeleton-image"
                 height="290"
                 rx="0"
                 ry="0"
@@ -275,7 +278,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient"
+              id="cf-ui-skeleton-clip-gradient-7"
             >
               <stop
                 offset="0%"
@@ -285,7 +288,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation1"
+                  id="animation-8"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -297,7 +300,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.25s"
+                  begin="animation-8.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -310,7 +313,7 @@ exports[`ProductList should render successfully with no items selected 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.5s"
+                  begin="animation-8.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -379,18 +382,19 @@ exports[`ProductList should render successfully with selected items 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-id)"
+            clip-path="url(#cf-ui-skeleton-clip-9)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient-10);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-id"
+              id="cf-ui-skeleton-clip-9"
             >
               <rect
+                data-test-id="cf-ui-skeleton-image"
                 height="290"
                 rx="0"
                 ry="0"
@@ -398,7 +402,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient"
+              id="cf-ui-skeleton-clip-gradient-10"
             >
               <stop
                 offset="0%"
@@ -408,7 +412,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation1"
+                  id="animation-11"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -420,7 +424,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.25s"
+                  begin="animation-11.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -433,7 +437,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.5s"
+                  begin="animation-11.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -493,18 +497,19 @@ exports[`ProductList should render successfully with selected items 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-id)"
+            clip-path="url(#cf-ui-skeleton-clip-12)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient-13);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-id"
+              id="cf-ui-skeleton-clip-12"
             >
               <rect
+                data-test-id="cf-ui-skeleton-image"
                 height="290"
                 rx="0"
                 ry="0"
@@ -512,7 +517,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient"
+              id="cf-ui-skeleton-clip-gradient-13"
             >
               <stop
                 offset="0%"
@@ -522,7 +527,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation1"
+                  id="animation-14"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -534,7 +539,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.25s"
+                  begin="animation-14.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -547,7 +552,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.5s"
+                  begin="animation-14.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -607,18 +612,19 @@ exports[`ProductList should render successfully with selected items 1`] = `
             Loading component...
           </title>
           <rect
-            clip-path="url(#cf-ui-skeleton-clip-id)"
+            clip-path="url(#cf-ui-skeleton-clip-15)"
             height="100%"
-            style="fill: url(#cf-ui-skeleton-clip-gradient);"
+            style="fill: url(#cf-ui-skeleton-clip-gradient-16);"
             width="100%"
             x="0"
             y="0"
           />
           <defs>
             <clippath
-              id="cf-ui-skeleton-clip-id"
+              id="cf-ui-skeleton-clip-15"
             >
               <rect
+                data-test-id="cf-ui-skeleton-image"
                 height="290"
                 rx="0"
                 ry="0"
@@ -626,7 +632,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               />
             </clippath>
             <lineargradient
-              id="cf-ui-skeleton-clip-gradient"
+              id="cf-ui-skeleton-clip-gradient-16"
             >
               <stop
                 offset="0%"
@@ -636,7 +642,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
                 <animate
                   attributeName="stop-color"
                   dur="2s"
-                  id="animation1"
+                  id="animation-17"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
                 />
@@ -648,7 +654,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.25s"
+                  begin="animation-17.begin+0.25s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"
@@ -661,7 +667,7 @@ exports[`ProductList should render successfully with selected items 1`] = `
               >
                 <animate
                   attributeName="stop-color"
-                  begin="animation1.begin+0.5s"
+                  begin="animation-17.begin+0.5s"
                   dur="2s"
                   repeatCount="indefinite"
                   values="#e5ebed; #f7f9fa; #e5ebed"

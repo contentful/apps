@@ -3,11 +3,11 @@
   "version": "1.1.0",
   "private": true,
   "devDependencies": {
-    "@babel/core": "7.3.4",
-    "@babel/plugin-proposal-class-properties": "7.3.4",
-    "@babel/plugin-transform-runtime": "7.3.4",
-    "@babel/preset-env": "7.3.4",
-    "@babel/preset-react": "7.0.0",
+    "@babel/core": "7.8.4",
+    "@babel/plugin-proposal-class-properties": "7.8.3",
+    "@babel/plugin-transform-runtime": "7.8.3",
+    "@babel/preset-env": "^7.8.7",
+    "@babel/preset-react": "7.8.3",
     "@contentful/contentful-extension-scripts": "^0.19.1",
     "@contentful/eslint-config-extension": "0.2.0",
     "@testing-library/react": "8.0.4",
@@ -16,6 +16,7 @@
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "@types/webpack-env": "1.13.9",
+    "@typescript-eslint/parser": "^4.14.2",
     "contentful-cli": "1.2.12",
     "cssnano": "4.1.10",
     "eslint": "^6.0.1",
@@ -23,7 +24,7 @@
     "node-fetch": "^2.6.1",
     "prettier": "1.19.1",
     "sass": "^1.23.7",
-    "typescript": "3.5.2"
+    "typescript": "^4.1.5"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
@@ -38,7 +39,7 @@
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
     "@contentful/forma-36-fcss": "^0.0.20",
-    "@contentful/forma-36-react-components": "^3.39.7",
+    "@contentful/forma-36-react-components": "^3.79.2",
     "@contentful/forma-36-tokens": "^0.3.3",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",

@@ -11,7 +11,7 @@ import {
   TextLink
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 import FieldSelector from './FieldSelector';
 

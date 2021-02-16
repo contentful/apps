@@ -40,7 +40,7 @@ exports[`AppView when the app is installed should render the app view with confi
         Follow the next steps to create a new image entry with focal point data:
       </p>
       <ul
-        class="List__List___1awv4 css-qslnu8"
+        class="List__List___1YcFy List__List--unordered___3MCEx css-qslnu8"
         data-test-id="cf-ui-list"
       >
         <li
@@ -69,7 +69,7 @@ exports[`AppView when the app is installed should render the app view with confi
         Follow the next steps to reference the newly created image with focal point entry in another content type:
       </p>
       <ul
-        class="List__List___1awv4 css-qslnu8"
+        class="List__List___1YcFy List__List--unordered___3MCEx css-qslnu8"
         data-test-id="cf-ui-list"
       >
         <li
@@ -137,7 +137,7 @@ exports[`AppView when the app is installed should render the app view with confi
         If you uninstall the Image Focal Point app you will have to manually clean up the content type we created for you during the installation. To do that follow the next steps:
       </p>
       <ul
-        class="List__List___1awv4 css-qslnu8"
+        class="List__List___1YcFy List__List--unordered___3MCEx css-qslnu8"
         data-test-id="cf-ui-list"
       >
         <li
@@ -180,7 +180,7 @@ exports[`AppView when the app is installed should render the app view with confi
 
 exports[`AppView when the app is not installed should render inline validation if the content type id is taken 1`] = `
 <div
-  class="TextField__TextField___Sf6eo css-15g2oxy"
+  class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK css-15g2oxy"
   data-test-id="content-type-name"
 >
   <div
@@ -216,32 +216,6 @@ exports[`AppView when the app is not installed should render inline validation i
     />
   </div>
   <div
-    class="ValidationMessage__ValidationMessage___3_rEq TextField__TextField__validation-message___1Idkl"
-    data-test-id="cf-ui-validation-message"
-  >
-    <svg
-      class="Icon__Icon___38Epv ValidationMessage__ValidationMessage__icon___3HPCh Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
-      data-test-id="cf-ui-icon"
-      height="18"
-      viewBox="0 0 24 24"
-      width="18"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M0 0h24v24H0z"
-        fill="none"
-      />
-      <path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
-      />
-    </svg>
-    <p
-      class="ValidationMessage__ValidationMessage__text___8FBj5"
-    >
-      A content type with ID "imageWithFocalPoint" already exists. Try a different name.
-    </p>
-  </div>
-  <div
     class="TextField__TextField__hints___3Di2P"
   >
     <p
@@ -251,12 +225,37 @@ exports[`AppView when the app is not installed should render inline validation i
       You can use this content type to wrap images with focal point data
     </p>
   </div>
+  <div
+    class="ValidationMessage__ValidationMessage___3_rEq TextField__TextField__validation-message___1Idkl"
+    data-test-id="cf-ui-validation-message"
+  >
+    <svg
+      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled ValidationMessage__ValidationMessage__icon___3HPCh"
+      data-test-id="cf-ui-icon"
+      height="1em"
+      viewBox="0 0 24 24"
+      width="1em"
+    >
+      <path
+        d="M0 0h24v24H0V0z"
+        fill="none"
+      />
+      <path
+        d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+      />
+    </svg>
+    <p
+      class="ValidationMessage__ValidationMessage__text___8FBj5"
+    >
+      A content type with ID "imageWithFocalPoint" already exists. Try a different name.
+    </p>
+  </div>
 </div>
 `;
 
 exports[`AppView when the app is not installed should render inline validation if the content type id is taken 2`] = `
 <div
-  class="TextField__TextField___Sf6eo css-15g2oxy"
+  class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK css-15g2oxy"
   data-test-id="content-type-id"
 >
   <div
@@ -291,32 +290,6 @@ exports[`AppView when the app is not installed should render inline validation i
     />
   </div>
   <div
-    class="ValidationMessage__ValidationMessage___3_rEq TextField__TextField__validation-message___1Idkl"
-    data-test-id="cf-ui-validation-message"
-  >
-    <svg
-      class="Icon__Icon___38Epv ValidationMessage__ValidationMessage__icon___3HPCh Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
-      data-test-id="cf-ui-icon"
-      height="18"
-      viewBox="0 0 24 24"
-      width="18"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M0 0h24v24H0z"
-        fill="none"
-      />
-      <path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
-      />
-    </svg>
-    <p
-      class="ValidationMessage__ValidationMessage__text___8FBj5"
-    >
-      A content type with ID "imageWithFocalPoint" already exists. Try a different ID.
-    </p>
-  </div>
-  <div
     class="TextField__TextField__hints___3Di2P"
   >
     <p
@@ -324,6 +297,31 @@ exports[`AppView when the app is not installed should render inline validation i
       data-test-id="cf-ui-help-text"
     >
       The ID is generated from the name, you can also set it manually
+    </p>
+  </div>
+  <div
+    class="ValidationMessage__ValidationMessage___3_rEq TextField__TextField__validation-message___1Idkl"
+    data-test-id="cf-ui-validation-message"
+  >
+    <svg
+      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled ValidationMessage__ValidationMessage__icon___3HPCh"
+      data-test-id="cf-ui-icon"
+      height="1em"
+      viewBox="0 0 24 24"
+      width="1em"
+    >
+      <path
+        d="M0 0h24v24H0V0z"
+        fill="none"
+      />
+      <path
+        d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
+      />
+    </svg>
+    <p
+      class="ValidationMessage__ValidationMessage__text___8FBj5"
+    >
+      A content type with ID "imageWithFocalPoint" already exists. Try a different ID.
     </p>
   </div>
 </div>
@@ -369,7 +367,7 @@ exports[`AppView when the app is not installed should render the app view with i
         To help you get started, we are going to create a content type for you with a title field, an image field and a focal point field.
       </p>
       <div
-        class="TextField__TextField___Sf6eo css-15g2oxy"
+        class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK css-15g2oxy"
         data-test-id="content-type-name"
       >
         <div
@@ -416,7 +414,7 @@ exports[`AppView when the app is not installed should render the app view with i
         </div>
       </div>
       <div
-        class="TextField__TextField___Sf6eo css-15g2oxy"
+        class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK css-15g2oxy"
         data-test-id="content-type-id"
       >
         <div

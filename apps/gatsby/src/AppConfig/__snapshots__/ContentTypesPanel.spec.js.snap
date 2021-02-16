@@ -15,16 +15,16 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
       Loading component...
     </title>
     <rect
-      clip-path="url(#cf-ui-skeleton-clip-id)"
+      clip-path="url(#cf-ui-skeleton-clip-0)"
       height="100%"
-      style="fill: url(#cf-ui-skeleton-clip-gradient);"
+      style="fill: url(#cf-ui-skeleton-clip-gradient-1);"
       width="100%"
       x="0"
       y="0"
     />
     <defs>
       <clippath
-        id="cf-ui-skeleton-clip-id"
+        id="cf-ui-skeleton-clip-0"
       >
         <rect
           height="16"
@@ -52,7 +52,7 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
         />
       </clippath>
       <lineargradient
-        id="cf-ui-skeleton-clip-gradient"
+        id="cf-ui-skeleton-clip-gradient-1"
       >
         <stop
           offset="0%"
@@ -62,7 +62,7 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
           <animate
             attributeName="stop-color"
             dur="2s"
-            id="animation1"
+            id="animation-2"
             repeatCount="indefinite"
             values="#e5ebed; #f7f9fa; #e5ebed"
           />
@@ -74,7 +74,7 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
         >
           <animate
             attributeName="stop-color"
-            begin="animation1.begin+0.25s"
+            begin="animation-2.begin+0.25s"
             dur="2s"
             repeatCount="indefinite"
             values="#e5ebed; #f7f9fa; #e5ebed"
@@ -87,7 +87,7 @@ exports[`ContentTypesList should show Skeleton on nil values 1`] = `
         >
           <animate
             attributeName="stop-color"
-            begin="animation1.begin+0.5s"
+            begin="animation-2.begin+0.5s"
             dur="2s"
             repeatCount="indefinite"
             values="#e5ebed; #f7f9fa; #e5ebed"
@@ -111,10 +111,9 @@ exports[`ContentTypesList should show a Note if there are no content types 1`] =
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--warning___39Bnz"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
           d="M0 0h24v24H0z"
@@ -125,8 +124,12 @@ exports[`ContentTypesList should show a Note if there are no content types 1`] =
         />
       </svg>
     </div>
-    <div>
-      <div>
+    <div
+      class="Note__Note__info___2m_-K"
+    >
+      <div
+        class="Note__Note__content___H1pf-"
+      >
         There are no content types available in this environment. You can add one
          
         <a

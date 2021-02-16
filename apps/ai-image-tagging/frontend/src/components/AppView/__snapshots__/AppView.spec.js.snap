@@ -40,7 +40,7 @@ exports[`AppView when the app is installed should render the app view with confi
         Follow the next steps to create a new image entry with AI generated tags:
       </p>
       <ul
-        class="List__List___1awv4 css-qslnu8"
+        class="List__List___1YcFy List__List--unordered___3MCEx css-qslnu8"
         data-test-id="cf-ui-list"
       >
         <li
@@ -69,7 +69,7 @@ exports[`AppView when the app is installed should render the app view with confi
         Follow the next steps to reference the newly created image with AI Image Tagging in another content type:
       </p>
       <ul
-        class="List__List___1awv4 css-qslnu8"
+        class="List__List___1YcFy List__List--unordered___3MCEx css-qslnu8"
         data-test-id="cf-ui-list"
       >
         <li
@@ -137,7 +137,7 @@ exports[`AppView when the app is installed should render the app view with confi
         If you uninstall the AI Image Tagging app you will have to manually clean up the content type we created for you during the installation. To do that follow the next steps:
       </p>
       <ul
-        class="List__List___1awv4 css-qslnu8"
+        class="List__List___1YcFy List__List--unordered___3MCEx css-qslnu8"
         data-test-id="cf-ui-list"
       >
         <li

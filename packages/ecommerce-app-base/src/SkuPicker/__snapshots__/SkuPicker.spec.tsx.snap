@@ -25,13 +25,12 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
-          d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+          d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
         />
         <path
           d="M0 0h24v24H0z"
@@ -52,7 +51,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
         class="css-k008qs"
       />
       <button
-        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
+        class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
         data-test-id="cf-ui-button"
         disabled=""
         type="button"
@@ -195,7 +194,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
       class="css-1twx1i5"
     >
       <button
-        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-fedt8m Button__Button--muted___2Wair Button__Button--disabled___1E20M"
+        class="Button__Button___1ZfFj css-fedt8m Button__Button--muted___2Wair Button__Button--disabled___1E20M"
         data-test-id="cf-ui-button"
         disabled=""
         type="button"
@@ -216,7 +215,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
         </span>
       </button>
       <button
-        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-fedt8m Button__Button--muted___2Wair Button__Button--disabled___1E20M"
+        class="Button__Button___1ZfFj css-fedt8m Button__Button--muted___2Wair Button__Button--disabled___1E20M"
         data-test-id="cf-ui-button"
         disabled=""
         type="button"
@@ -228,23 +227,18 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
           <svg
             class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw Button__Button__icon___2YX5-"
             data-test-id="cf-ui-icon"
-            height="18"
+            height="1em"
             viewBox="0 0 24 24"
-            width="18"
-            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
           >
             <path
-              d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"
-            />
-            <path
-              d="M0 0h24v24H0z"
-              fill="none"
+              d="M15.3738 5.29289C15.7643 5.68342 15.7643 6.31658 15.3738 6.70711L10.0809 12L15.3738 17.2929C15.7643 17.6834 15.7643 18.3166 15.3738 18.7071C14.9833 19.0976 14.3501 19.0976 13.9596 18.7071L7.95956 12.7071C7.56904 12.3166 7.56904 11.6834 7.95956 11.2929L13.9596 5.29289C14.3501 4.90237 14.9833 4.90237 15.3738 5.29289Z"
             />
           </svg>
         </span>
       </button>
       <button
-        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-fedt8m Button__Button--primary___JImeO"
+        class="Button__Button___1ZfFj css-fedt8m Button__Button--primary___JImeO"
         data-test-id="active"
         type="button"
       >
@@ -260,7 +254,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
         </span>
       </button>
       <button
-        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-fedt8m Button__Button--muted___2Wair Button__Button--disabled___1E20M"
+        class="Button__Button___1ZfFj css-fedt8m Button__Button--muted___2Wair Button__Button--disabled___1E20M"
         data-test-id="cf-ui-button"
         disabled=""
         type="button"
@@ -272,23 +266,18 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
           <svg
             class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw Button__Button__icon___2YX5-"
             data-test-id="cf-ui-icon"
-            height="18"
+            height="1em"
             viewBox="0 0 24 24"
-            width="18"
-            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
           >
             <path
-              d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
-            />
-            <path
-              d="M0 0h24v24H0z"
-              fill="none"
+              d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
             />
           </svg>
         </span>
       </button>
       <button
-        class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-fedt8m Button__Button--muted___2Wair Button__Button--disabled___1E20M"
+        class="Button__Button___1ZfFj css-fedt8m Button__Button--muted___2Wair Button__Button--disabled___1E20M"
         data-test-id="cf-ui-button"
         disabled=""
         type="button"

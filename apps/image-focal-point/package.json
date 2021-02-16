@@ -10,7 +10,7 @@
     "@babel/preset-react": "7.0.0",
     "@contentful/contentful-extension-scripts": "^0.15.1",
     "@contentful/eslint-config-extension": "0.2.0",
-    "@testing-library/react": "8.0.4",
+    "@testing-library/react": "^11.2.5",
     "contentful-cli": "1.2.12",
     "cssnano": "4.1.10",
     "eslint": "^6.0.1"
@@ -26,7 +26,7 @@
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
     "@contentful/forma-36-fcss": "0.0.31",
-    "@contentful/forma-36-react-components": "^3.18.4",
+    "@contentful/forma-36-react-components": "^3.79.2",
     "@contentful/forma-36-tokens": "^0.4.5",
     "emotion": "^10.0.17",
     "hex-rgb": "^4.1.0",
