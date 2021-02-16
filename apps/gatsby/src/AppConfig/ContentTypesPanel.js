@@ -72,11 +72,11 @@ const NoContentTypes = ({ space, environment }) => (
 //   ));
 // };
 
-const UrlInput = ({urlConstructors, id, onSlugInput}) => {
+const UrlInput = ({urlConstructors, id, onSlugInput, placeholder}) => {
   const valueIndex = urlConstructors.findIndex(constructor => constructor.id === id)
   const value = valueIndex !== -1 ? urlConstructors[valueIndex].slug : ""
   return (
-    <TextInput id={id} value={value} onChange={(event)=> onSlugInput(id, event.target.value)} />
+    <TextInput id={id} value={value} onChange={(event)=> onSlugInput(id, event.target.value)} placeholder={placeholder} />
   )
 }
 
@@ -100,15 +100,17 @@ export const ContentTypesSelection = ({
   // State to maintain previous value of a select in case it is changed
   const [focusValue, changeFocus] = useState("");
   return fullEnabledTypes.map(({ sys }) => (
-   <Flex>
-     <Flex>
+   <Flex marginBottom="spacingM">
+     <Flex marginRight = "spacingS">
        <Select value={sys.id} 
         onFocus={(event) => changeFocus(event.target.value)}
         onChange={(event)=>onContentTypeToggle(event.target.value, focusValue)} 
        >
          {contentTypes.map(({name, sys}) => <Option key={`option - ${sys.id}`} value={sys.id}>{name}</Option>)}
        </Select>
-       <UrlInput id={sys.id} onSlugInput={onSlugInput} urlConstructors={urlConstructors} />
+       </Flex>
+      <Flex fullWidth>
+       <UrlInput id={sys.id} onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={"slug || slugPrefix/slug || metaInfo.prefix/metaInfo.url.slug"}/>
      </Flex>
    </Flex>
   ));
@@ -127,7 +129,7 @@ const ContentTypesPanel = ({
     <Heading>Content Types</Heading>
     <Paragraph>
       Select content types that will show the Gatsby Cloud functionality in the
-      sidebar.
+      sidebar. Optionally, define fields used for generating slugs depending on the content type. Use dot notiation if the slug field is the child of single reference field on the parent content type.
     </Paragraph>
     <div className={styles.checks}>
       <FieldGroup>

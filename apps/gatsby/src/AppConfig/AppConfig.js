@@ -117,7 +117,6 @@ export class AppConfig extends React.Component {
       return false;
     }
 
-    console.log(urlConstructors)
     return {
       parameters: {
         previewUrl,
@@ -157,7 +156,6 @@ export class AppConfig extends React.Component {
   };
 
   toggleContentType = (enabledContentTypes, newId, prevId) => {
-    console.log(newId, prevId)
     if (enabledContentTypes.includes(prevId) && prevId !== newId) {
       return enabledContentTypes.concat([newId]).filter((cur) => cur !== prevId);
     } else {
