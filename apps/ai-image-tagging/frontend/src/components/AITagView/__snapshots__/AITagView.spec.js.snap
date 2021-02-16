@@ -28,10 +28,9 @@ exports[`AITagView Calling AI Tags should disable btn if image dimensions are in
         <svg
           class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--warning___39Bnz"
           data-test-id="cf-ui-icon"
-          height="18"
+          height="1em"
           viewBox="0 0 24 24"
-          width="18"
-          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
         >
           <path
             d="M0 0h24v24H0z"
@@ -42,14 +41,18 @@ exports[`AITagView Calling AI Tags should disable btn if image dimensions are in
           />
         </svg>
       </div>
-      <div>
-        <div>
+      <div
+        class="Note__Note__info___2m_-K"
+      >
+        <div
+          class="Note__Note__content___H1pf-"
+        >
           Please make sure your image is less than 5MB and has dimensions of at least 80px for both width and height
         </div>
       </div>
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
       data-test-id="cf-ui-button"
       disabled=""
       id="fetch-tag-btn"
@@ -70,16 +73,36 @@ exports[`AITagView Calling AI Tags should disable btn if image dimensions are in
       class="ControlledInputField__ControlledInputField___2uIG9 ControlledInputField__ControlledInputField--disabled___HDWt6"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB ControlledInput__ControlledInput--disabled___3prPF"
-        data-test-id="cf-ui-controlled-input"
-        disabled=""
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j ControlledInput__ControlledInput--disabled___3prPF"
+          data-test-id="cf-ui-controlled-input"
+          disabled=""
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -122,10 +145,9 @@ exports[`AITagView Calling AI Tags should disable btn if image is too big 1`] = 
         <svg
           class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--warning___39Bnz"
           data-test-id="cf-ui-icon"
-          height="18"
+          height="1em"
           viewBox="0 0 24 24"
-          width="18"
-          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
         >
           <path
             d="M0 0h24v24H0z"
@@ -136,14 +158,18 @@ exports[`AITagView Calling AI Tags should disable btn if image is too big 1`] = 
           />
         </svg>
       </div>
-      <div>
-        <div>
+      <div
+        class="Note__Note__info___2m_-K"
+      >
+        <div
+          class="Note__Note__content___H1pf-"
+        >
           Please make sure your image is less than 5MB and has dimensions of at least 80px for both width and height
         </div>
       </div>
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
       data-test-id="cf-ui-button"
       disabled=""
       id="fetch-tag-btn"
@@ -164,16 +190,36 @@ exports[`AITagView Calling AI Tags should disable btn if image is too big 1`] = 
       class="ControlledInputField__ControlledInputField___2uIG9 ControlledInputField__ControlledInputField--disabled___HDWt6"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB ControlledInput__ControlledInput--disabled___3prPF"
-        data-test-id="cf-ui-controlled-input"
-        disabled=""
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j ControlledInput__ControlledInput--disabled___3prPF"
+          data-test-id="cf-ui-controlled-input"
+          disabled=""
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -216,10 +262,9 @@ exports[`AITagView Calling AI Tags should disable btn if image type is unsupport
         <svg
           class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--warning___39Bnz"
           data-test-id="cf-ui-icon"
-          height="18"
+          height="1em"
           viewBox="0 0 24 24"
-          width="18"
-          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
         >
           <path
             d="M0 0h24v24H0z"
@@ -230,14 +275,18 @@ exports[`AITagView Calling AI Tags should disable btn if image type is unsupport
           />
         </svg>
       </div>
-      <div>
-        <div>
+      <div
+        class="Note__Note__info___2m_-K"
+      >
+        <div
+          class="Note__Note__content___H1pf-"
+        >
           Unfortunately, we can only auto-tag PNG and JPG file types
         </div>
       </div>
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
       data-test-id="cf-ui-button"
       disabled=""
       id="fetch-tag-btn"
@@ -258,16 +307,36 @@ exports[`AITagView Calling AI Tags should disable btn if image type is unsupport
       class="ControlledInputField__ControlledInputField___2uIG9 ControlledInputField__ControlledInputField--disabled___HDWt6"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB ControlledInput__ControlledInput--disabled___3prPF"
-        data-test-id="cf-ui-controlled-input"
-        disabled=""
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j ControlledInput__ControlledInput--disabled___3prPF"
+          data-test-id="cf-ui-controlled-input"
+          disabled=""
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -307,10 +376,12 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         <span
           aria-label="ai-tag-1"
           class="Pill__Pill__label____EsBZ"
+          title="ai-tag-1"
         >
           ai-tag-1
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -321,17 +392,12 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -344,10 +410,12 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         <span
           aria-label="ai-tag-2"
           class="Pill__Pill__label____EsBZ"
+          title="ai-tag-2"
         >
           ai-tag-2
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -358,17 +426,12 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -381,10 +444,12 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         <span
           aria-label="ai-tag-3"
           class="Pill__Pill__label____EsBZ"
+          title="ai-tag-3"
         >
           ai-tag-3
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -395,17 +460,12 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -418,10 +478,12 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         <span
           aria-label="prior-tag"
           class="Pill__Pill__label____EsBZ"
+          title="prior-tag"
         >
           prior-tag
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -432,17 +494,12 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -450,7 +507,7 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
       </div>
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO"
       data-test-id="cf-ui-button"
       id="fetch-tag-btn"
       type="button"
@@ -465,21 +522,57 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
           Auto-tag from AI
         </span>
         <svg
-          class="Spinner__Spinner___32lpa Button__Button__spinner___3j8Aj Spinner__Spinner--small___2hyo0 Spinner__Spinner--white___3Hsq3 Button__Button--spinner--exit___2RUI- Button__Button--spinner-exit-active___3HXa7"
+          class="Spinner__Spinner___32lpa Button__Button__spinner___3j8Aj undefined Spinner__Spinner--white___3Hsq3 Button__Button--spinner--exit___2RUI- Button__Button--spinner-exit-active___3HXa7"
           data-test-id="cf-ui-spinner"
-          viewBox="0 0 20 20"
+          style="height: 18px; width: 18px;"
+          viewBox="0 0 60 51"
           xmlns="http://www.w3.org/2000/svg"
         >
           <title>
             Loading…
           </title>
-          <path
-            d="M2,10a8,8,0,0,1,8-8V0a10,10,0,0,0,0,20V18A8,8,0,0,1,2,10Z"
-          />
-          <path
-            d="M10,0V2a8,8,0,0,1,0,16v2A10,10,0,0,0,10,0Z"
-            style="opacity: 0.4;"
-          />
+          <g
+            class="Spinner__circle1--translate___1u68A"
+            transform="translate(10,33.528168)"
+          >
+            <g
+              class="Spinner__circle1--scale___38WqL"
+            >
+              <circle
+                id="circle1"
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
+          <g
+            class="Spinner__circle2--translate___1GBUJ"
+            transform="translate(30,33.528168)"
+          >
+            <g
+              class="Spinner__circle2--scale___3khDl"
+            >
+              <circle
+                id="circle2"
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
+          <g
+            class="Spinner__circle3--translate___2M3jS"
+            transform="translate(50,33.528168)"
+          >
+            <g
+              class="Spinner__circle3--scale___2zFhX"
+            >
+              <circle
+                id="circle3"
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
         </svg>
       </span>
     </button>
@@ -487,15 +580,35 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
       class="ControlledInputField__ControlledInputField___2uIG9"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
-        data-test-id="cf-ui-controlled-input"
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j"
+          data-test-id="cf-ui-controlled-input"
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -535,10 +648,12 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
         <span
           aria-label="ai-tag-1"
           class="Pill__Pill__label____EsBZ"
+          title="ai-tag-1"
         >
           ai-tag-1
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -549,17 +664,12 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -572,10 +682,12 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
         <span
           aria-label="ai-tag-2"
           class="Pill__Pill__label____EsBZ"
+          title="ai-tag-2"
         >
           ai-tag-2
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -586,17 +698,12 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -609,10 +716,12 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
         <span
           aria-label="ai-tag-3"
           class="Pill__Pill__label____EsBZ"
+          title="ai-tag-3"
         >
           ai-tag-3
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -623,17 +732,12 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -641,7 +745,7 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
       </div>
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO"
       data-test-id="cf-ui-button"
       id="fetch-tag-btn"
       type="button"
@@ -656,21 +760,57 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
           Auto-tag from AI
         </span>
         <svg
-          class="Spinner__Spinner___32lpa Button__Button__spinner___3j8Aj Spinner__Spinner--small___2hyo0 Spinner__Spinner--white___3Hsq3 Button__Button--spinner--exit___2RUI- Button__Button--spinner-exit-active___3HXa7"
+          class="Spinner__Spinner___32lpa Button__Button__spinner___3j8Aj undefined Spinner__Spinner--white___3Hsq3 Button__Button--spinner--exit___2RUI- Button__Button--spinner-exit-active___3HXa7"
           data-test-id="cf-ui-spinner"
-          viewBox="0 0 20 20"
+          style="height: 18px; width: 18px;"
+          viewBox="0 0 60 51"
           xmlns="http://www.w3.org/2000/svg"
         >
           <title>
             Loading…
           </title>
-          <path
-            d="M2,10a8,8,0,0,1,8-8V0a10,10,0,0,0,0,20V18A8,8,0,0,1,2,10Z"
-          />
-          <path
-            d="M10,0V2a8,8,0,0,1,0,16v2A10,10,0,0,0,10,0Z"
-            style="opacity: 0.4;"
-          />
+          <g
+            class="Spinner__circle1--translate___1u68A"
+            transform="translate(10,33.528168)"
+          >
+            <g
+              class="Spinner__circle1--scale___38WqL"
+            >
+              <circle
+                id="circle1"
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
+          <g
+            class="Spinner__circle2--translate___1GBUJ"
+            transform="translate(30,33.528168)"
+          >
+            <g
+              class="Spinner__circle2--scale___3khDl"
+            >
+              <circle
+                id="circle2"
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
+          <g
+            class="Spinner__circle3--translate___2M3jS"
+            transform="translate(50,33.528168)"
+          >
+            <g
+              class="Spinner__circle3--scale___2zFhX"
+            >
+              <circle
+                id="circle3"
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
         </svg>
       </span>
     </button>
@@ -678,15 +818,35 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
       class="ControlledInputField__ControlledInputField___2uIG9"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
-        data-test-id="cf-ui-controlled-input"
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j"
+          data-test-id="cf-ui-controlled-input"
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -726,10 +886,12 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
         <span
           aria-label="ai-tag-1"
           class="Pill__Pill__label____EsBZ"
+          title="ai-tag-1"
         >
           ai-tag-1
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -740,17 +902,12 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -763,10 +920,12 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
         <span
           aria-label="ai-tag-2"
           class="Pill__Pill__label____EsBZ"
+          title="ai-tag-2"
         >
           ai-tag-2
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -777,17 +936,12 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -800,10 +954,12 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
         <span
           aria-label="ai-tag-3"
           class="Pill__Pill__label____EsBZ"
+          title="ai-tag-3"
         >
           ai-tag-3
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -814,17 +970,12 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -832,7 +983,7 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
       </div>
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO"
       data-test-id="cf-ui-button"
       id="fetch-tag-btn"
       type="button"
@@ -847,21 +998,57 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
           Auto-tag from AI
         </span>
         <svg
-          class="Spinner__Spinner___32lpa Button__Button__spinner___3j8Aj Spinner__Spinner--small___2hyo0 Spinner__Spinner--white___3Hsq3 Button__Button--spinner--exit___2RUI- Button__Button--spinner-exit-active___3HXa7"
+          class="Spinner__Spinner___32lpa Button__Button__spinner___3j8Aj undefined Spinner__Spinner--white___3Hsq3 Button__Button--spinner--exit___2RUI- Button__Button--spinner-exit-active___3HXa7"
           data-test-id="cf-ui-spinner"
-          viewBox="0 0 20 20"
+          style="height: 18px; width: 18px;"
+          viewBox="0 0 60 51"
           xmlns="http://www.w3.org/2000/svg"
         >
           <title>
             Loading…
           </title>
-          <path
-            d="M2,10a8,8,0,0,1,8-8V0a10,10,0,0,0,0,20V18A8,8,0,0,1,2,10Z"
-          />
-          <path
-            d="M10,0V2a8,8,0,0,1,0,16v2A10,10,0,0,0,10,0Z"
-            style="opacity: 0.4;"
-          />
+          <g
+            class="Spinner__circle1--translate___1u68A"
+            transform="translate(10,33.528168)"
+          >
+            <g
+              class="Spinner__circle1--scale___38WqL"
+            >
+              <circle
+                id="circle1"
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
+          <g
+            class="Spinner__circle2--translate___1GBUJ"
+            transform="translate(30,33.528168)"
+          >
+            <g
+              class="Spinner__circle2--scale___3khDl"
+            >
+              <circle
+                id="circle2"
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
+          <g
+            class="Spinner__circle3--translate___2M3jS"
+            transform="translate(50,33.528168)"
+          >
+            <g
+              class="Spinner__circle3--scale___2zFhX"
+            >
+              <circle
+                id="circle3"
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
         </svg>
       </span>
     </button>
@@ -869,15 +1056,35 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
       class="ControlledInputField__ControlledInputField___2uIG9"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
-        data-test-id="cf-ui-controlled-input"
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j"
+          data-test-id="cf-ui-controlled-input"
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -917,10 +1124,12 @@ exports[`AITagView should add image tags on Enter 1`] = `
         <span
           aria-label="new tag"
           class="Pill__Pill__label____EsBZ"
+          title="new tag"
         >
           new tag
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -931,17 +1140,12 @@ exports[`AITagView should add image tags on Enter 1`] = `
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -949,7 +1153,7 @@ exports[`AITagView should add image tags on Enter 1`] = `
       </div>
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO"
       data-test-id="cf-ui-button"
       id="fetch-tag-btn"
       type="button"
@@ -969,15 +1173,35 @@ exports[`AITagView should add image tags on Enter 1`] = `
       class="ControlledInputField__ControlledInputField___2uIG9"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
-        data-test-id="cf-ui-controlled-input"
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j"
+          data-test-id="cf-ui-controlled-input"
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -1012,7 +1236,7 @@ exports[`AITagView should disable everything if theres no image 1`] = `
       class="css-m9mlq4"
     />
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO Button__Button--disabled___1E20M"
       data-test-id="cf-ui-button"
       disabled=""
       id="fetch-tag-btn"
@@ -1033,16 +1257,36 @@ exports[`AITagView should disable everything if theres no image 1`] = `
       class="ControlledInputField__ControlledInputField___2uIG9 ControlledInputField__ControlledInputField--disabled___HDWt6"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB ControlledInput__ControlledInput--disabled___3prPF"
-        data-test-id="cf-ui-controlled-input"
-        disabled=""
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j ControlledInput__ControlledInput--disabled___3prPF"
+          data-test-id="cf-ui-controlled-input"
+          disabled=""
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -1076,7 +1320,7 @@ exports[`AITagView should enable everything if theres an image 1`] = `
       class="css-m9mlq4"
     />
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO"
       data-test-id="cf-ui-button"
       id="fetch-tag-btn"
       type="button"
@@ -1096,15 +1340,35 @@ exports[`AITagView should enable everything if theres an image 1`] = `
       class="ControlledInputField__ControlledInputField___2uIG9"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
-        data-test-id="cf-ui-controlled-input"
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j"
+          data-test-id="cf-ui-controlled-input"
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -1144,10 +1408,12 @@ exports[`AITagView should ignore duplicate image tags 1`] = `
         <span
           aria-label="tag1"
           class="Pill__Pill__label____EsBZ"
+          title="tag1"
         >
           tag1
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -1158,17 +1424,12 @@ exports[`AITagView should ignore duplicate image tags 1`] = `
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -1181,10 +1442,12 @@ exports[`AITagView should ignore duplicate image tags 1`] = `
         <span
           aria-label="tag2"
           class="Pill__Pill__label____EsBZ"
+          title="tag2"
         >
           tag2
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -1195,17 +1458,12 @@ exports[`AITagView should ignore duplicate image tags 1`] = `
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -1213,7 +1471,7 @@ exports[`AITagView should ignore duplicate image tags 1`] = `
       </div>
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO"
       data-test-id="cf-ui-button"
       id="fetch-tag-btn"
       type="button"
@@ -1233,15 +1491,35 @@ exports[`AITagView should ignore duplicate image tags 1`] = `
       class="ControlledInputField__ControlledInputField___2uIG9"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
-        data-test-id="cf-ui-controlled-input"
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j"
+          data-test-id="cf-ui-controlled-input"
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
@@ -1281,10 +1559,12 @@ exports[`AITagView should render image tags if available 1`] = `
         <span
           aria-label="tag1"
           class="Pill__Pill__label____EsBZ"
+          title="tag1"
         >
           tag1
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -1295,17 +1575,12 @@ exports[`AITagView should render image tags if available 1`] = `
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -1318,10 +1593,12 @@ exports[`AITagView should render image tags if available 1`] = `
         <span
           aria-label="tag2"
           class="Pill__Pill__label____EsBZ"
+          title="tag2"
         >
           tag2
         </span>
         <button
+          aria-label="close"
           class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
           type="button"
         >
@@ -1332,17 +1609,12 @@ exports[`AITagView should render image tags if available 1`] = `
             <svg
               class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
               data-test-id="cf-ui-icon"
-              height="24"
+              height="1em"
               viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
             >
               <path
-                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-              />
-              <path
-                d="M0 0h24v24H0z"
-                fill="none"
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
               />
             </svg>
           </span>
@@ -1350,7 +1622,7 @@ exports[`AITagView should render image tags if available 1`] = `
       </div>
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-1kr4fmq Button__Button--primary___JImeO"
+      class="Button__Button___1ZfFj css-1kr4fmq Button__Button--primary___JImeO"
       data-test-id="cf-ui-button"
       id="fetch-tag-btn"
       type="button"
@@ -1370,15 +1642,35 @@ exports[`AITagView should render image tags if available 1`] = `
       class="ControlledInputField__ControlledInputField___2uIG9"
       data-test-id="cf-ui-checkbox-field"
     >
-      <input
-        aria-label="Overwrite existing tags"
-        checked=""
-        class="ControlledInput__ControlledInput___2XK3j ControlledInputField__ControlledInputField__input___3OMYB"
-        data-test-id="cf-ui-controlled-input"
-        id="overwrite-tags"
-        type="checkbox"
-        value=""
-      />
+      <div
+        class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+      >
+        <input
+          aria-label="Overwrite existing tags"
+          checked=""
+          class="ControlledInput__ControlledInput___2XK3j"
+          data-test-id="cf-ui-controlled-input"
+          id="overwrite-tags"
+          type="checkbox"
+          value=""
+        />
+        <label
+          class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+          for="overwrite-tags"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+            />
+          </svg>
+        </label>
+      </div>
       <div>
         <label
           class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"

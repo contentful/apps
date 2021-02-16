@@ -18,7 +18,7 @@ exports[`App #render should render the extension field view 1`] = `
       />
     </div>
     <button
-      class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-dp0f2t Button__Button--muted___2Wair"
+      class="Button__Button___1ZfFj css-dp0f2t Button__Button--muted___2Wair"
       data-test-id="cf-ui-button"
       type="button"
     >

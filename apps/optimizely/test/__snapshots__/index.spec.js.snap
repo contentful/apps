@@ -12,12 +12,11 @@ exports[`Optimizely App should render the editor page 1`] = `
       class="css-xieh1a"
     >
       <svg
-        class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
           d="M0 0h24v24H0z"
@@ -32,31 +31,25 @@ exports[`Optimizely App should render the editor page 1`] = `
       </span>
     </div>
     <svg
-      class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
       data-test-id="cf-ui-icon"
-      height="18"
+      height="1em"
       viewBox="0 0 24 24"
-      width="18"
-      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
     >
       <path
-        d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
-      />
-      <path
-        d="M0 0h24v24H0z"
-        fill="none"
+        d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
       />
     </svg>
     <div
       class="css-xieh1a"
     >
       <svg
-        class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
           d="M0 0h24v24H0z"
@@ -71,31 +64,25 @@ exports[`Optimizely App should render the editor page 1`] = `
       </span>
     </div>
     <svg
-      class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
       data-test-id="cf-ui-icon"
-      height="18"
+      height="1em"
       viewBox="0 0 24 24"
-      width="18"
-      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
     >
       <path
-        d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
-      />
-      <path
-        d="M0 0h24v24H0z"
-        fill="none"
+        d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
       />
     </svg>
     <div
       class="css-xieh1a"
     >
       <svg
-        class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
           d="M0 0h24v24H0z"
@@ -110,31 +97,25 @@ exports[`Optimizely App should render the editor page 1`] = `
       </span>
     </div>
     <svg
-      class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
       data-test-id="cf-ui-icon"
-      height="18"
+      height="1em"
       viewBox="0 0 24 24"
-      width="18"
-      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
     >
       <path
-        d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
-      />
-      <path
-        d="M0 0h24v24H0z"
-        fill="none"
+        d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
       />
     </svg>
     <div
       class="css-xieh1a"
     >
       <svg
-        class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
           d="M0 0h24v24H0z"
@@ -176,7 +157,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       <rect
         clip-path="url(#references-section)"
         height="100%"
-        style="fill: url(#cf-ui-skeleton-clip-gradient);"
+        style="fill: url(#cf-ui-skeleton-clip-gradient-0);"
         width="100%"
         x="0"
         y="0"
@@ -195,7 +176,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           />
         </clippath>
         <lineargradient
-          id="cf-ui-skeleton-clip-gradient"
+          id="cf-ui-skeleton-clip-gradient-0"
         >
           <stop
             offset="0%"
@@ -205,7 +186,7 @@ exports[`Optimizely App should render the editor page 1`] = `
             <animate
               attributeName="stop-color"
               dur="2s"
-              id="animation1"
+              id="animation-1"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
             />
@@ -217,7 +198,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           >
             <animate
               attributeName="stop-color"
-              begin="animation1.begin+0.25s"
+              begin="animation-1.begin+0.25s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -230,7 +211,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           >
             <animate
               attributeName="stop-color"
-              begin="animation1.begin+0.5s"
+              begin="animation-1.begin+0.5s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -272,11 +253,11 @@ exports[`Optimizely App should render the editor page 1`] = `
       </label>
     </div>
     <div
-      class="Select__Select__wrapper___2pBIz Select__Select--large___1PgJW"
+      class="Select__Select__wrapper___2mbYV Select__Select--large___1HaJb"
     >
       <select
         aria-label="experiment"
-        class="Select__Select___31Z46 a11y__focus-border--default___60AXp Select__Select--disabled___3n58N"
+        class="Select__Select___2Gi9N a11y__focus-border--default___60AXp Select__Select--disabled___156vR"
         data-test-id="cf-ui-select"
         disabled=""
         id="experiment"
@@ -291,19 +272,14 @@ exports[`Optimizely App should render the editor page 1`] = `
         </option>
       </select>
       <svg
-        class="Icon__Icon___38Epv Select__Select__icon___boRAZ Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___OBmvS"
         data-test-id="cf-ui-icon"
-        height="24"
+        height="1em"
         viewBox="0 0 24 24"
-        width="24"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
-          d="M7 10l5 5 5-5z"
-        />
-        <path
-          d="M0 0h24v24H0z"
-          fill="none"
+          d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
         />
       </svg>
     </div>
@@ -335,7 +311,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       <rect
         clip-path="url(#variations-section)"
         height="100%"
-        style="fill: url(#cf-ui-skeleton-clip-gradient);"
+        style="fill: url(#cf-ui-skeleton-clip-gradient-2);"
         width="100%"
         x="0"
         y="0"
@@ -370,7 +346,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           />
         </clippath>
         <lineargradient
-          id="cf-ui-skeleton-clip-gradient"
+          id="cf-ui-skeleton-clip-gradient-2"
         >
           <stop
             offset="0%"
@@ -380,7 +356,7 @@ exports[`Optimizely App should render the editor page 1`] = `
             <animate
               attributeName="stop-color"
               dur="2s"
-              id="animation1"
+              id="animation-3"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
             />
@@ -392,7 +368,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           >
             <animate
               attributeName="stop-color"
-              begin="animation1.begin+0.25s"
+              begin="animation-3.begin+0.25s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -405,7 +381,7 @@ exports[`Optimizely App should render the editor page 1`] = `
           >
             <animate
               attributeName="stop-color"
-              begin="animation1.begin+0.5s"
+              begin="animation-3.begin+0.5s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -431,29 +407,32 @@ exports[`Optimizely App should render the incorrect type message 1`] = `
       class="Note__Note__icon___20RqC"
     >
       <svg
-        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
+        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--negative___1dled"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
           d="M0 0h24v24H0z"
           fill="none"
         />
         <path
-          d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
         />
       </svg>
     </div>
-    <div>
+    <div
+      class="Note__Note__info___2m_-K"
+    >
       <div
         class="Note__Note__title___2nwpx"
       >
         Extension "undefined" cannot be assigned to this content type
       </div>
-      <div>
+      <div
+        class="Note__Note__content___H1pf-"
+      >
         <div>
           <strong>
             Required:
@@ -489,22 +468,25 @@ exports[`Optimizely App should render the missing project on the sidebar 1`] = `
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--negative___1dled"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
           d="M0 0h24v24H0z"
           fill="none"
         />
         <path
-          d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
         />
       </svg>
     </div>
-    <div>
-      <div>
+    <div
+      class="Note__Note__info___2m_-K"
+    >
+      <div
+        class="Note__Note__content___H1pf-"
+      >
         Please, set 
         <strong>
           Optimizely Project ID
@@ -521,7 +503,7 @@ exports[`Optimizely App should render the sidebar 1`] = `
   data-test-id="sidebar"
 >
   <a
-    class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-82qlwu Button__Button--primary___JImeO Button__Button--full-width___3Fmpo"
+    class="Button__Button___1ZfFj css-82qlwu Button__Button--primary___JImeO Button__Button--full-width___3Fmpo"
     data-test-id="view-experiment"
     href="https://app.optimizely.com/v2/projects/123/experiments/exp123/variations"
     target="_blank"
@@ -539,7 +521,7 @@ exports[`Optimizely App should render the sidebar 1`] = `
     </span>
   </a>
   <a
-    class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-82qlwu Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+    class="Button__Button___1ZfFj css-82qlwu Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
     data-test-id="view-all"
     href="https://app.optimizely.com/v2/projects/123/experiments"
     target="_blank"

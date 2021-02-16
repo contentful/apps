@@ -34,8 +34,8 @@ const makeContentType = (contentTypeId, contentTypeName) => ({
       id: 'imageTags',
       name: 'Image tags',
       required: true,
-      "type": "Array",
-      "items": { "type": "Symbol" }
+      type: 'Array',
+      items: { type: 'Symbol' }
     }
   ]
 });
@@ -147,7 +147,9 @@ export class AppView extends Component {
           <Typography>
             <Heading className={styles.heading}>About AI Image Tagging</Heading>
             <Paragraph>
-              The AI Image Tagging app uses AI and deep learning capabilities to automatically assign tags to images. The tags are visible and accessible via the Contentful web app entry editor and tags are searchable in the search bar.
+              The AI Image Tagging app uses AI and deep learning capabilities to automatically
+              assign tags to images. The tags are visible and accessible via the Contentful web app
+              entry editor and tags are searchable in the search bar.
             </Paragraph>
             <Divider />
             {isInstalled && <ConfigurationContent />}

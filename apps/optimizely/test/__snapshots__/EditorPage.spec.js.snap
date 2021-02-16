@@ -13,12 +13,11 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         class="css-xieh1a"
       >
         <svg
-          class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP css-uoder"
           data-test-id="cf-ui-icon"
-          height="18"
+          height="1em"
           viewBox="0 0 24 24"
-          width="18"
-          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
         >
           <path
             d="M0 0h24v24H0z"
@@ -33,31 +32,25 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         </span>
       </div>
       <svg
-        class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
-          d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
-        />
-        <path
-          d="M0 0h24v24H0z"
-          fill="none"
+          d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
         />
       </svg>
       <div
         class="css-xieh1a"
       >
         <svg
-          class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
           data-test-id="cf-ui-icon"
-          height="18"
+          height="1em"
           viewBox="0 0 24 24"
-          width="18"
-          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
         >
           <path
             d="M0 0h24v24H0z"
@@ -72,31 +65,25 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         </span>
       </div>
       <svg
-        class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
-          d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
-        />
-        <path
-          d="M0 0h24v24H0z"
-          fill="none"
+          d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
         />
       </svg>
       <div
         class="css-xieh1a"
       >
         <svg
-          class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
           data-test-id="cf-ui-icon"
-          height="18"
+          height="1em"
           viewBox="0 0 24 24"
-          width="18"
-          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
         >
           <path
             d="M0 0h24v24H0z"
@@ -111,31 +98,25 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         </span>
       </div>
       <svg
-        class="Icon__Icon___38Epv css-13af3fo Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-13af3fo"
         data-test-id="cf-ui-icon"
-        height="18"
+        height="1em"
         viewBox="0 0 24 24"
-        width="18"
-        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
       >
         <path
-          d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
-        />
-        <path
-          d="M0 0h24v24H0z"
-          fill="none"
+          d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
         />
       </svg>
       <div
         class="css-xieh1a"
       >
         <svg
-          class="Icon__Icon___38Epv css-uoder Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP css-uoder"
           data-test-id="cf-ui-icon"
-          height="18"
+          height="1em"
           viewBox="0 0 24 24"
-          width="18"
-          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
         >
           <path
             d="M0 0h24v24H0z"
@@ -201,11 +182,11 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         </label>
       </div>
       <div
-        class="Select__Select__wrapper___2pBIz Select__Select--large___1PgJW"
+        class="Select__Select__wrapper___2mbYV Select__Select--large___1HaJb"
       >
         <select
           aria-label="experiment"
-          class="Select__Select___31Z46 a11y__focus-border--default___60AXp"
+          class="Select__Select___2Gi9N a11y__focus-border--default___60AXp"
           data-test-id="cf-ui-select"
           id="experiment"
           name="experiment"
@@ -225,19 +206,14 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
           </option>
         </select>
         <svg
-          class="Icon__Icon___38Epv Select__Select__icon___boRAZ Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Select__Select__icon___OBmvS"
           data-test-id="cf-ui-icon"
-          height="24"
+          height="1em"
           viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
         >
           <path
-            d="M7 10l5 5 5-5z"
-          />
-          <path
-            d="M0 0h24v24H0z"
-            fill="none"
+            d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
           />
         </svg>
       </div>
@@ -283,11 +259,12 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
             class="css-cet0rr"
           >
             <div
-              class="Dropdown__Dropdown___1qyn8"
+              class="Dropdown__Dropdown___nAsJ-"
               data-test-id="cf-ui-dropdown"
-              position="bottom-left"
             >
               <button
+                aria-expanded="false"
+                aria-haspopup="menu"
                 class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
                 data-test-id="cf-ui-text-link"
                 type="button"
@@ -300,12 +277,11 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                     class="TextLink__TextLink__icon-wrapper___25_tI"
                   >
                     <svg
-                      class="Icon__Icon___38Epv TextLink__TextLink__icon___3ggiB Icon__Icon--small___1yGZK undefined"
+                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
                       data-test-id="cf-ui-icon"
-                      height="18"
+                      height="1em"
                       viewBox="0 0 24 24"
-                      width="18"
-                      xmlns="http://www.w3.org/2000/svg"
+                      width="1em"
                     >
                       <path
                         d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"
@@ -337,12 +313,11 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                   class="TextLink__TextLink__icon-wrapper___25_tI"
                 >
                   <svg
-                    class="Icon__Icon___38Epv TextLink__TextLink__icon___3ggiB Icon__Icon--small___1yGZK undefined"
+                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
                     data-test-id="cf-ui-icon"
-                    height="18"
+                    height="1em"
                     viewBox="0 0 24 24"
-                    width="18"
-                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
                   >
                     <path
                       d="M0 0h24v24H0z"
@@ -381,11 +356,12 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
             class="css-cet0rr"
           >
             <div
-              class="Dropdown__Dropdown___1qyn8"
+              class="Dropdown__Dropdown___nAsJ-"
               data-test-id="cf-ui-dropdown"
-              position="bottom-left"
             >
               <button
+                aria-expanded="false"
+                aria-haspopup="menu"
                 class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
                 data-test-id="cf-ui-text-link"
                 type="button"
@@ -398,12 +374,11 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                     class="TextLink__TextLink__icon-wrapper___25_tI"
                   >
                     <svg
-                      class="Icon__Icon___38Epv TextLink__TextLink__icon___3ggiB Icon__Icon--small___1yGZK undefined"
+                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
                       data-test-id="cf-ui-icon"
-                      height="18"
+                      height="1em"
                       viewBox="0 0 24 24"
-                      width="18"
-                      xmlns="http://www.w3.org/2000/svg"
+                      width="1em"
                     >
                       <path
                         d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"
@@ -435,12 +410,11 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                   class="TextLink__TextLink__icon-wrapper___25_tI"
                 >
                   <svg
-                    class="Icon__Icon___38Epv TextLink__TextLink__icon___3ggiB Icon__Icon--small___1yGZK undefined"
+                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
                     data-test-id="cf-ui-icon"
-                    height="18"
+                    height="1em"
                     viewBox="0 0 24 24"
-                    width="18"
-                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
                   >
                     <path
                       d="M0 0h24v24H0z"

@@ -3,7 +3,7 @@
 exports[`ConnectButton should match snapshot 1`] = `
 <div>
   <button
-    class="Button__Button___1ZfFj a11y__focus-border--default___60AXp css-4k45fw Button__Button--naked___mB6LS Button__Button--full-width___3Fmpo"
+    class="Button__Button___1ZfFj css-4k45fw Button__Button--naked___mB6LS Button__Button--full-width___3Fmpo"
     data-test-id="connect-button"
     type="button"
   >

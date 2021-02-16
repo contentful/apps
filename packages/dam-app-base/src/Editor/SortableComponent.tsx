@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import arrayMove from 'array-move';
 import { IconButton, Card } from '@contentful/forma-36-react-components';
 import { ThumbnailFn, DeleteFn, Asset, Config } from '../interfaces';
