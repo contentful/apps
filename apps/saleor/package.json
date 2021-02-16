@@ -1,6 +1,6 @@
 {
   "name": "saleor",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.7.2",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
-    "@contentful/ecommerce-app-base": "^1.0.5",
+    "@contentful/ecommerce-app-base": "^1.0.6",
     "@types/lodash": "^4.14.161",
     "core-js": "3.4.1",
     "graphql": "^15.3.0",
