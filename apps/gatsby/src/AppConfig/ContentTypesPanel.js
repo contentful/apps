@@ -1,9 +1,10 @@
 import {
-  CheckboxField,
+  Button,
   Flex,
   FieldGroup,
   Heading,
   Note,
+  Modal,
   Option,
   Paragraph,
   SkeletonBodyText,
@@ -15,6 +16,19 @@ import {
 } from "@contentful/forma-36-react-components";
 import styles from "../styles";
 import React, {useState} from "react";
+
+const sortContentTypesAlphabetically = (contentTypes) => {
+  const sorted = contentTypes.sort((type1, type2) => {
+    if (type1.name < type2.name) {
+      return -1
+    }
+    if (type1.name > type2.name) {
+      return 1
+    }
+    return 0
+  })
+  return sorted
+}
 
 const ContentTypesSkeleton = () => (
   <SkeletonContainer width="100%">
@@ -40,43 +54,11 @@ const NoContentTypes = ({ space, environment }) => (
   </Note>
 );
 
-// export const ContentTypesList = ({
-//   contentTypes,
-//   enabledContentTypes,
-//   onContentTypeToggle,
-//   space,
-//   environment,
-// }) => {
-//   if (!contentTypes) {
-//     return <ContentTypesSkeleton />;
-//   }
-
-//   if (0 === contentTypes.length) {
-//     return <NoContentTypes space={space} environment={environment} />;
-//   }
-
-//   // console.log(enabledContentTypes)
-//   // console.log(contentTypes)
-
-//   return contentTypes.map(({ sys, name }) => (
-//     <CheckboxField
-//       key={sys.id}
-//       labelIsLight
-//       labelText={name}
-//       name={name}
-//       checked={enabledContentTypes.includes(sys.id)}
-//       value={sys.id}
-//       onChange={() => onContentTypeToggle(sys.id)}
-//       id={sys.id}
-//     />
-//   ));
-// };
-
-const UrlInput = ({urlConstructors, id, onSlugInput, placeholder}) => {
+const UrlInput = ({urlConstructors, id, onSlugInput, placeholder, disabled}) => {
   const valueIndex = urlConstructors.findIndex(constructor => constructor.id === id)
   const value = valueIndex !== -1 ? urlConstructors[valueIndex].slug : ""
   return (
-    <TextInput id={id} value={value} onChange={(event)=> onSlugInput(id, event.target.value)} placeholder={placeholder} />
+    <TextInput disabled={disabled} id={id} value={value} onChange={(event) => onSlugInput(id, event.target.value)} placeholder={placeholder} />
   )
 }
 
@@ -84,8 +66,11 @@ export const ContentTypesSelection = ({
   contentTypes,
   enabledContentTypes,
   urlConstructors,
+  disableContentType,
   onSlugInput,
   onContentTypeToggle,
+  selectorTypeToggle,
+  selectorType,
   space,
   environment,
 }) => {
@@ -96,24 +81,118 @@ export const ContentTypesSelection = ({
   if (0 === contentTypes.length) {
     return <NoContentTypes space={space} environment={environment} />;
   }
-  const fullEnabledTypes = contentTypes.filter(type => enabledContentTypes.findIndex(enabledType => enabledType === type.sys.id) !== -1)
-  // State to maintain previous value of a select in case it is changed
+  
+  const fullEnabledTypes = enabledContentTypes.map(enabledType => {
+    const fullType = contentTypes.find(type => type.sys.id === enabledType)
+    return fullType
+  })
+
+  //Focus value to compare with selection value to determine whether an update in state is necessary
   const [focusValue, changeFocus] = useState("");
-  return fullEnabledTypes.map(({ sys }) => (
-   <Flex marginBottom="spacingM">
-     <Flex marginRight = "spacingS">
-       <Select value={sys.id} 
-        onFocus={(event) => changeFocus(event.target.value)}
-        onChange={(event)=>onContentTypeToggle(event.target.value, focusValue)} 
-       >
-         {contentTypes.map(({name, sys}) => <Option key={`option - ${sys.id}`} value={sys.id}>{name}</Option>)}
-       </Select>
-       </Flex>
-      <Flex fullWidth>
-       <UrlInput id={sys.id} onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={"slug || slugPrefix/slug || metaInfo.prefix/metaInfo.url.slug"}/>
-     </Flex>
-   </Flex>
-  ));
+  //Modal state
+  const [modalState, updateModalState] = useState({
+    open: false,
+    id: ""
+  })
+
+  //Function to reset modal state
+  const modalReset = () => {
+    updateModalState(
+      {
+        open: false,
+        id: ""
+      }
+    )
+  }
+  
+  const sortedContentTypes = sortContentTypesAlphabetically(contentTypes)
+
+  return ( 
+    <>
+    {/* Selectors for existing enabled content types */}
+      {fullEnabledTypes.map(({ sys }, index) => (
+      <Flex marginBottom="spacingM" key={`fullSelect - ${sys.id}`}>
+        <Flex marginRight = "spacingS">
+          <Select value={sys.id} 
+            onFocus={(event) => changeFocus(event.target.value)}
+            onChange={(event)=> onContentTypeToggle(event.target.value, focusValue)} 
+          >
+            {sortedContentTypes.map(({name, sys}) => 
+              <Option key={`option - ${sys.id}`} value={sys.id}>
+                {name}
+              </Option>
+            )}
+          </Select>
+        </Flex>
+        <Flex fullWidth marginRight = "spacingS">
+          <UrlInput id={sys.id} onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={'slugField || "example"/parentField.slugField'}/>
+        </Flex>
+        <Flex>
+          <TextLink onClick={() => updateModalState({open: true, id: sys.id})}>
+            Remove
+          </TextLink>
+        </Flex>
+      </Flex>
+      ))}
+
+      {/* Selector triggered by add content type button */}
+      {selectorType && (
+        <Flex marginBottom="spacingM" key={`fullSelect - selector`}>
+        <Flex marginRight = "spacingS">
+          <Select
+            onFocus={(event) => changeFocus(event.target.value)}
+            onChange={(event) => {
+              onContentTypeToggle(event.target.value, focusValue)
+              selectorTypeToggle()
+            }} 
+          >
+            <Option selected disabled  value>
+                {"Select a content type"}
+            </Option>
+            {sortedContentTypes.map(({name, sys}) => 
+              <Option key={sys.id} value={sys.id}>
+                {name}
+              </Option>
+            )}
+          </Select>
+        </Flex>
+        <Flex fullWidth marginRight = "spacingS">
+          <UrlInput disabled onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={'slugField || "example"/parentField.slugField'}/>
+        </Flex>
+        <Flex>
+          <TextLink onClick={() => selectorTypeToggle()}>Remove</TextLink>
+        </Flex>
+      </Flex>
+      )}
+
+      {/* Button to add a new content type */}
+      <Flex justifyContent="center" marginTop="spacingXl">
+        <Button disabled={selectorType} onClick={() => selectorTypeToggle()}>
+          Add Content Type
+        </Button>
+      </Flex>
+
+      {/* Modal to confirm removal of contentType */}
+      <Modal isShown={modalState.open} onClose={() => modalReset()}>
+        {() => (
+          <>
+            <Modal.Header title={"Are you sure?"}></Modal.Header>
+            <Modal.Controls position={"left"}>
+              <Flex marginTop={"spacingXl"}>
+                <Button buttonType="positive" onClick={() => {
+                  disableContentType(modalState.id)
+                  modalReset()
+                }}>Remove</Button>
+                <Button buttonType="muted" onClick={() => modalReset()}>
+                  Do not remove
+                </Button>
+              </Flex>
+            </Modal.Controls>
+          </>
+        )}
+      </Modal>
+    </>
+  )
 };
 
 const ContentTypesPanel = ({
@@ -121,7 +200,10 @@ const ContentTypesPanel = ({
   enabledContentTypes,
   urlConstructors,
   onContentTypeToggle,
+  disableContentType,
+  selectorTypeToggle,
   onSlugInput,
+  selectorType,
   space,
   environment,
 }) => (
@@ -129,17 +211,10 @@ const ContentTypesPanel = ({
     <Heading>Content Types</Heading>
     <Paragraph>
       Select content types that will show the Gatsby Cloud functionality in the
-      sidebar. Optionally, define fields used for generating slugs depending on the content type. Use dot notiation if the slug field is the child of single reference field on the parent content type.
+      sidebar. Optionally, define slugs using strings or fields on the content type. A string must be contained in quotes. Fields must be expressed in dot notation (allows for children of references).
     </Paragraph>
     <div className={styles.checks}>
       <FieldGroup>
-        {/* <ContentTypesList
-          space={space}
-          environment={environment}
-          contentTypes={contentTypes}
-          enabledContentTypes={enabledContentTypes}
-          onContentTypeToggle={onContentTypeToggle}
-        /> */}
         <ContentTypesSelection 
           space={space}
           environment={environment}
@@ -147,7 +222,11 @@ const ContentTypesPanel = ({
           enabledContentTypes={enabledContentTypes}
           urlConstructors={urlConstructors}
           onSlugInput={onSlugInput}
-          onContentTypeToggle={onContentTypeToggle} />
+          onContentTypeToggle={onContentTypeToggle} 
+          disableContentType={disableContentType} 
+          selectorTypeToggle={selectorTypeToggle}
+          selectorType={selectorType}
+        />
       </FieldGroup>
     </div>
   </Typography>

@@ -43,6 +43,7 @@ export class AppConfig extends React.Component {
   state = {
     contentTypes: null,
     enabledContentTypes: {},
+    selectorType: false,
     urlConstructors: [],
     previewUrl: "",
     webhookUrl: "",
@@ -70,6 +71,7 @@ export class AppConfig extends React.Component {
           eisRes.items,
           ids.app
         ),
+        selectorType: params.selectorType,
         urlConstructors: params.urlConstructors || [],
         previewUrl: params.previewUrl || "",
         webhookUrl: params.webhookUrl || "",
@@ -155,6 +157,23 @@ export class AppConfig extends React.Component {
     }
   };
 
+  selectorTypeToggle = () => {
+    this.setState((prevState) => ({
+      selectorType: !prevState.selectorType
+    }))
+  }
+
+  disableContentType = (id) => {
+    const index = this.state.enabledContentTypes.findIndex(type => type === id)
+    if (index !== -1) {
+      this.setState((prevState) => (
+        {
+          enabledContentTypes: prevState.enabledContentTypes.filter(type => type !== id)
+        }
+      ))
+    }
+  }
+
   toggleContentType = (enabledContentTypes, newId, prevId) => {
     if (enabledContentTypes.includes(prevId) && prevId !== newId) {
       return enabledContentTypes.concat([newId]).filter((cur) => cur !== prevId);
@@ -207,7 +226,7 @@ export class AppConfig extends React.Component {
   }
 
   render() {
-    const { contentTypes, enabledContentTypes, urlConstructors } = this.state;
+    const { contentTypes, enabledContentTypes, urlConstructors, selectorType} = this.state;
     const { sdk } = this.props;
     const {
       ids: { space, environment },
@@ -305,6 +324,9 @@ export class AppConfig extends React.Component {
             urlConstructors={urlConstructors}
             onSlugInput={this.onSlugInput}
             onContentTypeToggle={this.onContentTypeToggle}
+            disableContentType={this.disableContentType}
+            selectorTypeToggle={this.selectorTypeToggle}
+            selectorType={selectorType}
           />
         </div>
         <div className={styles.icon}>
