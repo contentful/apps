@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.7](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@1.0.6...@contentful/ecommerce-app-base@1.0.7) (2021-02-26)
+
+
+### Bug Fixes
+
+* **ecommerce-app-base:** bump Forma36 dependency ([34d03f5](https://github.com/contentful/apps/commit/34d03f5cd70f9247868952d3f8e56b1e40f26c33))
+
+
+
+
+
 ## [1.0.6](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@1.0.5...@contentful/ecommerce-app-base@1.0.6) (2021-02-16)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
