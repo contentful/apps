@@ -172,6 +172,7 @@ export const ContentTypesSelection = ({
         </Button>
       </Flex>
 
+
       {/* Modal to confirm removal of contentType */}
       <Modal isShown={modalState.open} onClose={() => modalReset()}>
         {() => (

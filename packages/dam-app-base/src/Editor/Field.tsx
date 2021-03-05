@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Button, Note, TextLink } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { SortableComponent } from './SortableComponent';
 import { ThumbnailFn, OpenDialogFn, DisabledPredicateFn, Asset } from '../interfaces';

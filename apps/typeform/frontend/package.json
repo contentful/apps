@@ -1,6 +1,6 @@
 {
   "name": "typeform-frontend",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
@@ -20,7 +20,7 @@
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
     "@contentful/forma-36-fcss": "0.0.31",
-    "@contentful/forma-36-react-components": "^3.16.7",
+    "@contentful/forma-36-react-components": "^3.79.2",
     "@contentful/forma-36-tokens": "^0.4.5",
     "@testing-library/react": "^10.0.1",
     "@typeform/embed": "^0.16.0",

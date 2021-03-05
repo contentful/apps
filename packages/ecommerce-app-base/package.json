@@ -1,7 +1,7 @@
 {
   "name": "@contentful/ecommerce-app-base",
   "description": "Library to quickly build an app to integrate your e-commerce system of choice with Contentful",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
@@ -25,12 +25,14 @@
     "@types/array-move": "2.0.0",
     "@types/jest": "25.1.2",
     "@types/lodash.get": "^4.4.6",
-    "@types/react": "^16.9.19",
+    "@types/react": "^16.14.3",
     "@types/react-dom": "^16.9.5",
     "@types/react-sortable-hoc": "0.7.1",
     "@types/webpack-env": "1.15.1",
     "contentful-cli": "^1.2.12",
     "cssnano": "4.1.10",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "rimraf": "3.0.2",
     "typedoc": "0.20.4",
     "typedoc-plugin-markdown": "3.2.1",
@@ -39,16 +41,18 @@
   "dependencies": {
     "@contentful/app-sdk": "^3.31.0",
     "@contentful/forma-36-fcss": "^0.0.34",
-    "@contentful/forma-36-react-components": "^3.30.2",
-    "@contentful/forma-36-tokens": "^0.5.1",
+    "@contentful/forma-36-react-components": "^3.81.0",
+    "@contentful/forma-36-tokens": "^0.5.3",
+    "@emotion/css": "^11.1.3",
     "array-move": "2.2.1",
     "core-js": "3.6.4",
-    "emotion": "^10.0.27",
     "lodash.get": "^4.4.2",
     "prop-types": "15.7.2",
-    "react": "16.12.0",
-    "react-dom": "16.12.0",
     "react-sortable-hoc": "1.11.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
   },
   "scripts": {
     "build": "rimraf lib && tsc",

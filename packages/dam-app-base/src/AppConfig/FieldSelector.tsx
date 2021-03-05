@@ -1,6 +1,6 @@
 import * as React from 'react';
 import tokens from '@contentful/forma-36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { Form, Subheading, CheckboxField, Typography } from '@contentful/forma-36-react-components';
 
 import { ContentType, CompatibleFields, SelectedFields } from './fields';
