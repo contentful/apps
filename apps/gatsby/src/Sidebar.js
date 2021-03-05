@@ -43,9 +43,9 @@ export default class Sidebar extends React.Component {
   buildSlug = async () => {
     const {urlConstructors, previewUrl} = this.sdk.parameters.installation;
     //Find the url constructor for the given contentType
-    const constructor = urlConstructors.find(
+    const constructor = urlConstructors ? urlConstructors.find(
       constructor => constructor.id === this.sdk.contentType.sys.id
-    );
+    ) : undefined;
     // If there is no constructor set the url as the base preview
     if (!constructor){
       return

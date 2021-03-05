@@ -55,7 +55,7 @@ const NoContentTypes = ({ space, environment }) => (
 );
 
 const UrlInput = ({urlConstructors, id, onSlugInput, placeholder, disabled}) => {
-  const valueIndex = urlConstructors.findIndex(constructor => constructor.id === id)
+  const valueIndex = urlConstructors ? urlConstructors.findIndex(constructor => constructor.id === id) : -1
   const value = valueIndex !== -1 ? urlConstructors[valueIndex].slug : ""
   return (
     <TextInput disabled={disabled} id={id} value={value} onChange={(event) => onSlugInput(id, event.target.value)} placeholder={placeholder} />
@@ -118,7 +118,7 @@ export const ContentTypesSelection = ({
             onChange={(event)=> onContentTypeToggle(event.target.value, focusValue)} 
           >
             {sortedContentTypes.map(({name, sys}) => 
-              <Option key={`option - ${sys.id}`} value={sys.id}>
+              <Option key={`option - ${sys.id}`} value={sys.id} label={name}>
                 {name}
               </Option>
             )}
@@ -150,7 +150,7 @@ export const ContentTypesSelection = ({
                 {"Select a content type"}
             </Option>
             {sortedContentTypes.map(({name, sys}) => 
-              <Option key={sys.id} value={sys.id}>
+              <Option key={sys.id} value={sys.id} label={name}>
                 {name}
               </Option>
             )}
