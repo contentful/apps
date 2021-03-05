@@ -104,7 +104,7 @@ export const ContentTypesSelection = ({
       }
     )
   }
-  
+
   const sortedContentTypes = sortContentTypesAlphabetically(contentTypes)
 
   return ( 
