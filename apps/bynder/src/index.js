@@ -47,6 +47,7 @@ isPublic
 brandId
 name
 publishedAt
+updatedAt
 createdAt
 files
 `;
@@ -89,11 +90,11 @@ function transformAsset(asset) {
     "height": asset.height,
     "width": asset.width,
     "copyright": asset.copyright,
-    "extension": asset.extenstions,
+    "extension": asset.extensions,
     "userCreated": asset.createdBy,
     "datePublished": asset.publishedAt,
     "dateCreated": asset.createdAt,
-    "dateModified": asset.modifiedAt,
+    "dateModified": asset.updatedAt,
     "watermarked": asset.isWatermarked ? 1 : 0,
     "limited": asset.isLimitedUse ? 1 : 0,
     "isPublic": asset.isPublic ? 1 : 0,
