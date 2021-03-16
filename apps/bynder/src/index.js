@@ -63,14 +63,6 @@ function makeThumbnail(resource) {
 }
 
 function prepareBynderHTML({ bynderURL, assetTypes }) {
-  let types = '';
-  if (!assetTypes) {
-    // We deault to just images in this fallback since this is the behavior the App had in its initial release
-    types = 'image';
-  } else {
-    types = assetTypes.trim().split(',').map(type => type.trim()).join(',');
-  }
-
   return `
     <div class="dialog-container">
       <div id="bynder-compactview" />
@@ -112,7 +104,7 @@ function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
   const { assetTypes, bynderURL } = config
 
-  let types = '';
+  let types = [];
   if (!assetTypes) {
     // We deault to just images in this fallback since this is the behavior the App had in its initial release
     types = ['IMAGE'];
