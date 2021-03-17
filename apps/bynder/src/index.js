@@ -122,6 +122,12 @@ function renderDialog(sdk) {
     sdk.close(Array.isArray(assets) ? assets.map(transformAsset) : []);
   }
 
+  window.addEventListener("message", (e) => {
+    if (e.origin === 'https://app.contentful.com') {
+      e.stopImmediatePropagation()
+    }
+  })
+
 
   BynderCompactView.open({
     language: "en_US",
