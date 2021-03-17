@@ -5,8 +5,8 @@ import logo from './logo.svg';
 
 const CTA = 'Select a file on Bynder';
 
-const BYNDER_SDK_URL =
-    "https://d8ejoa1fys2rk.cloudfront.net/5.0.5/modules/compactview/bynder-compactview-2-latest.js";
+const BYNDER_SDK_DOMAIN = "https://d8ejoa1fys2rk.cloudfront.net";
+const BYNDER_SDK_URL = `${BYNDER_SDK_DOMAIN}/5.0.5/modules/compactview/bynder-compactview-2-latest.js`;
 
 const FIELDS_TO_PERSIST = [
   'archive',
@@ -108,7 +108,7 @@ function transformAsset(asset) {
 }
 
 function checkMessageEvent(e) {
-  if (e.origin === 'https://app.contentful.com') {
+  if (e.origin !== BYNDER_SDK_DOMAIN) {
     e.stopImmediatePropagation()
   }
 }
@@ -119,7 +119,7 @@ function renderDialog(sdk) {
 
   let types = [];
   if (!assetTypes) {
-    // We deault to just images in this fallback since this is the behavior the App had in its initial release
+    // We default to just images in this fallback since this is the behavior the App had in its initial release
     types = ['IMAGE'];
   } else {
     types = assetTypes.trim().split(',').map((type) => type.toUpperCase());
