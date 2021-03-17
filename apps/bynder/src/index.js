@@ -5,6 +5,9 @@ import logo from './logo.svg';
 
 const CTA = 'Select a file on Bynder';
 
+const BYNDER_SDK_URL =
+    "https://d8ejoa1fys2rk.cloudfront.net/5.0.5/modules/compactview/bynder-compactview-2-latest.js";
+
 const FIELDS_TO_PERSIST = [
   'archive',
   'brandId',
@@ -100,6 +103,12 @@ function transformAsset(asset) {
   })
 }
 
+function checkMessageEvent(e) {
+  if (e.origin === 'https://app.contentful.com') {
+    e.stopImmediatePropagation()
+  }
+}
+
 function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
   const { assetTypes, bynderURL } = config
@@ -112,32 +121,35 @@ function renderDialog(sdk) {
     types = assetTypes.trim().split(',').map((type) => type.toUpperCase());
   }
 
+  const script = document.createElement('script');
+  script.src = BYNDER_SDK_URL;
+  script.async = true;
+  document.body.appendChild(script);
+
   const container = document.createElement('div');
   container.innerHTML = prepareBynderHTML(config);
   document.body.appendChild(container);
 
   sdk.window.startAutoResizer();
 
+  window.addEventListener("message", checkMessageEvent)
+
   function onSuccess(assets, selected) {
     sdk.close(Array.isArray(assets) ? assets.map(transformAsset) : []);
+    window.removeEventListener("message", checkMessageEvent)
   }
 
-  window.addEventListener("message", (e) => {
-    if (e.origin === 'https://app.contentful.com') {
-      e.stopImmediatePropagation()
-    }
+  script.addEventListener("load", () => {
+    BynderCompactView.open({
+      language: "en_US",
+      mode: "MultiSelect",
+      assetTypes: types,
+      portal: { url: bynderURL, editable: true },
+      assetFieldSelection: FIELD_SELECTION,
+      container: document.getElementById("bynder-compactview"),
+      onSuccess: onSuccess
+    });
   })
-
-
-  BynderCompactView.open({
-    language: "en_US",
-    mode: "MultiSelect",
-    assetTypes: types,
-    portal: { url: bynderURL, editable: true },
-    assetFieldSelection: FIELD_SELECTION,
-    container: document.getElementById("bynder-compactview"),
-    onSuccess: onSuccess
-  });
 }
 
 async function openDialog(sdk, _currentValue, config) {
