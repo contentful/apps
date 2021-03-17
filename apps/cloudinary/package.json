@@ -1,6 +1,6 @@
 {
   "name": "cloudinary-assets",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.4.5",
@@ -13,7 +13,7 @@
     "cssnano": "4.1.10"
   },
   "dependencies": {
-    "@contentful/dam-app-base": "^1.0.6",
+    "@contentful/dam-app-base": "^1.0.7",
     "cloudinary-core": "^2.8.0",
     "core-js": "3.1.4"
   },
