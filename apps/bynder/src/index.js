@@ -74,6 +74,15 @@ function prepareBynderHTML({ bynderURL, assetTypes }) {
 }
 
 function transformAsset(asset) {
+  const thumbnails = {
+    "webimage": asset.files.webImage?.url,
+    "thul": asset.files.thumbnail?.url
+  }
+
+  Object.entries(asset.files)
+      .filter(([name]) => !["webImage", "thumbnail"].includes(name))
+      .forEach(([key, value]) => thumbnails[key] = value?.url);
+
   return ({
     "id": asset.databaseId,
     "orientation": asset.orientation.toLowerCase(),
@@ -94,12 +103,7 @@ function transformAsset(asset) {
     "limited": asset.isLimitedUse ? 1 : 0,
     "isPublic": asset.isPublic ? 1 : 0,
     "brandId": asset.brandId,
-    "thumbnails": {
-      "contentful": asset.files.contentful.url,
-      "mini": asset.files.mini.url,
-      "webimage": asset.files.webImage.url,
-      "thul": asset.files.thumbnail.url
-    }
+    "thumbnails": thumbnails
   })
 }
 
