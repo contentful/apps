@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.4](https://github.com/contentful/apps/compare/bynder-assets@1.1.3...bynder-assets@1.1.4) (2021-03-18)
+
+
+### Bug Fixes
+
+* add event listener to stop bynder sdk from throwing errors + login view styling ([d7ed278](https://github.com/contentful/apps/commit/d7ed2780d5b89764f3220e326515a1e353f31d79))
+* fix typo for extension + add dateModified with updatedAt ([3046eb5](https://github.com/contentful/apps/commit/3046eb5224e18fc885b1a1ecbd1128ee68b55405))
+* generate thumbnails dynamically ([1aea6f8](https://github.com/contentful/apps/commit/1aea6f8f628bf034e6d582c00c2d5b38b8caad73))
+* load script dynamically only on open + remove eventlistener on dialog close ([dc0d44b](https://github.com/contentful/apps/commit/dc0d44b4717dd9712a182027c9ad1588fed636ad))
+* remove unused code + use correct default for types ([d8823e8](https://github.com/contentful/apps/commit/d8823e8efcd767892e82665bfbd534249ccd14b1))
+* reverse domain check for message ([6768b5a](https://github.com/contentful/apps/commit/6768b5af53876ebec1ab0a29fb6fc94f51ff90b5))
+
+
+
+
+
 ## [1.1.3](https://github.com/contentful/apps/compare/bynder-assets@1.1.2...bynder-assets@1.1.3) (2021-03-17)
 
 **Note:** Version bump only for package bynder-assets
