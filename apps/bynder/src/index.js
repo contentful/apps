@@ -53,6 +53,7 @@ publishedAt
 updatedAt
 createdAt
 files
+originalUrl
 `;
 
 const validAssetTypes = ['image', 'audio', 'document', 'video'];
@@ -103,7 +104,8 @@ function transformAsset(asset) {
     "limited": asset.isLimitedUse ? 1 : 0,
     "isPublic": asset.isPublic ? 1 : 0,
     "brandId": asset.brandId,
-    "thumbnails": thumbnails
+    "thumbnails": thumbnails,
+    "original": asset.originalUrl
   })
 }
 
