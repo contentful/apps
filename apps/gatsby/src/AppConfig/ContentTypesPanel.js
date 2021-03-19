@@ -3,8 +3,10 @@ import {
   Flex,
   FieldGroup,
   Heading,
-  Note,
+  List,
+  ListItem,
   Modal,
+  Note,
   Option,
   Paragraph,
   SkeletonBodyText,
@@ -38,7 +40,7 @@ const ContentTypesSkeleton = () => (
 
 const NoContentTypes = ({ space, environment }) => (
   <Note noteType="warning">
-    There are no content types available in this environment. You can add one{" "}
+    There are no content types available in this environment. You can add one
     <TextLink
       target="_blank"
       href={
@@ -112,7 +114,7 @@ export const ContentTypesSelection = ({
     {/* Selectors for existing enabled content types */}
       {fullEnabledTypes.map(({ sys }, index) => (
       <Flex marginBottom="spacingM" key={`fullSelect - ${sys.id}`}>
-        <Flex marginRight = "spacingS">
+        <Flex marginRight = "spacingS" flexDirection={"column"}>
           <Select value={sys.id} 
             onFocus={(event) => changeFocus(event.target.value)}
             onChange={(event)=> onContentTypeToggle(event.target.value, focusValue)} 
@@ -124,11 +126,11 @@ export const ContentTypesSelection = ({
             )}
           </Select>
         </Flex>
-        <Flex fullWidth marginRight = "spacingS">
-          <UrlInput id={sys.id} onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={'slugField || "example"/parentField.slugField'}/>
+        <Flex fullWidth flexDirection="column" marginRight = "spacingS">
+          <UrlInput id={sys.id} onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={'(Optional) define slug'}/>
         </Flex>
         <Flex>
-          <TextLink onClick={() => updateModalState({open: true, id: sys.id})}>
+          <TextLink linkType="negative" onClick={() => updateModalState({open: true, id: sys.id})}>
             Remove
           </TextLink>
         </Flex>
@@ -144,31 +146,36 @@ export const ContentTypesSelection = ({
             onChange={(event) => {
               onContentTypeToggle(event.target.value, focusValue)
               selectorTypeToggle()
-            }} 
+            }}
+            defaultValue
           >
-            <Option selected disabled  value>
+            <Option  disabled  value>
                 {"Select a content type"}
             </Option>
-            {sortedContentTypes.map(({name, sys}) => 
-              <Option key={sys.id} value={sys.id} label={name}>
-                {name}
-              </Option>
-            )}
+            {sortedContentTypes.map(({name, sys}) => {
+              // Check if the type is already selected so it can be disabled if so
+              const selected = fullEnabledTypes.findIndex(type => type.name === name) !== -1;
+                return (
+                  <Option disabled={selected} key={sys.id} value={sys.id} label={`${name}${selected ? " – already selected":""}`}>
+                    {name}
+                  </Option>
+                )
+            })}
           </Select>
         </Flex>
         <Flex fullWidth marginRight = "spacingS">
-          <UrlInput disabled onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={'slugField || "example"/parentField.slugField'}/>
+          <UrlInput disabled onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={'(Optional) define slug'}/>
         </Flex>
         <Flex>
-          <TextLink onClick={() => selectorTypeToggle()}>Remove</TextLink>
+          <TextLink linkType="negative" onClick={() => selectorTypeToggle()}>Remove</TextLink>
         </Flex>
       </Flex>
       )}
 
       {/* Button to add a new content type */}
-      <Flex justifyContent="center" marginTop="spacingXl">
-        <Button disabled={selectorType} onClick={() => selectorTypeToggle()}>
-          Add Content Type
+      <Flex justifyContent="left" marginTop="spacingXl">
+        <Button buttonType="muted" disabled={selectorType} onClick={() => selectorTypeToggle()}>
+          Add content type
         </Button>
       </Flex>
 
@@ -212,8 +219,30 @@ const ContentTypesPanel = ({
     <Heading>Content Types</Heading>
     <Paragraph>
       Select content types that will show the Gatsby Cloud functionality in the
-      sidebar. Optionally, define slugs using strings or fields on the content type. A string must be contained in quotes. Fields must be expressed in dot notation (allows for children of references).
+      sidebar. 
     </Paragraph>
+    <Paragraph>
+    Optionally, define slugs using: strings or fields on the content type to be appended to your site url.
+    </Paragraph>
+    <List>
+      <ListItem>
+        <Paragraph>
+          Strings (must be contained in quotes, will be the same for every entry): <strong>"resources"</strong>
+        </Paragraph>
+      </ListItem>
+      <ListItem>
+        <Paragraph>
+          Dot notation to access fields (will return field value for the entry):<strong>parentField.slug</strong>
+        </Paragraph>
+      </ListItem>
+      <ListItem>
+        <Paragraph>
+          Backslashes (to seperate different parts of the slug): <strong>"resources"/slugPrefix/parentField.slug</strong>
+        </Paragraph>
+      </ListItem>
+    </List>
+
+    
     <div className={styles.checks}>
       <FieldGroup>
         <ContentTypesSelection 

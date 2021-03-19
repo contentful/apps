@@ -61,7 +61,7 @@ export default class Sidebar extends React.Component {
       const childField = fullParentEntry.fields[array[index + 1]][sdk.locales.default]
       // QUESTION: Best way to throw an error if someone is trying to use a multi reference field in their reference chain (would be no way to determine which entry on the multi reference field should be used for the slug)
       if (Array.isArray(childField)) {
-        console.log("You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
+        console.error("You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
         return ""
       }
 
@@ -79,15 +79,18 @@ export default class Sidebar extends React.Component {
     const slug = await (
       Promise.all(
         subFields.map(async fieldArray => {
-          // If the generated array is greater than 1 it means there is reference chain which can be resolved with the resolveReferenceChain function
-          if (fieldArray.length > 1) {
-            const parentId = this.sdk.entry.fields[fieldArray[0]].getValue().sys.id
-            return resolveReferenceChain(this.sdk, fieldArray, 0, parentId)
-          } else if(fieldArray[0].includes('"' || "'")) { // Checks for static text
-            return fieldArray[0].replace(/['"]/g, "")
-          }
-           else {//Field directly on the entry, no use for reference resolver
-            return this.sdk.entry.fields[fieldArray[0]].getValue()
+          try {
+            // If the generated array's length is greater than 1 it means there is reference chain which can be resolved recursively with the resolveReferenceChain function
+            if (fieldArray.length > 1) {
+              const parentId = this.sdk.entry.fields[fieldArray[0]].getValue().sys.id
+              return resolveReferenceChain(this.sdk, fieldArray, 0, parentId)
+            } else if(fieldArray[0].includes('"' || "'")) { // Checks for static text
+              return fieldArray[0].replace(/['"]/g, "")
+            } else { //Field directly on the entry, no use for reference resolver
+              return this.sdk.entry.fields[fieldArray[0]].getValue()
+            }
+          } catch {
+            console.error(`Gatsby Preview Extension: ${fieldArray[0]}, as defined in the slug constructor for this content type in the Gatsby Preview App, is not a field. Maybe you mistyped it, or maybe you meant it to be a static string in which case you need to surround it in quotes: ${`"${fieldArray[0]}"`}. The open preview button will send users to your site's base url until fixed.`)
           }
         })
       )
@@ -95,7 +98,7 @@ export default class Sidebar extends React.Component {
     //Make sure the base preview url ends with a /
     const cleanPreviewUrl = previewUrl.charAt(previewUrl.length - 1) === "/" ? previewUrl : `${previewUrl}/`
     
-    const fullUrl = `${cleanPreviewUrl}${slug.toString().replace(/,/i, "/")}`
+    const fullUrl = `${cleanPreviewUrl}${slug.toString().replace(/,/i, "/")}` 
 
     this.setState({url: fullUrl})
   }
@@ -132,12 +135,10 @@ export default class Sidebar extends React.Component {
 
   render =  () => {
     const { webhookUrl, authToken } = this.sdk.parameters.installation;
-    const contentSlug = this.sdk.entry.fields.slug;
     return (
       <div className="extension">
         <div className="flexcontainer">
           <ExtensionUI
-            contentSlug={contentSlug && contentSlug.getValue()}
             previewUrl={this.state.url}
             authToken={authToken}
           />
