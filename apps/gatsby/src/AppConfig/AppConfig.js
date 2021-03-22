@@ -176,7 +176,10 @@ export class AppConfig extends React.Component {
 
   toggleContentType = (enabledContentTypes, newId, prevId) => {
     if (enabledContentTypes.includes(prevId) && prevId !== newId) {
-      return enabledContentTypes.concat([newId]).filter((cur) => cur !== prevId);
+      //Swap in the new id at the correct index in state to avoid the movement in the UI
+      const index = enabledContentTypes.findIndex(id => id === prevId);
+      enabledContentTypes[index] = newId;
+      return enabledContentTypes;
     } else {
       return enabledContentTypes.concat([newId]);
     }

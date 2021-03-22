@@ -55,13 +55,13 @@ export default class Sidebar extends React.Component {
 
     // Recursive helper to return slug values buried in a chain of references
     const resolveReferenceChain = async (sdk, array, index, parentId) => {
+      console.log(sdk)
       // Full entry to access child fields
       const fullParentEntry = await sdk.space.getEntry(parentId)
       // Child field
       const childField = fullParentEntry.fields[array[index + 1]][sdk.locales.default]
-      // QUESTION: Best way to throw an error if someone is trying to use a multi reference field in their reference chain (would be no way to determine which entry on the multi reference field should be used for the slug)
       if (Array.isArray(childField)) {
-        console.error("You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
+       console.error("Gatsby Preview App: You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
         return ""
       }
 
@@ -90,7 +90,7 @@ export default class Sidebar extends React.Component {
               return this.sdk.entry.fields[fieldArray[0]].getValue()
             }
           } catch {
-            console.error(`Gatsby Preview Extension: ${fieldArray[0]}, as defined in the slug constructor for this content type in the Gatsby Preview App, is not a field. Maybe you mistyped it, or maybe you meant it to be a static string in which case you need to surround it in quotes: ${`"${fieldArray[0]}"`}. The open preview button will send users to your site's base url until fixed.`)
+            console.error(`Gatsby Preview App: ${fieldArray[0]}, as defined in the slug field for this content type in the Gatsby Preview App, is not a field. Maybe you mistyped it, or maybe you meant it to be a static string in which case you need to surround it in quotes: ${`"${fieldArray[0]}"`}. The open preview button will send users to your site's base url until fixed.`)
           }
         })
       )

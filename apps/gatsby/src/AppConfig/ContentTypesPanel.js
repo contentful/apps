@@ -60,7 +60,14 @@ const UrlInput = ({urlConstructors, id, onSlugInput, placeholder, disabled}) => 
   const valueIndex = urlConstructors ? urlConstructors.findIndex(constructor => constructor.id === id) : -1
   const value = valueIndex !== -1 ? urlConstructors[valueIndex].slug : ""
   return (
-    <TextInput disabled={disabled} id={id} value={value} onChange={(event) => onSlugInput(id, event.target.value)} placeholder={placeholder} />
+    <TextInput 
+      disabled={disabled} 
+      id={id} 
+      value={value} 
+      onChange={(event) => onSlugInput(id, event.target.value)} 
+      placeholder={placeholder} 
+      width={"full"}
+    />
   )
 }
 
@@ -113,11 +120,17 @@ export const ContentTypesSelection = ({
     <>
     {/* Selectors for existing enabled content types */}
       {fullEnabledTypes.map(({ sys }, index) => (
-      <Flex marginBottom="spacingM" key={`fullSelect - ${sys.id}`}>
-        <Flex marginRight = "spacingS" flexDirection={"column"}>
-          <Select value={sys.id} 
+      <Flex marginBottom="spacingM">
+        <Flex marginRight = "spacingS" flexDirection="column">
+          <Select
+            key={`enabledSelect-${index}`}
+            value={sys.id} 
             onFocus={(event) => changeFocus(event.target.value)}
-            onChange={(event)=> onContentTypeToggle(event.target.value, focusValue)} 
+            onChange={(event)=> {
+              onContentTypeToggle(event.target.value, focusValue)
+              event.target.blur() //Have to blur target for correct focus value in the case dropdown is changed multiple times
+            }}
+            width={"medium"}
           >
             {sortedContentTypes.map(({name, sys}) => 
               <Option key={`option - ${sys.id}`} value={sys.id} label={name}>
@@ -127,7 +140,12 @@ export const ContentTypesSelection = ({
           </Select>
         </Flex>
         <Flex fullWidth flexDirection="column" marginRight = "spacingS">
-          <UrlInput id={sys.id} onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={'(Optional) define slug'}/>
+          <UrlInput 
+            id={sys.id} 
+            onSlugInput={onSlugInput} 
+            urlConstructors={urlConstructors} 
+            placeholder={'(Optional) slug'}
+          />
         </Flex>
         <Flex>
           <TextLink linkType="negative" onClick={() => updateModalState({open: true, id: sys.id})}>
@@ -139,24 +157,29 @@ export const ContentTypesSelection = ({
 
       {/* Selector triggered by add content type button */}
       {selectorType && (
-        <Flex marginBottom="spacingM" key={`fullSelect - selector`}>
+      <Flex marginBottom="spacingM">
         <Flex marginRight = "spacingS">
           <Select
-            onFocus={(event) => changeFocus(event.target.value)}
             onChange={(event) => {
-              onContentTypeToggle(event.target.value, focusValue)
+              onContentTypeToggle(event.target.value, null)
               selectorTypeToggle()
             }}
             defaultValue
+            width={"medium"}
           >
             <Option  disabled  value>
-                {"Select a content type"}
+              {"Select a content type"}
             </Option>
             {sortedContentTypes.map(({name, sys}) => {
               // Check if the type is already selected so it can be disabled if so
               const selected = fullEnabledTypes.findIndex(type => type.name === name) !== -1;
                 return (
-                  <Option disabled={selected} key={sys.id} value={sys.id} label={`${name}${selected ? " – already selected":""}`}>
+                  <Option 
+                    disabled={selected} 
+                    key={sys.id} 
+                    value={sys.id} 
+                    label={`${name}${selected ? " – already selected":""}`}
+                  >
                     {name}
                   </Option>
                 )
@@ -164,7 +187,12 @@ export const ContentTypesSelection = ({
           </Select>
         </Flex>
         <Flex fullWidth marginRight = "spacingS">
-          <UrlInput disabled onSlugInput={onSlugInput} urlConstructors={urlConstructors} placeholder={'(Optional) define slug'}/>
+          <UrlInput 
+            disabled 
+            onSlugInput={onSlugInput} 
+            urlConstructors={urlConstructors} 
+            placeholder={'(Optional) slug'}
+          />
         </Flex>
         <Flex>
           <TextLink linkType="negative" onClick={() => selectorTypeToggle()}>Remove</TextLink>
@@ -187,10 +215,14 @@ export const ContentTypesSelection = ({
             <Modal.Header title={"Are you sure?"}></Modal.Header>
             <Modal.Controls position={"left"}>
               <Flex marginTop={"spacingXl"}>
-                <Button buttonType="positive" onClick={() => {
-                  disableContentType(modalState.id)
-                  modalReset()
-                }}>Remove</Button>
+                <Button buttonType="positive" 
+                  onClick={() => {
+                    disableContentType(modalState.id)
+                    modalReset()
+                  }}
+                >
+                  Remove
+                </Button>
                 <Button buttonType="muted" onClick={() => modalReset()}>
                   Do not remove
                 </Button>
@@ -232,7 +264,7 @@ const ContentTypesPanel = ({
       </ListItem>
       <ListItem>
         <Paragraph>
-          Dot notation to access fields (will return field value for the entry):<strong>parentField.slug</strong>
+          Dot notation to access fields (will return field value for the entry): <strong>parentField.slug</strong>
         </Paragraph>
       </ListItem>
       <ListItem>
