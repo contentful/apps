@@ -51,7 +51,7 @@ const NoContentTypes = ({ space, environment }) => (
       rel="noopener noreferrer"
     >
       content type
-    </TextLink>{" "}
+    </TextLink>
     and assign it to the app from this screen.
   </Note>
 );
@@ -166,6 +166,7 @@ export const ContentTypesSelection = ({
             }}
             defaultValue
             width={"medium"}
+            key={"placeholder"}
           >
             <Option  disabled  value>
               {"Select a content type"}
@@ -257,17 +258,17 @@ const ContentTypesPanel = ({
     Optionally, define slugs using: strings or fields on the content type to be appended to your site url.
     </Paragraph>
     <List>
-      <ListItem>
+      <ListItem key={`instruction-1`}>
         <Paragraph>
           Strings (must be contained in quotes, will be the same for every entry): <strong>"resources"</strong>
         </Paragraph>
       </ListItem>
-      <ListItem>
+      <ListItem key={`instruction-2`}>
         <Paragraph>
           Dot notation to access fields (will return field value for the entry): <strong>parentField.slug</strong>
         </Paragraph>
       </ListItem>
-      <ListItem>
+      <ListItem key={`instruction-3`}>
         <Paragraph>
           Backslashes (to seperate different parts of the slug): <strong>"resources"/slugPrefix/parentField.slug</strong>
         </Paragraph>
@@ -275,7 +276,7 @@ const ContentTypesPanel = ({
     </List>
 
     
-    <div className={styles.checks}>
+
       <FieldGroup>
         <ContentTypesSelection 
           space={space}
@@ -290,7 +291,7 @@ const ContentTypesPanel = ({
           selectorType={selectorType}
         />
       </FieldGroup>
-    </div>
+
   </Typography>
 );
 
