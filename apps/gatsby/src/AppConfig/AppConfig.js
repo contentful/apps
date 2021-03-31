@@ -164,11 +164,12 @@ export class AppConfig extends React.Component {
   }
 
   disableContentType = (id) => {
-    const index = this.state.enabledContentTypes.findIndex(type => type === id)
-    if (index !== -1) {
-      this.setState((prevState) => (
+    const newEnabledTypes = this.state.enabledContentTypes.filter(type => type !== id);
+    const shouldUpdate = this.state.enabledContentTypes.length > newEnabledTypes.length
+    if (shouldUpdate) {
+      this.setState(() => (
         {
-          enabledContentTypes: prevState.enabledContentTypes.filter(type => type !== id)
+          enabledContentTypes: newEnabledTypes
         }
       ))
     }

@@ -20,6 +20,7 @@ const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   body: JSON.stringify({})
 });
 
+
 export default class Sidebar extends React.Component {
   static propTypes = {
     sdk: PropTypes.object.isRequired
@@ -40,6 +41,24 @@ export default class Sidebar extends React.Component {
     this.debounceInterval = setInterval(this.refreshPreview, 1000);
   };
 
+  // Recursive helper to return slug values buried in a chain of references
+  resolveReferenceChain = async (sdk, array, index, parentId) => {
+    // Full entry to access child fields
+    const fullParentEntry = await sdk.space.getEntry(parentId)
+    // Child field
+    const childField = fullParentEntry.fields[array[index + 1]][sdk.locales.default]
+    if (Array.isArray(childField)) {
+    console.error("Gatsby Preview App: You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
+      return ""
+    }
+
+    if (index + 2 < array.length) {
+      return resolveReferenceChain(sdk, array, (index + 1), childField.sys.id)
+    } else {
+      return childField
+    }
+  }
+
   buildSlug = async () => {
     const {urlConstructors, previewUrl} = this.sdk.parameters.installation;
     //Find the url constructor for the given contentType
@@ -51,26 +70,6 @@ export default class Sidebar extends React.Component {
       return
     }
 
-    //QUESTION: What does the locale object in the sdk look like when there are multiple locales available. Need to account for spaces that have more than one locale, so they can have previews everywhere.
-
-    // Recursive helper to return slug values buried in a chain of references
-    const resolveReferenceChain = async (sdk, array, index, parentId) => {
-      console.log(sdk)
-      // Full entry to access child fields
-      const fullParentEntry = await sdk.space.getEntry(parentId)
-      // Child field
-      const childField = fullParentEntry.fields[array[index + 1]][sdk.locales.default]
-      if (Array.isArray(childField)) {
-       console.error("Gatsby Preview App: You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
-        return ""
-      }
-
-      if (index + 2 < array.length) {
-        return resolveReferenceChain(sdk, array, (index + 1), childField.sys.id)
-      } else {
-        return childField
-      }
-    }
     //Get array of fields to build slug
     const parentFields = constructor.slug.split("/")
     //Get array of subfields if the slug is using references
@@ -83,7 +82,7 @@ export default class Sidebar extends React.Component {
             // If the generated array's length is greater than 1 it means there is reference chain which can be resolved recursively with the resolveReferenceChain function
             if (fieldArray.length > 1) {
               const parentId = this.sdk.entry.fields[fieldArray[0]].getValue().sys.id
-              return resolveReferenceChain(this.sdk, fieldArray, 0, parentId)
+              return this.resolveReferenceChain(this.sdk, fieldArray, 0, parentId)
             } else if(fieldArray[0].includes('"' || "'")) { // Checks for static text
               return fieldArray[0].replace(/['"]/g, "")
             } else { //Field directly on the entry, no use for reference resolver
@@ -97,9 +96,7 @@ export default class Sidebar extends React.Component {
     )
     //Make sure the base preview url ends with a /
     const cleanPreviewUrl = previewUrl.charAt(previewUrl.length - 1) === "/" ? previewUrl : `${previewUrl}/`
-    
-    const fullUrl = `${cleanPreviewUrl}${slug.toString().replace(/,/i, "/")}` 
-
+    const fullUrl = `${cleanPreviewUrl}${slug.join('/')}`
     this.setState({url: fullUrl})
   }
 
