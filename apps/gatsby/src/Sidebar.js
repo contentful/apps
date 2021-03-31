@@ -94,9 +94,19 @@ export default class Sidebar extends React.Component {
         })
       )
     )
+    // check if the slug conforms the shape we want
+    const assertSlug = (s) => {
+      if (slug.length > 0 && !slug.includes("//")) { 
+        return 
+      }
+      
+      throw new Error(`Unexpected slug shape for: ${s}`)
+    }
     //Make sure the base preview url ends with a /
     const cleanPreviewUrl = previewUrl.charAt(previewUrl.length - 1) === "/" ? previewUrl : `${previewUrl}/`
-    const fullUrl = `${cleanPreviewUrl}${slug.join('/')}`
+    const cleanSlug = slug.join('/')
+    assertSlug(cleanSlug)
+    const fullUrl = `${cleanPreviewUrl}${cleanSlug}`
     this.setState({url: fullUrl})
   }
 
