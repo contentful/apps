@@ -89,7 +89,7 @@ export default class Sidebar extends React.Component {
               return this.sdk.entry.fields[fieldArray[0]].getValue()
             }
           } catch {
-            console.error(`Gatsby Preview App: ${fieldArray[0]}, as defined in the slug field for this content type in the Gatsby Preview App, is not a field. Maybe you mistyped it, or maybe you meant it to be a static string in which case you need to surround it in quotes: ${`"${fieldArray[0]}"`}. The open preview button will send users to your site's base url until fixed.`)
+            console.error(`Gatsby Preview App: ${fieldArray[0]}, as defined in the slug field for this content type in the Gatsby Preview App, is not a field. Maybe you mistyped it, or maybe you meant it to be a static string in which case you need to surround it in quotes: ${`"${fieldArray[0]}"` }. The open preview button will send users to your site's base url until fixed.`)
           }
         })
       )
