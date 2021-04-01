@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/contentful/apps/compare/gatsby-preview@1.1.3...gatsby-preview@1.2.0) (2021-04-01)
+
+
+### Features
+
+* define_entry_slugs ([e933688](https://github.com/contentful/apps/commit/e933688293fcb7f2a7277dac628b2374f6b21672))
+
+
+
+
+
 ## [1.1.3](https://github.com/contentful/apps/compare/gatsby-preview@1.1.2...gatsby-preview@1.1.3) (2021-04-01)
 
 
