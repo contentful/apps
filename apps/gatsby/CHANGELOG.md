@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/contentful/apps/compare/gatsby-preview@1.2.0...gatsby-preview@1.2.1) (2021-04-06)
+
+
+### Bug Fixes
+
+* revert back to original gatsby app ([#217](https://github.com/contentful/apps/issues/217)) ([364a62d](https://github.com/contentful/apps/commit/364a62d77ad69464ae3bd92711144271ad9e488d))
+
+
+
+
+
 # [1.2.0](https://github.com/contentful/apps/compare/gatsby-preview@1.1.3...gatsby-preview@1.2.0) (2021-04-01)
 
 
