@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.8](https://github.com/contentful/apps/compare/shopify-sku@1.0.7...shopify-sku@1.0.8) (2021-04-06)
+
+
+### Bug Fixes
+
+* use latest version of shopify-buy ([#213](https://github.com/contentful/apps/issues/213)) ([ba84070](https://github.com/contentful/apps/commit/ba84070c5352720b457731ebc9891f7472a3cbeb))
+
+
+
+
+
 ## [1.0.7](https://github.com/contentful/apps/compare/shopify-sku@1.0.6...shopify-sku@1.0.7) (2021-02-16)
 
 
