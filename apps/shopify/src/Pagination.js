@@ -41,7 +41,6 @@ class Pagination {
     const hasEnoughVariantsToConsume = this.variants.length >= PER_PAGE || nothingLeftToFetch;
     if (hasEnoughVariantsToConsume) {
       const variants = this.variants.splice(0, PER_PAGE);
-      // const lastProduct = this.products.find(product => product.id === last(variants).productId);
       return {
         pagination: {
           // There is going to be a next page in the following two complimentary cases:
