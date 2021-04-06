@@ -44,7 +44,7 @@ class Pagination {
       return {
         pagination: {
           // There is going to be a next page in the following two complimentary cases:
-          // A). The product corresponding to the last variant belongs is tagged as having a next page
+          // A). There are more products to fetch via the Shopify API
           // B). There are variants left to consume in the in-memory variants list
           hasNextPage: this.hasNextProductPage || this.variants.length > 0
         },
