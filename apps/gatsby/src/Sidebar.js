@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 import { ExtensionUI } from '@gatsby-cloud-pkg/gatsby-cms-extension-base';
 import {
   Spinner,
+  Paragraph,
   HelpText,
   Icon,
+  ValidationMessage
 } from '@contentful/forma-36-react-components';
 
 const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
@@ -20,7 +22,6 @@ const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   body: JSON.stringify({})
 });
 
-
 export default class Sidebar extends React.Component {
   static propTypes = {
     sdk: PropTypes.object.isRequired
@@ -29,7 +30,7 @@ export default class Sidebar extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {url: props.sdk.parameters.installation.previewUrl};
+    this.state = {};
     this.sdk = props.sdk;
     this.sdk.entry.onSysChanged(this.onSysChanged);
   }
@@ -41,78 +42,8 @@ export default class Sidebar extends React.Component {
     this.debounceInterval = setInterval(this.refreshPreview, 1000);
   };
 
-  // Recursive helper to return slug values buried in a chain of references
-  resolveReferenceChain = async (sdk, array, index, parentId) => {
-    // Full entry to access child fields
-    const fullParentEntry = await sdk.space.getEntry(parentId)
-    // Child field
-    const childField = fullParentEntry.fields[array[index + 1]][sdk.locales.default]
-    if (Array.isArray(childField)) {
-    console.error("Gatsby Preview App: You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
-      return ""
-    }
-
-    if (index + 2 < array.length) {
-      return resolveReferenceChain(sdk, array, (index + 1), childField.sys.id)
-    } else {
-      return childField
-    }
-  }
-
-  buildSlug = async () => {
-    const {urlConstructors, previewUrl} = this.sdk.parameters.installation;
-    //Find the url constructor for the given contentType
-    const constructor = urlConstructors ? urlConstructors.find(
-      constructor => constructor.id === this.sdk.contentType.sys.id
-    ) : undefined;
-    // If there is no constructor set the url as the base preview
-    if (!constructor){
-      return
-    }
-
-    //Get array of fields to build slug
-    const parentFields = constructor.slug.split("/")
-    //Get array of subfields if the slug is using references
-    const subFields = parentFields.map(parent => parent.split("."))
-    //Generate slug
-    const slug = await (
-      Promise.all(
-        subFields.map(async fieldArray => {
-          try {
-            // If the generated array's length is greater than 1 it means there is reference chain which can be resolved recursively with the resolveReferenceChain function
-            if (fieldArray.length > 1) {
-              const parentId = this.sdk.entry.fields[fieldArray[0]].getValue().sys.id
-              return this.resolveReferenceChain(this.sdk, fieldArray, 0, parentId)
-            } else if(fieldArray[0].includes('"' || "'")) { // Checks for static text
-              return fieldArray[0].replace(/['"]/g, "")
-            } else { //Field directly on the entry, no use for reference resolver
-              return this.sdk.entry.fields[fieldArray[0]].getValue()
-            }
-          } catch {
-            console.error(`Gatsby Preview App: ${fieldArray[0]}, as defined in the slug field for this content type in the Gatsby Preview App, is not a field. Maybe you mistyped it, or maybe you meant it to be a static string in which case you need to surround it in quotes: ${`"${fieldArray[0]}"` }. The open preview button will send users to your site's base url until fixed.`)
-          }
-        })
-      )
-    )
-    // check if the slug conforms the shape we want
-    const assertSlug = (s) => {
-      if (slug.length > 0 && !slug.includes("//")) { 
-        return 
-      }
-      
-      throw new Error(`Unexpected slug shape for: ${s}`)
-    }
-    //Make sure the base preview url ends with a /
-    const cleanPreviewUrl = previewUrl.charAt(previewUrl.length - 1) === "/" ? previewUrl : `${previewUrl}/`
-    const cleanSlug = slug.join('/')
-    assertSlug(cleanSlug)
-    const fullUrl = `${cleanPreviewUrl}${cleanSlug}`
-    this.setState({url: fullUrl})
-  }
-
-  async componentDidMount() {
+  componentDidMount() {
     this.sdk.window.startAutoResizer();
-    this.buildSlug()
   }
 
   refreshPreview = async () => {
@@ -140,13 +71,16 @@ export default class Sidebar extends React.Component {
     this.setState({ busy: false, ok: res.ok });
   };
 
-  render =  () => {
-    const { webhookUrl, authToken } = this.sdk.parameters.installation;
+  render = () => {
+    const { webhookUrl, previewUrl, authToken } = this.sdk.parameters.installation;
+    const contentSlug = this.sdk.entry.fields.slug;
+
     return (
       <div className="extension">
         <div className="flexcontainer">
           <ExtensionUI
-            previewUrl={this.state.url}
+            contentSlug={contentSlug && contentSlug.getValue()}
+            previewUrl={previewUrl}
             authToken={authToken}
           />
           {webhookUrl && this.renderRefreshStatus()}

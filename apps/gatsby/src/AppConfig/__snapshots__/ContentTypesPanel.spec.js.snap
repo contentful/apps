@@ -131,6 +131,7 @@ exports[`ContentTypesList should show a Note if there are no content types 1`] =
         class="Note__Note__content___H1pf-"
       >
         There are no content types available in this environment. You can add one
+         
         <a
           class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
           data-test-id="cf-ui-text-link"
@@ -145,6 +146,7 @@ exports[`ContentTypesList should show a Note if there are no content types 1`] =
             content type
           </span>
         </a>
+         
         and assign it to the app from this screen.
       </div>
     </div>
