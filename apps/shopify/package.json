@@ -15,7 +15,7 @@
   "dependencies": {
     "@contentful/ecommerce-app-base": "1.0.4",
     "core-js": "3.4.1",
-    "shopify-buy": "^2.8.1"
+    "shopify-buy": "2.11.0"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
