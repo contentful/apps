@@ -27,9 +27,7 @@ export const productsToVariantsTransformer = products =>
         sku: variant.id,
         productId: product.id,
         title: product.title,
-        hasNextPage: false
       }));
-      variants[variants.length - 1].hasNextPage = product.hasNextPage;
       return variants;
     })
   );
