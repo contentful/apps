@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.9](https://github.com/contentful/apps/compare/shopify-sku@1.0.8...shopify-sku@1.0.9) (2021-04-07)
+
+
+### Bug Fixes
+
+* **Shopify:** 'load more' button was wrongly displayed in some edge cases ([#218](https://github.com/contentful/apps/issues/218)) ([7675f84](https://github.com/contentful/apps/commit/7675f8426eaa4a979cc622d873d502ee33b9b92e))
+
+
+
+
+
 ## [1.0.8](https://github.com/contentful/apps/compare/shopify-sku@1.0.7...shopify-sku@1.0.8) (2021-04-06)
 
 
