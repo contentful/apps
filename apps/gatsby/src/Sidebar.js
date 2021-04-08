@@ -3,10 +3,8 @@ import PropTypes from 'prop-types';
 import { ExtensionUI } from '@gatsby-cloud-pkg/gatsby-cms-extension-base';
 import {
   Spinner,
-  Paragraph,
   HelpText,
   Icon,
-  ValidationMessage
 } from '@contentful/forma-36-react-components';
 
 const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
@@ -21,6 +19,7 @@ const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   },
   body: JSON.stringify({})
 });
+
 
 export default class Sidebar extends React.Component {
   static propTypes = {
@@ -61,16 +60,16 @@ export default class Sidebar extends React.Component {
   }
 
   buildSlug = async () => {
-    const {urlConstructors} = this.sdk.parameters.installation;
+    const {urlConstructors, previewUrl} = this.sdk.parameters.installation;
     //Find the url constructor for the given contentType
     const constructor = urlConstructors ? urlConstructors.find(
       constructor => constructor.id === this.sdk.contentType.sys.id
     ) : undefined;
-    // If there is no constructor set the url as the base preview search for a slug field on the entry (returns undefined if none)
+    // If there is no constructor set the url as the base preview
     if (!constructor){
-      const fallbackSlug = await this.sdk.entry.fields.slug.getValue()
+      const fallbackSlug = await this.props.sdk.entry.fields.slug.getValue();
       this.setState({slug: fallbackSlug});
-      return;
+      return; 
     }
 
     //Get array of fields to build slug
@@ -92,7 +91,7 @@ export default class Sidebar extends React.Component {
               return this.sdk.entry.fields[fieldArray[0]].getValue()
             }
           } catch {
-            console.error(`Gatsby Preview App: ${fieldArray[0]}, as defined in the slug field for this content type in the Gatsby Preview App, is not a field. Maybe you mistyped it, or maybe you meant it to be a static string in which case you need to surround it in quotes: ${`"${fieldArray[0]}"` }. The open preview button will send users to your site's base url until fixed.`)
+            console.error(`Gatsby Preview App: ${fieldArray[0]}, as defined in the slug field for this content type in the Gatsby Preview App, is not a field. Maybe you mistyped it, or maybe you meant it to be a static string in which case you need to surround it in quotes: ${`"${fieldArray[0]}"`}. The open preview button will send users to your site's base url until fixed.`)
           }
         })
       )
@@ -104,6 +103,7 @@ export default class Sidebar extends React.Component {
 
   async componentDidMount() {
     this.sdk.window.startAutoResizer();
+    this.buildSlug();
   }
 
   refreshPreview = async () => {
@@ -132,10 +132,9 @@ export default class Sidebar extends React.Component {
   };
 
   render =  () => {
-    const { webhookUrl, previewUrl, authToken } = this.sdk.parameters.installation;
-    const { slug } = this.state;
+    const { webhookUrl, authToken, previewUrl } = this.sdk.parameters.installation;
+    const { slug } = this.state
     console.log(`Gatsby cloud preview slug: ${slug}`)
-
     return (
       <div className="extension">
         <div className="flexcontainer">

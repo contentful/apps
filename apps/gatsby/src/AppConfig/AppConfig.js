@@ -1,4 +1,4 @@
-import { get } from "lodash";
+import {get} from "lodash";
 import React from "react";
 import PropTypes from "prop-types";
 import {
@@ -43,6 +43,8 @@ export class AppConfig extends React.Component {
   state = {
     contentTypes: null,
     enabledContentTypes: {},
+    selectorType: false,
+    urlConstructors: [],
     previewUrl: "",
     webhookUrl: "",
     authToken: "",
@@ -69,6 +71,8 @@ export class AppConfig extends React.Component {
           eisRes.items,
           ids.app
         ),
+        selectorType: params.selectorType,
+        urlConstructors: params.urlConstructors || [],
         previewUrl: params.previewUrl || "",
         webhookUrl: params.webhookUrl || "",
         authToken: params.authToken || "",
@@ -77,17 +81,19 @@ export class AppConfig extends React.Component {
     );
 
     app.onConfigure(this.configureApp);
+
   }
 
   configureApp = async () => {
     const {
       contentTypes,
       enabledContentTypes,
+      urlConstructors,
       previewUrl,
       webhookUrl,
       authToken,
     } = this.state;
-
+    
     this.setState({ validPreview: true, validWebhook: true });
 
     let valid = true;
@@ -118,6 +124,7 @@ export class AppConfig extends React.Component {
         previewUrl,
         webhookUrl,
         authToken,
+        urlConstructors
       },
       targetState: enabledContentTypesToTargetState(
         contentTypes,
@@ -150,26 +157,80 @@ export class AppConfig extends React.Component {
     }
   };
 
-  toggleContentType = (enabledContentTypes, ctId) => {
-    if (enabledContentTypes.includes(ctId)) {
-      return enabledContentTypes.filter((cur) => cur !== ctId);
+  selectorTypeToggle = () => {
+    this.setState((prevState) => ({
+      selectorType: !prevState.selectorType
+    }))
+  }
+
+  disableContentType = (id) => {
+    const newEnabledTypes = this.state.enabledContentTypes.filter(type => type !== id);
+    const shouldUpdate = this.state.enabledContentTypes.length > newEnabledTypes.length
+    if (shouldUpdate) {
+      this.setState(() => (
+        {
+          enabledContentTypes: newEnabledTypes
+        }
+      ))
+    }
+  }
+
+  toggleContentType = (enabledContentTypes, newId, prevId) => {
+    if (enabledContentTypes.includes(prevId) && prevId !== newId) {
+      //Swap in the new id at the correct index in state to avoid the movement in the UI
+      const index = enabledContentTypes.findIndex(id => id === prevId);
+      enabledContentTypes[index] = newId;
+      return enabledContentTypes;
     } else {
-      return enabledContentTypes.concat([ctId]);
+      return enabledContentTypes.concat([newId]);
     }
   };
 
-  onContentTypeToggle = (ctId) => {
+  onContentTypeToggle = (newId, prevId) => {
     this.setState((prevState) => ({
       ...prevState,
       enabledContentTypes: this.toggleContentType(
         prevState.enabledContentTypes,
-        ctId
+        newId,
+        prevId
       ),
     }));
   };
 
+  updateUrlConstructors = (currentUrlConstructors, id, newInput) => {
+    let constructors;
+    // Check if the constructor needs to be added, or if an id that already exists needs a new slug
+    const index = currentUrlConstructors.findIndex(cur => cur.id === id)
+    if (index !== -1) {
+      currentUrlConstructors[index].slug = newInput
+       constructors = currentUrlConstructors
+    } else {
+      const newConstructor = {
+        id,
+        slug: newInput
+      }
+      constructors = [...currentUrlConstructors, ...[newConstructor]]
+    }
+    // Filter out constructors that no longer have the app enabled
+    return constructors.filter(constructor => {
+      const keep = this.state.enabledContentTypes.findIndex(id => id === constructor.id) !== -1
+      return keep
+    })
+  }
+
+  onSlugInput = (id, input) => {
+    this.setState((prevState) => ({
+      ...prevState,
+      urlConstructors: this.updateUrlConstructors(
+        prevState.urlConstructors,
+        id,
+        input
+      ),
+    }))
+  }
+
   render() {
-    const { contentTypes, enabledContentTypes } = this.state;
+    const { contentTypes, enabledContentTypes, urlConstructors, selectorType} = this.state;
     const { sdk } = this.props;
     const {
       ids: { space, environment },
@@ -264,7 +325,12 @@ export class AppConfig extends React.Component {
             environment={environment}
             contentTypes={contentTypes}
             enabledContentTypes={enabledContentTypes}
+            urlConstructors={urlConstructors}
+            onSlugInput={this.onSlugInput}
             onContentTypeToggle={this.onContentTypeToggle}
+            disableContentType={this.disableContentType}
+            selectorTypeToggle={this.selectorTypeToggle}
+            selectorType={selectorType}
           />
         </div>
         <div className={styles.icon}>
