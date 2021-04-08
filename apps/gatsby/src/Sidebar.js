@@ -29,7 +29,7 @@ export default class Sidebar extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {url: props.sdk.parameters.installation.previewUrl};
+    this.state = {slug: undefined};
     this.sdk = props.sdk;
     this.sdk.entry.onSysChanged(this.onSysChanged);
   }
@@ -67,7 +67,10 @@ export default class Sidebar extends React.Component {
     ) : undefined;
     // If there is no constructor set the url as the base preview
     if (!constructor){
-      return
+      const fallbackSlug = await this.props.sdk.entry.fields.slug.getValue();
+      console.log(fallbackSlug)
+      this.setState({slug: fallbackSlug});
+      return; 
     }
 
     //Get array of fields to build slug
@@ -94,25 +97,14 @@ export default class Sidebar extends React.Component {
         })
       )
     )
-    // check if the slug conforms the shape we want
-    const assertSlug = (s) => {
-      if (slug.length > 0 && !slug.includes("//")) { 
-        return 
-      }
-      
-      throw new Error(`Unexpected slug shape for: ${s}`)
-    }
     //Make sure the base preview url ends with a /
-    const cleanPreviewUrl = previewUrl.charAt(previewUrl.length - 1) === "/" ? previewUrl : `${previewUrl}/`
-    const cleanSlug = slug.join('/')
-    assertSlug(cleanSlug)
-    const fullUrl = `${cleanPreviewUrl}${cleanSlug}`
-    this.setState({url: fullUrl})
+    const finalSlug = slug.join('/')
+    this.setState({slug: finalSlug})
   }
 
   async componentDidMount() {
     this.sdk.window.startAutoResizer();
-    this.buildSlug()
+    this.buildSlug();
   }
 
   refreshPreview = async () => {
@@ -141,12 +133,16 @@ export default class Sidebar extends React.Component {
   };
 
   render =  () => {
-    const { webhookUrl, authToken } = this.sdk.parameters.installation;
+    const { webhookUrl, authToken, previewUrl } = this.sdk.parameters.installation;
+    const { slug } = this.state
+    console.log(this.sdk)
+    console.log(`Gatsby cloud preview slug: ${slug}`)
     return (
       <div className="extension">
         <div className="flexcontainer">
           <ExtensionUI
-            previewUrl={this.state.url}
+            contentSlug={slug && slug}
+            previewUrl={previewUrl}
             authToken={authToken}
           />
           {webhookUrl && this.renderRefreshStatus()}
