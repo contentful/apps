@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 import { ExtensionUI } from '@gatsby-cloud-pkg/gatsby-cms-extension-base';
 import {
   Spinner,
+  Paragraph,
   HelpText,
   Icon,
+  ValidationMessage
 } from '@contentful/forma-36-react-components';
 
 const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
@@ -19,7 +21,6 @@ const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   },
   body: JSON.stringify({})
 });
-
 
 export default class Sidebar extends React.Component {
   static propTypes = {
@@ -104,7 +105,6 @@ export default class Sidebar extends React.Component {
 
   async componentDidMount() {
     this.sdk.window.startAutoResizer();
-    this.buildSlug()
   }
 
   refreshPreview = async () => {
