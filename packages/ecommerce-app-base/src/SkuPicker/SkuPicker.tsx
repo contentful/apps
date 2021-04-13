@@ -15,6 +15,7 @@ export interface Props {
   sdk: DialogExtensionSDK;
   fetchProductPreviews: ProductPreviewsFn;
   fetchProducts: ProductsFn;
+  searchDelay?: number;
 }
 
 interface State {
@@ -26,7 +27,7 @@ interface State {
   selectedSKUs: string[];
 }
 
-const SEARCH_DELAY = 250;
+const DEFAULT_SEARCH_DELAY = 250;
 
 function getSaveBtnText(selectedSKUs: string[]): string {
   switch (selectedSKUs.length) {
@@ -54,15 +55,20 @@ export class SkuPicker extends Component<Props, State> {
     selectedSKUs: get(this.props, ['sdk', 'parameters', 'invocation', 'fieldValue'], [])
   };
 
+  setSearchCallback: () => void;
+
+  constructor(props: Props) {
+    super(props);
+    this.setSearchCallback = debounce(() => {
+      this.setActivePage(1);
+      this.updateProducts();
+    }, this.props.searchDelay || DEFAULT_SEARCH_DELAY);
+  }
+
   componentDidMount() {
     this.updateProducts();
     this.updateSelectedProducts();
   }
-
-  setSearchCallback = debounce(() => {
-    this.setActivePage(1);
-    this.updateProducts();
-  }, SEARCH_DELAY);
 
   setSearch = (search: string) => {
     this.setState({ search }, this.setSearchCallback);
