@@ -32,7 +32,7 @@ async function renderDialog(sdk) {
     sdk,
     fetchProductPreviews,
     fetchProducts: await makeProductSearchResolver(sdk),
-    searchDelay: 1500
+    searchDelay: 750
   });
 
   sdk.window.startAutoResizer();
