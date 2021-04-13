@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.0.0...@contentful/ecommerce-app-base@2.1.0) (2021-04-13)
+
+
+### Features
+
+* add option to change search debounce time ([#220](https://github.com/contentful/apps/issues/220)) ([0493357](https://github.com/contentful/apps/commit/0493357b7e8d28a5ad0ee7b0668f82f4febe7732))
+
+
+
+
+
 # [2.0.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@1.0.7...@contentful/ecommerce-app-base@2.0.0) (2021-02-26)
 
 

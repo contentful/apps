@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/contentful/apps/compare/shopify-sku@1.0.9...shopify-sku@1.1.0) (2021-04-13)
+
+
+### Features
+
+* add option to change search debounce time ([#220](https://github.com/contentful/apps/issues/220)) ([0493357](https://github.com/contentful/apps/commit/0493357b7e8d28a5ad0ee7b0668f82f4febe7732))
+
+
+
+
+
 ## [1.0.9](https://github.com/contentful/apps/compare/shopify-sku@1.0.8...shopify-sku@1.0.9) (2021-04-07)
 
 
