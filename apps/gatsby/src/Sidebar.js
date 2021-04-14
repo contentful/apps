@@ -51,16 +51,15 @@ export default class Sidebar extends React.Component {
     console.error("Gatsby Preview App: You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
       return ""
     }
-
     if (index + 2 < array.length) {
-      return resolveReferenceChain(sdk, array, (index + 1), childField.sys.id)
+       return this.resolveReferenceChain(sdk, array, (index + 1), childField.sys.id)
     } else {
       return childField
     }
   }
 
   buildSlug = async () => {
-    const {urlConstructors, previewUrl} = this.sdk.parameters.installation;
+    const {urlConstructors} = this.sdk.parameters.installation;
     //Find the url constructor for the given contentType
     const constructor = urlConstructors ? urlConstructors.find(
       constructor => constructor.id === this.sdk.contentType.sys.id
@@ -96,7 +95,7 @@ export default class Sidebar extends React.Component {
         })
       )
     )
-    //Make sure the base preview url ends with a /
+
     const finalSlug = slug.join('/')
     this.setState({slug: finalSlug})
   }
