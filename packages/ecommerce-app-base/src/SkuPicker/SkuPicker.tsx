@@ -82,8 +82,12 @@ export class SkuPicker extends Component<Props, State> {
         search
       } = this.state;
       const offset = (activePage - 1) * limit;
-      const { pagination, products } = await this.props.fetchProducts(search, { offset });
-      this.setState({ pagination, products });
+      const fetched = await this.props.fetchProducts(search, { offset });
+      // If the request has been cancelled because a new one has been launched
+      // then fetchProducts will return null
+      if (fetched && fetched.pagination && fetched.products) {
+        this.setState({ pagination: fetched.pagination, products: fetched.products });
+      }
     } catch (error) {
       this.props.sdk.notifier.error('There was an error fetching the product list.');
     }

@@ -25,8 +25,13 @@ class Pagination {
     this.shopifyClient = await makeShopifyClient(this.sdk);
   }
 
-  async fetchNext(search) {
+  async fetchNext(search, recursing = false) {
     const searchHasChanged = search !== this.prevSearch;
+    const shouldStop = searchHasChanged && recursing;
+    if (shouldStop) {
+      return;
+    }
+
     if (searchHasChanged) {
       this.prevSearch = search;
       this._resetPagination();
@@ -55,7 +60,7 @@ class Pagination {
     // When there are not enough variants to fill the page, we need to fetch more products,
     // extract their variants and then call this method recursively to render the next page.
     await this._fetchMoreProducts(search);
-    return this.fetchNext(search);
+    return this.fetchNext(search, true);
   }
 
   /**
