@@ -255,7 +255,7 @@ const ContentTypesPanel = ({
       sidebar. 
     </Paragraph>
     <Paragraph>
-    Optionally, define slugs using: strings or fields on the content type to be appended to your site url.
+    Optionally, define slugs using:
     </Paragraph>
     <List>
       <ListItem key={`instruction-1`}>
@@ -273,9 +273,18 @@ const ContentTypesPanel = ({
           Backslashes (to seperate different parts of the slug): <strong>"resources"/slugPrefix/parentField.slug</strong>
         </Paragraph>
       </ListItem>
+      <ListItem key={`instruction-4`}>
+      <Flex marginBottom={"spacingXl"}>
+        <TextLink
+          target="_blank"
+          href={"https://youtu.be/81JqPzLhPzk"}
+          rel="noopener noreferrer"
+        >
+          Watch short explainer video on optional slugs here.
+        </TextLink>
+      </Flex>
+      </ListItem>
     </List>
-
-    
 
       <FieldGroup>
         <ContentTypesSelection 

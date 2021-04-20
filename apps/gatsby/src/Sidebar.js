@@ -35,6 +35,7 @@ export default class Sidebar extends React.Component {
   }
 
   onSysChanged = () => {
+    this.buildSlug()
     if (this.debounceInterval) {
       clearInterval(this.debounceInterval);
     }
@@ -67,7 +68,7 @@ export default class Sidebar extends React.Component {
     // If there is no constructor set the url as the base preview
     if (!constructor){
       const fallbackSlug = await this.props.sdk.entry.fields.slug.getValue();
-      this.setState({slug: fallbackSlug});
+      this.setState({ slug: fallbackSlug });
       return; 
     }
 
@@ -102,7 +103,6 @@ export default class Sidebar extends React.Component {
 
   async componentDidMount() {
     this.sdk.window.startAutoResizer();
-    this.buildSlug();
   }
 
   refreshPreview = async () => {
@@ -130,10 +130,10 @@ export default class Sidebar extends React.Component {
     this.setState({ busy: false, ok: res.ok });
   };
 
-  render =  () => {
+  render = () => {
     const { webhookUrl, authToken, previewUrl } = this.sdk.parameters.installation;
     const { slug } = this.state
-    console.log(`Gatsby cloud preview slug: ${slug}`)
+
     return (
       <div className="extension">
         <div className="flexcontainer">
