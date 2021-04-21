@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/contentful/apps/compare/shopify-sku@1.1.0...shopify-sku@1.1.1) (2021-04-21)
+
+
+### Bug Fixes
+
+* stop simultaneous recursive chains ([#225](https://github.com/contentful/apps/issues/225)) ([0433a5d](https://github.com/contentful/apps/commit/0433a5d587479d311395d16ef8f20c7dc3bfbc4d))
+
+
+
+
+
 # [1.1.0](https://github.com/contentful/apps/compare/shopify-sku@1.0.9...shopify-sku@1.1.0) (2021-04-13)
 
 
