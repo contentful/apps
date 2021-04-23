@@ -119,7 +119,12 @@ export const ContentTypesSelection = ({
   return ( 
     <>
     {/* Selectors for existing enabled content types */}
-      {fullEnabledTypes.map(({ sys }, index) => (
+    {fullEnabledTypes.map((item, index) => {
+      const sys = item.sys;
+      return !sys ? (
+        null
+      ):
+      (
       <Flex marginBottom="spacingM">
         <Flex marginRight = "spacingS" flexDirection="column">
           <Select
@@ -153,7 +158,7 @@ export const ContentTypesSelection = ({
           </TextLink>
         </Flex>
       </Flex>
-      ))}
+      )})}
 
       {/* Selector triggered by add content type button */}
       {selectorType && (
