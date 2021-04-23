@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.1](https://github.com/contentful/apps/compare/gatsby-preview@1.3.0...gatsby-preview@1.3.1) (2021-04-23)
+
+
+### Bug Fixes
+
+* add check for sys object on select maps ([#228](https://github.com/contentful/apps/issues/228)) ([d6b2a45](https://github.com/contentful/apps/commit/d6b2a45e6111419a0ac0e0fd03c0dff572a84535))
+
+
+
+
+
 # [1.3.0](https://github.com/contentful/apps/compare/gatsby-preview@1.2.1...gatsby-preview@1.3.0) (2021-04-22)
 
 
