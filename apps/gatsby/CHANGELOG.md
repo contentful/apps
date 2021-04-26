@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.2](https://github.com/contentful/apps/compare/gatsby-preview@1.3.1...gatsby-preview@1.3.2) (2021-04-26)
+
+
+### Bug Fixes
+
+* retrieve all content types from space ([#230](https://github.com/contentful/apps/issues/230)) ([ad4df15](https://github.com/contentful/apps/commit/ad4df15bbdc0e787b4afd7055916166613f0df24))
+
+
+
+
+
 ## [1.3.1](https://github.com/contentful/apps/compare/gatsby-preview@1.3.0...gatsby-preview@1.3.1) (2021-04-23)
 
 
