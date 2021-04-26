@@ -90,7 +90,7 @@ export const ContentTypesSelection = ({
   if (0 === contentTypes.length) {
     return <NoContentTypes space={space} environment={environment} />;
   }
-  
+
   const fullEnabledTypes = enabledContentTypes.map(enabledType => {
     const fullType = contentTypes.find(type => type.sys.id === enabledType)
     return fullType
@@ -119,46 +119,43 @@ export const ContentTypesSelection = ({
   return ( 
     <>
     {/* Selectors for existing enabled content types */}
-    {fullEnabledTypes.map((item, index) => {
-      const sys = item.sys;
-      return !sys ? (
-        null
-      ):
-      (
-      <Flex marginBottom="spacingM">
-        <Flex marginRight = "spacingS" flexDirection="column">
-          <Select
-            key={`enabledSelect-${index}`}
-            value={sys.id} 
-            onFocus={(event) => changeFocus(event.target.value)}
-            onChange={(event)=> {
-              onContentTypeToggle(event.target.value, focusValue)
-              event.target.blur() //Have to blur target for correct focus value in the case dropdown is changed multiple times
-            }}
-            width={"medium"}
-          >
-            {sortedContentTypes.map(({name, sys}) => 
-              <Option key={`option - ${sys.id}`} value={sys.id} label={name}>
-                {name}
-              </Option>
-            )}
-          </Select>
+    {fullEnabledTypes.map(({ sys }, index) => {
+      return (
+        <Flex marginBottom="spacingM">
+          <Flex marginRight = "spacingS" flexDirection="column">
+            <Select
+              key={`enabledSelect-${index}`}
+              value={sys.id} 
+              onFocus={(event) => changeFocus(event.target.value)}
+              onChange={(event)=> {
+                onContentTypeToggle(event.target.value, focusValue)
+                event.target.blur() //Have to blur target for correct focus value in the case dropdown is changed multiple times
+              }}
+              width={"medium"}
+            >
+              {sortedContentTypes.map(({name, sys}) => 
+                <Option key={`option - ${sys.id}`} value={sys.id} label={name}>
+                  {name}
+                </Option>
+              )}
+            </Select>
+          </Flex>
+          <Flex fullWidth flexDirection="column" marginRight = "spacingS">
+            <UrlInput 
+              id={sys.id} 
+              onSlugInput={onSlugInput} 
+              urlConstructors={urlConstructors} 
+              placeholder={'(Optional) slug'}
+            />
+          </Flex>
+          <Flex>
+            <TextLink linkType="negative" onClick={() => updateModalState({open: true, id: sys.id})}>
+              Remove
+            </TextLink>
+          </Flex>
         </Flex>
-        <Flex fullWidth flexDirection="column" marginRight = "spacingS">
-          <UrlInput 
-            id={sys.id} 
-            onSlugInput={onSlugInput} 
-            urlConstructors={urlConstructors} 
-            placeholder={'(Optional) slug'}
-          />
-        </Flex>
-        <Flex>
-          <TextLink linkType="negative" onClick={() => updateModalState({open: true, id: sys.id})}>
-            Remove
-          </TextLink>
-        </Flex>
-      </Flex>
-      )})}
+      )}
+    )}
 
       {/* Selector triggered by add content type button */}
       {selectorType && (
