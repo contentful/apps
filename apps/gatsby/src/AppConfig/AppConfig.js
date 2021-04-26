@@ -15,7 +15,6 @@ import styles from "../styles";
 function editorInterfacesToEnabledContentTypes(eis, appId) {
   const findAppWidget = (item) =>
     item.widgetNamespace === "app" && item.widgetId === appId;
-
   return eis
     .filter((ei) => !!get(ei, ["sidebar"], []).find(findAppWidget))
     .map((ei) => get(ei, ["sys", "contentType", "sys", "id"]))
@@ -58,7 +57,7 @@ export class AppConfig extends React.Component {
     const [installationParams, eisRes, contentTypesRes] = await Promise.all([
       app.getParameters(),
       space.getEditorInterfaces(),
-      space.getContentTypes(),
+      space.getContentTypes({limit: 1000}),
     ]);
 
     const params = installationParams || {};

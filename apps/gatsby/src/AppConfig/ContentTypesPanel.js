@@ -90,7 +90,7 @@ export const ContentTypesSelection = ({
   if (0 === contentTypes.length) {
     return <NoContentTypes space={space} environment={environment} />;
   }
-  
+
   const fullEnabledTypes = enabledContentTypes.map(enabledType => {
     const fullType = contentTypes.find(type => type.sys.id === enabledType)
     return fullType
