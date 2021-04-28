@@ -38,23 +38,32 @@ function renderDialog(sdk) {
   const container = document.createElement('div');
   const bf_embed_url = config.bf_api_key ? BF_EMBED_URL + `&apiKey=${config.bf_api_key}&hideLogout=true` : BF_EMBED_URL;
 
-  container.innerHTML = `<iframe id='brandfolder-embed' class='iframe-container' src='${bf_embed_url}' width=400 height=650 style='border:none;'/>`;
+  const iframe = document.createElement('iframe');
+  iframe.id = 'brandfolder-embed';
+  iframe.className="iframe-container";
+  iframe.src = bf_embed_url;
+  iframe.width = 400;
+  iframe.height = 650;
+  iframe.style.border = 'none'
+  container.appendChild(iframe)
+
   document.body.appendChild(container);
 
   sdk.window.startAutoResizer();
 
   window.addEventListener('message', e => {
-    const { data, origin } = e;
-    if (origin === 'https://integration-panel-ui.brandfolder-svc.com') {
-      const { event, payload } = data;
-      if (event === 'selectedAttachment') {
-        sdk.close([payload]);
-      } else if (data.event === 'selectedAsset' && payload.attachments.length !== 0) {
-        const att_id = payload.attachments[0].id;
-        const attachment = payload.included.find(att => att.id === att_id);
-        if (attachment) {
-          sdk.close([attachment]);
-        }
+    if (e.source !== iframe.contentWindow) {
+      return ;
+    }
+
+    const { event, payload } = e.data;
+    if (event === 'selectedAttachment') {
+      sdk.close([payload]);
+    } else if (data.event === 'selectedAsset' && payload.attachments.length !== 0) {
+      const att_id = payload.attachments[0].id;
+      const attachment = payload.included.find(att => att.id === att_id);
+      if (attachment) {
+        sdk.close([attachment]);
       }
     }
   });

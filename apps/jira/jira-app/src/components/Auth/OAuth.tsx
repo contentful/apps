@@ -27,8 +27,12 @@ export default class OAuth extends React.Component<Props> {
 
     const oauthWindow = window.open(url, 'Jira Contentful', 'left=150,top=10,width=800,height=900');
 
-    window.addEventListener('message', ({ data }) => {
-      const { token, error } = data;
+    window.addEventListener('message', (e) => {
+      if (e.source !== oauthWindow) {
+        return ;
+      }
+
+      const { token, error } = e.data;
 
       if (error) {
         this.props.notifyError('There was an error authenticating. Please refresh and try again.');
