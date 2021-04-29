@@ -53,7 +53,7 @@ function renderDialog(sdk) {
 
   window.addEventListener('message', e => {
     if (e.source !== iframe.contentWindow) {
-      return ;
+      return;
     }
 
     const { event, payload } = e.data;
