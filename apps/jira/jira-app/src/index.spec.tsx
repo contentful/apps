@@ -76,7 +76,7 @@ describe('The Jira App Components', () => {
       const oauthButton = wrapper.getByTestId('oauth-button');
       const token = '123';
 
-      const source: MessageEventSource = 'source' as any;
+      const source: MessageEventSource = { close: jest.fn() } as any;
       (window.open as jest.Mock).mockReturnValue(source);
 
       fireEvent.click(oauthButton);
@@ -98,7 +98,7 @@ describe('The Jira App Components', () => {
       const oauthButton = wrapper.getByTestId('oauth-button');
       const error = '123';
 
-      const source: MessageEventSource = 'source' as any;
+      const source: MessageEventSource = { close: jest.fn() } as any;
       (window.open as jest.Mock).mockReturnValue(source);
 
       fireEvent.click(oauthButton);
