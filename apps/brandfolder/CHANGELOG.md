@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.7](https://github.com/contentful/apps/compare/brandfolder-assets@1.0.6...brandfolder-assets@1.0.7) (2021-04-30)
+
+
+### Bug Fixes
+
+* only handle messages events of relevant sources ([#236](https://github.com/contentful/apps/issues/236)) ([aec87cc](https://github.com/contentful/apps/commit/aec87cc6158eb1cf9397283e6e98ac71c46099f7))
+
+
+
+
+
 ## [1.0.6](https://github.com/contentful/apps/compare/brandfolder-assets@1.0.5...brandfolder-assets@1.0.6) (2021-03-17)
 
 **Note:** Version bump only for package brandfolder-assets
