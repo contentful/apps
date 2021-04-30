@@ -76,8 +76,11 @@ describe('The Jira App Components', () => {
       const oauthButton = wrapper.getByTestId('oauth-button');
       const token = '123';
 
+      const source: MessageEventSource = { close: jest.fn() } as any;
+      (window.open as jest.Mock).mockReturnValue(source);
+
       fireEvent.click(oauthButton);
-      fireEvent(window, new MessageEvent('message', { data: { token } }));
+      fireEvent(window, new MessageEvent('message', { data: { token }, source }));
 
       expect(window.open).toHaveBeenCalledWith(
         'https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=XD9k9QU9VT4Rt26u6lbO3NM0fOqvvXan&scope=read%3Ajira-user%20read%3Ajira-work%20write%3Ajira-work&redirect_uri=https%3A%2F%2Fapi.jira.ctfapps.net%2Fauth&response_type=code&state=http%3A%2F%2Flocalhost%2F&prompt=consent',
@@ -95,8 +98,11 @@ describe('The Jira App Components', () => {
       const oauthButton = wrapper.getByTestId('oauth-button');
       const error = '123';
 
+      const source: MessageEventSource = { close: jest.fn() } as any;
+      (window.open as jest.Mock).mockReturnValue(source);
+
       fireEvent.click(oauthButton);
-      fireEvent(window, new MessageEvent('message', { data: { error } }));
+      fireEvent(window, new MessageEvent('message', { data: { error }, source }));
 
       expect(mockSdk.notifier.error).toHaveBeenCalledWith(
         'There was an error authenticating. Please refresh and try again.'
@@ -137,7 +143,9 @@ describe('The Jira App Components', () => {
       });
 
       const instanceSelector = wrapper.getByTestId('instance-selector');
-      const projectSearchInput: HTMLInputElement = wrapper.getByTestId('cf-ui-text-input') as HTMLInputElement;
+      const projectSearchInput: HTMLInputElement = wrapper.getByTestId(
+        'cf-ui-text-input'
+      ) as HTMLInputElement;
 
       // expect instance data to load into the first <select>
       expect(instanceSelector.textContent).toEqual(

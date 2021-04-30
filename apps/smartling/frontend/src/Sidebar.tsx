@@ -147,7 +147,11 @@ export default class Sidebar extends React.Component<Props, State> {
     } else if (refresh.failed) {
       const smartlingWindow = window.open('/openauth', '', 'height=600,width=600,top=50,left=50');
 
-      const listener = ({ data }: any) => {
+      const listener = ({ data, source }: any) => {
+        if (source !== smartlingWindow) {
+          return;
+        }
+
         const { token, refreshToken } = data;
 
         if (token) {
