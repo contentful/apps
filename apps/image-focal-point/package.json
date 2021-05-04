@@ -8,6 +8,7 @@
     "@babel/plugin-transform-runtime": "7.3.4",
     "@babel/preset-env": "7.3.4",
     "@babel/preset-react": "7.0.0",
+    "@contentful/app-scripts": "^0.8.11",
     "@contentful/contentful-extension-scripts": "^0.15.1",
     "@contentful/eslint-config-extension": "0.2.0",
     "@testing-library/react": "^11.2.5",
@@ -19,7 +20,8 @@
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/focal-point --acl public-read",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 342Q2DqCjmsdN5BJCEPkrJ --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
     "test": "contentful-extension-scripts test --env=jsdom --watch",
     "test:ci": "contentful-extension-scripts test --env=jsdom"
   },
@@ -35,9 +37,5 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },
-  "browserslist": [
-    "last 5 Chrome version",
-    "> 1%",
-    "not ie <= 11"
-  ]
+  "browserslist": ["last 5 Chrome version", "> 1%", "not ie <= 11"]
 }
