@@ -20,7 +20,8 @@
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/shopify --acl public-read"
+    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/shopify --acl public-read",
+    "deploy:test": "npm run deploy"
   },
   "browserslist": [
     "last 5 Chrome version",
