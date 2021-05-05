@@ -48,6 +48,7 @@
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/commercetools --acl public-read",
+    "deploy:test": "npm run deploy",
     "test": "contentful-extension-scripts test --env=jsdom --watch",
     "test:ci": "contentful-extension-scripts test --env=jsdom",
     "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit"

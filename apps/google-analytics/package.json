@@ -26,7 +26,8 @@
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
     "lint:fixme": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/google-analytics --acl public-read"
+    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/google-analytics --acl public-read",
+    "deploy:test": "npm run deploy"
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
