@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/contentful/apps/compare/bynder-assets@1.1.6...bynder-assets@1.2.0) (2021-05-05)
+
+
+### Features
+
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+
+
+
+
+
 ## [1.1.6](https://github.com/contentful/apps/compare/bynder-assets@1.1.5...bynder-assets@1.1.6) (2021-04-27)
 
 **Note:** Version bump only for package bynder-assets

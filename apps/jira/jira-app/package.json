@@ -1,6 +1,6 @@
 {
   "name": "jira-app",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.8.4",
