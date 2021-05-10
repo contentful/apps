@@ -54,6 +54,7 @@ updatedAt
 createdAt
 files
 originalUrl
+previewUrls
 `;
 
 const validAssetTypes = ['image', 'audio', 'document', 'video'];
@@ -105,7 +106,8 @@ function transformAsset(asset) {
     "isPublic": asset.isPublic ? 1 : 0,
     "brandId": asset.brandId,
     "thumbnails": thumbnails,
-    "original": asset.originalUrl
+    "original": asset.originalUrl,
+    "videoPreviewURLs": asset.previewUrls
   })
 }
 
