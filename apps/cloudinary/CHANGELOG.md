@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/contentful/apps/compare/cloudinary-assets@1.1.0...cloudinary-assets@1.2.0) (2021-05-10)
+
+
+### Features
+
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+
+
+
+
+
 # [1.1.0](https://github.com/contentful/apps/compare/cloudinary-assets@1.0.7...cloudinary-assets@1.1.0) (2021-05-05)
 
 
