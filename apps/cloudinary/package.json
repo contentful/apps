@@ -1,6 +1,6 @@
 {
   "name": "cloudinary-assets",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.4.5",

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.1](https://github.com/contentful/apps/compare/commercelayer-products@1.2.0...commercelayer-products@1.2.1) (2021-05-10)
+
+
+### Reverts
+
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+
+
 # [1.2.0](https://github.com/contentful/apps/compare/commercelayer-products@1.1.0...commercelayer-products@1.2.0) (2021-05-10)
 
 
