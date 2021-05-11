@@ -3,10 +3,10 @@ import { setup } from '@contentful/dam-app-base';
 
 import logo from './logo.svg';
 
-const CTA = 'Select a file on Bynder';
+const BYNDER_SDK_URL =
+  'https://d8ejoa1fys2rk.cloudfront.net/modules/compactview/includes/js/client-1.5.0.min.js';
 
-const BYNDER_SDK_DOMAIN = "https://d8ejoa1fys2rk.cloudfront.net";
-const BYNDER_SDK_URL = `${BYNDER_SDK_DOMAIN}/5.0.5/modules/compactview/bynder-compactview-2-latest.js`;
+const CTA = 'Select a file on Bynder';
 
 const FIELDS_TO_PERSIST = [
   'archive',
@@ -32,31 +32,6 @@ const FIELDS_TO_PERSIST = [
   "videoPreviewURLs"
 ];
 
-const FIELD_SELECTION = `
-databaseId
-type
-orientation
-description
-isArchived
-fileSize
-height
-width
-copyright
-extensions
-createdBy
-isWatermarked
-isLimitedUse
-isPublic
-brandId
-name
-publishedAt
-updatedAt
-createdAt
-files
-originalUrl
-previewUrls
-`;
-
 const validAssetTypes = ['image', 'audio', 'document', 'video'];
 
 function makeThumbnail(resource) {
@@ -68,96 +43,51 @@ function makeThumbnail(resource) {
 }
 
 function prepareBynderHTML({ bynderURL, assetTypes }) {
+  let types = '';
+  if (!assetTypes) {
+    // We deault to just images in this fallback since this is the behavior the App had in its initial release
+    types = 'image';
+  } else {
+    types = assetTypes.trim().split(',').map(type => type.trim()).join(',');
+  }
+
   return `
     <div class="dialog-container">
-      <div id="bynder-compactview" />
-    </div>      
+      <div
+        id="bynder-compactview"
+        data-assetTypes="${types}"
+        data-autoload="true"
+        data-button="Load media from bynder.com"
+        data-collections="true"
+        data-folder="bynder-compactview"
+        data-fullScreen="true"
+        data-header="false"
+        data-language="en_US"
+        data-mode="multi"
+        data-zindex="300"
+        data-defaultEnvironment="${bynderURL}"
+      />
+    </div>
   `;
-}
-
-function transformAsset(asset) {
-  const thumbnails = {
-    "webimage": asset.files.webImage?.url,
-    "thul": asset.files.thumbnail?.url
-  }
-
-  Object.entries(asset.files)
-      .filter(([name]) => !["webImage", "thumbnail"].includes(name))
-      .forEach(([key, value]) => thumbnails[key] = value?.url);
-
-  return ({
-    "id": asset.databaseId,
-    "orientation": asset.orientation.toLowerCase(),
-    "archive": asset.isArchived ? 1 : 0,
-    "type": asset.type.toLowerCase(),
-    "fileSize": asset.fileSize,
-    "description": asset.description,
-    "name": asset.name,
-    "height": asset.height,
-    "width": asset.width,
-    "copyright": asset.copyright,
-    "extension": asset.extensions,
-    "userCreated": asset.createdBy,
-    "datePublished": asset.publishedAt,
-    "dateCreated": asset.createdAt,
-    "dateModified": asset.updatedAt,
-    "watermarked": asset.isWatermarked ? 1 : 0,
-    "limited": asset.isLimitedUse ? 1 : 0,
-    "isPublic": asset.isPublic ? 1 : 0,
-    "brandId": asset.brandId,
-    "thumbnails": thumbnails,
-    "original": asset.originalUrl,
-    "videoPreviewURLs": asset.previewUrls
-  })
-}
-
-function checkMessageEvent(e) {
-  if (e.origin !== BYNDER_SDK_DOMAIN) {
-    e.stopImmediatePropagation()
-  }
 }
 
 function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
-  const { assetTypes, bynderURL } = config
 
-  let types = [];
-  if (!assetTypes) {
-    // We default to just images in this fallback since this is the behavior the App had in its initial release
-    types = ['IMAGE'];
-  } else {
-    types = assetTypes.trim().split(',').map((type) => type.toUpperCase());
-  }
+  const container = document.createElement('div');
+  container.innerHTML = prepareBynderHTML(config);
+  document.body.appendChild(container);
 
   const script = document.createElement('script');
   script.src = BYNDER_SDK_URL;
   script.async = true;
   document.body.appendChild(script);
 
-  const container = document.createElement('div');
-  container.innerHTML = prepareBynderHTML(config);
-  document.body.appendChild(container);
-
   sdk.window.startAutoResizer();
 
-  window.addEventListener("message", checkMessageEvent)
-
-  function onSuccess(assets, selected) {
-    sdk.close(Array.isArray(assets) ? assets.map(transformAsset) : []);
-    window.removeEventListener("message", checkMessageEvent)
-  }
-
-  script.addEventListener("load", () => {
-    BynderCompactView.open({
-      language: "en_US",
-      mode: "MultiSelect",
-      assetTypes: types,
-      portal: { url: bynderURL, editable: true },
-      assetFieldSelection: FIELD_SELECTION,
-      container: document.getElementById("bynder-compactview"),
-      onSuccess: onSuccess
-    });
-  })
+  document.addEventListener('BynderAddMedia', e => {
+    sdk.close(Array.isArray(e.detail) ? e.detail : []);
+  });
 }
 
 async function openDialog(sdk, _currentValue, config) {
