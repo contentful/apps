@@ -1,6 +1,6 @@
 {
   "name": "saleor",
-  "version": "1.0.7",
+  "version": "1.2.1",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.7.2",
@@ -26,6 +26,7 @@
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/saleor --acl public-read",
+    "deploy:test": "npm run deploy",
     "typecheck": "tsc"
   },
   "browserslist": [

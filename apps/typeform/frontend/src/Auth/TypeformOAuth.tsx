@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Button } from '@contentful/forma-36-react-components';
 import { BASE_URL, CLIENT_ID } from '../constants';
@@ -19,16 +19,40 @@ export function TypeformOAuth({
   isFullWidth,
   ...rest
 }: Props) {
-  let oauthWindow: Window | null;
+  const [oauthWindow, setOAuthWindow] = useState<Window | null>(null);
 
   useEffect(() => {
     if (sdk) {
       // we are on the config screen
       sdk.app.setReady();
     }
-
-    return () => window.removeEventListener('message', handleTokenEvent);
   }, []);
+  
+  useEffect(() => {
+    if (oauthWindow === null) {
+      return;
+    }
+    
+    const handleTokenEvent = ({ data, source }: any) => {
+      if (source !== oauthWindow) {
+        return;
+      }
+      
+      const { token, error } = data;
+      
+      if (error) {
+        console.error('There was an error authenticating. Please try again.');
+      } else if (token) {
+        setToken(token);
+        if (oauthWindow) {
+          oauthWindow.close();
+        }
+      }
+    };
+
+    window.addEventListener('message', handleTokenEvent);    
+    return () => window.removeEventListener('message', handleTokenEvent);
+  }, [oauthWindow])
 
   const executeOauth = () => {
     const url = `${BASE_URL}/oauth/authorize?&client_id=${
@@ -37,23 +61,10 @@ export function TypeformOAuth({
       `${window.location.origin}/callback`
     )}&scope=forms:read+workspaces:read`;
 
-    oauthWindow = window.open(url, 'Typeform Contentful', 'left=150,top=10,width=800,height=900');
+    setOAuthWindow(window.open(url, 'Typeform Contentful', 'left=150,top=10,width=800,height=900'))
 
-    window.addEventListener('message', handleTokenEvent);
   };
 
-  const handleTokenEvent = ({ data }: any) => {
-    const { token, error } = data;
-
-    if (error) {
-      console.error('There was an error authenticating. Please try again.');
-    } else if (token) {
-      setToken(token);
-      if (oauthWindow) {
-        oauthWindow.close();
-      }
-    }
-  };
 
   return (
     <Button onClick={executeOauth} isFullWidth={isFullWidth} buttonType={buttonType} {...rest}>

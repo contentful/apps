@@ -1,6 +1,6 @@
 {
   "name": "mux-contentful-uploader",
-  "version": "1.0.6",
+  "version": "1.2.1",
   "private": true,
   "devDependencies": {
     "@babel/core": "^7.3.4",
@@ -54,6 +54,7 @@
     "test:ci": "contentful-extension-scripts test --env=jsdom",
     "test:dev": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/mux --acl public-read",
+    "deploy:test": "npm run deploy",
     "lint": "prettier --write src/**/*.tsx"
   },
   "prettier": {

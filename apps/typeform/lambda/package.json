@@ -1,7 +1,7 @@
 {
   "name": "typeform-lambda",
   "private": true,
-  "version": "1.1.1",
+  "version": "1.2.0",
   "author": "Contentful GmbH",
   "license": "MIT",
   "scripts": {
@@ -9,7 +9,8 @@
     "test": "jest",
     "test:ci": "jest",
     "serve:local": "LOCAL_DEV=true nodemon serve.js",
-    "deploy": "sls deploy --stage $STAGE"
+    "deploy": "sls deploy --stage $STAGE",
+    "deploy:test": "npm run deploy"
   },
   "devDependencies": {
     "eslint": "6.8.0",
@@ -24,6 +25,6 @@
     "express": "4.17.1",
     "luxon": "1.22.0",
     "node-fetch": "2.6.0",
-    "typeform-frontend": "^1.1.1"
+    "typeform-frontend": "^1.1.2"
   }
 }

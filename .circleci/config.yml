@@ -27,7 +27,7 @@ commands:
           command: |
             STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
                 STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
-                STAGE='test' npm run deploy
+                STAGE='test' npm run deploy:test
       - run:
           name: Deploy apps to prod
           command: |
