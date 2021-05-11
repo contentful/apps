@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.3](https://github.com/contentful/apps/compare/bynder-assets@1.3.2...bynder-assets@1.3.3) (2021-05-11)
+
+
+### Reverts
+
+* Revert "Reinstate bynder update (#205)" (#257) ([3d05911](https://github.com/contentful/apps/commit/3d05911e6595d73683d49f005aeb6ca4799bf80c)), closes [#205](https://github.com/contentful/apps/issues/205) [#257](https://github.com/contentful/apps/issues/257)
+
+
+
+
+
 ## [1.3.2](https://github.com/contentful/apps/compare/bynder-assets@1.3.1...bynder-assets@1.3.2) (2021-05-11)
 
 **Note:** Version bump only for package bynder-assets
