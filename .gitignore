@@ -3,7 +3,6 @@ node_modules
 build
 dist
 .cache
-.idea
 tags
 **/.coverage/**
 lerna-debug.log
