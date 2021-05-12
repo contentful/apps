@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/brandfolder-assets@1.2.1...brandfolder-assets@1.3.0) (2021-05-12)
+
+
+### Features
+
+* [] Add mux_hls_url field in attachments response ([#259](https://github.com/contentful/apps/issues/259)) ([74c64b6](https://github.com/contentful/apps/commit/74c64b617a96ac56d988a3c1efb4ed01aee8e4f9))
+
+
+
+
+
 ## [1.2.1](https://github.com/contentful/apps/compare/brandfolder-assets@1.2.0...brandfolder-assets@1.2.1) (2021-05-10)
 
 
