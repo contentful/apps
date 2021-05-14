@@ -7,22 +7,22 @@ const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=m
 const CTA = 'Select an asset on Brandfolder';
 
 const FIELDS_TO_PERSIST = [
-        'asset',
-        'cdn_url',
-        'mux_hls_url',
-        'extension',
-        'filename',
-        'height',
-        'id',
-        'included',
-        'mimetype',
-        'position',
-        'relationships',
-        'size',
-        'thumbnail_url',
-        'type',
-        'url',
-        'width',
+  'asset',
+  'cdn_url',
+  'mux_hls_url',
+  'extension',
+  'filename',
+  'height',
+  'id',
+  'included',
+  'mimetype',
+  'position',
+  'relationships',
+  'size',
+  'thumbnail_url',
+  'type',
+  'url',
+  'width',
 ];
 
 function makeThumbnail(attachment) {
@@ -80,7 +80,7 @@ async function openDialog(sdk, _currentValue, config) {
     shouldCloseOnEscapePress: true,
     parameters: { ...config },
     width: 400,
-    allowHeightOverflow: true
+    allowHeightOverflow: true,
   });
 
   if (!Array.isArray(result)) {
@@ -122,14 +122,14 @@ setup({
       name: 'Brandfolder API key',
       description:
         'If you want to use just one API key (https://brandfolder.com/profile#integrations) for all users, enter it here.',
-      required: false
-    }
+      required: false,
+    },
   ],
   validateParameters: () => {},
   makeThumbnail,
   renderDialog,
   openDialog,
   isDisabled: () => {
-    false;
-  }
+    return false; // ???
+  },
 });
