@@ -6,8 +6,8 @@ export const getFormattedIdentifiers = (identifiers?: Identifiers) =>
     : '[]';
 
 export const extractProductsAndVariantsIdentifiers = (labels: Labels) => ({
-  productIds: getFilteredIdsOfLabels(labels, DisplayLabelPrefix.productID),
-  variantSkus: getFilteredIdsOfLabels(labels, DisplayLabelPrefix.variantSKU)
+  productIds: getFilteredIdsOfLabels(labels, DisplayLabelPrefix.ProductID),
+  variantSkus: getFilteredIdsOfLabels(labels, DisplayLabelPrefix.VariantSKU)
 });
 
 export const getFilteredIdsOfLabels = (labels: Labels, prefix: DisplayLabelPrefix): Identifiers =>

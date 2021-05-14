@@ -70,8 +70,8 @@ export type ProductsFnResponse = {
 };
 
 export enum DisplayLabelPrefix {
-  variantSKU = 'Variant SKU',
-  productID = 'Product ID'
+  VariantSKU = 'Variant SKU',
+  ProductID = 'Product ID'
 }
 
 export type Identifiers = string[];

@@ -54,7 +54,7 @@ class DataParser {
   getProductOfVariantsIds = (): string[] => this.getParsedProductsOfVariants().map(({ id }) => id);
 
   private static getDisplayLabel = (id: string, sku?: string) =>
-    sku ? `${DisplayLabelPrefix.variantSKU}: ${sku}` : `${DisplayLabelPrefix.productID}: ${id}`;
+    sku ? `${DisplayLabelPrefix.VariantSKU}: ${sku}` : `${DisplayLabelPrefix.ProductID}: ${id}`;
 
   private getParsedProductsOfVariants = (): Product[] =>
     uniqBy(
