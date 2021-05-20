@@ -33,28 +33,30 @@ const FIELDS_TO_PERSIST = [
 ];
 
 const FIELD_SELECTION = `
-databaseId
-type
-orientation
-description
-isArchived
-fileSize
-height
-width
-copyright
-extensions
-createdBy
-isWatermarked
-isLimitedUse
-isPublic
-brandId
-name
-publishedAt
-updatedAt
-createdAt
-files
-originalUrl
-previewUrls
+  databaseId
+  type
+  orientation
+  description
+  isArchived
+  fileSize
+  height
+  width
+  copyright
+  extensions
+  createdBy
+  isWatermarked
+  isLimitedUse
+  isPublic
+  brandId
+  name
+  publishedAt
+  updatedAt
+  createdAt
+  files
+  originalUrl
+  ... on Video {
+    previewUrls
+  }
 `;
 
 const validAssetTypes = ['image', 'audio', 'document', 'video'];
@@ -67,7 +69,7 @@ function makeThumbnail(resource) {
   return [url, alt];
 }
 
-function prepareBynderHTML({ bynderURL, assetTypes }) {
+function prepareBynderHTML() {
   return `
     <div class="dialog-container">
       <div id="bynder-compactview" />
@@ -107,7 +109,7 @@ function transformAsset(asset) {
     "brandId": asset.brandId,
     "thumbnails": thumbnails,
     "original": asset.originalUrl,
-    "videoPreviewURLs": asset.previewUrls
+    "videoPreviewURLs": asset.previewUrls || []
   })
 }
 
