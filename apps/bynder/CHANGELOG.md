@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/contentful/apps/compare/bynder-assets@1.3.3...bynder-assets@1.4.0) (2021-05-26)
+
+
+### Features
+
+* use cca in shopify app ([#267](https://github.com/contentful/apps/issues/267)) ([217ec31](https://github.com/contentful/apps/commit/217ec31928e684c13f49fc57237327d0b8d2c725))
+
+
+
+
+
 ## [1.3.3](https://github.com/contentful/apps/compare/bynder-assets@1.3.2...bynder-assets@1.3.3) (2021-05-11)
 
 
