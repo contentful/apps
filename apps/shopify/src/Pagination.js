@@ -1,5 +1,4 @@
 import last from 'lodash/last';
-import get from 'lodash/get';
 import uniqBy from 'lodash/uniqBy';
 import sortBy from 'lodash/sortBy';
 import { dataTransformer, productsToVariantsTransformer } from './dataTransformer';
