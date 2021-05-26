@@ -36,20 +36,13 @@ export default class Config extends Component<ConfigProps, ConfigState> {
   };
 
   createTargetState = async () => {
-    const appId = this.props.sdk.ids.app;
-
     const currentState = await this.props.sdk.app.getCurrentState();
 
     const EditorInterface = this.state.data.reduce(
       (editorInterface: any, { active, contentType }) => {
         if (active) {
           editorInterface[contentType.sys.id] = {
-            editors: [
-              {
-                widgetNamespace: "app",
-                widgetId: appId,
-              },
-            ],
+            editors: { position: 1 },
           };
         }
         return editorInterface;
@@ -120,3 +113,4 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     );
   }
 }
+
