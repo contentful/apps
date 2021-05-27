@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/commercetools@1.2.0...commercetools@1.3.0) (2021-05-27)
+
+
+### Features
+
+* [] move commercetools to hosting ([#271](https://github.com/contentful/apps/issues/271)) ([7d2e87a](https://github.com/contentful/apps/commit/7d2e87ac52ca16cae3b21dc83f448bd229d6d3b5))
+
+
+
+
+
 # [1.2.0](https://github.com/contentful/apps/compare/commercetools@1.1.1...commercetools@1.2.0) (2021-05-05)
 
 
