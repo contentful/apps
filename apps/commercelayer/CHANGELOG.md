@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/commercelayer-products@1.2.1...commercelayer-products@1.3.0) (2021-05-27)
+
+
+### Features
+
+* update commercelayer and saleor to use cca ([#268](https://github.com/contentful/apps/issues/268)) ([fbd8ef6](https://github.com/contentful/apps/commit/fbd8ef61eba59625e2bc55403be94c250b2df8bf))
+
+
+
+
+
 ## [1.2.1](https://github.com/contentful/apps/compare/commercelayer-products@1.2.0...commercelayer-products@1.2.1) (2021-05-10)
 
 
