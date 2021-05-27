@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/contentful/apps/compare/brandfolder-assets@1.4.0...brandfolder-assets@1.5.0) (2021-05-27)
+
+
+### Features
+
+* [] move brandfolder app to hosting ([#272](https://github.com/contentful/apps/issues/272)) ([ecd20ea](https://github.com/contentful/apps/commit/ecd20ea0b5f0f071fbfacba5da4f159a556e55a4))
+
+
+
+
+
 # [1.4.0](https://github.com/contentful/apps/compare/brandfolder-assets@1.3.0...brandfolder-assets@1.4.0) (2021-05-26)
 
 
