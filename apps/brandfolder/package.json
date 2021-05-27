@@ -12,6 +12,7 @@
     "contentful-cli": "1.2.12"
   },
   "dependencies": {
+    "@contentful/app-scripts": "^0.8.45",
     "@contentful/dam-app-base": "^1.0.7"
   },
   "scripts": {
