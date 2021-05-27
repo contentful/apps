@@ -1,7 +1,7 @@
 import pick from 'lodash/pick';
 import { setup } from '@contentful/dam-app-base';
 
-const CTF_APP_URL = 'https://brandfolder.ctfapps.net';
+const CTF_APP_URL = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
 const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=message&appName=Contentful&origin=${CTF_APP_URL}&attachment_fields=mux_hls_url`;
 
 const CTA = 'Select an asset on Brandfolder';

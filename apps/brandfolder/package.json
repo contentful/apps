@@ -12,13 +12,14 @@
     "contentful-cli": "1.2.12"
   },
   "dependencies": {
+    "@contentful/app-scripts": "^0.8.45",
     "@contentful/dam-app-base": "^1.0.7"
   },
   "scripts": {
     "start": "contentful-extension-scripts start --serve-only",
     "build": "contentful-extension-scripts build --no-inline",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/brandfolder --acl public-read",
-    "deploy:test": "npm run deploy"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id bgBVVuNbfvUW5tpFnD20s --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
   },
   "browserslist": [
     "last 5 Chrome version",
