@@ -9,12 +9,14 @@ import flatten from 'lodash/flatten';
 export const dataTransformer = product => {
   const image = get(product, ['image', 'src'], '');
   const sku = get(product, ['sku'], '');
+  const variantSku = get(product, ['variantSKU'], '');
 
   return {
     id: product.id,
     image,
     name: product.title,
-    sku
+    readableSKU: variantSku,
+    sku,
   };
 };
 

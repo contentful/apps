@@ -152,7 +152,7 @@ export const ProductListItem = (props: Props) => {
           </div>
         )}
         <p className={styles.name}>{product.name}</p>
-        <p className={styles.sku}>{product.sku}</p>
+        <p className={styles.sku}>{product.readableSKU || product.sku}</p>
       </div>
     </div>
   );
