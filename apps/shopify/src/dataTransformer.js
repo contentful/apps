@@ -15,7 +15,7 @@ export const dataTransformer = product => {
     id: product.id,
     image,
     name: product.title,
-    readableSKU: variantSKU,
+    readableIdentifier: variantSKU,
     sku,
   };
 };

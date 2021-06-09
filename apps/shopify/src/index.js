@@ -32,7 +32,9 @@ async function renderDialog(sdk) {
     sdk,
     fetchProductPreviews,
     fetchProducts: await makeProductSearchResolver(sdk),
-    searchDelay: 750
+    searchDelay: 750,
+    skuLabel: 'SKU',
+    readableIdentifierLabel: 'Variant ID',
   });
 
   sdk.window.startAutoResizer();
@@ -46,7 +48,7 @@ async function openDialog(sdk, currentValue, config) {
     shouldCloseOnOverlayClick: true,
     shouldCloseOnEscapePress: true,
     parameters: config,
-    width: 1400
+    width: 1400,
   });
 
   return Array.isArray(skus) ? skus : [];
@@ -70,19 +72,19 @@ setup({
       name: 'Storefront Access Token',
       description: 'The storefront access token to your Shopify store',
       type: 'Symbol',
-      required: true
+      required: true,
     },
     {
       id: 'apiEndpoint',
       name: 'API Endpoint',
       description: 'The Shopify API endpoint',
       type: 'Symbol',
-      required: true
-    }
+      required: true,
+    },
   ],
   fetchProductPreviews,
   renderDialog,
   openDialog,
   isDisabled,
-  validateParameters
+  validateParameters,
 });

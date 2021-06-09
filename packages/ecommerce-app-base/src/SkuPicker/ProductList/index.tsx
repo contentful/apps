@@ -8,6 +8,8 @@ export interface Props {
   products: Product[];
   selectProduct: (sku: string) => void;
   selectedSKUs: string[];
+  skuLabel?: string;
+  readableIdentifierLabel?: string;
 }
 
 const styles = {
@@ -19,7 +21,13 @@ const styles = {
   })
 };
 
-export const ProductList = ({ selectProduct, selectedSKUs, products }: Props) => (
+export const ProductList = ({
+  selectProduct,
+  selectedSKUs,
+  products,
+  skuLabel,
+  readableIdentifierLabel,
+}: Props) => (
   <div className={styles.productList}>
     {products.map(product => (
       <ProductListItem
@@ -27,6 +35,8 @@ export const ProductList = ({ selectProduct, selectedSKUs, products }: Props) =>
         product={product}
         isSelected={selectedSKUs.includes(product.sku)}
         selectProduct={selectProduct}
+        skuLabel={skuLabel}
+        readableIdentifierLabel={readableIdentifierLabel}
       />
     ))}
   </div>

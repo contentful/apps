@@ -48,7 +48,7 @@ export interface Product {
   image: string;
   id: string;
   name: string;
-  readableSKU?: string;
+  readableIdentifier?: string;
   externalLink?: string;
 }
 

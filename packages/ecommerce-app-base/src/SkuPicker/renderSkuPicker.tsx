@@ -9,11 +9,13 @@ interface Props {
   fetchProductPreviews: ProductPreviewsFn;
   fetchProducts: ProductsFn;
   searchDelay?: number;
+  skuLabel?: string;
+  readableIdentifierLabel?: string;
 }
 
 export function renderSkuPicker(
   elementId: string,
-  { sdk, fetchProductPreviews, fetchProducts, searchDelay }: Props
+  { sdk, fetchProductPreviews, fetchProducts, searchDelay, skuLabel, readableIdentifierLabel }: Props
 ): void {
   const root = document.getElementById(elementId);
   render(
@@ -22,6 +24,8 @@ export function renderSkuPicker(
       fetchProductPreviews={fetchProductPreviews}
       fetchProducts={fetchProducts}
       searchDelay={searchDelay}
+      skuLabel={skuLabel}
+      readableIdentifierLabel={readableIdentifierLabel}
     />,
     root
   );

@@ -16,6 +16,8 @@ export interface Props {
   fetchProductPreviews: ProductPreviewsFn;
   fetchProducts: ProductsFn;
   searchDelay?: number;
+  skuLabel?: string
+  readableIdentifierLabel?: string
 }
 
 interface State {
@@ -183,6 +185,8 @@ export class SkuPicker extends Component<Props, State> {
             products={products}
             selectProduct={this.selectProduct}
             selectedSKUs={selectedSKUs}
+            skuLabel={this.props.skuLabel}
+            readableIdentifierLabel={this.props.readableIdentifierLabel}
           />
           {!infiniteScrollingPaginationMode && products.length > 0 && (
             <Paginator
