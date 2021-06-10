@@ -14,6 +14,7 @@
 * [id](product.md#id)
 * [image](product.md#image)
 * [name](product.md#name)
+* [readableIdentifier](product.md#readableidentifier)
 * [sku](product.md#sku)
 
 ## Properties
@@ -39,6 +40,12 @@ ___
 ### name
 
 • **name**: *string*
+
+___
+
+### readableIdentifier
+
+• `Optional` **readableIdentifier**: *string*
 
 ___
 
