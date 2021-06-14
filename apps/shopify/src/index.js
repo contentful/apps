@@ -33,8 +33,6 @@ async function renderDialog(sdk) {
     fetchProductPreviews,
     fetchProducts: await makeProductSearchResolver(sdk),
     searchDelay: 750,
-    skuLabel: 'SKU',
-    readableIdentifierLabel: 'Variant ID',
   });
 
   sdk.window.startAutoResizer();

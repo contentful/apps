@@ -29,6 +29,7 @@ export async function makeShopifyClient({ parameters: { installation } }) {
  *       selection would be cut off after product no. 250.
  */
 export const fetchProductPreviews = async (skus, config) => {
+  console.log(skus)
   if (!skus.length) {
     return [];
   }
@@ -79,13 +80,18 @@ export const fetchProductPreviews = async (skus, config) => {
   });
 
   const data = await res.json();
+  console.log(data)
 
+  // here we have the data, including 'readable' names
   const nodes = get(data, ['data', 'nodes'], []).filter(identity);
 
   const variantPreviews = nodes.map(previewsToVariants(config));
+
+  console.log('skus', skus)
+  console.log('variantPreviews', variantPreviews)
   const missingVariants = difference(
     skus,
-    variantPreviews.map(variant => variant.sku)
+    variantPreviews.map(variant => variant.id)
   ).map(sku => ({ sku, isMissing: true, name: '', image: '' }));
 
   return [...variantPreviews, ...missingVariants];
