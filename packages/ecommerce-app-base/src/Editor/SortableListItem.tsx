@@ -157,7 +157,7 @@ export const SortableListItem = SortableElement<Props>(
               {productIsMissing ? (
                 <Tag tagType="negative">Product missing</Tag>
               ) : (
-                <Subheading className={styles.sku}>{product.display ?? product.sku}</Subheading>
+                <Subheading className={styles.sku}>{product.displaySKU ?? product.sku}</Subheading>
               )}
             </Typography>
           </section>
