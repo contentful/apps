@@ -10,14 +10,20 @@
 
 ### Properties
 
+* [displaySKU](product.md#displaysku)
 * [externalLink](product.md#externallink)
 * [id](product.md#id)
 * [image](product.md#image)
 * [name](product.md#name)
-* [readableIdentifier](product.md#readableidentifier)
 * [sku](product.md#sku)
 
 ## Properties
+
+### displaySKU
+
+• `Optional` **displaySKU**: *string*
+
+___
 
 ### externalLink
 
@@ -40,12 +46,6 @@ ___
 ### name
 
 • **name**: *string*
-
-___
-
-### readableIdentifier
-
-• `Optional` **readableIdentifier**: *string*
 
 ___
 
