@@ -45,13 +45,14 @@ export const previewsToVariants = ({ apiEndpoint }) => ({ sku, id, image, produc
     // as an alternative piece of info to persist instead of the SKU.
     // For now this is a temporary hack.
     sku: id,
+    display: sku !== '' ? `SKU: ${sku}` : `Product ID: ${id}`,
     productId: product.id,
     name: product.title,
     ...(apiEndpoint &&
       productId && {
         externalLink: `https://${apiEndpoint}${
           last(apiEndpoint) === '/' ? '' : '/'
-        }admin/products/${productId}`
-      })
+        }admin/products/${productId}`,
+      }),
   };
 };
