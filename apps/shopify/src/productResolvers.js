@@ -83,10 +83,9 @@ export const fetchProductPreviews = async (skus, config) => {
   const nodes = get(data, ['data', 'nodes'], []).filter(identity);
 
   const variantPreviews = nodes.map(previewsToVariants(config));
-
   const missingVariants = difference(
     skus,
-    variantPreviews.map(variant => variant.id)
+    variantPreviews.map(variant => variant.sku)
   ).map(sku => ({ sku, isMissing: true, name: '', image: '' }));
 
   return [...variantPreviews, ...missingVariants];
