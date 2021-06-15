@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, wait, configure, fireEvent } from '@testing-library/react';
+import { render, waitFor, configure, fireEvent } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 
 import mockProps from '../../test/mockProps';
@@ -83,9 +83,8 @@ describe('AITagView', () => {
       }));
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => tags);
 
-      const { getAllByTestId, getByText, container } = renderComponent(sdk);
-      await waitFor(() => getByText('Auto-tag from AI'));
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(tags.length);
+      const { getAllByTestId, container } = renderComponent(sdk);
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(tags.length));
       expect(container).toMatchSnapshot();
     });
 
@@ -99,14 +98,13 @@ describe('AITagView', () => {
 
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await wait();
+      await waitFor(() => getByTestId('image-tag'));
 
       const tagInput = getByTestId('image-tag');
       fireEvent.change(tagInput, {target: { value: 'new tag'} });
       fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
-      await wait();
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(1));
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
       expect(appView.container).toMatchSnapshot();
     });
 
@@ -120,14 +118,13 @@ describe('AITagView', () => {
 
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await wait();
+      await waitFor(() => getByTestId('image-tag'));
 
       const tagInput = getByTestId('image-tag');
       fireEvent.change(tagInput, {target: { value: 'tag1'} });
       fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
-      await wait();
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(2));
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(2);
       expect(appView.container).toMatchSnapshot();
     });
   })
@@ -161,13 +158,13 @@ describe('AITagView', () => {
     it('should fetch tags and render them on btn click', async () => {
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await wait();
+      await waitFor(() => getByTestId('image-tag'))
 
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-button'));
-      await wait();
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(3);
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(3))
+
       expect(appView.container).toMatchSnapshot();
     });
 
@@ -175,14 +172,13 @@ describe('AITagView', () => {
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['prior-tag']);
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await wait();
+      await waitFor(() => getAllByTestId('cf-ui-pill'))
 
       expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-button'));
-      await wait();
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(3))
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(3);
       expect(appView.container).toMatchSnapshot();
     });
 
@@ -190,15 +186,15 @@ describe('AITagView', () => {
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['prior-tag']);
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await wait();
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(1));
+
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-controlled-input'));
       fireEvent.click(getByTestId('cf-ui-button'));
-      await wait();
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(4);
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(4));
+
       expect(appView.container).toMatchSnapshot();
     });
 
@@ -213,9 +209,8 @@ describe('AITagView', () => {
       }))
       const appView = renderComponent(sdk);
       const { getByTestId } = appView;
-      await wait();
+      await waitFor(() => expect(getByTestId('cf-ui-button').disabled).toBeTruthy());
 
-      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
       expect(getByTestId('cf-ui-note')).toBeTruthy();
       expect(appView.container).toMatchSnapshot();
     });
@@ -231,9 +226,8 @@ describe('AITagView', () => {
       }))
       const appView = renderComponent(sdk);
       const { getByTestId } = appView;
-      await wait();
 
-      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
+      await waitFor(() => expect(getByTestId('cf-ui-button').disabled).toBeTruthy());
       expect(getByTestId('cf-ui-note')).toBeTruthy();
       expect(appView.container).toMatchSnapshot();
     });
@@ -249,9 +243,8 @@ describe('AITagView', () => {
       }))
       const appView = renderComponent(sdk);
       const { getByTestId } = appView;
-      await wait();
 
-      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
+      await waitFor(() => expect(getByTestId('cf-ui-button').disabled).toBeTruthy());
       expect(getByTestId('cf-ui-note')).toBeTruthy();
       expect(appView.container).toMatchSnapshot();
     });
