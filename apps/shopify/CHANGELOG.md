@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/contentful/apps/compare/shopify-sku@1.4.0...shopify-sku@1.5.0) (2021-06-15)
+
+
+### Features
+
+* [EXT-2785] show variant SKU in shopify SKU picker ([#277](https://github.com/contentful/apps/issues/277)) ([c72fff3](https://github.com/contentful/apps/commit/c72fff3372d745cdb9b333415067e57aba419b74))
+
+
+
+
+
 # [1.4.0](https://github.com/contentful/apps/compare/shopify-sku@1.3.1...shopify-sku@1.4.0) (2021-05-26)
 
 

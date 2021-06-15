@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.2.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.1.1...@contentful/ecommerce-app-base@2.2.0) (2021-06-15)
+
+
+### Features
+
+* [EXT-2785] show variant SKU in shopify SKU picker ([#277](https://github.com/contentful/apps/issues/277)) ([c72fff3](https://github.com/contentful/apps/commit/c72fff3372d745cdb9b333415067e57aba419b74))
+
+
+
+
+
 ## [2.1.1](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.1.0...@contentful/ecommerce-app-base@2.1.1) (2021-04-21)
 
 
