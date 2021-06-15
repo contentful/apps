@@ -3,7 +3,6 @@
   "version": "1.0.2",
   "private": true,
   "devDependencies": {
-    "@contentful/contentful-extension-scripts": "^0.15.1",
     "@testing-library/react": "^11.2.5",
     "contentful-cli": "1.2.12",
     "cross-env": "^7.0.3",
