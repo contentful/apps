@@ -10,6 +10,7 @@
 
 ### Properties
 
+* [displaySKU](product.md#displaysku)
 * [externalLink](product.md#externallink)
 * [id](product.md#id)
 * [image](product.md#image)
@@ -17,6 +18,12 @@
 * [sku](product.md#sku)
 
 ## Properties
+
+### displaySKU
+
+• `Optional` **displaySKU**: *string*
+
+___
 
 ### externalLink
 

@@ -45,6 +45,7 @@ export interface ParameterDefinition {
 
 export interface Product {
   sku: string;
+  displaySKU?: string;
   image: string;
   id: string;
   name: string;

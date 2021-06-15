@@ -9,12 +9,14 @@ import flatten from 'lodash/flatten';
 export const dataTransformer = product => {
   const image = get(product, ['image', 'src'], '');
   const sku = get(product, ['sku'], '');
+  const variantSKU = get(product, ['variantSKU'], '');
 
   return {
     id: product.id,
     image,
     name: product.title,
-    sku
+    displaySKU: variantSKU !== '' ? `SKU: ${variantSKU}` : `Product ID: ${sku}`,
+    sku,
   };
 };
 
@@ -43,13 +45,14 @@ export const previewsToVariants = ({ apiEndpoint }) => ({ sku, id, image, produc
     // as an alternative piece of info to persist instead of the SKU.
     // For now this is a temporary hack.
     sku: id,
+    displaySKU: sku !== '' ? `SKU: ${sku}` : `Product ID: ${id}`,
     productId: product.id,
     name: product.title,
     ...(apiEndpoint &&
       productId && {
         externalLink: `https://${apiEndpoint}${
           last(apiEndpoint) === '/' ? '' : '/'
-        }admin/products/${productId}`
-      })
+        }admin/products/${productId}`,
+      }),
   };
 };
