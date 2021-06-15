@@ -129,7 +129,5 @@ setup({
   makeThumbnail,
   renderDialog,
   openDialog,
-  isDisabled: () => {
-    false;
-  }
+  isDisabled: () => false
 });
