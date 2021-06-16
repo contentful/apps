@@ -3,27 +3,29 @@
   "version": "1.5.0",
   "private": true,
   "devDependencies": {
-    "@babel/core": "7.3.4",
-    "@babel/plugin-proposal-class-properties": "7.3.4",
-    "@babel/plugin-transform-runtime": "7.3.4",
-    "@babel/preset-env": "7.3.4",
-    "@babel/preset-react": "7.0.0",
-    "@contentful/contentful-extension-scripts": "^0.15.1",
+    "cross-env": "^7.0.3",
     "contentful-cli": "1.2.12"
   },
   "dependencies": {
+    "react-scripts": "^4.0.3",
     "@contentful/app-scripts": "^0.8.45",
-    "@contentful/dam-app-base": "^1.0.7"
+    "@contentful/dam-app-base": "^1.0.7",
+    "react": "16.12.0",
+    "react-dom": "16.12.0"
   },
   "scripts": {
-    "start": "contentful-extension-scripts start --serve-only",
-    "build": "contentful-extension-scripts build --no-inline",
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id bgBVVuNbfvUW5tpFnD20s --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
   },
   "browserslist": [
     "last 5 Chrome version",
     "> 1%",
     "not ie <= 11"
-  ]
+  ],
+  "homepage": "."
 }
