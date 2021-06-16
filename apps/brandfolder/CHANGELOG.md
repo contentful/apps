@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/contentful/apps/compare/brandfolder-assets@1.5.0...brandfolder-assets@1.6.0) (2021-06-16)
+
+
+### Features
+
+* [] build brandfolder with react scripts ([#287](https://github.com/contentful/apps/issues/287)) ([f2e379f](https://github.com/contentful/apps/commit/f2e379f4e818fc459d09dace5923f73b5c2b23e3))
+
+
+
+
+
 # [1.5.0](https://github.com/contentful/apps/compare/brandfolder-assets@1.4.0...brandfolder-assets@1.5.0) (2021-05-27)
 
 
