@@ -29,7 +29,8 @@ export interface Product {
   isMissing?: boolean;
 }
 
-export type PreviewsFn = (skus: string[]) => Promise<Product[]>;
+export type ProductPreviewsFn = (skus: string[]) => Promise<Product[]>;
+export type CategoriesPreviewsFn = (skus: string[]) => Promise<Category[]>;
 
 export type DeleteFn = (index: number) => void;
 

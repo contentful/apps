@@ -4,7 +4,7 @@ import { createAuthMiddlewareForClientCredentialsFlow } from "@commercetools/sdk
 import { createHttpMiddleware } from "@commercetools/sdk-middleware-http";
 import { createQueueMiddleware } from "@commercetools/sdk-middleware-queue";
 
-let commercetoolsClient = null;
+let commercetoolsClient: any = null;
 
 export function makeCommerceToolsClient({
   parameters: {
