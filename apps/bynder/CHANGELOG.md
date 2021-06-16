@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/contentful/apps/compare/bynder-assets@1.4.3...bynder-assets@1.5.0) (2021-06-16)
+
+
+### Features
+
+* [] build bynder with react-scripts ([#288](https://github.com/contentful/apps/issues/288)) ([f9abdd3](https://github.com/contentful/apps/commit/f9abdd31a356ae2f443208fdd951422e5e589ba6))
+
+
+
+
+
 ## [1.4.3](https://github.com/contentful/apps/compare/bynder-assets@1.4.2...bynder-assets@1.4.3) (2021-06-15)
 
 **Note:** Version bump only for package bynder-assets
