@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/cloudinary-assets@1.2.4...cloudinary-assets@1.3.0) (2021-06-16)
+
+
+### Features
+
+* [] build cloudianry with react scripts ([#289](https://github.com/contentful/apps/issues/289)) ([59e4979](https://github.com/contentful/apps/commit/59e4979b10cff838fda00295ec2ba6e484ea412b))
+
+
+
+
+
 ## [1.2.4](https://github.com/contentful/apps/compare/cloudinary-assets@1.2.3...cloudinary-assets@1.2.4) (2021-06-15)
 
 **Note:** Version bump only for package cloudinary-assets
