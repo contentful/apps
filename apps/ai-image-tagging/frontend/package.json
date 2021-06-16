@@ -6,10 +6,10 @@
     "@testing-library/react": "^11.2.5",
     "contentful-cli": "1.2.12",
     "cross-env": "^7.0.3",
-    "fetch-mock": "^9.0.0-beta.2",
-    "react-scripts": "^4.0.3"
+    "fetch-mock": "^9.0.0-beta.2"
   },
   "dependencies": {
+    "react-scripts": "^4.0.3",
     "@contentful/app-sdk": "3.31.0",
     "@contentful/forma-36-fcss": "^0.0.20",
     "@contentful/forma-36-react-components": "^3.79.2",
