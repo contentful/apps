@@ -1,11 +1,9 @@
 /* global global */
 import { render } from 'react-dom';
 
-const mockGetElementById = jest.fn(id => id);
-const mockFetch = jest.fn(() => Promise.resolve());
+jest.mock('react-dom')
 
-global.window.fetch = mockFetch;
-global.window.document.getElementById = mockGetElementById;
+
 
 function loadEntryPoint() {
   jest.isolateModules(() => {
@@ -55,11 +53,22 @@ function doSdkMock() {
   });
 }
 
+let fetchSpy
+let getElementByIdSpy
 describe('Gatsby Preview entry point', () => {
   beforeEach(() => {
+    fetchSpy = jest.spyOn(window, "fetch");
+    fetchSpy.mockImplementation(() => Promise.resolve())
+
+    getElementByIdSpy = jest.spyOn(document, "getElementById");
+    getElementByIdSpy.mockImplementation(id => id)
+
     doSdkMock();
   });
+
   afterEach(() => {
+    fetchSpy.mockRestore()
+    getElementByIdSpy.mockRestore()
     render.mockClear();
     jest.unmock('@contentful/app-sdk');
   });
