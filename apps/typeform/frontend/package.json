@@ -4,18 +4,13 @@
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
-    "@babel/core": "7.5.5",
-    "@babel/plugin-proposal-class-properties": "7.5.5",
-    "@babel/plugin-transform-runtime": "7.5.5",
-    "@babel/preset-env": "7.5.5",
-    "@babel/preset-react": "7.0.0",
-    "@contentful/contentful-extension-scripts": "0.15.1",
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",
     "contentful-cli": "^0.36.2",
     "react-test-renderer": "^16.9.0",
     "sass": "^1.26.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "cross-env": "^7.0.3"
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
@@ -33,15 +28,22 @@
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
+    "react-scripts": "^4.0.3",
     "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
-    "start": "contentful-extension-scripts start --serve-only",
-    "build": "contentful-extension-scripts build --no-inline",
-    "test": "contentful-extension-scripts test --watch --env=jsdom",
-    "test:ci": "contentful-extension-scripts test --env=jsdom"
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "test:ci": "react-scripts test"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
   },
   "browserslist": [
-    "last 2 versions"
-  ]
+    "last 5 Chrome version",
+    "> 1%",
+    "not ie <= 11"
+  ],
+  "homepage": "."
 }
