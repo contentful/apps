@@ -101,7 +101,7 @@ export class AITagView extends React.Component {
     const file = await this.props.space.getAsset(imageId);
     const locale = this.props.locale;
     const fullURL = get(file, `fields.file.${locale}.url`);
-    const imagePath = new URL(`${window.location.protocol}${fullURL}`).pathname;
+    const imagePath = new URL(`${location.protocol}${fullURL}`).pathname;
     this.setState({ isFetchingTags: true });
 
     try {
