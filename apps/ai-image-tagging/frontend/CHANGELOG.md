@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/contentful/apps/compare/ai-image-tagging-frontend@1.1.1...ai-image-tagging-frontend@1.2.0) (2021-06-17)
+
+
+### Features
+
+* [] build ai image tagging with react-scripts take 2 ([#295](https://github.com/contentful/apps/issues/295)) ([ea5b9ea](https://github.com/contentful/apps/commit/ea5b9ea60c6ffda87d4f761e3bd3d1ed8b1cbef3)), closes [#286](https://github.com/contentful/apps/issues/286) [#294](https://github.com/contentful/apps/issues/294)
+
+
+
+
+
 ## [1.1.1](https://github.com/contentful/apps/compare/ai-image-tagging-frontend@1.1.0...ai-image-tagging-frontend@1.1.1) (2021-06-17)
 
 
