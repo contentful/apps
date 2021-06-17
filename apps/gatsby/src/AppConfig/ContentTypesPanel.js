@@ -16,7 +16,6 @@ import {
   TextInput,
   Typography,
 } from "@contentful/forma-36-react-components";
-import styles from "../styles";
 import React, {useState} from "react";
 
 const sortContentTypesAlphabetically = (contentTypes) => {
@@ -83,6 +82,14 @@ export const ContentTypesSelection = ({
   space,
   environment,
 }) => {
+  //Focus value to compare with selection value to determine whether an update in state is necessary
+  const [focusValue, changeFocus] = useState("");
+  //Modal state
+  const [modalState, updateModalState] = useState({
+    open: false,
+    id: ""
+  })
+
   if (!contentTypes) {
     return <ContentTypesSkeleton />;
   }
@@ -96,13 +103,6 @@ export const ContentTypesSelection = ({
     return fullType
   })
 
-  //Focus value to compare with selection value to determine whether an update in state is necessary
-  const [focusValue, changeFocus] = useState("");
-  //Modal state
-  const [modalState, updateModalState] = useState({
-    open: false,
-    id: ""
-  })
 
   //Function to reset modal state
   const modalReset = () => {
