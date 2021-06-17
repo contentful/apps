@@ -1,6 +1,6 @@
 {
   "name": "ai-image-tagging-frontend",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "private": true,
   "devDependencies": {
     "@testing-library/react": "^11.2.5",
@@ -9,7 +9,6 @@
     "fetch-mock": "^9.0.0-beta.2"
   },
   "dependencies": {
-    "react-scripts": "^4.0.3",
     "@contentful/app-sdk": "3.31.0",
     "@contentful/forma-36-fcss": "^0.0.20",
     "@contentful/forma-36-react-components": "^3.79.2",
@@ -19,7 +18,8 @@
     "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "react-scripts": "^4.0.3"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
