@@ -150,7 +150,7 @@ export default class Field extends React.Component<Props, State> {
                 disabled={editingDisabled}
                 skus={data}
                 onChange={this.updateStateValue}
-                fetchProductPreviews={skus =>
+                fetchProductPreviews={(skus: string[]) =>
                   fetchProductPreviews(skus, config)
                 }
               />
