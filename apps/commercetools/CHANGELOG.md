@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/contentful/apps/compare/commercetools@1.3.0...commercetools@1.4.0) (2021-06-17)
+
+
+### Features
+
+* [] build Commercetools with react scripts  ([#290](https://github.com/contentful/apps/issues/290)) ([2df4bab](https://github.com/contentful/apps/commit/2df4babe407f079abea22270e3d3834a9d480f32))
+
+
+
+
+
 # [1.3.0](https://github.com/contentful/apps/compare/commercetools@1.2.0...commercetools@1.3.0) (2021-05-27)
 
 
