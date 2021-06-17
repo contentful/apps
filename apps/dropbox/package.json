@@ -3,26 +3,28 @@
   "version": "1.2.4",
   "private": true,
   "devDependencies": {
-    "@babel/core": "7.3.4",
-    "@babel/plugin-proposal-class-properties": "7.3.4",
-    "@babel/plugin-transform-runtime": "7.3.4",
-    "@babel/preset-env": "7.3.4",
-    "@babel/preset-react": "7.0.0",
-    "@contentful/contentful-extension-scripts": "^0.15.1",
-    "contentful-cli": "1.2.12"
+    "contentful-cli": "1.2.12",
+    "cross-env": "^7.0.3"
   },
   "dependencies": {
-    "@contentful/dam-app-base": "^1.0.7"
+    "@contentful/dam-app-base": "^1.0.7",
+    "react": "16.12.0",
+    "react-dom": "16.12.0",
+    "react-scripts": "^4.0.3"
   },
   "scripts": {
-    "start": "contentful-extension-scripts start --serve-only",
-    "build": "contentful-extension-scripts build --no-inline",
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/dropbox --acl public-read",
     "deploy:test": "npm run deploy"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
   },
   "browserslist": [
     "last 5 Chrome version",
     "> 1%",
     "not ie <= 11"
-  ]
+  ],
+  "homepage": "."
 }
