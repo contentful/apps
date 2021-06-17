@@ -2,6 +2,7 @@
   "name": "ai-image-tagging-frontend",
   "version": "1.1.1",
   "private": true,
+  "main": "build/index.html",
   "devDependencies": {
     "@testing-library/react": "^11.2.5",
     "contentful-cli": "1.2.12",
