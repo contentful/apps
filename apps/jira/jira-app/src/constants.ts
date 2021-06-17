@@ -8,8 +8,9 @@ if (process.env.NODE_ENV === 'development') {
   CLIENT_ID = process.env.ATLASSIAN_APP_CLIENT_ID || '';
 }
 
-export default {
+const constants = {
   OAUTH_REDIRECT_URI: `${LAMBDA_URI}/auth`,
   CONNECT_URL: `${LAMBDA_URI}/connect.json`,
   CLIENT_ID
 };
+export default constants

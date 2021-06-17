@@ -6,6 +6,7 @@ import {
   Typography
 } from '@contentful/forma-36-react-components';
 import IssueCard from './IssueCard';
+import { FormattedIssue } from '../../interfaces';
 
 interface Props {
   issues: FormattedIssue[];

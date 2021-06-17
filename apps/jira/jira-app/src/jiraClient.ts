@@ -1,3 +1,17 @@
+import {
+  RequestOptions,
+  ContentfulEntry,
+  JiraIssue,
+  FormattedIssue,
+  IssuesResponse,
+  UrnRecordsResponse,
+  CloudAccountsResponse,
+  JiraCloudResource,
+  CloudProject,
+  CloudProjectResponse,
+  CloudProjectsResponse,
+  CloudProjectsResource,
+} from './interfaces';
 enum HTTPMethod {
   GET = 'GET',
   POST = 'POST',

@@ -17,7 +17,7 @@ interface Props {
   contentTypes: { name: string; id: string }[];
 }
 
-export default ({ contentTypes, selectCt, selectedContentTypes, space, environment }: Props) => {
+const ContentTypeStep = ({ contentTypes, selectCt, selectedContentTypes, space, environment }: Props) => {
   const ctMap: { [key: string]: string } = contentTypes.reduce((acc, ct) => {
     return {
       ...acc,
@@ -79,3 +79,5 @@ export default ({ contentTypes, selectCt, selectedContentTypes, space, environme
     </Typography>
   );
 };
+
+export default ContentTypeStep

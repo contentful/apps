@@ -13,6 +13,7 @@ import Auth from './components/Auth';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.scss';
 import JiraClient from './jiraClient';
+import { InstallationParameters } from './interfaces';
 
 function renderAtRoot(component: JSX.Element) {
   render(component, document.getElementById('root'));
