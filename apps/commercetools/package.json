@@ -42,8 +42,8 @@
     "build": "react-scripts build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 7yUlnpgAofvRDee0n6Ocv2 --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
-    "test": "contentful-extension-scripts test --env=jsdom --watch",
-    "test:ci": "contentful-extension-scripts test --env=jsdom"
+    "test": "react-scripts test",
+    "test:ci": "react-scripts test"
   },
   "eslintConfig": {
     "extends": "react-app"
