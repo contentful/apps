@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, render, wait, configure, fireEvent } from '@testing-library/react';
+import { render, waitFor, configure, fireEvent } from '@testing-library/react';
 import fetchMock from 'fetch-mock';
 
 import mockProps from '../../test/mockProps';
@@ -34,99 +34,103 @@ function renderComponent(sdk) {
 }
 
 describe('AITagView', () => {
-  afterEach(cleanup);
 
-  it('should disable everything if theres no image', async () => {
-    const appView = renderComponent(sdk);
-    const { getByTestId } = appView;
-    await wait();
-    expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
-    expect(getByTestId('cf-ui-controlled-input').disabled).toBeTruthy();
-    expect(getByTestId('image-tag').disabled).toBeTruthy();
-    expect(appView.container).toMatchSnapshot();
-  });
+  describe('if there is no image', () => {
+    it('should disable everything', async () => {
+      const appView = renderComponent(sdk);
+      const { getByTestId, getByText } = appView;
+      await waitFor(() => getByText('Auto-tag from AI'));
+      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
+      expect(getByTestId('cf-ui-controlled-input').disabled).toBeTruthy();
+      expect(getByTestId('image-tag').disabled).toBeTruthy();
+      expect(appView.container).toMatchSnapshot();
+    });
+  })
 
-  it('should enable everything if theres an image', async () => {
-    const imgData = {
-      url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png",
-      contentType: 'image/png',
-      details: { size: 200, height: 100, width: 100 }
-    };
-    sdk.space.getAsset.mockImplementation(() => ({
-      fields: {file: { 'en-US': imgData }}
-    }))
-    sdk.entry.fields.image.getValue.mockImplementation(() => ({
-      sys: {
-        id: '098dsjnwe9ds'
-      }
-    }));
+  describe('if there is an image', () => {
+    beforeEach(() => {
+      const imgData = {
+        url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png",
+        contentType: 'image/png',
+        details: { size: 200, height: 100, width: 100 }
+      };
+      sdk.space.getAsset.mockImplementation(() => ({
+        fields: {file: { 'en-US': imgData }}
+      }))
 
-    const appView = renderComponent(sdk);
-    const { getByTestId } = appView;
-    await wait();
-    expect(getByTestId('cf-ui-button').disabled).toBeFalsy();
-    expect(getByTestId('cf-ui-controlled-input').disabled).toBeFalsy();
-    expect(getByTestId('image-tag').disabled).toBeFalsy();
-    expect(appView.container).toMatchSnapshot();
-  });
+    })
+    it('should enable everything', async () => {
+      sdk.entry.fields.image.getValue.mockImplementation(() => ({
+        sys: {
+          id: '098dsjnwe9ds'
+        }
+      }));
 
-  it('should render image tags if available', async () => {
-    const tags = ['tag1', 'tag2'];
-    sdk.entry.fields.image.getValue.mockImplementation(() => ({
-      sys: {
-        id: '098dsjnwe9ds'
-      }
-    }));
-    sdk.entry.fields.imageTags.getValue.mockImplementation(() => tags);
+      const { getByTestId, getByText, container } = renderComponent(sdk);
+      await waitFor(() => getByText('Auto-tag from AI'));
+      expect(getByTestId('cf-ui-button').disabled).toBeFalsy();
+      expect(getByTestId('cf-ui-controlled-input').disabled).toBeFalsy();
+      expect(getByTestId('image-tag').disabled).toBeFalsy();
+      expect(container).toMatchSnapshot();
+    });
 
-    const appView = renderComponent(sdk);
-    const { getAllByTestId } = appView;
-    await wait();
-    expect(getAllByTestId('cf-ui-pill')).toHaveLength(tags.length);
-    expect(appView.container).toMatchSnapshot();
-  });
+    it('should render image tags if available', async () => {
+      const tags = ['tag1', 'tag2'];
+      sdk.entry.fields.image.getValue.mockImplementation(() => ({
+        sys: {
+          id: '098dsjnwe9ds'
+        }
+      }));
+      sdk.entry.fields.imageTags.getValue.mockImplementation(() => tags);
 
-  it('should add image tags on Enter', async () => {
-    sdk.entry.fields.image.getValue.mockImplementation(() => ({
-      sys: {
-        id: '098dsjnwe9ds'
-      }
-    }));
-    sdk.entry.fields.imageTags.getValue.mockImplementation(() => []);
+      const { getAllByTestId, container } = renderComponent(sdk);
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(tags.length));
+      expect(container).toMatchSnapshot();
+    });
 
-    const appView = renderComponent(sdk);
-    const { getByTestId, getAllByTestId } = appView;
-    await wait();
+    it('should add image tags on Enter', async () => {
+      sdk.entry.fields.image.getValue.mockImplementation(() => ({
+        sys: {
+          id: '098dsjnwe9ds'
+        }
+      }));
+      sdk.entry.fields.imageTags.getValue.mockImplementation(() => []);
 
-    const tagInput = getByTestId('image-tag');
-    fireEvent.change(tagInput, {target: { value: 'new tag'} });
-    fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
-    await wait();
+      const appView = renderComponent(sdk);
+      const { getByTestId, getAllByTestId } = appView;
+      await waitFor(() => getByTestId('image-tag'));
 
-    expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
-    expect(appView.container).toMatchSnapshot();
-  });
+      const tagInput = getByTestId('image-tag');
+      fireEvent.change(tagInput, {target: { value: 'new tag'} });
+      fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(1));
 
-  it('should ignore duplicate image tags', async () => {
-    sdk.entry.fields.image.getValue.mockImplementation(() => ({
-      sys: {
-        id: '098dsjnwe9ds'
-      }
-    }));
-    sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['tag1', 'tag2']);
+      expect(appView.container).toMatchSnapshot();
+    });
 
-    const appView = renderComponent(sdk);
-    const { getByTestId, getAllByTestId } = appView;
-    await wait();
+    it('should ignore duplicate image tags', async () => {
+      sdk.entry.fields.image.getValue.mockImplementation(() => ({
+        sys: {
+          id: '098dsjnwe9ds'
+        }
+      }));
+      sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['tag1', 'tag2']);
 
-    const tagInput = getByTestId('image-tag');
-    fireEvent.change(tagInput, {target: { value: 'tag1'} });
-    fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
-    await wait();
+      const appView = renderComponent(sdk);
+      const { getByTestId, getAllByTestId } = appView;
+      await waitFor(() => getByTestId('image-tag'));
 
-    expect(getAllByTestId('cf-ui-pill')).toHaveLength(2);
-    expect(appView.container).toMatchSnapshot();
-  });
+      const tagInput = getByTestId('image-tag');
+      fireEvent.change(tagInput, {target: { value: 'tag1'} });
+      fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(2));
+
+      expect(appView.container).toMatchSnapshot();
+    });
+  })
+
+
+
 
   describe('Calling AI Tags', () => {
     beforeEach(() => {
@@ -154,13 +158,13 @@ describe('AITagView', () => {
     it('should fetch tags and render them on btn click', async () => {
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await wait();
+      await waitFor(() => getByTestId('image-tag'))
 
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-button'));
-      await wait();
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(3);
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(3))
+
       expect(appView.container).toMatchSnapshot();
     });
 
@@ -168,14 +172,13 @@ describe('AITagView', () => {
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['prior-tag']);
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await wait();
+      await waitFor(() => getAllByTestId('cf-ui-pill'))
 
       expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-button'));
-      await wait();
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(3))
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(3);
       expect(appView.container).toMatchSnapshot();
     });
 
@@ -183,15 +186,15 @@ describe('AITagView', () => {
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['prior-tag']);
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await wait();
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(1));
+
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-controlled-input'));
       fireEvent.click(getByTestId('cf-ui-button'));
-      await wait();
 
-      expect(getAllByTestId('cf-ui-pill')).toHaveLength(4);
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(4));
+
       expect(appView.container).toMatchSnapshot();
     });
 
@@ -206,9 +209,8 @@ describe('AITagView', () => {
       }))
       const appView = renderComponent(sdk);
       const { getByTestId } = appView;
-      await wait();
+      await waitFor(() => expect(getByTestId('cf-ui-button').disabled).toBeTruthy());
 
-      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
       expect(getByTestId('cf-ui-note')).toBeTruthy();
       expect(appView.container).toMatchSnapshot();
     });
@@ -224,9 +226,8 @@ describe('AITagView', () => {
       }))
       const appView = renderComponent(sdk);
       const { getByTestId } = appView;
-      await wait();
 
-      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
+      await waitFor(() => expect(getByTestId('cf-ui-button').disabled).toBeTruthy());
       expect(getByTestId('cf-ui-note')).toBeTruthy();
       expect(appView.container).toMatchSnapshot();
     });
@@ -242,9 +243,8 @@ describe('AITagView', () => {
       }))
       const appView = renderComponent(sdk);
       const { getByTestId } = appView;
-      await wait();
 
-      expect(getByTestId('cf-ui-button').disabled).toBeTruthy();
+      await waitFor(() => expect(getByTestId('cf-ui-button').disabled).toBeTruthy());
       expect(getByTestId('cf-ui-note')).toBeTruthy();
       expect(appView.container).toMatchSnapshot();
     });
