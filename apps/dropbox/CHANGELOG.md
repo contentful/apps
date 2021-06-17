@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/dropbox-assets@1.2.4...dropbox-assets@1.3.0) (2021-06-17)
+
+
+### Features
+
+* [] build dropbox with react-scripts ([#291](https://github.com/contentful/apps/issues/291)) ([2c4c724](https://github.com/contentful/apps/commit/2c4c72426370b73436d7bda1c69a14ba6ca5c14a))
+
+
+
+
+
 ## [1.2.4](https://github.com/contentful/apps/compare/dropbox-assets@1.2.3...dropbox-assets@1.2.4) (2021-06-15)
 
 **Note:** Version bump only for package dropbox-assets
