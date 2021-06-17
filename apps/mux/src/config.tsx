@@ -21,7 +21,6 @@ import {
   AppExtensionSDK,
   AppConfigAPI,
   SpaceAPI,
-  BaseExtensionSDK,
 } from '@contentful/app-sdk';
 import {
   editorInterfacesToSelectedFields,
