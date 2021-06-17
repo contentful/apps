@@ -1,6 +1,0 @@
-{
-  "id": "frontend",
-  "name": "frontend",
-  "srcdoc": "./build/index.html",
-  "sidebar": true
-}
