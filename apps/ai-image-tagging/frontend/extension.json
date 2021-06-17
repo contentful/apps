@@ -1,0 +1,8 @@
+{
+  "id": "frontend",
+  "name": "frontend",
+  "srcdoc": "./build/index.html",
+  "fieldTypes": [
+    "Symbols"
+  ]
+}
