@@ -1,16 +1,16 @@
 {
   "name": "typeform-frontend",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",
     "contentful-cli": "^0.36.2",
+    "cross-env": "^7.0.3",
     "react-test-renderer": "^16.9.0",
     "sass": "^1.26.2",
-    "typescript": "^3.8.3",
-    "cross-env": "^7.0.3"
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
