@@ -1,5 +1,3 @@
-/* global process */
-
 let LAMBDA_URI = 'https://api.jira.ctfapps.net';
 let CLIENT_ID = 'XD9k9QU9VT4Rt26u6lbO3NM0fOqvvXan';
 
