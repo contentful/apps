@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/contentful/apps/compare/google-analytics@1.1.0...google-analytics@1.2.0) (2021-06-18)
+
+
+### Features
+
+* [] build google analytics with react-scripts ([#296](https://github.com/contentful/apps/issues/296)) ([3e9b113](https://github.com/contentful/apps/commit/3e9b1132d998fd10fab5bba598f22807f265da3b))
+
+
+
+
+
 # [1.1.0](https://github.com/contentful/apps/compare/google-analytics@1.0.2...google-analytics@1.1.0) (2021-05-05)
 
 
