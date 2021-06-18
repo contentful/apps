@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/contentful/apps/compare/gatsby-preview@1.4.0...gatsby-preview@1.5.0) (2021-06-18)
+
+
+### Features
+
+* [] build gatsby with react-scripts ([#293](https://github.com/contentful/apps/issues/293)) ([25882c9](https://github.com/contentful/apps/commit/25882c91c809f6a8d304de36c122614140586881))
+
+
+
+
+
 # [1.4.0](https://github.com/contentful/apps/compare/gatsby-preview@1.3.2...gatsby-preview@1.4.0) (2021-05-05)
 
 
