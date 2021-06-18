@@ -219,7 +219,6 @@ class Config extends React.Component<ConfigProps, IState> {
         muxAccessTokenSecret,
         muxEnableSignedUrls,
         muxSigningKeyId,
-        muxSigningKeyPrivate,
       },
       contentTypes,
       compatibleFields,
@@ -391,7 +390,7 @@ class Config extends React.Component<ConfigProps, IState> {
           </Paragraph>
         </div>
         <div className="config-logo-bottom">
-          <img src={MuxLogoSvg} />
+          <img alt="Mux Logo" src={MuxLogoSvg} />
         </div>
       </React.Fragment>
     );
