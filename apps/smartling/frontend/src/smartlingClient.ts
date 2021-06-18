@@ -1,4 +1,4 @@
-export default {
+const smartlingClient = {
   async getLinkedJobs(
     token: string,
     spaceId: string,
@@ -40,3 +40,4 @@ export default {
     };
   }
 };
+export default smartlingClient

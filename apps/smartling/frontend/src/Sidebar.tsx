@@ -98,7 +98,7 @@ function sortSubs(a: Submission, b: Submission) {
     return 0;
   }
 
-  if (aStatus == 'in_progress') {
+  if (aStatus === 'in_progress') {
     return -1;
   }
 
