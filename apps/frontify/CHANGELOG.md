@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/frontify-assets@1.2.4...frontify-assets@1.3.0) (2021-06-18)
+
+
+### Features
+
+* [] build frontify with react-scripts ([#292](https://github.com/contentful/apps/issues/292)) ([667ede2](https://github.com/contentful/apps/commit/667ede2f0cd4c11dbcd0c44aa20f2f8146b2de30))
+
+
+
+
+
 ## [1.2.4](https://github.com/contentful/apps/compare/frontify-assets@1.2.3...frontify-assets@1.2.4) (2021-06-15)
 
 **Note:** Version bump only for package frontify-assets
