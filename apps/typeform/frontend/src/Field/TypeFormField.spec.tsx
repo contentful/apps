@@ -5,22 +5,21 @@ import { typeforms } from '../__mocks__/typeforms';
 import { sdk as mockSdk } from '../__mocks__/sdk';
 
 configure({
-  testIdAttribute: 'data-test-id'
+  testIdAttribute: 'data-test-id',
 });
 
-window.fetch = jest.fn(() => ({
-  json: () => typeforms
-})) as any;
-
 describe('TypeFormField', () => {
-  afterEach(cleanup);
-
+  beforeEach(() => {
+    window.fetch = jest.fn(() => ({
+      json: () => typeforms,
+    })) as any;
+  });
   it('should render successfully when the user is signed in', async () => {
     Object.defineProperty(window, 'localStorage', {
       value: {
-        getItem: jest.fn(() => 'some token')
+        getItem: jest.fn(() => 'some token'),
       },
-      writable: true
+      writable: true,
     });
     const component = render(<TypeFormField sdk={mockSdk} />);
     await component.findByTestId('typeform-select');
@@ -30,9 +29,9 @@ describe('TypeFormField', () => {
   it('should render the auth button when the user is not authenticated', async () => {
     Object.defineProperty(window, 'localStorage', {
       value: {
-        getItem: jest.fn(() => null)
+        getItem: jest.fn(() => null),
       },
-      writable: true
+      writable: true,
     });
     const component = render(<TypeFormField sdk={mockSdk} />);
     await component.findByTestId('typeform-auth');
@@ -42,13 +41,13 @@ describe('TypeFormField', () => {
   it('should render the error screen if something goes wrong', async () => {
     Object.defineProperty(window, 'localStorage', {
       value: {
-        getItem: jest.fn(() => 'token')
+        getItem: jest.fn(() => 'token'),
       },
-      writable: true
+      writable: true,
     });
 
     window.fetch = jest.fn(() => ({
-      json: () => new Error()
+      json: () => new Error(),
     })) as any;
 
     const component = render(<TypeFormField sdk={mockSdk} />);
