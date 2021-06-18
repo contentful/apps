@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/image-focal-point@1.2.0...image-focal-point@1.3.0) (2021-06-18)
+
+
+### Features
+
+* [] build image-focal-point with react-scripts ([#297](https://github.com/contentful/apps/issues/297)) ([73cd123](https://github.com/contentful/apps/commit/73cd1239f83c7214a2c47f9ab1c3c9d503d5c8ae))
+
+
+
+
+
 # [1.2.0](https://github.com/contentful/apps/compare/image-focal-point@1.1.1...image-focal-point@1.2.0) (2021-05-05)
 
 
