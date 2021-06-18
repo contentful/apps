@@ -14,34 +14,34 @@ interface Props {
 }
 
 export default function AuthWrapper({ sdk }: Props) {
-  let expirationWatchInterval: NodeJS.Timeout | undefined;
+  let expirationWatchInterval = React.useRef<NodeJS.Timeout | undefined>(undefined);
   const [token, setToken] = useState(getToken());
   const [expireSoon, setExpireSoon] = useState(false);
 
   useEffect(() => {
+    const refreshToken = () => {
+      if (tokenIsExpired()) {
+        resetLocalStorage();
+      } else if (tokenWillExpireSoon()) {
+        setExpireSoon(true);
+      }
+    };
+
+    const clearExpirationInterval = () => {
+      if (expirationWatchInterval.current) {
+        clearInterval(expirationWatchInterval.current);
+      }
+    };
+
+    const watchForExpiration = () => {
+      clearExpirationInterval();
+      expirationWatchInterval.current = setInterval(refreshToken, 5000);
+    };
+
     watchForExpiration();
     refreshToken();
     return () => clearExpirationInterval();
   }, []);
-
-  const refreshToken = () => {
-    if (tokenIsExpired()) {
-      resetLocalStorage();
-    } else if (tokenWillExpireSoon()) {
-      setExpireSoon(true);
-    }
-  };
-
-  const clearExpirationInterval = () => {
-    if (expirationWatchInterval) {
-      clearInterval(expirationWatchInterval);
-    }
-  };
-
-  const watchForExpiration = () => {
-    clearExpirationInterval();
-    expirationWatchInterval = setInterval(refreshToken, 5000);
-  };
 
   if (token) {
     return <AppConfig sdk={sdk} expireSoon={expireSoon} />;

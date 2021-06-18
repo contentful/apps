@@ -26,7 +26,7 @@ export function TypeformOAuth({
       // we are on the config screen
       sdk.app.setReady();
     }
-  }, []);
+  }, [sdk]);
   
   useEffect(() => {
     if (oauthWindow === null) {
@@ -52,7 +52,7 @@ export function TypeformOAuth({
 
     window.addEventListener('message', handleTokenEvent);    
     return () => window.removeEventListener('message', handleTokenEvent);
-  }, [oauthWindow])
+  }, [oauthWindow, setToken])
 
   const executeOauth = () => {
     const url = `${BASE_URL}/oauth/authorize?&client_id=${
