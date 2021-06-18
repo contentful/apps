@@ -157,7 +157,7 @@ export default function EditorPage(props) {
     const unsubsribeExperimentChange = props.sdk.entry.fields.experimentId.onValueChanged(data => {
       actions.setExperimentId(data);
     });
-    const unsubsribeVariationsChange = props.sdk.entry.fields.variations.onValueChanged(data => {
+    const unsubscribeVariationsChange = props.sdk.entry.fields.variations.onValueChanged(data => {
       actions.setVariations(data || []);
     });
     const unsubscribeMetaChange = props.sdk.entry.fields.meta.onValueChanged(data => {
@@ -165,7 +165,7 @@ export default function EditorPage(props) {
     });
     return () => {
       unsubsribeExperimentChange();
-      unsubsribeVariationsChange();
+      unsubscribeVariationsChange();
       unsubscribeMetaChange();
     };
   }, [
