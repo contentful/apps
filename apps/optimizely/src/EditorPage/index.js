@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events, jsx-a11y/anchor-is-valid */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { css } from 'emotion';
 import useMethods from 'use-methods';
@@ -157,7 +157,7 @@ export default function EditorPage(props) {
     const unsubsribeExperimentChange = props.sdk.entry.fields.experimentId.onValueChanged(data => {
       actions.setExperimentId(data);
     });
-    const unsubsribeVariationsChange = props.sdk.entry.fields.variations.onValueChanged(data => {
+    const unsubscribeVariationsChange = props.sdk.entry.fields.variations.onValueChanged(data => {
       actions.setVariations(data || []);
     });
     const unsubscribeMetaChange = props.sdk.entry.fields.meta.onValueChanged(data => {
@@ -165,7 +165,7 @@ export default function EditorPage(props) {
     });
     return () => {
       unsubsribeExperimentChange();
-      unsubsribeVariationsChange();
+      unsubscribeVariationsChange();
       unsubscribeMetaChange();
     };
   }, [
@@ -214,13 +214,13 @@ export default function EditorPage(props) {
    * Handlers
    */
 
-  const onChangeExperiment = useCallback(value => {
+  const onChangeExperiment = value => {
     props.sdk.entry.fields.meta.setValue({});
     props.sdk.entry.fields.experimentId.setValue(value.experimentId);
     props.sdk.entry.fields.experimentKey.setValue(value.experimentKey);
-  });
+  };
 
-  const onLinkVariation = useCallback(async variation => {
+  const onLinkVariation = async variation => {
     const data = await props.sdk.dialogs.selectSingleEntry({
       locale: props.sdk.locales.default,
       contentTypes: state.referenceInfo.linkContentTypes
@@ -246,13 +246,13 @@ export default function EditorPage(props) {
         }
       }
     ]);
-  });
+  };
 
-  const onOpenEntry = useCallback(entryId => {
+  const onOpenEntry = entryId => {
     props.sdk.navigator.openEntry(entryId, { slideIn: true });
-  });
+  };
 
-  const onCreateVariation = useCallback(async (variation, contentTypeId) => {
+  const onCreateVariation = async (variation, contentTypeId) => {
     const data = await props.sdk.navigator.openNewEntry(contentTypeId, {
       slideIn: true
     });
@@ -278,9 +278,9 @@ export default function EditorPage(props) {
         }
       }
     ]);
-  });
+  };
 
-  const onRemoveVariation = useCallback((entryId, variation) => {
+  const onRemoveVariation = (entryId, variation) => {
     const values = props.sdk.entry.fields.variations.getValue() || [];
     const meta = props.sdk.entry.fields.meta.getValue() || {};
     if (variation) {
@@ -288,12 +288,12 @@ export default function EditorPage(props) {
     }
     props.sdk.entry.fields.meta.setValue(meta);
     props.sdk.entry.fields.variations.setValue(values.filter(item => item.sys.id !== entryId));
-  });
+  };
 
-  const onClearVariations = useCallback(() => {
+  const onClearVariations = () => {
     props.sdk.entry.fields.meta.setValue({});
     props.sdk.entry.fields.variations.setValue([]);
-  });
+  };
 
   const { combinedLinkValidationType } = state.referenceInfo || {};
   if (combinedLinkValidationType === COMBINED_LINK_VALIDATION_CONFLICT) {
