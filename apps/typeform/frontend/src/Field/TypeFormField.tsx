@@ -152,7 +152,7 @@ export function TypeFormField({ sdk }: Props) {
     fetchForms();
     // Start auto resizer to adjust field height
     sdk.window.startAutoResizer();
-  }, [token]);
+  }, [token, sdk.window, selectedWorkspaceId]);
 
   const onChange = (event: any) => {
     const value = event.currentTarget.value;
@@ -220,7 +220,7 @@ export function TypeFormField({ sdk }: Props) {
   return (
     <React.Fragment>
       <div className={styles.field}>
-        <img src={logo} className={styles.logo} />
+        <img alt="TypeForm Logo" src={logo} className={styles.logo} />
         <Select onChange={onChange} value={value} data-test-id="typeform-select">
           <Option key="" value="">
             {forms.length === 0 ? 'No forms available' : 'Choose a typeform'}

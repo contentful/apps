@@ -19,7 +19,7 @@ export function TypeformPreviewWidget({ sdk }: Props) {
       opacity: 0
     });
     sdk.window.updateHeight(SDK_WINDOW_HEIGHT);
-  }, [value]);
+  }, [value, sdk.window]);
 
   return (
     <div

@@ -1,6 +1,6 @@
 const DEFAULT_TOKEN_EXPIRATION_TIME = 604800;
 
-export default (window: Window) => {
+const processTokenCallback = (window: Window) => {
   const { searchParams, search } = new URL(window.location.href);
 
   if (search.length) {
@@ -26,3 +26,4 @@ export default (window: Window) => {
     window.opener.postMessage({ error: 'No query string provided!' }, '*');
   }
 };
+export default processTokenCallback;
