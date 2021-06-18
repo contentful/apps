@@ -84,14 +84,14 @@ describe('netlify-integration', () => {
   });
 
   describe('update', () => {
-    it('removes existing hooks and continues as in installation', () => {
+    it('removes existing hooks and continues as in installation', async () => {
       const notificationHooks = [
         'notification-hook-id-1',
         'notification-hook-id-2',
         'notification-hook-id-3'
       ];
 
-      NetlifyIntegration.update({
+      await NetlifyIntegration.update({
         config: {
           netlifyHookIds: notificationHooks,
           sites: [
