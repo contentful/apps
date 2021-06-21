@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/contentful/apps/compare/optimizely@1.1.0...optimizely@1.2.0) (2021-06-21)
+
+
+### Features
+
+* [] build optimizely with react-scripts ([#301](https://github.com/contentful/apps/issues/301)) ([472f9a2](https://github.com/contentful/apps/commit/472f9a2c62b4e5ffaf31382a4e582481ba94007f))
+
+
+
+
+
 # [1.1.0](https://github.com/contentful/apps/compare/optimizely@1.0.2...optimizely@1.1.0) (2021-05-05)
 
 
