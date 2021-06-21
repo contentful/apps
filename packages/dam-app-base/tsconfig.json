@@ -2,15 +2,31 @@
   "compilerOptions": {
     "outDir": "./lib",
     "target": "es5",
-    "module": "commonjs",
+    "module": "esnext",
     "strict": true,
     "jsx": "react",
     "rootDir": "./src",
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    "lib": ["dom", "es2015"],
+    "lib": [
+      "dom",
+      "es2015"
+    ],
     "resolveJsonModule": true,
-    "declaration": true
+    "declaration": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "noEmit": true
   },
-  "files": ["./src/index.tsx"]
+  "files": [
+    "./src/index.tsx"
+  ],
+  "include": [
+    "src"
+  ]
 }
