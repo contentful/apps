@@ -3,16 +3,11 @@
   "version": "1.1.1",
   "private": true,
   "devDependencies": {
-    "@babel/core": "^7.3.4",
-    "@babel/plugin-proposal-class-properties": "7.3.4",
-    "@babel/plugin-transform-runtime": "7.3.4",
-    "@babel/preset-env": "7.3.4",
-    "@babel/preset-react": "7.0.0",
-    "@contentful/contentful-extension-scripts": "^0.15.1",
     "@testing-library/react": "^8.0.4",
     "contentful-cli": "1.2.12",
     "cssnano": "4.1.10",
-    "identity-obj-proxy": "^3.0.0"
+    "identity-obj-proxy": "^3.0.0",
+    "cross-env": "^7.0.3"
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
@@ -27,18 +22,23 @@
     "pubnub": "^4.24.3",
     "react": "16.8.6",
     "react-dom": "16.8.6",
+    "react-scripts": "^4.0.3",
     "whatwg-fetch": "3.0.0"
   },
   "scripts": {
-    "start": "contentful-extension-scripts start --serve-only",
-    "build": "contentful-extension-scripts build --no-inline",
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/netlify --acl public-read",
-    "test": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
-    "test:ci": "TZ=UTC contentful-extension-scripts test --env=jsdom"
+    "test": "TZ=UTC react-scripts test",
+    "test:ci": "TZ=UTC react-scripts test"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
   },
   "browserslist": [
     "last 5 Chrome version",
     "> 1%",
     "not ie <= 11"
-  ]
+  ],
+  "homepage": "."
 }
