@@ -3,30 +3,21 @@
   "version": "1.2.1",
   "private": true,
   "devDependencies": {
-    "@babel/core": "^7.3.4",
-    "@babel/plugin-proposal-class-properties": "^7.3.4",
-    "@babel/plugin-transform-runtime": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
-    "@babel/preset-react": "7.0.0",
-    "@babel/preset-typescript": "^7.3.3",
-    "@contentful/contentful-extension-scripts": "0.16.0",
     "@types/enzyme": "^3.9.1",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/jest": "^24.0.15",
-    "@types/nock": "^10.0.3",
     "@types/react": "^16.8.22",
     "@types/react-dom": "^16.8.4",
     "@types/webpack-env": "1.13.9",
     "contentful-cli": "^1.3.30",
-    "cssnano": "4.1.10",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.3",
     "isomorphic-fetch": "^2.2.1",
     "jest-environment-enzyme": "^7.1.2",
     "jest-enzyme": "^7.1.2",
-    "nock": "^10.0.6",
     "prettier": "^2.0.5",
-    "typescript": "^3.5.2"
+    "typescript": "^3.5.2",
+    "cross-env": "^7.0.3"
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
@@ -44,18 +35,17 @@
     "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "react-scripts": "^4.0.3"
   },
   "scripts": {
-    "start": "contentful-extension-scripts start --serve-only",
-    "build": "contentful-extension-scripts build --no-inline",
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
     "tsc": "tsc -p ./ --noEmit",
-    "test": "contentful-extension-scripts test --env=jsdom --watch",
-    "test:ci": "contentful-extension-scripts test --env=jsdom",
-    "test:dev": "TZ=UTC contentful-extension-scripts test --env=jsdom --watch",
+    "test": "TZ=UTC react-scripts test",
+    "test:ci": "react-scripts test",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/mux --acl public-read",
-    "deploy:test": "npm run deploy",
-    "lint": "prettier --write src/**/*.tsx"
+    "deploy:test": "npm run deploy"
   },
   "prettier": {
     "trailingComma": "es5",
@@ -63,9 +53,13 @@
     "semi": true,
     "singleQuote": true
   },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
   "browserslist": [
     "last 5 Chrome version",
     "> 1%",
     "not ie <= 11"
-  ]
+  ],
+  "homepage": "."
 }
