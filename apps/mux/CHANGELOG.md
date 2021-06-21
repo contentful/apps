@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.2.1...mux-contentful-uploader@1.3.0) (2021-06-21)
+
+
+### Features
+
+* [] build mux with react-scripts ([#299](https://github.com/contentful/apps/issues/299)) ([c32c3e1](https://github.com/contentful/apps/commit/c32c3e12faea3eea6e88303811d9eac63f6c1361))
+
+
+
+
+
 ## [1.2.1](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.2.0...mux-contentful-uploader@1.2.1) (2021-05-10)
 
 
