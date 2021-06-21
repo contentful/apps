@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/jira-app@1.2.3...jira-app@1.3.0) (2021-06-21)
+
+
+### Features
+
+* [] Build jira app with react scripts ([#298](https://github.com/contentful/apps/issues/298)) ([7d15910](https://github.com/contentful/apps/commit/7d159106a169c31d808f1e6edea69e93f7fd9721))
+
+
+
+
+
 ## [1.2.3](https://github.com/contentful/apps/compare/jira-app@1.2.2...jira-app@1.2.3) (2021-06-15)
 
 **Note:** Version bump only for package jira-app
