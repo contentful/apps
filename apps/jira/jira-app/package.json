@@ -3,39 +3,19 @@
   "version": "1.2.3",
   "private": true,
   "devDependencies": {
-    "@babel/core": "7.8.4",
-    "@babel/plugin-proposal-class-properties": "7.8.3",
-    "@babel/plugin-transform-runtime": "7.8.3",
-    "@babel/preset-env": "^7.8.7",
-    "@babel/preset-react": "7.8.3",
-    "@contentful/contentful-extension-scripts": "^0.19.1",
-    "@contentful/eslint-config-extension": "0.2.0",
     "@testing-library/react": "8.0.4",
     "@types/jest": "24.0.15",
     "@types/lodash.get": "^4.4.6",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "@types/webpack-env": "1.13.9",
-    "@typescript-eslint/parser": "^4.14.2",
     "contentful-cli": "1.2.12",
-    "cssnano": "4.1.10",
-    "eslint": "^6.0.1",
     "fetch-mock": "^8.3.2",
     "node-fetch": "^2.6.1",
     "prettier": "1.19.1",
     "sass": "^1.23.7",
-    "typescript": "^4.1.5"
-  },
-  "scripts": {
-    "start": "contentful-extension-scripts start --serve-only",
-    "build": "contentful-extension-scripts build --no-inline",
-    "lint": "eslint ./ --ext .js,.jsx,.ts,.tsx && tsc -p ./ --noEmit",
-    "deploy": "aws s3 sync ./build ${STATIC_JIRA_S3_BASE} --acl public-read",
-    "deploy:test": "npm run deploy",
-    "test": "contentful-extension-scripts test --env=jsdom",
-    "test:ci": "contentful-extension-scripts test --env=jsdom",
-    "test:dev": "contentful-extension-scripts test --env=jsdom --watch",
-    "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'"
+    "typescript": "^4.1.5",
+    "cross-env": "^7.0.3"
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
@@ -46,11 +26,25 @@
     "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "react-scripts": "^4.0.3"
+  },
+  "scripts": {
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
+    "deploy": "aws s3 sync ./build ${STATIC_JIRA_S3_BASE} --acl public-read",
+    "deploy:test": "npm run deploy",
+    "test": "react-scripts test",
+    "test:ci": "react-scripts test",
+    "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
   },
   "browserslist": [
     "last 5 Chrome version",
     "> 1%",
     "not ie <= 11"
-  ]
+  ],
+  "homepage": "."
 }

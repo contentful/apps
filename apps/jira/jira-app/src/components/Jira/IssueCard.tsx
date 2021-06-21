@@ -1,5 +1,6 @@
 import React from 'react';
 import { TagType } from '@contentful/forma-36-react-components/dist/components/Tag/Tag';
+import { FormattedIssue } from '../../interfaces';
 
 import {
   Card,

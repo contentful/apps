@@ -8,6 +8,7 @@ import {
   TextInput,
   Card
 } from '@contentful/forma-36-react-components';
+import { JiraCloudResource, CloudProject } from '../../../interfaces';
 
 // using lodash.debouce basically breaks test with infinite timers
 const debounce = function(fn: Function, timeout: number): Function {

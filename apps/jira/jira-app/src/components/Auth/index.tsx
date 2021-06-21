@@ -3,6 +3,7 @@ import React from 'react';
 import OAuth from './OAuth';
 import JiraClient from '../../jiraClient';
 import { Typography, Heading, Paragraph } from '@contentful/forma-36-react-components';
+import { InstallationParameters } from '../../interfaces';
 
 /** Gets the expireTime from local storage to determine if the token is expired */
 function tokenIsExpired() {

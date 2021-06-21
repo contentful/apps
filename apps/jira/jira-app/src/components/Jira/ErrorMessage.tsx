@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Note, TextLink } from '@contentful/forma-36-react-components';
+import { IssuesResponse } from '../../interfaces';
 
 interface Props {
   errorType: IssuesResponse['error'];

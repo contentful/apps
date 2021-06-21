@@ -1,8 +1,22 @@
+import {
+  RequestOptions,
+  ContentfulEntry,
+  JiraIssue,
+  FormattedIssue,
+  IssuesResponse,
+  UrnRecordsResponse,
+  CloudAccountsResponse,
+  JiraCloudResource,
+  CloudProject,
+  CloudProjectResponse,
+  CloudProjectsResponse,
+  CloudProjectsResource,
+} from './interfaces';
 enum HTTPMethod {
   GET = 'GET',
   POST = 'POST',
   PUT = 'PUT',
-  DELETE = 'DELETE'
+  DELETE = 'DELETE',
 }
 export default class JiraClient {
   private readonly token: string;
@@ -35,10 +49,10 @@ export default class JiraClient {
       headers: {
         Authorization: `Bearer ${this.token}`,
         'Content-Type': 'application/json',
-        Accept: 'application/json'
+        Accept: 'application/json',
       },
       method: options ? options.method : HTTPMethod.GET,
-      body: options ? JSON.stringify(options.data) : undefined
+      body: options ? JSON.stringify(options.data) : undefined,
     });
 
     if (response.status === 401) {
@@ -66,7 +80,7 @@ export default class JiraClient {
       priority: jiraIssue.fields.priority,
       assignee: jiraIssue.fields.assignee,
       status: jiraIssue.fields.status,
-      issuetype: jiraIssue.fields.issuetype
+      issuetype: jiraIssue.fields.issuetype,
     };
   };
 
@@ -79,23 +93,23 @@ export default class JiraClient {
         const { issues }: { issues: JiraIssue[] } = await result.json();
         return {
           error: null,
-          issues: issues.map(this.formatIssue)
+          issues: issues.map(this.formatIssue),
         };
       } else if (result.status === 401 || result.status === 403) {
         return {
           error: 'unauthorized_error',
-          issues: []
+          issues: [],
         };
       }
 
       return {
         error: 'general_error',
-        issues: []
+        issues: [],
       };
     } catch (e) {
       return {
         error: 'general_error',
-        issues: []
+        issues: [],
       };
     }
   }
@@ -110,7 +124,7 @@ export default class JiraClient {
       if (!result.ok) {
         return {
           error: true,
-          records: []
+          records: [],
         };
       }
 
@@ -120,18 +134,18 @@ export default class JiraClient {
       if (!Array.isArray(linkData.records)) {
         return {
           error: false,
-          records: []
+          records: [],
         };
       }
 
       return {
         error: false,
-        records: linkData.records as string[]
+        records: linkData.records as string[],
       };
     } catch (e) {
       return {
         error: true,
-        records: []
+        records: [],
       };
     }
   }
@@ -167,7 +181,7 @@ export default class JiraClient {
     try {
       const result = await this.request(url, {
         method: HTTPMethod.PUT,
-        data: { records: updatedLinks }
+        data: { records: updatedLinks },
       });
 
       return result.ok;
@@ -213,12 +227,12 @@ export default class JiraClient {
 
     const [summaryData, issueData] = await Promise.all([
       this.makeJqlQuery(summaryJql),
-      this.makeJqlQuery(issueKeyJql)
+      this.makeJqlQuery(issueKeyJql),
     ]);
 
     return {
       issues: [...summaryData.issues, ...issueData.issues],
-      error: summaryData.error || issueData.error
+      error: summaryData.error || issueData.error,
     };
   }
 
@@ -233,25 +247,25 @@ export default class JiraClient {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         }
       );
 
       if (!result.ok) {
-        throw void null;
+        throw new Error();
       }
 
       const resources: JiraCloudResource[] = await result.json();
 
       return {
         error: false,
-        resources
+        resources,
       };
     } catch (e) {
       return {
         error: true,
-        resources: []
+        resources: [],
       };
     }
   }
@@ -259,32 +273,36 @@ export default class JiraClient {
    * @param projectId The id of the cloud instance to find projects in.
    * @param token oauth token.
    */
-  public static async getProjectById(cloudId: string, token: string, id: string = ''): Promise<CloudProjectResponse> {
+  public static async getProjectById(
+    cloudId: string,
+    token: string,
+    id: string = ''
+  ): Promise<CloudProjectResponse> {
     try {
       const result = await window.fetch(
         `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/2/project/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         }
       );
 
       if (!result.ok) {
-        throw void null;
+        throw new Error()
       }
 
       const res: CloudProject = await result.json();
 
       return {
         error: false,
-        project: res
+        project: res,
       };
     } catch (e) {
       return {
         error: true,
-        project: null
+        project: null,
       };
     }
   }
@@ -293,32 +311,36 @@ export default class JiraClient {
    * @param cloudId The id of the cloud instance to find projects in.
    * @param token oauth token.
    */
-  public static async getProjects(cloudId: string, token: string, query: string = ''): Promise<CloudProjectsResponse> {
+  public static async getProjects(
+    cloudId: string,
+    token: string,
+    query: string = ''
+  ): Promise<CloudProjectsResponse> {
     try {
       const result = await window.fetch(
         `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/2/project/search?query=${query}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         }
       );
 
       if (!result.ok) {
-        throw void null;
+        throw new Error();
       }
 
       const res: CloudProjectsResource = await result.json();
 
       return {
         error: false,
-        projects: res.values
+        projects: res.values,
       };
     } catch (e) {
       return {
         error: true,
-        projects: []
+        projects: [],
       };
     }
   }

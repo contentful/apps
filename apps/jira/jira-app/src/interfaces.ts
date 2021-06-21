@@ -1,10 +1,10 @@
-interface ContentfulEntry {
+export interface ContentfulEntry {
   space: string;
   environment: string;
   entry: string;
 }
 
-interface JiraCloudResource {
+export interface JiraCloudResource {
   avatarUrl: string;
   id: string;
   name: string;
@@ -12,12 +12,12 @@ interface JiraCloudResource {
   url: string;
 }
 
-interface CloudAccountsResponse {
+export interface CloudAccountsResponse {
   error: boolean;
   resources: JiraCloudResource[];
 }
 
-interface CloudProjectsResource {
+export interface CloudProjectsResource {
   isLast: boolean;
   maxResults: number;
   self: string;
@@ -26,17 +26,17 @@ interface CloudProjectsResource {
   values: CloudProject[];
 }
 
-interface CloudProjectResponse {
+export interface CloudProjectResponse {
   error: boolean;
   project: CloudProject | null;
 }
 
-interface CloudProjectsResponse {
+export interface CloudProjectsResponse {
   error: boolean;
   projects: CloudProject[];
 }
 
-interface CloudProject {
+export interface CloudProject {
   avatarUrls: {
     '48x48': string;
     '24x24': string;
@@ -55,7 +55,7 @@ interface CloudProject {
   style: string;
 }
 
-interface JiraIssueStatus {
+export interface JiraIssueStatus {
   description: string;
   iconUrl: string;
   id: string;
@@ -70,7 +70,7 @@ interface JiraIssueStatus {
   };
 }
 
-interface JiraIssue {
+export interface JiraIssue {
   key: string;
   fields: {
     summary: string;
@@ -81,7 +81,7 @@ interface JiraIssue {
   };
 }
 
-interface IssueAssignee {
+export interface IssueAssignee {
   accountId: string;
   accountType: string;
   active: boolean;
@@ -98,14 +98,14 @@ interface IssueAssignee {
   timeZone: string;
 }
 
-interface IssuePriority {
+export interface IssuePriority {
   iconUrl: string;
   id: string;
   name: string;
   self: string;
 }
 
-interface FormattedIssue {
+export interface FormattedIssue {
   link: string;
   key: string;
   summary: string;
@@ -122,22 +122,22 @@ declare enum HTTPMethod {
   DELETE = 'DELETE'
 }
 
-interface RequestOptions {
+export interface RequestOptions {
   method: HTTPMethod;
   data?: object;
 }
 
-interface IssuesResponse {
+export interface IssuesResponse {
   issues: FormattedIssue[];
   error: 'unauthorized_error' | 'general_error' | null;
 }
 
-interface SingleIssueResponse {
+export interface SingleIssueResponse {
   error: boolean;
   issue: FormattedIssue | null;
 }
 
-interface ProjectIssueType {
+export interface ProjectIssueType {
   avatarId: number;
   description: string;
   iconUrl: string;
@@ -147,7 +147,7 @@ interface ProjectIssueType {
   subtask: boolean;
 }
 
-interface UrnRecordsResponse {
+export interface UrnRecordsResponse {
   error: boolean;
   /**URN record
    * ex: `ctf:{spaceId}:{environmentId}:{entryId}`
@@ -155,12 +155,13 @@ interface UrnRecordsResponse {
   records: string[];
 }
 
-interface InstallationParameters {
+export interface InstallationParameters {
   projectId: string;
   resourceId: string;
   resourceUrl: string;
 }
 
-interface CurrentState {
+export interface CurrentState {
   [key: string]: object;
 }
+
