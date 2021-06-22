@@ -1,5 +1,4 @@
 import React from 'react';
-import identity from 'lodash/identity';
 import merge from 'lodash/merge';
 import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, SkuPicker } from './SkuPicker';
@@ -10,34 +9,6 @@ configure({
   testIdAttribute: 'data-test-id'
 });
 
-const defaultProps: Props = {
-  sdk: ({
-    parameters: {
-      installation: {},
-      invocation: {
-        fieldType: 'Symbol',
-        fieldValue: []
-      }
-    },
-    close: jest.fn(),
-    notifier: {
-      success: jest.fn(),
-      error: jest.fn()
-    }
-  } as unknown) as DialogExtensionSDK,
-  fetchProductPreviews: jest.fn(skus =>
-    productPreviews.filter(preview => skus.includes(preview.sku))
-  ) as any,
-  fetchProducts: jest.fn(() => ({
-    pagination: {
-      count: 3,
-      limit: 20,
-      offset: 0,
-      total: 3
-    },
-    products: productPreviews
-  })) as any
-};
 
 const renderComponent = async (props: Props) => {
   const component = render(<SkuPicker {...props} />);
@@ -48,12 +19,43 @@ const renderComponent = async (props: Props) => {
 };
 
 jest.mock('react-sortable-hoc', () => ({
-  SortableContainer: identity,
-  SortableElement: identity,
-  SortableHandle: identity
+  SortableContainer: (x: any) => x,
+  SortableElement: (x: any) => x,
+  SortableHandle: (x: any) => x
 }));
 
 describe('SkuPicker', () => {
+  let defaultProps: Props;
+  beforeEach(() => {
+    defaultProps = {
+      sdk: ({
+        parameters: {
+          installation: {},
+          invocation: {
+            fieldType: 'Symbol',
+            fieldValue: []
+          }
+        },
+        close: jest.fn(),
+        notifier: {
+          success: jest.fn(),
+          error: jest.fn()
+        }
+      } as unknown) as DialogExtensionSDK,
+      fetchProductPreviews: jest.fn(skus =>
+        productPreviews.filter(preview => skus.includes(preview.sku))
+      ) as any,
+      fetchProducts: jest.fn(() => ({
+        pagination: {
+          count: 3,
+          limit: 20,
+          offset: 0,
+          total: 3
+        },
+        products: productPreviews
+      })) as any
+    };
+  })
   afterEach(cleanup);
 
   it('should render successfully with no products selected', async () => {

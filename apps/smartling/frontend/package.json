@@ -22,7 +22,7 @@
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
-    "test": "TZ=UTC contentful-extension-scripts test --env=jsdom",
+    "test": "TZ=UTC react-scripts test",
     "test:ci": "react-scripts test",
     "test:dev": "TZ=UTC react-scripts test",
     "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'"
