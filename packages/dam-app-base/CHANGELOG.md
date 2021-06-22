@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.0.7...@contentful/dam-app-base@1.1.0) (2021-06-22)
+
+
+### Features
+
+* [] Clear up remaing create contentful extension usages ([#304](https://github.com/contentful/apps/issues/304)) ([02939bb](https://github.com/contentful/apps/commit/02939bbb9d4bd4d7161dddb9beace375e0027ab1))
+
+
+
+
+
 ## [1.0.7](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.0.6...@contentful/dam-app-base@1.0.7) (2021-03-17)
 
 **Note:** Version bump only for package @contentful/dam-app-base
