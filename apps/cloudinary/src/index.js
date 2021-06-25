@@ -72,17 +72,22 @@ function makeThumbnail(resource, config) {
 function renderDialog(sdk) {
   const { cloudinary } = window;
   const config = sdk.parameters.invocation;
-  let default_transformations = {};
+  let defaultTransformations = JSON.parse(config.defaultTransformations);
   
+  if (!defaultTransformations.length) {
+    const defaultTransformation = {};
 
-  // Handle format
-  if(config.format!=='none'){
-    default_transformations.fetch_format = config.format;
-  }
+    // Handle format
+    if (config.format !== 'none') {
+      defaultTransformation.fetch_format = config.format;
+    }
 
-  // Handle quality
-  if(config.quality!=='none'){
-    default_transformations.quality = config.quality;
+    // Handle quality
+    if (config.quality !== 'none') {
+      defaultTransformation.quality = config.quality;
+    }
+
+    defaultTransformations.push(defaultTransformation);
   }
 
   const options = {
@@ -92,7 +97,7 @@ function renderDialog(sdk) {
     multiple: config.maxFiles > 1,
     inline_container: '#root',
     remove_header: true,
-    default_transformations: [default_transformations]
+    default_transformations: defaultTransformations
   };
   
 
@@ -158,11 +163,21 @@ function validateParameters(parameters) {
     return 'Provide your Cloudinary API key.';
   }
 
-  const validFormat = /^[1-9][0-9]*$/.test(parameters.maxFiles);
-  const int = parseInt(parameters.maxFiles, 10);
-  const valid = validFormat && int > 0 && int <= MAX_FILES_UPPER_LIMIT;
-  if (!valid) {
+  const validMaxFilesFormat = /^[1-9][0-9]*$/.test(parameters.maxFiles);
+  const maxFiles = parseInt(parameters.maxFiles, 10);
+  const validMaxFiles = validMaxFilesFormat && maxFiles > 0 && maxFiles <= MAX_FILES_UPPER_LIMIT;
+  if (!validMaxFiles) {
     return `Max files should be a number between 1 and ${MAX_FILES_UPPER_LIMIT}.`;
+  }
+
+  let defaultTransformations = [];
+  try {
+    defaultTransformations = JSON.parse(parameters.defaultTransformations);
+  } catch(err) {
+    defaultTransformations = err;
+  }
+  if (!Array.isArray(defaultTransformations)) {
+    return 'Default transformations should be a valid JSON array.';
   }
 
   return null;
@@ -186,7 +201,7 @@ setup({
     {
       "id": "apiKey",
       "name": "API key",
-      "description": "The Cloduinary API Key that can be found in your Cloudinary console.",
+      "description": "The Cloudinary API Key that can be found in your Cloudinary console.",
       "type": "Symbol",
       "required": true
     },
@@ -223,6 +238,14 @@ setup({
       "value":"auto,none,gif,webp,bmp,flif,heif,heic,ico,jpg,jpe,jpeg,jp2,wdp,jxr,hdp,png,psd,arw,cr2,svg,tga,tif,tiff",
       "required": true,
       "default": "auto"
+    },
+    {
+      "id": "defaultTransformations",
+      "name": "Default Transformations",
+      "description": "Specific upload transformations. When this is specified, 'Media Quality' and 'Format' are ignored. See https://cloudinary.com/documentation/transformations_on_upload for available transformations. Needs to be a valid JSON array, e.g. '[{\"quality\": 15, \"width\": 100, \"height\": 100, \"crop\": \"crop\"}]'.",
+      "type": "Symbol",
+      "required": false,
+      "default": "[]"
     }
   ],
   makeThumbnail,
