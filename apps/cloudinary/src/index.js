@@ -72,17 +72,17 @@ function makeThumbnail(resource, config) {
 function renderDialog(sdk) {
   const { cloudinary } = window;
   const config = sdk.parameters.invocation;
-  let default_transformations = {};
-  
+
+  const transformations = []
 
   // Handle format
   if(config.format!=='none'){
-    default_transformations.fetch_format = config.format;
+    transformations.push({ fetch_format: config.format });
   }
 
   // Handle quality
   if(config.quality!=='none'){
-    default_transformations.quality = config.quality;
+    transformations.push({ quality: config.quality });
   }
 
   const options = {
@@ -92,7 +92,7 @@ function renderDialog(sdk) {
     multiple: config.maxFiles > 1,
     inline_container: '#root',
     remove_header: true,
-    default_transformations: [default_transformations]
+    default_transformations: [transformations]
   };
   
 
