@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.3](https://github.com/contentful/apps/compare/cloudinary-assets@1.3.2...cloudinary-assets@1.3.3) (2021-07-05)
+
+
+### Bug Fixes
+
+* adjust shape of transformation option ([#312](https://github.com/contentful/apps/issues/312)) ([ea8fa82](https://github.com/contentful/apps/commit/ea8fa822742521a1c62a571b201e8ae938c4485a))
+
+
+
+
+
 ## [1.3.2](https://github.com/contentful/apps/compare/cloudinary-assets@1.3.1...cloudinary-assets@1.3.2) (2021-06-22)
 
 **Note:** Version bump only for package cloudinary-assets
