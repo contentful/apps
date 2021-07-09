@@ -51,6 +51,7 @@ function makeThumbnail(resource, config) {
   });
 
   let url;
+  resource.raw_transformation = resource.raw_transformation || "";
   const alt = [resource.public_id, ...(resource.tags || [])].join(', ');
   let transformations = `${resource.raw_transformation}/c_fill,h_100,w_150`;
 
