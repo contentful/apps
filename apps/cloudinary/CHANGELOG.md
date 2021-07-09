@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.4](https://github.com/contentful/apps/compare/cloudinary-assets@1.3.3...cloudinary-assets@1.3.4) (2021-07-09)
+
+
+### Bug Fixes
+
+* render thumbnail correctly when quality/format transformation is disabled ([#313](https://github.com/contentful/apps/issues/313)) ([248c235](https://github.com/contentful/apps/commit/248c23528b395adbc5c57b66ea8e76cd541df647))
+
+
+
+
+
 ## [1.3.3](https://github.com/contentful/apps/compare/cloudinary-assets@1.3.2...cloudinary-assets@1.3.3) (2021-07-05)
 
 
