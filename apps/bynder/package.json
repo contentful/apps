@@ -1,10 +1,10 @@
 {
   "name": "bynder-assets",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "private": true,
   "devDependencies": {
-    "contentful-cli": "1.2.12",
     "@contentful/app-scripts": "^0.8.11",
+    "contentful-cli": "1.2.12",
     "cross-env": "^7.0.3"
   },
   "dependencies": {
@@ -22,6 +22,10 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "browserslist": ["last 5 Chrome version", "> 1%", "not ie <= 11"],
+  "browserslist": [
+    "last 5 Chrome version",
+    "> 1%",
+    "not ie <= 11"
+  ],
   "homepage": "."
 }

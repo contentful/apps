@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/contentful/apps/compare/bynder-assets@1.5.2...bynder-assets@1.6.0) (2021-07-22)
+
+
+### Features
+
+* [EXT-2717] deploy bynder app with ctf app hosting ([#315](https://github.com/contentful/apps/issues/315)) ([38a5454](https://github.com/contentful/apps/commit/38a5454b8a4a98fc14624db99d01cbd6c2f6e5a3))
+
+
+
+
+
 ## [1.5.2](https://github.com/contentful/apps/compare/bynder-assets@1.5.1...bynder-assets@1.5.2) (2021-06-22)
 
 **Note:** Version bump only for package bynder-assets
