@@ -5,6 +5,7 @@
   "devDependencies": {
     "contentful-cli": "1.2.12",
     "cross-env": "^7.0.3",
+    "@contentful/app-scripts": "^0.8.11",
     "react-scripts": "4.0.3"
   },
   "dependencies": {
@@ -17,8 +18,8 @@
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/commercelayer --acl public-read",
-    "deploy:test": "npm run deploy"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1ENTlXR17q1veUn74QF9ns --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
   },
   "eslintConfig": {
     "extends": "react-app"
