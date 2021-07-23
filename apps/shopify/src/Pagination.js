@@ -1,5 +1,4 @@
 import last from 'lodash/last';
-import get from 'lodash/get';
 import uniqBy from 'lodash/uniqBy';
 import sortBy from 'lodash/sortBy';
 import { dataTransformer, productsToVariantsTransformer } from './dataTransformer';
@@ -10,6 +9,7 @@ const PER_PAGE = 20;
 class Pagination {
   freshSearch = true;
 
+  hasNextProductPage = false;
   products = [];
 
   variants = [];
@@ -24,8 +24,13 @@ class Pagination {
     this.shopifyClient = await makeShopifyClient(this.sdk);
   }
 
-  async fetchNext(search) {
+  async fetchNext(search, recursing = false) {
     const searchHasChanged = search !== this.prevSearch;
+    const shouldStop = searchHasChanged && recursing;
+    if (shouldStop) {
+      return;
+    }
+
     if (searchHasChanged) {
       this.prevSearch = search;
       this._resetPagination();
@@ -40,13 +45,12 @@ class Pagination {
     const hasEnoughVariantsToConsume = this.variants.length >= PER_PAGE || nothingLeftToFetch;
     if (hasEnoughVariantsToConsume) {
       const variants = this.variants.splice(0, PER_PAGE);
-      const lastProduct = this.products.find(product => product.id === last(variants).productId);
       return {
         pagination: {
           // There is going to be a next page in the following two complimentary cases:
-          // A). The product corresponding to the last variant belongs is tagged as having a next page
+          // A). There are more products to fetch via the Shopify API
           // B). There are variants left to consume in the in-memory variants list
-          hasNextPage: get(lastProduct, ['hasNextPage'], false) || this.variants.length > 0
+          hasNextPage: this.hasNextProductPage || this.variants.length > 0
         },
         products: variants.map(dataTransformer)
       };
@@ -55,7 +59,7 @@ class Pagination {
     // When there are not enough variants to fill the page, we need to fetch more products,
     // extract their variants and then call this method recursively to render the next page.
     await this._fetchMoreProducts(search);
-    return this.fetchNext(search);
+    return this.fetchNext(search, true);
   }
 
   /**
@@ -68,6 +72,9 @@ class Pagination {
     const nextProducts = noProductsFetchedYet
       ? await this._fetchProducts(search)
       : await this._fetchNextPage(this.products);
+    this.hasNextProductPage =
+      nextProducts.length > 0 && nextProducts.every(product => product.hasNextPage);
+
     const nextVariants = productsToVariantsTransformer(nextProducts);
     this.products = uniqBy([...this.products, ...nextProducts], 'id');
     this.variants = sortBy(uniqBy([...this.variants, ...nextVariants], 'id'), ['title', 'sku']);

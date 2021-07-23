@@ -19,7 +19,11 @@ const styles = {
   })
 };
 
-export const ProductList = ({ selectProduct, selectedSKUs, products }: Props) => (
+export const ProductList = ({
+  selectProduct,
+  selectedSKUs,
+  products,
+}: Props) => (
   <div className={styles.productList}>
     {products.map(product => (
       <ProductListItem

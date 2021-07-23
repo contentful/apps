@@ -3,6 +3,120 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.4](https://github.com/contentful/apps/compare/cloudinary-assets@1.3.3...cloudinary-assets@1.3.4) (2021-07-09)
+
+
+### Bug Fixes
+
+* render thumbnail correctly when quality/format transformation is disabled ([#313](https://github.com/contentful/apps/issues/313)) ([248c235](https://github.com/contentful/apps/commit/248c23528b395adbc5c57b66ea8e76cd541df647))
+
+
+
+
+
+## [1.3.3](https://github.com/contentful/apps/compare/cloudinary-assets@1.3.2...cloudinary-assets@1.3.3) (2021-07-05)
+
+
+### Bug Fixes
+
+* adjust shape of transformation option ([#312](https://github.com/contentful/apps/issues/312)) ([ea8fa82](https://github.com/contentful/apps/commit/ea8fa822742521a1c62a571b201e8ae938c4485a))
+
+
+
+
+
+## [1.3.2](https://github.com/contentful/apps/compare/cloudinary-assets@1.3.1...cloudinary-assets@1.3.2) (2021-06-22)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.3.1](https://github.com/contentful/apps/compare/cloudinary-assets@1.3.0...cloudinary-assets@1.3.1) (2021-06-22)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+# [1.3.0](https://github.com/contentful/apps/compare/cloudinary-assets@1.2.4...cloudinary-assets@1.3.0) (2021-06-16)
+
+
+### Features
+
+* [] build cloudianry with react scripts ([#289](https://github.com/contentful/apps/issues/289)) ([59e4979](https://github.com/contentful/apps/commit/59e4979b10cff838fda00295ec2ba6e484ea412b))
+
+
+
+
+
+## [1.2.4](https://github.com/contentful/apps/compare/cloudinary-assets@1.2.3...cloudinary-assets@1.2.4) (2021-06-15)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.2.3](https://github.com/contentful/apps/compare/cloudinary-assets@1.2.2...cloudinary-assets@1.2.3) (2021-06-01)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.2.2](https://github.com/contentful/apps/compare/cloudinary-assets@1.2.1...cloudinary-assets@1.2.2) (2021-05-31)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.2.1](https://github.com/contentful/apps/compare/cloudinary-assets@1.2.0...cloudinary-assets@1.2.1) (2021-05-10)
+
+
+### Reverts
+
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+
+
+# [1.2.0](https://github.com/contentful/apps/compare/cloudinary-assets@1.1.0...cloudinary-assets@1.2.0) (2021-05-10)
+
+
+### Features
+
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+
+
+
+
+
+# [1.1.0](https://github.com/contentful/apps/compare/cloudinary-assets@1.0.7...cloudinary-assets@1.1.0) (2021-05-05)
+
+
+### Features
+
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+
+
+
+
+
+## [1.0.7](https://github.com/contentful/apps/compare/cloudinary-assets@1.0.6...cloudinary-assets@1.0.7) (2021-04-27)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
 ## [1.0.6](https://github.com/contentful/apps/compare/cloudinary-assets@1.0.5...cloudinary-assets@1.0.6) (2021-03-17)
 
 **Note:** Version bump only for package cloudinary-assets

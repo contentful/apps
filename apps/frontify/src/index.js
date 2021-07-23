@@ -61,6 +61,10 @@ function renderDialog(sdk) {
 
   // cross document messaging
   window.addEventListener('message', e => {
+    if (e.source !== chooser) {
+      return;
+    }
+
     if (!e.data) return;
 
     if (e.data.error) {

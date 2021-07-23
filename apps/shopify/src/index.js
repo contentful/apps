@@ -31,7 +31,8 @@ async function renderDialog(sdk) {
   renderSkuPicker(DIALOG_ID, {
     sdk,
     fetchProductPreviews,
-    fetchProducts: await makeProductSearchResolver(sdk)
+    fetchProducts: await makeProductSearchResolver(sdk),
+    searchDelay: 750
   });
 
   sdk.window.startAutoResizer();

@@ -39,7 +39,7 @@ export async function fetchCategoryPreviews(
     const missingCategories = [
       ...difference(
         validIds,
-        foundCategories.map(category => category.id)
+        foundCategories.map((category: Category) => category.id)
       ),
       ...invalidIds
     ].map(id => ({ id, name: '', slug: '', isMissing: true }));

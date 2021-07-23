@@ -1,7 +1,7 @@
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
 
-export default {
+const styles = {
   body: css({
     height: 'auto',
     minHeight: '65vh',
@@ -94,3 +94,4 @@ export default {
     margin: `${tokens.spacing2Xl} 0 ${tokens.spacing4Xl}`
   })
 };
+export default styles

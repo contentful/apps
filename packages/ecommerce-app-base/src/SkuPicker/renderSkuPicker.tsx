@@ -8,11 +8,12 @@ interface Props {
   sdk: DialogExtensionSDK;
   fetchProductPreviews: ProductPreviewsFn;
   fetchProducts: ProductsFn;
+  searchDelay?: number;
 }
 
 export function renderSkuPicker(
   elementId: string,
-  { sdk, fetchProductPreviews, fetchProducts }: Props
+  { sdk, fetchProductPreviews, fetchProducts, searchDelay }: Props
 ): void {
   const root = document.getElementById(elementId);
   render(
@@ -20,6 +21,7 @@ export function renderSkuPicker(
       sdk={sdk}
       fetchProductPreviews={fetchProductPreviews}
       fetchProducts={fetchProducts}
+      searchDelay={searchDelay}
     />,
     root
   );

@@ -1,6 +1,6 @@
 {
   "name": "functions",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
     "test": "ts-mocha '**/*.spec.ts'",
     "test:ci": "npm run test",
     "deploy": "sls deploy --stage $STAGE",
+    "deploy:test": "npm run deploy",
     "start": "npm run build && serverless offline --httpPort 3000"
   },
   "dependencies": {

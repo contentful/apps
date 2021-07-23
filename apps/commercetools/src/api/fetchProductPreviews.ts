@@ -26,7 +26,7 @@ export async function fetchProductPreviews(
   const response = await client.execute({ uri, method: 'GET' });
   if (response.statusCode === 200) {
     const products = response.body.results.map(productTransformer(config));
-    const foundSKUs = products.map(product => product.sku);
+    const foundSKUs = products.map((product: Product) => product.sku);
     const missingProducts = difference(skus, foundSKUs).map(sku => ({
       sku,
       image: '',

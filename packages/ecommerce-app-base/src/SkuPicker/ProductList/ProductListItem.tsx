@@ -19,11 +19,11 @@ const styles = {
     padding: tokens.spacingS,
     position: 'relative',
     '@media screen and (min-width: 767px)': {
-      flex: `0 0 calc(33.3% - ${parseFloat(tokens.spacingS) * 2}rem)`
+      flex: `0 0 calc(33.3% - ${parseFloat(tokens.spacingS) * 2}rem)`,
     },
     '@media screen and (min-width: 992px)': {
-      flex: `0 0 calc(25% - ${parseFloat(tokens.spacingS) * 2}rem)`
-    }
+      flex: `0 0 calc(25% - ${parseFloat(tokens.spacingS) * 2}rem)`,
+    },
   }),
   product: css({
     border: '1px solid',
@@ -37,27 +37,27 @@ const styles = {
     transition: `all ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
     '&:hover': {
       borderColor: tokens.colorElementDark,
-      cursor: 'pointer'
+      cursor: 'pointer',
     },
     width: '100%',
     // Force hardware acceleration for non-accelerated
     // animated props box-shadow and border-color
     transform: 'translateZ(0)',
-    willChange: 'box-shadow, border-color'
+    willChange: 'box-shadow, border-color',
   }),
   selectedProduct: css({
     borderColor: 'rgba(48, 114, 190, 1)',
     boxShadow: '0px 0px 0px 1px inset rgba(48, 114, 190, 1), 0 1px 3px rgba(0, 0, 0, 0.08)',
     '&:hover': {
       borderColor: 'rgba(48, 114, 190, 1)',
-      cursor: 'pointer'
-    }
+      cursor: 'pointer',
+    },
   }),
   imgWrapper: (imageHasLoaded: boolean) =>
     css({
       height: `${imageHasLoaded ? 290 : 0}px`,
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
     }),
   previewImg: css({
     height: '290px',
@@ -65,12 +65,12 @@ const styles = {
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: 'translate(-50%, -50%)'
+    transform: 'translate(-50%, -50%)',
   }),
   name: css({
     flex: '1 0 auto',
     fontWeight: 'bold',
-    textTransform: 'capitalize'
+    textTransform: 'capitalize',
   }),
   sku: css({
     flex: '0 1 auto',
@@ -81,11 +81,11 @@ const styles = {
     maxWidth: '289px',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
   }),
   skeletonImage: css({
     width: '100%',
-    height: '290px'
+    height: '290px',
   }),
   errorImage: css({
     backgroundColor: tokens.colorElementLightest,
@@ -99,8 +99,8 @@ const styles = {
       position: 'absolute',
       top: '50%',
       left: '50%',
-      transform: 'translate(-50%, -50%)'
-    })
+      transform: 'translate(-50%, -50%)',
+    }),
   }),
   check: (isSelected: boolean) =>
     css({
@@ -108,8 +108,8 @@ const styles = {
       position: 'absolute',
       top: tokens.spacingL,
       right: tokens.spacingL,
-      transition: `opacity ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`
-    })
+      transition: `opacity ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
+    }),
 };
 
 export const ProductListItem = (props: Props) => {
@@ -152,7 +152,7 @@ export const ProductListItem = (props: Props) => {
           </div>
         )}
         <p className={styles.name}>{product.name}</p>
-        <p className={styles.sku}>{product.sku}</p>
+        <p className={styles.sku}>{product.displaySKU ?? product.sku}</p>
       </div>
     </div>
   );

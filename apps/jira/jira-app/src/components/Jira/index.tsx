@@ -5,6 +5,7 @@ import IssueList from './IssueList';
 import Search from './Search';
 import JiraClient from '../../jiraClient';
 import ErrorMessage from './ErrorMessage';
+import { FormattedIssue, IssuesResponse } from '../../interfaces';
 
 interface Props {
   sdk: SidebarExtensionSDK;

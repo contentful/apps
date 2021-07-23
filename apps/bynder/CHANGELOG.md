@@ -3,6 +3,139 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/contentful/apps/compare/bynder-assets@1.5.2...bynder-assets@1.6.0) (2021-07-22)
+
+
+### Features
+
+* [EXT-2717] deploy bynder app with ctf app hosting ([#315](https://github.com/contentful/apps/issues/315)) ([38a5454](https://github.com/contentful/apps/commit/38a5454b8a4a98fc14624db99d01cbd6c2f6e5a3))
+
+
+
+
+
+## [1.5.2](https://github.com/contentful/apps/compare/bynder-assets@1.5.1...bynder-assets@1.5.2) (2021-06-22)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.5.1](https://github.com/contentful/apps/compare/bynder-assets@1.5.0...bynder-assets@1.5.1) (2021-06-22)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+# [1.5.0](https://github.com/contentful/apps/compare/bynder-assets@1.4.3...bynder-assets@1.5.0) (2021-06-16)
+
+
+### Features
+
+* [] build bynder with react-scripts ([#288](https://github.com/contentful/apps/issues/288)) ([f9abdd3](https://github.com/contentful/apps/commit/f9abdd31a356ae2f443208fdd951422e5e589ba6))
+
+
+
+
+
+## [1.4.3](https://github.com/contentful/apps/compare/bynder-assets@1.4.2...bynder-assets@1.4.3) (2021-06-15)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.4.2](https://github.com/contentful/apps/compare/bynder-assets@1.4.1...bynder-assets@1.4.2) (2021-06-01)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.4.1](https://github.com/contentful/apps/compare/bynder-assets@1.4.0...bynder-assets@1.4.1) (2021-05-31)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+# [1.4.0](https://github.com/contentful/apps/compare/bynder-assets@1.3.3...bynder-assets@1.4.0) (2021-05-26)
+
+
+### Features
+
+* use cca in shopify app ([#267](https://github.com/contentful/apps/issues/267)) ([217ec31](https://github.com/contentful/apps/commit/217ec31928e684c13f49fc57237327d0b8d2c725))
+
+
+
+
+
+## [1.3.3](https://github.com/contentful/apps/compare/bynder-assets@1.3.2...bynder-assets@1.3.3) (2021-05-11)
+
+
+### Reverts
+
+* Revert "Reinstate bynder update (#205)" (#257) ([3d05911](https://github.com/contentful/apps/commit/3d05911e6595d73683d49f005aeb6ca4799bf80c)), closes [#205](https://github.com/contentful/apps/issues/205) [#257](https://github.com/contentful/apps/issues/257)
+
+
+
+
+
+## [1.3.2](https://github.com/contentful/apps/compare/bynder-assets@1.3.1...bynder-assets@1.3.2) (2021-05-11)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.3.1](https://github.com/contentful/apps/compare/bynder-assets@1.3.0...bynder-assets@1.3.1) (2021-05-10)
+
+
+### Reverts
+
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+
+
+# [1.3.0](https://github.com/contentful/apps/compare/bynder-assets@1.2.0...bynder-assets@1.3.0) (2021-05-10)
+
+
+### Features
+
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+
+
+
+
+
+# [1.2.0](https://github.com/contentful/apps/compare/bynder-assets@1.1.6...bynder-assets@1.2.0) (2021-05-05)
+
+
+### Features
+
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+
+
+
+
+
+## [1.1.6](https://github.com/contentful/apps/compare/bynder-assets@1.1.5...bynder-assets@1.1.6) (2021-04-27)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
 ## [1.1.5](https://github.com/contentful/apps/compare/bynder-assets@1.1.4...bynder-assets@1.1.5) (2021-03-18)
 
 **Note:** Version bump only for package bynder-assets

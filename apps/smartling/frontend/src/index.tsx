@@ -7,7 +7,11 @@ import App from './App';
 
 import standalone from './standalone';
 
-if (window.location.search) {
+/*
+  If we are running this code in standalone mode, it just means we have been redirected
+  with an access or refresh_token
+*/
+if (window.location.search.includes('access_token') || window.location.search.includes('refresh_token')) {
   standalone(window);
 } else {
   init(sdk => {

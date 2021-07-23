@@ -1,6 +1,7 @@
 import React from 'react';
 import { TextInput, Card, Tooltip } from '@contentful/forma-36-react-components';
 import JiraClient from '../../jiraClient';
+import { ContentfulEntry, FormattedIssue } from '../../interfaces';
 
 interface Props {
   client: JiraClient;

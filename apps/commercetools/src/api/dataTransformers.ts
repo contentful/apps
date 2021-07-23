@@ -1,4 +1,4 @@
-import get from "lodash/get";
+import { PropertyName, get } from 'lodash'
 import {
   Product,
   Category,
@@ -19,7 +19,7 @@ export const productTransformer = ({
   return {
     id,
     image: get(item, ["masterVariant", "images", 0, "url"], ""),
-    name: get(item, ["name", locale || "en"], ""),
+    name: get(item, ["name", locale as PropertyName || "en"], ""),
     sku: get(item, ["masterVariant", "sku"], ""),
     externalLink
   };
@@ -37,8 +37,8 @@ export const categoryTransformer = ({
     "";
   return {
     id,
-    name: get(item, ["name", locale], ""),
-    slug: get(item, ["slug", locale], ""),
+    name: get(item, ["name", locale as PropertyName], ""),
+    slug: get(item, ["slug", locale as PropertyName], ""),
     isMissing: false,
     externalLink,
   };

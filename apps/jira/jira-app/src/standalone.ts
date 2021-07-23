@@ -1,4 +1,4 @@
-export default (window: Window) => {
+const standalone = (window: Window) => {
   const { searchParams, search } = new URL(window.location.href);
 
   if (search.length) {
@@ -23,3 +23,4 @@ export default (window: Window) => {
     window.opener.postMessage({ error: 'No query string provided!' }, '*');
   }
 };
+export default standalone

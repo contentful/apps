@@ -134,7 +134,7 @@ export class App extends React.Component<AppProps, AppState> {
       }
 
       if (this.state.value.ready) {
-        const isValid = await this.checkForValidAsset();
+        await this.checkForValidAsset();
         if (this.state.value.playbackId) {
           this.setPublicPlayback(this.state.value.playbackId);
         }

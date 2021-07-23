@@ -1,4 +1,4 @@
-export default (window: Window) => {
+const standalone = (window: Window) => {
   const { searchParams, search } = new URL(window.location.href);
   window.history.replaceState({}, 'smartling', '/');
 
@@ -11,3 +11,4 @@ export default (window: Window) => {
     window.opener.postMessage({ token, refreshToken }, '*');
   }
 };
+export default standalone

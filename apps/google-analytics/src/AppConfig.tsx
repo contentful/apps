@@ -19,6 +19,7 @@ import {
   EditorInterface,
   CollectionResponse
 } from '@contentful/app-sdk';
+import { ReactComponent as GoogleLogo } from './ga-logo.svg';
 
 export default class AppConfig extends React.Component<AppConfigParams, AppConfigState> {
   state: AppConfigState = {
@@ -368,7 +369,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         </div>
 
         <div className={styles.logo}>
-          <img src={require('./ga-logo.svg')} alt="Google Analytics Logo" />
+          <GoogleLogo title="Google Analytics Logo" />
         </div>
       </>
     );

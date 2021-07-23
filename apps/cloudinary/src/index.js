@@ -51,6 +51,7 @@ function makeThumbnail(resource, config) {
   });
 
   let url;
+  resource.raw_transformation = resource.raw_transformation || "";
   const alt = [resource.public_id, ...(resource.tags || [])].join(', ');
   let transformations = `${resource.raw_transformation}/c_fill,h_100,w_150`;
 
@@ -72,17 +73,17 @@ function makeThumbnail(resource, config) {
 function renderDialog(sdk) {
   const { cloudinary } = window;
   const config = sdk.parameters.invocation;
-  let default_transformations = {};
-  
+
+  const transformations = []
 
   // Handle format
   if(config.format!=='none'){
-    default_transformations.fetch_format = config.format;
+    transformations.push({ fetch_format: config.format });
   }
 
   // Handle quality
   if(config.quality!=='none'){
-    default_transformations.quality = config.quality;
+    transformations.push({ quality: config.quality });
   }
 
   const options = {
@@ -92,7 +93,7 @@ function renderDialog(sdk) {
     multiple: config.maxFiles > 1,
     inline_container: '#root',
     remove_header: true,
-    default_transformations: [default_transformations]
+    default_transformations: [transformations]
   };
   
 

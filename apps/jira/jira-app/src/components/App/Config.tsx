@@ -6,6 +6,7 @@ import InstanceStep from './Steps/InstanceStep';
 import ContentTypeStep from './Steps/ContentTypeStep';
 import JiraStep from './Steps/JiraStep';
 import { AppExtensionSDK, CollectionResponse, EditorInterface } from '@contentful/app-sdk';
+import { JiraCloudResource, CloudProject, InstallationParameters } from '../../interfaces';
 
 interface Props {
   token: string;

@@ -11,7 +11,7 @@ import {
   SkeletonImage,
   Subheading,
   Tag,
-  Typography
+  Typography,
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { Product } from '../interfaces';
@@ -31,8 +31,8 @@ const styles = {
     padding: 0,
     position: 'relative',
     ':not(:first-of-type)': css({
-      marginTop: tokens.spacingXs
-    })
+      marginTop: tokens.spacingXs,
+    }),
   }),
   imageWrapper: (imageHasLoaded: boolean) =>
     css({
@@ -49,11 +49,11 @@ const styles = {
         position: 'absolute',
         left: '50%',
         top: '50%',
-        transform: 'translate(-50%, -50%)'
-      })
+        transform: 'translate(-50%, -50%)',
+      }),
     }),
   dragHandle: css({
-    height: 'auto'
+    height: 'auto',
   }),
   actions: css({
     position: 'absolute',
@@ -63,36 +63,36 @@ const styles = {
       display: 'inline-block',
       marginRight: tokens.spacingXs,
       svg: css({
-        transition: `fill ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`
+        transition: `fill ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
       }),
       '&:hover': {
         svg: css({
-          fill: tokens.colorContrastDark
-        })
-      }
-    })
+          fill: tokens.colorContrastDark,
+        }),
+      },
+    }),
   }),
   description: css({
     flex: '1 0 auto',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center'
+    justifyContent: 'center',
   }),
   name: (name?: string) =>
     css({
       fontSize: tokens.fontSizeL,
       marginBottom: tokens.spacing2Xs,
-      ...(name && { textTransform: 'capitalize' })
+      ...(name && { textTransform: 'capitalize' }),
     }),
   sku: css({
     color: tokens.colorElementDarkest,
     fontSize: tokens.fontSizeS,
-    marginBottom: 0
+    marginBottom: 0,
   }),
   skeletonImage: css({
     width: `${IMAGE_SIZE}px`,
     height: `${IMAGE_SIZE}px`,
-    padding: tokens.spacingM
+    padding: tokens.spacingM,
   }),
   errorImage: css({
     backgroundColor: tokens.colorElementLightest,
@@ -108,9 +108,9 @@ const styles = {
       position: 'absolute',
       top: '50%',
       left: '50%',
-      transform: 'translate(-50%, -50%)'
-    })
-  })
+      transform: 'translate(-50%, -50%)',
+    }),
+  }),
 };
 
 const CardDragHandle = SortableHandle(() => (
@@ -157,7 +157,7 @@ export const SortableListItem = SortableElement<Props>(
               {productIsMissing ? (
                 <Tag tagType="negative">Product missing</Tag>
               ) : (
-                <Subheading className={styles.sku}>{product.sku}</Subheading>
+                <Subheading className={styles.sku}>{product.displaySKU ?? product.sku}</Subheading>
               )}
             </Typography>
           </section>
@@ -174,7 +174,7 @@ export const SortableListItem = SortableElement<Props>(
               iconProps={{ icon: 'Close' }}
               {...{
                 buttonType: 'muted',
-                onClick: onDelete
+                onClick: onDelete,
               }}
             />
           </div>
