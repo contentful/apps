@@ -150,7 +150,7 @@ function renderDialog(sdk) {
   }
 
   script.addEventListener("load", () => {
-    BynderCompactView.open({
+    window.BynderCompactView.open({
       language: "en_US",
       mode: "MultiSelect",
       assetTypes: types,
