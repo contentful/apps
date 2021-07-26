@@ -43,7 +43,7 @@ export const styles = {
       },
       '&:hover': {
         svg: {
-          fill: disabled ? tokens.colorPrimary : tokens.colorTextDark
+          fill: disabled ? tokens.colorPrimary : tokens.gray900
         }
       }
     })

@@ -24,7 +24,7 @@ const styles = {
   }),
   product: css({
     border: '1px solid',
-    borderColor: tokens.colorElementLight,
+    borderColor: tokens.gray200,
     borderRadius: '3px',
     display: 'flex',
     flexDirection: 'column',
@@ -38,7 +38,7 @@ const styles = {
     transform: 'translateZ(0)', // Force hardware acceleration for transitions
     willChange: 'box-shadow, border-color',
     '&:hover': {
-      borderColor: tokens.colorElementDarkest,
+      borderColor: tokens.gray500,
       cursor: 'pointer',
       '> span > div': {
         opacity: 1
@@ -73,13 +73,13 @@ const styles = {
     })
   }),
   errorImage: css({
-    backgroundColor: tokens.colorElementLightest,
+    backgroundColor: tokens.gray100,
     width: '100%',
     height: '40px',
     position: 'relative',
     zIndex: -1,
     svg: css({
-      fill: tokens.colorTextLight,
+      fill: tokens.gray600,
       width: '100%',
       height: '50%',
       position: 'absolute',

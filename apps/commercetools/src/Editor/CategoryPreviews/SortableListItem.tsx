@@ -45,7 +45,7 @@ const styles = {
       }),
       '&:hover': {
         svg: css({
-          fill: tokens.colorContrastDark
+          fill: tokens.colorBlack
         })
       }
     })
@@ -64,12 +64,12 @@ const styles = {
       ...(category.name && { textTransform: 'capitalize' })
     }),
   subheading: css({
-    color: tokens.colorElementDarkest,
+    color: tokens.gray500,
     fontSize: tokens.fontSizeS,
     marginBottom: 0
   }),
   slug: css({
-    color: tokens.colorElementDarkest,
+    color: tokens.gray500,
     fontSize: tokens.fontSizeS,
     marginBottom: 0
   })

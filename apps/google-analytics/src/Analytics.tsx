@@ -76,41 +76,39 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
     const dimensions = getDateRangeInterval(start, end);
     const formattedPageViews = formatLargeNumbers(totalPageViews);
 
-    return (
-      <>
-        <div className={styles.header}>
-          <div className={loading ? styles.pageViewsLoading : styles.pageViews}>
-            <DisplayText size="large">{formattedPageViews}</DisplayText>
-            <Paragraph>pageviews</Paragraph>
-          </div>
-          <Select
-            name="range"
-            value={`${rangeOptionIndex}`}
-            onChange={event => this.handleRangeChange((event.target as HTMLSelectElement).value)}>
-            {RANGE_OPTIONS.map((r, index) => (
-              <option key={index} value={`${index}`}>
-                {r.label}
-              </option>
-            ))}
-          </Select>
+    return <>
+      <div className={styles.header}>
+        <div className={loading ? styles.pageViewsLoading : styles.pageViews}>
+          <DisplayText size="large">{formattedPageViews}</DisplayText>
+          <Paragraph>pageviews</Paragraph>
         </div>
-        <Timeline
-          onData={(d: ChartData) => {
-            this.updateTotalPageViews(d);
-            this.setState({ loading: false });
-          }}
-          onQuery={() => this.setState({ loading: true })}
-          onError={error => this.handleError(error)}
-          pagePath={pagePath}
-          start={start}
-          end={end}
-          dimensions={dimensions}
-          sdk={sdk}
-          gapi={gapi}
-          // remove 'ga:' prefix from view id
-          viewId={viewId.replace(/^ga:/, '')}
-        />
-      </>
-    );
+        <Select
+          name="range"
+          value={`${rangeOptionIndex}`}
+          onChange={event => this.handleRangeChange((event.target as HTMLSelectElement).value)}>
+          {RANGE_OPTIONS.map((r, index) => (
+            <option key={index} value={`${index}`}>
+              {r.label}
+            </option>
+          ))}
+        </Select>
+      </div>
+      <Timeline
+        onData={(d: ChartData) => {
+          this.updateTotalPageViews(d);
+          this.setState({ loading: false });
+        }}
+        onQuery={() => this.setState({ loading: true })}
+        onError={error => this.handleError(error)}
+        pagePath={pagePath}
+        start={start}
+        end={end}
+        dimensions={dimensions}
+        sdk={sdk}
+        gapi={gapi}
+        // remove 'ga:' prefix from view id
+        viewId={viewId.replace(/^ga:/, '')}
+      />
+    </>;
   }
 }

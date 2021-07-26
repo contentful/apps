@@ -10,10 +10,10 @@ export interface Props {
 const styles = {
   label: css({
     border: '1px solid',
-    borderColor: tokens.colorElementLight,
+    borderColor: tokens.gray200,
     borderRadius: '3px',
-    backgroundColor: tokens.colorElementMid,
-    color: tokens.colorTextMid,
+    backgroundColor: tokens.gray300,
+    color: tokens.gray700,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -27,7 +27,7 @@ const styles = {
     willChange: 'border-color',
 
     '&:hover': {
-      borderColor: tokens.colorElementDarkest,
+      borderColor: tokens.gray500,
       cursor: 'pointer'
     }
   }),

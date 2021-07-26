@@ -86,7 +86,7 @@ export default class Sidebar extends React.Component {
               const parentId = this.sdk.entry.fields[fieldArray[0]].getValue().sys.id
               return this.resolveReferenceChain(this.sdk, fieldArray, 0, parentId)
             } else if(fieldArray[0].includes('"' || "'")) { // Checks for static text
-              return fieldArray[0].replace(/['"]/g, "")
+              return fieldArray[0].replace(/['"]/g, "");
             } else { //Field directly on the entry, no use for reference resolver
               return this.sdk.entry.fields[fieldArray[0]].getValue()
             }
