@@ -11,8 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
-    "@contentful/forma-36-fcss": "^0.0.35",
-    "@contentful/forma-36-react-components": "^3.39.0",
+    "@contentful/forma-36-fcss": "^0.3.3",
+    "@contentful/forma-36-react-components": "^3.93.2",
     "@contentful/node-apps-toolkit": "^1.0.1",
     "@hapi/hapi": "^19.1.1",
     "@hapi/inert": "^6.0.1",
