@@ -23,7 +23,7 @@ const styles = {
   }),
   variationTitle: css({
     small: {
-      color: tokens.colorTextLight,
+      color: tokens.gray600,
       fontWeight: tokens.fontWeightNormal,
       marginLeft: tokens.spacingXs,
       fontSize: tokens.fontSizeL
@@ -33,7 +33,7 @@ const styles = {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    color: tokens.colorTextLight,
+    color: tokens.gray600,
     marginTop: tokens.spacingXs
   }),
   entryCard: css({

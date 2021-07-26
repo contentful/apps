@@ -17,14 +17,14 @@ const styles = {
   }),
   description: css({
     marginTop: tokens.spacingS,
-    color: tokens.colorTextLight,
+    color: tokens.gray600,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis'
   }),
   clearDescription: css({
     marginTop: tokens.spacingXs,
-    color: tokens.colorTextLightest
+    color: tokens.gray500
   })
 };
 

@@ -7,8 +7,8 @@ import { Button } from '@contentful/forma-36-react-components';
 
 const styles = {
   container: css({
-    backgroundColor: tokens.colorElementLightest,
-    border: `1px solid ${tokens.colorElementMid}`,
+    backgroundColor: tokens.gray100,
+    border: `1px solid ${tokens.gray300}`,
     borderBottomLeftRadius: '2px',
     borderBottomRightRadius: '2px',
     borderTop: 'none'
@@ -27,11 +27,11 @@ const styles = {
   }),
   statItemValue: css({
     fontSize: tokens.fontSizeXl,
-    color: tokens.colorTextDark
+    color: tokens.gray900
   }),
   statItemLabel: css({
     fontSize: tokens.fontSizeM,
-    color: tokens.colorTextLight
+    color: tokens.gray600
   })
 };
 

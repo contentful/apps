@@ -8,7 +8,7 @@ export const styles = {
     display: 'flex'
   }),
   previewWrapper: css({
-    backgroundColor: tokens.colorElementLight,
+    backgroundColor: tokens.gray200,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',

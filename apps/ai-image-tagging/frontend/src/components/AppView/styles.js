@@ -21,14 +21,14 @@ export const styles = {
     top: '0',
     width: '100%',
     height: '300px',
-    backgroundColor: tokens.colorOrangeBase // corresponds to logo
+    backgroundColor: tokens.orange500 // corresponds to logo
   }),
   featuresListItem: css({
     listStyleType: 'disc',
     marginLeft: tokens.spacingM
   }),
   light: css({
-    color: tokens.colorTextLight,
+    color: tokens.gray600,
     marginTop: tokens.spacingM
   }),
   logo: css({

@@ -20,7 +20,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     fontSize: tokens.fontSizeM,
-    color: tokens.colorTextMid
+    color: tokens.gray700
   }),
   itemSeparator: css({
     marginLeft: tokens.spacingM,
