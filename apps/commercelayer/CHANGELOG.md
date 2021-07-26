@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/contentful/apps/compare/commercelayer-products@1.3.2...commercelayer-products@1.4.0) (2021-07-26)
+
+
+### Features
+
+* [EXT-2717] deploy commercelayer with ctf app hosting ([#333](https://github.com/contentful/apps/issues/333)) ([e8bac53](https://github.com/contentful/apps/commit/e8bac531888fe5d9560ade91b151493e4e46a543))
+
+
+
+
+
 ## [1.3.2](https://github.com/contentful/apps/compare/commercelayer-products@1.3.1...commercelayer-products@1.3.2) (2021-06-22)
 
 **Note:** Version bump only for package commercelayer-products
