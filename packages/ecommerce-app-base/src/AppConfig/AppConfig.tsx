@@ -132,7 +132,7 @@ export default class AppConfig extends React.Component<Props, State> {
         compatibleFields,
         selectedFields: editorInterfacesToSelectedFields(editorInterfaces, ids.app),
         parameters: toInputParameters(this.props.parameterDefinitions, parameters),
-        fieldSkuTypes: (parameters as { skuTypes?: FieldsSkuTypes }).skuTypes ?? {}
+        fieldSkuTypes: (parameters as { skuTypes?: FieldsSkuTypes })?.skuTypes ?? {}
       },
       () => app.setReady()
     );
