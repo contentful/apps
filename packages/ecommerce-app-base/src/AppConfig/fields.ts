@@ -21,6 +21,7 @@ interface Control {
   fieldId: string;
   widgetNamespace: string;
   widgetId: string;
+  settings?: Record<string, string>;
 }
 
 export interface EditorInterface {
@@ -30,6 +31,10 @@ export interface EditorInterface {
 
 export type CompatibleFields = Record<string, Field[]>;
 export type SelectedFields = Record<string, string[] | undefined>;
+
+export interface FieldsSkuTypes {
+  [key: string]: Record<string, string>;
+}
 
 function isCompatibleField(field: Field) {
   const isArray = field.type === 'Array';

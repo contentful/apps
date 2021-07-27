@@ -2,18 +2,20 @@ import identity from 'lodash/identity';
 import difference from 'lodash/difference';
 import get from 'lodash/get';
 import Client from 'shopify-buy';
-import makePagination from './Pagination';
+import makeProductVariantPagination from './productVariantPagination';
+import makeProductPagination from './productPagination';
+import { productDataTransformer } from './dataTransformer';
 
 import { validateParameters } from '.';
-import { previewsToVariants } from './dataTransformer';
+import { previewsToProductVariants } from './dataTransformer';
 
-export async function makeShopifyClient({ parameters: { installation } }) {
-  const validationError = validateParameters(installation);
+export async function makeShopifyClient(config) {
+  const validationError = validateParameters(config);
   if (validationError) {
     throw new Error(validationError);
   }
 
-  const { storefrontAccessToken, apiEndpoint } = installation;
+  const { storefrontAccessToken, apiEndpoint } = config;
 
   return Client.buildClient({
     domain: apiEndpoint,
@@ -29,6 +31,24 @@ export async function makeShopifyClient({ parameters: { installation } }) {
  *       selection would be cut off after product no. 250.
  */
 export const fetchProductPreviews = async (skus, config) => {
+  if (!skus.length) {
+    return [];
+  }
+
+  const shopifyClient = await makeShopifyClient(config);
+  const products = await shopifyClient.product.fetchMultiple(skus);
+
+  return products.map(product => productDataTransformer(product, config.apiEndpoint));
+};
+
+/**
+ * Fetches the product variant previews for the product variants selected by the user.
+ *
+ * Note: currently there is no way to cover the edge case where the user
+ *       would have more than 250 variants selected. In such a case their
+ *       selection would be cut off after variant no. 250.
+ */
+export const fetchProductVariantPreviews = async (skus, config) => {
   if (!skus.length) {
     return [];
   }
@@ -82,7 +102,7 @@ export const fetchProductPreviews = async (skus, config) => {
 
   const nodes = get(data, ['data', 'nodes'], []).filter(identity);
 
-  const variantPreviews = nodes.map(previewsToVariants(config));
+  const variantPreviews = nodes.map(previewsToProductVariants(config));
   const missingVariants = difference(
     skus,
     variantPreviews.map(variant => variant.sku)
@@ -92,12 +112,29 @@ export const fetchProductPreviews = async (skus, config) => {
 };
 
 /**
- * Fetches the products searched by the user
+ * Fetches the product variants searched by the user
  *
  * Shopify does not support indexed pagination, only infinite scrolling
  * @see https://community.shopify.com/c/Shopify-APIs-SDKs/How-to-display-more-than-20-products-in-my-app-when-products-are/td-p/464090 for more details (KarlOffenberger's answer)
  */
-export const makeProductSearchResolver = async sdk => {
-  const pagination = await makePagination(sdk);
+export const makeProductVariantSearchResolver = async sdk => {
+  const pagination = await makeProductVariantPagination(sdk);
   return search => pagination.fetchNext(search);
+};
+
+/**
+ * Selects search resolver based on skuType
+
+ */
+export const makeProductSearchResolver = async sdk => {
+  const pagination = await makeProductPagination(sdk);
+  return search => pagination.fetchNext(search);
+};
+
+export const makeSkuResolver = async (sdk, skuType) => {
+  if (skuType === 'product') {
+    return makeProductSearchResolver(sdk);
+  }
+
+  return makeProductVariantSearchResolver(sdk);
 };

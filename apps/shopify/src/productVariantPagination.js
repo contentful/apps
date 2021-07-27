@@ -1,8 +1,8 @@
 import last from 'lodash/last';
 import uniqBy from 'lodash/uniqBy';
 import sortBy from 'lodash/sortBy';
-import { dataTransformer, productsToVariantsTransformer } from './dataTransformer';
-import { makeShopifyClient } from './productResolvers';
+import { productVariantDataTransformer, productsToVariantsTransformer } from './dataTransformer';
+import { makeShopifyClient } from './skuResolvers';
 
 const PER_PAGE = 20;
 
@@ -21,7 +21,7 @@ class Pagination {
   }
 
   async init() {
-    this.shopifyClient = await makeShopifyClient(this.sdk);
+    this.shopifyClient = await makeShopifyClient(this.sdk.parameters.installation);
   }
 
   async fetchNext(search, recursing = false) {
@@ -52,7 +52,7 @@ class Pagination {
           // B). There are variants left to consume in the in-memory variants list
           hasNextPage: this.hasNextProductPage || this.variants.length > 0
         },
-        products: variants.map(dataTransformer)
+        products: variants.map(productVariantDataTransformer)
       };
     }
 
