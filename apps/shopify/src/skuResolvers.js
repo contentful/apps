@@ -27,9 +27,9 @@ export async function makeShopifyClient(config) {
 /**
  * Fetches the collection previews for the collections selected by the user.
  *
- * Note: currently there is no way to cover the edge case where the user
- *       would have more than 250 collections selected. In such a case their
- *       selection would be cut off after collection no. 250.
+ * Note: currently there is no way to fetch multiple collections by id
+ * so we use fetchAll instead and then filter on the client. Besides the obvious disadvantage,
+ * this could also fail if there are mo collections in the stroe than the pagination limit
  */
 export const fetchCollectionPreviews = async (skus, config) => {
   if (!skus.length) {
@@ -37,7 +37,9 @@ export const fetchCollectionPreviews = async (skus, config) => {
   }
 
   const shopifyClient = await makeShopifyClient(config);
-  const collections = await shopifyClient.collection.fetchMultiple(skus);
+  const collections = (await shopifyClient.collection.fetchAll()).filter(collection =>
+    skus.includes(collection.id)
+  );
 
   return collections.map(collection => collectionDataTransformer(collection, config.apiEndpoint));
 };
