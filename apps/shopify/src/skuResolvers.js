@@ -4,7 +4,8 @@ import get from 'lodash/get';
 import Client from 'shopify-buy';
 import makeProductVariantPagination from './productVariantPagination';
 import makeProductPagination from './productPagination';
-import { productDataTransformer } from './dataTransformer';
+import makeCollectionPagination from './collectionPagination';
+import { productDataTransformer, collectionDataTransformer } from './dataTransformer';
 
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
@@ -22,6 +23,24 @@ export async function makeShopifyClient(config) {
     storefrontAccessToken
   });
 }
+
+/**
+ * Fetches the collection previews for the collections selected by the user.
+ *
+ * Note: currently there is no way to cover the edge case where the user
+ *       would have more than 250 collections selected. In such a case their
+ *       selection would be cut off after collection no. 250.
+ */
+export const fetchCollectionPreviews = async (skus, config) => {
+  if (!skus.length) {
+    return [];
+  }
+
+  const shopifyClient = await makeShopifyClient(config);
+  const collections = await shopifyClient.collection.fetchMultiple(skus);
+
+  return collections.map(collection => collectionDataTransformer(collection, config.apiEndpoint));
+};
 
 /**
  * Fetches the product previews for the products selected by the user.
@@ -122,18 +141,27 @@ export const makeProductVariantSearchResolver = async sdk => {
   return search => pagination.fetchNext(search);
 };
 
-/**
- * Selects search resolver based on skuType
-
- */
 export const makeProductSearchResolver = async sdk => {
   const pagination = await makeProductPagination(sdk);
   return search => pagination.fetchNext(search);
 };
 
+export const makeCollectionSearchResolver = async sdk => {
+  const pagination = await makeCollectionPagination(sdk);
+  return search => pagination.fetchNext(search);
+};
+
+/**
+ * Selects search resolver based on skuType
+
+ */
 export const makeSkuResolver = async (sdk, skuType) => {
   if (skuType === 'product') {
     return makeProductSearchResolver(sdk);
+  }
+
+  if (skuType === 'collection') {
+    return makeCollectionSearchResolver(sdk);
   }
 
   return makeProductVariantSearchResolver(sdk);
