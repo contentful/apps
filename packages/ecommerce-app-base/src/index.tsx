@@ -34,6 +34,7 @@ export function setup(integration: Integration) {
           fetchProductPreviews={integration.fetchProductPreviews}
           openDialog={integration.openDialog}
           isDisabled={integration.isDisabled}
+          skuTypes={integration.skuTypes}
         />,
         root
       );
@@ -49,6 +50,7 @@ export function setup(integration: Integration) {
           logo={integration.logo}
           color={integration.color}
           description={integration.description}
+          skuTypes={integration.skuTypes}
         />,
         root
       );
