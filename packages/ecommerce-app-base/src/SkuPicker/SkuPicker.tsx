@@ -69,7 +69,6 @@ export class SkuPicker extends Component<Props, State> {
     super(props);
     this.setSearchCallback = debounce(() => {
       this.setActivePage(1);
-      this.updateProducts();
     }, this.props.searchDelay || DEFAULT_SEARCH_DELAY);
   }
 
