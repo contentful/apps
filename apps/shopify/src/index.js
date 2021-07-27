@@ -1,5 +1,10 @@
 import { setup, renderSkuPicker } from '@contentful/ecommerce-app-base';
-import { fetchProductVariantPreviews, fetchProductPreviews, makeSkuResolver } from './skuResolvers';
+import {
+  fetchProductVariantPreviews,
+  fetchProductPreviews,
+  fetchCollectionPreviews,
+  makeSkuResolver
+} from './skuResolvers';
 import { SKU_TYPES } from './constants';
 
 import logo from './logo.svg';
@@ -74,6 +79,10 @@ function fetchPreviews(skus, config, skuType) {
     return fetchProductPreviews(skus, config);
   }
 
+  if (skuType === 'collection') {
+    return fetchCollectionPreviews(skus, config);
+  }
+
   return fetchProductVariantPreviews(skus, config);
 }
 
@@ -102,7 +111,7 @@ async function openDialog(sdk, currentValue, config) {
   const skus = await sdk.dialogs.openCurrentApp({
     allowHeightOverflow: true,
     position: 'center',
-    title: makeCTA(sdk.field.type),
+    title: makeCTA(sdk.field.type, config.skuType),
     shouldCloseOnOverlayClick: true,
     shouldCloseOnEscapePress: true,
     parameters: config,

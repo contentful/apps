@@ -4,6 +4,40 @@ import flatten from 'lodash/flatten';
 import { DEFAULT_SHOPIFY_VARIANT_TITLE } from './constants';
 
 /**
+ * Transforms the API response of Shopify collections into
+ * the product schema expected by the SkuPicker component
+ */
+export const collectionDataTransformer = (collection, apiEndpoint) => {
+  const image = get(collection, ['image', 'src'], '');
+  const handle = get(collection, ['handle'], undefined);
+
+  let externalLink;
+
+  if (apiEndpoint) {
+    try {
+      const collectionIdDecoded = atob(collection.id);
+      const collectionId =
+        collectionIdDecoded && collectionIdDecoded.slice(collectionIdDecoded.lastIndexOf('/') + 1);
+
+      if (apiEndpoint && collectionId) {
+        externalLink = `https://${apiEndpoint}${
+          last(apiEndpoint) === '/' ? '' : '/'
+        }admin/collections/${collectionId}`;
+      }
+    } catch {}
+  }
+
+  return {
+    id: collection.id,
+    image,
+    name: collection.title,
+    displaySKU: handle ? `Handle: ${handle}` : `Collection ID: ${collection.id}`,
+    sku: collection.id,
+    ...(externalLink ? { externalLink } : {})
+  };
+};
+
+/**
  * Transforms the API response of Shopify products into
  * the product schema expected by the SkuPicker component
  */
