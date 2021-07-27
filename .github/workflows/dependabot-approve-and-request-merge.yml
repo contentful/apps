@@ -1,0 +1,39 @@
+name: "dependabot approve-and-request-merge"
+
+on:
+  pull_request_target
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: approve-and-request-merge
+        uses: actions/github-script@v4.0.2
+        with:
+          script: |
+            const opts = github.pulls.listReviews.endpoint.merge({
+              pull_number: context.payload.pull_request.number,
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+            });
+            const comments = await github.paginate(opts);
+            const mergeComment = comments.find(
+              (review) =>
+                review.body === "@dependabot merge" && review.state === "APPROVED"
+            );
+            if (mergeComment) {
+              console.log(
+                `The user "${mergeComment.user.login}" has already approved and requested this PR is merged, exiting`
+              );
+              return;
+            }
+            github.pulls.createReview({
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              pull_number: context.payload.pull_request.number,
+              event: 'APPROVE',
+              body: '@dependabot merge'
+            })
+          github-token: ${{ secrets.WHYDAH_GITHUB_TOKEN_AUTO_APPROVE }}
