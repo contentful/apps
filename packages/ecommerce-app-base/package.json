@@ -32,7 +32,7 @@
     "cssnano": "4.1.10",
     "jest": "^27.0.4",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1",
+    "react-dom": "^16.13.0",
     "rimraf": "3.0.2",
     "ts-jest": "^27.0.3",
     "typedoc": "0.20.4",
@@ -53,7 +53,7 @@
   },
   "peerDependencies": {
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^16.13.0"
   },
   "scripts": {
     "build": "rimraf lib && tsc",
