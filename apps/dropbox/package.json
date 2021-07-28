@@ -1,13 +1,13 @@
 {
   "name": "dropbox-assets",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "private": true,
   "devDependencies": {
     "contentful-cli": "1.2.12",
     "cross-env": "^7.0.3"
   },
   "dependencies": {
-    "@contentful/dam-app-base": "^1.1.1",
+    "@contentful/dam-app-base": "^1.1.2",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "react-scripts": "^4.0.3"
