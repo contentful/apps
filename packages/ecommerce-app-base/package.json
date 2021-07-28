@@ -31,7 +31,7 @@
     "contentful-cli": "^1.2.12",
     "cssnano": "4.1.11",
     "jest": "^27.0.4",
-    "react": "^17.0.1",
+    "react": "^16.14.0",
     "react-dom": "^16.13.0",
     "rimraf": "3.0.2",
     "ts-jest": "^27.0.3",
@@ -52,7 +52,7 @@
     "react-sortable-hoc": "2.0.0"
   },
   "peerDependencies": {
-    "react": "^17.0.1",
+    "react": "^16.14.0",
     "react-dom": "^16.13.0"
   },
   "scripts": {
