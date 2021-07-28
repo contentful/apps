@@ -49,7 +49,7 @@
     "core-js": "3.6.4",
     "lodash.get": "^4.4.2",
     "prop-types": "15.7.2",
-    "react-sortable-hoc": "1.11.0"
+    "react-sortable-hoc": "2.0.0"
   },
   "peerDependencies": {
     "react": "^17.0.1",
