@@ -48,7 +48,7 @@
     "lodash.get": "^4.4.2",
     "prop-types": "15.7.2",
     "react": "16.12.0",
-    "react-dom": "16.12.0",
+    "react-dom": "16.13.0",
     "react-sortable-hoc": "1.11.0"
   },
   "scripts": {
