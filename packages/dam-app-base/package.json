@@ -35,7 +35,7 @@
     "ts-jest": "^27.0.3",
     "typedoc": "0.21.4",
     "typedoc-plugin-markdown": "3.9.0",
-    "typescript": "4.2.4"
+    "typescript": "4.3.5"
   },
   "dependencies": {
     "@contentful/app-sdk": "^3.31.0",
