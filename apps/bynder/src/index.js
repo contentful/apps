@@ -5,8 +5,8 @@ import logo from './logo.svg';
 
 const CTA = 'Select a file on Bynder';
 
-const BYNDER_SDK_DOMAIN = "https://d8ejoa1fys2rk.cloudfront.net";
-const BYNDER_SDK_URL = `${BYNDER_SDK_DOMAIN}/5.0.5/modules/compactview/bynder-compactview-2-latest.js`;
+const BYNDER_BASE_URL = "https://d8ejoa1fys2rk.cloudfront.net";
+const BYNDER_SDK_URL = `${BYNDER_BASE_URL}/5.0.5/modules/compactview/bynder-compactview-2-latest.js`;
 
 const FIELDS_TO_PERSIST = [
   'archive',
@@ -114,7 +114,7 @@ function transformAsset(asset) {
 }
 
 function checkMessageEvent(e) {
-  if (e.origin !== BYNDER_SDK_DOMAIN) {
+  if (e.origin !== BYNDER_BASE_URL) {
     e.stopImmediatePropagation()
   }
 }
