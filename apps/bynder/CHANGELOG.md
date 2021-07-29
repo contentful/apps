@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.7.0](https://github.com/contentful/apps/compare/bynder-assets@1.6.8...bynder-assets@1.7.0) (2021-07-29)
+
+
+### Features
+
+* [] Reinstate bynder ([#258](https://github.com/contentful/apps/issues/258)) ([574c820](https://github.com/contentful/apps/commit/574c820c2b001f7c1529f4fb4858e7b2ff378cc9)), closes [#203](https://github.com/contentful/apps/issues/203) [#204](https://github.com/contentful/apps/issues/204)
+
+
+
+
+
 ## [1.6.8](https://github.com/contentful/apps/compare/bynder-assets@1.6.7...bynder-assets@1.6.8) (2021-07-29)
 
 **Note:** Version bump only for package bynder-assets
