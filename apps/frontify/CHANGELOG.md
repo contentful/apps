@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/contentful/apps/compare/frontify-assets@1.3.9...frontify-assets@1.4.0) (2021-07-30)
+
+
+### Features
+
+* [EXT-2717] deploy frontify with app hosting ([#362](https://github.com/contentful/apps/issues/362)) ([c417c01](https://github.com/contentful/apps/commit/c417c010cb81884be11c145911d533ab6ab3722c))
+
+
+
+
+
 ## [1.3.9](https://github.com/contentful/apps/compare/frontify-assets@1.3.8...frontify-assets@1.3.9) (2021-07-29)
 
 **Note:** Version bump only for package frontify-assets
