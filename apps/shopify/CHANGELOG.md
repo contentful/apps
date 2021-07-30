@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/contentful/apps/compare/shopify-sku@1.5.9...shopify-sku@1.6.0) (2021-07-30)
+
+
+### Features
+
+* [EXT-2717] deploy shopify with app hosting ([#367](https://github.com/contentful/apps/issues/367)) ([0a38ecb](https://github.com/contentful/apps/commit/0a38ecb85a59c5be46f8f1be06681f6c2e1acbcf))
+
+
+
+
+
 ## [1.5.9](https://github.com/contentful/apps/compare/shopify-sku@1.5.8...shopify-sku@1.5.9) (2021-07-28)
 
 **Note:** Version bump only for package shopify-sku
