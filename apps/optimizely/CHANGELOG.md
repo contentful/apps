@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.1](https://github.com/contentful/apps/compare/optimizely@1.3.0...optimizely@1.3.1) (2021-08-03)
+
+
+### Reverts
+
+* Revert "feat: [EXT-2717] build optimizely with app hosting (#365)" (#373) ([7eff4dd](https://github.com/contentful/apps/commit/7eff4dd0e7feca757ac7d22e53da7d4323dd764d)), closes [#365](https://github.com/contentful/apps/issues/365) [#373](https://github.com/contentful/apps/issues/373)
+
+
+
+
+
 # [1.3.0](https://github.com/contentful/apps/compare/optimizely@1.2.0...optimizely@1.3.0) (2021-07-30)
 
 
