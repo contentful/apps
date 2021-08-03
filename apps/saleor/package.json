@@ -3,6 +3,7 @@
   "version": "1.3.12",
   "private": true,
   "devDependencies": {
+    "@contentful/app-scripts": "^0.8.11",
     "contentful-cli": "1.2.12",
     "cross-env": "^7.0.3",
     "react-scripts": "4.0.3"
@@ -22,8 +23,8 @@
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/saleor --acl public-read",
-    "deploy:test": "npm run deploy",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 6sLWDUsuXcyIfkPeokdRxJ --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
     "typecheck": "tsc"
   },
   "eslintConfig": {
