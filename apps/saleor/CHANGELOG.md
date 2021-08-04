@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/contentful/apps/compare/saleor@1.3.12...saleor@1.4.0) (2021-08-04)
+
+
+### Features
+
+* [EXT-2717] deploy saleor with app hosting ([#366](https://github.com/contentful/apps/issues/366)) ([ae7606a](https://github.com/contentful/apps/commit/ae7606afd346001dc8b11effa699bffcfb1b9090))
+
+
+
+
+
 ## [1.3.12](https://github.com/contentful/apps/compare/saleor@1.3.11...saleor@1.3.12) (2021-08-02)
 
 **Note:** Version bump only for package saleor
