@@ -1,6 +1,6 @@
 {
   "name": "mux-contentful-uploader",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "devDependencies": {
     "@types/enzyme": "^3.9.1",
