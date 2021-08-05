@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/netlify-build-and-preview@1.2.0...netlify-build-and-preview@1.3.0) (2021-08-05)
+
+
+### Features
+
+* [EXT-2717] use app hosting for netlify ([#364](https://github.com/contentful/apps/issues/364)) ([313d1b0](https://github.com/contentful/apps/commit/313d1b0be3ad5b366141c2b0fb08ded886883728))
+
+
+
+
+
 # [1.2.0](https://github.com/contentful/apps/compare/netlify-build-and-preview@1.1.1...netlify-build-and-preview@1.2.0) (2021-06-21)
 
 
