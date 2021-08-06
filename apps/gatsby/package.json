@@ -5,6 +5,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^5.3.0",
     "@testing-library/react": "^8.0.7",
+    "@contentful/app-scripts": "^0.8.11",
     "contentful-cli": "1.2.12",
     "cross-env": "^7.0.3"
   },
@@ -23,8 +24,8 @@
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/gatsby --acl public-read",
-    "deploy:test": "npm run deploy",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 35f8xJFaJpOUFAKepAWiUj --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
     "test": "TZ=UTC react-scripts test",
     "test:ci": "TZ=UTC react-scripts test"
   },
