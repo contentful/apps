@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/contentful/apps/compare/gatsby-preview@1.5.0...gatsby-preview@1.6.0) (2021-08-06)
+
+
+### Features
+
+* [EXT-2717] use app hosting for gatsby ([#361](https://github.com/contentful/apps/issues/361)) ([9f438f0](https://github.com/contentful/apps/commit/9f438f06db4a057767e80352e7f1b68e6cfd5512))
+
+
+
+
+
 # [1.5.0](https://github.com/contentful/apps/compare/gatsby-preview@1.4.0...gatsby-preview@1.5.0) (2021-06-18)
 
 
