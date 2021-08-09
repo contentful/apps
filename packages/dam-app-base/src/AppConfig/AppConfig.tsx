@@ -185,7 +185,7 @@ export default class AppConfig extends React.Component<Props, State> {
     );
   }
 
-  onParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  onParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = e.currentTarget;
 
     this.setState((state) => ({
