@@ -133,7 +133,7 @@ exports[`SortableList should render successfully 1`] = `
             Dress Twin-Set rose
           </h1>
           <h2
-            class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+            class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
             data-test-id="cf-ui-subheading"
           >
             M0E20130820E90Z
@@ -141,7 +141,7 @@ exports[`SortableList should render successfully 1`] = `
         </div>
       </section>
       <div
-        class="css-zdzpuy"
+        class="css-mfolfb"
       >
         <a
           href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -174,7 +174,7 @@ exports[`SortableList should render successfully 1`] = `
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -323,7 +323,7 @@ exports[`SortableList should render successfully 1`] = `
             Michael Kors – Shopper “Jet Set Travel”
           </h1>
           <h2
-            class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+            class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
             data-test-id="cf-ui-subheading"
           >
             A0E2300FX102203
@@ -331,7 +331,7 @@ exports[`SortableList should render successfully 1`] = `
         </div>
       </section>
       <div
-        class="css-zdzpuy"
+        class="css-mfolfb"
       >
         <a
           href="https://mc.commercetools.com/example-project/products/4e5446e8/general"
@@ -364,7 +364,7 @@ exports[`SortableList should render successfully 1`] = `
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -513,7 +513,7 @@ exports[`SortableList should render successfully 1`] = `
             Shirt “Jenny“ Polo Ralph Lauren white
           </h1>
           <h2
-            class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+            class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
             data-test-id="cf-ui-subheading"
           >
             M0E21300900DZN7
@@ -521,7 +521,7 @@ exports[`SortableList should render successfully 1`] = `
         </div>
       </section>
       <div
-        class="css-zdzpuy"
+        class="css-mfolfb"
       >
         <a
           href="https://mc.commercetools.com/example-project/products/db3c234l/general"
@@ -554,7 +554,7 @@ exports[`SortableList should render successfully 1`] = `
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
