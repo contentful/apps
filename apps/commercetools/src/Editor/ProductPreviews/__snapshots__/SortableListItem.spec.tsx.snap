@@ -346,16 +346,16 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
         Loading component...
       </title>
       <rect
-        clip-path="url(#cf-ui-skeleton-clip-0)"
+        clip-path="url(#cf-ui-skeleton-clip-6)"
         height="100%"
-        style="fill: url(#cf-ui-skeleton-clip-gradient-1);"
+        style="fill: url(#cf-ui-skeleton-clip-gradient-7);"
         width="100%"
         x="0"
         y="0"
       />
       <defs>
         <clippath
-          id="cf-ui-skeleton-clip-0"
+          id="cf-ui-skeleton-clip-6"
         >
           <rect
             data-test-id="cf-ui-skeleton-image"
@@ -366,7 +366,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
           />
         </clippath>
         <lineargradient
-          id="cf-ui-skeleton-clip-gradient-1"
+          id="cf-ui-skeleton-clip-gradient-7"
         >
           <stop
             offset="0%"
@@ -376,7 +376,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
             <animate
               attributeName="stop-color"
               dur="2s"
-              id="animation-2"
+              id="animation-8"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
             />
@@ -388,7 +388,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
           >
             <animate
               attributeName="stop-color"
-              begin="animation-2.begin+0.25s"
+              begin="animation-8.begin+0.25s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
@@ -401,7 +401,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
           >
             <animate
               attributeName="stop-color"
-              begin="animation-2.begin+0.5s"
+              begin="animation-8.begin+0.5s"
               dur="2s"
               repeatCount="indefinite"
               values="#e5ebed; #f7f9fa; #e5ebed"
