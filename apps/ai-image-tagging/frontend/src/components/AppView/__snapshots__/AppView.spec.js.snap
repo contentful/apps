@@ -3,7 +3,7 @@
 exports[`AppView when the app is installed should render the app view with configuration screen 1`] = `
 <div>
   <div
-    class="css-x3z8dg"
+    class="css-7bfeg1"
   />
   <div
     class="css-jwwzlh"
@@ -25,7 +25,7 @@ exports[`AppView when the app is installed should render the app view with confi
         The AI Image Tagging app uses AI and deep learning capabilities to automatically assign tags to images. The tags are visible and accessible via the Contentful web app entry editor and tags are searchable in the search bar.
       </p>
       <hr
-        class="css-14380qe"
+        class="css-10hsrou"
       />
       <h1
         class="Heading__Heading___83D3K css-acwcvw f36-margin-bottom--m"
@@ -122,7 +122,7 @@ exports[`AppView when the app is installed should render the app view with confi
         </li>
       </ul>
       <hr
-        class="css-14380qe"
+        class="css-10hsrou"
       />
       <h1
         class="Heading__Heading___83D3K css-acwcvw f36-margin-bottom--m"
@@ -205,7 +205,6 @@ exports[`AppView when the app is not installed should render inline validation i
     class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
   >
     <input
-      aria-label="contentTypeName"
       class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
       data-test-id="content-type-name-input"
       id="content-type-name"
@@ -255,7 +254,6 @@ exports[`AppView when the app is not installed should render inline validation i
     class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
   >
     <input
-      aria-label="contentTypeId"
       class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
       data-test-id="content-type-id-input"
       id="content-type-id"
@@ -280,7 +278,7 @@ exports[`AppView when the app is not installed should render inline validation i
 exports[`AppView when the app is not installed should render the app view with installation screen 1`] = `
 <div>
   <div
-    class="css-x3z8dg"
+    class="css-7bfeg1"
   />
   <div
     class="css-jwwzlh"
@@ -302,7 +300,7 @@ exports[`AppView when the app is not installed should render the app view with i
         The AI Image Tagging app uses AI and deep learning capabilities to automatically assign tags to images. The tags are visible and accessible via the Contentful web app entry editor and tags are searchable in the search bar.
       </p>
       <hr
-        class="css-14380qe"
+        class="css-10hsrou"
       />
       <h1
         class="Heading__Heading___83D3K css-acwcvw f36-margin-bottom--m"
@@ -342,7 +340,6 @@ exports[`AppView when the app is not installed should render the app view with i
           class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
         >
           <input
-            aria-label="contentTypeName"
             class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
             data-test-id="content-type-name-input"
             id="content-type-name"
@@ -389,7 +386,6 @@ exports[`AppView when the app is not installed should render the app view with i
           class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
         >
           <input
-            aria-label="contentTypeId"
             class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
             data-test-id="content-type-id-input"
             id="content-type-id"
