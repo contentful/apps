@@ -3,7 +3,7 @@
   "version": "1.8.15",
   "private": true,
   "devDependencies": {
-    "contentful-cli": "1.2.12",
+    "contentful-cli": "^1.8.23",
     "cross-env": "^7.0.3"
   },
   "dependencies": {
