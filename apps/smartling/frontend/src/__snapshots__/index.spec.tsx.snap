@@ -452,7 +452,6 @@ Object {
                   class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
                 >
                   <input
-                    aria-label="projectId"
                     class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
                     data-test-id="cf-ui-text-input"
                     id="projectId"
@@ -1211,7 +1210,6 @@ Object {
                 class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
               >
                 <input
-                  aria-label="projectId"
                   class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
                   data-test-id="cf-ui-text-input"
                   id="projectId"

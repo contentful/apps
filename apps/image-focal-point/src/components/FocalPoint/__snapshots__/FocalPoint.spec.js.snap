@@ -3,7 +3,7 @@
 exports[`FocalPoint should render the focal point 1`] = `
 <div>
   <div
-    class="css-hwcl17"
+    class="css-1wd7evo"
     style="width: 32px; height: 32px; transform: translate3d(-8px, 12px, 0); top: 0px; left: 0px;"
   />
 </div>
