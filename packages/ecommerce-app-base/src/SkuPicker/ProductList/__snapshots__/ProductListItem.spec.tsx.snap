@@ -7,7 +7,7 @@ exports[`ProductListItem should render successfully 1`] = `
   >
     <div
       aria-checked="false"
-      class="css-1qso258 "
+      class="css-16t4lg0 "
       data-test-id="product-preview-M0E20130820E90Z"
       role="switch"
       tabindex="-1"
@@ -34,7 +34,7 @@ exports[`ProductListItem should render successfully 1`] = `
         Dress Twin-Set rose
       </p>
       <p
-        class="css-1tx1iym"
+        class="css-1bgao96"
       >
         M0E20130820E90Z
       </p>
@@ -50,16 +50,16 @@ exports[`ProductListItem should render successfully the error variation 1`] = `
   >
     <div
       aria-checked="true"
-      class="css-1qso258 css-1rtg1va"
+      class="css-16t4lg0 css-1rtg1va"
       data-test-id="product-preview-M0E20130820E90Z"
       role="switch"
       tabindex="-1"
     >
       <div
-        class="css-37z5d9"
+        class="css-vx9dyc"
       >
         <svg
-          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il"
           data-test-id="cf-ui-icon"
           height="1em"
           viewBox="0 0 24 24"
@@ -85,7 +85,7 @@ exports[`ProductListItem should render successfully the error variation 1`] = `
         Dress Twin-Set rose
       </p>
       <p
-        class="css-1tx1iym"
+        class="css-1bgao96"
       >
         M0E20130820E90Z
       </p>
@@ -101,7 +101,7 @@ exports[`ProductListItem should render successfully the isSelected variation 1`]
   >
     <div
       aria-checked="true"
-      class="css-1qso258 css-1rtg1va"
+      class="css-16t4lg0 css-1rtg1va"
       data-test-id="product-preview-M0E20130820E90Z"
       role="switch"
       tabindex="-1"
@@ -128,7 +128,7 @@ exports[`ProductListItem should render successfully the isSelected variation 1`]
         Dress Twin-Set rose
       </p>
       <p
-        class="css-1tx1iym"
+        class="css-1bgao96"
       >
         M0E20130820E90Z
       </p>
@@ -144,7 +144,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
   >
     <div
       aria-checked="false"
-      class="css-1qso258 "
+      class="css-16t4lg0 "
       data-test-id="product-preview-M0E20130820E90Z"
       role="switch"
       tabindex="-1"
@@ -248,7 +248,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
         Dress Twin-Set rose
       </p>
       <p
-        class="css-1tx1iym"
+        class="css-1bgao96"
       >
         M0E20130820E90Z
       </p>

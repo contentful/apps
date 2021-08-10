@@ -3,7 +3,7 @@
 exports[`SkuPicker should render successfully with no products selected 1`] = `
 <div>
   <header
-    class="css-1irjrk3"
+    class="css-zv97dc"
   >
     <div
       class="css-kpva4h"
@@ -12,7 +12,6 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
         class="TextInput__TextInput___36-K- TextInput__TextInput--medium___1bR2D"
       >
         <input
-          aria-label="sku-search"
           class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
           data-test-id="sku-search"
           id="sku-search"
@@ -38,7 +37,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
         />
       </svg>
       <span
-        class="css-1nagyg6"
+        class="css-1x7yppz"
       >
         Total results: 
         3
@@ -80,7 +79,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
       >
         <div
           aria-checked="false"
-          class="css-1qso258 "
+          class="css-16t4lg0 "
           data-test-id="product-preview-M0E20130820E90Z"
           role="switch"
           tabindex="-1"
@@ -107,7 +106,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
             Dress Twin-Set rose
           </p>
           <p
-            class="css-1tx1iym"
+            class="css-1bgao96"
           >
             M0E20130820E90Z
           </p>
@@ -118,7 +117,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
       >
         <div
           aria-checked="false"
-          class="css-1qso258 "
+          class="css-16t4lg0 "
           data-test-id="product-preview-A0E2300FX102203"
           role="switch"
           tabindex="-1"
@@ -145,7 +144,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
             Michael Kors – Shopper “Jet Set Travel”
           </p>
           <p
-            class="css-1tx1iym"
+            class="css-1bgao96"
           >
             A0E2300FX102203
           </p>
@@ -156,7 +155,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
       >
         <div
           aria-checked="false"
-          class="css-1qso258 "
+          class="css-16t4lg0 "
           data-test-id="product-preview-M0E21300900DZN7"
           role="switch"
           tabindex="-1"
@@ -183,7 +182,7 @@ exports[`SkuPicker should render successfully with no products selected 1`] = `
             Shirt “Jenny“ Polo Ralph Lauren white
           </p>
           <p
-            class="css-1tx1iym"
+            class="css-1bgao96"
           >
             M0E21300900DZN7
           </p>
