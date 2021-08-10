@@ -9,7 +9,7 @@
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "@types/webpack-env": "1.13.9",
-    "contentful-cli": "1.2.12",
+    "contentful-cli": "^1.8.23",
     "cross-env": "^7.0.3",
     "fetch-mock": "^8.3.2",
     "node-fetch": "^2.6.1",
