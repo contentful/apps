@@ -6,7 +6,7 @@
   "devDependencies": {
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",
-    "contentful-cli": "^0.36.2",
+    "contentful-cli": "^1.8.23",
     "cross-env": "^7.0.3",
     "react-test-renderer": "^16.9.0",
     "sass": "^1.26.2",

@@ -4,7 +4,7 @@
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^0.8.11",
-    "contentful-cli": "1.2.12",
+    "contentful-cli": "^1.8.23",
     "cross-env": "^7.0.3",
     "react-scripts": "4.0.3"
   },

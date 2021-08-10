@@ -5,7 +5,7 @@
   "devDependencies": {
     "@contentful/app-scripts": "^0.8.11",
     "@testing-library/react": "^8.0.4",
-    "contentful-cli": "1.2.12",
+    "contentful-cli": "^1.8.23",
     "cross-env": "^7.0.3",
     "cssnano": "4.1.10",
     "identity-obj-proxy": "^3.0.0"
