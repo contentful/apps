@@ -26,7 +26,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
           You’re currently connected to Optimizely.
         </p>
         <p
-          class="Paragraph__Paragraph___2aO-9 css-1ntki7d f36-margin-bottom--m"
+          class="Paragraph__Paragraph___2aO-9 css-j3lppu f36-margin-bottom--m"
           data-test-id="cf-ui-paragraph"
         >
           This access token is valid for 2 hours – after this you must reauthorize with Optimizely.
@@ -34,7 +34,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
       </div>
     </div>
     <hr
-      class="css-14380qe"
+      class="css-10hsrou"
     />
     <div>
       <svg
@@ -133,7 +133,7 @@ exports[`AppPage should render the AppPage loading when first connected to Optim
       </svg>
     </div>
     <hr
-      class="css-14380qe"
+      class="css-10hsrou"
     />
     <div>
       <svg
@@ -301,7 +301,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
           You’re currently connected to Optimizely.
         </p>
         <p
-          class="Paragraph__Paragraph___2aO-9 css-1ntki7d f36-margin-bottom--m"
+          class="Paragraph__Paragraph___2aO-9 css-j3lppu f36-margin-bottom--m"
           data-test-id="cf-ui-paragraph"
         >
           This access token is valid for 2 hours – after this you must reauthorize with Optimizely.
@@ -309,7 +309,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
       </div>
     </div>
     <hr
-      class="css-14380qe"
+      class="css-10hsrou"
     />
     <div>
       <svg
@@ -408,7 +408,7 @@ exports[`AppPage should render the AppPage with Features and connect button 1`] 
       </svg>
     </div>
     <hr
-      class="css-14380qe"
+      class="css-10hsrou"
     />
     <div>
       <svg
@@ -576,7 +576,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
           You’re currently connected to Optimizely.
         </p>
         <p
-          class="Paragraph__Paragraph___2aO-9 css-1ntki7d f36-margin-bottom--m"
+          class="Paragraph__Paragraph___2aO-9 css-j3lppu f36-margin-bottom--m"
           data-test-id="cf-ui-paragraph"
         >
           This access token is valid for 2 hours – after this you must reauthorize with Optimizely.
@@ -584,7 +584,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
       </div>
     </div>
     <hr
-      class="css-14380qe"
+      class="css-10hsrou"
     />
     <div
       class="Typography__Typography___1ZUfE"
@@ -670,7 +670,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
       </div>
     </div>
     <hr
-      class="css-14380qe"
+      class="css-10hsrou"
     />
     <div
       class="Typography__Typography___1ZUfE"
@@ -717,7 +717,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
           >
             <td
               align="left"
-              class="TableCell__TableCell___Wou8a css-qd6c40"
+              class="TableCell__TableCell___ZC2ZI css-qd6c40"
               data-test-id="cf-ui-table-cell"
               style="top: 0px;"
             >
@@ -727,7 +727,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
             </td>
             <td
               align="left"
-              class="TableCell__TableCell___Wou8a css-qd6c40"
+              class="TableCell__TableCell___ZC2ZI css-qd6c40"
               data-test-id="cf-ui-table-cell"
               style="top: 0px;"
             >
@@ -738,7 +738,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
             </td>
             <td
               align="left"
-              class="TableCell__TableCell___Wou8a css-qd6c40"
+              class="TableCell__TableCell___ZC2ZI css-qd6c40"
               data-test-id="cf-ui-table-cell"
               style="top: 0px;"
             >
@@ -774,7 +774,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
           >
             <td
               align="left"
-              class="TableCell__TableCell___Wou8a css-qd6c40"
+              class="TableCell__TableCell___ZC2ZI css-qd6c40"
               data-test-id="cf-ui-table-cell"
               style="top: 0px;"
             >
@@ -784,7 +784,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
             </td>
             <td
               align="left"
-              class="TableCell__TableCell___Wou8a css-qd6c40"
+              class="TableCell__TableCell___ZC2ZI css-qd6c40"
               data-test-id="cf-ui-table-cell"
               style="top: 0px;"
             >
@@ -818,7 +818,7 @@ exports[`AppPage should render the Optimizely config and allow for adding conten
             </td>
             <td
               align="left"
-              class="TableCell__TableCell___Wou8a css-qd6c40"
+              class="TableCell__TableCell___ZC2ZI css-qd6c40"
               data-test-id="cf-ui-table-cell"
               style="top: 0px;"
             >

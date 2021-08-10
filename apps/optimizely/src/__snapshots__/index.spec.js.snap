@@ -9,7 +9,7 @@ exports[`Optimizely App should render the editor page 1`] = `
     class="css-3p38p2"
   >
     <div
-      class="css-xieh1a"
+      class="css-1eow32f"
     >
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
@@ -42,7 +42,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       />
     </svg>
     <div
-      class="css-xieh1a"
+      class="css-1eow32f"
     >
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
@@ -75,7 +75,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       />
     </svg>
     <div
-      class="css-xieh1a"
+      class="css-1eow32f"
     >
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
@@ -108,7 +108,7 @@ exports[`Optimizely App should render the editor page 1`] = `
       />
     </svg>
     <div
-      class="css-xieh1a"
+      class="css-1eow32f"
     >
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
@@ -131,7 +131,7 @@ exports[`Optimizely App should render the editor page 1`] = `
     </div>
   </div>
   <hr
-    class="css-14380qe"
+    class="css-10hsrou"
   />
   <h2
     class="Heading__Heading___83D3K css-1fobf8d"
@@ -222,7 +222,7 @@ exports[`Optimizely App should render the editor page 1`] = `
     </svg>
   </div>
   <hr
-    class="css-14380qe"
+    class="css-10hsrou"
   />
   <h2
     class="Heading__Heading___83D3K css-1fobf8d"
@@ -285,7 +285,7 @@ exports[`Optimizely App should render the editor page 1`] = `
     </div>
   </div>
   <hr
-    class="css-14380qe"
+    class="css-10hsrou"
   />
   <h2
     class="Heading__Heading___83D3K"
