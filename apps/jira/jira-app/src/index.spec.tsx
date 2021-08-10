@@ -14,8 +14,6 @@ configure({
 });
 
 const originalStorage = window.localStorage;
-const mockDate = 100;
-const realNow = Date.now;
 
 describe('The Jira App Components', () => {
   let mockSdk: any = {};
@@ -26,7 +24,8 @@ describe('The Jira App Components', () => {
     window.open = jest.fn();
     Object.defineProperty(window, 'localStorage', { writable: true, value: originalStorage });
 
-    Date.now = jest.fn().mockReturnValue(mockDate);
+    Date.now = jest.fn(() => 100);
+    Math.random = jest.fn(() => 0.5);
 
     mockSdk = {
       ids: {
@@ -60,7 +59,6 @@ describe('The Jira App Components', () => {
   });
 
   afterEach(() => {
-    Date.now = realNow;
     cleanup();
   });
 
