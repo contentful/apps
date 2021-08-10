@@ -1,6 +1,6 @@
 {
   "name": "ai-image-tagging-frontend",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "main": "build/index.html",
   "devDependencies": {

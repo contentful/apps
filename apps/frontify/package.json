@@ -1,6 +1,6 @@
 {
   "name": "frontify-assets",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^0.8.11",
