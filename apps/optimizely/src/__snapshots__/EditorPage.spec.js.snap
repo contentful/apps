@@ -266,7 +266,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                 aria-expanded="false"
                 aria-haspopup="menu"
                 class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
-                data-node-id="dropdown-trigger-1535150138021.0503"
+                data-node-id="dropdown-trigger-50"
                 data-test-id="cf-ui-text-link"
                 type="button"
               >
@@ -364,7 +364,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                 aria-expanded="false"
                 aria-haspopup="menu"
                 class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
-                data-node-id="dropdown-trigger-874725058138.1036"
+                data-node-id="dropdown-trigger-50"
                 data-test-id="cf-ui-text-link"
                 type="button"
               >
