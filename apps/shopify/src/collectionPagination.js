@@ -5,8 +5,6 @@ import { makeShopifyClient } from './skuResolvers';
 const PER_PAGE = 20;
 
 class Pagination {
-  freshSearch = true;
-
   hasNextProductPage = false;
   collections = [];
 
@@ -49,7 +47,6 @@ class Pagination {
       ? await this._fetchCollections(search)
       : await this._fetchNextPage(this.collections);
     this.hasNextProductPage = nextCollections.length === PER_PAGE;
-    this.freshSearch = false;
 
     const newCollections = differenceBy(nextCollections, this.collections, 'id');
 
@@ -83,7 +80,6 @@ class Pagination {
 
   _resetPagination() {
     this.collections = [];
-    this.freshSearch = true;
   }
 }
 
