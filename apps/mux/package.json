@@ -1,15 +1,16 @@
 {
   "name": "mux-contentful-uploader",
-  "version": "1.4.3",
+  "version": "1.4.6",
   "private": true,
   "devDependencies": {
+    "@contentful/app-scripts": "^0.8.11",
     "@types/enzyme": "^3.9.1",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/jest": "^24.0.15",
     "@types/react": "^16.8.22",
     "@types/react-dom": "^16.8.4",
     "@types/webpack-env": "1.13.9",
-    "contentful-cli": "^1.3.30",
+    "contentful-cli": "^1.8.23",
     "cross-env": "^7.0.3",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.3",
@@ -21,10 +22,10 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
-    "@contentful/dam-app-base": "^1.1.14",
-    "@contentful/forma-36-fcss": "^0.3.3",
-    "@contentful/forma-36-react-components": "^3.93.2",
-    "@contentful/forma-36-tokens": "^0.11.0",
+    "@contentful/dam-app-base": "^1.1.15",
+    "@contentful/forma-36-fcss": "^0.0.35",
+    "@contentful/forma-36-react-components": "^3.79.2",
+    "@contentful/forma-36-tokens": "^0.5.3",
     "@mux/upchunk": "^2.0.0",
     "@types/hls.js": "^0.12.3",
     "@types/jsonwebtoken": "^8.5.0",
@@ -44,8 +45,8 @@
     "tsc": "tsc -p ./ --noEmit",
     "test": "TZ=UTC react-scripts test",
     "test:ci": "react-scripts test",
-    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/mux --acl public-read",
-    "deploy:test": "npm run deploy"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5l4WmuXdhJGcADHfCm1v4k --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
   },
   "prettier": {
     "trailingComma": "es5",

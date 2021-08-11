@@ -1,11 +1,11 @@
 {
   "name": "image-focal-point",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^0.8.11",
     "@testing-library/react": "^11.2.5",
-    "contentful-cli": "1.2.12",
+    "contentful-cli": "^1.8.23",
     "cross-env": "^7.0.3"
   },
   "scripts": {
