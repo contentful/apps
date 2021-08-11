@@ -47,6 +47,7 @@ interface State {
   selectedFields: SelectedFields;
   fieldSkuTypes: FieldsSkuTypes;
   parameters: Config;
+  appReady: boolean;
 }
 
 const styles = {
@@ -99,7 +100,8 @@ export default class AppConfig extends React.Component<Props, State> {
     compatibleFields: {},
     selectedFields: {},
     fieldSkuTypes: {},
-    parameters: toInputParameters(this.props.parameterDefinitions, null)
+    parameters: toInputParameters(this.props.parameterDefinitions, null),
+    appReady: false
   };
 
   componentDidMount() {
@@ -132,7 +134,8 @@ export default class AppConfig extends React.Component<Props, State> {
         compatibleFields,
         selectedFields: editorInterfacesToSelectedFields(editorInterfaces, ids.app),
         parameters: toInputParameters(this.props.parameterDefinitions, parameters),
-        fieldSkuTypes: (parameters as { skuTypes?: FieldsSkuTypes })?.skuTypes ?? {}
+        fieldSkuTypes: (parameters as { skuTypes?: FieldsSkuTypes })?.skuTypes ?? {},
+        appReady: true
       },
       () => app.setReady()
     );
@@ -200,7 +203,8 @@ export default class AppConfig extends React.Component<Props, State> {
       compatibleFields,
       selectedFields,
       fieldSkuTypes,
-      parameters
+      parameters,
+      appReady
     } = this.state;
     const { parameterDefinitions, sdk, skuTypes } = this.props;
     const {
@@ -271,15 +275,17 @@ export default class AppConfig extends React.Component<Props, State> {
               </Note>
             </>
           )}
-          <FieldSelector
-            contentTypes={contentTypes}
-            compatibleFields={compatibleFields}
-            selectedFields={selectedFields}
-            onSelectedFieldsChange={this.onSelectedFieldsChange}
-            fieldSkuTypes={fieldSkuTypes}
-            onFieldSkuTypesChange={this.onFieldSkuTypesChange}
-            skuTypes={skuTypes}
-          />
+          {appReady === true ? (
+            <FieldSelector
+              contentTypes={contentTypes}
+              compatibleFields={compatibleFields}
+              selectedFields={selectedFields}
+              onSelectedFieldsChange={this.onSelectedFieldsChange}
+              fieldSkuTypes={fieldSkuTypes}
+              onFieldSkuTypesChange={this.onFieldSkuTypesChange}
+              skuTypes={skuTypes}
+            />
+          ) : null}
         </Typography>
       </>
     );

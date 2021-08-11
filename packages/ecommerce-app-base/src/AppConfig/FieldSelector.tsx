@@ -8,7 +8,8 @@ import {
   Typography,
   FieldGroup,
   Flex,
-  RadioButtonField
+  RadioButtonField,
+  Paragraph
 } from '@contentful/forma-36-react-components';
 
 import { ContentType, CompatibleFields, SelectedFields, FieldsSkuTypes } from './fields';
@@ -24,7 +25,21 @@ interface Props {
   skuTypes?: Integration['skuTypes'];
 }
 
-export default class FieldSelector extends React.Component<Props> {
+interface State {
+  initialSelectedFields: SelectedFields;
+  changedSkuTypes: Record<string, Record<string, boolean>>;
+}
+
+export default class FieldSelector extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      initialSelectedFields: { ...props.selectedFields },
+      changedSkuTypes: {}
+    };
+  }
+
   onSelectedFieldChange = (
     ctId: string,
     fieldId: string,
@@ -48,6 +63,24 @@ export default class FieldSelector extends React.Component<Props> {
   ): void => {
     const updated = { ...this.props.fieldSkuTypes };
 
+    const isOldField = this.state.initialSelectedFields?.[ctId]?.includes(fieldId) === true;
+
+    if (isOldField === true) {
+      // They are changing the type of an existing field, warn them of
+      // potential trouble
+      const changedSkuTypes = { ...this.state.changedSkuTypes };
+
+      if (changedSkuTypes[ctId] === undefined) {
+        changedSkuTypes[ctId] = {};
+      }
+
+      changedSkuTypes[ctId][fieldId] = true;
+
+      this.setState({
+        changedSkuTypes
+      });
+    }
+
     if (updated[ctId] === undefined) {
       updated[ctId] = {};
     }
@@ -65,6 +98,7 @@ export default class FieldSelector extends React.Component<Props> {
       fieldSkuTypes,
       skuTypes = []
     } = this.props;
+    const { changedSkuTypes } = this.state;
 
     const defaultSkuType = skuTypes.find(skuType => skuType.default === true)?.id;
 
@@ -88,23 +122,31 @@ export default class FieldSelector extends React.Component<Props> {
                       onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
                     />
                     {skuTypes.length > 0 && (selectedFields[ct.sys.id] || []).includes(field.id) ? (
-                      <Flex>
-                        {skuTypes.map(skuType => (
-                          <RadioButtonField
-                            key={skuType.id}
-                            id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
-                            name={`skuType-${ct.sys.id}-${field.id}`}
-                            value={skuType.id}
-                            labelText={skuType.name}
-                            className="f36-margin-left--l"
-                            checked={
-                              (fieldSkuTypes[ct.sys.id]?.[field.id] ?? defaultSkuType) ===
-                              skuType.id
-                            }
-                            onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}
-                          />
-                        ))}
-                      </Flex>
+                      <>
+                        <Flex>
+                          {skuTypes.map(skuType => (
+                            <RadioButtonField
+                              key={skuType.id}
+                              id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
+                              name={`skuType-${ct.sys.id}-${field.id}`}
+                              value={skuType.id}
+                              labelText={skuType.name}
+                              className="f36-margin-left--l"
+                              checked={
+                                (fieldSkuTypes[ct.sys.id]?.[field.id] ?? defaultSkuType) ===
+                                skuType.id
+                              }
+                              onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}
+                            />
+                          ))}
+                        </Flex>
+                        {changedSkuTypes?.[ct.sys.id]?.[field.id] === true ? (
+                          <Paragraph className="f36-margin-left--l f36-margin-top--s">
+                            Note: Changing SKU type can cause problems with existing entries relying
+                            on the old SKU type.
+                          </Paragraph>
+                        ) : null}
+                      </>
                     ) : null}
                   </FieldGroup>
                 ))}
