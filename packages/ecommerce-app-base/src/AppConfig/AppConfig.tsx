@@ -147,9 +147,7 @@ export default class AppConfig extends React.Component<Props, State> {
       return false;
     }
 
-    const updatedParameters = {
-      ...toAppParameters(this.props.parameterDefinitions, parameters)
-    };
+    const updatedParameters = toAppParameters(this.props.parameterDefinitions, parameters);
 
     if (this.props.skuTypes !== undefined) {
       updatedParameters.skuTypes = fieldSkuTypes;
