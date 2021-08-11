@@ -1,6 +1,6 @@
 {
   "name": "cloudinary-assets",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^0.8.11",
@@ -8,7 +8,7 @@
     "cross-env": "^7.0.3"
   },
   "dependencies": {
-    "@contentful/dam-app-base": "^1.1.14",
+    "@contentful/dam-app-base": "^1.1.15",
     "cloudinary-core": "^2.8.0",
     "core-js": "3.1.4",
     "react": "16.12.0",
