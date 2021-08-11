@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.6](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.4.5...mux-contentful-uploader@1.4.6) (2021-08-11)
+
+
+### Reverts
+
+* Revert "Revert "feat: [EXT-2717] use app hosting for MUX (#363)" (#384)" (#393) ([0361287](https://github.com/contentful/apps/commit/0361287d14597d608622c69a6656034b434000f3)), closes [#363](https://github.com/contentful/apps/issues/363) [#384](https://github.com/contentful/apps/issues/384) [#393](https://github.com/contentful/apps/issues/393)
+
+
+
+
+
 ## [1.4.5](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.4.4...mux-contentful-uploader@1.4.5) (2021-08-11)
 
 **Note:** Version bump only for package mux-contentful-uploader
