@@ -2,7 +2,7 @@ import React from 'react';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { render } from 'react-dom';
 import { SkuPicker } from './SkuPicker';
-import { GetSaveBtnTextFn, ProductPreviewsFn, ProductsFn } from '../interfaces';
+import { MakeSaveBtnTextFn, ProductPreviewsFn, ProductsFn } from '../interfaces';
 
 interface Props {
   sdk: DialogExtensionSDK;
@@ -10,12 +10,12 @@ interface Props {
   fetchProducts: ProductsFn;
   searchDelay?: number;
   skuType?: string;
-  getSaveBtnText?: GetSaveBtnTextFn;
+  makeSaveBtnText?: MakeSaveBtnTextFn;
 }
 
 export function renderSkuPicker(
   elementId: string,
-  { sdk, fetchProductPreviews, fetchProducts, searchDelay, skuType, getSaveBtnText }: Props
+  { sdk, fetchProductPreviews, fetchProducts, searchDelay, skuType, makeSaveBtnText }: Props
 ): void {
   const root = document.getElementById(elementId);
 
@@ -26,7 +26,7 @@ export function renderSkuPicker(
       fetchProducts={fetchProducts}
       searchDelay={searchDelay}
       skuType={skuType}
-      getSaveBtnText={getSaveBtnText}
+      makeSaveBtnText={makeSaveBtnText}
     />,
     root
   );

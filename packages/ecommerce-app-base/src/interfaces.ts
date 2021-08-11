@@ -85,7 +85,7 @@ export type MakeCTAFn = (fieldType: string, skuType?: string) => string;
  * @param selectedSKUs An array of SKUs chosen.
  * @returns Text that should be displayed on the button
  */
-export type GetSaveBtnTextFn = (selectedSKUs: string[], skuType?: string) => string;
+export type MakeSaveBtnTextFn = (selectedSKUs: string[], skuType?: string) => string;
 
 /**
  * Custom code that validates installation parameters that is run before saving.

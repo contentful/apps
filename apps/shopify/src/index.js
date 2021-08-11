@@ -23,7 +23,7 @@ function makeCTA(fieldType, skuType) {
   return fieldType === 'Array' ? 'Select product variants' : 'Select a product variant';
 }
 
-function getSaveBtnText(skuType) {
+function makeSaveBtnText(skuType) {
   if (skuType === 'product') {
     return selectedSKUs => {
       switch (selectedSKUs.length) {
@@ -101,7 +101,7 @@ async function renderDialog(sdk) {
     fetchProducts: await makeSkuResolver(sdk, skuType),
     searchDelay: 750,
     skuType,
-    getSaveBtnText: getSaveBtnText(skuType)
+    makeSaveBtnText: makeSaveBtnText(skuType)
   });
 
   sdk.window.startAutoResizer();

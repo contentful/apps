@@ -7,7 +7,7 @@ import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { Paginator } from './Paginator';
 import {
-  GetSaveBtnTextFn,
+  MakeSaveBtnTextFn,
   Pagination,
   Product,
   ProductPreviewsFn,
@@ -23,7 +23,7 @@ export interface Props {
   fetchProducts: ProductsFn;
   searchDelay?: number;
   skuType?: string;
-  getSaveBtnText?: GetSaveBtnTextFn;
+  makeSaveBtnText?: MakeSaveBtnTextFn;
 }
 
 interface State {
@@ -151,7 +151,7 @@ export class SkuPicker extends Component<Props, State> {
 
   render() {
     const { search, pagination, products, selectedProducts, selectedSKUs } = this.state;
-    const { getSaveBtnText = defaultGetSaveBtnText, skuType } = this.props;
+    const { makeSaveBtnText = defaultGetSaveBtnText, skuType } = this.props;
     const infiniteScrollingPaginationMode = 'hasNextPage' in pagination;
     const pageCount = Math.ceil(pagination.total / pagination.limit);
 
@@ -183,7 +183,7 @@ export class SkuPicker extends Component<Props, State> {
               buttonType="primary"
               onClick={() => this.props.sdk.close(selectedSKUs)}
               disabled={selectedSKUs.length === 0}>
-              {getSaveBtnText(selectedSKUs, skuType)}
+              {makeSaveBtnText(selectedSKUs, skuType)}
             </Button>
           </div>
         </header>
