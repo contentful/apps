@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/typeform-frontend@1.2.1...typeform-frontend@1.3.0) (2021-08-16)
+
+
+### Features
+
+* update to the latest forma and new tokens ([#336](https://github.com/contentful/apps/issues/336)) ([d4cba00](https://github.com/contentful/apps/commit/d4cba009066b590b790b0d32bb1afbcf699d3bee))
+
+
+
+
+
 ## [1.2.1](https://github.com/contentful/apps/compare/typeform-frontend@1.2.0...typeform-frontend@1.2.1) (2021-08-10)
 
 **Note:** Version bump only for package typeform-frontend

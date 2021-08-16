@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/contentful/apps/compare/image-focal-point@1.3.1...image-focal-point@1.4.0) (2021-08-16)
+
+
+### Features
+
+* update to the latest forma and new tokens ([#336](https://github.com/contentful/apps/issues/336)) ([d4cba00](https://github.com/contentful/apps/commit/d4cba009066b590b790b0d32bb1afbcf699d3bee))
+
+
+
+
+
 ## [1.3.1](https://github.com/contentful/apps/compare/image-focal-point@1.3.0...image-focal-point@1.3.1) (2021-08-10)
 
 **Note:** Version bump only for package image-focal-point
