@@ -28,15 +28,15 @@ const styles = {
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.colorElementMid
+    backgroundColor: tokens.gray300
   }),
   connectAgain: css({
     marginTop: tokens.spacingXs,
     textAlign: 'center',
-    color: tokens.colorTextLight
+    color: tokens.gray600
   }),
   connectAgainIcon: css({
-    fill: tokens.colorTextLight,
+    fill: tokens.gray600,
     marginRight: tokens.spacingXs,
     verticalAlign: 'middle'
   })

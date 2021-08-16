@@ -30,7 +30,7 @@ exports[`SortableListItem should render successfully 1`] = `
           Dress Twin-Set rose
         </h1>
         <h2
-          class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+          class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
           data-test-id="cf-ui-subheading"
         >
           M0E20130820E90Z
@@ -38,7 +38,7 @@ exports[`SortableListItem should render successfully 1`] = `
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -71,7 +71,7 @@ exports[`SortableListItem should render successfully 1`] = `
           tabindex="-1"
         >
           <svg
-            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
             data-test-id="cf-ui-icon"
             height="1em"
             viewBox="0 0 24 24"
@@ -125,10 +125,10 @@ exports[`SortableListItem should render successfully the error variation for mis
       </span>
     </div>
     <div
-      class="css-1rmpyga"
+      class="css-6t06np"
     >
       <svg
-        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il"
         data-test-id="cf-ui-icon"
         height="1em"
         viewBox="0 0 24 24"
@@ -162,7 +162,7 @@ exports[`SortableListItem should render successfully the error variation for mis
           Dress Twin-Set rose
         </h1>
         <h2
-          class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+          class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
           data-test-id="cf-ui-subheading"
         >
           M0E20130820E90Z
@@ -170,7 +170,7 @@ exports[`SortableListItem should render successfully the error variation for mis
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -203,7 +203,7 @@ exports[`SortableListItem should render successfully the error variation for mis
           tabindex="-1"
         >
           <svg
-            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
             data-test-id="cf-ui-icon"
             height="1em"
             viewBox="0 0 24 24"
@@ -232,10 +232,10 @@ exports[`SortableListItem should render successfully the error variation for mis
     data-test-id="cf-ui-card"
   >
     <div
-      class="css-1rmpyga"
+      class="css-6t06np"
     >
       <svg
-        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined"
+        class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il"
         data-test-id="cf-ui-icon"
         height="1em"
         viewBox="0 0 24 24"
@@ -272,7 +272,7 @@ exports[`SortableListItem should render successfully the error variation for mis
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -305,7 +305,7 @@ exports[`SortableListItem should render successfully the error variation for mis
           tabindex="-1"
         >
           <svg
-            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
             data-test-id="cf-ui-icon"
             height="1em"
             viewBox="0 0 24 24"
@@ -434,7 +434,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
           Dress Twin-Set rose
         </h1>
         <h2
-          class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+          class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
           data-test-id="cf-ui-subheading"
         >
           M0E20130820E90Z
@@ -442,7 +442,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -475,7 +475,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
           tabindex="-1"
         >
           <svg
-            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
             data-test-id="cf-ui-icon"
             height="1em"
             viewBox="0 0 24 24"
@@ -552,7 +552,7 @@ exports[`SortableListItem should render successfully the sortable variation 1`] 
           Dress Twin-Set rose
         </h1>
         <h2
-          class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+          class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
           data-test-id="cf-ui-subheading"
         >
           M0E20130820E90Z
@@ -560,7 +560,7 @@ exports[`SortableListItem should render successfully the sortable variation 1`] 
       </div>
     </section>
     <div
-      class="css-zdzpuy"
+      class="css-mfolfb"
     >
       <a
         href="https://mc.commercetools.com/example-project/products/28a7442d/general"
@@ -593,7 +593,7 @@ exports[`SortableListItem should render successfully the sortable variation 1`] 
           tabindex="-1"
         >
           <svg
-            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
             data-test-id="cf-ui-icon"
             height="1em"
             viewBox="0 0 24 24"

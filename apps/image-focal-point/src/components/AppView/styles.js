@@ -28,7 +28,7 @@ export const styles = {
     marginLeft: tokens.spacingM
   }),
   light: css({
-    color: tokens.colorTextLight,
+    color: tokens.gray600,
     marginTop: tokens.spacingM
   }),
   logo: css({

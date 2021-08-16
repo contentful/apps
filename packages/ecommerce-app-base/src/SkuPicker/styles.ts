@@ -24,7 +24,7 @@ function makeBodyStyle() {
 
 export const styles = {
   header: css({
-    borderBottom: `1px solid ${tokens.colorElementMid}`,
+    borderBottom: `1px solid ${tokens.gray300}`,
     display: 'flex',
     justifyContent: 'space-between',
     padding: tokens.spacingL,
@@ -40,7 +40,7 @@ export const styles = {
   body: makeBodyStyle(),
   total: css({
     fontSize: tokens.fontSizeS,
-    color: tokens.colorTextLight,
+    color: tokens.gray600,
     display: 'block',
     marginTop: tokens.spacingS
   }),

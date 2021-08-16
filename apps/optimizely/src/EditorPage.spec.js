@@ -13,6 +13,9 @@ describe("EditorPage", () => {
   beforeEach(() => {
     sdk = mockProps.sdk;
     sdk.entry.fields.experimentId.onValueChanged = fn => () => {};
+
+    Date.now = jest.fn(() => 100);
+    Math.random = jest.fn(() => 0.5);
   });
 
   it("should show the reauth modal when no client is available", () => {

@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "3.31.0",
-    "@contentful/forma-36-fcss": "^0.0.27",
-    "@contentful/forma-36-react-components": "^3.79.2",
-    "@contentful/forma-36-tokens": "^0.4.5",
+    "@contentful/forma-36-fcss": "^0.3.3",
+    "@contentful/forma-36-react-components": "^3.93.2",
+    "@contentful/forma-36-tokens": "^0.11.0",
     "@gatsby-cloud-pkg/gatsby-cms-extension-base": "0.0.46",
     "emotion": "10.0.14",
     "prop-types": "15.7.2",

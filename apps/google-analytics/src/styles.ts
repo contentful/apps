@@ -15,7 +15,7 @@ const styles = {
     borderRadius: '2px'
   }),
   lightText: css({
-    color: tokens.colorTextLight
+    color: tokens.gray600
   }),
   signInButton: css({
     textAlign: 'center',
@@ -28,7 +28,7 @@ const styles = {
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.colorElementMid
+    backgroundColor: tokens.gray300
   }),
   background: css({
     display: 'block',
@@ -62,7 +62,7 @@ const styles = {
     display: 'none'
   }),
   slug: css({
-    color: tokens.colorTextLight,
+    color: tokens.gray600,
     fontSize: tokens.fontSizeS,
     marginBottom: tokens.spacingM
   }),

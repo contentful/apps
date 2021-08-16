@@ -19,7 +19,7 @@ const styles = {
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.colorElementMid
+    backgroundColor: tokens.gray300
   }),
   background: css({
     display: 'block',

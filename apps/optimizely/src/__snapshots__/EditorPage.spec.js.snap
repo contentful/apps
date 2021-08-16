@@ -10,7 +10,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
       class="css-3p38p2"
     >
       <div
-        class="css-xieh1a"
+        class="css-1eow32f"
       >
         <svg
           class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP css-uoder"
@@ -43,7 +43,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         />
       </svg>
       <div
-        class="css-xieh1a"
+        class="css-1eow32f"
       >
         <svg
           class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
@@ -76,7 +76,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         />
       </svg>
       <div
-        class="css-xieh1a"
+        class="css-1eow32f"
       >
         <svg
           class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD css-uoder"
@@ -109,7 +109,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         />
       </svg>
       <div
-        class="css-xieh1a"
+        class="css-1eow32f"
       >
         <svg
           class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--positive___1V4nP css-uoder"
@@ -132,7 +132,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
       </div>
     </div>
     <hr
-      class="css-14380qe"
+      class="css-10hsrou"
     />
     <h2
       class="Heading__Heading___83D3K css-1fobf8d"
@@ -151,7 +151,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
       </p>
     </div>
     <hr
-      class="css-14380qe"
+      class="css-10hsrou"
     />
     <h2
       class="Heading__Heading___83D3K css-1fobf8d"
@@ -220,7 +220,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
     </div>
     
     <hr
-      class="css-14380qe"
+      class="css-10hsrou"
     />
     <h2
       class="Heading__Heading___83D3K"
@@ -241,7 +241,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         class="css-i51og3"
       >
         <h2
-          class="Subheading__Subheading___2mA9j css-1ih9qgr"
+          class="Subheading__Subheading___2mA9j css-rbbksw"
           data-test-id="cf-ui-subheading"
         >
           variation_1
@@ -266,6 +266,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                 aria-expanded="false"
                 aria-haspopup="menu"
                 class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+                data-node-id="dropdown-trigger-50"
                 data-test-id="cf-ui-text-link"
                 type="button"
               >
@@ -277,7 +278,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                     class="TextLink__TextLink__icon-wrapper___25_tI"
                   >
                     <svg
-                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
+                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il TextLink__TextLink__icon___3ggiB"
                       data-test-id="cf-ui-icon"
                       height="1em"
                       viewBox="0 0 24 24"
@@ -313,7 +314,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                   class="TextLink__TextLink__icon-wrapper___25_tI"
                 >
                   <svg
-                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
+                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il TextLink__TextLink__icon___3ggiB"
                     data-test-id="cf-ui-icon"
                     height="1em"
                     viewBox="0 0 24 24"
@@ -338,7 +339,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
         class="css-i51og3"
       >
         <h2
-          class="Subheading__Subheading___2mA9j css-1ih9qgr"
+          class="Subheading__Subheading___2mA9j css-rbbksw"
           data-test-id="cf-ui-subheading"
         >
           variation_2
@@ -363,6 +364,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                 aria-expanded="false"
                 aria-haspopup="menu"
                 class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+                data-node-id="dropdown-trigger-50"
                 data-test-id="cf-ui-text-link"
                 type="button"
               >
@@ -374,7 +376,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                     class="TextLink__TextLink__icon-wrapper___25_tI"
                   >
                     <svg
-                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
+                      class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il TextLink__TextLink__icon___3ggiB"
                       data-test-id="cf-ui-icon"
                       height="1em"
                       viewBox="0 0 24 24"
@@ -410,7 +412,7 @@ exports[`EditorPage should show the experiment data when loaded 1`] = `
                   class="TextLink__TextLink__icon-wrapper___25_tI"
                 >
                   <svg
-                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined TextLink__TextLink__icon___3ggiB"
+                    class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il TextLink__TextLink__icon___3ggiB"
                     data-test-id="cf-ui-icon"
                     height="1em"
                     viewBox="0 0 24 24"

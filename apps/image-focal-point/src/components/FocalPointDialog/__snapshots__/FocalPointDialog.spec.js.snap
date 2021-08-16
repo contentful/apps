@@ -21,7 +21,7 @@ exports[`FocalPointDialog should render the focal point dialog 1`] = `
         tabindex="-1"
       >
         <svg
-          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK undefined IconButton__IconButton__icon___3yZQN"
+          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
           data-test-id="cf-ui-icon"
           height="1em"
           viewBox="0 0 24 24"
@@ -54,7 +54,7 @@ exports[`FocalPointDialog should render the focal point dialog 1`] = `
           Select position of focal point
         </h2>
         <div
-          class="css-y836as"
+          class="css-1biw769"
         >
           <div
             class="css-1njnee2"

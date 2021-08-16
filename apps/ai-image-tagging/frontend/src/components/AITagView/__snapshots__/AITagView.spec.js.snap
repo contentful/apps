@@ -370,19 +370,19 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
       class="css-m9mlq4"
     >
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="ai-tag-1"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="ai-tag-1"
         >
           ai-tag-1
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -390,7 +390,7 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -404,19 +404,19 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         </button>
       </div>
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="ai-tag-2"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="ai-tag-2"
         >
           ai-tag-2
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -424,7 +424,7 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -438,19 +438,19 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         </button>
       </div>
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="ai-tag-3"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="ai-tag-3"
         >
           ai-tag-3
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -458,7 +458,7 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -472,19 +472,19 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         </button>
       </div>
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="prior-tag"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="prior-tag"
         >
           prior-tag
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -492,7 +492,7 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -521,59 +521,63 @@ exports[`AITagView Calling AI Tags should fetch tags and add them to current tag
         >
           Auto-tag from AI
         </span>
-        <svg
-          class="Spinner__Spinner___32lpa Button__Button__spinner___3j8Aj undefined Spinner__Spinner--white___3Hsq3 Button__Button--spinner--exit___2RUI- Button__Button--spinner-exit-active___3HXa7"
-          data-test-id="cf-ui-spinner"
-          style="height: 18px; width: 18px;"
-          viewBox="0 0 60 51"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          class="Button__Button--spinner-wrapper___3m7zk Button__Button--spinner--exit___2RUI- Button__Button--spinner--exit-active___3TjZf"
         >
-          <title>
-            Loading…
-          </title>
-          <g
-            class="Spinner__circle1--translate___1u68A"
-            transform="translate(10,33.528168)"
+          <svg
+            class="Spinner__Spinner___32lpa undefined Spinner__Spinner--white___3Hsq3"
+            data-test-id="cf-ui-spinner"
+            style="height: 12px; width: 12px;"
+            viewBox="0 0 60 51"
+            xmlns="http://www.w3.org/2000/svg"
           >
+            <title>
+              Loading…
+            </title>
             <g
-              class="Spinner__circle1--scale___38WqL"
+              class="Spinner__circle1--translate___1u68A"
+              transform="translate(10,33.528168)"
             >
-              <circle
-                id="circle1"
-                r="6"
-                transform="translate(0,10.471832)"
-              />
+              <g
+                class="Spinner__circle1--scale___38WqL"
+              >
+                <circle
+                  id="circle1"
+                  r="6"
+                  transform="translate(0,10.471832)"
+                />
+              </g>
             </g>
-          </g>
-          <g
-            class="Spinner__circle2--translate___1GBUJ"
-            transform="translate(30,33.528168)"
-          >
             <g
-              class="Spinner__circle2--scale___3khDl"
+              class="Spinner__circle2--translate___1GBUJ"
+              transform="translate(30,33.528168)"
             >
-              <circle
-                id="circle2"
-                r="6"
-                transform="translate(0,10.471832)"
-              />
+              <g
+                class="Spinner__circle2--scale___3khDl"
+              >
+                <circle
+                  id="circle2"
+                  r="6"
+                  transform="translate(0,10.471832)"
+                />
+              </g>
             </g>
-          </g>
-          <g
-            class="Spinner__circle3--translate___2M3jS"
-            transform="translate(50,33.528168)"
-          >
             <g
-              class="Spinner__circle3--scale___2zFhX"
+              class="Spinner__circle3--translate___2M3jS"
+              transform="translate(50,33.528168)"
             >
-              <circle
-                id="circle3"
-                r="6"
-                transform="translate(0,10.471832)"
-              />
+              <g
+                class="Spinner__circle3--scale___2zFhX"
+              >
+                <circle
+                  id="circle3"
+                  r="6"
+                  transform="translate(0,10.471832)"
+                />
+              </g>
             </g>
-          </g>
-        </svg>
+          </svg>
+        </div>
       </span>
     </button>
     <div
@@ -642,19 +646,19 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
       class="css-m9mlq4"
     >
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="ai-tag-1"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="ai-tag-1"
         >
           ai-tag-1
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -662,7 +666,7 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -676,19 +680,19 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
         </button>
       </div>
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="ai-tag-2"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="ai-tag-2"
         >
           ai-tag-2
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -696,7 +700,7 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -710,19 +714,19 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
         </button>
       </div>
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="ai-tag-3"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="ai-tag-3"
         >
           ai-tag-3
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -730,7 +734,7 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -759,59 +763,63 @@ exports[`AITagView Calling AI Tags should fetch tags and overwrite current ones 
         >
           Auto-tag from AI
         </span>
-        <svg
-          class="Spinner__Spinner___32lpa Button__Button__spinner___3j8Aj undefined Spinner__Spinner--white___3Hsq3 Button__Button--spinner--exit___2RUI- Button__Button--spinner-exit-active___3HXa7"
-          data-test-id="cf-ui-spinner"
-          style="height: 18px; width: 18px;"
-          viewBox="0 0 60 51"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          class="Button__Button--spinner-wrapper___3m7zk Button__Button--spinner--exit___2RUI- Button__Button--spinner--exit-active___3TjZf"
         >
-          <title>
-            Loading…
-          </title>
-          <g
-            class="Spinner__circle1--translate___1u68A"
-            transform="translate(10,33.528168)"
+          <svg
+            class="Spinner__Spinner___32lpa undefined Spinner__Spinner--white___3Hsq3"
+            data-test-id="cf-ui-spinner"
+            style="height: 12px; width: 12px;"
+            viewBox="0 0 60 51"
+            xmlns="http://www.w3.org/2000/svg"
           >
+            <title>
+              Loading…
+            </title>
             <g
-              class="Spinner__circle1--scale___38WqL"
+              class="Spinner__circle1--translate___1u68A"
+              transform="translate(10,33.528168)"
             >
-              <circle
-                id="circle1"
-                r="6"
-                transform="translate(0,10.471832)"
-              />
+              <g
+                class="Spinner__circle1--scale___38WqL"
+              >
+                <circle
+                  id="circle1"
+                  r="6"
+                  transform="translate(0,10.471832)"
+                />
+              </g>
             </g>
-          </g>
-          <g
-            class="Spinner__circle2--translate___1GBUJ"
-            transform="translate(30,33.528168)"
-          >
             <g
-              class="Spinner__circle2--scale___3khDl"
+              class="Spinner__circle2--translate___1GBUJ"
+              transform="translate(30,33.528168)"
             >
-              <circle
-                id="circle2"
-                r="6"
-                transform="translate(0,10.471832)"
-              />
+              <g
+                class="Spinner__circle2--scale___3khDl"
+              >
+                <circle
+                  id="circle2"
+                  r="6"
+                  transform="translate(0,10.471832)"
+                />
+              </g>
             </g>
-          </g>
-          <g
-            class="Spinner__circle3--translate___2M3jS"
-            transform="translate(50,33.528168)"
-          >
             <g
-              class="Spinner__circle3--scale___2zFhX"
+              class="Spinner__circle3--translate___2M3jS"
+              transform="translate(50,33.528168)"
             >
-              <circle
-                id="circle3"
-                r="6"
-                transform="translate(0,10.471832)"
-              />
+              <g
+                class="Spinner__circle3--scale___2zFhX"
+              >
+                <circle
+                  id="circle3"
+                  r="6"
+                  transform="translate(0,10.471832)"
+                />
+              </g>
             </g>
-          </g>
-        </svg>
+          </svg>
+        </div>
       </span>
     </button>
     <div
@@ -880,19 +888,19 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
       class="css-m9mlq4"
     >
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="ai-tag-1"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="ai-tag-1"
         >
           ai-tag-1
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -900,7 +908,7 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -914,19 +922,19 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
         </button>
       </div>
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="ai-tag-2"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="ai-tag-2"
         >
           ai-tag-2
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -934,7 +942,7 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -948,19 +956,19 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
         </button>
       </div>
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="ai-tag-3"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="ai-tag-3"
         >
           ai-tag-3
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -968,7 +976,7 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -997,59 +1005,63 @@ exports[`AITagView Calling AI Tags should fetch tags and render them on btn clic
         >
           Auto-tag from AI
         </span>
-        <svg
-          class="Spinner__Spinner___32lpa Button__Button__spinner___3j8Aj undefined Spinner__Spinner--white___3Hsq3 Button__Button--spinner--exit___2RUI- Button__Button--spinner-exit-active___3HXa7"
-          data-test-id="cf-ui-spinner"
-          style="height: 18px; width: 18px;"
-          viewBox="0 0 60 51"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          class="Button__Button--spinner-wrapper___3m7zk Button__Button--spinner--exit___2RUI- Button__Button--spinner--exit-active___3TjZf"
         >
-          <title>
-            Loading…
-          </title>
-          <g
-            class="Spinner__circle1--translate___1u68A"
-            transform="translate(10,33.528168)"
+          <svg
+            class="Spinner__Spinner___32lpa undefined Spinner__Spinner--white___3Hsq3"
+            data-test-id="cf-ui-spinner"
+            style="height: 12px; width: 12px;"
+            viewBox="0 0 60 51"
+            xmlns="http://www.w3.org/2000/svg"
           >
+            <title>
+              Loading…
+            </title>
             <g
-              class="Spinner__circle1--scale___38WqL"
+              class="Spinner__circle1--translate___1u68A"
+              transform="translate(10,33.528168)"
             >
-              <circle
-                id="circle1"
-                r="6"
-                transform="translate(0,10.471832)"
-              />
+              <g
+                class="Spinner__circle1--scale___38WqL"
+              >
+                <circle
+                  id="circle1"
+                  r="6"
+                  transform="translate(0,10.471832)"
+                />
+              </g>
             </g>
-          </g>
-          <g
-            class="Spinner__circle2--translate___1GBUJ"
-            transform="translate(30,33.528168)"
-          >
             <g
-              class="Spinner__circle2--scale___3khDl"
+              class="Spinner__circle2--translate___1GBUJ"
+              transform="translate(30,33.528168)"
             >
-              <circle
-                id="circle2"
-                r="6"
-                transform="translate(0,10.471832)"
-              />
+              <g
+                class="Spinner__circle2--scale___3khDl"
+              >
+                <circle
+                  id="circle2"
+                  r="6"
+                  transform="translate(0,10.471832)"
+                />
+              </g>
             </g>
-          </g>
-          <g
-            class="Spinner__circle3--translate___2M3jS"
-            transform="translate(50,33.528168)"
-          >
             <g
-              class="Spinner__circle3--scale___2zFhX"
+              class="Spinner__circle3--translate___2M3jS"
+              transform="translate(50,33.528168)"
             >
-              <circle
-                id="circle3"
-                r="6"
-                transform="translate(0,10.471832)"
-              />
+              <g
+                class="Spinner__circle3--scale___2zFhX"
+              >
+                <circle
+                  id="circle3"
+                  r="6"
+                  transform="translate(0,10.471832)"
+                />
+              </g>
             </g>
-          </g>
-        </svg>
+          </svg>
+        </div>
       </span>
     </button>
     <div
@@ -1118,19 +1130,19 @@ exports[`AITagView if there is an image should add image tags on Enter 1`] = `
       class="css-m9mlq4"
     >
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="new tag"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="new tag"
         >
           new tag
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -1138,7 +1150,7 @@ exports[`AITagView if there is an image should add image tags on Enter 1`] = `
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -1317,19 +1329,19 @@ exports[`AITagView if there is an image should ignore duplicate image tags 1`] =
       class="css-m9mlq4"
     >
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="tag1"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="tag1"
         >
           tag1
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -1337,7 +1349,7 @@ exports[`AITagView if there is an image should ignore duplicate image tags 1`] =
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -1351,19 +1363,19 @@ exports[`AITagView if there is an image should ignore duplicate image tags 1`] =
         </button>
       </div>
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="tag2"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="tag2"
         >
           tag2
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -1371,7 +1383,7 @@ exports[`AITagView if there is an image should ignore duplicate image tags 1`] =
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -1468,19 +1480,19 @@ exports[`AITagView if there is an image should render image tags if available 1`
       class="css-m9mlq4"
     >
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="tag1"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="tag1"
         >
           tag1
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -1488,7 +1500,7 @@ exports[`AITagView if there is an image should render image tags if available 1`
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"
@@ -1502,19 +1514,19 @@ exports[`AITagView if there is an image should render image tags if available 1`
         </button>
       </div>
       <div
-        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 css-wqjilo"
+        class="Pill__Pill___2yQFD a11y__focus-outline--default___2hwb1 Pill__Pill--idle___3nZ8p css-wqjilo"
         data-test-id="cf-ui-pill"
       >
         <span
           aria-label="tag2"
-          class="Pill__Pill__label____EsBZ"
+          class="Pill__Pill__label____EsBZ Pill__Pill__label--idle___3PU9m"
           title="tag2"
         >
           tag2
         </span>
         <button
           aria-label="close"
-          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1"
+          class="Pill__Pill__close-button___3OlnQ a11y__focus-outline--default___2hwb1 Pill__Pill__close-button--idle___OneTW"
           type="button"
         >
           <span
@@ -1522,7 +1534,7 @@ exports[`AITagView if there is an image should render image tags if available 1`
             tabindex="-1"
           >
             <svg
-              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon___1NILR"
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--muted___3egnD Pill__Pill__icon--idle___1Yi7d"
               data-test-id="cf-ui-icon"
               height="1em"
               viewBox="0 0 24 24"

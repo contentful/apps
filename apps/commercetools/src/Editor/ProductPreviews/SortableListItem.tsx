@@ -67,7 +67,7 @@ const styles = {
       }),
       '&:hover': {
         svg: css({
-          fill: tokens.colorContrastDark
+          fill: tokens.colorBlack
         })
       }
     })
@@ -85,7 +85,7 @@ const styles = {
       ...(product.name && { textTransform: 'capitalize' })
     }),
   subheading: css({
-    color: tokens.colorElementDarkest,
+    color: tokens.gray500,
     fontSize: tokens.fontSizeS,
     marginBottom: 0
   }),
@@ -95,14 +95,14 @@ const styles = {
     padding: tokens.spacingM
   }),
   errorImage: css({
-    backgroundColor: tokens.colorElementLightest,
+    backgroundColor: tokens.gray100,
     borderRadius: '3px',
     margin: tokens.spacingM,
     width: `${IMAGE_SIZE}px`,
     height: `${IMAGE_SIZE}px`,
     position: 'relative',
     svg: css({
-      fill: tokens.colorTextLight,
+      fill: tokens.gray600,
       width: '100%',
       height: '50%',
       position: 'absolute',

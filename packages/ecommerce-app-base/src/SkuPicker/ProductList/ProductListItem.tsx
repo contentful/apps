@@ -27,7 +27,7 @@ const styles = {
   }),
   product: css({
     border: '1px solid',
-    borderColor: tokens.colorElementLight,
+    borderColor: tokens.gray200,
     borderRadius: '3px',
     boxShadow: '0px 0px 0px 1px inset rgba(48, 114, 190, 0), 0 1px 3px rgba(0, 0, 0, 0)',
     display: 'flex',
@@ -36,7 +36,7 @@ const styles = {
     outline: 0,
     transition: `all ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
     '&:hover': {
-      borderColor: tokens.colorElementDark,
+      borderColor: tokens.gray400,
       cursor: 'pointer',
     },
     width: '100%',
@@ -74,7 +74,7 @@ const styles = {
   }),
   sku: css({
     flex: '0 1 auto',
-    color: tokens.colorTextLight,
+    color: tokens.gray600,
     fontSize: tokens.fontSizeS,
     marginTop: 0,
     marginBottom: 0,
@@ -88,12 +88,12 @@ const styles = {
     height: '290px',
   }),
   errorImage: css({
-    backgroundColor: tokens.colorElementLightest,
+    backgroundColor: tokens.gray100,
     width: '100%',
     height: '290px',
     position: 'relative',
     svg: css({
-      fill: tokens.colorTextLight,
+      fill: tokens.gray600,
       width: '100%',
       height: '50%',
       position: 'absolute',
