@@ -1,4 +1,4 @@
-import {get} from "lodash";
+import { get } from "lodash";
 import React from "react";
 import PropTypes from "prop-types";
 import {
@@ -13,22 +13,23 @@ import ContentTypesPanel from "./ContentTypesPanel";
 import styles from "../styles";
 
 function editorInterfacesToEnabledContentTypes(eis, appId) {
-  const findAppWidget = (item) =>
-    item.widgetNamespace === "app" && item.widgetId === appId;
+  const findAppWidget = item => item.widgetNamespace === "app" && item.widgetId === appId;
   return eis
-    .filter((ei) => !!get(ei, ["sidebar"], []).find(findAppWidget))
-    .map((ei) => get(ei, ["sys", "contentType", "sys", "id"]))
-    .filter((ctId) => typeof ctId === "string" && ctId.length > 0);
+    .filter(ei => !!get(ei, ["sidebar"], []).find(findAppWidget))
+    .map(ei => get(ei, ["sys", "contentType", "sys", "id"]))
+    .filter(ctId => typeof ctId === "string" && ctId.length > 0);
 }
 
-function enabledContentTypesToTargetState(contentTypes, enabledContentTypes) {
+export function enabledContentTypesToTargetState(currentState, contentTypes, enabledContentTypes) {
   return {
     EditorInterface: contentTypes.reduce((acc, ct) => {
+      const ctCurrentStateSidebar = currentState?.EditorInterface[ct.sys.id]?.sidebar;
+      const ctEditorInterface = ctCurrentStateSidebar
+        ? { sidebar: ctCurrentStateSidebar }
+        : { sidebar: { position: 3 } };
       return {
         ...acc,
-        [ct.sys.id]: enabledContentTypes.includes(ct.sys.id)
-          ? { sidebar: { position: 3 } }
-          : {},
+        [ct.sys.id]: enabledContentTypes.includes(ct.sys.id) ? ctEditorInterface : {},
       };
     }, {}),
   };
@@ -57,7 +58,7 @@ export class AppConfig extends React.Component {
     const [installationParams, eisRes, contentTypesRes] = await Promise.all([
       app.getParameters(),
       space.getEditorInterfaces(),
-      space.getContentTypes({limit: 1000}),
+      space.getContentTypes({ limit: 1000 }),
     ]);
 
     const params = installationParams || {};
@@ -66,10 +67,7 @@ export class AppConfig extends React.Component {
     this.setState(
       {
         contentTypes: contentTypesRes.items,
-        enabledContentTypes: editorInterfacesToEnabledContentTypes(
-          eisRes.items,
-          ids.app
-        ),
+        enabledContentTypes: editorInterfacesToEnabledContentTypes(eisRes.items, ids.app),
         selectorType: params.selectorType,
         urlConstructors: params.urlConstructors || [],
         previewUrl: params.previewUrl || "",
@@ -80,7 +78,6 @@ export class AppConfig extends React.Component {
     );
 
     app.onConfigure(this.configureApp);
-
   }
 
   configureApp = async () => {
@@ -92,7 +89,7 @@ export class AppConfig extends React.Component {
       webhookUrl,
       authToken,
     } = this.state;
-    
+
     this.setState({ validPreview: true, validWebhook: true });
 
     let valid = true;
@@ -117,30 +114,32 @@ export class AppConfig extends React.Component {
       this.props.sdk.notifier.error("Please review the errors in the form.");
       return false;
     }
+    const currentState = await this.props.sdk.app.getCurrentState();
 
     return {
       parameters: {
         previewUrl,
         webhookUrl,
         authToken,
-        urlConstructors
+        urlConstructors,
       },
       targetState: enabledContentTypesToTargetState(
+        currentState,
         contentTypes,
         enabledContentTypes
       ),
     };
   };
 
-  updatePreviewUrl = (e) => {
+  updatePreviewUrl = e => {
     this.setState({ previewUrl: e.target.value, validPreview: true });
   };
 
-  updateWebhookUrl = (e) => {
+  updateWebhookUrl = e => {
     this.setState({ webhookUrl: e.target.value, validWebhook: true });
   };
 
-  updateAuthToken = (e) => {
+  updateAuthToken = e => {
     this.setState({ authToken: e.target.value });
   };
 
@@ -157,22 +156,20 @@ export class AppConfig extends React.Component {
   };
 
   selectorTypeToggle = () => {
-    this.setState((prevState) => ({
-      selectorType: !prevState.selectorType
-    }))
-  }
+    this.setState(prevState => ({
+      selectorType: !prevState.selectorType,
+    }));
+  };
 
-  disableContentType = (id) => {
+  disableContentType = id => {
     const newEnabledTypes = this.state.enabledContentTypes.filter(type => type !== id);
-    const shouldUpdate = this.state.enabledContentTypes.length > newEnabledTypes.length
+    const shouldUpdate = this.state.enabledContentTypes.length > newEnabledTypes.length;
     if (shouldUpdate) {
-      this.setState(() => (
-        {
-          enabledContentTypes: newEnabledTypes
-        }
-      ))
+      this.setState(() => ({
+        enabledContentTypes: newEnabledTypes,
+      }));
     }
-  }
+  };
 
   toggleContentType = (enabledContentTypes, newId, prevId) => {
     if (enabledContentTypes.includes(prevId) && prevId !== newId) {
@@ -186,50 +183,42 @@ export class AppConfig extends React.Component {
   };
 
   onContentTypeToggle = (newId, prevId) => {
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       ...prevState,
-      enabledContentTypes: this.toggleContentType(
-        prevState.enabledContentTypes,
-        newId,
-        prevId
-      ),
+      enabledContentTypes: this.toggleContentType(prevState.enabledContentTypes, newId, prevId),
     }));
   };
 
   updateUrlConstructors = (currentUrlConstructors, id, newInput) => {
     let constructors;
     // Check if the constructor needs to be added, or if an id that already exists needs a new slug
-    const index = currentUrlConstructors.findIndex(cur => cur.id === id)
+    const index = currentUrlConstructors.findIndex(cur => cur.id === id);
     if (index !== -1) {
-      currentUrlConstructors[index].slug = newInput
-       constructors = currentUrlConstructors
+      currentUrlConstructors[index].slug = newInput;
+      constructors = currentUrlConstructors;
     } else {
       const newConstructor = {
         id,
-        slug: newInput
-      }
-      constructors = [...currentUrlConstructors, ...[newConstructor]]
+        slug: newInput,
+      };
+      constructors = [...currentUrlConstructors, ...[newConstructor]];
     }
     // Filter out constructors that no longer have the app enabled
     return constructors.filter(constructor => {
-      const keep = this.state.enabledContentTypes.findIndex(id => id === constructor.id) !== -1
-      return keep
-    })
-  }
+      const keep = this.state.enabledContentTypes.findIndex(id => id === constructor.id) !== -1;
+      return keep;
+    });
+  };
 
   onSlugInput = (id, input) => {
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       ...prevState,
-      urlConstructors: this.updateUrlConstructors(
-        prevState.urlConstructors,
-        id,
-        input
-      ),
-    }))
-  }
+      urlConstructors: this.updateUrlConstructors(prevState.urlConstructors, id, input),
+    }));
+  };
 
   render() {
-    const { contentTypes, enabledContentTypes, urlConstructors, selectorType} = this.state;
+    const { contentTypes, enabledContentTypes, urlConstructors, selectorType } = this.state;
     const { sdk } = this.props;
     const {
       ids: { space, environment },
@@ -243,19 +232,16 @@ export class AppConfig extends React.Component {
             <Typography>
               <Heading>About Gatsby Cloud</Heading>
               <Paragraph>
-                This app connects to Gatsby Cloud which lets you see updates to
-                your Gatsby site as soon as you change content in Contentful.
-                This makes it easy for content creators to see changes they make
-                to the website before going live.
+                This app connects to Gatsby Cloud which lets you see updates to your Gatsby site as
+                soon as you change content in Contentful. This makes it easy for content creators to
+                see changes they make to the website before going live.
               </Paragraph>
             </Typography>
           </div>
           <hr className={styles.splitter} />
           <Typography>
             <Heading>Account Details</Heading>
-            <Paragraph>
-              Gatsby Cloud needs a Site URL in order to preview projects.
-            </Paragraph>
+            <Paragraph>Gatsby Cloud needs a Site URL in order to preview projects.</Paragraph>
             <TextField
               name="previewUrl"
               id="previewUrl"
