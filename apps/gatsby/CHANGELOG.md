@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.8.0](https://github.com/contentful/apps/compare/gatsby-preview@1.7.0...gatsby-preview@1.8.0) (2021-08-24)
+
+
+### Features
+
+* [] don't overwrite existing editor interface config when configuring gatsby ([#418](https://github.com/contentful/apps/issues/418)) ([f2e185d](https://github.com/contentful/apps/commit/f2e185d65c19e9260f448c65ceed83bc5b3ebe93))
+
+
+
+
+
 # [1.7.0](https://github.com/contentful/apps/compare/gatsby-preview@1.6.1...gatsby-preview@1.7.0) (2021-08-16)
 
 
