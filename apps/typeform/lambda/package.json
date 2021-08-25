@@ -1,7 +1,7 @@
 {
   "name": "typeform-lambda",
   "private": true,
-  "version": "1.2.3",
+  "version": "1.2.4",
   "author": "Contentful GmbH",
   "license": "MIT",
   "scripts": {
