@@ -18,7 +18,7 @@
     "node-fetch": "^2.6.1",
     "openid-client": "^4.7.4",
     "rimraf": "^3.0.1",
-    "serverless": "^2.53.1",
+    "serverless": "1.63.0",
     "serverless-express": "^2.0.11",
     "smartling-frontend": "^1.4.0",
     "typescript": "^3.7.5"
