@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.6](https://github.com/contentful/apps/compare/functions@1.1.5...functions@1.1.6) (2021-08-26)
+
+**Note:** Version bump only for package functions
+
+
+
+
+
 ## [1.1.5](https://github.com/contentful/apps/compare/functions@1.1.4...functions@1.1.5) (2021-08-25)
 
 **Note:** Version bump only for package functions
