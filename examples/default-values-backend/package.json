@@ -10,28 +10,30 @@
   "author": "Contentful GmbH",
   "license": "MIT",
   "dependencies": {
-    "@contentful/app-sdk": "3.31.0",
+    "@contentful/app-sdk": "3.39.0",
     "@contentful/forma-36-fcss": "^0.3.3",
     "@contentful/forma-36-react-components": "^3.93.2",
-    "@contentful/node-apps-toolkit": "^1.0.1",
-    "@hapi/hapi": "^19.1.1",
+    "@contentful/node-apps-toolkit": "^2.0.0",
+    "@hapi/hapi": "^20.1.5",
     "@hapi/inert": "^6.0.1",
-    "@types/hapi__hapi": "^19.0.3",
+    "@types/hapi__hapi": "^20.0.9",
     "@types/node-fetch": "^2.5.7",
-    "dotenv": "^8.2.0",
-    "hapi": "^18.1.0",
+    "dotenv": "^10.0.0",
     "node-fetch": "^2.6.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "tslint": "^6.1.2",
-    "typescript": "^3.9.2"
+    "typescript": "^4.3.5"
   },
   "devDependencies": {
     "parcel-bundler": "^1.12.4",
     "prettier": "^2.0.5",
-    "ts-node": "^8.10.1"
+    "ts-node": "^10.2.1"
   },
   "browserslist": [
     "last 1 Chrome versions"
-  ]
+  ],
+  "engines": {
+    "node": "^14 || ^16"
+  }
 }
