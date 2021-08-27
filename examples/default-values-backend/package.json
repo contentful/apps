@@ -34,6 +34,6 @@
     "last 1 Chrome versions"
   ],
   "engines": {
-    "node": ">15 <17"
+    "node": "^14 || ^16"
   }
 }
