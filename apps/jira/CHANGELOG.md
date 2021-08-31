@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.3](https://github.com/contentful/apps/compare/jira@1.4.2...jira@1.4.3) (2021-08-31)
+
+**Note:** Version bump only for package jira
+
+
+
+
+
 ## [1.4.2](https://github.com/contentful/apps/compare/jira@1.4.1...jira@1.4.2) (2021-08-26)
 
 **Note:** Version bump only for package jira

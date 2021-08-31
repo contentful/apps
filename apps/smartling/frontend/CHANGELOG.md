@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1](https://github.com/contentful/apps/compare/smartling-frontend@1.4.0...smartling-frontend@1.4.1) (2021-08-31)
+
+**Note:** Version bump only for package smartling-frontend
+
+
+
+
+
 # [1.4.0](https://github.com/contentful/apps/compare/smartling-frontend@1.3.4...smartling-frontend@1.4.0) (2021-08-16)
 
 
