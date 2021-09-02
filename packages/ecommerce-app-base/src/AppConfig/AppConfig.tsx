@@ -24,10 +24,11 @@ import {
   EditorInterface,
   ContentType,
   CompatibleFields,
-  SelectedFields
+  SelectedFields,
+  FieldsSkuTypes
 } from './fields';
 
-import { Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
+import { Config, Integration, ParameterDefinition, ValidateParametersFn } from '../interfaces';
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -37,13 +38,16 @@ interface Props {
   name: string;
   color: string;
   description: string;
+  skuTypes?: Integration['skuTypes'];
 }
 
 interface State {
   contentTypes: ContentType[];
   compatibleFields: CompatibleFields;
   selectedFields: SelectedFields;
+  fieldSkuTypes: FieldsSkuTypes;
   parameters: Config;
+  appReady: boolean;
 }
 
 const styles = {
@@ -95,7 +99,9 @@ export default class AppConfig extends React.Component<Props, State> {
     contentTypes: [],
     compatibleFields: {},
     selectedFields: {},
-    parameters: toInputParameters(this.props.parameterDefinitions, null)
+    fieldSkuTypes: {},
+    parameters: toInputParameters(this.props.parameterDefinitions, null),
+    appReady: false
   };
 
   componentDidMount() {
@@ -127,14 +133,16 @@ export default class AppConfig extends React.Component<Props, State> {
         contentTypes: filteredContentTypes,
         compatibleFields,
         selectedFields: editorInterfacesToSelectedFields(editorInterfaces, ids.app),
-        parameters: toInputParameters(this.props.parameterDefinitions, parameters)
+        parameters: toInputParameters(this.props.parameterDefinitions, parameters),
+        fieldSkuTypes: (parameters as { skuTypes?: FieldsSkuTypes })?.skuTypes ?? {},
+        appReady: true
       },
       () => app.setReady()
     );
   };
 
   onAppConfigure = () => {
-    const { parameters, contentTypes, selectedFields } = this.state;
+    const { parameters, contentTypes, selectedFields, fieldSkuTypes } = this.state;
     const error = this.props.validateParameters(parameters);
 
     if (error) {
@@ -142,8 +150,14 @@ export default class AppConfig extends React.Component<Props, State> {
       return false;
     }
 
+    const updatedParameters = toAppParameters(this.props.parameterDefinitions, parameters);
+
+    if (this.props.skuTypes !== undefined) {
+      updatedParameters.skuTypes = fieldSkuTypes;
+    }
+
     return {
-      parameters: toAppParameters(this.props.parameterDefinitions, parameters),
+      parameters: updatedParameters,
       targetState: selectedFieldsToTargetState(contentTypes, selectedFields)
     };
   };
@@ -179,9 +193,20 @@ export default class AppConfig extends React.Component<Props, State> {
     this.setState({ selectedFields });
   };
 
+  onFieldSkuTypesChange = (fieldSkuTypes: FieldsSkuTypes): void => {
+    this.setState({ fieldSkuTypes });
+  };
+
   renderApp() {
-    const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
-    const { parameterDefinitions, sdk } = this.props;
+    const {
+      contentTypes,
+      compatibleFields,
+      selectedFields,
+      fieldSkuTypes,
+      parameters,
+      appReady
+    } = this.state;
+    const { parameterDefinitions, sdk, skuTypes } = this.props;
     const {
       ids: { space, environment }
     } = sdk;
@@ -250,12 +275,17 @@ export default class AppConfig extends React.Component<Props, State> {
               </Note>
             </>
           )}
-          <FieldSelector
-            contentTypes={contentTypes}
-            compatibleFields={compatibleFields}
-            selectedFields={selectedFields}
-            onSelectedFieldsChange={this.onSelectedFieldsChange}
-          />
+          {appReady === true ? (
+            <FieldSelector
+              contentTypes={contentTypes}
+              compatibleFields={compatibleFields}
+              selectedFields={selectedFields}
+              onSelectedFieldsChange={this.onSelectedFieldsChange}
+              fieldSkuTypes={fieldSkuTypes}
+              onFieldSkuTypesChange={this.onFieldSkuTypesChange}
+              skuTypes={skuTypes}
+            />
+          ) : null}
         </Typography>
       </>
     );

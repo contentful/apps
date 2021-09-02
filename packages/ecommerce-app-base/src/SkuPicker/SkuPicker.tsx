@@ -6,7 +6,13 @@ import { Button, TextInput, Icon } from '@contentful/forma-36-react-components';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { Paginator } from './Paginator';
-import { Pagination, Product, ProductPreviewsFn, ProductsFn } from '../interfaces';
+import {
+  MakeSaveBtnTextFn,
+  Pagination,
+  Product,
+  ProductPreviewsFn,
+  ProductsFn
+} from '../interfaces';
 import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
 import { mapSort } from '../utils';
@@ -16,6 +22,8 @@ export interface Props {
   fetchProductPreviews: ProductPreviewsFn;
   fetchProducts: ProductsFn;
   searchDelay?: number;
+  skuType?: string;
+  makeSaveBtnText?: MakeSaveBtnTextFn;
 }
 
 interface State {
@@ -29,7 +37,7 @@ interface State {
 
 const DEFAULT_SEARCH_DELAY = 250;
 
-function getSaveBtnText(selectedSKUs: string[]): string {
+function defaultGetSaveBtnText(selectedSKUs: string[]): string {
   switch (selectedSKUs.length) {
     case 0:
       return 'Save products';
@@ -61,7 +69,6 @@ export class SkuPicker extends Component<Props, State> {
     super(props);
     this.setSearchCallback = debounce(() => {
       this.setActivePage(1);
-      this.updateProducts();
     }, this.props.searchDelay || DEFAULT_SEARCH_DELAY);
   }
 
@@ -96,8 +103,9 @@ export class SkuPicker extends Component<Props, State> {
   updateSelectedProducts = async () => {
     try {
       const { selectedSKUs } = this.state;
-      const config = this.props.sdk.parameters.installation;
-      const selectedProductsUnsorted = await this.props.fetchProductPreviews(selectedSKUs, config);
+      const { sdk, skuType, fetchProductPreviews } = this.props;
+      const config = sdk.parameters.installation;
+      const selectedProductsUnsorted = await fetchProductPreviews(selectedSKUs, config, skuType);
       const selectedProducts = mapSort(selectedProductsUnsorted, selectedSKUs, 'sku');
       this.setState({ selectedProducts });
     } catch (error) {
@@ -143,6 +151,7 @@ export class SkuPicker extends Component<Props, State> {
 
   render() {
     const { search, pagination, products, selectedProducts, selectedSKUs } = this.state;
+    const { makeSaveBtnText = defaultGetSaveBtnText, skuType } = this.props;
     const infiniteScrollingPaginationMode = 'hasNextPage' in pagination;
     const pageCount = Math.ceil(pagination.total / pagination.limit);
 
@@ -174,7 +183,7 @@ export class SkuPicker extends Component<Props, State> {
               buttonType="primary"
               onClick={() => this.props.sdk.close(selectedSKUs)}
               disabled={selectedSKUs.length === 0}>
-              {getSaveBtnText(selectedSKUs)}
+              {makeSaveBtnText(selectedSKUs, skuType)}
             </Button>
           </div>
         </header>

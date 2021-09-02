@@ -74,9 +74,18 @@ export type ProductsFn = (
  * Returns the text that is displayed on the button in the field location.
  *
  * @param fieldType Type of the field the app is used for.
+ * @param skuType SKU type of the current field. Undefined if only a single SKU type is supported by the app.
  * @returns Text that should be displayed on the button
  */
-export type MakeCTAFn = (fieldType: string) => string;
+export type MakeCTAFn = (fieldType: string, skuType?: string) => string;
+
+/**
+ * Returns the text that is used for confirming the dialog selection.
+ *
+ * @param selectedSKUs An array of SKUs chosen.
+ * @returns Text that should be displayed on the button
+ */
+export type MakeSaveBtnTextFn = (selectedSKUs: string[], skuType?: string) => string;
 
 /**
  * Custom code that validates installation parameters that is run before saving.
@@ -91,9 +100,14 @@ export type ValidateParametersFn = (parameters: Record<string, string>) => strin
  *
  * @param skus List of skus
  * @param config App configuration
+ * @param skuType SKU type of the current field. Undefined if only a single SKU type is supported by the app.
  * @returns List of Products which is used to render a preview.
  */
-export type ProductPreviewsFn = (skus: string[], config: Config) => Promise<Product[]>;
+export type ProductPreviewsFn = (
+  skus: string[],
+  config: Config,
+  skuType?: string
+) => Promise<Product[]>;
 export type DeleteFn = (index: number) => void;
 
 /**
@@ -247,4 +261,10 @@ export interface Integration {
    * @returns true, if the button in the field location should be disabled. false, if the button should be enabled
    */
   isDisabled: DisabledPredicateFn;
+
+  /**
+   * If your app supports multiple sku types (for example - product, product variant, category...) you can provide a list here.
+   * This configuration will be stored under the skuTypes key in your installation parameters.
+   */
+  skuTypes?: { id: string; name: string; default?: boolean }[];
 }

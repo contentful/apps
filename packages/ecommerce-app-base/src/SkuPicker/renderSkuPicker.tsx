@@ -2,26 +2,31 @@ import React from 'react';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { render } from 'react-dom';
 import { SkuPicker } from './SkuPicker';
-import { ProductPreviewsFn, ProductsFn } from '../interfaces';
+import { MakeSaveBtnTextFn, ProductPreviewsFn, ProductsFn } from '../interfaces';
 
 interface Props {
   sdk: DialogExtensionSDK;
   fetchProductPreviews: ProductPreviewsFn;
   fetchProducts: ProductsFn;
   searchDelay?: number;
+  skuType?: string;
+  makeSaveBtnText?: MakeSaveBtnTextFn;
 }
 
 export function renderSkuPicker(
   elementId: string,
-  { sdk, fetchProductPreviews, fetchProducts, searchDelay }: Props
+  { sdk, fetchProductPreviews, fetchProducts, searchDelay, skuType, makeSaveBtnText }: Props
 ): void {
   const root = document.getElementById(elementId);
+
   render(
     <SkuPicker
       sdk={sdk}
       fetchProductPreviews={fetchProductPreviews}
       fetchProducts={fetchProducts}
       searchDelay={searchDelay}
+      skuType={skuType}
+      makeSaveBtnText={makeSaveBtnText}
     />,
     root
   );

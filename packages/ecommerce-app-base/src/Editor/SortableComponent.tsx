@@ -14,6 +14,7 @@ interface Props {
   config: Config;
   skus: string[];
   fetchProductPreviews: ProductPreviewsFn;
+  skuType?: string;
 }
 
 interface State {
@@ -40,9 +41,9 @@ export class SortableComponent extends React.Component<Props, State> {
 
   updateProductPreviews = async (shouldRefetch: boolean = true) => {
     try {
-      const { fetchProductPreviews, skus, config } = this.props;
+      const { fetchProductPreviews, skus, config, skuType } = this.props;
       const productPreviewsUnsorted = shouldRefetch
-        ? await fetchProductPreviews(skus, config)
+        ? await fetchProductPreviews(skus, config, skuType)
         : this.state.productPreviews;
       const productPreviews = mapSort(productPreviewsUnsorted, skus, 'sku');
       this.setState({ productPreviews });
