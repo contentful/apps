@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.7.0](https://github.com/contentful/apps/compare/shopify-sku@1.6.15...shopify-sku@1.7.0) (2021-09-02)
+
+
+### Features
+
+* [] Extend Shopify app support to products and collections ([#340](https://github.com/contentful/apps/issues/340)) ([6bf4080](https://github.com/contentful/apps/commit/6bf40807cd6ecd7810f62420de2da9a8b444bd5c))
+
+
+
+
+
 ## [1.6.15](https://github.com/contentful/apps/compare/shopify-sku@1.6.14...shopify-sku@1.6.15) (2021-09-02)
 
 **Note:** Version bump only for package shopify-sku

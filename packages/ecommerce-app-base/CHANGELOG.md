@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.5.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.4.5...@contentful/ecommerce-app-base@2.5.0) (2021-09-02)
+
+
+### Features
+
+* [] Extend Shopify app support to products and collections ([#340](https://github.com/contentful/apps/issues/340)) ([6bf4080](https://github.com/contentful/apps/commit/6bf40807cd6ecd7810f62420de2da9a8b444bd5c))
+
+
+
+
+
 ## [2.4.5](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.4.4...@contentful/ecommerce-app-base@2.4.5) (2021-09-02)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
