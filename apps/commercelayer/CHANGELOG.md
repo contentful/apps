@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.24](https://github.com/contentful/apps/compare/commercelayer-products@1.4.23...commercelayer-products@1.4.24) (2021-09-03)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
 ## [1.4.23](https://github.com/contentful/apps/compare/commercelayer-products@1.4.22...commercelayer-products@1.4.23) (2021-09-02)
 
 **Note:** Version bump only for package commercelayer-products
