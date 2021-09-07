@@ -1,7 +1,7 @@
 service:
   name: sls-apps-smartling
 
-frameworkVersion: '>=1.0.0 <2.0.0'
+frameworkVersion: '>=2.0.0 <3.0.0'
 
 plugins:
   - serverless-domain-manager
