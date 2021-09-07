@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/typeform-lambda@1.2.5...typeform-lambda@1.3.0) (2021-09-07)
+
+
+### Features
+
+* upgrade serverless to v2 ([#451](https://github.com/contentful/apps/issues/451)) ([fa64ac3](https://github.com/contentful/apps/commit/fa64ac34e9a884230bd6f1c71adcb2fdbb778dc8))
+
+
+
+
+
 ## [1.2.5](https://github.com/contentful/apps/compare/typeform-lambda@1.2.4...typeform-lambda@1.2.5) (2021-08-26)
 
 **Note:** Version bump only for package typeform-lambda

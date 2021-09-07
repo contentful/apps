@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/contentful/apps/compare/smartling-lambda@1.1.13...smartling-lambda@1.2.0) (2021-09-07)
+
+
+### Features
+
+* upgrade serverless to v2 ([#451](https://github.com/contentful/apps/issues/451)) ([fa64ac3](https://github.com/contentful/apps/commit/fa64ac34e9a884230bd6f1c71adcb2fdbb778dc8))
+
+
+
+
+
 ## [1.1.13](https://github.com/contentful/apps/compare/smartling-lambda@1.1.12...smartling-lambda@1.1.13) (2021-08-31)
 
 **Note:** Version bump only for package smartling-lambda
