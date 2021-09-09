@@ -24,9 +24,9 @@ provider:
   deploymentPrefix: sls-apps-typeform
 
 package:
-  exclude:
-    - .git/**
-    - node_modules/typeform-frontend/node_modules/**
+  patterns:
+    - '!.git/**'
+    - '!node_modules/typeform-frontend/node_modules/**'
 
 functions:
   app:

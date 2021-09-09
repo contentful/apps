@@ -35,11 +35,10 @@ provider:
   deploymentPrefix: sls-apps-jira-backend
 
 package:
-  include:
-    - built/**
-  exclude:
-    - .git/**
-    - "**/*.ts"
+  patterns:
+    - 'built/**'
+    - '!.git/**'
+    - '!**/*.ts'
 
 functions:
   oauth:

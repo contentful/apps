@@ -25,12 +25,11 @@ provider:
   deploymentPrefix: sls-apps-smartling
 
 package:
-  include:
-    - built/**
-  exclude:
-    - .git/**
-    - "**/*.ts"
-    - node_modules/smartling-frontend/node_modules/**
+  patterns:
+    - 'built/**'
+    - '!.git/**'
+    - '!**/*.ts'
+    - '!node_modules/smartling-frontend/node_modules/**'
 
 functions:
   app:
