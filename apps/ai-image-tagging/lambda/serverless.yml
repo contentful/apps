@@ -1,5 +1,4 @@
-service:
-  name: sls-apps-ai-image-tagging
+service: sls-apps-ai-image-tagging
 
 frameworkVersion: '>=2.0.0 <3.0.0'
 

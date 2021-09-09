@@ -1,5 +1,4 @@
-service:
-  name: sls-apps-smartling
+service: sls-apps-smartling
 
 frameworkVersion: '>=2.0.0 <3.0.0'
 

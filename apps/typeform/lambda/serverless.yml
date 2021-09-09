@@ -1,5 +1,4 @@
-service:
-  name: sls-apps-typeform
+service: sls-apps-typeform
 
 frameworkVersion: '>=2.0.0 <3.0.0'
 
