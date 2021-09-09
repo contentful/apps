@@ -19,7 +19,7 @@ custom:
 provider:
   name: aws
   runtime: nodejs12.x
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, 'test'}
   region: 'us-east-1'
   deploymentBucket:
     name: cf-apps-serverless-deployment
