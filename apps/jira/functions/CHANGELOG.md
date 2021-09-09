@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/contentful/apps/compare/functions@1.2.0...functions@1.3.0) (2021-09-09)
+
+
+### Features
+
+* upgrade serverless to v2 ([#452](https://github.com/contentful/apps/issues/452)) ([24422fd](https://github.com/contentful/apps/commit/24422fd543f765db0167b2b98c61a02d72809008))
+
+
+
+
+
 # [1.2.0](https://github.com/contentful/apps/compare/functions@1.1.6...functions@1.2.0) (2021-09-07)
 
 
