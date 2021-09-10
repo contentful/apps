@@ -9,7 +9,7 @@
     "react-scripts": "4.0.3"
   },
   "dependencies": {
-    "@contentful/app-sdk": "3.31.0",
+    "@contentful/app-sdk": "3.39.1",
     "@contentful/ecommerce-app-base": "^2.5.5",
     "@types/lodash": "^4.14.161",
     "core-js": "3.4.1",
