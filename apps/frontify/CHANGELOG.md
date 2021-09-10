@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.23](https://github.com/contentful/apps/compare/frontify-assets@1.4.22...frontify-assets@1.4.23) (2021-09-10)
+
+**Note:** Version bump only for package frontify-assets
+
+
+
+
+
 ## [1.4.22](https://github.com/contentful/apps/compare/frontify-assets@1.4.21...frontify-assets@1.4.22) (2021-09-10)
 
 **Note:** Version bump only for package frontify-assets
