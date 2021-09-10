@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/app-sdk": "^3.31.0",
+    "@contentful/app-sdk": "3.39.1",
     "@contentful/field-editor-single-line": "^0.11.4",
     "@contentful/field-editor-test-utils": "^0.8.4",
     "@contentful/forma-36-fcss": "^0.3.3",

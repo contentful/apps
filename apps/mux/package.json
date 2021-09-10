@@ -21,7 +21,7 @@
     "typescript": "^3.5.2"
   },
   "dependencies": {
-    "@contentful/app-sdk": "3.31.0",
+    "@contentful/app-sdk": "3.39.1",
     "@contentful/dam-app-base": "^1.2.11",
     "@contentful/forma-36-fcss": "^0.0.35",
     "@contentful/forma-36-react-components": "^3.79.2",
