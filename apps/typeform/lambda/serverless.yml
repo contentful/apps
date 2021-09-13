@@ -1,5 +1,4 @@
-service:
-  name: sls-apps-typeform
+service: sls-apps-typeform
 
 frameworkVersion: '>=2.0.0 <3.0.0'
 
@@ -25,9 +24,9 @@ provider:
   deploymentPrefix: sls-apps-typeform
 
 package:
-  exclude:
-    - .git/**
-    - node_modules/typeform-frontend/node_modules/**
+  patterns:
+    - '!.git/**'
+    - '!node_modules/typeform-frontend/node_modules/**'
 
 functions:
   app:

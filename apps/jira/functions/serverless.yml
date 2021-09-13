@@ -1,5 +1,4 @@
-service:
-  name: sls-apps-jira-backend
+service: sls-apps-jira-backend
 
 frameworkVersion: '>=2.0.0 <3.0.0'
 
@@ -36,11 +35,10 @@ provider:
   deploymentPrefix: sls-apps-jira-backend
 
 package:
-  include:
-    - built/**
-  exclude:
-    - .git/**
-    - "**/*.ts"
+  patterns:
+    - 'built/**'
+    - '!.git/**'
+    - '!**/*.ts'
 
 functions:
   oauth:

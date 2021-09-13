@@ -1,5 +1,4 @@
-service:
-  name: sls-apps-smartling
+service: sls-apps-smartling
 
 frameworkVersion: '>=2.0.0 <3.0.0'
 
@@ -26,12 +25,11 @@ provider:
   deploymentPrefix: sls-apps-smartling
 
 package:
-  include:
-    - built/**
-  exclude:
-    - .git/**
-    - "**/*.ts"
-    - node_modules/smartling-frontend/node_modules/**
+  patterns:
+    - 'built/**'
+    - '!.git/**'
+    - '!**/*.ts'
+    - '!node_modules/smartling-frontend/node_modules/**'
 
 functions:
   app:

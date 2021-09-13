@@ -1,7 +1,6 @@
-service:
-  name: sls-apps-ai-image-tagging
+service: sls-apps-ai-image-tagging
 
-frameworkVersion: '>=2.0.0 <3.0.0'
+frameworkVersion: ">=2.0.0 <3.0.0"
 
 plugins:
   - serverless-domain-manager
@@ -12,34 +11,36 @@ custom:
     domainName: ai-image-tagging.ctfapps.net
     stage: prd
     createRoute53Record: true
-    endpointType: 'edge'
+    endpointType: "edge"
     securityPolicy: tls_1_2
 
 provider:
   name: aws
   runtime: nodejs12.x
   stage: ${opt:stage, 'test'}
-  region: 'us-east-1'
+  region: "us-east-1"
   deploymentBucket:
     name: cf-apps-serverless-deployment
   deploymentPrefix: sls-apps-ai-image-tagging
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-       - rekognition:DetectLabels
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - dynamodb:DescribeTable
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-      Resource: "arn:aws:dynamodb:*:*:table/sls*" # TODO limit to the usage table
-#         - "Fn::GetAtt": [ UsageTable, Arn ]
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - rekognition:DetectLabels
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+          Resource: "arn:aws:dynamodb:*:*:table/sls*" # TODO limit to the usage table
+    #         - "Fn::GetAtt": [ UsageTable, Arn ]
 
 package:
-  exclude:
-    - node_modules/ai-image-tagging-frontend/node_modules/**
+  patterns:
+    - "!node_modules/ai-image-tagging-frontend/node_modules/**"
 
 functions:
   app:
@@ -53,7 +54,6 @@ functions:
       - http:
           path: /{proxy+}
           method: ANY
-
 # resources:
 #   Resources:
 #     UsageTable:
