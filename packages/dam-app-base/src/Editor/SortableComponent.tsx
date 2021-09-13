@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { css } from '@emotion/css';
-import arrayMove from 'array-move';
+import { arrayMoveImmutable } from 'array-move';
 import { IconButton, Card } from '@contentful/forma-36-react-components';
 import { ThumbnailFn, DeleteFn, Asset, Config } from '../interfaces';
 
@@ -131,7 +131,7 @@ const SortableList = SortableContainer<SortableContainerProps>((props: SortableC
 
 export class SortableComponent extends React.Component<Props> {
   onSortEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    const resources = arrayMove(this.props.resources, oldIndex, newIndex);
+    const resources = arrayMoveImmutable(this.props.resources, oldIndex, newIndex);
     this.props.onChange(resources);
   };
 
