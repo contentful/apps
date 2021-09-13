@@ -1,5 +1,5 @@
 import * as React from 'react';
-import arrayMove from 'array-move';
+import { arrayMoveImmutable } from 'array-move';
 import isEqual from 'lodash/isEqual';
 import difference from 'lodash/difference';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
@@ -21,7 +21,7 @@ interface State {
 
 export class ProductPreviews extends React.Component<Props, State> {
   state = {
-    productPreviews: []
+    productPreviews: [],
   };
 
   componentDidMount() {
@@ -53,7 +53,7 @@ export class ProductPreviews extends React.Component<Props, State> {
   };
 
   onSortEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    const skus = arrayMove(this.props.skus, oldIndex, newIndex);
+    const skus = arrayMoveImmutable(this.props.skus, oldIndex, newIndex);
     this.props.onChange(skus);
   };
 
