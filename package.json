@@ -12,6 +12,6 @@
     "publish-packages": "lerna version --conventional-commits --create-release github --yes && lerna publish from-git --yes"
   },
   "dependencies": {
-    "lerna": "^4.0.0"
+    "lerna": "4.0.0"
   }
 }

@@ -3,17 +3,17 @@
   "version": "1.4.30",
   "private": true,
   "devDependencies": {
-    "@contentful/app-scripts": "^0.8.11",
-    "contentful-cli": "^1.8.23",
-    "cross-env": "^7.0.3",
+    "@contentful/app-scripts": "0.8.11",
+    "contentful-cli": "1.8.23",
+    "cross-env": "7.0.3",
     "react-scripts": "4.0.3"
   },
   "dependencies": {
     "@commercelayer/js-auth": "2.0.1",
-    "@contentful/ecommerce-app-base": "^2.5.7",
+    "@contentful/ecommerce-app-base": "2.5.7",
     "core-js": "3.4.1",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react": "17.0.1",
+    "react-dom": "17.0.1"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",

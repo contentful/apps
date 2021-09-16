@@ -4,23 +4,23 @@
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
-    "@testing-library/react": "^11.2.5",
-    "contentful-cli": "^1.8.23",
-    "cross-env": "^7.0.3",
-    "fetch-mock": "^9.0.0-beta.2"
+    "@testing-library/react": "11.2.5",
+    "contentful-cli": "1.8.23",
+    "cross-env": "7.0.3",
+    "fetch-mock": "9.0.0-beta.2"
   },
   "dependencies": {
     "@contentful/app-sdk": "3.39.1",
-    "@contentful/forma-36-fcss": "^0.3.3",
-    "@contentful/forma-36-react-components": "^3.93.2",
-    "@contentful/forma-36-tokens": "^0.11.0",
-    "emotion": "^10.0.27",
-    "lodash.camelcase": "^4.3.0",
-    "lodash.get": "^4.4.2",
-    "prop-types": "^15.7.2",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-scripts": "^4.0.3"
+    "@contentful/forma-36-fcss": "0.3.3",
+    "@contentful/forma-36-react-components": "3.93.2",
+    "@contentful/forma-36-tokens": "0.11.0",
+    "emotion": "10.0.27",
+    "lodash.camelcase": "4.3.0",
+    "lodash.get": "4.4.2",
+    "prop-types": "15.7.2",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-scripts": "4.0.3"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
