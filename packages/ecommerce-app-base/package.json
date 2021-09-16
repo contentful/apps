@@ -25,7 +25,7 @@
     "@types/jest": "27.0.1",
     "@types/lodash.get": "4.4.6",
     "@types/node": "16.4.4",
-    "@types/react": "17.0.15",
+    "@types/react": "17.0.21",
     "@types/react-dom": "17.0.9",
     "@types/react-sortable-hoc": "0.7.1",
     "contentful-cli": "1.2.12",
