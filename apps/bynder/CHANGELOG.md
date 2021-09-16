@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.26](https://github.com/contentful/apps/compare/bynder-assets@1.7.25...bynder-assets@1.7.26) (2021-09-16)
+
+
+### Bug Fixes
+
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+
+
+
+
+
 ## [1.7.25](https://github.com/contentful/apps/compare/bynder-assets@1.7.24...bynder-assets@1.7.25) (2021-09-13)
 
 **Note:** Version bump only for package bynder-assets

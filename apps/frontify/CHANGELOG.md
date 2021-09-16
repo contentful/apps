@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.25](https://github.com/contentful/apps/compare/frontify-assets@1.4.24...frontify-assets@1.4.25) (2021-09-16)
+
+
+### Bug Fixes
+
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+
+
+
+
+
 ## [1.4.24](https://github.com/contentful/apps/compare/frontify-assets@1.4.23...frontify-assets@1.4.24) (2021-09-13)
 
 **Note:** Version bump only for package frontify-assets

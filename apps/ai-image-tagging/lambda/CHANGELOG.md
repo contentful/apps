@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.3](https://github.com/contentful/apps/compare/ai-image-tagging-lambda@1.3.2...ai-image-tagging-lambda@1.3.3) (2021-09-16)
+
+
+### Bug Fixes
+
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+
+
+
+
+
 ## [1.3.2](https://github.com/contentful/apps/compare/ai-image-tagging-lambda@1.3.1...ai-image-tagging-lambda@1.3.2) (2021-09-13)
 
 **Note:** Version bump only for package ai-image-tagging-lambda

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.5.8](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.5.7...@contentful/ecommerce-app-base@2.5.8) (2021-09-16)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#471](https://github.com/contentful/apps/issues/471)) ([e61f7c7](https://github.com/contentful/apps/commit/e61f7c7518058bfba85df840d8d53e9ea6acc15c))
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+
+
+
+
+
 ## [2.5.7](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.5.6...@contentful/ecommerce-app-base@2.5.7) (2021-09-13)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base

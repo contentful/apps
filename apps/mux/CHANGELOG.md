@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.22](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.4.21...mux-contentful-uploader@1.4.22) (2021-09-16)
+
+
+### Bug Fixes
+
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+
+
+
+
+
 ## [1.4.21](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.4.20...mux-contentful-uploader@1.4.21) (2021-09-13)
 
 **Note:** Version bump only for package mux-contentful-uploader
