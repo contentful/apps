@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.19](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.2.18...@contentful/dam-app-base@1.2.19) (2021-09-20)
+
+
+### Bug Fixes
+
+* **deps:** bump core-js from 3.17.3 to 3.18.0 ([#487](https://github.com/contentful/apps/issues/487)) ([9b615d5](https://github.com/contentful/apps/commit/9b615d5806a284e0abdce4d6a3f78d373ba0194d))
+
+
+
+
+
 ## [1.2.18](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.2.17...@contentful/dam-app-base@1.2.18) (2021-09-17)
 
 **Note:** Version bump only for package @contentful/dam-app-base

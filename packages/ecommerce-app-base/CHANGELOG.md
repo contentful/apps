@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.5.14](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.5.13...@contentful/ecommerce-app-base@2.5.14) (2021-09-20)
+
+
+### Bug Fixes
+
+* **deps:** bump core-js from 3.17.3 to 3.18.0 ([#487](https://github.com/contentful/apps/issues/487)) ([9b615d5](https://github.com/contentful/apps/commit/9b615d5806a284e0abdce4d6a3f78d373ba0194d))
+
+
+
+
+
 ## [2.5.13](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.5.12...@contentful/ecommerce-app-base@2.5.13) (2021-09-17)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
