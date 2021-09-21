@@ -30,7 +30,7 @@
     "@types/react-sortable-hoc": "0.7.1",
     "contentful-cli": "1.9.20",
     "cssnano": "4.1.11",
-    "jest": "27.2.0",
+    "jest": "27.2.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "rimraf": "3.0.2",
