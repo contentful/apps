@@ -45,10 +45,6 @@ export default class Sidebar extends React.Component {
   onSysChanged = (content) => {
     this.setManifestId(content);
     this.buildSlug();
-    if (this.debounceInterval) {
-      clearInterval(this.debounceInterval);
-    }
-    this.debounceInterval = setInterval(this.refreshPreview, 1000);
   };
 
   // Recursive helper to return slug values buried in a chain of references
@@ -127,10 +123,6 @@ export default class Sidebar extends React.Component {
   }
 
   refreshPreview = async () => {
-    if (this.debounceInterval) {
-      clearInterval(this.debounceInterval);
-    }
-
     const { webhookUrl, authToken } = this.sdk.parameters.installation;
 
     if (!webhookUrl) {
@@ -172,6 +164,8 @@ export default class Sidebar extends React.Component {
             contentSlug={slug && slug}
             previewUrl={previewUrl}
             authToken={authToken}
+            onOpenPreviewButtonClick={this.refreshPreview}
+
           />
           {webhookUrl && this.renderRefreshStatus()}
         </div>
@@ -193,6 +187,9 @@ export default class Sidebar extends React.Component {
         {!busy && (ok === true) && (
           <>
             <Icon icon="CheckCircle" color="positive" style={ICON_STYLE} />
+            {/**
+              * @todo remvove or reword for accuracy
+              */}
             {' '}Entry data in Gatsby up to date!
           </>
         )}
