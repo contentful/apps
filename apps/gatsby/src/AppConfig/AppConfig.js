@@ -12,6 +12,15 @@ import GatsbyIcon from "../GatsbyIcon";
 import ContentTypesPanel from "./ContentTypesPanel";
 import styles from "../styles";
 
+
+/**
+ * @todo ensure that this regex is legit
+ */
+function isValidUrl(url) {
+  const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/g;
+  return regex.test(url);
+}
+
 function editorInterfacesToEnabledContentTypes(eis, appId) {
   const findAppWidget = item => item.widgetNamespace === "app" && item.widgetId === appId;
   return eis
@@ -47,8 +56,10 @@ export class AppConfig extends React.Component {
     urlConstructors: [],
     previewUrl: "",
     webhookUrl: "",
+    contentSyncUrl: "",
     authToken: "",
     validPreview: true,
+    validContentSync: true,
     validWebhook: true,
   };
 
@@ -72,6 +83,7 @@ export class AppConfig extends React.Component {
         urlConstructors: params.urlConstructors || [],
         previewUrl: params.previewUrl || "",
         webhookUrl: params.webhookUrl || "",
+        contentSyncUrl: params.contentSyncUrl || "",
         authToken: params.authToken || "",
       },
       () => app.setReady()
@@ -86,26 +98,32 @@ export class AppConfig extends React.Component {
       enabledContentTypes,
       urlConstructors,
       previewUrl,
+      contentSyncUrl,
       webhookUrl,
       authToken,
     } = this.state;
 
-    this.setState({ validPreview: true, validWebhook: true });
+    this.setState({
+      validPreview: true,
+      validContentSync: true,
+      validWebhook: true,
+    });
 
     let valid = true;
 
-    if (!previewUrl) {
+    if (!previewUrl || !isValidUrl(previewUrl)) {
       this.setState({ validPreview: false });
       valid = false;
     }
 
-    if (!previewUrl.startsWith("http")) {
-      this.setState({ validPreview: false });
+    // the contentSyncUrl is optional but if it is passed, check that it is valid
+    if (contentSyncUrl && !isValidUrl(contentSyncUrl)) {
+      this.setState({ validContentSync: false });
       valid = false;
     }
 
     // the webhookUrl is optional but if it is passed, check that it is valid
-    if (webhookUrl && !webhookUrl.startsWith("http")) {
+    if (webhookUrl && !isValidUrl(webhookUrl)) {
       this.setState({ validWebhook: false });
       valid = false;
     }
@@ -119,6 +137,7 @@ export class AppConfig extends React.Component {
     return {
       parameters: {
         previewUrl,
+        contentSyncUrl,
         webhookUrl,
         authToken,
         urlConstructors,
@@ -135,6 +154,10 @@ export class AppConfig extends React.Component {
     this.setState({ previewUrl: e.target.value, validPreview: true });
   };
 
+  updateContentSyncUrl = e => {
+    this.setState({ contentSyncUrl: e.target.value, validContentSync: true });
+  }
+
   updateWebhookUrl = e => {
     this.setState({ webhookUrl: e.target.value, validWebhook: true });
   };
@@ -144,10 +167,16 @@ export class AppConfig extends React.Component {
   };
 
   validatePreviewUrl = () => {
-    if (!this.state.previewUrl.startsWith("http")) {
+    if (!isValidUrl(this.state.previewUrl)) {
       this.setState({ validPreview: false });
     }
   };
+
+  validateContentSyncUrl = () => {
+    if (this.state.contentSyncUrl && !isValidUrl(this.state.contentSyncUrl)) {
+      this.setState({ validContentSync: false });
+    }
+  }
 
   validateWebhookUrl = () => {
     if (this.state.webhookUrl && !this.state.webhookUrl.startsWith("http")) {
@@ -224,6 +253,8 @@ export class AppConfig extends React.Component {
       ids: { space, environment },
     } = sdk;
 
+    const urlHelpText = 'Please provide a valid URL (It should start with http)';
+
     return (
       <>
         <div className={styles.background} />
@@ -274,6 +305,24 @@ export class AppConfig extends React.Component {
               }}
             />
             <TextField
+              name="contentSyncUrl"
+              id="contentSyncUrl"
+              labelText="Content Sync Url"
+              value={this.state.contentSyncUrl}
+              onChange={this.state.updateContentSyncUrl}
+              onBlur={this.validateContentSyncUrl}
+              className={styles.input}
+              helpText=""
+              validationMessage={
+                !this.state.validContentSync
+                  ? urlHelpText
+                  : ""
+              }
+              textInputProps={{
+                type: "text",
+              }}
+            />
+            <TextField
               name="webhookUrl"
               id="webhookUrl"
               labelText="Webhook URL"
@@ -284,7 +333,7 @@ export class AppConfig extends React.Component {
               helpText="Optional Webhook URL. If provided, your site will be automatically rebuilt as you change content."
               validationMessage={
                 !this.state.validWebhook
-                  ? "Please provide a valid URL (It should start with http)"
+                  ? urlHelpText
                   : ""
               }
               textInputProps={{

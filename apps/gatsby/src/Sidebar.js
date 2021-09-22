@@ -66,7 +66,16 @@ export default class Sidebar extends React.Component {
       constructor => constructor.id === this.sdk.contentType.sys.id
     ) : undefined;
     // If there is no constructor set the url as the base preview
-    if (!constructor){
+    if (!constructor) {
+      const { slug } = this.props.sdk.entry.fields;
+
+      if (!slug) {
+        /**
+         * @todo bolster up how we might handle and warn users/content editors about this
+         */
+        return;
+      }
+
       const fallbackSlug = await this.props.sdk.entry.fields.slug.getValue();
       this.setState({ slug: fallbackSlug });
       return; 
@@ -133,6 +142,9 @@ export default class Sidebar extends React.Component {
   render = () => {
     const { webhookUrl, authToken, previewUrl } = this.sdk.parameters.installation;
     const { slug } = this.state
+
+    console.log('props', this.props);
+    console.log('sdk', this.sdk)
 
     return (
       <div className="extension">
