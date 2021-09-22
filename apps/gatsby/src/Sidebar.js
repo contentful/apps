@@ -20,7 +20,6 @@ const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   body: JSON.stringify({})
 });
 
-
 export default class Sidebar extends React.Component {
   static propTypes = {
     sdk: PropTypes.object.isRequired
@@ -29,13 +28,23 @@ export default class Sidebar extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {slug: undefined};
+    this.state = {
+      slug: null,
+      manifestId: null,
+    };
     this.sdk = props.sdk;
     this.sdk.entry.onSysChanged(this.onSysChanged);
   }
 
-  onSysChanged = () => {
-    this.buildSlug()
+  setManifestId = (content) => {
+    const { id, space, updatedAt } = content;
+    const manifestId = `${space.sys.id}-${id}-${updatedAt}`;
+    this.setState({ manifestId });
+  }
+
+  onSysChanged = (content) => {
+    this.setManifestId(content);
+    this.buildSlug();
     if (this.debounceInterval) {
       clearInterval(this.debounceInterval);
     }
@@ -111,6 +120,9 @@ export default class Sidebar extends React.Component {
   }
 
   async componentDidMount() {
+    const content = this.props.sdk.entry.getSys();
+    this.setManifestId(content);
+
     this.sdk.window.startAutoResizer();
   }
 
@@ -140,8 +152,18 @@ export default class Sidebar extends React.Component {
   };
 
   render = () => {
-    const { webhookUrl, authToken, previewUrl } = this.sdk.parameters.installation;
-    const { slug } = this.state
+    let {
+      webhookUrl,
+      contentSyncUrl,
+      authToken,
+      previewUrl,
+    } = this.sdk.parameters.installation;
+    const { slug, manifestId } = this.state
+
+    if (contentSyncUrl && manifestId) {
+      previewUrl = `${contentSyncUrl}/gatsby-source-contentful/${manifestId}`;
+      // kick off a preview here and do not also kick if off in the onSysChange handler above
+    }
 
     return (
       <div className="extension">
