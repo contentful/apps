@@ -307,12 +307,15 @@ export class AppConfig extends React.Component {
             <TextField
               name="contentSyncUrl"
               id="contentSyncUrl"
-              labelText="Content Sync Url"
+              labelText="Content Sync URL"
               value={this.state.contentSyncUrl}
-              onChange={this.state.updateContentSyncUrl}
+              onChange={this.updateContentSyncUrl}
               onBlur={this.validateContentSyncUrl}
               className={styles.input}
-              helpText=""
+              /*
+               * @todo ensure that this help text is okay
+               */
+              helpText="Optional Content Sync URL. If provided, previewing content changes will use the Gatsby Content Sync feature."
               validationMessage={
                 !this.state.validContentSync
                   ? urlHelpText

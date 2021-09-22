@@ -143,9 +143,6 @@ export default class Sidebar extends React.Component {
     const { webhookUrl, authToken, previewUrl } = this.sdk.parameters.installation;
     const { slug } = this.state
 
-    console.log('props', this.props);
-    console.log('sdk', this.sdk)
-
     return (
       <div className="extension">
         <div className="flexcontainer">
