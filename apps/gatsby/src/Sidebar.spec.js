@@ -47,11 +47,6 @@ describe('Gatsby App Sidebar', () => {
   beforeEach(() => {
     mockSdk = getMockSdk();
     mockSdk.entry.getSys.mockReturnValue(getMockContent());
-
-    // mockSdk.entry.onSysChanged.mockImplementationOnce(fn => {
-    //   fn({ ...getMockContent() });
-    //   return jest.fn();
-    // });
   });
 
   it('should match snapshot', () => {
