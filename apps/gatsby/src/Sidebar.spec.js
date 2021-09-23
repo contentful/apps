@@ -101,6 +101,6 @@ describe('Gatsby App Sidebar', () => {
     const pluginName = 'gatsby-source-contentful'
     const expectedManifestId = '123-456-2390-08-23T15:27:27.861Z';
     const expectedUrl = `${contentSyncUrl}/${pluginName}/${expectedManifestId}`;
-    expect(mockWindowOpen.mock.calls[0][0]).toEqual(expectedUrl);
+    expect(mockWindowOpen).toBeCalledWith(expectedUrl);
   });
 });
