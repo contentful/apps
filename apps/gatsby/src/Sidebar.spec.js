@@ -1,6 +1,6 @@
 /* global global */
 import React from 'react';
-import { render, cleanup, wait } from '@testing-library/react';
+import { render, cleanup, wait, fireEvent } from '@testing-library/react';
 
 import Sidebar from './Sidebar';
 
@@ -53,7 +53,9 @@ describe('Gatsby App Sidebar', () => {
 
   it('should call onSysChanged and create a manifestId', async () => {
     const mockFetch = jest.fn(() => Promise.resolve());
+    const mockWindowOpen = jest.fn();
     global.fetch = mockFetch;
+    global.open = mockWindowOpen;
     mockSdk.entry.onSysChanged.mockImplementationOnce(fn => {
       fn({ ...getMockContent() });
       return jest.fn();
@@ -61,6 +63,17 @@ describe('Gatsby App Sidebar', () => {
 
     mockSdk.entry.getSys.mockReturnValue(getMockContent());
 
-    render(<Sidebar sdk={mockSdk} />);
+    const { getByText } = render(<Sidebar sdk={mockSdk} />);
+    
+    fireEvent(
+      getByText('Open Preview'),
+      new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+
+    expect(mockFetch.mock.calls[0][0]).toEqual('https://webhook.com');
+    expect(mockWindowOpen.mock.calls[0][0]).toEqual('https://preview.com');
   });
 });
