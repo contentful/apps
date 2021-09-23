@@ -4,7 +4,6 @@ import { render } from 'react-dom';
 jest.mock('react-dom')
 
 
-
 function loadEntryPoint() {
   jest.isolateModules(() => {
     require('./index');
@@ -25,7 +24,15 @@ const mockSdk = {
     }
   },
   entry: {
-    onSysChanged: jest.fn(),
+    onSysChanged: jest.fn(() => ({
+      id: '123',
+      space: {
+        sys: {
+          id: '456',
+        },
+      },
+      updatedAt: '2390-08-23T15:27:27.861Z',
+    })),
     fields: {
       slug: {
         getValue: jest.fn(() => 'preview-slug')

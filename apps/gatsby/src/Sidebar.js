@@ -24,8 +24,16 @@ export default class Sidebar extends React.Component {
       slug: null,
       manifestId: null,
     };
+
     this.sdk = props.sdk;
+  }
+
+  async componentDidMount() {
     this.sdk.entry.onSysChanged(this.onSysChanged);
+    this.sdk.window.startAutoResizer();
+
+    const content = this.props.sdk.entry.getSys();
+    this.setManifestId(content);
   }
 
   setManifestId = (content) => {
@@ -107,15 +115,9 @@ export default class Sidebar extends React.Component {
     this.setState({ slug: finalSlug })
   }
 
-  async componentDidMount() {
-    const content = this.props.sdk.entry.getSys();
-    this.setManifestId(content);
-
-    this.sdk.window.startAutoResizer();
-  }
-
-  refreshPreview = () => {
+  refreshPreview = async () => {
     const { webhookUrl, authToken } = this.sdk.parameters.installation;
+    console.log('hello')
 
     if (!webhookUrl) {
       return;
@@ -150,5 +152,5 @@ export default class Sidebar extends React.Component {
       </div>
     );
   };
-
 }
+
