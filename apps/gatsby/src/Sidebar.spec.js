@@ -1,14 +1,14 @@
 /* global global */
 import React from 'react';
-import { render, cleanup, wait, fireEvent } from '@testing-library/react';
+import { render, cleanup, fireEvent } from '@testing-library/react';
 
 import Sidebar from './Sidebar';
 
 const getMockContent = () => ({
-  id: 'contentId',
+  id: '456',
   space: {
     sys: {
-      id: 'spaceId',
+      id: '123',
     },
   },
   updatedAt: '2390-08-23T15:27:27.861Z',
@@ -80,7 +80,8 @@ describe('Gatsby App Sidebar', () => {
     global.fetch = mockFetch;
     global.open = mockWindowOpen;
 
-    mockSdk.parameters.installation.contentSyncUrl = 'https://content-sync.com/content-sync/fake-site-id';
+    const contentSyncUrl = 'https://content-sync.com/content-sync/fake-site-id';
+    mockSdk.parameters.installation.contentSyncUrl = contentSyncUrl;
 
     const { getByText } = render(<Sidebar sdk={mockSdk} />);
     
@@ -93,6 +94,14 @@ describe('Gatsby App Sidebar', () => {
     );
 
     expect(mockFetch.mock.calls[0][0]).toEqual('https://webhook.com');
-    expect(mockWindowOpen.mock.calls[0][0]).toEqual('https://content-sync.com/content-sync/fake-site-id/gatsby-source-contentful/spaceId-contentId-2390-08-23T15:27:27.861Z');
+    /**
+     * The expected url should be in the form of:
+     * {contentSyncUrl - from gatsby dashboard which includes the site id}/{the source plugin name}/{manifestId}
+     * manifestId is built with the following:
+     */
+    const pluginName = 'gatsby-source-contentful'
+    const expectedManifestId = '123-456-2390-08-23T15:27:27.861Z';
+    const expectedUrl = `${contentSyncUrl}/${pluginName}/${expectedManifestId}`;
+    expect(mockWindowOpen.mock.calls[0][0]).toEqual(expectedUrl);
   });
 });
