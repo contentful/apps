@@ -97,7 +97,6 @@ describe('Gatsby App Sidebar', () => {
     /**
      * The expected url should be in the form of:
      * {contentSyncUrl - from gatsby dashboard which includes the site id}/{the source plugin name}/{manifestId}
-     * manifestId is built with the following:
      */
     const pluginName = 'gatsby-source-contentful'
     const expectedManifestId = '123-456-2390-08-23T15:27:27.861Z';
