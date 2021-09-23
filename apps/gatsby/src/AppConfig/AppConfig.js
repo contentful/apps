@@ -9,17 +9,10 @@ import {
   TextLink,
 } from "@contentful/forma-36-react-components";
 import GatsbyIcon from "../GatsbyIcon";
+import { isValidUrl } from '../utils';
 import ContentTypesPanel from "./ContentTypesPanel";
 import styles from "../styles";
 
-
-/**
- * @todo ensure that this regex is legit
- */
-function isValidUrl(url) {
-  const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/g;
-  return regex.test(url);
-}
 
 function editorInterfacesToEnabledContentTypes(eis, appId) {
   const findAppWidget = item => item.widgetNamespace === "app" && item.widgetId === appId;
