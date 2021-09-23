@@ -5,16 +5,16 @@ import { render, cleanup, wait, fireEvent } from '@testing-library/react';
 import Sidebar from './Sidebar';
 
 const getMockContent = () => ({
-  id: '123',
+  id: 'contentId',
   space: {
     sys: {
-      id: '456',
+      id: 'spaceId',
     },
   },
   updatedAt: '2390-08-23T15:27:27.861Z',
 });
 
-const mockSdk = {
+const getMockSdk = () => ({
   location: {
     is: val => val === 'entry-sidebar'
   },
@@ -39,13 +39,19 @@ const mockSdk = {
   window: {
     startAutoResizer: jest.fn()
   }
-};
-
+});
 
 describe('Gatsby App Sidebar', () => {
+  let mockSdk;
   afterEach(cleanup);
   beforeEach(() => {
+    mockSdk = getMockSdk();
     mockSdk.entry.getSys.mockReturnValue(getMockContent());
+
+    // mockSdk.entry.onSysChanged.mockImplementationOnce(fn => {
+    //   fn({ ...getMockContent() });
+    //   return jest.fn();
+    // });
   });
 
   it('should match snapshot', () => {
@@ -59,11 +65,6 @@ describe('Gatsby App Sidebar', () => {
     const mockWindowOpen = jest.fn();
     global.fetch = mockFetch;
     global.open = mockWindowOpen;
-    mockSdk.entry.onSysChanged.mockImplementationOnce(fn => {
-      fn({ ...getMockContent() });
-      return jest.fn();
-    });
-
     const { getByText } = render(<Sidebar sdk={mockSdk} />);
     
     fireEvent(
@@ -78,5 +79,25 @@ describe('Gatsby App Sidebar', () => {
     expect(mockWindowOpen.mock.calls[0][0]).toEqual('https://preview.com');
   });
 
-  it('should call window.fetch and window.open with the correct urls when a user has added a Content Sync Url', async () => {});
+  it('should call window.fetch and window.open with the correct urls when a user has added a Content Sync Url', async () => {
+    const mockFetch = jest.fn(() => Promise.resolve());
+    const mockWindowOpen = jest.fn();
+    global.fetch = mockFetch;
+    global.open = mockWindowOpen;
+
+    mockSdk.parameters.installation.contentSyncUrl = 'https://content-sync.com/content-sync/fake-site-id';
+
+    const { getByText } = render(<Sidebar sdk={mockSdk} />);
+    
+    fireEvent(
+      getByText('Open Preview'),
+      new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+
+    expect(mockFetch.mock.calls[0][0]).toEqual('https://webhook.com');
+    expect(mockWindowOpen.mock.calls[0][0]).toEqual('https://content-sync.com/content-sync/fake-site-id/gatsby-source-contentful/spaceId-contentId-2390-08-23T15:27:27.861Z');
+  });
 });
