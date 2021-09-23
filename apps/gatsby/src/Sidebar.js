@@ -115,7 +115,7 @@ export default class Sidebar extends React.Component {
     this.setState({ slug: finalSlug })
   }
 
-  refreshPreview = async () => {
+  refreshPreview = () => {
     const { webhookUrl, authToken } = this.sdk.parameters.installation;
 
     if (!webhookUrl) {
