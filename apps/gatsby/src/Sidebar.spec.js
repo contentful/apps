@@ -48,7 +48,7 @@ describe('Gatsby App Sidebar', () => {
     mockSdk.entry.getSys.mockReturnValue(getMockContent());
   });
 
-  xit('should match snapshot', () => {
+  it('should match snapshot', () => {
     const { container } = render(<Sidebar sdk={mockSdk} />);
 
     expect(container).toMatchSnapshot();
