@@ -1,14 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ExtensionUI } from '@gatsby-cloud-pkg/gatsby-cms-extension-base';
-import {
-  Spinner,
-  HelpText,
-  Icon,
-} from '@contentful/forma-36-react-components';
-
-const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
-const ICON_STYLE = { marginBottom: '-4px' };
 
 const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   method: 'POST',
@@ -54,18 +46,18 @@ export default class Sidebar extends React.Component {
     // Child field
     const childField = fullParentEntry.fields[array[index + 1]][sdk.locales.default]
     if (Array.isArray(childField)) {
-    console.error("Gatsby Preview App: You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
+      console.error("Gatsby Preview App: You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
       return ""
     }
     if (index + 2 < array.length) {
-       return this.resolveReferenceChain(sdk, array, (index + 1), childField.sys.id)
+      return this.resolveReferenceChain(sdk, array, (index + 1), childField.sys.id)
     } else {
       return childField
     }
   }
 
   buildSlug = async () => {
-    const {urlConstructors} = this.sdk.parameters.installation;
+    const { urlConstructors } = this.sdk.parameters.installation;
     //Find the url constructor for the given contentType
     const constructor = urlConstructors ? urlConstructors.find(
       constructor => constructor.id === this.sdk.contentType.sys.id
@@ -83,7 +75,7 @@ export default class Sidebar extends React.Component {
 
       const fallbackSlug = await this.props.sdk.entry.fields.slug.getValue();
       this.setState({ slug: fallbackSlug });
-      return; 
+      return;
     }
 
     //Get array of fields to build slug
@@ -99,7 +91,7 @@ export default class Sidebar extends React.Component {
             if (fieldArray.length > 1) {
               const parentId = this.sdk.entry.fields[fieldArray[0]].getValue().sys.id
               return this.resolveReferenceChain(this.sdk, fieldArray, 0, parentId)
-            } else if(fieldArray[0].includes('"' || "'")) { // Checks for static text
+            } else if (fieldArray[0].includes('"' || "'")) { // Checks for static text
               return fieldArray[0].replace(/['"]/g, "");
             } else { //Field directly on the entry, no use for reference resolver
               return this.sdk.entry.fields[fieldArray[0]].getValue()
@@ -112,7 +104,7 @@ export default class Sidebar extends React.Component {
     )
 
     const finalSlug = slug.join('/')
-    this.setState({slug: finalSlug})
+    this.setState({ slug: finalSlug })
   }
 
   async componentDidMount() {
@@ -122,30 +114,18 @@ export default class Sidebar extends React.Component {
     this.sdk.window.startAutoResizer();
   }
 
-  refreshPreview = async () => {
+  refreshPreview = () => {
     const { webhookUrl, authToken } = this.sdk.parameters.installation;
 
     if (!webhookUrl) {
       return;
     }
 
-    this.setState({ busy: true })
-
-    const [res] = await Promise.all([
-      // Convert any errors thrown to non-2xx HTTP response
-      // (for uniform handling of errors).
-      callWebhook(webhookUrl, authToken).catch(() => ({ ok: false })),
-      // Make sure the spinner spins for at least a second
-      // (to avoid a blink of text).
-      new Promise(resolve => setTimeout(resolve, 1000))
-    ]);
-
-    this.setState({ busy: false, ok: res.ok });
+    callWebhook(webhookUrl, authToken);
   };
 
   render = () => {
     let {
-      webhookUrl,
       contentSyncUrl,
       authToken,
       previewUrl,
@@ -165,41 +145,10 @@ export default class Sidebar extends React.Component {
             previewUrl={previewUrl}
             authToken={authToken}
             onOpenPreviewButtonClick={this.refreshPreview}
-
           />
-          {webhookUrl && this.renderRefreshStatus()}
         </div>
       </div>
     );
   };
 
-  renderRefreshStatus = () => {
-    const { busy, ok } = this.state;
-
-    return (
-      <HelpText style={STATUS_STYLE}>
-        {busy && (
-          <>
-            <Spinner />
-            {' '}Sending entry data...
-          </>
-        )}
-        {!busy && (ok === true) && (
-          <>
-            <Icon icon="CheckCircle" color="positive" style={ICON_STYLE} />
-            {/**
-              * @todo remvove or reword for accuracy
-              */}
-            {' '}Entry data in Gatsby up to date!
-          </>
-        )}
-        {!busy && (ok === false) && (
-          <>
-            <Icon icon="Warning" color="negative" style={ICON_STYLE} />
-            {' '}Last update failed.
-          </>
-        )}
-      </HelpText>
-    );
-  };
 }
