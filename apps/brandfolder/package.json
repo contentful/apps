@@ -1,6 +1,6 @@
 {
   "name": "brandfolder-assets",
-  "version": "1.8.43",
+  "version": "1.8.44",
   "private": true,
   "devDependencies": {
     "contentful-cli": "1.8.23",
@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@contentful/app-scripts": "0.8.45",
-    "@contentful/dam-app-base": "^1.2.24",
+    "@contentful/dam-app-base": "^1.2.25",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "react-scripts": "4.0.3"
