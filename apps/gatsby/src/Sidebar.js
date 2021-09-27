@@ -83,7 +83,6 @@ export default class Sidebar extends React.Component {
   }
 
   onSysChanged = (content) => {
-    console.log({ content });
     this.setManifestId(content);
     this.maybeStartProductionBuild(content);
     this.buildSlug();
