@@ -62,7 +62,10 @@ export default class Sidebar extends React.Component {
     const { webhookUrl, authToken } = this.sdk.parameters.installation;
     const { lastPublishedDateTime } = this.state;
 
-    // if these timestamps are equal than the content has not been published
+    /**
+     * if these timestamps are equal than the content has not been published OR has not been
+     * re-published after changes to the content have been made
+     */
     if (!lastPublishedDateTime || lastPublishedDateTime === content.publishedAt) {
       return;
     }
