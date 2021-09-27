@@ -62,8 +62,6 @@ export default class Sidebar extends React.Component {
     const { webhookUrl, authToken } = this.sdk.parameters.installation;
     const { lastPublishedDateTime } = this.state;
 
-    console.log('maybe making a build....', { lastPublishedDateTime, state: this.state });
-
     // if these timestamps are equal than the content has not been published
     if (!lastPublishedDateTime || lastPublishedDateTime === content.publishedAt) {
       return;
@@ -77,8 +75,6 @@ export default class Sidebar extends React.Component {
       return;
     }
 
-    console.log('making a new build')
-   
     callWebhook(webhookUrl, authToken);
   }
 
