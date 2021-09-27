@@ -23,6 +23,7 @@ export default class Sidebar extends React.Component {
     this.state = {
       slug: null,
       manifestId: null,
+      lastPublishedDateTime: null,
     };
 
     this.sdk = props.sdk;
@@ -34,16 +35,57 @@ export default class Sidebar extends React.Component {
 
     const content = this.props.sdk.entry.getSys();
     this.setManifestId(content);
+    this.setLastPublishedDateTime(content);
   }
 
+  /**
+   * manifestId is used by the Gatsby Content Sync preview feature to match states of content
+   * in Contentful with preview builds on Gatsby Cloud
+   */
   setManifestId = (content) => {
     const { id, space, updatedAt } = content;
     const manifestId = `${space.sys.id}-${id}-${updatedAt}`;
     this.setState({ manifestId });
   }
 
+  setLastPublishedDateTime = (content) => {
+    this.setState({
+      lastPublishedDateTime: content.publishedAt,
+    });
+  }
+
+  /**
+   * lastPublishedDateTime is used to track when the built in Contentful publish button is clicked
+   * and then kick off production builds of the Gatsby site accordingly
+   */
+  maybeStartProductionBuild = (content) => {
+    const { webhookUrl, authToken } = this.sdk.parameters.installation;
+    const { lastPublishedDateTime } = this.state;
+
+    console.log('maybe making a build....', { lastPublishedDateTime, state: this.state });
+
+    // if these timestamps are equal than the content has not been published
+    if (!lastPublishedDateTime || lastPublishedDateTime === content.publishedAt) {
+      return;
+    }
+
+    if (!webhookUrl) {
+      /**
+       * @todo add this warning to the UI
+       */
+      console.warn('Warning: Gatsby production build not started since no webhookUrl has been configured.');
+      return;
+    }
+
+    console.log('making a new build')
+   
+    callWebhook(webhookUrl, authToken);
+  }
+
   onSysChanged = (content) => {
+    console.log({ content });
     this.setManifestId(content);
+    this.maybeStartProductionBuild(content);
     this.buildSlug();
   };
 
@@ -135,7 +177,6 @@ export default class Sidebar extends React.Component {
 
     if (contentSyncUrl && manifestId) {
       previewUrl = `${contentSyncUrl}/gatsby-source-contentful/${manifestId}`;
-      // kick off a preview here and do not also kick if off in the onSysChange handler above
     }
 
     return (
