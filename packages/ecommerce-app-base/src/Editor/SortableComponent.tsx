@@ -75,6 +75,7 @@ export class SortableComponent extends React.Component<Props, State> {
         productPreviews={this.state.productPreviews}
         deleteFn={this.deleteItem}
         useDragHandle
+        skuType={this.props.skuType}
       />
     );
   }

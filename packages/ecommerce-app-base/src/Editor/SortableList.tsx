@@ -7,10 +7,11 @@ export interface Props {
   disabled: boolean;
   productPreviews: Product[];
   deleteFn: DeleteFn;
+  skuType?: string;
 }
 
 export const SortableList = SortableContainer<Props>(
-  ({ disabled, deleteFn, productPreviews }: Props) => {
+  ({ disabled, deleteFn, productPreviews, skuType }: Props) => {
     const itemsAreSortable = productPreviews.length > 1;
     return (
       <div>
@@ -23,6 +24,7 @@ export const SortableList = SortableContainer<Props>(
               index={index}
               onDelete={() => deleteFn(index)}
               isSortable={itemsAreSortable}
+              skuType={skuType}
             />
           );
         })}
