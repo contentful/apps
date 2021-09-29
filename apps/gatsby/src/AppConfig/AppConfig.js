@@ -181,8 +181,10 @@ export class AppConfig extends React.Component {
   };
 
   validateContentSyncUrl = () => {
-    if (this.state.contentSyncUrl && !isValidUrl(this.state.contentSyncUrl)) {
-      this.setState({ validContentSync: false });
+    if (this.state.contentSyncUrl) {
+      this.setState({ 
+        validContentSync: isValidUrl(this.state.contentSyncUrl)
+      });
     }
   }
 
@@ -193,8 +195,10 @@ export class AppConfig extends React.Component {
   };
 
   validatePreviewWebhookUrl = () => {
-    if (this.state.previewWebhookUrl && !this.state.previewWebhookUrl.startsWith("http")) {
-      this.setState({ validPreviewWebhook: false });
+    if (this.state.previewWebhookUrl) {
+      this.setState({ 
+        validPreviewWebhook: isValidUrl(this.state.previewWebhookUrl)
+      });
     }
   };
 
