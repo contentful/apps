@@ -369,7 +369,7 @@ export class AppConfig extends React.Component {
               onChange={this.updatePreviewWebhookUrl}
               onBlur={this.validatePreviewWebhookUrl}
               className={styles.input}
-              helpText="Optional Preview Webhook URL. If provided, your site will be automatically rebuilt as you change draft content."
+              helpText={`Optional Preview Webhook URL. If provided, your site will be automatically rebuilt with draft content when you press "Open Preview".`}
               validationMessage={
                 !this.state.validPreviewWebhook
                   ? urlHelpText
