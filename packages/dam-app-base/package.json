@@ -30,7 +30,7 @@
     "@types/webpack-env": "1.16.2",
     "contentful-cli": "1.9.20",
     "cssnano": "4.1.11",
-    "jest": "27.2.1",
+    "jest": "27.2.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "rimraf": "3.0.2",
