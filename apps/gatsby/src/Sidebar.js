@@ -156,13 +156,20 @@ export default class Sidebar extends React.Component {
   }
 
   refreshPreview = () => {
-    const { webhookUrl, authToken } = this.sdk.parameters.installation;
+    const {
+      webhookUrl,
+      previewWebhookUrl,
+      authToken
+    } = this.sdk.parameters.installation;
 
-    if (!webhookUrl) {
-      return;
+    if (previewWebhookUrl)  {
+      callWebhook(previewWebhookUrl, authToken);
+    } else if (webhookUrl) { 
+      callWebhook(webhookUrl, authToken);
+    } else {
+      // @todo show this in the UI
+      console.warn(`Please add a Preview Webhook URL to your Gatsby App settings.`)
     }
-
-    callWebhook(webhookUrl, authToken);
   };
 
   render = () => {
@@ -181,7 +188,7 @@ export default class Sidebar extends React.Component {
       <div className="extension">
         <div className="flexcontainer">
           <ExtensionUI
-            contentSlug={slug && slug}
+            contentSlug={!contentSyncUrl && !!slug && slug}
             previewUrl={previewUrl}
             authToken={authToken}
             onOpenPreviewButtonClick={this.refreshPreview}

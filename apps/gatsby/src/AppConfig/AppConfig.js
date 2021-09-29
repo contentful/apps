@@ -54,6 +54,7 @@ export class AppConfig extends React.Component {
     validPreview: true,
     validContentSync: true,
     validWebhook: true,
+    validPreviewWebhook: true,
   };
 
   async componentDidMount() {
@@ -76,6 +77,7 @@ export class AppConfig extends React.Component {
         urlConstructors: params.urlConstructors || [],
         previewUrl: params.previewUrl || "",
         webhookUrl: params.webhookUrl || "",
+        previewWebhookUrl: params.previewWebhookUrl || "",
         contentSyncUrl: params.contentSyncUrl || "",
         authToken: params.authToken || "",
       },
@@ -93,6 +95,7 @@ export class AppConfig extends React.Component {
       previewUrl,
       contentSyncUrl,
       webhookUrl,
+      previewWebhookUrl,
       authToken,
     } = this.state;
 
@@ -100,6 +103,7 @@ export class AppConfig extends React.Component {
       validPreview: true,
       validContentSync: true,
       validWebhook: true,
+      validPreviewWebhook: true,
     });
 
     let valid = true;
@@ -121,6 +125,12 @@ export class AppConfig extends React.Component {
       valid = false;
     }
 
+    // the previewWebhookUrl is optional but if it is passed, check that it is valid
+    if (previewWebhookUrl && !isValidUrl(previewWebhookUrl)) {
+      this.setState({ validPreviewWebhook: false });
+      valid = false;
+    }
+
     if (!valid) {
       this.props.sdk.notifier.error("Please review the errors in the form.");
       return false;
@@ -132,6 +142,7 @@ export class AppConfig extends React.Component {
         previewUrl,
         contentSyncUrl,
         webhookUrl,
+        previewWebhookUrl,
         authToken,
         urlConstructors,
       },
@@ -155,6 +166,10 @@ export class AppConfig extends React.Component {
     this.setState({ webhookUrl: e.target.value, validWebhook: true });
   };
 
+  updatePreviewWebhookUrl = e => {
+    this.setState({ previewWebhookUrl: e.target.value, validPreviewWebhook: true });
+  };
+
   updateAuthToken = e => {
     this.setState({ authToken: e.target.value });
   };
@@ -174,6 +189,12 @@ export class AppConfig extends React.Component {
   validateWebhookUrl = () => {
     if (this.state.webhookUrl && !this.state.webhookUrl.startsWith("http")) {
       this.setState({ validWebhook: false });
+    }
+  };
+
+  validatePreviewWebhookUrl = () => {
+    if (this.state.previewWebhookUrl && !this.state.previewWebhookUrl.startsWith("http")) {
+      this.setState({ validPreviewWebhook: false });
     }
   };
 
@@ -329,6 +350,24 @@ export class AppConfig extends React.Component {
               helpText="Optional Webhook URL. If provided, your site will be automatically rebuilt as you change content."
               validationMessage={
                 !this.state.validWebhook
+                  ? urlHelpText
+                  : ""
+              }
+              textInputProps={{
+                type: "text",
+              }}
+            />
+            <TextField
+              name="previewWebhookUrl"
+              id="previewWebhookUrl"
+              labelText="Preview Webhook URL"
+              value={this.state.previewWebhookUrl}
+              onChange={this.updatePreviewWebhookUrl}
+              onBlur={this.validatePreviewWebhookUrl}
+              className={styles.input}
+              helpText="Optional Preview Webhook URL. If provided, your site will be automatically rebuilt as you change draft content."
+              validationMessage={
+                !this.state.validPreviewWebhook
                   ? urlHelpText
                   : ""
               }
