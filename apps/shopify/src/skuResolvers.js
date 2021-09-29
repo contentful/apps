@@ -37,7 +37,7 @@ export const fetchCollectionPreviews = async (skus, config) => {
   }
 
   const shopifyClient = await makeShopifyClient(config);
-  const collections = (await shopifyClient.collection.fetchAll()).filter(collection =>
+  const collections = (await shopifyClient.collection.fetchAll(250)).filter(collection =>
     skus.includes(collection.id)
   );
 
