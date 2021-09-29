@@ -121,7 +121,7 @@ const CardDragHandle = SortableHandle(() => (
 export const SortableListItem = SortableElement<Props>(
   ({ product, disabled, isSortable, onDelete, skuType }: Props) => {
     const [imageHasLoaded, setImageLoaded] = useState(false);
-    const [imageHasErrored, setImageHasErrored] = useState(product.image !== '');
+    const [imageHasErrored, setImageHasErrored] = useState(!product.image);
     const productIsMissing = !product.name;
 
     return (
