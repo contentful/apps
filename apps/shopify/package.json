@@ -1,6 +1,6 @@
 {
   "name": "shopify-sku",
-  "version": "1.7.22",
+  "version": "1.7.23",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
@@ -9,7 +9,7 @@
     "react-scripts": "4.0.3"
   },
   "dependencies": {
-    "@contentful/ecommerce-app-base": "^2.5.22",
+    "@contentful/ecommerce-app-base": "^2.5.23",
     "core-js": "3.4.1",
     "react": "17.0.1",
     "react-dom": "17.0.1",
