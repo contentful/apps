@@ -37,11 +37,23 @@ export const fetchCollectionPreviews = async (skus, config) => {
   }
 
   const shopifyClient = await makeShopifyClient(config);
-  const collections = (await shopifyClient.collection.fetchAll()).filter(collection =>
+  const collections = (await shopifyClient.collection.fetchAll(250)).filter(collection =>
     skus.includes(collection.id)
   );
 
-  return collections.map(collection => collectionDataTransformer(collection, config.apiEndpoint));
+  return skus.map((sku) => {
+    const collection = collections.find((collection) => collection.id === sku)
+
+    return collection
+      ? collectionDataTransformer(collection, config.apiEndpoint)
+      : {
+          sku,
+          isMissing: true,
+          image: '',
+          id: sku,
+          name: '',
+        }
+  })
 };
 
 /**
@@ -59,7 +71,19 @@ export const fetchProductPreviews = async (skus, config) => {
   const shopifyClient = await makeShopifyClient(config);
   const products = await shopifyClient.product.fetchMultiple(skus);
 
-  return products.map(product => productDataTransformer(product, config.apiEndpoint));
+  return skus.map((sku) => {
+    const product = products.find((product) => product?.id === sku)
+
+    return product
+      ? productDataTransformer(product, config.apiEndpoint)
+      : {
+          sku,
+          isMissing: true,
+          image: '',
+          id: sku,
+          name: '',
+        }
+  })
 };
 
 /**

@@ -21,6 +21,7 @@ export interface Props {
   disabled: boolean;
   onDelete: () => void;
   isSortable: boolean;
+  skuType?: string;
 }
 
 const IMAGE_SIZE = 48;
@@ -118,7 +119,7 @@ const CardDragHandle = SortableHandle(() => (
 ));
 
 export const SortableListItem = SortableElement<Props>(
-  ({ product, disabled, isSortable, onDelete }: Props) => {
+  ({ product, disabled, isSortable, onDelete, skuType }: Props) => {
     const [imageHasLoaded, setImageLoaded] = useState(false);
     const [imageHasErrored, setImageHasErrored] = useState(false);
     const productIsMissing = !product.name;
@@ -127,17 +128,16 @@ export const SortableListItem = SortableElement<Props>(
       <Card className={styles.card}>
         <>
           {isSortable && <CardDragHandle />}
-          {!imageHasLoaded && !imageHasErrored && (
+          {!imageHasLoaded && !imageHasErrored && product.image && (
             <SkeletonContainer className={styles.skeletonImage}>
               <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
             </SkeletonContainer>
           )}
-          {imageHasErrored && (
+          {!product.image || imageHasErrored ? (
             <div className={styles.errorImage}>
               <Icon icon={productIsMissing ? 'ErrorCircle' : 'Asset'} />
             </div>
-          )}
-          {!imageHasErrored && (
+          ) : (
             <div className={styles.imageWrapper(imageHasLoaded)}>
               <img
                 style={{ display: imageHasLoaded ? 'block' : 'none' }}
@@ -155,7 +155,7 @@ export const SortableListItem = SortableElement<Props>(
                 {productIsMissing ? product.sku : product.name}
               </Heading>
               {productIsMissing ? (
-                <Tag tagType="negative">Product missing</Tag>
+                <Tag tagType="negative">{skuType ?? 'Product'} missing</Tag>
               ) : (
                 <Subheading className={styles.sku}>{product.displaySKU ?? product.sku}</Subheading>
               )}

@@ -267,7 +267,8 @@ exports[`SortableListItem should render successfully the error variation for mis
           class="Tag__Tag___Y-myd Tag__Tag--negative___12luW"
           data-test-id="cf-ui-tag"
         >
-          Product missing
+          Product
+           missing
         </div>
       </div>
     </section>
