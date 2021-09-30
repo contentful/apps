@@ -121,7 +121,7 @@ const CardDragHandle = SortableHandle(() => (
 export const SortableListItem = SortableElement<Props>(
   ({ product, disabled, isSortable, onDelete, skuType }: Props) => {
     const [imageHasLoaded, setImageLoaded] = useState(false);
-    const [imageHasErrored, setImageHasErrored] = useState(!product.image);
+    const [imageHasErrored, setImageHasErrored] = useState(false);
     const productIsMissing = !product.name;
 
     return (
@@ -133,12 +133,11 @@ export const SortableListItem = SortableElement<Props>(
               <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
             </SkeletonContainer>
           )}
-          {imageHasErrored && (
+          {!product.image || imageHasErrored ? (
             <div className={styles.errorImage}>
               <Icon icon={productIsMissing ? 'ErrorCircle' : 'Asset'} />
             </div>
-          )}
-          {!imageHasErrored && (
+          ) : (
             <div className={styles.imageWrapper(imageHasLoaded)}>
               <img
                 style={{ display: imageHasLoaded ? 'block' : 'none' }}
