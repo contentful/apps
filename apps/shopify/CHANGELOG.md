@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.25](https://github.com/contentful/apps/compare/shopify-sku@1.7.24...shopify-sku@1.7.25) (2021-09-30)
+
+
+### Bug Fixes
+
+* [] Fix Shopify not displaying missing SKUs for collections/products ([#506](https://github.com/contentful/apps/issues/506)) ([3a3b736](https://github.com/contentful/apps/commit/3a3b73635c783673619c47bdbea15c643c9c0679))
+
+
+
+
+
 ## [1.7.24](https://github.com/contentful/apps/compare/shopify-sku@1.7.23...shopify-sku@1.7.24) (2021-09-30)
 
 **Note:** Version bump only for package shopify-sku

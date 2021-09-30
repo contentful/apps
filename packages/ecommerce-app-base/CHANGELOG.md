@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.5.25](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.5.24...@contentful/ecommerce-app-base@2.5.25) (2021-09-30)
+
+
+### Bug Fixes
+
+* [] Fix Shopify not displaying missing SKUs for collections/products ([#506](https://github.com/contentful/apps/issues/506)) ([3a3b736](https://github.com/contentful/apps/commit/3a3b73635c783673619c47bdbea15c643c9c0679))
+
+
+
+
+
 ## [2.5.24](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.5.23...@contentful/ecommerce-app-base@2.5.24) (2021-09-30)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
