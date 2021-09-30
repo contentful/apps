@@ -128,7 +128,7 @@ export const SortableListItem = SortableElement<Props>(
       <Card className={styles.card}>
         <>
           {isSortable && <CardDragHandle />}
-          {!imageHasLoaded && !imageHasErrored && (
+          {!imageHasLoaded && !imageHasErrored && product.image && (
             <SkeletonContainer className={styles.skeletonImage}>
               <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
             </SkeletonContainer>
