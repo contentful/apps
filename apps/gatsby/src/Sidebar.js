@@ -2,6 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ExtensionUI } from '@gatsby-cloud-pkg/gatsby-cms-extension-base';
 
+import {
+  Spinner,
+  HelpText,
+  Icon,
+} from '@contentful/forma-36-react-components';
+
+const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
+const ICON_STYLE = { marginBottom: '-4px' };
+
 const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   method: 'POST',
   headers: {
@@ -162,13 +171,13 @@ export default class Sidebar extends React.Component {
       authToken
     } = this.sdk.parameters.installation;
 
-    if (previewWebhookUrl)  {
+    if (previewWebhookUrl) {
       callWebhook(previewWebhookUrl, authToken);
-    } else if (webhookUrl) { 
+    } else if (webhookUrl) {
       callWebhook(webhookUrl, authToken);
     } else {
       // @todo show this in the UI
-      console.warn(`Please add a Preview Webhook URL to your Gatsby App settings.`)
+      console.warn(`Please add a Preview Webhook URL to your Gatsby Cloud App settings.`)
     }
   };
 
@@ -177,6 +186,8 @@ export default class Sidebar extends React.Component {
       contentSyncUrl,
       authToken,
       previewUrl,
+      webhookUrl,
+      previewWebhookUrl,
     } = this.sdk.parameters.installation;
     const { slug, manifestId } = this.state
 
@@ -187,12 +198,18 @@ export default class Sidebar extends React.Component {
     return (
       <div className="extension">
         <div className="flexcontainer">
-          <ExtensionUI
-            contentSlug={!contentSyncUrl && !!slug && slug}
-            previewUrl={previewUrl}
-            authToken={authToken}
-            onOpenPreviewButtonClick={this.refreshPreview}
-          />
+          {(previewWebhookUrl || webhookUrl) ?
+            <ExtensionUI
+              contentSlug={!contentSyncUrl && !!slug && slug}
+              previewUrl={previewUrl}
+              authToken={authToken}
+              onOpenPreviewButtonClick={this.refreshPreview}
+            /> :
+            <HelpText style={STATUS_STYLE}>
+              <Icon icon="Warning" color="negative" style={ICON_STYLE} />
+              {' '}Please add a Preview Webhook URL to your Gatsby App settings.
+            </HelpText>
+          }
         </div>
       </div>
     );
