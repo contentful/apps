@@ -247,8 +247,10 @@ export default class Sidebar extends React.Component {
               onOpenPreviewButtonClick={async ({ previewWindow }) => {
                 await this.refreshPreview();
                 /**
-                 * ensure that the preview tab has the correct manifest id
-                 * just in case the timing was slight off and it was opened with the wrong manifest id
+                 * ExtensionUI returns a reference to the opened tab (previewWindow) after eagerly
+                 * opening it with the given previewUrl. Because there is a small chance that this will
+                 * have a stale manifestId, we update the url in the opened preview tab just in case
+                 * to ensure that the user is redirected to the correct preview build
                  */
                 previewWindow.location.href = this.getPreviewUrl();
               }}
