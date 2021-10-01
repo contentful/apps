@@ -188,9 +188,7 @@ export default class Sidebar extends React.Component {
       });
     });
 
-    await space.updateEntry(updatedEntry);
-
-    return;
+    return space.updateEntry(updatedEntry);
   }
 
   refreshPreview = async () => {
@@ -212,6 +210,20 @@ export default class Sidebar extends React.Component {
     }
   };
 
+  getPreviewUrl = () => {
+    let {
+      previewUrl,
+      contentSyncUrl,
+    } = this.props.sdk.parameters.installation;
+    const { manifestId } = this.state
+
+    if (contentSyncUrl && manifestId) {
+      previewUrl = `${contentSyncUrl}/gatsby-source-contentful/${manifestId}`;
+    }
+
+    return previewUrl;
+  }
+
   render = () => {
     let {
       contentSyncUrl,
@@ -220,13 +232,9 @@ export default class Sidebar extends React.Component {
       webhookUrl,
       previewWebhookUrl,
     } = this.sdk.parameters.installation;
-    const { slug, manifestId } = this.state
+    const { slug } = this.state
 
-    if (contentSyncUrl && manifestId) {
-      previewUrl = `${contentSyncUrl}/gatsby-source-contentful/${manifestId}`;
-    }
-
-    console.log({ sdk: this.props.sdk });
+    previewUrl = this.getPreviewUrl();
 
     return (
       <div className="extension">
@@ -236,7 +244,14 @@ export default class Sidebar extends React.Component {
               contentSlug={!contentSyncUrl && !!slug && slug}
               previewUrl={previewUrl}
               authToken={authToken}
-              onOpenPreviewButtonClick={this.refreshPreview}
+              onOpenPreviewButtonClick={async ({ previewWindow }) => {
+                await this.refreshPreview();
+                /**
+                 * ensure that the preview tab has the correct manifest id
+                 * just in case the timing was slight off and it was opened with the wrong manifest id
+                 */
+                previewWindow.location = this.getPreviewUrl();
+              }}
             /> :
             <HelpText style={STATUS_STYLE}>
               <Icon icon="Warning" color="negative" style={ICON_STYLE} />
