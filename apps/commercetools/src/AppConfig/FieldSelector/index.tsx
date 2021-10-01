@@ -7,8 +7,8 @@ import { css } from 'emotion';
 import { Form, Subheading, CheckboxField } from '@contentful/forma-36-react-components';
 
 import { ToggleGroup } from './ToggleGroup';
-import { ContentType, CompatibleFields, FieldsConfig } from '../fields';
-import { PickerMode } from '../../interfaces';
+import { CompatibleFields, FieldsConfig } from '../fields';
+import { PickerMode, ContentType } from '../../interfaces';
 
 const styles = {
   fieldGroup: css({
@@ -67,7 +67,9 @@ export default class FieldSelector extends React.Component<Props> {
                   <CheckboxField
                     id={`field-box-${ct.sys.id}-${field.id}`}
                     labelText={field.name}
-                    helpText={`Short text · Field ID: ${field.id}`}
+                    helpText={`${
+                      field.type === 'Symbol' ? 'Short text' : 'Short text, list'
+                    } · Field ID: ${field.id}`}
                     checked={isChecked}
                     onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id, 'product')}
                   />
@@ -75,6 +77,7 @@ export default class FieldSelector extends React.Component<Props> {
                     <ToggleGroup
                       activePickerMode={type}
                       onChange={type => this.onSelectedFieldTypeChange(ct.sys.id, field.id, type)}
+                      field={field}
                     />
                   )}
                 </div>

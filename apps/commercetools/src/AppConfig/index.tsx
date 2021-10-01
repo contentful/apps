@@ -17,8 +17,6 @@ import {
   getCompatibleFields,
   editorInterfacesToSelectedFields,
   selectedFieldsToTargetState,
-  EditorInterface,
-  ContentType,
   CompatibleFields,
   FieldsConfig
 } from './fields';
@@ -26,7 +24,7 @@ import { validateParameters } from './parameters';
 
 import { styles } from './styles';
 
-import { Hash } from '../interfaces';
+import { Hash, EditorInterface,  ContentType } from '../interfaces';
 import logo from '../logo.svg';
 import { FieldTypeInstructions } from './FieldTypeInstructions';
 
