@@ -250,7 +250,7 @@ export default class Sidebar extends React.Component {
                  * ensure that the preview tab has the correct manifest id
                  * just in case the timing was slight off and it was opened with the wrong manifest id
                  */
-                previewWindow.location = this.getPreviewUrl();
+                previewWindow.location.href = this.getPreviewUrl();
               }}
             /> :
             <HelpText style={STATUS_STYLE}>
