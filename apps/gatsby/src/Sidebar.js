@@ -164,12 +164,43 @@ export default class Sidebar extends React.Component {
     this.setState({ slug: finalSlug })
   }
 
-  refreshPreview = () => {
+  manuallySaveContentEntry = async () => {
+    const { entry, space, ids } = this.props.sdk;
+    const fields = Object.entries(entry.fields);
+
+    const updatedEntry = await space.getEntry(ids.entry);
+
+    fields.forEach(([fieldName, field]) => {
+      const { locales } = field;
+
+      locales.forEach((locale) => {
+        const fieldLocale = field._getFieldLocale(locale);
+        const fieldValue = fieldLocale.getValue();
+
+        // if a field was previously empty, it will not be on the updateEntry object
+        let updateField = updatedEntry.fields[fieldName];
+        if (!updateField) {
+          updateField = {};
+          updatedEntry.fields[fieldName] = updateField;
+        }
+
+        updateField[locale] = fieldValue;
+      });
+    });
+
+    await space.updateEntry(updatedEntry);
+
+    return;
+  }
+
+  refreshPreview = async () => {
     const {
       webhookUrl,
       previewWebhookUrl,
       authToken
     } = this.sdk.parameters.installation;
+
+    await this.manuallySaveContentEntry();
 
     if (previewWebhookUrl) {
       callWebhook(previewWebhookUrl, authToken);
@@ -194,6 +225,8 @@ export default class Sidebar extends React.Component {
     if (contentSyncUrl && manifestId) {
       previewUrl = `${contentSyncUrl}/gatsby-source-contentful/${manifestId}`;
     }
+
+    console.log({ sdk: this.props.sdk });
 
     return (
       <div className="extension">
