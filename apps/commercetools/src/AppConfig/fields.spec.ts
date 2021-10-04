@@ -39,7 +39,7 @@ describe('fields', () => {
 
       expect(result).toEqual({
         ct1: [{ id: 'x', name: 'X', type: 'Symbol' }],
-        ct2: [],
+        ct2: [{ id: 'z', name: 'Z', type: 'Array', items: { type: 'Symbol' } }],
         ct3: [{ id: 'a', name: 'A', type: 'Symbol' }]
       });
     });
