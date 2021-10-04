@@ -1,6 +1,6 @@
 import React from "react";
 import { ToggleButton } from "@contentful/forma-36-react-components";
-import { PickerMode } from "../../interfaces";
+import { Field, PickerMode } from "../../interfaces";
 import { css } from "emotion";
 import tokens from "@contentful/forma-36-tokens";
 
@@ -29,9 +29,10 @@ const styles = {
 interface Props {
   activePickerMode: PickerMode;
   onChange: (pickerMode: PickerMode) => void;
+  field: Field;
 }
 
-export function ToggleGroup({ activePickerMode, onChange }: Props) {
+export function ToggleGroup({ activePickerMode, onChange, field }: Props) {
   const isPickerModeSetToProduct = activePickerMode === "product";
   return (
     <div className={styles.toggleGroup(isPickerModeSetToProduct)}>
@@ -39,13 +40,13 @@ export function ToggleGroup({ activePickerMode, onChange }: Props) {
         onToggle={() => onChange("product")}
         isActive={isPickerModeSetToProduct}
       >
-        Product
+        {field.type === 'Symbol' ? 'Product' : 'Products'}
       </ToggleButton>
       <ToggleButton
         onToggle={() => onChange("category")}
         isActive={!isPickerModeSetToProduct}
       >
-        Category
+        {field.type === 'Symbol' ? 'Category' : 'Categories'}
       </ToggleButton>
     </div>
   );

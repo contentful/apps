@@ -1,40 +1,13 @@
-import { PickerMode } from './../interfaces';
+import { ContentType, EditorInterface, Field, PickerMode } from './../interfaces';
 import get from 'lodash/get';
 import set from 'lodash/set';
-
-interface FieldItems {
-  type: string;
-}
-
-interface Field {
-  id: string;
-  name: string;
-  type: string;
-  items?: FieldItems;
-}
-
-export interface ContentType {
-  sys: { id: string };
-  name: string;
-  fields?: Field[];
-}
-
-interface Control {
-  fieldId: string;
-  widgetNamespace: string;
-  widgetId: string;
-}
-
-export interface EditorInterface {
-  sys: { contentType: { sys: { id: string } } };
-  controls?: Control[];
-}
 
 export type CompatibleFields = Record<string, Field[]>;
 export type FieldsConfig = Record<string, Record<string, PickerMode | undefined> | undefined>;
 
 function isCompatibleField(field: Field): boolean {
-  return field.type === 'Symbol';
+  return field.type === 'Symbol'
+         || (field.type === 'Array' && field.items!.type === 'Symbol');
 }
 
 export function getCompatibleFields(contentTypes: ContentType[]): CompatibleFields {

@@ -35,3 +35,31 @@ export type CategoriesPreviewsFn = (skus: string[]) => Promise<Category[]>;
 export type DeleteFn = (index: number) => void;
 
 export type PickerMode = 'product' | 'category';
+
+export interface FieldItems {
+  type: string;
+}
+
+export interface Field {
+  id: string;
+  name: string;
+  type: string;
+  items?: FieldItems;
+}
+
+export interface ContentType {
+  sys: { id: string };
+  name: string;
+  fields?: Field[];
+}
+
+export interface Control {
+  fieldId: string;
+  widgetNamespace: string;
+  widgetId: string;
+}
+
+export interface EditorInterface {
+  sys: { contentType: { sys: { id: string } } };
+  controls?: Control[];
+}
