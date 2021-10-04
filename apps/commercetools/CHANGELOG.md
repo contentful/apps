@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/contentful/apps/compare/commercetools@1.5.2...commercetools@1.6.0) (2021-10-04)
+
+
+### Features
+
+* commercetools: show "Short text, list" fields on app config page ([#513](https://github.com/contentful/apps/issues/513)) ([28f5e7e](https://github.com/contentful/apps/commit/28f5e7e638fab33e9919e35d5600f6824c35b42f))
+
+
+
+
+
 ## [1.5.2](https://github.com/contentful/apps/compare/commercetools@1.5.1...commercetools@1.5.2) (2021-09-16)
 
 
