@@ -188,37 +188,6 @@ export default class Sidebar extends React.Component {
     this.setState({ slug: finalSlug })
   }
 
-  manuallySaveContentEntry = async () => {
-    const { entry, space, ids } = this.props.sdk;
-    const fields = Object.entries(entry.fields);
-
-    const updatedEntry = await space.getEntry(ids.entry);
-
-    console.log({updatedEntry})
-
-    fields.forEach(([fieldName, field]) => {
-      const { locales } = field;
-
-      locales.forEach((locale) => {
-        const fieldLocale = field._getFieldLocale(locale);
-        const fieldValue = fieldLocale.getValue();
-
-        // if a field was previously empty, it will not be on the updateEntry object
-        let updateField = updatedEntry.fields[fieldName];
-        if (!updateField) {
-          updateField = {};
-          updatedEntry.fields[fieldName] = updateField;
-        }
-
-        updateField[locale] = fieldValue;
-      });
-    });
-
-    this.setManifestId(updatedEntry.sys);
-
-    return space.updateEntry(updatedEntry);
-  }
-
   refreshPreview = () => {
     const {
       webhookUrl,
@@ -231,7 +200,6 @@ export default class Sidebar extends React.Component {
     } else if (webhookUrl) {
       callWebhook(webhookUrl, authToken);
     } else {
-      // @todo show this in the UI
       console.warn(`Please add a Preview Webhook URL to your Gatsby Cloud App settings.`)
     }
   };
