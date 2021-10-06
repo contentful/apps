@@ -53,7 +53,6 @@ export default class Sidebar extends React.Component {
   setManifestId = (content) => {
     const { id, space, updatedAt } = content;
     const manifestId = `${space.sys.id}-${id}-${updatedAt}`;
-    console.info(`setting manifest id to state ${manifestId}`)
     this.setState({ manifestId });
   }
 
