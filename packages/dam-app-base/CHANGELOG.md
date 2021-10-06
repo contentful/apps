@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.30](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.2.29...@contentful/dam-app-base@1.2.30) (2021-10-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#520](https://github.com/contentful/apps/issues/520)) ([70393ae](https://github.com/contentful/apps/commit/70393aee5ac66fec18289eeee70e4ab4571dfb78))
+* **deps:** bump core-js from 3.18.1 to 3.18.2 ([#521](https://github.com/contentful/apps/issues/521)) ([998cda8](https://github.com/contentful/apps/commit/998cda8cca1a47c6009bc1ffdf343c134373e38c))
+
+
+
+
+
 ## [1.2.29](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.2.28...@contentful/dam-app-base@1.2.29) (2021-10-04)
 
 **Note:** Version bump only for package @contentful/dam-app-base
