@@ -200,7 +200,7 @@ export default class Sidebar extends React.Component {
 
     this.setState({ buttonDisabled: true })
 
-    // wait a bit for contentful to save.
+    // Contentful takes a few seconds to save. If we do not wait a bit for this, then the Gatsby preview may be started and finish before any content is even saved on the Contentful side
     await new Promise(resolve => setTimeout(resolve, 3000))
     
     this.refreshPreview();
