@@ -20,12 +20,12 @@ export const Button = styled(`button`)`
 
   ${props => props.disabled ? `
     background-color: grey;
-  ` : ``}
-
-  &:hover {
-    background-color: #542c85;
-    cursor: pointer;
-  }
+  ` : `
+    &:hover {
+      background-color: #542c85;
+      cursor: pointer;
+    }
+  `}
 `
 
 const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
@@ -53,7 +53,7 @@ export default class Sidebar extends React.Component {
       slug: null,
       manifestId: null,
       lastPublishedDateTime: null,
-      buttonDisabled: false
+      buttonDisabled: false,
     };
 
     this.sdk = props.sdk;
@@ -243,8 +243,10 @@ export default class Sidebar extends React.Component {
                     }
 
                     this.setState({ buttonDisabled: true })
+
                     // wait a bit for contentful to save.
                     await new Promise(resolve => setTimeout(resolve, 3000))
+                    
                     this.refreshPreview();
 
                     console.log({ previewUrl: this.getPreviewUrl() })
@@ -253,6 +255,7 @@ export default class Sidebar extends React.Component {
                     console.log(`opening preview url ${previewUrl}`)
                     window.open(previewUrl, `GATSBY`)
 
+                    // Wait to see if Contentful saves new data async
                     const interval = setInterval(() => {
                         const newPreviewUrl = this.getPreviewUrl()
                         console.log({previewUrl, newPreviewUrl})
@@ -270,6 +273,7 @@ export default class Sidebar extends React.Component {
                         }
                     }, 1000)
 
+                    // after 10 seconds stop waiting for Contentful to save data
                     setTimeout(() => {
                       clearInterval(interval)
                       this.setState({ buttonDisabled: false })
