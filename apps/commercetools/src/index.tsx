@@ -1,5 +1,4 @@
 import "./vendor/ct-picker.min.js";
-import "es6-promise/auto";
 
 import * as React from "react";
 import { render } from "react-dom";
