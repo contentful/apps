@@ -15,7 +15,6 @@
     "@types/react-dom": "^16.8.4",
     "@types/react-router": "5.0.2",
     "@types/react-router-dom": "4.3.4",
-    "cssnano": "4.1.10",
     "eslint": "^6.0.1",
     "parcel-bundler": "^1.12.4",
     "prettier": "^2.0.5",
