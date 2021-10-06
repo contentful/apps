@@ -65,7 +65,7 @@ export default class Sidebar extends React.Component {
     this.sdk.window.startAutoResizer();
 
     const content = this.props.sdk.entry.getSys();
-    console.log({content})
+
     this.setManifestId(content);
     this.setLastPublishedDateTime(content);
   }
@@ -115,7 +115,6 @@ export default class Sidebar extends React.Component {
   }
 
   onSysChanged = (content) => {
-    console.log(`onSysChanged`)
     this.setManifestId(content);
     this.maybeStartProductionBuild(content);
     this.buildSlug();
