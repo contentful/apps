@@ -4,30 +4,6 @@ import { ExtensionUI } from '@gatsby-cloud-pkg/gatsby-cms-extension-base';
 
 import { Spinner, HelpText, Icon } from '@contentful/forma-36-react-components';
 
-import styled from "@emotion/styled"
-
-export const Button = styled(`button`)`
-  border: 0;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  transition: all 0.3s cubic-bezier(0.55, 0, 0.1, 1);
-  width: 100%;
-  color: white;
-  background-color: #663399;
-  height: 2.5rem;
-
-  ${props => props.disabled ? `
-    background-color: grey;
-  ` : `
-    &:hover {
-      background-color: #542c85;
-      cursor: pointer;
-    }
-  `}
-`
-
 const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
 const ICON_STYLE = { marginBottom: '-4px' };
 const GATSBY_PREVIEW_TAB_ID = `GATSBY_TAB`
