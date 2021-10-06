@@ -30,6 +30,7 @@ export const Button = styled(`button`)`
 
 const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
 const ICON_STYLE = { marginBottom: '-4px' };
+const GATSBY_PREVIEW_TAB_ID = `GATSBY_TAB`
 
 const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   method: 'POST',
@@ -218,6 +219,48 @@ export default class Sidebar extends React.Component {
     return previewUrl;
   }
 
+  handleContentSync = async () => {
+    if (this.state.buttonDisabled) {
+      return
+    }
+
+    this.setState({ buttonDisabled: true })
+
+    // wait a bit for contentful to save.
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    
+    this.refreshPreview();
+
+    let previewUrl = this.getPreviewUrl()
+    console.info(`opening preview url ${previewUrl}`)
+    window.open(previewUrl, GATSBY_PREVIEW_TAB_ID)
+
+    // Wait to see if Contentful saves new data async
+    const interval = setInterval(() => {
+        const newPreviewUrl = this.getPreviewUrl()
+
+        if (previewUrl !== newPreviewUrl) {
+          clearInterval(interval)
+
+          previewUrl = newPreviewUrl
+
+          console.info(`new preview url ${newPreviewUrl}`)
+          window.open(previewUrl, GATSBY_PREVIEW_TAB_ID)
+
+          this.refreshPreview();
+          this.setState({ buttonDisabled: false })
+        }
+    }, 1000)
+
+    // after 10 seconds stop waiting for Contentful to save data
+    setTimeout(() => {
+      clearInterval(interval)
+      this.setState({ buttonDisabled: false })
+    }, 10000)
+}
+
+
+
   render = () => {
     let {
       contentSyncUrl,
@@ -234,91 +277,17 @@ export default class Sidebar extends React.Component {
       <div className="extension">
         <div className="flexcontainer">
           {(previewWebhookUrl || webhookUrl) ?
-
-            contentSyncUrl ? (
               <>
-                <Button disabled={this.state.buttonDisabled} onClick={async () => {
-                    if (this.state.buttonDisabled) {
-                      return
-                    }
-
-                    this.setState({ buttonDisabled: true })
-
-                    // wait a bit for contentful to save.
-                    await new Promise(resolve => setTimeout(resolve, 3000))
-                    
-                    this.refreshPreview();
-
-                    console.log({ previewUrl: this.getPreviewUrl() })
-
-                    let previewUrl = this.getPreviewUrl()
-                    console.log(`opening preview url ${previewUrl}`)
-                    window.open(previewUrl, `GATSBY`)
-
-                    // Wait to see if Contentful saves new data async
-                    const interval = setInterval(() => {
-                        const newPreviewUrl = this.getPreviewUrl()
-                        console.log({previewUrl, newPreviewUrl})
-
-                        if (previewUrl !== newPreviewUrl) {
-                          clearInterval(interval)
-
-                          previewUrl = newPreviewUrl
-
-                          console.log(`new preview url ${newPreviewUrl}`)
-                          window.open(previewUrl, `GATSBY`)
-
-                          this.refreshPreview();
-                          this.setState({ buttonDisabled: false })
-                        }
-                    }, 1000)
-
-                    // after 10 seconds stop waiting for Contentful to save data
-                    setTimeout(() => {
-                      clearInterval(interval)
-                      this.setState({ buttonDisabled: false })
-                    }, 10000)
-                }}>
-                  {this.state.buttonDisabled ? `Opening Preview` : `Open Preview`}
-                </Button>
+                <ExtensionUI
+                  disabled={this.state.buttonDisabled}
+                  disablePreviewOpen={!!contentSyncUrl}
+                  contentSlug={!!slug && slug}
+                  previewUrl={previewUrl}
+                  authToken={authToken}
+                  onOpenPreviewButtonClick={this.handleContentSync}
+                />
                 {!!this.state.buttonDisabled && <Spinner />}
               </>
-            ) : (
-              <ExtensionUI
-                contentSlug={!contentSyncUrl && !!slug && slug}
-                previewUrl={previewUrl}
-                authToken={authToken}
-                onOpenPreviewButtonClick={async () => {
-                  // wait a bit for contentful to save.
-                  await new Promise(resolve => setTimeout(resolve, 3000))
-                  console.log({ previewUrl: this.getPreviewUrl() })
-                  this.refreshPreview();
-                  /**
-                  * ExtensionUI returns a reference to the opened tab (previewWindow) after eagerly
-                  * opening it with the given previewUrl. Because there is a small chance that this will
-                  * have a stale manifestId, we update the url in the opened preview tab just in case
-                  * to ensure that the user is redirected to the correct preview build
-                  */
-                  let previewUrl = this.getPreviewUrl()
-                  console.log(`opening preview url ${previewUrl}`)
-                  window.open(previewUrl, `GATSBY`)
-                  const interval = setInterval(() => {
-                    const newPreviewUrl = this.getPreviewUrl()
-                    console.log({previewUrl, newPreviewUrl})
-
-                    if (previewUrl !== newPreviewUrl) {
-                      previewUrl = newPreviewUrl
-                      window.open(previewUrl, `GATSBY`)
-                      console.log(`new preview url ${newPreviewUrl}`)
-                      this.refreshPreview();
-                      clearInterval(interval)
-                    }
-                  }, 1000)
-
-                  setTimeout(() => clearInterval(interval), 10000)
-                }}
-              />
-            )
             :
             <HelpText style={STATUS_STYLE}>
               <Icon icon="Warning" color="negative" style={ICON_STYLE} />
