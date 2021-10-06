@@ -251,13 +251,21 @@ const ContentTypesPanel = ({
   environment,
 }) => (
   <Typography>
-    <Heading>Content Types</Heading>
+    <Heading>Slug Configuration</Heading>
     <Paragraph>
-      Select content types that will show the Gatsby Cloud functionality in the
-      sidebar. 
+    You may need to define slugs for content types if CMS Preview is unable to route editors to the correct URL. In most cases, this is not required.
     </Paragraph>
     <Paragraph>
-    Optionally, define slugs using:
+        <TextLink
+          target="_blank"
+          href={"https://youtu.be/81JqPzLhPzk"}
+          rel="noopener noreferrer"
+        >
+          Watch short explainer video on optional slugs here.
+        </TextLink>
+      </Paragraph>
+    <Paragraph>
+    Define slugs using:
     </Paragraph>
     <List>
       <ListItem key={`instruction-1`}>
@@ -275,18 +283,9 @@ const ContentTypesPanel = ({
           Backslashes (to seperate different parts of the slug): <strong>"resources"/slugPrefix/parentField.slug</strong>
         </Paragraph>
       </ListItem>
-      <ListItem key={`instruction-4`}>
-      <Flex marginBottom={"spacingXl"}>
-        <TextLink
-          target="_blank"
-          href={"https://youtu.be/81JqPzLhPzk"}
-          rel="noopener noreferrer"
-        >
-          Watch short explainer video on optional slugs here.
-        </TextLink>
-      </Flex>
-      </ListItem>
-    </List>
+      </List>
+
+
 
       <FieldGroup>
         <ContentTypesSelection 

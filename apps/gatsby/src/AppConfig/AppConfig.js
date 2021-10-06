@@ -6,7 +6,6 @@ import {
   Typography,
   Paragraph,
   TextField,
-  TextLink,
 } from "@contentful/forma-36-react-components";
 import GatsbyIcon from "../GatsbyIcon";
 import { isValidUrl } from '../utils';
@@ -175,14 +174,14 @@ export class AppConfig extends React.Component {
   };
 
   validatePreviewUrl = () => {
-    if (!isValidUrl(this.state.previewUrl)) {
-      this.setState({ validPreview: false });
+    if (this.state.previewUrl) {
+      this.setState({ validPreview: isValidUrl(this.state.previewUrl) })
     }
   };
 
   validateContentSyncUrl = () => {
     if (this.state.contentSyncUrl) {
-      this.setState({ 
+      this.setState({
         validContentSync: isValidUrl(this.state.contentSyncUrl)
       });
     }
@@ -196,7 +195,7 @@ export class AppConfig extends React.Component {
 
   validatePreviewWebhookUrl = () => {
     if (this.state.previewWebhookUrl) {
-      this.setState({ 
+      this.setState({
         validPreviewWebhook: isValidUrl(this.state.previewWebhookUrl)
       });
     }
@@ -281,61 +280,24 @@ export class AppConfig extends React.Component {
             <Typography>
               <Heading>About Gatsby Cloud</Heading>
               <Paragraph>
-                This app connects to Gatsby Cloud which lets you see updates to your Gatsby site as
-                soon as you change content in Contentful. This makes it easy for content creators to
-                see changes they make to the website before going live.
+                This app connects Gatsby Cloud with your Contentful space so you can preview content changes before going live.
               </Paragraph>
             </Typography>
           </div>
           <hr className={styles.splitter} />
           <Typography>
-            <Heading>Account Details</Heading>
-            <Paragraph>Gatsby Cloud needs a Site URL in order to preview projects.</Paragraph>
+            <Heading>Site Settings</Heading>
+            <Paragraph>Use the Site Settings for your Gatsby Cloud site below.</Paragraph>
             <TextField
-              name="previewUrl"
-              id="previewUrl"
-              labelText="Site URL"
-              required
-              value={this.state.previewUrl}
-              onChange={this.updatePreviewUrl}
-              onBlur={this.validatePreviewUrl}
+              name="previewWebhookUrl"
+              id="previewWebhookUrl"
+              labelText="Preview Webhook"
+              value={this.state.previewWebhookUrl}
+              onChange={this.updatePreviewWebhookUrl}
+              onBlur={this.validatePreviewWebhookUrl}
               className={styles.input}
-              helpText={
-                <span>
-                  To get your Site URL, see your{" "}
-                  <TextLink
-                    href="https://www.gatsbyjs.com/dashboard/sites"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Gatsby dashboard
-                  </TextLink>
-                  .
-                </span>
-              }
               validationMessage={
-                !this.state.validPreview
-                  ? "Please provide a valid URL (It should start with http)"
-                  : ""
-              }
-              textInputProps={{
-                type: "text",
-              }}
-            />
-            <TextField
-              name="contentSyncUrl"
-              id="contentSyncUrl"
-              labelText="Content Sync URL"
-              value={this.state.contentSyncUrl}
-              onChange={this.updateContentSyncUrl}
-              onBlur={this.validateContentSyncUrl}
-              className={styles.input}
-              /*
-               * @todo ensure that this help text is okay
-               */
-              helpText="Optional Content Sync URL. If provided, previewing content changes will use the Gatsby Content Sync feature."
-              validationMessage={
-                !this.state.validContentSync
+                !this.state.validPreviewWebhook
                   ? urlHelpText
                   : ""
               }
@@ -346,12 +308,11 @@ export class AppConfig extends React.Component {
             <TextField
               name="webhookUrl"
               id="webhookUrl"
-              labelText="Webhook URL"
+              labelText="Builds Webhook"
               value={this.state.webhookUrl}
               onChange={this.updateWebhookUrl}
               onBlur={this.validateWebhookUrl}
               className={styles.input}
-              helpText="Optional Webhook URL. If provided, your site will be automatically rebuilt as you change content."
               validationMessage={
                 !this.state.validWebhook
                   ? urlHelpText
@@ -362,16 +323,40 @@ export class AppConfig extends React.Component {
               }}
             />
             <TextField
-              name="previewWebhookUrl"
-              id="previewWebhookUrl"
-              labelText="Preview Webhook URL"
-              value={this.state.previewWebhookUrl}
-              onChange={this.updatePreviewWebhookUrl}
-              onBlur={this.validatePreviewWebhookUrl}
+              name="contentSyncUrl"
+              id="contentSyncUrl"
+              labelText="Content Sync"
+              value={this.state.contentSyncUrl}
+              onChange={this.updateContentSyncUrl}
+              onBlur={this.validateContentSyncUrl}
               className={styles.input}
-              helpText={`Optional Preview Webhook URL. If provided, your site will be automatically rebuilt with draft content when you press "Open Preview".`}
+              /*
+               * @todo ensure that this help text is okay
+               */
               validationMessage={
-                !this.state.validPreviewWebhook
+                !this.state.validContentSync
+                  ? urlHelpText
+                  : ""
+              }
+              textInputProps={{
+                type: "text",
+              }}
+            />
+            <TextField
+              name="previewUrl"
+              id="previewUrl"
+              labelText="CMS Preview"
+              value={this.state.previewUrl}
+              onChange={this.updatePreviewUrl}
+              onBlur={this.validatePreviewUrl}
+              className={styles.input}
+              helpText={
+                <span>
+                  Copy the URL of CMS Preview from Gatsby Cloud
+                </span>
+              }
+              validationMessage={
+                !this.state.validPreview
                   ? urlHelpText
                   : ""
               }
@@ -386,25 +371,29 @@ export class AppConfig extends React.Component {
               value={this.state.authToken}
               onChange={this.updateAuthToken}
               className={styles.input}
-              helpText="Optional Authentication token for private Gatsby Cloud sites."
+              helpText="Optional authentication token for private Gatsby Cloud sites"
               textInputProps={{
                 type: "password",
               }}
             />
           </Typography>
-          <hr className={styles.splitter} />
-          <ContentTypesPanel
-            space={space}
-            environment={environment}
-            contentTypes={contentTypes}
-            enabledContentTypes={enabledContentTypes}
-            urlConstructors={urlConstructors}
-            onSlugInput={this.onSlugInput}
-            onContentTypeToggle={this.onContentTypeToggle}
-            disableContentType={this.disableContentType}
-            selectorTypeToggle={this.selectorTypeToggle}
-            selectorType={selectorType}
-          />
+          {!this.state.contentSyncUrl &&
+            <>
+              <hr className={styles.splitter} />
+              <ContentTypesPanel
+                space={space}
+                environment={environment}
+                contentTypes={contentTypes}
+                enabledContentTypes={enabledContentTypes}
+                urlConstructors={urlConstructors}
+                onSlugInput={this.onSlugInput}
+                onContentTypeToggle={this.onContentTypeToggle}
+                disableContentType={this.disableContentType}
+                selectorTypeToggle={this.selectorTypeToggle}
+                selectorType={selectorType}
+              />
+            </>
+          }
         </div>
         <div className={styles.icon}>
           <GatsbyIcon />
