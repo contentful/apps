@@ -259,7 +259,7 @@ export default class Sidebar extends React.Component {
                   contentSlug={!!slug && slug}
                   previewUrl={previewUrl}
                   authToken={authToken}
-                  onOpenPreviewButtonClick={this.handleContentSync}
+                  onOpenPreviewButtonClick={!!contentSyncUrl && this.handleContentSync}
                 />
                 {!!this.state.buttonDisabled && <Spinner />}
               </>
