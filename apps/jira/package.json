@@ -13,5 +13,8 @@
     "start:app": "npm run --prefix jira-app start",
     "start": "concurrently -n lambda,app \"npm run start:lambda\" \"npm run start:app\"",
     "dev": "node ./scripts/dev.js"
+  },
+  "dependencies": {
+    "contentful-management": "7.42.1"
   }
 }
