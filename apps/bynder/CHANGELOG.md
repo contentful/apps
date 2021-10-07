@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.43](https://github.com/contentful/apps/compare/bynder-assets@1.7.42...bynder-assets@1.7.43) (2021-10-07)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
 ## [1.7.42](https://github.com/contentful/apps/compare/bynder-assets@1.7.41...bynder-assets@1.7.42) (2021-10-06)
 
 **Note:** Version bump only for package bynder-assets
