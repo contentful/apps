@@ -15,11 +15,6 @@
     "directory": "packages/dam-app-base"
   },
   "devDependencies": {
-    "@babel/core": "7.15.8",
-    "@babel/plugin-proposal-class-properties": "7.14.5",
-    "@babel/plugin-transform-runtime": "7.15.0",
-    "@babel/preset-env": "7.15.6",
-    "@babel/preset-react": "7.14.5",
     "@testing-library/react": "9.4.0",
     "@types/array-move": "2.0.0",
     "@types/jest": "27.0.2",
@@ -27,9 +22,6 @@
     "@types/react": "17.0.27",
     "@types/react-dom": "17.0.9",
     "@types/react-sortable-hoc": "0.7.1",
-    "@types/webpack-env": "1.16.2",
-    "contentful-cli": "1.9.20",
-    "cssnano": "4.1.11",
     "jest": "27.2.4",
     "react": "17.0.2",
     "react-dom": "17.0.2",
@@ -46,9 +38,7 @@
     "@contentful/forma-36-tokens": "^0.11.0",
     "@emotion/css": "^11.1.3",
     "array-move": "^3.0.1",
-    "core-js": "^3.17.3",
     "lodash.get": "^4.4.2",
-    "prop-types": "^15.7.2",
     "react-sortable-hoc": "^2.0.0"
   },
   "peerDependencies": {

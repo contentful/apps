@@ -5,7 +5,6 @@
   "main": "build/index.html",
   "devDependencies": {
     "@testing-library/react": "11.2.5",
-    "contentful-cli": "1.8.23",
     "cross-env": "7.0.3",
     "fetch-mock": "9.0.0-beta.2"
   },
