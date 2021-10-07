@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppExtensionSDK, CollectionResponse, EditorInterface } from '@contentful/app-sdk';
+import { AppExtensionSDK } from '@contentful/app-sdk';
 import {
   Heading,
   Paragraph,
@@ -45,7 +45,7 @@ export default class AppConfig extends React.Component<Props, State> {
       sdk.space.getEditorInterfaces()
     ]);
 
-    const selectedContentTypes = (eiRes as CollectionResponse<EditorInterface>).items
+    const selectedContentTypes = eiRes.items
       .filter(ei =>
         get(ei, ['sidebar'], []).some(item => {
           return item.widgetNamespace === 'app' && item.widgetId === this.props.sdk.ids.app;
