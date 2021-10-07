@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.5](https://github.com/contentful/apps/compare/jira@1.6.4...jira@1.6.5) (2021-10-07)
+
+
+### Bug Fixes
+
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+
+
+
 ## [1.6.4](https://github.com/contentful/apps/compare/jira@1.6.3...jira@1.6.4) (2021-09-21)
 
 **Note:** Version bump only for package jira

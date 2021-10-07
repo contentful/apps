@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.3](https://github.com/contentful/apps/compare/optimizely@1.4.2...optimizely@1.4.3) (2021-10-07)
+
+
+### Bug Fixes
+
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+
+
+
 ## [1.4.2](https://github.com/contentful/apps/compare/optimizely@1.4.1...optimizely@1.4.2) (2021-09-16)
 
 

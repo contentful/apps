@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.52](https://github.com/contentful/apps/compare/commercelayer-products@1.4.51...commercelayer-products@1.4.52) (2021-10-07)
+
+
+### Bug Fixes
+
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+
+
+
 ## [1.4.51](https://github.com/contentful/apps/compare/commercelayer-products@1.4.50...commercelayer-products@1.4.51) (2021-10-07)
 
 **Note:** Version bump only for package commercelayer-products

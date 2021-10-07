@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.1](https://github.com/contentful/apps/compare/commercetools@1.6.0...commercetools@1.6.1) (2021-10-07)
+
+
+### Bug Fixes
+
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+
+
+
 # [1.6.0](https://github.com/contentful/apps/compare/commercetools@1.5.2...commercetools@1.6.0) (2021-10-04)
 
 
