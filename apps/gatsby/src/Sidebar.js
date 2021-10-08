@@ -137,12 +137,14 @@ export default class Sidebar extends React.Component {
 
   refreshPreview = () => {
     const {
-      webhookUrl,
       authToken
     } = this.sdk.parameters.installation;
 
-    if (webhookUrl) {
-      callWebhook(webhookUrl, authToken);
+    const previewWebhookUrl = this.sdk.parameters.installation.previewWebhookUrl ||
+      this.sdk.parameters.installation.webhookUrl
+
+    if (previewWebhookUrl) {
+      callWebhook(previewWebhookUrl, authToken);
     } else {
       console.warn(`Please add a Preview Webhook URL to your Gatsby Cloud App settings.`)
     }
@@ -171,7 +173,7 @@ export default class Sidebar extends React.Component {
 
     // Contentful takes a few seconds to save. If we do not wait a bit for this, then the Gatsby preview may be started and finish before any content is even saved on the Contentful side
     await new Promise(resolve => setTimeout(resolve, 3000))
-    
+
     this.refreshPreview();
 
     let previewUrl = this.getPreviewUrl()
@@ -180,19 +182,19 @@ export default class Sidebar extends React.Component {
 
     // Wait to see if Contentful saves new data async
     const interval = setInterval(() => {
-        const newPreviewUrl = this.getPreviewUrl()
+      const newPreviewUrl = this.getPreviewUrl()
 
-        if (previewUrl !== newPreviewUrl) {
-          clearInterval(interval)
+      if (previewUrl !== newPreviewUrl) {
+        clearInterval(interval)
 
-          previewUrl = newPreviewUrl
+        previewUrl = newPreviewUrl
 
-          console.info(`new preview url ${newPreviewUrl}`)
-          window.open(previewUrl, GATSBY_PREVIEW_TAB_ID)
+        console.info(`new preview url ${newPreviewUrl}`)
+        window.open(previewUrl, GATSBY_PREVIEW_TAB_ID)
 
-          this.refreshPreview();
-          this.setState({ buttonDisabled: false })
-        }
+        this.refreshPreview();
+        this.setState({ buttonDisabled: false })
+      }
     }, 1000)
 
     // after 10 seconds stop waiting for Contentful to save data
@@ -200,7 +202,7 @@ export default class Sidebar extends React.Component {
       clearInterval(interval)
       this.setState({ buttonDisabled: false })
     }, 10000)
-}
+  }
 
   render = () => {
     let {
@@ -208,6 +210,7 @@ export default class Sidebar extends React.Component {
       authToken,
       previewUrl,
       webhookUrl,
+      previewWebhookUrl,
     } = this.sdk.parameters.installation;
     const { slug } = this.state
 
@@ -216,18 +219,18 @@ export default class Sidebar extends React.Component {
     return (
       <div className="extension">
         <div className="flexcontainer">
-          {(webhookUrl) ?
-              <>
-                <ExtensionUI
-                  disabled={this.state.buttonDisabled}
-                  disablePreviewOpen={!!contentSyncUrl}
-                  contentSlug={!!slug && slug}
-                  previewUrl={previewUrl}
-                  authToken={authToken}
-                  onOpenPreviewButtonClick={!!contentSyncUrl && this.handleContentSync}
-                />
-                {!!this.state.buttonDisabled && <Spinner />}
-              </>
+          {(webhookUrl || previewWebhookUrl) ?
+            <>
+              <ExtensionUI
+                disabled={this.state.buttonDisabled}
+                disablePreviewOpen={!!contentSyncUrl}
+                contentSlug={!!slug && slug}
+                previewUrl={previewUrl}
+                authToken={authToken}
+                onOpenPreviewButtonClick={!!contentSyncUrl && this.handleContentSync}
+              />
+              {!!this.state.buttonDisabled && <Spinner />}
+            </>
             :
             <HelpText style={STATUS_STYLE}>
               <Icon icon="Warning" color="negative" style={ICON_STYLE} />
