@@ -286,29 +286,12 @@ export class AppConfig extends React.Component {
           </div>
           <hr className={styles.splitter} />
           <Typography>
-            <Heading>Site Settings</Heading>
+            <Heading>Configure CMS Preview</Heading>
             <Paragraph>Use the Site Settings for your Gatsby Cloud site below.</Paragraph>
-            <TextField
-              name="previewWebhookUrl"
-              id="previewWebhookUrl"
-              labelText="Preview Webhook"
-              value={this.state.previewWebhookUrl}
-              onChange={this.updatePreviewWebhookUrl}
-              onBlur={this.validatePreviewWebhookUrl}
-              className={styles.input}
-              validationMessage={
-                !this.state.validPreviewWebhook
-                  ? urlHelpText
-                  : ""
-              }
-              textInputProps={{
-                type: "text",
-              }}
-            />
             <TextField
               name="webhookUrl"
               id="webhookUrl"
-              labelText="Builds Webhook"
+              labelText="Preview Webhook"
               value={this.state.webhookUrl}
               onChange={this.updateWebhookUrl}
               onBlur={this.validateWebhookUrl}

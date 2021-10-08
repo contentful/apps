@@ -62,36 +62,8 @@ export default class Sidebar extends React.Component {
     });
   }
 
-  /**
-   * lastPublishedDateTime is used to track when the built in Contentful publish button is clicked
-   * and then kick off production builds of the Gatsby site accordingly
-   */
-  maybeStartProductionBuild = (content) => {
-    const { webhookUrl, authToken } = this.sdk.parameters.installation;
-    const { lastPublishedDateTime } = this.state;
-
-    /**
-     * if these timestamps are equal than the content has not been published OR has not been
-     * re-published after changes to the content have been made
-     */
-    if (!lastPublishedDateTime || lastPublishedDateTime === content.publishedAt) {
-      return;
-    }
-
-    if (!webhookUrl) {
-      /**
-       * @todo add this warning to the UI
-       */
-      console.warn('Warning: Gatsby production build not started since no webhookUrl has been configured.');
-      return;
-    }
-
-    callWebhook(webhookUrl, authToken);
-  }
-
   onSysChanged = (content) => {
     this.setManifestId(content);
-    this.maybeStartProductionBuild(content);
     this.buildSlug();
   };
 
@@ -165,15 +137,14 @@ export default class Sidebar extends React.Component {
 
   refreshPreview = () => {
     const {
-      webhookUrl,
-      previewWebhookUrl,
       authToken
     } = this.sdk.parameters.installation;
 
+    const previewWebhookUrl = this.sdk.parameters.installation.previewWebhookUrl ||
+      this.sdk.parameters.installation.webhookUrl
+
     if (previewWebhookUrl) {
       callWebhook(previewWebhookUrl, authToken);
-    } else if (webhookUrl) {
-      callWebhook(webhookUrl, authToken);
     } else {
       console.warn(`Please add a Preview Webhook URL to your Gatsby Cloud App settings.`)
     }
@@ -202,7 +173,7 @@ export default class Sidebar extends React.Component {
 
     // Contentful takes a few seconds to save. If we do not wait a bit for this, then the Gatsby preview may be started and finish before any content is even saved on the Contentful side
     await new Promise(resolve => setTimeout(resolve, 3000))
-    
+
     this.refreshPreview();
 
     let previewUrl = this.getPreviewUrl()
@@ -211,19 +182,19 @@ export default class Sidebar extends React.Component {
 
     // Wait to see if Contentful saves new data async
     const interval = setInterval(() => {
-        const newPreviewUrl = this.getPreviewUrl()
+      const newPreviewUrl = this.getPreviewUrl()
 
-        if (previewUrl !== newPreviewUrl) {
-          clearInterval(interval)
+      if (previewUrl !== newPreviewUrl) {
+        clearInterval(interval)
 
-          previewUrl = newPreviewUrl
+        previewUrl = newPreviewUrl
 
-          console.info(`new preview url ${newPreviewUrl}`)
-          window.open(previewUrl, GATSBY_PREVIEW_TAB_ID)
+        console.info(`new preview url ${newPreviewUrl}`)
+        window.open(previewUrl, GATSBY_PREVIEW_TAB_ID)
 
-          this.refreshPreview();
-          this.setState({ buttonDisabled: false })
-        }
+        this.refreshPreview();
+        this.setState({ buttonDisabled: false })
+      }
     }, 1000)
 
     // after 10 seconds stop waiting for Contentful to save data
@@ -231,9 +202,7 @@ export default class Sidebar extends React.Component {
       clearInterval(interval)
       this.setState({ buttonDisabled: false })
     }, 10000)
-}
-
-
+  }
 
   render = () => {
     let {
@@ -250,18 +219,18 @@ export default class Sidebar extends React.Component {
     return (
       <div className="extension">
         <div className="flexcontainer">
-          {(previewWebhookUrl || webhookUrl) ?
-              <>
-                <ExtensionUI
-                  disabled={this.state.buttonDisabled}
-                  disablePreviewOpen={!!contentSyncUrl}
-                  contentSlug={!!slug && slug}
-                  previewUrl={previewUrl}
-                  authToken={authToken}
-                  onOpenPreviewButtonClick={!!contentSyncUrl && this.handleContentSync}
-                />
-                {!!this.state.buttonDisabled && <Spinner />}
-              </>
+          {(webhookUrl || previewWebhookUrl) ?
+            <>
+              <ExtensionUI
+                disabled={this.state.buttonDisabled}
+                disablePreviewOpen={!!contentSyncUrl}
+                contentSlug={!!slug && slug}
+                previewUrl={previewUrl}
+                authToken={authToken}
+                onOpenPreviewButtonClick={!!contentSyncUrl && this.handleContentSync}
+              />
+              {!!this.state.buttonDisabled && <Spinner />}
+            </>
             :
             <HelpText style={STATUS_STYLE}>
               <Icon icon="Warning" color="negative" style={ICON_STYLE} />
