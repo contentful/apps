@@ -62,36 +62,8 @@ export default class Sidebar extends React.Component {
     });
   }
 
-  /**
-   * lastPublishedDateTime is used to track when the built in Contentful publish button is clicked
-   * and then kick off production builds of the Gatsby site accordingly
-   */
-  maybeStartProductionBuild = (content) => {
-    const { webhookUrl, authToken } = this.sdk.parameters.installation;
-    const { lastPublishedDateTime } = this.state;
-
-    /**
-     * if these timestamps are equal than the content has not been published OR has not been
-     * re-published after changes to the content have been made
-     */
-    if (!lastPublishedDateTime || lastPublishedDateTime === content.publishedAt) {
-      return;
-    }
-
-    if (!webhookUrl) {
-      /**
-       * @todo add this warning to the UI
-       */
-      console.warn('Warning: Gatsby production build not started since no webhookUrl has been configured.');
-      return;
-    }
-
-    callWebhook(webhookUrl, authToken);
-  }
-
   onSysChanged = (content) => {
     this.setManifestId(content);
-    this.maybeStartProductionBuild(content);
     this.buildSlug();
   };
 
@@ -166,13 +138,10 @@ export default class Sidebar extends React.Component {
   refreshPreview = () => {
     const {
       webhookUrl,
-      previewWebhookUrl,
       authToken
     } = this.sdk.parameters.installation;
 
-    if (previewWebhookUrl) {
-      callWebhook(previewWebhookUrl, authToken);
-    } else if (webhookUrl) {
+    if (webhookUrl) {
       callWebhook(webhookUrl, authToken);
     } else {
       console.warn(`Please add a Preview Webhook URL to your Gatsby Cloud App settings.`)
@@ -233,15 +202,12 @@ export default class Sidebar extends React.Component {
     }, 10000)
 }
 
-
-
   render = () => {
     let {
       contentSyncUrl,
       authToken,
       previewUrl,
       webhookUrl,
-      previewWebhookUrl,
     } = this.sdk.parameters.installation;
     const { slug } = this.state
 
@@ -250,7 +216,7 @@ export default class Sidebar extends React.Component {
     return (
       <div className="extension">
         <div className="flexcontainer">
-          {(previewWebhookUrl || webhookUrl) ?
+          {(webhookUrl) ?
               <>
                 <ExtensionUI
                   disabled={this.state.buttonDisabled}
