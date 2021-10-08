@@ -21,13 +21,31 @@ function editorInterfacesToEnabledContentTypes(eis, appId) {
     .filter(ctId => typeof ctId === "string" && ctId.length > 0);
 }
 
-export function enabledContentTypesToTargetState(currentState, contentTypes, enabledContentTypes) {
+export function enabledContentTypesToTargetState(
+  currentState,
+  contentTypes,
+  enabledContentTypes,
+  usingContentSync
+) {
   return {
     EditorInterface: contentTypes.reduce((acc, ct) => {
-      const ctCurrentStateSidebar = currentState?.EditorInterface[ct.sys.id]?.sidebar;
+      if (usingContentSync) {
+        return {
+          ...acc,
+          // if content sync is being used
+          // auto add our preview button to each content type
+          // at the top of the sidebar
+          [ct.sys.id]: { sidebar: { position: 0 } }
+        }
+      }
+
+      const ctCurrentStateSidebar = 
+        currentState?.EditorInterface[ct.sys.id]?.sidebar;
+
       const ctEditorInterface = ctCurrentStateSidebar
         ? { sidebar: ctCurrentStateSidebar }
         : { sidebar: { position: 3 } };
+
       return {
         ...acc,
         [ct.sys.id]: enabledContentTypes.includes(ct.sys.id) ? ctEditorInterface : {},
@@ -148,7 +166,8 @@ export class AppConfig extends React.Component {
       targetState: enabledContentTypesToTargetState(
         currentState,
         contentTypes,
-        enabledContentTypes
+        enabledContentTypes,
+        !!contentSyncUrl
       ),
     };
   };
