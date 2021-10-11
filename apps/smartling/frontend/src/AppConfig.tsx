@@ -40,7 +40,7 @@ export default class AppConfig extends React.Component<Props, State> {
     sdk.app.onConfigure(this.configure);
 
     const [ctsRes, parameters, eiRes] = await Promise.all([
-      sdk.space.getContentTypes(),
+      sdk.space.getContentTypes({limit: 1000}),
       sdk.app.getParameters() as Promise<SmartlingParameters | null>,
       sdk.space.getEditorInterfaces()
     ]);
