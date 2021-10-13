@@ -1,6 +1,6 @@
 {
   "name": "image-focal-point",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
@@ -16,7 +16,7 @@
     "test:ci": "react-scripts test"
   },
   "dependencies": {
-    "@contentful/app-sdk": "3.39.1",
+    "@contentful/app-sdk": "4.2.1",
     "@contentful/forma-36-fcss": "0.3.3",
     "@contentful/forma-36-react-components": "3.93.2",
     "@contentful/forma-36-tokens": "0.11.0",

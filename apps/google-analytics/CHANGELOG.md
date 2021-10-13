@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/contentful/apps/compare/google-analytics@1.3.3...google-analytics@1.4.0) (2021-10-13)
+
+
+### Features
+
+* use App SDK v4 ([#528](https://github.com/contentful/apps/issues/528)) ([5fb634a](https://github.com/contentful/apps/commit/5fb634a0679de8af4ada0de3d571a8a5e5564090))
+
+
+
+
+
 ## [1.3.3](https://github.com/contentful/apps/compare/google-analytics@1.3.2...google-analytics@1.3.3) (2021-10-07)
 
 

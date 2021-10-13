@@ -5,7 +5,7 @@ import JiraClient from '../../jiraClient';
 import InstanceStep from './Steps/InstanceStep';
 import ContentTypeStep from './Steps/ContentTypeStep';
 import JiraStep from './Steps/JiraStep';
-import { AppExtensionSDK, CollectionResponse, EditorInterface } from '@contentful/app-sdk';
+import { AppExtensionSDK } from '@contentful/app-sdk';
 import { JiraCloudResource, CloudProject, InstallationParameters } from '../../interfaces';
 
 interface Props {
@@ -105,10 +105,7 @@ export default class Config extends React.Component<Props, State> {
   };
 
   loadContentTypes = async () => {
-    const data = (await this.props.sdk.space.getContentTypes()) as CollectionResponse<{
-      name: string;
-      sys: { id: string };
-    }>;
+    const data = await this.props.sdk.space.getContentTypes();
     if (data.items.length) {
       this.setState({
         contentTypes: data.items.map(i => ({ name: i.name, id: i.sys.id }))
@@ -118,7 +115,7 @@ export default class Config extends React.Component<Props, State> {
 
   loadEditorInterfaces = async () => {
     const { space, ids } = this.props.sdk;
-    const eisResponse = (await space.getEditorInterfaces()) as CollectionResponse<EditorInterface>;
+    const eisResponse = await space.getEditorInterfaces();
 
     const selectedContentTypes = eisResponse.items
       .filter(

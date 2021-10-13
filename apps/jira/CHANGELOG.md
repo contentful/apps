@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.7.0](https://github.com/contentful/apps/compare/jira@1.6.5...jira@1.7.0) (2021-10-13)
+
+
+### Features
+
+* use App SDK v4 ([#528](https://github.com/contentful/apps/issues/528)) ([5fb634a](https://github.com/contentful/apps/commit/5fb634a0679de8af4ada0de3d571a8a5e5564090))
+
+
+
+
+
 ## [1.6.5](https://github.com/contentful/apps/compare/jira@1.6.4...jira@1.6.5) (2021-10-07)
 
 
