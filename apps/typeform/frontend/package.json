@@ -1,6 +1,6 @@
 {
   "name": "typeform-frontend",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "private": true,
   "main": "build/index.html",
   "devDependencies": {

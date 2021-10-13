@@ -1,6 +1,6 @@
 {
   "name": "optimizely",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "private": true,
   "devDependencies": {
     "cross-env": "7.0.3"

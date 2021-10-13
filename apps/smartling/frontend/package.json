@@ -1,6 +1,6 @@
 {
   "name": "smartling-frontend",
-  "version": "1.4.4",
+  "version": "1.5.0",
   "main": "build/index.html",
   "devDependencies": {
     "@testing-library/react": "8.0.4",
