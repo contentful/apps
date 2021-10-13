@@ -3,12 +3,12 @@
   "private": true,
   "scripts": {
     "bootstrap": "lerna bootstrap --no-ci",
-    "bootstrap:ci": "lerna bootstrap --ci --concurrency=2",
-    "lint": "lerna run lint --concurrency=2",
-    "build": "lerna run build --concurrency=1",
-    "test": "lerna run test:ci --concurrency=2",
-    "deploy": "lerna run deploy --concurrency=2",
-    "deploy:test": "lerna run deploy:test --concurrency=2",
+    "bootstrap:ci": "lerna bootstrap --ci --concurrency=3",
+    "lint": "lerna run lint --concurrency=3",
+    "build": "lerna run build --concurrency=1 --stream",
+    "test": "lerna run test:ci --concurrency=1 --stream",
+    "deploy": "lerna run deploy --concurrency=3",
+    "deploy:test": "lerna run deploy:test --concurrency=3",
     "publish-packages": "lerna version --conventional-commits --create-release github --yes && lerna publish from-git --yes"
   },
   "dependencies": {

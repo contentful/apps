@@ -21,7 +21,7 @@
     "@commercetools/sdk-middleware-http": "6.0.1",
     "@commercetools/sdk-middleware-queue": "2.1.1",
     "@contentful/app-scripts": "0.8.45",
-    "@contentful/app-sdk": "3.39.1",
+    "@contentful/app-sdk": "4.2.1",
     "@contentful/forma-36-fcss": "0.3.3",
     "@contentful/forma-36-react-components": "3.93.2",
     "@contentful/forma-36-tokens": "0.11.0",

@@ -10,7 +10,7 @@
   "author": "Contentful GmbH",
   "license": "MIT",
   "dependencies": {
-    "@contentful/app-sdk": "3.39.1",
+    "@contentful/app-sdk": "4.2.1",
     "@contentful/forma-36-fcss": "^0.3.3",
     "@contentful/forma-36-react-components": "^3.93.2",
     "@contentful/node-apps-toolkit": "^2.0.0",

@@ -26,10 +26,11 @@
     "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'"
   },
   "dependencies": {
-    "@contentful/app-sdk": "3.39.1",
+    "@contentful/app-sdk": "4.2.1",
     "@contentful/forma-36-fcss": "^0.3.3",
     "@contentful/forma-36-react-components": "^3.93.2",
     "@contentful/forma-36-tokens": "^0.11.0",
+    "contentful-management": "7.42.1",
     "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",

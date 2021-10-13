@@ -39,6 +39,7 @@ jobs:
   all:
     docker:
       - image: circleci/node:14.16-stretch
+    resource_class: medium+
     steps:
       - checkout
       - run:
