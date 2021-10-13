@@ -237,8 +237,37 @@ export default class Sidebar extends React.Component {
               {' '}Please add a Preview Webhook URL to your Gatsby App settings.
             </HelpText>
           }
+
+          {!!webhookUrl && !contentSyncUrl && this.renderRefreshStatus()}
         </div>
       </div>
+    );
+  };
+
+  renderRefreshStatus = () => {
+    const { busy, ok } = this.state;
+
+    return (
+      <HelpText style={STATUS_STYLE}>
+        {busy && (
+          <>
+            <Spinner />
+            {' '}Sending entry data...
+          </>
+        )}
+        {!busy && (ok === true) && (
+          <>
+            <Icon icon="CheckCircle" color="positive" style={ICON_STYLE} />
+            {' '}Entry data in Gatsby up to date!
+          </>
+        )}
+        {!busy && (ok === false) && (
+          <>
+            <Icon icon="Warning" color="negative" style={ICON_STYLE} />
+            {' '}Last update failed.
+          </>
+        )}
+      </HelpText>
     );
   };
 }
