@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/contentful/apps/compare/smartling-frontend@1.5.0...smartling-frontend@1.6.0) (2021-10-13)
+
+
+### Features
+
+* **smartling:** fetch all content types by setting limit to 1000 ([#532](https://github.com/contentful/apps/issues/532)) ([065059d](https://github.com/contentful/apps/commit/065059dda56e20320d094e1734adb75a0135b8ba))
+
+
+
+
+
 # [1.5.0](https://github.com/contentful/apps/compare/smartling-frontend@1.4.4...smartling-frontend@1.5.0) (2021-10-13)
 
 
