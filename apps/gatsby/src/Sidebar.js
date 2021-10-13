@@ -37,7 +37,14 @@ export default class Sidebar extends React.Component {
   }
 
   async componentDidMount() {
-    this.sdk.entry.onSysChanged(this.onSysChanged);
+    const {contentSyncUrl} = this.sdk.parameters.installation
+
+    this.sdk.entry.onSysChanged(
+      contentSyncUrl 
+        ? this.onSysChanged
+        : this.legacyOnSysChanged
+    );
+
     this.sdk.window.startAutoResizer();
 
     const content = this.props.sdk.entry.getSys();
@@ -65,6 +72,14 @@ export default class Sidebar extends React.Component {
   onSysChanged = (content) => {
     this.setManifestId(content);
     this.buildSlug();
+  };
+
+  legacyOnSysChanged = () => {
+    this.buildSlug()
+    if (this.debounceInterval) {
+      clearInterval(this.debounceInterval);
+    }
+    this.debounceInterval = setInterval(this.refreshPreview, 1000);
   };
 
   // Recursive helper to return slug values buried in a chain of references
@@ -241,7 +256,6 @@ export default class Sidebar extends React.Component {
       authToken,
       previewUrl,
       webhookUrl,
-      previewWebhookUrl,
     } = this.sdk.parameters.installation;
     const { slug } = this.state
 
@@ -250,7 +264,7 @@ export default class Sidebar extends React.Component {
     return (
       <div className="extension">
         <div className="flexcontainer">
-          {(webhookUrl || previewWebhookUrl) ?
+          {webhookUrl ?
             <>
               <ExtensionUI
                 disabled={this.state.buttonDisabled}
@@ -258,7 +272,11 @@ export default class Sidebar extends React.Component {
                 contentSlug={!!slug && slug}
                 previewUrl={previewUrl}
                 authToken={authToken}
-                onOpenPreviewButtonClick={!!contentSyncUrl && this.handleContentSync}
+                onOpenPreviewButtonClick={
+                  !!contentSyncUrl 
+                    ? this.handleContentSync
+                    : () => {}
+                }
               />
               {!!this.state.buttonDisabled && <Spinner />}
             </>
