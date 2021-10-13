@@ -4,7 +4,7 @@ import tokens from '@contentful/forma-36-tokens';
 const styles = {
   body: css({
     height: 'auto',
-    minHeight: '65vh',
+    minHeight: '55vh',
     margin: '0 auto',
     marginTop: tokens.spacingXl,
     padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,

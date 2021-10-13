@@ -2,7 +2,6 @@ import {
   Button,
   Flex,
   FieldGroup,
-  Heading,
   List,
   ListItem,
   Modal,
@@ -15,6 +14,7 @@ import {
   TextLink,
   TextInput,
   Typography,
+  FormLabel,
 } from "@contentful/forma-36-react-components";
 import React, {useState} from "react";
 
@@ -251,7 +251,9 @@ const ContentTypesPanel = ({
   environment,
 }) => (
   <Typography>
-    <Heading>Slug Configuration</Heading>
+    <FormLabel>
+      Slug Configuration
+    </FormLabel>
     <Paragraph>
     You may need to define slugs for content types if CMS Preview is unable to route editors to the correct URL. In most cases, this is not required.
     </Paragraph>
@@ -284,8 +286,6 @@ const ContentTypesPanel = ({
         </Paragraph>
       </ListItem>
       </List>
-
-
 
       <FieldGroup>
         <ContentTypesSelection 
