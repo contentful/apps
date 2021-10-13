@@ -137,8 +137,14 @@ export default class Sidebar extends React.Component {
 
   refreshPreview = () => {
     const {
-      authToken
+      authToken,
+      contentSyncUrl
     } = this.sdk.parameters.installation;
+
+    if (!contentSyncUrl) {
+      this.legacyRefreshPreview()
+      return
+    }
 
     const previewWebhookUrl = this.sdk.parameters.installation.previewWebhookUrl ||
       this.sdk.parameters.installation.webhookUrl
@@ -148,6 +154,31 @@ export default class Sidebar extends React.Component {
     } else {
       console.warn(`Please add a Preview Webhook URL to your Gatsby Cloud App settings.`)
     }
+  };
+
+  legacyRefreshPreview = async () => {
+    if (this.debounceInterval) {
+      clearInterval(this.debounceInterval);
+    }
+
+    const { webhookUrl, authToken } = this.sdk.parameters.installation;
+
+    if (!webhookUrl) {
+      return;
+    }
+
+    this.setState({ busy: true })
+
+    const [res] = await Promise.all([
+      // Convert any errors thrown to non-2xx HTTP response
+      // (for uniform handling of errors).
+      callWebhook(webhookUrl, authToken).catch(() => ({ ok: false })),
+      // Make sure the spinner spins for at least a second
+      // (to avoid a blink of text).
+      new Promise(resolve => setTimeout(resolve, 1000))
+    ]);
+
+    this.setState({ busy: false, ok: res.ok });
   };
 
   getPreviewUrl = () => {
