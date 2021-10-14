@@ -121,7 +121,7 @@ export const ContentTypesSelection = ({
     {/* Selectors for existing enabled content types */}
     {fullEnabledTypes.map(({ sys }, index) => {
       return (
-        <Flex marginBottom="spacingM">
+        <Flex marginBottom="spacingM" key={sys.id}>
           <Flex marginRight = "spacingS" flexDirection="column">
             <Select
               key={`enabledSelect-${index}`}

@@ -4,6 +4,9 @@ import { render, cleanup, fireEvent } from '@testing-library/react';
 
 import Sidebar from './Sidebar';
 
+const PREVIEW_URL = 'https://preview.com'
+const WEBHOOK_URL = 'https://webhook.com'
+
 const getMockContent = () => ({
   id: '456',
   space: {
@@ -20,8 +23,8 @@ const getMockSdk = () => ({
   },
   parameters: {
     installation: {
-      previewUrl: 'https://preview.com',
-      webhookUrl: 'https://webhook.com',
+      previewUrl: PREVIEW_URL,
+      webhookUrl: WEBHOOK_URL,
       authToken: 'test-token'
     }
   },
@@ -56,11 +59,15 @@ describe('Gatsby App Sidebar', () => {
   });
 
   it('should call window.fetch and window.open with the correct urls when a user has not added a Content Sync Url', async () => {
-    const mockFetch = jest.fn(() => Promise.resolve());
+    const mockFetch = jest.fn(() => Promise.resolve({ ok: true }));
     const mockWindowOpen = jest.fn();
+
     global.fetch = mockFetch;
     global.open = mockWindowOpen;
+    
     const { getByText } = render(<Sidebar sdk={mockSdk} />);
+
+    expect(mockSdk.entry.onSysChanged).toBeCalled()
     
     fireEvent(
       getByText('Open Preview'),
@@ -70,12 +77,13 @@ describe('Gatsby App Sidebar', () => {
       }),
     );
 
-    expect(mockFetch.mock.calls[0][0]).toEqual('https://webhook.com');
-    expect(mockWindowOpen.mock.calls[0][0]).toEqual('https://preview.com');
+    await new Promise(res => setTimeout(res, 2000))
+    expect(mockFetch).toBeCalledWith(WEBHOOK_URL, expect.anything());
+    expect(mockWindowOpen).toBeCalledWith(PREVIEW_URL);
   });
 
   it('should call window.fetch and window.open with the correct urls when a user has added a Content Sync Url', async () => {
-    const mockFetch = jest.fn(() => Promise.resolve());
+    const mockFetch = jest.fn(() => Promise.resolve({ ok: true }));
     const mockWindowOpen = jest.fn();
     global.fetch = mockFetch;
     global.open = mockWindowOpen;
@@ -93,7 +101,9 @@ describe('Gatsby App Sidebar', () => {
       }),
     );
 
-    expect(mockFetch.mock.calls[0][0]).toEqual('https://webhook.com');
+    await new Promise(res => setTimeout(res, 3000)) 
+
+    expect(mockFetch).toBeCalledWith(WEBHOOK_URL, expect.anything());
     /**
      * The expected url should be in the form of:
      * {contentSyncUrl - from gatsby dashboard which includes the site id}/{the source plugin name}/{manifestId}
@@ -101,6 +111,6 @@ describe('Gatsby App Sidebar', () => {
     const pluginName = 'gatsby-source-contentful'
     const expectedManifestId = '123-456-2390-08-23T15:27:27.861Z';
     const expectedUrl = `${contentSyncUrl}/${pluginName}/${expectedManifestId}`;
-    expect(mockWindowOpen).toBeCalledWith(expectedUrl);
+    expect(mockWindowOpen).toBeCalledWith(expectedUrl, `GATSBY_TAB`);
   });
 });

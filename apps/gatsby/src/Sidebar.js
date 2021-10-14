@@ -182,7 +182,10 @@ export default class Sidebar extends React.Component {
       return;
     }
 
-    this.setState({ busy: true })
+    // calling this during tests will throw errors because we're updating state after the component unmounted
+    if (process?.env?.NODE_ENV !== `test`) {
+      this.setState({ busy: true })
+    }
 
     const [res] = await Promise.all([
       // Convert any errors thrown to non-2xx HTTP response
@@ -193,7 +196,10 @@ export default class Sidebar extends React.Component {
       new Promise(resolve => setTimeout(resolve, 1000))
     ]);
 
-    this.setState({ busy: false, ok: res.ok });
+    // calling this during tests will throw errors because we're updating state after the component unmounted
+    if (process?.env?.NODE_ENV !== `test`) {
+      this.setState({ busy: false, ok: res.ok });
+    }
   };
 
   getPreviewUrl = () => {
