@@ -340,7 +340,7 @@ export class AppConfig extends React.Component {
                 helpText={<span>
                   To set up Content Sync, see the {" "}
                   <TextLink
-                    href="https://www.notion.so/gatsbyjs/Installing-Content-Sync-for-Contentful-ebcdc21451b644218bce4d4bbf39355a"
+                    href="http://gatsby.dev/contentful-preview-docs"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
