@@ -311,96 +311,97 @@ export class AppConfig extends React.Component {
           <Typography>
             <Heading>Configure CMS Preview</Heading>
             <Paragraph>Use the Site Settings for your Gatsby Cloud site below.</Paragraph>
-            <TextField
-              name="webhookUrl"
-              id="webhookUrl"
-              labelText="Preview Webhook"
-              value={this.state.webhookUrl}
-              onChange={this.updateWebhookUrl}
-              onBlur={this.validateWebhookUrl}
-              className={styles.input}
-              validationMessage={
-                !this.state.validWebhook
-                  ? urlHelpText
-                  : ""
-              }
-              textInputProps={{
-                type: "text",
-              }}
-            />
-            <TextField
-              name="contentSyncUrl"
-              id="contentSyncUrl"
-              labelText="Content Sync"
-              value={this.state.contentSyncUrl}
-              onChange={this.updateContentSyncUrl}
-              onBlur={this.validateContentSyncUrl}
-              className={styles.input}
-              helpText={<span>
-                To set up Content Sync, see the {" "}
-                <TextLink
-                  href="https://www.notion.so/gatsbyjs/Installing-Content-Sync-for-Contentful-ebcdc21451b644218bce4d4bbf39355a"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  installation instructions
-                </TextLink>
-                .
-              </span>
-              }
-              /*
-               * @todo ensure that this help text is okay
-               */
-              validationMessage={
-                !this.state.validContentSync
-                  ? urlHelpText
-                  : ""
-              }
-              textInputProps={{
-                type: "text",
-              }}
-            />
-            <p></p>
+            <div className={styles.mainbody}>
+              <TextField
+                name="webhookUrl"
+                id="webhookUrl"
+                labelText="Preview Webhook"
+                value={this.state.webhookUrl}
+                onChange={this.updateWebhookUrl}
+                onBlur={this.validateWebhookUrl}
+                className={styles.input}
+                validationMessage={
+                  !this.state.validWebhook
+                    ? urlHelpText
+                    : ""
+                }
+                textInputProps={{
+                  type: "text",
+                }}
+              />
+              <TextField
+                name="contentSyncUrl"
+                id="contentSyncUrl"
+                labelText="Content Sync"
+                value={this.state.contentSyncUrl}
+                onChange={this.updateContentSyncUrl}
+                onBlur={this.validateContentSyncUrl}
+                className={styles.input}
+                helpText={<span>
+                  To set up Content Sync, see the {" "}
+                  <TextLink
+                    href="https://www.notion.so/gatsbyjs/Installing-Content-Sync-for-Contentful-ebcdc21451b644218bce4d4bbf39355a"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    installation instructions
+                  </TextLink>
+                  .
+                </span>
+                }
+                /*
+                 * @todo ensure that this help text is okay
+                 */
+                validationMessage={
+                  !this.state.validContentSync
+                    ? urlHelpText
+                    : ""
+                }
+                textInputProps={{
+                  type: "text",
+                }}
+              />
+            </div>
             <Accordion >
               <AccordionItem
-                title={<FormLabel  className={styles.accordion3}>Advanced Settings</FormLabel>}
+                title={<FormLabel>Advanced Settings</FormLabel>}
               >
-                <TextField
-                  name="previewUrl"
-                  id="previewUrl"
-                  labelText="CMS Preview"
-                  value={this.state.previewUrl}
-                  onChange={this.updatePreviewUrl}
-                  onBlur={this.validatePreviewUrl}
-                  className={styles.input}
-                  helpText={
-                    <span>
-                      Copy the URL of CMS Preview from Gatsby Cloud
-                    </span>
-                  }
-                  validationMessage={
-                    !this.state.validPreview
-                      ? urlHelpText
-                      : ""
-                  }
-                  textInputProps={{
-                    type: "text",
-                  }}
-                />
-
-                <TextField
-                  name="authToken"
-                  id="authToken"
-                  labelText="Authentication Token"
-                  value={this.state.authToken}
-                  onChange={this.updateAuthToken}
-                  className={styles.input}
-                  helpText="Optional authentication token for private Gatsby Cloud sites"
-                  textInputProps={{
-                    type: "password",
-                  }}
-                />
-                <p></p>
+                <div className={styles.mainbody}>
+                  <TextField
+                    name="previewUrl"
+                    id="previewUrl"
+                    labelText="CMS Preview"
+                    value={this.state.previewUrl}
+                    onChange={this.updatePreviewUrl}
+                    onBlur={this.validatePreviewUrl}
+                    className={styles.input}
+                    helpText={
+                      <span>
+                        Copy the URL of CMS Preview from Gatsby Cloud
+                      </span>
+                    }
+                    validationMessage={
+                      !this.state.validPreview
+                        ? urlHelpText
+                        : ""
+                    }
+                    textInputProps={{
+                      type: "text",
+                    }}
+                  />
+                  <TextField
+                    name="authToken"
+                    id="authToken"
+                    labelText="Authentication Token"
+                    value={this.state.authToken}
+                    onChange={this.updateAuthToken}
+                    className={styles.input}
+                    helpText="Optional authentication token for private Gatsby Cloud sites"
+                    textInputProps={{
+                      type: "password",
+                    }}
+                  />
+                </div>
                 <ContentTypesPanel
                   space={space}
                   environment={environment}

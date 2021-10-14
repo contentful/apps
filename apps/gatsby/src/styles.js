@@ -21,6 +21,9 @@ const styles = {
     height: '1px',
     backgroundColor: tokens.gray300
   }),
+  mainbody: css({
+    marginBottom: tokens.spacingL,
+  }),
   background: css({
     display: 'block',
     position: 'absolute',
