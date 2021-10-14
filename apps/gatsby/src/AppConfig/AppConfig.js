@@ -402,18 +402,20 @@ export class AppConfig extends React.Component {
                     }}
                   />
                 </div>
-                <ContentTypesPanel
-                  space={space}
-                  environment={environment}
-                  contentTypes={contentTypes}
-                  enabledContentTypes={enabledContentTypes}
-                  urlConstructors={urlConstructors}
-                  onSlugInput={this.onSlugInput}
-                  onContentTypeToggle={this.onContentTypeToggle}
-                  disableContentType={this.disableContentType}
-                  selectorTypeToggle={this.selectorTypeToggle}
-                  selectorType={selectorType}
-                />
+                {!this.state.contentSyncUrl &&
+                  <ContentTypesPanel
+                    space={space}
+                    environment={environment}
+                    contentTypes={contentTypes}
+                    enabledContentTypes={enabledContentTypes}
+                    urlConstructors={urlConstructors}
+                    onSlugInput={this.onSlugInput}
+                    onContentTypeToggle={this.onContentTypeToggle}
+                    disableContentType={this.disableContentType}
+                    selectorTypeToggle={this.selectorTypeToggle}
+                    selectorType={selectorType}
+                  />
+                }
               </AccordionItem>
             </Accordion>
           </Typography>
