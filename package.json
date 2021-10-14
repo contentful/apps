@@ -12,7 +12,6 @@
     "publish-packages": "lerna version --conventional-commits --create-release github --yes && lerna publish from-git --yes"
   },
   "dependencies": {
-    "@gatsby-cloud-pkg/gatsby-cms-extension-base": "0.0.47",
     "lerna": "4.0.0"
   }
 }
