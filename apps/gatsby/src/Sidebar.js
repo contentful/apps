@@ -37,7 +37,14 @@ export default class Sidebar extends React.Component {
   }
 
   async componentDidMount() {
-    this.sdk.entry.onSysChanged(this.onSysChanged);
+    const {contentSyncUrl} = this.sdk.parameters.installation
+
+    this.sdk.entry.onSysChanged(
+      contentSyncUrl 
+        ? this.onSysChanged
+        : this.legacyOnSysChanged
+    );
+
     this.sdk.window.startAutoResizer();
 
     const content = this.props.sdk.entry.getSys();
@@ -65,6 +72,14 @@ export default class Sidebar extends React.Component {
   onSysChanged = (content) => {
     this.setManifestId(content);
     this.buildSlug();
+  };
+
+  legacyOnSysChanged = () => {
+    this.buildSlug()
+    if (this.debounceInterval) {
+      clearInterval(this.debounceInterval);
+    }
+    this.debounceInterval = setInterval(this.refreshPreview, 1000);
   };
 
   // Recursive helper to return slug values buried in a chain of references
@@ -137,8 +152,14 @@ export default class Sidebar extends React.Component {
 
   refreshPreview = () => {
     const {
-      authToken
+      authToken,
+      contentSyncUrl
     } = this.sdk.parameters.installation;
+
+    if (!contentSyncUrl) {
+      this.legacyRefreshPreview()
+      return
+    }
 
     const previewWebhookUrl = this.sdk.parameters.installation.previewWebhookUrl ||
       this.sdk.parameters.installation.webhookUrl
@@ -148,6 +169,31 @@ export default class Sidebar extends React.Component {
     } else {
       console.warn(`Please add a Preview Webhook URL to your Gatsby Cloud App settings.`)
     }
+  };
+
+  legacyRefreshPreview = async () => {
+    if (this.debounceInterval) {
+      clearInterval(this.debounceInterval);
+    }
+
+    const { webhookUrl, authToken } = this.sdk.parameters.installation;
+
+    if (!webhookUrl) {
+      return;
+    }
+
+    this.setState({ busy: true })
+
+    const [res] = await Promise.all([
+      // Convert any errors thrown to non-2xx HTTP response
+      // (for uniform handling of errors).
+      callWebhook(webhookUrl, authToken).catch(() => ({ ok: false })),
+      // Make sure the spinner spins for at least a second
+      // (to avoid a blink of text).
+      new Promise(resolve => setTimeout(resolve, 1000))
+    ]);
+
+    this.setState({ busy: false, ok: res.ok });
   };
 
   getPreviewUrl = () => {
@@ -210,7 +256,6 @@ export default class Sidebar extends React.Component {
       authToken,
       previewUrl,
       webhookUrl,
-      previewWebhookUrl,
     } = this.sdk.parameters.installation;
     const { slug } = this.state
 
@@ -219,7 +264,7 @@ export default class Sidebar extends React.Component {
     return (
       <div className="extension">
         <div className="flexcontainer">
-          {(webhookUrl || previewWebhookUrl) ?
+          {webhookUrl ?
             <>
               <ExtensionUI
                 disabled={this.state.buttonDisabled}
@@ -227,7 +272,11 @@ export default class Sidebar extends React.Component {
                 contentSlug={!!slug && slug}
                 previewUrl={previewUrl}
                 authToken={authToken}
-                onOpenPreviewButtonClick={!!contentSyncUrl && this.handleContentSync}
+                onOpenPreviewButtonClick={
+                  !!contentSyncUrl 
+                    ? this.handleContentSync
+                    : () => {}
+                }
               />
               {!!this.state.buttonDisabled && <Spinner />}
             </>
@@ -237,8 +286,37 @@ export default class Sidebar extends React.Component {
               {' '}Please add a Preview Webhook URL to your Gatsby App settings.
             </HelpText>
           }
+
+          {!!webhookUrl && !contentSyncUrl && this.renderRefreshStatus()}
         </div>
       </div>
+    );
+  };
+
+  renderRefreshStatus = () => {
+    const { busy, ok } = this.state;
+
+    return (
+      <HelpText style={STATUS_STYLE}>
+        {busy && (
+          <>
+            <Spinner />
+            {' '}Sending entry data...
+          </>
+        )}
+        {!busy && (ok === true) && (
+          <>
+            <Icon icon="CheckCircle" color="positive" style={ICON_STYLE} />
+            {' '}Entry data in Gatsby up to date!
+          </>
+        )}
+        {!busy && (ok === false) && (
+          <>
+            <Icon icon="Warning" color="negative" style={ICON_STYLE} />
+            {' '}Last update failed.
+          </>
+        )}
+      </HelpText>
     );
   };
 }
