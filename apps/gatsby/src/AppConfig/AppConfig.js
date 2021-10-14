@@ -6,6 +6,10 @@ import {
   Typography,
   Paragraph,
   TextField,
+  TextLink,
+  Accordion,
+  AccordionItem,
+  FormLabel,
 } from "@contentful/forma-36-react-components";
 import GatsbyIcon from "../GatsbyIcon";
 import { isValidUrl } from '../utils';
@@ -39,7 +43,7 @@ export function enabledContentTypesToTargetState(
         }
       }
 
-      const ctCurrentStateSidebar = 
+      const ctCurrentStateSidebar =
         currentState?.EditorInterface[ct.sys.id]?.sidebar;
 
       const ctEditorInterface = ctCurrentStateSidebar
@@ -125,7 +129,7 @@ export class AppConfig extends React.Component {
 
     let valid = true;
 
-    if (!previewUrl || !isValidUrl(previewUrl)) {
+    if (previewUrl && !isValidUrl(previewUrl)) {
       this.setState({ validPreview: false });
       valid = false;
     }
@@ -307,95 +311,114 @@ export class AppConfig extends React.Component {
           <Typography>
             <Heading>Configure CMS Preview</Heading>
             <Paragraph>Use the Site Settings for your Gatsby Cloud site below.</Paragraph>
-            <TextField
-              name="webhookUrl"
-              id="webhookUrl"
-              labelText="Preview Webhook"
-              value={this.state.webhookUrl}
-              onChange={this.updateWebhookUrl}
-              onBlur={this.validateWebhookUrl}
-              className={styles.input}
-              validationMessage={
-                !this.state.validWebhook
-                  ? urlHelpText
-                  : ""
-              }
-              textInputProps={{
-                type: "text",
-              }}
-            />
-            <TextField
-              name="contentSyncUrl"
-              id="contentSyncUrl"
-              labelText="Content Sync"
-              value={this.state.contentSyncUrl}
-              onChange={this.updateContentSyncUrl}
-              onBlur={this.validateContentSyncUrl}
-              className={styles.input}
-              /*
-               * @todo ensure that this help text is okay
-               */
-              validationMessage={
-                !this.state.validContentSync
-                  ? urlHelpText
-                  : ""
-              }
-              textInputProps={{
-                type: "text",
-              }}
-            />
-            <TextField
-              name="previewUrl"
-              id="previewUrl"
-              labelText="CMS Preview"
-              value={this.state.previewUrl}
-              onChange={this.updatePreviewUrl}
-              onBlur={this.validatePreviewUrl}
-              className={styles.input}
-              helpText={
-                <span>
-                  Copy the URL of CMS Preview from Gatsby Cloud
-                </span>
-              }
-              validationMessage={
-                !this.state.validPreview
-                  ? urlHelpText
-                  : ""
-              }
-              textInputProps={{
-                type: "text",
-              }}
-            />
-            <TextField
-              name="authToken"
-              id="authToken"
-              labelText="Authentication Token"
-              value={this.state.authToken}
-              onChange={this.updateAuthToken}
-              className={styles.input}
-              helpText="Optional authentication token for private Gatsby Cloud sites"
-              textInputProps={{
-                type: "password",
-              }}
-            />
-          </Typography>
-          {!this.state.contentSyncUrl &&
-            <>
-              <hr className={styles.splitter} />
-              <ContentTypesPanel
-                space={space}
-                environment={environment}
-                contentTypes={contentTypes}
-                enabledContentTypes={enabledContentTypes}
-                urlConstructors={urlConstructors}
-                onSlugInput={this.onSlugInput}
-                onContentTypeToggle={this.onContentTypeToggle}
-                disableContentType={this.disableContentType}
-                selectorTypeToggle={this.selectorTypeToggle}
-                selectorType={selectorType}
+            <div className={styles.mainbody}>
+              <TextField
+                name="webhookUrl"
+                id="webhookUrl"
+                labelText="Preview Webhook"
+                value={this.state.webhookUrl}
+                onChange={this.updateWebhookUrl}
+                onBlur={this.validateWebhookUrl}
+                className={styles.input}
+                validationMessage={
+                  !this.state.validWebhook
+                    ? urlHelpText
+                    : ""
+                }
+                textInputProps={{
+                  type: "text",
+                }}
               />
-            </>
-          }
+              <TextField
+                name="contentSyncUrl"
+                id="contentSyncUrl"
+                labelText="Content Sync"
+                value={this.state.contentSyncUrl}
+                onChange={this.updateContentSyncUrl}
+                onBlur={this.validateContentSyncUrl}
+                className={styles.input}
+                helpText={<span>
+                  To set up Content Sync, see the {" "}
+                  <TextLink
+                    href="http://gatsby.dev/contentful-preview-docs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    installation instructions
+                  </TextLink>
+                  .
+                </span>
+                }
+                /*
+                 * @todo ensure that this help text is okay
+                 */
+                validationMessage={
+                  !this.state.validContentSync
+                    ? urlHelpText
+                    : ""
+                }
+                textInputProps={{
+                  type: "text",
+                }}
+              />
+            </div>
+            <Accordion >
+              <AccordionItem
+                title={<FormLabel>Advanced Settings</FormLabel>}
+              >
+                <div className={styles.mainbody}>
+                  <TextField
+                    name="previewUrl"
+                    id="previewUrl"
+                    labelText="CMS Preview"
+                    value={this.state.previewUrl}
+                    onChange={this.updatePreviewUrl}
+                    onBlur={this.validatePreviewUrl}
+                    className={styles.input}
+                    helpText={
+                      <span>
+                        Copy the URL of CMS Preview from Gatsby Cloud
+                      </span>
+                    }
+                    validationMessage={
+                      !this.state.validPreview
+                        ? urlHelpText
+                        : ""
+                    }
+                    textInputProps={{
+                      type: "text",
+                    }}
+                  />
+                  <TextField
+                    name="authToken"
+                    id="authToken"
+                    labelText="Authentication Token"
+                    value={this.state.authToken}
+                    onChange={this.updateAuthToken}
+                    className={styles.input}
+                    helpText="Optional authentication token for private Gatsby Cloud sites"
+                    textInputProps={{
+                      type: "password",
+                    }}
+                  />
+                </div>
+                {!this.state.contentSyncUrl &&
+                  <ContentTypesPanel
+                    space={space}
+                    environment={environment}
+                    contentTypes={contentTypes}
+                    enabledContentTypes={enabledContentTypes}
+                    urlConstructors={urlConstructors}
+                    onSlugInput={this.onSlugInput}
+                    onContentTypeToggle={this.onContentTypeToggle}
+                    disableContentType={this.disableContentType}
+                    selectorTypeToggle={this.selectorTypeToggle}
+                    selectorType={selectorType}
+                  />
+                }
+              </AccordionItem>
+            </Accordion>
+          </Typography>
         </div>
         <div className={styles.icon}>
           <GatsbyIcon />
