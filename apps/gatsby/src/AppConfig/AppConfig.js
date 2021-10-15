@@ -120,42 +120,26 @@ export class AppConfig extends React.Component {
       authToken,
     } = this.state;
 
+    const validPreview = !previewUrl || isValidUrl(previewUrl)
+    const validContentSync = !contentSyncUrl || isValidUrl(contentSyncUrl)
+    const validWebhook = !webhookUrl || isValidUrl(webhookUrl)
+    const validPreviewWebhook = !previewWebhookUrl || isValidUrl(previewWebhookUrl)
+    
+    const valid = !!validPreview && !!validContentSync && !!validWebhook
+
     this.setState({
-      validPreview: true,
-      validContentSync: true,
-      validWebhook: true,
-      validPreviewWebhook: true,
+      validPreview: validPreview,
+      validContentSync: validContentSync,
+      validWebhook: validWebhook,
+      validPreviewWebhook: validPreviewWebhook,
     });
-
-    let valid = true;
-
-    if (previewUrl && !isValidUrl(previewUrl)) {
-      this.setState({ validPreview: false });
-      valid = false;
-    }
-
-    // the contentSyncUrl is optional but if it is passed, check that it is valid
-    if (contentSyncUrl && !isValidUrl(contentSyncUrl)) {
-      this.setState({ validContentSync: false });
-      valid = false;
-    }
-
-    // the webhookUrl is optional but if it is passed, check that it is valid
-    if (webhookUrl && !isValidUrl(webhookUrl)) {
-      this.setState({ validWebhook: false });
-      valid = false;
-    }
-
-    // the previewWebhookUrl is optional but if it is passed, check that it is valid
-    if (previewWebhookUrl && !isValidUrl(previewWebhookUrl)) {
-      this.setState({ validPreviewWebhook: false });
-      valid = false;
-    }
 
     if (!valid) {
       this.props.sdk.notifier.error("Please review the errors in the form.");
+      
       return false;
     }
+
     const currentState = await this.props.sdk.app.getCurrentState();
 
     return {
