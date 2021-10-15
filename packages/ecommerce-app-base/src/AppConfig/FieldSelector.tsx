@@ -9,7 +9,7 @@ import {
   FieldGroup,
   Flex,
   RadioButtonField,
-  Paragraph
+  Paragraph,
 } from '@contentful/forma-36-react-components';
 
 import { ContentType, CompatibleFields, SelectedFields, FieldsSkuTypes } from './fields';
@@ -36,7 +36,7 @@ export default class FieldSelector extends React.Component<Props, State> {
 
     this.state = {
       initialSelectedFields: { ...props.selectedFields },
-      changedSkuTypes: {}
+      changedSkuTypes: {},
     };
   }
 
@@ -50,7 +50,7 @@ export default class FieldSelector extends React.Component<Props, State> {
     if (e.currentTarget.checked) {
       updated[ctId] = (updated[ctId] || []).concat([fieldId]);
     } else {
-      updated[ctId] = (updated[ctId] || []).filter(cur => cur !== fieldId);
+      updated[ctId] = (updated[ctId] || []).filter((cur) => cur !== fieldId);
     }
 
     this.props.onSelectedFieldsChange(updated);
@@ -77,7 +77,7 @@ export default class FieldSelector extends React.Component<Props, State> {
       changedSkuTypes[ctId][fieldId] = true;
 
       this.setState({
-        changedSkuTypes
+        changedSkuTypes,
       });
     }
 
@@ -96,21 +96,21 @@ export default class FieldSelector extends React.Component<Props, State> {
       contentTypes,
       selectedFields,
       fieldSkuTypes,
-      skuTypes = []
+      skuTypes = [],
     } = this.props;
     const { changedSkuTypes } = this.state;
 
-    const defaultSkuType = skuTypes.find(skuType => skuType.default === true)?.id;
+    const defaultSkuType = skuTypes.find((skuType) => skuType.default === true)?.id;
 
     return (
       <Typography>
-        {contentTypes.map(ct => {
+        {contentTypes.map((ct) => {
           const fields = compatibleFields[ct.sys.id];
           return (
             <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
               <Subheading>{ct.name}</Subheading>
               <Form>
-                {fields.map(field => (
+                {fields.map((field) => (
                   <FieldGroup key={field.id}>
                     <CheckboxField
                       id={`field-box-${ct.sys.id}-${field.id}`}
@@ -124,7 +124,7 @@ export default class FieldSelector extends React.Component<Props, State> {
                     {skuTypes.length > 0 && (selectedFields[ct.sys.id] || []).includes(field.id) ? (
                       <>
                         <Flex>
-                          {skuTypes.map(skuType => (
+                          {skuTypes.map((skuType) => (
                             <RadioButtonField
                               key={skuType.id}
                               id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}

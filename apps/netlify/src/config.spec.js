@@ -8,16 +8,16 @@ const config = {
       name: 'Site 1',
       netlifySiteId: 'id1',
       netlifySiteName: 'foo-bar',
-      netlifySiteUrl: 'https://foo-bar.netlify.com'
+      netlifySiteUrl: 'https://foo-bar.netlify.com',
     },
     {
       buildHookId: 'bh2',
       name: 'Site 2',
       netlifySiteId: 'id2',
       netlifySiteName: 'bar-baz',
-      netlifySiteUrl: 'https://bar-baz.netlify.com'
-    }
-  ]
+      netlifySiteUrl: 'https://bar-baz.netlify.com',
+    },
+  ],
 };
 
 const parameters = {
@@ -26,7 +26,7 @@ const parameters = {
   names: 'Site 1,Site 2',
   siteIds: 'id1,id2',
   siteNames: 'foo-bar,bar-baz',
-  siteUrls: 'https://foo-bar.netlify.com,https://bar-baz.netlify.com'
+  siteUrls: 'https://foo-bar.netlify.com,https://bar-baz.netlify.com',
 };
 
 describe('config', () => {
@@ -45,7 +45,7 @@ describe('config', () => {
       expect(
         parametersToConfig({
           ...parameters,
-          names: '    Site 1   ,,   Site 2,,,,'
+          names: '    Site 1   ,,   Site 2,,,,',
         })
       ).toEqual(config);
     });

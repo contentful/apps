@@ -9,7 +9,7 @@ import {
   CardActions,
   DropdownList,
   DropdownListItem,
-  TextLink
+  TextLink,
 } from '@contentful/forma-36-react-components';
 
 const statusColors: { [key: string]: TagType } = {
@@ -18,7 +18,7 @@ const statusColors: { [key: string]: TagType } = {
   yellow: 'warning',
   brown: 'secondary',
   'warm-red': 'negative',
-  'blue-gray': 'muted'
+  'blue-gray': 'muted',
 };
 
 interface Props {

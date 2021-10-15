@@ -27,19 +27,19 @@ export function TypeformOAuth({
       sdk.app.setReady();
     }
   }, [sdk]);
-  
+
   useEffect(() => {
     if (oauthWindow === null) {
       return;
     }
-    
+
     const handleTokenEvent = ({ data, source }: any) => {
       if (source !== oauthWindow) {
         return;
       }
-      
+
       const { token, error } = data;
-      
+
       if (error) {
         console.error('There was an error authenticating. Please try again.');
       } else if (token) {
@@ -50,21 +50,17 @@ export function TypeformOAuth({
       }
     };
 
-    window.addEventListener('message', handleTokenEvent);    
+    window.addEventListener('message', handleTokenEvent);
     return () => window.removeEventListener('message', handleTokenEvent);
-  }, [oauthWindow, setToken])
+  }, [oauthWindow, setToken]);
 
   const executeOauth = () => {
-    const url = `${BASE_URL}/oauth/authorize?&client_id=${
-      CLIENT_ID
-    }&redirect_uri=${encodeURIComponent(
+    const url = `${BASE_URL}/oauth/authorize?&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
       `${window.location.origin}/callback`
     )}&scope=forms:read+workspaces:read`;
 
-    setOAuthWindow(window.open(url, 'Typeform Contentful', 'left=150,top=10,width=800,height=900'))
-
+    setOAuthWindow(window.open(url, 'Typeform Contentful', 'left=150,top=10,width=800,height=900'));
   };
-
 
   return (
     <Button onClick={executeOauth} isFullWidth={isFullWidth} buttonType={buttonType} {...rest}>

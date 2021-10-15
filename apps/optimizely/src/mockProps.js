@@ -4,7 +4,7 @@ export default {
     user: {
       sys: {
         type: 'User',
-        id: '2userId252'
+        id: '2userId252',
       },
       firstName: 'leroy',
       lastName: 'jenkins',
@@ -13,24 +13,24 @@ export default {
       spaceMembership: {
         sys: {
           type: 'SpaceMembership',
-          id: 'cyu19ucaypb9-2userId252'
+          id: 'cyu19ucaypb9-2userId252',
         },
         admin: true,
-        roles: []
-      }
+        roles: [],
+      },
     },
     parameters: {
       instance: {},
       installation: {
-        optimizelyProjectId: '14632250064'
-      }
+        optimizelyProjectId: '14632250064',
+      },
     },
     locales: {
       available: ['en-US'],
       default: 'en-US',
       names: {
-        'en-US': 'English (United States)'
-      }
+        'en-US': 'English (United States)',
+      },
     },
     space: {},
     dialogs: {},
@@ -42,7 +42,7 @@ export default {
       environment: 'master',
       contentType: 'variationContainer',
       entry: '928dNykvv7L31PNIH8d0W',
-      user: '2userId252'
+      user: '2userId252',
     },
     contentType: {
       sys: {
@@ -50,8 +50,8 @@ export default {
           sys: {
             type: 'Link',
             linkType: 'Space',
-            id: 'cyu19ucaypb9'
-          }
+            id: 'cyu19ucaypb9',
+          },
         },
         id: 'variationContainer',
         type: 'ContentType',
@@ -61,10 +61,10 @@ export default {
           sys: {
             id: 'master',
             type: 'Link',
-            linkType: 'Environment'
-          }
+            linkType: 'Environment',
+          },
         },
-        revision: 4
+        revision: 4,
       },
       name: 'Variation Container',
       description: null,
@@ -78,7 +78,7 @@ export default {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'experimentId',
@@ -88,7 +88,7 @@ export default {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'meta',
@@ -98,7 +98,7 @@ export default {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'variations',
@@ -112,8 +112,8 @@ export default {
           items: {
             type: 'Link',
             validations: [],
-            linkType: 'Entry'
-          }
+            linkType: 'Entry',
+          },
         },
         {
           id: 'experimentKey',
@@ -123,9 +123,9 @@ export default {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
-        }
-      ]
+          omitted: false,
+        },
+      ],
     },
     entry: {
       fields: {
@@ -143,49 +143,49 @@ export default {
               _valueSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _isDisabledSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _schemaErrorsChangedSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _channel: {
                 _messageHandlers: {
                   sysChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   valueChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   isDisabledChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   schemaErrorsChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   localeSettingsChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   showDisabledFieldsChanged: {
                     _id: 1,
-                    _listeners: {}
-                  }
+                    _listeners: {},
+                  },
                 },
-                _responseHandlers: {}
-              }
-            }
-          }
+                _responseHandlers: {},
+              },
+            },
+          },
         },
         experimentId: {
           getValue: jest.fn(),
@@ -204,49 +204,49 @@ export default {
               _valueSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: ['14942730290']
+                __private__memoized__arguments__: ['14942730290'],
               },
               _isDisabledSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _schemaErrorsChangedSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _channel: {
                 _messageHandlers: {
                   sysChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   valueChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   isDisabledChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   schemaErrorsChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   localeSettingsChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   showDisabledFieldsChanged: {
                     _id: 1,
-                    _listeners: {}
-                  }
+                    _listeners: {},
+                  },
                 },
-                _responseHandlers: {}
-              }
-            }
-          }
+                _responseHandlers: {},
+              },
+            },
+          },
         },
         meta: {
           getValue: jest.fn(),
@@ -265,49 +265,49 @@ export default {
               _valueSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [{}]
+                __private__memoized__arguments__: [{}],
               },
               _isDisabledSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _schemaErrorsChangedSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _channel: {
                 _messageHandlers: {
                   sysChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   valueChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   isDisabledChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   schemaErrorsChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   localeSettingsChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   showDisabledFieldsChanged: {
                     _id: 1,
-                    _listeners: {}
-                  }
+                    _listeners: {},
+                  },
                 },
-                _responseHandlers: {}
-              }
-            }
-          }
+                _responseHandlers: {},
+              },
+            },
+          },
         },
         variations: {
           getValue: jest.fn(),
@@ -320,7 +320,7 @@ export default {
           items: {
             type: 'Link',
             validations: [],
-            linkType: 'Entry'
+            linkType: 'Entry',
           },
           _defaultLocale: 'en-US',
           _fieldLocales: {
@@ -330,49 +330,49 @@ export default {
               _valueSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _isDisabledSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _schemaErrorsChangedSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _channel: {
                 _messageHandlers: {
                   sysChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   valueChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   isDisabledChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   schemaErrorsChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   localeSettingsChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   showDisabledFieldsChanged: {
                     _id: 1,
-                    _listeners: {}
-                  }
+                    _listeners: {},
+                  },
                 },
-                _responseHandlers: {}
-              }
-            }
-          }
+                _responseHandlers: {},
+              },
+            },
+          },
         },
         experimentKey: {
           id: 'experimentKey',
@@ -388,51 +388,51 @@ export default {
               _valueSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _isDisabledSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _schemaErrorsChangedSignal: {
                 _id: 0,
                 _listeners: {},
-                __private__memoized__arguments__: [null]
+                __private__memoized__arguments__: [null],
               },
               _channel: {
                 _messageHandlers: {
                   sysChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   valueChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   isDisabledChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   schemaErrorsChanged: {
                     _id: 5,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   localeSettingsChanged: {
                     _id: 1,
-                    _listeners: {}
+                    _listeners: {},
                   },
                   showDisabledFieldsChanged: {
                     _id: 1,
-                    _listeners: {}
-                  }
+                    _listeners: {},
+                  },
                 },
-                _responseHandlers: {}
-              }
-            }
-          }
-        }
-      }
+                _responseHandlers: {},
+              },
+            },
+          },
+        },
+      },
     },
     editor: {
       editorInterface: {
@@ -443,8 +443,8 @@ export default {
             sys: {
               id: 'cyu19ucaypb9',
               type: 'Link',
-              linkType: 'Space'
-            }
+              linkType: 'Space',
+            },
           },
           version: 8,
           createdAt: '2019-05-24T07:45:48.999Z',
@@ -452,118 +452,118 @@ export default {
             sys: {
               id: '5aZ5pwqlNWeMnNIZP6lCE1',
               type: 'Link',
-              linkType: 'User'
-            }
+              linkType: 'User',
+            },
           },
           updatedAt: '2019-07-10T07:19:11.763Z',
           updatedBy: {
             sys: {
               id: '2userId252',
               type: 'Link',
-              linkType: 'User'
-            }
+              linkType: 'User',
+            },
           },
           contentType: {
             sys: {
               id: 'variationContainer',
               type: 'Link',
-              linkType: 'ContentType'
-            }
+              linkType: 'ContentType',
+            },
           },
           environment: {
             sys: {
               id: 'master',
               type: 'Link',
-              linkType: 'Environment'
-            }
-          }
+              linkType: 'Environment',
+            },
+          },
         },
         editor: {
           settings: {},
           widgetId: 'optimizely',
-          widgetNamespace: 'extension'
+          widgetNamespace: 'extension',
         },
         sidebar: [
           {
             settings: {},
             widgetId: 'optimizely-app-olocz4yVWMnb79x6',
-            widgetNamespace: 'extension'
+            widgetNamespace: 'extension',
           },
           {
             settings: {},
             widgetId: 'publication-widget',
-            widgetNamespace: 'sidebar-builtin'
+            widgetNamespace: 'sidebar-builtin',
           },
           {
             settings: {},
             widgetId: 'content-preview-widget',
-            widgetNamespace: 'sidebar-builtin'
+            widgetNamespace: 'sidebar-builtin',
           },
           {
             disabled: true,
             widgetId: 'jobs-widget',
-            widgetNamespace: 'sidebar-builtin'
+            widgetNamespace: 'sidebar-builtin',
           },
           {
             disabled: true,
             widgetId: 'content-workflows-tasks-widget',
-            widgetNamespace: 'sidebar-builtin'
+            widgetNamespace: 'sidebar-builtin',
           },
           {
             disabled: true,
             widgetId: 'incoming-links-widget',
-            widgetNamespace: 'sidebar-builtin'
+            widgetNamespace: 'sidebar-builtin',
           },
           {
             disabled: true,
             widgetId: 'translation-widget',
-            widgetNamespace: 'sidebar-builtin'
+            widgetNamespace: 'sidebar-builtin',
           },
           {
             disabled: true,
             widgetId: 'versions-widget',
-            widgetNamespace: 'sidebar-builtin'
+            widgetNamespace: 'sidebar-builtin',
           },
           {
             disabled: true,
             widgetId: 'users-widget',
-            widgetNamespace: 'sidebar-builtin'
+            widgetNamespace: 'sidebar-builtin',
           },
           {
             disabled: true,
             widgetId: 'entry-activity-widget',
-            widgetNamespace: 'sidebar-builtin'
-          }
+            widgetNamespace: 'sidebar-builtin',
+          },
         ],
         controls: [
           {
             fieldId: 'experimentTitle',
             widgetId: 'singleLine',
-            widgetNamespace: 'builtin'
+            widgetNamespace: 'builtin',
           },
           {
             fieldId: 'experimentId',
             widgetId: 'singleLine',
-            widgetNamespace: 'builtin'
+            widgetNamespace: 'builtin',
           },
           {
             fieldId: 'meta',
             widgetId: 'objectEditor',
-            widgetNamespace: 'builtin'
+            widgetNamespace: 'builtin',
           },
           {
             fieldId: 'variations',
             widgetId: 'entryLinksEditor',
-            widgetNamespace: 'builtin'
+            widgetNamespace: 'builtin',
           },
           {
             fieldId: 'experimentKey',
             widgetId: 'singleLine',
-            widgetNamespace: 'builtin'
-          }
-        ]
-      }
-    }
+            widgetNamespace: 'builtin',
+          },
+        ],
+      },
+    },
   },
   client: {
     sdk: {
@@ -571,7 +571,7 @@ export default {
       user: {
         sys: {
           type: 'User',
-          id: '2userId252'
+          id: '2userId252',
         },
         firstName: 'leroy',
         lastName: 'jenkins',
@@ -580,24 +580,24 @@ export default {
         spaceMembership: {
           sys: {
             type: 'SpaceMembership',
-            id: 'cyu19ucaypb9-2userId252'
+            id: 'cyu19ucaypb9-2userId252',
           },
           admin: true,
-          roles: []
-        }
+          roles: [],
+        },
       },
       parameters: {
         instance: {},
         installation: {
-          optimizelyProjectId: '14632250064'
-        }
+          optimizelyProjectId: '14632250064',
+        },
       },
       locales: {
         available: ['en-US'],
         default: 'en-US',
         names: {
-          'en-US': 'English (United States)'
-        }
+          'en-US': 'English (United States)',
+        },
       },
       space: {},
       dialogs: {},
@@ -609,7 +609,7 @@ export default {
         environment: 'master',
         contentType: 'variationContainer',
         entry: '928dNykvv7L31PNIH8d0W',
-        user: '2userId252'
+        user: '2userId252',
       },
       contentType: {
         sys: {
@@ -617,8 +617,8 @@ export default {
             sys: {
               type: 'Link',
               linkType: 'Space',
-              id: 'cyu19ucaypb9'
-            }
+              id: 'cyu19ucaypb9',
+            },
           },
           id: 'variationContainer',
           type: 'ContentType',
@@ -628,10 +628,10 @@ export default {
             sys: {
               id: 'master',
               type: 'Link',
-              linkType: 'Environment'
-            }
+              linkType: 'Environment',
+            },
           },
-          revision: 4
+          revision: 4,
         },
         name: 'Variation Container',
         description: null,
@@ -645,7 +645,7 @@ export default {
             required: false,
             validations: [],
             disabled: false,
-            omitted: false
+            omitted: false,
           },
           {
             id: 'experimentId',
@@ -655,7 +655,7 @@ export default {
             required: false,
             validations: [],
             disabled: false,
-            omitted: false
+            omitted: false,
           },
           {
             id: 'meta',
@@ -665,7 +665,7 @@ export default {
             required: false,
             validations: [],
             disabled: false,
-            omitted: false
+            omitted: false,
           },
           {
             id: 'variations',
@@ -679,8 +679,8 @@ export default {
             items: {
               type: 'Link',
               validations: [],
-              linkType: 'Entry'
-            }
+              linkType: 'Entry',
+            },
           },
           {
             id: 'experimentKey',
@@ -690,9 +690,9 @@ export default {
             required: false,
             validations: [],
             disabled: false,
-            omitted: false
-          }
-        ]
+            omitted: false,
+          },
+        ],
       },
       entry: {
         fields: {
@@ -710,49 +710,49 @@ export default {
                 _valueSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _isDisabledSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _schemaErrorsChangedSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _channel: {
                   _messageHandlers: {
                     sysChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     valueChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     isDisabledChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     schemaErrorsChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     localeSettingsChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     showDisabledFieldsChanged: {
                       _id: 1,
-                      _listeners: {}
-                    }
+                      _listeners: {},
+                    },
                   },
-                  _responseHandlers: {}
-                }
-              }
-            }
+                  _responseHandlers: {},
+                },
+              },
+            },
           },
           experimentId: {
             id: 'experimentId',
@@ -769,49 +769,49 @@ export default {
                 _valueSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: ['14942730290']
+                  __private__memoized__arguments__: ['14942730290'],
                 },
                 _isDisabledSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _schemaErrorsChangedSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _channel: {
                   _messageHandlers: {
                     sysChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     valueChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     isDisabledChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     schemaErrorsChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     localeSettingsChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     showDisabledFieldsChanged: {
                       _id: 1,
-                      _listeners: {}
-                    }
+                      _listeners: {},
+                    },
                   },
-                  _responseHandlers: {}
-                }
-              }
-            }
+                  _responseHandlers: {},
+                },
+              },
+            },
           },
           meta: {
             id: 'meta',
@@ -829,49 +829,49 @@ export default {
                 _valueSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [{}]
+                  __private__memoized__arguments__: [{}],
                 },
                 _isDisabledSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _schemaErrorsChangedSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _channel: {
                   _messageHandlers: {
                     sysChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     valueChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     isDisabledChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     schemaErrorsChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     localeSettingsChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     showDisabledFieldsChanged: {
                       _id: 1,
-                      _listeners: {}
-                    }
+                      _listeners: {},
+                    },
                   },
-                  _responseHandlers: {}
-                }
-              }
-            }
+                  _responseHandlers: {},
+                },
+              },
+            },
           },
           variations: {
             id: 'variations',
@@ -882,7 +882,7 @@ export default {
             items: {
               type: 'Link',
               validations: [],
-              linkType: 'Entry'
+              linkType: 'Entry',
             },
             _defaultLocale: 'en-US',
             _fieldLocales: {
@@ -892,49 +892,49 @@ export default {
                 _valueSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _isDisabledSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _schemaErrorsChangedSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _channel: {
                   _messageHandlers: {
                     sysChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     valueChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     isDisabledChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     schemaErrorsChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     localeSettingsChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     showDisabledFieldsChanged: {
                       _id: 1,
-                      _listeners: {}
-                    }
+                      _listeners: {},
+                    },
                   },
-                  _responseHandlers: {}
-                }
-              }
-            }
+                  _responseHandlers: {},
+                },
+              },
+            },
           },
           experimentKey: {
             id: 'experimentKey',
@@ -950,51 +950,51 @@ export default {
                 _valueSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _isDisabledSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _schemaErrorsChangedSignal: {
                   _id: 0,
                   _listeners: {},
-                  __private__memoized__arguments__: [null]
+                  __private__memoized__arguments__: [null],
                 },
                 _channel: {
                   _messageHandlers: {
                     sysChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     valueChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     isDisabledChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     schemaErrorsChanged: {
                       _id: 5,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     localeSettingsChanged: {
                       _id: 1,
-                      _listeners: {}
+                      _listeners: {},
                     },
                     showDisabledFieldsChanged: {
                       _id: 1,
-                      _listeners: {}
-                    }
+                      _listeners: {},
+                    },
                   },
-                  _responseHandlers: {}
-                }
-              }
-            }
-          }
-        }
+                  _responseHandlers: {},
+                },
+              },
+            },
+          },
+        },
       },
       editor: {
         editorInterface: {
@@ -1005,8 +1005,8 @@ export default {
               sys: {
                 id: 'cyu19ucaypb9',
                 type: 'Link',
-                linkType: 'Space'
-              }
+                linkType: 'Space',
+              },
             },
             version: 8,
             createdAt: '2019-05-24T07:45:48.999Z',
@@ -1014,120 +1014,120 @@ export default {
               sys: {
                 id: '5aZ5pwqlNWeMnNIZP6lCE1',
                 type: 'Link',
-                linkType: 'User'
-              }
+                linkType: 'User',
+              },
             },
             updatedAt: '2019-07-10T07:19:11.763Z',
             updatedBy: {
               sys: {
                 id: '2userId252',
                 type: 'Link',
-                linkType: 'User'
-              }
+                linkType: 'User',
+              },
             },
             contentType: {
               sys: {
                 id: 'variationContainer',
                 type: 'Link',
-                linkType: 'ContentType'
-              }
+                linkType: 'ContentType',
+              },
             },
             environment: {
               sys: {
                 id: 'master',
                 type: 'Link',
-                linkType: 'Environment'
-              }
-            }
+                linkType: 'Environment',
+              },
+            },
           },
           editor: {
             settings: {},
             widgetId: 'optimizely',
-            widgetNamespace: 'extension'
+            widgetNamespace: 'extension',
           },
           sidebar: [
             {
               settings: {},
               widgetId: 'optimizely-app-olocz4yVWMnb79x6',
-              widgetNamespace: 'extension'
+              widgetNamespace: 'extension',
             },
             {
               settings: {},
               widgetId: 'publication-widget',
-              widgetNamespace: 'sidebar-builtin'
+              widgetNamespace: 'sidebar-builtin',
             },
             {
               settings: {},
               widgetId: 'content-preview-widget',
-              widgetNamespace: 'sidebar-builtin'
+              widgetNamespace: 'sidebar-builtin',
             },
             {
               disabled: true,
               widgetId: 'jobs-widget',
-              widgetNamespace: 'sidebar-builtin'
+              widgetNamespace: 'sidebar-builtin',
             },
             {
               disabled: true,
               widgetId: 'content-workflows-tasks-widget',
-              widgetNamespace: 'sidebar-builtin'
+              widgetNamespace: 'sidebar-builtin',
             },
             {
               disabled: true,
               widgetId: 'incoming-links-widget',
-              widgetNamespace: 'sidebar-builtin'
+              widgetNamespace: 'sidebar-builtin',
             },
             {
               disabled: true,
               widgetId: 'translation-widget',
-              widgetNamespace: 'sidebar-builtin'
+              widgetNamespace: 'sidebar-builtin',
             },
             {
               disabled: true,
               widgetId: 'versions-widget',
-              widgetNamespace: 'sidebar-builtin'
+              widgetNamespace: 'sidebar-builtin',
             },
             {
               disabled: true,
               widgetId: 'users-widget',
-              widgetNamespace: 'sidebar-builtin'
+              widgetNamespace: 'sidebar-builtin',
             },
             {
               disabled: true,
               widgetId: 'entry-activity-widget',
-              widgetNamespace: 'sidebar-builtin'
-            }
+              widgetNamespace: 'sidebar-builtin',
+            },
           ],
           controls: [
             {
               fieldId: 'experimentTitle',
               widgetId: 'singleLine',
-              widgetNamespace: 'builtin'
+              widgetNamespace: 'builtin',
             },
             {
               fieldId: 'experimentId',
               widgetId: 'singleLine',
-              widgetNamespace: 'builtin'
+              widgetNamespace: 'builtin',
             },
             {
               fieldId: 'meta',
               widgetId: 'objectEditor',
-              widgetNamespace: 'builtin'
+              widgetNamespace: 'builtin',
             },
             {
               fieldId: 'variations',
               widgetId: 'entryLinksEditor',
-              widgetNamespace: 'builtin'
+              widgetNamespace: 'builtin',
             },
             {
               fieldId: 'experimentKey',
               widgetId: 'singleLine',
-              widgetNamespace: 'builtin'
-            }
-          ]
-        }
-      }
+              widgetNamespace: 'builtin',
+            },
+          ],
+        },
+      },
     },
     project: '14632250064',
-    baseURL: 'https://api.optimizely.com/v2'
-  }
+    baseURL: 'https://api.optimizely.com/v2',
+  },
 };

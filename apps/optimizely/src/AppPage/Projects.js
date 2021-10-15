@@ -8,13 +8,13 @@ import {
   Paragraph,
   SelectField,
   Option,
-  Typography
+  Typography,
 } from '@contentful/forma-36-react-components';
 
 const styles = {
   section: css({
-    marginTop: tokens.spacingM
-  })
+    marginTop: tokens.spacingM,
+  }),
 };
 
 export default function Projects({ allProjects, selectedProject, onProjectChange }) {
@@ -31,10 +31,11 @@ export default function Projects({ allProjects, selectedProject, onProjectChange
         value={selectedProject ? selectedProject.toString() : ''}
         onChange={onProjectChange}
         selectProps={{ isDisabled: !allProjects }}
-        width="large">
+        width="large"
+      >
         <Option value="">Select Optimizely Project</Option>
         {!!allProjects.length &&
-          allProjects.map(p => (
+          allProjects.map((p) => (
             <Option key={p.id} value={p.id.toString()}>
               {p.name}
             </Option>
@@ -45,11 +46,11 @@ export default function Projects({ allProjects, selectedProject, onProjectChange
 }
 
 Projects.defaultProps = {
-  allProjects: []
+  allProjects: [],
 };
 
 Projects.propTypes = {
   allProjects: PropTypes.array,
   selectedProject: PropTypes.string,
-  onProjectChange: PropTypes.func.isRequired
+  onProjectChange: PropTypes.func.isRequired,
 };

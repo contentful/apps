@@ -8,7 +8,7 @@ import {
   Typography,
   TextField,
   Form,
-  TextLink
+  TextLink,
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from '@emotion/css';
@@ -25,7 +25,7 @@ import {
   ContentType,
   CompatibleFields,
   SelectedFields,
-  FieldsSkuTypes
+  FieldsSkuTypes,
 } from './fields';
 
 import { Config, Integration, ParameterDefinition, ValidateParametersFn } from '../interfaces';
@@ -61,7 +61,7 @@ const styles = {
     backgroundColor: tokens.colorWhite,
     zIndex: 2,
     boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
-    borderRadius: '2px'
+    borderRadius: '2px',
   }),
   background: (color: string) =>
     css({
@@ -71,17 +71,17 @@ const styles = {
       top: 0,
       width: '100%',
       height: '300px',
-      backgroundColor: color
+      backgroundColor: color,
     }),
   section: css({
-    margin: `${tokens.spacingXl} 0`
+    margin: `${tokens.spacingXl} 0`,
   }),
   splitter: css({
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.gray300
+    backgroundColor: tokens.gray300,
   }),
   icon: css({
     display: 'flex',
@@ -89,9 +89,9 @@ const styles = {
     '> img': {
       display: 'block',
       width: '70px',
-      margin: `${tokens.spacingXl} 0`
-    }
-  })
+      margin: `${tokens.spacingXl} 0`,
+    },
+  }),
 };
 
 export default class AppConfig extends React.Component<Props, State> {
@@ -101,7 +101,7 @@ export default class AppConfig extends React.Component<Props, State> {
     selectedFields: {},
     fieldSkuTypes: {},
     parameters: toInputParameters(this.props.parameterDefinitions, null),
-    appReady: false
+    appReady: false,
   };
 
   componentDidMount() {
@@ -116,14 +116,14 @@ export default class AppConfig extends React.Component<Props, State> {
     const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
       space.getContentTypes(),
       space.getEditorInterfaces(),
-      app.getParameters()
+      app.getParameters(),
     ]);
 
     const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items;
     const editorInterfaces = (eisResponse as CollectionResponse<EditorInterface>).items;
 
     const compatibleFields = getCompatibleFields(contentTypes);
-    const filteredContentTypes = contentTypes.filter(ct => {
+    const filteredContentTypes = contentTypes.filter((ct) => {
       const fields = compatibleFields[ct.sys.id];
       return fields && fields.length > 0;
     });
@@ -135,7 +135,7 @@ export default class AppConfig extends React.Component<Props, State> {
         selectedFields: editorInterfacesToSelectedFields(editorInterfaces, ids.app),
         parameters: toInputParameters(this.props.parameterDefinitions, parameters),
         fieldSkuTypes: (parameters as { skuTypes?: FieldsSkuTypes })?.skuTypes ?? {},
-        appReady: true
+        appReady: true,
       },
       () => app.setReady()
     );
@@ -158,7 +158,7 @@ export default class AppConfig extends React.Component<Props, State> {
 
     return {
       parameters: updatedParameters,
-      targetState: selectedFieldsToTargetState(contentTypes, selectedFields)
+      targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
     };
   };
 
@@ -184,8 +184,8 @@ export default class AppConfig extends React.Component<Props, State> {
   onParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
 
-    this.setState(state => ({
-      parameters: { ...state.parameters, [key]: value }
+    this.setState((state) => ({
+      parameters: { ...state.parameters, [key]: value },
     }));
   };
 
@@ -198,17 +198,11 @@ export default class AppConfig extends React.Component<Props, State> {
   };
 
   renderApp() {
-    const {
-      contentTypes,
-      compatibleFields,
-      selectedFields,
-      fieldSkuTypes,
-      parameters,
-      appReady
-    } = this.state;
+    const { contentTypes, compatibleFields, selectedFields, fieldSkuTypes, parameters, appReady } =
+      this.state;
     const { parameterDefinitions, sdk, skuTypes } = this.props;
     const {
-      ids: { space, environment }
+      ids: { space, environment },
     } = sdk;
     const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
 
@@ -218,7 +212,7 @@ export default class AppConfig extends React.Component<Props, State> {
           <Typography>
             <Heading>Configuration</Heading>
             <Form>
-              {parameterDefinitions.map(def => {
+              {parameterDefinitions.map((def) => {
                 const key = `config-input-${def.id}`;
 
                 return (
@@ -231,7 +225,7 @@ export default class AppConfig extends React.Component<Props, State> {
                     textInputProps={{
                       width: def.type === 'Symbol' ? 'large' : 'medium',
                       type: def.type === 'Symbol' ? 'text' : 'number',
-                      maxLength: 255
+                      maxLength: 255,
                     }}
                     helpText={def.description}
                     value={parameters[def.id]}
@@ -268,7 +262,8 @@ export default class AppConfig extends React.Component<Props, State> {
                     environment === 'master'
                       ? `https://app.contentful.com/spaces/${space}/content_types`
                       : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-                  }>
+                  }
+                >
                   content model
                 </TextLink>{' '}
                 and assign it to the app from this screen.

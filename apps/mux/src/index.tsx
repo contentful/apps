@@ -227,8 +227,9 @@ export class App extends React.Component<AppProps, AppState> {
         cors_origin: window.location.origin,
         new_asset_settings: {
           passthrough: passthroughId,
-          playback_policy: (this.props.sdk.parameters
-            .installation as InstallationParams).muxEnableSignedUrls
+          playback_policy: (
+            this.props.sdk.parameters.installation as InstallationParams
+          ).muxEnableSignedUrls
             ? 'signed'
             : 'public',
         },

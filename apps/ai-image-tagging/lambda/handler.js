@@ -7,7 +7,7 @@ module.exports = async (method, path, { fetch, rekog, documentClient }) => {
   if (method !== 'GET') {
     return {
       status: 405,
-      body: { message: 'Method not allowed.' }
+      body: { message: 'Method not allowed.' },
     };
   }
 
@@ -26,7 +26,7 @@ module.exports = async (method, path, { fetch, rekog, documentClient }) => {
       console.error(`Hard usage limit exceeded for space ${spaceId}. Aborting.`);
       return {
         status: 403,
-        message: 'Usage exceeded.'
+        message: 'Usage exceeded.',
       };
     }
   } catch (err) {
@@ -37,12 +37,12 @@ module.exports = async (method, path, { fetch, rekog, documentClient }) => {
   try {
     return {
       status: 200,
-      body: { tags: await tag(path, { fetch, rekog }) }
+      body: { tags: await tag(path, { fetch, rekog }) },
     };
   } catch (err) {
     return {
       status: 400,
-      body: { message: err.message || err.errorMessage }
+      body: { message: err.message || err.errorMessage },
     };
   }
 };

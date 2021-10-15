@@ -9,7 +9,7 @@ import { RangeOption, AnalyticsProps, AnalyticsState, ChartData, GapiError } fro
 const RANGE_OPTIONS: RangeOption[] = [
   { label: 'Last 24 hours', startDaysAgo: 1, endDaysAgo: 0 },
   { label: 'Last 7 days', startDaysAgo: 7, endDaysAgo: 0 },
-  { label: 'Last 28 days', startDaysAgo: 28, endDaysAgo: 0 }
+  { label: 'Last 28 days', startDaysAgo: 28, endDaysAgo: 0 },
 ];
 
 const INITIAL_RANGE_INDEX = 1;
@@ -21,8 +21,8 @@ function getRangeDates(rangeOptionIndex: number) {
   return {
     startEnd: {
       start: new Date(today - DAY_IN_MS * range.startDaysAgo),
-      end: new Date(today - DAY_IN_MS * range.endDaysAgo)
-    }
+      end: new Date(today - DAY_IN_MS * range.endDaysAgo),
+    },
   };
 }
 
@@ -33,7 +33,7 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
       totalPageViews: 0,
       rangeOptionIndex: INITIAL_RANGE_INDEX,
       ...getRangeDates(INITIAL_RANGE_INDEX),
-      loading: true
+      loading: true,
     };
   }
 
@@ -42,7 +42,7 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
 
     this.setState({
       rangeOptionIndex,
-      ...getRangeDates(rangeOptionIndex)
+      ...getRangeDates(rangeOptionIndex),
     });
   }
 
@@ -53,16 +53,15 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
   }
 
   handleError(error: GapiError) {
-    const errorNotification = getErrorNotification(error)
+    const errorNotification = getErrorNotification(error);
 
     if (errorNotification) {
-      this.props.setHelpText(errorNotification)
-    }
-    else {
-      this.props.sdk.notifier.error(`Google Analytics: ${error.message}`)
+      this.props.setHelpText(errorNotification);
+    } else {
+      this.props.sdk.notifier.error(`Google Analytics: ${error.message}`);
     }
 
-    this.props.gapi.analytics.auth.signOut()
+    this.props.gapi.analytics.auth.signOut();
   }
 
   render() {
@@ -70,45 +69,48 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
       rangeOptionIndex,
       totalPageViews,
       startEnd: { start, end },
-      loading
+      loading,
     } = this.state;
     const { pagePath, viewId, sdk, gapi } = this.props;
     const dimensions = getDateRangeInterval(start, end);
     const formattedPageViews = formatLargeNumbers(totalPageViews);
 
-    return <>
-      <div className={styles.header}>
-        <div className={loading ? styles.pageViewsLoading : styles.pageViews}>
-          <DisplayText size="large">{formattedPageViews}</DisplayText>
-          <Paragraph>pageviews</Paragraph>
+    return (
+      <>
+        <div className={styles.header}>
+          <div className={loading ? styles.pageViewsLoading : styles.pageViews}>
+            <DisplayText size="large">{formattedPageViews}</DisplayText>
+            <Paragraph>pageviews</Paragraph>
+          </div>
+          <Select
+            name="range"
+            value={`${rangeOptionIndex}`}
+            onChange={(event) => this.handleRangeChange((event.target as HTMLSelectElement).value)}
+          >
+            {RANGE_OPTIONS.map((r, index) => (
+              <option key={index} value={`${index}`}>
+                {r.label}
+              </option>
+            ))}
+          </Select>
         </div>
-        <Select
-          name="range"
-          value={`${rangeOptionIndex}`}
-          onChange={event => this.handleRangeChange((event.target as HTMLSelectElement).value)}>
-          {RANGE_OPTIONS.map((r, index) => (
-            <option key={index} value={`${index}`}>
-              {r.label}
-            </option>
-          ))}
-        </Select>
-      </div>
-      <Timeline
-        onData={(d: ChartData) => {
-          this.updateTotalPageViews(d);
-          this.setState({ loading: false });
-        }}
-        onQuery={() => this.setState({ loading: true })}
-        onError={error => this.handleError(error)}
-        pagePath={pagePath}
-        start={start}
-        end={end}
-        dimensions={dimensions}
-        sdk={sdk}
-        gapi={gapi}
-        // remove 'ga:' prefix from view id
-        viewId={viewId.replace(/^ga:/, '')}
-      />
-    </>;
+        <Timeline
+          onData={(d: ChartData) => {
+            this.updateTotalPageViews(d);
+            this.setState({ loading: false });
+          }}
+          onQuery={() => this.setState({ loading: true })}
+          onError={(error) => this.handleError(error)}
+          pagePath={pagePath}
+          start={start}
+          end={end}
+          dimensions={dimensions}
+          sdk={sdk}
+          gapi={gapi}
+          // remove 'ga:' prefix from view id
+          viewId={viewId.replace(/^ga:/, '')}
+        />
+      </>
+    );
   }
 }

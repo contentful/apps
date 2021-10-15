@@ -126,7 +126,8 @@ export const ProductListItem = (props: Props) => {
         tabIndex={-1}
         className={`${styles.product} ${isSelected ? styles.selectedProduct : ''}`}
         onKeyUp={noop}
-        onClick={() => selectProduct(product.sku)}>
+        onClick={() => selectProduct(product.sku)}
+      >
         {!imageHasLoaded && !imageHasErrored && (
           <SkeletonContainer className={styles.skeletonImage}>
             <SkeletonImage width={400} height={290} />

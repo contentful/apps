@@ -9,7 +9,7 @@ import {
   DropdownList,
   DropdownListItem,
   Note,
-  TextLink
+  TextLink,
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { SDKContext, GlobalStateContext } from './all-context';
@@ -19,29 +19,29 @@ import { getAdditionalEntryInformation } from './utils';
 
 const styles = {
   variationContainer: css({
-    marginTop: tokens.spacingXl
+    marginTop: tokens.spacingXl,
   }),
   variationTitle: css({
     small: {
       color: tokens.gray600,
       fontWeight: tokens.fontWeightNormal,
       marginLeft: tokens.spacingXs,
-      fontSize: tokens.fontSizeL
-    }
+      fontSize: tokens.fontSizeL,
+    },
   }),
   variationDescription: css({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     color: tokens.gray600,
-    marginTop: tokens.spacingXs
+    marginTop: tokens.spacingXs,
   }),
   entryCard: css({
-    marginTop: tokens.spacingM
+    marginTop: tokens.spacingM,
   }),
   missingNote: css({
-    marginTop: tokens.spacingM
-  })
+    marginTop: tokens.spacingM,
+  }),
 };
 
 function getPercentOfTraffic(variation) {
@@ -60,10 +60,10 @@ function useEntryCard(id) {
   const fetchEntry = useCallback(() => {
     sdk.space
       .getEntry(id)
-      .then(entry => {
+      .then((entry) => {
         const data = {
           ...entry,
-          meta: getAdditionalEntryInformation(entry, allContentTypes, sdk.locales.default)
+          meta: getAdditionalEntryInformation(entry, allContentTypes, sdk.locales.default),
         };
         actions.setEntry(id, data);
         return entry;
@@ -84,7 +84,7 @@ function useEntryCard(id) {
   return {
     entry,
     loading: !entry,
-    error
+    error,
   };
 }
 
@@ -131,7 +131,7 @@ export function SelectedReference(props) {
 SelectedReference.propTypes = {
   sys: PropTypes.object.isRequired,
   onEditClick: PropTypes.func.isRequired,
-  onRemoveClick: PropTypes.func.isRequired
+  onRemoveClick: PropTypes.func.isRequired,
 };
 
 export default function VariationItem(props) {
@@ -170,7 +170,7 @@ export default function VariationItem(props) {
       )}
       {!props.sys && (
         <VariationSelect
-          onCreate={contentType => {
+          onCreate={(contentType) => {
             props.onCreateVariation(props.variation, contentType);
           }}
           onDuplicateClick={() => {}}
@@ -190,5 +190,5 @@ VariationItem.propTypes = {
   onCreateVariation: PropTypes.func,
   onLinkVariation: PropTypes.func,
   onOpenEntry: PropTypes.func.isRequired,
-  onRemoveVariation: PropTypes.func.isRequired
+  onRemoveVariation: PropTypes.func.isRequired,
 };

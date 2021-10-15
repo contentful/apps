@@ -9,15 +9,15 @@ import RefToolTip from './RefToolTip';
 const styles = {
   container: css({
     position: 'relative',
-    marginRight: '0.5rem'
-  })
+    marginRight: '0.5rem',
+  }),
 };
 
 ReferenceField.propTypes = {
   id: PropTypes.string.isRequired,
   checked: PropTypes.bool.isRequired,
   contentType: PropTypes.object.isRequired,
-  onSelect: PropTypes.func.isRequired
+  onSelect: PropTypes.func.isRequired,
 };
 
 export default function ReferenceField({ id, checked, contentType, onSelect }) {
@@ -30,7 +30,7 @@ export default function ReferenceField({ id, checked, contentType, onSelect }) {
         id={`reference-field-${id}`}
         checked={checked || disabled}
         disabled={disabled}
-        onChange={e => onSelect(e.target.checked)}
+        onChange={(e) => onSelect(e.target.checked)}
         labelText={field.name}
         labelIsLight={true}
       />
@@ -40,15 +40,15 @@ export default function ReferenceField({ id, checked, contentType, onSelect }) {
 }
 
 export function findFieldById(id, contentType) {
-  return contentType.fields.find(field => field.id === id);
+  return contentType.fields.find((field) => field.id === id);
 }
 
 export function getFieldLinkValidations(field) {
-  return get(field, ['items', 'validations'], field.validations).filter(v => v.linkContentType);
+  return get(field, ['items', 'validations'], field.validations).filter((v) => v.linkContentType);
 }
 
 export function getNonFieldLinkValidations(field) {
-  return get(field, ['items', 'validations'], field.validations).filter(v => !v.linkContentType);
+  return get(field, ['items', 'validations'], field.validations).filter((v) => !v.linkContentType);
 }
 
 export function hasFieldLinkValidations(field) {

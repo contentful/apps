@@ -6,27 +6,27 @@ import { Note } from '@contentful/forma-36-react-components';
 
 const styles = {
   container: css({
-    margin: tokens.spacingL
-  })
+    margin: tokens.spacingL,
+  }),
 };
 
 const requiredFields = [
   {
     id: 'experimentTitle',
-    type: 'Symbol'
+    type: 'Symbol',
   },
   { id: 'experimentId', type: 'Symbol' },
   { id: 'experimentKey', type: 'Symbol' },
   { id: 'meta', type: 'Object' },
-  { id: 'variations', type: 'Array' }
+  { id: 'variations', type: 'Array' },
 ];
 
 export function isValidContentType(contentType) {
   const missing = [];
 
-  requiredFields.forEach(item => {
+  requiredFields.forEach((item) => {
     const exists = contentType.fields.find(
-      field => field.id === item.id && field.type === item.type
+      (field) => field.id === item.id && field.type === item.type
     );
     if (!exists) {
       missing.push(item);
@@ -53,11 +53,11 @@ export function IncorrectContentType(props) {
       <Note noteType="negative" title={title}>
         <div>
           <strong>Required:</strong>{' '}
-          {requiredFields.map(item => `${item.id} (${item.type})`).join(', ')}
+          {requiredFields.map((item) => `${item.id} (${item.type})`).join(', ')}
         </div>
         <div>
           <strong>Missing:</strong>{' '}
-          {props.missingFields.map(item => `${item.id} (${item.type})`).join(',')}
+          {props.missingFields.map((item) => `${item.id} (${item.type})`).join(',')}
         </div>
       </Note>
     </div>
@@ -68,7 +68,7 @@ IncorrectContentType.propTypes = {
   missingFields: PropTypes.array.isRequired,
   sdk: PropTypes.shape({
     ids: PropTypes.shape({
-      extension: PropTypes.string
-    }).isRequired
-  }).isRequired
+      extension: PropTypes.string,
+    }).isRequired,
+  }).isRequired,
 };

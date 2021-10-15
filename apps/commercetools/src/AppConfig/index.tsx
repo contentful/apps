@@ -7,7 +7,7 @@ import {
   Paragraph,
   Typography,
   TextField,
-  Form
+  Form,
 } from '@contentful/forma-36-react-components';
 
 import FieldSelector from './FieldSelector';
@@ -18,13 +18,13 @@ import {
   editorInterfacesToSelectedFields,
   selectedFieldsToTargetState,
   CompatibleFields,
-  FieldsConfig
+  FieldsConfig,
 } from './fields';
 import { validateParameters } from './parameters';
 
 import { styles } from './styles';
 
-import { Hash, EditorInterface,  ContentType } from '../interfaces';
+import { Hash, EditorInterface, ContentType } from '../interfaces';
 import logo from '../logo.svg';
 import { FieldTypeInstructions } from './FieldTypeInstructions';
 
@@ -44,7 +44,7 @@ export default class AppConfig extends React.Component<Props, State> {
     contentTypes: [],
     compatibleFields: {},
     selectedFields: {},
-    parameters: toInputParameters(parameterDefinitions, null)
+    parameters: toInputParameters(parameterDefinitions, null),
   };
 
   async componentDidMount() {
@@ -55,7 +55,7 @@ export default class AppConfig extends React.Component<Props, State> {
     const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
       space.getContentTypes(),
       space.getEditorInterfaces(),
-      app.getParameters()
+      app.getParameters(),
     ]);
 
     const fieldsConfig = get(parameters, ['fieldsConfig'], {});
@@ -64,7 +64,7 @@ export default class AppConfig extends React.Component<Props, State> {
     const editorInterfaces = (eisResponse as Hash).items as EditorInterface[];
 
     const compatibleFields = getCompatibleFields(contentTypes);
-    const filteredContentTypes = contentTypes.filter(ct => {
+    const filteredContentTypes = contentTypes.filter((ct) => {
       const fields = compatibleFields[ct.sys.id];
       return fields && fields.length > 0;
     });
@@ -75,7 +75,7 @@ export default class AppConfig extends React.Component<Props, State> {
         contentTypes: filteredContentTypes,
         compatibleFields,
         selectedFields: editorInterfacesToSelectedFields(editorInterfaces, fieldsConfig, ids.app),
-        parameters: toInputParameters(parameterDefinitions, parameters)
+        parameters: toInputParameters(parameterDefinitions, parameters),
       },
       () => app.setReady()
     );
@@ -85,7 +85,7 @@ export default class AppConfig extends React.Component<Props, State> {
     const { contentTypes, selectedFields } = this.state;
     const parameters = {
       ...toAppParameters(parameterDefinitions, this.state.parameters),
-      fieldsConfig: selectedFields
+      fieldsConfig: selectedFields,
     };
 
     const error = validateParameters(parameters);
@@ -97,15 +97,15 @@ export default class AppConfig extends React.Component<Props, State> {
 
     return {
       parameters,
-      targetState: selectedFieldsToTargetState(contentTypes, selectedFields)
+      targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
     };
   };
 
   onParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
 
-    this.setState(state => ({
-      parameters: { ...state.parameters, [key]: value }
+    this.setState((state) => ({
+      parameters: { ...state.parameters, [key]: value },
     }));
   };
 
@@ -117,7 +117,7 @@ export default class AppConfig extends React.Component<Props, State> {
     const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
     const { sdk } = this.props;
     const {
-      ids: { space, environment }
+      ids: { space, environment },
     } = sdk;
 
     return (
@@ -134,7 +134,7 @@ export default class AppConfig extends React.Component<Props, State> {
 
             <Heading>Configuration</Heading>
             <Form>
-              {parameterDefinitions.map(def => {
+              {parameterDefinitions.map((def) => {
                 const key = `config-input-${def.id}`;
                 return (
                   <TextField
@@ -145,7 +145,7 @@ export default class AppConfig extends React.Component<Props, State> {
                     labelText={def.name}
                     textInputProps={{
                       width: 'large',
-                      maxLength: 255
+                      maxLength: 255,
                     }}
                     helpText={def.description}
                     value={parameters[def.id]}

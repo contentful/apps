@@ -9,7 +9,7 @@ import contentTypeResponse from './mockData/contentTypeResponse.json';
 import entryMockResponse from './mockData/entryMockResponse.json';
 
 configure({
-  testIdAttribute: 'data-test-id'
+  testIdAttribute: 'data-test-id',
 });
 
 let mockSdk: any;
@@ -22,26 +22,26 @@ describe('App', () => {
       location: {
         is() {
           return false;
-        }
+        },
       },
       parameters: {
         installation: {
-          projectId: 'project-id-123'
-        }
+          projectId: 'project-id-123',
+        },
       },
       window: {
-        startAutoResizer() {}
+        startAutoResizer() {},
       },
       locales: {
         names: {
           'en-US': 'English (United State)',
-          'de-DE': 'German (Germany)'
-        }
+          'de-DE': 'German (Germany)',
+        },
       },
       ids: {
         app: 'smartling-app-id',
         entry: 'entry-123',
-        space: 'space-123'
+        space: 'space-123',
       },
       app: {
         async setReady() {},
@@ -52,21 +52,21 @@ describe('App', () => {
         async getParameters() {
           return null;
         },
-        async onConfigurationCompleted() {}
+        async onConfigurationCompleted() {},
       },
       space: {
         async getEditorInterfaces() {
           return {
-            items: []
+            items: [],
           };
         },
         async getContentTypes() {
           return contentTypeResponse;
-        }
+        },
       },
       notifier: {
-        error() {}
-      }
+        error() {},
+      },
     };
   });
 
@@ -149,8 +149,8 @@ describe('App', () => {
           }
         }),
         setItem: jest.fn(),
-        removeItem: jest.fn()
-      }
+        removeItem: jest.fn(),
+      },
     });
 
     fetchMock.get(
@@ -187,15 +187,11 @@ describe('App', () => {
           }
         }),
         setItem: jest.fn(),
-        removeItem: jest.fn()
-      }
+        removeItem: jest.fn(),
+      },
     });
 
-    fetchMock.get(
-      '/refresh?refresh_token=',
-      401,
-      { overwriteRoutes: true }
-    );
+    fetchMock.get('/refresh?refresh_token=', 401, { overwriteRoutes: true });
     fetchMock.get(
       '/entry?spaceId=space-123&projectId=project-id-123&entryId=entry-123',
       {},

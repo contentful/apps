@@ -3,7 +3,7 @@ import {
   fetchProductVariantPreviews,
   fetchProductPreviews,
   fetchCollectionPreviews,
-  makeSkuResolver
+  makeSkuResolver,
 } from './skuResolvers';
 import { SKU_TYPES } from './constants';
 
@@ -25,7 +25,7 @@ function makeCTA(fieldType, skuType) {
 
 function makeSaveBtnText(skuType) {
   if (skuType === 'product') {
-    return selectedSKUs => {
+    return (selectedSKUs) => {
       switch (selectedSKUs.length) {
         case 0:
           return 'Save products';
@@ -38,7 +38,7 @@ function makeSaveBtnText(skuType) {
   }
 
   if (skuType === 'collection') {
-    return selectedSKUs => {
+    return (selectedSKUs) => {
       switch (selectedSKUs.length) {
         case 0:
           return 'Save collections';
@@ -50,7 +50,7 @@ function makeSaveBtnText(skuType) {
     };
   }
 
-  return selectedSKUs => {
+  return (selectedSKUs) => {
     switch (selectedSKUs.length) {
       case 0:
         return 'Save product variants';
@@ -101,7 +101,7 @@ async function renderDialog(sdk) {
     fetchProducts: await makeSkuResolver(sdk, skuType),
     searchDelay: 750,
     skuType,
-    makeSaveBtnText: makeSaveBtnText(skuType)
+    makeSaveBtnText: makeSaveBtnText(skuType),
   });
 
   sdk.window.startAutoResizer();
@@ -115,7 +115,7 @@ async function openDialog(sdk, currentValue, config) {
     shouldCloseOnOverlayClick: true,
     shouldCloseOnEscapePress: true,
     parameters: config,
-    width: 1400
+    width: 1400,
   });
 
   return Array.isArray(skus) ? skus : [];
@@ -139,20 +139,20 @@ setup({
       name: 'Storefront Access Token',
       description: 'The storefront access token to your Shopify store',
       type: 'Symbol',
-      required: true
+      required: true,
     },
     {
       id: 'apiEndpoint',
       name: 'API Endpoint',
       description: 'The Shopify API endpoint',
       type: 'Symbol',
-      required: true
-    }
+      required: true,
+    },
   ],
   skuTypes: SKU_TYPES,
   fetchProductPreviews: fetchPreviews,
   renderDialog,
   openDialog,
   isDisabled,
-  validateParameters
+  validateParameters,
 });

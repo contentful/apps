@@ -17,8 +17,8 @@ function makeBodyStyle() {
     padding: `${tokens.spacingL} ${tokens.spacingL} 0 ${tokens.spacingL}`,
 
     [`@media screen and (min-height: ${STICKY_HEADER_BREAKPOINT}px)`]: {
-      padding: `calc(${tokens.spacingL} + ${HEADER_HEIGHT}px)  ${tokens.spacingL} 0 ${tokens.spacingL}`
-    }
+      padding: `calc(${tokens.spacingL} + ${HEADER_HEIGHT}px)  ${tokens.spacingL} 0 ${tokens.spacingL}`,
+    },
   });
 }
 
@@ -34,22 +34,22 @@ export const styles = {
       position: 'fixed',
       top: 0,
       zIndex: 1,
-      width: `calc(100% - 2rem)`
-    }
+      width: `calc(100% - 2rem)`,
+    },
   }),
   body: makeBodyStyle(),
   total: css({
     fontSize: tokens.fontSizeS,
     color: tokens.gray600,
     display: 'block',
-    marginTop: tokens.spacingS
+    marginTop: tokens.spacingS,
   }),
   saveBtn: css({
-    marginRight: tokens.spacingM
+    marginRight: tokens.spacingM,
   }),
   paginator: css({
     margin: `${tokens.spacingM} auto ${tokens.spacingL} auto`,
-    textAlign: 'center'
+    textAlign: 'center',
   }),
   leftsideControls: css({
     position: 'relative',
@@ -58,19 +58,19 @@ export const styles = {
       zIndex: 1,
       position: 'absolute',
       top: '10px',
-      left: '10px'
+      left: '10px',
     }),
     input: css({
-      paddingLeft: '35px'
-    })
+      paddingLeft: '35px',
+    }),
   }),
   rightsideControls: css({
     justifyContent: 'flex-end',
     flexGrow: 1,
-    display: 'flex'
+    display: 'flex',
   }),
   loadMoreButton: css({
     width: '100%',
-    marginTop: tokens.spacingXs
-  })
+    marginTop: tokens.spacingXs,
+  }),
 };

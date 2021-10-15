@@ -7,43 +7,43 @@ export const definitions: ParameterDefinition[] = [
     name: 'Commercetools Project Key',
     description: 'The Commercetools project key',
     type: 'Symbol',
-    required: true
+    required: true,
   },
   {
     id: 'clientId',
     name: 'Client ID',
     description: 'The client ID',
     type: 'Symbol',
-    required: true
+    required: true,
   },
   {
     id: 'clientSecret',
     name: 'Client Secret',
     description: 'The client secret',
     type: 'Symbol',
-    required: true
+    required: true,
   },
   {
     id: 'apiEndpoint',
     name: 'API Endpoint',
     description: 'The Commercetools API endpoint',
     type: 'Symbol',
-    required: true
+    required: true,
   },
   {
     id: 'authApiEndpoint',
     name: 'Auth API Endpoint',
     description: 'The auth API endpoint',
     type: 'Symbol',
-    required: true
+    required: true,
   },
   {
     id: 'locale',
     name: 'Commercetools data locale',
     description: 'The Commercetools data locale to display',
     type: 'Symbol',
-    required: true
-  }
+    required: true,
+  },
 ];
 
 describe('parameters', () => {
@@ -57,7 +57,7 @@ describe('parameters', () => {
         clientSecret: '',
         apiEndpoint: '',
         authApiEndpoint: '',
-        locale: ''
+        locale: '',
       });
     });
 
@@ -68,7 +68,7 @@ describe('parameters', () => {
         clientSecret: 'some-secret',
         apiEndpoint: 'some-endpoint',
         authApiEndpoint: 'some-auth-endpoint',
-        locale: 'en'
+        locale: 'en',
       });
 
       expect(result).toEqual({
@@ -77,7 +77,7 @@ describe('parameters', () => {
         clientSecret: 'some-secret',
         apiEndpoint: 'some-endpoint',
         authApiEndpoint: 'some-auth-endpoint',
-        locale: 'en'
+        locale: 'en',
       });
     });
   });
@@ -92,8 +92,8 @@ describe('parameters', () => {
             name: 'Some number param',
             description: 'Description',
             type: 'Number',
-            required: true
-          }
+            required: true,
+          },
         ],
         {
           projectKey: 'some-key',
@@ -102,7 +102,7 @@ describe('parameters', () => {
           apiEndpoint: 'some-endpoint',
           authApiEndpoint: 'some-auth-endpoint',
           locale: 'en',
-          numParam: '12345'
+          numParam: '12345',
         }
       );
 
@@ -113,7 +113,7 @@ describe('parameters', () => {
         apiEndpoint: 'some-endpoint',
         authApiEndpoint: 'some-auth-endpoint',
         locale: 'en',
-        numParam: 12345
+        numParam: 12345,
       });
     });
   });

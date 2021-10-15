@@ -59,7 +59,8 @@ export default function AuthWrapper({ sdk }: Props) {
                     <TextLink
                       href="https://www.typeform.com/"
                       target="_blank"
-                      rel="noopener noreferrer">
+                      rel="noopener noreferrer"
+                    >
                       Typeform
                     </TextLink>{' '}
                     app allows you to reference your forms from Typeform without leaving Contentful.

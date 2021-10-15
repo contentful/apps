@@ -19,8 +19,8 @@ export const ImagePreviewWithFocalPoint = ({
   file: {
     url,
     details: {
-      image: { width: originalImgWidth, height: originalImgHeight }
-    }
+      image: { width: originalImgWidth, height: originalImgHeight },
+    },
   },
   subtitle,
   wrapperWidth,
@@ -41,7 +41,7 @@ export const ImagePreviewWithFocalPoint = ({
 
   const focalPoint = {
     x: otherProps.focalPoint.x / widthRatio,
-    y: otherProps.focalPoint.y / heightRatio
+    y: otherProps.focalPoint.y / heightRatio,
   };
 
   const translateX = getTranslateValue(focalPoint.x, wrapperWidth, imgWidth);
@@ -54,8 +54,9 @@ export const ImagePreviewWithFocalPoint = ({
           width: wrapperWidth,
           height: wrapperHeight,
           overflow: 'hidden',
-          position: 'relative'
-        }}>
+          position: 'relative',
+        }}
+      >
         <img
           alt="Preview with cropping applied"
           src={url}
@@ -63,7 +64,7 @@ export const ImagePreviewWithFocalPoint = ({
             width: `${imgWidth}px`,
             height: `${imgHeight}px`,
             transform: `translate3d(${translateX}px, ${translateY}px, 0)`,
-            transition: `transform ${tokens.transitionDurationLong} ${tokens.transitionEasingCubicBezier}`
+            transition: `transform ${tokens.transitionDurationLong} ${tokens.transitionEasingCubicBezier}`,
           }}
         />
       </div>
@@ -80,21 +81,21 @@ ImagePreviewWithFocalPoint.propTypes = {
     details: PropTypes.shape({
       image: PropTypes.shape({
         width: PropTypes.number.isRequired,
-        height: PropTypes.number.isRequired
-      }).isRequired
-    }).isRequired
+        height: PropTypes.number.isRequired,
+      }).isRequired,
+    }).isRequired,
   }).isRequired,
   focalPoint: PropTypes.shape({
     x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired
+    y: PropTypes.number.isRequired,
   }).isRequired,
   wrapperHeight: PropTypes.number,
   wrapperWidth: PropTypes.number,
-  subtitle: PropTypes.string
+  subtitle: PropTypes.string,
 };
 
 ImagePreviewWithFocalPoint.defaultProps = {
   className: '',
   wrapperWidth: 150,
-  subtitle: ''
+  subtitle: '',
 };

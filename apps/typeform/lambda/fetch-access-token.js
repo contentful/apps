@@ -13,9 +13,9 @@ module.exports = async (code, origin, { fetch }) => {
   const response = await fetch(ENDPOINT, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body
+    body,
   });
 
   if (!response.ok) {

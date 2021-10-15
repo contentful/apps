@@ -1,6 +1,6 @@
-import React, { Component } from "react";
-import { AppExtensionSDK } from "@contentful/app-sdk";
-import { Heading, List, ListItem, Switch } from "@contentful/forma-36-react-components";
+import React, { Component } from 'react';
+import { AppExtensionSDK } from '@contentful/app-sdk';
+import { Heading, List, ListItem, Switch } from '@contentful/forma-36-react-components';
 
 interface ConfigProps {
   sdk: AppExtensionSDK;
@@ -87,7 +87,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
   }
 
   toggleElement(index: number, current: boolean) {
-    this.setState(state => {
+    this.setState((state) => {
       state.data[index].active = !current;
       return state;
     });
@@ -113,4 +113,3 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     );
   }
 }
-

@@ -37,11 +37,11 @@ const DragHandle = SortableHandle<DragHandleProps>(({ url, alt }: DragHandleProp
 
 const styles = {
   container: css({
-    maxWidth: '600px'
+    maxWidth: '600px',
   }),
   grid: css({
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)'
+    gridTemplateColumns: 'repeat(3, 1fr)',
   }),
   card: (disabled: boolean) =>
     css({
@@ -55,15 +55,15 @@ const styles = {
         maxWidth: '150px',
         maxHeight: '100px',
         margin: 'auto',
-        userSelect: 'none' // Image selection sometimes makes drag and drop ugly.
-      }
+        userSelect: 'none', // Image selection sometimes makes drag and drop ugly.
+      },
     }),
   remove: css({
     position: 'absolute',
     top: '-10px',
     right: '-10px',
-    backgroundColor: 'white'
-  })
+    backgroundColor: 'white',
+  }),
 };
 
 const SortableItem = SortableElement<SortableElementProps>((props: SortableElementProps) => {
@@ -103,7 +103,7 @@ const SortableList = SortableContainer<SortableContainerProps>((props: SortableC
 
       return {
         counts,
-        list: [...acc.list, item]
+        list: [...acc.list, item],
       };
     },
     { counts: {}, list: [] }

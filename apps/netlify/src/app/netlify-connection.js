@@ -8,7 +8,7 @@ import { Typography, Heading, Paragraph, Icon } from '@contentful/forma-36-react
 const styles = {
   auth: css({
     display: 'flex',
-    justifyContent: 'center'
+    justifyContent: 'center',
   }),
   button: css({
     backgroundColor: '#00ad9e',
@@ -21,25 +21,25 @@ const styles = {
     boxShadow: '0 2px 4px 0 rgba(14,30,37,.12)',
     cursor: 'pointer',
     fontSize: '16px',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
   }),
   splitter: css({
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.gray300
+    backgroundColor: tokens.gray300,
   }),
   connectAgain: css({
     marginTop: tokens.spacingXs,
     textAlign: 'center',
-    color: tokens.gray600
+    color: tokens.gray600,
   }),
   connectAgainIcon: css({
     fill: tokens.gray600,
     marginRight: tokens.spacingXs,
-    verticalAlign: 'middle'
-  })
+    verticalAlign: 'middle',
+  }),
 };
 
 export default class NetlifyConnection extends React.Component {
@@ -49,9 +49,9 @@ export default class NetlifyConnection extends React.Component {
     email: PropTypes.string,
     netlifyCounts: PropTypes.shape({
       buildable: PropTypes.number.isRequired,
-      unavailable: PropTypes.number.isRequired
+      unavailable: PropTypes.number.isRequired,
     }),
-    onConnectClick: PropTypes.func.isRequired
+    onConnectClick: PropTypes.func.isRequired,
   };
 
   render() {
@@ -89,7 +89,7 @@ export default class NetlifyConnection extends React.Component {
     );
   }
 
-  getSitePlural = count => {
+  getSitePlural = (count) => {
     return count === 1 ? 'site' : 'sites';
   };
 

@@ -3,7 +3,7 @@ import {
   SkeletonContainer,
   SkeletonBodyText,
   Paragraph,
-  Typography
+  Typography,
 } from '@contentful/forma-36-react-components';
 import IssueCard from './IssueCard';
 import { FormattedIssue } from '../../interfaces';
@@ -36,7 +36,7 @@ export default class IssueList extends React.Component<Props> {
 
     return (
       <>
-        {issues.map(issue => (
+        {issues.map((issue) => (
           <IssueCard issue={issue} key={issue.key} onRemoveClick={() => unlinkIssue(issue.key)} />
         ))}
       </>

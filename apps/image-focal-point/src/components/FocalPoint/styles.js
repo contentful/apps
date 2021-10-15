@@ -14,6 +14,6 @@ export const styles = {
     opacity: 1,
     transition: `transform ${tokens.transitionDurationDefault} ${tokens.transitionEasingCubicBezier}`,
     position: 'absolute',
-    pointerEvents: 'none'
-  })
+    pointerEvents: 'none',
+  }),
 };

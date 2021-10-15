@@ -40,7 +40,7 @@ async function getAccessToken(clientId, endpoint) {
         // CLayerAuth SDK will throw if not present. By setting to empty
         // string we prevent the SDK exception and the value is ignored
         // by the Commerce Layer Auth API.
-        clientSecret: ''
+        clientSecret: '',
       })
     ).accessToken;
   }
@@ -64,16 +64,16 @@ async function fetchSKUs(installationParams, search, pagination) {
   const { clientId, apiEndpoint } = installationParams;
   const accessToken = await getAccessToken(clientId, apiEndpoint);
 
-  const URL = `${apiEndpoint}/api/skus?page[size]=${PER_PAGE}&page[number]=${pagination.offset /
-    PER_PAGE +
-    1}${search.length ? `&filter[q][name_or_code_cont]=${search}` : ''}`;
+  const URL = `${apiEndpoint}/api/skus?page[size]=${PER_PAGE}&page[number]=${
+    pagination.offset / PER_PAGE + 1
+  }${search.length ? `&filter[q][name_or_code_cont]=${search}` : ''}`;
 
   const res = await fetch(URL, {
     headers: {
       Accept: 'application/vnd.api+json',
-      Authorization: `Bearer ${accessToken}`
+      Authorization: `Bearer ${accessToken}`,
     },
-    method: 'GET'
+    method: 'GET',
   });
 
   return await res.json();
@@ -96,14 +96,14 @@ const fetchProductPreviews = async function fetchProductPreviews(skus, config) {
   // Here we account for the edge case where the user has picked more than 25
   // products, which is the max amount of pagination results. We need to fetch
   // and compile the complete selection result doing 1 request per 25 items.
-  const resultPromises = chunk(skus, PREVIEWS_PER_PAGE).map(async skusSubset => {
+  const resultPromises = chunk(skus, PREVIEWS_PER_PAGE).map(async (skusSubset) => {
     const URL = `${apiEndpoint}/api/skus?page[size]=${PREVIEWS_PER_PAGE}&filter[q][code_in]=${skusSubset}`;
     const res = await fetch(URL, {
       headers: {
         Accept: 'application/vnd.api+json',
-        Authorization: `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`,
       },
-      method: 'GET'
+      method: 'GET',
     });
     return await res.json();
   });
@@ -116,8 +116,8 @@ const fetchProductPreviews = async function fetchProductPreviews(skus, config) {
 
   const missingProducts = difference(
     skus,
-    foundProducts.map(product => product.sku)
-  ).map(sku => ({ sku, isMissing: true, image: '', name: '', id: '' }));
+    foundProducts.map((product) => product.sku)
+  ).map((sku) => ({ sku, isMissing: true, image: '', name: '', id: '' }));
 
   return [...foundProducts, ...missingProducts];
 };
@@ -138,11 +138,11 @@ async function renderDialog(sdk) {
           count: PER_PAGE,
           limit: PER_PAGE,
           total: result.meta.record_count,
-          offset: pagination.offset
+          offset: pagination.offset,
         },
-        products: result.data.map(dataTransformer(sdk.parameters.installation.apiEndpoint))
+        products: result.data.map(dataTransformer(sdk.parameters.installation.apiEndpoint)),
       };
-    }
+    },
   });
 
   sdk.window.startAutoResizer();
@@ -156,7 +156,7 @@ async function openDialog(sdk, currentValue, config) {
     shouldCloseOnOverlayClick: true,
     shouldCloseOnEscapePress: true,
     parameters: config,
-    width: 1400
+    width: 1400,
   });
 
   return Array.isArray(skus) ? skus : [];
@@ -180,19 +180,19 @@ setup({
       name: 'Client ID',
       description: 'The client ID',
       type: 'Symbol',
-      required: true
+      required: true,
     },
     {
       id: 'apiEndpoint',
       name: 'API Endpoint',
       description: 'The Commerce Layer API endpoint',
       type: 'Symbol',
-      required: true
-    }
+      required: true,
+    },
   ],
   fetchProductPreviews,
   renderDialog,
   openDialog,
   isDisabled,
-  validateParameters
+  validateParameters,
 });

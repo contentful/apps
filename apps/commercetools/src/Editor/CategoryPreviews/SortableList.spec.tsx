@@ -6,7 +6,7 @@ import categoryPreviews from '../../__mocks__/categoryPreviews';
 const defaultProps: Props = {
   disabled: false,
   categoryPreviews,
-  deleteFn: jest.fn()
+  deleteFn: jest.fn(),
 };
 
 const renderComponent = (props: Props) => {
@@ -16,7 +16,7 @@ const renderComponent = (props: Props) => {
 jest.mock('react-sortable-hoc', () => ({
   SortableContainer: (x: any) => x,
   SortableElement: (x: any) => x,
-  SortableHandle: (x: any) => x
+  SortableHandle: (x: any) => x,
 }));
 
 describe('SortableList', () => {

@@ -3,5 +3,5 @@ export const Status = {
   AddContent: 'AddContent',
   PublishVariations: 'PublishVariations',
   StartExperiment: 'StartExperiment',
-  Finished: 'Finished'
+  Finished: 'Finished',
 };

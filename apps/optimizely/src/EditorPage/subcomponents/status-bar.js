@@ -8,27 +8,27 @@ import { getEntryStatus } from './utils';
 
 const styles = {
   note: css({
-    marginBottom: tokens.spacingL
+    marginBottom: tokens.spacingL,
   }),
   container: css({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    maxWidth: 1000
+    maxWidth: 1000,
   }),
   item: css({
     display: 'flex',
     alignItems: 'center',
     fontSize: tokens.fontSizeM,
-    color: tokens.gray700
+    color: tokens.gray700,
   }),
   itemSeparator: css({
     marginLeft: tokens.spacingM,
-    marginRight: tokens.spacingM
+    marginRight: tokens.spacingM,
   }),
   itemIcon: css({
-    marginRight: tokens.spacingS
-  })
+    marginRight: tokens.spacingS,
+  }),
 };
 
 function StatusItem(props) {
@@ -47,7 +47,7 @@ function StatusItem(props) {
 
 StatusItem.propTypes = {
   children: PropTypes.string,
-  active: PropTypes.bool
+  active: PropTypes.bool,
 };
 
 function StatusSeparator() {
@@ -89,7 +89,7 @@ export default function StatusBar(props) {
     [Status.SelectExperiment]: false,
     [Status.StartExperiment]: false,
     [Status.AddContent]: false,
-    [Status.PublishVariations]: false
+    [Status.PublishVariations]: false,
   };
 
   if (props.loaded) {
@@ -113,5 +113,5 @@ StatusBar.propTypes = {
   loaded: PropTypes.bool.isRequired,
   experiment: PropTypes.object,
   variations: PropTypes.array,
-  entries: PropTypes.object
+  entries: PropTypes.object,
 };

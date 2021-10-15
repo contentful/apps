@@ -16,11 +16,11 @@ const styles = {
     position: 'relative',
     overflow: 'hidden',
     ':not(:first-of-type)': css({
-      marginLeft: tokens.spacingXs
+      marginLeft: tokens.spacingXs,
     }),
     '&:last-child': css({
-      marginRight: tokens.spacingXs
-    })
+      marginRight: tokens.spacingXs,
+    }),
   }),
   product: css({
     border: '1px solid',
@@ -41,9 +41,9 @@ const styles = {
       borderColor: tokens.gray500,
       cursor: 'pointer',
       '> span > div': {
-        opacity: 1
-      }
-    }
+        opacity: 1,
+      },
+    },
   }),
   previewImg: (imageHasLoaded: boolean) =>
     css({
@@ -51,7 +51,7 @@ const styles = {
       margin: '0 auto',
       minWidth: 'auto',
       height: '40px',
-      overflow: 'hidden'
+      overflow: 'hidden',
     }),
   removeIcon: css({
     backgroundColor: 'rgba(0,0,0,.65)',
@@ -69,8 +69,8 @@ const styles = {
       position: 'absolute',
       top: '50%',
       left: '50%',
-      transform: 'translate(-50%, -50%)'
-    })
+      transform: 'translate(-50%, -50%)',
+    }),
   }),
   errorImage: css({
     backgroundColor: tokens.gray100,
@@ -85,9 +85,9 @@ const styles = {
       position: 'absolute',
       top: '50%',
       left: '50%',
-      transform: 'translate(-50%, -50%)'
-    })
-  })
+      transform: 'translate(-50%, -50%)',
+    }),
+  }),
 };
 
 export const ProductSelectionListItem = (props: Props) => {
@@ -105,7 +105,8 @@ export const ProductSelectionListItem = (props: Props) => {
         className={styles.product}
         onKeyUp={noop}
         data-test-id={`selection-preview-${product.sku}`}
-        onClick={() => selectProduct(product.sku)}>
+        onClick={() => selectProduct(product.sku)}
+      >
         <Tooltip content={productIsMissing ? 'Product missing' : product.name} place="bottom">
           <div className={styles.removeIcon}>
             <Icon color="white" icon="Close" />

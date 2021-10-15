@@ -14,7 +14,7 @@ describe('usage', () => {
 
   test('reports usage', async () => {
     global.Date = class extends OriginalDate {
-      constructor () {
+      constructor() {
         return new OriginalDate(2015, 1, 15);
       }
     };
@@ -32,7 +32,7 @@ describe('usage', () => {
       UpdateExpression: 'SET #attr = if_not_exists(#attr, :zero) + :incr',
       ExpressionAttributeNames: { '#attr': 'reqs' },
       ExpressionAttributeValues: { ':incr': 1, ':zero': 0 },
-      ReturnValues: 'ALL_NEW'
+      ReturnValues: 'ALL_NEW',
     });
   });
 });

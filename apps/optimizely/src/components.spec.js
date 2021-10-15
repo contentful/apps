@@ -11,8 +11,8 @@ describe('error message components', () => {
     it('should match snapshot', () => {
       const mockSdk = {
         ids: {
-          extension: 'test-extension'
-        }
+          extension: 'test-extension',
+        },
       };
 
       const missingFields = [{ id: 'key', type: 'symbol' }];
@@ -45,7 +45,7 @@ describe('error message components', () => {
             required: false,
             validations: [],
             disabled: false,
-            omitted: false
+            omitted: false,
           },
           {
             id: 'experimentId',
@@ -55,7 +55,7 @@ describe('error message components', () => {
             required: false,
             validations: [],
             disabled: false,
-            omitted: false
+            omitted: false,
           },
           {
             id: 'meta',
@@ -65,7 +65,7 @@ describe('error message components', () => {
             required: false,
             validations: [],
             disabled: false,
-            omitted: false
+            omitted: false,
           },
           {
             id: 'variations',
@@ -79,9 +79,9 @@ describe('error message components', () => {
             items: {
               type: 'Link',
               validations: [],
-              linkType: 'Entry'
-            }
-          }
+              linkType: 'Entry',
+            },
+          },
         ].concat(
           valid
             ? {
@@ -92,16 +92,16 @@ describe('error message components', () => {
                 required: false,
                 validations: [],
                 disabled: false,
-                omitted: false
+                omitted: false,
               }
             : []
-        )
+        ),
       };
     };
     it('should produce an invalid response', () => {
       expect(isValidContentType(makeFields())).toEqual([
         false,
-        [{ id: 'experimentKey', type: 'Symbol' }]
+        [{ id: 'experimentKey', type: 'Symbol' }],
       ]);
     });
     it('should produce a valid response', () => {

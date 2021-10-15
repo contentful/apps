@@ -6,15 +6,15 @@ export const DEFAULT_SHOPIFY_VARIANT_TITLE = 'Default Title';
 export const SKU_TYPES = [
   {
     id: 'product',
-    name: 'Product'
+    name: 'Product',
   },
   {
     id: 'variant',
     name: 'Product variant',
-    default: true
+    default: true,
   },
   {
     id: 'collection',
-    name: 'Collection'
-  }
+    name: 'Collection',
+  },
 ];

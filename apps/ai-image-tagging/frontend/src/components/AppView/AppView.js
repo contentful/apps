@@ -12,7 +12,7 @@ import appLogo from './app-logo.svg';
 
 const makeContentType = (contentTypeId, contentTypeName) => ({
   sys: {
-    id: contentTypeId
+    id: contentTypeId,
   },
   name: contentTypeName,
   displayField: 'title',
@@ -21,28 +21,28 @@ const makeContentType = (contentTypeId, contentTypeName) => ({
       id: 'title',
       name: 'Title',
       required: true,
-      type: 'Symbol'
+      type: 'Symbol',
     },
     {
       id: 'image',
       name: 'Image',
       required: true,
       type: 'Link',
-      linkType: 'Asset'
+      linkType: 'Asset',
     },
     {
       id: 'imageTags',
       name: 'Image tags',
       required: true,
       type: 'Array',
-      items: { type: 'Symbol' }
-    }
-  ]
+      items: { type: 'Symbol' },
+    },
+  ],
 });
 
 export class AppView extends Component {
   static propTypes = {
-    sdk: PropTypes.object.isRequired
+    sdk: PropTypes.object.isRequired,
   };
 
   state = {
@@ -50,7 +50,7 @@ export class AppView extends Component {
     allContentTypesIds: [],
     contentTypeId: 'imageWithAiTags',
     contentTypeName: 'Image with AI tags',
-    isContentTypeIdPristine: true
+    isContentTypeIdPristine: true,
   };
 
   async componentDidMount() {
@@ -58,7 +58,7 @@ export class AppView extends Component {
 
     const [isInstalled, allContentTypes] = await Promise.all([
       app.isInstalled(),
-      space.getContentTypes()
+      space.getContentTypes(),
     ]);
 
     const allContentTypesIds = allContentTypes.items.map(({ sys: { id } }) => id);
@@ -68,7 +68,7 @@ export class AppView extends Component {
     this.setState({ isInstalled, allContentTypesIds }, () => app.setReady());
 
     app.onConfigure(this.installApp);
-    app.onConfigurationCompleted(err => {
+    app.onConfigurationCompleted((err) => {
       if (!err) {
         this.setState({ isInstalled: true });
       }
@@ -118,23 +118,23 @@ export class AppView extends Component {
       targetState: {
         EditorInterface: {
           [contentType.sys.id]: {
-            controls: [{ fieldId: 'imageTags' }]
-          }
-        }
-      }
+            controls: [{ fieldId: 'imageTags' }],
+          },
+        },
+      },
     };
   };
 
   onContentTypeNameChange = ({ target: { value } }) =>
-    this.setState(oldState => ({
+    this.setState((oldState) => ({
       ...(oldState.isContentTypeIdPristine && { contentTypeId: camelCase(value) }),
-      contentTypeName: value
+      contentTypeName: value,
     }));
 
   onContentTypeIdChange = ({ target: { value } }) =>
     this.setState({
       isContentTypeIdPristine: false,
-      contentTypeId: value
+      contentTypeId: value,
     });
 
   render() {

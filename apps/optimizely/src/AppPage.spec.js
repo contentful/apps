@@ -10,9 +10,9 @@ const basicProps = {
   openAuth: () => {},
   accessToken: '',
   client: {
-    getProjects: () => Promise.resolve(projectData)
+    getProjects: () => Promise.resolve(projectData),
   },
-  sdk: mockProps.sdk
+  sdk: mockProps.sdk,
 };
 
 configure({ testIdAttribute: 'data-test-id' });
@@ -28,15 +28,15 @@ describe('AppPage', () => {
     const sdk = {
       ...basicProps.sdk,
       space: {
-        getContentTypes: jest.fn(() => Promise.resolve(contentTypesData))
+        getContentTypes: jest.fn(() => Promise.resolve(contentTypesData)),
       },
       app: {
         setReady: jest.fn(),
         getParameters: jest.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
-        onConfigure: jest.fn(fn => {
+        onConfigure: jest.fn((fn) => {
           configFunc = fn;
-        })
-      }
+        }),
+      },
     };
 
     const props = { ...basicProps, accessToken: '123', sdk };

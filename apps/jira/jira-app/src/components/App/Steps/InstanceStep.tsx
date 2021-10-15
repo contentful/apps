@@ -6,24 +6,24 @@ import {
   Select,
   Option,
   TextInput,
-  Card
+  Card,
 } from '@contentful/forma-36-react-components';
 import { JiraCloudResource, CloudProject } from '../../../interfaces';
 
 // using lodash.debouce basically breaks test with infinite timers
-const debounce = function(fn: Function, timeout: number): Function {
+const debounce = function (fn: Function, timeout: number): Function {
   let timer: any;
 
-  return function(...args: any[]) {
+  return function (...args: any[]) {
     clearTimeout(timer);
     timer = setTimeout(() => {
       fn(...args);
     }, timeout);
-  }
-}
+  };
+};
 
 interface State {
-  inputValue: string
+  inputValue: string;
 }
 
 interface Props {
@@ -33,7 +33,7 @@ interface Props {
   projects: CloudProject[];
   pickProject: (project: CloudProject) => void;
   selectedProject: CloudProject | null;
-  queryProjects: (query: string)=>void;
+  queryProjects: (query: string) => void;
 }
 
 export default class InstanceStep extends React.Component<Props, State> {
@@ -41,34 +41,28 @@ export default class InstanceStep extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      inputValue: ''
-    }
+      inputValue: '',
+    };
   }
 
   handleInputChange = debounce((ev: any) => {
     this.setState({
-      inputValue: ev.target.value
+      inputValue: ev.target.value,
     });
 
     this.props.queryProjects(ev.target.value);
-  }, 300)
+  }, 300);
 
   selectProject = (project: CloudProject) => {
     this.setState({
-      inputValue: project.name
+      inputValue: project.name,
     });
 
-    this.props.pickProject(project)
-  }
+    this.props.pickProject(project);
+  };
 
-  render () {
-    const {
-      resources,
-      pickResource,
-      selectedResource,
-      projects,
-      selectedProject
-    } = this.props;
+  render() {
+    const { resources, pickResource, selectedResource, projects, selectedProject } = this.props;
 
     return (
       <Typography>
@@ -79,12 +73,13 @@ export default class InstanceStep extends React.Component<Props, State> {
             data-test-id="instance-selector"
             className="selector"
             // @ts-ignore: 2339
-            onChange={e => pickResource(e.target.value)}
+            onChange={(e) => pickResource(e.target.value)}
             isDisabled={resources.length === 1}
             width="full"
-            value={selectedResource || ''}>
+            value={selectedResource || ''}
+          >
             <Option value="">Select a site</Option>
-            {resources.map(r => (
+            {resources.map((r) => (
               <Option key={r.id} value={r.id}>
                 {r.url.replace('https://', '')}
               </Option>
@@ -94,29 +89,35 @@ export default class InstanceStep extends React.Component<Props, State> {
           <div className="search-projects">
             <TextInput
               width="full"
-              placeholder={selectedProject ? selectedProject.name : "Search for a project"}
-              value={ this.state.inputValue }
-              onChange={ev => { ev.persist(); this.handleInputChange(ev) }}
-              onFocus={() => {this.setState({inputValue: ''})}}
-              onBlur={() => {this.setState({inputValue: (selectedProject ? selectedProject.name : '')})}}
+              placeholder={selectedProject ? selectedProject.name : 'Search for a project'}
+              value={this.state.inputValue}
+              onChange={(ev) => {
+                ev.persist();
+                this.handleInputChange(ev);
+              }}
+              onFocus={() => {
+                this.setState({ inputValue: '' });
+              }}
+              onBlur={() => {
+                this.setState({ inputValue: selectedProject ? selectedProject.name : '' });
+              }}
             />
             <div className="search-projects-results">
-              {
-                projects.map(project => (
-                  <Card
-                    key={project.id}
-                    testId="search-result-project"
-                    onClick={() => {this.selectProject(project)}}
-                  >
-                    { project.name }
-                  </Card>
-                ))
-              }
+              {projects.map((project) => (
+                <Card
+                  key={project.id}
+                  testId="search-result-project"
+                  onClick={() => {
+                    this.selectProject(project);
+                  }}
+                >
+                  {project.name}
+                </Card>
+              ))}
             </div>
           </div>
         </div>
       </Typography>
     );
-
   }
 }

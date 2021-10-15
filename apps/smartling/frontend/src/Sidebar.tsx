@@ -11,7 +11,7 @@ import {
   SkeletonContainer,
   SkeletonImage,
   Spinner,
-  Note
+  Note,
 } from '@contentful/forma-36-react-components';
 import smartlingClient from './smartlingClient';
 
@@ -86,7 +86,7 @@ function formatDate(date: string) {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
-    minute: 'numeric'
+    minute: 'numeric',
   });
 }
 
@@ -120,7 +120,7 @@ function sortSubs(a: Submission, b: Submission) {
 function formatSmartlingEntry(entry: SmartlingContentfulEntry): SmartlingContentfulEntry {
   return {
     ...entry,
-    translationSubmissions: entry.translationSubmissions.slice().sort(sortSubs)
+    translationSubmissions: entry.translationSubmissions.slice().sort(sortSubs),
   };
 }
 
@@ -182,10 +182,10 @@ export default class Sidebar extends React.Component<Props, State> {
     } else if (res.code === 'SUCCESS') {
       this.setState({
         smartlingEntry: formatSmartlingEntry(res.data),
-        showAllSubs: res.data.translationSubmissions.length <= SUBS_TO_SHOW
+        showAllSubs: res.data.translationSubmissions.length <= SUBS_TO_SHOW,
       });
     } else {
-      this.setState({generalError: true});
+      this.setState({ generalError: true });
     }
   };
 
@@ -215,7 +215,8 @@ export default class Sidebar extends React.Component<Props, State> {
         buttonType="muted"
         isFullWidth
         className="request-translation"
-        onClick={() => window.open(smartlingLink)}>
+        onClick={() => window.open(smartlingLink)}
+      >
         <Icon icon="ExternalLink" color="secondary" /> Request Translation
       </Button>
     );
@@ -228,7 +229,8 @@ export default class Sidebar extends React.Component<Props, State> {
             buttonType="primary"
             isFullWidth
             className="signin"
-            onClick={() => this.runAuthFlow()}>
+            onClick={() => this.runAuthFlow()}
+          >
             Sign in with Smartling
           </Button>
           <br />
@@ -267,11 +269,12 @@ export default class Sidebar extends React.Component<Props, State> {
           <div className="smartling-entry">
             <div className="submission-list">
               <Paragraph className="info-p">Translation submissions</Paragraph>
-              {subsToShow.map(sub => (
+              {subsToShow.map((sub) => (
                 <Card
                   key={sub.submissionId}
                   className="submission"
-                  onClick={() => this.linkToFile(sub)}>
+                  onClick={() => this.linkToFile(sub)}
+                >
                   <div className="info">
                     <div className="locale">{this.getLocaleByName(sub.targetLocaleExternalId)}</div>
                     {sub.status.toLowerCase() === 'in_progress' && (
@@ -306,19 +309,25 @@ export default class Sidebar extends React.Component<Props, State> {
         smartlingBody = <></>;
       }
     } else if (generalError) {
-        statusTag = (
+      statusTag = (
         <Tag className="job-status" tagType="negative">
           Disconnected
         </Tag>
-        );
+      );
 
-        smartlingBody = (
-          <Note title="Connection error" noteType="negative" className="general-error">
-            Please ensure that you have access to the connected Smartling project.
-            <br />
-            <TextLink href="https://contentful.com/developers/docs/extensibility/apps/smartling/" target="_blank" rel="noopener noreferrer">View documentation</TextLink>
-          </Note>
-        );
+      smartlingBody = (
+        <Note title="Connection error" noteType="negative" className="general-error">
+          Please ensure that you have access to the connected Smartling project.
+          <br />
+          <TextLink
+            href="https://contentful.com/developers/docs/extensibility/apps/smartling/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View documentation
+          </TextLink>
+        </Note>
+      );
     }
 
     return (

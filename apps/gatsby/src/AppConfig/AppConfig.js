@@ -1,23 +1,23 @@
-import { get } from "lodash";
-import React from "react";
-import PropTypes from "prop-types";
+import { get } from 'lodash';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Heading,
   Typography,
   Paragraph,
   TextField,
   TextLink,
-} from "@contentful/forma-36-react-components";
-import GatsbyIcon from "../GatsbyIcon";
-import ContentTypesPanel from "./ContentTypesPanel";
-import styles from "../styles";
+} from '@contentful/forma-36-react-components';
+import GatsbyIcon from '../GatsbyIcon';
+import ContentTypesPanel from './ContentTypesPanel';
+import styles from '../styles';
 
 function editorInterfacesToEnabledContentTypes(eis, appId) {
-  const findAppWidget = item => item.widgetNamespace === "app" && item.widgetId === appId;
+  const findAppWidget = (item) => item.widgetNamespace === 'app' && item.widgetId === appId;
   return eis
-    .filter(ei => !!get(ei, ["sidebar"], []).find(findAppWidget))
-    .map(ei => get(ei, ["sys", "contentType", "sys", "id"]))
-    .filter(ctId => typeof ctId === "string" && ctId.length > 0);
+    .filter((ei) => !!get(ei, ['sidebar'], []).find(findAppWidget))
+    .map((ei) => get(ei, ['sys', 'contentType', 'sys', 'id']))
+    .filter((ctId) => typeof ctId === 'string' && ctId.length > 0);
 }
 
 export function enabledContentTypesToTargetState(currentState, contentTypes, enabledContentTypes) {
@@ -45,9 +45,9 @@ export class AppConfig extends React.Component {
     enabledContentTypes: {},
     selectorType: false,
     urlConstructors: [],
-    previewUrl: "",
-    webhookUrl: "",
-    authToken: "",
+    previewUrl: '',
+    webhookUrl: '',
+    authToken: '',
     validPreview: true,
     validWebhook: true,
   };
@@ -70,9 +70,9 @@ export class AppConfig extends React.Component {
         enabledContentTypes: editorInterfacesToEnabledContentTypes(eisRes.items, ids.app),
         selectorType: params.selectorType,
         urlConstructors: params.urlConstructors || [],
-        previewUrl: params.previewUrl || "",
-        webhookUrl: params.webhookUrl || "",
-        authToken: params.authToken || "",
+        previewUrl: params.previewUrl || '',
+        webhookUrl: params.webhookUrl || '',
+        authToken: params.authToken || '',
       },
       () => app.setReady()
     );
@@ -99,19 +99,19 @@ export class AppConfig extends React.Component {
       valid = false;
     }
 
-    if (!previewUrl.startsWith("http")) {
+    if (!previewUrl.startsWith('http')) {
       this.setState({ validPreview: false });
       valid = false;
     }
 
     // the webhookUrl is optional but if it is passed, check that it is valid
-    if (webhookUrl && !webhookUrl.startsWith("http")) {
+    if (webhookUrl && !webhookUrl.startsWith('http')) {
       this.setState({ validWebhook: false });
       valid = false;
     }
 
     if (!valid) {
-      this.props.sdk.notifier.error("Please review the errors in the form.");
+      this.props.sdk.notifier.error('Please review the errors in the form.');
       return false;
     }
     const currentState = await this.props.sdk.app.getCurrentState();
@@ -131,38 +131,38 @@ export class AppConfig extends React.Component {
     };
   };
 
-  updatePreviewUrl = e => {
+  updatePreviewUrl = (e) => {
     this.setState({ previewUrl: e.target.value, validPreview: true });
   };
 
-  updateWebhookUrl = e => {
+  updateWebhookUrl = (e) => {
     this.setState({ webhookUrl: e.target.value, validWebhook: true });
   };
 
-  updateAuthToken = e => {
+  updateAuthToken = (e) => {
     this.setState({ authToken: e.target.value });
   };
 
   validatePreviewUrl = () => {
-    if (!this.state.previewUrl.startsWith("http")) {
+    if (!this.state.previewUrl.startsWith('http')) {
       this.setState({ validPreview: false });
     }
   };
 
   validateWebhookUrl = () => {
-    if (this.state.webhookUrl && !this.state.webhookUrl.startsWith("http")) {
+    if (this.state.webhookUrl && !this.state.webhookUrl.startsWith('http')) {
       this.setState({ validWebhook: false });
     }
   };
 
   selectorTypeToggle = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       selectorType: !prevState.selectorType,
     }));
   };
 
-  disableContentType = id => {
-    const newEnabledTypes = this.state.enabledContentTypes.filter(type => type !== id);
+  disableContentType = (id) => {
+    const newEnabledTypes = this.state.enabledContentTypes.filter((type) => type !== id);
     const shouldUpdate = this.state.enabledContentTypes.length > newEnabledTypes.length;
     if (shouldUpdate) {
       this.setState(() => ({
@@ -174,7 +174,7 @@ export class AppConfig extends React.Component {
   toggleContentType = (enabledContentTypes, newId, prevId) => {
     if (enabledContentTypes.includes(prevId) && prevId !== newId) {
       //Swap in the new id at the correct index in state to avoid the movement in the UI
-      const index = enabledContentTypes.findIndex(id => id === prevId);
+      const index = enabledContentTypes.findIndex((id) => id === prevId);
       enabledContentTypes[index] = newId;
       return enabledContentTypes;
     } else {
@@ -183,7 +183,7 @@ export class AppConfig extends React.Component {
   };
 
   onContentTypeToggle = (newId, prevId) => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       ...prevState,
       enabledContentTypes: this.toggleContentType(prevState.enabledContentTypes, newId, prevId),
     }));
@@ -192,7 +192,7 @@ export class AppConfig extends React.Component {
   updateUrlConstructors = (currentUrlConstructors, id, newInput) => {
     let constructors;
     // Check if the constructor needs to be added, or if an id that already exists needs a new slug
-    const index = currentUrlConstructors.findIndex(cur => cur.id === id);
+    const index = currentUrlConstructors.findIndex((cur) => cur.id === id);
     if (index !== -1) {
       currentUrlConstructors[index].slug = newInput;
       constructors = currentUrlConstructors;
@@ -204,14 +204,14 @@ export class AppConfig extends React.Component {
       constructors = [...currentUrlConstructors, ...[newConstructor]];
     }
     // Filter out constructors that no longer have the app enabled
-    return constructors.filter(constructor => {
-      const keep = this.state.enabledContentTypes.findIndex(id => id === constructor.id) !== -1;
+    return constructors.filter((constructor) => {
+      const keep = this.state.enabledContentTypes.findIndex((id) => id === constructor.id) !== -1;
       return keep;
     });
   };
 
   onSlugInput = (id, input) => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       ...prevState,
       urlConstructors: this.updateUrlConstructors(prevState.urlConstructors, id, input),
     }));
@@ -253,7 +253,7 @@ export class AppConfig extends React.Component {
               className={styles.input}
               helpText={
                 <span>
-                  To get your Site URL, see your{" "}
+                  To get your Site URL, see your{' '}
                   <TextLink
                     href="https://www.gatsbyjs.com/dashboard/sites"
                     target="_blank"
@@ -266,11 +266,11 @@ export class AppConfig extends React.Component {
               }
               validationMessage={
                 !this.state.validPreview
-                  ? "Please provide a valid URL (It should start with http)"
-                  : ""
+                  ? 'Please provide a valid URL (It should start with http)'
+                  : ''
               }
               textInputProps={{
-                type: "text",
+                type: 'text',
               }}
             />
             <TextField
@@ -284,11 +284,11 @@ export class AppConfig extends React.Component {
               helpText="Optional Webhook URL. If provided, your site will be automatically rebuilt as you change content."
               validationMessage={
                 !this.state.validWebhook
-                  ? "Please provide a valid URL (It should start with http)"
-                  : ""
+                  ? 'Please provide a valid URL (It should start with http)'
+                  : ''
               }
               textInputProps={{
-                type: "text",
+                type: 'text',
               }}
             />
             <TextField
@@ -300,7 +300,7 @@ export class AppConfig extends React.Component {
               className={styles.input}
               helpText="Optional Authentication token for private Gatsby Cloud sites."
               textInputProps={{
-                type: "password",
+                type: 'password',
               }}
             />
           </Typography>

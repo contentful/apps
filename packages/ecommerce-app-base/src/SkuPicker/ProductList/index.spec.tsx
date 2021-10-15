@@ -6,7 +6,7 @@ import productPreviews from '../../__mocks__/productPreviews';
 const defaultProps: Props = {
   products: productPreviews,
   selectProduct: jest.fn(),
-  selectedSKUs: []
+  selectedSKUs: [],
 };
 
 const renderComponent = (props: Props) => {
@@ -24,7 +24,7 @@ describe('ProductList', () => {
   it('should render successfully with selected items', () => {
     const component = renderComponent({
       ...defaultProps,
-      selectedSKUs: [productPreviews[1].sku]
+      selectedSKUs: [productPreviews[1].sku],
     });
     expect(component.container).toMatchSnapshot();
   });

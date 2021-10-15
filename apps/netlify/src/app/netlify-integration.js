@@ -14,7 +14,7 @@ export async function install({ config, accessToken }) {
   config = prepareConfig(config);
 
   // Create build hooks for all sites.
-  const buildHookPromises = config.sites.map(siteConfig => {
+  const buildHookPromises = config.sites.map((siteConfig) => {
     return NetlifyClient.createBuildHook(siteConfig.netlifySiteId, accessToken);
   });
 
@@ -23,16 +23,16 @@ export async function install({ config, accessToken }) {
   const updatedConfig = {
     sites: config.sites.map((siteConfig, i) => {
       return { ...siteConfig, buildHookId: buildHooks[i].id };
-    })
+    }),
   };
 
   // Create Netlify notification hooks for all sites.
-  const netlifyHookPromises = uniqBy(updatedConfig.sites, s => s.netlifySiteId).reduce(
+  const netlifyHookPromises = uniqBy(updatedConfig.sites, (s) => s.netlifySiteId).reduce(
     (acc, siteConfig) => {
       const siteId = siteConfig.netlifySiteId;
       const url = getPostPublishUrl(siteId + siteConfig.buildHookId);
 
-      const promisesForSite = NETLIFY_HOOK_EVENTS.map(event => {
+      const promisesForSite = NETLIFY_HOOK_EVENTS.map((event) => {
         const hook = { event, url };
         return NetlifyClient.createNotificationHook(siteId, accessToken, hook);
       });
@@ -46,7 +46,7 @@ export async function install({ config, accessToken }) {
 
   // Merge flattened notification hook IDs to configuration.
   updatedConfig.netlifyHookIds = netlifyHooks.reduce((acc, hooksForSite) => {
-    return acc.concat(hooksForSite.map(h => h.id));
+    return acc.concat(hooksForSite.map((h) => h.id));
   }, []);
 
   return updatedConfig;
@@ -60,9 +60,9 @@ export async function update({ config, accessToken }) {
 
   // Remove references to removed hooks from configuration.
   const updatedConfig = {
-    sites: config.sites.map(siteConfig => {
+    sites: config.sites.map((siteConfig) => {
       return { ...siteConfig, buildHookId: undefined };
-    })
+    }),
   };
 
   // Proceed as in the installation step.
@@ -70,7 +70,7 @@ export async function update({ config, accessToken }) {
 }
 
 function prepareConfig(config = {}) {
-  const sites = (config.sites || []).map(siteConfig => {
+  const sites = (config.sites || []).map((siteConfig) => {
     return { ...siteConfig, name: (siteConfig.name || '').trim() };
   });
 
@@ -88,7 +88,7 @@ function validateSiteConfigs(siteConfigs) {
   }
 
   // Find all site configurations with incomplete information.
-  const incomplete = siteConfigs.filter(siteConfig => {
+  const incomplete = siteConfigs.filter((siteConfig) => {
     return !siteConfig.netlifySiteId || siteConfig.name.length < 1;
   });
 
@@ -97,7 +97,7 @@ function validateSiteConfigs(siteConfigs) {
   }
 
   // Display names must be unique.
-  const uniqueNames = uniqBy(siteConfigs, config => config.name);
+  const uniqueNames = uniqBy(siteConfigs, (config) => config.name);
 
   if (uniqueNames.length !== siteConfigs.length) {
     throw makeError('Display names must be unique.');
@@ -115,7 +115,7 @@ async function removeExistingHooks({ config, accessToken }) {
   const netlifyHookIds = config.netlifyHookIds || [];
 
   // ...remove build hooks for it and...
-  const buildHookRemovalPromises = siteConfigs.map(siteConfig => {
+  const buildHookRemovalPromises = siteConfigs.map((siteConfig) => {
     const { netlifySiteId, buildHookId } = siteConfig;
     if (netlifySiteId && buildHookId) {
       return NetlifyClient.deleteBuildHook(netlifySiteId, buildHookId, accessToken);
@@ -126,8 +126,8 @@ async function removeExistingHooks({ config, accessToken }) {
 
   // ...remove Netlify hooks for it.
   const netlifyHookRemovalPromises = netlifyHookIds
-    .filter(id => typeof id === 'string' && id.length > 0)
-    .map(id => NetlifyClient.deleteNotificationHook(id, accessToken));
+    .filter((id) => typeof id === 'string' && id.length > 0)
+    .map((id) => NetlifyClient.deleteNotificationHook(id, accessToken));
 
   const removalPromises = buildHookRemovalPromises.concat(netlifyHookRemovalPromises);
 

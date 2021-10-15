@@ -6,7 +6,7 @@ import {
   locations,
   FieldExtensionSDK,
   DialogExtensionSDK,
-  AppExtensionSDK
+  AppExtensionSDK,
 } from '@contentful/app-sdk';
 
 import '@contentful/forma-36-react-components/dist/styles.css';
@@ -18,7 +18,7 @@ import AppConfig from './AppConfig/AppConfig';
 import { Integration } from './interfaces';
 
 export function setup(integration: Integration) {
-  init(sdk => {
+  init((sdk) => {
     const root = document.getElementById('root');
 
     if (sdk.location.is(locations.LOCATION_DIALOG)) {

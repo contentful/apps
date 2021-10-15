@@ -8,7 +8,7 @@ const handleWorkspaces = require('./workspaces-handler');
 const fetchAccessToken = require('./fetch-access-token');
 
 const deps = {
-  fetch
+  fetch,
 };
 
 const app = express();

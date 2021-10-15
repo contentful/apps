@@ -28,7 +28,7 @@ export default class Jira extends React.Component<Props, State> {
     this.state = {
       loading: true,
       issues: [],
-      error: null
+      error: null,
     };
   }
 
@@ -57,7 +57,7 @@ export default class Jira extends React.Component<Props, State> {
     } = {
       mine: [],
       assigned: [],
-      other: []
+      other: [],
     };
 
     // sort list by assigned first then others
@@ -97,7 +97,7 @@ export default class Jira extends React.Component<Props, State> {
   unlinkIssue = async (issueId: string) => {
     // optimistically remove from local state
     this.setState((prevState: State) => ({
-      issues: prevState.issues.filter(issue => issue.key !== issueId)
+      issues: prevState.issues.filter((issue) => issue.key !== issueId),
     }));
 
     const success = await this.props.client.removeContentfulLink(this.props.sdk.ids, issueId);
@@ -112,7 +112,7 @@ export default class Jira extends React.Component<Props, State> {
   linkIssue = async (issue: FormattedIssue) => {
     // optimistically add the issue
     this.setState((prevState: State) => ({
-      issues: this.sortIssues([issue, ...prevState.issues])
+      issues: this.sortIssues([issue, ...prevState.issues]),
     }));
 
     const success = await this.props.client.addContentfulLink(this.props.sdk.ids, issue.key);
@@ -124,7 +124,7 @@ export default class Jira extends React.Component<Props, State> {
 
       // Remove the optimistically added issue :(
       this.setState((prevState: State) => ({
-        issues: prevState.issues.filter(i => i.key !== issue.key)
+        issues: prevState.issues.filter((i) => i.key !== issue.key),
       }));
     }
   };
@@ -145,7 +145,7 @@ export default class Jira extends React.Component<Props, State> {
           entry={this.props.sdk.ids}
           client={this.props.client}
           linkIssue={this.linkIssue}
-          issuesAdded={this.state.issues.map(i => i.key)}
+          issuesAdded={this.state.issues.map((i) => i.key)}
         />
       </div>
     );

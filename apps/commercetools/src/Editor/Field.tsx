@@ -1,14 +1,14 @@
-import * as React from "react";
-import { Button } from "@contentful/forma-36-react-components";
-import tokens from "@contentful/forma-36-tokens";
-import get from "lodash/get";
-import { css } from "emotion";
-import { FieldExtensionSDK } from "@contentful/app-sdk";
-import { ProductPreviews } from "./ProductPreviews/ProductPreviews";
-import { CategoryPreviews } from "./CategoryPreviews/CategoryPreviews";
-import { fetchProductPreviews } from "../api/fetchProductPreviews";
-import { fetchCategoryPreviews } from "../api/fetchCategoryPreviews";
-import logo from "../logo.svg";
+import * as React from 'react';
+import { Button } from '@contentful/forma-36-react-components';
+import tokens from '@contentful/forma-36-tokens';
+import get from 'lodash/get';
+import { css } from 'emotion';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { ProductPreviews } from './ProductPreviews/ProductPreviews';
+import { CategoryPreviews } from './CategoryPreviews/CategoryPreviews';
+import { fetchProductPreviews } from '../api/fetchProductPreviews';
+import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
+import logo from '../logo.svg';
 
 interface Props {
   sdk: FieldExtensionSDK;
@@ -21,17 +21,17 @@ interface State {
 
 const styles = {
   sortable: css({
-    marginBottom: tokens.spacingM
+    marginBottom: tokens.spacingM,
   }),
   container: css({
-    display: "flex"
+    display: 'flex',
   }),
   logo: css({
-    display: "block",
-    width: "30px",
-    height: "30px",
-    marginRight: tokens.spacingM
-  })
+    display: 'block',
+    width: '30px',
+    height: '30px',
+    marginRight: tokens.spacingM,
+  }),
 };
 
 function fieldValueToState(value?: string | string[]): string[] {
@@ -41,23 +41,23 @@ function fieldValueToState(value?: string | string[]): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-function makeCTAText(fieldType: string, pickerMode: "category" | "product") {
-  const isArray = fieldType === "Array";
+function makeCTAText(fieldType: string, pickerMode: 'category' | 'product') {
+  const isArray = fieldType === 'Array';
   const beingSelected =
-    pickerMode === "category"
+    pickerMode === 'category'
       ? isArray
-        ? "categories"
-        : "a category"
+        ? 'categories'
+        : 'a category'
       : isArray
-      ? "products"
-      : "a product";
+      ? 'products'
+      : 'a product';
   return `Select ${beingSelected}`;
 }
 
 export default class Field extends React.Component<Props, State> {
   state = {
     value: fieldValueToState(this.props.sdk.field.getValue()),
-    editingDisabled: true
+    editingDisabled: true,
   };
 
   componentDidMount() {
@@ -81,8 +81,8 @@ export default class Field extends React.Component<Props, State> {
 
     return get(
       sdk,
-      ["parameters", "installation", "fieldsConfig", contentTypeId, fieldId],
-      "product"
+      ['parameters', 'installation', 'fieldsConfig', contentTypeId, fieldId],
+      'product'
     );
   };
 
@@ -90,7 +90,7 @@ export default class Field extends React.Component<Props, State> {
     this.setState({ value: skus });
 
     if (skus.length > 0) {
-      const value = this.props.sdk.field.type === "Array" ? skus : skus[0];
+      const value = this.props.sdk.field.type === 'Array' ? skus : skus[0];
       this.props.sdk.field.setValue(value);
     } else {
       this.props.sdk.field.removeValue();
@@ -102,7 +102,7 @@ export default class Field extends React.Component<Props, State> {
 
     const skus = await sdk.dialogs.openCurrentApp({
       allowHeightOverflow: true,
-      position: "center",
+      position: 'center',
       title: makeCTAText(sdk.field.type, this.getPickerMode()),
       shouldCloseOnOverlayClick: true,
       shouldCloseOnEscapePress: true,
@@ -111,9 +111,9 @@ export default class Field extends React.Component<Props, State> {
         fieldValue: fieldValueToState(sdk.field.getValue()),
         fieldType: sdk.field.type,
         fieldId: sdk.field.id,
-        pickerMode: this.getPickerMode()
+        pickerMode: this.getPickerMode(),
       },
-      width: 1400
+      width: 1400,
     });
     const result = Array.isArray(skus) ? skus : [];
 
@@ -125,10 +125,10 @@ export default class Field extends React.Component<Props, State> {
   render = () => {
     const { value: data, editingDisabled } = this.state;
 
-    const isPickerTypeSetToCategory = this.getPickerMode() === "category";
+    const isPickerTypeSetToCategory = this.getPickerMode() === 'category';
     const hasItems = data.length > 0;
     const config = this.props.sdk.parameters.installation;
-    const fieldType = get(this.props, ["sdk", "field", "type"], "");
+    const fieldType = get(this.props, ['sdk', 'field', 'type'], '');
 
     return (
       <>
@@ -140,9 +140,7 @@ export default class Field extends React.Component<Props, State> {
                 disabled={editingDisabled}
                 categories={data}
                 onChange={this.updateStateValue}
-                fetchCategoryPreviews={categories =>
-                  fetchCategoryPreviews(categories, config)
-                }
+                fetchCategoryPreviews={(categories) => fetchCategoryPreviews(categories, config)}
               />
             ) : (
               <ProductPreviews
@@ -150,9 +148,7 @@ export default class Field extends React.Component<Props, State> {
                 disabled={editingDisabled}
                 skus={data}
                 onChange={this.updateStateValue}
-                fetchProductPreviews={(skus: string[]) =>
-                  fetchProductPreviews(skus, config)
-                }
+                fetchProductPreviews={(skus: string[]) => fetchProductPreviews(skus, config)}
               />
             )}
           </div>

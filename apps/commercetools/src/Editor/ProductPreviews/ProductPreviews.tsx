@@ -21,7 +21,7 @@ interface State {
 
 export class ProductPreviews extends React.Component<Props, State> {
   state = {
-    productPreviews: []
+    productPreviews: [],
   };
 
   componentDidMount() {

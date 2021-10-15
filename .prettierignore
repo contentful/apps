@@ -1,5 +1,7 @@
 node_modules/
 build/
+built/
+dist/
 vendor/
 __snapshots__/
 .coverage/

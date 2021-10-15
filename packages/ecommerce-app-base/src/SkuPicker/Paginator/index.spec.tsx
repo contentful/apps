@@ -3,13 +3,13 @@ import { configure, render, cleanup } from '@testing-library/react';
 import { getPagesRange, Props, Paginator } from '.';
 
 configure({
-  testIdAttribute: 'data-test-id'
+  testIdAttribute: 'data-test-id',
 });
 
 const defaultProps: Props = {
   activePage: 3,
   pageCount: 12,
-  setActivePage: jest.fn()
+  setActivePage: jest.fn(),
 };
 
 const renderComponent = (props: Props) => {
