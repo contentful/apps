@@ -26,7 +26,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "rimraf": "3.0.2",
-    "ts-jest": "27.0.5",
+    "ts-jest": "27.0.6",
     "typedoc": "0.22.5",
     "typedoc-plugin-markdown": "3.11.3",
     "typescript": "4.4.4"
