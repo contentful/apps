@@ -15,7 +15,7 @@
     "deploy": "lerna run deploy --concurrency=3",
     "deploy:test": "lerna run deploy:test --concurrency=3",
     "publish-packages": "lerna version --conventional-commits --create-release github --yes && lerna publish from-git --yes",
-    "prettier": "prettier --no-editorconfig --write {apps,packages,examples}/**/*.{js,jsx,ts,tsx}",
+    "prettier": "prettier --no-editorconfig --no-error-on-unmatched-pattern --write {apps,packages,examples}/**/*.{js,jsx,ts,tsx}",
     "prepare": "husky install"
   },
   "dependencies": {
