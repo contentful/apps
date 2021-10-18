@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.6.5](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.4...@contentful/ecommerce-app-base@2.6.5) (2021-10-18)
+
+
+### Bug Fixes
+
+* **deps:** bump @emotion/css from 11.1.3 to 11.5.0 ([#548](https://github.com/contentful/apps/issues/548)) ([eee003b](https://github.com/contentful/apps/commit/eee003b5b2b7d47f87e22aba6bb676ee8daf87a8))
+
+
+
+
+
 ## [2.6.4](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.3...@contentful/ecommerce-app-base@2.6.4) (2021-10-15)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.3](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.2...@contentful/dam-app-base@1.3.3) (2021-10-18)
+
+
+### Bug Fixes
+
+* **deps:** bump @emotion/css from 11.1.3 to 11.5.0 ([#548](https://github.com/contentful/apps/issues/548)) ([eee003b](https://github.com/contentful/apps/commit/eee003b5b2b7d47f87e22aba6bb676ee8daf87a8))
+
+
+
+
+
 ## [1.3.2](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.1...@contentful/dam-app-base@1.3.2) (2021-10-15)
 
 **Note:** Version bump only for package @contentful/dam-app-base
