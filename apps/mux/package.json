@@ -16,7 +16,6 @@
     "isomorphic-fetch": "2.2.1",
     "jest-environment-enzyme": "7.1.2",
     "jest-enzyme": "7.1.2",
-    "prettier": "2.0.5",
     "typescript": "3.5.2"
   },
   "dependencies": {
@@ -46,12 +45,6 @@
     "test:ci": "react-scripts test",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5l4WmuXdhJGcADHfCm1v4k --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
-  },
-  "prettier": {
-    "trailingComma": "es5",
-    "tabWidth": 2,
-    "semi": true,
-    "singleQuote": true
   },
   "eslintConfig": {
     "extends": "react-app"
