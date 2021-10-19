@@ -83,6 +83,17 @@ export class App extends React.Component<AppProps, AppState> {
 
   detachExternalChangeHandler: Function | null = null;
 
+  syncDuration = async (assetDuration: number) => {
+    const currentValue: MuxContentfulObject = await this.props.sdk.field.getValue();
+
+    if (currentValue.duration !== assetDuration) {
+      await this.props.sdk.field.setValue({
+        ...currentValue,
+        duration: assetDuration,
+      })
+    }
+  }
+
   checkForValidAsset = async () => {
     if (!(this.state.value && this.state.value.assetId)) return false;
     const res = await this.apiClient.get(
@@ -112,6 +123,12 @@ export class App extends React.Component<AppProps, AppState> {
       });
       return false;
     }
+
+    const asset = await res.json();
+    if (asset.data.duration) {
+      this.syncDuration(asset.data.duration)
+    }
+
     return true;
   };
 
