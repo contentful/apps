@@ -48,6 +48,7 @@ interface MuxContentfulObject {
   ready: boolean;
   ratio: string;
   error: string;
+  duration: number;
 }
 
 interface AppState {
@@ -214,6 +215,7 @@ export class App extends React.Component<AppProps, AppState> {
       ready: undefined,
       ratio: undefined,
       error: undefined,
+      duration: undefined,
     });
     this.setState({ error: false, errorShowResetAction: false });
   };
@@ -401,6 +403,7 @@ export class App extends React.Component<AppProps, AppState> {
       ready: asset.status === 'ready',
       ratio: asset.aspect_ratio,
       error: assetError,
+      duration: asset.duration,
     });
 
     if (publicPlayback) {
