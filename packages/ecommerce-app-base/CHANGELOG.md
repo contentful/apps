@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.6.11](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.10...@contentful/ecommerce-app-base@2.6.11) (2021-10-25)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#562](https://github.com/contentful/apps/issues/562)) ([fa3da1a](https://github.com/contentful/apps/commit/fa3da1a704fed01c5be4da3346bf73b8605ace83))
+
+
+
+
+
 ## [2.6.10](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.9...@contentful/ecommerce-app-base@2.6.10) (2021-10-22)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
