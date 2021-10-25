@@ -20,7 +20,7 @@
     "@types/jest": "27.0.2",
     "@types/lodash.get": "4.4.6",
     "@types/node": "16.11.4",
-    "@types/react": "17.0.31",
+    "@types/react": "17.0.32",
     "@types/react-dom": "17.0.10",
     "@types/react-sortable-hoc": "0.7.1",
     "jest": "27.3.1",
