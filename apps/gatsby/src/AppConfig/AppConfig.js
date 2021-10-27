@@ -7,10 +7,15 @@ import {
   Paragraph,
   TextField,
   TextLink,
+  Accordion,
+  AccordionItem,
+  FormLabel,
 } from "@contentful/forma-36-react-components";
 import GatsbyIcon from "../GatsbyIcon";
+import { isValidUrl } from '../utils';
 import ContentTypesPanel from "./ContentTypesPanel";
 import styles from "../styles";
+
 
 function editorInterfacesToEnabledContentTypes(eis, appId) {
   const findAppWidget = item => item.widgetNamespace === "app" && item.widgetId === appId;
@@ -20,13 +25,31 @@ function editorInterfacesToEnabledContentTypes(eis, appId) {
     .filter(ctId => typeof ctId === "string" && ctId.length > 0);
 }
 
-export function enabledContentTypesToTargetState(currentState, contentTypes, enabledContentTypes) {
+export function enabledContentTypesToTargetState(
+  currentState,
+  contentTypes,
+  enabledContentTypes,
+  usingContentSync
+) {
   return {
     EditorInterface: contentTypes.reduce((acc, ct) => {
-      const ctCurrentStateSidebar = currentState?.EditorInterface[ct.sys.id]?.sidebar;
+      if (usingContentSync) {
+        return {
+          ...acc,
+          // if content sync is being used
+          // auto add our preview button to each content type
+          // at the top of the sidebar
+          [ct.sys.id]: { sidebar: { position: 0 } }
+        }
+      }
+
+      const ctCurrentStateSidebar =
+        currentState?.EditorInterface[ct.sys.id]?.sidebar;
+
       const ctEditorInterface = ctCurrentStateSidebar
         ? { sidebar: ctCurrentStateSidebar }
         : { sidebar: { position: 3 } };
+
       return {
         ...acc,
         [ct.sys.id]: enabledContentTypes.includes(ct.sys.id) ? ctEditorInterface : {},
@@ -47,9 +70,12 @@ export class AppConfig extends React.Component {
     urlConstructors: [],
     previewUrl: "",
     webhookUrl: "",
+    contentSyncUrl: "",
     authToken: "",
     validPreview: true,
+    validContentSync: true,
     validWebhook: true,
+    validPreviewWebhook: true,
   };
 
   async componentDidMount() {
@@ -72,6 +98,8 @@ export class AppConfig extends React.Component {
         urlConstructors: params.urlConstructors || [],
         previewUrl: params.previewUrl || "",
         webhookUrl: params.webhookUrl || "",
+        previewWebhookUrl: params.previewWebhookUrl || "",
+        contentSyncUrl: params.contentSyncUrl || "",
         authToken: params.authToken || "",
       },
       () => app.setReady()
@@ -86,47 +114,48 @@ export class AppConfig extends React.Component {
       enabledContentTypes,
       urlConstructors,
       previewUrl,
+      contentSyncUrl,
       webhookUrl,
+      previewWebhookUrl,
       authToken,
     } = this.state;
 
-    this.setState({ validPreview: true, validWebhook: true });
+    const validPreview = !previewUrl || isValidUrl(previewUrl)
+    const validContentSync = !contentSyncUrl || isValidUrl(contentSyncUrl)
+    const validWebhook = !webhookUrl || isValidUrl(webhookUrl)
+    const validPreviewWebhook = !previewWebhookUrl || isValidUrl(previewWebhookUrl)
+    
+    const valid = !!validPreview && !!validContentSync && !!validWebhook
 
-    let valid = true;
-
-    if (!previewUrl) {
-      this.setState({ validPreview: false });
-      valid = false;
-    }
-
-    if (!previewUrl.startsWith("http")) {
-      this.setState({ validPreview: false });
-      valid = false;
-    }
-
-    // the webhookUrl is optional but if it is passed, check that it is valid
-    if (webhookUrl && !webhookUrl.startsWith("http")) {
-      this.setState({ validWebhook: false });
-      valid = false;
-    }
+    this.setState({
+      validPreview: validPreview,
+      validContentSync: validContentSync,
+      validWebhook: validWebhook,
+      validPreviewWebhook: validPreviewWebhook,
+    });
 
     if (!valid) {
       this.props.sdk.notifier.error("Please review the errors in the form.");
+      
       return false;
     }
+
     const currentState = await this.props.sdk.app.getCurrentState();
 
     return {
       parameters: {
         previewUrl,
+        contentSyncUrl,
         webhookUrl,
+        previewWebhookUrl,
         authToken,
         urlConstructors,
       },
       targetState: enabledContentTypesToTargetState(
         currentState,
         contentTypes,
-        enabledContentTypes
+        enabledContentTypes,
+        !!contentSyncUrl
       ),
     };
   };
@@ -135,8 +164,16 @@ export class AppConfig extends React.Component {
     this.setState({ previewUrl: e.target.value, validPreview: true });
   };
 
+  updateContentSyncUrl = e => {
+    this.setState({ contentSyncUrl: e.target.value, validContentSync: true });
+  }
+
   updateWebhookUrl = e => {
     this.setState({ webhookUrl: e.target.value, validWebhook: true });
+  };
+
+  updatePreviewWebhookUrl = e => {
+    this.setState({ previewWebhookUrl: e.target.value, validPreviewWebhook: true });
   };
 
   updateAuthToken = e => {
@@ -144,14 +181,30 @@ export class AppConfig extends React.Component {
   };
 
   validatePreviewUrl = () => {
-    if (!this.state.previewUrl.startsWith("http")) {
-      this.setState({ validPreview: false });
+    if (this.state.previewUrl) {
+      this.setState({ validPreview: isValidUrl(this.state.previewUrl) })
     }
   };
+
+  validateContentSyncUrl = () => {
+    if (this.state.contentSyncUrl) {
+      this.setState({
+        validContentSync: isValidUrl(this.state.contentSyncUrl)
+      });
+    }
+  }
 
   validateWebhookUrl = () => {
     if (this.state.webhookUrl && !this.state.webhookUrl.startsWith("http")) {
       this.setState({ validWebhook: false });
+    }
+  };
+
+  validatePreviewWebhookUrl = () => {
+    if (this.state.previewWebhookUrl) {
+      this.setState({
+        validPreviewWebhook: isValidUrl(this.state.previewWebhookUrl)
+      });
     }
   };
 
@@ -224,6 +277,8 @@ export class AppConfig extends React.Component {
       ids: { space, environment },
     } = sdk;
 
+    const urlHelpText = 'Please provide a valid URL (It should start with http)';
+
     return (
       <>
         <div className={styles.background} />
@@ -232,91 +287,122 @@ export class AppConfig extends React.Component {
             <Typography>
               <Heading>About Gatsby Cloud</Heading>
               <Paragraph>
-                This app connects to Gatsby Cloud which lets you see updates to your Gatsby site as
-                soon as you change content in Contentful. This makes it easy for content creators to
-                see changes they make to the website before going live.
+                This app connects Gatsby Cloud with your Contentful space so you can preview content changes before going live.
               </Paragraph>
             </Typography>
           </div>
           <hr className={styles.splitter} />
           <Typography>
-            <Heading>Account Details</Heading>
-            <Paragraph>Gatsby Cloud needs a Site URL in order to preview projects.</Paragraph>
-            <TextField
-              name="previewUrl"
-              id="previewUrl"
-              labelText="Site URL"
-              required
-              value={this.state.previewUrl}
-              onChange={this.updatePreviewUrl}
-              onBlur={this.validatePreviewUrl}
-              className={styles.input}
-              helpText={
-                <span>
-                  To get your Site URL, see your{" "}
+            <Heading>Configure CMS Preview</Heading>
+            <Paragraph>Use the Site Settings for your Gatsby Cloud site below.</Paragraph>
+            <div className={styles.mainbody}>
+              <TextField
+                name="webhookUrl"
+                id="webhookUrl"
+                labelText="Preview Webhook"
+                value={this.state.webhookUrl}
+                onChange={this.updateWebhookUrl}
+                onBlur={this.validateWebhookUrl}
+                className={styles.input}
+                validationMessage={
+                  !this.state.validWebhook
+                    ? urlHelpText
+                    : ""
+                }
+                textInputProps={{
+                  type: "text",
+                }}
+              />
+              <TextField
+                name="contentSyncUrl"
+                id="contentSyncUrl"
+                labelText="Content Sync"
+                value={this.state.contentSyncUrl}
+                onChange={this.updateContentSyncUrl}
+                onBlur={this.validateContentSyncUrl}
+                className={styles.input}
+                helpText={<span>
+                  To set up Content Sync, see the {" "}
                   <TextLink
-                    href="https://www.gatsbyjs.com/dashboard/sites"
+                    href="http://gatsby.dev/contentful-preview-docs"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Gatsby dashboard
+                    installation instructions
                   </TextLink>
                   .
                 </span>
-              }
-              validationMessage={
-                !this.state.validPreview
-                  ? "Please provide a valid URL (It should start with http)"
-                  : ""
-              }
-              textInputProps={{
-                type: "text",
-              }}
-            />
-            <TextField
-              name="webhookUrl"
-              id="webhookUrl"
-              labelText="Webhook URL"
-              value={this.state.webhookUrl}
-              onChange={this.updateWebhookUrl}
-              onBlur={this.validateWebhookUrl}
-              className={styles.input}
-              helpText="Optional Webhook URL. If provided, your site will be automatically rebuilt as you change content."
-              validationMessage={
-                !this.state.validWebhook
-                  ? "Please provide a valid URL (It should start with http)"
-                  : ""
-              }
-              textInputProps={{
-                type: "text",
-              }}
-            />
-            <TextField
-              name="authToken"
-              id="authToken"
-              labelText="Authentication Token"
-              value={this.state.authToken}
-              onChange={this.updateAuthToken}
-              className={styles.input}
-              helpText="Optional Authentication token for private Gatsby Cloud sites."
-              textInputProps={{
-                type: "password",
-              }}
-            />
+                }
+                /*
+                 * @todo ensure that this help text is okay
+                 */
+                validationMessage={
+                  !this.state.validContentSync
+                    ? urlHelpText
+                    : ""
+                }
+                textInputProps={{
+                  type: "text",
+                }}
+              />
+            </div>
+            <Accordion >
+              <AccordionItem
+                title={<FormLabel>Advanced Settings</FormLabel>}
+              >
+                <div className={styles.mainbody}>
+                  <TextField
+                    name="previewUrl"
+                    id="previewUrl"
+                    labelText="CMS Preview"
+                    value={this.state.previewUrl}
+                    onChange={this.updatePreviewUrl}
+                    onBlur={this.validatePreviewUrl}
+                    className={styles.input}
+                    helpText={
+                      <span>
+                        Copy the URL of CMS Preview from Gatsby Cloud
+                      </span>
+                    }
+                    validationMessage={
+                      !this.state.validPreview
+                        ? urlHelpText
+                        : ""
+                    }
+                    textInputProps={{
+                      type: "text",
+                    }}
+                  />
+                  <TextField
+                    name="authToken"
+                    id="authToken"
+                    labelText="Authentication Token"
+                    value={this.state.authToken}
+                    onChange={this.updateAuthToken}
+                    className={styles.input}
+                    helpText="Optional authentication token for private Gatsby Cloud sites"
+                    textInputProps={{
+                      type: "password",
+                    }}
+                  />
+                </div>
+                {!this.state.contentSyncUrl &&
+                  <ContentTypesPanel
+                    space={space}
+                    environment={environment}
+                    contentTypes={contentTypes}
+                    enabledContentTypes={enabledContentTypes}
+                    urlConstructors={urlConstructors}
+                    onSlugInput={this.onSlugInput}
+                    onContentTypeToggle={this.onContentTypeToggle}
+                    disableContentType={this.disableContentType}
+                    selectorTypeToggle={this.selectorTypeToggle}
+                    selectorType={selectorType}
+                  />
+                }
+              </AccordionItem>
+            </Accordion>
           </Typography>
-          <hr className={styles.splitter} />
-          <ContentTypesPanel
-            space={space}
-            environment={environment}
-            contentTypes={contentTypes}
-            enabledContentTypes={enabledContentTypes}
-            urlConstructors={urlConstructors}
-            onSlugInput={this.onSlugInput}
-            onContentTypeToggle={this.onContentTypeToggle}
-            disableContentType={this.disableContentType}
-            selectorTypeToggle={this.selectorTypeToggle}
-            selectorType={selectorType}
-          />
         </div>
         <div className={styles.icon}>
           <GatsbyIcon />

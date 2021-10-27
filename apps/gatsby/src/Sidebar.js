@@ -1,14 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ExtensionUI } from '@gatsby-cloud-pkg/gatsby-cms-extension-base';
-import {
-  Spinner,
-  HelpText,
-  Icon,
-} from '@contentful/forma-36-react-components';
+
+import { Spinner, HelpText, Icon } from '@contentful/forma-36-react-components';
 
 const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
 const ICON_STYLE = { marginBottom: '-4px' };
+const GATSBY_PREVIEW_TAB_ID = `GATSBY_TAB`
 
 const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   method: 'POST',
@@ -20,7 +18,6 @@ const callWebhook = (webhookUrl, authToken) => fetch(webhookUrl, {
   body: JSON.stringify({})
 });
 
-
 export default class Sidebar extends React.Component {
   static propTypes = {
     sdk: PropTypes.object.isRequired
@@ -29,12 +26,55 @@ export default class Sidebar extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {slug: undefined};
+    this.state = {
+      slug: null,
+      manifestId: null,
+      lastPublishedDateTime: null,
+      buttonDisabled: false,
+    };
+
     this.sdk = props.sdk;
-    this.sdk.entry.onSysChanged(this.onSysChanged);
   }
 
-  onSysChanged = () => {
+  async componentDidMount() {
+    const {contentSyncUrl} = this.sdk.parameters.installation
+
+    this.sdk.entry.onSysChanged(
+      contentSyncUrl 
+        ? this.onSysChanged
+        : this.legacyOnSysChanged
+    );
+
+    this.sdk.window.startAutoResizer();
+
+    const content = this.props.sdk.entry.getSys();
+
+    this.setManifestId(content);
+    this.setLastPublishedDateTime(content);
+  }
+
+  /**
+   * manifestId is used by the Gatsby Content Sync preview feature to match states of content
+   * in Contentful with preview builds on Gatsby Cloud
+   */
+  setManifestId = (content) => {
+    const { id, space, updatedAt } = content;
+    const manifestId = `${space.sys.id}-${id}-${updatedAt}`;
+    this.setState({ manifestId });
+  }
+
+  setLastPublishedDateTime = (content) => {
+    this.setState({
+      lastPublishedDateTime: content.publishedAt,
+    });
+  }
+
+  onSysChanged = (content) => {
+    this.setManifestId(content);
+    this.buildSlug();
+  };
+
+  legacyOnSysChanged = () => {
     this.buildSlug()
     if (this.debounceInterval) {
       clearInterval(this.debounceInterval);
@@ -49,27 +89,36 @@ export default class Sidebar extends React.Component {
     // Child field
     const childField = fullParentEntry.fields[array[index + 1]][sdk.locales.default]
     if (Array.isArray(childField)) {
-    console.error("Gatsby Preview App: You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
+      console.error("Gatsby Preview App: You are trying to search for a slug in a multi reference field. Only single reference fields are searchable with this app. Either change the field to a single reference, or change the field you are searching for in the slug.")
       return ""
     }
     if (index + 2 < array.length) {
-       return this.resolveReferenceChain(sdk, array, (index + 1), childField.sys.id)
+      return this.resolveReferenceChain(sdk, array, (index + 1), childField.sys.id)
     } else {
       return childField
     }
   }
 
   buildSlug = async () => {
-    const {urlConstructors} = this.sdk.parameters.installation;
+    const { urlConstructors } = this.sdk.parameters.installation;
     //Find the url constructor for the given contentType
     const constructor = urlConstructors ? urlConstructors.find(
       constructor => constructor.id === this.sdk.contentType.sys.id
     ) : undefined;
     // If there is no constructor set the url as the base preview
-    if (!constructor){
+    if (!constructor) {
+      const { slug } = this.props.sdk.entry.fields;
+
+      if (!slug) {
+        /**
+         * @todo bolster up how we might handle and warn users/content editors about this
+         */
+        return;
+      }
+
       const fallbackSlug = await this.props.sdk.entry.fields.slug.getValue();
       this.setState({ slug: fallbackSlug });
-      return; 
+      return;
     }
 
     //Get array of fields to build slug
@@ -85,7 +134,7 @@ export default class Sidebar extends React.Component {
             if (fieldArray.length > 1) {
               const parentId = this.sdk.entry.fields[fieldArray[0]].getValue().sys.id
               return this.resolveReferenceChain(this.sdk, fieldArray, 0, parentId)
-            } else if(fieldArray[0].includes('"' || "'")) { // Checks for static text
+            } else if (fieldArray[0].includes('"' || "'")) { // Checks for static text
               return fieldArray[0].replace(/['"]/g, "");
             } else { //Field directly on the entry, no use for reference resolver
               return this.sdk.entry.fields[fieldArray[0]].getValue()
@@ -98,14 +147,31 @@ export default class Sidebar extends React.Component {
     )
 
     const finalSlug = slug.join('/')
-    this.setState({slug: finalSlug})
+    this.setState({ slug: finalSlug })
   }
 
-  async componentDidMount() {
-    this.sdk.window.startAutoResizer();
-  }
+  refreshPreview = () => {
+    const {
+      authToken,
+      contentSyncUrl
+    } = this.sdk.parameters.installation;
 
-  refreshPreview = async () => {
+    if (!contentSyncUrl) {
+      this.legacyRefreshPreview()
+      return
+    }
+
+    const previewWebhookUrl = this.sdk.parameters.installation.previewWebhookUrl ||
+      this.sdk.parameters.installation.webhookUrl
+
+    if (previewWebhookUrl) {
+      callWebhook(previewWebhookUrl, authToken);
+    } else {
+      console.warn(`Please add a Preview Webhook URL to your Gatsby Cloud App settings.`)
+    }
+  };
+
+  legacyRefreshPreview = async () => {
     if (this.debounceInterval) {
       clearInterval(this.debounceInterval);
     }
@@ -116,7 +182,10 @@ export default class Sidebar extends React.Component {
       return;
     }
 
-    this.setState({ busy: true })
+    // calling this during tests will throw errors because we're updating state after the component unmounted
+    if (process?.env?.NODE_ENV !== `test`) {
+      this.setState({ busy: true })
+    }
 
     const [res] = await Promise.all([
       // Convert any errors thrown to non-2xx HTTP response
@@ -127,22 +196,104 @@ export default class Sidebar extends React.Component {
       new Promise(resolve => setTimeout(resolve, 1000))
     ]);
 
-    this.setState({ busy: false, ok: res.ok });
+    // calling this during tests will throw errors because we're updating state after the component unmounted
+    if (process?.env?.NODE_ENV !== `test`) {
+      this.setState({ busy: false, ok: res.ok });
+    }
   };
 
+  getPreviewUrl = () => {
+    let {
+      previewUrl,
+      contentSyncUrl,
+    } = this.props.sdk.parameters.installation;
+    const { manifestId } = this.state
+
+    if (contentSyncUrl && manifestId) {
+      previewUrl = `${contentSyncUrl}/gatsby-source-contentful/${manifestId}`;
+    }
+
+    return previewUrl;
+  }
+
+  handleContentSync = async () => {
+    if (this.state.buttonDisabled) {
+      return
+    }
+
+    this.setState({ buttonDisabled: true })
+
+    // Contentful takes a few seconds to save. If we do not wait a bit for this, then the Gatsby preview may be started and finish before any content is even saved on the Contentful side
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
+    this.refreshPreview();
+
+    let previewUrl = this.getPreviewUrl()
+    console.info(`opening preview url ${previewUrl}`)
+    window.open(previewUrl, GATSBY_PREVIEW_TAB_ID)
+
+    // Wait to see if Contentful saves new data async
+    const interval = setInterval(() => {
+      const newPreviewUrl = this.getPreviewUrl()
+
+      if (previewUrl !== newPreviewUrl) {
+        clearInterval(interval)
+
+        previewUrl = newPreviewUrl
+
+        console.info(`new preview url ${newPreviewUrl}`)
+        window.open(previewUrl, GATSBY_PREVIEW_TAB_ID)
+
+        this.refreshPreview();
+        this.setState({ buttonDisabled: false })
+      }
+    }, 1000)
+
+    // after 10 seconds stop waiting for Contentful to save data
+    setTimeout(() => {
+      clearInterval(interval)
+      this.setState({ buttonDisabled: false })
+    }, 10000)
+  }
+
   render = () => {
-    const { webhookUrl, authToken, previewUrl } = this.sdk.parameters.installation;
+    let {
+      contentSyncUrl,
+      authToken,
+      previewUrl,
+      webhookUrl,
+    } = this.sdk.parameters.installation;
     const { slug } = this.state
+
+    previewUrl = this.getPreviewUrl();
 
     return (
       <div className="extension">
         <div className="flexcontainer">
-          <ExtensionUI
-            contentSlug={slug && slug}
-            previewUrl={previewUrl}
-            authToken={authToken}
-          />
-          {webhookUrl && this.renderRefreshStatus()}
+          {webhookUrl ?
+            <>
+              <ExtensionUI
+                disabled={this.state.buttonDisabled}
+                disablePreviewOpen={!!contentSyncUrl}
+                contentSlug={!!slug && slug}
+                previewUrl={previewUrl}
+                authToken={authToken}
+                onOpenPreviewButtonClick={
+                  !!contentSyncUrl 
+                    ? this.handleContentSync
+                    : () => {}
+                }
+              />
+              {!!this.state.buttonDisabled && <Spinner />}
+            </>
+            :
+            <HelpText style={STATUS_STYLE}>
+              <Icon icon="Warning" color="negative" style={ICON_STYLE} />
+              {' '}Please add a Preview Webhook URL to your Gatsby App settings.
+            </HelpText>
+          }
+
+          {!!webhookUrl && !contentSyncUrl && this.renderRefreshStatus()}
         </div>
       </div>
     );
@@ -175,3 +326,4 @@ export default class Sidebar extends React.Component {
     );
   };
 }
+
