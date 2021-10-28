@@ -17,7 +17,11 @@ import {
   TextLink,
   Spinner,
 } from '@contentful/forma-36-react-components';
-import { AppExtensionSDK, AppConfigAPI, SpaceAPI } from '@contentful/app-sdk';
+import {
+  AppExtensionSDK,
+  AppConfigAPI,
+  SpaceAPI,
+} from '@contentful/app-sdk';
 import {
   editorInterfacesToSelectedFields,
   getCompatibleFields,

@@ -9,12 +9,16 @@ import {
   Button,
   Select,
   FormLabel,
-  TextInput,
+  TextInput
 } from '@contentful/forma-36-react-components';
 import styles from './styles';
 import { AppConfigParams, AppConfigState, AllContentTypes, ContentTypes } from './typings';
 import { getAndUpdateSavedParams } from './utils';
-import { ContentType, EditorInterface, CollectionResponse } from '@contentful/app-sdk';
+import {
+  ContentType,
+  EditorInterface,
+  CollectionResponse
+} from '@contentful/app-sdk';
 import { ReactComponent as GoogleLogo } from './ga-logo.svg';
 
 export default class AppConfig extends React.Component<AppConfigParams, AppConfigState> {
@@ -22,30 +26,32 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
     allContentTypes: {},
     contentTypes: {},
     clientId: '',
-    viewId: '',
+    viewId: ''
   };
 
   async componentDidMount() {
     const { sdk } = this.props;
 
     const [{ items: spaceContentTypes }, savedParams] = await Promise.all([
-      sdk.space.getContentTypes() as Promise<CollectionResponse<ContentType>>,
-      getAndUpdateSavedParams(sdk),
+      sdk.space.getContentTypes() as Promise<
+        CollectionResponse<ContentType>
+      >,
+      getAndUpdateSavedParams(sdk)
     ]);
 
     const allContentTypes = sortBy(spaceContentTypes, 'name').reduce(
       (acc: AllContentTypes, contentType) => {
         const fields = sortBy(
           // use only short text fields of content type
-          contentType.fields.filter((f) => f.type === 'Symbol'),
+          contentType.fields.filter(f => f.type === 'Symbol'),
           // sort by field name
           'name'
-        );
+        )
 
         if (fields.length) {
           acc[contentType.sys.id] = {
             ...contentType,
-            fields,
+            fields
           };
         }
 
@@ -60,10 +66,10 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         // if the saved content type is no longer in the list of all available types
         !(type in allContentTypes) ||
         // or the saved slugField is no longer available
-        !allContentTypes[type].fields.some((f) => f.id === slugField)
+        !allContentTypes[type].fields.some(f => f.id === slugField)
       ) {
         // remove the content type from the list
-        delete contentTypes[type];
+        delete contentTypes[type]
       }
     }
 
@@ -78,7 +84,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         allContentTypes,
         contentTypes,
         clientId: savedParams.clientId || '',
-        viewId: savedParams.viewId || '',
+        viewId: savedParams.viewId || ''
       },
       () => sdk.app.setReady()
     );
@@ -104,10 +110,10 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
 
     if (!ctKeys.length || !ctKeys[0]) {
       notifier.error('You need to select at least one content type with a slug field!');
-      return false;
+      return false
     }
 
-    if (ctKeys.some((key) => key && !contentTypes[key].slugField)) {
+    if (ctKeys.some(key => key && !contentTypes[key].slugField)) {
       notifier.error('Please complete or remove the incomplete content type rows!');
       return false;
     }
@@ -126,34 +132,30 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
       parameters: {
         contentTypes,
         clientId,
-        viewId,
+        viewId
       },
       targetState: {
-        EditorInterface: editorInterface,
-      },
+        EditorInterface: editorInterface
+      }
     };
   }
 
   getBestSlugField(contentTypeId: string) {
-    const { fields } = this.state.allContentTypes[contentTypeId];
+    const { fields } = this.state.allContentTypes[contentTypeId]
 
     // return the only short text field
-    if (fields.length === 1) {
-      return fields[0].id;
-    }
+    if (fields.length === 1) { return fields[0].id }
 
     // find field that starts with 'slug'
     for (const field of fields) {
-      if (/^slug/i.test(field.name)) {
-        return field.id;
-      }
+      if (/^slug/i.test(field.name)) { return field.id }
     }
 
-    return '';
+    return ''
   }
 
   handleContentTypeChange(prevKey: string, newKey: string) {
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const contentTypes: ContentTypes = {};
 
       // remove contentType[prevKey] field and replace with the new contentType
@@ -162,7 +164,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         if (prop === prevKey) {
           contentTypes[newKey as keyof typeof contentTypes] = {
             slugField: this.getBestSlugField(newKey),
-            urlPrefix: value.urlPrefix,
+            urlPrefix: value.urlPrefix
           };
         } else {
           contentTypes[prop] = value;
@@ -170,13 +172,13 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
       }
 
       return {
-        contentTypes,
+        contentTypes
       };
     });
   }
 
   handleContentTypeFieldChange(key: string, field: string, value: string) {
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const prevContentTypes = prevState.contentTypes;
       const curContentTypeProps = prevContentTypes[key];
 
@@ -185,24 +187,24 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
           ...prevState.contentTypes,
           [key]: {
             ...curContentTypeProps,
-            [field]: value,
-          },
-        },
+            [field]: value
+          }
+        }
       };
     });
   }
 
   addContentType() {
-    this.setState((prevState) => ({
+    this.setState(prevState => ({
       contentTypes: {
         ...prevState.contentTypes,
-        '': { slugField: '', urlPrefix: '' },
-      },
+        '': { slugField: '', urlPrefix: '' }
+      }
     }));
   }
 
   removeContentType(key: string) {
-    this.setState((prevState) => {
+    this.setState(prevState => {
       const contentTypes = { ...prevState.contentTypes };
 
       delete contentTypes[key];
@@ -213,8 +215,8 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
 
   render() {
     const { contentTypes, allContentTypes } = this.state;
-    const contentTypeEntries = Object.entries(contentTypes);
-    const hasSelectedContentTypes = contentTypeEntries.length > 0;
+    const contentTypeEntries = Object.entries(contentTypes)
+    const hasSelectedContentTypes = contentTypeEntries.length > 0
 
     return (
       <>
@@ -230,8 +232,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                 <TextLink
                   href="https://www.contentful.com/developers/docs/extensibility/apps/google-analytics/"
                   target="_blank"
-                  rel="noopener noreferrer"
-                >
+                  rel="noopener noreferrer">
                   documentation
                 </TextLink>
                 .
@@ -257,7 +258,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
               className={styles.spaced}
               textInputProps={{
                 type: 'text',
-                placeholder: 'XXXXXXXX-XXXXXXXX.apps.googleusercontent.com',
+                placeholder: 'XXXXXXXX-XXXXXXXX.apps.googleusercontent.com'
               }}
             />
             <TextField
@@ -271,7 +272,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
               }
               helpText="The ID of the Google Analytics view you want to query"
               textInputProps={{
-                type: 'text',
+                type: 'text'
               }}
             />
           </Typography>
@@ -287,29 +288,25 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
             </Paragraph>
 
             <div className={styles.contentTypeGrid}>
-              {hasSelectedContentTypes && (
-                <>
+              {hasSelectedContentTypes && <>
                   <FormLabel htmlFor="">Content type</FormLabel>
                   <FormLabel htmlFor="">Slug field</FormLabel>
                   <FormLabel htmlFor="">URL prefix</FormLabel>
-                </>
-              )}
+                </>}
               <div className={styles.invisible}>Remover</div>
             </div>
 
             {contentTypeEntries.map(([key, { slugField, urlPrefix }], index) => (
               <div
                 key={key}
-                className={[styles.contentTypeGrid, styles.contentTypeGridInputs].join(' ')}
-              >
+                className={[styles.contentTypeGrid, styles.contentTypeGridInputs].join(' ')}>
                 <Select
                   name={'contentType-' + index}
                   id={'contentType-' + index}
                   value={key}
                   onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
                     this.handleContentTypeChange(key, event.target.value)
-                  }
-                >
+                  }>
                   {key ? null : (
                     <option disabled value="">
                       Select a Content Type
@@ -335,13 +332,12 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   value={slugField}
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                     this.handleContentTypeFieldChange(key, 'slugField', event.target.value)
-                  }
-                >
+                  }>
                   <option disabled value="">
                     Select slug field
                   </option>
                   {key &&
-                    allContentTypes[key].fields.map((f) => (
+                    allContentTypes[key].fields.map(f => (
                       <option key={`${key}.${f.id}`} value={f.id}>
                         {f.name}
                       </option>
@@ -353,7 +349,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   id={'urlPrefix-' + index}
                   value={urlPrefix}
                   disabled={!key}
-                  onChange={(event) =>
+                  onChange={event =>
                     this.handleContentTypeFieldChange(key, 'urlPrefix', event.target.value)
                   }
                 />
@@ -365,9 +361,8 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
             <Button
               type="button"
               buttonType="muted"
-              disabled={Object.values(contentTypes).some((ct) => !ct.slugField)}
-              onClick={() => this.addContentType()}
-            >
+              disabled={Object.values(contentTypes).some(ct => !ct.slugField)}
+              onClick={() => this.addContentType()}>
               {hasSelectedContentTypes ? 'Add another content type' : 'Add a content type'}
             </Button>
           </Typography>

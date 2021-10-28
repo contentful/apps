@@ -6,7 +6,7 @@ import {
   CheckboxField,
   Paragraph,
   Note,
-  TextLink,
+  TextLink
 } from '@contentful/forma-36-react-components';
 
 interface Props {
@@ -17,25 +17,19 @@ interface Props {
   contentTypes: { name: string; id: string }[];
 }
 
-const ContentTypeStep = ({
-  contentTypes,
-  selectCt,
-  selectedContentTypes,
-  space,
-  environment,
-}: Props) => {
+const ContentTypeStep = ({ contentTypes, selectCt, selectedContentTypes, space, environment }: Props) => {
   const ctMap: { [key: string]: string } = contentTypes.reduce((acc, ct) => {
     return {
       ...acc,
-      ...{ [ct.name]: ct.id },
+      ...{ [ct.name]: ct.id }
     };
   }, {});
 
   const sortedContentTypes = Object.keys(ctMap)
     .sort()
-    .map((ctName) => ({
+    .map(ctName => ({
       name: ctName,
-      id: ctMap[ctName],
+      id: ctMap[ctName]
     }));
 
   let contentToRender;
@@ -51,8 +45,7 @@ const ContentTypeStep = ({
             environment === 'master'
               ? `https://app.contentful.com/spaces/${space}/content_types`
               : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-          }
-        >
+          }>
           content type
         </TextLink>{' '}
         and assign it to the app from this screen.
@@ -61,7 +54,7 @@ const ContentTypeStep = ({
   } else {
     contentToRender = (
       <FieldGroup>
-        {sortedContentTypes.map((ct) => (
+        {sortedContentTypes.map(ct => (
           <CheckboxField
             onChange={() => selectCt(ct.id)}
             labelText={ct.name}
@@ -87,4 +80,4 @@ const ContentTypeStep = ({
   );
 };
 
-export default ContentTypeStep;
+export default ContentTypeStep

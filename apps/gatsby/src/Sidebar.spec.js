@@ -6,26 +6,26 @@ import Sidebar from './Sidebar';
 
 const mockSdk = {
   location: {
-    is: (val) => val === 'entry-sidebar',
+    is: val => val === 'entry-sidebar'
   },
   parameters: {
     installation: {
       previewUrl: 'https://preview.com',
       webhookUrl: 'https://webhook.com',
-      authToken: 'test-token',
-    },
+      authToken: 'test-token'
+    }
   },
   entry: {
     onSysChanged: jest.fn(),
     fields: {
       slug: {
-        getValue: jest.fn(() => 'preview-slug'),
-      },
-    },
+        getValue: jest.fn(() => 'preview-slug')
+      }
+    }
   },
   window: {
-    startAutoResizer: jest.fn(),
-  },
+    startAutoResizer: jest.fn()
+  }
 };
 
 describe('Gatsby App Sidebar', () => {
@@ -41,7 +41,7 @@ describe('Gatsby App Sidebar', () => {
     const mockFetch = jest.fn(() => Promise.resolve());
     let timerComplete = false;
     global.fetch = mockFetch;
-    mockSdk.entry.onSysChanged.mockImplementationOnce((fn) => {
+    mockSdk.entry.onSysChanged.mockImplementationOnce(fn => {
       fn();
       setTimeout(() => {
         timerComplete = true;
@@ -66,9 +66,9 @@ describe('Gatsby App Sidebar', () => {
       headers: {
         'Content-Type': 'application/json',
         'x-preview-auth-token': 'test-token',
-        'x-preview-update-source': 'contentful-sidebar-extension',
+        'x-preview-update-source': 'contentful-sidebar-extension'
       },
-      method: 'POST',
+      method: 'POST'
     });
   });
 });

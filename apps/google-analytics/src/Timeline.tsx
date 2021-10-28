@@ -5,16 +5,9 @@ import {
   SkeletonImage,
   TextLink,
   SkeletonContainer,
-  Paragraph,
+  Paragraph
 } from '@contentful/forma-36-react-components';
-import {
-  TimelineProps,
-  TimelineState,
-  ChartData,
-  AccountsSummary,
-  DataChart,
-  GapiError,
-} from './typings';
+import { TimelineProps, TimelineState, ChartData, AccountsSummary, DataChart, GapiError } from './typings';
 
 const CHART_HEIGHT = 200;
 const externalUrlBase = 'https://analytics.google.com/analytics/web/#/report/content-pages';
@@ -52,7 +45,7 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
     } catch (e) {
       const error: GapiError = e.result ? e.result.error : e;
 
-      return this.onError({ error: error });
+      return this.onError({ error: error })
     }
 
     const dataChart = new gapi.analytics.googleCharts.DataChart({
@@ -65,9 +58,9 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
           height: CHART_HEIGHT,
           backgroundColor: 'transparent',
           legend: 'none',
-          margin: 0,
-        },
-      },
+          margin: 0
+        }
+      }
     });
 
     dataChart.on('success', this.onSuccess);
@@ -98,11 +91,11 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
     const { dimensions, start, end, pagePath, viewId } = this.props;
     // pathWithoutTrailingSlash
     // filter to path with and without trailing slash
-    const untrailedPath = pagePath.replace(/\/$/, '');
+    const untrailedPath = pagePath.replace(/\/$/, '')
     const filters = [untrailedPath, `${untrailedPath}/`]
       .filter(Boolean)
-      .map((p) => `ga:pagePath==${p}`)
-      .join(',');
+      .map(p => `ga:pagePath==${p}`)
+      .join(',')
 
     const query = {
       ids: `ga:${viewId}`,
@@ -110,7 +103,7 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
       metrics: 'ga:pageViews',
       filters,
       'start-date': formatDate(start),
-      'end-date': formatDate(end),
+      'end-date': formatDate(end)
     };
 
     this.dataChart.set({ query }).execute();

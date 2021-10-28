@@ -6,15 +6,15 @@ import { css } from 'emotion';
 
 const styles = {
   button: css({
-    marginBottom: tokens.spacingS,
-  }),
+    marginBottom: tokens.spacingS
+  })
 };
 
 const getExperimentUrl = (projectId, experimentId) => {
   return `https://app.optimizely.com/v2/projects/${projectId}/experiments/${experimentId}/variations`;
 };
 
-const getAllExperimentsUrl = (projectId) => {
+const getAllExperimentsUrl = projectId => {
   return `https://app.optimizely.com/v2/projects/${projectId}/experiments`;
 };
 
@@ -30,7 +30,7 @@ export default function Sidebar(props) {
   }, [props.sdk.window]);
 
   useEffect(() => {
-    const unsubscribe = props.sdk.entry.fields.experimentId.onValueChanged((value) => {
+    const unsubscribe = props.sdk.entry.fields.experimentId.onValueChanged(value => {
       setExperimentId(value);
     });
     return () => {
@@ -49,8 +49,7 @@ export default function Sidebar(props) {
         disabled={!experimentId}
         href={getExperimentUrl(projectId, experimentId)}
         target="_blank"
-        data-test-id="view-experiment"
-      >
+        data-test-id="view-experiment">
         View in Optimizely
       </Button>
       <Button
@@ -59,8 +58,7 @@ export default function Sidebar(props) {
         className={styles.button}
         target="_blank"
         href={getAllExperimentsUrl(projectId)}
-        data-test-id="view-all"
-      >
+        data-test-id="view-all">
         View all experiments
       </Button>
     </div>
@@ -71,14 +69,14 @@ Sidebar.propTypes = {
   sdk: PropTypes.shape({
     entry: PropTypes.shape({
       fields: PropTypes.shape({
-        experimentId: PropTypes.object.isRequired,
-      }).isRequired,
+        experimentId: PropTypes.object.isRequired
+      }).isRequired
     }),
     window: PropTypes.object.isRequired,
     parameters: PropTypes.shape({
       installation: PropTypes.shape({
-        optimizelyProjectId: PropTypes.string.isRequired,
-      }),
-    }),
-  }).isRequired,
+        optimizelyProjectId: PropTypes.string.isRequired
+      })
+    })
+  }).isRequired
 };

@@ -44,8 +44,7 @@ export function Paginator(props: Props) {
         className={styles.button}
         buttonType="muted"
         disabled={hasOnlyOnePage || activePageIsAtPaginatorStart}
-        onClick={() => setActivePage(1)}
-      >
+        onClick={() => setActivePage(1)}>
         <img className={styles.chevronLeft} src={doubleChevron} alt="right" />
       </Button>
       <Button
@@ -55,7 +54,7 @@ export function Paginator(props: Props) {
         disabled={hasOnlyOnePage || activePageIsAtPaginatorStart}
         onClick={() => setActivePage(activePage - 1)}
       />
-      {getPagesRange(activePage, pageCount).map((pageIndex) => {
+      {getPagesRange(activePage, pageCount).map(pageIndex => {
         const page = pageIndex + 1;
         return (
           <Button
@@ -63,8 +62,7 @@ export function Paginator(props: Props) {
             className={styles.button}
             buttonType={page === activePage ? 'primary' : 'muted'}
             testId={page === activePage ? 'active' : `inactive-${page}`}
-            key={pageIndex}
-          >
+            key={pageIndex}>
             {page}
           </Button>
         );
@@ -80,8 +78,7 @@ export function Paginator(props: Props) {
         buttonType="muted"
         className={styles.button}
         disabled={hasOnlyOnePage || activePageIsAtPaginatorEnd}
-        onClick={() => setActivePage(pageCount)}
-      >
+        onClick={() => setActivePage(pageCount)}>
         <img className={styles.chevronRight} src={doubleChevron} alt="right" />
       </Button>
     </div>

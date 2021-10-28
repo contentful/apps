@@ -1,4 +1,7 @@
-import { DialogExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
+import {
+  DialogExtensionSDK,
+  FieldExtensionSDK,
+} from "@contentful/app-sdk";
 
 /**
  * Object containing all information configured on the app configuration page.
@@ -40,7 +43,7 @@ export interface ParameterDefinition {
    * - List: List of texts
    * - Number: Integer
    */
-  type: 'Symbol' | 'List' | 'Number';
+  type: "Symbol" | "List" | "Number";
 
   /**
    * Whether it is possible without providing a value.
@@ -54,7 +57,9 @@ export interface ParameterDefinition {
  * @param parameters Object containg the entered parameters.
  * @returns `string` containing an error message. `null` if the parameters are valid.
  */
-export type ValidateParametersFn = (parameters: Record<string, any>) => string | null;
+export type ValidateParametersFn = (
+  parameters: Record<string, any>
+) => string | null;
 
 /**
  * Returns the url of the thumbnail of an asset.
@@ -63,7 +68,10 @@ export type ValidateParametersFn = (parameters: Record<string, any>) => string |
  * @param config App configuration
  * @returns Tuple containing (1) the url and (2) the text represantation of the asset (optional)
  */
-export type ThumbnailFn = (asset: Asset, config: Config) => [string, string | undefined];
+export type ThumbnailFn = (
+  asset: Asset,
+  config: Config
+) => [string, string | undefined];
 
 export type DeleteFn = (index: number) => void;
 
@@ -118,7 +126,10 @@ export type OpenDialogFn = (
  * @param config App configuration
  * @returns true, if the button in the field location should be disabled. false, if the button should be enabled
  */
-export type DisabledPredicateFn = (currentValue: Asset[], config: Config) => boolean;
+export type DisabledPredicateFn = (
+  currentValue: Asset[],
+  config: Config
+) => boolean;
 
 export interface Integration {
   /**
