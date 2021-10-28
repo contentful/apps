@@ -10,7 +10,8 @@ export default () => (
         fy="-50%"
         r="100.11%"
         gradientTransform="matrix(0 .9989 -1 0 0 -1)"
-        id="a">
+        id="a"
+      >
         <stop stopColor="#20C6B7" offset="0%" />
         <stop stopColor="#4D9ABF" offset="100%" />
       </radialGradient>

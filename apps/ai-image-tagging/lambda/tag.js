@@ -12,10 +12,10 @@ const fetchImage = async (imageUrl, fetch) => {
   }
 };
 
-const getDetectParams = imageData => ({
-  Image: { Bytes: imageData, },
+const getDetectParams = (imageData) => ({
+  Image: { Bytes: imageData },
   MaxLabels: 10,
-  MinConfidence: 70.0
+  MinConfidence: 70.0,
 });
 
 module.exports = async (path, { fetch, rekog }) => {
@@ -23,5 +23,5 @@ module.exports = async (path, { fetch, rekog }) => {
   const params = getDetectParams(imageData);
   const tags = await rekog.detectLabels(params).promise();
 
-  return tags.Labels.map(label => label.Name);
+  return tags.Labels.map((label) => label.Name);
 };

@@ -11,8 +11,8 @@ describe('auth handler', () => {
         'http://some-origin',
         Object.assign(mocks, {
           fetch: jest.fn().mockResolvedValue({
-            status: 500
-          })
+            status: 500,
+          }),
         })
       );
     expect(fn()).rejects.toEqual(new Error('Typeform token exchange failed'));

@@ -15,17 +15,13 @@ const styles = {
     display: 'flex',
     flexWrap: 'wrap',
     marginLeft: `-${tokens.spacingS}`,
-    marginRight: `-${tokens.spacingS}`
-  })
+    marginRight: `-${tokens.spacingS}`,
+  }),
 };
 
-export const ProductList = ({
-  selectProduct,
-  selectedSKUs,
-  products,
-}: Props) => (
+export const ProductList = ({ selectProduct, selectedSKUs, products }: Props) => (
   <div className={styles.productList}>
-    {products.map(product => (
+    {products.map((product) => (
       <ProductListItem
         key={product.id}
         product={product}

@@ -6,26 +6,26 @@ import {
   SelectField,
   Option,
   Paragraph,
-  TextLink
+  TextLink,
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { ExperimentType } from './prop-types';
 
 const styles = {
   heading: css({
-    marginBottom: tokens.spacingL
+    marginBottom: tokens.spacingL,
   }),
   description: css({
     marginTop: tokens.spacingS,
     color: tokens.gray600,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
-    textOverflow: 'ellipsis'
+    textOverflow: 'ellipsis',
   }),
   clearDescription: css({
     marginTop: tokens.spacingXs,
-    color: tokens.gray500
-  })
+    color: tokens.gray500,
+  }),
 };
 
 const NOT_SELECTED = '-1';
@@ -40,36 +40,37 @@ export default function ExperimentSection(props) {
         labelText="Optimizely experiment"
         required
         value={props.experiment ? props.experiment.id.toString() : ''}
-        onChange={e => {
+        onChange={(e) => {
           const value = e.target.value;
           if (value === NOT_SELECTED) {
             props.onChangeExperiment({
               experimentId: '',
-              experimentKey: ''
+              experimentKey: '',
             });
           } else {
             const experiment = props.experiments.find(
-              experiment => experiment.id.toString() === value
+              (experiment) => experiment.id.toString() === value
             );
             if (experiment) {
               props.onChangeExperiment({
                 experimentId: experiment.id.toString(),
-                experimentKey: experiment.key.toString()
+                experimentKey: experiment.key.toString(),
               });
             }
           }
         }}
         selectProps={{
           width: 'large',
-          isDisabled: props.disabled === true || props.loaded === false
+          isDisabled: props.disabled === true || props.loaded === false,
         }}
         id="experiment"
-        name="experiment">
+        name="experiment"
+      >
         {props.loaded === false && <Option value={NOT_SELECTED}>Fetching experiments...</Option>}
         {props.loaded && (
           <React.Fragment>
             <Option value={NOT_SELECTED}>Select Optimizely experiment</Option>
-            {props.experiments.map(experiment => (
+            {props.experiments.map((experiment) => (
               <Option key={experiment.id.toString()} value={experiment.id.toString()}>
                 {experiment.name || experiment.key} ({experiment.status})
               </Option>
@@ -98,9 +99,9 @@ ExperimentSection.propTypes = {
   experiment: ExperimentType,
   experiments: PropTypes.arrayOf(ExperimentType.isRequired),
   onChangeExperiment: PropTypes.func.isRequired,
-  onClearVariations: PropTypes.func.isRequired
+  onClearVariations: PropTypes.func.isRequired,
 };
 
 ExperimentSection.defaultProps = {
-  experiments: []
+  experiments: [],
 };

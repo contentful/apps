@@ -33,7 +33,7 @@ export default class Config extends React.Component<Props, State> {
       contentTypes: [],
       checkedResource: '',
       checkedProject: null,
-      selectedContentTypes: []
+      selectedContentTypes: [],
     };
   }
 
@@ -44,7 +44,7 @@ export default class Config extends React.Component<Props, State> {
       app.getParameters() as Promise<InstallationParameters | null>,
       this.getCloudAccounts(),
       this.loadContentTypes(),
-      this.loadEditorInterfaces()
+      this.loadEditorInterfaces(),
     ]);
 
     app.onConfigure(this.configure);
@@ -52,7 +52,9 @@ export default class Config extends React.Component<Props, State> {
     if (config) {
       const { resourceId = '', projectId = '' } = config;
 
-      const configResourceExistsInResources = !!this.state.resources.find(r => r.id === resourceId);
+      const configResourceExistsInResources = !!this.state.resources.find(
+        (r) => r.id === resourceId
+      );
       const { project } = await JiraClient.getProjectById(resourceId, this.props.token, projectId);
 
       // only use the saved config if the resource exists
@@ -61,7 +63,7 @@ export default class Config extends React.Component<Props, State> {
         // eslint-disable-next-line react/no-did-mount-set-state
         this.setState({
           checkedResource: resourceId,
-          checkedProject: project
+          checkedProject: project,
         });
       }
 
@@ -90,17 +92,17 @@ export default class Config extends React.Component<Props, State> {
       parameters: {
         projectId: checkedProject.id,
         resourceId: checkedResource,
-        resourceUrl: this.state.resources.find(r => r.id === checkedResource)!.url
+        resourceUrl: this.state.resources.find((r) => r.id === checkedResource)!.url,
       },
       targetState: {
         EditorInterface: selectedContentTypes.reduce(
           (acc, ct) => ({
             ...acc,
-            ...{ [ct]: { sidebar: { position: 1 } } }
+            ...{ [ct]: { sidebar: { position: 1 } } },
           }),
           {}
-        )
-      }
+        ),
+      },
     };
   };
 
@@ -108,7 +110,7 @@ export default class Config extends React.Component<Props, State> {
     const data = await this.props.sdk.space.getContentTypes();
     if (data.items.length) {
       this.setState({
-        contentTypes: data.items.map(i => ({ name: i.name, id: i.sys.id }))
+        contentTypes: data.items.map((i) => ({ name: i.name, id: i.sys.id })),
       });
     }
   };
@@ -119,13 +121,13 @@ export default class Config extends React.Component<Props, State> {
 
     const selectedContentTypes = eisResponse.items
       .filter(
-        ei =>
-          !!get(ei, ['sidebar'], []).find(item => {
+        (ei) =>
+          !!get(ei, ['sidebar'], []).find((item) => {
             return item.widgetNamespace === 'app' && item.widgetId === ids.app;
           })
       )
-      .map(ei => get(ei, ['sys', 'contentType', 'sys', 'id']))
-      .filter(ctId => typeof ctId === 'string' && ctId.length > 0);
+      .map((ei) => get(ei, ['sys', 'contentType', 'sys', 'id']))
+      .filter((ctId) => typeof ctId === 'string' && ctId.length > 0);
 
     this.setState({ selectedContentTypes });
   };
@@ -137,7 +139,7 @@ export default class Config extends React.Component<Props, State> {
       this.setState({
         resources: res.resources,
         // if there is only one project, automatically check it
-        checkedResource: res.resources.length === 1 ? res.resources[0].id : ''
+        checkedResource: res.resources.length === 1 ? res.resources[0].id : '',
       });
     } else {
       this.props.reauth();
@@ -149,13 +151,13 @@ export default class Config extends React.Component<Props, State> {
   };
 
   getProjects = async (query: string = '') => {
-    const resource = this.state.resources.find(r => r.id === this.state.checkedResource);
+    const resource = this.state.resources.find((r) => r.id === this.state.checkedResource);
 
     if (resource) {
       const data = await JiraClient.getProjects(resource.id, this.props.token, query);
 
       this.setState(() => ({
-        projects: data.projects
+        projects: data.projects,
       }));
     }
   };
@@ -171,11 +173,11 @@ export default class Config extends React.Component<Props, State> {
   toggleCtSelection = (id: string) => {
     if (this.state.selectedContentTypes.includes(id)) {
       this.setState((prevState: State) => ({
-        selectedContentTypes: prevState.selectedContentTypes.filter(ct => ct !== id)
+        selectedContentTypes: prevState.selectedContentTypes.filter((ct) => ct !== id),
       }));
     } else {
       this.setState((prevState: State) => ({
-        selectedContentTypes: prevState.selectedContentTypes.concat(id)
+        selectedContentTypes: prevState.selectedContentTypes.concat(id),
       }));
     }
   };
@@ -183,7 +185,7 @@ export default class Config extends React.Component<Props, State> {
   render() {
     const { sdk } = this.props;
     const {
-      ids: { space, environment }
+      ids: { space, environment },
     } = sdk;
     return (
       <div className="configuration" data-test-id="configuration">

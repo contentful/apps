@@ -23,17 +23,17 @@ interface State {
 
 const styles = {
   sortable: css({
-    marginBottom: tokens.spacingM
+    marginBottom: tokens.spacingM,
   }),
   container: css({
-    display: 'flex'
+    display: 'flex',
   }),
   logo: css({
     display: 'block',
     width: '30px',
     height: '30px',
-    marginRight: tokens.spacingM
-  })
+    marginRight: tokens.spacingM,
+  }),
 };
 
 const isObject = (o: any) => typeof o === 'object' && o !== null && !Array.isArray(o);
@@ -53,7 +53,7 @@ export default class Field extends React.Component<Props, State> {
     this.state = {
       value: Array.isArray(value) ? value : [],
       valid,
-      editingDisabled: false
+      editingDisabled: false,
     };
   }
 
@@ -131,7 +131,8 @@ export default class Field extends React.Component<Props, State> {
             buttonType="muted"
             size="small"
             onClick={this.onDialogOpen}
-            disabled={isDisabled}>
+            disabled={isDisabled}
+          >
             {this.props.cta}
           </Button>
         </div>

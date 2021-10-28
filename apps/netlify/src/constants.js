@@ -13,7 +13,7 @@ export const NETLIFY_STATE_TO_EVENT = {
   uploaded: EVENT_BUILD_STARTED,
   building: EVENT_BUILD_STARTED,
   ready: EVENT_BUILD_READY,
-  error: EVENT_BUILD_FAILED
+  error: EVENT_BUILD_FAILED,
 };
 
 export const PUBNUB_PUBLISH_KEY = 'pub-c-a99421b9-4f21-467b-ac0c-d0292824e8e1';

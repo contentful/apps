@@ -11,7 +11,7 @@ import {
   Pagination,
   Product,
   ProductPreviewsFn,
-  ProductsFn
+  ProductsFn,
 } from '../interfaces';
 import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
@@ -56,11 +56,11 @@ export class SkuPicker extends Component<Props, State> {
       count: 0,
       limit: 0,
       offset: 0,
-      total: 0
+      total: 0,
     },
     products: [],
     selectedProducts: [],
-    selectedSKUs: get(this.props, ['sdk', 'parameters', 'invocation', 'fieldValue'], [])
+    selectedSKUs: get(this.props, ['sdk', 'parameters', 'invocation', 'fieldValue'], []),
   };
 
   setSearchCallback: () => void;
@@ -86,7 +86,7 @@ export class SkuPicker extends Component<Props, State> {
       const {
         activePage,
         pagination: { limit },
-        search
+        search,
       } = this.state;
       const offset = (activePage - 1) * limit;
       const fetched = await this.props.fetchProducts(search, { offset });
@@ -117,7 +117,7 @@ export class SkuPicker extends Component<Props, State> {
 
   loadMoreProducts = async () => {
     const { pagination, products } = await this.props.fetchProducts(this.state.search);
-    this.setState(oldState => ({ pagination, products: [...oldState.products, ...products] }));
+    this.setState((oldState) => ({ pagination, products: [...oldState.products, ...products] }));
   };
 
   setActivePage = (activePage: number) => {
@@ -135,14 +135,14 @@ export class SkuPicker extends Component<Props, State> {
     if (this.state.selectedSKUs.includes(sku)) {
       this.setState(
         ({ selectedSKUs }) => ({
-          selectedSKUs: selectedSKUs.filter(productSku => productSku !== sku)
+          selectedSKUs: selectedSKUs.filter((productSku) => productSku !== sku),
         }),
         () => this.updateSelectedProducts()
       );
     } else {
       this.setState(
         ({ selectedSKUs }) => ({
-          selectedSKUs: onlyOneProductCanBeSelected ? [sku] : [...selectedSKUs, sku]
+          selectedSKUs: onlyOneProductCanBeSelected ? [sku] : [...selectedSKUs, sku],
         }),
         () => this.updateSelectedProducts()
       );
@@ -167,7 +167,7 @@ export class SkuPicker extends Component<Props, State> {
               testId="sku-search"
               width="medium"
               value={search}
-              onChange={event => this.setSearch((event.target as HTMLInputElement).value)}
+              onChange={(event) => this.setSearch((event.target as HTMLInputElement).value)}
             />
             <Icon color="muted" icon="Search" />
             {!!pagination.total && (
@@ -182,7 +182,8 @@ export class SkuPicker extends Component<Props, State> {
               className={styles.saveBtn}
               buttonType="primary"
               onClick={() => this.props.sdk.close(selectedSKUs)}
-              disabled={selectedSKUs.length === 0}>
+              disabled={selectedSKUs.length === 0}
+            >
               {makeSaveBtnText(selectedSKUs, skuType)}
             </Button>
           </div>
@@ -206,7 +207,8 @@ export class SkuPicker extends Component<Props, State> {
               className={styles.loadMoreButton}
               buttonType="naked"
               testId="infinite-scrolling-pagination"
-              onClick={this.loadMoreProducts}>
+              onClick={this.loadMoreProducts}
+            >
               Load more
             </Button>
           )}

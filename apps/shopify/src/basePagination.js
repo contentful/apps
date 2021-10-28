@@ -31,9 +31,9 @@ export default class BasePagination {
 
     return {
       pagination: {
-        hasNextPage: this.hasNextProductPage
+        hasNextPage: this.hasNextProductPage,
       },
-      products: products.map(this.dataTransformer)
+      products: products.map(this.dataTransformer),
     };
   }
 

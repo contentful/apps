@@ -11,7 +11,7 @@ import '@contentful/forma-36-fcss/dist/styles.css';
 import NeflifySidebar from './sidebar';
 import NetlifyAppConfig from './app';
 
-init(sdk => {
+init((sdk) => {
   const root = document.getElementById('root');
 
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {

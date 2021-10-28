@@ -1,6 +1,6 @@
 import {
   editorInterfacesToEnabledContentTypes,
-  enabledContentTypesToTargetState
+  enabledContentTypesToTargetState,
 } from '../../src/app/target-state';
 
 describe('target-state', () => {
@@ -17,7 +17,7 @@ describe('target-state', () => {
           {
             sys: { contentType: { sys: { id: 'ct1' } } },
             // "some-app" app in the sidebar - enabled.
-            sidebar: [{ widgetNamespace: 'app', widgetId: 'some-app' }]
+            sidebar: [{ widgetNamespace: 'app', widgetId: 'some-app' }],
           },
           {
             sys: {
@@ -26,9 +26,9 @@ describe('target-state', () => {
               controls: [{ fieldId: 'title', widgetNamespace: 'app', widgetId: 'some-app' }],
               editor: {
                 widgetNamespace: 'app',
-                widgetId: 'some-app'
-              }
-            }
+                widgetId: 'some-app',
+              },
+            },
           },
           {
             sys: { contentType: { sys: { id: 'ct3' } } },
@@ -36,17 +36,17 @@ describe('target-state', () => {
               { widgetNamespace: 'extension', widgetId: 'some-ext' },
               { widgetNamespace: 'builtin-sidebar', widgetId: 'publish-button' },
               // "some-app" app deep in the sidebar - still enabled.
-              { widgetNamespace: 'app', widgetId: 'some-app' }
-            ]
+              { widgetNamespace: 'app', widgetId: 'some-app' },
+            ],
           },
           {
             sys: { contentType: { sys: { id: 'ct4' } } },
             sidebar: [
               { widgetNamespace: 'app', widgetId: 'some-diff-app' },
               // "some-app" ID is used for an extension, not an app - not enabled.
-              { widgetNamespace: 'extension', widgetId: 'some-app' }
-            ]
-          }
+              { widgetNamespace: 'extension', widgetId: 'some-app' },
+            ],
+          },
         ],
         'some-app'
       );
@@ -60,7 +60,7 @@ describe('target-state', () => {
       const contentTypes = [
         ['ct1', 'Content Type no 1'],
         ['ct2', 'Content Type no 2'],
-        ['ct3', 'Content Type no 3']
+        ['ct3', 'Content Type no 3'],
       ];
 
       const enabled = ['ct1', 'ct3'];
@@ -71,8 +71,8 @@ describe('target-state', () => {
         EditorInterface: {
           ct1: { sidebar: { position: 2 } },
           ct2: {},
-          ct3: { sidebar: { position: 2 } }
-        }
+          ct3: { sidebar: { position: 2 } },
+        },
       });
     });
   });

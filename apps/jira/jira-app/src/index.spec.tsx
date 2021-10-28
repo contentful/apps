@@ -10,7 +10,7 @@ import fetchMock from 'fetch-mock';
 import standalone from './standalone';
 
 configure({
-  testIdAttribute: 'data-test-id'
+  testIdAttribute: 'data-test-id',
 });
 
 const originalStorage = window.localStorage;
@@ -31,30 +31,30 @@ describe('The Jira App Components', () => {
       ids: {
         space: 'test-space',
         environment: 'master',
-        user: '123'
+        user: '123',
       },
       app: {
         setReady: jest.fn(),
         isInstalled: jest.fn().mockReturnValue(Promise.resolve(false)),
         getParameters: jest.fn().mockReturnValue(Promise.resolve(null)),
-        onConfigure: jest.fn(fn => {
+        onConfigure: jest.fn((fn) => {
           configureFn = fn;
-        })
+        }),
       },
       space: {
         getContentTypes: jest.fn().mockReturnValue(Promise.resolve(mockContentTypes)),
-        getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] })
+        getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] }),
       },
       notifier: {
-        error: jest.fn()
+        error: jest.fn(),
       },
       window: {
-        startAutoResizer: jest.fn()
+        startAutoResizer: jest.fn(),
       },
       user: {
         firstName: 'David',
-        lastName: 'Fateh'
-      }
+        lastName: 'Fateh',
+      },
     };
   });
 
@@ -126,8 +126,8 @@ describe('The Jira App Components', () => {
             }
           }),
           setItem: jest.fn(),
-          removeItem: jest.fn()
-        }
+          removeItem: jest.fn(),
+        },
       });
 
       const wrapper = render(<App sdk={mockSdk} />);
@@ -155,14 +155,14 @@ describe('The Jira App Components', () => {
 
       // pick an instance
       fireEvent.change(instanceSelector, {
-        target: { value: '11111111-1111-1111-1111-111111111112' }
+        target: { value: '11111111-1111-1111-1111-111111111112' },
       });
 
       await wait();
 
       // pick the extensibility project
       fireEvent.change(projectSearchInput, {
-        target: { value: 'extensibility' }
+        target: { value: 'extensibility' },
       });
 
       jest.advanceTimersByTime(1000);
@@ -215,8 +215,8 @@ describe('The Jira App Components', () => {
             }
           }),
           setItem: jest.fn(),
-          removeItem: jest.fn()
-        }
+          removeItem: jest.fn(),
+        },
       });
 
       const wrapper = render(<App sdk={mockSdk} />);
@@ -242,7 +242,7 @@ describe('The Jira App Components', () => {
 
       // pick an instance
       fireEvent.change(instanceSelector, {
-        target: { value: '11111111-1111-1111-1111-111111111112' }
+        target: { value: '11111111-1111-1111-1111-111111111112' },
       });
 
       // try to install with no project selected
@@ -290,7 +290,7 @@ describe('The Jira App Components', () => {
         'https://api.atlassian.com/ex/jira/cloud-id/rest/api/2/search?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22',
         { issues: [] },
         {
-          overwriteRoutes: true
+          overwriteRoutes: true,
         }
       );
 
@@ -329,7 +329,7 @@ describe('The Jira App Components', () => {
         'https://api.atlassian.com/ex/jira/cloud-id/rest/api/2/search?jql=issue.property%5BcontentfulLink%5D.records%20%3D%20%22ctf%3Atest-space%3Amaster%3Aundefined%22',
         403,
         {
-          overwriteRoutes: true
+          overwriteRoutes: true,
         }
       );
 
@@ -345,17 +345,17 @@ describe('The Jira App Components', () => {
     it('should handle a successful token and expire time', () => {
       const mockWindow = {
         location: {
-          href: `http://localhost:1234?token=123&expiresIn=10`
+          href: `http://localhost:1234?token=123&expiresIn=10`,
         },
         opener: {
-          postMessage: jest.fn()
+          postMessage: jest.fn(),
         },
         localStorage: {
-          setItem: jest.fn()
+          setItem: jest.fn(),
         },
         history: {
-          replaceState: jest.fn()
-        }
+          replaceState: jest.fn(),
+        },
       };
 
       standalone(mockWindow as any);
@@ -370,17 +370,17 @@ describe('The Jira App Components', () => {
       const errorMessage = 'therewasanerror';
       const mockWindow = {
         location: {
-          href: `http://localhost:1234?token=123&&error=${errorMessage}`
+          href: `http://localhost:1234?token=123&&error=${errorMessage}`,
         },
         opener: {
-          postMessage: jest.fn()
+          postMessage: jest.fn(),
         },
         localStorage: {
-          setItem: jest.fn()
+          setItem: jest.fn(),
         },
         history: {
-          replaceState: jest.fn()
-        }
+          replaceState: jest.fn(),
+        },
       };
 
       standalone(mockWindow as any);
@@ -392,17 +392,17 @@ describe('The Jira App Components', () => {
     it('should handle no query string', () => {
       const mockWindow = {
         location: {
-          href: 'http://localhost:1234'
+          href: 'http://localhost:1234',
         },
         opener: {
-          postMessage: jest.fn()
+          postMessage: jest.fn(),
         },
         localStorage: {
-          setItem: jest.fn()
+          setItem: jest.fn(),
         },
         history: {
-          replaceState: jest.fn()
-        }
+          replaceState: jest.fn(),
+        },
       };
 
       standalone(mockWindow as any);

@@ -6,7 +6,7 @@ export const VariationType = PropTypes.shape({
   weight: PropTypes.number,
   key: PropTypes.string.isRequired,
   variation_id: PropTypes.number.isRequired,
-  description: PropTypes.string
+  description: PropTypes.string,
 });
 
 export const ExperimentType = PropTypes.shape({
@@ -15,5 +15,5 @@ export const ExperimentType = PropTypes.shape({
   key: PropTypes.string.isRequired,
   description: PropTypes.string,
   status: PropTypes.string.isRequired,
-  variations: PropTypes.arrayOf(VariationType.isRequired).isRequired
+  variations: PropTypes.arrayOf(VariationType.isRequired).isRequired,
 });

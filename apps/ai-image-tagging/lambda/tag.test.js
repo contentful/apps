@@ -14,10 +14,10 @@ describe('tagging', () => {
 
     expect(rekog.detectLabels).toBeCalledWith({
       Image: {
-        Bytes: 'SOME_ARR_BUFF'
+        Bytes: 'SOME_ARR_BUFF',
       },
       MaxLabels: 10,
-      MinConfidence: 70.0
+      MinConfidence: 70.0,
     });
   });
 

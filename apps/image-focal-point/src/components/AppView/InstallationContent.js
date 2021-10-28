@@ -8,7 +8,7 @@ export function InstallationContent({
   contentTypeId,
   contentTypeName,
   onContentTypeNameChange,
-  onContentTypeIdChange
+  onContentTypeIdChange,
 }) {
   const validationMessageName = allContentTypesIds.includes(contentTypeId)
     ? `A content type with ID "${contentTypeId}" already exists. Try a different name.`
@@ -31,7 +31,7 @@ export function InstallationContent({
         name="contentTypeName"
         textInputProps={{
           placeholder: 'e.g. Image with Focal Point',
-          testId: 'content-type-name-input'
+          testId: 'content-type-name-input',
         }}
         helpText="You can use this content type to wrap images with focal point data"
         value={contentTypeName}
@@ -63,5 +63,5 @@ InstallationContent.propTypes = {
   contentTypeId: PropTypes.string.isRequired,
   contentTypeName: PropTypes.string.isRequired,
   onContentTypeNameChange: PropTypes.func.isRequired,
-  onContentTypeIdChange: PropTypes.func.isRequired
+  onContentTypeIdChange: PropTypes.func.isRequired,
 };

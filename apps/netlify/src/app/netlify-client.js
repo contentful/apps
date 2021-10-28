@@ -3,7 +3,7 @@ import {
   NETLIFY_API_BASE,
   NETLIFY_AUTHORIZE_ENDPOINT,
   NETLIFY_AUTH_WINDOW_OPTS,
-  NETLIFY_AUTH_POLL_INTERVAL
+  NETLIFY_AUTH_POLL_INTERVAL,
 } from '../constants';
 
 async function request(method, url, accessToken, body) {
@@ -80,7 +80,10 @@ export function getAccessTokenWithTicket(ticketId, cb) {
     if (err) {
       cb(err);
     } else if (authorizedTicketId) {
-      exchangeTicketForToken(authorizedTicketId).then(token => cb(null, token), err => cb(err));
+      exchangeTicketForToken(authorizedTicketId).then(
+        (token) => cb(null, token),
+        (err) => cb(err)
+      );
     }
   });
 
@@ -95,7 +98,7 @@ export async function listSites(accessToken) {
 
   // Get sites for each account.
   const sitesForAccounts = await Promise.all(
-    accounts.map(account => {
+    accounts.map((account) => {
       return get(`/${account.slug}/sites?page=1&per_page=100`, accessToken);
     })
   );
@@ -106,7 +109,7 @@ export async function listSites(accessToken) {
   }, []);
 
   // Filter out sites with no build configuration.
-  const buildable = sites.filter(site => {
+  const buildable = sites.filter((site) => {
     const settings = site.build_settings;
     return null !== settings && typeof settings === 'object';
   });
@@ -115,14 +118,14 @@ export async function listSites(accessToken) {
     sites: buildable,
     counts: {
       buildable: buildable.length,
-      unavailable: sites.length - buildable.length
-    }
+      unavailable: sites.length - buildable.length,
+    },
   };
 }
 
 export function createBuildHook(siteId, accessToken) {
   return post(`/sites/${siteId}/build_hooks`, accessToken, {
-    title: 'Contentful integration'
+    title: 'Contentful integration',
   });
 }
 
@@ -134,7 +137,7 @@ export function createNotificationHook(siteId, accessToken, { event, url }) {
   return post('/hooks', accessToken, {
     site_id: siteId,
     event,
-    data: { url }
+    data: { url },
   });
 }
 

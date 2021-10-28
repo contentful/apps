@@ -1,5 +1,5 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
 import {
   Typography,
@@ -9,7 +9,7 @@ import {
   Paragraph,
   FieldGroup,
   CheckboxField,
-} from "@contentful/forma-36-react-components";
+} from '@contentful/forma-36-react-components';
 
 export default class NetlifyContentTypes extends React.Component {
   static propTypes = {
@@ -39,13 +39,7 @@ export default class NetlifyContentTypes extends React.Component {
   };
 
   render() {
-    const {
-      disabled,
-      contentTypes,
-      enabledContentTypes,
-      space,
-      environment,
-    } = this.props;
+    const { disabled, contentTypes, enabledContentTypes, space, environment } = this.props;
 
     const allSelected = contentTypes.length === enabledContentTypes.length;
 
@@ -53,20 +47,19 @@ export default class NetlifyContentTypes extends React.Component {
     if (contentTypes.length === 0) {
       contentToRender = (
         <Note noteType="warning">
-          There are <strong>no content types</strong> in this environment. You
-          can add a{" "}
+          There are <strong>no content types</strong> in this environment. You can add a{' '}
           <TextLink
             linkType="primary"
             target="_blank"
             rel="noopener noreferrer"
             href={
-              environment === "master"
+              environment === 'master'
                 ? `https://app.contentful.com/spaces/${space}/content_types`
                 : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
             }
           >
             content type
-          </TextLink>{" "}
+          </TextLink>{' '}
           and assign it to the app from this screen.
         </Note>
       );
@@ -103,8 +96,7 @@ export default class NetlifyContentTypes extends React.Component {
       <Typography>
         <Heading>Content Types</Heading>
         <Paragraph>
-          Select which content types will show the Netlify functionality in the
-          sidebar.
+          Select which content types will show the Netlify functionality in the sidebar.
         </Paragraph>
         {contentToRender}
       </Typography>

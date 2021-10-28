@@ -1,25 +1,31 @@
 import {
   getCompatibleFields,
   editorInterfacesToSelectedFields,
-  selectedFieldsToTargetState
+  selectedFieldsToTargetState,
 } from './fields';
 
 const contentTypes = [
   {
     sys: { id: 'ct1' },
     name: 'CT1',
-    fields: [{ id: 'x', name: 'X', type: 'Symbol' }, { id: 'y', name: 'Y', type: 'Object' }]
+    fields: [
+      { id: 'x', name: 'X', type: 'Symbol' },
+      { id: 'y', name: 'Y', type: 'Object' },
+    ],
   },
   {
     sys: { id: 'ct2' },
     name: 'CT2',
-    fields: [{ id: 'foo', name: 'FOO', type: 'Text' }]
+    fields: [{ id: 'foo', name: 'FOO', type: 'Text' }],
   },
   {
     sys: { id: 'ct3' },
     name: 'CT3',
-    fields: [{ id: 'bar', name: 'BAR', type: 'Object' }, { id: 'baz', name: 'BAZ', type: 'Object' }]
-  }
+    fields: [
+      { id: 'bar', name: 'BAR', type: 'Object' },
+      { id: 'baz', name: 'BAZ', type: 'Object' },
+    ],
+  },
 ];
 
 describe('fields', () => {
@@ -32,8 +38,8 @@ describe('fields', () => {
         ct2: [],
         ct3: [
           { id: 'bar', name: 'BAR', type: 'Object' },
-          { id: 'baz', name: 'BAZ', type: 'Object' }
-        ]
+          { id: 'baz', name: 'BAZ', type: 'Object' },
+        ],
       });
     });
   });
@@ -52,31 +58,31 @@ describe('fields', () => {
             sys: { contentType: { sys: { id: 'ct1' } } },
             controls: [
               { fieldId: 'foo', widgetNamespace: 'app', widgetId: 'some-app' },
-              { fieldId: 'bar', widgetNamespace: 'app', widgetId: 'some-diff-app' }
-            ]
+              { fieldId: 'bar', widgetNamespace: 'app', widgetId: 'some-diff-app' },
+            ],
           },
           {
             sys: { contentType: { sys: { id: 'ct2' } } },
-            controls: []
+            controls: [],
           },
           {
-            sys: { contentType: { sys: { id: 'ct3' } } }
+            sys: { contentType: { sys: { id: 'ct3' } } },
           },
           {
             sys: { contentType: { sys: { id: 'ct4' } } },
             controls: [
               { fieldId: 'foo', widgetNamespace: 'builtin', widgetId: 'singleLine' },
               { fieldId: 'bar', widgetNamespace: 'app', widgetId: 'some-app' },
-              { fieldId: 'baz', widgetNamespace: 'app', widgetId: 'some-app' }
-            ]
-          }
+              { fieldId: 'baz', widgetNamespace: 'app', widgetId: 'some-app' },
+            ],
+          },
         ],
         'some-app'
       );
 
       expect(result).toEqual({
         ct1: ['foo'],
-        ct4: ['bar', 'baz']
+        ct4: ['bar', 'baz'],
       });
     });
   });
@@ -85,15 +91,15 @@ describe('fields', () => {
     it('converts selected field map to target state', () => {
       const result = selectedFieldsToTargetState(contentTypes, {
         ct1: ['y'],
-        ct3: ['bar']
+        ct3: ['bar'],
       });
 
       expect(result).toEqual({
         EditorInterface: {
           ct1: { controls: [{ fieldId: 'y' }] },
           ct2: {},
-          ct3: { controls: [{ fieldId: 'bar' }] }
-        }
+          ct3: { controls: [{ fieldId: 'bar' }] },
+        },
       });
     });
   });

@@ -12,7 +12,7 @@ const styles = {
     backgroundColor: tokens.colorWhite,
     zIndex: '2',
     boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
-    borderRadius: '2px'
+    borderRadius: '2px',
   }),
   background: css({
     display: 'block',
@@ -22,36 +22,36 @@ const styles = {
     width: '100%',
     height: '300px',
     backgroundColor: 'rgb(23,64,121)',
-    background: 'linear-gradient(90deg, rgba(23,64,121,1) 0%, rgba(27,158,156,1) 100%)'
+    background: 'linear-gradient(90deg, rgba(23,64,121,1) 0%, rgba(27,158,156,1) 100%)',
   }),
   section: css({
-    margin: `${tokens.spacingXl} 0`
+    margin: `${tokens.spacingXl} 0`,
   }),
   input: css({
-    marginTop: tokens.spacingM
+    marginTop: tokens.spacingM,
   }),
   splitter: css({
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.gray300
+    backgroundColor: tokens.gray300,
   }),
   icon: css({
     display: 'flex',
     justifyContent: 'center',
     marginTop: tokens.spacingXl,
-    marginBottom: tokens.spacingXl
+    marginBottom: tokens.spacingXl,
   }),
   checks: css({
     marginTop: tokens.spacingM,
-    display: 'flex'
+    display: 'flex',
   }),
   pills: css({
-    margin: `0 ${tokens.spacingXs}`
+    margin: `0 ${tokens.spacingXs}`,
   }),
   relative: css({
-    position: 'relative'
+    position: 'relative',
   }),
   configurationProtector: css({
     zIndex: 9999,
@@ -61,7 +61,7 @@ const styles = {
     bottom: 0,
     pointerEvents: 'none',
     backgroundColor: 'rgba(255, 255, 255, 0.60)',
-    position: 'absolute'
-  })
+    position: 'absolute',
+  }),
 };
-export default styles
+export default styles;

@@ -4,7 +4,7 @@ export default {
     url: 'https://mycdn.com/some_image.png',
     details: { size: 11524052, image: { width: 4534, height: 3050 } },
     fileName: 'Pôr do Sol - Praia do Boldro.jpg',
-    contentType: 'image/jpeg'
+    contentType: 'image/jpeg',
   },
   sdk: {
     location: {},
@@ -17,11 +17,11 @@ export default {
       spaceMembership: {
         sys: {
           type: 'SpaceMembership',
-          id: 'cyu19ucaypb9-2userId252'
+          id: 'cyu19ucaypb9-2userId252',
         },
         admin: true,
-        roles: []
-      }
+        roles: [],
+      },
     },
     parameters: {
       instance: {},
@@ -31,15 +31,15 @@ export default {
           url: 'https://mycdn.com/some_image.png',
           details: { size: 11524052, image: { width: 4534, height: 3050 } },
           fileName: 'Pôr do Sol - Praia do Boldro.jpg',
-          contentType: 'image/jpeg'
+          contentType: 'image/jpeg',
         },
-        focalPoint: { x: 925, y: 1312 }
-      }
+        focalPoint: { x: 925, y: 1312 },
+      },
     },
     locales: {
       available: ['en-US'],
       default: 'en-US',
-      names: { 'en-US': 'English (United States)' }
+      names: { 'en-US': 'English (United States)' },
     },
 
     contentType: {
@@ -50,7 +50,7 @@ export default {
         createdAt: '2019-09-03T12:19:45.454Z',
         updatedAt: '2019-09-17T14:10:53.642Z',
         environment: { sys: { id: 'master', type: 'Link', linkType: 'Environment' } },
-        revision: 22
+        revision: 22,
       },
       name: 'Article',
       description: 'User written articles.',
@@ -64,7 +64,7 @@ export default {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'createdAt',
@@ -74,7 +74,7 @@ export default {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'meta',
@@ -84,7 +84,7 @@ export default {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'person',
@@ -94,7 +94,7 @@ export default {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'articleImg',
@@ -105,7 +105,7 @@ export default {
           validations: [],
           disabled: false,
           omitted: false,
-          linkType: 'Asset'
+          linkType: 'Asset',
         },
         {
           id: 'articleImageFocalPoint',
@@ -115,9 +115,9 @@ export default {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
-        }
-      ]
+          omitted: false,
+        },
+      ],
     },
     space: {},
     dialogs: {},
@@ -127,8 +127,8 @@ export default {
       extension: 'image-focal-point',
       space: 'cyu19ucaypb9',
       environment: 'master',
-      user: '2userId252'
+      user: '2userId252',
     },
-    window: {}
-  }
+    window: {},
+  },
 };

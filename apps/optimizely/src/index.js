@@ -54,14 +54,14 @@ export default class App extends React.Component {
     sdk: PropTypes.shape({
       contentType: PropTypes.object,
       location: PropTypes.shape({
-        is: PropTypes.func.isRequired
+        is: PropTypes.func.isRequired,
       }),
       parameters: PropTypes.shape({
         installation: PropTypes.shape({
-          optimizelyProjectId: PropTypes.string.isRequired
-        }).isRequired
-      }).isRequired
-    }).isRequired
+          optimizelyProjectId: PropTypes.string.isRequired,
+        }).isRequired,
+      }).isRequired,
+    }).isRequired,
   };
 
   constructor(props) {
@@ -73,12 +73,12 @@ export default class App extends React.Component {
     this.state = {
       client: token ? this.makeClient(token) : null,
       accessToken: token,
-      expires
+      expires,
     };
 
     this.listener = window.addEventListener(
       'message',
-      event => {
+      (event) => {
         const { data, origin } = event;
         const { token, expires } = data;
 
@@ -94,13 +94,13 @@ export default class App extends React.Component {
     );
   }
 
-  makeClient = token => {
+  makeClient = (token) => {
     return new OptimizelyClient({
       accessToken: token,
       project: this.props.sdk.parameters.installation.optimizelyProjectId,
       onReauth: () => {
         this.setState({ client: null });
-      }
+      },
     });
   };
 
@@ -153,6 +153,6 @@ export default class App extends React.Component {
   }
 }
 
-init(sdk => {
+init((sdk) => {
   render(<App sdk={sdk} />, document.getElementById('root'));
 });

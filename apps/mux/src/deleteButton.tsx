@@ -11,11 +11,7 @@ class DeleteButton extends React.Component<DeleteActionProps, {}> {
   render() {
     return (
       <div className="button-container">
-        <Button
-          buttonType="negative"
-          size="small"
-          onClick={this.props.requestDeleteAsset}
-        >
+        <Button buttonType="negative" size="small" onClick={this.props.requestDeleteAsset}>
           Delete this asset
         </Button>
       </div>

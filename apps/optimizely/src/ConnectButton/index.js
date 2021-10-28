@@ -11,9 +11,9 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     '&:hover': {
-      backgroundColor: 'transparent!important' // necessary to eliminate the forma styling in favor of the custom optimizely styling
-    }
-  })
+      backgroundColor: 'transparent!important', // necessary to eliminate the forma styling in favor of the custom optimizely styling
+    },
+  }),
 };
 
 export default function ConnectButton({ openAuth }) {
@@ -23,12 +23,13 @@ export default function ConnectButton({ openAuth }) {
       onClick={openAuth}
       testId="connect-button"
       isFullWidth
-      buttonType="naked">
+      buttonType="naked"
+    >
       <OptimizelyLogo />
     </Button>
   );
 }
 
 ConnectButton.propTypes = {
-  openAuth: PropTypes.func.isRequired
+  openAuth: PropTypes.func.isRequired,
 };

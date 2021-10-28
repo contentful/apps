@@ -23,7 +23,7 @@ interface State {
 
 export class SortableComponent extends React.Component<Props, State> {
   state = {
-    productPreviews: []
+    productPreviews: [],
   };
 
   componentDidMount() {

@@ -5,7 +5,7 @@ import productPreviews from '../../__mocks__/productPreviews';
 
 const defaultProps: Props = {
   products: productPreviews,
-  selectProduct: jest.fn()
+  selectProduct: jest.fn(),
 };
 
 const renderComponent = (props: Props) => {

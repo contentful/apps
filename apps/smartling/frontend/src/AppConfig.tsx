@@ -8,7 +8,7 @@ import {
   CheckboxField,
   TextField,
   TextLink,
-  Note
+  Note,
 } from '@contentful/forma-36-react-components';
 import get from 'lodash.get';
 // @ts-ignore 2307
@@ -31,7 +31,7 @@ export default class AppConfig extends React.Component<Props, State> {
   state: State = {
     contentTypes: [],
     selectedContentTypes: [],
-    projectId: ''
+    projectId: '',
   };
 
   async componentDidMount() {
@@ -40,28 +40,28 @@ export default class AppConfig extends React.Component<Props, State> {
     sdk.app.onConfigure(this.configure);
 
     const [ctsRes, parameters, eiRes] = await Promise.all([
-      sdk.space.getContentTypes({limit: 1000}),
+      sdk.space.getContentTypes({ limit: 1000 }),
       sdk.app.getParameters() as Promise<SmartlingParameters | null>,
-      sdk.space.getEditorInterfaces()
+      sdk.space.getEditorInterfaces(),
     ]);
 
     const selectedContentTypes = eiRes.items
-      .filter(ei =>
-        get(ei, ['sidebar'], []).some(item => {
+      .filter((ei) =>
+        get(ei, ['sidebar'], []).some((item) => {
           return item.widgetNamespace === 'app' && item.widgetId === this.props.sdk.ids.app;
         })
       )
-      .map(ei => get(ei, ['sys', 'contentType', 'sys', 'id']))
-      .filter(ctId => typeof ctId === 'string' && ctId.length > 0);
+      .map((ei) => get(ei, ['sys', 'contentType', 'sys', 'id']))
+      .filter((ctId) => typeof ctId === 'string' && ctId.length > 0);
 
     const items = ctsRes ? (ctsRes.items as { name: string; sys: { id: string } }[]) : [];
 
     // eslint-disable-next-line react/no-did-mount-set-state
     this.setState(
       {
-        contentTypes: items.map(ct => ({ name: ct.name, id: ct.sys.id })),
+        contentTypes: items.map((ct) => ({ name: ct.name, id: ct.sys.id })),
         projectId: parameters ? parameters.projectId : '',
-        selectedContentTypes
+        selectedContentTypes,
       },
       () => sdk.app.setReady()
     );
@@ -75,14 +75,14 @@ export default class AppConfig extends React.Component<Props, State> {
 
     return {
       parameters: {
-        projectId: this.state.projectId
+        projectId: this.state.projectId,
       },
       targetState: {
         EditorInterface: this.state.selectedContentTypes.reduce((acc: any, ct) => {
           acc[ct] = { sidebar: { position: 1 } };
           return acc;
-        }, {})
-      }
+        }, {}),
+      },
     };
   };
 
@@ -96,12 +96,12 @@ export default class AppConfig extends React.Component<Props, State> {
 
       if (selectedContentTypes.includes(id)) {
         return {
-          selectedContentTypes: selectedContentTypes.filter(ct => ct !== id)
+          selectedContentTypes: selectedContentTypes.filter((ct) => ct !== id),
         };
       }
 
       return {
-        selectedContentTypes: selectedContentTypes.concat([id])
+        selectedContentTypes: selectedContentTypes.concat([id]),
       };
     });
   }
@@ -109,7 +109,7 @@ export default class AppConfig extends React.Component<Props, State> {
   render() {
     const { sdk } = this.props;
     const {
-      ids: { space, environment }
+      ids: { space, environment },
     } = sdk;
     return (
       <div className="app">
@@ -124,7 +124,8 @@ export default class AppConfig extends React.Component<Props, State> {
                   <TextLink
                     href="https://dashboard.smartling.com"
                     target="_blank"
-                    rel="noopener noreferrer">
+                    rel="noopener noreferrer"
+                  >
                     Smartling
                   </TextLink>{' '}
                   app allows you to view the status of your translation without leaving Contentful.
@@ -145,7 +146,7 @@ export default class AppConfig extends React.Component<Props, State> {
                 labelText="Smartling project ID"
                 value={this.state.projectId}
                 // @ts-ignore 2339
-                onChange={e => this.setProjectId(e.target.value)}
+                onChange={(e) => this.setProjectId(e.target.value)}
                 helpText="To get the project ID, see the 'Project Settings > API' of your Smartling project."
               />
               <Typography>
@@ -163,14 +164,15 @@ export default class AppConfig extends React.Component<Props, State> {
                       environment === 'master'
                         ? `https://app.contentful.com/spaces/${space}/content_types`
                         : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-                    }>
+                    }
+                  >
                     content type
                   </TextLink>{' '}
                   and assign it to the app from this screen.
                 </Note>
               ) : (
                 <FieldGroup>
-                  {this.state.contentTypes.map(ct => (
+                  {this.state.contentTypes.map((ct) => (
                     <CheckboxField
                       onChange={() => this.toggleCt(ct.id)}
                       labelText={ct.name}

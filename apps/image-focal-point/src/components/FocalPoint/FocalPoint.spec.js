@@ -6,8 +6,8 @@ import { FocalPoint } from './FocalPoint';
 const props = {
   focalPoint: {
     x: 10,
-    y: 30
-  }
+    y: 30,
+  },
 };
 
 describe('FocalPoint', () => {

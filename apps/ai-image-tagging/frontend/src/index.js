@@ -7,7 +7,7 @@ import './index.css';
 import { AppView } from './components/AppView';
 import { AITagView } from './components/AITagView';
 
-init(sdk => {
+init((sdk) => {
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     render(<AppView sdk={sdk} />, document.getElementById('root'));
   }
@@ -19,8 +19,8 @@ init(sdk => {
       <AITagView
         entries={sdk.entry.fields}
         space={sdk.space}
-        locale={sdk.locales.default }
-        notifier={sdk.notifier }
+        locale={sdk.locales.default}
+        notifier={sdk.notifier}
       />,
       document.getElementById('root')
     );

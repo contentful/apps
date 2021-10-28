@@ -11,7 +11,7 @@ const FIELDS_TO_PERSIST = [
   'bytes',
   'link',
   'id',
-  'icon'
+  'icon',
 ];
 
 function makeThumbnail(file) {
@@ -22,14 +22,14 @@ function makeThumbnail(file) {
 }
 
 async function openDialog() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     window.Dropbox.choose({
-      success: files =>
-        resolve(Array.isArray(files) ? files.map(file => pick(file, FIELDS_TO_PERSIST)) : []),
+      success: (files) =>
+        resolve(Array.isArray(files) ? files.map((file) => pick(file, FIELDS_TO_PERSIST)) : []),
       linkType: 'preview',
       multiselect: true,
       folderselect: false,
-      extensions: ['.jpg', '.jpeg', '.gif', '.svg', '.png']
+      extensions: ['.jpg', '.jpeg', '.gif', '.svg', '.png'],
     });
   });
 }
@@ -46,5 +46,5 @@ setup({
   renderDialog: () => {},
   openDialog,
   isDisabled: () => false,
-  validateParameters: () => {}
+  validateParameters: () => {},
 });

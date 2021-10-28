@@ -1,12 +1,7 @@
 import * as React from 'react';
 import debounce from 'lodash/debounce';
 import { render } from 'react-dom';
-import {
-  init,
-  locations,
-  AppExtensionSDK,
-  SidebarExtensionSDK
-} from '@contentful/app-sdk';
+import { init, locations, AppExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 import AppConfig from './AppConfig';
@@ -29,7 +24,7 @@ export class SidebarExtension extends React.Component<
     this.state = {
       isAuthorized: props.gapi.analytics.auth.isAuthorized(),
       helpText: new URLSearchParams(window.location.search).get('helpText') || '',
-      ...this.getEntryStateFields()
+      ...this.getEntryStateFields(),
     };
   }
 
@@ -41,8 +36,8 @@ export class SidebarExtension extends React.Component<
 
     auth.on('signIn', () => this.setState({ isAuthorized: true, helpText: '' }));
     auth.on('signOut', () => {
-      const { helpText } = this.state
-      window.location.search = helpText && `?helpText=${encodeURIComponent(helpText)}`
+      const { helpText } = this.state;
+      window.location.search = helpText && `?helpText=${encodeURIComponent(helpText)}`;
     });
 
     this.props.sdk.entry.onSysChanged(
@@ -54,19 +49,19 @@ export class SidebarExtension extends React.Component<
 
   getEntryStateFields() {
     const { entry, contentType, parameters } = this.props.sdk;
-    const contentTypeParams = (parameters.installation as SavedParams).contentTypes[contentType.sys.id]
-    const contentTypeName = contentType.name
+    const contentTypeParams = (parameters.installation as SavedParams).contentTypes[
+      contentType.sys.id
+    ];
+    const contentTypeName = contentType.name;
 
     if (!contentTypeParams) {
-      return { isContentTypeConfigured: false, hasSlug: false, pagePath: '', contentTypeName }
+      return { isContentTypeConfigured: false, hasSlug: false, pagePath: '', contentTypeName };
     }
 
     const { urlPrefix, slugField } = contentTypeParams;
     const hasSlug = slugField in entry.fields;
 
-    const pagePath = hasSlug
-      ? `${urlPrefix || ''}${entry.fields[slugField].getValue() || ''}`
-      : '';
+    const pagePath = hasSlug ? `${urlPrefix || ''}${entry.fields[slugField].getValue() || ''}` : '';
 
     return {
       isContentTypeConfigured: true,
@@ -77,29 +72,38 @@ export class SidebarExtension extends React.Component<
   }
 
   render() {
-    const { isAuthorized, isContentTypeConfigured, pagePath, hasSlug, contentTypeName, helpText } = this.state;
+    const { isAuthorized, isContentTypeConfigured, pagePath, hasSlug, contentTypeName, helpText } =
+      this.state;
     const { parameters, entry, notifier } = this.props.sdk;
     const { clientId, viewId } = parameters.installation as SavedParams;
 
-    const helpTextNode = helpText && <Paragraph className={styles.lightText}>
-      {helpText}. See <TextLink target="_blank" rel="noopener noreferer" href={docsUrl}>this app&apos;s docs</TextLink> for help.
+    const helpTextNode = helpText && (
+      <Paragraph className={styles.lightText}>
+        {helpText}. See{' '}
+        <TextLink target="_blank" rel="noopener noreferer" href={docsUrl}>
+          this app&apos;s docs
+        </TextLink>{' '}
+        for help.
       </Paragraph>
+    );
 
     if (!isAuthorized) {
       const renderAuthButton = async (authButton: HTMLDivElement) => {
-        if (!authButton) { return }
+        if (!authButton) {
+          return;
+        }
 
         try {
           this.props.gapi.analytics.auth.authorize({
             container: authButton,
-            clientid: clientId
+            clientid: clientId,
           });
         } catch (error) {
           notifier.error("The client ID set in this app's config is invalid");
         }
 
         setTimeout(() => {
-          const gaButton = authButton.children[0]
+          const gaButton = authButton.children[0];
 
           // if the login button is still not displayed after some time, assume
           // that the browser is blocking requests
@@ -109,40 +113,55 @@ export class SidebarExtension extends React.Component<
             window.getComputedStyle(gaButton).display === 'none' &&
             !this.state.helpText
           ) {
-            this.setState({ helpText: `Your browser seems to be blocking Google Analytics.
+            this.setState({
+              helpText: `Your browser seems to be blocking Google Analytics.
                           Consider temporarily disabling any content blockers or tracking
-                          protection` })
+                          protection`,
+            });
           }
-        }, 4000)
+        }, 4000);
       };
 
       return (
         <>
-        <div
-          ref={renderAuthButton}
-          className={isAuthorized ? styles.hidden : styles.signInButton}
-        />
-          {helpTextNode && <>
-        <div className={styles.spaced}/>
-        {helpTextNode}
-        </>}
+          <div
+            ref={renderAuthButton}
+            className={isAuthorized ? styles.hidden : styles.signInButton}
+          />
+          {helpTextNode && (
+            <>
+              <div className={styles.spaced} />
+              {helpTextNode}
+            </>
+          )}
         </>
       );
     }
 
     if (!isContentTypeConfigured) {
-      return <Paragraph className={styles.lightText}>The {contentTypeName}{' '}
-      content type hasn&apos;t been configured for use with this app. It must
-      have a field of type short text and must be added to the list of
-      content types in this app&apos;s configuration.</Paragraph>;
+      return (
+        <Paragraph className={styles.lightText}>
+          The {contentTypeName} content type hasn&apos;t been configured for use with this app. It
+          must have a field of type short text and must be added to the list of content types in
+          this app&apos;s configuration.
+        </Paragraph>
+      );
     }
 
     if (!hasSlug) {
-      return <Paragraph className={styles.lightText}>This {contentTypeName} entry doesn&apos;t have a valid slug field.</Paragraph>;
+      return (
+        <Paragraph className={styles.lightText}>
+          This {contentTypeName} entry doesn&apos;t have a valid slug field.
+        </Paragraph>
+      );
     }
 
     if (!entry.getSys().publishedAt) {
-      return <Paragraph className={styles.lightText}>This {contentTypeName} entry hasn&apos;t been published.</Paragraph>;
+      return (
+        <Paragraph className={styles.lightText}>
+          This {contentTypeName} entry hasn&apos;t been published.
+        </Paragraph>
+      );
     }
 
     return (
@@ -150,7 +169,7 @@ export class SidebarExtension extends React.Component<
         {helpTextNode}
         <Analytics
           sdk={this.props.sdk}
-          setHelpText={helpText => this.setState({ helpText })}
+          setHelpText={(helpText) => this.setState({ helpText })}
           gapi={this.props.gapi}
           pagePath={pagePath}
           viewId={viewId}
@@ -160,14 +179,14 @@ export class SidebarExtension extends React.Component<
   }
 }
 
-init(sdk => {
+init((sdk) => {
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     render(<AppConfig sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
   } else if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
     render(
       <SidebarExtension
         sdk={sdk as SidebarExtensionSDK}
-        gapi={((window as unknown) as { gapi: Gapi }).gapi}
+        gapi={(window as unknown as { gapi: Gapi }).gapi}
       />,
       document.getElementById('root')
     );

@@ -1,18 +1,7 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import {
-  Note,
-  Paragraph,
-  Spinner,
-  Button,
-  TextLink,
-} from '@contentful/forma-36-react-components';
-import {
-  init,
-  locations,
-  AppExtensionSDK,
-  FieldExtensionSDK,
-} from '@contentful/app-sdk';
+import { Note, Paragraph, Spinner, Button, TextLink } from '@contentful/forma-36-react-components';
+import { init, locations, AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
 import { createUpload } from '@mux/upchunk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
@@ -21,10 +10,7 @@ import Config from './config';
 import Player from './player';
 import DeleteButton from './deleteButton';
 import ApiClient from './apiClient';
-import {
-  createSignedPlaybackUrl,
-  createSignedThumbnailUrl,
-} from './signingTokens';
+import { createSignedPlaybackUrl, createSignedThumbnailUrl } from './signingTokens';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -84,15 +70,12 @@ export class App extends React.Component<AppProps, AppState> {
 
   checkForValidAsset = async () => {
     if (!(this.state.value && this.state.value.assetId)) return false;
-    const res = await this.apiClient.get(
-      `/video/v1/assets/${this.state.value.assetId}`
-    );
+    const res = await this.apiClient.get(`/video/v1/assets/${this.state.value.assetId}`);
     if (res.status === 400) {
       const json = await res.json();
       if (json.error.messages[0].match(/mismatching environment/)) {
         this.setState({
-          error:
-            'Error: it looks like your api keys are for the wrong environment',
+          error: 'Error: it looks like your api keys are for the wrong environment',
         });
         return false;
       }
@@ -118,9 +101,7 @@ export class App extends React.Component<AppProps, AppState> {
     this.props.sdk.window.startAutoResizer();
 
     // Handler for external field value changes (e.g. when multiple authors are working on the same entry).
-    this.detachExternalChangeHandler = this.props.sdk.field.onValueChanged(
-      this.onExternalChange
-    );
+    this.detachExternalChangeHandler = this.props.sdk.field.onValueChanged(this.onExternalChange);
 
     if (this.state.error) return;
 
@@ -162,18 +143,12 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   isUsingSigned = () => {
-    return (
-      this.state.value &&
-      !this.state.value.playbackId &&
-      this.state.value.signedPlaybackId
-    );
+    return this.state.value && !this.state.value.playbackId && this.state.value.signedPlaybackId;
   };
 
   requestDeleteAsset = async () => {
     if (!this.state.value || !this.state.value.assetId) {
-      throw Error(
-        'Something went wrong, we cannot delete an asset without an assetId.'
-      );
+      throw Error('Something went wrong, we cannot delete an asset without an assetId.');
     }
 
     const result = await this.props.sdk.dialogs.openConfirm({
@@ -191,9 +166,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
     this.setState({ isDeleting: true });
 
-    const res = await this.apiClient.get(
-      `/video/v1/assets/${this.state.value.assetId}`
-    );
+    const res = await this.apiClient.get(`/video/v1/assets/${this.state.value.assetId}`);
 
     if (res.status === 401) {
       throw Error(
@@ -227,8 +200,8 @@ export class App extends React.Component<AppProps, AppState> {
         cors_origin: window.location.origin,
         new_asset_settings: {
           passthrough: passthroughId,
-          playback_policy: (this.props.sdk.parameters
-            .installation as InstallationParams).muxEnableSignedUrls
+          playback_policy: (this.props.sdk.parameters.installation as InstallationParams)
+            .muxEnableSignedUrls
             ? 'signed'
             : 'public',
         },
@@ -297,14 +270,10 @@ export class App extends React.Component<AppProps, AppState> {
 
   pollForUploadDetails = async () => {
     if (!this.state.value || !this.state.value.uploadId) {
-      throw Error(
-        'Something went wrong, because by this point we require an upload ID.'
-      );
+      throw Error('Something went wrong, because by this point we require an upload ID.');
     }
 
-    const res = await this.apiClient.get(
-      `/video/v1/uploads/${this.state.value.uploadId}`
-    );
+    const res = await this.apiClient.get(`/video/v1/uploads/${this.state.value.uploadId}`);
     const { data: muxUpload } = await res.json();
 
     if (muxUpload && muxUpload['asset_id']) {
@@ -354,14 +323,10 @@ export class App extends React.Component<AppProps, AppState> {
 
   getAsset = async () => {
     if (!this.state.value || !this.state.value.assetId) {
-      throw Error(
-        'Something went wrong, we cannot getAsset without an assetId.'
-      );
+      throw Error('Something went wrong, we cannot getAsset without an assetId.');
     }
 
-    const res = await this.apiClient.get(
-      `/video/v1/assets/${this.state.value.assetId}`
-    );
+    const res = await this.apiClient.get(`/video/v1/assets/${this.state.value.assetId}`);
     const { data: asset } = await res.json();
 
     return asset;
@@ -369,17 +334,14 @@ export class App extends React.Component<AppProps, AppState> {
 
   pollForAssetDetails = async () => {
     if (!this.state.value || !this.state.value.assetId) {
-      throw Error(
-        'Something went wrong, because by this point we require an assetId.'
-      );
+      throw Error('Something went wrong, because by this point we require an assetId.');
     }
 
     const asset = await this.getAsset();
     let assetError;
     if (asset.status === 'errored') {
       assetError =
-        (asset.errors && asset.errors.messages && asset.errors.messages[0]) ||
-        'Unknown error';
+        (asset.errors && asset.errors.messages && asset.errors.messages[0]) || 'Unknown error';
     }
 
     if (!asset) {
@@ -459,11 +421,7 @@ export class App extends React.Component<AppProps, AppState> {
         );
       }
 
-      if (
-        this.state.value.ready &&
-        this.state.playbackUrl &&
-        this.state.posterUrl
-      ) {
+      if (this.state.value.ready && this.state.playbackUrl && this.state.posterUrl) {
         return (
           <div>
             {this.isUsingSigned() && (
@@ -501,31 +459,20 @@ export class App extends React.Component<AppProps, AppState> {
               ? 'Uploading file to Mux...'
               : 'Upload complete! Waiting for created asset details...'}
           </Paragraph>
-          <div
-            className="progress"
-            style={{ width: `${this.state.uploadProgress}%` }}
-          />
+          <div className="progress" style={{ width: `${this.state.uploadProgress}%` }} />
         </div>
       );
     }
 
-    return (
-      <input type="file" className="cf-file-input" onChange={this.onChange} />
-    );
+    return <input type="file" className="cf-file-input" onChange={this.onChange} />;
   };
 }
 
 init((sdk) => {
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-    render(
-      <Config sdk={sdk as AppExtensionSDK} />,
-      document.getElementById('root')
-    );
+    render(<Config sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
   } else {
-    render(
-      <App sdk={sdk as FieldExtensionSDK} />,
-      document.getElementById('root')
-    );
+    render(<App sdk={sdk as FieldExtensionSDK} />, document.getElementById('root'));
   }
 });
 

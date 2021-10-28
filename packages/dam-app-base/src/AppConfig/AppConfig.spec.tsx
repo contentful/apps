@@ -10,36 +10,36 @@ const contentTypes = [
   {
     sys: { id: 'ct1' },
     name: 'CT no 1',
-    fields: [{ id: 'obj', name: 'Some object', type: 'Object' }]
+    fields: [{ id: 'obj', name: 'Some object', type: 'Object' }],
   },
   {
     sys: { id: 'ct2' },
     name: 'CT no 2',
-    fields: [{ id: 'txt', name: 'Some text', type: 'Text' }]
+    fields: [{ id: 'txt', name: 'Some text', type: 'Text' }],
   },
   {
     sys: { id: 'ct3' },
     name: 'CT no 3',
     fields: [
       { id: 'txt', name: 'Some other text', type: 'Text' },
-      { id: 'obj', name: 'Some other object', type: 'Object' }
-    ]
-  }
+      { id: 'obj', name: 'Some other object', type: 'Object' },
+    ],
+  },
 ];
 
 const makeSdkMock = () => ({
   space: {
     getContentTypes: jest.fn().mockResolvedValue({ items: contentTypes }),
-    getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] })
+    getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] }),
   },
   app: {
     setReady: jest.fn(),
     getParameters: jest.fn().mockResolvedValue(null),
-    onConfigure: jest.fn().mockReturnValue(undefined)
+    onConfigure: jest.fn().mockReturnValue(undefined),
   },
   ids: {
-    app: 'some-app'
-  }
+    app: 'some-app',
+  },
 });
 
 const validate = () => null; // Means no error
@@ -66,14 +66,16 @@ describe('AppConfig', () => {
     const { getByLabelText } = renderComponent(sdk);
     await wait(() => getByLabelText(/Cloud name/));
 
-    [[/Cloud name/, ''], [/API key/, ''], [/Max number of files/, '10']].forEach(
-      ([labelRe, expected]) => {
-        const configInput = getByLabelText(labelRe) as HTMLInputElement;
-        expect(configInput.value).toEqual(expected);
-      }
-    );
+    [
+      [/Cloud name/, ''],
+      [/API key/, ''],
+      [/Max number of files/, '10'],
+    ].forEach(([labelRe, expected]) => {
+      const configInput = getByLabelText(labelRe) as HTMLInputElement;
+      expect(configInput.value).toEqual(expected);
+    });
 
-    [/Some object/, /Some other object/].forEach(labelRe => {
+    [/Some object/, /Some other object/].forEach((labelRe) => {
       const fieldCheckbox = getByLabelText(labelRe) as HTMLInputElement;
       expect(fieldCheckbox.checked).toBe(false);
     });
@@ -84,7 +86,7 @@ describe('AppConfig', () => {
     sdk.app.getParameters.mockResolvedValueOnce({
       cloudName: 'test-cloud',
       apiKey: 'test-api-key',
-      maxFiles: 12
+      maxFiles: 12,
     });
     sdk.space.getEditorInterfaces.mockResolvedValueOnce({
       items: [
@@ -94,11 +96,11 @@ describe('AppConfig', () => {
             {
               fieldId: 'obj',
               widgetNamespace: 'app',
-              widgetId: 'some-app'
-            }
-          ]
-        }
-      ]
+              widgetId: 'some-app',
+            },
+          ],
+        },
+      ],
     });
 
     const { getByLabelText } = renderComponent(sdk);
@@ -107,13 +109,16 @@ describe('AppConfig', () => {
     [
       [/Cloud name/, 'test-cloud'],
       [/API key/, 'test-api-key'],
-      [/Max number of files/, '12']
+      [/Max number of files/, '12'],
     ].forEach(([labelRe, expected]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
     });
 
-    [[/Some object/, false], [/Some other object/, true]].forEach(([labelRe, expected]) => {
+    [
+      [/Some object/, false],
+      [/Some other object/, true],
+    ].forEach(([labelRe, expected]) => {
       const fieldCheckbox = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(fieldCheckbox.checked).toBe(expected);
     });
@@ -126,7 +131,7 @@ describe('AppConfig', () => {
     [
       [/Cloud name/, 'test-cloud'],
       [/API key/, 'test-api-key'],
-      [/Max number of files/, '12']
+      [/Max number of files/, '12'],
     ].forEach(([labelRe, value]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       fireEvent.change(configInput, { target: { value } });
@@ -142,14 +147,14 @@ describe('AppConfig', () => {
       parameters: {
         cloudName: 'test-cloud',
         apiKey: 'test-api-key',
-        maxFiles: 12
+        maxFiles: 12,
       },
       targetState: {
         EditorInterface: {
           ct1: {},
-          ct3: { controls: [{ fieldId: 'obj' }] }
-        }
-      }
+          ct3: { controls: [{ fieldId: 'obj' }] },
+        },
+      },
     });
   });
 });

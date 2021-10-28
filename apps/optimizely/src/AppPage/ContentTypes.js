@@ -16,30 +16,30 @@ import {
   Option,
   Modal,
   Typography,
-  SectionHeading
+  SectionHeading,
 } from '@contentful/forma-36-react-components';
 import ReferenceField, { hasFieldLinkValidations } from './ReferenceField';
 import RefToolTip from './RefToolTip';
 
 const styles = {
   table: css({
-    marginTop: tokens.spacingL
+    marginTop: tokens.spacingL,
   }),
   link: css({
-    marginRight: tokens.spacingS
+    marginRight: tokens.spacingS,
   }),
   contentTypeRow: css({
-    gridTemplateColumns: 'auto 6rem'
+    gridTemplateColumns: 'auto 6rem',
   }),
   refList: css({
     display: 'flex',
     flexDirection: 'row',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   }),
   sectionHeading: css({
     marginTop: tokens.spacingL,
-    marginBottom: tokens.spacingM
-  })
+    marginBottom: tokens.spacingM,
+  }),
 };
 
 ContentTypes.propTypes = {
@@ -47,7 +47,7 @@ ContentTypes.propTypes = {
   allContentTypes: PropTypes.array.isRequired,
   allReferenceFields: PropTypes.object.isRequired,
   onAddContentType: PropTypes.func.isRequired,
-  onDeleteContentType: PropTypes.func.isRequired
+  onDeleteContentType: PropTypes.func.isRequired,
 };
 
 function isContentTypeValidSelection(contentType, addedContentTypes, isEditMode) {
@@ -64,33 +64,33 @@ export default function ContentTypes({
   allContentTypes,
   allReferenceFields,
   onAddContentType,
-  onDeleteContentType
+  onDeleteContentType,
 }) {
   const [selectedContentType, selectContentType] = useState('');
   const [selectedReferenceFields, selectRef] = useState({});
   const [modalOpen, toggleModal] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
 
-  const contentType = allContentTypes.find(ct => ct.sys.id === selectedContentType);
+  const contentType = allContentTypes.find((ct) => ct.sys.id === selectedContentType);
   let referenceFields = [];
   let checkedFields = {};
 
-  const addableContentTypes = allContentTypes.filter(ct =>
+  const addableContentTypes = allContentTypes.filter((ct) =>
     isContentTypeValidSelection(ct, addedContentTypes, isEditMode)
   );
 
   if (contentType) {
     referenceFields = contentType.fields
       .filter(
-        field =>
+        (field) =>
           field.linkType === 'Entry' || (field.type === 'Array' && field.items.linkType === 'Entry')
       )
-      .map(ref => ref.id);
+      .map((ref) => ref.id);
 
     checkedFields = referenceFields.reduce((acc, id) => {
       const checkedReferences = {
         ...allReferenceFields[selectedContentType],
-        ...selectedReferenceFields
+        ...selectedReferenceFields,
       };
 
       if (checkedReferences) {
@@ -101,11 +101,11 @@ export default function ContentTypes({
     }, {});
   }
 
-  const onSelectReferenceField = fields => {
+  const onSelectReferenceField = (fields) => {
     selectRef({ ...selectedReferenceFields, ...fields });
   };
 
-  const onSelectContentType = ctId => {
+  const onSelectContentType = (ctId) => {
     selectRef({});
     selectContentType(ctId);
   };
@@ -130,7 +130,7 @@ export default function ContentTypes({
     closeModal();
   };
 
-  const onEdit = ctId => {
+  const onEdit = (ctId) => {
     setEditMode(true);
     onSelectContentType(ctId);
     toggleModal(true);
@@ -145,13 +145,14 @@ export default function ContentTypes({
           buttonType="muted"
           onClick={() => toggleModal(true)}
           disabled={!addableContentTypes.length}
-          testId="add-content">
+          testId="add-content"
+        >
           Add content type
         </Button>
         {addedContentTypes.length > 0 ? (
           <Table className={styles.table}>
             <tbody>
-              {addedContentTypes.map(id => (
+              {addedContentTypes.map((id) => (
                 <ContentTypeRow
                   key={id}
                   contentTypeId={id}
@@ -180,14 +181,15 @@ export default function ContentTypes({
                   name="content-types"
                   labelText="Content Type"
                   selectProps={{ width: 'medium', isDisabled: isEditMode }}
-                  onChange={e => onSelectContentType(e.target.value)}
+                  onChange={(e) => onSelectContentType(e.target.value)}
                   value={selectedContentType || ''}
                   testId="content-type-selector"
-                  required>
+                  required
+                >
                   <Option value="" disabled>
                     Select content type
                   </Option>
-                  {addableContentTypes.map(ct => (
+                  {addableContentTypes.map((ct) => (
                     <Option key={ct.sys.id} value={ct.sys.id}>
                       {ct.name}
                     </Option>
@@ -199,13 +201,13 @@ export default function ContentTypes({
                       Reference Fields
                     </SectionHeading>
                     <div className={styles.refList}>
-                      {referenceFields.map(field => (
+                      {referenceFields.map((field) => (
                         <ReferenceField
                           key={field}
                           contentType={contentType}
                           id={field}
                           checked={checkedFields[field] || selectedReferenceFields[field]}
-                          onSelect={checked => onSelectReferenceField({ [field]: checked })}
+                          onSelect={(checked) => onSelectReferenceField({ [field]: checked })}
                           testId="reference-field"
                         />
                       ))}
@@ -218,7 +220,8 @@ export default function ContentTypes({
               <Button
                 disabled={!selectedContentType}
                 onClick={addContentTypeCloseModal}
-                buttonType="positive">
+                buttonType="positive"
+              >
                 Save
               </Button>
               <Button onClick={onClose} buttonType="muted">
@@ -237,7 +240,7 @@ ContentTypeRow.propTypes = {
   allContentTypes: PropTypes.array.isRequired,
   allReferenceFields: PropTypes.object.isRequired,
   onClickDelete: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired
+  onEdit: PropTypes.func.isRequired,
 };
 
 function ContentTypeRow({
@@ -245,12 +248,12 @@ function ContentTypeRow({
   allContentTypes,
   allReferenceFields,
   onClickDelete,
-  onEdit
+  onEdit,
 }) {
-  const contentType = allContentTypes.find(ct => ct.sys.id === contentTypeId);
+  const contentType = allContentTypes.find((ct) => ct.sys.id === contentTypeId);
   const referenceFields = allReferenceFields[contentTypeId];
   const referenceFieldIds = Object.keys(referenceFields);
-  const referencesToShow = referenceFieldIds.filter(id => referenceFields[id]);
+  const referencesToShow = referenceFieldIds.filter((id) => referenceFields[id]);
 
   if (!referencesToShow.length) {
     return null;
@@ -265,8 +268,8 @@ function ContentTypeRow({
         <strong>{contentType.name}</strong>
       </TableCell>
       <TableCell className={styles.contentTypeRow}>
-        {referencesToShow.map(id => {
-          const field = contentType.fields.find(f => f.id === id) || {};
+        {referencesToShow.map((id) => {
+          const field = contentType.fields.find((f) => f.id === id) || {};
           const disabled = !hasFieldLinkValidations(field);
 
           if (disabled) {
@@ -288,7 +291,8 @@ function ContentTypeRow({
           <TextLink
             onClick={() => onClickDelete(contentTypeId)}
             className={styles.link}
-            linkType="negative">
+            linkType="negative"
+          >
             Delete
           </TextLink>
         )}

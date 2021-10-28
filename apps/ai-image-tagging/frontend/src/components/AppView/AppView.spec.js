@@ -6,25 +6,24 @@ import { AppView } from './AppView';
 
 configure({ testIdAttribute: 'data-test-id' });
 
-
 describe('AppView', () => {
-  let props
+  let props;
   beforeEach(() => {
     props = {
       sdk: {
         ...mockProps.sdk,
         space: {
-          getContentTypes: jest.fn(() => Promise.resolve({ items: [] }))
+          getContentTypes: jest.fn(() => Promise.resolve({ items: [] })),
         },
         app: {
           setReady: jest.fn(),
           isInstalled: jest.fn(),
           onConfigure: jest.fn(),
-          onConfigurationCompleted: jest.fn()
-        }
-      }
+          onConfigurationCompleted: jest.fn(),
+        },
+      },
     };
-  })
+  });
 
   describe('when the app is not installed', () => {
     beforeEach(() => props.sdk.app.isInstalled.mockImplementation(() => Promise.resolve(false)));
@@ -36,9 +35,11 @@ describe('AppView', () => {
     });
 
     it('should render inline validation if the content type id is taken', async () => {
-      props.sdk.space.getContentTypes.mockImplementation(() => Promise.resolve({
-        items: [{ sys: { id: 'imageWithFocalPoint' } }]
-      }));
+      props.sdk.space.getContentTypes.mockImplementation(() =>
+        Promise.resolve({
+          items: [{ sys: { id: 'imageWithFocalPoint' } }],
+        })
+      );
       const { getByTestId, getByText } = render(<AppView {...props} />);
       await waitFor(() => getByText('Configuration'));
       expect(getByTestId('content-type-name')).toMatchSnapshot();

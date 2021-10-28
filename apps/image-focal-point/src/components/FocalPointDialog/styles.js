@@ -5,7 +5,7 @@ export const MAX_PREVIEW_WRAPPER_SIZE = 350;
 
 export const styles = {
   modalContent: css({
-    display: 'flex'
+    display: 'flex',
   }),
   previewWrapper: css({
     backgroundColor: tokens.gray200,
@@ -14,7 +14,7 @@ export const styles = {
     justifyContent: 'center',
     position: 'relative',
     width: `${MAX_PREVIEW_WRAPPER_SIZE}px`,
-    height: `${MAX_PREVIEW_WRAPPER_SIZE}px`
+    height: `${MAX_PREVIEW_WRAPPER_SIZE}px`,
   }),
   previewImg: css({
     '&, & > img': {
@@ -23,24 +23,24 @@ export const styles = {
       margin: '0 auto',
       maxWidth: '100%',
       maxHeight: '100%',
-      outline: 0
-    }
+      outline: 0,
+    },
   }),
   focalPointDemo: css({
     display: 'flex',
     flexDirection: 'column',
-    marginLeft: tokens.spacing2Xl
+    marginLeft: tokens.spacing2Xl,
   }),
   displayFlex: css({
-    display: 'flex'
+    display: 'flex',
   }),
   spacingLeftXs: css({
-    marginLeft: tokens.spacingXs
+    marginLeft: tokens.spacingXs,
   }),
   previewHeading: css({
-    marginTop: tokens.spacingM
+    marginTop: tokens.spacingM,
   }),
   subheading: css({
-    marginBottom: tokens.spacingXs
-  })
+    marginBottom: tokens.spacingXs,
+  }),
 };

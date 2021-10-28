@@ -10,8 +10,8 @@ export const ConfigurationContent = () => (
     <List className={styles.list}>
       <ListItem>Go to the &quot;Content&quot; page</ListItem>
       <ListItem>
-        Create a new entry of type &quot;AI Image Tagging&quot; (or the name you chose during
-        the installation)
+        Create a new entry of type &quot;AI Image Tagging&quot; (or the name you chose during the
+        installation)
       </ListItem>
       <ListItem>Fill in the required fields and publish</ListItem>
     </List>
@@ -21,9 +21,7 @@ export const ConfigurationContent = () => (
     </Paragraph>
     <List className={styles.list}>
       <ListItem>Go to the &quot;content model&quot; page</ListItem>
-      <ListItem>
-        Edit the content type that needs to reference the image with the AI tags
-      </ListItem>
+      <ListItem>Edit the content type that needs to reference the image with the AI tags</ListItem>
       <ListItem>Create a new field of type &quot;reference&quot;</ListItem>
       <ListItem>
         Set a validation rule requiring that the content type the reference points to is of type

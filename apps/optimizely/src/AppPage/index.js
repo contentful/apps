@@ -21,7 +21,7 @@ const styles = {
     backgroundColor: tokens.colorWhite,
     zIndex: '2',
     boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
-    borderRadius: '2px'
+    borderRadius: '2px',
   }),
   background: css({
     display: 'block',
@@ -30,23 +30,23 @@ const styles = {
     top: '0',
     width: '100%',
     height: '300px',
-    backgroundColor: '#bcc3ca'
+    backgroundColor: '#bcc3ca',
   }),
   featuresListItem: css({
     listStyleType: 'disc',
-    marginLeft: tokens.spacingM
+    marginLeft: tokens.spacingM,
   }),
   light: css({
     color: tokens.gray600,
-    marginTop: tokens.spacingM
+    marginTop: tokens.spacingM,
   }),
   logo: css({
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
     marginTop: tokens.spacingXl,
-    marginBottom: tokens.spacingXl
-  })
+    marginBottom: tokens.spacingXl,
+  }),
 };
 
 export default class AppPage extends React.Component {
@@ -54,7 +54,7 @@ export default class AppPage extends React.Component {
     openAuth: PropTypes.func.isRequired,
     accessToken: PropTypes.string,
     client: PropTypes.object,
-    sdk: PropTypes.object.isRequired
+    sdk: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -63,9 +63,9 @@ export default class AppPage extends React.Component {
     this.state = {
       config: {
         optimizelyProjectId: '',
-        contentTypes: {}
+        contentTypes: {},
       },
-      allContentTypes: []
+      allContentTypes: [],
     };
   }
 
@@ -74,21 +74,21 @@ export default class AppPage extends React.Component {
 
     const [currentParameters, { items: allContentTypes = [] }] = await Promise.all([
       app.getParameters(),
-      space.getContentTypes({ order: 'name', limit: 1000 })
+      space.getContentTypes({ order: 'name', limit: 1000 }),
     ]);
 
     const enabledContentTypes = this.findEnabledContentTypes(allContentTypes);
 
     // eslint-disable-next-line react/no-did-mount-set-state
     this.setState(
-      prevState => ({
+      (prevState) => ({
         allContentTypes,
         config: {
           contentTypes: enabledContentTypes,
           optimizelyProjectId: currentParameters
             ? currentParameters.optimizelyProjectId
-            : prevState.optimizelyProjectId
-        }
+            : prevState.optimizelyProjectId,
+        },
       }),
       () => app.setReady()
     );
@@ -112,7 +112,7 @@ export default class AppPage extends React.Component {
     }
 
     const needsVariationContainerInSpace = !this.state.allContentTypes.find(
-      ct => ct.sys.id === VARIATION_CONTAINER_ID
+      (ct) => ct.sys.id === VARIATION_CONTAINER_ID
     );
 
     if (needsVariationContainerInSpace) {
@@ -126,7 +126,7 @@ export default class AppPage extends React.Component {
 
     this.props.sdk.space
       .getContentTypes()
-      .then(data => this.setState({ allContentTypes: data.items }));
+      .then((data) => this.setState({ allContentTypes: data.items }));
 
     if (!res) {
       this.props.sdk.notifier.error('Something went wrong, please try again.');
@@ -135,20 +135,20 @@ export default class AppPage extends React.Component {
 
     return {
       parameters: {
-        optimizelyProjectId: config.optimizelyProjectId
+        optimizelyProjectId: config.optimizelyProjectId,
       },
       targetState: {
         EditorInterface: {
-          [VARIATION_CONTAINER_ID]: { editor: true, sidebar: { position: 0 } }
-        }
-      }
+          [VARIATION_CONTAINER_ID]: { editor: true, sidebar: { position: 0 } },
+        },
+      },
     };
   };
 
   createVariationContainerContentType = async () => {
     const variationContainer = await this.props.sdk.space.createContentType({
       sys: {
-        id: VARIATION_CONTAINER_ID
+        id: VARIATION_CONTAINER_ID,
       },
       name: 'Variation Container',
       displayField: 'experimentTitle',
@@ -156,17 +156,17 @@ export default class AppPage extends React.Component {
         {
           id: 'experimentTitle',
           name: 'Experiment title',
-          type: 'Symbol'
+          type: 'Symbol',
         },
         {
           id: 'experimentId',
           name: 'Experiment ID',
-          type: 'Symbol'
+          type: 'Symbol',
         },
         {
           id: 'meta',
           name: 'Meta',
-          type: 'Object'
+          type: 'Object',
         },
         {
           id: 'variations',
@@ -175,15 +175,15 @@ export default class AppPage extends React.Component {
           items: {
             type: 'Link',
             validations: [],
-            linkType: 'Entry'
-          }
+            linkType: 'Entry',
+          },
         },
         {
           id: 'experimentKey',
           name: 'Experiment Key',
-          type: 'Symbol'
-        }
-      ]
+          type: 'Symbol',
+        },
+      ],
     });
 
     await this.props.sdk.space.updateContentType(variationContainer);
@@ -199,13 +199,12 @@ export default class AppPage extends React.Component {
       for (const contentField of ct.fields) {
         const validations =
           contentField.type === 'Array' ? contentField.items.validations : contentField.validations;
-        const index = (validations || []).findIndex(v => v.linkContentType);
+        const index = (validations || []).findIndex((v) => v.linkContentType);
 
         if (index > -1) {
           const linkValidations = validations[index];
-          const includesVariationContainer = linkValidations.linkContentType.includes(
-            VARIATION_CONTAINER_ID
-          );
+          const includesVariationContainer =
+            linkValidations.linkContentType.includes(VARIATION_CONTAINER_ID);
 
           const fieldsToEnable = contentTypes[ct.sys.id] || {};
 
@@ -219,7 +218,7 @@ export default class AppPage extends React.Component {
             (!Object.keys(contentTypes).includes(ct.sys.id) || !fieldsToEnable[contentField.id])
           ) {
             linkValidations.linkContentType = linkValidations.linkContentType.filter(
-              lct => lct !== VARIATION_CONTAINER_ID
+              (lct) => lct !== VARIATION_CONTAINER_ID
             );
             hasChanges = true;
           }
@@ -235,7 +234,7 @@ export default class AppPage extends React.Component {
       return true;
     }
 
-    const updates = output.map(ct => {
+    const updates = output.map((ct) => {
       return this.props.sdk.space.updateContentType(ct);
     });
 
@@ -253,7 +252,7 @@ export default class AppPage extends React.Component {
 
       for (const field of ct.fields) {
         if (field.type === 'Array' && field.items.linkType === 'Entry') {
-          output[field.id] = field.items.validations.some(val =>
+          output[field.id] = field.items.validations.some((val) =>
             val.linkContentType.includes(VARIATION_CONTAINER_ID)
           );
           continue;
@@ -262,13 +261,13 @@ export default class AppPage extends React.Component {
         if (field.type === 'Link' && field.linkType === 'Entry') {
           output[field.id] =
             field.validations.length === 0 ||
-            field.validations.some(val => val.linkContentType.includes(VARIATION_CONTAINER_ID));
+            field.validations.some((val) => val.linkContentType.includes(VARIATION_CONTAINER_ID));
         }
       }
 
       const keys = Object.keys(output);
 
-      if (keys.some(key => output[key])) {
+      if (keys.some((key) => output[key])) {
         return { ...acc, [ct.sys.id]: output };
       }
 
@@ -276,12 +275,12 @@ export default class AppPage extends React.Component {
     }, {});
   };
 
-  updateConfig = config => {
-    this.setState(state => ({
+  updateConfig = (config) => {
+    this.setState((state) => ({
       config: {
         ...state.config,
-        ...config
-      }
+        ...config,
+      },
     }));
   };
 

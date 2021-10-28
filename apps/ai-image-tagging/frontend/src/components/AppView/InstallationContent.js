@@ -8,7 +8,7 @@ export function InstallationContent({
   contentTypeId,
   contentTypeName,
   onContentTypeNameChange,
-  onContentTypeIdChange
+  onContentTypeIdChange,
 }) {
   const validationMessageId = allContentTypesIds.includes(contentTypeId)
     ? `A content type with ID "${contentTypeId}" already exists. Try a different ID.`
@@ -27,7 +27,7 @@ export function InstallationContent({
         name="contentTypeName"
         textInputProps={{
           placeholder: 'e.g. AI Tagged Image',
-          testId: 'content-type-name-input'
+          testId: 'content-type-name-input',
         }}
         helpText="You can use this content type to add tags to images"
         value={contentTypeName}
@@ -58,5 +58,5 @@ InstallationContent.propTypes = {
   contentTypeId: PropTypes.string.isRequired,
   contentTypeName: PropTypes.string.isRequired,
   onContentTypeNameChange: PropTypes.func.isRequired,
-  onContentTypeIdChange: PropTypes.func.isRequired
+  onContentTypeIdChange: PropTypes.func.isRequired,
 };

@@ -1,27 +1,27 @@
-import "./vendor/ct-picker.min.js";
+import './vendor/ct-picker.min.js';
 
-import * as React from "react";
-import { render } from "react-dom";
-import { renderDialog } from "./renderDialog";
+import * as React from 'react';
+import { render } from 'react-dom';
+import { renderDialog } from './renderDialog';
 
 import {
   init,
   locations,
   FieldExtensionSDK,
   DialogExtensionSDK,
-  AppExtensionSDK
-} from "@contentful/app-sdk";
+  AppExtensionSDK,
+} from '@contentful/app-sdk';
 
-import "@contentful/forma-36-react-components/dist/styles.css";
-import "@contentful/forma-36-fcss/dist/styles.css";
+import '@contentful/forma-36-react-components/dist/styles.css';
+import '@contentful/forma-36-fcss/dist/styles.css';
 
-import Field from "./Editor/Field";
-import AppConfig from "./AppConfig";
+import Field from './Editor/Field';
+import AppConfig from './AppConfig';
 
-import "./index.css";
+import './index.css';
 
-init(sdk => {
-  const root = document.getElementById("root");
+init((sdk) => {
+  const root = document.getElementById('root');
 
   if (sdk.location.is(locations.LOCATION_DIALOG)) {
     renderDialog(sdk as DialogExtensionSDK);

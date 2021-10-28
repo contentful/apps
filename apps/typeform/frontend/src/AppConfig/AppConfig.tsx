@@ -9,7 +9,7 @@ import {
   Select,
   Option,
   FormLabel,
-  Note
+  Note,
 } from '@contentful/forma-36-react-components';
 import FieldSelector from './FieldSelector';
 import {
@@ -20,14 +20,14 @@ import {
   InstallationParameters,
   SelectedFields,
   WorkspaceOption,
-  WorkspacesResponse
+  WorkspacesResponse,
 } from '../typings';
 import {
   getCompatibleFields,
   editorInterfacesToSelectedFields,
   selectedFieldsToTargetState,
   validateParameters,
-  getToken
+  getToken,
 } from '../utils';
 import { styles } from './styles';
 
@@ -57,7 +57,7 @@ export class AppConfig extends React.Component<Props, State> {
     selectedContentTypes: [],
     selectedFields: {},
     selectedWorkspaceId: '',
-    accessToken: getToken()
+    accessToken: getToken(),
   };
 
   async componentDidMount() {
@@ -69,13 +69,13 @@ export class AppConfig extends React.Component<Props, State> {
       sdk.space.getContentTypes(),
       sdk.space.getEditorInterfaces(),
       sdk.app.getParameters(),
-      this.fetchWorkspaces()
+      this.fetchWorkspaces(),
     ]);
 
     const contentTypes = (contentTypesResponse as Hash).items as ContentType[];
     const editorInterfaces = (eisResponse as Hash).items as EditorInterface[];
     const compatibleFields = getCompatibleFields(contentTypes);
-    const filteredContentTypes = contentTypes.filter(ct => {
+    const filteredContentTypes = contentTypes.filter((ct) => {
       const fields = compatibleFields[ct.sys.id];
       return fields && fields.length > 0;
     });
@@ -87,7 +87,7 @@ export class AppConfig extends React.Component<Props, State> {
         selectedWorkspaceId: get(parameters, ['selectedWorkspaceId'], ''),
         compatibleFields,
         contentTypes: filteredContentTypes,
-        selectedFields: editorInterfacesToSelectedFields(editorInterfaces, sdk.ids.app)
+        selectedFields: editorInterfacesToSelectedFields(editorInterfaces, sdk.ids.app),
       },
       () => sdk.app.setReady()
     );
@@ -97,8 +97,8 @@ export class AppConfig extends React.Component<Props, State> {
     try {
       const response = await fetch(`/workspaces`, {
         headers: {
-          Authorization: `Bearer ${this.state.accessToken}`
-        }
+          Authorization: `Bearer ${this.state.accessToken}`,
+        },
       });
       const result: WorkspacesResponse = await response.json();
       this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
@@ -110,9 +110,9 @@ export class AppConfig extends React.Component<Props, State> {
   };
 
   normalizeWorkspaceResponse = (response: WorkspacesResponse) => {
-    return response.workspaces.items.map(workspace => ({
+    return response.workspaces.items.map((workspace) => ({
       name: workspace.name,
-      id: workspace.id
+      id: workspace.id,
     }));
   };
 
@@ -134,13 +134,13 @@ export class AppConfig extends React.Component<Props, State> {
 
     return {
       parameters: { selectedWorkspaceId },
-      targetState: selectedFieldsToTargetState(contentTypes, selectedFields)
+      targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
     };
   };
 
   selectedWorkspaceIdIsValid = (): boolean => {
     return !!this.state.workspaces.find(
-      workspace => workspace.id === this.state.selectedWorkspaceId
+      (workspace) => workspace.id === this.state.selectedWorkspaceId
     );
   };
 
@@ -157,17 +157,12 @@ export class AppConfig extends React.Component<Props, State> {
   };
 
   render() {
-    const {
-      contentTypes,
-      compatibleFields,
-      selectedFields,
-      selectedWorkspaceId,
-      workspaces
-    } = this.state;
+    const { contentTypes, compatibleFields, selectedFields, selectedWorkspaceId, workspaces } =
+      this.state;
 
     const { sdk } = this.props;
     const {
-      ids: { space, environment }
+      ids: { space, environment },
     } = sdk;
 
     return (
@@ -183,7 +178,8 @@ export class AppConfig extends React.Component<Props, State> {
                   <TextLink
                     href="https://www.typeform.com/"
                     target="_blank"
-                    rel="noopener noreferrer">
+                    rel="noopener noreferrer"
+                  >
                     Typeform
                   </TextLink>{' '}
                   app allows you to reference your forms from Typeform without leaving Contentful.
@@ -203,11 +199,12 @@ export class AppConfig extends React.Component<Props, State> {
                   onChange={(event: any) => this.setWorkSpaceId(event.currentTarget.value)}
                   hasError={workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
                   value={selectedWorkspaceId}
-                  data-test-id="typeform-select">
+                  data-test-id="typeform-select"
+                >
                   <Option key="" value="">
                     {workspaces.length === 0 ? 'No workspaces available' : 'Choose workspace'}
                   </Option>
-                  {workspaces.map(workspace => (
+                  {workspaces.map((workspace) => (
                     <Option key={workspace.id} value={workspace.id}>
                       {workspace.name}
                     </Option>
@@ -242,7 +239,8 @@ export class AppConfig extends React.Component<Props, State> {
                         environment === 'master'
                           ? `https://app.contentful.com/spaces/${space}/content_types`
                           : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-                      }>
+                      }
+                    >
                       content model
                     </TextLink>{' '}
                     and assign it to the app from this screen.

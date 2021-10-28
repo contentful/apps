@@ -8,7 +8,8 @@ export default function ConnectButton() {
       data-name="Layer 1"
       width="216"
       height="42"
-      viewBox="0 0 216 42">
+      viewBox="0 0 216 42"
+    >
       <title>ConnectWithOptimizelyButton</title>
       <rect x="1.5" y="1.84" width="213.5" height="38" rx="5" ry="5" style={{ fill: '#4069ff' }} />
       <path

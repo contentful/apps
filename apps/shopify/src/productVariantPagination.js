@@ -50,9 +50,9 @@ class Pagination {
           // There is going to be a next page in the following two complimentary cases:
           // A). There are more products to fetch via the Shopify API
           // B). There are variants left to consume in the in-memory variants list
-          hasNextPage: this.hasNextProductPage || this.variants.length > 0
+          hasNextPage: this.hasNextProductPage || this.variants.length > 0,
         },
-        products: variants.map(productVariantDataTransformer)
+        products: variants.map(productVariantDataTransformer),
       };
     }
 
@@ -73,7 +73,7 @@ class Pagination {
       ? await this._fetchProducts(search)
       : await this._fetchNextPage(this.products);
     this.hasNextProductPage =
-      nextProducts.length > 0 && nextProducts.every(product => product.hasNextPage);
+      nextProducts.length > 0 && nextProducts.every((product) => product.hasNextPage);
 
     const nextVariants = productsToVariantsTransformer(nextProducts);
     this.products = uniqBy([...this.products, ...nextProducts], 'id');
@@ -93,7 +93,7 @@ class Pagination {
       first: PER_PAGE,
       sortBy: 'TITLE',
       reverse: true,
-      ...(search.length && query)
+      ...(search.length && query),
     });
   }
 
@@ -112,7 +112,7 @@ class Pagination {
   }
 }
 
-const makePagination = async sdk => {
+const makePagination = async (sdk) => {
   const pagination = new Pagination(sdk);
   await pagination.init();
   return pagination;

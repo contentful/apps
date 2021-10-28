@@ -13,17 +13,17 @@ function mockSdk() {
   return {
     parameters: {
       installation: {
-        optimizelyProjectId: PROJECT_ID
-      }
+        optimizelyProjectId: PROJECT_ID,
+      },
     },
     location: {
-      is: jest.fn(l => {
+      is: jest.fn((l) => {
         return l === LOCATION;
-      })
+      }),
     },
     window: {
       startAutoResizer: jest.fn(),
-      stopAutoResizer: jest.fn()
+      stopAutoResizer: jest.fn(),
     },
     ids: {},
     space: {},
@@ -32,17 +32,17 @@ function mockSdk() {
       fields: {
         experimentId: {
           getValue: jest.fn(() => 'exp123'),
-          onValueChanged: jest.fn(() => mockUnsub)
+          onValueChanged: jest.fn(() => mockUnsub),
         },
         meta: {
           getValue: jest.fn(),
-          onValueChanged: jest.fn(() => jest.fn())
+          onValueChanged: jest.fn(() => jest.fn()),
         },
         variations: {
           getValue: jest.fn(),
-          onValueChanged: jest.fn(() => jest.fn())
-        }
-      }
+          onValueChanged: jest.fn(() => jest.fn()),
+        },
+      },
     },
     contentType: {
       sys: {
@@ -50,8 +50,8 @@ function mockSdk() {
           sys: {
             type: 'Link',
             linkType: 'Space',
-            id: 'cyu19ucaypb9'
-          }
+            id: 'cyu19ucaypb9',
+          },
         },
         id: 'variationContainer',
         type: 'ContentType',
@@ -61,10 +61,10 @@ function mockSdk() {
           sys: {
             id: 'master',
             type: 'Link',
-            linkType: 'Environment'
-          }
+            linkType: 'Environment',
+          },
         },
-        revision: 3
+        revision: 3,
       },
       name: 'Variation Container',
       description: null,
@@ -78,7 +78,7 @@ function mockSdk() {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'experimentId',
@@ -88,7 +88,7 @@ function mockSdk() {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'meta',
@@ -98,7 +98,7 @@ function mockSdk() {
           required: false,
           validations: [],
           disabled: false,
-          omitted: false
+          omitted: false,
         },
         {
           id: 'variations',
@@ -112,9 +112,9 @@ function mockSdk() {
           items: {
             type: 'Link',
             validations: [],
-            linkType: 'Entry'
-          }
-        }
+            linkType: 'Entry',
+          },
+        },
       ].concat(
         VALID_FIELDS
           ? {
@@ -125,11 +125,11 @@ function mockSdk() {
               required: false,
               validations: [],
               disabled: false,
-              omitted: false
+              omitted: false,
             }
           : []
-      )
-    }
+      ),
+    },
   };
 }
 

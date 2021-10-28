@@ -7,22 +7,22 @@ const BF_EMBED_URL = `https://integration-panel-ui.brandfolder-svc.com?channel=m
 const CTA = 'Select an asset on Brandfolder';
 
 const FIELDS_TO_PERSIST = [
-        'asset',
-        'cdn_url',
-        'mux_hls_url',
-        'extension',
-        'filename',
-        'height',
-        'id',
-        'included',
-        'mimetype',
-        'position',
-        'relationships',
-        'size',
-        'thumbnail_url',
-        'type',
-        'url',
-        'width',
+  'asset',
+  'cdn_url',
+  'mux_hls_url',
+  'extension',
+  'filename',
+  'height',
+  'id',
+  'included',
+  'mimetype',
+  'position',
+  'relationships',
+  'size',
+  'thumbnail_url',
+  'type',
+  'url',
+  'width',
 ];
 
 function makeThumbnail(attachment) {
@@ -54,7 +54,7 @@ function renderDialog(sdk) {
 
   sdk.window.startAutoResizer();
 
-  window.addEventListener('message', e => {
+  window.addEventListener('message', (e) => {
     if (e.source !== iframe.contentWindow) {
       return;
     }
@@ -64,7 +64,7 @@ function renderDialog(sdk) {
       sdk.close([payload]);
     } else if (event === 'selectedAsset' && payload.attachments.length !== 0) {
       const att_id = payload.attachments[0].id;
-      const attachment = payload.included.find(att => att.id === att_id);
+      const attachment = payload.included.find((att) => att.id === att_id);
       if (attachment) {
         sdk.close([attachment]);
       }
@@ -80,7 +80,7 @@ async function openDialog(sdk, _currentValue, config) {
     shouldCloseOnEscapePress: true,
     parameters: { ...config },
     width: 400,
-    allowHeightOverflow: true
+    allowHeightOverflow: true,
   });
 
   if (!Array.isArray(result)) {
@@ -105,7 +105,7 @@ async function openDialog(sdk, _currentValue, config) {
   //       url: "https://s3.amazonaws.com/bf.boulder.prod/pfbfh7-f4zem0-dpcdo2/original/brandfolder-icon.png"
   //       width: 312
   // }]
-  return result.map(asset => pick(asset, FIELDS_TO_PERSIST));
+  return result.map((asset) => pick(asset, FIELDS_TO_PERSIST));
 }
 
 setup({
@@ -122,12 +122,12 @@ setup({
       name: 'Brandfolder API key',
       description:
         'If you want to use just one API key (https://brandfolder.com/profile#integrations) for all users, enter it here.',
-      required: false
-    }
+      required: false,
+    },
   ],
   validateParameters: () => {},
   makeThumbnail,
   renderDialog,
   openDialog,
-  isDisabled: () => false
+  isDisabled: () => false,
 });

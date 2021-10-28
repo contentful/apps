@@ -7,25 +7,25 @@ import {
   Tooltip,
   SkeletonContainer,
   SkeletonBodyText,
-  Paragraph
+  Paragraph,
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 
 const styles = {
   heading: css({
-    marginBottom: tokens.spacingL
+    marginBottom: tokens.spacingL,
   }),
   container: css({
     display: 'flex',
-    marginBottom: `-${tokens.spacingM}`
+    marginBottom: `-${tokens.spacingM}`,
   }),
   item: css({
     marginRight: tokens.spacingM,
-    marginBottom: tokens.spacingM
+    marginBottom: tokens.spacingM,
   }),
   emptyParagraph: css({
-    marginBottom: tokens.spacingM
-  })
+    marginBottom: tokens.spacingM,
+  }),
 };
 
 function ReferenceItem(props) {
@@ -39,7 +39,7 @@ function ReferenceItem(props) {
 }
 ReferenceItem.propTypes = {
   entry: PropTypes.object.isRequired,
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
 };
 
 function Container(props) {
@@ -54,13 +54,13 @@ function Container(props) {
 }
 
 Container.propTypes = {
-  children: PropTypes.any
+  children: PropTypes.any,
 };
 
 export default function ReferencesSection(props) {
-  const onItemClick = id => () => {
+  const onItemClick = (id) => () => {
     props.sdk.navigator.openEntry(id, {
-      slideIn: true
+      slideIn: true,
     });
   };
 
@@ -95,9 +95,9 @@ export default function ReferencesSection(props) {
 ReferencesSection.propTypes = {
   loaded: PropTypes.bool.isRequired,
   references: PropTypes.array,
-  sdk: PropTypes.object.isRequired
+  sdk: PropTypes.object.isRequired,
 };
 
 ReferencesSection.defaultProps = {
-  references: []
+  references: [],
 };

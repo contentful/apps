@@ -10,11 +10,11 @@ export default class OptimizelyClient {
     this.onReauth = onReauth;
   }
 
-  makeRequest = async url => {
+  makeRequest = async (url) => {
     const response = await fetch(`${this.baseURL}${url}`, {
       headers: {
-        Authorization: `Bearer ${this.accessToken}`
-      }
+        Authorization: `Bearer ${this.accessToken}`,
+      },
     });
 
     if (response.ok) {
@@ -29,7 +29,7 @@ export default class OptimizelyClient {
     return this.makeRequest('/projects');
   }
 
-  getExperiment = experimentId => {
+  getExperiment = (experimentId) => {
     return this.makeRequest(`/experiments/${experimentId}`);
   };
 
@@ -54,13 +54,13 @@ export default class OptimizelyClient {
       }
     }
 
-    experiments = experiments.filter(experiment => {
+    experiments = experiments.filter((experiment) => {
       return experiment.status !== 'archived';
     });
     return experiments;
   };
 
-  getExperimentResults = experimentId => {
+  getExperimentResults = (experimentId) => {
     return this.makeRequest(`/experiments/${experimentId}/results`);
   };
 

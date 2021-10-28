@@ -11,28 +11,28 @@ const styles = {
     border: `1px solid ${tokens.gray300}`,
     borderBottomLeftRadius: '2px',
     borderBottomRightRadius: '2px',
-    borderTop: 'none'
+    borderTop: 'none',
   }),
   row: css({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: tokens.spacingM
+    padding: tokens.spacingM,
   }),
   statItemsContainer: css({
-    display: 'flex'
+    display: 'flex',
   }),
   statItem: css({
-    marginRight: tokens.spacingM
+    marginRight: tokens.spacingM,
   }),
   statItemValue: css({
     fontSize: tokens.fontSizeXl,
-    color: tokens.gray900
+    color: tokens.gray900,
   }),
   statItemLabel: css({
     fontSize: tokens.fontSizeM,
-    color: tokens.gray600
-  })
+    color: tokens.gray600,
+  }),
 };
 
 function StatItem(props) {
@@ -46,7 +46,7 @@ function StatItem(props) {
 
 StatItem.propTypes = {
   value: PropTypes.any,
-  label: PropTypes.string
+  label: PropTypes.string,
 };
 
 function getPercent(value) {
@@ -59,14 +59,14 @@ export default function VariationStats(props) {
     'reach',
     'variations',
     props.variationId,
-    'count'
+    'count',
   ]);
   const visitorsReach = get(props.experimentResults, [
     'results',
     'reach',
     'variations',
     props.variationId,
-    'variation_reach'
+    'variation_reach',
   ]);
   const url = get(props.experimentResults, ['url']);
   return (
@@ -94,6 +94,6 @@ VariationStats.propTypes = {
   variationId: PropTypes.any,
   experimentResults: PropTypes.shape({
     results: PropTypes.object,
-    url: PropTypes.string.isRequired
-  })
+    url: PropTypes.string.isRequired,
+  }),
 };
