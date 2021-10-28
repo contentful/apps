@@ -31,17 +31,17 @@ const FocalPointView = ({ focalPoint, showFocalPointDialog, resetFocalPoint }) =
 FocalPointView.propTypes = {
   focalPoint: PropTypes.shape({
     x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired
+    y: PropTypes.number.isRequired,
   }),
   showFocalPointDialog: PropTypes.func.isRequired,
-  resetFocalPoint: PropTypes.func.isRequired
+  resetFocalPoint: PropTypes.func.isRequired,
 };
 
 FocalPointView.defaultProps = {
   focalPoint: {
     x: 0,
-    y: 0
-  }
+    y: 0,
+  },
 };
 
 export { FocalPointView };

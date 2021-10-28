@@ -4,13 +4,13 @@ import { Props, ProductListItem } from './ProductListItem';
 import productPreviews from '../../__mocks__/productPreviews';
 
 configure({
-  testIdAttribute: 'data-test-id'
+  testIdAttribute: 'data-test-id',
 });
 
 const defaultProps: Props = {
   product: productPreviews[0],
   selectProduct: jest.fn(),
-  isSelected: false
+  isSelected: false,
 };
 
 const renderComponent = (props: Props) => {

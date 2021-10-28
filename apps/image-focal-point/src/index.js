@@ -15,7 +15,7 @@ const IMAGE_FIELD_ID = 'image';
 
 export class App extends React.Component {
   static propTypes = {
-    sdk: PropTypes.object.isRequired
+    sdk: PropTypes.object.isRequired,
   };
 
   detachExternalChangeHandler = null;
@@ -23,7 +23,7 @@ export class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: props.sdk.field.getValue() || { focalPoint: null }
+      value: props.sdk.field.getValue() || { focalPoint: null },
     };
   }
 
@@ -42,13 +42,13 @@ export class App extends React.Component {
     }
   }
 
-  onExternalChange = value => {
+  onExternalChange = (value) => {
     if (value) {
       this.setState({ value });
     }
   };
 
-  onChange = e => {
+  onChange = (e) => {
     const value = e.currentTarget.value;
     this.setState({ value });
     if (value) {
@@ -70,13 +70,13 @@ export class App extends React.Component {
     this.setFocalPoint(null);
   };
 
-  setFocalPoint = focalPoint => {
+  setFocalPoint = (focalPoint) => {
     this.setState(
-      oldState => ({
+      (oldState) => ({
         value: {
           ...oldState.value,
-          focalPoint
-        }
+          focalPoint,
+        },
       }),
       () => this.props.sdk.field.setValue(this.state.value)
     );
@@ -84,7 +84,7 @@ export class App extends React.Component {
 
   showFocalPointDialog = async () => {
     const {
-      sdk: { notifier, space, entry }
+      sdk: { notifier, space, entry },
     } = this.props;
 
     try {
@@ -108,8 +108,8 @@ export class App extends React.Component {
         width: 1000,
         parameters: {
           file,
-          focalPoint: this.state.value.focalPoint
-        }
+          focalPoint: this.state.value.focalPoint,
+        },
       });
 
       if (focalPoint) {
@@ -157,7 +157,7 @@ function renderDialog(sdk) {
   ReactDOM.render(
     <FocalPointDialog
       sdk={sdk}
-      onSave={data => sdk.close(data)}
+      onSave={(data) => sdk.close(data)}
       onClose={() => sdk.close()}
       {...otherProps}
     />,
@@ -165,7 +165,7 @@ function renderDialog(sdk) {
   );
 }
 
-init(sdk => {
+init((sdk) => {
   if (sdk.location.is(locations.LOCATION_DIALOG)) {
     renderDialog(sdk);
   } else if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {

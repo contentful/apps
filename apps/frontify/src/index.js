@@ -13,26 +13,26 @@ setup({
     'The Frontify app enables editors to access all digital brand assets in Frontify directly from Contentful.',
   parameterDefinitions: [
     {
-      "id": "domain",
-      "type": "Symbol",
-      "name": "Frontify Domain",
-      "description": "Your Frontify domain, e.g. https://weare.frontify.com",
-      "default": "https://weare.frontify.com",
-      "required": true
+      id: 'domain',
+      type: 'Symbol',
+      name: 'Frontify Domain',
+      description: 'Your Frontify domain, e.g. https://weare.frontify.com',
+      default: 'https://weare.frontify.com',
+      required: true,
     },
     {
-      "id": "defaultAccessToken",
-      "type": "Symbol",
-      "name": "Access Token",
-      "description": "Your Frontify access token",
-      "required": false
-    }
+      id: 'defaultAccessToken',
+      type: 'Symbol',
+      name: 'Access Token',
+      description: 'Your Frontify access token',
+      required: false,
+    },
   ],
   makeThumbnail,
   renderDialog,
   openDialog,
   isDisabled,
-  validateParameters
+  validateParameters,
 });
 
 function makeThumbnail(resource) {
@@ -60,7 +60,7 @@ function renderDialog(sdk) {
   const chooser = iframe.contentWindow;
 
   // cross document messaging
-  window.addEventListener('message', e => {
+  window.addEventListener('message', (e) => {
     if (e.source !== chooser) {
       return;
     }
@@ -96,14 +96,14 @@ async function openDialog(sdk) {
     shouldCloseOnOverlayClick: true,
     shouldCloseOnEscapePress: true,
     parameters: { domain: params.installation.domain, accessToken },
-    width: 1400
+    width: 1400,
   });
 
   if (!Array.isArray(result)) {
     return [];
   }
 
-  return result.map(item => ({
+  return result.map((item) => ({
     id: item.id,
     title: item.title,
     name: item.name,
@@ -113,7 +113,7 @@ async function openDialog(sdk) {
     created: item.created,
     generic_url: item.generic_url,
     preview_url: item.preview_url,
-    src: item.preview_url
+    src: item.preview_url,
   }));
 }
 
@@ -123,7 +123,7 @@ function isDisabled() {
 
 function validateParameters({ domain }) {
   const hasValidProtocol = domain.startsWith('https://');
-  const isHTMLSafe = ['"', '<', '>'].every(unsafe => !domain.includes(unsafe));
+  const isHTMLSafe = ['"', '<', '>'].every((unsafe) => !domain.includes(unsafe));
 
   if (hasValidProtocol && isHTMLSafe) {
     return null;

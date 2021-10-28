@@ -1,6 +1,6 @@
-import { get } from "lodash";
-import React from "react";
-import PropTypes from "prop-types";
+import { get } from 'lodash';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Heading,
   Typography,
@@ -10,19 +10,18 @@ import {
   Accordion,
   AccordionItem,
   FormLabel,
-} from "@contentful/forma-36-react-components";
-import GatsbyIcon from "../GatsbyIcon";
+} from '@contentful/forma-36-react-components';
+import GatsbyIcon from '../GatsbyIcon';
 import { isValidUrl } from '../utils';
-import ContentTypesPanel from "./ContentTypesPanel";
-import styles from "../styles";
-
+import ContentTypesPanel from './ContentTypesPanel';
+import styles from '../styles';
 
 function editorInterfacesToEnabledContentTypes(eis, appId) {
-  const findAppWidget = item => item.widgetNamespace === "app" && item.widgetId === appId;
+  const findAppWidget = (item) => item.widgetNamespace === 'app' && item.widgetId === appId;
   return eis
-    .filter(ei => !!get(ei, ["sidebar"], []).find(findAppWidget))
-    .map(ei => get(ei, ["sys", "contentType", "sys", "id"]))
-    .filter(ctId => typeof ctId === "string" && ctId.length > 0);
+    .filter((ei) => !!get(ei, ['sidebar'], []).find(findAppWidget))
+    .map((ei) => get(ei, ['sys', 'contentType', 'sys', 'id']))
+    .filter((ctId) => typeof ctId === 'string' && ctId.length > 0);
 }
 
 export function enabledContentTypesToTargetState(
@@ -39,12 +38,11 @@ export function enabledContentTypesToTargetState(
           // if content sync is being used
           // auto add our preview button to each content type
           // at the top of the sidebar
-          [ct.sys.id]: { sidebar: { position: 0 } }
-        }
+          [ct.sys.id]: { sidebar: { position: 0 } },
+        };
       }
 
-      const ctCurrentStateSidebar =
-        currentState?.EditorInterface[ct.sys.id]?.sidebar;
+      const ctCurrentStateSidebar = currentState?.EditorInterface[ct.sys.id]?.sidebar;
 
       const ctEditorInterface = ctCurrentStateSidebar
         ? { sidebar: ctCurrentStateSidebar }
@@ -68,10 +66,10 @@ export class AppConfig extends React.Component {
     enabledContentTypes: {},
     selectorType: false,
     urlConstructors: [],
-    previewUrl: "",
-    webhookUrl: "",
-    contentSyncUrl: "",
-    authToken: "",
+    previewUrl: '',
+    webhookUrl: '',
+    contentSyncUrl: '',
+    authToken: '',
     validPreview: true,
     validContentSync: true,
     validWebhook: true,
@@ -96,11 +94,11 @@ export class AppConfig extends React.Component {
         enabledContentTypes: editorInterfacesToEnabledContentTypes(eisRes.items, ids.app),
         selectorType: params.selectorType,
         urlConstructors: params.urlConstructors || [],
-        previewUrl: params.previewUrl || "",
-        webhookUrl: params.webhookUrl || "",
-        previewWebhookUrl: params.previewWebhookUrl || "",
-        contentSyncUrl: params.contentSyncUrl || "",
-        authToken: params.authToken || "",
+        previewUrl: params.previewUrl || '',
+        webhookUrl: params.webhookUrl || '',
+        previewWebhookUrl: params.previewWebhookUrl || '',
+        contentSyncUrl: params.contentSyncUrl || '',
+        authToken: params.authToken || '',
       },
       () => app.setReady()
     );
@@ -120,12 +118,12 @@ export class AppConfig extends React.Component {
       authToken,
     } = this.state;
 
-    const validPreview = !previewUrl || isValidUrl(previewUrl)
-    const validContentSync = !contentSyncUrl || isValidUrl(contentSyncUrl)
-    const validWebhook = !webhookUrl || isValidUrl(webhookUrl)
-    const validPreviewWebhook = !previewWebhookUrl || isValidUrl(previewWebhookUrl)
-    
-    const valid = !!validPreview && !!validContentSync && !!validWebhook
+    const validPreview = !previewUrl || isValidUrl(previewUrl);
+    const validContentSync = !contentSyncUrl || isValidUrl(contentSyncUrl);
+    const validWebhook = !webhookUrl || isValidUrl(webhookUrl);
+    const validPreviewWebhook = !previewWebhookUrl || isValidUrl(previewWebhookUrl);
+
+    const valid = !!validPreview && !!validContentSync && !!validWebhook;
 
     this.setState({
       validPreview: validPreview,
@@ -135,8 +133,8 @@ export class AppConfig extends React.Component {
     });
 
     if (!valid) {
-      this.props.sdk.notifier.error("Please review the errors in the form.");
-      
+      this.props.sdk.notifier.error('Please review the errors in the form.');
+
       return false;
     }
 
@@ -160,42 +158,42 @@ export class AppConfig extends React.Component {
     };
   };
 
-  updatePreviewUrl = e => {
+  updatePreviewUrl = (e) => {
     this.setState({ previewUrl: e.target.value, validPreview: true });
   };
 
-  updateContentSyncUrl = e => {
+  updateContentSyncUrl = (e) => {
     this.setState({ contentSyncUrl: e.target.value, validContentSync: true });
-  }
+  };
 
-  updateWebhookUrl = e => {
+  updateWebhookUrl = (e) => {
     this.setState({ webhookUrl: e.target.value, validWebhook: true });
   };
 
-  updatePreviewWebhookUrl = e => {
+  updatePreviewWebhookUrl = (e) => {
     this.setState({ previewWebhookUrl: e.target.value, validPreviewWebhook: true });
   };
 
-  updateAuthToken = e => {
+  updateAuthToken = (e) => {
     this.setState({ authToken: e.target.value });
   };
 
   validatePreviewUrl = () => {
     if (this.state.previewUrl) {
-      this.setState({ validPreview: isValidUrl(this.state.previewUrl) })
+      this.setState({ validPreview: isValidUrl(this.state.previewUrl) });
     }
   };
 
   validateContentSyncUrl = () => {
     if (this.state.contentSyncUrl) {
       this.setState({
-        validContentSync: isValidUrl(this.state.contentSyncUrl)
+        validContentSync: isValidUrl(this.state.contentSyncUrl),
       });
     }
-  }
+  };
 
   validateWebhookUrl = () => {
-    if (this.state.webhookUrl && !this.state.webhookUrl.startsWith("http")) {
+    if (this.state.webhookUrl && !this.state.webhookUrl.startsWith('http')) {
       this.setState({ validWebhook: false });
     }
   };
@@ -203,19 +201,19 @@ export class AppConfig extends React.Component {
   validatePreviewWebhookUrl = () => {
     if (this.state.previewWebhookUrl) {
       this.setState({
-        validPreviewWebhook: isValidUrl(this.state.previewWebhookUrl)
+        validPreviewWebhook: isValidUrl(this.state.previewWebhookUrl),
       });
     }
   };
 
   selectorTypeToggle = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       selectorType: !prevState.selectorType,
     }));
   };
 
-  disableContentType = id => {
-    const newEnabledTypes = this.state.enabledContentTypes.filter(type => type !== id);
+  disableContentType = (id) => {
+    const newEnabledTypes = this.state.enabledContentTypes.filter((type) => type !== id);
     const shouldUpdate = this.state.enabledContentTypes.length > newEnabledTypes.length;
     if (shouldUpdate) {
       this.setState(() => ({
@@ -227,7 +225,7 @@ export class AppConfig extends React.Component {
   toggleContentType = (enabledContentTypes, newId, prevId) => {
     if (enabledContentTypes.includes(prevId) && prevId !== newId) {
       //Swap in the new id at the correct index in state to avoid the movement in the UI
-      const index = enabledContentTypes.findIndex(id => id === prevId);
+      const index = enabledContentTypes.findIndex((id) => id === prevId);
       enabledContentTypes[index] = newId;
       return enabledContentTypes;
     } else {
@@ -236,7 +234,7 @@ export class AppConfig extends React.Component {
   };
 
   onContentTypeToggle = (newId, prevId) => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       ...prevState,
       enabledContentTypes: this.toggleContentType(prevState.enabledContentTypes, newId, prevId),
     }));
@@ -245,7 +243,7 @@ export class AppConfig extends React.Component {
   updateUrlConstructors = (currentUrlConstructors, id, newInput) => {
     let constructors;
     // Check if the constructor needs to be added, or if an id that already exists needs a new slug
-    const index = currentUrlConstructors.findIndex(cur => cur.id === id);
+    const index = currentUrlConstructors.findIndex((cur) => cur.id === id);
     if (index !== -1) {
       currentUrlConstructors[index].slug = newInput;
       constructors = currentUrlConstructors;
@@ -257,14 +255,14 @@ export class AppConfig extends React.Component {
       constructors = [...currentUrlConstructors, ...[newConstructor]];
     }
     // Filter out constructors that no longer have the app enabled
-    return constructors.filter(constructor => {
-      const keep = this.state.enabledContentTypes.findIndex(id => id === constructor.id) !== -1;
+    return constructors.filter((constructor) => {
+      const keep = this.state.enabledContentTypes.findIndex((id) => id === constructor.id) !== -1;
       return keep;
     });
   };
 
   onSlugInput = (id, input) => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       ...prevState,
       urlConstructors: this.updateUrlConstructors(prevState.urlConstructors, id, input),
     }));
@@ -287,7 +285,8 @@ export class AppConfig extends React.Component {
             <Typography>
               <Heading>About Gatsby Cloud</Heading>
               <Paragraph>
-                This app connects Gatsby Cloud with your Contentful space so you can preview content changes before going live.
+                This app connects Gatsby Cloud with your Contentful space so you can preview content
+                changes before going live.
               </Paragraph>
             </Typography>
           </div>
@@ -304,13 +303,9 @@ export class AppConfig extends React.Component {
                 onChange={this.updateWebhookUrl}
                 onBlur={this.validateWebhookUrl}
                 className={styles.input}
-                validationMessage={
-                  !this.state.validWebhook
-                    ? urlHelpText
-                    : ""
-                }
+                validationMessage={!this.state.validWebhook ? urlHelpText : ''}
                 textInputProps={{
-                  type: "text",
+                  type: 'text',
                 }}
               />
               <TextField
@@ -321,35 +316,30 @@ export class AppConfig extends React.Component {
                 onChange={this.updateContentSyncUrl}
                 onBlur={this.validateContentSyncUrl}
                 className={styles.input}
-                helpText={<span>
-                  To set up Content Sync, see the {" "}
-                  <TextLink
-                    href="http://gatsby.dev/contentful-preview-docs"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    installation instructions
-                  </TextLink>
-                  .
-                </span>
+                helpText={
+                  <span>
+                    To set up Content Sync, see the{' '}
+                    <TextLink
+                      href="http://gatsby.dev/contentful-preview-docs"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      installation instructions
+                    </TextLink>
+                    .
+                  </span>
                 }
                 /*
                  * @todo ensure that this help text is okay
                  */
-                validationMessage={
-                  !this.state.validContentSync
-                    ? urlHelpText
-                    : ""
-                }
+                validationMessage={!this.state.validContentSync ? urlHelpText : ''}
                 textInputProps={{
-                  type: "text",
+                  type: 'text',
                 }}
               />
             </div>
-            <Accordion >
-              <AccordionItem
-                title={<FormLabel>Advanced Settings</FormLabel>}
-              >
+            <Accordion>
+              <AccordionItem title={<FormLabel>Advanced Settings</FormLabel>}>
                 <div className={styles.mainbody}>
                   <TextField
                     name="previewUrl"
@@ -359,18 +349,10 @@ export class AppConfig extends React.Component {
                     onChange={this.updatePreviewUrl}
                     onBlur={this.validatePreviewUrl}
                     className={styles.input}
-                    helpText={
-                      <span>
-                        Copy the URL of CMS Preview from Gatsby Cloud
-                      </span>
-                    }
-                    validationMessage={
-                      !this.state.validPreview
-                        ? urlHelpText
-                        : ""
-                    }
+                    helpText={<span>Copy the URL of CMS Preview from Gatsby Cloud</span>}
+                    validationMessage={!this.state.validPreview ? urlHelpText : ''}
                     textInputProps={{
-                      type: "text",
+                      type: 'text',
                     }}
                   />
                   <TextField
@@ -382,11 +364,11 @@ export class AppConfig extends React.Component {
                     className={styles.input}
                     helpText="Optional authentication token for private Gatsby Cloud sites"
                     textInputProps={{
-                      type: "password",
+                      type: 'password',
                     }}
                   />
                 </div>
-                {!this.state.contentSyncUrl &&
+                {!this.state.contentSyncUrl && (
                   <ContentTypesPanel
                     space={space}
                     environment={environment}
@@ -399,7 +381,7 @@ export class AppConfig extends React.Component {
                     selectorTypeToggle={this.selectorTypeToggle}
                     selectorType={selectorType}
                   />
-                }
+                )}
               </AccordionItem>
             </Accordion>
           </Typography>

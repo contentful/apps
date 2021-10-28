@@ -15,11 +15,9 @@ describe('handler', () => {
     const { status, body } = await handle('GET', '/some-space/some-image', mocks);
 
     expect(status).toBe(200);
-    expect(body).toEqual({ tags: ['cat', 'yolo']});
+    expect(body).toEqual({ tags: ['cat', 'yolo'] });
 
-    expect(mocks.fetch).toBeCalledWith(
-      'https://images.ctfassets.net/some-space/some-image'
-    );
+    expect(mocks.fetch).toBeCalledWith('https://images.ctfassets.net/some-space/some-image');
     expect(mocks.documentClient.update).toBeCalledTimes(1);
     expect(mocks.rekog.detectLabels).toBeCalledTimes(1);
   });

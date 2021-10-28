@@ -21,7 +21,7 @@ interface State {
 
 export class CategoryPreviews extends React.Component<Props, State> {
   state = {
-    categoryPreviews: []
+    categoryPreviews: [],
   };
 
   componentDidMount() {

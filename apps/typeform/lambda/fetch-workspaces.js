@@ -6,13 +6,13 @@ const fetchWorkspaces = async (method, _path, token, { fetch }) => {
   if (method !== 'GET') {
     return {
       status: 405,
-      body: { message: 'Method not allowed.' }
+      body: { message: 'Method not allowed.' },
     };
   }
   const response = await fetch(`${BASE_URL}/workspaces`, {
     headers: {
-      Authorization: 'Bearer ' + token
-    }
+      Authorization: 'Bearer ' + token,
+    },
   });
 
   if (!response.ok) {

@@ -1,11 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import {
-  init,
-  locations,
-  AppExtensionSDK,
-  SidebarExtensionSDK
-} from '@contentful/app-sdk';
+import { init, locations, AppExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
 import standalone from './standalone';
 import App from './components/App';
 import Jira from './components/Jira';
@@ -26,7 +21,7 @@ function renderAtRoot(component: JSX.Element) {
 if (window.location.search.includes('token')) {
   standalone(window);
 } else {
-  init(sdk => {
+  init((sdk) => {
     if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
       renderAtRoot(<App sdk={sdk as AppExtensionSDK} />);
     }
@@ -35,7 +30,8 @@ if (window.location.search.includes('token')) {
       renderAtRoot(
         <Auth
           notifyError={sdk.notifier.error}
-          parameters={sdk.parameters.installation as InstallationParameters}>
+          parameters={sdk.parameters.installation as InstallationParameters}
+        >
           {(token, client: JiraClient, resetClient) => (
             <Jira client={client} sdk={sdk as SidebarExtensionSDK} signOut={resetClient} />
           )}

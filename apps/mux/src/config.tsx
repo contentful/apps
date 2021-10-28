@@ -17,11 +17,7 @@ import {
   TextLink,
   Spinner,
 } from '@contentful/forma-36-react-components';
-import {
-  AppExtensionSDK,
-  AppConfigAPI,
-  SpaceAPI,
-} from '@contentful/app-sdk';
+import { AppExtensionSDK, AppConfigAPI, SpaceAPI } from '@contentful/app-sdk';
 import {
   editorInterfacesToSelectedFields,
   getCompatibleFields,
@@ -85,9 +81,7 @@ class Config extends React.Component<ConfigProps, IState> {
 
     const { ids } = this.props.sdk;
 
-    const compatibleFields = getCompatibleFields(
-      contentTypesRes.items as ContentType[]
-    );
+    const compatibleFields = getCompatibleFields(contentTypesRes.items as ContentType[]);
     const selectedFields = editorInterfacesToSelectedFields(
       eisRes.items as EditorInterface[],
       ids.app
@@ -116,12 +110,9 @@ class Config extends React.Component<ConfigProps, IState> {
     if (enabled) {
       selectedFields[contentTypeId]!.push(fieldId);
     } else {
-      selectedFields[contentTypeId] = selectedFields[contentTypeId]!.filter(
-        (id) => id !== fieldId
-      );
+      selectedFields[contentTypeId] = selectedFields[contentTypeId]!.filter((id) => id !== fieldId);
     }
-    if (!selectedFields[contentTypeId]!.length)
-      delete selectedFields[contentTypeId];
+    if (!selectedFields[contentTypeId]!.length) delete selectedFields[contentTypeId];
     this.setState({ selectedFields: { ...selectedFields } });
   }
 
@@ -133,12 +124,7 @@ class Config extends React.Component<ConfigProps, IState> {
   }
 
   haveValidSigningKeys = async () => {
-    if (
-      !(
-        this.state.parameters.muxSigningKeyId &&
-        this.state.parameters.muxSigningKeyPrivate
-      )
-    )
+    if (!(this.state.parameters.muxSigningKeyId && this.state.parameters.muxSigningKeyPrivate))
       return;
     const apiClient = new ApiClient(
       this.state.parameters.muxAccessTokenId!,
@@ -151,10 +137,7 @@ class Config extends React.Component<ConfigProps, IState> {
   };
 
   haveApiCredentials = () => {
-    return (
-      this.state.parameters.muxAccessTokenId &&
-      this.state.parameters.muxAccessTokenSecret
-    );
+    return this.state.parameters.muxAccessTokenId && this.state.parameters.muxAccessTokenSecret;
   };
 
   toggleSignedUrls = async (enabled: boolean) => {
@@ -187,15 +170,11 @@ class Config extends React.Component<ConfigProps, IState> {
     try {
       res = await apiClient.post('/video/v1/signing-keys');
     } catch (e) {
-      this.props.sdk.notifier.error(
-        'Error creating signing keys, please refresh and try again'
-      );
+      this.props.sdk.notifier.error('Error creating signing keys, please refresh and try again');
       return;
     }
     if (res.status === 401) {
-      this.props.sdk.notifier.error(
-        'It looks like your access token or secret is incorrect'
-      );
+      this.props.sdk.notifier.error('It looks like your access token or secret is incorrect');
       return;
     }
     const json = await res.json();
@@ -214,12 +193,7 @@ class Config extends React.Component<ConfigProps, IState> {
   // Renders the UI of the app.
   render() {
     const {
-      parameters: {
-        muxAccessTokenId,
-        muxAccessTokenSecret,
-        muxEnableSignedUrls,
-        muxSigningKeyId,
-      },
+      parameters: { muxAccessTokenId, muxAccessTokenSecret, muxEnableSignedUrls, muxSigningKeyId },
       contentTypes,
       compatibleFields,
     } = this.state;
@@ -231,17 +205,12 @@ class Config extends React.Component<ConfigProps, IState> {
           <Typography>
             <Heading>About Mux</Heading>
             <Paragraph>
-              This app connects to Mux and allows you to upload videos to your
-              content in Contentful. After entering your API Credentials then
-              choose which JSON fields in your content model you would like to
-              configure for Mux Video. For those configured fields you'll get a
-              video uploader in the Contentful UI. Your videos will be
-              transcoded, stored and delivered by{' '}
-              <TextLink
-                href="https://mux.com"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
+              This app connects to Mux and allows you to upload videos to your content in
+              Contentful. After entering your API Credentials then choose which JSON fields in your
+              content model you would like to configure for Mux Video. For those configured fields
+              you'll get a video uploader in the Contentful UI. Your videos will be transcoded,
+              stored and delivered by{' '}
+              <TextLink href="https://mux.com" rel="noopener noreferrer" target="_blank">
                 Mux
               </TextLink>
               .
@@ -287,8 +256,7 @@ class Config extends React.Component<ConfigProps, IState> {
                   this.setState({
                     parameters: {
                       ...this.state.parameters,
-                      muxAccessTokenSecret: (e.target as HTMLTextAreaElement)
-                        .value,
+                      muxAccessTokenSecret: (e.target as HTMLTextAreaElement).value,
                     },
                   })
                 }
@@ -297,48 +265,38 @@ class Config extends React.Component<ConfigProps, IState> {
               <hr className="config-splitter" />
               <Heading>Assign to fields</Heading>
               <Paragraph>
-                This app is meant to be used with <strong>JSON object</strong>{' '}
-                fields. Select which JSON fields you'd like to enable for this
-                app.
+                This app is meant to be used with <strong>JSON object</strong> fields. Select which
+                JSON fields you'd like to enable for this app.
               </Paragraph>
               {Object.keys(compatibleFields || {})
-                .filter(
-                  (contentTypeId) => compatibleFields[contentTypeId].length
-                )
+                .filter((contentTypeId) => compatibleFields[contentTypeId].length)
                 .map((contentTypeId) => {
-                  const contentType = contentTypes.find(
-                    ({ sys }) => sys.id === contentTypeId
-                  );
+                  const contentType = contentTypes.find(({ sys }) => sys.id === contentTypeId);
                   return (
                     <div key={contentTypeId}>
                       <Subheading>{contentType && contentType.name}</Subheading>
                       {compatibleFields[contentTypeId].length &&
-                        compatibleFields[contentTypeId].map(
-                          ({ id: fieldId, name: fieldName }) => {
-                            return (
-                              <FieldGroup key={fieldId}>
-                                <CheckboxField
-                                  labelText={fieldName}
-                                  helpText={`Field ID: ${fieldId}`}
-                                  name={`${contentTypeId}-${fieldName}`}
-                                  value={fieldId}
-                                  id={fieldId}
-                                  checked={this.isChecked(
+                        compatibleFields[contentTypeId].map(({ id: fieldId, name: fieldName }) => {
+                          return (
+                            <FieldGroup key={fieldId}>
+                              <CheckboxField
+                                labelText={fieldName}
+                                helpText={`Field ID: ${fieldId}`}
+                                name={`${contentTypeId}-${fieldName}`}
+                                value={fieldId}
+                                id={fieldId}
+                                checked={this.isChecked(contentTypeId, fieldId)}
+                                onChange={(e) =>
+                                  this.assignToField(
                                     contentTypeId,
-                                    fieldId
-                                  )}
-                                  onChange={(e) =>
-                                    this.assignToField(
-                                      contentTypeId,
-                                      fieldId,
-                                      (e.target as HTMLInputElement).checked
-                                    )
-                                  }
-                                />
-                              </FieldGroup>
-                            );
-                          }
-                        )}
+                                    fieldId,
+                                    (e.target as HTMLInputElement).checked
+                                  )
+                                }
+                              />
+                            </FieldGroup>
+                          );
+                        })}
                     </div>
                   );
                 })}
@@ -356,8 +314,8 @@ class Config extends React.Component<ConfigProps, IState> {
               >
                 this guide
               </TextLink>
-              . To use signed URLs in your application you will have to generate
-              valid JSON web tokens (JWT) on your server.
+              . To use signed URLs in your application you will have to generate valid JSON web
+              tokens (JWT) on your server.
             </Note>
             <CheckboxField
               labelText="Enable signed URLs"
@@ -366,9 +324,7 @@ class Config extends React.Component<ConfigProps, IState> {
               id="mux-enable-signed_urls"
               checked={muxEnableSignedUrls}
               disabled={!this.haveApiCredentials()}
-              onChange={(e) =>
-                this.toggleSignedUrls((e.target as HTMLInputElement).checked)
-              }
+              onChange={(e) => this.toggleSignedUrls((e.target as HTMLInputElement).checked)}
             />
             {this.state.isEnablingSignedUrls && (
               <Paragraph>
@@ -378,16 +334,14 @@ class Config extends React.Component<ConfigProps, IState> {
             {muxEnableSignedUrls && muxSigningKeyId && (
               <Paragraph>
                 The signing key ID that contentful will use is{' '}
-                {this.state.parameters.muxSigningKeyId}. This key is only used
-                for previewing content in the Contentful UI. You should generate
-                a different key to use in your application server.
+                {this.state.parameters.muxSigningKeyId}. This key is only used for previewing
+                content in the Contentful UI. You should generate a different key to use in your
+                application server.
               </Paragraph>
             )}
           </Form>
           <hr className="config-splitter" />
-          <Paragraph>
-            After entering your API credentials, click 'Install' above.
-          </Paragraph>
+          <Paragraph>After entering your API credentials, click 'Install' above.</Paragraph>
         </div>
         <div className="config-logo-bottom">
           <img alt="Mux Logo" src={MuxLogoSvg} />
@@ -404,9 +358,7 @@ class Config extends React.Component<ConfigProps, IState> {
       !isParamValid(parameters.muxAccessTokenId) ||
       !isParamValid(parameters.muxAccessTokenSecret)
     ) {
-      this.props.sdk.notifier.error(
-        'Please enter a valid access token and secret.'
-      );
+      this.props.sdk.notifier.error('Please enter a valid access token and secret.');
       return false;
     }
 

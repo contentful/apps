@@ -4,8 +4,8 @@ import { render, cleanup, fireEvent } from '@testing-library/react';
 
 import Sidebar from './Sidebar';
 
-const PREVIEW_URL = 'https://preview.com'
-const WEBHOOK_URL = 'https://webhook.com'
+const PREVIEW_URL = 'https://preview.com';
+const WEBHOOK_URL = 'https://webhook.com';
 
 const getMockContent = () => ({
   id: '456',
@@ -19,14 +19,14 @@ const getMockContent = () => ({
 
 const getMockSdk = () => ({
   location: {
-    is: val => val === 'entry-sidebar'
+    is: (val) => val === 'entry-sidebar',
   },
   parameters: {
     installation: {
       previewUrl: PREVIEW_URL,
       webhookUrl: WEBHOOK_URL,
-      authToken: 'test-token'
-    }
+      authToken: 'test-token',
+    },
   },
   entry: {
     onSysChanged: jest.fn((cb) => {
@@ -35,13 +35,13 @@ const getMockSdk = () => ({
     getSys: jest.fn(() => getMockContent()),
     fields: {
       slug: {
-        getValue: jest.fn(() => 'preview-slug')
-      }
-    }
+        getValue: jest.fn(() => 'preview-slug'),
+      },
+    },
   },
   window: {
-    startAutoResizer: jest.fn()
-  }
+    startAutoResizer: jest.fn(),
+  },
 });
 
 describe('Gatsby App Sidebar', () => {
@@ -64,20 +64,20 @@ describe('Gatsby App Sidebar', () => {
 
     global.fetch = mockFetch;
     global.open = mockWindowOpen;
-    
+
     const { getByText } = render(<Sidebar sdk={mockSdk} />);
 
-    expect(mockSdk.entry.onSysChanged).toBeCalled()
-    
+    expect(mockSdk.entry.onSysChanged).toBeCalled();
+
     fireEvent(
       getByText('Open Preview'),
       new MouseEvent('click', {
         bubbles: true,
         cancelable: true,
-      }),
+      })
     );
 
-    await new Promise(res => setTimeout(res, 2000))
+    await new Promise((res) => setTimeout(res, 2000));
     expect(mockFetch).toBeCalledWith(WEBHOOK_URL, expect.anything());
     expect(mockWindowOpen).toBeCalledWith(PREVIEW_URL);
   });
@@ -92,23 +92,23 @@ describe('Gatsby App Sidebar', () => {
     mockSdk.parameters.installation.contentSyncUrl = contentSyncUrl;
 
     const { getByText } = render(<Sidebar sdk={mockSdk} />);
-    
+
     fireEvent(
       getByText('Open Preview'),
       new MouseEvent('click', {
         bubbles: true,
         cancelable: true,
-      }),
+      })
     );
 
-    await new Promise(res => setTimeout(res, 3000)) 
+    await new Promise((res) => setTimeout(res, 3000));
 
     expect(mockFetch).toBeCalledWith(WEBHOOK_URL, expect.anything());
     /**
      * The expected url should be in the form of:
      * {contentSyncUrl - from gatsby dashboard which includes the site id}/{the source plugin name}/{manifestId}
      */
-    const pluginName = 'gatsby-source-contentful'
+    const pluginName = 'gatsby-source-contentful';
     const expectedManifestId = '123-456-2390-08-23T15:27:27.861Z';
     const expectedUrl = `${contentSyncUrl}/${pluginName}/${expectedManifestId}`;
     expect(mockWindowOpen).toBeCalledWith(expectedUrl, `GATSBY_TAB`);

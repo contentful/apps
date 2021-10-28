@@ -1,20 +1,20 @@
-import React from "react";
-import PropTypes from "prop-types";
-import uniqBy from "lodash.uniqby";
+import React from 'react';
+import PropTypes from 'prop-types';
+import uniqBy from 'lodash.uniqby';
 import {
   editorInterfacesToEnabledContentTypes,
   enabledContentTypesToTargetState,
-} from "./target-state";
+} from './target-state';
 
-import NetlifyConnection from "./netlify-connection";
-import NetlifyConfigEditor from "./netlify-config-editor";
-import NetlifyContentTypes from "./netlify-content-types";
-import * as NetlifyClient from "./netlify-client";
-import * as NetlifyIntegration from "./netlify-integration";
-import NetlifyIcon from "./NetlifyIcon";
-import styles from "./styles";
+import NetlifyConnection from './netlify-connection';
+import NetlifyConfigEditor from './netlify-config-editor';
+import NetlifyContentTypes from './netlify-content-types';
+import * as NetlifyClient from './netlify-client';
+import * as NetlifyIntegration from './netlify-integration';
+import NetlifyIcon from './NetlifyIcon';
+import styles from './styles';
 
-import { parametersToConfig, configToParameters } from "../config";
+import { parametersToConfig, configToParameters } from '../config';
 
 export default class NetlifyAppConfig extends React.Component {
   static propTypes = {
@@ -50,10 +50,7 @@ export default class NetlifyAppConfig extends React.Component {
     ]);
 
     const config = parametersToConfig(parameters);
-    const enabledContentTypes = editorInterfacesToEnabledContentTypes(
-      eisResponse.items,
-      ids.app
-    );
+    const enabledContentTypes = editorInterfacesToEnabledContentTypes(eisResponse.items, ids.app);
 
     // First empty site (so no UI click is needed).
     if (!Array.isArray(config.sites) || config.sites.length < 1) {
@@ -74,10 +71,7 @@ export default class NetlifyAppConfig extends React.Component {
       {
         config,
         enabledContentTypes,
-        contentTypes: contentTypesResponse.items.map((ct) => [
-          ct.sys.id,
-          ct.name,
-        ]),
+        contentTypes: contentTypesResponse.items.map((ct) => [ct.sys.id, ct.name]),
         netlifySites: uniqBy(netlifySites, (s) => s.id),
         ticketId,
       },
@@ -87,33 +81,23 @@ export default class NetlifyAppConfig extends React.Component {
 
   onAppConfigure = async () => {
     if (!this.state.token) {
-      this.notifyError(
-        "You must be connected to Netlify to configure the app."
-      );
+      this.notifyError('You must be connected to Netlify to configure the app.');
       return false;
     }
 
-    const configuredNetlifySiteIds = this.state.config.sites.map(
-      (site) => site.netlifySiteId
-    );
-    const availableNetlifySiteIds = this.state.netlifySites.map(
-      (site) => site.id
-    );
+    const configuredNetlifySiteIds = this.state.config.sites.map((site) => site.netlifySiteId);
+    const availableNetlifySiteIds = this.state.netlifySites.map((site) => site.id);
 
-    if (
-      !configuredNetlifySiteIds.every((id) =>
-        availableNetlifySiteIds.includes(id)
-      )
-    ) {
+    if (!configuredNetlifySiteIds.every((id) => availableNetlifySiteIds.includes(id))) {
       this.notifyError(
-        "Looks like some sites were deleted in Netlify. Pick a new site or remove outdated configuration."
+        'Looks like some sites were deleted in Netlify. Pick a new site or remove outdated configuration.'
       );
       return false;
     }
 
     try {
       const isInstalled = await this.props.sdk.app.isInstalled();
-      const method = isInstalled ? "update" : "install";
+      const method = isInstalled ? 'update' : 'install';
       const config = await NetlifyIntegration[method]({
         config: this.state.config, // eslint-disable-line react/no-access-state-in-setstate
         accessToken: this.state.token, // eslint-disable-line react/no-access-state-in-setstate
@@ -129,14 +113,14 @@ export default class NetlifyAppConfig extends React.Component {
         ),
       };
     } catch (err) {
-      this.notifyError(err, "Failed to configure the app.");
+      this.notifyError(err, 'Failed to configure the app.');
       return false;
     }
   };
 
   notifyError = (err, fallbackMessage) => {
-    let message = fallbackMessage || "Operation failed.";
-    if (typeof err === "string") {
+    let message = fallbackMessage || 'Operation failed.';
+    if (typeof err === 'string') {
       message = err;
     } else if (err.useMessage && err.message) {
       message = err.message;
@@ -161,7 +145,7 @@ export default class NetlifyAppConfig extends React.Component {
       this.state.ticketId,
       (err, token) => {
         if (err || !token) {
-          this.notifyError(err, "Failed to connect with Netlify. Try again!");
+          this.notifyError(err, 'Failed to connect with Netlify. Try again!');
         } else {
           this.initNetlifyConnection(token);
         }
@@ -172,9 +156,7 @@ export default class NetlifyAppConfig extends React.Component {
   initNetlifyConnection = async ({ token, email }) => {
     try {
       const { sites, counts } = await NetlifyClient.listSites(token);
-      this.props.sdk.notifier.success(
-        "Netlify account connected successfully."
-      );
+      this.props.sdk.notifier.success('Netlify account connected successfully.');
       this.setState({
         token,
         email,
@@ -182,7 +164,7 @@ export default class NetlifyAppConfig extends React.Component {
         netlifyCounts: counts,
       });
     } catch (err) {
-      this.notifyError(err, "Failed to connect with Netlify. Try again!");
+      this.notifyError(err, 'Failed to connect with Netlify. Try again!');
     }
   };
 

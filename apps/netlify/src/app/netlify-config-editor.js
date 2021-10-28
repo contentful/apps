@@ -11,7 +11,7 @@ import {
   SelectField,
   Option,
   TextField,
-  TextLink
+  TextLink,
 } from '@contentful/forma-36-react-components';
 
 import { MAX_CONFIGS } from '../constants';
@@ -20,25 +20,25 @@ const PICK_OPTION_VALUE = '__pick__';
 
 const styles = {
   container: css({
-    margin: `${tokens.spacingXl} 0`
+    margin: `${tokens.spacingXl} 0`,
   }),
   row: css({
     display: 'flex',
-    margin: `${tokens.spacingXl} 0`
+    margin: `${tokens.spacingXl} 0`,
   }),
   item: css({
-    marginRight: tokens.spacingXl
+    marginRight: tokens.spacingXl,
   }),
   removeBtn: css({
-    marginTop: tokens.spacingL
+    marginTop: tokens.spacingL,
   }),
   splitter: css({
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.gray300
-  })
+    backgroundColor: tokens.gray300,
+  }),
 };
 
 export default class NetlifyConfigEditor extends React.Component {
@@ -46,12 +46,12 @@ export default class NetlifyConfigEditor extends React.Component {
     disabled: PropTypes.bool.isRequired,
     siteConfigs: PropTypes.array.isRequired,
     netlifySites: PropTypes.array.isRequired,
-    onSiteConfigsChange: PropTypes.func.isRequired
+    onSiteConfigsChange: PropTypes.func.isRequired,
   };
 
   onNetlifySiteChange = (configIndex, netlifySiteId) => {
     const { netlifySites, siteConfigs, onSiteConfigsChange } = this.props;
-    const site = netlifySites.find(site => site.id === netlifySiteId) || {};
+    const site = netlifySites.find((site) => site.id === netlifySiteId) || {};
 
     const updated = siteConfigs.map((siteConfig, i) => {
       if (configIndex === i) {
@@ -59,7 +59,7 @@ export default class NetlifyConfigEditor extends React.Component {
           ...siteConfig,
           netlifySiteId: site.id,
           netlifySiteName: site.name,
-          netlifySiteUrl: site.ssl_url || site.url
+          netlifySiteUrl: site.ssl_url || site.url,
         };
       } else {
         return siteConfig;
@@ -83,7 +83,7 @@ export default class NetlifyConfigEditor extends React.Component {
     onSiteConfigsChange(updated);
   };
 
-  onRemove = configIndex => {
+  onRemove = (configIndex) => {
     const { siteConfigs, onSiteConfigsChange } = this.props;
     const updated = siteConfigs.filter((_, i) => i !== configIndex);
     onSiteConfigsChange(updated);
@@ -115,9 +115,10 @@ export default class NetlifyConfigEditor extends React.Component {
                 labelText="Netlify site:"
                 selectProps={{ isDisabled: disabled, width: 'medium' }}
                 value={siteConfig.netlifySiteId || PICK_OPTION_VALUE}
-                onChange={e => this.onNetlifySiteChange(configIndex, e.target.value)}>
+                onChange={(e) => this.onNetlifySiteChange(configIndex, e.target.value)}
+              >
                 <Option value={PICK_OPTION_VALUE}>Pick site</Option>
-                {netlifySites.map(netlifySite => {
+                {netlifySites.map((netlifySite) => {
                   return (
                     <Option key={netlifySite.id} value={netlifySite.id}>
                       {netlifySite.name}
@@ -132,12 +133,13 @@ export default class NetlifyConfigEditor extends React.Component {
                 labelText="Display name:"
                 textInputProps={{ disabled, width: 'medium', maxLength: 50 }}
                 value={siteConfig.name || ''}
-                onChange={e => this.onNameChange(configIndex, e.target.value)}
+                onChange={(e) => this.onNameChange(configIndex, e.target.value)}
               />
               <TextLink
                 className={styles.removeBtn}
                 disabled={disabled}
-                onClick={() => this.onRemove(configIndex)}>
+                onClick={() => this.onRemove(configIndex)}
+              >
                 Remove
               </TextLink>
             </div>
@@ -146,7 +148,8 @@ export default class NetlifyConfigEditor extends React.Component {
         <Button
           disabled={disabled || siteConfigs.length >= MAX_CONFIGS}
           buttonType="muted"
-          onClick={this.onAdd}>
+          onClick={this.onAdd}
+        >
           Add another site (max {MAX_CONFIGS})
         </Button>
         <hr className={styles.splitter} />

@@ -13,8 +13,8 @@ export const FieldTypeInstructions = ({ contentTypesFound, space, environment }:
     {contentTypesFound ? (
       <Paragraph>
         This app can only be used with <strong>Short text</strong> or{' '}
-        <strong>Short text, list</strong> fields. Select which fields you’d like to enable for
-        this app.
+        <strong>Short text, list</strong> fields. Select which fields you’d like to enable for this
+        app.
       </Paragraph>
     ) : (
       <>
@@ -23,8 +23,8 @@ export const FieldTypeInstructions = ({ contentTypesFound, space, environment }:
           <strong>Short text, list</strong> fields.
         </Paragraph>
         <Paragraph>
-          There are <strong>no content types with Short text or Short text, list</strong>{' '}
-          fields in this environment. You can add one in your{' '}
+          There are <strong>no content types with Short text or Short text, list</strong> fields in
+          this environment. You can add one in your{' '}
           <TextLink
             linkType="primary"
             target="_blank"
@@ -32,7 +32,8 @@ export const FieldTypeInstructions = ({ contentTypesFound, space, environment }:
               environment === 'master'
                 ? `https://app.contentful.com/spaces/${space}/content_types`
                 : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-            }>
+            }
+          >
             content model
           </TextLink>{' '}
           and assign it to the app from this screen.

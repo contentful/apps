@@ -27,7 +27,6 @@
   },
   "devDependencies": {
     "parcel-bundler": "^1.12.4",
-    "prettier": "^2.0.5",
     "ts-node": "^10.2.1"
   },
   "browserslist": [

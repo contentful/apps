@@ -1,6 +1,11 @@
 {
   "name": "apps",
   "private": true,
+  "devDependencies": {
+    "prettier": "2.4.1",
+    "husky": "^7.0.0",
+    "lint-staged": "^11.2.3"
+  },
   "scripts": {
     "bootstrap": "lerna bootstrap --no-ci",
     "bootstrap:ci": "lerna bootstrap --ci --concurrency=3",
@@ -9,9 +14,16 @@
     "test": "lerna run test:ci --concurrency=1 --stream",
     "deploy": "lerna run deploy --concurrency=3",
     "deploy:test": "lerna run deploy:test --concurrency=3",
-    "publish-packages": "lerna version --conventional-commits --create-release github --yes && lerna publish from-git --yes"
+    "publish-packages": "lerna version --conventional-commits --create-release github --yes && lerna publish from-git --yes",
+    "prettier": "prettier --no-editorconfig --no-error-on-unmatched-pattern --write {apps,packages,examples}/**/*.{js,jsx,ts,tsx}",
+    "prepare": "husky install"
   },
   "dependencies": {
     "lerna": "4.0.0"
+  },
+  "lint-staged": {
+    "*.{t,j}s?(x)": [
+      "prettier --write"
+    ]
   }
 }

@@ -1,37 +1,37 @@
-import React from "react";
-import { render, wait, configure } from "@testing-library/react";
+import React from 'react';
+import { render, wait, configure } from '@testing-library/react';
 
-import mockProps from "./mockProps";
-import mockVariantData from "./mockData/mockVariantData";
+import mockProps from './mockProps';
+import mockVariantData from './mockData/mockVariantData';
 
-import EditorPage from "../src/EditorPage";
+import EditorPage from '../src/EditorPage';
 
-configure({ testIdAttribute: "data-test-id" });
+configure({ testIdAttribute: 'data-test-id' });
 
-describe("EditorPage", () => {
+describe('EditorPage', () => {
   let sdk;
   beforeEach(() => {
     sdk = mockProps.sdk;
-    sdk.entry.fields.experimentId.onValueChanged = fn => () => {};
+    sdk.entry.fields.experimentId.onValueChanged = (fn) => () => {};
 
     Date.now = jest.fn(() => 100);
     Math.random = jest.fn(() => 0.5);
   });
 
-  it("should show the reauth modal when no client is available", () => {
+  it('should show the reauth modal when no client is available', () => {
     const { getByTestId } = render(<EditorPage sdk={sdk} />);
 
-    expect(getByTestId("reconnect-optimizely")).toMatchSnapshot();
+    expect(getByTestId('reconnect-optimizely')).toMatchSnapshot();
   });
 
-  it("should show the preemtive reconnect warning box", () => {
+  it('should show the preemtive reconnect warning box', () => {
     const expires = (Date.now() + 50000).toString();
     const { getByTestId } = render(<EditorPage sdk={sdk} client={() => {}} expires={expires} />);
 
-    expect(getByTestId("preemptive-connect")).toMatchSnapshot();
+    expect(getByTestId('preemptive-connect')).toMatchSnapshot();
   });
 
-  it("should show the experiment data when loaded", async () => {
+  it('should show the experiment data when loaded', async () => {
     const space = {
       getContentTypes: () => Promise.resolve(mockVariantData.contentTypes),
       getEntries: () => Promise.resolve(mockVariantData.entries),
@@ -42,7 +42,7 @@ describe("EditorPage", () => {
     sdk = { ...sdk, space };
 
     sdk.entry.fields.experimentTitle.setValue = jest.fn();
-    sdk.entry.fields.experimentId.onValueChanged = fn => {
+    sdk.entry.fields.experimentId.onValueChanged = (fn) => {
       valueChange = fn;
       return () => {};
     };
@@ -61,7 +61,7 @@ describe("EditorPage", () => {
     );
 
     await wait();
-    valueChange("15049730511");
+    valueChange('15049730511');
 
     await wait();
 

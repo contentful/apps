@@ -12,7 +12,6 @@
     "cross-env": "^7.0.3",
     "fetch-mock": "^8.3.2",
     "node-fetch": "^2.6.1",
-    "prettier": "1.19.1",
     "sass": "^1.23.7",
     "typescript": "^4.1.5"
   },
@@ -34,8 +33,7 @@
     "deploy": "aws s3 sync ./build ${STATIC_JIRA_S3_BASE} --acl public-read",
     "deploy:test": "npm run deploy",
     "test": "react-scripts test",
-    "test:ci": "react-scripts test",
-    "pretty": "prettier --config ./.prettierrc --write '{**/*.tsx,**/*.ts}'"
+    "test:ci": "react-scripts test"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -9,7 +9,7 @@ import {
   IconButton,
   Subheading,
   Tag,
-  Typography
+  Typography,
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { Category } from '../../interfaces';
@@ -27,11 +27,11 @@ const styles = {
     padding: 0,
     position: 'relative',
     ':not(:first-of-type)': css({
-      marginTop: tokens.spacingXs
-    })
+      marginTop: tokens.spacingXs,
+    }),
   }),
   dragHandle: css({
-    height: 'auto'
+    height: 'auto',
   }),
   actions: css({
     position: 'absolute',
@@ -41,38 +41,38 @@ const styles = {
       display: 'inline-block',
       marginRight: tokens.spacingXs,
       svg: css({
-        transition: `fill ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`
+        transition: `fill ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
       }),
       '&:hover': {
         svg: css({
-          fill: tokens.colorBlack
-        })
-      }
-    })
+          fill: tokens.colorBlack,
+        }),
+      },
+    }),
   }),
   description: css({
     padding: tokens.spacingM,
     flex: '1 0 auto',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center'
+    justifyContent: 'center',
   }),
   heading: (category: Category) =>
     css({
       fontSize: tokens.fontSizeL,
       marginBottom: category.isMissing || !category.name ? 0 : tokens.spacing2Xs,
-      ...(category.name && { textTransform: 'capitalize' })
+      ...(category.name && { textTransform: 'capitalize' }),
     }),
   subheading: css({
     color: tokens.gray500,
     fontSize: tokens.fontSizeS,
-    marginBottom: 0
+    marginBottom: 0,
   }),
   slug: css({
     color: tokens.gray500,
     fontSize: tokens.fontSizeS,
-    marginBottom: 0
-  })
+    marginBottom: 0,
+  }),
 };
 
 const CardDragHandle = SortableHandle(() => (
@@ -117,7 +117,7 @@ export const SortableListItem = SortableElement<Props>(
               iconProps={{ icon: 'Close' }}
               {...{
                 buttonType: 'muted',
-                onClick: onDelete
+                onClick: onDelete,
               }}
             />
           </div>

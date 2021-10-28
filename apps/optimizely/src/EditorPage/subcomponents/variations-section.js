@@ -5,7 +5,7 @@ import {
   Heading,
   Paragraph,
   SkeletonContainer,
-  SkeletonBodyText
+  SkeletonBodyText,
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { ExperimentType } from './prop-types';
@@ -14,11 +14,11 @@ import VariationItem from './variation-item';
 const styles = {
   container: css({
     marginTop: tokens.spacingS,
-    maxWidth: 1000
+    maxWidth: 1000,
   }),
   unassignedHeader: css({
-    marginTop: tokens.spacingXl
-  })
+    marginTop: tokens.spacingXl,
+  }),
 };
 
 function Container(props) {
@@ -31,23 +31,23 @@ function Container(props) {
 }
 
 Container.propTypes = {
-  children: PropTypes.any
+  children: PropTypes.any,
 };
 
 function mergeReferencesAndVariations(variationReferences, variations, meta) {
   const linkedReferences = Object.values(meta);
 
-  const mappedVariations = variations.map(variation => {
+  const mappedVariations = variations.map((variation) => {
     const entryId = meta[variation.key];
-    const reference = variationReferences.find(item => item.sys.id === entryId);
+    const reference = variationReferences.find((item) => item.sys.id === entryId);
     return {
       variation,
-      sys: reference ? reference.sys : undefined
+      sys: reference ? reference.sys : undefined,
     };
   });
 
   const unmappedReferences = variationReferences.filter(
-    item => linkedReferences.includes(item.sys.id) === false
+    (item) => linkedReferences.includes(item.sys.id) === false
   );
 
   return { mappedVariations, unmappedReferences };
@@ -83,7 +83,7 @@ export default function VariationsSection(props) {
       <Paragraph>
         Content created in this experiment is only available for this experiment.
       </Paragraph>
-      {mappedVariations.map(item => (
+      {mappedVariations.map((item) => (
         <VariationItem
           variation={item.variation}
           experimentResults={props.experimentResults}
@@ -101,7 +101,7 @@ export default function VariationsSection(props) {
             Unassigned content
           </Heading>
           <Paragraph>These entries have no corresponding variations in Optimizely.</Paragraph>
-          {unmappedReferences.map(item => (
+          {unmappedReferences.map((item) => (
             <VariationItem
               sys={item.sys}
               key={item.sys.id}
@@ -124,5 +124,5 @@ VariationsSection.propTypes = {
   onLinkVariation: PropTypes.func.isRequired,
   onOpenEntry: PropTypes.func.isRequired,
   onRemoveVariation: PropTypes.func.isRequired,
-  onCreateVariation: PropTypes.func.isRequired
+  onCreateVariation: PropTypes.func.isRequired,
 };

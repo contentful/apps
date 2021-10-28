@@ -4,14 +4,14 @@ import { Props, SortableListItem } from './SortableListItem';
 import categoryPreviews from '../../__mocks__/categoryPreviews';
 
 configure({
-  testIdAttribute: 'data-test-id'
+  testIdAttribute: 'data-test-id',
 });
 
 const defaultProps: Props = {
   category: categoryPreviews[0],
   disabled: false,
   onDelete: jest.fn(),
-  isSortable: false
+  isSortable: false,
 };
 
 const renderComponent = (props: Props) => {
@@ -21,7 +21,7 @@ const renderComponent = (props: Props) => {
 jest.mock('react-sortable-hoc', () => ({
   SortableContainer: (x: any) => x,
   SortableElement: (x: any) => x,
-  SortableHandle: (x: any) => x
+  SortableHandle: (x: any) => x,
 }));
 
 describe('SortableListItem', () => {
@@ -35,7 +35,7 @@ describe('SortableListItem', () => {
   it('should render successfully the error variation for missing slug', () => {
     const component = renderComponent({
       ...defaultProps,
-      category: { ...categoryPreviews[0], name: '' }
+      category: { ...categoryPreviews[0], name: '' },
     });
     expect(component.container).toMatchSnapshot();
   });

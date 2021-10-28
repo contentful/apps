@@ -13,11 +13,11 @@ import { PickerMode, ContentType } from '../../interfaces';
 const styles = {
   fieldGroup: css({
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
   }),
   select: css({
-    marginLeft: '10px'
-  })
+    marginLeft: '10px',
+  }),
 };
 
 interface Props {
@@ -52,13 +52,13 @@ export default class FieldSelector extends React.Component<Props> {
   render() {
     const { compatibleFields, contentTypes, selectedFields } = this.props;
 
-    return contentTypes.map(ct => {
+    return contentTypes.map((ct) => {
       const fields = compatibleFields[ct.sys.id];
       return (
         <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
           <Subheading>{ct.name}</Subheading>
           <Form>
-            {fields.map(field => {
+            {fields.map((field) => {
               const type = get(selectedFields, [ct.sys.id, field.id], null);
               const isChecked = !!type;
 
@@ -76,7 +76,7 @@ export default class FieldSelector extends React.Component<Props> {
                   {isChecked && (
                     <ToggleGroup
                       activePickerMode={type}
-                      onChange={type => this.onSelectedFieldTypeChange(ct.sys.id, field.id, type)}
+                      onChange={(type) => this.onSelectedFieldTypeChange(ct.sys.id, field.id, type)}
                       field={field}
                     />
                   )}

@@ -8,7 +8,7 @@ import {
   EVENT_BUILD_READY,
   EVENT_BUILD_FAILED,
   NETLIFY_EVENTS,
-  NETLIFY_STATE_TO_EVENT
+  NETLIFY_STATE_TO_EVENT,
 } from '../constants';
 
 function isValidNetlifyMessage(msg, siteId) {
@@ -22,7 +22,7 @@ function normalizeNetlifyMessage(msg, siteId) {
     event,
     siteId,
     buildId: msg.id,
-    error: msg.error_message
+    error: msg.error_message,
   };
 }
 
@@ -31,7 +31,7 @@ function isValidContentfulMessage(msg) {
 }
 
 function normalizeContentfulMessage(msg, users) {
-  const user = (users || []).find(u => u.sys.id === msg.userId);
+  const user = (users || []).find((u) => u.sys.id === msg.userId);
   const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : null;
 
   const normalized = { ...msg, userName };
@@ -93,7 +93,7 @@ export function messageToState(msg) {
       status: 'Triggering...',
       busy: true,
       ok: true,
-      info
+      info,
     };
   }
 
@@ -101,7 +101,7 @@ export function messageToState(msg) {
     return {
       busy: false,
       ok: false,
-      info: 'Try again! If the problem persists make sure the Netlify site still exists.'
+      info: 'Try again! If the problem persists make sure the Netlify site still exists.',
     };
   }
 
@@ -109,7 +109,7 @@ export function messageToState(msg) {
     return {
       status: 'Building...',
       busy: true,
-      ok: true
+      ok: true,
     };
   }
 
@@ -117,7 +117,7 @@ export function messageToState(msg) {
     return {
       busy: false,
       ok: true,
-      info: `Last built ${formattedTime}.`
+      info: `Last built ${formattedTime}.`,
     };
   }
 
@@ -125,7 +125,7 @@ export function messageToState(msg) {
     return {
       busy: false,
       ok: false,
-      info: msg.error || 'Unknown error. Try again!'
+      info: msg.error || 'Unknown error. Try again!',
     };
   }
 

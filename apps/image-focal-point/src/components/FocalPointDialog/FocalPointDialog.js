@@ -12,10 +12,10 @@ export class FocalPointDialog extends Component {
     file: PropTypes.object.isRequired,
     focalPoint: PropTypes.shape({
       x: PropTypes.number.isRequired,
-      y: PropTypes.number.isRequired
+      y: PropTypes.number.isRequired,
     }),
     onClose: PropTypes.func.isRequired,
-    onSave: PropTypes.func.isRequired
+    onSave: PropTypes.func.isRequired,
   };
 
   imgRef = React.createRef();
@@ -23,9 +23,9 @@ export class FocalPointDialog extends Component {
   state = {
     focalPoint: this.props.focalPoint || {
       x: this.props.file.details.image.width / 2,
-      y: this.props.file.details.image.height / 2
+      y: this.props.file.details.image.height / 2,
     },
-    imgElementRect: null
+    imgElementRect: null,
   };
 
   componentDidMount() {
@@ -49,11 +49,11 @@ export class FocalPointDialog extends Component {
 
     return {
       x: Math.round(focalPoint.x / widthRatio + marginLeft),
-      y: Math.round(focalPoint.y / heightRatio + marginTop)
+      y: Math.round(focalPoint.y / heightRatio + marginTop),
     };
   };
 
-  onImageClick = e => {
+  onImageClick = (e) => {
     const imageWasClicked = this.imgRef.current === e.target;
     if (!imageWasClicked) {
       return;
@@ -74,18 +74,18 @@ export class FocalPointDialog extends Component {
     const actualY = Math.round(y * heightRatio);
 
     this.setState({
-      focalPoint: { x: actualX, y: actualY }
+      focalPoint: { x: actualX, y: actualY },
     });
   };
 
-  onImageLoad = e =>
+  onImageLoad = (e) =>
     this.setState({
-      imgElementRect: e.target.getBoundingClientRect()
+      imgElementRect: e.target.getBoundingClientRect(),
     });
 
   onWindowResize = () =>
     this.setState({
-      imgElementRect: this.imgRef.current.getBoundingClientRect()
+      imgElementRect: this.imgRef.current.getBoundingClientRect(),
     });
 
   render() {
@@ -106,7 +106,8 @@ export class FocalPointDialog extends Component {
                   role="button"
                   tabIndex={-1}
                   onClick={this.onImageClick}
-                  onKeyDown={() => {}}>
+                  onKeyDown={() => {}}
+                >
                   <img
                     ref={this.imgRef}
                     src={file.url}

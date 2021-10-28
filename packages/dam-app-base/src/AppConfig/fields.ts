@@ -30,7 +30,7 @@ export function getCompatibleFields(contentTypes: ContentType[]): CompatibleFiel
   return contentTypes.reduce((acc, ct) => {
     return {
       ...acc,
-      [ct.sys.id]: (ct.fields || []).filter(field => field.type === 'Object')
+      [ct.sys.id]: (ct.fields || []).filter((field) => field.type === 'Object'),
     };
   }, {});
 }
@@ -42,9 +42,9 @@ export function editorInterfacesToSelectedFields(
   return eis.reduce((acc, ei) => {
     const ctId = get(ei, ['sys', 'contentType', 'sys', 'id']);
     const fieldIds = get(ei, ['controls'], [])
-      .filter(control => control.widgetNamespace === 'app' && control.widgetId === appId)
-      .map(control => control.fieldId)
-      .filter(fieldId => typeof fieldId === 'string' && fieldId.length > 0);
+      .filter((control) => control.widgetNamespace === 'app' && control.widgetId === appId)
+      .map((control) => control.fieldId)
+      .filter((fieldId) => typeof fieldId === 'string' && fieldId.length > 0);
 
     if (ctId && fieldIds.length > 0) {
       return { ...acc, [ctId]: fieldIds };
@@ -63,9 +63,9 @@ export function selectedFieldsToTargetState(
       const { id } = ct.sys;
       const fields = selectedFields[id] || [];
       const targetState =
-        fields.length > 0 ? { controls: fields.map(fieldId => ({ fieldId })) } : {};
+        fields.length > 0 ? { controls: fields.map((fieldId) => ({ fieldId })) } : {};
 
       return { ...acc, [id]: targetState };
-    }, {})
+    }, {}),
   };
 }

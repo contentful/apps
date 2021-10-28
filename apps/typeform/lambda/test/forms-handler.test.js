@@ -22,7 +22,7 @@ describe('forms handler', () => {
           const error = new Error('Some error happened');
           error.code = errorCode;
           throw error;
-        }
+        },
       })
     );
 

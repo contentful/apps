@@ -4,14 +4,14 @@ import { Props, SortableListItem } from './SortableListItem';
 import productPreviews from '../../__mocks__/productPreviews';
 
 configure({
-  testIdAttribute: 'data-test-id'
+  testIdAttribute: 'data-test-id',
 });
 
 const defaultProps: Props = {
   product: productPreviews[0],
   disabled: false,
   onDelete: jest.fn(),
-  isSortable: false
+  isSortable: false,
 };
 
 const renderComponent = (props: Props) => {
@@ -21,7 +21,7 @@ const renderComponent = (props: Props) => {
 jest.mock('react-sortable-hoc', () => ({
   SortableContainer: (x: any) => x,
   SortableElement: (x: any) => x,
-  SortableHandle: (x: any) => x
+  SortableHandle: (x: any) => x,
 }));
 
 describe('SortableListItem', () => {
@@ -53,7 +53,7 @@ describe('SortableListItem', () => {
   it('should render successfully the error variation for missing product', () => {
     const component = renderComponent({
       ...defaultProps,
-      product: { ...productPreviews[0], name: '' }
+      product: { ...productPreviews[0], name: '' },
     });
     fireEvent(component.getByTestId('image'), new Event('error'));
     expect(component.container).toMatchSnapshot();

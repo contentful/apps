@@ -40,17 +40,13 @@ class Player extends React.Component<PlayerProps, {}> {
     if (Hls.isSupported()) {
       this.hls.loadSource(this.props.playbackUrl);
       this.hls.attachMedia(this.playerRef.current);
-    } else if (
-      this.playerRef.current.canPlayType('application/vnd.apple.mpegurl')
-    ) {
+    } else if (this.playerRef.current.canPlayType('application/vnd.apple.mpegurl')) {
       this.playerRef.current.src = this.props.playbackUrl;
     }
   }
 
   convertRatio = () => {
-    const [width, height] = this.props.ratio
-      .split(':')
-      .map((n) => parseFloat(n));
+    const [width, height] = this.props.ratio.split(':').map((n) => parseFloat(n));
     return height / width;
   };
 

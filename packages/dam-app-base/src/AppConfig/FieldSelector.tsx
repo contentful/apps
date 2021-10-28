@@ -23,7 +23,7 @@ export default class FieldSelector extends React.Component<Props> {
     if (e.currentTarget.checked) {
       updated[ctId] = (updated[ctId] || []).concat([fieldId]);
     } else {
-      updated[ctId] = (updated[ctId] || []).filter(cur => cur !== fieldId);
+      updated[ctId] = (updated[ctId] || []).filter((cur) => cur !== fieldId);
     }
 
     this.props.onSelectedFieldsChange(updated);
@@ -34,13 +34,13 @@ export default class FieldSelector extends React.Component<Props> {
 
     return (
       <Typography>
-        {contentTypes.map(ct => {
+        {contentTypes.map((ct) => {
           const fields = compatibleFields[ct.sys.id];
           return (
             <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
               <Subheading>{ct.name}</Subheading>
               <Form>
-                {fields.map(field => (
+                {fields.map((field) => (
                   <CheckboxField
                     key={field.id}
                     id={`field-box-${ct.sys.id}-${field.id}`}

@@ -11,7 +11,8 @@ const JiraStep = () => (
       </Paragraph>
       <Paragraph>
         <Button
-          onClick={() => window.open('https://marketplace.atlassian.com/apps/1221865/', '_blank')}>
+          onClick={() => window.open('https://marketplace.atlassian.com/apps/1221865/', '_blank')}
+        >
           Get companion app for Jira Cloud
         </Button>
         <br />

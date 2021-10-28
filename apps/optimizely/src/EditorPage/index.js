@@ -17,18 +17,18 @@ import ConnectButton from '../ConnectButton';
 
 const styles = {
   root: css({
-    margin: tokens.spacingXl
+    margin: tokens.spacingXl,
   }),
   paragraph: css({
-    marginBottom: tokens.spacingM
+    marginBottom: tokens.spacingM,
   }),
   link: css({
     cursor: 'pointer',
-    textDecoration: 'underline'
-  })
+    textDecoration: 'underline',
+  }),
 };
 
-const methods = state => {
+const methods = (state) => {
   return {
     setInitialData({ experiments, contentTypes, referenceInfo }) {
       state.experiments = experiments;
@@ -57,16 +57,16 @@ const methods = state => {
     },
     updateExperiment(id, experiment) {
       const index = state.experiments.findIndex(
-        experiment => experiment.id.toString() === id.toString()
+        (experiment) => experiment.id.toString() === id.toString()
       );
       if (index !== -1) {
         state.experiments[index] = experiment;
       }
-    }
+    },
   };
 };
 
-const getInitialValue = sdk => ({
+const getInitialValue = (sdk) => ({
   loaded: false,
   error: false,
   experiments: [],
@@ -75,7 +75,7 @@ const getInitialValue = sdk => ({
   variations: sdk.entry.fields.variations.getValue() || [],
   experimentId: sdk.entry.fields.experimentId.getValue(),
   entries: {},
-  experimentsResults: {}
+  experimentsResults: {},
 });
 
 const fetchInitialData = async (sdk, client) => {
@@ -84,7 +84,7 @@ const fetchInitialData = async (sdk, client) => {
   const [contentTypesRes, entriesRes, experiments] = await Promise.all([
     space.getContentTypes({ order: 'name', limit: 1000 }),
     space.getEntries({ links_to_entry: ids.entry, skip: 0, limit: 1000 }),
-    client.getExperiments()
+    client.getExperiments(),
   ]);
 
   return {
@@ -95,8 +95,8 @@ const fetchInitialData = async (sdk, client) => {
       entries: entriesRes.items,
       variationContainerId: ids.entry,
       variationContainerContentTypeId: ids.contentType,
-      defaultLocale: locales.default
-    })
+      defaultLocale: locales.default,
+    }),
   };
 };
 
@@ -111,7 +111,7 @@ export default function EditorPage(props) {
   const [showAuth, setShowAuth] = useState(isCloseToExpiration(props.expires));
 
   const experiment = state.experiments.find(
-    experiment => experiment.id.toString() === state.experimentId
+    (experiment) => experiment.id.toString() === state.experimentId
   );
 
   /**
@@ -119,7 +119,7 @@ export default function EditorPage(props) {
    */
   useEffect(() => {
     fetchInitialData(props.sdk, props.client)
-      .then(data => {
+      .then((data) => {
         actions.setInitialData(data);
         return data;
       })
@@ -135,7 +135,7 @@ export default function EditorPage(props) {
     if (state.experimentId) {
       props.client
         .getExperiment(state.experimentId)
-        .then(experiment => {
+        .then((experiment) => {
           actions.updateExperiment(state.experimentId, experiment);
           return experiment;
         })
@@ -154,13 +154,15 @@ export default function EditorPage(props) {
    * Subscribe for changes in entry
    */
   useEffect(() => {
-    const unsubsribeExperimentChange = props.sdk.entry.fields.experimentId.onValueChanged(data => {
-      actions.setExperimentId(data);
-    });
-    const unsubscribeVariationsChange = props.sdk.entry.fields.variations.onValueChanged(data => {
+    const unsubsribeExperimentChange = props.sdk.entry.fields.experimentId.onValueChanged(
+      (data) => {
+        actions.setExperimentId(data);
+      }
+    );
+    const unsubscribeVariationsChange = props.sdk.entry.fields.variations.onValueChanged((data) => {
       actions.setVariations(data || []);
     });
-    const unsubscribeMetaChange = props.sdk.entry.fields.meta.onValueChanged(data => {
+    const unsubscribeMetaChange = props.sdk.entry.fields.meta.onValueChanged((data) => {
       actions.setMeta(data || {});
     });
     return () => {
@@ -172,7 +174,7 @@ export default function EditorPage(props) {
     actions,
     props.sdk.entry.fields.experimentId,
     props.sdk.entry.fields.meta,
-    props.sdk.entry.fields.variations
+    props.sdk.entry.fields.variations,
   ]);
 
   /**
@@ -192,7 +194,7 @@ export default function EditorPage(props) {
     if (state.loaded && experiment) {
       props.client
         .getExperimentResults(experiment.id)
-        .then(results => {
+        .then((results) => {
           actions.setExperimentResults(experiment.id, results);
           return results;
         })
@@ -200,13 +202,13 @@ export default function EditorPage(props) {
     }
   }, [actions, experiment, props.client, state.loaded]);
 
-  const getExperimentResults = experiment => {
+  const getExperimentResults = (experiment) => {
     if (!experiment) {
       return undefined;
     }
     return {
       url: props.client.getResultsUrl(experiment.campaign_id, experiment.id),
-      results: state.experimentsResults[experiment.id]
+      results: state.experimentsResults[experiment.id],
     };
   };
 
@@ -214,16 +216,16 @@ export default function EditorPage(props) {
    * Handlers
    */
 
-  const onChangeExperiment = value => {
+  const onChangeExperiment = (value) => {
     props.sdk.entry.fields.meta.setValue({});
     props.sdk.entry.fields.experimentId.setValue(value.experimentId);
     props.sdk.entry.fields.experimentKey.setValue(value.experimentKey);
   };
 
-  const onLinkVariation = async variation => {
+  const onLinkVariation = async (variation) => {
     const data = await props.sdk.dialogs.selectSingleEntry({
       locale: props.sdk.locales.default,
-      contentTypes: state.referenceInfo.linkContentTypes
+      contentTypes: state.referenceInfo.linkContentTypes,
     });
 
     if (!data) {
@@ -234,7 +236,7 @@ export default function EditorPage(props) {
     const meta = props.sdk.entry.fields.meta.getValue() || {};
     props.sdk.entry.fields.meta.setValue({
       ...meta,
-      [variation.key]: data.sys.id
+      [variation.key]: data.sys.id,
     });
     props.sdk.entry.fields.variations.setValue([
       ...values,
@@ -242,19 +244,19 @@ export default function EditorPage(props) {
         sys: {
           type: 'Link',
           id: data.sys.id,
-          linkType: 'Entry'
-        }
-      }
+          linkType: 'Entry',
+        },
+      },
     ]);
   };
 
-  const onOpenEntry = entryId => {
+  const onOpenEntry = (entryId) => {
     props.sdk.navigator.openEntry(entryId, { slideIn: true });
   };
 
   const onCreateVariation = async (variation, contentTypeId) => {
     const data = await props.sdk.navigator.openNewEntry(contentTypeId, {
-      slideIn: true
+      slideIn: true,
     });
 
     if (!data) {
@@ -266,7 +268,7 @@ export default function EditorPage(props) {
 
     props.sdk.entry.fields.meta.setValue({
       ...meta,
-      [variation.key]: data.entity.sys.id
+      [variation.key]: data.entity.sys.id,
     });
     props.sdk.entry.fields.variations.setValue([
       ...values,
@@ -274,9 +276,9 @@ export default function EditorPage(props) {
         sys: {
           type: 'Link',
           id: data.entity.sys.id,
-          linkType: 'Entry'
-        }
-      }
+          linkType: 'Entry',
+        },
+      },
     ]);
   };
 
@@ -287,7 +289,7 @@ export default function EditorPage(props) {
       delete meta[variation.key];
     }
     props.sdk.entry.fields.meta.setValue(meta);
-    props.sdk.entry.fields.variations.setValue(values.filter(item => item.sys.id !== entryId));
+    props.sdk.entry.fields.variations.setValue(values.filter((item) => item.sys.id !== entryId));
   };
 
   const onClearVariations = () => {
@@ -374,10 +376,10 @@ EditorPage.propTypes = {
     locales: PropTypes.object.isRequired,
     navigator: PropTypes.shape({
       openEntry: PropTypes.func.isRequired,
-      openNewEntry: PropTypes.func.isRequired
+      openNewEntry: PropTypes.func.isRequired,
     }).isRequired,
     dialogs: PropTypes.shape({
-      selectSingleEntry: PropTypes.func.isRequired
+      selectSingleEntry: PropTypes.func.isRequired,
     }).isRequired,
     entry: PropTypes.shape({
       fields: PropTypes.shape({
@@ -385,14 +387,14 @@ EditorPage.propTypes = {
         experimentKey: PropTypes.object.isRequired,
         variations: PropTypes.object.isRequired,
         meta: PropTypes.object.isRequired,
-        experimentTitle: PropTypes.object.isRequired
+        experimentTitle: PropTypes.object.isRequired,
       }).isRequired,
-      getSys: PropTypes.func.isRequired
+      getSys: PropTypes.func.isRequired,
     }).isRequired,
     parameters: PropTypes.shape({
       installation: PropTypes.shape({
-        optimizelyProjectId: PropTypes.string.isRequired
-      }).isRequired
-    }).isRequired
-  }).isRequired
+        optimizelyProjectId: PropTypes.string.isRequired,
+      }).isRequired,
+    }).isRequired,
+  }).isRequired,
 };

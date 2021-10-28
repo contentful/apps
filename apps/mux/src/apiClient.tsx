@@ -14,10 +14,7 @@ class ApiClient {
 
   requestHeaders = () => {
     let headers = new Headers();
-    headers.set(
-      'Authorization',
-      'Basic ' + btoa(`${this.tokenId}:${this.tokenSecret}`)
-    );
+    headers.set('Authorization', 'Basic ' + btoa(`${this.tokenId}:${this.tokenSecret}`));
     headers.set('Content-Type', 'application/json');
 
     return headers;
@@ -43,11 +40,7 @@ class ApiClient {
     return this.request('DELETE', path);
   };
 
-  request = async (
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-    path: string,
-    body?: string
-  ) => {
+  request = async (method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: string) => {
     return fetch(`https://api.mux.com${path}`, {
       ...this.baseOptions,
       method,

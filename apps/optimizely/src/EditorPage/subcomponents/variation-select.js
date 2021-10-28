@@ -4,7 +4,7 @@ import {
   TextLink,
   Dropdown,
   DropdownList,
-  DropdownListItem
+  DropdownListItem,
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
@@ -12,11 +12,11 @@ import { GlobalStateContext } from './all-context';
 
 const styles = {
   container: css({
-    marginTop: tokens.spacingM
+    marginTop: tokens.spacingM,
   }),
   item: css({
-    marginBottom: tokens.spacingXs
-  })
+    marginBottom: tokens.spacingXs,
+  }),
 };
 
 export default function VariationSelect(props) {
@@ -39,10 +39,12 @@ export default function VariationSelect(props) {
               icon="Plus"
               onClick={() => {
                 setShowDropdown(true);
-              }}>
+              }}
+            >
               Create entry and link
             </TextLink>
-          }>
+          }
+        >
           <DropdownList maxHeight={300}>
             <DropdownListItem isTitle>Select content type</DropdownListItem>
             {linkContentTypes.map((value, index) => (
@@ -51,7 +53,8 @@ export default function VariationSelect(props) {
                 onClick={() => {
                   props.onCreate(value);
                   setShowDropdown(false);
-                }}>
+                }}
+              >
                 {linkContentTypeNames[index]}
               </DropdownListItem>
             ))}
@@ -69,5 +72,5 @@ export default function VariationSelect(props) {
 
 VariationSelect.propTypes = {
   onLinkExistingClick: PropTypes.func.isRequired,
-  onCreate: PropTypes.func.isRequired
+  onCreate: PropTypes.func.isRequired,
 };

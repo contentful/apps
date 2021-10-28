@@ -2,12 +2,7 @@ import * as jwt from 'jsonwebtoken';
 
 const getPrivateKey = (key: string) => Buffer.from(key, 'base64');
 
-const sign = (
-  playbackId: string,
-  signingKeyId: string,
-  signingKeyPrivate: string,
-  aud: string
-) =>
+const sign = (playbackId: string, signingKeyId: string, signingKeyPrivate: string, aud: string) =>
   jwt.sign({}, getPrivateKey(signingKeyPrivate), {
     algorithm: 'RS256',
     keyid: signingKeyId,

@@ -20,7 +20,7 @@ export async function makeShopifyClient(config) {
 
   return Client.buildClient({
     domain: apiEndpoint,
-    storefrontAccessToken
+    storefrontAccessToken,
   });
 }
 
@@ -37,12 +37,12 @@ export const fetchCollectionPreviews = async (skus, config) => {
   }
 
   const shopifyClient = await makeShopifyClient(config);
-  const collections = (await shopifyClient.collection.fetchAll(250)).filter(collection =>
+  const collections = (await shopifyClient.collection.fetchAll(250)).filter((collection) =>
     skus.includes(collection.id)
   );
 
   return skus.map((sku) => {
-    const collection = collections.find((collection) => collection.id === sku)
+    const collection = collections.find((collection) => collection.id === sku);
 
     return collection
       ? collectionDataTransformer(collection, config.apiEndpoint)
@@ -52,8 +52,8 @@ export const fetchCollectionPreviews = async (skus, config) => {
           image: '',
           id: sku,
           name: '',
-        }
-  })
+        };
+  });
 };
 
 /**
@@ -72,7 +72,7 @@ export const fetchProductPreviews = async (skus, config) => {
   const products = await shopifyClient.product.fetchMultiple(skus);
 
   return skus.map((sku) => {
-    const product = products.find((product) => product?.id === sku)
+    const product = products.find((product) => product?.id === sku);
 
     return product
       ? productDataTransformer(product, config.apiEndpoint)
@@ -82,8 +82,8 @@ export const fetchProductPreviews = async (skus, config) => {
           image: '',
           id: sku,
           name: '',
-        }
-  })
+        };
+  });
 };
 
 /**
@@ -99,7 +99,7 @@ export const fetchProductVariantPreviews = async (skus, config) => {
   }
 
   const validIds = skus
-    .map(sku => {
+    .map((sku) => {
       try {
         // If not valid base64 window.atob will throw
         const unencodedId = atob(sku);
@@ -108,10 +108,10 @@ export const fetchProductVariantPreviews = async (skus, config) => {
         return null;
       }
     })
-    .filter(sku => sku && /^gid.*ProductVariant/.test(sku.unencodedId))
+    .filter((sku) => sku && /^gid.*ProductVariant/.test(sku.unencodedId))
     .map(({ sku }) => sku);
 
-  const queryIds = validIds.map(sku => `"${sku}"`).join(',');
+  const queryIds = validIds.map((sku) => `"${sku}"`).join(',');
   const query = `
   {
     nodes (ids: [${queryIds}]) {
@@ -138,9 +138,9 @@ export const fetchProductVariantPreviews = async (skus, config) => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'x-shopify-storefront-access-token': storefrontAccessToken
+      'x-shopify-storefront-access-token': storefrontAccessToken,
     },
-    body: JSON.stringify({ query })
+    body: JSON.stringify({ query }),
   });
 
   const data = await res.json();
@@ -150,8 +150,8 @@ export const fetchProductVariantPreviews = async (skus, config) => {
   const variantPreviews = nodes.map(previewsToProductVariants(config));
   const missingVariants = difference(
     skus,
-    variantPreviews.map(variant => variant.sku)
-  ).map(sku => ({ sku, isMissing: true, name: '', image: '' }));
+    variantPreviews.map((variant) => variant.sku)
+  ).map((sku) => ({ sku, isMissing: true, name: '', image: '' }));
 
   return [...variantPreviews, ...missingVariants];
 };
@@ -162,19 +162,19 @@ export const fetchProductVariantPreviews = async (skus, config) => {
  * Shopify does not support indexed pagination, only infinite scrolling
  * @see https://community.shopify.com/c/Shopify-APIs-SDKs/How-to-display-more-than-20-products-in-my-app-when-products-are/td-p/464090 for more details (KarlOffenberger's answer)
  */
-export const makeProductVariantSearchResolver = async sdk => {
+export const makeProductVariantSearchResolver = async (sdk) => {
   const pagination = await makeProductVariantPagination(sdk);
-  return search => pagination.fetchNext(search);
+  return (search) => pagination.fetchNext(search);
 };
 
-export const makeProductSearchResolver = async sdk => {
+export const makeProductSearchResolver = async (sdk) => {
   const pagination = await makeProductPagination(sdk);
-  return search => pagination.fetchNext(search);
+  return (search) => pagination.fetchNext(search);
 };
 
-export const makeCollectionSearchResolver = async sdk => {
+export const makeCollectionSearchResolver = async (sdk) => {
   const pagination = await makeCollectionPagination(sdk);
-  return search => pagination.fetchNext(search);
+  return (search) => pagination.fetchNext(search);
 };
 
 /**

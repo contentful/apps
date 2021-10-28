@@ -8,8 +8,8 @@ const styles = {
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.gray300
-  })
+    backgroundColor: tokens.gray300,
+  }),
 };
 
 export default function SectionSplitter() {

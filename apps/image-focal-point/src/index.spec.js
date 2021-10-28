@@ -10,20 +10,20 @@ const sdk = {
     getValue: jest.fn(),
     onValueChanged: jest.fn(),
     setValue: jest.fn(),
-    removeValue: jest.fn()
+    removeValue: jest.fn(),
   },
   window: {
-    startAutoResizer: jest.fn()
-  }
+    startAutoResizer: jest.fn(),
+  },
 };
 
 jest.mock('./utils', () => ({
   getField: jest.fn(),
-  isCompatibleImageField: () => true
+  isCompatibleImageField: () => true,
 }));
 
 configure({
-  testIdAttribute: 'data-test-id'
+  testIdAttribute: 'data-test-id',
 });
 
 function renderComponent(sdk) {

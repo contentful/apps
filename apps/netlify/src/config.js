@@ -1,8 +1,8 @@
-const readCsvParam = csv =>
+const readCsvParam = (csv) =>
   (csv || '')
     .split(',')
-    .map(val => val.trim())
-    .filter(val => val.length > 0);
+    .map((val) => val.trim())
+    .filter((val) => val.length > 0);
 
 export function configToParameters(config) {
   const flat = {
@@ -13,9 +13,9 @@ export function configToParameters(config) {
         names: (acc.names || []).concat([site.name]),
         siteIds: (acc.siteIds || []).concat([site.netlifySiteId]),
         siteNames: (acc.siteNames || []).concat([site.netlifySiteName]),
-        siteUrls: (acc.siteUrls || []).concat([site.netlifySiteUrl])
+        siteUrls: (acc.siteUrls || []).concat([site.netlifySiteUrl]),
       };
-    }, {})
+    }, {}),
   };
 
   return Object.keys(flat).reduce((acc, key) => {
@@ -39,8 +39,8 @@ export function parametersToConfig(parameters) {
         name: names[i],
         netlifySiteId: siteIds[i],
         netlifySiteName: siteNames[i],
-        netlifySiteUrl: siteUrls[i]
+        netlifySiteUrl: siteUrls[i],
       };
-    })
+    }),
   };
 }

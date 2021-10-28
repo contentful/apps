@@ -8,7 +8,7 @@ describe('netlify-integration', () => {
       return Promise.resolve({ id: 'build-hook-id-1' });
     });
 
-    [1, 2, 3].forEach(i => {
+    [1, 2, 3].forEach((i) => {
       NetlifyClient.createNotificationHook.mockImplementationOnce(() => {
         return Promise.resolve({ id: `notification-hook-id-${i}` });
       });
@@ -24,11 +24,11 @@ describe('netlify-integration', () => {
               name: 'Site 1',
               netlifySiteId: 'id1',
               netlifySiteName: 'foo-bar',
-              netlifySiteUrl: 'https://foo-bar.netlify.com'
-            }
-          ]
+              netlifySiteUrl: 'https://foo-bar.netlify.com',
+            },
+          ],
         },
-        accessToken: 'token'
+        accessToken: 'token',
       });
 
       expect(NetlifyClient.createBuildHook).toHaveBeenCalledTimes(1);
@@ -36,10 +36,10 @@ describe('netlify-integration', () => {
 
       expect(NetlifyClient.createNotificationHook).toHaveBeenCalledTimes(3);
 
-      ['deploy_building', 'deploy_created', 'deploy_failed'].forEach(event => {
+      ['deploy_building', 'deploy_created', 'deploy_failed'].forEach((event) => {
         expect(NetlifyClient.createNotificationHook).toHaveBeenCalledWith('id1', 'token', {
           event,
-          url: expect.stringMatching(/id1build-hook-id-1/) // channel is site ID + build hook ID
+          url: expect.stringMatching(/id1build-hook-id-1/), // channel is site ID + build hook ID
         });
       });
 
@@ -47,7 +47,7 @@ describe('netlify-integration', () => {
         netlifyHookIds: [
           'notification-hook-id-1',
           'notification-hook-id-2',
-          'notification-hook-id-3'
+          'notification-hook-id-3',
         ],
         sites: [
           {
@@ -55,9 +55,9 @@ describe('netlify-integration', () => {
             name: 'Site 1',
             netlifySiteId: 'id1',
             netlifySiteName: 'foo-bar',
-            netlifySiteUrl: 'https://foo-bar.netlify.com'
-          }
-        ]
+            netlifySiteUrl: 'https://foo-bar.netlify.com',
+          },
+        ],
       });
     });
 
@@ -66,9 +66,14 @@ describe('netlify-integration', () => {
         [{ sites: [] }, expect.stringMatching(/at least one/)],
         [{ sites: [{ netlifySiteId: 'x', name: '' }] }, expect.stringMatching(/provide a name/)],
         [
-          { sites: [{ netlifySiteId: 'x', name: 'x' }, { netlifySiteId: 'y', name: 'x' }] },
-          expect.stringMatching(/must be unique/)
-        ]
+          {
+            sites: [
+              { netlifySiteId: 'x', name: 'x' },
+              { netlifySiteId: 'y', name: 'x' },
+            ],
+          },
+          expect.stringMatching(/must be unique/),
+        ],
       ];
 
       expect.assertions(3);
@@ -88,7 +93,7 @@ describe('netlify-integration', () => {
       const notificationHooks = [
         'notification-hook-id-1',
         'notification-hook-id-2',
-        'notification-hook-id-3'
+        'notification-hook-id-3',
       ];
 
       await NetlifyIntegration.update({
@@ -100,18 +105,18 @@ describe('netlify-integration', () => {
               name: 'Site 1',
               netlifySiteId: 'id1',
               netlifySiteName: 'foo-bar',
-              netlifySiteUrl: 'https://foo-bar.netlify.com'
-            }
-          ]
+              netlifySiteUrl: 'https://foo-bar.netlify.com',
+            },
+          ],
         },
-        accessToken: 'token'
+        accessToken: 'token',
       });
 
       expect(NetlifyClient.deleteBuildHook).toHaveBeenCalledTimes(1);
       expect(NetlifyClient.deleteBuildHook).toHaveBeenCalledWith('id1', 'build-hook-id-1', 'token');
 
       expect(NetlifyClient.deleteNotificationHook).toHaveBeenCalledTimes(3);
-      notificationHooks.forEach(id => {
+      notificationHooks.forEach((id) => {
         expect(NetlifyClient.deleteNotificationHook).toHaveBeenCalledWith(id, 'token');
       });
 

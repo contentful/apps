@@ -1,9 +1,6 @@
-import * as React from "react";
+import * as React from 'react';
 
-import {
-  AppExtensionSDK,
-  CollectionResponse,
-} from "@contentful/app-sdk";
+import { AppExtensionSDK, CollectionResponse } from '@contentful/app-sdk';
 import {
   Heading,
   Paragraph,
@@ -14,13 +11,13 @@ import {
   SelectField,
   Option,
   TextLink,
-} from "@contentful/forma-36-react-components";
-import tokens from "@contentful/forma-36-tokens";
-import { css } from "@emotion/css";
+} from '@contentful/forma-36-react-components';
+import tokens from '@contentful/forma-36-tokens';
+import { css } from '@emotion/css';
 
-import FieldSelector from "./FieldSelector";
+import FieldSelector from './FieldSelector';
 
-import { toInputParameters, toExtensionParameters } from "./parameters";
+import { toInputParameters, toExtensionParameters } from './parameters';
 
 import {
   getCompatibleFields,
@@ -30,9 +27,9 @@ import {
   ContentType,
   CompatibleFields,
   SelectedFields,
-} from "./fields";
+} from './fields';
 
-import { Config, ParameterDefinition, ValidateParametersFn } from "../interfaces";
+import { Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -53,25 +50,25 @@ interface State {
 
 const styles = {
   body: css({
-    height: "auto",
-    minHeight: "65vh",
-    margin: "0 auto",
+    height: 'auto',
+    minHeight: '65vh',
+    margin: '0 auto',
     marginTop: tokens.spacingXl,
     padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
     maxWidth: tokens.contentWidthText,
     backgroundColor: tokens.colorWhite,
     zIndex: 2,
-    boxShadow: "0px 0px 20px rgba(0, 0, 0, 0.1)",
-    borderRadius: "2px",
+    boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
+    borderRadius: '2px',
   }),
   background: (color: string) =>
     css({
-      display: "block",
-      position: "absolute",
+      display: 'block',
+      position: 'absolute',
       zIndex: -1,
       top: 0,
-      width: "100%",
-      height: "300px",
+      width: '100%',
+      height: '300px',
       backgroundColor: color,
     }),
   section: css({
@@ -81,15 +78,15 @@ const styles = {
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
     border: 0,
-    height: "1px",
+    height: '1px',
     backgroundColor: tokens.gray300,
   }),
   icon: css({
-    display: "flex",
-    justifyContent: "center",
-    "> img": {
-      display: "block",
-      width: "70px",
+    display: 'flex',
+    justifyContent: 'center',
+    '> img': {
+      display: 'block',
+      width: '70px',
       margin: `${tokens.spacingXl} 0`,
     },
   }),
@@ -98,8 +95,8 @@ const styles = {
 export default class AppConfig extends React.Component<Props, State> {
   state = {
     contentTypes: [] as ContentType[],
-    compatibleFields: ({} as any) as CompatibleFields,
-    selectedFields: ({} as any) as SelectedFields,
+    compatibleFields: {} as any as CompatibleFields,
+    selectedFields: {} as any as SelectedFields,
     parameters: toInputParameters(this.props.parameterDefinitions, null),
   };
 
@@ -118,12 +115,8 @@ export default class AppConfig extends React.Component<Props, State> {
       app.getParameters(),
     ]);
 
-    const contentTypes = (contentTypesResponse as CollectionResponse<
-      ContentType
-    >).items;
-    const editorInterfaces = (eisResponse as CollectionResponse<
-      EditorInterface
-    >).items;
+    const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items;
+    const editorInterfaces = (eisResponse as CollectionResponse<EditorInterface>).items;
 
     const compatibleFields = getCompatibleFields(contentTypes);
     const filteredContentTypes = contentTypes.filter((ct) => {
@@ -135,14 +128,8 @@ export default class AppConfig extends React.Component<Props, State> {
       {
         contentTypes: filteredContentTypes,
         compatibleFields,
-        selectedFields: editorInterfacesToSelectedFields(
-          editorInterfaces,
-          ids.app
-        ),
-        parameters: toInputParameters(
-          this.props.parameterDefinitions,
-          parameters
-        ),
+        selectedFields: editorInterfacesToSelectedFields(editorInterfaces, ids.app),
+        parameters: toInputParameters(this.props.parameterDefinitions, parameters),
       },
       () => app.setReady()
     );
@@ -158,10 +145,7 @@ export default class AppConfig extends React.Component<Props, State> {
     }
 
     return {
-      parameters: toExtensionParameters(
-        this.props.parameterDefinitions,
-        parameters
-      ),
+      parameters: toExtensionParameters(this.props.parameterDefinitions, parameters),
       targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
     };
   };
@@ -185,7 +169,12 @@ export default class AppConfig extends React.Component<Props, State> {
     );
   }
 
-  onParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
+  onParameterChange = (
+    key: string,
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const { value } = e.currentTarget;
 
     this.setState((state) => ({
@@ -199,7 +188,7 @@ export default class AppConfig extends React.Component<Props, State> {
   };
 
   buildSelectField = (key: string, def: Record<string, any>) => {
-    const values = def.value.split(",");
+    const values = def.value.split(',');
     return (
       <SelectField
         labelText={def.name}
@@ -221,18 +210,12 @@ export default class AppConfig extends React.Component<Props, State> {
   };
 
   renderApp() {
-    const {
-      contentTypes,
-      compatibleFields,
-      selectedFields,
-      parameters,
-    } = this.state;
+    const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
     const { parameterDefinitions, sdk } = this.props;
     const { ids } = sdk;
     const { space, environment } = ids;
 
-    const hasConfigurationOptions =
-      parameterDefinitions && parameterDefinitions.length > 0;
+    const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
     return (
       <>
         {hasConfigurationOptions && (
@@ -241,7 +224,7 @@ export default class AppConfig extends React.Component<Props, State> {
             <Form>
               {parameterDefinitions.map((def) => {
                 const key = `config-input-${def.id}`;
-                if (def.type === "List") {
+                if (def.type === 'List') {
                   return this.buildSelectField(key, def);
                 } else {
                   return (
@@ -252,8 +235,8 @@ export default class AppConfig extends React.Component<Props, State> {
                       name={key}
                       labelText={def.name}
                       textInputProps={{
-                        width: def.type === "Symbol" ? "large" : "medium",
-                        type: def.type === "Symbol" ? "text" : "number",
+                        width: def.type === 'Symbol' ? 'large' : 'medium',
+                        type: def.type === 'Symbol' ? 'text' : 'number',
                         maxLength: 255,
                       }}
                       helpText={def.description}
@@ -271,31 +254,29 @@ export default class AppConfig extends React.Component<Props, State> {
           <Heading>Assign to fields</Heading>
           {contentTypes.length > 0 ? (
             <Paragraph>
-              This app can only be used with <strong>JSON object</strong>{" "}
-              fields. Select which JSON fields you’d like to enable for this
-              app.
+              This app can only be used with <strong>JSON object</strong> fields. Select which JSON
+              fields you’d like to enable for this app.
             </Paragraph>
           ) : (
             <>
               <Paragraph>
-                This app can be used only with <strong>JSON object</strong>{" "}
-                fields.
+                This app can be used only with <strong>JSON object</strong> fields.
               </Paragraph>
               <Note noteType="warning">
-                There are <strong>no content types with JSON object</strong>{" "}
-                fields in this environment. You can add one in your{" "}
+                There are <strong>no content types with JSON object</strong> fields in this
+                environment. You can add one in your{' '}
                 <TextLink
                   linkType="primary"
                   target="_blank"
                   rel="noopener noreferrer"
                   href={
-                    environment === "master"
+                    environment === 'master'
                       ? `https://app.contentful.com/spaces/${space}/content_types`
                       : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
                   }
                 >
                   content model
-                </TextLink>{" "}
+                </TextLink>{' '}
                 and assign it to the app from this screen.
               </Note>
             </>

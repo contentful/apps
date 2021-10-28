@@ -5,7 +5,7 @@ export const COMBINED_LINK_VALIDATION_ALL = 'ALL';
 export const COMBINED_LINK_VALIDATION_INTERSECTION = 'INTERSECTION';
 export const COMBINED_LINK_VALIDATION_CONFLICT = 'CONFLICT';
 
-const isEntryLink = f => get(f, ['linkType']) === 'Entry';
+const isEntryLink = (f) => get(f, ['linkType']) === 'Entry';
 
 // Find all field IDs in an entry given that are linking to the
 // variation container.
@@ -15,7 +15,7 @@ function findLinkingFieldIds(entry, ct, variationContainerId) {
     const locales = Object.keys(get(entry, ['fields', field.id], {}));
 
     // For every locale in this field...
-    const found = !!locales.find(locale => {
+    const found = !!locales.find((locale) => {
       const value = get(entry, ['fields', field.id, locale]);
 
       // If the field-locale is a single Entry refenrence, check
@@ -27,7 +27,7 @@ function findLinkingFieldIds(entry, ct, variationContainerId) {
       // If the field-locale is an array of Entry references, check
       // if at least one item links to the container.
       if (field.type === 'Array' && isEntryLink(field.items) && Array.isArray(value)) {
-        return !!value.find(item => get(item, ['sys', 'id']) === variationContainerId);
+        return !!value.find((item) => get(item, ['sys', 'id']) === variationContainerId);
       }
 
       // In any other case we're sure we're not linking to the
@@ -77,7 +77,7 @@ function normalizeLinkContentTypeValidation(
   // If validation value is already an array only do the variation
   // container content type.
   if (Array.isArray(ctIds)) {
-    return ctIds.filter(ctId => ctId !== variationContainerContentTypeId);
+    return ctIds.filter((ctId) => ctId !== variationContainerContentTypeId);
   }
 
   return [];
@@ -88,7 +88,7 @@ function normalizeLinkContentTypeValidation(
 // `hasLinkValidation` boolean flag.
 function prepareFieldLinkValidations(field, variationContainerContentTypeId) {
   const validations = get(field, getValidationsPath(field), []);
-  const linkContentTypeValidation = validations.find(v => v && v.linkContentType);
+  const linkContentTypeValidation = validations.find((v) => v && v.linkContentType);
 
   if (!linkContentTypeValidation) {
     return { hasLinkValidation: false };
@@ -99,7 +99,7 @@ function prepareFieldLinkValidations(field, variationContainerContentTypeId) {
     linkContentTypes: normalizeLinkContentTypeValidation(
       linkContentTypeValidation,
       variationContainerContentTypeId
-    )
+    ),
   };
 }
 
@@ -111,13 +111,13 @@ function prepareReferenceInfoForEntry(
   variationContainerId,
   variationContainerContentTypeId
 ) {
-  return findLinkingFieldIds(entry, ct, variationContainerId).map(fieldId => {
-    const field = (ct.fields || []).find(f => f.id === fieldId);
+  return findLinkingFieldIds(entry, ct, variationContainerId).map((fieldId) => {
+    const field = (ct.fields || []).find((f) => f.id === fieldId);
 
     return {
       id: field.id,
       name: field.name,
-      ...prepareFieldLinkValidations(field, variationContainerContentTypeId)
+      ...prepareFieldLinkValidations(field, variationContainerContentTypeId),
     };
   });
 }
@@ -129,7 +129,7 @@ function prepareReferenceInfoForEntry(
 // - conflicting if intersection results in an empty array
 // - all content types otherwise
 function combineLinkValidations(linkValidations, ctMap) {
-  const getCtName = ctId => get(ctMap, [ctId, 'name'], 'Untitled');
+  const getCtName = (ctId) => get(ctMap, [ctId, 'name'], 'Untitled');
 
   if (linkValidations.length > 0) {
     const linkValidationsIntersection = intersection(...linkValidations);
@@ -137,7 +137,7 @@ function combineLinkValidations(linkValidations, ctMap) {
       return {
         combinedLinkValidationType: COMBINED_LINK_VALIDATION_INTERSECTION,
         linkContentTypes: linkValidationsIntersection,
-        linkContentTypeNames: linkValidationsIntersection.map(getCtName)
+        linkContentTypeNames: linkValidationsIntersection.map(getCtName),
       };
     }
 
@@ -148,15 +148,15 @@ function combineLinkValidations(linkValidations, ctMap) {
   return {
     combinedLinkValidationType: COMBINED_LINK_VALIDATION_ALL,
     linkContentTypes: allContentTypeIds,
-    linkContentTypeNames: allContentTypeIds.map(getCtName)
+    linkContentTypeNames: allContentTypeIds.map(getCtName),
   };
 }
 
 // Combine link validations for all fields in a single entry.
 function combineLinkValidtionsForEntry(entryReferenceInfo, ctMap) {
   const linkValidations = entryReferenceInfo
-    .filter(info => info.hasLinkValidation)
-    .map(info => info.linkContentTypes);
+    .filter((info) => info.hasLinkValidation)
+    .map((info) => info.linkContentTypes);
 
   return combineLinkValidations(linkValidations, ctMap);
 }
@@ -164,7 +164,7 @@ function combineLinkValidtionsForEntry(entryReferenceInfo, ctMap) {
 // Combine link validations for all entries.
 function combineLinkValidationsForReferences(references, ctMap) {
   const hasConflict = !!references.find(
-    ref => ref.combinedLinkValidationType === COMBINED_LINK_VALIDATION_CONFLICT
+    (ref) => ref.combinedLinkValidationType === COMBINED_LINK_VALIDATION_CONFLICT
   );
 
   // If there's at least one conflict combination is conflicting too.
@@ -173,8 +173,8 @@ function combineLinkValidationsForReferences(references, ctMap) {
   }
 
   const linkValidations = references
-    .filter(ref => ref.combinedLinkValidationType === COMBINED_LINK_VALIDATION_INTERSECTION)
-    .map(ref => ref.linkContentTypes);
+    .filter((ref) => ref.combinedLinkValidationType === COMBINED_LINK_VALIDATION_INTERSECTION)
+    .map((ref) => ref.linkContentTypes);
 
   // Use the regular algorithm otherwise for all intersections.
   return combineLinkValidations(linkValidations, ctMap);
@@ -185,11 +185,11 @@ export default function prepareReferenceInfo({
   entries,
   variationContainerId,
   variationContainerContentTypeId,
-  defaultLocale
+  defaultLocale,
 }) {
   const ctMap = contentTypes.reduce((acc, ct) => ({ ...acc, [ct.sys.id]: ct }), {});
 
-  const references = entries.map(entry => {
+  const references = entries.map((entry) => {
     const ctId = get(entry, ['sys', 'contentType', 'sys', 'id']);
     const ct = ctMap[ctId];
 
@@ -204,13 +204,13 @@ export default function prepareReferenceInfo({
       id: entry.sys.id,
       title: get(entry, ['fields', ct.displayField, defaultLocale], 'Untitled'),
       contentTypeName: ct.name,
-      referencedFromFields: entryReferenceInfo.map(f => f.name),
-      ...combineLinkValidtionsForEntry(entryReferenceInfo, ctMap)
+      referencedFromFields: entryReferenceInfo.map((f) => f.name),
+      ...combineLinkValidtionsForEntry(entryReferenceInfo, ctMap),
     };
   });
 
   return {
     references,
-    ...combineLinkValidationsForReferences(references, ctMap)
+    ...combineLinkValidationsForReferences(references, ctMap),
   };
 }

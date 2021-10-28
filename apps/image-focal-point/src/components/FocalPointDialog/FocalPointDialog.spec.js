@@ -9,7 +9,7 @@ const props = {
   focalPoint: mockProps.focalPoint,
   onClose: jest.fn(),
   onSave: jest.fn(),
-  sdk: mockProps.sdk
+  sdk: mockProps.sdk,
 };
 
 describe('FocalPointDialog', () => {

@@ -2,7 +2,7 @@ import {
   normalizeMessage,
   isOutOfOrder,
   isDuplicate,
-  messageToState
+  messageToState,
 } from '../../src/sidebar/message-processor';
 
 import {
@@ -11,7 +11,7 @@ import {
   EVENT_TRIGGER_FAILED,
   EVENT_BUILD_STARTED,
   EVENT_BUILD_FAILED,
-  EVENT_BUILD_READY
+  EVENT_BUILD_READY,
 } from '../../src/constants';
 
 describe('message-processor', () => {
@@ -20,13 +20,13 @@ describe('message-processor', () => {
       const normalized = normalizeMessage('site-id', [], {
         id: 'build-id',
         site_id: 'site-id',
-        state: 'uploaded'
+        state: 'uploaded',
       });
 
       expect(normalized).toEqual({
         event: EVENT_BUILD_STARTED,
         buildId: 'build-id',
-        siteId: 'site-id'
+        siteId: 'site-id',
       });
     });
 
@@ -34,7 +34,7 @@ describe('message-processor', () => {
       const normalized = normalizeMessage('site-id', [], {
         id: 'build-id',
         site_id: 'different-site',
-        state: 'uploaded'
+        state: 'uploaded',
       });
 
       expect(normalized).toBeNull();
@@ -44,7 +44,7 @@ describe('message-processor', () => {
       const normalized = normalizeMessage('site-id', [], {
         id: 'build-id',
         site_id: 'site-id',
-        state: 'BOOM'
+        state: 'BOOM',
       });
 
       expect(normalized).toBeNull();
@@ -54,41 +54,41 @@ describe('message-processor', () => {
       const normalized = normalizeMessage('site-id', [], {
         contentful: true,
         event: EVENT_TRIGGERED,
-        someProperty: 'hello world'
+        someProperty: 'hello world',
       });
 
       expect(normalized).toEqual({
         event: EVENT_TRIGGERED,
         someProperty: 'hello world',
-        userName: null
+        userName: null,
       });
     });
 
     it('resolves user name in Contentful events if possible', () => {
       const users = [
         { sys: { id: 'uid1' }, firstName: 'Jakub', lastName: 'Jakub' },
-        { sys: { id: 'uid2' }, firstName: 'David', lastName: 'David' }
+        { sys: { id: 'uid2' }, firstName: 'David', lastName: 'David' },
       ];
 
       const normalized = normalizeMessage('site-id', users, {
         contentful: true,
         event: EVENT_TRIGGERED,
         userId: 'uid2',
-        someProperty: 'hello world'
+        someProperty: 'hello world',
       });
 
       expect(normalized).toEqual({
         event: EVENT_TRIGGERED,
         someProperty: 'hello world',
         userId: 'uid2',
-        userName: 'David David'
+        userName: 'David David',
       });
     });
 
     it('ignores Contentful events for unsupported events', () => {
       const normalized = normalizeMessage('site-id', [], {
         contentful: true,
-        event: 'BOOM'
+        event: 'BOOM',
       });
 
       expect(normalized).toBeNull();
@@ -103,16 +103,16 @@ describe('message-processor', () => {
     });
 
     it('returns true if the build already failed or succeeded in the past', () => {
-      [EVENT_BUILD_FAILED, EVENT_BUILD_READY].forEach(event => {
+      [EVENT_BUILD_FAILED, EVENT_BUILD_READY].forEach((event) => {
         const result = isOutOfOrder(
           {
             event: EVENT_BUILD_STARTED,
-            buildId: 'build-id'
+            buildId: 'build-id',
           },
           [
             { event, buildId: 'some-other-build' },
             { event: 'some-other-event', buildId: 'build-id' },
-            { event, buildId: 'build-id' }
+            { event, buildId: 'build-id' },
           ]
         );
 
@@ -124,9 +124,12 @@ describe('message-processor', () => {
       const result = isOutOfOrder(
         {
           event: EVENT_BUILD_STARTED,
-          buildId: 'b3'
+          buildId: 'b3',
         },
-        [{ event: EVENT_BUILD_FAILED, buildId: 'b2' }, { event: EVENT_BUILD_READY, buildId: 'b1' }]
+        [
+          { event: EVENT_BUILD_FAILED, buildId: 'b2' },
+          { event: EVENT_BUILD_READY, buildId: 'b1' },
+        ]
       );
 
       expect(result).toBe(false);
@@ -144,7 +147,7 @@ describe('message-processor', () => {
       const msg = { event: NETLIFY_EVENTS[0], buildId: 'build-id' };
       const result = isDuplicate(msg, [
         { event: NETLIFY_EVENTS[1], buildId: 'build-id' },
-        { event: NETLIFY_EVENTS[0], buildId: 'other-build' }
+        { event: NETLIFY_EVENTS[0], buildId: 'other-build' },
       ]);
       expect(result).toBe(false);
     });
@@ -162,14 +165,14 @@ describe('message-processor', () => {
     it('produces state for "triggered" message', () => {
       const state = messageToState({
         t,
-        event: EVENT_TRIGGERED
+        event: EVENT_TRIGGERED,
       });
 
       expect(state).toEqual({
         busy: true,
         info: expect.stringMatching(/at 2:26:02 PM/),
         ok: true,
-        status: 'Triggering...'
+        status: 'Triggering...',
       });
     });
 
@@ -177,53 +180,53 @@ describe('message-processor', () => {
       const state = messageToState({
         t,
         event: EVENT_TRIGGERED,
-        userName: 'Jakub'
+        userName: 'Jakub',
       });
 
       expect(state).toEqual({
         busy: true,
         info: expect.stringMatching(/by Jakub.+at 2:26:02 PM/),
         ok: true,
-        status: 'Triggering...'
+        status: 'Triggering...',
       });
     });
 
     it('produces state for "tiggering failed" message', () => {
       const state = messageToState({
         t,
-        event: EVENT_TRIGGER_FAILED
+        event: EVENT_TRIGGER_FAILED,
       });
 
       expect(state).toEqual({
         busy: false,
         ok: false,
-        info: 'Try again! If the problem persists make sure the Netlify site still exists.'
+        info: 'Try again! If the problem persists make sure the Netlify site still exists.',
       });
     });
 
     it('produces state for "build started" message', () => {
       const state = messageToState({
         t,
-        event: EVENT_BUILD_STARTED
+        event: EVENT_BUILD_STARTED,
       });
 
       expect(state).toEqual({
         status: 'Building...',
         busy: true,
-        ok: true
+        ok: true,
       });
     });
 
     it('produces state for "build ready" message', () => {
       const state = messageToState({
         t,
-        event: EVENT_BUILD_READY
+        event: EVENT_BUILD_READY,
       });
 
       expect(state).toEqual({
         busy: false,
         ok: true,
-        info: expect.stringMatching(/Last built.+at 2:26:02 PM/)
+        info: expect.stringMatching(/Last built.+at 2:26:02 PM/),
       });
     });
 
@@ -231,13 +234,13 @@ describe('message-processor', () => {
       const state = messageToState({
         t,
         event: EVENT_BUILD_FAILED,
-        error: 'Something wrong happened.'
+        error: 'Something wrong happened.',
       });
 
       expect(state).toEqual({
         busy: false,
         ok: false,
-        info: 'Something wrong happened.'
+        info: 'Something wrong happened.',
       });
     });
   });

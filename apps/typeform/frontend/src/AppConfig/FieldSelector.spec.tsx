@@ -5,11 +5,11 @@ import { typeforms } from '../__mocks__/typeforms';
 import { sdk as mockSdk } from '../__mocks__/sdk';
 
 configure({
-  testIdAttribute: 'data-test-id'
+  testIdAttribute: 'data-test-id',
 });
 
 window.fetch = jest.fn(() => ({
-  json: () => typeforms
+  json: () => typeforms,
 })) as any;
 
 const defaultProps: Props = {
@@ -19,24 +19,24 @@ const defaultProps: Props = {
       name: 'CT1',
       fields: [
         { id: 'x', name: 'X', type: 'Symbol' },
-        { id: 'y', name: 'Y', type: 'Object' }
-      ]
+        { id: 'y', name: 'Y', type: 'Object' },
+      ],
     },
     {
       sys: { id: 'ct2' },
       name: 'CT2',
       fields: [
         { id: 'foo', name: 'FOO', type: 'Text' },
-        { id: 'z', name: 'Z', type: 'Array', items: { type: 'Symbol' } }
-      ]
-    }
+        { id: 'z', name: 'Z', type: 'Array', items: { type: 'Symbol' } },
+      ],
+    },
   ],
   compatibleFields: {
     ct1: [{ id: 'x', name: 'X', type: 'Symbol' }],
-    ct2: []
+    ct2: [],
   },
   selectedFields: {},
-  onSelectedFieldsChange: jest.fn()
+  onSelectedFieldsChange: jest.fn(),
 };
 
 describe('FieldSelector', () => {
@@ -50,7 +50,7 @@ describe('FieldSelector', () => {
   it('should render successfully with preselected fields', async () => {
     const props = {
       ...defaultProps,
-      selectedFields: { ct1: ['x'] }
+      selectedFields: { ct1: ['x'] },
     };
     const component = render(<FieldSelector {...props} />);
     expect(component.container).toMatchSnapshot();

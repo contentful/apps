@@ -11,13 +11,13 @@ const contentTypes = [
     name: 'CT1',
     fields: [
       { id: 'product_x', name: 'Product X', type: 'Symbol' },
-      { id: 'y', name: 'Y', type: 'Object' }
-    ]
+      { id: 'y', name: 'Y', type: 'Object' },
+    ],
   },
   {
     sys: { id: 'ct2' },
     name: 'CT2',
-    fields: [{ id: 'foo', name: 'FOO', type: 'Text' }]
+    fields: [{ id: 'foo', name: 'FOO', type: 'Text' }],
   },
   {
     sys: { id: 'ct3' },
@@ -25,24 +25,24 @@ const contentTypes = [
     fields: [
       { id: 'bar', name: 'BAR', type: 'Object' },
       { id: 'baz', name: 'BAZ', type: 'Object' },
-      { id: 'product_a', name: 'Product A', type: 'Symbol' }
-    ]
-  }
+      { id: 'product_a', name: 'Product A', type: 'Symbol' },
+    ],
+  },
 ];
 
 const makeSdkMock = () => ({
   ids: {
-    app: 'some-app'
+    app: 'some-app',
   },
   space: {
     getContentTypes: jest.fn().mockResolvedValue({ items: contentTypes }),
-    getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] })
+    getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] }),
   },
   app: {
     setReady: jest.fn(),
     getParameters: jest.fn().mockResolvedValue(null),
-    onConfigure: jest.fn().mockReturnValue(undefined)
-  }
+    onConfigure: jest.fn().mockReturnValue(undefined),
+  },
 });
 
 const renderComponent = (sdk: unknown) => {
@@ -63,13 +63,13 @@ describe('AppConfig', () => {
       [/Client Secret/, ''],
       [/^API URL/, ''],
       [/Auth URL/, ''],
-      [/commercetools data locale/, '']
+      [/commercetools data locale/, ''],
     ].forEach(([labelRe, expected]) => {
       const configInput = getByLabelText(labelRe) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
     });
 
-    [/Product X$/].forEach(labelRe => {
+    [/Product X$/].forEach((labelRe) => {
       const fieldCheckbox = getByLabelText(labelRe) as HTMLInputElement;
       expect(fieldCheckbox.checked).toBe(false);
     });
@@ -83,7 +83,7 @@ describe('AppConfig', () => {
       clientSecret: 'some-secret',
       apiEndpoint: 'some-endpoint',
       authApiEndpoint: 'some-auth-endpoint',
-      locale: 'en'
+      locale: 'en',
     });
     sdk.space.getEditorInterfaces.mockResolvedValueOnce({
       items: [
@@ -93,21 +93,21 @@ describe('AppConfig', () => {
             {
               fieldId: 'product_a',
               widgetNamespace: 'app',
-              widgetId: 'some-app'
+              widgetId: 'some-app',
             },
             {
               fieldId: 'bar',
               widgetNamespace: 'app',
-              widgetId: 'some-diff-app'
+              widgetId: 'some-diff-app',
             },
             {
               fieldId: 'product_d',
               widgetNamespace: 'app',
-              widgetId: 'some-app'
-            }
-          ]
-        }
-      ]
+              widgetId: 'some-app',
+            },
+          ],
+        },
+      ],
     });
 
     const { getByLabelText } = renderComponent(sdk);
@@ -119,7 +119,7 @@ describe('AppConfig', () => {
       [/Client Secret/, 'some-secret'],
       [/^API URL/, 'some-endpoint'],
       [/Auth URL/, 'some-auth-endpoint'],
-      [/commercetools data locale/, 'en']
+      [/commercetools data locale/, 'en'],
     ].forEach(([labelRe, expected]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
@@ -141,7 +141,7 @@ describe('AppConfig', () => {
       [/Client Secret/, 'some-secret'],
       [/^API URL/, 'some-endpoint'],
       [/Auth URL/, 'some-auth-endpoint'],
-      [/commercetools data locale/, 'en']
+      [/commercetools data locale/, 'en'],
     ].forEach(([labelRe, value]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       fireEvent.change(configInput, { target: { value } });
@@ -158,14 +158,14 @@ describe('AppConfig', () => {
         apiEndpoint: 'some-endpoint',
         authApiEndpoint: 'some-auth-endpoint',
         locale: 'en',
-        fieldsConfig: {}
+        fieldsConfig: {},
       },
       targetState: {
         EditorInterface: {
           ct1: {},
-          ct3: {}
-        }
-      }
+          ct3: {},
+        },
+      },
     });
   });
 });

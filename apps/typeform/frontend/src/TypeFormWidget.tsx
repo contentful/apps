@@ -16,7 +16,7 @@ export function TypeformPreviewWidget({ sdk }: Props) {
     typeformEmbed.makeWidget(element, value, {
       hideFooter: true,
       hideHeaders: true,
-      opacity: 0
+      opacity: 0,
     });
     sdk.window.updateHeight(SDK_WINDOW_HEIGHT);
   }, [value, sdk.window]);
@@ -26,7 +26,7 @@ export function TypeformPreviewWidget({ sdk }: Props) {
       ref={el}
       style={{
         width: '100%',
-        height: SDK_WINDOW_HEIGHT
+        height: SDK_WINDOW_HEIGHT,
       }}
     />
   );

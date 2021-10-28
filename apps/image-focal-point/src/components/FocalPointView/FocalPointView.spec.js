@@ -6,10 +6,10 @@ import { FocalPointView } from './FocalPointView';
 const props = {
   focalPoint: {
     x: 10,
-    y: 30
+    y: 30,
   },
   showFocalPointDialog: jest.fn(),
-  resetFocalPoint: jest.fn()
+  resetFocalPoint: jest.fn(),
 };
 
 describe('FocalPointView', () => {

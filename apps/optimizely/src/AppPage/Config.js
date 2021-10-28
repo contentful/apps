@@ -10,7 +10,7 @@ export default class Config extends React.Component {
     client: PropTypes.object.isRequired,
     allContentTypes: PropTypes.array.isRequired,
     config: PropTypes.object.isRequired,
-    updateConfig: PropTypes.func.isRequired
+    updateConfig: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -18,7 +18,7 @@ export default class Config extends React.Component {
 
     this.state = {
       loadingProjects: true,
-      allProjects: null
+      allProjects: null,
     };
   }
 
@@ -28,38 +28,38 @@ export default class Config extends React.Component {
     // eslint-disable-next-line react/no-did-mount-set-state
     this.setState({
       allProjects,
-      loadingProjects: false
+      loadingProjects: false,
     });
   }
 
-  onProjectChange = event => {
+  onProjectChange = (event) => {
     this.props.updateConfig({
-      optimizelyProjectId: event.target.value
+      optimizelyProjectId: event.target.value,
     });
   };
 
-  onDeleteContentType = contentTypeId => {
+  onDeleteContentType = (contentTypeId) => {
     const { contentTypes } = this.props.config;
 
     const newContentTypes = {
-      ...contentTypes
+      ...contentTypes,
     };
 
     delete newContentTypes[contentTypeId];
 
     this.props.updateConfig({
-      contentTypes: newContentTypes
+      contentTypes: newContentTypes,
     });
   };
 
-  onAddContentType = contentTypeConfig => {
+  onAddContentType = (contentTypeConfig) => {
     const { contentTypes } = this.props.config;
 
     this.props.updateConfig({
       contentTypes: {
         ...contentTypes,
-        ...contentTypeConfig
-      }
+        ...contentTypeConfig,
+      },
     });
   };
 

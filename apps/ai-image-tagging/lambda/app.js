@@ -14,7 +14,7 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 const deps = {
   fetch,
   rekog,
-  documentClient
+  documentClient,
 };
 
 const app = express();

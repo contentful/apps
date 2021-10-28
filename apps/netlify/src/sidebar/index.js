@@ -12,16 +12,16 @@ import { parametersToConfig } from '../config';
 const styles = {
   previewContent: css({
     display: 'flex',
-    alignContent: 'center'
+    alignContent: 'center',
   }),
   separator: css({
-    marginTop: tokens.spacingS
-  })
+    marginTop: tokens.spacingS,
+  }),
 };
 
 export default class NetlifySidebar extends React.Component {
   static propTypes = {
-    sdk: PropTypes.object.isRequired
+    sdk: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -32,7 +32,7 @@ export default class NetlifySidebar extends React.Component {
     this.state = {
       users: [],
       sites,
-      selectedSiteIndex: 0
+      selectedSiteIndex: 0,
     };
   }
 
@@ -47,7 +47,7 @@ export default class NetlifySidebar extends React.Component {
     this.setState({ users: items });
   };
 
-  selectSite = e => {
+  selectSite = (e) => {
     this.setState({ selectedSiteIndex: parseInt(e.target.value, 10) });
   };
 
@@ -78,7 +78,8 @@ export default class NetlifySidebar extends React.Component {
           target="_blank"
           rel="noopener noreferrer"
           buttonType="muted"
-          isFullWidth>
+          isFullWidth
+        >
           <div className={styles.previewContent}>Open site</div>
         </Button>
       </>

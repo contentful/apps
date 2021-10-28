@@ -11,30 +11,36 @@ const sdk = {
     fields: {
       image: {
         getValue: jest.fn(),
-        onValueChanged: jest.fn()
+        onValueChanged: jest.fn(),
       },
       imageTags: {
         getValue: jest.fn(),
-        setValue: jest.fn()
-      }
-    }
+        setValue: jest.fn(),
+      },
+    },
   },
   space: {
-    getAsset: jest.fn()
+    getAsset: jest.fn(),
   },
   notifier: {
-    error: jest.fn()
-  }
+    error: jest.fn(),
+  },
 };
 
 configure({ testIdAttribute: 'data-test-id' });
 
 function renderComponent(sdk) {
-  return render(<AITagView space={sdk.space} entries={sdk.entry.fields} locale='en-US' notifier={sdk.notifier} />)
+  return render(
+    <AITagView
+      space={sdk.space}
+      entries={sdk.entry.fields}
+      locale="en-US"
+      notifier={sdk.notifier}
+    />
+  );
 }
 
 describe('AITagView', () => {
-
   describe('if there is no image', () => {
     it('should disable everything', async () => {
       const appView = renderComponent(sdk);
@@ -45,25 +51,24 @@ describe('AITagView', () => {
       expect(getByTestId('image-tag').disabled).toBeTruthy();
       expect(appView.container).toMatchSnapshot();
     });
-  })
+  });
 
   describe('if there is an image', () => {
     beforeEach(() => {
       const imgData = {
-        url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png",
+        url: '//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png',
         contentType: 'image/png',
-        details: { size: 200, height: 100, width: 100 }
+        details: { size: 200, height: 100, width: 100 },
       };
       sdk.space.getAsset.mockImplementation(() => ({
-        fields: {file: { 'en-US': imgData }}
-      }))
-
-    })
+        fields: { file: { 'en-US': imgData } },
+      }));
+    });
     it('should enable everything', async () => {
       sdk.entry.fields.image.getValue.mockImplementation(() => ({
         sys: {
-          id: '098dsjnwe9ds'
-        }
+          id: '098dsjnwe9ds',
+        },
       }));
 
       const { getByTestId, getByText, container } = renderComponent(sdk);
@@ -78,8 +83,8 @@ describe('AITagView', () => {
       const tags = ['tag1', 'tag2'];
       sdk.entry.fields.image.getValue.mockImplementation(() => ({
         sys: {
-          id: '098dsjnwe9ds'
-        }
+          id: '098dsjnwe9ds',
+        },
       }));
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => tags);
 
@@ -91,8 +96,8 @@ describe('AITagView', () => {
     it('should add image tags on Enter', async () => {
       sdk.entry.fields.image.getValue.mockImplementation(() => ({
         sys: {
-          id: '098dsjnwe9ds'
-        }
+          id: '098dsjnwe9ds',
+        },
       }));
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => []);
 
@@ -101,7 +106,7 @@ describe('AITagView', () => {
       await waitFor(() => getByTestId('image-tag'));
 
       const tagInput = getByTestId('image-tag');
-      fireEvent.change(tagInput, {target: { value: 'new tag'} });
+      fireEvent.change(tagInput, { target: { value: 'new tag' } });
       fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
       await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(1));
 
@@ -111,8 +116,8 @@ describe('AITagView', () => {
     it('should ignore duplicate image tags', async () => {
       sdk.entry.fields.image.getValue.mockImplementation(() => ({
         sys: {
-          id: '098dsjnwe9ds'
-        }
+          id: '098dsjnwe9ds',
+        },
       }));
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['tag1', 'tag2']);
 
@@ -121,36 +126,34 @@ describe('AITagView', () => {
       await waitFor(() => getByTestId('image-tag'));
 
       const tagInput = getByTestId('image-tag');
-      fireEvent.change(tagInput, {target: { value: 'tag1'} });
+      fireEvent.change(tagInput, { target: { value: 'tag1' } });
       fireEvent.keyPress(tagInput, { key: 'Enter', keyCode: 13 });
       await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(2));
 
       expect(appView.container).toMatchSnapshot();
     });
-  })
-
-
-
+  });
 
   describe('Calling AI Tags', () => {
     beforeEach(() => {
       const imgData = {
         url: '//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.jpeg',
         contentType: 'image/png',
-        details: { size: 200, height: 100, width: 100 }
+        details: { size: 200, height: 100, width: 100 },
       };
-      const expectedPath = '/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.jpeg'
+      const expectedPath =
+        '/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.jpeg';
 
       sdk.entry.fields.image.getValue.mockImplementation(() => ({
         sys: {
-          id: '098dsjnwe9ds'
-        }
+          id: '098dsjnwe9ds',
+        },
       }));
       sdk.space.getAsset.mockImplementation(() => ({
-        fields: {file: { 'en-US': imgData }}
-      }))
+        fields: { file: { 'en-US': imgData } },
+      }));
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => []);
-      fetchMock.get(`/tags/${expectedPath}`, {tags: ['ai-tag-1', 'ai-tag-2', 'ai-tag-3']})
+      fetchMock.get(`/tags/${expectedPath}`, { tags: ['ai-tag-1', 'ai-tag-2', 'ai-tag-3'] });
     });
 
     afterEach(fetchMock.reset);
@@ -158,12 +161,12 @@ describe('AITagView', () => {
     it('should fetch tags and render them on btn click', async () => {
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await waitFor(() => getByTestId('image-tag'))
+      await waitFor(() => getByTestId('image-tag'));
 
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-button'));
 
-      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(3))
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(3));
 
       expect(appView.container).toMatchSnapshot();
     });
@@ -172,12 +175,12 @@ describe('AITagView', () => {
       sdk.entry.fields.imageTags.getValue.mockImplementation(() => ['prior-tag']);
       const appView = renderComponent(sdk);
       const { getByTestId, getAllByTestId } = appView;
-      await waitFor(() => getAllByTestId('cf-ui-pill'))
+      await waitFor(() => getAllByTestId('cf-ui-pill'));
 
       expect(getAllByTestId('cf-ui-pill')).toHaveLength(1);
       getByTestId('image-tag').value = 'new tag';
       fireEvent.click(getByTestId('cf-ui-button'));
-      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(3))
+      await waitFor(() => expect(getAllByTestId('cf-ui-pill')).toHaveLength(3));
 
       expect(appView.container).toMatchSnapshot();
     });
@@ -200,13 +203,13 @@ describe('AITagView', () => {
 
     it('should disable btn if image type is unsupported', async () => {
       const imgData = {
-        url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.gif",
+        url: '//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.gif',
         contentType: 'image/gif',
-        details: { size: 200, height: 100, width: 100 }
+        details: { size: 200, height: 100, width: 100 },
       };
       sdk.space.getAsset.mockImplementation(() => ({
-        fields: {file: { 'en-US': imgData }}
-      }))
+        fields: { file: { 'en-US': imgData } },
+      }));
       const appView = renderComponent(sdk);
       const { getByTestId } = appView;
       await waitFor(() => expect(getByTestId('cf-ui-button').disabled).toBeTruthy());
@@ -217,13 +220,13 @@ describe('AITagView', () => {
 
     it('should disable btn if image dimensions are invalid', async () => {
       const imgData = {
-        url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png",
+        url: '//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png',
         contentType: 'image/png',
-        details: { size: 2000, height: 70, width: 200 }
+        details: { size: 2000, height: 70, width: 200 },
       };
       sdk.space.getAsset.mockImplementation(() => ({
-        fields: {file: { 'en-US': imgData }}
-      }))
+        fields: { file: { 'en-US': imgData } },
+      }));
       const appView = renderComponent(sdk);
       const { getByTestId } = appView;
 
@@ -234,13 +237,13 @@ describe('AITagView', () => {
 
     it('should disable btn if image is too big', async () => {
       const imgData = {
-        url: "//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png",
+        url: '//images.ctfassets.net/k3tebg1cbyuz/4dgP2U7BeMuk0icguS4qGw/59b8fe25285cdd1b5fcc69bd5555b3be/doge.png',
         contentType: 'image/png',
-        details: { size: 6000000, height: 3000, width: 300 }
+        details: { size: 6000000, height: 3000, width: 300 },
       };
       sdk.space.getAsset.mockImplementation(() => ({
-        fields: {file: { 'en-US': imgData }}
-      }))
+        fields: { file: { 'en-US': imgData } },
+      }));
       const appView = renderComponent(sdk);
       const { getByTestId } = appView;
 

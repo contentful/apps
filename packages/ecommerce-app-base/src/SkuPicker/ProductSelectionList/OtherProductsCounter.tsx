@@ -28,19 +28,20 @@ const styles = {
 
     '&:hover': {
       borderColor: tokens.gray500,
-      cursor: 'pointer'
-    }
+      cursor: 'pointer',
+    },
   }),
   tooltip: css({
-    height: '40px'
-  })
+    height: '40px',
+  }),
 };
 
 export const OtherProductsCounter = (props: Props) => (
   <Tooltip
     targetWrapperClassName={styles.tooltip}
     content={`${props.productCount} more`}
-    place="bottom">
+    place="bottom"
+  >
     <div className={styles.label}>
       <span>+{props.productCount}</span>
     </div>

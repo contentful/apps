@@ -12,16 +12,16 @@ const contentTypes = [
     name: 'CT1',
     fields: [
       { id: 'product_x', name: 'Product X', type: 'Symbol' },
-      { id: 'y', name: 'Y', type: 'Object' }
-    ]
+      { id: 'y', name: 'Y', type: 'Object' },
+    ],
   },
   {
     sys: { id: 'ct2' },
     name: 'CT2',
     fields: [
       { id: 'foo', name: 'FOO', type: 'Text' },
-      { id: 'z', name: 'Z', type: 'Array', items: { type: 'Symbol' } }
-    ]
+      { id: 'z', name: 'Z', type: 'Array', items: { type: 'Symbol' } },
+    ],
   },
   {
     sys: { id: 'ct3' },
@@ -30,24 +30,24 @@ const contentTypes = [
       { id: 'bar', name: 'BAR', type: 'Object' },
       { id: 'baz', name: 'BAZ', type: 'Object' },
       { id: 'product_d', name: 'Product D', type: 'Array', items: { type: 'Symbol' } },
-      { id: 'product_a', name: 'Product A', type: 'Symbol' }
-    ]
-  }
+      { id: 'product_a', name: 'Product A', type: 'Symbol' },
+    ],
+  },
 ];
 
 const makeSdkMock = () => ({
   ids: {
-    app: 'some-app'
+    app: 'some-app',
   },
   space: {
     getContentTypes: jest.fn().mockResolvedValue({ items: contentTypes }),
-    getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] })
+    getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] }),
   },
   app: {
     setReady: jest.fn(),
     getParameters: jest.fn().mockResolvedValue(null),
-    onConfigure: jest.fn().mockReturnValue(undefined)
-  }
+    onConfigure: jest.fn().mockReturnValue(undefined),
+  },
 });
 
 const validate = () => null; // Means no error
@@ -80,13 +80,13 @@ describe('AppConfig', () => {
       [/Client Secret/, ''],
       [/^API Endpoint/, ''],
       [/Auth API Endpoint/, ''],
-      [/Commercetools data locale/, '']
+      [/Commercetools data locale/, ''],
     ].forEach(([labelRe, expected]) => {
       const configInput = getByLabelText(labelRe) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
     });
 
-    [/Product X$/, /Product D$/].forEach(labelRe => {
+    [/Product X$/, /Product D$/].forEach((labelRe) => {
       const fieldCheckbox = getByLabelText(labelRe) as HTMLInputElement;
       expect(fieldCheckbox.checked).toBe(false);
     });
@@ -100,7 +100,7 @@ describe('AppConfig', () => {
       clientSecret: 'some-secret',
       apiEndpoint: 'some-endpoint',
       authApiEndpoint: 'some-auth-endpoint',
-      locale: 'en'
+      locale: 'en',
     });
     sdk.space.getEditorInterfaces.mockResolvedValueOnce({
       items: [
@@ -109,10 +109,10 @@ describe('AppConfig', () => {
           controls: [
             { fieldId: 'product_a', widgetNamespace: 'app', widgetId: 'some-app' },
             { fieldId: 'bar', widgetNamespace: 'app', widgetId: 'some-diff-app' },
-            { fieldId: 'product_d', widgetNamespace: 'app', widgetId: 'some-app' }
-          ]
-        }
-      ]
+            { fieldId: 'product_d', widgetNamespace: 'app', widgetId: 'some-app' },
+          ],
+        },
+      ],
     });
 
     const { getByLabelText } = renderComponent(sdk);
@@ -124,13 +124,16 @@ describe('AppConfig', () => {
       [/Client Secret/, 'some-secret'],
       [/^API Endpoint/, 'some-endpoint'],
       [/Auth API Endpoint/, 'some-auth-endpoint'],
-      [/Commercetools data locale/, 'en']
+      [/Commercetools data locale/, 'en'],
     ].forEach(([labelRe, expected]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
     });
 
-    [[/Product X$/, false], [/Product D$/, true]].forEach(([labelRe, expected]) => {
+    [
+      [/Product X$/, false],
+      [/Product D$/, true],
+    ].forEach(([labelRe, expected]) => {
       const fieldCheckbox = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(fieldCheckbox.checked).toBe(expected);
     });
@@ -146,7 +149,7 @@ describe('AppConfig', () => {
       [/Client Secret/, 'some-secret'],
       [/^API Endpoint/, 'some-endpoint'],
       [/Auth API Endpoint/, 'some-auth-endpoint'],
-      [/Commercetools data locale/, 'en']
+      [/Commercetools data locale/, 'en'],
     ].forEach(([labelRe, value]) => {
       const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
       fireEvent.change(configInput, { target: { value } });
@@ -165,15 +168,15 @@ describe('AppConfig', () => {
         clientSecret: 'some-secret',
         apiEndpoint: 'some-endpoint',
         authApiEndpoint: 'some-auth-endpoint',
-        locale: 'en'
+        locale: 'en',
       },
       targetState: {
         EditorInterface: {
           ct1: {},
           ct2: {},
-          ct3: { controls: [{ fieldId: 'product_d' }] }
-        }
-      }
+          ct3: { controls: [{ fieldId: 'product_d' }] },
+        },
+      },
     });
   });
 });

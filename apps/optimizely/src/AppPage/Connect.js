@@ -9,8 +9,8 @@ import ConnectButton from '../ConnectButton';
 
 const styles = {
   spacing: css({
-    margin: `${tokens.spacingM} 0`
-  })
+    margin: `${tokens.spacingM} 0`,
+  }),
 };
 
 export default function Connect({ openAuth }) {
@@ -27,5 +27,5 @@ export default function Connect({ openAuth }) {
 }
 
 Connect.propTypes = {
-  openAuth: PropTypes.func.isRequired
+  openAuth: PropTypes.func.isRequired,
 };

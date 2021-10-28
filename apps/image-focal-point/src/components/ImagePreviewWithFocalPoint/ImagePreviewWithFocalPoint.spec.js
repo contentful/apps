@@ -8,11 +8,11 @@ const props = {
   file: mockProps.file,
   focalPoint: {
     x: 10,
-    y: 30
+    y: 30,
   },
   wrapperWidth: 320,
   wrapperHeight: 180,
-  subtitle: 'Desktop'
+  subtitle: 'Desktop',
 };
 
 describe('ImagePreviewWithFocalPoint', () => {
