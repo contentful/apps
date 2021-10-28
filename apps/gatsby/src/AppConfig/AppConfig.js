@@ -63,7 +63,7 @@ export class AppConfig extends React.Component {
 
   state = {
     contentTypes: null,
-    enabledContentTypes: {},
+    enabledContentTypes: [],
     selectorType: false,
     urlConstructors: [],
     previewUrl: '',
