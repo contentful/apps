@@ -1,6 +1,6 @@
 {
   "name": "jira",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "private": true,
   "devDependencies": {
     "concurrently": "5.3.0",
