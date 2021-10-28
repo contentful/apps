@@ -3,6 +3,82 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.10](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.9...@contentful/dam-app-base@1.3.10) (2021-10-26)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.9](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.8...@contentful/dam-app-base@1.3.9) (2021-10-26)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#563](https://github.com/contentful/apps/issues/563)) ([b9656a8](https://github.com/contentful/apps/commit/b9656a84549857eb611492c604597a15bb01d86a))
+
+
+
+
+
+## [1.3.8](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.7...@contentful/dam-app-base@1.3.8) (2021-10-25)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#562](https://github.com/contentful/apps/issues/562)) ([fa3da1a](https://github.com/contentful/apps/commit/fa3da1a704fed01c5be4da3346bf73b8605ace83))
+
+
+
+
+
+## [1.3.7](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.6...@contentful/dam-app-base@1.3.7) (2021-10-22)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.6](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.5...@contentful/dam-app-base@1.3.6) (2021-10-21)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.5](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.4...@contentful/dam-app-base@1.3.5) (2021-10-20)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#553](https://github.com/contentful/apps/issues/553)) ([f12b499](https://github.com/contentful/apps/commit/f12b499848d640dc5c7a9a6322d0cf57761e6945))
+
+
+
+
+
+## [1.3.4](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.3...@contentful/dam-app-base@1.3.4) (2021-10-18)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.3](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.2...@contentful/dam-app-base@1.3.3) (2021-10-18)
+
+
+### Bug Fixes
+
+* **deps:** bump @emotion/css from 11.1.3 to 11.5.0 ([#548](https://github.com/contentful/apps/issues/548)) ([eee003b](https://github.com/contentful/apps/commit/eee003b5b2b7d47f87e22aba6bb676ee8daf87a8))
+
+
+
+
+
 ## [1.3.2](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.1...@contentful/dam-app-base@1.3.2) (2021-10-15)
 
 **Note:** Version bump only for package @contentful/dam-app-base

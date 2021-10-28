@@ -3,6 +3,70 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.10](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.9...mux-contentful-uploader@1.5.10) (2021-10-26)
+
+**Note:** Version bump only for package mux-contentful-uploader
+
+
+
+
+
+## [1.5.9](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.8...mux-contentful-uploader@1.5.9) (2021-10-26)
+
+**Note:** Version bump only for package mux-contentful-uploader
+
+
+
+
+
+## [1.5.8](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.7...mux-contentful-uploader@1.5.8) (2021-10-25)
+
+**Note:** Version bump only for package mux-contentful-uploader
+
+
+
+
+
+## [1.5.7](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.6...mux-contentful-uploader@1.5.7) (2021-10-22)
+
+**Note:** Version bump only for package mux-contentful-uploader
+
+
+
+
+
+## [1.5.6](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.5...mux-contentful-uploader@1.5.6) (2021-10-21)
+
+**Note:** Version bump only for package mux-contentful-uploader
+
+
+
+
+
+## [1.5.5](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.4...mux-contentful-uploader@1.5.5) (2021-10-20)
+
+**Note:** Version bump only for package mux-contentful-uploader
+
+
+
+
+
+## [1.5.4](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.3...mux-contentful-uploader@1.5.4) (2021-10-18)
+
+**Note:** Version bump only for package mux-contentful-uploader
+
+
+
+
+
+## [1.5.3](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.2...mux-contentful-uploader@1.5.3) (2021-10-18)
+
+**Note:** Version bump only for package mux-contentful-uploader
+
+
+
+
+
 ## [1.5.2](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.1...mux-contentful-uploader@1.5.2) (2021-10-15)
 
 **Note:** Version bump only for package mux-contentful-uploader

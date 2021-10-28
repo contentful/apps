@@ -3,6 +3,70 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.57](https://github.com/contentful/apps/compare/frontify-assets@1.4.56...frontify-assets@1.4.57) (2021-10-26)
+
+**Note:** Version bump only for package frontify-assets
+
+
+
+
+
+## [1.4.56](https://github.com/contentful/apps/compare/frontify-assets@1.4.55...frontify-assets@1.4.56) (2021-10-26)
+
+**Note:** Version bump only for package frontify-assets
+
+
+
+
+
+## [1.4.55](https://github.com/contentful/apps/compare/frontify-assets@1.4.54...frontify-assets@1.4.55) (2021-10-25)
+
+**Note:** Version bump only for package frontify-assets
+
+
+
+
+
+## [1.4.54](https://github.com/contentful/apps/compare/frontify-assets@1.4.53...frontify-assets@1.4.54) (2021-10-22)
+
+**Note:** Version bump only for package frontify-assets
+
+
+
+
+
+## [1.4.53](https://github.com/contentful/apps/compare/frontify-assets@1.4.52...frontify-assets@1.4.53) (2021-10-21)
+
+**Note:** Version bump only for package frontify-assets
+
+
+
+
+
+## [1.4.52](https://github.com/contentful/apps/compare/frontify-assets@1.4.51...frontify-assets@1.4.52) (2021-10-20)
+
+**Note:** Version bump only for package frontify-assets
+
+
+
+
+
+## [1.4.51](https://github.com/contentful/apps/compare/frontify-assets@1.4.50...frontify-assets@1.4.51) (2021-10-18)
+
+**Note:** Version bump only for package frontify-assets
+
+
+
+
+
+## [1.4.50](https://github.com/contentful/apps/compare/frontify-assets@1.4.49...frontify-assets@1.4.50) (2021-10-18)
+
+**Note:** Version bump only for package frontify-assets
+
+
+
+
+
 ## [1.4.49](https://github.com/contentful/apps/compare/frontify-assets@1.4.48...frontify-assets@1.4.49) (2021-10-15)
 
 **Note:** Version bump only for package frontify-assets

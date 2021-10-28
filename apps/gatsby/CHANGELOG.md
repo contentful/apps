@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.10.0](https://github.com/contentful/apps/compare/gatsby-preview@1.9.0...gatsby-preview@1.10.0) (2021-10-27)
+
+
+### Features
+
+* [] Add Gatsby Cloud Content Sync support (Next-gen Preview) ([#543](https://github.com/contentful/apps/issues/543)) ([9ca8ad8](https://github.com/contentful/apps/commit/9ca8ad8e4196f5088cbb22aea600cb0c7ba25dcd)), closes [#6](https://github.com/contentful/apps/issues/6) [#11](https://github.com/contentful/apps/issues/11)
+
+
+
+
+
 # [1.9.0](https://github.com/contentful/apps/compare/gatsby-preview@1.8.3...gatsby-preview@1.9.0) (2021-10-13)
 
 

@@ -3,6 +3,86 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.47](https://github.com/contentful/apps/compare/shopify-sku@1.7.46...shopify-sku@1.7.47) (2021-10-26)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
+## [1.7.46](https://github.com/contentful/apps/compare/shopify-sku@1.7.45...shopify-sku@1.7.46) (2021-10-26)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
+## [1.7.45](https://github.com/contentful/apps/compare/shopify-sku@1.7.44...shopify-sku@1.7.45) (2021-10-25)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
+## [1.7.44](https://github.com/contentful/apps/compare/shopify-sku@1.7.43...shopify-sku@1.7.44) (2021-10-25)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
+## [1.7.43](https://github.com/contentful/apps/compare/shopify-sku@1.7.42...shopify-sku@1.7.43) (2021-10-22)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
+## [1.7.42](https://github.com/contentful/apps/compare/shopify-sku@1.7.41...shopify-sku@1.7.42) (2021-10-22)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
+## [1.7.41](https://github.com/contentful/apps/compare/shopify-sku@1.7.40...shopify-sku@1.7.41) (2021-10-21)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
+## [1.7.40](https://github.com/contentful/apps/compare/shopify-sku@1.7.39...shopify-sku@1.7.40) (2021-10-20)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
+## [1.7.39](https://github.com/contentful/apps/compare/shopify-sku@1.7.38...shopify-sku@1.7.39) (2021-10-18)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
+## [1.7.38](https://github.com/contentful/apps/compare/shopify-sku@1.7.37...shopify-sku@1.7.38) (2021-10-18)
+
+**Note:** Version bump only for package shopify-sku
+
+
+
+
+
 ## [1.7.37](https://github.com/contentful/apps/compare/shopify-sku@1.7.36...shopify-sku@1.7.37) (2021-10-15)
 
 **Note:** Version bump only for package shopify-sku

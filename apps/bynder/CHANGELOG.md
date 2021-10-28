@@ -3,6 +3,70 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.58](https://github.com/contentful/apps/compare/bynder-assets@1.7.57...bynder-assets@1.7.58) (2021-10-26)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.7.57](https://github.com/contentful/apps/compare/bynder-assets@1.7.56...bynder-assets@1.7.57) (2021-10-26)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.7.56](https://github.com/contentful/apps/compare/bynder-assets@1.7.55...bynder-assets@1.7.56) (2021-10-25)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.7.55](https://github.com/contentful/apps/compare/bynder-assets@1.7.54...bynder-assets@1.7.55) (2021-10-22)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.7.54](https://github.com/contentful/apps/compare/bynder-assets@1.7.53...bynder-assets@1.7.54) (2021-10-21)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.7.53](https://github.com/contentful/apps/compare/bynder-assets@1.7.52...bynder-assets@1.7.53) (2021-10-20)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.7.52](https://github.com/contentful/apps/compare/bynder-assets@1.7.51...bynder-assets@1.7.52) (2021-10-18)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
+## [1.7.51](https://github.com/contentful/apps/compare/bynder-assets@1.7.50...bynder-assets@1.7.51) (2021-10-18)
+
+**Note:** Version bump only for package bynder-assets
+
+
+
+
+
 ## [1.7.50](https://github.com/contentful/apps/compare/bynder-assets@1.7.49...bynder-assets@1.7.50) (2021-10-15)
 
 **Note:** Version bump only for package bynder-assets

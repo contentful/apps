@@ -3,6 +3,70 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.65](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.64...brandfolder-assets@1.8.65) (2021-10-26)
+
+**Note:** Version bump only for package brandfolder-assets
+
+
+
+
+
+## [1.8.64](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.63...brandfolder-assets@1.8.64) (2021-10-26)
+
+**Note:** Version bump only for package brandfolder-assets
+
+
+
+
+
+## [1.8.63](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.62...brandfolder-assets@1.8.63) (2021-10-25)
+
+**Note:** Version bump only for package brandfolder-assets
+
+
+
+
+
+## [1.8.62](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.61...brandfolder-assets@1.8.62) (2021-10-22)
+
+**Note:** Version bump only for package brandfolder-assets
+
+
+
+
+
+## [1.8.61](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.60...brandfolder-assets@1.8.61) (2021-10-21)
+
+**Note:** Version bump only for package brandfolder-assets
+
+
+
+
+
+## [1.8.60](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.59...brandfolder-assets@1.8.60) (2021-10-20)
+
+**Note:** Version bump only for package brandfolder-assets
+
+
+
+
+
+## [1.8.59](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.58...brandfolder-assets@1.8.59) (2021-10-18)
+
+**Note:** Version bump only for package brandfolder-assets
+
+
+
+
+
+## [1.8.58](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.57...brandfolder-assets@1.8.58) (2021-10-18)
+
+**Note:** Version bump only for package brandfolder-assets
+
+
+
+
+
 ## [1.8.57](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.56...brandfolder-assets@1.8.57) (2021-10-15)
 
 **Note:** Version bump only for package brandfolder-assets

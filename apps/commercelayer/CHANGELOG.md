@@ -3,6 +3,86 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.70](https://github.com/contentful/apps/compare/commercelayer-products@1.4.69...commercelayer-products@1.4.70) (2021-10-26)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
+## [1.4.69](https://github.com/contentful/apps/compare/commercelayer-products@1.4.68...commercelayer-products@1.4.69) (2021-10-26)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
+## [1.4.68](https://github.com/contentful/apps/compare/commercelayer-products@1.4.67...commercelayer-products@1.4.68) (2021-10-25)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
+## [1.4.67](https://github.com/contentful/apps/compare/commercelayer-products@1.4.66...commercelayer-products@1.4.67) (2021-10-25)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
+## [1.4.66](https://github.com/contentful/apps/compare/commercelayer-products@1.4.65...commercelayer-products@1.4.66) (2021-10-22)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
+## [1.4.65](https://github.com/contentful/apps/compare/commercelayer-products@1.4.64...commercelayer-products@1.4.65) (2021-10-22)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
+## [1.4.64](https://github.com/contentful/apps/compare/commercelayer-products@1.4.63...commercelayer-products@1.4.64) (2021-10-21)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
+## [1.4.63](https://github.com/contentful/apps/compare/commercelayer-products@1.4.62...commercelayer-products@1.4.63) (2021-10-20)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
+## [1.4.62](https://github.com/contentful/apps/compare/commercelayer-products@1.4.61...commercelayer-products@1.4.62) (2021-10-18)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
+## [1.4.61](https://github.com/contentful/apps/compare/commercelayer-products@1.4.60...commercelayer-products@1.4.61) (2021-10-18)
+
+**Note:** Version bump only for package commercelayer-products
+
+
+
+
+
 ## [1.4.60](https://github.com/contentful/apps/compare/commercelayer-products@1.4.59...commercelayer-products@1.4.60) (2021-10-15)
 
 **Note:** Version bump only for package commercelayer-products

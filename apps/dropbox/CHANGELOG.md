@@ -3,6 +3,70 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.58](https://github.com/contentful/apps/compare/dropbox-assets@1.5.57...dropbox-assets@1.5.58) (2021-10-26)
+
+**Note:** Version bump only for package dropbox-assets
+
+
+
+
+
+## [1.5.57](https://github.com/contentful/apps/compare/dropbox-assets@1.5.56...dropbox-assets@1.5.57) (2021-10-26)
+
+**Note:** Version bump only for package dropbox-assets
+
+
+
+
+
+## [1.5.56](https://github.com/contentful/apps/compare/dropbox-assets@1.5.55...dropbox-assets@1.5.56) (2021-10-25)
+
+**Note:** Version bump only for package dropbox-assets
+
+
+
+
+
+## [1.5.55](https://github.com/contentful/apps/compare/dropbox-assets@1.5.54...dropbox-assets@1.5.55) (2021-10-22)
+
+**Note:** Version bump only for package dropbox-assets
+
+
+
+
+
+## [1.5.54](https://github.com/contentful/apps/compare/dropbox-assets@1.5.53...dropbox-assets@1.5.54) (2021-10-21)
+
+**Note:** Version bump only for package dropbox-assets
+
+
+
+
+
+## [1.5.53](https://github.com/contentful/apps/compare/dropbox-assets@1.5.52...dropbox-assets@1.5.53) (2021-10-20)
+
+**Note:** Version bump only for package dropbox-assets
+
+
+
+
+
+## [1.5.52](https://github.com/contentful/apps/compare/dropbox-assets@1.5.51...dropbox-assets@1.5.52) (2021-10-18)
+
+**Note:** Version bump only for package dropbox-assets
+
+
+
+
+
+## [1.5.51](https://github.com/contentful/apps/compare/dropbox-assets@1.5.50...dropbox-assets@1.5.51) (2021-10-18)
+
+**Note:** Version bump only for package dropbox-assets
+
+
+
+
+
 ## [1.5.50](https://github.com/contentful/apps/compare/dropbox-assets@1.5.49...dropbox-assets@1.5.50) (2021-10-15)
 
 **Note:** Version bump only for package dropbox-assets

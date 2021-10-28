@@ -3,6 +3,70 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.58](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.57...cloudinary-assets@1.4.58) (2021-10-26)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.4.57](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.56...cloudinary-assets@1.4.57) (2021-10-26)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.4.56](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.55...cloudinary-assets@1.4.56) (2021-10-25)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.4.55](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.54...cloudinary-assets@1.4.55) (2021-10-22)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.4.54](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.53...cloudinary-assets@1.4.54) (2021-10-21)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.4.53](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.52...cloudinary-assets@1.4.53) (2021-10-20)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.4.52](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.51...cloudinary-assets@1.4.52) (2021-10-18)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
+## [1.4.51](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.50...cloudinary-assets@1.4.51) (2021-10-18)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
 ## [1.4.50](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.49...cloudinary-assets@1.4.50) (2021-10-15)
 
 **Note:** Version bump only for package cloudinary-assets
