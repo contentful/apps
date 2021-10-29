@@ -263,10 +263,14 @@ export default class Sidebar extends React.Component {
 
     if (contentSyncUrl && !(webhookUrl || previewWebhookUrl)) {
       return (
-        <HelpText style={STATUS_STYLE}>
-          <Icon icon="Warning" color="negative" style={ICON_STYLE} /> Please add a Preview Webhook
-          URL to your Gatsby App settings.
-        </HelpText>
+        <div className="extension">
+          <div className="flexcontainer">
+            <HelpText style={STATUS_STYLE}>
+              <Icon icon="Warning" color="negative" style={ICON_STYLE} /> Please add a Preview
+              Webhook URL to your Gatsby App settings.
+            </HelpText>
+          </div>
+        </div>
       );
     }
 
