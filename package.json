@@ -9,6 +9,7 @@
   "scripts": {
     "bootstrap": "lerna bootstrap --no-ci",
     "bootstrap:ci": "lerna bootstrap --ci --concurrency=3",
+    "clean": "lerna clean",
     "lint": "lerna run lint --concurrency=3",
     "build": "lerna run build --concurrency=1 --stream",
     "test": "lerna run test:ci --concurrency=1 --stream",
