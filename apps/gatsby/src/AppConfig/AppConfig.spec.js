@@ -60,11 +60,6 @@ function makeContentTypes() {
   ];
 }
 
-function makeEnabledContentTypes() {
-  return ['page'];
-};
-
-
 describe('<AppConfig />', () => {
   /** 
    * Because the Contentful SDK takes care of calling configure, we need to follow an atypical
