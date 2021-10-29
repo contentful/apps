@@ -63,7 +63,7 @@ export class AppConfig extends React.Component {
 
   state = {
     contentTypes: null,
-    enabledContentTypes: {},
+    enabledContentTypes: [],
     selectorType: false,
     urlConstructors: [],
     previewUrl: '',
@@ -123,7 +123,7 @@ export class AppConfig extends React.Component {
     const validWebhook = !webhookUrl || isValidUrl(webhookUrl);
     const validPreviewWebhook = !previewWebhookUrl || isValidUrl(previewWebhookUrl);
 
-    const valid = !!validPreview && !!validContentSync && !!validWebhook;
+    const valid = !!validPreview && !!validContentSync && !!validWebhook && !!validPreviewWebhook;
 
     this.setState({
       validPreview: validPreview,
