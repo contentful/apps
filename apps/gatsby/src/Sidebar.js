@@ -261,7 +261,7 @@ export default class Sidebar extends React.Component {
 
     previewUrl = this.getPreviewUrl();
 
-    if (contentSyncUrl && !(webhookUrl || previewWebhookUrl)) {
+    if (contentSyncUrl && !previewWebhookUrl) {
       return (
         <div className="extension">
           <div className="flexcontainer">

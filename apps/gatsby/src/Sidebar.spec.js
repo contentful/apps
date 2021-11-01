@@ -90,6 +90,7 @@ describe('Gatsby App Sidebar', () => {
 
     const contentSyncUrl = 'https://content-sync.com/content-sync/fake-site-id';
     mockSdk.parameters.installation.contentSyncUrl = contentSyncUrl;
+    mockSdk.parameters.installation.previewWebhookUrl = WEBHOOK_URL;
 
     const { getByText } = render(<Sidebar sdk={mockSdk} />);
 
