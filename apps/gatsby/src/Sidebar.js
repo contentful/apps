@@ -255,32 +255,39 @@ export default class Sidebar extends React.Component {
   };
 
   render = () => {
-    let { contentSyncUrl, authToken, previewUrl, webhookUrl } = this.sdk.parameters.installation;
+    let { contentSyncUrl, authToken, previewUrl, webhookUrl, previewWebhookUrl } =
+      this.sdk.parameters.installation;
     const { slug } = this.state;
 
     previewUrl = this.getPreviewUrl();
 
-    return (
-      <div className="extension">
-        <div className="flexcontainer">
-          {webhookUrl ? (
-            <>
-              <ExtensionUI
-                disabled={this.state.buttonDisabled}
-                disablePreviewOpen={!!contentSyncUrl}
-                contentSlug={!!slug && slug}
-                previewUrl={previewUrl}
-                authToken={authToken}
-                onOpenPreviewButtonClick={!!contentSyncUrl ? this.handleContentSync : () => {}}
-              />
-              {!!this.state.buttonDisabled && <Spinner />}
-            </>
-          ) : (
+    if (contentSyncUrl && !previewWebhookUrl) {
+      return (
+        <div className="extension">
+          <div className="flexcontainer">
             <HelpText style={STATUS_STYLE}>
               <Icon icon="Warning" color="negative" style={ICON_STYLE} /> Please add a Preview
               Webhook URL to your Gatsby App settings.
             </HelpText>
-          )}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="extension">
+        <div className="flexcontainer">
+          <>
+            <ExtensionUI
+              disabled={this.state.buttonDisabled}
+              disablePreviewOpen={!!contentSyncUrl}
+              contentSlug={!!slug && slug}
+              previewUrl={previewUrl}
+              authToken={authToken}
+              onOpenPreviewButtonClick={!!contentSyncUrl ? this.handleContentSync : () => {}}
+            />
+            {!!this.state.buttonDisabled && <Spinner />}
+          </>
 
           {!!webhookUrl && !contentSyncUrl && this.renderRefreshStatus()}
         </div>
