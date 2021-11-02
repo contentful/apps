@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.3](https://github.com/contentful/apps/compare/gatsby-preview@1.10.2...gatsby-preview@1.10.3) (2021-11-02)
+
+
+### Bug Fixes
+
+* [] preview button incorrectly hidden ([#569](https://github.com/contentful/apps/issues/569)) ([a665d6a](https://github.com/contentful/apps/commit/a665d6a72e3c05d272e7543fd7b2999ddbdf4c65))
+
+
+
+
+
 ## [1.10.2](https://github.com/contentful/apps/compare/gatsby-preview@1.10.1...gatsby-preview@1.10.2) (2021-10-29)
 
 
