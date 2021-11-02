@@ -67,6 +67,12 @@ export class AppConfig extends React.Component {
     selectorType: false,
     urlConstructors: [],
     previewUrl: '',
+    /**
+     * The Preview Webhook Url was historically named "webhookUrl" which is a *bit* confusing
+     * since you might expect it to be called "previewWebhookUrl" In order to keep backwards
+     * compatibility for users not yet using Content Sync, we must continue using the
+     * variable / keyname "webhookUrl"
+     */
     webhookUrl: '',
     contentSyncUrl: '',
     authToken: '',
@@ -96,7 +102,6 @@ export class AppConfig extends React.Component {
         urlConstructors: params.urlConstructors || [],
         previewUrl: params.previewUrl || '',
         webhookUrl: params.webhookUrl || '',
-        previewWebhookUrl: params.previewWebhookUrl || '',
         contentSyncUrl: params.contentSyncUrl || '',
         authToken: params.authToken || '',
       },
@@ -114,22 +119,19 @@ export class AppConfig extends React.Component {
       previewUrl,
       contentSyncUrl,
       webhookUrl,
-      previewWebhookUrl,
       authToken,
     } = this.state;
 
     const validPreview = !previewUrl || isValidUrl(previewUrl);
     const validContentSync = !contentSyncUrl || isValidUrl(contentSyncUrl);
     const validWebhook = !webhookUrl || isValidUrl(webhookUrl);
-    const validPreviewWebhook = !previewWebhookUrl || isValidUrl(previewWebhookUrl);
 
-    const valid = !!validPreview && !!validContentSync && !!validWebhook && !!validPreviewWebhook;
+    const valid = !!validPreview && !!validContentSync && !!validWebhook;
 
     this.setState({
       validPreview: validPreview,
       validContentSync: validContentSync,
       validWebhook: validWebhook,
-      validPreviewWebhook: validPreviewWebhook,
     });
 
     if (!valid) {
@@ -145,7 +147,6 @@ export class AppConfig extends React.Component {
         previewUrl,
         contentSyncUrl,
         webhookUrl,
-        previewWebhookUrl,
         authToken,
         urlConstructors,
       },
@@ -170,10 +171,6 @@ export class AppConfig extends React.Component {
     this.setState({ webhookUrl: e.target.value, validWebhook: true });
   };
 
-  updatePreviewWebhookUrl = (e) => {
-    this.setState({ previewWebhookUrl: e.target.value, validPreviewWebhook: true });
-  };
-
   updateAuthToken = (e) => {
     this.setState({ authToken: e.target.value });
   };
@@ -195,14 +192,6 @@ export class AppConfig extends React.Component {
   validateWebhookUrl = () => {
     if (this.state.webhookUrl && !this.state.webhookUrl.startsWith('http')) {
       this.setState({ validWebhook: false });
-    }
-  };
-
-  validatePreviewWebhookUrl = () => {
-    if (this.state.previewWebhookUrl) {
-      this.setState({
-        validPreviewWebhook: isValidUrl(this.state.previewWebhookUrl),
-      });
     }
   };
 
