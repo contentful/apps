@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.4](https://github.com/contentful/apps/compare/gatsby-preview@1.10.3...gatsby-preview@1.10.4) (2021-11-02)
+
+
+### Bug Fixes
+
+* remove previewWebhookUrl references and use webhookUrl instead ([#576](https://github.com/contentful/apps/issues/576)) ([9b84aed](https://github.com/contentful/apps/commit/9b84aed7ad104eba5bf8655e8706bd23db8d7c16))
+
+
+
+
+
 ## [1.10.3](https://github.com/contentful/apps/compare/gatsby-preview@1.10.2...gatsby-preview@1.10.3) (2021-11-02)
 
 
