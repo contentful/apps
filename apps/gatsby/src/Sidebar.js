@@ -161,12 +161,10 @@ export default class Sidebar extends React.Component {
       return;
     }
 
-    const previewWebhookUrl =
-      this.sdk.parameters.installation.previewWebhookUrl ||
-      this.sdk.parameters.installation.webhookUrl;
+    const { webhookUrl } = this.sdk.parameters.installation;
 
-    if (previewWebhookUrl) {
-      callWebhook(previewWebhookUrl, authToken);
+    if (webhookUrl) {
+      callWebhook(webhookUrl, authToken);
     } else {
       console.warn(`Please add a Preview Webhook URL to your Gatsby Cloud App settings.`);
     }
@@ -255,13 +253,13 @@ export default class Sidebar extends React.Component {
   };
 
   render = () => {
-    let { contentSyncUrl, authToken, previewUrl, webhookUrl, previewWebhookUrl } =
+    let { contentSyncUrl, authToken, previewUrl, webhookUrl } =
       this.sdk.parameters.installation;
     const { slug } = this.state;
 
     previewUrl = this.getPreviewUrl();
 
-    if (contentSyncUrl && !previewWebhookUrl) {
+    if (contentSyncUrl && !webhookUrl) {
       return (
         <div className="extension">
           <div className="flexcontainer">

@@ -8,10 +8,8 @@ function delay(ms) {
 
 function makeMockSdk({
   onConfigure = () => {},
-  getParameters = () => {},
   previewUrl = 'https://preview.de',
   webhookUrl = 'https://webhook.de',
-  previewWebhookUrl = 'https://preview-webhook.de',
   contentSyncUrl = 'https://content-sync-url.de',
 }) {
   return {
@@ -28,7 +26,6 @@ function makeMockSdk({
       getParameters: () => ({
         previewUrl,
         webhookUrl,
-        previewWebhookUrl,
         contentSyncUrl,
       }),
       getCurrentState: () => ({ EditorInterface: {} }),
@@ -85,7 +82,6 @@ describe('<AppConfig />', () => {
       expect(configureResult).toBeTruthy();
       expect(parameters.previewUrl).toEqual('https://preview.de');
       expect(parameters.webhookUrl).toEqual('https://webhook.de');
-      expect(parameters.previewWebhookUrl).toEqual('https://preview-webhook.de');
       expect(parameters.contentSyncUrl).toEqual('https://content-sync-url.de');
     });
 
@@ -113,23 +109,6 @@ describe('<AppConfig />', () => {
           configure = cb;
         }),
         webhookUrl: 'not-a-real-url',
-      });
-
-      render(<AppConfig sdk={mockSdk} />);
-
-      await delay(500);
-      const configureResult = await configure();
-
-      expect(configureResult).toEqual(false);
-    });
-
-    it('returns false if previewWebhookUrl is invalid', async () => {
-      let configure;
-      const mockSdk = makeMockSdk({
-        onConfigure: jest.fn((cb) => {
-          configure = cb;
-        }),
-        previewWebhookUrl: 'not-a-real-url',
       });
 
       render(<AppConfig sdk={mockSdk} />);
