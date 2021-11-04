@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.60](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.59...cloudinary-assets@1.4.60) (2021-11-04)
+
+**Note:** Version bump only for package cloudinary-assets
+
+
+
+
+
 ## [1.4.59](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.58...cloudinary-assets@1.4.59) (2021-10-28)
 
 **Note:** Version bump only for package cloudinary-assets
