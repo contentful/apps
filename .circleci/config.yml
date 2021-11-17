@@ -17,11 +17,11 @@ commands:
   deploy:
     steps:
       - run:
-          name: Install pip
-          command: sudo apt-get install python3-pip python3-dev
-      - run:
           name: Install awscli
-          command: sudo pip3 install awscli
+          command: |
+            sudo apt-get update
+            sudo apt-get install python3-pip python3-dev
+            sudo pip3 install awscli
       - run:
           name: Deploy apps to test
           command: |
@@ -38,7 +38,7 @@ commands:
 jobs:
   all:
     docker:
-      - image: circleci/node:14.16-stretch
+      - image: cimg/node:14.18
     resource_class: medium+
     steps:
       - checkout
