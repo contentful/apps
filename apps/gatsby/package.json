@@ -1,6 +1,6 @@
 {
   "name": "gatsby-preview",
-  "version": "1.10.4",
+  "version": "1.10.5",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
