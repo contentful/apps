@@ -19,7 +19,7 @@
     "@contentful/forma-36-react-components": "3.93.2",
     "@contentful/forma-36-tokens": "0.11.0",
     "emotion": "10.0.27",
-    "lodash": "4.17.15",
+    "lodash": "4.17.21",
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
