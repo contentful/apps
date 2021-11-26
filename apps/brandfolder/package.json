@@ -1,13 +1,13 @@
 {
   "name": "brandfolder-assets",
-  "version": "1.8.76",
+  "version": "1.8.77",
   "private": true,
   "devDependencies": {
     "cross-env": "7.0.3"
   },
   "dependencies": {
     "@contentful/app-scripts": "0.8.45",
-    "@contentful/dam-app-base": "^1.3.21",
+    "@contentful/dam-app-base": "^1.3.22",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "react-scripts": "4.0.3"
