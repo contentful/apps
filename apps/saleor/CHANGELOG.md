@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.33](https://github.com/contentful/apps/compare/saleor@1.5.32...saleor@1.5.33) (2021-12-02)
+
+**Note:** Version bump only for package saleor
+
+
+
+
+
 ## [1.5.32](https://github.com/contentful/apps/compare/saleor@1.5.31...saleor@1.5.32) (2021-12-01)
 
 **Note:** Version bump only for package saleor
