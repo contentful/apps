@@ -27,6 +27,7 @@ if (window.location.search.includes('token')) {
     }
 
     if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
+      (sdk as SidebarExtensionSDK).window.startAutoResizer()
       renderAtRoot(
         <Auth
           notifyError={sdk.notifier.error}

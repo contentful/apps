@@ -33,7 +33,6 @@ export default class Jira extends React.Component<Props, State> {
   }
 
   async componentDidMount() {
-    this.props.sdk.window.startAutoResizer();
     await this.getIssues();
 
     this.issueInterval = setInterval(this.getIssues, 30000);
