@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.2](https://github.com/contentful/apps/compare/jira-app@1.5.1...jira-app@1.5.2) (2021-12-06)
+
+
+### Bug Fixes
+
+* **jira:** start auto resizer when not authenticated ([#623](https://github.com/contentful/apps/issues/623)) ([141a26a](https://github.com/contentful/apps/commit/141a26a2409a7f974d351baa4f57b74934c30540))
+
+
+
+
+
 ## [1.5.1](https://github.com/contentful/apps/compare/jira-app@1.5.0...jira-app@1.5.1) (2021-10-28)
 
 **Note:** Version bump only for package jira-app
