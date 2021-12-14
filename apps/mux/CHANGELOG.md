@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.30](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.29...mux-contentful-uploader@1.5.30) (2021-12-14)
+
+**Note:** Version bump only for package mux-contentful-uploader
+
+
+
+
+
 ## [1.5.29](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.28...mux-contentful-uploader@1.5.29) (2021-12-13)
 
 **Note:** Version bump only for package mux-contentful-uploader
