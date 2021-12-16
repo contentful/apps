@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.2](https://github.com/contentful/apps/compare/commercetools@1.7.1...commercetools@1.7.2) (2021-12-16)
+
+
+### Bug Fixes
+
+* add localize string to helper ([#639](https://github.com/contentful/apps/issues/639)) ([80fd580](https://github.com/contentful/apps/commit/80fd58045f5d0503803b40da971c1851bf41368a))
+
+
+
+
+
 ## [1.7.1](https://github.com/contentful/apps/compare/commercetools@1.7.0...commercetools@1.7.1) (2021-10-28)
 
 **Note:** Version bump only for package commercetools
