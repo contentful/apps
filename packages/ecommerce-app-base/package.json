@@ -1,7 +1,7 @@
 {
   "name": "@contentful/ecommerce-app-base",
   "description": "Library to quickly build an app to integrate your e-commerce system of choice with Contentful",
-  "version": "2.6.47",
+  "version": "2.6.48",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
