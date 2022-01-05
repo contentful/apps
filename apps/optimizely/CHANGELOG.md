@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.2](https://github.com/contentful/apps/compare/optimizely@1.5.1...optimizely@1.5.2) (2022-01-05)
+
+
+### Bug Fixes
+
+* **Optimizely:** remove index.js script tag ([#657](https://github.com/contentful/apps/issues/657)) ([ac04020](https://github.com/contentful/apps/commit/ac0402041ac73768e44cc2c751e83c2732d890d3))
+
+
+
+
+
 ## [1.5.1](https://github.com/contentful/apps/compare/optimizely@1.5.0...optimizely@1.5.1) (2021-10-28)
 
 **Note:** Version bump only for package optimizely
