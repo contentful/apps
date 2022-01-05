@@ -1,6 +1,6 @@
 {
   "name": "commercelayer-products",
-  "version": "1.4.107",
+  "version": "1.4.108",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@commercelayer/js-auth": "2.0.1",
-    "@contentful/ecommerce-app-base": "^2.6.51",
+    "@contentful/ecommerce-app-base": "^2.6.52",
     "core-js": "3.4.1",
     "react": "17.0.1",
     "react-dom": "17.0.1"
