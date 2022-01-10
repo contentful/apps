@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.10](https://github.com/contentful/apps/compare/gatsby-preview@1.10.9...gatsby-preview@1.10.10) (2022-01-10)
+
+**Note:** Version bump only for package gatsby-preview
+
+
+
+
+
 ## [1.10.9](https://github.com/contentful/apps/compare/gatsby-preview@1.10.8...gatsby-preview@1.10.9) (2021-11-18)
 
 **Note:** Version bump only for package gatsby-preview
