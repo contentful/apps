@@ -1,5 +1,5 @@
 {
-  "name": "frontify-assets",
+  "name": "@contentful/frontify-assets",
   "version": "1.4.85",
   "private": true,
   "devDependencies": {

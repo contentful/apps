@@ -1,5 +1,5 @@
 {
-  "name": "typeform-frontend",
+  "name": "@contentful/typeform-frontend",
   "version": "1.4.1",
   "private": true,
   "main": "build/index.html",

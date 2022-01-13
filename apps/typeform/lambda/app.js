@@ -13,7 +13,7 @@ const deps = {
 
 const app = express();
 
-const FRONTEND = path.dirname(require.resolve('typeform-frontend'));
+const FRONTEND = path.dirname(require.resolve('@contentful/typeform-frontend'));
 
 app.use('/forms', async (req, res) => {
   const { authorization } = req.headers;

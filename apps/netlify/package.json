@@ -1,5 +1,5 @@
 {
-  "name": "netlify-build-and-preview",
+  "name": "@contentful/netlify-build-and-preview",
   "version": "1.5.1",
   "private": true,
   "devDependencies": {

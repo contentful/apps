@@ -1,5 +1,5 @@
 {
-  "name": "backend_app_demo",
+  "name": "@contentful/backend_app_demo",
   "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {

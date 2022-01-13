@@ -21,7 +21,7 @@ export function makeApp(fetchFn: any, issuer: any) {
 
     return new Client({
       client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET
+      client_secret: process.env.CLIENT_SECRET,
     });
   }
 
@@ -92,8 +92,8 @@ export function makeApp(fetchFn: any, issuer: any) {
       {
         headers: {
           Authorization: req.headers.authorization || '',
-          'content-type': 'application/json'
-        }
+          'content-type': 'application/json',
+        },
       }
     );
 
@@ -107,9 +107,10 @@ export function makeApp(fetchFn: any, issuer: any) {
     );
   });
 
-  app.use('/frontend', express.static(path.dirname(
-    require.resolve('smartling-frontend')
-  )));
+  app.use(
+    '/frontend',
+    express.static(path.dirname(require.resolve('@contentful/smartling-frontend')))
+  );
 
   app.use((_req, res) => res.status(404).send('Not found'));
 

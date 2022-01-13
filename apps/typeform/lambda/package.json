@@ -1,5 +1,5 @@
 {
-  "name": "typeform-lambda",
+  "name": "@contentful/typeform-lambda",
   "private": true,
   "version": "1.4.5",
   "author": "Contentful GmbH",
@@ -24,6 +24,6 @@
     "express": "4.17.1",
     "luxon": "1.22.0",
     "node-fetch": "2.6.0",
-    "typeform-frontend": "^1.4.1"
+    "@contentful/typeform-frontend": "^1.4.1"
   }
 }

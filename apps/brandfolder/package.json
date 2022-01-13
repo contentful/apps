@@ -1,5 +1,5 @@
 {
-  "name": "brandfolder-assets",
+  "name": "@contentful/brandfolder-assets",
   "version": "1.8.93",
   "private": true,
   "devDependencies": {
