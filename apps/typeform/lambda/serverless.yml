@@ -26,7 +26,7 @@ provider:
 package:
   patterns:
     - '!.git/**'
-    - '!node_modules/typeform-frontend/node_modules/**'
+    - '!node_modules/@contentful/typeform-frontend/node_modules/**'
 
 functions:
   app:

@@ -1,5 +1,5 @@
 {
-  "name": "smartling-frontend",
+  "name": "@contentful/smartling-frontend",
   "version": "1.6.2",
   "main": "build/index.html",
   "devDependencies": {

@@ -1,5 +1,5 @@
 {
-  "name": "commercelayer-products",
+  "name": "@contentful/commercelayer-products",
   "version": "1.4.111",
   "private": true,
   "devDependencies": {
