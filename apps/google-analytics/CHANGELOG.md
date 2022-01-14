@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.4](https://github.com/contentful/apps/compare/google-analytics@1.4.3...google-analytics@1.4.4) (2022-01-14)
+
+**Note:** Version bump only for package google-analytics
+
+
+
+
+
 ## [1.4.3](https://github.com/contentful/apps/compare/google-analytics@1.4.2...google-analytics@1.4.3) (2021-11-18)
 
 **Note:** Version bump only for package google-analytics

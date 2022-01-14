@@ -1,6 +1,6 @@
 {
   "name": "google-analytics",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "private": true,
   "devDependencies": {
     "@testing-library/react": "8.0.4",
