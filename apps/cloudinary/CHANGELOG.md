@@ -3,6 +3,49 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.5.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* adjust shape of transformation option ([#312](https://github.com/contentful/apps/issues/312)) ([ea8fa82](https://github.com/contentful/apps/commit/ea8fa822742521a1c62a571b201e8ae938c4485a))
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+* render thumbnail correctly when quality/format transformation is disabled ([#313](https://github.com/contentful/apps/issues/313)) ([248c235](https://github.com/contentful/apps/commit/248c23528b395adbc5c57b66ea8e76cd541df647))
+
+
+### Features
+
+* [] build cloudianry with react scripts ([#289](https://github.com/contentful/apps/issues/289)) ([59e4979](https://github.com/contentful/apps/commit/59e4979b10cff838fda00295ec2ba6e484ea412b))
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+* [EXT-2717] deploy cloudinary with ctf app hosting ([#332](https://github.com/contentful/apps/issues/332)) ([033d863](https://github.com/contentful/apps/commit/033d863ae71a3aab536f7e7c06f819ca13f1346f))
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+
+
+### Reverts
+
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+## 1.0.1 (2021-01-11)
+
+
+
+# 1.0.0 (2021-01-08)
+
+
+### Bug Fixes
+
+* allow all Cloudinary-supported files to be previewed ([237cc65](https://github.com/contentful/apps/commit/237cc65e783e71fd11f1289ed23af82eaedd84c5))
+* allow TIFF file previews ([5498014](https://github.com/contentful/apps/commit/5498014097b3bad0fb31bcda5838efe8c3ef4587))
+* stop cloudinary covering up dialog header and close button ([1ba40fa](https://github.com/contentful/apps/commit/1ba40fa053dcd052280e37b8f8d452673a3fa803))
+
+
+
+
+
 ## [1.4.86](https://github.com/contentful/apps/compare/cloudinary-assets@1.4.85...cloudinary-assets@1.4.86) (2022-01-14)
 
 **Note:** Version bump only for package cloudinary-assets

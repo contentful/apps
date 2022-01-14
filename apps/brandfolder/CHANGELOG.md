@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.9.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+* only handle messages events of relevant sources ([#236](https://github.com/contentful/apps/issues/236)) ([aec87cc](https://github.com/contentful/apps/commit/aec87cc6158eb1cf9397283e6e98ac71c46099f7))
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+### Features
+
+* [] Add mux_hls_url field in attachments response ([#259](https://github.com/contentful/apps/issues/259)) ([74c64b6](https://github.com/contentful/apps/commit/74c64b617a96ac56d988a3c1efb4ed01aee8e4f9))
+* [] build ai image tagging with react-scripts take 2 ([#295](https://github.com/contentful/apps/issues/295)) ([ea5b9ea](https://github.com/contentful/apps/commit/ea5b9ea60c6ffda87d4f761e3bd3d1ed8b1cbef3)), closes [#286](https://github.com/contentful/apps/issues/286) [#294](https://github.com/contentful/apps/issues/294)
+* [] build brandfolder with react scripts ([#287](https://github.com/contentful/apps/issues/287)) ([f2e379f](https://github.com/contentful/apps/commit/f2e379f4e818fc459d09dace5923f73b5c2b23e3))
+* [] move brandfolder app to hosting ([#272](https://github.com/contentful/apps/issues/272)) ([ecd20ea](https://github.com/contentful/apps/commit/ecd20ea0b5f0f071fbfacba5da4f159a556e55a4))
+* [] use react scripts for ai-image-tagging frontend ([#286](https://github.com/contentful/apps/issues/286)) ([5c32a17](https://github.com/contentful/apps/commit/5c32a1795e80561132907baa04f355a1f6c0b9df))
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+* use cca in shopify app ([#267](https://github.com/contentful/apps/issues/267)) ([217ec31](https://github.com/contentful/apps/commit/217ec31928e684c13f49fc57237327d0b8d2c725))
+
+
+### Reverts
+
+* Revert "feat: [] use react scripts for ai-image-tagging frontend (#286)" (#294) ([dca9b86](https://github.com/contentful/apps/commit/dca9b8618c8d713187baa59d87dc30654d5a652e)), closes [#286](https://github.com/contentful/apps/issues/286) [#294](https://github.com/contentful/apps/issues/294)
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+## 1.0.1 (2021-01-11)
+
+
+
+# 1.0.0 (2021-01-08)
+
+
+
+
+
 ## [1.8.93](https://github.com/contentful/apps/compare/brandfolder-assets@1.8.92...brandfolder-assets@1.8.93) (2022-01-14)
 
 **Note:** Version bump only for package brandfolder-assets

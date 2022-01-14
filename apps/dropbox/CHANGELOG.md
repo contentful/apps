@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.6.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+### Features
+
+* [] build dropbox with react-scripts ([#291](https://github.com/contentful/apps/issues/291)) ([2c4c724](https://github.com/contentful/apps/commit/2c4c72426370b73436d7bda1c69a14ba6ca5c14a))
+* [] Clear up remaing create contentful extension usages ([#304](https://github.com/contentful/apps/issues/304)) ([02939bb](https://github.com/contentful/apps/commit/02939bbb9d4bd4d7161dddb9beace375e0027ab1))
+* [] deploy dropbox with ctf app hosting ([#334](https://github.com/contentful/apps/issues/334)) ([bf6b515](https://github.com/contentful/apps/commit/bf6b515e72aff949661fc3ce072da4202f80c418))
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+
+
+### Reverts
+
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+## 1.0.1 (2021-01-11)
+
+
+
+# 1.0.0 (2021-01-08)
+
+
+
+
+
 ## [1.5.86](https://github.com/contentful/apps/compare/dropbox-assets@1.5.85...dropbox-assets@1.5.86) (2022-01-14)
 
 **Note:** Version bump only for package dropbox-assets

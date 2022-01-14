@@ -1,6 +1,6 @@
 {
   "name": "@contentful/commercelayer-products",
-  "version": "1.4.111",
+  "version": "1.5.0",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",

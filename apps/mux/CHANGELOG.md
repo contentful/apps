@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.6.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+### Features
+
+* [] build mux with react-scripts ([#299](https://github.com/contentful/apps/issues/299)) ([c32c3e1](https://github.com/contentful/apps/commit/c32c3e12faea3eea6e88303811d9eac63f6c1361))
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+* [EXT-2717] use app hosting for MUX ([#363](https://github.com/contentful/apps/issues/363)) ([4232d1f](https://github.com/contentful/apps/commit/4232d1f586d13519eccff7f05be02b0852a07c49))
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+* use App SDK v4 ([#528](https://github.com/contentful/apps/issues/528)) ([5fb634a](https://github.com/contentful/apps/commit/5fb634a0679de8af4ada0de3d571a8a5e5564090))
+
+
+### Reverts
+
+* Revert "Revert "feat: [EXT-2717] use app hosting for MUX (#363)" (#384)" (#393) ([0361287](https://github.com/contentful/apps/commit/0361287d14597d608622c69a6656034b434000f3)), closes [#363](https://github.com/contentful/apps/issues/363) [#384](https://github.com/contentful/apps/issues/384) [#393](https://github.com/contentful/apps/issues/393)
+* Revert "feat: [EXT-2717] use app hosting for MUX (#363)" (#384) ([52d6d1c](https://github.com/contentful/apps/commit/52d6d1cec64675ecadc741fc3853e4f13d61f7ae)), closes [#363](https://github.com/contentful/apps/issues/363) [#384](https://github.com/contentful/apps/issues/384)
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+## 1.0.1 (2021-01-11)
+
+
+
+# 1.0.0 (2021-01-08)
+
+
+
+
+
 ## [1.5.37](https://github.com/contentful/apps/compare/mux-contentful-uploader@1.5.36...mux-contentful-uploader@1.5.37) (2022-01-10)
 
 **Note:** Version bump only for package mux-contentful-uploader

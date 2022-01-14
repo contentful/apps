@@ -3,6 +3,55 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.8.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* add event listener to stop bynder sdk from throwing errors + login view styling ([d7ed278](https://github.com/contentful/apps/commit/d7ed2780d5b89764f3220e326515a1e353f31d79))
+* fix typo for extension + add dateModified with updatedAt ([3046eb5](https://github.com/contentful/apps/commit/3046eb5224e18fc885b1a1ecbd1128ee68b55405))
+* generate thumbnails dynamically ([1aea6f8](https://github.com/contentful/apps/commit/1aea6f8f628bf034e6d582c00c2d5b38b8caad73))
+* load script dynamically only on open + remove eventlistener on dialog close ([dc0d44b](https://github.com/contentful/apps/commit/dc0d44b4717dd9712a182027c9ad1588fed636ad))
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+* remove unused code + use correct default for types ([d8823e8](https://github.com/contentful/apps/commit/d8823e8efcd767892e82665bfbd534249ccd14b1))
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+* reverse domain check for message ([6768b5a](https://github.com/contentful/apps/commit/6768b5af53876ebec1ab0a29fb6fc94f51ff90b5))
+
+
+### Features
+
+* [] build bynder with react-scripts ([#288](https://github.com/contentful/apps/issues/288)) ([f9abdd3](https://github.com/contentful/apps/commit/f9abdd31a356ae2f443208fdd951422e5e589ba6))
+* [] Reinstate bynder ([#258](https://github.com/contentful/apps/issues/258)) ([574c820](https://github.com/contentful/apps/commit/574c820c2b001f7c1529f4fb4858e7b2ff378cc9)), closes [#203](https://github.com/contentful/apps/issues/203) [#204](https://github.com/contentful/apps/issues/204)
+* [EXT-2488] save videoPreviewsURLs field in bynder app ([#191](https://github.com/contentful/apps/issues/191)) ([62bd9ac](https://github.com/contentful/apps/commit/62bd9ac3457ec9727aea6c68ac91002286e962fd))
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+* [EXT-2717] deploy bynder app with ctf app hosting ([#315](https://github.com/contentful/apps/issues/315)) ([38a5454](https://github.com/contentful/apps/commit/38a5454b8a4a98fc14624db99d01cbd6c2f6e5a3))
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+* use cca in shopify app ([#267](https://github.com/contentful/apps/issues/267)) ([217ec31](https://github.com/contentful/apps/commit/217ec31928e684c13f49fc57237327d0b8d2c725))
+
+
+### Reverts
+
+* Revert "Reinstate bynder update (#205)" (#257) ([3d05911](https://github.com/contentful/apps/commit/3d05911e6595d73683d49f005aeb6ca4799bf80c)), closes [#205](https://github.com/contentful/apps/issues/205) [#257](https://github.com/contentful/apps/issues/257)
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+## 1.0.1 (2021-01-11)
+
+
+
+# 1.0.0 (2021-01-08)
+
+
+### Bug Fixes
+
+* change bynder button copy ([6775f03](https://github.com/contentful/apps/commit/6775f0301ef8518133ff85ca27cd66c993b85cb6))
+
+
+
+
+
 ## [1.7.86](https://github.com/contentful/apps/compare/bynder-assets@1.7.85...bynder-assets@1.7.86) (2022-01-14)
 
 **Note:** Version bump only for package bynder-assets

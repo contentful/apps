@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.5.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+* pin version for ecommerce base app ([#193](https://github.com/contentful/apps/issues/193)) ([0984a04](https://github.com/contentful/apps/commit/0984a044244df77d90190a8f110af7825a676628))
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+### Features
+
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+* [EXT-2717] deploy commercelayer with ctf app hosting ([#333](https://github.com/contentful/apps/issues/333)) ([e8bac53](https://github.com/contentful/apps/commit/e8bac531888fe5d9560ade91b151493e4e46a543))
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+* update commercelayer and saleor to use cca ([#268](https://github.com/contentful/apps/issues/268)) ([fbd8ef6](https://github.com/contentful/apps/commit/fbd8ef61eba59625e2bc55403be94c250b2df8bf))
+
+
+### Reverts
+
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+## 1.0.1 (2021-01-11)
+
+
+
+# 1.0.0 (2021-01-08)
+
+
+
+
+
 ## [1.4.111](https://github.com/contentful/apps/compare/commercelayer-products@1.4.110...commercelayer-products@1.4.111) (2022-01-14)
 
 **Note:** Version bump only for package commercelayer-products

@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.4.0 (2022-01-14)
+
+
+### Features
+
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+* upgrade serverless to v2 ([#451](https://github.com/contentful/apps/issues/451)) ([fa64ac3](https://github.com/contentful/apps/commit/fa64ac34e9a884230bd6f1c71adcb2fdbb778dc8))
+* upgrade serverless to v2 ([#452](https://github.com/contentful/apps/issues/452)) ([24422fd](https://github.com/contentful/apps/commit/24422fd543f765db0167b2b98c61a02d72809008))
+
+
+
+## 1.0.1 (2021-01-11)
+
+
+
+# 1.0.0 (2021-01-08)
+
+
+### Bug Fixes
+
+* make bootstrap work ([15b3298](https://github.com/contentful/apps/commit/15b32984a3c96e3455cc13705e0347951a90bac6))
+
+
+
+
+
 ## [1.3.8](https://github.com/contentful/apps/compare/smartling-lambda@1.3.7...smartling-lambda@1.3.8) (2022-01-14)
 
 **Note:** Version bump only for package smartling-lambda

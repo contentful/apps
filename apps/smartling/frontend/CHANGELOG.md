@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.7.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* only handle messages events of relevant sources ([#236](https://github.com/contentful/apps/issues/236)) ([aec87cc](https://github.com/contentful/apps/commit/aec87cc6158eb1cf9397283e6e98ac71c46099f7))
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+### Features
+
+* [] build smartling with react-scripts ([#302](https://github.com/contentful/apps/issues/302)) ([e84b040](https://github.com/contentful/apps/commit/e84b040204a85cc6175d33ae72be4cf4c0883e35))
+* [] Clear up remaing create contentful extension usages ([#304](https://github.com/contentful/apps/issues/304)) ([02939bb](https://github.com/contentful/apps/commit/02939bbb9d4bd4d7161dddb9beace375e0027ab1))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+* improve empty states of assignments [EXT-1960] ([#95](https://github.com/contentful/apps/issues/95)) ([642d5ee](https://github.com/contentful/apps/commit/642d5ee11664f87acb9797e39c07e1ceabb588c6))
+* **smartling:** fetch all content types by setting limit to 1000 ([#532](https://github.com/contentful/apps/issues/532)) ([065059d](https://github.com/contentful/apps/commit/065059dda56e20320d094e1734adb75a0135b8ba))
+* update to the latest forma and new tokens ([#336](https://github.com/contentful/apps/issues/336)) ([d4cba00](https://github.com/contentful/apps/commit/d4cba009066b590b790b0d32bb1afbcf699d3bee))
+* use App SDK v4 ([#528](https://github.com/contentful/apps/issues/528)) ([5fb634a](https://github.com/contentful/apps/commit/5fb634a0679de8af4ada0de3d571a8a5e5564090))
+
+
+
+
+
 ## [1.6.2](https://github.com/contentful/apps/compare/smartling-frontend@1.6.1...smartling-frontend@1.6.2) (2022-01-14)
 
 **Note:** Version bump only for package smartling-frontend

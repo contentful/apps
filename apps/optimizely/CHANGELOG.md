@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.6.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* add flex wrap to handle many references ([b0a7a2d](https://github.com/contentful/apps/commit/b0a7a2d5ae9bbd838b23d096a0881a288db37eb3))
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+* **Optimizely:** remove index.js script tag ([#657](https://github.com/contentful/apps/issues/657)) ([ac04020](https://github.com/contentful/apps/commit/ac0402041ac73768e44cc2c751e83c2732d890d3))
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+
+
+### Features
+
+* [] build optimizely with react-scripts ([#301](https://github.com/contentful/apps/issues/301)) ([472f9a2](https://github.com/contentful/apps/commit/472f9a2c62b4e5ffaf31382a4e582481ba94007f))
+* [EXT-2717] build optimizely with app hosting ([#365](https://github.com/contentful/apps/issues/365)) ([f92e8cc](https://github.com/contentful/apps/commit/f92e8cce4b854a8045f9d96bb8724e0530c5d38e))
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+* update to the latest forma and new tokens ([#336](https://github.com/contentful/apps/issues/336)) ([d4cba00](https://github.com/contentful/apps/commit/d4cba009066b590b790b0d32bb1afbcf699d3bee))
+* use App SDK v4 ([#528](https://github.com/contentful/apps/issues/528)) ([5fb634a](https://github.com/contentful/apps/commit/5fb634a0679de8af4ada0de3d571a8a5e5564090))
+
+
+### Reverts
+
+* Revert "feat: [EXT-2717] build optimizely with app hosting (#365)" (#373) ([7eff4dd](https://github.com/contentful/apps/commit/7eff4dd0e7feca757ac7d22e53da7d4323dd764d)), closes [#365](https://github.com/contentful/apps/issues/365) [#373](https://github.com/contentful/apps/issues/373)
+
+
+
+
+
 ## [1.5.2](https://github.com/contentful/apps/compare/optimizely@1.5.1...optimizely@1.5.2) (2022-01-05)
 
 

@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.4.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+
+
+### Features
+
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+* upgrade serverless to v2 ([#451](https://github.com/contentful/apps/issues/451)) ([fa64ac3](https://github.com/contentful/apps/commit/fa64ac34e9a884230bd6f1c71adcb2fdbb778dc8))
+* upgrade serverless to v2 ([#452](https://github.com/contentful/apps/issues/452)) ([24422fd](https://github.com/contentful/apps/commit/24422fd543f765db0167b2b98c61a02d72809008))
+
+
+
+# 1.0.0 (2021-01-08)
+
+
+
+
+
 ## [1.3.6](https://github.com/contentful/apps/compare/ai-image-tagging-lambda@1.3.5...ai-image-tagging-lambda@1.3.6) (2021-10-28)
 
 **Note:** Version bump only for package ai-image-tagging-lambda

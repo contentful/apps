@@ -3,6 +3,48 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.8.0 (2022-01-14)
+
+
+### Bug Fixes
+
+* [] Fix Shopify not displaying missing SKUs for collections/products ([#506](https://github.com/contentful/apps/issues/506)) ([3a3b736](https://github.com/contentful/apps/commit/3a3b73635c783673619c47bdbea15c643c9c0679))
+* move react to peer dependency & unpin dependencies ([#475](https://github.com/contentful/apps/issues/475)) ([981e177](https://github.com/contentful/apps/commit/981e177092fafdcce211822277d3ee0dad7ae689))
+* pin version for ecommerce base app ([#193](https://github.com/contentful/apps/issues/193)) ([0984a04](https://github.com/contentful/apps/commit/0984a044244df77d90190a8f110af7825a676628))
+* remove unused dependencies ([#523](https://github.com/contentful/apps/issues/523)) ([a1af1dd](https://github.com/contentful/apps/commit/a1af1dd07726c1119e0c16fcbdfb3bea4f88dae2))
+* **Shopify:** 'load more' button was wrongly displayed in some edge cases ([#218](https://github.com/contentful/apps/issues/218)) ([7675f84](https://github.com/contentful/apps/commit/7675f8426eaa4a979cc622d873d502ee33b9b92e))
+* stop simultaneous recursive chains ([#225](https://github.com/contentful/apps/issues/225)) ([0433a5d](https://github.com/contentful/apps/commit/0433a5d587479d311395d16ef8f20c7dc3bfbc4d))
+* use latest version of shopify-buy ([#213](https://github.com/contentful/apps/issues/213)) ([ba84070](https://github.com/contentful/apps/commit/ba84070c5352720b457731ebc9891f7472a3cbeb))
+
+
+### Features
+
+* [] Extend Shopify app support to products and collections ([#340](https://github.com/contentful/apps/issues/340)) ([6bf4080](https://github.com/contentful/apps/commit/6bf40807cd6ecd7810f62420de2da9a8b444bd5c))
+* [EXT-2533] use new version of ecommerce base app ([#239](https://github.com/contentful/apps/issues/239)) ([b4f398f](https://github.com/contentful/apps/commit/b4f398f7fe4fb2952e8505a7657b876861fe3a24))
+* [EXT-2717] deploy shopify with app hosting ([#367](https://github.com/contentful/apps/issues/367)) ([0a38ecb](https://github.com/contentful/apps/commit/0a38ecb85a59c5be46f8f1be06681f6c2e1acbcf))
+* [EXT-2722] use contentful hosting for image focal point app ([#238](https://github.com/contentful/apps/issues/238)) ([11b57ae](https://github.com/contentful/apps/commit/11b57ae3e4fb5dd376544d89056430b71883517c))
+* [EXT-2785] show variant SKU in shopify SKU picker ([#277](https://github.com/contentful/apps/issues/277)) ([c72fff3](https://github.com/contentful/apps/commit/c72fff3372d745cdb9b333415067e57aba419b74))
+* [EXT-3415] move all package names to [@contentful](https://github.com/contentful) ([#665](https://github.com/contentful/apps/issues/665)) ([9bd7534](https://github.com/contentful/apps/commit/9bd75340860e59f25b4eed900a832a482508f603))
+* add option to change search debounce time ([#220](https://github.com/contentful/apps/issues/220)) ([0493357](https://github.com/contentful/apps/commit/0493357b7e8d28a5ad0ee7b0668f82f4febe7732))
+* use cca in shopify app ([#267](https://github.com/contentful/apps/issues/267)) ([217ec31](https://github.com/contentful/apps/commit/217ec31928e684c13f49fc57237327d0b8d2c725))
+
+
+### Reverts
+
+* Revert "feat: [EXT-2533] use new version of ecommerce base app (#239)" (#251) ([dae2ae6](https://github.com/contentful/apps/commit/dae2ae66181543a93981b1b97cc9dfc71e5abf16)), closes [#239](https://github.com/contentful/apps/issues/239) [#251](https://github.com/contentful/apps/issues/251)
+
+
+
+## 1.0.1 (2021-01-11)
+
+
+
+# 1.0.0 (2021-01-08)
+
+
+
+
+
 ## [1.7.87](https://github.com/contentful/apps/compare/shopify-sku@1.7.86...shopify-sku@1.7.87) (2022-01-10)
 
 **Note:** Version bump only for package shopify-sku
