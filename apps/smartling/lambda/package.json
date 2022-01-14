@@ -19,11 +19,7 @@
     "rimraf": "^3.0.1",
     "serverless": "2.57.0",
     "serverless-express": "^2.0.11",
-<<<<<<< HEAD
-    "smartling-frontend": "^1.6.2",
-=======
-    "@contentful/smartling-frontend": "^1.6.1",
->>>>>>> feat: [EXT-3415] move all package names to @contentful
+    "@contentful/smartling-frontend": "^1.6.2",
     "typescript": "^3.7.5"
   },
   "devDependencies": {
