@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.38](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.37...@contentful/dam-app-base@1.3.38) (2022-01-17)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
 ## [1.3.37](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.36...@contentful/dam-app-base@1.3.37) (2022-01-10)
 
 **Note:** Version bump only for package @contentful/dam-app-base
