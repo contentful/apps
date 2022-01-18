@@ -115,7 +115,7 @@ exports[`SortableList should render successfully 1`] = `
         <img
           alt="Dress Twin-Set rose"
           data-test-id="image"
-          src="https://s3-eu-west-1.amazonaws.com/commercetools-example/products/picture-1.jpg"
+          src="https://example.com/commercetools-example/products/picture-1.jpg"
           style="display: none;"
         />
       </div>
@@ -305,7 +305,7 @@ exports[`SortableList should render successfully 1`] = `
         <img
           alt="Michael Kors – Shopper “Jet Set Travel”"
           data-test-id="image"
-          src="https://s3-eu-west-1.amazonaws.com/commercetools-example/products/picture-2.jpg"
+          src="https://example.com/commercetools-example/products/picture-2.jpg"
           style="display: none;"
         />
       </div>
@@ -495,7 +495,7 @@ exports[`SortableList should render successfully 1`] = `
         <img
           alt="Shirt “Jenny“ Polo Ralph Lauren white"
           data-test-id="image"
-          src="https://s3-eu-west-1.amazonaws.com/commercetools-example/products/picture-3.jpg"
+          src="https://example.com/commercetools-example/products/picture-3.jpg"
           style="display: none;"
         />
       </div>

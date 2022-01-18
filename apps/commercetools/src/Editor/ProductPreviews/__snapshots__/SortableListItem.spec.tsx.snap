@@ -12,7 +12,7 @@ exports[`SortableListItem should render successfully 1`] = `
       <img
         alt="Dress Twin-Set rose"
         data-test-id="image"
-        src="https://s3-eu-west-1.amazonaws.com/commercetools-example/products/picture-1.jpg"
+        src="https://example.com/commercetools-example/products/picture-1.jpg"
         style="display: block;"
       />
     </div>
@@ -416,7 +416,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
       <img
         alt="Dress Twin-Set rose"
         data-test-id="image"
-        src="https://s3-eu-west-1.amazonaws.com/commercetools-example/products/picture-1.jpg"
+        src="https://example.com/commercetools-example/products/picture-1.jpg"
         style="display: none;"
       />
     </div>
@@ -534,7 +534,7 @@ exports[`SortableListItem should render successfully the sortable variation 1`] 
       <img
         alt="Dress Twin-Set rose"
         data-test-id="image"
-        src="https://s3-eu-west-1.amazonaws.com/commercetools-example/products/picture-1.jpg"
+        src="https://example.com/commercetools-example/products/picture-1.jpg"
         style="display: block;"
       />
     </div>
