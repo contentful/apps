@@ -1,7 +1,9 @@
+'use strict';
+
 const express = require('express');
 const app = express();
 
-app.post('/build', (req, res) => {
+app.post('/build', (_req, res) => {
   // TODO: handle build app actions
   res.json({ success: true });
 });
