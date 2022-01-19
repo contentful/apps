@@ -1,0 +1,41 @@
+service: sls-apps-netlify-build-action
+
+frameworkVersion: ">=2.0.0 <3.0.0"
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  tableName: sls-${opt:stage, self:provider.stage}-NetlifyBuildAction
+  customDomain:
+    domainName: netlify-build-action.ctfapps.net
+    stage: prd
+    createRoute53Record: true
+    endpointType: "edge"
+    securityPolicy: tls_1_2
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'test'}
+  region: "us-east-1"
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: sls-apps-netlify-build-action
+
+package:
+  patterns:
+    - "!node_modules/@contentful/netlify-build-action-frontend/node_modules/**"
+
+functions:
+  app:
+    handler: index.handler
+    environment:
+      TABLE_NAME: ${self:custom.tableName}
+    events:
+      - http:
+          path: /
+          method: ANY
+      - http:
+          path: /{proxy+}
+          method: ANY
