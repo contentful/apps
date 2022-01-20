@@ -94,7 +94,7 @@ export default class NeflifySidebarBuildButton extends React.Component {
       userId: this.props.userId,
     });
 
-    const { buildHookId } = this.props.site;
+    const buildHookId = '61e9633db95ff20fe700baa1';
     const buildHookUrl = `https://api.netlify.com/build_hooks/${buildHookId}`;
     const res = await fetch(buildHookUrl, { method: 'POST' });
 
@@ -108,7 +108,6 @@ export default class NeflifySidebarBuildButton extends React.Component {
 
   render() {
     const { ready, busy, status, misconfigured, info, ok } = this.state;
-
     return (
       <div className={styles.body}>
         <Button disabled={!ready || busy} loading={busy} isFullWidth onClick={this.build}>
