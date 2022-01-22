@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.2](https://github.com/contentful/apps/compare/@contentful/optimizely@1.6.1...@contentful/optimizely@1.6.2) (2022-01-22)
+
+**Note:** Version bump only for package @contentful/optimizely
+
+
+
+
+
 ## [1.6.1](https://github.com/contentful/apps/compare/@contentful/optimizely@1.6.0...@contentful/optimizely@1.6.1) (2022-01-16)
 
 **Note:** Version bump only for package @contentful/optimizely
