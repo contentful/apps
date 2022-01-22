@@ -1,6 +1,6 @@
 {
   "name": "@contentful/brandfolder-assets",
-  "version": "1.9.4",
+  "version": "1.9.5",
   "private": true,
   "devDependencies": {
     "cross-env": "7.0.3"
