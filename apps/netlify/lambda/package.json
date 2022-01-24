@@ -6,19 +6,22 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "jest",
     "serve": "node serve.js",
     "deploy": "sls deploy --stage $STAGE",
     "deploy:test": "npm run deploy"
   },
   "devDependencies": {
     "eslint": "6.8.0",
-    "jest": "25.1.0",
+    "jest": "^25.1.0",
     "serverless": "2.53.1",
     "serverless-domain-manager": "3.3.1"
   },
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.0.0",
     "aws-serverless-express": "3.3.6",
+    "cors": "^2.8.5",
     "express": "4.17.1",
     "node-fetch": "2.6.1"
   }

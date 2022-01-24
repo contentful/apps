@@ -6,7 +6,6 @@ plugins:
   - serverless-domain-manager
 
 custom:
-  tableName: sls-${opt:stage, self:provider.stage}-NetlifyBuildAction
   customDomain:
     domainName: netlify-build-action.ctfapps.net
     stage: prd
@@ -25,13 +24,14 @@ provider:
 
 package:
   patterns:
-    - "!node_modules/@contentful/netlify-build-action-frontend/node_modules/**"
+    - "!node_modules/@contentful/netlify-build-and-preview/node_modules/**"
 
 functions:
   app:
     handler: index.handler
     environment:
-      TABLE_NAME: ${self:custom.tableName}
+      SIGNING_SECRET: ${env:SIGNING_SECRET}
+      APP_IDENTITY_PRIVATE_KEY: ${env:APP_IDENTITY_PRIVATE_KEY}
     events:
       - http:
           path: /

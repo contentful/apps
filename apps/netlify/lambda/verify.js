@@ -2,29 +2,35 @@
 
 const { verifyRequest } = require('@contentful/node-apps-toolkit');
 
-const makeCanonicalReq = (req, options = {}) => {
-  if (!req.body) {
-    return '';
-  }
-
-  const body = req.body && req.body.length ? req.body.toString('utf8') : '';
+const makeCanonicalReq = (req, buf) => {
+  const body = buf && buf.length ? buf.toString('utf8') : '';
 
   return {
-    path: options.path,
+    method: req.method,
+    path: req.path,
     headers: req.headers,
     body,
   };
 };
 
-module.exports = function makeReqVerificationMiddleware(secretKey) {
-  return (req, res, next) => {
-    const canonicalReq = makeCanonicalReq(req);
-    const isValidReq = verifyRequest(secretKey, canonicalReq, 0);
-
-    if (!isValidReq) {
-      res.status(403).json({ error: 'Unauthorized request' });
+module.exports = function makeReqVerificationMiddleware(secretKey, opts = { paths: [] }) {
+  return (req, _res, buf) => {
+    // dont even bother verifying if we dont have to
+    if (!opts.paths.includes(req.path) || req.method.toLowerCase() !== 'post') {
+      return;
     }
 
-    next();
+    const canonicalReq = makeCanonicalReq(req, buf);
+    let isValidReq = false;
+    try {
+      isValidReq = verifyRequest(secretKey, canonicalReq, 0);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+
+    if (!isValidReq) {
+      throw new Error('Invalid request from req verification');
+    }
   };
 };
