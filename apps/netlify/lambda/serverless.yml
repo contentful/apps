@@ -6,6 +6,12 @@ plugins:
   - serverless-domain-manager
 
 custom:
+  signingSecret:
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/signing-secret}
+    test: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/test/signing-secret}
+  appIdentityKey:
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/app-identity-key}
+    test: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/test/app-identity-key}
   customDomain:
     domainName: netlify-build-action.ctfapps.net
     stage: prd
@@ -30,8 +36,8 @@ functions:
   app:
     handler: index.handler
     environment:
-      SIGNING_SECRET: ${env:SIGNING_SECRET}
-      APP_IDENTITY_PRIVATE_KEY: ${env:APP_IDENTITY_PRIVATE_KEY}
+      SIGNING_SECRET: ${self:custom.signingSecret.${opt:stage, 'test'}}
+      APP_IDENTITY_PRIVATE_KEY: ${self:custom.appIdentityKey.${opt:stage, 'test'}}
     events:
       - http:
           path: /
