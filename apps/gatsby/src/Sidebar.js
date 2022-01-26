@@ -205,8 +205,11 @@ export default class Sidebar extends React.Component {
     let { previewUrl, contentSyncUrl } = this.props.sdk.parameters.installation;
     const { manifestId } = this.state;
 
+    // contentId is used in Gatsby Cloud Content Sync to redirect a user as soon as possible. The content id is stored in localStorage and mapped to a redirect url after the first preview. On subsequent previews, we check if the redirect url still exists and then eagerly redirect there. Once on the frontend of the site, Preview UI takes over and handles showing a preview building message.
+    const contentId = btoa(this.props.sdk.ids.contentType + this.props.sdk.ids.entry);
+
     if (contentSyncUrl && manifestId) {
-      previewUrl = `${contentSyncUrl}/gatsby-source-contentful/${manifestId}`;
+      previewUrl = `${contentSyncUrl}/gatsby-source-contentful/${manifestId}/${contentId}`;
     }
 
     return previewUrl;
@@ -253,8 +256,7 @@ export default class Sidebar extends React.Component {
   };
 
   render = () => {
-    let { contentSyncUrl, authToken, previewUrl, webhookUrl } =
-      this.sdk.parameters.installation;
+    let { contentSyncUrl, authToken, previewUrl, webhookUrl } = this.sdk.parameters.installation;
     const { slug } = this.state;
 
     previewUrl = this.getPreviewUrl();
