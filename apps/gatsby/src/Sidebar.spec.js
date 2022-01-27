@@ -92,7 +92,7 @@ describe('Gatsby App Sidebar', () => {
     global.fetch = mockFetch;
     global.open = mockWindowOpen;
 
-    const contentSyncUrl = 'https://content-sync.com/content-sync/fake-site-id/';
+    const contentSyncUrl = 'https://content-sync.com/content-sync/fake-site-id';
     mockSdk.parameters.installation.contentSyncUrl = contentSyncUrl;
 
     const { getByText } = render(<Sidebar sdk={mockSdk} />);
