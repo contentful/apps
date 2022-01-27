@@ -40,8 +40,5 @@ functions:
       APP_IDENTITY_PRIVATE_KEY: ${self:custom.appIdentityKey.${opt:stage, 'test'}}
     events:
       - http:
-          path: /
-          method: ANY
-      - http:
           path: /{proxy+}
           method: ANY

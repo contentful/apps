@@ -2,7 +2,6 @@
 
 const express = require('express');
 const fetch = require('node-fetch');
-const cors = require('cors');
 const makeReqVerificationMiddleware = require('./verify');
 const getBuildHookFromAppInstallationParams = require('./app-installation');
 
@@ -10,15 +9,6 @@ const app = express();
 
 const signingSecret = process.env['SIGNING_SECRET'] || '';
 const buildBaseURL = 'https://api.netlify.com/build_hooks/';
-
-app.use(
-  cors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  })
-);
 
 app.use(
   express.json({
