@@ -42,6 +42,10 @@ const getMockSdk = () => ({
   window: {
     startAutoResizer: jest.fn(),
   },
+  ids: {
+    contentType: `content-type`,
+    entry: `entry-id`,
+  },
 });
 
 describe('Gatsby App Sidebar', () => {
@@ -88,7 +92,7 @@ describe('Gatsby App Sidebar', () => {
     global.fetch = mockFetch;
     global.open = mockWindowOpen;
 
-    const contentSyncUrl = 'https://content-sync.com/content-sync/fake-site-id';
+    const contentSyncUrl = 'https://content-sync.com/content-sync/fake-site-id/';
     mockSdk.parameters.installation.contentSyncUrl = contentSyncUrl;
 
     const { getByText } = render(<Sidebar sdk={mockSdk} />);
@@ -110,7 +114,8 @@ describe('Gatsby App Sidebar', () => {
      */
     const pluginName = 'gatsby-source-contentful';
     const expectedManifestId = '123-456-2390-08-23T15:27:27.861Z';
-    const expectedUrl = `${contentSyncUrl}/${pluginName}/${expectedManifestId}`;
+    const contentId = btoa(`content-typeentry-id`);
+    const expectedUrl = `${contentSyncUrl}/${pluginName}/${expectedManifestId}/${contentId}`;
     expect(mockWindowOpen).toBeCalledWith(expectedUrl, `GATSBY_TAB`);
   });
 });
