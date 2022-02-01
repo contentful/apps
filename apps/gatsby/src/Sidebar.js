@@ -243,8 +243,8 @@ export default class Sidebar extends React.Component {
       let totalLoopsWaited = 0;
       while (waitForSave) {
         contentfulSavedRecently = this.entryWasUpdatedInLastXSeconds(5);
-        // 60 loops === 6 seconds (100 ms * 60)
-        if (totalLoopsWaited >= 60 || contentfulSavedRecently) {
+        // 50 totalLoopsWaited === 5 seconds === (100 ms * 60)
+        if (totalLoopsWaited >= 50 || contentfulSavedRecently) {
           waitForSave = false;
         } else {
           totalLoopsWaited++;
