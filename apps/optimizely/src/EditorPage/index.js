@@ -202,6 +202,13 @@ export default function EditorPage(props) {
     }
   }, [actions, experiment, props.client, state.loaded]);
 
+  useEffect(() => {
+    props.sdk.window.startAutoResizer();
+    return () => {
+      props.sdk.window.stopAutoResizer();
+    };
+  }, [props.sdk.window]);
+
   const getExperimentResults = (experiment) => {
     if (!experiment) {
       return undefined;
