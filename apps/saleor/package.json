@@ -1,6 +1,6 @@
 {
   "name": "@contentful/saleor",
-  "version": "1.6.10",
+  "version": "1.6.11",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "4.2.1",
-    "@contentful/ecommerce-app-base": "^2.6.62",
+    "@contentful/ecommerce-app-base": "^2.6.63",
     "@types/lodash": "4.14.161",
     "core-js": "3.4.1",
     "graphql": "15.3.0",
