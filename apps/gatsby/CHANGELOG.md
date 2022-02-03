@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.12.1](https://github.com/contentful/apps/compare/@contentful/gatsby-preview@1.12.0...@contentful/gatsby-preview@1.12.1) (2022-02-03)
+
+
+### Bug Fixes
+
+* **Gatsby:** Check the updated at time repeatedly to wait for a save to happen ([#728](https://github.com/contentful/apps/issues/728)) ([68ee680](https://github.com/contentful/apps/commit/68ee68074a01bae3cbd71f85b3c8d81f44500750))
+
+
+
+
+
 # [1.12.0](https://github.com/contentful/apps/compare/@contentful/gatsby-preview@1.11.1...@contentful/gatsby-preview@1.12.0) (2022-01-31)
 
 
