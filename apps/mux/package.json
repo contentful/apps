@@ -1,6 +1,6 @@
 {
   "name": "@contentful/mux-contentful-uploader",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "4.2.1",
-    "@contentful/dam-app-base": "^1.3.41",
+    "@contentful/dam-app-base": "^1.3.42",
     "@contentful/forma-36-fcss": "0.0.35",
     "@contentful/forma-36-react-components": "3.79.2",
     "@contentful/forma-36-tokens": "0.5.3",
