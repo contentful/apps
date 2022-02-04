@@ -12,3 +12,15 @@ updates:
     prefix: "fix"
     prefix-development: "chore"
     include: "scope"
+
+- package-ecosystem: npm
+  directory: "/examples/templates/typescript-template"
+  schedule:
+    interval: daily
+    time: "00:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
