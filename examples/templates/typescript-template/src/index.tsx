@@ -9,6 +9,7 @@ import {
   DialogExtensionSDK,
   EditorExtensionSDK,
   PageExtensionSDK,
+  init,
   locations,
 } from '@contentful/app-sdk';
 import type { KnownSDK } from '@contentful/app-sdk';
