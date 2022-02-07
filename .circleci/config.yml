@@ -57,6 +57,9 @@ jobs:
           name: Test
           command: npm run test
       - run:
+          name: Build TypeScript template
+          command: cd templates/typescript && npm i && npm run build && npm run test
+      - run:
           name: Exit successfully if not in master
           command: |
             if [ "$CIRCLE_BRANCH" != "master" ]; then
