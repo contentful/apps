@@ -14,7 +14,7 @@ updates:
     include: "scope"
 
 - package-ecosystem: npm
-  directory: "/examples/templates/typescript-template"
+  directory: "/templates/typescript"
   schedule:
     interval: daily
     time: "00:00"

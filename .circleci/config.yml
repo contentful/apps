@@ -57,8 +57,8 @@ jobs:
           name: Test
           command: npm run test
       - run:
-          name: Build template-typescript
-          command: cd examples/templates/typescript-template && npm i && npm run build
+          name: Build TypeScript template
+          command: cd templates/typescript && npm i && npm run build
       - run:
           name: Exit successfully if not in master
           command: |
