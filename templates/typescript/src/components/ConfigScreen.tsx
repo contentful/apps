@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { PlainClientAPI } from 'contentful-management';
 import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 
 export interface AppInstallationParameters {}
 
