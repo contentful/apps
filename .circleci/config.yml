@@ -36,7 +36,7 @@ commands:
                 STAGE='prd' npm run deploy
 
 jobs:
-  all:
+  apps:
     docker:
       - image: cimg/node:14.18
     resource_class: medium+
@@ -57,9 +57,6 @@ jobs:
           name: Test
           command: npm run test
       - run:
-          name: Build TypeScript template
-          command: cd templates/typescript && npm i && npm run build && npm run test
-      - run:
           name: Exit successfully if not in master
           command: |
             if [ "$CIRCLE_BRANCH" != "master" ]; then
@@ -68,8 +65,40 @@ jobs:
       - publish
       - deploy
 
+  test-ts-template:
+    docker:
+        - image: cimg/node:16.14.0
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: cd templates/typescript && npm i
+      - run:
+          name: Build
+          command: cd templates/typescript && npm run build
+      - run:
+          name: Test
+          command: cd templates/typescript && npm run test
+
+  test-js-template:
+    docker:
+        - image: cimg/node:16.14.0
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: cd templates/javascript && npm i
+      - run:
+          name: Build
+          command: cd templates/javascript && npm run build
+      - run:
+          name: Test
+          command: cd templates/javascript && npm run test
+
 workflows:
   version: 2
   test-deploy:
     jobs:
-      - all
+      - apps
+      - test-ts-template
+      - test-js-template

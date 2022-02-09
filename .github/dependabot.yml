@@ -28,3 +28,19 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+
+- package-ecosystem: npm
+  directory: "/templates/javascript"
+  schedule:
+    interval: daily
+    time: "00:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "emotion"
+      versions:
+        - ">=11"
