@@ -3,12 +3,12 @@ import { render } from 'react-dom';
 import { createClient } from 'contentful-management';
 import { init, locations } from '@contentful/app-sdk';
 import { GlobalStyles } from '@contentful/f36-components';
-import ConfigScreen from './components/ConfigScreen';
-import EntryEditor from './components/EntryEditor';
-import Page from './components/Page';
-import Sidebar from './components/Sidebar';
-import Field from './components/Field';
-import Dialog from './components/Dialog';
+import ConfigScreen from './locations/ConfigScreen';
+import EntryEditor from './locations/EntryEditor';
+import Page from './locations/Page';
+import Sidebar from './locations/Sidebar';
+import Field from './locations/Field';
+import Dialog from './locations/Dialog';
 import LocalhostWarning from './components/LocalhostWarning';
 
 if (process.env.NODE_ENV === 'development' && window.self === window.top) {
