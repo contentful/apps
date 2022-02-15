@@ -6,7 +6,7 @@
     "@contentful/app-sdk": "^4.3.1",
     "@contentful/f36-components": "^4.0.23",
     "@contentful/f36-tokens": "^4.0.0",
-    "contentful-management": "^7.53.0",
+    "contentful-management": "^7.54.2",
     "emotion": "^10.0.27",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
