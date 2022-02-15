@@ -5,18 +5,21 @@ const nodeFetch = require('node-fetch');
 
 const privateKey = process.env['APP_IDENTITY_PRIVATE_KEY'] || '';
 const baseUrl = 'https://api.contentful.com/';
+const buildBaseURL = 'https://api.netlify.com/build_hooks/';
 
-const getBuildHookFromAppInstallationParams = async (
-  appActionCall,
+const getBuildHooksFromAppInstallationParams = async (
+  appContextDetails = {
+    environmentId: '',
+    spaceId: '',
+    appInstallationId: '',
+    buildHookId: '',
+    contentTypeId: '',
+  },
   getToken = getManagementToken,
   fetch = nodeFetch
 ) => {
-  const [spaceId, environmentId, appInstallationId, buildHookId] = [
-    appActionCall.sys.space.sys.id,
-    appActionCall.sys.environment.sys.id,
-    appActionCall.sys.appDefinition.sys.id,
-    appActionCall.body.buildHookId,
-  ];
+  const { spaceId, environmentId, appInstallationId, buildHookId, contentTypeId } =
+    appContextDetails;
 
   const token = await getToken(privateKey, {
     spaceId,
@@ -41,11 +44,23 @@ const getBuildHookFromAppInstallationParams = async (
 
   const appInstallationBuildHooks = parsedRes.parameters.buildHookIds.split(',');
 
-  if (!appInstallationBuildHooks.includes(buildHookId)) {
+  if (buildHookId && !appInstallationBuildHooks.includes(buildHookId)) {
     throw new Error('Invalid build hook');
   }
 
-  return buildHookId;
+  if (contentTypeId) {
+    return appInstallationBuildHooks;
+  }
+
+  return buildHookId ? [buildHookId] : [];
 };
 
-module.exports = getBuildHookFromAppInstallationParams;
+const fireBuildHook = async (buildHookId) => {
+  const buildHookUrl = `${buildBaseURL}/${buildHookId}`;
+  return nodeFetch(buildHookUrl, { method: 'POST' });
+};
+
+module.exports = {
+  fireBuildHook,
+  getBuildHooksFromAppInstallationParams,
+};
