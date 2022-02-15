@@ -2,6 +2,7 @@
 
 const { getManagementToken } = require('@contentful/node-apps-toolkit');
 const nodeFetch = require('node-fetch');
+const get = require('lodash.get');
 
 const privateKey = process.env['APP_IDENTITY_PRIVATE_KEY'] || '';
 const baseUrl = 'https://api.contentful.com/';
@@ -60,7 +61,26 @@ const fireBuildHook = async (buildHookId) => {
   return nodeFetch(buildHookUrl, { method: 'POST' });
 };
 
+const extractAppContextDetails = (body) => {
+  const [spaceId, environmentId, contentTypeId, appInstallationId, buildHookId] = [
+    get(body, 'sys.space.sys.id'),
+    get(body, 'sys.environment.sys.id'),
+    get(body, 'sys.contentType.sys.id') || '',
+    get(body, 'sys.appDefinition.sys.id') || '',
+    get(body, 'body.buildHookId') || '',
+  ];
+
+  return {
+    spaceId,
+    environmentId,
+    contentTypeId,
+    appInstallationId,
+    buildHookId,
+  };
+};
+
 module.exports = {
   fireBuildHook,
   getBuildHooksFromAppInstallationParams,
+  extractAppContextDetails,
 };

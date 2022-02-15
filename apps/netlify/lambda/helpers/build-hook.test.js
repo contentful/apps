@@ -1,6 +1,9 @@
 'use strict';
 
-const getBuildHookFromAppInstallationParams = require('./validate-build-hook');
+const {
+  getBuildHooksFromAppInstallationParams,
+  extractAppContextDetails,
+} = require('./build-hook');
 
 const getMgmtToken = () => 'some-random-token';
 const mockFetch = (parameters) => async () => {
@@ -39,7 +42,7 @@ const mockFetch = (parameters) => async () => {
 
 describe('Validate Build hook', () => {
   test('succeed with correct installation parameters', async () => {
-    const expectedHookId = 'my-build-hook';
+    const expectedHookId = ['my-build-hook'];
     const actionCall = {
       sys: {
         appDefinition: { sys: { id: 'some-app-def' } },
@@ -51,8 +54,8 @@ describe('Validate Build hook', () => {
       },
     };
 
-    const hookId = await getBuildHookFromAppInstallationParams(
-      actionCall,
+    const hookId = await getBuildHooksFromAppInstallationParams(
+      extractAppContextDetails(actionCall),
       getMgmtToken,
       mockFetch({ buildHookIds: expectedHookId })
     );
@@ -60,7 +63,7 @@ describe('Validate Build hook', () => {
   });
 
   test('should throw error if wrong AppActionCall is returned', async () => {
-    const expectedHookId = 'my-build-hook';
+    const expectedHookId = ['my-build-hook'];
     const actionCall = {
       sys: {
         appDefinition: { sys: { id: 'some-app-def' } },
@@ -73,8 +76,8 @@ describe('Validate Build hook', () => {
     };
 
     await expect(
-      getBuildHookFromAppInstallationParams(
-        actionCall,
+      getBuildHooksFromAppInstallationParams(
+        extractAppContextDetails(actionCall),
         getMgmtToken,
         mockFetch({ buildHookIds: expectedHookId })
       )
@@ -94,7 +97,11 @@ describe('Validate Build hook', () => {
     };
 
     await expect(
-      getBuildHookFromAppInstallationParams(actionCall, getMgmtToken, mockFetch({}))
+      getBuildHooksFromAppInstallationParams(
+        extractAppContextDetails(actionCall),
+        getMgmtToken,
+        mockFetch({})
+      )
     ).rejects.toThrow('Missing build hook parameters in app installation');
   });
 
@@ -111,7 +118,11 @@ describe('Validate Build hook', () => {
     };
 
     await expect(
-      getBuildHookFromAppInstallationParams(actionCall, getMgmtToken, mockFetch({}))
+      getBuildHooksFromAppInstallationParams(
+        extractAppContextDetails(actionCall),
+        getMgmtToken,
+        mockFetch({})
+      )
     ).rejects.toThrow('Missing build hook parameters in app installation');
   });
 });

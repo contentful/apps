@@ -1,25 +1,17 @@
 'use strict';
 
-const get = require('lodash.get');
-const { getBuildHooksFromAppInstallationParams, fireBuildHook } = require('../helpers/build-hook');
+const {
+  getBuildHooksFromAppInstallationParams,
+  fireBuildHook,
+  extractAppContextDetails,
+} = require('../helpers/build-hook');
 
 const actionHandler = async (req, res, next) => {
   try {
-    const appActionCall = req.body;
-    const [spaceId, environmentId, appInstallationId, buildHookId] = [
-      get(appActionCall, 'sys.space.sys.id'),
-      get(appActionCall, 'sys.environment.sys.id'),
-      get(appActionCall, 'sys.appDefinition.sys.id'),
-      get(appActionCall, 'body.buildHookId'),
-    ];
+    const appContextDetails = extractAppContextDetails(req.body);
 
     // actions are for building only one site
-    const [validBuildHookId] = await getBuildHooksFromAppInstallationParams({
-      spaceId,
-      environmentId,
-      appInstallationId,
-      buildHookId,
-    });
+    const [validBuildHookId] = await getBuildHooksFromAppInstallationParams(appContextDetails);
 
     if (!validBuildHookId) {
       console.log('Cannot find build hook');
