@@ -1,6 +1,6 @@
 {
   "name": "@contentful/mux-contentful-uploader",
-  "version": "1.6.10",
+  "version": "1.6.11",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
