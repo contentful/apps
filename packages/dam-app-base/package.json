@@ -15,7 +15,7 @@
     "directory": "packages/dam-app-base"
   },
   "devDependencies": {
-    "@testing-library/react": "9.4.0",
+    "@testing-library/react": "12.1.2",
     "@types/array-move": "2.0.0",
     "@types/jest": "27.4.0",
     "@types/lodash.get": "4.4.6",
