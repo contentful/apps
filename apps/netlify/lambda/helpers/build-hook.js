@@ -7,6 +7,24 @@ const get = require('lodash.get');
 const privateKey = process.env['APP_IDENTITY_PRIVATE_KEY'] || '';
 const baseUrl = 'https://api.contentful.com/';
 const buildBaseURL = 'https://api.netlify.com/build_hooks/';
+const validEventTypes = ['Entry', 'Asset', 'DeletedEntry', 'DeletedAsset'];
+
+const validateParams = (installation) => {
+  const missingParams = get(installation, 'parameters.buildHookIds') === undefined;
+
+  if (missingParams) {
+    throw new Error('Missing build hook parameters in app installation');
+  }
+};
+
+const filterHookIdsFromCT = (ct, installParams) => {
+  return installParams.buildHookIds.split(',').filter((hookId) => {
+    return (
+      installParams.events[hookId] &&
+      (installParams.events[hookId] === '*' || installParams.events[hookId].includes(ct))
+    );
+  });
+};
 
 const getBuildHooksFromAppInstallationParams = async (
   appContextDetails = {
@@ -21,6 +39,10 @@ const getBuildHooksFromAppInstallationParams = async (
 ) => {
   const { spaceId, environmentId, appInstallationId, buildHookId, contentTypeId } =
     appContextDetails;
+
+  if (!buildHookId && !contentTypeId) {
+    throw new Error('Invalid request, requires action call or publish/unpublish event');
+  }
 
   const token = await getToken(privateKey, {
     spaceId,
@@ -38,22 +60,17 @@ const getBuildHooksFromAppInstallationParams = async (
     }
   );
   const parsedRes = await rawResult.json();
-
-  if (!parsedRes.parameters || !parsedRes.parameters.buildHookIds) {
-    throw new Error('Missing build hook parameters in app installation');
-  }
+  validateParams(parsedRes);
 
   const appInstallationBuildHooks = parsedRes.parameters.buildHookIds.split(',');
 
-  if (buildHookId && !appInstallationBuildHooks.includes(buildHookId)) {
-    throw new Error('Invalid build hook');
+  if (buildHookId) {
+    return appInstallationBuildHooks.includes(buildHookId) ? [buildHookId] : [];
   }
 
   if (contentTypeId) {
-    return appInstallationBuildHooks;
+    return filterHookIdsFromCT(contentTypeId, parsedRes.parameters);
   }
-
-  return buildHookId ? [buildHookId] : [];
 };
 
 const fireBuildHook = async (buildHookId) => {
@@ -79,8 +96,17 @@ const extractAppContextDetails = (body) => {
   };
 };
 
+const validateAppEvent = (body) => {
+  const entityType = get(body, 'sys.type');
+
+  if (!validEventTypes.includes(entityType)) {
+    throw new Error('Unsupported entity type');
+  }
+};
+
 module.exports = {
   fireBuildHook,
   getBuildHooksFromAppInstallationParams,
   extractAppContextDetails,
+  validateAppEvent,
 };

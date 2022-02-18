@@ -6,7 +6,7 @@ const {
   extractAppContextDetails,
 } = require('../helpers/build-hook');
 
-const actionHandler = async (req, res, next) => {
+const actionHandler = async (req, res) => {
   try {
     const appContextDetails = extractAppContextDetails(req.body);
 
@@ -14,16 +14,16 @@ const actionHandler = async (req, res, next) => {
     const [validBuildHookId] = await getBuildHooksFromAppInstallationParams(appContextDetails);
 
     if (!validBuildHookId) {
-      console.log('Cannot find build hook');
       res.status(404);
-      res.json({ sucess: false });
+      res.json({ message: 'Cannot find build hook' });
     }
 
     await fireBuildHook(validBuildHookId);
     res.json({ success: true });
   } catch (err) {
     console.error(err);
-    next(err);
+    res.status(400);
+    res.json({ message: err.message });
   }
 };
 
