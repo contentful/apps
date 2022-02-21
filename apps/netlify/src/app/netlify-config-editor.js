@@ -21,8 +21,14 @@ const styles = {
   }),
   row: css({
     display: 'flex',
-    width: '100%',
-    margin: `${tokens.spacingXl} 0`,
+    marginBottom: tokens.spacingM,
+    paddingBottom: tokens.spacingM,
+    borderBottom: `1px solid ${tokens.gray200}`,
+    '&:last-child': css({
+      marginBottom: tokens.spacingL,
+      paddingBottom: 0,
+      borderBottom: 0,
+    }),
   }),
   site: css({
     flexGrow: 1,
@@ -35,13 +41,6 @@ const styles = {
   }),
   editBtn: css({
     margin: `0 ${tokens.spacingM}`,
-  }),
-  splitter: css({
-    marginTop: tokens.spacingL,
-    marginBottom: tokens.spacingL,
-    border: 0,
-    height: '1px',
-    backgroundColor: tokens.gray300,
   }),
 };
 
@@ -74,38 +73,40 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, onSiteConfig
       <Typography className={styles.container}>
         <Heading>Configure Netlify sites</Heading>
         {disabled ? (
-          <Paragraph>Requires a Netlify account.</Paragraph>
+          <Paragraph marginBottom={tokens.spacingL}>Requires a Netlify account.</Paragraph>
         ) : (
-          <Paragraph>
+          <Paragraph marginBottom={tokens.spacingL}>
             Pick the Netlify site(s) you want to enable a build for. Only sites with continuous deployment configured can be configured.
           </Paragraph>
         )}
-        {siteConfigs.map((siteConfig, configIndex) => {
-          return (
-            <div key={configIndex} className={styles.row}>
-              <div className={styles.site}>
-                <Subheading className={styles.siteName}>{siteConfig.name}</Subheading>
-                <Paragraph className={styles.netlifySiteName}>{siteConfig.netlifySiteName}</Paragraph>
+        <div>
+          {siteConfigs.map((siteConfig, configIndex) => {
+            return (
+              <div key={configIndex} className={styles.row}>
+                <div className={styles.site}>
+                  <Subheading className={styles.siteName}>{siteConfig.name}</Subheading>
+                  <Paragraph className={styles.netlifySiteName}>{siteConfig.netlifySiteName}</Paragraph>
+                </div>
+                <div>Automatic deploys</div>
+                <TextLink
+                  className={styles.editBtn}
+                  linkType="primary"
+                  disabled={disabled}
+                  onClick={() => onEdit(configIndex)}
+                >
+                  Edit
+                </TextLink>
+                <TextLink
+                  linkType="negative"
+                  disabled={disabled}
+                  onClick={() => onRemove(configIndex)}
+                >
+                  Remove
+                </TextLink>
               </div>
-              <div>Automatic deploys</div>
-              <TextLink
-                className={styles.editBtn}
-                linkType="primary"
-                disabled={disabled}
-                onClick={() => onEdit(configIndex)}
-              >
-                Edit
-              </TextLink>
-              <TextLink
-                linkType="negative"
-                disabled={disabled}
-                onClick={() => onRemove(configIndex)}
-              >
-                Remove
-              </TextLink>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
         <Button
           disabled={disabled || siteConfigs.length >= MAX_CONFIGS}
           buttonType="muted"
@@ -114,7 +115,6 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, onSiteConfig
         >
           Add another site
         </Button>
-        <hr className={styles.splitter} />
       </Typography>
       <EditSiteModal
         configIndex={editingSiteIndex.current}
