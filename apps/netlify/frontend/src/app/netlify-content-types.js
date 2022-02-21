@@ -94,7 +94,7 @@ export default class NetlifyContentTypes extends React.Component {
 
     return (
       <Typography>
-        <Heading>Content Types</Heading>
+        <Heading>Assign to sidebars</Heading>
         <Paragraph>
           Select which content types will show the Netlify functionality in the sidebar.
         </Paragraph>
