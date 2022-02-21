@@ -202,6 +202,7 @@ export default class NetlifyAppConfig extends React.Component {
               disabled={disabled}
               siteConfigs={this.state.config.sites}
               netlifySites={this.state.netlifySites}
+              contentTypes={this.state.contentTypes}
               onSiteConfigsChange={this.onSiteConfigsChange}
             />
             <NetlifyContentTypes

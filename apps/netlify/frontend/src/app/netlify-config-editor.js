@@ -44,7 +44,7 @@ const styles = {
   }),
 };
 
-const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, onSiteConfigsChange }) => {
+const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes, onSiteConfigsChange }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const editingSiteIndex = useRef(null);
 
@@ -120,6 +120,7 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, onSiteConfig
         configIndex={editingSiteIndex.current}
         siteConfigs={siteConfigs}
         netlifySites={netlifySites}
+        contentTypes={contentTypes}
         isShown={isModalVisible}
         onSiteConfigsChange={onSiteConfigsChange}
         onClose={onCloseModal}

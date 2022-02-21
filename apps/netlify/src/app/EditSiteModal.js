@@ -2,28 +2,52 @@ import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Form,
+  Select,
   SelectField,
   TextField,
   Button,
   Option,
+  CheckboxField,
+  Pill,
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
+import tokens from '@contentful/forma-36-tokens';
 
 const styles = {
   controls: css({
     justifyContent: 'flex-end',
   }),
+  pill: css({
+    margin: `${tokens.spacingXs} ${tokens.spacingXs} 0 0`,
+  }),
+  contentTypeSelect: css({
+    marginLeft: tokens.spacingL,
+  }),
 };
 
 const PICK_OPTION_VALUE = '__pick__';
+const PICK_CONTENT_TYPE = '__select-content-type__';
 
-export const EditSiteModal = ({ configIndex, siteConfigs, netlifySites, isShown, onSiteConfigsChange, onClose }) => {
+export const EditSiteModal = ({
+  configIndex,
+  siteConfigs,
+  netlifySites,
+  contentTypes,
+  isShown,
+  onSiteConfigsChange,
+  onClose
+}) => {
   const [siteId, setSiteId] = useState(PICK_OPTION_VALUE);
   const [displayName, setDisplayName] = useState('');
+  const [isDeploysOn, setIsDeploysOn] = useState(false);
+  const [selectedContentTypes, setSelectedContentTypes] = useState({});
+
   const isNewSite = configIndex === undefined || configIndex === null;
 
   const selectId = `site-select-${configIndex ?? 'new'}`;
   const inputId = `site-input-${configIndex ?? 'new'}`;
+  const deploysId = `deploys-checkbox-${configIndex ?? 'new'}`;
+  const contentTypeSelectId = `content-type-select-${configIndex ?? 'new'}`;
 
   const updateSiteData = (selectedSite) => {
     return {
@@ -54,17 +78,10 @@ export const EditSiteModal = ({ configIndex, siteConfigs, netlifySites, isShown,
     }
   };
 
-  const onDisplayNameChange = (e) => {
-    setDisplayName(e.target.value);
-  };
-
-  const onSiteChange = (e) => {
-    setSiteId(e.target.value);
-  };
-
   const resetFields = () => {
     setSiteId(PICK_OPTION_VALUE);
     setDisplayName('');
+    setSelectedContentTypes({});
   };
 
   const onConfirm = () => {
@@ -76,6 +93,43 @@ export const EditSiteModal = ({ configIndex, siteConfigs, netlifySites, isShown,
   const onCancel = () => {
     onClose();
     resetFields();
+  };
+
+  const onSelectContentType = (e) => {
+    const selected = contentTypes.find(([id, name]) => id === e.target.value);
+    if (selected) {
+      setSelectedContentTypes({...selectedContentTypes, ...{ [selected[0]]: selected[1] } });
+    }
+  };
+
+  const onRemoveContentType = (ctId) => {
+    const filtered = {};
+    
+    Object.keys(selectedContentTypes).forEach((id) => {
+      if (id !== ctId) {
+        filtered[id] = selectedContentTypes[id];
+      }
+    });
+
+    setSelectedContentTypes(filtered);
+  };
+
+  const renderAvailableContentTypes = () => {
+    if (!contentTypes) {
+      return null;
+    }
+
+    return contentTypes
+      .filter(([id, _]) => !Object.keys(selectedContentTypes).includes(id))
+      .map(([id, name]) => (
+        <Option key={id} value={id}>{name}</Option>
+      ));
+  };
+
+  const renderSelectedContentTypes = () => {
+    return Object.entries(selectedContentTypes).map(([id, name]) => (
+      <Pill key={id} label={name} className={styles.pill} onClose={() => onRemoveContentType(id)} />
+    ));
   };
 
   useEffect(() => {
@@ -102,7 +156,7 @@ export const EditSiteModal = ({ configIndex, siteConfigs, netlifySites, isShown,
                 name={selectId}
                 labelText="Netlify site"
                 value={siteId}
-                onChange={onSiteChange}
+                onChange={(e) => setSiteId(e.target.value)}
                 required
               >
                 {isNewSite && (
@@ -121,9 +175,34 @@ export const EditSiteModal = ({ configIndex, siteConfigs, netlifySites, isShown,
                 name={inputId}
                 labelText="Display name"
                 value={displayName}
-                onChange={onDisplayNameChange}
+                onChange={(e) => setDisplayName(e.target.value)}
                 required
               />
+              <CheckboxField
+                id={deploysId}
+                name={deploysId}
+                checked={isDeploysOn}
+                labelText="Automatic deploys on publish events"
+                helpText="Rebuild site when an entry of matching content types or assets are published or unpublished."
+                onChange={(e) => setIsDeploysOn(e.target.checked)}
+              />
+              {isDeploysOn && (
+                <>
+                  <Select
+                    id={contentTypeSelectId}
+                    name={contentTypeSelectId}
+                    value={PICK_CONTENT_TYPE}
+                    className={styles.contentTypeSelect}
+                    width="auto"
+                    onChange={onSelectContentType}
+                  >
+                    <Option value={PICK_CONTENT_TYPE} disabled>Select content types...</Option>
+                    <Option value="*">All</Option>
+                    {renderAvailableContentTypes(contentTypes)}
+                  </Select>
+                  {renderSelectedContentTypes()}
+                </>
+              )}
             </Form>
           </Modal.Content>
           <Modal.Controls className={styles.controls}>
