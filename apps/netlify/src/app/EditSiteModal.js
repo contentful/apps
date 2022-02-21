@@ -7,6 +7,13 @@ import {
   Button,
   Option,
 } from '@contentful/forma-36-react-components';
+import { css } from 'emotion';
+
+const styles = {
+  controls: css({
+    justifyContent: 'flex-end',
+  }),
+};
 
 const PICK_OPTION_VALUE = '__pick__';
 
@@ -84,7 +91,7 @@ export const EditSiteModal = ({ configIndex, siteConfigs, netlifySites, isShown,
   }, [configIndex, isNewSite, siteConfigs]);
 
   return (
-    <Modal isShown={isShown} onClose={onCancel}>
+    <Modal isShown={isShown} onClose={onCancel} size="small">
       {() => (
         <>
           <Modal.Header title={isNewSite ? 'Add site' : 'Edit site'} />
@@ -119,11 +126,11 @@ export const EditSiteModal = ({ configIndex, siteConfigs, netlifySites, isShown,
               />
             </Form>
           </Modal.Content>
-          <Modal.Controls>
+          <Modal.Controls className={styles.controls}>
             <Button buttonType="muted" size="small" onClick={onCancel}>
               Cancel
             </Button>
-            <Button buttonType="positive" size="small" onClick={onConfirm} disabled={!siteId || !displayName}>
+            <Button buttonType="positive" size="small" onClick={onConfirm} disabled={!siteId || !displayName.trim()}>
               Confirm
             </Button>
           </Modal.Controls>
