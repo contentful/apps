@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.6.71](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.70...@contentful/ecommerce-app-base@2.6.71) (2022-02-22)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.3.3 to 4.3.4 ([#866](https://github.com/contentful/apps/issues/866)) ([0f7baad](https://github.com/contentful/apps/commit/0f7baad002f6afc956aa1519f7d4a5554335ba8e))
+
+
+
+
+
 ## [2.6.70](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.69...@contentful/ecommerce-app-base@2.6.70) (2022-02-21)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
