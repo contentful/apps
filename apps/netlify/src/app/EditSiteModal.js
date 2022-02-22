@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Form,
-  Select,
   SelectField,
   TextField,
   Button,
   Option,
   CheckboxField,
   Pill,
+  Autocomplete,
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
@@ -26,7 +26,6 @@ const styles = {
 };
 
 const PICK_OPTION_VALUE = '__pick__';
-const PICK_CONTENT_TYPE = '__select-content-type__';
 
 export const EditSiteModal = ({
   configIndex,
@@ -40,7 +39,9 @@ export const EditSiteModal = ({
   const [siteId, setSiteId] = useState(PICK_OPTION_VALUE);
   const [displayName, setDisplayName] = useState('');
   const [isDeploysOn, setIsDeploysOn] = useState(false);
-  const [selectedContentTypes, setSelectedContentTypes] = useState({});
+  const [availableContentTypes, setAvailableContentTypes] = useState([]);
+  const [selectedContentTypes, setSelectedContentTypes] = useState([]);
+  const [contentTypeQuery, setContentTypeQuery] = useState('');
 
   const isNewSite = configIndex === undefined || configIndex === null;
 
@@ -81,7 +82,7 @@ export const EditSiteModal = ({
   const resetFields = () => {
     setSiteId(PICK_OPTION_VALUE);
     setDisplayName('');
-    setSelectedContentTypes({});
+    setSelectedContentTypes([]);
   };
 
   const onConfirm = () => {
@@ -95,42 +96,40 @@ export const EditSiteModal = ({
     resetFields();
   };
 
-  const onSelectContentType = (e) => {
-    const selected = contentTypes.find(([id, name]) => id === e.target.value);
+  const onSelectContentType = (item) => {
+    const selected = availableContentTypes.find((contentType) => contentType.value === item.value);
     if (selected) {
-      setSelectedContentTypes({...selectedContentTypes, ...{ [selected[0]]: selected[1] } });
+      setSelectedContentTypes([...selectedContentTypes, { value: selected.value, label: selected.label } ]);
+    }
+  };
+
+  const onContentTypeQueryChange = (query) => {
+    if (typeof query === 'string') {
+      setContentTypeQuery(query);
     }
   };
 
   const onRemoveContentType = (ctId) => {
-    const filtered = {};
-    
-    Object.keys(selectedContentTypes).forEach((id) => {
-      if (id !== ctId) {
-        filtered[id] = selectedContentTypes[id];
-      }
-    });
-
+    const filtered = selectedContentTypes.filter((contentType) => contentType.value !== ctId);
     setSelectedContentTypes(filtered);
   };
 
-  const renderAvailableContentTypes = () => {
-    if (!contentTypes) {
-      return null;
-    }
-
-    return contentTypes
-      .filter(([id, _]) => !Object.keys(selectedContentTypes).includes(id))
-      .map(([id, name]) => (
-        <Option key={id} value={id}>{name}</Option>
-      ));
-  };
-
   const renderSelectedContentTypes = () => {
-    return Object.entries(selectedContentTypes).map(([id, name]) => (
-      <Pill key={id} label={name} className={styles.pill} onClose={() => onRemoveContentType(id)} />
+    return selectedContentTypes.map(({ value, label }) => (
+      <Pill key={value} label={label} className={styles.pill} onClose={() => onRemoveContentType(value)} />
     ));
   };
+
+  useEffect(() => {
+    if (contentTypes) {
+      const available = contentTypes
+        .filter(([id, _]) => !selectedContentTypes.some((contentType) => contentType.value === id))
+        .filter(([id, name]) => contentTypeQuery ? new RegExp(contentTypeQuery, 'i').test(name) : true)
+        .map(([id, name]) => ({ value: id, label: name }));
+
+      setAvailableContentTypes(available);
+    }
+  }, [contentTypes, contentTypeQuery, selectedContentTypes]);
 
   useEffect(() => {
     if (!isNewSite) {
@@ -145,7 +144,7 @@ export const EditSiteModal = ({
   }, [configIndex, isNewSite, siteConfigs]);
 
   return (
-    <Modal isShown={isShown} onClose={onCancel} size="small">
+    <Modal isShown={isShown} onClose={onCancel} size="medium">
       {() => (
         <>
           <Modal.Header title={isNewSite ? 'Add site' : 'Edit site'} />
@@ -187,21 +186,22 @@ export const EditSiteModal = ({
                 onChange={(e) => setIsDeploysOn(e.target.checked)}
               />
               {isDeploysOn && (
-                <>
-                  <Select
+                <div className={styles.contentTypeSelect}>
+                  <Autocomplete
                     id={contentTypeSelectId}
                     name={contentTypeSelectId}
-                    value={PICK_CONTENT_TYPE}
-                    className={styles.contentTypeSelect}
-                    width="auto"
+                    items={availableContentTypes}
+                    emptyListMessage="There a no content types"
+                    noMatchesMessage="Your search didn't match any content type"
+                    placeholder="Add more content types..."
+                    width="full"
                     onChange={onSelectContentType}
+                    onQueryChange={onContentTypeQueryChange}
                   >
-                    <Option value={PICK_CONTENT_TYPE} disabled>Select content types...</Option>
-                    <Option value="*">All</Option>
-                    {renderAvailableContentTypes(contentTypes)}
-                  </Select>
+                    {(options) => options.map((option) => <span key={option.value}>{option.label}</span>)}
+                  </Autocomplete>
                   {renderSelectedContentTypes()}
-                </>
+                </div>
               )}
             </Form>
           </Modal.Content>
