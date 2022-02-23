@@ -8,18 +8,39 @@ export function configToParameters(config) {
   const flat = {
     notificationHookIds: config.netlifyHookIds,
     ...config.sites.reduce((acc, site) => {
-      return {
+      const result = {
         buildHookIds: (acc.buildHookIds || []).concat([site.buildHookId]),
         names: (acc.names || []).concat([site.name]),
         siteIds: (acc.siteIds || []).concat([site.netlifySiteId]),
         siteNames: (acc.siteNames || []).concat([site.netlifySiteName]),
         siteUrls: (acc.siteUrls || []).concat([site.netlifySiteUrl]),
+        events: {
+          ...(acc.events || {}),
+        },
       };
+
+      if (site.selectedContentTypes) {
+        result.events = {
+          ...result.events,
+          [site.buildHookId]: site.selectedContentTypes,
+        }
+      }
+
+      return result;
     }, {}),
   };
 
   return Object.keys(flat).reduce((acc, key) => {
-    return { ...acc, [key]: flat[key].join(',') };
+    if (key === 'events') {
+      const flatEvents = Object.keys(flat.events).reduce((flatEvents, buildHookId) => {
+        return { ...flatEvents, [buildHookId]: (flat.events[buildHookId] || []).join(',') };
+      }, {});
+      acc = { ...acc, events: flatEvents };
+    } else {
+      acc = { ...acc, [key]: flat[key].join(',') };
+    }
+
+    return acc;
   }, {});
 }
 
@@ -34,12 +55,15 @@ export function parametersToConfig(parameters) {
   return {
     netlifyHookIds: readCsvParam(parameters.notificationHookIds),
     sites: buildHookIds.map((buildHookId, i) => {
+      const selectedContentTypes = readCsvParam(parameters.events[buildHookId]);
+
       return {
         buildHookId,
         name: names[i],
         netlifySiteId: siteIds[i],
         netlifySiteName: siteNames[i],
         netlifySiteUrl: siteUrls[i],
+        selectedContentTypes,
       };
     }),
   };

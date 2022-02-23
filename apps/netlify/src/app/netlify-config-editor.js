@@ -10,6 +10,7 @@ import {
   Button,
   TextLink,
   Subheading,
+  Icon,
 } from '@contentful/forma-36-react-components';
 
 import { MAX_CONFIGS } from '../constants';
@@ -24,6 +25,7 @@ const styles = {
     marginBottom: tokens.spacingM,
     paddingBottom: tokens.spacingM,
     borderBottom: `1px solid ${tokens.gray200}`,
+    alignItems: 'center',
     '&:last-child': css({
       marginBottom: tokens.spacingL,
       paddingBottom: 0,
@@ -38,6 +40,14 @@ const styles = {
   }),
   netlifySiteName: css({
     marginBottom: 0,
+  }),
+  deploysState: css({
+    display: 'flex',
+    marginRight: tokens.spacingM,
+    color: tokens.gray600,
+  }),
+  deploysStateLabel: css({
+    margin: 0,
   }),
   editBtn: css({
     margin: `0 ${tokens.spacingM}`,
@@ -61,6 +71,10 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
   const onRemove = (configIndex) => {
     const updated = siteConfigs.filter((_, i) => i !== configIndex);
     onSiteConfigsChange(updated);
+  };
+
+  const onIsDeploysOnChange = () => {
+
   };
 
   const onCloseModal = () => {
@@ -87,7 +101,12 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
                   <Subheading className={styles.siteName}>{siteConfig.name}</Subheading>
                   <Paragraph className={styles.netlifySiteName}>{siteConfig.netlifySiteName}</Paragraph>
                 </div>
-                <div>Automatic deploys</div>
+                {siteConfig.selectedContentTypes?.length > 0 && (
+                  <div className={styles.deploysState}>
+                    <Icon color="muted" size="tiny" icon="CheckCircleTrimmed" />
+                    <Paragraph className={styles.deploysStateLabel}>Automatic deploys</Paragraph>
+                  </div>
+                )}
                 <TextLink
                   className={styles.editBtn}
                   linkType="primary"
