@@ -61,6 +61,10 @@ export const EditSiteModal = ({
       return '*';
     }
 
+    if (selectedContentTypes.length === 0) {
+      return undefined;
+    }
+
     return selectedContentTypes.map((contentType) => contentType.value);
   };
 

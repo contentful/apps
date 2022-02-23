@@ -19,11 +19,13 @@ export function configToParameters(config) {
         },
       };
 
-      if (site.selectedContentTypes) {
-        result.events = {
-          ...result.events,
-          [site.buildHookId]: site.selectedContentTypes,
-        }
+      if (!site.selectedContentTypes || site.selectedContentTypes.length === 0) {
+        return result;
+      }
+
+      result.events = {
+        ...result.events,
+        [site.buildHookId]: site.selectedContentTypes,
       }
 
       return result;
