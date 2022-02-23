@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   Form,
@@ -56,6 +56,7 @@ export const EditSiteModal = ({
       netlifySiteId: selectedSite.id,
       netlifySiteName: selectedSite.name,
       netlifySiteUrl: selectedSite.ssl_url || selectedSite.url,
+      selectedContentTypes: isDeploysOn ? selectedContentTypes.map((contentType) => contentType.value) : undefined,
     };
   };
 
@@ -83,6 +84,7 @@ export const EditSiteModal = ({
     setSiteId(PICK_OPTION_VALUE);
     setDisplayName('');
     setSelectedContentTypes([]);
+    setIsDeploysOn(false);
   };
 
   const onConfirm = () => {
@@ -120,16 +122,25 @@ export const EditSiteModal = ({
     ));
   };
 
+  const getAvailableContentTypes = useCallback(() => {
+    return contentTypes
+      .filter(([id, _]) => !selectedContentTypes.some((contentType) => contentType.value === id))
+      .filter(([_, name]) => contentTypeQuery ? new RegExp(contentTypeQuery, 'i').test(name) : true)
+      .map(([id, name]) => ({ value: id, label: name }));
+  }, [contentTypes, contentTypeQuery, selectedContentTypes]);
+
+  const getSelectedContentTypes = useCallback(() => {
+    return siteConfigs[configIndex]?.selectedContentTypes.map((ctId) => {
+      const contentType = contentTypes.find(([id, _]) => ctId === id);
+      return { value: contentType[0], label: contentType[1] };
+    });
+  }, [configIndex, siteConfigs, contentTypes]);
+
   useEffect(() => {
     if (contentTypes) {
-      const available = contentTypes
-        .filter(([id, _]) => !selectedContentTypes.some((contentType) => contentType.value === id))
-        .filter(([id, name]) => contentTypeQuery ? new RegExp(contentTypeQuery, 'i').test(name) : true)
-        .map(([id, name]) => ({ value: id, label: name }));
-
-      setAvailableContentTypes(available);
+      setAvailableContentTypes(getAvailableContentTypes());
     }
-  }, [contentTypes, contentTypeQuery, selectedContentTypes]);
+  }, [contentTypes, getAvailableContentTypes]);
 
   useEffect(() => {
     if (!isNewSite) {
@@ -142,6 +153,17 @@ export const EditSiteModal = ({
       setSiteId(siteConfig.netlifySiteId);
     }
   }, [configIndex, isNewSite, siteConfigs]);
+
+  useEffect(() => {
+    const isContentTypesSelected = !isNewSite && siteConfigs[configIndex]?.selectedContentTypes?.length > 0;
+
+    if (isContentTypesSelected) {
+      const selected = getSelectedContentTypes();
+
+      setIsDeploysOn(isContentTypesSelected);
+      setSelectedContentTypes(selected);
+    }
+  }, [configIndex, isNewSite, siteConfigs, getSelectedContentTypes]);
 
   return (
     <Modal isShown={isShown} onClose={onCancel} size="medium">
