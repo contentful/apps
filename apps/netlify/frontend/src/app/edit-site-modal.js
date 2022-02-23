@@ -2,16 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   Form,
-  SelectField,
-  TextField,
+  FormControl,
+  Select,
+  TextInput,
   Button,
   Option,
-  CheckboxField,
+  Checkbox,
   Pill,
   Autocomplete,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import tokens from '@contentful/forma-36-tokens';
 
 const styles = {
   controls: css({
@@ -207,41 +208,47 @@ export const EditSiteModal = ({
           <Modal.Header title={isNewSite ? 'Add site' : 'Edit site'} />
           <Modal.Content>
             <Form onSubmit={onConfirm} spacing="default">
-              <SelectField
-                id={selectId}
-                name={selectId}
-                labelText="Netlify site"
-                value={siteId}
-                onChange={(e) => setSiteId(e.target.value)}
-                required
-              >
-                {isNewSite && (
-                  <Option value={PICK_OPTION_VALUE}>Pick site</Option>
-                )}
-                {netlifySites.length > 0 && netlifySites.map((netlifySite) => {
-                  return (
-                    <Option key={netlifySite.id} value={netlifySite.id}>
-                      {netlifySite.name}
-                    </Option>
-                  );
-                })}
-              </SelectField>
-              <TextField
-                id={inputId}
-                name={inputId}
-                labelText="Display name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                required
-              />
-              <CheckboxField
-                id={deploysId}
-                name={deploysId}
-                checked={isDeploysOn}
-                labelText="Automatic deploys on publish events"
-                helpText="Rebuild site when an entry of matching content types or assets are published or unpublished."
-                onChange={(e) => setIsDeploysOn(e.target.checked)}
-              />
+              <FormControl marginBottom="spacingM">
+                <FormControl.Label>Netlify site</FormControl.Label>
+                <Select
+                  id={selectId}
+                  name={selectId}
+                  value={siteId}
+                  onChange={(e) => setSiteId(e.target.value)}
+                  required
+                >
+                  {isNewSite && (
+                    <Option value={PICK_OPTION_VALUE}>Pick site</Option>
+                  )}
+                  {netlifySites.length > 0 && netlifySites.map((netlifySite) => {
+                    return (
+                      <Option key={netlifySite.id} value={netlifySite.id}>
+                        {netlifySite.name}
+                      </Option>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+              <FormControl marginBottom="spacingM">
+                <FormControl.Label>Display name</FormControl.Label>
+                <TextInput
+                  id={inputId}
+                  name={inputId}
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  required
+                />
+              </FormControl>
+              <FormControl marginBottom="spacingS">
+                <Checkbox
+                  name={deploysId}
+                  checked={isDeploysOn}
+                  helpText="Rebuild site when an entry of matching content types or assets are published or unpublished"
+                  onChange={(e) => setIsDeploysOn(e.target.checked)}
+                >
+                  Automatic deploys on publish events
+                </Checkbox>
+              </FormControl>
               {isDeploysOn && (
                 <div className={styles.contentTypeSelect}>
                   <Autocomplete
@@ -252,28 +259,28 @@ export const EditSiteModal = ({
                     noMatchesMessage="Your search didn't match any content type"
                     placeholder="Add more content types..."
                     width="full"
-                    onChange={onSelectContentType}
-                    onQueryChange={onContentTypeQueryChange}
-                  >
-                    {(options) => options.map((option) =>
+                    itemToString={(item) => item.label}
+                    renderItem={(item) => (
                       <span
-                        key={option.value}
-                        className={option.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''}
+                        key={item.value}
+                        className={item.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''}
                       >
-                        {option.label}
+                        {item.label}
                       </span>
                     )}
-                  </Autocomplete>
+                    onSelectItem={onSelectContentType}
+                    onInputValueChange={onContentTypeQueryChange}
+                  />
                   {renderSelectedContentTypes()}
                 </div>
               )}
             </Form>
           </Modal.Content>
           <Modal.Controls className={styles.controls}>
-            <Button buttonType="muted" size="small" onClick={onCancel}>
+            <Button variant="secondary" size="small" onClick={onCancel}>
               Cancel
             </Button>
-            <Button buttonType="positive" size="small" onClick={onConfirm} disabled={!siteId || !displayName.trim()}>
+            <Button variant="positive" size="small" onClick={onConfirm} disabled={!siteId || !displayName.trim()}>
               Confirm
             </Button>
           </Modal.Controls>
