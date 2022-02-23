@@ -33,7 +33,11 @@ export function configToParameters(config) {
   return Object.keys(flat).reduce((acc, key) => {
     if (key === 'events') {
       const flatEvents = Object.keys(flat.events).reduce((flatEvents, buildHookId) => {
-        return { ...flatEvents, [buildHookId]: (flat.events[buildHookId] || []).join(',') };
+        const contentTypes = flat.events[buildHookId];
+        return {
+          ...flatEvents,
+          [buildHookId]: Array.isArray(contentTypes) ? flat.events[buildHookId].join(',') : contentTypes
+        };
       }, {});
       acc = { ...acc, events: flatEvents };
     } else {
@@ -55,7 +59,9 @@ export function parametersToConfig(parameters) {
   return {
     netlifyHookIds: readCsvParam(parameters.notificationHookIds),
     sites: buildHookIds.map((buildHookId, i) => {
-      const selectedContentTypes = readCsvParam(parameters.events[buildHookId]);
+      const selectedContentTypes = parameters.events[buildHookId] === '*' ?
+      parameters.events[buildHookId] :
+      readCsvParam(parameters.events[buildHookId]);
 
       return {
         buildHookId,
