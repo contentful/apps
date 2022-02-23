@@ -2,14 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  Typography,
   Note,
   TextLink,
   Heading,
   Paragraph,
-  FieldGroup,
-  CheckboxField,
-} from '@contentful/forma-36-react-components';
+  Checkbox,
+} from '@contentful/f36-components';
 
 export default class NetlifyContentTypes extends React.Component {
   static propTypes = {
@@ -46,10 +44,10 @@ export default class NetlifyContentTypes extends React.Component {
     let contentToRender;
     if (contentTypes.length === 0) {
       contentToRender = (
-        <Note noteType="warning">
+        <Note variant="warning">
           There are <strong>no content types</strong> in this environment. You can add a{' '}
           <TextLink
-            linkType="primary"
+            variant="primary"
             target="_blank"
             rel="noopener noreferrer"
             href={
@@ -66,40 +64,39 @@ export default class NetlifyContentTypes extends React.Component {
     } else {
       contentToRender = (
         <div>
-          <FieldGroup>
-            <CheckboxField
+          <Checkbox.Group>
+            <Checkbox
               id="selectAll"
-              labelText="Select all"
               disabled={disabled}
               onChange={this.onToggleSelect}
               checked={allSelected}
-            />
-          </FieldGroup>
-          <FieldGroup>
+            >
+              Select all
+            </Checkbox>
             {contentTypes.map(([id, name]) => (
-              <CheckboxField
+              <Checkbox
                 key={id}
                 id={`ct-box-${id}`}
-                labelIsLight
-                labelText={name}
                 onChange={(e) => this.onChange(e.target.checked, id)}
                 disabled={disabled}
                 checked={enabledContentTypes.includes(id)}
-              />
+              >
+                {name}
+              </Checkbox>
             ))}
-          </FieldGroup>
+          </Checkbox.Group>
         </div>
       );
     }
 
     return (
-      <Typography>
+      <>
         <Heading>Assign to sidebars</Heading>
         <Paragraph>
           Select which content types will show the Netlify functionality in the sidebar.
         </Paragraph>
         {contentToRender}
-      </Typography>
+      </>
     );
   }
 }
