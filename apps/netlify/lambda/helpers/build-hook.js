@@ -20,6 +20,7 @@ const validateParams = (installation) => {
 const filterHookIdsFromCT = (ct, installParams) => {
   return installParams.buildHookIds.split(',').filter((hookId) => {
     return (
+      installParams.events &&
       installParams.events[hookId] &&
       (installParams.events[hookId] === '*' || installParams.events[hookId].includes(ct))
     );

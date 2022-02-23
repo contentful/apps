@@ -21,7 +21,8 @@ const appEventHandler = async (req, res) => {
 
     if (!buildHookIds || buildHookIds.length === 0) {
       res.status(404);
-      res.json({ messagge: 'missing build hook' });
+      res.json({ message: 'missing build hook' });
+      return;
     }
 
     // fire all build hooks as there might be multiple

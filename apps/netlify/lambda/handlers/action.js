@@ -16,6 +16,7 @@ const actionHandler = async (req, res) => {
     if (!validBuildHookId) {
       res.status(404);
       res.json({ message: 'Cannot find build hook' });
+      return;
     }
 
     await fireBuildHook(validBuildHookId);
