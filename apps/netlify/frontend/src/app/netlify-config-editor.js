@@ -73,10 +73,6 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
     onSiteConfigsChange(updated);
   };
 
-  const onIsDeploysOnChange = () => {
-
-  };
-
   const onCloseModal = () => {
     editingSiteIndex.current = null;
     setIsModalVisible(false);
