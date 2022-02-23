@@ -23,9 +23,13 @@ const styles = {
   contentTypeSelect: css({
     marginLeft: tokens.spacingL,
   }),
+  allContentTypes: css({
+    fontWeight: 500,
+  }),
 };
 
 const PICK_OPTION_VALUE = '__pick__';
+const ALL_CONTENT_TYPES_VALUE = '__all__';
 
 export const EditSiteModal = ({
   configIndex,
@@ -50,13 +54,23 @@ export const EditSiteModal = ({
   const deploysId = `deploys-checkbox-${configIndex ?? 'new'}`;
   const contentTypeSelectId = `content-type-select-${configIndex ?? 'new'}`;
 
+  const serializeSelectedContentTypes = () => {
+    if (!isDeploysOn) return undefined;
+
+    if (selectedContentTypes.length === contentTypes.length) {
+      return '*';
+    }
+
+    return selectedContentTypes.map((contentType) => contentType.value);
+  };
+
   const updateSiteData = (selectedSite) => {
     return {
       name: displayName,
       netlifySiteId: selectedSite.id,
       netlifySiteName: selectedSite.name,
       netlifySiteUrl: selectedSite.ssl_url || selectedSite.url,
-      selectedContentTypes: isDeploysOn ? selectedContentTypes.map((contentType) => contentType.value) : undefined,
+      selectedContentTypes: serializeSelectedContentTypes(),
     };
   };
 
@@ -76,6 +90,7 @@ export const EditSiteModal = ({
 
         return siteConfig;
       });
+
       onSiteConfigsChange(updated);
     }
   };
@@ -84,6 +99,7 @@ export const EditSiteModal = ({
     setSiteId(PICK_OPTION_VALUE);
     setDisplayName('');
     setSelectedContentTypes([]);
+    setContentTypeQuery('');
     setIsDeploysOn(false);
   };
 
@@ -99,9 +115,16 @@ export const EditSiteModal = ({
   };
 
   const onSelectContentType = (item) => {
-    const selected = availableContentTypes.find((contentType) => contentType.value === item.value);
-    if (selected) {
-      setSelectedContentTypes([...selectedContentTypes, { value: selected.value, label: selected.label } ]);
+    const selected = availableContentTypes.filter((contentType) => {
+      if (item.value === ALL_CONTENT_TYPES_VALUE) {
+        return contentType.value !== ALL_CONTENT_TYPES_VALUE;
+      } else {
+        return contentType.value === item.value;
+      }
+    });
+
+    if (selected.length > 0) {
+      setSelectedContentTypes([...selectedContentTypes, ...selected ]);
     }
   };
 
@@ -123,14 +146,21 @@ export const EditSiteModal = ({
   };
 
   const getAvailableContentTypes = useCallback(() => {
-    return contentTypes
+    const items = contentTypes
       .filter(([id, _]) => !selectedContentTypes.some((contentType) => contentType.value === id))
       .filter(([_, name]) => contentTypeQuery ? new RegExp(contentTypeQuery, 'i').test(name) : true)
       .map(([id, name]) => ({ value: id, label: name }));
+    return [{ value: ALL_CONTENT_TYPES_VALUE, label: 'All Content Types' }, ...items];
   }, [contentTypes, contentTypeQuery, selectedContentTypes]);
 
-  const getSelectedContentTypes = useCallback(() => {
-    return siteConfigs[configIndex]?.selectedContentTypes.map((ctId) => {
+  const getContentTypesFromConfig = useCallback(() => {
+    const types = siteConfigs[configIndex]?.selectedContentTypes;
+
+    if (types === '*') {
+      return contentTypes.map(([id, name]) => ({ value: id, label: name }));
+    }
+
+    return types.map((ctId) => {
       const contentType = contentTypes.find(([id, _]) => ctId === id);
       return { value: contentType[0], label: contentType[1] };
     });
@@ -143,27 +173,28 @@ export const EditSiteModal = ({
   }, [contentTypes, getAvailableContentTypes]);
 
   useEffect(() => {
-    if (!isNewSite) {
-      const siteConfig = siteConfigs[configIndex];
+    if (isNewSite) return;
 
-      if (siteConfig?.name) {
-        setDisplayName(siteConfig.name);
-      }
+    const siteConfig = siteConfigs[configIndex];
 
-      setSiteId(siteConfig.netlifySiteId);
+    if (siteConfig?.name) {
+      setDisplayName(siteConfig.name);
     }
+
+    setSiteId(siteConfig.netlifySiteId);
   }, [configIndex, isNewSite, siteConfigs]);
 
   useEffect(() => {
-    const isContentTypesSelected = !isNewSite && siteConfigs[configIndex]?.selectedContentTypes?.length > 0;
+    if (isNewSite) return;
+
+    const selected = getContentTypesFromConfig();
+    const isContentTypesSelected = selected.length > 0;
 
     if (isContentTypesSelected) {
-      const selected = getSelectedContentTypes();
-
       setIsDeploysOn(isContentTypesSelected);
       setSelectedContentTypes(selected);
     }
-  }, [configIndex, isNewSite, siteConfigs, getSelectedContentTypes]);
+  }, [isNewSite, getContentTypesFromConfig]);
 
   return (
     <Modal isShown={isShown} onClose={onCancel} size="medium">
@@ -220,7 +251,14 @@ export const EditSiteModal = ({
                     onChange={onSelectContentType}
                     onQueryChange={onContentTypeQueryChange}
                   >
-                    {(options) => options.map((option) => <span key={option.value}>{option.label}</span>)}
+                    {(options) => options.map((option) =>
+                      <span
+                        key={option.value}
+                        className={option.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''}
+                      >
+                        {option.label}
+                      </span>
+                    )}
                   </Autocomplete>
                   {renderSelectedContentTypes()}
                 </div>
