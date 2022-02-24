@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import tokens from '@contentful/forma-36-tokens';
 import noop from 'lodash/noop';
-import { Icon, SkeletonContainer, SkeletonImage } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import { activeProductCheck } from '../iconsInBase64';
 import { Product } from '../../interfaces';
+
+import { Icon, SkeletonContainer, SkeletonImage } from '@contentful/f36-components';
+
+import { AssetIcon } from '@contentful/f36-icons';
 
 export interface Props {
   product: Product;
@@ -135,7 +138,7 @@ export const ProductListItem = (props: Props) => {
         )}
         {imageHasErrored && (
           <div className={styles.errorImage}>
-            <Icon icon="Asset" />
+            <AssetIcon />
           </div>
         )}
         {!imageHasErrored && (

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import get from 'lodash/get';
 import clamp from 'lodash/clamp';
 import debounce from 'lodash/debounce';
-import { Button, TextInput, Icon } from '@contentful/forma-36-react-components';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { Paginator } from './Paginator';
@@ -16,6 +15,10 @@ import {
 import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
 import { mapSort } from '../utils';
+
+import { Button, Icon, TextInput } from '@contentful/f36-components';
+
+import { SearchIcon } from '@contentful/f36-icons';
 
 export interface Props {
   sdk: DialogExtensionSDK;
@@ -165,11 +168,10 @@ export class SkuPicker extends Component<Props, State> {
               name="sku-search"
               id="sku-search"
               testId="sku-search"
-              width="medium"
               value={search}
               onChange={(event) => this.setSearch((event.target as HTMLInputElement).value)}
             />
-            <Icon color="muted" icon="Search" />
+            <SearchIcon variant="muted" />
             {!!pagination.total && (
               <span className={styles.total}>
                 Total results: {pagination.total.toLocaleString()}
@@ -180,9 +182,9 @@ export class SkuPicker extends Component<Props, State> {
             <ProductSelectionList products={selectedProducts} selectProduct={this.selectProduct} />
             <Button
               className={styles.saveBtn}
-              buttonType="primary"
+              variant="primary"
               onClick={() => this.props.sdk.close(selectedSKUs)}
-              disabled={selectedSKUs.length === 0}
+              isDisabled={selectedSKUs.length === 0}
             >
               {makeSaveBtnText(selectedSKUs, skuType)}
             </Button>
@@ -205,7 +207,7 @@ export class SkuPicker extends Component<Props, State> {
           {infiniteScrollingPaginationMode && pagination.hasNextPage && (
             <Button
               className={styles.loadMoreButton}
-              buttonType="naked"
+              variant="transparent"
               testId="infinite-scrolling-pagination"
               onClick={this.loadMoreProducts}
             >

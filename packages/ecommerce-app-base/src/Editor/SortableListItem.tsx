@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
-import { SortableElement, SortableHandle } from 'react-sortable-hoc';
-import { css } from 'emotion';
 import {
+  Badge,
   Card,
-  CardDragHandle as FormaCardDragHandle,
   Heading,
-  Icon,
   IconButton,
   SkeletonContainer,
   SkeletonImage,
   Subheading,
-  Tag,
   Typography,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+} from '@contentful/f36-components';
+import { AssetIcon, CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
+import React, { ReactElement, useState } from 'react';
+import { SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { Product } from '../interfaces';
 
 export interface Props {
@@ -55,6 +54,9 @@ const styles = {
     }),
   dragHandle: css({
     height: 'auto',
+    borderBottomLeftRadius: tokens.borderRadiusMedium,
+    borderTopLeftRadius: tokens.borderRadiusMedium,
+    cursor: 'grab',
   }),
   actions: css({
     position: 'absolute',
@@ -114,9 +116,9 @@ const styles = {
   }),
 };
 
-const CardDragHandle = SortableHandle(() => (
-  <FormaCardDragHandle className={styles.dragHandle}>Reorder product</FormaCardDragHandle>
-));
+const CardDragHandle = SortableHandle<{ drag: ReactElement }>(
+  ({ drag }: { drag: ReactElement }) => drag
+);
 
 export const SortableListItem = SortableElement<Props>(
   ({ product, disabled, isSortable, onDelete, skuType }: Props) => {
@@ -126,8 +128,8 @@ export const SortableListItem = SortableElement<Props>(
 
     return (
       <Card className={styles.card}>
+        {/* TODO: Drag Handle */}
         <>
-          {isSortable && <CardDragHandle />}
           {!imageHasLoaded && !imageHasErrored && product.image && (
             <SkeletonContainer className={styles.skeletonImage}>
               <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
@@ -135,7 +137,7 @@ export const SortableListItem = SortableElement<Props>(
           )}
           {!product.image || imageHasErrored ? (
             <div className={styles.errorImage}>
-              <Icon icon={productIsMissing ? 'ErrorCircle' : 'Asset'} />
+              {productIsMissing ? <ErrorCircleIcon /> : <AssetIcon />}
             </div>
           ) : (
             <div className={styles.imageWrapper(imageHasLoaded)}>
@@ -155,7 +157,7 @@ export const SortableListItem = SortableElement<Props>(
                 {productIsMissing ? product.sku : product.name}
               </Heading>
               {productIsMissing ? (
-                <Tag tagType="negative">{skuType ?? 'Product'} missing</Tag>
+                <Badge variant="negative">{skuType ?? 'Product'} missing</Badge>
               ) : (
                 <Subheading className={styles.sku}>{product.displaySKU ?? product.sku}</Subheading>
               )}
@@ -166,12 +168,12 @@ export const SortableListItem = SortableElement<Props>(
           <div className={styles.actions}>
             {product.externalLink && (
               <a target="_blank" rel="noopener noreferrer" href={product.externalLink}>
-                <Icon icon="ExternalLink" color="muted" />
+                <ExternalLinkIcon color="muted" />
               </a>
             )}
             <IconButton
-              label="Delete"
-              iconProps={{ icon: 'Close' }}
+              aria-label="Delete"
+              icon={<CloseIcon />}
               {...{
                 buttonType: 'muted',
                 onClick: onDelete,

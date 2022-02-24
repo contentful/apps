@@ -1,19 +1,12 @@
 import * as React from 'react';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
-import {
-  Form,
-  Subheading,
-  CheckboxField,
-  Typography,
-  FieldGroup,
-  Flex,
-  RadioButtonField,
-  Paragraph,
-} from '@contentful/forma-36-react-components';
+import { FieldGroup } from '@contentful/forma-36-react-components';
 
 import { ContentType, CompatibleFields, SelectedFields, FieldsSkuTypes } from './fields';
 import { Integration } from '../interfaces';
+
+import { Checkbox, Flex, Form, Radio, Paragraph, Subheading } from '@contentful/f36-components';
 
 interface Props {
   contentTypes: ContentType[];
@@ -103,7 +96,7 @@ export default class FieldSelector extends React.Component<Props, State> {
     const defaultSkuType = skuTypes.find((skuType) => skuType.default === true)?.id;
 
     return (
-      <Typography>
+      <React.Fragment>
         {contentTypes.map((ct) => {
           const fields = compatibleFields[ct.sys.id];
           return (
@@ -112,32 +105,33 @@ export default class FieldSelector extends React.Component<Props, State> {
               <Form>
                 {fields.map((field) => (
                   <FieldGroup key={field.id}>
-                    <CheckboxField
+                    <Checkbox
                       id={`field-box-${ct.sys.id}-${field.id}`}
-                      labelText={field.name}
                       helpText={`${
                         field.type === 'Symbol' ? 'Short text' : 'Short text, list'
                       } · Field ID: ${field.id}`}
-                      checked={(selectedFields[ct.sys.id] || []).includes(field.id)}
+                      isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
                       onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
-                    />
+                    >
+                      {field.name}
+                    </Checkbox>
                     {skuTypes.length > 0 && (selectedFields[ct.sys.id] || []).includes(field.id) ? (
                       <>
                         <Flex>
                           {skuTypes.map((skuType) => (
-                            <RadioButtonField
-                              key={skuType.id}
+                            <Radio
                               id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
                               name={`skuType-${ct.sys.id}-${field.id}`}
                               value={skuType.id}
-                              labelText={skuType.name}
-                              className="f36-margin-left--l"
-                              checked={
+                              isChecked={
                                 (fieldSkuTypes[ct.sys.id]?.[field.id] ?? defaultSkuType) ===
                                 skuType.id
                               }
                               onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}
-                            />
+                              className="f36-margin-left--l"
+                            >
+                              {skuType.name}
+                            </Radio>
                           ))}
                         </Flex>
                         {changedSkuTypes?.[ct.sys.id]?.[field.id] === true ? (
@@ -154,7 +148,7 @@ export default class FieldSelector extends React.Component<Props, State> {
             </div>
           );
         })}
-      </Typography>
+      </React.Fragment>
     );
   }
 }

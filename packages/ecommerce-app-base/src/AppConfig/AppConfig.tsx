@@ -6,11 +6,13 @@ import {
   Paragraph,
   Note,
   Typography,
-  TextField,
   Form,
   TextLink,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+  FormControl,
+  Flex,
+  TextInput,
+} from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 
 import FieldSelector from './FieldSelector';
@@ -216,21 +218,22 @@ export default class AppConfig extends React.Component<Props, State> {
                 const key = `config-input-${def.id}`;
 
                 return (
-                  <TextField
-                    required={def.required}
-                    key={key}
-                    id={key}
-                    name={key}
-                    labelText={def.name}
-                    textInputProps={{
-                      width: def.type === 'Symbol' ? 'large' : 'medium',
-                      type: def.type === 'Symbol' ? 'text' : 'number',
-                      maxLength: 255,
-                    }}
-                    helpText={def.description}
-                    value={parameters[def.id]}
-                    onChange={this.onParameterChange.bind(this, def.id)}
-                  />
+                  <FormControl key={key} id={key}>
+                    <FormControl.Label>{def.name}</FormControl.Label>
+                    <TextInput
+                      name={key}
+                      width={def.type === 'Symbol' ? 'large' : 'medium'}
+                      type={def.type === 'Symbol' ? 'text' : 'number'}
+                      maxLength={255}
+                      isRequired={def.required}
+                      value={parameters[def.id]}
+                      onChange={this.onParameterChange.bind(this, def.id)}
+                    />
+                    <Flex justifyContent="space-between">
+                      <FormControl.HelpText>{def.description}</FormControl.HelpText>
+                      <FormControl.Counter />
+                    </Flex>
+                  </FormControl>
                 );
               })}
             </Form>
@@ -251,11 +254,11 @@ export default class AppConfig extends React.Component<Props, State> {
                 This app can only be used with <strong>Short text</strong> or{' '}
                 <strong>Short text, list</strong> fields.
               </Paragraph>
-              <Note noteType="warning">
+              <Note variant="warning">
                 There are <strong>no content types with Short text or Short text, list</strong>{' '}
                 fields in this environment. You can add one in your{' '}
                 <TextLink
-                  linkType="primary"
+                  variant="primary"
                   target="_blank"
                   rel="noopener noreferrer"
                   href={
