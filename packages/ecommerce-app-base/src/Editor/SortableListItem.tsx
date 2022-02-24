@@ -174,10 +174,8 @@ export const SortableListItem = SortableElement<Props>(
             <IconButton
               aria-label="Delete"
               icon={<CloseIcon />}
-              {...{
-                buttonType: 'muted',
-                onClick: onDelete,
-              }}
+              variant="secondary"
+              onClick={onDelete}
             />
           </div>
         )}
