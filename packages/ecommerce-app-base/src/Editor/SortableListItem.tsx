@@ -116,9 +116,7 @@ const styles = {
   }),
 };
 
-const CardDragHandle = SortableHandle<{ drag: ReactElement }>(
-  ({ drag }: { drag: ReactElement }) => drag
-);
+const CardDragHandle = SortableHandle(({ drag }: { drag: ReactElement }) => <>{drag}</>);
 
 export const SortableListItem = SortableElement<Props>(
   ({ product, disabled, isSortable, onDelete, skuType }: Props) => {
@@ -127,8 +125,10 @@ export const SortableListItem = SortableElement<Props>(
     const productIsMissing = !product.name;
 
     return (
-      <Card className={styles.card}>
-        {/* TODO: Drag Handle */}
+      <Card
+        className={styles.card}
+        dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}
+      >
         <>
           {!imageHasLoaded && !imageHasErrored && product.image && (
             <SkeletonContainer className={styles.skeletonImage}>
