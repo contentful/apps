@@ -1,9 +1,10 @@
+import { Card, IconButton } from '@contentful/f36-components';
+import { CloseIcon } from '@contentful/f36-icons';
+import { css } from 'emotion';
+import arrayMove from 'array-move';
 import * as React from 'react';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
-import { css } from '@emotion/css';
-import arrayMove from 'array-move';
-import { IconButton, Card } from '@contentful/forma-36-react-components';
-import { ThumbnailFn, DeleteFn, Asset, Config } from '../interfaces';
+import { Asset, Config, DeleteFn, ThumbnailFn } from '../interfaces';
 
 interface Props {
   disabled: boolean;
@@ -72,11 +73,11 @@ const SortableItem = SortableElement<SortableElementProps>((props: SortableEleme
       <DragHandle url={props.url} alt={props.alt} />
       {!props.disabled && (
         <IconButton
-          label="Close"
+          variant="transparent"
+          icon={<CloseIcon variant="muted" />}
+          aria-label="Close"
           onClick={props.onDelete}
           className={styles.remove}
-          iconProps={{ icon: 'Close' }}
-          buttonType="muted"
         />
       )}
     </Card>

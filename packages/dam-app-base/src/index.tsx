@@ -1,20 +1,14 @@
-import * as React from 'react';
-import { render } from 'react-dom';
-
 import {
+  AppExtensionSDK,
+  DialogExtensionSDK,
+  FieldExtensionSDK,
   init,
   locations,
-  FieldExtensionSDK,
-  DialogExtensionSDK,
-  AppExtensionSDK,
 } from '@contentful/app-sdk';
-
-import '@contentful/forma-36-react-components/dist/styles.css';
-import '@contentful/forma-36-fcss/dist/styles.css';
-
-import Field from './Editor/Field';
+import * as React from 'react';
+import { render } from 'react-dom';
 import AppConfig from './AppConfig/AppConfig';
-
+import Field from './Editor/Field';
 import { Integration } from './interfaces';
 
 export function setup(integration: Integration) {
