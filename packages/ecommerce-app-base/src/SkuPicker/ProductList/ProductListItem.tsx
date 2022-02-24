@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 import noop from 'lodash/noop';
 import { css } from 'emotion';
 import { activeProductCheck } from '../iconsInBase64';

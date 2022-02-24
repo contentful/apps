@@ -1,12 +1,9 @@
-import * as React from 'react';
-import tokens from '@contentful/forma-36-tokens';
+import { Checkbox, Flex, Form, Paragraph, Radio, Subheading } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import { FieldGroup } from '@contentful/forma-36-react-components';
-
-import { ContentType, CompatibleFields, SelectedFields, FieldsSkuTypes } from './fields';
+import * as React from 'react';
 import { Integration } from '../interfaces';
-
-import { Checkbox, Flex, Form, Radio, Paragraph, Subheading } from '@contentful/f36-components';
+import { CompatibleFields, ContentType, FieldsSkuTypes, SelectedFields } from './fields';
 
 interface Props {
   contentTypes: ContentType[];
@@ -104,7 +101,7 @@ export default class FieldSelector extends React.Component<Props, State> {
               <Subheading>{ct.name}</Subheading>
               <Form>
                 {fields.map((field) => (
-                  <FieldGroup key={field.id}>
+                  <Flex key={field.id}>
                     <Checkbox
                       id={`field-box-${ct.sys.id}-${field.id}`}
                       helpText={`${
@@ -142,7 +139,7 @@ export default class FieldSelector extends React.Component<Props, State> {
                         ) : null}
                       </>
                     ) : null}
-                  </FieldGroup>
+                  </Flex>
                 ))}
               </Form>
             </div>
