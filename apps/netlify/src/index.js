@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 
 import { init, locations } from '@contentful/app-sdk';
 
-import '@contentful/f36-components/dist/styles.css';
+// import '@contentful/f36-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 
 import NeflifySidebar from './sidebar';
