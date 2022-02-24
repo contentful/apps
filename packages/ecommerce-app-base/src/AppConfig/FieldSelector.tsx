@@ -101,7 +101,7 @@ export default class FieldSelector extends React.Component<Props, State> {
               <Subheading>{ct.name}</Subheading>
               <Form>
                 {fields.map((field) => (
-                  <Flex key={field.id}>
+                  <Flex flexDirection="column" gap="spacingXs" key={field.id}>
                     <Checkbox
                       id={`field-box-${ct.sys.id}-${field.id}`}
                       helpText={`${
