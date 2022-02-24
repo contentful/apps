@@ -36,7 +36,7 @@
     "@contentful/app-sdk": "^4.0.0",
     "@contentful/f36-components": "^4.0.0",
     "@contentful/f36-tokens": "^4.0.0",
-    "@emotion/css": "^10.0.0",
+    "emotion": "^10.0.0",
     "array-move": "^3.0.0",
     "contentful-management": "^8.0.0",
     "lodash.get": "^4.0.0",

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import tokens from '@contentful/forma-36-tokens';
 import noop from 'lodash/noop';
 import { Icon, SkeletonContainer, SkeletonImage } from '@contentful/forma-36-react-components';
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 import { activeProductCheck } from '../iconsInBase64';
 import { Product } from '../../interfaces';
 

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import tokens from '@contentful/forma-36-tokens';
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 import {
   Form,
   Subheading,

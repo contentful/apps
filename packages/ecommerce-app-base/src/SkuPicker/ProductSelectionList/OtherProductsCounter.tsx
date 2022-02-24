@@ -1,7 +1,7 @@
 import React from 'react';
 import tokens from '@contentful/forma-36-tokens';
 import { Tooltip } from '@contentful/forma-36-react-components';
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 
 export interface Props {
   productCount: number;

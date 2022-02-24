@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SortableElement, SortableHandle } from 'react-sortable-hoc';
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 import {
   Card,
   CardDragHandle as FormaCardDragHandle,

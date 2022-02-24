@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
 
 const HEADER_HEIGHT = 114;

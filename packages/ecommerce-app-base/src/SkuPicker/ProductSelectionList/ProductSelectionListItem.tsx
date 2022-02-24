@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import tokens from '@contentful/forma-36-tokens';
 import noop from 'lodash/noop';
 import { Tooltip, Icon } from '@contentful/forma-36-react-components';
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 import { Product } from '../../interfaces';
 
 export interface Props {
