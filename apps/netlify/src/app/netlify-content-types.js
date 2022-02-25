@@ -3,11 +3,23 @@ import PropTypes from 'prop-types';
 
 import {
   Note,
+  Text,
   TextLink,
   Heading,
   Paragraph,
   Checkbox,
 } from '@contentful/f36-components';
+import { css } from 'emotion';
+import tokens from '@contentful/f36-tokens';
+
+const styles = {
+  selectAllCheckbox: css({
+    marginBottom: tokens.spacingXs,
+  }),
+  checkboxLabel: css({
+    fontWeight: 400,
+  }),
+};
 
 const SELECT_ALL_CHECKBOX = 'selectAll';
 
@@ -64,6 +76,7 @@ const NetlifyContentTypes = ({
             id={SELECT_ALL_CHECKBOX}
             value={SELECT_ALL_CHECKBOX}
             isDisabled={disabled}
+            className={styles.selectAllCheckbox}
           >
             Select all
           </Checkbox>
@@ -74,7 +87,7 @@ const NetlifyContentTypes = ({
               value={id}
               isDisabled={disabled}
             >
-              {name}
+              <Text className={styles.checkboxLabel}>{name}</Text>
             </Checkbox>
           ))}
         </Checkbox.Group>
