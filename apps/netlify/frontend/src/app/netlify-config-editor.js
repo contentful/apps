@@ -14,7 +14,7 @@ import {
 } from '@contentful/forma-36-react-components';
 
 import { MAX_CONFIGS } from '../constants';
-import { EditSiteModal } from './EditSiteModal';
+import { EditSiteModal } from './edit-site-modal';
 
 const styles = {
   container: css({
