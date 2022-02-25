@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import {
   Note,
-  Text,
   TextLink,
   Heading,
   Paragraph,
