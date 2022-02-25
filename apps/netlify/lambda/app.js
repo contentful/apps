@@ -1,5 +1,3 @@
-'use strict';
-
 const express = require('express');
 const actionHandler = require('./handlers/action');
 const appEventHandler = require('./handlers/app-event');

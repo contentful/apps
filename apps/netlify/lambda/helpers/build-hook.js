@@ -1,5 +1,3 @@
-'use strict';
-
 const { getManagementToken } = require('@contentful/node-apps-toolkit');
 const nodeFetch = require('node-fetch');
 const get = require('lodash.get');
