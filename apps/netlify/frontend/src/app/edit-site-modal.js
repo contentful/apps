@@ -281,7 +281,7 @@ export const EditSiteModal = ({
             <Button variant="secondary" size="small" onClick={onCancel}>
               Cancel
             </Button>
-            <Button variant="positive" size="small" onClick={onConfirm} disabled={!siteId || !displayName.trim()}>
+            <Button variant="positive" size="small" onClick={onConfirm} isDisabled={!siteId || !displayName.trim()}>
               Confirm
             </Button>
           </Modal.Controls>
