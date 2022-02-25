@@ -8,9 +8,11 @@ const buildBaseURL = 'https://api.netlify.com/build_hooks/';
 const validEventTypes = ['Entry', 'Asset', 'DeletedEntry', 'DeletedAsset'];
 
 const validateParams = (installation) => {
-  const missingParams = get(installation, 'parameters.buildHookIds') === undefined;
+  const validParams =
+    get(installation, 'parameters.buildHookIds') &&
+    typeof get(installation, 'parameters.buildHookIds') === 'string';
 
-  if (missingParams) {
+  if (!validParams) {
     throw new Error('Missing build hook parameters in app installation');
   }
 };
