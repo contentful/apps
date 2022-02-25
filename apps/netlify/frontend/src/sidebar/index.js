@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
 import tokens from '@contentful/f36-tokens';
-import { Select, Button } from '@contentful/f36-components';
+import { Select, IconButton } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 import NeflifySidebarBuildButton from './build-button';
 
@@ -72,16 +73,16 @@ export default class NetlifySidebar extends React.Component {
           site={selectedSite}
         />
         <div className={styles.separator} />
-        <Button
-          icon="ExternalLink"
+        <IconButton
+          icon={<ExternalLinkIcon />}
           href={selectedSite.netlifySiteUrl}
           target="_blank"
           rel="noopener noreferrer"
-          variant="muted"
+          variant="secondary"
           isFullWidth
         >
           <div className={styles.previewContent}>Open site</div>
-        </Button>
+        </IconButton>
       </>
     );
   }
