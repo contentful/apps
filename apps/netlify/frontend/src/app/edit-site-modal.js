@@ -56,14 +56,14 @@ export const EditSiteModal = ({
   const contentTypeSelectId = `content-type-select-${configIndex ?? 'new'}`;
 
   const serializeSelectedContentTypes = () => {
-    if (!isDeploysOn) return undefined;
+    if (!isDeploysOn) return [];
 
     if (selectedContentTypes.length === contentTypes.length) {
       return '*';
     }
 
     if (selectedContentTypes.length === 0) {
-      return undefined;
+      return [];
     }
 
     return selectedContentTypes.map((contentType) => contentType.value);
@@ -242,7 +242,7 @@ export const EditSiteModal = ({
               <FormControl marginBottom="spacingS">
                 <Checkbox
                   name={deploysId}
-                  checked={isDeploysOn}
+                  isChecked={isDeploysOn}
                   helpText="Rebuild site when an entry of matching content types or assets are published or unpublished"
                   onChange={(e) => setIsDeploysOn(e.target.checked)}
                 >
@@ -268,6 +268,7 @@ export const EditSiteModal = ({
                         {item.label}
                       </span>
                     )}
+                    clearAfterSelect
                     onSelectItem={onSelectContentType}
                     onInputValueChange={onContentTypeQueryChange}
                   />

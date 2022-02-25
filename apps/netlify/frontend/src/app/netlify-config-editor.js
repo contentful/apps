@@ -101,14 +101,14 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
                 <TextLink
                   className={styles.editBtn}
                   variant="primary"
-                  disabled={disabled}
+                  isDisabled={disabled}
                   onClick={() => onEdit(configIndex)}
                 >
                   Edit
                 </TextLink>
                 <TextLink
                   variant="negative"
-                  disabled={disabled}
+                  isDisabled={disabled}
                   onClick={() => onRemove(configIndex)}
                 >
                   Remove
@@ -118,7 +118,7 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
           })}
         </div>
         <Button
-          disabled={disabled || siteConfigs.length >= MAX_CONFIGS}
+          isDisabled={disabled || siteConfigs.length >= MAX_CONFIGS}
           variant="secondary"
           startIcon={<PlusIcon />}
           onClick={onAdd}
