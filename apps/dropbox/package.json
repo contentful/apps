@@ -1,6 +1,6 @@
 {
   "name": "@contentful/dropbox-assets",
-  "version": "1.6.15",
+  "version": "1.6.16",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
