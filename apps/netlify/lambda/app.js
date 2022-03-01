@@ -1,14 +1,11 @@
-'use strict';
-
 const express = require('express');
-const fetch = require('node-fetch');
-const makeReqVerificationMiddleware = require('./verify');
-const getBuildHookFromAppInstallationParams = require('./app-installation');
+const actionHandler = require('./handlers/action');
+const appEventHandler = require('./handlers/app-event');
+const makeReqVerificationMiddleware = require('./helpers/verify');
 
 const app = express();
 
 const signingSecret = process.env['SIGNING_SECRET'] || '';
-const buildBaseURL = 'https://api.netlify.com/build_hooks/';
 
 app.use(
   express.json({
@@ -24,19 +21,8 @@ app.use((err, _req, res, next) => {
   next();
 });
 
-app.post('/build', async (req, res, next) => {
-  try {
-    const appActionCall = req.body;
-    const buildHookId = getBuildHookFromAppInstallationParams(appActionCall);
+app.post('/build', actionHandler);
 
-    // fire build hook
-    const buildHookUrl = `${buildBaseURL}/${buildHookId}`;
-    await fetch(buildHookUrl, { method: 'POST' });
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    next(err);
-  }
-});
+app.post('/app-events', appEventHandler);
 
 module.exports = app;

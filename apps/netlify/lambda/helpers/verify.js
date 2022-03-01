@@ -1,5 +1,3 @@
-'use strict';
-
 const { verifyRequest } = require('@contentful/node-apps-toolkit');
 
 const makeCanonicalReq = (req, buf) => {
