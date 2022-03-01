@@ -117,8 +117,9 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
         </div>
         <Button
           isDisabled={disabled || siteConfigs.length >= MAX_CONFIGS}
-          variant="secondary"
+          variant={siteConfigs.length > 0 ? 'secondary' : 'primary'}
           startIcon={<PlusIcon />}
+          size="small"
           onClick={onAdd}
         >
           {`Add ${siteConfigs.length > 0 ? 'another ' : ''}site`}
