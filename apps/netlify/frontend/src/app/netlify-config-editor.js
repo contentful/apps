@@ -85,37 +85,35 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
           </Paragraph>
         )}
         <div>
-          {siteConfigs.map((siteConfig, configIndex) => {
-            return (
-              <div key={configIndex} className={styles.row}>
-                <div className={styles.site}>
-                  <Subheading marginBottom={0}>{siteConfig.name}</Subheading>
-                  <Text fontColor="gray600">{siteConfig.netlifySiteName}</Text>
-                </div>
-                {siteConfig.selectedContentTypes?.length > 0 && (
-                  <div className={styles.deploysState}>
-                    <DoneIcon variant="secondary" size="tiny" />
-                    <Text fontColor="gray600">Automatic deploys</Text>
-                  </div>
-                )}
-                <TextLink
-                  className={styles.editBtn}
-                  variant="primary"
-                  isDisabled={disabled}
-                  onClick={() => onEdit(configIndex)}
-                >
-                  Edit
-                </TextLink>
-                <TextLink
-                  variant="negative"
-                  isDisabled={disabled}
-                  onClick={() => onRemove(configIndex)}
-                >
-                  Remove
-                </TextLink>
+          {siteConfigs.map((siteConfig, configIndex) => (
+            <div key={configIndex} className={styles.row}>
+              <div className={styles.site}>
+                <Subheading marginBottom={0}>{siteConfig.name}</Subheading>
+                <Text fontColor="gray600">{siteConfig.netlifySiteName}</Text>
               </div>
-            );
-          })}
+              {siteConfig.selectedContentTypes?.length > 0 && (
+                <div className={styles.deploysState}>
+                  <DoneIcon variant="secondary" size="tiny" />
+                  <Text fontColor="gray600">Automatic deploys</Text>
+                </div>
+              )}
+              <TextLink
+                className={styles.editBtn}
+                variant="primary"
+                isDisabled={disabled}
+                onClick={() => onEdit(configIndex)}
+              >
+                Edit
+              </TextLink>
+              <TextLink
+                variant="negative"
+                isDisabled={disabled}
+                onClick={() => onRemove(configIndex)}
+              >
+                Remove
+              </TextLink>
+            </div>
+          ))}
         </div>
         <Button
           isDisabled={disabled || siteConfigs.length >= MAX_CONFIGS}
@@ -123,7 +121,7 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
           startIcon={<PlusIcon />}
           onClick={onAdd}
         >
-          Add another site
+          {`Add ${siteConfigs.length > 0 ? 'another ' : ''}site`}
         </Button>
       </div>
       <EditSiteModal
