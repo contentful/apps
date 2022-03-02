@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
-import tokens from '@contentful/forma-36-tokens';
-import { Typography, Heading, Paragraph, Icon } from '@contentful/forma-36-react-components';
+import tokens from '@contentful/f36-tokens';
+import { Heading, Paragraph, Icon } from '@contentful/f36-components';
 
 const styles = {
   auth: css({
@@ -56,11 +56,11 @@ export default class NetlifyConnection extends React.Component {
 
   render() {
     return (
-      <Typography>
+      <div>
         <Heading>Connect Netlify</Heading>
         {this.props.connected ? this.renderConnectionInfo() : this.renderConnectButton()}
         {!this.props.connected && this.props.hasConfig ? this.renderConnectAgainInfo() : null}
-      </Typography>
+      </div>
     );
   }
 

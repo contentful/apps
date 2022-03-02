@@ -2,16 +2,19 @@ import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 import {
-  Typography,
   Heading,
   Paragraph,
   Button,
+  Text,
   TextLink,
   Subheading,
-  Icon,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
+import {
+  PlusIcon,
+  DoneIcon,
+} from '@contentful/f36-icons';
 
 import { MAX_CONFIGS } from '../constants';
 import { EditSiteModal } from './edit-site-modal';
@@ -35,19 +38,11 @@ const styles = {
   site: css({
     flexGrow: 1,
   }),
-  siteName: css({
-    marginBottom: 0,
-  }),
-  netlifySiteName: css({
-    marginBottom: 0,
-  }),
   deploysState: css({
     display: 'flex',
     marginRight: tokens.spacingM,
+    alignItems: 'center',
     color: tokens.gray600,
-  }),
-  deploysStateLabel: css({
-    margin: 0,
   }),
   editBtn: css({
     margin: `0 ${tokens.spacingM}`,
@@ -80,57 +75,56 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
 
   return (
     <>
-      <Typography className={styles.container}>
+      <div className={styles.container}>
         <Heading>Configure Netlify sites</Heading>
         {disabled ? (
-          <Paragraph marginBottom={tokens.spacingL}>Requires a Netlify account.</Paragraph>
+          <Paragraph marginBottom="spacingL" fontColor="gray700">Requires a Netlify account.</Paragraph>
         ) : (
-          <Paragraph marginBottom={tokens.spacingL}>
+          <Paragraph marginBottom="spacingL" fontColor="gray700">
             Pick the Netlify site(s) you want to enable a build for. Only sites with continuous deployment configured can be configured.
           </Paragraph>
         )}
         <div>
-          {siteConfigs.map((siteConfig, configIndex) => {
-            return (
-              <div key={configIndex} className={styles.row}>
-                <div className={styles.site}>
-                  <Subheading className={styles.siteName}>{siteConfig.name}</Subheading>
-                  <Paragraph className={styles.netlifySiteName}>{siteConfig.netlifySiteName}</Paragraph>
-                </div>
-                {siteConfig.selectedContentTypes?.length > 0 && (
-                  <div className={styles.deploysState}>
-                    <Icon color="muted" size="tiny" icon="CheckCircleTrimmed" />
-                    <Paragraph className={styles.deploysStateLabel}>Automatic deploys</Paragraph>
-                  </div>
-                )}
-                <TextLink
-                  className={styles.editBtn}
-                  linkType="primary"
-                  disabled={disabled}
-                  onClick={() => onEdit(configIndex)}
-                >
-                  Edit
-                </TextLink>
-                <TextLink
-                  linkType="negative"
-                  disabled={disabled}
-                  onClick={() => onRemove(configIndex)}
-                >
-                  Remove
-                </TextLink>
+          {siteConfigs.map((siteConfig, configIndex) => (
+            <div key={configIndex} className={styles.row}>
+              <div className={styles.site}>
+                <Subheading marginBottom={0}>{siteConfig.name}</Subheading>
+                <Text fontColor="gray600">{siteConfig.netlifySiteName}</Text>
               </div>
-            );
-          })}
+              {siteConfig.selectedContentTypes?.length > 0 && (
+                <div className={styles.deploysState}>
+                  <DoneIcon variant="secondary" size="tiny" />
+                  <Text fontColor="gray600">Automatic deploys</Text>
+                </div>
+              )}
+              <TextLink
+                className={styles.editBtn}
+                variant="primary"
+                isDisabled={disabled}
+                onClick={() => onEdit(configIndex)}
+              >
+                Edit
+              </TextLink>
+              <TextLink
+                variant="negative"
+                isDisabled={disabled}
+                onClick={() => onRemove(configIndex)}
+              >
+                Remove
+              </TextLink>
+            </div>
+          ))}
         </div>
         <Button
-          disabled={disabled || siteConfigs.length >= MAX_CONFIGS}
-          buttonType="muted"
-          icon="Plus"
+          isDisabled={disabled || siteConfigs.length >= MAX_CONFIGS}
+          variant={siteConfigs.length > 0 ? 'secondary' : 'primary'}
+          startIcon={<PlusIcon />}
+          size="small"
           onClick={onAdd}
         >
-          Add another site
+          {`Add ${siteConfigs.length > 0 ? 'another ' : ''}site`}
         </Button>
-      </Typography>
+      </div>
       <EditSiteModal
         configIndex={editingSiteIndex.current}
         siteConfigs={siteConfigs}
