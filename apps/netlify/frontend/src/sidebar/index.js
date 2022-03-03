@@ -74,6 +74,7 @@ export default class NetlifySidebar extends React.Component {
         />
         <div className={styles.separator} />
         <IconButton
+          as="a"
           icon={<ExternalLinkIcon />}
           href={selectedSite.netlifySiteUrl}
           target="_blank"
