@@ -5,7 +5,7 @@
   "dependencies": {
     "@contentful/app-sdk": "^4.3.5",
     "@contentful/f36-components": "^4.0.36",
-    "@contentful/f36-tokens": "^4.0.0",
+    "@contentful/f36-tokens": "^4.0.1",
     "contentful-management": "^8.2.0",
     "emotion": "^10.0.27",
     "react": "^17.0.2",
