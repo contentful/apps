@@ -59,11 +59,10 @@ exports[`ProductListItem should render successfully the error variation 1`] = `
         class="css-vx9dyc"
       >
         <svg
-          class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il"
+          aria-hidden="true"
+          class="css-rm9mk1"
           data-test-id="cf-ui-icon"
-          height="1em"
           viewBox="0 0 24 24"
-          width="1em"
         >
           <path
             d="M0 0h24v24H0V0z"
@@ -151,10 +150,9 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
     >
       <svg
         aria-label="Loading component..."
-        class="SkeletonContainer__SkeletonContainer___23jiu css-7uqnex"
+        class="css-b8h2u"
         data-test-id="cf-ui-skeleton-form"
         height="100%"
-        preserveAspectRatio="xMidYMid meet"
         role="img"
         width="100%"
       >
@@ -162,16 +160,16 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
           Loading component...
         </title>
         <rect
-          clip-path="url(#cf-ui-skeleton-clip-6)"
+          clip-path="url(#cf-ui-skeleton-clip_9090)"
           height="100%"
-          style="fill: url(#cf-ui-skeleton-clip-gradient-7);"
+          style="fill: url(#cf-ui-skeleton-clip-gradient_1831);"
           width="100%"
           x="0"
           y="0"
         />
         <defs>
           <clippath
-            id="cf-ui-skeleton-clip-6"
+            id="cf-ui-skeleton-clip_9090"
           >
             <rect
               data-test-id="cf-ui-skeleton-image"
@@ -182,7 +180,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
             />
           </clippath>
           <lineargradient
-            id="cf-ui-skeleton-clip-gradient-7"
+            id="cf-ui-skeleton-clip-gradient_1831"
           >
             <stop
               offset="0%"
@@ -192,7 +190,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
               <animate
                 attributeName="stop-color"
                 dur="2s"
-                id="animation-8"
+                id="animation_1604"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
               />
@@ -204,7 +202,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-8.begin+0.25s"
+                begin="animation_1604.begin+0.25s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
@@ -217,7 +215,7 @@ exports[`ProductListItem should render successfully the loading variation 1`] = 
             >
               <animate
                 attributeName="stop-color"
-                begin="animation-8.begin+0.5s"
+                begin="animation_1604.begin+0.5s"
                 dur="2s"
                 repeatCount="indefinite"
                 values="#e5ebed; #f7f9fa; #e5ebed"
