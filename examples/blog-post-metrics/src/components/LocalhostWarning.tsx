@@ -31,7 +31,7 @@ const LocalhostWarning = () => {
 
         <Paragraph>
           Follow{" "}
-          <TextLink href="https://www.contentful.com/developers/docs/extensibility/app-framework/tutorial/">
+          <TextLink href="https://www.contentful.com/developers/docs/extensibility/app-framework/tutorial/#embed-your-app-in-the-contentful-web-app">
             our guide
           </TextLink>{" "}
           to get started or{" "}
