@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
-import tokens from '@contentful/forma-36-tokens';
-import { Select, Option, Button } from '@contentful/forma-36-react-components';
+import tokens from '@contentful/f36-tokens';
+import { Select, IconButton } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 import NeflifySidebarBuildButton from './build-button';
 
@@ -59,9 +60,9 @@ export default class NetlifySidebar extends React.Component {
       <>
         <Select onChange={this.selectSite}>
           {this.state.sites.map((site, idx) => (
-            <Option key={site.buildHookId} value={`${idx}`}>
+            <Select.Option key={site.buildHookId} value={`${idx}`}>
               {site.name}
-            </Option>
+            </Select.Option>
           ))}
         </Select>
         <div className={styles.separator} />
@@ -72,16 +73,17 @@ export default class NetlifySidebar extends React.Component {
           site={selectedSite}
         />
         <div className={styles.separator} />
-        <Button
-          icon="ExternalLink"
+        <IconButton
+          as="a"
+          icon={<ExternalLinkIcon />}
           href={selectedSite.netlifySiteUrl}
           target="_blank"
           rel="noopener noreferrer"
-          buttonType="muted"
+          variant="secondary"
           isFullWidth
         >
           <div className={styles.previewContent}>Open site</div>
-        </Button>
+        </IconButton>
       </>
     );
   }
