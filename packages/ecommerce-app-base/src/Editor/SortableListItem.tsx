@@ -6,7 +6,6 @@ import {
   SkeletonContainer,
   SkeletonImage,
   Subheading,
-  Typography,
 } from '@contentful/f36-components';
 import { AssetIcon, CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
@@ -152,16 +151,14 @@ export const SortableListItem = SortableElement<Props>(
             </div>
           )}
           <section className={styles.description}>
-            <Typography>
-              <Heading className={styles.name(product.name)}>
-                {productIsMissing ? product.sku : product.name}
-              </Heading>
-              {productIsMissing ? (
-                <Badge variant="negative">{skuType ?? 'Product'} missing</Badge>
-              ) : (
-                <Subheading className={styles.sku}>{product.displaySKU ?? product.sku}</Subheading>
-              )}
-            </Typography>
+            <Heading className={styles.name(product.name)}>
+              {productIsMissing ? product.sku : product.name}
+            </Heading>
+            {productIsMissing ? (
+              <Badge variant="negative">{skuType ?? 'Product'} missing</Badge>
+            ) : (
+              <Subheading className={styles.sku}>{product.displaySKU ?? product.sku}</Subheading>
+            )}
           </section>
         </>
         {!disabled && (
