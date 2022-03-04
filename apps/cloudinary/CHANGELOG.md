@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.20](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.19...@contentful/cloudinary-assets@1.5.20) (2022-03-04)
+
+**Note:** Version bump only for package @contentful/cloudinary-assets
+
+
+
+
+
 ## [1.5.19](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.18...@contentful/cloudinary-assets@1.5.19) (2022-03-03)
 
 **Note:** Version bump only for package @contentful/cloudinary-assets
