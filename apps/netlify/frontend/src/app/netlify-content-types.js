@@ -2,54 +2,62 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  Typography,
   Note,
+  Text,
   TextLink,
   Heading,
   Paragraph,
-  FieldGroup,
-  CheckboxField,
-} from '@contentful/forma-36-react-components';
+  Checkbox,
+} from '@contentful/f36-components';
+import { css } from 'emotion';
+import tokens from '@contentful/f36-tokens';
 
-export default class NetlifyContentTypes extends React.Component {
-  static propTypes = {
-    disabled: PropTypes.bool.isRequired,
-    space: PropTypes.string.isRequired,
-    environment: PropTypes.string.isRequired,
-    contentTypes: PropTypes.array.isRequired,
-    enabledContentTypes: PropTypes.array.isRequired,
-    onEnabledContentTypesChange: PropTypes.func.isRequired,
-  };
+const styles = {
+  selectAllCheckbox: css({
+    marginBottom: tokens.spacingXs,
+  }),
+  checkboxLabel: css({
+    fontWeight: 400,
+  }),
+};
 
-  onToggleSelect = () => {
-    const { contentTypes, enabledContentTypes } = this.props;
-    const allSelected = contentTypes.length === enabledContentTypes.length;
-    if (allSelected) {
-      this.props.onEnabledContentTypesChange([]);
+const SELECT_ALL_CHECKBOX = 'selectAll';
+
+const NetlifyContentTypes = ({
+  contentTypes,
+  enabledContentTypes,
+  onEnabledContentTypesChange,
+  disabled,
+  space,
+  environment,
+}) => {
+  const allSelected = contentTypes.length === enabledContentTypes.length;
+
+  const onChange = (e) => {
+    const isChecked = e.target.checked;
+    const id = e.target.value;
+    let changed = [];
+
+    if (id === SELECT_ALL_CHECKBOX) {
+      changed = allSelected ? [] : contentTypes.map(([id]) => id);
     } else {
-      this.props.onEnabledContentTypesChange(contentTypes.map(([id]) => id));
+      changed = isChecked ? enabledContentTypes.concat([id]) : enabledContentTypes.filter((cur) => cur !== id);
     }
+
+    onEnabledContentTypesChange(changed);
   };
 
-  onChange = (checked, id) => {
-    const enabled = this.props.enabledContentTypes;
-    this.props.onEnabledContentTypesChange(
-      checked ? enabled.concat([id]) : enabled.filter((cur) => cur !== id)
-    );
-  };
-
-  render() {
-    const { disabled, contentTypes, enabledContentTypes, space, environment } = this.props;
-
-    const allSelected = contentTypes.length === enabledContentTypes.length;
-
-    let contentToRender;
-    if (contentTypes.length === 0) {
-      contentToRender = (
-        <Note noteType="warning">
+  return (
+    <>
+      <Heading>Assign to sidebars</Heading>
+      <Paragraph>
+        Select which content types will show the Netlify functionality in the sidebar.
+      </Paragraph>
+      {contentTypes.length === 0 ? (
+        <Note variant="warning">
           There are <strong>no content types</strong> in this environment. You can add a{' '}
           <TextLink
-            linkType="primary"
+            variant="primary"
             target="_blank"
             rel="noopener noreferrer"
             href={
@@ -62,44 +70,39 @@ export default class NetlifyContentTypes extends React.Component {
           </TextLink>{' '}
           and assign it to the app from this screen.
         </Note>
-      );
-    } else {
-      contentToRender = (
-        <div>
-          <FieldGroup>
-            <CheckboxField
-              id="selectAll"
-              labelText="Select all"
-              disabled={disabled}
-              onChange={this.onToggleSelect}
-              checked={allSelected}
-            />
-          </FieldGroup>
-          <FieldGroup>
-            {contentTypes.map(([id, name]) => (
-              <CheckboxField
-                key={id}
-                id={`ct-box-${id}`}
-                labelIsLight
-                labelText={name}
-                onChange={(e) => this.onChange(e.target.checked, id)}
-                disabled={disabled}
-                checked={enabledContentTypes.includes(id)}
-              />
-            ))}
-          </FieldGroup>
-        </div>
-      );
-    }
+      ) : (
+        <Checkbox.Group onChange={onChange} value={allSelected ? [SELECT_ALL_CHECKBOX, ...enabledContentTypes] : enabledContentTypes}>
+          <Checkbox
+            id={SELECT_ALL_CHECKBOX}
+            value={SELECT_ALL_CHECKBOX}
+            isDisabled={disabled}
+            className={styles.selectAllCheckbox}
+          >
+            Select all
+          </Checkbox>
+          {contentTypes.map(([id, name]) => (
+            <Checkbox
+              key={id}
+              id={`ct-box-${id}`}
+              value={id}
+              isDisabled={disabled}
+            >
+              <Text className={styles.checkboxLabel}>{name}</Text>
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
+      )}
+    </>
+  );
+};
 
-    return (
-      <Typography>
-        <Heading>Content Types</Heading>
-        <Paragraph>
-          Select which content types will show the Netlify functionality in the sidebar.
-        </Paragraph>
-        {contentToRender}
-      </Typography>
-    );
-  }
-}
+NetlifyContentTypes.propTypes = {
+  disabled: PropTypes.bool.isRequired,
+  space: PropTypes.string.isRequired,
+  environment: PropTypes.string.isRequired,
+  contentTypes: PropTypes.array.isRequired,
+  enabledContentTypes: PropTypes.array.isRequired,
+  onEnabledContentTypesChange: PropTypes.func.isRequired,
+};
+
+export default NetlifyContentTypes;

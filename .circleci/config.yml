@@ -61,15 +61,15 @@ jobs:
           command: |
             npm i
             npm run bootstrap:ci
-      - run:
-          name: Lint
-          command: npm run lint
-      - run:
-          name: Build
-          command: npm run build
-      - run:
-          name: Test
-          command: npm run test
+      # - run:
+      #     name: Lint
+      #     command: npm run lint
+      # - run:
+      #     name: Build
+      #     command: npm run build
+      # - run:
+      #     name: Test
+      #     command: npm run test
       - run:
           name: Test deploying netlify lambda
           command: |

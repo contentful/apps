@@ -1,22 +1,23 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 import {
-  Typography,
   Heading,
   Paragraph,
   Button,
-  SelectField,
-  Option,
-  TextField,
+  Text,
   TextLink,
-} from '@contentful/forma-36-react-components';
+  Subheading,
+} from '@contentful/f36-components';
+import {
+  PlusIcon,
+  DoneIcon,
+} from '@contentful/f36-icons';
 
 import { MAX_CONFIGS } from '../constants';
-
-const PICK_OPTION_VALUE = '__pick__';
+import { EditSiteModal } from './edit-site-modal';
 
 const styles = {
   container: css({
@@ -24,136 +25,124 @@ const styles = {
   }),
   row: css({
     display: 'flex',
-    margin: `${tokens.spacingXl} 0`,
+    marginBottom: tokens.spacingM,
+    paddingBottom: tokens.spacingM,
+    borderBottom: `1px solid ${tokens.gray200}`,
+    alignItems: 'center',
+    '&:last-child': css({
+      marginBottom: tokens.spacingL,
+      paddingBottom: 0,
+      borderBottom: 0,
+    }),
   }),
-  item: css({
-    marginRight: tokens.spacingXl,
+  site: css({
+    flexGrow: 1,
   }),
-  removeBtn: css({
-    marginTop: tokens.spacingL,
+  deploysState: css({
+    display: 'flex',
+    marginRight: tokens.spacingM,
+    alignItems: 'center',
+    color: tokens.gray600,
   }),
-  splitter: css({
-    marginTop: tokens.spacingL,
-    marginBottom: tokens.spacingL,
-    border: 0,
-    height: '1px',
-    backgroundColor: tokens.gray300,
+  editBtn: css({
+    margin: `0 ${tokens.spacingM}`,
   }),
 };
 
-export default class NetlifyConfigEditor extends React.Component {
-  static propTypes = {
-    disabled: PropTypes.bool.isRequired,
-    siteConfigs: PropTypes.array.isRequired,
-    netlifySites: PropTypes.array.isRequired,
-    onSiteConfigsChange: PropTypes.func.isRequired,
+const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes, onSiteConfigsChange }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const editingSiteIndex = useRef(null);
+
+  const onAdd = () => {
+    editingSiteIndex.current = null;
+    setIsModalVisible(true);
   };
 
-  onNetlifySiteChange = (configIndex, netlifySiteId) => {
-    const { netlifySites, siteConfigs, onSiteConfigsChange } = this.props;
-    const site = netlifySites.find((site) => site.id === netlifySiteId) || {};
-
-    const updated = siteConfigs.map((siteConfig, i) => {
-      if (configIndex === i) {
-        return {
-          ...siteConfig,
-          netlifySiteId: site.id,
-          netlifySiteName: site.name,
-          netlifySiteUrl: site.ssl_url || site.url,
-        };
-      } else {
-        return siteConfig;
-      }
-    });
-
-    onSiteConfigsChange(updated);
+  const onEdit = (configIndex) => {
+    editingSiteIndex.current = configIndex;
+    setIsModalVisible(true);
   };
 
-  onNameChange = (configIndex, name) => {
-    const { siteConfigs, onSiteConfigsChange } = this.props;
-    const updated = siteConfigs.map((siteConfig, i) => {
-      return configIndex === i ? { ...siteConfig, name } : siteConfig;
-    });
-    onSiteConfigsChange(updated);
-  };
-
-  onAdd = () => {
-    const { siteConfigs, onSiteConfigsChange } = this.props;
-    const updated = siteConfigs.concat([{}]);
-    onSiteConfigsChange(updated);
-  };
-
-  onRemove = (configIndex) => {
-    const { siteConfigs, onSiteConfigsChange } = this.props;
+  const onRemove = (configIndex) => {
     const updated = siteConfigs.filter((_, i) => i !== configIndex);
     onSiteConfigsChange(updated);
   };
 
-  render() {
-    const { disabled, siteConfigs, netlifySites } = this.props;
+  const onCloseModal = () => {
+    editingSiteIndex.current = null;
+    setIsModalVisible(false);
+  };
 
-    return (
-      <Typography className={styles.container}>
-        <Heading>Build Netlify sites</Heading>
+  return (
+    <>
+      <div className={styles.container}>
+        <Heading>Configure Netlify sites</Heading>
         {disabled ? (
-          <Paragraph>Requires a Netlify account.</Paragraph>
+          <Paragraph marginBottom="spacingL" fontColor="gray700">Requires a Netlify account.</Paragraph>
         ) : (
-          <Paragraph>
-            Pick the Netlify site(s) you want to enable a build for. Only sites with continuous
-            deployment configured are accepted.
+          <Paragraph marginBottom="spacingL" fontColor="gray700">
+            Pick the Netlify site(s) you want to enable a build for. Only sites with continuous deployment configured can be configured.
           </Paragraph>
         )}
-        {siteConfigs.map((siteConfig, configIndex) => {
-          const selectId = `site-select-${configIndex}`;
-          const inputId = `site-input-${configIndex}`;
-          return (
+        <div>
+          {siteConfigs.map((siteConfig, configIndex) => (
             <div key={configIndex} className={styles.row}>
-              <SelectField
-                className={styles.item}
-                id={selectId}
-                name={selectId}
-                labelText="Netlify site:"
-                selectProps={{ isDisabled: disabled, width: 'medium' }}
-                value={siteConfig.netlifySiteId || PICK_OPTION_VALUE}
-                onChange={(e) => this.onNetlifySiteChange(configIndex, e.target.value)}
-              >
-                <Option value={PICK_OPTION_VALUE}>Pick site</Option>
-                {netlifySites.map((netlifySite) => {
-                  return (
-                    <Option key={netlifySite.id} value={netlifySite.id}>
-                      {netlifySite.name}
-                    </Option>
-                  );
-                })}
-              </SelectField>
-              <TextField
-                className={styles.item}
-                id={inputId}
-                name={inputId}
-                labelText="Display name:"
-                textInputProps={{ disabled, width: 'medium', maxLength: 50 }}
-                value={siteConfig.name || ''}
-                onChange={(e) => this.onNameChange(configIndex, e.target.value)}
-              />
+              <div className={styles.site}>
+                <Subheading marginBottom={0}>{siteConfig.name}</Subheading>
+                <Text fontColor="gray600">{siteConfig.netlifySiteName}</Text>
+              </div>
+              {siteConfig.selectedContentTypes?.length > 0 && (
+                <div className={styles.deploysState}>
+                  <DoneIcon variant="secondary" size="tiny" />
+                  <Text fontColor="gray600">Automatic deploys</Text>
+                </div>
+              )}
               <TextLink
-                className={styles.removeBtn}
-                disabled={disabled}
-                onClick={() => this.onRemove(configIndex)}
+                className={styles.editBtn}
+                variant="primary"
+                isDisabled={disabled}
+                onClick={() => onEdit(configIndex)}
+              >
+                Edit
+              </TextLink>
+              <TextLink
+                variant="negative"
+                isDisabled={disabled}
+                onClick={() => onRemove(configIndex)}
               >
                 Remove
               </TextLink>
             </div>
-          );
-        })}
+          ))}
+        </div>
         <Button
-          disabled={disabled || siteConfigs.length >= MAX_CONFIGS}
-          buttonType="muted"
-          onClick={this.onAdd}
+          isDisabled={disabled || siteConfigs.length >= MAX_CONFIGS}
+          variant={siteConfigs.length > 0 ? 'secondary' : 'primary'}
+          startIcon={<PlusIcon />}
+          size="small"
+          onClick={onAdd}
         >
-          Add another site (max {MAX_CONFIGS})
+          {`Add ${siteConfigs.length > 0 ? 'another ' : ''}site`}
         </Button>
-        <hr className={styles.splitter} />
-      </Typography>
-    );
-  }
+      </div>
+      <EditSiteModal
+        configIndex={editingSiteIndex.current}
+        siteConfigs={siteConfigs}
+        netlifySites={netlifySites}
+        contentTypes={contentTypes}
+        isShown={isModalVisible}
+        onSiteConfigsChange={onSiteConfigsChange}
+        onClose={onCloseModal}
+      />
+    </>
+  );
 }
+
+NetlifyConfigEditor.propTypes = {
+  disabled: PropTypes.bool.isRequired,
+  siteConfigs: PropTypes.array.isRequired,
+  netlifySites: PropTypes.array.isRequired,
+  onSiteConfigsChange: PropTypes.func.isRequired,
+};
+
+export default NetlifyConfigEditor;
