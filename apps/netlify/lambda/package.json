@@ -10,7 +10,7 @@
     "test": "jest",
     "test:ci": "jest",
     "serve": "node serve.js",
-    "deploy": "sls deploy",
+    "deploy": "SLS_DEBUG=* sls deploy --verbose",
     "deploy:test": "npm run deploy"
   },
   "devDependencies": {

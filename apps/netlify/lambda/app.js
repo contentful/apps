@@ -24,5 +24,8 @@ app.use((err, _req, res, next) => {
 app.post('/build', actionHandler);
 
 app.post('/app-events', appEventHandler);
+app.get('/app-events', (req, res) => {
+  res.json({ hello: 'World' });
+});
 
 module.exports = app;
