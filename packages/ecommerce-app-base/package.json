@@ -53,10 +53,5 @@
     "prepublishOnly": "npm run build && npm run build:docs",
     "test": "jest --watch",
     "test:ci": "jest"
-  },
-  "browserslist": [
-    "last 5 Chrome version",
-    "> 1%",
-    "not ie <= 11"
-  ]
+  }
 }
