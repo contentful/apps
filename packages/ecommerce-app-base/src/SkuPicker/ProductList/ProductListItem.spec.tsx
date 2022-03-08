@@ -21,25 +21,29 @@ describe('ProductListItem', () => {
   afterEach(cleanup);
 
   it('should render successfully', async () => {
-    const component = renderComponent(defaultProps);
-    fireEvent(component.getByTestId('image'), new Event('load'));
-    expect(component.container).toMatchSnapshot();
+    const { getByTestId } = renderComponent(defaultProps);
+    const image = getByTestId('image');
+    fireEvent(image, new Event('load'));
+    expect(image).toHaveStyle('display: block');
   });
 
   it('should render successfully the isSelected variation', () => {
-    const component = renderComponent({ ...defaultProps, isSelected: true });
-    fireEvent(component.getByTestId('image'), new Event('load'));
-    expect(component.container).toMatchSnapshot();
+    const { getByTestId, getByRole } = renderComponent({ ...defaultProps, isSelected: true });
+    const image = getByTestId('image');
+    fireEvent(image, new Event('load'));
+    expect(getByRole('switch')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('should render successfully the loading variation', () => {
-    const component = renderComponent(defaultProps);
-    expect(component.container).toMatchSnapshot();
+    const { getByTestId } = renderComponent(defaultProps);
+    expect(getByTestId('image')).toHaveStyle('display: none');
+    expect(getByTestId('cf-ui-skeleton-form')).toBeInTheDocument();
   });
 
   it('should render successfully the error variation', () => {
-    const component = renderComponent({ ...defaultProps, isSelected: true });
-    fireEvent(component.getByTestId('image'), new Event('error'));
-    expect(component.container).toMatchSnapshot();
+    const { getByTestId } = renderComponent({ ...defaultProps, isSelected: true });
+    const image = getByTestId('image');
+    fireEvent(image, new Event('error'));
+    expect(image).toHaveStyle('display: none');
   });
 });

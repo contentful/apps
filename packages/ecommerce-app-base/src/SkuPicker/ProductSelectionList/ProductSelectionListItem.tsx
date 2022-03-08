@@ -100,7 +100,7 @@ export const ProductSelectionListItem = (props: Props) => {
   const productIsMissing = !product.name;
 
   return (
-    <div className={styles.productWrapper}>
+    <div className={styles.productWrapper} data-testid="ProductSelectionListItem">
       <div
         role="switch"
         aria-checked={true}

@@ -121,7 +121,7 @@ export const ProductListItem = (props: Props) => {
   const [imageHasErrored, setImageHasErrored] = useState(false);
 
   return (
-    <div className={styles.productWrapper}>
+    <div className={styles.productWrapper} data-test-id="ProductListItem">
       <div
         data-test-id={`product-preview-${product.sku}`}
         role="switch"

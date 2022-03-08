@@ -125,6 +125,7 @@ export const SortableListItem = SortableElement<Props>(
 
     return (
       <Card
+        data-testid="SortableListItem"
         className={styles.card}
         dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}
       >
@@ -136,7 +137,11 @@ export const SortableListItem = SortableElement<Props>(
           )}
           {!product.image || imageHasErrored ? (
             <div className={styles.errorImage}>
-              {productIsMissing ? <ErrorCircleIcon /> : <AssetIcon />}
+              {productIsMissing ? (
+                <ErrorCircleIcon testId="error-circle-icon" />
+              ) : (
+                <AssetIcon testId="asset-icon" />
+              )}
             </div>
           ) : (
             <div className={styles.imageWrapper(imageHasLoaded)}>

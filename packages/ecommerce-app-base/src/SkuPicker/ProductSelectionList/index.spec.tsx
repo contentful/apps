@@ -16,7 +16,7 @@ describe('ProductSelectionList', () => {
   afterEach(cleanup);
 
   it('should render successfully', async () => {
-    const component = renderComponent(defaultProps);
-    expect(component.container).toMatchSnapshot();
+    const { getAllByTestId } = renderComponent(defaultProps);
+    expect(getAllByTestId('ProductSelectionListItem')).toHaveLength(productPreviews.length);
   });
 });

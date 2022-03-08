@@ -15,4 +15,10 @@ module.exports = {
   modulePaths: [],
   moduleFileExtensions: ['js', 'ts', 'tsx', 'jsx'],
   resetMocks: true,
+  setupFilesAfterEnv: ['<rootDir>/jest-setup.ts'],
+  globals: {
+    'ts-jest': {
+      tsconfig: './tsconfig.jest.json',
+    },
+  },
 };
