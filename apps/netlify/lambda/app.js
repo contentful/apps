@@ -5,7 +5,7 @@ const makeReqVerificationMiddleware = require('./helpers/verify');
 
 const app = express();
 
-const signingSecret = process.env['SIGNING_SECRET'] || '';
+const signingSecret = (process.env['SIGNING_SECRET'] || '').trim();
 
 app.use(
   express.json({
@@ -24,8 +24,5 @@ app.use((err, _req, res, next) => {
 app.post('/build', actionHandler);
 
 app.post('/app-events', appEventHandler);
-app.get('/app-events', (req, res) => {
-  res.json({ hello: 'World' });
-});
 
 module.exports = app;

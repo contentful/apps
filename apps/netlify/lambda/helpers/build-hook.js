@@ -3,6 +3,7 @@ const nodeFetch = require('node-fetch');
 const get = require('lodash.get');
 
 const privateKey = process.env['APP_IDENTITY_PRIVATE_KEY'] || '';
+const appInstallationId = (process.env['APP_DEFINITION_ID'] || '').trim();
 const baseUrl = 'https://api.contentful.com/';
 const buildBaseURL = 'https://api.netlify.com/build_hooks/';
 const validEventTypes = ['Entry', 'Asset', 'DeletedEntry', 'DeletedAsset'];
@@ -27,21 +28,26 @@ const filterHookIdsFromCT = (ct, installParams) => {
   });
 };
 
+const getBuildHookIdFromSiteName = (siteName, params) => {
+  const buildHookIndex = params.siteNames.split(',').indexOf(siteName);
+  // build hooks are ordered in the same way as siteName
+  return buildHookIndex > -1 ? [params.buildHookIds.split(',')[buildHookIndex]] : [];
+};
+
 const getBuildHooksFromAppInstallationParams = async (
   appContextDetails = {
     environmentId: '',
     spaceId: '',
-    appInstallationId: '',
-    buildHookId: '',
+    siteName: '',
     contentTypeId: '',
+    appInstallationId,
   },
   getToken = getManagementToken,
   fetch = nodeFetch
 ) => {
-  const { spaceId, environmentId, appInstallationId, buildHookId, contentTypeId } =
-    appContextDetails;
+  const { spaceId, environmentId, siteName, contentTypeId } = appContextDetails;
 
-  if (!buildHookId && !contentTypeId) {
+  if (!siteName && !contentTypeId) {
     throw new Error('Invalid request, requires action call or publish/unpublish event');
   }
 
@@ -63,10 +69,8 @@ const getBuildHooksFromAppInstallationParams = async (
   const parsedRes = await rawResult.json();
   validateParams(parsedRes);
 
-  const appInstallationBuildHooks = parsedRes.parameters.buildHookIds.split(',');
-
-  if (buildHookId) {
-    return appInstallationBuildHooks.includes(buildHookId) ? [buildHookId] : [];
+  if (siteName) {
+    return getBuildHookIdFromSiteName(siteName, parsedRes.parameters);
   }
 
   if (contentTypeId) {
@@ -79,21 +83,19 @@ const fireBuildHook = async (buildHookId) => {
   return nodeFetch(buildHookUrl, { method: 'POST' });
 };
 
-const extractAppContextDetails = (body) => {
-  const [spaceId, environmentId, contentTypeId, appInstallationId, buildHookId] = [
-    get(body, 'sys.space.sys.id'),
-    get(body, 'sys.environment.sys.id'),
-    get(body, 'sys.contentType.sys.id') || '',
-    get(body, 'sys.appDefinition.sys.id') || '',
-    get(body, 'body.buildHookId') || '',
+const extractAppContextDetails = (req) => {
+  const [spaceId, environmentId, contentTypeId, siteName] = [
+    get(req.body, 'sys.space.sys.id') || get(req.headers, 'x-contentful-space-id'),
+    get(req.body, 'sys.environment.sys.id') || get(req.headers, 'x-contentful-environment-id'),
+    get(req.body, 'sys.contentType.sys.id') || '',
+    get(req.body, 'siteName') || '',
   ];
 
   return {
     spaceId,
     environmentId,
     contentTypeId,
-    appInstallationId,
-    buildHookId,
+    siteName,
   };
 };
 

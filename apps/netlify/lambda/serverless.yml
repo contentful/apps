@@ -8,10 +8,10 @@ plugins:
 
 custom:
   signingSecret:
-    # prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/signing-secret}
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/signing-secret}
     test: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/test/signing-secret}
   appIdentityKey:
-    # prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/app-identity-key}
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/app-identity-key}
     test: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/test/app-identity-key}
   customDomain:
     domainName: netlify-test.ctfapps.net
@@ -28,7 +28,7 @@ provider:
   lambdaHashingVersion: 20201221
   deploymentBucket:
     name: cf-apps-serverless-deployment
-  deploymentPrefix: sls-apps-netlify-test
+  deploymentPrefix: sls-apps-netlify-build
 
 functions:
   app:

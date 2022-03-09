@@ -40,23 +40,25 @@ const mockFetch = (parameters) => async () => {
 
 describe('Validate Build hook', () => {
   describe('for AppActionCall', () => {
+    const siteName = 'my-site-name';
+
     test('it succeed with correct installation parameters', async () => {
       const expectedHookId = 'my-build-hook';
-      const actionCall = {
-        sys: {
-          appDefinition: { sys: { id: 'some-app-def' } },
-          environment: { sys: { id: 'master' } },
-          space: { sys: { id: 'some-space' } },
+      const actionCallCtx = {
+        headers: {
+          'x-contentful-environment-id': 'master',
+          'x-contentful-space-id': 'some-space',
         },
         body: {
-          buildHookId: expectedHookId,
+          siteName,
         },
       };
 
       const hookId = await getBuildHooksFromAppInstallationParams(
-        extractAppContextDetails(actionCall),
+        extractAppContextDetails(actionCallCtx),
         getMgmtToken,
         mockFetch({
+          siteNames: siteName,
           buildHookIds: expectedHookId,
         })
       );
@@ -66,13 +68,12 @@ describe('Validate Build hook', () => {
     test('it succeed with list of build hook ids in installation parameters', async () => {
       const expectedHookId = 'my-build-hook';
       const actionCall = {
-        sys: {
-          appDefinition: { sys: { id: 'some-app-def' } },
-          environment: { sys: { id: 'master' } },
-          space: { sys: { id: 'some-space' } },
+        headers: {
+          'x-contentful-environment-id': 'master',
+          'x-contentful-space-id': 'some-space',
         },
         body: {
-          buildHookId: expectedHookId,
+          siteName,
         },
       };
 
@@ -80,6 +81,7 @@ describe('Validate Build hook', () => {
         extractAppContextDetails(actionCall),
         getMgmtToken,
         mockFetch({
+          siteNames: `${siteName},another-site-name`,
           buildHookIds: `${expectedHookId},another-hook-id`,
         })
       );
@@ -89,10 +91,9 @@ describe('Validate Build hook', () => {
     test('it should throw error if invalid AppActionCall is used', async () => {
       const expectedHookId = 'my-build-hook';
       const actionCall = {
-        sys: {
-          appDefinition: { sys: { id: 'some-app-def' } },
-          environment: { sys: { id: 'master' } },
-          space: { sys: { id: 'some-space' } },
+        headers: {
+          'x-contentful-environment-id': 'master',
+          'x-contentful-space-id': 'some-space',
         },
         body: {
           value: 'foo',
@@ -103,20 +104,22 @@ describe('Validate Build hook', () => {
         getBuildHooksFromAppInstallationParams(
           extractAppContextDetails(actionCall),
           getMgmtToken,
-          mockFetch({ buildHookIds: expectedHookId })
+          mockFetch({
+            siteName,
+            buildHookIds: expectedHookId,
+          })
         )
       ).rejects.toThrow('Invalid request, requires action call or publish/unpublish event');
     });
 
     test('it should throw error if App Installation is missing parameters', async () => {
       const actionCall = {
-        sys: {
-          appDefinition: { sys: { id: 'some-app-def' } },
-          environment: { sys: { id: 'master' } },
-          space: { sys: { id: 'some-space' } },
+        headers: {
+          'x-contentful-environment-id': 'master',
+          'x-contentful-space-id': 'some-space',
         },
         body: {
-          buildHookId: 'my-build-hook',
+          siteName,
         },
       };
 
@@ -154,7 +157,7 @@ describe('Validate Build hook', () => {
       };
 
       const hookId = await getBuildHooksFromAppInstallationParams(
-        extractAppContextDetails(unpublishEvent),
+        extractAppContextDetails({ body: unpublishEvent }),
         getMgmtToken,
         mockFetch({
           buildHookIds: expectedHookId,
@@ -205,7 +208,7 @@ describe('Validate Build hook', () => {
       };
 
       const hookId = await getBuildHooksFromAppInstallationParams(
-        extractAppContextDetails(publishEvent),
+        extractAppContextDetails({ body: publishEvent }),
         getMgmtToken,
         mockFetch({
           buildHookIds: expectedHookId,
@@ -256,7 +259,7 @@ describe('Validate Build hook', () => {
       };
 
       const hookId = await getBuildHooksFromAppInstallationParams(
-        extractAppContextDetails(publishEvent),
+        extractAppContextDetails({ body: publishEvent }),
         getMgmtToken,
         mockFetch({
           buildHookIds: `${expectedHookId},another-hook-id`,
@@ -308,7 +311,7 @@ describe('Validate Build hook', () => {
 
       expect(
         await getBuildHooksFromAppInstallationParams(
-          extractAppContextDetails(publishEvent),
+          extractAppContextDetails({ body: publishEvent }),
           getMgmtToken,
           mockFetch({
             buildHookIds: expectedHookId,
@@ -359,7 +362,7 @@ describe('Validate Build hook', () => {
 
       await expect(
         getBuildHooksFromAppInstallationParams(
-          extractAppContextDetails(publishEvent),
+          extractAppContextDetails({ body: publishEvent }),
           getMgmtToken,
           mockFetch({})
         )

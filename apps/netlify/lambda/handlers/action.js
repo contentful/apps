@@ -6,7 +6,7 @@ const {
 
 const actionHandler = async (req, res) => {
   try {
-    const appContextDetails = extractAppContextDetails(req.body);
+    const appContextDetails = extractAppContextDetails(req);
 
     // actions are for building only one site
     const [validBuildHookId] = await getBuildHooksFromAppInstallationParams(appContextDetails);

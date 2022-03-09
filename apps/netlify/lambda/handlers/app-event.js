@@ -5,17 +5,12 @@ const {
   validateAppEvent,
 } = require('../helpers/build-hook');
 
-const appInstallationId = process.env['APP_DEFINITION_ID'] || '';
-
 const appEventHandler = async (req, res) => {
   try {
     validateAppEvent(req.body);
-    const appContextDetails = extractAppContextDetails(req.body);
+    const appContextDetails = extractAppContextDetails(req);
 
-    const buildHookIds = await getBuildHooksFromAppInstallationParams({
-      ...appContextDetails,
-      appInstallationId,
-    });
+    const buildHookIds = await getBuildHooksFromAppInstallationParams(appContextDetails);
 
     if (!buildHookIds || buildHookIds.length === 0) {
       res.status(404);
