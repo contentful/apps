@@ -47,6 +47,7 @@ export const EditSiteModal = ({
   const [availableContentTypes, setAvailableContentTypes] = useState([]);
   const [selectedContentTypes, setSelectedContentTypes] = useState([]);
   const [contentTypeQuery, setContentTypeQuery] = useState('');
+  const [isSelectedContentTypesInvalid, setIsSelectedContentTypesInvalid] = useState(false);
 
   const isNewSite = configIndex === undefined || configIndex === null;
 
@@ -103,12 +104,19 @@ export const EditSiteModal = ({
   const resetFields = () => {
     setSiteId(PICK_OPTION_VALUE);
     setDisplayName('');
+    setIsDeploysOn(false);
     setSelectedContentTypes([]);
     setContentTypeQuery('');
-    setIsDeploysOn(false);
+    setIsSelectedContentTypesInvalid(false);
   };
 
   const onConfirm = () => {
+    if (isDeploysOn && selectedContentTypes.length === 0) {
+      setIsSelectedContentTypesInvalid(true);
+      return;
+    }
+
+    setIsSelectedContentTypesInvalid(false);
     updateConfig();
     onClose();
   };
@@ -127,6 +135,7 @@ export const EditSiteModal = ({
     });
 
     if (selected.length > 0) {
+      setIsSelectedContentTypesInvalid(false);
       setSelectedContentTypes([...selectedContentTypes, ...selected ]);
     }
   };
@@ -213,7 +222,14 @@ export const EditSiteModal = ({
     if (isShown && isNewSite) {
       resetFields();
     }
-  }, [isShown]);
+  }, [isShown, isNewSite]);
+
+  useEffect(() => {
+    if (!isDeploysOn) {
+      setSelectedContentTypes([]);
+      setIsSelectedContentTypesInvalid(false);
+    }
+  }, [isDeploysOn]);
 
   return (
     <Modal isShown={isShown} onClose={onCancel} size="medium" modalContentProps={{ paddingBottom: 'spacingM' }}>
@@ -265,28 +281,33 @@ export const EditSiteModal = ({
               </FormControl>
               {isDeploysOn && (
                 <div className={styles.contentTypeSelect}>
-                  <Autocomplete
-                    id={contentTypeSelectId}
-                    name={contentTypeSelectId}
-                    items={availableContentTypes}
-                    emptyListMessage="There a no content types"
-                    noMatchesMessage="Your search didn't match any content type"
-                    placeholder="Add more content types..."
-                    width="full"
-                    itemToString={(item) => item.label}
-                    renderItem={(item) => (
-                      <span
-                        key={item.value}
-                        className={item.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''}
-                      >
-                        {item.label}
-                      </span>
+                  <FormControl marginBottom={0} isInvalid={isSelectedContentTypesInvalid}>
+                    <Autocomplete
+                      id={contentTypeSelectId}
+                      name={contentTypeSelectId}
+                      items={availableContentTypes}
+                      emptyListMessage="There are no content types"
+                      noMatchesMessage="Your search didn't match any content type"
+                      placeholder="Add more content types..."
+                      width="full"
+                      itemToString={(item) => item.label}
+                      renderItem={(item) => (
+                        <span
+                          key={item.value}
+                          className={item.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''}
+                        >
+                          {item.label}
+                        </span>
+                      )}
+                      isDisabled={availableContentTypes.length === 1}
+                      clearAfterSelect
+                      onSelectItem={onSelectContentType}
+                      onInputValueChange={onContentTypeQueryChange}
+                    />
+                    {isSelectedContentTypesInvalid && (
+                      <FormControl.ValidationMessage>Add at least one Content type</FormControl.ValidationMessage>
                     )}
-                    isDisabled={availableContentTypes.length === 1}
-                    clearAfterSelect
-                    onSelectItem={onSelectContentType}
-                    onInputValueChange={onContentTypeQueryChange}
-                  />
+                  </FormControl>
                   {renderSelectedContentTypes()}
                 </div>
               )}
