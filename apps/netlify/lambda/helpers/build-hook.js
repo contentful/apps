@@ -6,7 +6,8 @@ const privateKey = process.env['APP_IDENTITY_PRIVATE_KEY'] || '';
 const appInstallationId = (process.env['APP_DEFINITION_ID'] || '').trim();
 const baseUrl = 'https://api.contentful.com/';
 const buildBaseURL = 'https://api.netlify.com/build_hooks/';
-const validEventTypes = ['Entry', 'Asset', 'DeletedEntry', 'DeletedAsset'];
+const assetTypes = ['Asset', 'DeletedAsset'];
+const validEventTypes = ['Entry', 'DeletedEntry', ...assetTypes];
 
 const validateParams = (installation) => {
   const validParams =
@@ -18,13 +19,26 @@ const validateParams = (installation) => {
   }
 };
 
-const filterHookIdsFromCT = (ct, installParams) => {
+const filterHookIdsFromCT = (eventData, installParams) => {
+  // for old params;
+  if (!installParams.events) {
+    return [];
+  }
+
   return installParams.buildHookIds.split(',').filter((hookId) => {
-    return (
-      installParams.events &&
+    const isUnsupportedParams = !(
       installParams.events[hookId] &&
-      (installParams.events[hookId] === '*' || installParams.events[hookId].includes(ct))
+      (installParams.events[hookId].cts || installParams.events[hookId].assets)
     );
+    if (isUnsupportedParams) {
+      return false;
+    }
+
+    // either we have an asset which we always publish or check if CT is supported
+    return eventData.isAsset
+      ? installParams.events[hookId].assets
+      : installParams.events[hookId].cts === '*' ||
+          installParams.events[hookId].cts.includes(eventData.contentTypeId);
   });
 };
 
@@ -40,14 +54,15 @@ const getBuildHooksFromAppInstallationParams = async (
     spaceId: '',
     siteName: '',
     contentTypeId: '',
+    isAsset: false,
     appInstallationId,
   },
   getToken = getManagementToken,
   fetch = nodeFetch
 ) => {
-  const { spaceId, environmentId, siteName, contentTypeId } = appContextDetails;
+  const { spaceId, environmentId, siteName, contentTypeId, isAsset } = appContextDetails;
 
-  if (!siteName && !contentTypeId) {
+  if (!siteName && !contentTypeId && !isAsset) {
     throw new Error('Invalid request, requires action call or publish/unpublish event');
   }
 
@@ -73,8 +88,8 @@ const getBuildHooksFromAppInstallationParams = async (
     return getBuildHookIdFromSiteName(siteName, parsedRes.parameters);
   }
 
-  if (contentTypeId) {
-    return filterHookIdsFromCT(contentTypeId, parsedRes.parameters);
+  if (contentTypeId || isAsset) {
+    return filterHookIdsFromCT({ contentTypeId, isAsset }, parsedRes.parameters);
   }
 };
 
@@ -84,11 +99,12 @@ const fireBuildHook = async (buildHookId) => {
 };
 
 const extractAppContextDetails = (req) => {
-  const [spaceId, environmentId, contentTypeId, siteName] = [
+  const [spaceId, environmentId, contentTypeId, siteName, isAsset] = [
     get(req.body, 'sys.space.sys.id') || get(req.headers, 'x-contentful-space-id'),
     get(req.body, 'sys.environment.sys.id') || get(req.headers, 'x-contentful-environment-id'),
     get(req.body, 'sys.contentType.sys.id') || '',
     get(req.body, 'siteName') || '',
+    assetTypes.includes(get(req.body, 'sys.type')),
   ];
 
   return {
@@ -96,6 +112,7 @@ const extractAppContextDetails = (req) => {
     environmentId,
     contentTypeId,
     siteName,
+    isAsset,
   };
 };
 

@@ -161,7 +161,7 @@ describe('Validate Build hook', () => {
         getMgmtToken,
         mockFetch({
           buildHookIds: expectedHookId,
-          events: { [expectedHookId]: ['post'] },
+          events: { [expectedHookId]: { cts: 'post' } },
         })
       );
       expect(hookId).toEqual([expectedHookId]);
@@ -212,7 +212,7 @@ describe('Validate Build hook', () => {
         getMgmtToken,
         mockFetch({
           buildHookIds: expectedHookId,
-          events: { [expectedHookId]: '*' },
+          events: { [expectedHookId]: { cts: '*' } },
         })
       );
       expect(hookId).toEqual([expectedHookId]);
@@ -263,7 +263,78 @@ describe('Validate Build hook', () => {
         getMgmtToken,
         mockFetch({
           buildHookIds: `${expectedHookId},another-hook-id`,
-          events: { [expectedHookId]: '*' },
+          events: { [expectedHookId]: { cts: '*' } },
+        })
+      );
+      expect(hookId).toEqual([expectedHookId]);
+    });
+
+    test('it succeed for assets if the published event is for an asset', async () => {
+      const expectedHookId = 'my-build-hook';
+      const publishEvent = {
+        metadata: { tags: [] },
+        sys: {
+          type: 'Asset',
+          id: 'some-entry-id',
+          space: {
+            sys: { type: 'Link', linkType: 'Space', id: 'my-space-id' },
+          },
+          environment: {
+            sys: { id: 'master', type: 'Link', linkType: 'Environment' },
+          },
+          createdBy: {
+            sys: {
+              type: 'Link',
+              linkType: 'User',
+              id: 'user-id',
+            },
+          },
+          updatedBy: {
+            sys: {
+              type: 'Link',
+              linkType: 'User',
+              id: 'user-id',
+            },
+          },
+          revision: 12,
+          createdAt: '2022-02-15T14:50:53.979Z',
+          updatedAt: '2022-02-18T11:37:14.616Z',
+        },
+        fields: {
+          title: {
+            'en-US': 'Doge',
+          },
+          description: {
+            'en-US': 'Wow! Such depth! Much 3D!',
+          },
+          file: {
+            'en-US': {
+              url: '//images.contentful.com/mySpaceId/1SdUi3xBMTRm2LxnQ9LEtk/doidsam32898sdaf/doge.jpg',
+              details: {
+                size: 423999,
+                image: {
+                  width: 1500,
+                  height: 1500,
+                },
+              },
+              fileName: 'doge.jpg',
+              contentType: 'image/jpeg',
+            },
+          },
+        },
+      };
+
+      const hookId = await getBuildHooksFromAppInstallationParams(
+        extractAppContextDetails({ body: publishEvent }),
+        getMgmtToken,
+        mockFetch({
+          buildHookIds: `${expectedHookId},another-hook-id`,
+          events: {
+            [expectedHookId]: {
+              cts: '*',
+              assets: true,
+            },
+          },
         })
       );
       expect(hookId).toEqual([expectedHookId]);
@@ -315,7 +386,7 @@ describe('Validate Build hook', () => {
           getMgmtToken,
           mockFetch({
             buildHookIds: expectedHookId,
-            events: { [expectedHookId]: ['someCT'] },
+            events: { [expectedHookId]: { cts: 'someCT' } },
           })
         )
       ).toEqual([]);
