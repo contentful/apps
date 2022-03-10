@@ -111,12 +111,10 @@ export const EditSiteModal = ({
   const onConfirm = () => {
     updateConfig();
     onClose();
-    resetFields();
   };
 
   const onCancel = () => {
     onClose();
-    resetFields();
   };
 
   const onSelectContentType = (item) => {
@@ -154,8 +152,18 @@ export const EditSiteModal = ({
     const items = contentTypes
       .filter(([id, _]) => !selectedContentTypes.some((contentType) => contentType.value === id))
       .filter(([_, name]) => contentTypeQuery ? new RegExp(contentTypeQuery, 'i').test(name) : true)
-      .map(([id, name]) => ({ value: id, label: name }));
-    return [{ value: ALL_CONTENT_TYPES_VALUE, label: 'All Content Types' }, ...items];
+      .map(([id, name]) => ({ value: id, label: name }))
+      .sort((a, b) => {
+        const aLabel = a.label.toUpperCase();
+        const bLabel = b.label.toUpperCase();
+
+        if (aLabel > bLabel ) return 1;
+        if (aLabel < bLabel ) return -1;
+
+        return 0;
+      });
+
+    return [{ value: ALL_CONTENT_TYPES_VALUE, label: 'Select all Content Types' }, ...items];
   }, [contentTypes, contentTypeQuery, selectedContentTypes]);
 
   const getContentTypesFromConfig = useCallback(() => {
@@ -201,8 +209,14 @@ export const EditSiteModal = ({
     }
   }, [isNewSite, getContentTypesFromConfig]);
 
+  useEffect(() => {
+    if (isShown && isNewSite) {
+      resetFields();
+    }
+  }, [isShown]);
+
   return (
-    <Modal isShown={isShown} onClose={onCancel} size="medium">
+    <Modal isShown={isShown} onClose={onCancel} size="medium" modalContentProps={{ paddingBottom: 'spacingM' }}>
       {() => (
         <>
           <Modal.Header title={isNewSite ? 'Add site' : 'Edit site'} />
@@ -218,7 +232,7 @@ export const EditSiteModal = ({
                   required
                 >
                   {isNewSite && (
-                    <Option value={PICK_OPTION_VALUE}>Pick site</Option>
+                    <Option value={PICK_OPTION_VALUE}>Select a Netlify site</Option>
                   )}
                   {netlifySites.length > 0 && netlifySites.map((netlifySite) => {
                     return (
@@ -268,6 +282,7 @@ export const EditSiteModal = ({
                         {item.label}
                       </span>
                     )}
+                    isDisabled={availableContentTypes.length === 1}
                     clearAfterSelect
                     onSelectItem={onSelectContentType}
                     onInputValueChange={onContentTypeQueryChange}
@@ -281,7 +296,12 @@ export const EditSiteModal = ({
             <Button variant="secondary" size="small" onClick={onCancel}>
               Cancel
             </Button>
-            <Button variant="positive" size="small" onClick={onConfirm} isDisabled={!siteId || !displayName.trim()}>
+            <Button
+              variant="positive"
+              size="small"
+              onClick={onConfirm}
+              isDisabled={!siteId || siteId === PICK_OPTION_VALUE || !displayName.trim()}
+            >
               Confirm
             </Button>
           </Modal.Controls>

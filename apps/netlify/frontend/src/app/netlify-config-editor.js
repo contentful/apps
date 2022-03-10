@@ -93,7 +93,7 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
               </div>
               {siteConfig.selectedContentTypes?.length > 0 && (
                 <div className={styles.deploysState}>
-                  <DoneIcon variant="secondary" size="tiny" />
+                  <DoneIcon variant="muted" size="tiny" marginRight="spacing2Xs" />
                   <Text fontColor="gray600">Automatic deploys</Text>
                 </div>
               )}
