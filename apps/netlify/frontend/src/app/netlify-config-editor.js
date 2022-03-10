@@ -10,6 +10,8 @@ import {
   Text,
   TextLink,
   Subheading,
+  ModalLauncher,
+  ModalConfirm,
 } from '@contentful/f36-components';
 import {
   PlusIcon,
@@ -64,8 +66,21 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
   };
 
   const onRemove = (configIndex) => {
-    const updated = siteConfigs.filter((_, i) => i !== configIndex);
-    onSiteConfigsChange(updated);
+    const siteName = siteConfigs[configIndex].name;
+    ModalLauncher.open(({ isShown, onClose }) => (
+      <ModalConfirm
+        intent="negative"
+        isShown={isShown}
+        onCancel={onClose}
+        onConfirm={() => {
+          const updated = siteConfigs.filter((_, i) => i !== configIndex);
+          onSiteConfigsChange(updated);
+          onClose();
+        }}
+      >
+        <Text>Do you really want to remove <b>{siteName}</b>?</Text>
+      </ModalConfirm>
+    ));
   };
 
   const onCloseModal = () => {
