@@ -6,6 +6,7 @@ import tokens from '@contentful/f36-tokens';
 import {
   Heading,
   Paragraph,
+  Flex,
   Button,
   Text,
   TextLink,
@@ -54,6 +55,7 @@ const styles = {
 const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes, onSiteConfigsChange }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const editingSiteIndex = useRef(null);
+  const isAllSitesConfigured = !disabled && siteConfigs.length === netlifySites.length;
 
   const onAdd = () => {
     editingSiteIndex.current = null;
@@ -130,15 +132,20 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
             </div>
           ))}
         </div>
-        <Button
-          isDisabled={disabled || siteConfigs.length >= MAX_CONFIGS}
-          variant={siteConfigs.length > 0 ? 'secondary' : 'primary'}
-          startIcon={<PlusIcon />}
-          size="small"
-          onClick={onAdd}
-        >
-          {`Add ${siteConfigs.length > 0 ? 'another ' : ''}site`}
-        </Button>
+        <Flex alignItems="center">
+          <Button
+            isDisabled={disabled || siteConfigs.length >= MAX_CONFIGS || isAllSitesConfigured}
+            variant={siteConfigs.length > 0 ? 'secondary' : 'primary'}
+            startIcon={<PlusIcon />}
+            size="small"
+            onClick={onAdd}
+          >
+            {`Add ${siteConfigs.length > 0 ? 'another ' : ''}site`}
+          </Button>
+          {isAllSitesConfigured && (
+            <Text marginLeft="spacingS" fontSize="fontSizeS" fontColor="gray500">All available sites are configured</Text>
+          )}
+        </Flex>
       </div>
       <EditSiteModal
         configIndex={editingSiteIndex.current}

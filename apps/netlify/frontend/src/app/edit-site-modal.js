@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Modal,
   Form,
@@ -55,6 +55,15 @@ export const EditSiteModal = ({
   const inputId = `site-input-${configIndex ?? 'new'}`;
   const deploysId = `deploys-checkbox-${configIndex ?? 'new'}`;
   const contentTypeSelectId = `content-type-select-${configIndex ?? 'new'}`;
+
+  const availableNetlifySites = useMemo(() => {
+    const configuredSiteIds = siteConfigs.map((config) => config.netlifySiteId);
+    if (isNewSite) {
+      return netlifySites.filter((site) => !configuredSiteIds.includes(site.id));
+    }
+
+    return netlifySites.filter((site) => !configuredSiteIds.includes(site.id) || siteConfigs[configIndex].netlifySiteId === site.id);
+  }, [configIndex, netlifySites, siteConfigs]);
 
   const serializeSelectedContentTypes = () => {
     if (!isDeploysOn) return [];
@@ -250,7 +259,7 @@ export const EditSiteModal = ({
                   {isNewSite && (
                     <Option value={PICK_OPTION_VALUE}>Select a Netlify site</Option>
                   )}
-                  {netlifySites.length > 0 && netlifySites.map((netlifySite) => {
+                  {availableNetlifySites.length > 0 && availableNetlifySites.map((netlifySite) => {
                     return (
                       <Option key={netlifySite.id} value={netlifySite.id}>
                         {netlifySite.name}
