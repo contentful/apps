@@ -96,7 +96,7 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
           <Paragraph marginBottom="spacingL" fontColor="gray700">Requires a Netlify account.</Paragraph>
         ) : (
           <Paragraph marginBottom="spacingL" fontColor="gray700">
-            Pick the Netlify site(s) you want to enable a build for. Only sites with continuous deployment configured can be configured.
+            Pick which Netlify sites you would like to be able to build from within Contentful. You will need to enable continuous deployment for each site within the Netlify settings.
           </Paragraph>
         )}
         <div>
