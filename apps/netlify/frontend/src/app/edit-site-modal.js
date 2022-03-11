@@ -44,6 +44,7 @@ export const EditSiteModal = ({
   const [siteId, setSiteId] = useState(PICK_OPTION_VALUE);
   const [displayName, setDisplayName] = useState('');
   const [isDeploysOn, setIsDeploysOn] = useState(false);
+  const [isAssetDeploysOn, setIsAssetDeploysOn] = useState(false);
   const [availableContentTypes, setAvailableContentTypes] = useState([]);
   const [selectedContentTypes, setSelectedContentTypes] = useState([]);
   const [contentTypeQuery, setContentTypeQuery] = useState('');
@@ -54,6 +55,7 @@ export const EditSiteModal = ({
   const selectId = `site-select-${configIndex ?? 'new'}`;
   const inputId = `site-input-${configIndex ?? 'new'}`;
   const deploysId = `deploys-checkbox-${configIndex ?? 'new'}`;
+  const assetDeploysId = `asset-deploys-checkbox-${configIndex ?? 'new'}`;
   const contentTypeSelectId = `content-type-select-${configIndex ?? 'new'}`;
 
   const availableNetlifySites = useMemo(() => {
@@ -63,7 +65,7 @@ export const EditSiteModal = ({
     }
 
     return netlifySites.filter((site) => !configuredSiteIds.includes(site.id) || siteConfigs[configIndex].netlifySiteId === site.id);
-  }, [configIndex, netlifySites, siteConfigs]);
+  }, [isNewSite, configIndex, netlifySites, siteConfigs]);
 
   const serializeSelectedContentTypes = () => {
     if (!isDeploysOn) return [];
@@ -86,6 +88,7 @@ export const EditSiteModal = ({
       netlifySiteName: selectedSite.name,
       netlifySiteUrl: selectedSite.ssl_url || selectedSite.url,
       selectedContentTypes: serializeSelectedContentTypes(),
+      assetDeploysOn: isAssetDeploysOn || false,
     };
   };
 
@@ -114,6 +117,7 @@ export const EditSiteModal = ({
     setSiteId(PICK_OPTION_VALUE);
     setDisplayName('');
     setIsDeploysOn(false);
+    setIsAssetDeploysOn(false);
     setSelectedContentTypes([]);
     setContentTypeQuery('');
     setIsSelectedContentTypesInvalid(false);
@@ -228,6 +232,12 @@ export const EditSiteModal = ({
   }, [isNewSite, getContentTypesFromConfig]);
 
   useEffect(() => {
+    if (isNewSite) return;
+
+    setIsAssetDeploysOn(siteConfigs[configIndex]?.assetDeploysOn || false);
+  }, [isNewSite, siteConfigs, configIndex]);
+
+  useEffect(() => {
     if (isShown && isNewSite) {
       resetFields();
     }
@@ -280,12 +290,22 @@ export const EditSiteModal = ({
               </FormControl>
               <FormControl marginBottom="spacingS">
                 <Checkbox
+                  name={assetDeploysId}
+                  isChecked={isAssetDeploysOn}
+                  helpText="Rebuild site when any asset is published or unpublished"
+                  onChange={(e) => setIsAssetDeploysOn(e.target.checked)}
+                >
+                  Automatic deploys on assets publish events
+                </Checkbox>
+              </FormControl>
+              <FormControl marginBottom="spacingS">
+                <Checkbox
                   name={deploysId}
                   isChecked={isDeploysOn}
-                  helpText="Rebuild site when an entry of matching content types or assets are published or unpublished"
+                  helpText="Rebuild site when an entry of matching content types are published or unpublished"
                   onChange={(e) => setIsDeploysOn(e.target.checked)}
                 >
-                  Automatic deploys on publish events
+                  Automatic deploys on entries publish events
                 </Checkbox>
               </FormControl>
               {isDeploysOn && (

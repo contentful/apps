@@ -16,16 +16,19 @@ export function configToParameters(config) {
         siteUrls: (acc.siteUrls || []).concat([site.netlifySiteUrl]),
         events: {
           ...(acc.events || {}),
+          [site.buildHookId]: {
+            cts: site.selectedContentTypes,
+            assets: site.assetDeploysOn,
+          },
         },
       };
 
       if (!site.selectedContentTypes || site.selectedContentTypes.length === 0) {
-        return result;
+        delete result.events[site.buildHookId].cts;
       }
 
-      result.events = {
-        ...result.events,
-        [site.buildHookId]: site.selectedContentTypes,
+      if (!site.assetDeploysOn) {
+        delete result.events[site.buildHookId].assets;
       }
 
       return result;
@@ -35,10 +38,13 @@ export function configToParameters(config) {
   return Object.keys(flat).reduce((acc, key) => {
     if (key === 'events') {
       const flatEvents = Object.keys(flat.events).reduce((flatEvents, buildHookId) => {
-        const contentTypes = flat.events[buildHookId];
+        const contentTypes = flat.events[buildHookId].cts;
         return {
           ...flatEvents,
-          [buildHookId]: Array.isArray(contentTypes) ? flat.events[buildHookId].join(',') : contentTypes
+          [buildHookId]: {
+            cts: Array.isArray(contentTypes) ? flat.events[buildHookId].cts.join(',') : contentTypes,
+            assets: flat.events[buildHookId].assets,
+          }
         };
       }, {});
       acc = { ...acc, events: flatEvents };
@@ -61,9 +67,9 @@ export function parametersToConfig(parameters) {
   return {
     netlifyHookIds: readCsvParam(parameters.notificationHookIds),
     sites: buildHookIds.map((buildHookId, i) => {
-      const selectedContentTypes = parameters.events[buildHookId] === '*' ?
-      parameters.events[buildHookId] :
-      readCsvParam(parameters.events[buildHookId]);
+      const selectedContentTypes = parameters.events[buildHookId]?.cts === '*' ?
+      parameters.events[buildHookId]?.cts :
+      readCsvParam(parameters.events[buildHookId]?.cts);
 
       return {
         buildHookId,
@@ -72,6 +78,7 @@ export function parametersToConfig(parameters) {
         netlifySiteName: siteNames[i],
         netlifySiteUrl: siteUrls[i],
         selectedContentTypes,
+        assetDeploysOn: parameters.events[buildHookId]?.assets || false,
       };
     }),
   };
