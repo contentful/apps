@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
 import tokens from '@contentful/f36-tokens';
-import { Heading, Paragraph, Icon } from '@contentful/f36-components';
+import { Heading, Paragraph, Icon, Button } from '@contentful/f36-components';
 
 const styles = {
   auth: css({
@@ -11,18 +11,23 @@ const styles = {
     justifyContent: 'center',
   }),
   button: css({
-    backgroundColor: '#00ad9e',
-    color: '#fff',
-    padding: '12px 80px',
-    outline: 'none',
-    borderRadius: '6px',
-    border: '1px solid #e9ebeb',
-    borderBottom: '1px solid #e1e2e4',
-    boxShadow: '0 2px 4px 0 rgba(14,30,37,.12)',
-    cursor: 'pointer',
-    fontSize: '16px',
-    boxSizing: 'border-box',
+    button: {
+      backgroundColor: '#00ad9e',
+      color: '#fff',
+      padding: '12px 80px',
+      outline: 'none',
+      borderRadius: '6px',
+      border: '1px solid #e9ebeb',
+      borderBottom: '1px solid #e1e2e4',
+      boxShadow: '0 2px 4px 0 rgba(14,30,37,.12)',
+      cursor: 'pointer',
+      fontSize: '16px',
+      boxSizing: 'border-box',
+    },
   }),
+  get buttonHover() {
+    return css({ '&:hover': this.button });
+  },
   splitter: css({
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
@@ -81,9 +86,9 @@ export default class NetlifyConnection extends React.Component {
           Web App.
         </Paragraph>
         <div className={styles.auth}>
-          <button onClick={this.props.onConnectClick} className={styles.button}>
-            Connect account
-          </button>
+          <div className={`${styles.button} ${styles.buttonHover}`}>
+            <Button onClick={this.props.onConnectClick}>Connect account</Button>
+          </div>
         </div>
       </>
     );
