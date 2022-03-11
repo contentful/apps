@@ -1,7 +1,7 @@
 {
   "name": "@contentful/ecommerce-app-base",
   "description": "Library to quickly build an app to integrate your e-commerce system of choice with Contentful",
-  "version": "2.6.76",
+  "version": "2.6.77",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
@@ -21,7 +21,7 @@
     "@types/jest": "27.4.1",
     "@types/lodash": "4.14.179",
     "@types/node": "17.0.21",
-    "@types/react": "17.0.39",
+    "@types/react": "17.0.40",
     "@types/react-dom": "17.0.13",
     "@types/react-sortable-hoc": "0.7.1",
     "jest": "27.5.1",
