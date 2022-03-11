@@ -27,6 +27,9 @@ const styles = {
   allContentTypes: css({
     fontWeight: 500,
   }),
+  assetsDeployCheckbox: css({
+    marginBottom: tokens.spacingXs,
+  }),
 };
 
 const PICK_OPTION_VALUE = '__pick__';
@@ -289,23 +292,22 @@ export const EditSiteModal = ({
                 />
               </FormControl>
               <FormControl marginBottom="spacingS">
+                <FormControl.Label marginBottom={0}>Automatic deploys</FormControl.Label>
+                <FormControl.HelpText marginTop={0} marginBottom="spacingS">Rebuild site automatically when content or assets are published or unpublished</FormControl.HelpText>
                 <Checkbox
                   name={assetDeploysId}
                   isChecked={isAssetDeploysOn}
-                  helpText="Rebuild site when any asset is published or unpublished"
+                  className={styles.assetsDeployCheckbox}
                   onChange={(e) => setIsAssetDeploysOn(e.target.checked)}
                 >
-                  Automatic deploys on assets publish events
+                  When assets are published or unpublished
                 </Checkbox>
-              </FormControl>
-              <FormControl marginBottom="spacingS">
                 <Checkbox
                   name={deploysId}
                   isChecked={isDeploysOn}
-                  helpText="Rebuild site when an entry of matching content types are published or unpublished"
                   onChange={(e) => setIsDeploysOn(e.target.checked)}
                 >
-                  Automatic deploys on entries publish events
+                  When content is published or unpublished
                 </Checkbox>
               </FormControl>
               {isDeploysOn && (
