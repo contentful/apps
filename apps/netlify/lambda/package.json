@@ -10,8 +10,8 @@
     "test": "jest",
     "test:ci": "jest",
     "serve": "node serve.js",
-    "deploy": "SLS_DEBUG=* sls deploy --verbose",
-    "deploy:test": "npm run deploy"
+    "deploy": "sls deploy",
+    "deploy:test": "SLS_DEBUG=* STAGE=test npm run deploy"
   },
   "devDependencies": {
     "eslint": "6.8.0",
