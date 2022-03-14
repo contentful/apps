@@ -7,7 +7,7 @@ import {
   TextInput,
   Button,
   Option,
-  Checkbox,
+  Switch,
   Pill,
   Autocomplete,
 } from '@contentful/f36-components';
@@ -22,7 +22,7 @@ const styles = {
     margin: `${tokens.spacingXs} ${tokens.spacingXs} 0 0`,
   }),
   contentTypeSelect: css({
-    marginLeft: tokens.spacingL,
+    marginLeft: tokens.spacing2Xl,
   }),
   allContentTypes: css({
     fontWeight: 500,
@@ -286,7 +286,7 @@ export const EditSiteModal = ({
               <FormControl marginBottom="spacingS">
                 <FormControl.Label marginBottom={0}>Automatic deploys</FormControl.Label>
                 <FormControl.HelpText marginTop={0} marginBottom="spacingS">Rebuild site automatically when content or assets are published or unpublished</FormControl.HelpText>
-                <Checkbox
+                <Switch
                   id={assetDeploysId}
                   name={assetDeploysId}
                   isChecked={isAssetDeploysOn}
@@ -294,15 +294,15 @@ export const EditSiteModal = ({
                   onChange={(e) => setIsAssetDeploysOn(e.target.checked)}
                 >
                   When assets are published or unpublished
-                </Checkbox>
-                <Checkbox
+                </Switch>
+                <Switch
                   id={deploysId}
                   name={deploysId}
                   isChecked={isDeploysOn}
                   onChange={(e) => setIsDeploysOn(e.target.checked)}
                 >
                   When content is published or unpublished
-                </Checkbox>
+                </Switch>
               </FormControl>
               {isDeploysOn && (
                 <div className={styles.contentTypeSelect}>
