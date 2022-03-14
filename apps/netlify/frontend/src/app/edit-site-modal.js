@@ -220,25 +220,17 @@ export const EditSiteModal = ({
     }
 
     setSiteId(siteConfig.netlifySiteId);
+    setIsAssetDeploysOn(siteConfigs[configIndex]?.assetDeploysOn || false);
   }, [configIndex, isNewSite, siteConfigs]);
 
   useEffect(() => {
     if (isNewSite) return;
 
     const selected = getContentTypesFromConfig();
-    const isContentTypesSelected = selected.length > 0;
 
-    if (isContentTypesSelected) {
-      setIsDeploysOn(isContentTypesSelected);
-      setSelectedContentTypes(selected);
-    }
+    setIsDeploysOn(selected.length > 0);
+    setSelectedContentTypes(selected);
   }, [isNewSite, getContentTypesFromConfig]);
-
-  useEffect(() => {
-    if (isNewSite) return;
-
-    setIsAssetDeploysOn(siteConfigs[configIndex]?.assetDeploysOn || false);
-  }, [isNewSite, siteConfigs, configIndex]);
 
   useEffect(() => {
     if (isShown && isNewSite) {
@@ -295,6 +287,7 @@ export const EditSiteModal = ({
                 <FormControl.Label marginBottom={0}>Automatic deploys</FormControl.Label>
                 <FormControl.HelpText marginTop={0} marginBottom="spacingS">Rebuild site automatically when content or assets are published or unpublished</FormControl.HelpText>
                 <Checkbox
+                  id={assetDeploysId}
                   name={assetDeploysId}
                   isChecked={isAssetDeploysOn}
                   className={styles.assetsDeployCheckbox}
@@ -303,6 +296,7 @@ export const EditSiteModal = ({
                   When assets are published or unpublished
                 </Checkbox>
                 <Checkbox
+                  id={deploysId}
                   name={deploysId}
                   isChecked={isDeploysOn}
                   onChange={(e) => setIsDeploysOn(e.target.checked)}
