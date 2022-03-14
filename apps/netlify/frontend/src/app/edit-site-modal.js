@@ -49,8 +49,8 @@ export const EditSiteModal = ({
   const [isDeploysOn, setIsDeploysOn] = useState(false);
   const [isAssetDeploysOn, setIsAssetDeploysOn] = useState(false);
   const [availableContentTypes, setAvailableContentTypes] = useState([]);
+  const [filteredContentTypes, setFilteredContentTypes] = useState([]);
   const [selectedContentTypes, setSelectedContentTypes] = useState([]);
-  const [contentTypeQuery, setContentTypeQuery] = useState('');
   const [isSelectedContentTypesInvalid, setIsSelectedContentTypesInvalid] = useState(false);
 
   const isNewSite = configIndex === undefined || configIndex === null;
@@ -122,7 +122,6 @@ export const EditSiteModal = ({
     setIsDeploysOn(false);
     setIsAssetDeploysOn(false);
     setSelectedContentTypes([]);
-    setContentTypeQuery('');
     setIsSelectedContentTypesInvalid(false);
   };
 
@@ -141,6 +140,14 @@ export const EditSiteModal = ({
     onClose();
   };
 
+  const onContentTypeQuery = (query) => {
+    if (query) {
+      const filtered = availableContentTypes
+        .filter((contentType) => new RegExp(query, 'i').test(contentType.label));
+      setFilteredContentTypes(filtered);
+    }
+  };
+
   const onSelectContentType = (item) => {
     const selected = availableContentTypes.filter((contentType) => {
       if (item.value === ALL_CONTENT_TYPES_VALUE) {
@@ -152,13 +159,7 @@ export const EditSiteModal = ({
 
     if (selected.length > 0) {
       setIsSelectedContentTypesInvalid(false);
-      setSelectedContentTypes([...selectedContentTypes, ...selected ]);
-    }
-  };
-
-  const onContentTypeQueryChange = (query) => {
-    if (typeof query === 'string') {
-      setContentTypeQuery(query);
+      setSelectedContentTypes([...selectedContentTypes, ...selected]);
     }
   };
 
@@ -172,24 +173,6 @@ export const EditSiteModal = ({
       <Pill key={value} label={label} className={styles.pill} onClose={() => onRemoveContentType(value)} />
     ));
   };
-
-  const getAvailableContentTypes = useCallback(() => {
-    const items = contentTypes
-      .filter(([id, _]) => !selectedContentTypes.some((contentType) => contentType.value === id))
-      .filter(([_, name]) => contentTypeQuery ? new RegExp(contentTypeQuery, 'i').test(name) : true)
-      .map(([id, name]) => ({ value: id, label: name }))
-      .sort((a, b) => {
-        const aLabel = a.label.toUpperCase();
-        const bLabel = b.label.toUpperCase();
-
-        if (aLabel > bLabel ) return 1;
-        if (aLabel < bLabel ) return -1;
-
-        return 0;
-      });
-
-    return [{ value: ALL_CONTENT_TYPES_VALUE, label: 'Select all Content Types' }, ...items];
-  }, [contentTypes, contentTypeQuery, selectedContentTypes]);
 
   const getContentTypesFromConfig = useCallback(() => {
     const types = siteConfigs[configIndex]?.selectedContentTypes;
@@ -205,10 +188,27 @@ export const EditSiteModal = ({
   }, [configIndex, siteConfigs, contentTypes]);
 
   useEffect(() => {
+    setFilteredContentTypes(availableContentTypes);
+  }, [availableContentTypes]);
+
+  useEffect(() => {
     if (contentTypes) {
-      setAvailableContentTypes(getAvailableContentTypes());
+      const items = contentTypes
+        .filter(([id, _]) => !selectedContentTypes.some((contentType) => contentType.value === id))
+        .map(([id, name]) => ({ value: id, label: name }))
+        .sort((a, b) => {
+          const aLabel = a.label.toUpperCase();
+          const bLabel = b.label.toUpperCase();
+
+          if (aLabel > bLabel ) return 1;
+          if (aLabel < bLabel ) return -1;
+
+          return 0;
+        });
+
+      setAvailableContentTypes(items);
     }
-  }, [contentTypes, getAvailableContentTypes]);
+  }, [contentTypes, selectedContentTypes]);
 
   useEffect(() => {
     if (isNewSite) return;
@@ -310,7 +310,7 @@ export const EditSiteModal = ({
                     <Autocomplete
                       id={contentTypeSelectId}
                       name={contentTypeSelectId}
-                      items={availableContentTypes}
+                      items={[{ value: ALL_CONTENT_TYPES_VALUE, label: 'Select all Content Types' }, ...filteredContentTypes]}
                       emptyListMessage="There are no content types"
                       noMatchesMessage="Your search didn't match any content type"
                       placeholder="Add more content types..."
@@ -324,10 +324,10 @@ export const EditSiteModal = ({
                           {item.label}
                         </span>
                       )}
-                      isDisabled={availableContentTypes.length === 1}
+                      isDisabled={availableContentTypes.length === 0}
                       clearAfterSelect
                       onSelectItem={onSelectContentType}
-                      onInputValueChange={onContentTypeQueryChange}
+                      onInputValueChange={onContentTypeQuery}
                     />
                     {isSelectedContentTypesInvalid && (
                       <FormControl.ValidationMessage>Add at least one Content type</FormControl.ValidationMessage>
