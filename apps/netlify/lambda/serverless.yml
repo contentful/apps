@@ -14,8 +14,8 @@ custom:
     prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/app-identity-key}
     test: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/test/app-identity-key}
   customDomain:
-    domainName: netlify-test.ctfapps.net
-    stage: test
+    domainName: netlify-build.ctfapps.net
+    stage: prd
     createRoute53Record: true
     endpointType: "edge"
     securityPolicy: tls_1_2
@@ -23,7 +23,7 @@ custom:
 provider:
   name: aws
   runtime: nodejs14.x
-  stage: test
+  stage: ${opt:stage, 'test'}
   region: "us-east-1"
   lambdaHashingVersion: 20201221
   deploymentBucket:
@@ -34,8 +34,8 @@ functions:
   app:
     handler: index.handler
     environment:
-      SIGNING_SECRET: ${self:custom.signingSecret.test}
-      APP_IDENTITY_PRIVATE_KEY: ${self:custom.appIdentityKey.test}
+      SIGNING_SECRET: ${self:custom.signingSecret.${opt:stage, 'test'}}
+      APP_IDENTITY_PRIVATE_KEY: ${self:custom.appIdentityKey.${opt:stage, 'test'}}
     events:
       - http:
           path: /{proxy+}
