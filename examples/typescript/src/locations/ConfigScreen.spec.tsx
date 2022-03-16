@@ -5,7 +5,7 @@ import { mockCma, mockSdk } from '../../test/mocks';
 
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
-    const { getByText } = render(<ConfigScreen cma={mockCma} sdk={mockSdk} />);
+    const { getByText } = render(<ConfigScreen cma={mockCma} />);
 
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();

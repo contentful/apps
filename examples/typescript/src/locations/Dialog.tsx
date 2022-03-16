@@ -1,14 +1,15 @@
 import React from 'react';
 import { PlainClientAPI } from 'contentful-management';
 import { Paragraph } from '@contentful/f36-components';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import {DialogExtensionSDK, PageExtensionSDK} from '@contentful/app-sdk';
+import {useSDK} from "@contentful/react-apps-toolkit";
 
 interface DialogProps {
-  sdk: DialogExtensionSDK;
   cma: PlainClientAPI;
 }
 
 const Dialog = (props: DialogProps) => {
+  const sdk = useSDK<DialogExtensionSDK>()
   return <Paragraph>Hello Dialog Component</Paragraph>;
 };
 

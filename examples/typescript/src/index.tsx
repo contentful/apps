@@ -5,15 +5,12 @@ import { createClient } from 'contentful-management';
 import {
   AppExtensionSDK,
   FieldExtensionSDK,
-  SidebarExtensionSDK,
-  DialogExtensionSDK,
-  EditorExtensionSDK,
-  PageExtensionSDK,
   init,
   locations,
 } from '@contentful/app-sdk';
 import type { KnownSDK } from '@contentful/app-sdk';
 import { GlobalStyles } from '@contentful/f36-components';
+import { SDKProvider } from '@contentful/react-apps-toolkit'
 
 import ConfigScreen from './locations/ConfigScreen';
 import EntryEditor from './locations/EntryEditor';
@@ -52,27 +49,27 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
     const ComponentLocationSettings = [
       {
         location: locations.LOCATION_APP_CONFIG,
-        component: <ConfigScreen cma={cma} sdk={sdk as AppExtensionSDK} />,
+        component: <ConfigScreen cma={cma} />,
       },
       {
         location: locations.LOCATION_ENTRY_FIELD,
-        component: <Field cma={cma} sdk={sdk as FieldExtensionSDK} />,
+        component: <Field cma={cma} />,
       },
       {
         location: locations.LOCATION_ENTRY_EDITOR,
-        component: <EntryEditor cma={cma} sdk={sdk as EditorExtensionSDK} />,
+        component: <EntryEditor cma={cma} />,
       },
       {
         location: locations.LOCATION_DIALOG,
-        component: <Dialog cma={cma} sdk={sdk as DialogExtensionSDK} />,
+        component: <Dialog cma={cma} />,
       },
       {
         location: locations.LOCATION_ENTRY_SIDEBAR,
-        component: <Sidebar cma={cma} sdk={sdk as SidebarExtensionSDK} />,
+        component: <Sidebar cma={cma} />,
       },
       {
         location: locations.LOCATION_PAGE,
-        component: <Page cma={cma} sdk={sdk as PageExtensionSDK} />,
+        component: <Page cma={cma} />,
       },
     ];
 
@@ -80,10 +77,10 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
     ComponentLocationSettings.forEach((componentLocationSetting) => {
       if (sdk.location.is(componentLocationSetting.location)) {
         render(
-          <>
+          <SDKProvider>
             <GlobalStyles />
             {componentLocationSetting.component}
-          </>,
+          </SDKProvider>,
           root
         );
       }

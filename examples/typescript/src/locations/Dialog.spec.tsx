@@ -1,11 +1,11 @@
 import React from 'react';
 import Dialog from './Dialog';
 import { render } from '@testing-library/react';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { mockCma } from '../../test/mocks';
 
 describe('Dialog component', () => {
   it('Component text exists', () => {
-    const { getByText } = render(<Dialog cma={mockCma} sdk={mockSdk} />);
+    const { getByText } = render(<Dialog cma={mockCma} />);
 
     expect(getByText('Hello Dialog Component')).toBeInTheDocument();
   });

@@ -5,7 +5,7 @@ import { mockCma, mockSdk } from '../../test/mocks';
 
 describe('Field component', () => {
   it('Component text exists', () => {
-    const { getByText } = render(<Field cma={mockCma} sdk={mockSdk} />);
+    const { getByText } = render(<Field cma={mockCma} />);
 
     expect(getByText('Hello Entry Field Component')).toBeInTheDocument();
   });
