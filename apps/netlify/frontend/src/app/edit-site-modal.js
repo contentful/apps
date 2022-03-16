@@ -90,7 +90,7 @@ export const EditSiteModal = ({
       netlifySiteName: selectedSite.name,
       netlifySiteUrl: selectedSite.ssl_url || selectedSite.url,
       selectedContentTypes: serializeSelectedContentTypes(),
-      assetDeploysOn: isAssetDeploysOn || false,
+      assetDeploysOn: isAssetDeploysOn,
     };
   };
 
