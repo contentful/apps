@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
 import tokens from '@contentful/f36-tokens';
-import { Heading, Paragraph, Icon, Button } from '@contentful/f36-components';
+import { Heading, Paragraph, Button } from '@contentful/f36-components';
+import { LockIcon } from '@contentful/f36-icons';
 
 const styles = {
   auth: css({
@@ -40,7 +41,6 @@ const styles = {
     color: tokens.gray600,
   }),
   connectAgainIcon: css({
-    fill: tokens.gray600,
     marginRight: tokens.spacingXs,
     verticalAlign: 'middle',
   }),
@@ -71,7 +71,7 @@ export default class NetlifyConnection extends React.Component {
   renderConnectAgainInfo() {
     return (
       <Paragraph className={styles.connectAgain}>
-        <Icon icon="Lock" className={styles.connectAgainIcon} />
+        <LockIcon variant="muted" className={styles.connectAgainIcon} />
         Connect account to make changes
       </Paragraph>
     );
