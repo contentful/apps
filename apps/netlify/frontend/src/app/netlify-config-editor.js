@@ -14,10 +14,7 @@ import {
   ModalLauncher,
   ModalConfirm,
 } from '@contentful/f36-components';
-import {
-  PlusIcon,
-  DoneIcon,
-} from '@contentful/f36-icons';
+import { PlusIcon, DoneIcon } from '@contentful/f36-icons';
 
 import { MAX_CONFIGS } from '../constants';
 import { EditSiteModal } from './edit-site-modal';
@@ -52,7 +49,13 @@ const styles = {
   }),
 };
 
-const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes, onSiteConfigsChange }) => {
+const NetlifyConfigEditor = ({
+  disabled,
+  siteConfigs,
+  netlifySites,
+  contentTypes,
+  onSiteConfigsChange,
+}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const editingSiteIndex = useRef(null);
   const isAllSitesConfigured = !disabled && siteConfigs.length === netlifySites.length;
@@ -80,7 +83,9 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
           onClose();
         }}
       >
-        <Text>Do you really want to remove <b>{siteName}</b>?</Text>
+        <Text>
+          Do you really want to remove <b>{siteName}</b>?
+        </Text>
       </ModalConfirm>
     ));
   };
@@ -95,10 +100,13 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
       <div className={styles.container}>
         <Heading>Configure Netlify sites</Heading>
         {disabled ? (
-          <Paragraph marginBottom="spacingL" fontColor="gray700">Requires a Netlify account.</Paragraph>
+          <Paragraph marginBottom="spacingL" fontColor="gray700">
+            Requires a Netlify account.
+          </Paragraph>
         ) : (
           <Paragraph marginBottom="spacingL" fontColor="gray700">
-            Pick which Netlify sites you would like to be able to build from within Contentful. You will need to enable continuous deployment for each site within the Netlify settings.
+            Pick which Netlify sites you would like to be able to build from within Contentful. You
+            will need to enable continuous deployment for each site within the Netlify settings.
           </Paragraph>
         )}
         <div>
@@ -140,10 +148,12 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
             size="small"
             onClick={onAdd}
           >
-            {`Add ${siteConfigs.length > 0 ? 'another ' : ''}site`}
+            Add {siteConfigs.length > 0 ? 'another ' : ''}site
           </Button>
           {isAllSitesConfigured && (
-            <Text marginLeft="spacingS" fontSize="fontSizeS" fontColor="gray500">All available sites are configured</Text>
+            <Text marginLeft="spacingS" fontSize="fontSizeS" fontColor="gray500">
+              All available sites are configured
+            </Text>
           )}
         </Flex>
       </div>
@@ -158,7 +168,7 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
       />
     </>
   );
-}
+};
 
 NetlifyConfigEditor.propTypes = {
   disabled: PropTypes.bool.isRequired,
