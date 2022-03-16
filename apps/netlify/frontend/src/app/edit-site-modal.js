@@ -270,14 +270,13 @@ export const EditSiteModal = ({
                   required
                 >
                   {isNewSite && <Option value={PICK_OPTION_VALUE}>Select a Netlify site</Option>}
-                  {availableNetlifySites.length > 0 &&
-                    availableNetlifySites.map((netlifySite) => {
-                      return (
-                        <Option key={netlifySite.id} value={netlifySite.id}>
-                          {netlifySite.name}
-                        </Option>
-                      );
-                    })}
+                  {availableNetlifySites.map((netlifySite) => {
+                    return (
+                      <Option key={netlifySite.id} value={netlifySite.id}>
+                        {netlifySite.name}
+                      </Option>
+                    );
+                  })}
                 </Select>
               </FormControl>
               <FormControl marginBottom="spacingM">
