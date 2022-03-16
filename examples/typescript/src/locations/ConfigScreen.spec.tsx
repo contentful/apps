@@ -3,6 +3,10 @@ import ConfigScreen from './ConfigScreen';
 import { render } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../test/mocks';
 
+jest.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk
+}))
+
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
     const { getByText } = render(<ConfigScreen cma={mockCma} />);
