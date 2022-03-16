@@ -1,8 +1,8 @@
 import React from 'react';
 import { PlainClientAPI } from 'contentful-management';
 import { Paragraph } from '@contentful/f36-components';
-import {PageExtensionSDK, SidebarExtensionSDK} from '@contentful/app-sdk';
-import {useSDK} from "@contentful/react-apps-toolkit";
+import { SidebarExtensionSDK } from '@contentful/app-sdk';
+import { useSDK } from "@contentful/react-apps-toolkit";
 
 interface SidebarProps {
   cma: PlainClientAPI;

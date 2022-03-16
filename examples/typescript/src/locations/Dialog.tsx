@@ -1,8 +1,8 @@
 import React from 'react';
 import { PlainClientAPI } from 'contentful-management';
 import { Paragraph } from '@contentful/f36-components';
-import {DialogExtensionSDK, PageExtensionSDK} from '@contentful/app-sdk';
-import {useSDK} from "@contentful/react-apps-toolkit";
+import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { useSDK } from "@contentful/react-apps-toolkit";
 
 interface DialogProps {
   cma: PlainClientAPI;
