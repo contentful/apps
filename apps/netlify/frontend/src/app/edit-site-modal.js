@@ -42,7 +42,7 @@ export const EditSiteModal = ({
   contentTypes,
   isShown,
   onSiteConfigsChange,
-  onClose
+  onClose,
 }) => {
   const [siteId, setSiteId] = useState(PICK_OPTION_VALUE);
   const [displayName, setDisplayName] = useState('');
@@ -67,7 +67,10 @@ export const EditSiteModal = ({
       return netlifySites.filter((site) => !configuredSiteIds.includes(site.id));
     }
 
-    return netlifySites.filter((site) => !configuredSiteIds.includes(site.id) || siteConfigs[configIndex].netlifySiteId === site.id);
+    return netlifySites.filter(
+      (site) =>
+        !configuredSiteIds.includes(site.id) || siteConfigs[configIndex].netlifySiteId === site.id
+    );
   }, [isNewSite, configIndex, netlifySites, siteConfigs]);
 
   const serializeSelectedContentTypes = () => {
@@ -142,8 +145,9 @@ export const EditSiteModal = ({
 
   const onContentTypeQuery = (query) => {
     if (query) {
-      const filtered = availableContentTypes
-        .filter((contentType) => new RegExp(query, 'i').test(contentType.label));
+      const filtered = availableContentTypes.filter((contentType) =>
+        new RegExp(query, 'i').test(contentType.label)
+      );
       setFilteredContentTypes(filtered);
     }
   };
@@ -170,7 +174,12 @@ export const EditSiteModal = ({
 
   const renderSelectedContentTypes = () => {
     return selectedContentTypes.map(({ value, label }) => (
-      <Pill key={value} label={label} className={styles.pill} onClose={() => onRemoveContentType(value)} />
+      <Pill
+        key={value}
+        label={label}
+        className={styles.pill}
+        onClose={() => onRemoveContentType(value)}
+      />
     ));
   };
 
@@ -200,8 +209,8 @@ export const EditSiteModal = ({
           const aLabel = a.label.toUpperCase();
           const bLabel = b.label.toUpperCase();
 
-          if (aLabel > bLabel ) return 1;
-          if (aLabel < bLabel ) return -1;
+          if (aLabel > bLabel) return 1;
+          if (aLabel < bLabel) return -1;
 
           return 0;
         });
@@ -246,7 +255,12 @@ export const EditSiteModal = ({
   }, [isDeploysOn]);
 
   return (
-    <Modal isShown={isShown} onClose={onCancel} size="medium" modalContentProps={{ paddingBottom: 'spacingM' }}>
+    <Modal
+      isShown={isShown}
+      onClose={onCancel}
+      size="medium"
+      modalContentProps={{ paddingBottom: 'spacingM' }}
+    >
       {() => (
         <>
           <Modal.Header title={isNewSite ? 'Add site' : 'Edit site'} />
@@ -261,16 +275,15 @@ export const EditSiteModal = ({
                   onChange={(e) => setSiteId(e.target.value)}
                   required
                 >
-                  {isNewSite && (
-                    <Option value={PICK_OPTION_VALUE}>Select a Netlify site</Option>
-                  )}
-                  {availableNetlifySites.length > 0 && availableNetlifySites.map((netlifySite) => {
-                    return (
-                      <Option key={netlifySite.id} value={netlifySite.id}>
-                        {netlifySite.name}
-                      </Option>
-                    );
-                  })}
+                  {isNewSite && <Option value={PICK_OPTION_VALUE}>Select a Netlify site</Option>}
+                  {availableNetlifySites.length > 0 &&
+                    availableNetlifySites.map((netlifySite) => {
+                      return (
+                        <Option key={netlifySite.id} value={netlifySite.id}>
+                          {netlifySite.name}
+                        </Option>
+                      );
+                    })}
                 </Select>
               </FormControl>
               <FormControl marginBottom="spacingM">
@@ -285,7 +298,9 @@ export const EditSiteModal = ({
               </FormControl>
               <FormControl marginBottom="spacingS">
                 <FormControl.Label marginBottom={0}>Automatic deploys</FormControl.Label>
-                <FormControl.HelpText marginTop={0} marginBottom="spacingS">Rebuild site automatically when content or assets are published or unpublished</FormControl.HelpText>
+                <FormControl.HelpText marginTop={0} marginBottom="spacingS">
+                  Rebuild site automatically when content or assets are published or unpublished
+                </FormControl.HelpText>
                 <Switch
                   id={assetDeploysId}
                   name={assetDeploysId}
@@ -310,16 +325,25 @@ export const EditSiteModal = ({
                     <Autocomplete
                       id={contentTypeSelectId}
                       name={contentTypeSelectId}
-                      items={[{ value: ALL_CONTENT_TYPES_VALUE, label: 'Select all Content Types' }, ...filteredContentTypes]}
+                      items={[
+                        { value: ALL_CONTENT_TYPES_VALUE, label: 'Select all Content Types' },
+                        ...filteredContentTypes,
+                      ]}
                       emptyListMessage="There are no content types"
                       noMatchesMessage="Your search didn't match any content type"
-                      placeholder="Add more content types..."
+                      placeholder={
+                        availableContentTypes.length === 0
+                          ? 'All content types already selected'
+                          : 'Add more content types...'
+                      }
                       width="full"
                       itemToString={(item) => item.label}
                       renderItem={(item) => (
                         <span
                           key={item.value}
-                          className={item.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''}
+                          className={
+                            item.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''
+                          }
                         >
                           {item.label}
                         </span>
@@ -330,7 +354,9 @@ export const EditSiteModal = ({
                       onInputValueChange={onContentTypeQuery}
                     />
                     {isSelectedContentTypesInvalid && (
-                      <FormControl.ValidationMessage>Add at least one Content type</FormControl.ValidationMessage>
+                      <FormControl.ValidationMessage>
+                        Add at least one Content type
+                      </FormControl.ValidationMessage>
                     )}
                   </FormControl>
                   {renderSelectedContentTypes()}
