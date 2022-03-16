@@ -295,7 +295,7 @@ export const EditSiteModal = ({
               <FormControl marginBottom="spacingS">
                 <FormControl.Label marginBottom={0}>Automatic deploys</FormControl.Label>
                 <FormControl.HelpText marginTop={0} marginBottom="spacingS">
-                  Rebuild site automatically when content or assets are published or unpublished
+                  Rebuild site automatically when entries or assets are published or unpublished
                 </FormControl.HelpText>
                 <Switch
                   id={assetDeploysId}
@@ -312,7 +312,7 @@ export const EditSiteModal = ({
                   isChecked={isDeploysOn}
                   onChange={(e) => setIsDeploysOn(e.target.checked)}
                 >
-                  When content is published or unpublished
+                  When entries are published or unpublished
                 </Switch>
               </FormControl>
               {isDeploysOn && (
