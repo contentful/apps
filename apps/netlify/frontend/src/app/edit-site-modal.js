@@ -269,7 +269,13 @@ export const EditSiteModal = ({
                   onChange={(e) => setSiteId(e.target.value)}
                   required
                 >
-                  {isNewSite && <Option value={PICK_OPTION_VALUE}>Select a Netlify site</Option>}
+                  {isNewSite && (
+                    <Option value={PICK_OPTION_VALUE}>
+                      {availableNetlifySites.length === 0
+                        ? 'No Netlify sites available'
+                        : 'Select a Netlify site'}
+                    </Option>
+                  )}
                   {availableNetlifySites.map((netlifySite) => {
                     return (
                       <Option key={netlifySite.id} value={netlifySite.id}>
