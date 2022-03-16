@@ -11,7 +11,7 @@ interface SidebarProps {
 const Sidebar = (props: SidebarProps) => {
   const sdk = useSDK<SidebarExtensionSDK>()
 
-  return <Paragraph>Hello Sidebar Component</Paragraph>;
+  return <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>;
 };
 
 export default Sidebar;

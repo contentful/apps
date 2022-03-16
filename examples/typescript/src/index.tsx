@@ -3,8 +3,6 @@ import { render } from 'react-dom';
 import { createClient } from 'contentful-management';
 
 import {
-  AppExtensionSDK,
-  FieldExtensionSDK,
   init,
   locations,
 } from '@contentful/app-sdk';

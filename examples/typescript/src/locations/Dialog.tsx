@@ -10,7 +10,7 @@ interface DialogProps {
 
 const Dialog = (props: DialogProps) => {
   const sdk = useSDK<DialogExtensionSDK>()
-  return <Paragraph>Hello Dialog Component</Paragraph>;
+  return <Paragraph>Hello Dialog Component (AppId: {sdk.ids.app})</Paragraph>;
 };
 
 export default Dialog;

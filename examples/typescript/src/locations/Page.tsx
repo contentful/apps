@@ -11,7 +11,7 @@ interface PageProps {
 const Page = (props: PageProps) => {
   const sdk = useSDK<PageExtensionSDK>()
 
-  return <Paragraph>Hello Page Component</Paragraph>;
+  return <Paragraph>Hello Page Component (AppId: {sdk.ids.app})</Paragraph>;
 };
 
 export default Page;

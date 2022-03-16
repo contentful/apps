@@ -10,7 +10,7 @@ interface EditorProps {
 
 const Entry = (props: EditorProps) => {
   const sdk = useSDK<EditorExtensionSDK>()
-  return <Paragraph>Hello Entry Editor Component</Paragraph>;
+  return <Paragraph>Hello Entry Editor Component (AppId: {sdk.ids.app})</Paragraph>;
 };
 
 export default Entry;
