@@ -332,7 +332,9 @@ export const EditSiteModal = ({
                       placeholder={
                         availableContentTypes.length === 0
                           ? 'All content types already selected'
-                          : 'Add more content types...'
+                          : selectedContentTypes.length >= 1
+                          ? 'Add more content types...'
+                          : 'Select content types...'
                       }
                       width="full"
                       itemToString={(item) => item.label}
