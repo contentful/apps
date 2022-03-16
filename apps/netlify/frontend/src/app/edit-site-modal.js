@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   Form,
@@ -61,17 +61,13 @@ export const EditSiteModal = ({
   const assetDeploysId = `asset-deploys-checkbox-${configIndex ?? 'new'}`;
   const contentTypeSelectId = `content-type-select-${configIndex ?? 'new'}`;
 
-  const availableNetlifySites = useMemo(() => {
-    const configuredSiteIds = siteConfigs.map((config) => config.netlifySiteId);
-    if (isNewSite) {
-      return netlifySites.filter((site) => !configuredSiteIds.includes(site.id));
-    }
-
-    return netlifySites.filter(
-      (site) =>
-        !configuredSiteIds.includes(site.id) || siteConfigs[configIndex].netlifySiteId === site.id
-    );
-  }, [isNewSite, configIndex, netlifySites, siteConfigs]);
+  const configuredSiteIds = siteConfigs.map((config) => config.netlifySiteId);
+  const availableNetlifySites = isNewSite
+    ? netlifySites.filter((site) => !configuredSiteIds.includes(site.id))
+    : netlifySites.filter(
+        (site) =>
+          !configuredSiteIds.includes(site.id) || siteConfigs[configIndex].netlifySiteId === site.id
+      );
 
   const serializeSelectedContentTypes = () => {
     if (!isDeploysOn) return [];
