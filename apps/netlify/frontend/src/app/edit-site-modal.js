@@ -140,12 +140,10 @@ export const EditSiteModal = ({
   };
 
   const onContentTypeQuery = (query) => {
-    if (query) {
-      const filtered = availableContentTypes.filter((contentType) =>
-        new RegExp(query, 'i').test(contentType.label)
-      );
-      setFilteredContentTypes(filtered);
-    }
+    const filtered = availableContentTypes.filter((contentType) =>
+      contentType.label.trim().toLowerCase().includes(query.trim().toLowerCase())
+    );
+    setFilteredContentTypes(filtered);
   };
 
   const onSelectContentType = (item) => {
