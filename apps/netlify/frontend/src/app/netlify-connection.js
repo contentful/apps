@@ -11,7 +11,9 @@ const styles = {
     justifyContent: 'center',
   }),
   button: css({
-    button: {
+    '&&,&&:hover': {
+      // This is required to make this selector more specific.
+      // Otherwise the default forma button styles override these styles
       backgroundColor: '#00ad9e',
       color: '#fff',
       padding: '12px 80px',
@@ -25,9 +27,6 @@ const styles = {
       boxSizing: 'border-box',
     },
   }),
-  get buttonHover() {
-    return css({ '&:hover': this.button });
-  },
   splitter: css({
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
@@ -86,9 +85,12 @@ export default class NetlifyConnection extends React.Component {
           Web App.
         </Paragraph>
         <div className={styles.auth}>
-          <div className={`${styles.button} ${styles.buttonHover}`}>
-            <Button onClick={this.props.onConnectClick}>Connect account</Button>
-          </div>
+          <Button
+            className={`${styles.button} ${styles.buttonHover}`}
+            onClick={this.props.onConnectClick}
+          >
+            Connect account
+          </Button>
         </div>
       </>
     );
