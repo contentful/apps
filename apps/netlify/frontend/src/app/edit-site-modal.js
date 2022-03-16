@@ -21,9 +21,6 @@ const styles = {
   pill: css({
     margin: `${tokens.spacingXs} ${tokens.spacingXs} 0 0`,
   }),
-  contentTypeSelect: css({
-    marginLeft: tokens.spacing2Xl,
-  }),
   allContentTypes: css({
     fontWeight: 500,
   }),
@@ -303,6 +300,7 @@ export const EditSiteModal = ({
                 <Switch
                   id={assetDeploysId}
                   name={assetDeploysId}
+                  size="small"
                   isChecked={isAssetDeploysOn}
                   className={styles.assetsDeployCheckbox}
                   onChange={(e) => setIsAssetDeploysOn(e.target.checked)}
@@ -312,6 +310,7 @@ export const EditSiteModal = ({
                 <Switch
                   id={deploysId}
                   name={deploysId}
+                  size="small"
                   isChecked={isDeploysOn}
                   onChange={(e) => setIsDeploysOn(e.target.checked)}
                 >
@@ -319,7 +318,7 @@ export const EditSiteModal = ({
                 </Switch>
               </FormControl>
               {isDeploysOn && (
-                <div className={styles.contentTypeSelect}>
+                <div>
                   <FormControl marginBottom={0} isInvalid={isSelectedContentTypesInvalid}>
                     <Autocomplete
                       id={contentTypeSelectId}
