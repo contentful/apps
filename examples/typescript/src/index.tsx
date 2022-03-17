@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { createClient } from 'contentful-management';
 
 import {
   init,
@@ -26,48 +25,33 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
 } else {
   init((sdk: KnownSDK) => {
     const root = document.getElementById('root');
-
-    // Creating a CMA client allows you to use the contentful-management library
-    // within your app. See the contentful-management documentation at https://contentful.github.io/contentful-management.js/contentful-management/latest/
-    // to learn what is possible.
-    const cma = createClient(
-      { apiAdapter: sdk.cmaAdapter },
-      {
-        type: 'plain',
-        defaults: {
-          environmentId: sdk.ids.environment,
-          spaceId: sdk.ids.space,
-        },
-      }
-    );
-
     // All possible locations for your app
     // Feel free to remove unused locations
     // Dont forget to delete the file too :)
     const ComponentLocationSettings = [
       {
         location: locations.LOCATION_APP_CONFIG,
-        component: <ConfigScreen cma={cma} />,
+        component: <ConfigScreen />,
       },
       {
         location: locations.LOCATION_ENTRY_FIELD,
-        component: <Field cma={cma} />,
+        component: <Field />,
       },
       {
         location: locations.LOCATION_ENTRY_EDITOR,
-        component: <EntryEditor cma={cma} />,
+        component: <EntryEditor />,
       },
       {
         location: locations.LOCATION_DIALOG,
-        component: <Dialog cma={cma} />,
+        component: <Dialog />,
       },
       {
         location: locations.LOCATION_ENTRY_SIDEBAR,
-        component: <Sidebar cma={cma} />,
+        component: <Sidebar />,
       },
       {
         location: locations.LOCATION_PAGE,
-        component: <Page cma={cma} />,
+        component: <Page />,
       },
     ];
 

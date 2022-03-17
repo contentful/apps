@@ -1,15 +1,13 @@
 import React from 'react';
-import { PlainClientAPI } from 'contentful-management';
 import { Paragraph } from '@contentful/f36-components';
-import {EditorExtensionSDK} from '@contentful/app-sdk';
-import {useSDK} from "@contentful/react-apps-toolkit";
+import { EditorExtensionSDK } from '@contentful/app-sdk';
+import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
 
-interface EditorProps {
-  cma: PlainClientAPI;
-}
-
-const Entry = (props: EditorProps) => {
+const Entry = () => {
   const sdk = useSDK<EditorExtensionSDK>()
+  /* eslint-disable @typescript-eslint/no-unused-vars  */
+  const cma = useCMA();
+
   return <Paragraph>Hello Entry Editor Component (AppId: {sdk.ids.app})</Paragraph>;
 };
 

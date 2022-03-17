@@ -1,19 +1,18 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import {AppExtensionSDK} from '@contentful/app-sdk';
-import { PlainClientAPI } from 'contentful-management';
 import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
 import { css } from 'emotion';
-import {useSDK} from "@contentful/react-apps-toolkit";
+import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
 
 export interface AppInstallationParameters {}
 
-interface ConfigScreenProps {
-  cma: PlainClientAPI;
-}
 
-const ConfigScreen = (props: ConfigScreenProps) => {
+
+const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<AppExtensionSDK>()
+  /* eslint-disable @typescript-eslint/no-unused-vars  */
+  const cma = useCMA();
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"
