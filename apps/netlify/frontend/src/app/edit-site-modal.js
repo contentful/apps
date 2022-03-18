@@ -59,12 +59,15 @@ export const EditSiteModal = ({
   const contentTypeSelectId = `content-type-select-${configIndex ?? 'new'}`;
 
   const configuredSiteIds = siteConfigs.map((config) => config.netlifySiteId);
-  const availableNetlifySites = isNewSite
-    ? netlifySites.filter((site) => !configuredSiteIds.includes(site.id))
-    : netlifySites.filter(
-        (site) =>
-          !configuredSiteIds.includes(site.id) || siteConfigs[configIndex].netlifySiteId === site.id
-      );
+  const availableNetlifySites = (
+    isNewSite
+      ? netlifySites.filter((site) => !configuredSiteIds.includes(site.id))
+      : netlifySites.filter(
+          (site) =>
+            !configuredSiteIds.includes(site.id) ||
+            siteConfigs[configIndex].netlifySiteId === site.id
+        )
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   const serializeSelectedContentTypes = () => {
     if (!isDeploysOn) return [];
