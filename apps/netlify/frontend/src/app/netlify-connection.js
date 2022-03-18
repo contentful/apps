@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
 import tokens from '@contentful/f36-tokens';
-import { Heading, Paragraph, Icon } from '@contentful/f36-components';
+import { Heading, Paragraph, Button } from '@contentful/f36-components';
+import { LockIcon } from '@contentful/f36-icons';
 
 const styles = {
   auth: css({
@@ -11,17 +12,21 @@ const styles = {
     justifyContent: 'center',
   }),
   button: css({
-    backgroundColor: '#00ad9e',
-    color: '#fff',
-    padding: '12px 80px',
-    outline: 'none',
-    borderRadius: '6px',
-    border: '1px solid #e9ebeb',
-    borderBottom: '1px solid #e1e2e4',
-    boxShadow: '0 2px 4px 0 rgba(14,30,37,.12)',
-    cursor: 'pointer',
-    fontSize: '16px',
-    boxSizing: 'border-box',
+    '&&,&&:hover': {
+      // This is required to make this selector more specific.
+      // Otherwise the default forma button styles override these styles
+      backgroundColor: '#00ad9e',
+      color: '#fff',
+      padding: '12px 80px',
+      outline: 'none',
+      borderRadius: '6px',
+      border: '1px solid #e9ebeb',
+      borderBottom: '1px solid #e1e2e4',
+      boxShadow: '0 2px 4px 0 rgba(14,30,37,.12)',
+      cursor: 'pointer',
+      fontSize: '16px',
+      boxSizing: 'border-box',
+    },
   }),
   splitter: css({
     marginTop: tokens.spacingL,
@@ -36,7 +41,6 @@ const styles = {
     color: tokens.gray600,
   }),
   connectAgainIcon: css({
-    fill: tokens.gray600,
     marginRight: tokens.spacingXs,
     verticalAlign: 'middle',
   }),
@@ -67,7 +71,7 @@ export default class NetlifyConnection extends React.Component {
   renderConnectAgainInfo() {
     return (
       <Paragraph className={styles.connectAgain}>
-        <Icon icon="Lock" className={styles.connectAgainIcon} />
+        <LockIcon variant="muted" className={styles.connectAgainIcon} />
         Connect account to make changes
       </Paragraph>
     );
@@ -81,9 +85,12 @@ export default class NetlifyConnection extends React.Component {
           Web App.
         </Paragraph>
         <div className={styles.auth}>
-          <button onClick={this.props.onConnectClick} className={styles.button}>
+          <Button
+            className={`${styles.button} ${styles.buttonHover}`}
+            onClick={this.props.onConnectClick}
+          >
             Connect account
-          </button>
+          </Button>
         </div>
       </>
     );

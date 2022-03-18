@@ -6,15 +6,15 @@ import tokens from '@contentful/f36-tokens';
 import {
   Heading,
   Paragraph,
+  Flex,
   Button,
   Text,
   TextLink,
   Subheading,
+  ModalLauncher,
+  ModalConfirm,
 } from '@contentful/f36-components';
-import {
-  PlusIcon,
-  DoneIcon,
-} from '@contentful/f36-icons';
+import { PlusIcon, DoneIcon } from '@contentful/f36-icons';
 
 import { MAX_CONFIGS } from '../constants';
 import { EditSiteModal } from './edit-site-modal';
@@ -49,9 +49,16 @@ const styles = {
   }),
 };
 
-const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes, onSiteConfigsChange }) => {
+const NetlifyConfigEditor = ({
+  disabled,
+  siteConfigs,
+  netlifySites,
+  contentTypes,
+  onSiteConfigsChange,
+}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const editingSiteIndex = useRef(null);
+  const isAllSitesConfigured = !disabled && siteConfigs.length === netlifySites.length;
 
   const onAdd = () => {
     editingSiteIndex.current = null;
@@ -64,8 +71,23 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
   };
 
   const onRemove = (configIndex) => {
-    const updated = siteConfigs.filter((_, i) => i !== configIndex);
-    onSiteConfigsChange(updated);
+    const siteName = siteConfigs[configIndex].name;
+    ModalLauncher.open(({ isShown, onClose }) => (
+      <ModalConfirm
+        intent="negative"
+        isShown={isShown}
+        onCancel={onClose}
+        onConfirm={() => {
+          const updated = siteConfigs.filter((_, i) => i !== configIndex);
+          onSiteConfigsChange(updated);
+          onClose();
+        }}
+      >
+        <Text>
+          Do you really want to remove <b>{siteName}</b>?
+        </Text>
+      </ModalConfirm>
+    ));
   };
 
   const onCloseModal = () => {
@@ -78,10 +100,13 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
       <div className={styles.container}>
         <Heading>Configure Netlify sites</Heading>
         {disabled ? (
-          <Paragraph marginBottom="spacingL" fontColor="gray700">Requires a Netlify account.</Paragraph>
+          <Paragraph marginBottom="spacingL" fontColor="gray700">
+            Requires a Netlify account.
+          </Paragraph>
         ) : (
           <Paragraph marginBottom="spacingL" fontColor="gray700">
-            Pick the Netlify site(s) you want to enable a build for. Only sites with continuous deployment configured can be configured.
+            Pick which Netlify sites you would like to be able to build from within Contentful. You
+            will need to enable continuous deployment for each site within the Netlify settings.
           </Paragraph>
         )}
         <div>
@@ -91,9 +116,9 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
                 <Subheading marginBottom={0}>{siteConfig.name}</Subheading>
                 <Text fontColor="gray600">{siteConfig.netlifySiteName}</Text>
               </div>
-              {siteConfig.selectedContentTypes?.length > 0 && (
+              {(siteConfig.selectedContentTypes?.length > 0 || siteConfig.assetDeploysOn) && (
                 <div className={styles.deploysState}>
-                  <DoneIcon variant="secondary" size="tiny" />
+                  <DoneIcon variant="muted" size="tiny" marginRight="spacing2Xs" />
                   <Text fontColor="gray600">Automatic deploys</Text>
                 </div>
               )}
@@ -115,15 +140,22 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
             </div>
           ))}
         </div>
-        <Button
-          isDisabled={disabled || siteConfigs.length >= MAX_CONFIGS}
-          variant={siteConfigs.length > 0 ? 'secondary' : 'primary'}
-          startIcon={<PlusIcon />}
-          size="small"
-          onClick={onAdd}
-        >
-          {`Add ${siteConfigs.length > 0 ? 'another ' : ''}site`}
-        </Button>
+        <Flex alignItems="center">
+          <Button
+            isDisabled={disabled || siteConfigs.length >= MAX_CONFIGS || isAllSitesConfigured}
+            variant={siteConfigs.length > 0 ? 'secondary' : 'primary'}
+            startIcon={<PlusIcon />}
+            size="small"
+            onClick={onAdd}
+          >
+            Add {siteConfigs.length > 0 ? 'another ' : ''}site
+          </Button>
+          {isAllSitesConfigured && (
+            <Text marginLeft="spacingS" fontSize="fontSizeS" fontColor="gray500">
+              All available sites are configured
+            </Text>
+          )}
+        </Flex>
       </div>
       <EditSiteModal
         configIndex={editingSiteIndex.current}
@@ -136,7 +168,7 @@ const NetlifyConfigEditor = ({ disabled, siteConfigs, netlifySites, contentTypes
       />
     </>
   );
-}
+};
 
 NetlifyConfigEditor.propTypes = {
   disabled: PropTypes.bool.isRequired,

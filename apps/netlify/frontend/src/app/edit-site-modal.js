@@ -7,7 +7,7 @@ import {
   TextInput,
   Button,
   Option,
-  Checkbox,
+  Switch,
   Pill,
   Autocomplete,
 } from '@contentful/f36-components';
@@ -21,11 +21,11 @@ const styles = {
   pill: css({
     margin: `${tokens.spacingXs} ${tokens.spacingXs} 0 0`,
   }),
-  contentTypeSelect: css({
-    marginLeft: tokens.spacingL,
-  }),
   allContentTypes: css({
     fontWeight: 500,
+  }),
+  assetsDeployCheckbox: css({
+    marginBottom: tokens.spacingXs,
   }),
 };
 
@@ -39,21 +39,35 @@ export const EditSiteModal = ({
   contentTypes,
   isShown,
   onSiteConfigsChange,
-  onClose
+  onClose,
 }) => {
   const [siteId, setSiteId] = useState(PICK_OPTION_VALUE);
   const [displayName, setDisplayName] = useState('');
   const [isDeploysOn, setIsDeploysOn] = useState(false);
+  const [isAssetDeploysOn, setIsAssetDeploysOn] = useState(false);
   const [availableContentTypes, setAvailableContentTypes] = useState([]);
+  const [filteredContentTypes, setFilteredContentTypes] = useState([]);
   const [selectedContentTypes, setSelectedContentTypes] = useState([]);
-  const [contentTypeQuery, setContentTypeQuery] = useState('');
+  const [isSelectedContentTypesInvalid, setIsSelectedContentTypesInvalid] = useState(false);
 
   const isNewSite = configIndex === undefined || configIndex === null;
 
   const selectId = `site-select-${configIndex ?? 'new'}`;
   const inputId = `site-input-${configIndex ?? 'new'}`;
   const deploysId = `deploys-checkbox-${configIndex ?? 'new'}`;
+  const assetDeploysId = `asset-deploys-checkbox-${configIndex ?? 'new'}`;
   const contentTypeSelectId = `content-type-select-${configIndex ?? 'new'}`;
+
+  const configuredSiteIds = siteConfigs.map((config) => config.netlifySiteId);
+  const availableNetlifySites = (
+    isNewSite
+      ? netlifySites.filter((site) => !configuredSiteIds.includes(site.id))
+      : netlifySites.filter(
+          (site) =>
+            !configuredSiteIds.includes(site.id) ||
+            siteConfigs[configIndex].netlifySiteId === site.id
+        )
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   const serializeSelectedContentTypes = () => {
     if (!isDeploysOn) return [];
@@ -76,6 +90,7 @@ export const EditSiteModal = ({
       netlifySiteName: selectedSite.name,
       netlifySiteUrl: selectedSite.ssl_url || selectedSite.url,
       selectedContentTypes: serializeSelectedContentTypes(),
+      assetDeploysOn: isAssetDeploysOn,
     };
   };
 
@@ -103,20 +118,32 @@ export const EditSiteModal = ({
   const resetFields = () => {
     setSiteId(PICK_OPTION_VALUE);
     setDisplayName('');
-    setSelectedContentTypes([]);
-    setContentTypeQuery('');
     setIsDeploysOn(false);
+    setIsAssetDeploysOn(false);
+    setSelectedContentTypes([]);
+    setIsSelectedContentTypesInvalid(false);
   };
 
   const onConfirm = () => {
+    if (isDeploysOn && selectedContentTypes.length === 0) {
+      setIsSelectedContentTypesInvalid(true);
+      return;
+    }
+
+    setIsSelectedContentTypesInvalid(false);
     updateConfig();
     onClose();
-    resetFields();
   };
 
   const onCancel = () => {
     onClose();
-    resetFields();
+  };
+
+  const onContentTypeQuery = (query) => {
+    const filtered = availableContentTypes.filter((contentType) =>
+      contentType.label.trim().toLowerCase().includes(query.trim().toLowerCase())
+    );
+    setFilteredContentTypes(filtered);
   };
 
   const onSelectContentType = (item) => {
@@ -129,13 +156,8 @@ export const EditSiteModal = ({
     });
 
     if (selected.length > 0) {
-      setSelectedContentTypes([...selectedContentTypes, ...selected ]);
-    }
-  };
-
-  const onContentTypeQueryChange = (query) => {
-    if (typeof query === 'string') {
-      setContentTypeQuery(query);
+      setIsSelectedContentTypesInvalid(false);
+      setSelectedContentTypes([...selectedContentTypes, ...selected]);
     }
   };
 
@@ -146,17 +168,14 @@ export const EditSiteModal = ({
 
   const renderSelectedContentTypes = () => {
     return selectedContentTypes.map(({ value, label }) => (
-      <Pill key={value} label={label} className={styles.pill} onClose={() => onRemoveContentType(value)} />
+      <Pill
+        key={value}
+        label={label}
+        className={styles.pill}
+        onClose={() => onRemoveContentType(value)}
+      />
     ));
   };
-
-  const getAvailableContentTypes = useCallback(() => {
-    const items = contentTypes
-      .filter(([id, _]) => !selectedContentTypes.some((contentType) => contentType.value === id))
-      .filter(([_, name]) => contentTypeQuery ? new RegExp(contentTypeQuery, 'i').test(name) : true)
-      .map(([id, name]) => ({ value: id, label: name }));
-    return [{ value: ALL_CONTENT_TYPES_VALUE, label: 'All Content Types' }, ...items];
-  }, [contentTypes, contentTypeQuery, selectedContentTypes]);
 
   const getContentTypesFromConfig = useCallback(() => {
     const types = siteConfigs[configIndex]?.selectedContentTypes;
@@ -172,10 +191,27 @@ export const EditSiteModal = ({
   }, [configIndex, siteConfigs, contentTypes]);
 
   useEffect(() => {
+    setFilteredContentTypes(availableContentTypes);
+  }, [availableContentTypes]);
+
+  useEffect(() => {
     if (contentTypes) {
-      setAvailableContentTypes(getAvailableContentTypes());
+      const items = contentTypes
+        .filter(([id, _]) => !selectedContentTypes.some((contentType) => contentType.value === id))
+        .map(([id, name]) => ({ value: id, label: name }))
+        .sort((a, b) => {
+          const aLabel = a.label.toUpperCase();
+          const bLabel = b.label.toUpperCase();
+
+          if (aLabel > bLabel) return 1;
+          if (aLabel < bLabel) return -1;
+
+          return 0;
+        });
+
+      setAvailableContentTypes(items);
     }
-  }, [contentTypes, getAvailableContentTypes]);
+  }, [contentTypes, selectedContentTypes]);
 
   useEffect(() => {
     if (isNewSite) return;
@@ -187,22 +223,38 @@ export const EditSiteModal = ({
     }
 
     setSiteId(siteConfig.netlifySiteId);
+    setIsAssetDeploysOn(siteConfigs[configIndex]?.assetDeploysOn || false);
   }, [configIndex, isNewSite, siteConfigs]);
 
   useEffect(() => {
     if (isNewSite) return;
 
     const selected = getContentTypesFromConfig();
-    const isContentTypesSelected = selected.length > 0;
 
-    if (isContentTypesSelected) {
-      setIsDeploysOn(isContentTypesSelected);
-      setSelectedContentTypes(selected);
-    }
+    setIsDeploysOn(selected.length > 0);
+    setSelectedContentTypes(selected);
   }, [isNewSite, getContentTypesFromConfig]);
 
+  useEffect(() => {
+    if (isShown && isNewSite) {
+      resetFields();
+    }
+  }, [isShown, isNewSite]);
+
+  useEffect(() => {
+    if (!isDeploysOn) {
+      setSelectedContentTypes([]);
+      setIsSelectedContentTypesInvalid(false);
+    }
+  }, [isDeploysOn]);
+
   return (
-    <Modal isShown={isShown} onClose={onCancel} size="medium">
+    <Modal
+      isShown={isShown}
+      onClose={onCancel}
+      size="medium"
+      modalContentProps={{ paddingBottom: 'spacingM' }}
+    >
       {() => (
         <>
           <Modal.Header title={isNewSite ? 'Add site' : 'Edit site'} />
@@ -218,9 +270,13 @@ export const EditSiteModal = ({
                   required
                 >
                   {isNewSite && (
-                    <Option value={PICK_OPTION_VALUE}>Pick site</Option>
+                    <Option value={PICK_OPTION_VALUE}>
+                      {availableNetlifySites.length === 0
+                        ? 'No Netlify sites available'
+                        : 'Select a Netlify site'}
+                    </Option>
                   )}
-                  {netlifySites.length > 0 && netlifySites.map((netlifySite) => {
+                  {availableNetlifySites.map((netlifySite) => {
                     return (
                       <Option key={netlifySite.id} value={netlifySite.id}>
                         {netlifySite.name}
@@ -240,38 +296,72 @@ export const EditSiteModal = ({
                 />
               </FormControl>
               <FormControl marginBottom="spacingS">
-                <Checkbox
+                <FormControl.Label marginBottom={0}>Automatic deploys</FormControl.Label>
+                <FormControl.HelpText marginTop={0} marginBottom="spacingS">
+                  Rebuild site automatically when entries or assets are published or unpublished
+                </FormControl.HelpText>
+                <Switch
+                  id={assetDeploysId}
+                  name={assetDeploysId}
+                  size="small"
+                  isChecked={isAssetDeploysOn}
+                  className={styles.assetsDeployCheckbox}
+                  onChange={(e) => setIsAssetDeploysOn(e.target.checked)}
+                >
+                  When assets are published or unpublished
+                </Switch>
+                <Switch
+                  id={deploysId}
                   name={deploysId}
+                  size="small"
                   isChecked={isDeploysOn}
-                  helpText="Rebuild site when an entry of matching content types or assets are published or unpublished"
                   onChange={(e) => setIsDeploysOn(e.target.checked)}
                 >
-                  Automatic deploys on publish events
-                </Checkbox>
+                  When entries are published or unpublished
+                </Switch>
               </FormControl>
               {isDeploysOn && (
-                <div className={styles.contentTypeSelect}>
-                  <Autocomplete
-                    id={contentTypeSelectId}
-                    name={contentTypeSelectId}
-                    items={availableContentTypes}
-                    emptyListMessage="There a no content types"
-                    noMatchesMessage="Your search didn't match any content type"
-                    placeholder="Add more content types..."
-                    width="full"
-                    itemToString={(item) => item.label}
-                    renderItem={(item) => (
-                      <span
-                        key={item.value}
-                        className={item.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''}
-                      >
-                        {item.label}
-                      </span>
+                <div>
+                  <FormControl marginBottom={0} isInvalid={isSelectedContentTypesInvalid}>
+                    <Autocomplete
+                      id={contentTypeSelectId}
+                      name={contentTypeSelectId}
+                      items={[
+                        { value: ALL_CONTENT_TYPES_VALUE, label: 'Select all Content Types' },
+                        ...filteredContentTypes,
+                      ]}
+                      emptyListMessage="There are no content types"
+                      noMatchesMessage="Your search didn't match any content type"
+                      placeholder={
+                        availableContentTypes.length === 0
+                          ? 'All content types already selected'
+                          : selectedContentTypes.length >= 1
+                          ? 'Add more content types...'
+                          : 'Select content types...'
+                      }
+                      width="full"
+                      itemToString={(item) => item.label}
+                      renderItem={(item) => (
+                        <span
+                          key={item.value}
+                          className={
+                            item.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''
+                          }
+                        >
+                          {item.label}
+                        </span>
+                      )}
+                      isDisabled={availableContentTypes.length === 0}
+                      clearAfterSelect
+                      onSelectItem={onSelectContentType}
+                      onInputValueChange={onContentTypeQuery}
+                    />
+                    {isSelectedContentTypesInvalid && (
+                      <FormControl.ValidationMessage>
+                        Add at least one Content type
+                      </FormControl.ValidationMessage>
                     )}
-                    clearAfterSelect
-                    onSelectItem={onSelectContentType}
-                    onInputValueChange={onContentTypeQueryChange}
-                  />
+                  </FormControl>
                   {renderSelectedContentTypes()}
                 </div>
               )}
@@ -281,7 +371,12 @@ export const EditSiteModal = ({
             <Button variant="secondary" size="small" onClick={onCancel}>
               Cancel
             </Button>
-            <Button variant="positive" size="small" onClick={onConfirm} isDisabled={!siteId || !displayName.trim()}>
+            <Button
+              variant="positive"
+              size="small"
+              onClick={onConfirm}
+              isDisabled={!siteId || siteId === PICK_OPTION_VALUE || !displayName.trim()}
+            >
               Confirm
             </Button>
           </Modal.Controls>
