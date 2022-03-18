@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import {AppExtensionSDK} from '@contentful/app-sdk';
+import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
 import { css } from 'emotion';
 import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
@@ -11,7 +11,8 @@ export interface AppInstallationParameters {}
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<AppExtensionSDK>()
-  /* eslint-disable @typescript-eslint/no-unused-vars  */
+  /* You can remove the next line as soon as you use the CMA, or, if not needed, simply remove the hook. */
+  /*  eslint-disable @typescript-eslint/no-unused-vars */
   const cma = useCMA();
 
   const onConfigure = useCallback(async () => {

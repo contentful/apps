@@ -5,7 +5,8 @@ import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
 
 const Entry = () => {
   const sdk = useSDK<EditorExtensionSDK>()
-  /* eslint-disable @typescript-eslint/no-unused-vars  */
+  /* You can remove the next line as soon as you use the CMA, or, if not needed, simply remove the hook. */
+  /*  eslint-disable @typescript-eslint/no-unused-vars */
   const cma = useCMA();
 
   return <Paragraph>Hello Entry Editor Component (AppId: {sdk.ids.app})</Paragraph>;

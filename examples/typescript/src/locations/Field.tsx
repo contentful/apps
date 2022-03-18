@@ -5,7 +5,8 @@ import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
 
 const Field = () => {
   const sdk = useSDK<FieldExtensionSDK>()
-  /* eslint-disable @typescript-eslint/no-unused-vars  */
+  /* You can remove the next line as soon as you use the CMA, or, if not needed, simply remove the hook. */
+  /*  eslint-disable @typescript-eslint/no-unused-vars */
   const cma = useCMA();
   // If you only want to extend Contentful's default editing experience
   // reuse Contentful's editor components
