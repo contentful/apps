@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
+import { /* useCMA, */ useSDK } from "@contentful/react-apps-toolkit";
 
 export interface AppInstallationParameters {}
 
@@ -11,9 +11,11 @@ export interface AppInstallationParameters {}
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<AppExtensionSDK>()
-  /* You can remove the next line as soon as you use the CMA, or, if not needed, simply remove the hook. */
-  /*  eslint-disable @typescript-eslint/no-unused-vars */
-  const cma = useCMA();
+  /*
+     To use the cma, inject it as follows.
+     If it is not needed, you can remove the next line.
+  */
+  // const cma = useCMA();
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"
