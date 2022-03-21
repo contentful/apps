@@ -13,9 +13,12 @@ custom:
   appIdentityKey:
     prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/app-identity-key}
     test: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/test/app-identity-key}
+  domainName:
+    prd: netlify-build.ctfapps.net
+    test: netlify-build-test.ctfapps.net
   customDomain:
-    domainName: netlify-build.ctfapps.net
-    stage: prd
+    domainName: ${self:custom.signingSecret.${opt:stage, 'test'}}
+    stage: ${opt:stage, 'test'}
     createRoute53Record: true
     endpointType: "edge"
     securityPolicy: tls_1_2
