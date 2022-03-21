@@ -9,12 +9,12 @@ import Page from "./locations/Page";
 import {useSDK} from "@contentful/react-apps-toolkit";
 
 const ComponentLocationSettings = {
-  [locations.LOCATION_APP_CONFIG]: <ConfigScreen />,
-  [locations.LOCATION_ENTRY_FIELD]: <Field />,
-  [locations.LOCATION_ENTRY_EDITOR]: <EntryEditor />,
-  [locations.LOCATION_DIALOG]: <Dialog />,
-  [locations.LOCATION_ENTRY_SIDEBAR]: <Sidebar />,
-  [locations.LOCATION_PAGE]: <Page />,
+  [locations.LOCATION_APP_CONFIG]: ConfigScreen,
+  [locations.LOCATION_ENTRY_FIELD]: Field,
+  [locations.LOCATION_ENTRY_EDITOR]: EntryEditor,
+  [locations.LOCATION_DIALOG]: Dialog,
+  [locations.LOCATION_ENTRY_SIDEBAR]: Sidebar,
+  [locations.LOCATION_PAGE]: Page,
 }
 
 const App = () => {
@@ -28,7 +28,7 @@ const App = () => {
     }
   }, [sdk.location])
 
-  return RenderedComponent ?? null
+  return RenderedComponent ? <RenderedComponent /> : null
 
 };
 
