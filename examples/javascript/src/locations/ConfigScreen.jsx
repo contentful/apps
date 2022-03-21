@@ -1,9 +1,16 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
 import { css } from 'emotion';
+import { /* useCMA, */ useSDK } from "@contentful/react-apps-toolkit";
 
-const ConfigScreen = (props) => {
+const ConfigScreen = () => {
   const [parameters, setParameters] = useState({});
+  const sdk = useSDK();
+  /*
+     To use the cma, inject it as follows.
+     If it is not needed, you can remove the next line.
+  */
+  // const cma = useCMA();
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"
     // or "Save" in the configuration screen.
@@ -11,7 +18,7 @@ const ConfigScreen = (props) => {
 
     // Get current the state of EditorInterface and other entities
     // related to this app installation
-    const currentState = await props.sdk.app.getCurrentState();
+    const currentState = await sdk.app.getCurrentState();
     return {
       // Parameters to be persisted as the app configuration.
       parameters,
@@ -19,28 +26,28 @@ const ConfigScreen = (props) => {
       // locations, you can just pass the currentState as is
       targetState: currentState,
     };
-  }, [parameters, props.sdk]);
+  }, [parameters, sdk]);
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
     // invoked when a user attempts to install the app or update
     // its configuration.
-    props.sdk.app.onConfigure(() => onConfigure());
-  }, [props.sdk, onConfigure]);
+    sdk.app.onConfigure(() => onConfigure());
+  }, [sdk, onConfigure]);
 
   useEffect(() => {
     (async () => {
       // Get current parameters of the app.
       // If the app is not installed yet, `parameters` will be `null`.
-      const currentParameters = await props.sdk.app.getParameters();
+      const currentParameters = await sdk.app.getParameters();
       if (currentParameters) {
         setParameters(currentParameters);
       }
       // Once preparation has finished, call `setReady` to hide
       // the loading screen and present the app to a user.
-      props.sdk.app.setReady();
+      sdk.app.setReady();
     })();
-  }, [props.sdk]);
+  }, [sdk]);
 
   return (
     <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
