@@ -65,40 +65,40 @@ jobs:
       - publish
       - deploy
 
-  test-ts-template:
+  test-ts-example:
     docker:
         - image: cimg/node:16.14.0
     steps:
       - checkout
       - run:
           name: Install dependencies
-          command: cd templates/typescript && npm i
+          command: cd examples/typescript && npm i
       - run:
           name: Build
-          command: cd templates/typescript && npm run build
+          command: cd examples/typescript && npm run build
       - run:
           name: Test
-          command: cd templates/typescript && npm run test
+          command: cd examples/typescript && npm run test
 
-  test-js-template:
+  test-js-example:
     docker:
         - image: cimg/node:16.14.0
     steps:
       - checkout
       - run:
           name: Install dependencies
-          command: cd templates/javascript && npm i
+          command: cd examples/javascript && npm i
       - run:
           name: Build
-          command: cd templates/javascript && npm run build
+          command: cd examples/javascript && npm run build
       - run:
           name: Test
-          command: cd templates/javascript && npm run test
+          command: cd examples/javascript && npm run test
 
 workflows:
   version: 2
   test-deploy:
     jobs:
       - apps
-      - test-ts-template
-      - test-js-template
+      - test-ts-example
+      - test-js-example

@@ -1,6 +1,6 @@
 {
   "name": "@contentful/functions",
-  "version": "1.4.2",
+  "version": "1.4.6",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -14,8 +14,8 @@
     "start": "npm run build && serverless offline --httpPort 3000"
   },
   "dependencies": {
-    "aws-sdk": "^2.581.0",
-    "node-fetch": "^2.6.1"
+    "aws-sdk": "^2.814.0",
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.36",

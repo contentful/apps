@@ -3,6 +3,121 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.30](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.29...@contentful/saleor@1.6.30) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.29](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.28...@contentful/saleor@1.6.29) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.28](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.27...@contentful/saleor@1.6.28) (2022-03-11)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.27](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.26...@contentful/saleor@1.6.27) (2022-03-03)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.26](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.25...@contentful/saleor@1.6.26) (2022-03-02)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.25](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.24...@contentful/saleor@1.6.25) (2022-02-28)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.24](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.23...@contentful/saleor@1.6.24) (2022-02-24)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 7.30.0 to 8.1.3 ([#873](https://github.com/contentful/apps/issues/873)) ([50ec8fe](https://github.com/contentful/apps/commit/50ec8fec9be6fcbd45fbe0f918aaaf2935361dc2))
+
+
+
+
+
+## [1.6.23](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.22...@contentful/saleor@1.6.23) (2022-02-24)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.22](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.21...@contentful/saleor@1.6.22) (2022-02-24)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.21](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.20...@contentful/saleor@1.6.21) (2022-02-22)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.20](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.19...@contentful/saleor@1.6.20) (2022-02-21)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.19](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.18...@contentful/saleor@1.6.19) (2022-02-17)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.18](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.17...@contentful/saleor@1.6.18) (2022-02-15)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
+## [1.6.17](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.16...@contentful/saleor@1.6.17) (2022-02-15)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
 ## [1.6.16](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.15...@contentful/saleor@1.6.16) (2022-02-08)
 
 **Note:** Version bump only for package @contentful/saleor

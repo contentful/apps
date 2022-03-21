@@ -3,6 +3,100 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.54](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.53...@contentful/dam-app-base@1.3.54) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.53](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.52...@contentful/dam-app-base@1.3.53) (2022-03-21)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 8.2.0 to 8.2.1 ([#967](https://github.com/contentful/apps/issues/967)) ([238070d](https://github.com/contentful/apps/commit/238070d35e331d7678cae7b3a046cc79af012ea8))
+* **deps:** bump contentful-management from 8.2.1 to 8.2.2 ([#975](https://github.com/contentful/apps/issues/975)) ([2fe8c4c](https://github.com/contentful/apps/commit/2fe8c4c78860462a166ce86c61c6c5ab3846a1d7))
+
+
+
+
+
+## [1.3.52](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.51...@contentful/dam-app-base@1.3.52) (2022-03-11)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-fcss from 0.3.4 to 0.3.5 ([#930](https://github.com/contentful/apps/issues/930)) ([303d047](https://github.com/contentful/apps/commit/303d0476267226295e160579ff8123179e732bd7))
+* **deps:** bump @contentful/forma-36-react-components ([#929](https://github.com/contentful/apps/issues/929)) ([22b72e6](https://github.com/contentful/apps/commit/22b72e6a14bb9f59968e91b4d5d07ce34b4fd8e3))
+* **deps:** bump @contentful/forma-36-tokens from 0.11.1 to 0.11.2 ([#928](https://github.com/contentful/apps/issues/928)) ([a6b13b7](https://github.com/contentful/apps/commit/a6b13b786c1f5366f8bf46ec218e9fcc9a4ca0da))
+
+
+
+
+
+## [1.3.51](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.50...@contentful/dam-app-base@1.3.51) (2022-03-03)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.50](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.49...@contentful/dam-app-base@1.3.50) (2022-03-02)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 8.1.3 to 8.2.0 ([#916](https://github.com/contentful/apps/issues/916)) ([c7f5a47](https://github.com/contentful/apps/commit/c7f5a472c1e59d3a29ba2e56783e381da8e1b9fa))
+
+
+
+
+
+## [1.3.49](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.48...@contentful/dam-app-base@1.3.49) (2022-02-24)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 7.30.0 to 8.1.3 ([#873](https://github.com/contentful/apps/issues/873)) ([50ec8fe](https://github.com/contentful/apps/commit/50ec8fec9be6fcbd45fbe0f918aaaf2935361dc2))
+
+
+
+
+
+## [1.3.48](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.47...@contentful/dam-app-base@1.3.48) (2022-02-24)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.3.3 to 4.3.4 ([#866](https://github.com/contentful/apps/issues/866)) ([0f7baad](https://github.com/contentful/apps/commit/0f7baad002f6afc956aa1519f7d4a5554335ba8e))
+* **deps:** bump @contentful/app-sdk from 4.3.4 to 4.3.5 ([#881](https://github.com/contentful/apps/issues/881)) ([302308b](https://github.com/contentful/apps/commit/302308b976532729a56cfd0537ad03bdbbc85f65))
+
+
+
+
+
+## [1.3.47](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.46...@contentful/dam-app-base@1.3.47) (2022-02-21)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.46](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.45...@contentful/dam-app-base@1.3.46) (2022-02-15)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.3.1 to 4.3.3 ([#789](https://github.com/contentful/apps/issues/789)) ([a5fe388](https://github.com/contentful/apps/commit/a5fe388d3b5333da3fa9bd242886d1d068f5abaa))
+
+
+
+
+
 ## [1.3.45](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.44...@contentful/dam-app-base@1.3.45) (2022-02-08)
 
 **Note:** Version bump only for package @contentful/dam-app-base

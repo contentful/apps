@@ -3,6 +3,70 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.11](https://github.com/contentful/apps/compare/@contentful/jira@1.8.10...@contentful/jira@1.8.11) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.8.10](https://github.com/contentful/apps/compare/@contentful/jira@1.8.9...@contentful/jira@1.8.10) (2022-02-28)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.8.9](https://github.com/contentful/apps/compare/@contentful/jira@1.8.8...@contentful/jira@1.8.9) (2022-02-17)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.8.8](https://github.com/contentful/apps/compare/@contentful/jira@1.8.7...@contentful/jira@1.8.8) (2022-02-17)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.8.7](https://github.com/contentful/apps/compare/@contentful/jira@1.8.6...@contentful/jira@1.8.7) (2022-02-15)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.8.6](https://github.com/contentful/apps/compare/@contentful/jira@1.8.5...@contentful/jira@1.8.6) (2022-02-15)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.8.5](https://github.com/contentful/apps/compare/@contentful/jira@1.8.4...@contentful/jira@1.8.5) (2022-02-15)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.8.4](https://github.com/contentful/apps/compare/@contentful/jira@1.8.3...@contentful/jira@1.8.4) (2022-02-15)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
 ## [1.8.3](https://github.com/contentful/apps/compare/@contentful/jira@1.8.2...@contentful/jira@1.8.3) (2022-02-04)
 
 **Note:** Version bump only for package @contentful/jira

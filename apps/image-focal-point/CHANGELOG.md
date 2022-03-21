@@ -3,6 +3,54 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.6](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.5...@contentful/image-focal-point@1.6.6) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/image-focal-point
+
+
+
+
+
+## [1.6.5](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.4...@contentful/image-focal-point@1.6.5) (2022-03-15)
+
+**Note:** Version bump only for package @contentful/image-focal-point
+
+
+
+
+
+## [1.6.4](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.3...@contentful/image-focal-point@1.6.4) (2022-02-28)
+
+**Note:** Version bump only for package @contentful/image-focal-point
+
+
+
+
+
+## [1.6.3](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.2...@contentful/image-focal-point@1.6.3) (2022-02-17)
+
+**Note:** Version bump only for package @contentful/image-focal-point
+
+
+
+
+
+## [1.6.2](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.1...@contentful/image-focal-point@1.6.2) (2022-02-15)
+
+**Note:** Version bump only for package @contentful/image-focal-point
+
+
+
+
+
+## [1.6.1](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.0...@contentful/image-focal-point@1.6.1) (2022-02-15)
+
+**Note:** Version bump only for package @contentful/image-focal-point
+
+
+
+
+
 # 1.6.0 (2022-01-14)
 
 

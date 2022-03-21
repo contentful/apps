@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.5](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.4...@contentful/typeform-frontend@1.5.5) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/typeform-frontend
+
+
+
+
+
+## [1.5.4](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.3...@contentful/typeform-frontend@1.5.4) (2022-03-15)
+
+**Note:** Version bump only for package @contentful/typeform-frontend
+
+
+
+
+
+## [1.5.3](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.2...@contentful/typeform-frontend@1.5.3) (2022-02-28)
+
+**Note:** Version bump only for package @contentful/typeform-frontend
+
+
+
+
+
+## [1.5.2](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.1...@contentful/typeform-frontend@1.5.2) (2022-02-17)
+
+**Note:** Version bump only for package @contentful/typeform-frontend
+
+
+
+
+
+## [1.5.1](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.0...@contentful/typeform-frontend@1.5.1) (2022-02-15)
+
+**Note:** Version bump only for package @contentful/typeform-frontend
+
+
+
+
+
 # 1.5.0 (2022-01-14)
 
 

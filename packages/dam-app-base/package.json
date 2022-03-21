@@ -1,7 +1,7 @@
 {
   "name": "@contentful/dam-app-base",
   "description": "Library to build an app to integrate your Digital Asset Management (DAM) system of choice with Contentful",
-  "version": "1.3.45",
+  "version": "1.3.54",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
@@ -17,18 +17,18 @@
   "devDependencies": {
     "@testing-library/react": "9.4.0",
     "@types/array-move": "2.0.0",
-    "@types/jest": "27.4.0",
+    "@types/jest": "27.4.1",
     "@types/lodash.get": "4.4.6",
-    "@types/react": "17.0.39",
-    "@types/react-dom": "17.0.11",
+    "@types/react": "17.0.41",
+    "@types/react-dom": "17.0.14",
     "@types/react-sortable-hoc": "0.7.1",
     "jest": "27.5.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "rimraf": "3.0.2",
     "ts-jest": "27.1.3",
-    "typedoc": "0.22.11",
-    "typedoc-plugin-markdown": "3.11.13",
+    "typedoc": "0.22.12",
+    "typedoc-plugin-markdown": "3.11.14",
     "typescript": "4.5.5"
   },
   "dependencies": {
@@ -38,7 +38,7 @@
     "@contentful/forma-36-tokens": "^0.11.0",
     "@emotion/css": "^11.1.3",
     "array-move": "^3.0.1",
-    "contentful-management": "^7.30.0",
+    "contentful-management": "^8.1.3",
     "lodash.get": "^4.4.2",
     "react-sortable-hoc": "^2.0.0"
   },
