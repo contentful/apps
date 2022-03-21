@@ -4,6 +4,7 @@ const config = {
   netlifyHookIds: ['hook1', 'hook2'],
   sites: [
     {
+      assetDeploysOn: true,
       buildHookId: 'bh1',
       name: 'Site 1',
       netlifySiteId: 'id1',
@@ -12,6 +13,7 @@ const config = {
       selectedContentTypes: [],
     },
     {
+      assetDeploysOn: false,
       buildHookId: 'bh2',
       name: 'Site 2',
       netlifySiteId: 'id2',
@@ -20,6 +22,7 @@ const config = {
       selectedContentTypes: ['type1', 'type2'],
     },
     {
+      assetDeploysOn: true,
       buildHookId: 'bh3',
       name: 'Site 3',
       netlifySiteId: 'id3',
@@ -38,8 +41,16 @@ const parameters = {
   siteNames: 'foo-bar,bar-baz,foo-bar-baz',
   siteUrls: 'https://foo-bar.netlify.com,https://bar-baz.netlify.com,https://foo-bar-baz.netlify.com',
   events: {
-    'bh2': 'type1,type2',
-    'bh3': '*',
+    'bh1': {
+      assets: true,
+    },
+    'bh2': {
+      cts: 'type1,type2',
+    },
+    'bh3': {
+      cts: '*',
+      assets: true,
+    },
   },
 };
 
