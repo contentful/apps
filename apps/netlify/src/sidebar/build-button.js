@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
-import tokens from '@contentful/f36-tokens';
-import { Button, ValidationMessage } from '@contentful/f36-components';
+import tokens from '@contentful/forma-36-tokens';
+import { Button, ValidationMessage } from '@contentful/forma-36-react-components';
 
 import { normalizeMessage, isOutOfOrder, isDuplicate, messageToState } from './message-processor';
 import { createPubSub } from './pubnub-client';
@@ -111,7 +111,7 @@ export default class NeflifySidebarBuildButton extends React.Component {
 
     return (
       <div className={styles.body}>
-        <Button variant="primary" isDisabled={!ready || busy} isLoading={busy} isFullWidth onClick={this.build}>
+        <Button disabled={!ready || busy} loading={busy} isFullWidth onClick={this.build}>
           {busy && status ? status : 'Build website'}
         </Button>
         {misconfigured && (

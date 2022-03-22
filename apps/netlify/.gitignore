@@ -13,14 +13,11 @@ yarn-error.log*
 .cache
 
 # Dependency directories
-**/node_modules/
+node_modules/
 
 # Build
-frontend/build/*
-!frontend/build/index.html
+build/*
+!/build/index.html
 
 # VS Code
 .vscode
-
-# serverless stuff
-.serverless
