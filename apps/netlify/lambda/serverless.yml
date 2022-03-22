@@ -20,7 +20,7 @@ custom:
     prd: 1VchawWvbIClHuMIyxwR5m
     test: yourTestId
   customDomain:
-    domainName: ${self:custom.signingSecret.${env:STAGE, 'test'}}
+    domainName: ${self:custom.domainName.${env:STAGE, 'test'}}
     stage: ${env:STAGE, 'test'}
     createRoute53Record: true
     endpointType: "edge"
