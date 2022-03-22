@@ -42,9 +42,11 @@ export function configToParameters(config) {
         return {
           ...flatEvents,
           [buildHookId]: {
-            cts: Array.isArray(contentTypes) ? flat.events[buildHookId].cts.join(',') : contentTypes,
+            cts: Array.isArray(contentTypes)
+              ? flat.events[buildHookId].cts.join(',')
+              : contentTypes,
             assets: flat.events[buildHookId].assets,
-          }
+          },
         };
       }, {});
       acc = { ...acc, events: flatEvents };
@@ -64,12 +66,17 @@ export function parametersToConfig(parameters) {
   const siteNames = readCsvParam(parameters.siteNames);
   const siteUrls = readCsvParam(parameters.siteUrls);
 
+  // Older installations don't have an events property, so we default
+  // to an empty object if the key is falsey
+  const events = parameters.events || {};
+
   return {
     netlifyHookIds: readCsvParam(parameters.notificationHookIds),
     sites: buildHookIds.map((buildHookId, i) => {
-      const selectedContentTypes = parameters.events[buildHookId]?.cts === '*' ?
-      parameters.events[buildHookId]?.cts :
-      readCsvParam(parameters.events[buildHookId]?.cts);
+      const selectedContentTypes =
+        events[buildHookId]?.cts === '*'
+          ? events[buildHookId]?.cts
+          : readCsvParam(events[buildHookId]?.cts);
 
       return {
         buildHookId,
@@ -78,7 +85,7 @@ export function parametersToConfig(parameters) {
         netlifySiteName: siteNames[i],
         netlifySiteUrl: siteUrls[i],
         selectedContentTypes,
-        assetDeploysOn: parameters.events[buildHookId]?.assets || false,
+        assetDeploysOn: events[buildHookId]?.assets || false,
       };
     }),
   };

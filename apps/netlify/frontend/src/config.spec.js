@@ -39,15 +39,16 @@ const parameters = {
   names: 'Site 1,Site 2,Site 3',
   siteIds: 'id1,id2,id3',
   siteNames: 'foo-bar,bar-baz,foo-bar-baz',
-  siteUrls: 'https://foo-bar.netlify.com,https://bar-baz.netlify.com,https://foo-bar-baz.netlify.com',
+  siteUrls:
+    'https://foo-bar.netlify.com,https://bar-baz.netlify.com,https://foo-bar-baz.netlify.com',
   events: {
-    'bh1': {
+    bh1: {
       assets: true,
     },
-    'bh2': {
+    bh2: {
       cts: 'type1,type2',
     },
-    'bh3': {
+    bh3: {
       cts: '*',
       assets: true,
     },
@@ -73,6 +74,22 @@ describe('config', () => {
           names: '    Site 1   ,,   Site 2,,,, Site 3',
         })
       ).toEqual(config);
+    });
+
+    it('Returns empty selectedContentTypes when events key is missing', () => {
+      // This is the state that would come from an older version of the app.
+      // The key thing is that it doesn't crash
+
+      const { events, ...localParameters } = parameters;
+      const result = parametersToConfig({
+        ...localParameters,
+      });
+
+      result.sites.map(({ selectedContentTypes }) => expect(selectedContentTypes).toEqual([]));
+
+      expect(result.sites.length).toEqual(3);
+
+      expect(result.netlifyHookIds).toEqual(['hook1', 'hook2']);
     });
   });
 });
