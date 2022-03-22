@@ -1,15 +1,17 @@
 import React from 'react';
-import { PlainClientAPI } from 'contentful-management';
 import { Paragraph } from '@contentful/f36-components';
 import { EditorExtensionSDK } from '@contentful/app-sdk';
+import { /* useCMA, */ useSDK } from "@contentful/react-apps-toolkit";
 
-interface EditorProps {
-  sdk: EditorExtensionSDK;
-  cma: PlainClientAPI;
-}
+const Entry = () => {
+  const sdk = useSDK<EditorExtensionSDK>()
+  /*
+     To use the cma, inject it as follows.
+     If it is not needed, you can remove the next line.
+  */
+  // const cma = useCMA();
 
-const Entry = (props: EditorProps) => {
-  return <Paragraph>Hello Entry Editor Component</Paragraph>;
+  return <Paragraph>Hello Entry Editor Component (AppId: {sdk.ids.app})</Paragraph>;
 };
 
 export default Entry;
