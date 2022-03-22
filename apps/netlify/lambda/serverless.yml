@@ -16,6 +16,9 @@ custom:
   domainName:
     prd: netlify-build.ctfapps.net
     test: netlify-build-test.ctfapps.net
+  appDefinitionId:
+    prd: 1VchawWvbIClHuMIyxwR5m
+    test: yourTestId
   customDomain:
     domainName: ${self:custom.signingSecret.${env:STAGE, 'test'}}
     stage: ${env:STAGE, 'test'}
@@ -37,9 +40,9 @@ functions:
   app:
     handler: index.handler
     environment:
-      SIGNING_SECRET: ${self:custom.signingSecret.${env:stage, 'test'}}
-      APP_IDENTITY_PRIVATE_KEY: ${self:custom.appIdentityKey.${env:stage, 'test'}}
-      APP_DEFINITION_ID: 1VchawWvbIClHuMIyxwR5m
+      SIGNING_SECRET: ${self:custom.signingSecret.${env:STAGE, 'test'}}
+      APP_IDENTITY_PRIVATE_KEY: ${self:custom.appIdentityKey.${env:STAGE, 'test'}}
+      APP_DEFINITION_ID: ${self:custom.appDefinitionId.${env:STAGE, 'test'}}
     events:
       - http:
           path: /{proxy+}
