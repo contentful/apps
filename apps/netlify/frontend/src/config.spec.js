@@ -4,29 +4,54 @@ const config = {
   netlifyHookIds: ['hook1', 'hook2'],
   sites: [
     {
+      assetDeploysOn: true,
       buildHookId: 'bh1',
       name: 'Site 1',
       netlifySiteId: 'id1',
       netlifySiteName: 'foo-bar',
       netlifySiteUrl: 'https://foo-bar.netlify.com',
+      selectedContentTypes: [],
     },
     {
+      assetDeploysOn: false,
       buildHookId: 'bh2',
       name: 'Site 2',
       netlifySiteId: 'id2',
       netlifySiteName: 'bar-baz',
       netlifySiteUrl: 'https://bar-baz.netlify.com',
+      selectedContentTypes: ['type1', 'type2'],
+    },
+    {
+      assetDeploysOn: true,
+      buildHookId: 'bh3',
+      name: 'Site 3',
+      netlifySiteId: 'id3',
+      netlifySiteName: 'foo-bar-baz',
+      netlifySiteUrl: 'https://foo-bar-baz.netlify.com',
+      selectedContentTypes: '*',
     },
   ],
 };
 
 const parameters = {
   notificationHookIds: 'hook1,hook2',
-  buildHookIds: 'bh1,bh2',
-  names: 'Site 1,Site 2',
-  siteIds: 'id1,id2',
-  siteNames: 'foo-bar,bar-baz',
-  siteUrls: 'https://foo-bar.netlify.com,https://bar-baz.netlify.com',
+  buildHookIds: 'bh1,bh2,bh3',
+  names: 'Site 1,Site 2,Site 3',
+  siteIds: 'id1,id2,id3',
+  siteNames: 'foo-bar,bar-baz,foo-bar-baz',
+  siteUrls: 'https://foo-bar.netlify.com,https://bar-baz.netlify.com,https://foo-bar-baz.netlify.com',
+  events: {
+    'bh1': {
+      assets: true,
+    },
+    'bh2': {
+      cts: 'type1,type2',
+    },
+    'bh3': {
+      cts: '*',
+      assets: true,
+    },
+  },
 };
 
 describe('config', () => {
@@ -36,7 +61,7 @@ describe('config', () => {
     });
   });
 
-  describe('paramtersToConfig', () => {
+  describe('parametersToConfig', () => {
     it('translates extension parameters to internal config format', () => {
       expect(parametersToConfig(parameters)).toEqual(config);
     });
@@ -45,7 +70,7 @@ describe('config', () => {
       expect(
         parametersToConfig({
           ...parameters,
-          names: '    Site 1   ,,   Site 2,,,,',
+          names: '    Site 1   ,,   Site 2,,,, Site 3',
         })
       ).toEqual(config);
     });

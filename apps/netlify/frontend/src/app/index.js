@@ -52,9 +52,8 @@ export default class NetlifyAppConfig extends React.Component {
     const config = parametersToConfig(parameters);
     const enabledContentTypes = editorInterfacesToEnabledContentTypes(eisResponse.items, ids.app);
 
-    // First empty site (so no UI click is needed).
     if (!Array.isArray(config.sites) || config.sites.length < 1) {
-      config.sites = [{}];
+      config.sites = [];
     }
 
     // Initially we are not connected to Netlify and we don't have
@@ -202,6 +201,7 @@ export default class NetlifyAppConfig extends React.Component {
               disabled={disabled}
               siteConfigs={this.state.config.sites}
               netlifySites={this.state.netlifySites}
+              contentTypes={this.state.contentTypes}
               onSiteConfigsChange={this.onSiteConfigsChange}
             />
             <NetlifyContentTypes
