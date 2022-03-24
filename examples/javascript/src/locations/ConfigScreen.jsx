@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { /* useCMA, */ useSDK } from "@contentful/react-apps-toolkit";
+import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState({});
