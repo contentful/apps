@@ -109,7 +109,7 @@ export interface FormattedIssue {
   link: string;
   key: string;
   summary: string;
-  priority: IssuePriority;
+  priority?: IssuePriority;
   assignee: IssueAssignee | null;
   status: JiraIssueStatus;
   issuetype: ProjectIssueType;

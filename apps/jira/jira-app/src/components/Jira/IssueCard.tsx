@@ -54,9 +54,13 @@ const IssueCard = ({ issue, onRemoveClick }: Props) => {
           <Tooltip place="right" content={issue.issuetype.name}>
             <img className="type" src={issue.issuetype.iconUrl} alt={issue.issuetype.name} />
           </Tooltip>
-          <Tooltip place="right" content={`${issue.priority.name} priority`}>
-            <img src={issue.priority.iconUrl} alt={issue.priority.name} height={22} />
-          </Tooltip>
+          {
+            issue.priority && (
+              <Tooltip place="right" content={`${issue.priority.name} priority`}>
+                <img src={issue.priority.iconUrl} alt={issue.priority.name} height={22} />
+              </Tooltip>
+            )
+          }
         </div>
         <div className="details">
           <TextLink onClick={openInJira}>
