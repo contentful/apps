@@ -1,0 +1,49 @@
+service: sls-apps-netlify-build
+
+frameworkVersion: ">=2.0.0 <3.0.0"
+variablesResolutionMode: 20210326
+
+plugins:
+  - serverless-domain-manager
+
+custom:
+  signingSecret:
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/signing-secret}
+    test: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/test/signing-secret}
+  appIdentityKey:
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/prd/app-identity-key}
+    test: ${ssm:/aws/reference/secretsmanager/ci/apps/netlify-build-action/test/app-identity-key}
+  domainName:
+    prd: netlify-build.ctfapps.net
+    test: netlify-build-test.ctfapps.net
+  appDefinitionId:
+    prd: 1VchawWvbIClHuMIyxwR5m
+    test: yourTestId
+  customDomain:
+    domainName: ${self:custom.domainName.${env:STAGE, 'test'}}
+    stage: ${env:STAGE, 'test'}
+    createRoute53Record: true
+    endpointType: "edge"
+    securityPolicy: tls_1_2
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: ${env:STAGE, 'test'}
+  region: "us-east-1"
+  lambdaHashingVersion: 20201221
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: sls-apps-netlify-build
+
+functions:
+  app:
+    handler: index.handler
+    environment:
+      SIGNING_SECRET: ${self:custom.signingSecret.${env:STAGE, 'test'}}
+      APP_IDENTITY_PRIVATE_KEY: ${self:custom.appIdentityKey.${env:STAGE, 'test'}}
+      APP_DEFINITION_ID: ${self:custom.appDefinitionId.${env:STAGE, 'test'}}
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
