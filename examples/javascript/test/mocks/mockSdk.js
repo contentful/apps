@@ -5,6 +5,9 @@ const mockSdk = {
     setReady: jest.fn(),
     getCurrentState: jest.fn(),
   },
+  ids: {
+    app: 'test-app'
+  }
 };
 
 export { mockSdk };
