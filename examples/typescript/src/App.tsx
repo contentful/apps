@@ -20,7 +20,7 @@ const ComponentLocationSettings = {
 const App = () => {
   const sdk = useSDK()
 
-  const RenderedComponent = useMemo(() => {
+  const Component = useMemo(() => {
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {
       if (sdk.location.is(location)) {
         return component;
@@ -28,7 +28,7 @@ const App = () => {
     }
   }, [sdk.location])
 
-  return RenderedComponent ? <RenderedComponent /> : null
+  return Component ? <Component /> : null
 
 };
 

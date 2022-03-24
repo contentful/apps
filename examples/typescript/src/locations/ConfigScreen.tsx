@@ -2,15 +2,13 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { /* useCMA, */ useSDK } from "@contentful/react-apps-toolkit";
+import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 
 export interface AppInstallationParameters {}
 
-
-
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
-  const sdk = useSDK<AppExtensionSDK>()
+  const sdk = useSDK<AppExtensionSDK>();
   /*
      To use the cma, inject it as follows.
      If it is not needed, you can remove the next line.
@@ -46,8 +44,7 @@ const ConfigScreen = () => {
     (async () => {
       // Get current parameters of the app.
       // If the app is not installed yet, `parameters` will be `null`.
-      const currentParameters: AppInstallationParameters | null =
-        await sdk.app.getParameters();
+      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       if (currentParameters) {
         setParameters(currentParameters);
