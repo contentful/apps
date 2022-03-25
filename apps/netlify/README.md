@@ -8,20 +8,17 @@ Application (living in `frontend`), and the Lambda functions (in `lambda`) which
 
 Technologies involved are:
 * [serverless](https://github.com/serverless/serverless):
-to run the Lambda function on your machine by means of the 
-[offline plugin](https://github.com/dherault/serverless-offline)
+to run the Lambda function on your machine
 * [ngrok](https://ngrok.com/):
 to create a public URL to be used as OAUTH URI
 
 ### Launching the frontend
-
 Go to the `frontend` folder and run:
 ```
 npm run start
 ```
 
 ### Launching the lambda
-
 First, start HTTP tunnel with ngrok:
 ```
 ngrok http 8000
