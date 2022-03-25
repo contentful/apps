@@ -16,7 +16,7 @@
     "typescript": "^4.1.5"
   },
   "dependencies": {
-    "@contentful/app-sdk": "4.2.1",
+    "@contentful/app-sdk": "^4.3.5",
     "@contentful/forma-36-fcss": "^0.3.3",
     "@contentful/forma-36-react-components": "^3.93.2",
     "@contentful/forma-36-tokens": "^0.11.0",
@@ -28,7 +28,7 @@
     "react-scripts": "^4.0.3"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
+    "start": "cross-env BROWSER=none REACT_APP_NGROK_URL=${NGROK_URL} REACT_APP_ATLASSIAN_APP_CLIENT_ID=${ATLASSIAN_APP_CLIENT_ID} react-scripts start",
     "build": "react-scripts build",
     "deploy": "aws s3 sync ./build ${STATIC_JIRA_S3_BASE} --acl public-read",
     "deploy:test": "npm run deploy",

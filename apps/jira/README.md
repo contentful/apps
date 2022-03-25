@@ -20,7 +20,7 @@ to create a public URL to be used as OAUTH URI
 Launching the application locally namely means
 
 ```
-npm run dev
+PORT=1234 npm run dev
 ```
 
 This script expects the following environment variables to be set

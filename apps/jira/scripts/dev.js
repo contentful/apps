@@ -25,7 +25,7 @@ npm.load({ loaded: false }, () => {
     process.env.NGROK_URL = url;
     process.env.AWS_ACCOUNT_ID = 'yolo'; // doesn't matter, it's local
     process.env.OAUTH_CREDENTIALS_SECRET_ID = 'yolo'; // doesn't matter, it's local
-    process.env.OAUTH_REDIRECT_URI = `${url}/dev/auth`;
+    process.env.OAUTH_REDIRECT_URI = `${url}/test/auth`;
     process.env.OAUTH_TOKEN_EXCHANGE_ENDPOINT = 'https://auth.atlassian.com/oauth/token';
     process.env.FRONTEND_URL = 'http://localhost:1234';
 
