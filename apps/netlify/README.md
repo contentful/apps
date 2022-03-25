@@ -31,7 +31,7 @@ Enable events and add https ngrok url to the events config on App definition pag
 `https://<ngrok url>/app-events`
 
 You would also want to enable Entry and Asset publish/unpublish events:
-
+![Events configuration](images/events-settings.png)
 
 Run lambda with command:
 ```
