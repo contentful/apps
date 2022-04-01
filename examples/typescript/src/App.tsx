@@ -3,6 +3,7 @@ import {locations} from "@contentful/app-sdk";
 import ConfigScreen from "./locations/ConfigScreen";
 import Field from "./locations/Field";
 import EntryEditor from "./locations/EntryEditor";
+import EntryList from "./locations/EntryList";
 import Dialog from "./locations/Dialog";
 import Sidebar from "./locations/Sidebar";
 import Page from "./locations/Page";
@@ -15,6 +16,7 @@ const ComponentLocationSettings = {
   [locations.LOCATION_DIALOG]: Dialog,
   [locations.LOCATION_ENTRY_SIDEBAR]: Sidebar,
   [locations.LOCATION_PAGE]: Page,
+  [locations.LOCATION_ENTRY_LIST]: EntryList,
 }
 
 const App = () => {
