@@ -3,7 +3,7 @@ Netlify App
 
 ## Local Development
 
-In order to develop Netlify App locally you will need to run locally both the Netlify Contentful 
+In order to develop Netlify App locally, you will need to run both the Netlify Contentful 
 Application (living in `frontend`), and the Lambda functions (in `lambda`) which handle Netlify build hooks.
 
 Technologies involved are:
