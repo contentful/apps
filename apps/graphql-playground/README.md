@@ -67,6 +67,21 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.
 Your app is ready to be deployed!
 
+## Incorporating downstream changes
+
+This code was originally sourced from [this repository](https://github.com/contentful/contentful-graphql-playground-app).
+
+While we expect and encourage all the changes to be made [here](https://github.com/contentful/apps), there is a chance 
+we might need to sync changes coming from the downstream repo.
+
+At this point the process is manual, and it goes like this
+
+```shell
+# from repository's root
+
+git subtree pull --prefix apps/graphql-playground https://github.com/contentful/contentful-graphql-playground-app main --squash
+```
+
 ## Learn More
 
 [Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.
