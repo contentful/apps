@@ -27,7 +27,7 @@ ngrok http 8000
 Enable events and add https ngrok url to the events config on App definition page as follows:
 `https://<ngrok url>/app-events`
 
-Go to app's Security tab. Generate key pair and signing secret. These are needed as environment variables (see below). For example you can copy private key contents and paste it as a value to `APP_IDENTITY_PRIVATE_KEY` variable.
+Go to the app's Security tab. Generate a key pair and a signing secret. These are needed as environment variables (see below). For example, you can copy the private key and paste it as a value to the `APP_IDENTITY_PRIVATE_KEY` variable.
 
 You would also want to enable Entry and Asset publish/unpublish events:
 ![Events configuration](images/events-settings.png)
