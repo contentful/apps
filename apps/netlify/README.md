@@ -29,7 +29,7 @@ Enable events and add https ngrok url to the events config on App definition pag
 
 Go to the app's Security tab. Generate a key pair and a signing secret. These are needed as environment variables (see below). For example, you can copy the private key and paste it as a value to the `APP_IDENTITY_PRIVATE_KEY` variable.
 
-You would also want to enable Entry and Asset publish/unpublish events:
+To receive Entry and Asset publish/unpublish events, configure the Events tab in the following way:
 ![Events configuration](images/events-settings.png)
 
 Run lambda with command:
