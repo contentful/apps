@@ -7,7 +7,7 @@ import {
   TextInput,
   Button,
   Option,
-  Switch,
+  Checkbox,
   Pill,
   Autocomplete,
 } from '@contentful/f36-components';
@@ -300,7 +300,7 @@ export const EditSiteModal = ({
                 <FormControl.HelpText marginTop={0} marginBottom="spacingS">
                   Rebuild site automatically when entries or assets are published or unpublished
                 </FormControl.HelpText>
-                <Switch
+                <Checkbox
                   id={assetDeploysId}
                   name={assetDeploysId}
                   size="small"
@@ -308,17 +308,17 @@ export const EditSiteModal = ({
                   className={styles.assetsDeployCheckbox}
                   onChange={(e) => setIsAssetDeploysOn(e.target.checked)}
                 >
-                  When assets are published or unpublished
-                </Switch>
-                <Switch
+                  When assets are (un)published
+                </Checkbox>
+                <Checkbox
                   id={deploysId}
                   name={deploysId}
                   size="small"
                   isChecked={isDeploysOn}
                   onChange={(e) => setIsDeploysOn(e.target.checked)}
                 >
-                  When entries are published or unpublished
-                </Switch>
+                  When entries are (un)published
+                </Checkbox>
               </FormControl>
               {isDeploysOn && (
                 <div>
