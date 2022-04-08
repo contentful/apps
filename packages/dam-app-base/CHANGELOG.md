@@ -3,6 +3,83 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.60](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.59...@contentful/dam-app-base@1.3.60) (2022-04-08)
+
+
+### Bug Fixes
+
+* **deps:** bump @emotion/css from 11.7.1 to 11.9.0 ([#1062](https://github.com/contentful/apps/issues/1062)) ([ef87822](https://github.com/contentful/apps/commit/ef8782216002ce4a07475d34cd0c0f2073e80042))
+
+
+
+
+
+## [1.3.59](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.58...@contentful/dam-app-base@1.3.59) (2022-04-05)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 8.2.2 to 9.0.0 ([#1039](https://github.com/contentful/apps/issues/1039)) ([4b49c8d](https://github.com/contentful/apps/commit/4b49c8d9c3475ff71af40e8a8781172955cd8f02))
+
+
+
+
+
+## [1.3.58](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.57...@contentful/dam-app-base@1.3.58) (2022-03-28)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.57](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.56...@contentful/dam-app-base@1.3.57) (2022-03-25)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.56](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.55...@contentful/dam-app-base@1.3.56) (2022-03-25)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.55](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.54...@contentful/dam-app-base@1.3.55) (2022-03-24)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#1008](https://github.com/contentful/apps/issues/1008)) ([92ee036](https://github.com/contentful/apps/commit/92ee03630bd20ad4430753903c27f4a0e9fc462b))
+
+
+
+
+
+## [1.3.54](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.53...@contentful/dam-app-base@1.3.54) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+
+
+
+
+## [1.3.53](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.52...@contentful/dam-app-base@1.3.53) (2022-03-21)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 8.2.0 to 8.2.1 ([#967](https://github.com/contentful/apps/issues/967)) ([238070d](https://github.com/contentful/apps/commit/238070d35e331d7678cae7b3a046cc79af012ea8))
+* **deps:** bump contentful-management from 8.2.1 to 8.2.2 ([#975](https://github.com/contentful/apps/issues/975)) ([2fe8c4c](https://github.com/contentful/apps/commit/2fe8c4c78860462a166ce86c61c6c5ab3846a1d7))
+
+
+
+
+
 ## [1.3.52](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.51...@contentful/dam-app-base@1.3.52) (2022-03-11)
 
 

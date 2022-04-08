@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.1](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.0...@contentful/jira-app@1.7.1) (2022-04-05)
+
+**Note:** Version bump only for package @contentful/jira-app
+
+
+
+
+
+# [1.7.0](https://github.com/contentful/apps/compare/@contentful/jira-app@1.6.5...@contentful/jira-app@1.7.0) (2022-03-25)
+
+
+### Features
+
+* **jira:** make priority optional EXT-3649 ([#1018](https://github.com/contentful/apps/issues/1018)) ([1862f4d](https://github.com/contentful/apps/commit/1862f4d0241771ed30bbca367fd81cdd804d573e))
+
+
+
+
+
+## [1.6.5](https://github.com/contentful/apps/compare/@contentful/jira-app@1.6.4...@contentful/jira-app@1.6.5) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/jira-app
+
+
+
+
+
 ## [1.6.4](https://github.com/contentful/apps/compare/@contentful/jira-app@1.6.3...@contentful/jira-app@1.6.4) (2022-02-28)
 
 **Note:** Version bump only for package @contentful/jira-app

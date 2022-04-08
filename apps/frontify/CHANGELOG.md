@@ -3,6 +3,70 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.27](https://github.com/contentful/apps/compare/@contentful/frontify-assets@1.5.26...@contentful/frontify-assets@1.5.27) (2022-04-08)
+
+**Note:** Version bump only for package @contentful/frontify-assets
+
+
+
+
+
+## [1.5.26](https://github.com/contentful/apps/compare/@contentful/frontify-assets@1.5.25...@contentful/frontify-assets@1.5.26) (2022-04-05)
+
+**Note:** Version bump only for package @contentful/frontify-assets
+
+
+
+
+
+## [1.5.25](https://github.com/contentful/apps/compare/@contentful/frontify-assets@1.5.24...@contentful/frontify-assets@1.5.25) (2022-03-28)
+
+**Note:** Version bump only for package @contentful/frontify-assets
+
+
+
+
+
+## [1.5.24](https://github.com/contentful/apps/compare/@contentful/frontify-assets@1.5.23...@contentful/frontify-assets@1.5.24) (2022-03-25)
+
+**Note:** Version bump only for package @contentful/frontify-assets
+
+
+
+
+
+## [1.5.23](https://github.com/contentful/apps/compare/@contentful/frontify-assets@1.5.22...@contentful/frontify-assets@1.5.23) (2022-03-25)
+
+**Note:** Version bump only for package @contentful/frontify-assets
+
+
+
+
+
+## [1.5.22](https://github.com/contentful/apps/compare/@contentful/frontify-assets@1.5.21...@contentful/frontify-assets@1.5.22) (2022-03-24)
+
+**Note:** Version bump only for package @contentful/frontify-assets
+
+
+
+
+
+## [1.5.21](https://github.com/contentful/apps/compare/@contentful/frontify-assets@1.5.20...@contentful/frontify-assets@1.5.21) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/frontify-assets
+
+
+
+
+
+## [1.5.20](https://github.com/contentful/apps/compare/@contentful/frontify-assets@1.5.19...@contentful/frontify-assets@1.5.20) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/frontify-assets
+
+
+
+
+
 ## [1.5.19](https://github.com/contentful/apps/compare/@contentful/frontify-assets@1.5.18...@contentful/frontify-assets@1.5.19) (2022-03-11)
 
 **Note:** Version bump only for package @contentful/frontify-assets

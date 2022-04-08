@@ -1,2 +1,2 @@
-export { mockCma } from './mockCma.ts';
-export { mockSdk } from './mockSdk.ts';
+export { mockCma } from './mockCma';
+export { mockSdk } from './mockSdk';

@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.2](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.7.1...@contentful/netlify-build-and-preview@1.7.2) (2022-03-22)
+
+
+### Bug Fixes
+
+* Revert netlify-actions merge [EXT-3458] ([#1005](https://github.com/contentful/apps/issues/1005)) ([962e2a2](https://github.com/contentful/apps/commit/962e2a2ec39cda05c5238c20d6565cff5eb64d77))
+
+
+
+
+
+## [1.6.6](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.6.5...@contentful/netlify-build-and-preview@1.6.6) (2022-03-21)
+
+**Note:** Version bump only for package @contentful/netlify-build-and-preview
+
+
+
+
+
+## [1.6.5](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.6.4...@contentful/netlify-build-and-preview@1.6.5) (2022-03-15)
+
+**Note:** Version bump only for package @contentful/netlify-build-and-preview
+
+
+
+
+
 ## [1.6.4](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.6.3...@contentful/netlify-build-and-preview@1.6.4) (2022-02-28)
 
 **Note:** Version bump only for package @contentful/netlify-build-and-preview
