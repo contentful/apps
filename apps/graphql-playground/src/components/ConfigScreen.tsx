@@ -110,7 +110,7 @@ const TABS = [
         <Paragraph>
           If you have any feedback don't hesitate to{" "}
           <TextLink
-            href="https://github.com/stefanjudis/contentful-graphql-playground-app"
+            href="https://github.com/contentful/apps"
             target="_blank"
             rel="noopener"
           >
