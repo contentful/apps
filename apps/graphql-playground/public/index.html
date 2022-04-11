@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script>
+      if (window.self === window.top) {
+        document.body.innerHTML = `
+          <p>This page is a Contentful app to enable GraphQL playground inside of the Contentful UI.</p>
+          <p><a href="https://github.com/contentful/apps">Please head over to GitHub to find further information</a></p>
+        `;
+
+      }
+    </script>
+  </body>
+</html>
