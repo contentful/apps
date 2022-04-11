@@ -1,0 +1,31 @@
+html,
+body,
+div {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+.graphiql-wrapper button {
+  border: none;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* dirty hack to desiable the animation in the dialog */
+.dialogCloseBtn + div > div {
+  opacity: 1;
+  animation: none !important;
+  transform: translateY(0);
+}
+
+body .playground {
+  /* dirty hack to overwrite this declaration that make the container overflow
+  and show scrollbars */
+  margin-right: 0 !important;
+}
