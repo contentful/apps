@@ -1,5 +1,5 @@
 # Entry List location example
-This example shows how an app with a `EntryList` location can be built. It creates a simple handler that retrieves the id of the entry and return it to be displayed on the entries table.
+This example shows how to build an app with an `EntryList` location. It creates a simple handler that retrieves the entry id and returns it to display on the entries table.
 
 ## How to use
 
