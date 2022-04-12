@@ -20,7 +20,7 @@ const EntryList = () => {
     }
 
     sdk.entryList.onEntryListUpdated((props) => onEntryListUpdated({entries: props.entries}))
-  }, [])
+  }, [sdk.entryList])
 
   return null;
 }
