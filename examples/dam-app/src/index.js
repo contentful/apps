@@ -5,7 +5,7 @@ import { useAsync } from 'react-async-hook';
 import { render } from 'react-dom';
 
 const CTA = 'Sample DAM Demo App';
-const FIELDS_TO_PERSIST = ['id', 'filename', 'url'];
+const FIELDS_TO_PERSIST = ['id', 'name', 'url'];
 
 setup({
   cta: CTA,
@@ -68,9 +68,9 @@ function DialogLocation({ sdk }) {
 }
 
 function makeThumbnail(attachment) {
-  const thumbnail = attachment.thumbnail_url || attachment.url;
+  const thumbnail = attachment.url;
   const url = typeof thumbnail === 'string' ? thumbnail : undefined;
-  const alt = attachment.filename;
+  const alt = attachment.name;
   return [url, alt];
 }
 
