@@ -1,3 +1,4 @@
+import './index.css';
 import { setup } from '@contentful/dam-app-base';
 import { EntityList } from '@contentful/f36-components';
 import pick from 'lodash/pick';
