@@ -1,3 +1,4 @@
+import './index.css';
 import { setup } from '@contentful/ecommerce-app-base';
 import { EntityList } from '@contentful/f36-components';
 import { useAsync } from 'react-async-hook';
