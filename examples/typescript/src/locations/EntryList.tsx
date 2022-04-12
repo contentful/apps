@@ -21,7 +21,7 @@ const EntryList = () => {
     }
 
     sdk.entryList.onEntryListUpdated((props) => onEntryListUpdated({entries: props.entries}))
-  })
+  }, [])
 
   return null;
 }
