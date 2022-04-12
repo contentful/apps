@@ -38,15 +38,15 @@ setup({
 });
 
 function DialogLocation({ sdk }) {
-  const appKey = sdk.parameters.installation.apiKey;
+  const apiKey = sdk.parameters.installation.apiKey;
   const projectId = sdk.parameters.installation.projectId;
 
   const { result: damData } = useAsync(async () => {
     const response = await fetch(
-      `/dam_api_response.json?api_key=${appKey}&project_id=${projectId}`
+      `/dam_api_response.json?api_key=${apiKey}&project_id=${projectId}`
     );
     return response.json();
-  }, [appKey, projectId]);
+  }, [apiKey, projectId]);
 
   if (!damData) {
     return <div>Please wait</div>;
