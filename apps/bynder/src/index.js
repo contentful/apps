@@ -30,11 +30,13 @@ const FIELDS_TO_PERSIST = [
   'watermarked',
   'width',
   'videoPreviewURLs',
+  'tags',
 ];
 
 const FIELD_SELECTION = `
   databaseId
   type
+  tags
   orientation
   description
   isArchived
@@ -110,6 +112,7 @@ function transformAsset(asset) {
     thumbnails: thumbnails,
     original: asset.originalUrl,
     videoPreviewURLs: asset.previewUrls || [],
+    tags:asset.tags
   };
 }
 
