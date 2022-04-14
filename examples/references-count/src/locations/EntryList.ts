@@ -3,7 +3,7 @@ import {
   EntryListExtensionSDK,
   EntryListExtraDataType,
 } from '@contentful/app-sdk';
-import { PlainClientAPI } from 'contentful-management';
+import { CollectionProp, ContentTypeProps, PlainClientAPI } from 'contentful-management';
 
 const DEFAULT_ENTRY_FIELD_LOCALE = 'en-US';
 const FIELD_TYPES_WITH_REFS = ['Link', 'RichText'];
@@ -23,11 +23,7 @@ export const onEntryListUpdated: OnEntryListUpdatedHandler = async ({
   sdk,
   cma,
 }) => {
-  const contentTypes = await cma.contentType.getMany({
-    query: {
-      limit: 100,
-    },
-  });
+  const contentTypes = await getContentTypes(cma)
 
   const values = entries.reduce<EntryListExtraDataType['values']>(
     (res, entry) => {
@@ -108,3 +104,17 @@ export const getNumberOfRefsInRichText = (content: ContentNode[]) => {
 
   return count;
 };
+
+
+let cachedContentTypes: CollectionProp<ContentTypeProps> | undefined
+export const getContentTypes = async (cma: PlainClientAPI) => {
+  if (!cachedContentTypes) {
+    cachedContentTypes = await cma.contentType.getMany({
+      query: {
+        limit: 100,
+      },
+    });
+  }
+
+  return cachedContentTypes as CollectionProp<ContentTypeProps>
+}

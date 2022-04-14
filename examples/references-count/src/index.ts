@@ -6,9 +6,6 @@ import type { KnownSDK } from '@contentful/app-sdk';
 import { onEntryListUpdated } from './locations/EntryList';
 
 init((sdk: KnownSDK) => {
-  // Creating a CMA client allows you to use the contentful-management library
-  // within your app. See the contentful-management documentation at https://contentful.github.io/contentful-management.js/contentful-management/latest/
-  // to learn what is possible.
   const cma = createClient(
     { apiAdapter: sdk.cmaAdapter },
     {
