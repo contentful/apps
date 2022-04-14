@@ -1,6 +1,7 @@
 import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 
+// For this case, we only care about short text fields
 const SHORT_TEXT_TYPE = 'Symbol';
 
 export const filterShortTextFieldCTs = (cts: ContentTypeProps[]) => {
@@ -9,6 +10,9 @@ export const filterShortTextFieldCTs = (cts: ContentTypeProps[]) => {
   });
 };
 
+// Initially, we need to go through all content types
+// and set the ones with the app assigned to its short
+// text fields with checkbox as selected
 export const setInitialFieldContentTypes = (
   cma: PlainClientAPI,
   sdk: AppExtensionSDK,
@@ -34,6 +38,10 @@ export const setInitialFieldContentTypes = (
   };
 };
 
+// building the final state to save
+// we replace all fields with type short text
+// for all selected content types
+// You could also build a select tree for each field
 export const buildFieldTargetState = (selectedFieldCTs: string[], fieldCTs: ContentTypeProps[]) => {
   return selectedFieldCTs.reduce((acc, ct) => {
     const fullCT = fieldCTs.find((item) => item.sys.id === ct);
