@@ -1,5 +1,6 @@
-import { createClient } from 'contentful-management';
+import 'regenerator-runtime/runtime' // should be always imported at the top
 
+import { createClient } from 'contentful-management';
 import { init, locations, EntryListExtensionSDK } from '@contentful/app-sdk';
 import type { KnownSDK } from '@contentful/app-sdk';
 
