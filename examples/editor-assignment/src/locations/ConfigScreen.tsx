@@ -116,16 +116,13 @@ const ConfigScreen = () => {
 
   // Get all editor interfaces to set initial list of content types
   // with app already assigned to it
-  useEffect(setInitialSidebarContentTypes(cma, sdk, setSelectedSidebarCTs), [
-    cma,
-    sdk,
-    setSelectedSidebarCTs,
-  ]);
-  useEffect(setInitialFieldContentTypes(cma, sdk, setSelectedFieldCTs), [
-    cma,
-    sdk,
-    setSelectedFieldCTs,
-  ]);
+  useEffect(() => {
+    setInitialSidebarContentTypes(cma, sdk, setSelectedSidebarCTs);
+  }, [cma, sdk, setSelectedSidebarCTs]);
+
+  useEffect(() => {
+    setInitialFieldContentTypes(cma, sdk, setSelectedFieldCTs);
+  }, [cma, sdk, setSelectedFieldCTs]);
 
   return (
     <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>

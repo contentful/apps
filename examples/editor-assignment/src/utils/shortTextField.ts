@@ -18,24 +18,22 @@ export const setInitialFieldContentTypes = (
   sdk: AppExtensionSDK,
   setSelectedCTs: (cts: string[]) => void
 ) => {
-  return () => {
-    (async () => {
-      const editorInterfaces = await cma.editorInterface.getMany({
-        spaceId: sdk.ids.space,
-        environmentId: sdk.ids.environment,
-      });
-      // go through all editor interfaces and see if the field contains the current app
-      const assignedCTs = editorInterfaces.items
-        .filter((ei) => {
-          const fieldWidget = ei.controls?.find(
-            (item) => item.widgetId === sdk.ids.app && item.widgetNamespace === 'app'
-          );
-          return !!fieldWidget;
-        })
-        .map((ei) => ei.sys.contentType.sys.id);
-      setSelectedCTs(assignedCTs);
-    })();
-  };
+  (async () => {
+    const editorInterfaces = await cma.editorInterface.getMany({
+      spaceId: sdk.ids.space,
+      environmentId: sdk.ids.environment,
+    });
+    // go through all editor interfaces and see if the field contains the current app
+    const assignedCTs = editorInterfaces.items
+      .filter((ei) => {
+        const fieldWidget = ei.controls?.find(
+          (item) => item.widgetId === sdk.ids.app && item.widgetNamespace === 'app'
+        );
+        return !!fieldWidget;
+      })
+      .map((ei) => ei.sys.contentType.sys.id);
+    setSelectedCTs(assignedCTs);
+  })();
 };
 
 // building the final state to save
