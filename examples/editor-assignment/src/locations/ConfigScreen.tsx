@@ -4,12 +4,42 @@ import { Heading, Form, Accordion, Flex, Checkbox } from '@contentful/f36-compon
 import { css } from 'emotion';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps } from 'contentful-management';
+import tokens from '@contentful/f36-tokens';
+import { setInitialSidebarContentTypes } from '../utils/sidebar';
+import {
+  filterShortTextFieldCTs,
+  setInitialFieldContentTypes,
+  buildFieldTargetState,
+} from '../utils/shortTextField';
+const merge = require('lodash.merge');
 
 export interface AppInstallationParameters {}
+
+const buildSidebarTargetState = (selectedSidebarCTs: string[]) => {
+  return selectedSidebarCTs.reduce(
+    (acc, ct) => ({
+      ...acc,
+      [ct]: {
+        sidebar: { position: 0 },
+      },
+    }),
+    {}
+  );
+};
+
+const onCTSelect =
+  (selectedCTs: string[], setSelectedCTs: (cts: string[]) => void) => (ct: string) => {
+    selectedCTs.includes(ct)
+      ? setSelectedCTs(selectedCTs.filter((item) => item !== ct))
+      : setSelectedCTs([...selectedCTs, ct]);
+  };
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
+  const [selectedSidebarCTs, setSelectedSidebarCTs] = useState<string[]>([]);
+  const [supportedFieldCTs, setSupportedFieldCTs] = useState<ContentTypeProps[]>([]);
+  const [selectedFieldCTs, setSelectedFieldCTs] = useState<string[]>([]);
   const sdk = useSDK<AppExtensionSDK>();
   const cma = useCMA();
 
@@ -27,9 +57,28 @@ const ConfigScreen = () => {
       parameters,
       // In case you don't want to submit any update to app
       // locations, you can just pass the currentState as is
-      targetState: currentState,
+      targetState: {
+        EditorInterface: {
+          ...currentState?.EditorInterface,
+
+          // apply to all selected content types' sidebar & fields
+          ...merge(
+            buildSidebarTargetState(selectedSidebarCTs),
+            buildFieldTargetState(selectedFieldCTs, supportedFieldCTs)
+          ),
+        },
+      },
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, selectedSidebarCTs, selectedFieldCTs, supportedFieldCTs]);
+
+  const onSidebarContentTypeClick = useCallback(
+    onCTSelect(selectedSidebarCTs, setSelectedSidebarCTs),
+    [selectedSidebarCTs, setSelectedSidebarCTs]
+  );
+  const onFieldContentTypeClick = useCallback(onCTSelect(selectedFieldCTs, setSelectedFieldCTs), [
+    selectedFieldCTs,
+    setSelectedFieldCTs,
+  ]);
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
@@ -56,22 +105,65 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const cts = await cma.contentType.getMany({ spaceId: sdk.ids.space, environmentId: sdk.ids.environment });
+      const cts = await cma.contentType.getMany({
+        spaceId: sdk.ids.space,
+        environmentId: sdk.ids.environment,
+      });
       setContentTypes(cts.items || []);
+      setSupportedFieldCTs(filterShortTextFieldCTs(cts.items));
     })();
   }, [cma, sdk]);
+
+  // Get all editor interfaces to set initial list of content types
+  // with app already assigned to it
+  useEffect(setInitialSidebarContentTypes(cma, sdk, setSelectedSidebarCTs), [
+    cma,
+    sdk,
+    setSelectedSidebarCTs,
+  ]);
+  useEffect(setInitialFieldContentTypes(cma, sdk, setSelectedFieldCTs), [
+    cma,
+    sdk,
+    setSelectedFieldCTs,
+  ]);
 
   return (
     <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
       <Form>
         <Heading>Editor assignment example</Heading>
         <Accordion>
-          <Accordion.Item title="Content Types">
-            <Checkbox.Group name="assigned-content-types">
+          <Accordion.Item title="Assign to Content Type Sidebar">
             {contentTypes.map((ct) => (
-              <Checkbox>{ct.name}</Checkbox>
+              <Checkbox
+                isChecked={selectedSidebarCTs.includes(ct.sys.id)}
+                onChange={() => {
+                  onSidebarContentTypeClick(ct.sys.id);
+                }}
+                key={ct.sys.id}
+                className={css({
+                  margin: tokens.spacingM,
+                })}
+              >
+                {ct.name}
+              </Checkbox>
             ))}
-            </Checkbox.Group>
+          </Accordion.Item>
+          <Accordion.Item title="Assign to Content Type Field (Short Text)">
+            {selectedFieldCTs.toString()}
+            {supportedFieldCTs.map((ct) => (
+              <Checkbox
+                isChecked={selectedFieldCTs.includes(ct.sys.id)}
+                onChange={() => {
+                  onFieldContentTypeClick(ct.sys.id);
+                }}
+                key={ct.sys.id}
+                className={css({
+                  margin: tokens.spacingM,
+                })}
+              >
+                {ct.name}
+              </Checkbox>
+            ))}
           </Accordion.Item>
         </Accordion>
       </Form>

@@ -10,13 +10,14 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
-    const { getByText } = render(<ConfigScreen />);
+    const configScreen = render(<ConfigScreen />);
 
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();
 
-    expect(
-      getByText('Welcome to your contentful app. This is your config page.')
-    ).toBeInTheDocument();
+    expect(configScreen.getByText('Assign to Content Type Sidebar')).toBeInTheDocument();
+    expect(configScreen.getByText('Assign to Content Type Field (Short Text)')).toBeInTheDocument();
+
+    expect(configScreen.container).toMatchSnapshot();
   });
 });

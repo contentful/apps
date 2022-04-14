@@ -9,6 +9,7 @@
     "@contentful/react-apps-toolkit": "^1.0.2",
     "contentful-management": "^9.1.2",
     "emotion": "^10.0.27",
+    "lodash.merge": "^4.6.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "^5.0.0"
@@ -43,6 +44,7 @@
     "@testing-library/react": "^12.1.5",
     "@tsconfig/create-react-app": "^1.0.2",
     "@types/jest": "^27.4.1",
+    "@types/lodash.merge": "^4.6.6",
     "@types/node": "^17.0.23",
     "@types/react": "^17.0.43",
     "@types/react-dom": "^18.0.0",
