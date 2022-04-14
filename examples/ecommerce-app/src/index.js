@@ -1,8 +1,8 @@
 import './index.css';
 import { setup } from '@contentful/ecommerce-app-base';
 import { EntityList } from '@contentful/f36-components';
-import { useAsync } from 'react-async-hook';
 import { render } from 'react-dom';
+import { useEffect, useState } from 'react';
 
 setup({
   makeCTA: () => 'Select a product',
@@ -38,14 +38,19 @@ function DialogLocation({ sdk }) {
   const apiKey = sdk.parameters.installation.apiKey;
   const projectId = sdk.parameters.installation.projectId;
 
-  const { result: products } = useAsync(async () => {
-    const response = await fetch(
-      `/ecommerce_api_response.json?api_key=${apiKey}&project_id=${projectId}`
-    );
-    return response.json();
+  const [products, setProducts] = useState();
+  useEffect(async () => {
+    const fetchProducts = async () => {
+      const response = await fetch(
+        `/ecommerce_api_response.json?api_key=${apiKey}&project_id=${projectId}`
+      );
+      return response.json();
+    };
+
+    fetchProducts().then(setProducts);
   }, [apiKey, projectId]);
 
-  if (!products) {
+  if (products === undefined) {
     return <div>Please wait</div>;
   }
 
