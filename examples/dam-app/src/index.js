@@ -1,9 +1,9 @@
-import './index.css';
 import { setup } from '@contentful/dam-app-base';
 import { EntityList } from '@contentful/f36-components';
-import pick from 'lodash/pick';
-import { useAsync } from 'react-async-hook';
+import { useEffect, useState } from 'react';
 import { render } from 'react-dom';
+import './index.css';
+import { pick } from './utils';
 
 const CTA = 'Sample DAM Demo App';
 const FIELDS_TO_PERSIST = ['id', 'name', 'url'];
@@ -42,14 +42,19 @@ function DialogLocation({ sdk }) {
   const apiKey = sdk.parameters.installation.apiKey;
   const projectId = sdk.parameters.installation.projectId;
 
-  const { result: damData } = useAsync(async () => {
-    const response = await fetch(
-      `/dam_api_response.json?api_key=${apiKey}&project_id=${projectId}`
-    );
-    return response.json();
+  const [damData, setDAMData] = useState();
+  useEffect(() => {
+    const fetchAssets = async () => {
+      const response = await fetch(
+        `/dam_api_response.json?api_key=${apiKey}&project_id=${projectId}`
+      );
+      return response.json();
+    };
+
+    fetchAssets().then(setDAMData);
   }, [apiKey, projectId]);
 
-  if (!damData) {
+  if (damData === undefined) {
     return <div>Please wait</div>;
   }
 
