@@ -19,7 +19,7 @@ const EntryList = () => {
       }
     }
 
-    sdk.entryList.onEntryListUpdated((props) => onEntryListUpdated({entries: props.entries}))
+    sdk.entryList.onEntryListUpdated(onEntryListUpdated)
   }, [sdk.entryList])
 
   return null;

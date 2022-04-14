@@ -13,6 +13,6 @@ yarn
 yarn start
 ```
 
-To test, you can create an app definition in your Contentful organization settings pointing to `http://localhost:3000` and registering the `entry-list` locations.
+To test, you can create an app definition in your Contentful organization settings pointing to `http://localhost:3000` and registering the `entry-list` location.
 
 [Read the docs](https://www.contentful.com/developers/docs/extensibility/app-framework/) for more information.
