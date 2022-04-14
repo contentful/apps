@@ -42,15 +42,14 @@ const styles = {
   }),
   grid: css({
     display: 'grid',
+    gap: '20px',
     gridTemplateColumns: 'repeat(3, 1fr)',
   }),
   card: (disabled: boolean) =>
     css({
       margin: '10px',
       position: 'relative',
-      width: '150px',
-      height: '100px',
-      '> img': {
+      img: {
         cursor: disabled ? 'move' : 'pointer',
         display: 'block',
         maxWidth: '150px',
@@ -64,6 +63,8 @@ const styles = {
     top: '-10px',
     right: '-10px',
     backgroundColor: 'white',
+    padding: 0,
+    minHeight: 'initial',
   }),
 };
 
