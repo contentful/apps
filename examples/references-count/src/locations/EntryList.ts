@@ -5,7 +5,8 @@ import {
 } from '@contentful/app-sdk';
 import { CollectionProp, ContentTypeProps, PlainClientAPI } from 'contentful-management';
 
-const DEFAULT_ENTRY_FIELD_LOCALE = 'en-US';
+
+const DEFAULT_ENTRY_FIELD_LOCALE = 'en-US'; // consider changing to the default locale of your space
 const FIELD_TYPES_WITH_REFS = ['Link', 'RichText'];
 const NODE_TYPES_WITH_REFS = [
   'embedded-entry-block',
@@ -111,7 +112,7 @@ export const getContentTypes = async (cma: PlainClientAPI) => {
   if (!cachedContentTypes) {
     cachedContentTypes = await cma.contentType.getMany({
       query: {
-        limit: 100,
+        limit: 1000,
       },
     });
   }
