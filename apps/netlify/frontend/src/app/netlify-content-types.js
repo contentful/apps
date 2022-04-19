@@ -1,7 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Note, Text, TextLink, Heading, Paragraph, Checkbox } from '@contentful/f36-components';
+import {
+  Note,
+  Text,
+  TextLink,
+  Heading,
+  Paragraph,
+  Checkbox,
+} from '@contentful/f36-components';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 
@@ -34,9 +41,7 @@ const NetlifyContentTypes = ({
     if (id === SELECT_ALL_CHECKBOX) {
       changed = allSelected ? [] : contentTypes.map(([id]) => id);
     } else {
-      changed = isChecked
-        ? enabledContentTypes.concat([id])
-        : enabledContentTypes.filter((cur) => cur !== id);
+      changed = isChecked ? enabledContentTypes.concat([id]) : enabledContentTypes.filter((cur) => cur !== id);
     }
 
     onEnabledContentTypesChange(changed);
@@ -66,10 +71,7 @@ const NetlifyContentTypes = ({
           and assign it to the app from this screen.
         </Note>
       ) : (
-        <Checkbox.Group
-          onChange={onChange}
-          value={allSelected ? [SELECT_ALL_CHECKBOX, ...enabledContentTypes] : enabledContentTypes}
-        >
+        <Checkbox.Group onChange={onChange} value={allSelected ? [SELECT_ALL_CHECKBOX, ...enabledContentTypes] : enabledContentTypes}>
           <Checkbox
             id={SELECT_ALL_CHECKBOX}
             value={SELECT_ALL_CHECKBOX}
@@ -79,7 +81,12 @@ const NetlifyContentTypes = ({
             Select all
           </Checkbox>
           {contentTypes.map(([id, name]) => (
-            <Checkbox key={id} id={`ct-box-${id}`} value={id} isDisabled={disabled}>
+            <Checkbox
+              key={id}
+              id={`ct-box-${id}`}
+              value={id}
+              isDisabled={disabled}
+            >
               <Text className={styles.checkboxLabel}>{name}</Text>
             </Checkbox>
           ))}
