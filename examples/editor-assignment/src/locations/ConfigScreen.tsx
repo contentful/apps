@@ -15,6 +15,30 @@ const merge = require('lodash.merge');
 
 export interface AppInstallationParameters {}
 
+const styles = {
+  body: css({
+    height: 'auto',
+    minHeight: '65vh',
+    margin: '0 auto',
+    marginTop: tokens.spacingXl,
+    padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
+    maxWidth: tokens.contentWidthText,
+    backgroundColor: tokens.colorWhite,
+    zIndex: 2,
+    boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
+    borderRadius: '2px',
+  }),
+  background: css({
+    display: 'block',
+    position: 'absolute',
+    zIndex: -1,
+    top: 0,
+    width: '100%',
+    height: '300px',
+    backgroundColor: tokens.colorPrimary,
+  }),
+};
+
 const buildSidebarTargetState = (selectedSidebarCTs: string[]) => {
   return selectedSidebarCTs.reduce(
     (acc, ct) => ({
@@ -125,46 +149,51 @@ const ConfigScreen = () => {
   }, [cma, sdk, setSelectedFieldCTs]);
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
-      <Form>
-        <Heading>Editor assignment example</Heading>
-        <Accordion>
-          <Accordion.Item title="Assign to Content Type Sidebar">
-            {contentTypes.map((ct) => (
-              <Checkbox
-                isChecked={selectedSidebarCTs.includes(ct.sys.id)}
-                onChange={() => {
-                  onSidebarContentTypeClick(ct.sys.id);
-                }}
-                key={ct.sys.id}
-                className={css({
-                  margin: tokens.spacingM,
-                })}
-              >
-                {ct.name}
-              </Checkbox>
-            ))}
-          </Accordion.Item>
-          <Accordion.Item title="Assign to Content Type Field (Short Text)">
-            {selectedFieldCTs.toString()}
-            {supportedFieldCTs.map((ct) => (
-              <Checkbox
-                isChecked={selectedFieldCTs.includes(ct.sys.id)}
-                onChange={() => {
-                  onFieldContentTypeClick(ct.sys.id);
-                }}
-                key={ct.sys.id}
-                className={css({
-                  margin: tokens.spacingM,
-                })}
-              >
-                {ct.name}
-              </Checkbox>
-            ))}
-          </Accordion.Item>
-        </Accordion>
-      </Form>
-    </Flex>
+    <>
+      <div className={styles.background} />
+      <div className={styles.body}>
+        <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
+          <Form>
+            <Heading>Editor assignment example</Heading>
+            <Accordion>
+              <Accordion.Item title="Assign to Content Type Sidebar">
+                {contentTypes.map((ct) => (
+                  <Checkbox
+                    isChecked={selectedSidebarCTs.includes(ct.sys.id)}
+                    onChange={() => {
+                      onSidebarContentTypeClick(ct.sys.id);
+                    }}
+                    key={ct.sys.id}
+                    className={css({
+                      margin: tokens.spacingM,
+                    })}
+                  >
+                    {ct.name}
+                  </Checkbox>
+                ))}
+              </Accordion.Item>
+              <Accordion.Item title="Assign to Content Type Field (Short Text)">
+                {selectedFieldCTs.toString()}
+                {supportedFieldCTs.map((ct) => (
+                  <Checkbox
+                    isChecked={selectedFieldCTs.includes(ct.sys.id)}
+                    onChange={() => {
+                      onFieldContentTypeClick(ct.sys.id);
+                    }}
+                    key={ct.sys.id}
+                    className={css({
+                      margin: tokens.spacingM,
+                    })}
+                  >
+                    {ct.name}
+                  </Checkbox>
+                ))}
+              </Accordion.Item>
+            </Accordion>
+          </Form>
+        </Flex>
+      </div>
+    </>
   );
 };
 
