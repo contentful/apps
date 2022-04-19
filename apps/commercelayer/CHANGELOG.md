@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.44](https://github.com/contentful/apps/compare/@contentful/commercelayer-products@1.5.43...@contentful/commercelayer-products@1.5.44) (2022-04-19)
+
+**Note:** Version bump only for package @contentful/commercelayer-products
+
+
+
+
+
 ## [1.5.43](https://github.com/contentful/apps/compare/@contentful/commercelayer-products@1.5.42...@contentful/commercelayer-products@1.5.43) (2022-04-19)
 
 **Note:** Version bump only for package @contentful/commercelayer-products
