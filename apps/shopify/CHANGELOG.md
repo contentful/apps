@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.47](https://github.com/contentful/apps/compare/@contentful/shopify-sku@1.8.46...@contentful/shopify-sku@1.8.47) (2022-04-19)
+
+**Note:** Version bump only for package @contentful/shopify-sku
+
+
+
+
+
+## [1.8.46](https://github.com/contentful/apps/compare/@contentful/shopify-sku@1.8.45...@contentful/shopify-sku@1.8.46) (2022-04-19)
+
+**Note:** Version bump only for package @contentful/shopify-sku
+
+
+
+
+
+## [1.8.45](https://github.com/contentful/apps/compare/@contentful/shopify-sku@1.8.44...@contentful/shopify-sku@1.8.45) (2022-04-15)
+
+**Note:** Version bump only for package @contentful/shopify-sku
+
+
+
+
+
+## [1.8.44](https://github.com/contentful/apps/compare/@contentful/shopify-sku@1.8.43...@contentful/shopify-sku@1.8.44) (2022-04-15)
+
+**Note:** Version bump only for package @contentful/shopify-sku
+
+
+
+
+
+## [1.8.43](https://github.com/contentful/apps/compare/@contentful/shopify-sku@1.8.42...@contentful/shopify-sku@1.8.43) (2022-04-15)
+
+**Note:** Version bump only for package @contentful/shopify-sku
+
+
+
+
+
 ## [1.8.42](https://github.com/contentful/apps/compare/@contentful/shopify-sku@1.8.41...@contentful/shopify-sku@1.8.42) (2022-04-11)
 
 **Note:** Version bump only for package @contentful/shopify-sku

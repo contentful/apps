@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.6.93](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.92...@contentful/ecommerce-app-base@2.6.93) (2022-04-19)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+
+
+
+
+## [2.6.92](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.91...@contentful/ecommerce-app-base@2.6.92) (2022-04-19)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+
+
+
+
+## [2.6.91](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.90...@contentful/ecommerce-app-base@2.6.91) (2022-04-15)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+
+
+
+
+## [2.6.90](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.89...@contentful/ecommerce-app-base@2.6.90) (2022-04-15)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 9.0.0 to 9.1.1 ([#1088](https://github.com/contentful/apps/issues/1088)) ([9d04a40](https://github.com/contentful/apps/commit/9d04a4001dc471f04e855556c1b8fc5ba155e27f))
+* **deps:** bump contentful-management from 9.1.1 to 9.2.1 ([#1100](https://github.com/contentful/apps/issues/1100)) ([3078c98](https://github.com/contentful/apps/commit/3078c98a30f0c6d9bc0e3b6d1640cc58120afcb0))
+* **deps:** bump contentful-management from 9.2.1 to 9.3.0 ([#1122](https://github.com/contentful/apps/issues/1122)) ([4979f8b](https://github.com/contentful/apps/commit/4979f8bce9d2859d5aa70424838e1b48a9c74541))
+
+
+
+
+
 ## [2.6.89](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@2.6.88...@contentful/ecommerce-app-base@2.6.89) (2022-04-11)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
