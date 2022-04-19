@@ -16,4 +16,4 @@ To test it, you can create an app definition in your Contentful organization set
 
 ## Keep in mind:
 
-- If you have a different default locale from the `en-US`, consider changing the `DEFAULT_ENTRY_FIELD_LOCALE` const in the [src/location/EntryList.ts](https://github.com/contentful/apps/blob/b9bc0476314d05ffc222122f3425d6f1b419e0de/examples/references-count/src/locations/EntryList.ts#L8)
+- If you have a different default locale from the `en-US`, consider changing the `DEFAULT_ENTRY_FIELD_LOCALE` const in the [src/location/EntryList.ts](https://github.com/contentful/apps/blob/feat/add-entry-list-examples/examples/references-count/src/locations/EntryList.ts#L9)
