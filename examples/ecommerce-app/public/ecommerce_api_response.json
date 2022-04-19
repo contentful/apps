@@ -1,0 +1,26 @@
+[
+  {
+    "sku": "6bwo3iKRBkAsC7wMgrvi1h",
+    "id": "6bwo3iKRBkAsC7wMgrvi1h",
+    "name": "Cycle Image",
+    "image": "https://cdn.pixabay.com/photo/2017/09/17/02/02/png-2757379_1280.png"
+  },
+  {
+    "sku": "693934iKRBkAsC7wMgrvi1h",
+    "name": "Fruit",
+    "id": "693934iKRBkAsC7wMgrvi1h",
+    "image": "https://cdn.pixabay.com/photo/2016/02/23/17/29/banana-1218133_1280.png"
+  },
+  {
+    "sku": "234324KRB245345Mgrvi1h",
+    "name": "Clock",
+    "id": "234324KRB245345Mgrvi1h",
+    "image": "https://cdn.pixabay.com/photo/2016/12/08/11/50/time-1891569_1280.png"
+  },
+  {
+    "sku": "oasdfuoi4i345345AsC7wMgrvi1h",
+    "name": "4th Image",
+    "id": "oasdfuoi4i345345AsC7wMgrvi1h",
+    "image": "https://cdn.pixabay.com/photo/2016/12/06/01/26/colour-1885352_1280.jpg"
+  }
+]
