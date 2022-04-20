@@ -17,6 +17,6 @@ describe('ProductSelectionList', () => {
 
   it('should render successfully', async () => {
     const { getAllByTestId } = renderComponent(defaultProps);
-    expect(getAllByTestId('ProductSelectionListItem')).toHaveLength(productPreviews.length);
+    expect(getAllByTestId('product-selection-list-item')).toHaveLength(productPreviews.length);
   });
 });

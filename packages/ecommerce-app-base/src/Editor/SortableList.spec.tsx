@@ -25,6 +25,6 @@ describe('SortableList', () => {
   it('should render successfully', async () => {
     const { queryAllByTestId } = renderComponent(defaultProps);
 
-    expect(queryAllByTestId('SortableListItem')).toHaveLength(productPreviews.length);
+    expect(queryAllByTestId('sortable-list-item')).toHaveLength(productPreviews.length);
   });
 });

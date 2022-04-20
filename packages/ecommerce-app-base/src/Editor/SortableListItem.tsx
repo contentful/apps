@@ -125,7 +125,7 @@ export const SortableListItem = SortableElement<Props>(
 
     return (
       <Card
-        data-testid="SortableListItem"
+        data-testid="sortable-list-item"
         className={styles.card}
         dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}
       >
