@@ -270,7 +270,7 @@ export default class AppConfig extends React.Component<Props, State> {
             </Note>
           </>
         )}
-        {appReady === true ? (
+        {appReady && (
           <FieldSelector
             contentTypes={contentTypes}
             compatibleFields={compatibleFields}
@@ -280,7 +280,7 @@ export default class AppConfig extends React.Component<Props, State> {
             onFieldSkuTypesChange={this.onFieldSkuTypesChange}
             skuTypes={skuTypes}
           />
-        ) : null}
+        )}
       </>
     );
   }
