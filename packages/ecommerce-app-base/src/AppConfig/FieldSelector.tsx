@@ -93,59 +93,56 @@ export default class FieldSelector extends React.Component<Props, State> {
     const defaultSkuType = skuTypes.find((skuType) => skuType.default === true)?.id;
 
     return (
-      <React.Fragment>
-        {contentTypes.map((ct) => {
-          const fields = compatibleFields[ct.sys.id];
-          return (
-            <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
-              <Subheading>{ct.name}</Subheading>
-              <Form>
-                {fields.map((field) => (
-                  <Flex flexDirection="column" gap="spacingXs" key={field.id}>
-                    <Checkbox
-                      id={`field-box-${ct.sys.id}-${field.id}`}
-                      helpText={`${
-                        field.type === 'Symbol' ? 'Short text' : 'Short text, list'
-                      } · Field ID: ${field.id}`}
-                      isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                      onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
-                    >
-                      {field.name}
-                    </Checkbox>
-                    {skuTypes.length > 0 && (selectedFields[ct.sys.id] || []).includes(field.id) ? (
-                      <>
-                        <Flex>
-                          {skuTypes.map((skuType) => (
-                            <Radio
-                              id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
-                              name={`skuType-${ct.sys.id}-${field.id}`}
-                              value={skuType.id}
-                              isChecked={
-                                (fieldSkuTypes[ct.sys.id]?.[field.id] ?? defaultSkuType) ===
-                                skuType.id
-                              }
-                              onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}
-                              className="f36-margin-left--l"
-                            >
-                              {skuType.name}
-                            </Radio>
-                          ))}
-                        </Flex>
-                        {changedSkuTypes?.[ct.sys.id]?.[field.id] === true ? (
-                          <Paragraph className="f36-margin-left--l f36-margin-top--s">
-                            Note: Changing SKU type can cause problems with existing entries relying
-                            on the old SKU type.
-                          </Paragraph>
-                        ) : null}
-                      </>
-                    ) : null}
-                  </Flex>
-                ))}
-              </Form>
-            </div>
-          );
-        })}
-      </React.Fragment>
+      <>
+        {contentTypes.map((ct) => (
+          <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
+            <Subheading>{ct.name}</Subheading>
+            <Form>
+              {compatibleFields[ct.sys.id].map((field) => (
+                <Flex flexDirection="column" gap="spacingXs" key={field.id}>
+                  <Checkbox
+                    id={`field-box-${ct.sys.id}-${field.id}`}
+                    helpText={`${
+                      field.type === 'Symbol' ? 'Short text' : 'Short text, list'
+                    } · Field ID: ${field.id}`}
+                    isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
+                    onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
+                  >
+                    {field.name}
+                  </Checkbox>
+                  {skuTypes.length > 0 && (selectedFields[ct.sys.id] || []).includes(field.id) ? (
+                    <>
+                      <Flex>
+                        {skuTypes.map((skuType) => (
+                          <Radio
+                            id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
+                            name={`skuType-${ct.sys.id}-${field.id}`}
+                            value={skuType.id}
+                            isChecked={
+                              (fieldSkuTypes[ct.sys.id]?.[field.id] ?? defaultSkuType) ===
+                              skuType.id
+                            }
+                            onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}
+                            className="f36-margin-left--l"
+                          >
+                            {skuType.name}
+                          </Radio>
+                        ))}
+                      </Flex>
+                      {changedSkuTypes?.[ct.sys.id]?.[field.id] === true ? (
+                        <Paragraph className="f36-margin-left--l f36-margin-top--s">
+                          Note: Changing SKU type can cause problems with existing entries relying
+                          on the old SKU type.
+                        </Paragraph>
+                      ) : null}
+                    </>
+                  ) : null}
+                </Flex>
+              ))}
+            </Form>
+          </div>
+        ))}
+      </>
     );
   }
 }

@@ -32,29 +32,26 @@ export default class FieldSelector extends React.Component<Props> {
     const { compatibleFields, contentTypes, selectedFields } = this.props;
 
     return (
-      <React.Fragment>
-        {contentTypes.map((ct) => {
-          const fields = compatibleFields[ct.sys.id];
-          return (
-            <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
-              <Subheading>{ct.name}</Subheading>
-              <Form>
-                {fields.map((field) => (
-                  <Checkbox
-                    key={field.id}
-                    id={`field-box-${ct.sys.id}-${field.id}`}
-                    helpText={`Field ID: ${field.id}`}
-                    isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                    onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
-                  >
-                    {field.name}
-                  </Checkbox>
-                ))}
-              </Form>
-            </div>
-          );
-        })}
-      </React.Fragment>
+      <>
+        {contentTypes.map((ct) => (
+          <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
+            <Subheading>{ct.name}</Subheading>
+            <Form>
+              {compatibleFields[ct.sys.id].map((field) => (
+                <Checkbox
+                  key={field.id}
+                  id={`field-box-${ct.sys.id}-${field.id}`}
+                  helpText={`Field ID: ${field.id}`}
+                  isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
+                  onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
+                >
+                  {field.name}
+                </Checkbox>
+              ))}
+            </Form>
+          </div>
+        ))}
+      </>
     );
   }
 }
