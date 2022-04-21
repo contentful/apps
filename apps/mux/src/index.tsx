@@ -254,8 +254,7 @@ export class App extends React.Component<AppProps, AppState> {
       upload.on('progress', this.onUploadProgress);
       upload.on('success', this.onUploadSuccess);
     } catch (error) {
-      //this.setState({ error: error.message });
-      console.log('error, fix this.');
+      this.setState({ error: error.message });
     }
   };
 
