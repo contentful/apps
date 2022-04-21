@@ -6,7 +6,6 @@ import {
 import { CollectionProp, ContentTypeProps, PlainClientAPI } from 'contentful-management';
 
 
-const DEFAULT_ENTRY_FIELD_LOCALE = 'en-US'; // consider changing to the default locale of your space
 const FIELD_TYPES_WITH_REFS = ['Link', 'RichText'];
 const NODE_TYPES_WITH_REFS = [
   'embedded-entry-block',
@@ -25,6 +24,7 @@ export const onEntryListUpdated: OnEntryListUpdatedHandler = async ({
   cma,
 }) => {
   const contentTypes = await getContentTypes(cma)
+  const defaultLocale = sdk.locales.default
 
   const values = entries.reduce<EntryListExtraDataType['values']>(
     (res, entry) => {
@@ -53,7 +53,7 @@ export const onEntryListUpdated: OnEntryListUpdatedHandler = async ({
           return;
         }
 
-        const fieldData = field[DEFAULT_ENTRY_FIELD_LOCALE];
+        const fieldData = field[defaultLocale];
         const fieldType = fieldInfo.type;
 
         switch (fieldType) {
