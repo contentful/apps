@@ -13,27 +13,20 @@ export const filterShortTextFieldCTs = (cts: ContentTypeProps[]) => {
 // Initially, we need to go through all content types
 // and set the ones with the app assigned to its short
 // text fields with checkbox as selected
-export const setInitialFieldContentTypes = (
-  cma: PlainClientAPI,
-  sdk: AppExtensionSDK,
-  setSelectedCTs: (cts: string[]) => void
-) => {
-  (async () => {
-    const editorInterfaces = await cma.editorInterface.getMany({
-      spaceId: sdk.ids.space,
-      environmentId: sdk.ids.environment,
-    });
-    // go through all editor interfaces and see if the field contains the current app
-    const assignedCTs = editorInterfaces.items
-      .filter((ei) => {
-        const fieldWidget = ei.controls?.find(
-          (item) => item.widgetId === sdk.ids.app && item.widgetNamespace === 'app'
-        );
-        return !!fieldWidget;
-      })
-      .map((ei) => ei.sys.contentType.sys.id);
-    setSelectedCTs(assignedCTs);
-  })();
+export const getInitialFieldContentTypes = async (cma: PlainClientAPI, sdk: AppExtensionSDK) => {
+  const editorInterfaces = await cma.editorInterface.getMany({
+    spaceId: sdk.ids.space,
+    environmentId: sdk.ids.environment,
+  });
+  // go through all editor interfaces and see if the field contains the current app
+  return editorInterfaces.items
+    .filter((ei) => {
+      const fieldWidget = ei.controls?.find(
+        (item) => item.widgetId === sdk.ids.app && item.widgetNamespace === 'app'
+      );
+      return !!fieldWidget;
+    })
+    .map((ei) => ei.sys.contentType.sys.id);
 };
 
 // building the final state to save

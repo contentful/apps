@@ -5,10 +5,10 @@ import { css } from 'emotion';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { ContentTypeProps } from 'contentful-management';
 import tokens from '@contentful/f36-tokens';
-import { setInitialSidebarContentTypes } from '../utils/sidebar';
+import { getInitialSidebarContentTypes } from '../utils/sidebar';
 import {
   filterShortTextFieldCTs,
-  setInitialFieldContentTypes,
+  getInitialFieldContentTypes,
   buildFieldTargetState,
 } from '../utils/shortTextField';
 const merge = require('lodash.merge');
@@ -51,12 +51,11 @@ const buildSidebarTargetState = (selectedSidebarCTs: string[]) => {
   );
 };
 
-const onCTSelect =
-  (selectedCTs: string[], setSelectedCTs: (cts: string[]) => void) => (ct: string) => {
-    selectedCTs.includes(ct)
-      ? setSelectedCTs(selectedCTs.filter((item) => item !== ct))
-      : setSelectedCTs([...selectedCTs, ct]);
-  };
+const onCTSelect = (selectedCTs: string[], setSelectedCTs: (cts: string[]) => void, ct: string) => {
+  selectedCTs.includes(ct)
+    ? setSelectedCTs(selectedCTs.filter((item) => item !== ct))
+    : setSelectedCTs([...selectedCTs, ct]);
+};
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
@@ -96,13 +95,17 @@ const ConfigScreen = () => {
   }, [parameters, sdk, selectedSidebarCTs, selectedFieldCTs, supportedFieldCTs]);
 
   const onSidebarContentTypeClick = useCallback(
-    onCTSelect(selectedSidebarCTs, setSelectedSidebarCTs),
+    (ct: string) => {
+      onCTSelect(selectedSidebarCTs, setSelectedSidebarCTs, ct);
+    },
     [selectedSidebarCTs, setSelectedSidebarCTs]
   );
-  const onFieldContentTypeClick = useCallback(onCTSelect(selectedFieldCTs, setSelectedFieldCTs), [
-    selectedFieldCTs,
-    setSelectedFieldCTs,
-  ]);
+  const onFieldContentTypeClick = useCallback(
+    (ct: string) => {
+      onCTSelect(selectedFieldCTs, setSelectedFieldCTs, ct);
+    },
+    [selectedFieldCTs, setSelectedFieldCTs]
+  );
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
@@ -141,11 +144,17 @@ const ConfigScreen = () => {
   // Get all editor interfaces to set initial list of content types
   // with app already assigned to it
   useEffect(() => {
-    setInitialSidebarContentTypes(cma, sdk, setSelectedSidebarCTs);
+    (async () => {
+      const assignedCTs = await getInitialSidebarContentTypes(cma, sdk);
+      setSelectedSidebarCTs(assignedCTs);
+    })();
   }, [cma, sdk, setSelectedSidebarCTs]);
 
   useEffect(() => {
-    setInitialFieldContentTypes(cma, sdk, setSelectedFieldCTs);
+    (async () => {
+      const assignedCTs = await getInitialFieldContentTypes(cma, sdk);
+      setSelectedFieldCTs(assignedCTs);
+    })();
   }, [cma, sdk, setSelectedFieldCTs]);
 
   return (

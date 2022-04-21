@@ -1,4 +1,4 @@
-# Replace Sidebar and/or Short Fields
+# Assigning an app to Sidebar and/or Short Fields
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 !["Config screen view"](https://user-images.githubusercontent.com/3318312/163389377-2e6c8148-a98f-4627-a099-65b7141b1182.png)
 

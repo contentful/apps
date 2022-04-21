@@ -17,7 +17,5 @@ describe('Config Screen component', () => {
 
     expect(configScreen.getByText('Assign to Content Type Sidebar')).toBeInTheDocument();
     expect(configScreen.getByText('Assign to Content Type Field (Short Text)')).toBeInTheDocument();
-
-    expect(configScreen.container).toMatchSnapshot();
   });
 });
