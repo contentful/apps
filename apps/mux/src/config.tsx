@@ -41,6 +41,7 @@ interface IParameters {
   muxEnableSignedUrls?: boolean;
   muxSigningKeyId?: string;
   muxSigningKeyPrivate?: string;
+  muxDomain?: string;
 }
 
 interface IState {
@@ -193,7 +194,13 @@ class Config extends React.Component<ConfigProps, IState> {
   // Renders the UI of the app.
   render() {
     const {
-      parameters: { muxAccessTokenId, muxAccessTokenSecret, muxEnableSignedUrls, muxSigningKeyId },
+      parameters: {
+        muxAccessTokenId,
+        muxAccessTokenSecret,
+        muxEnableSignedUrls,
+        muxSigningKeyId,
+        muxDomain,
+      },
       contentTypes,
       compatibleFields,
     } = this.state;
@@ -340,6 +347,23 @@ class Config extends React.Component<ConfigProps, IState> {
               </Paragraph>
             )}
           </Form>
+          <hr className="config-splitter" />
+          <Paragraph>Custom Domain (if enabled) Otherwise leave as mux.com</Paragraph>
+          <TextField
+            required
+            name="mux-domain"
+            id="mux-domain"
+            labelText="Mux Domain"
+            value={muxDomain || 'mux.com'}
+            onChange={(e) =>
+              this.setState({
+                parameters: {
+                  ...this.state.parameters,
+                  muxDomain: (e.target as HTMLTextAreaElement).value,
+                },
+              })
+            }
+          />
           <hr className="config-splitter" />
           <Paragraph>After entering your API credentials, click 'Install' above.</Paragraph>
         </div>
