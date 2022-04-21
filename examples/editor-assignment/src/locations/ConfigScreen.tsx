@@ -182,7 +182,6 @@ const ConfigScreen = () => {
                 ))}
               </Accordion.Item>
               <Accordion.Item title="Assign to Content Type Field (Short Text)">
-                {selectedFieldCTs.toString()}
                 {supportedFieldCTs.map((ct) => (
                   <Checkbox
                     isChecked={selectedFieldCTs.includes(ct.sys.id)}
