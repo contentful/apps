@@ -1,5 +1,3 @@
-import get from 'lodash.get';
-
 import { Config, ParameterDefinition } from '../interfaces';
 
 export function toInputParameters(
@@ -10,7 +8,7 @@ export function toInputParameters(
     const defaultValue = typeof def.default === 'undefined' ? '' : `${def.default}`;
     return {
       ...acc,
-      [def.id]: `${get(parameterValues, [def.id], defaultValue)}`,
+      [def.id]: `${parameterValues?.[def.id] ?? defaultValue}`,
     };
   }, {});
 }

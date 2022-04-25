@@ -1,7 +1,7 @@
 {
   "name": "@contentful/dam-app-base",
   "description": "Library to build an app to integrate your Digital Asset Management (DAM) system of choice with Contentful",
-  "version": "1.3.65",
+  "version": "2.0.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
@@ -15,10 +15,9 @@
     "directory": "packages/dam-app-base"
   },
   "devDependencies": {
-    "@testing-library/react": "9.4.0",
+    "@testing-library/react": "12.1.3",
     "@types/array-move": "2.0.0",
     "@types/jest": "27.4.1",
-    "@types/lodash.get": "4.4.7",
     "@types/react": "17.0.43",
     "@types/react-dom": "18.0.2",
     "@types/react-sortable-hoc": "0.7.1",
@@ -33,13 +32,11 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "^4.0.0",
-    "@contentful/forma-36-fcss": "^0.3.3",
-    "@contentful/forma-36-react-components": "^3.93.2",
-    "@contentful/forma-36-tokens": "^0.11.0",
-    "@emotion/css": "^11.1.3",
-    "array-move": "^3.0.1",
+    "@contentful/f36-components": "^4.0.0",
+    "@contentful/f36-tokens": "^4.0.0",
+    "array-move": "^3.0.0",
     "contentful-management": "^10.0.0",
-    "lodash.get": "^4.4.2",
+    "emotion": "^10.0.0",
     "react-sortable-hoc": "^2.0.0"
   },
   "peerDependencies": {
@@ -52,10 +49,5 @@
     "prepublishOnly": "npm run build && npm run build:docs",
     "test": "jest --watch",
     "test:ci": "jest"
-  },
-  "browserslist": [
-    "last 5 Chrome version",
-    "> 1%",
-    "not ie <= 11"
-  ]
+  }
 }

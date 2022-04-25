@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.9.0](https://github.com/contentful/apps/compare/@contentful/bynder-assets@1.8.33...@contentful/bynder-assets@1.9.0) (2022-04-25)
+
+
+### Features
+
+* store tags of Bynder assets ([#1112](https://github.com/contentful/apps/issues/1112)) ([8d9f695](https://github.com/contentful/apps/commit/8d9f6951c938090be3615d58c59726047fd495c7))
+
+
+
+
+
+## [1.8.33](https://github.com/contentful/apps/compare/@contentful/bynder-assets@1.8.32...@contentful/bynder-assets@1.8.33) (2022-04-25)
+
+**Note:** Version bump only for package @contentful/bynder-assets
+
+
+
+
+
 ## [1.8.32](https://github.com/contentful/apps/compare/@contentful/bynder-assets@1.8.31...@contentful/bynder-assets@1.8.32) (2022-04-22)
 
 **Note:** Version bump only for package @contentful/bynder-assets

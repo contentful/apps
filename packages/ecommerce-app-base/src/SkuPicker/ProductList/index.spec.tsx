@@ -1,7 +1,11 @@
 import React from 'react';
-import { render, cleanup } from '@testing-library/react';
+import { render, cleanup, configure } from '@testing-library/react';
 import { Props, ProductList } from '.';
 import productPreviews from '../../__mocks__/productPreviews';
+
+configure({
+  testIdAttribute: 'data-test-id',
+});
 
 const defaultProps: Props = {
   products: productPreviews,
@@ -17,15 +21,28 @@ describe('ProductList', () => {
   afterEach(cleanup);
 
   it('should render successfully with no items selected', async () => {
-    const component = renderComponent(defaultProps);
-    expect(component.container).toMatchSnapshot();
+    const { getAllByTestId, getByTestId } = renderComponent(defaultProps);
+    expect(getAllByTestId('ProductListItem')).toHaveLength(productPreviews.length);
+    for (let product of productPreviews) {
+      expect(getByTestId(`product-preview-${product.sku}`)).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+    }
   });
 
   it('should render successfully with selected items', () => {
-    const component = renderComponent({
+    const selectedSKU = productPreviews[1].sku;
+    const { getAllByTestId, getByTestId } = renderComponent({
       ...defaultProps,
-      selectedSKUs: [productPreviews[1].sku],
+      selectedSKUs: [selectedSKU],
     });
-    expect(component.container).toMatchSnapshot();
+    expect(getAllByTestId('ProductListItem')).toHaveLength(productPreviews.length);
+    for (let product of productPreviews) {
+      expect(getByTestId(`product-preview-${product.sku}`)).toHaveAttribute(
+        'aria-checked',
+        selectedSKU === product.sku ? 'true' : 'false'
+      );
+    }
   });
 });

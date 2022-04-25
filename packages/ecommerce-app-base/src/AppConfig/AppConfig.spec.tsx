@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, cleanup, wait, fireEvent } from '@testing-library/react';
+import { render, cleanup, fireEvent, waitFor } from '@testing-library/react';
 
 import { AppExtensionSDK } from '@contentful/app-sdk';
 
@@ -72,7 +72,7 @@ describe('AppConfig', () => {
   it('renders app before installation', async () => {
     const sdk = makeSdkMock();
     const { getByLabelText } = renderComponent(sdk);
-    await wait(() => getByLabelText(/Commercetools Project Key/));
+    await waitFor(() => getByLabelText(/Commercetools Project Key/));
 
     [
       [/Commercetools Project Key/, ''],
@@ -116,7 +116,7 @@ describe('AppConfig', () => {
     });
 
     const { getByLabelText } = renderComponent(sdk);
-    await wait(() => getByLabelText(/Commercetools Project Key/));
+    await waitFor(() => getByLabelText(/Commercetools Project Key/));
 
     [
       [/Commercetools Project Key/, 'some-key'],
@@ -142,7 +142,7 @@ describe('AppConfig', () => {
   it('updates configuration', async () => {
     const sdk = makeSdkMock();
     const { getByLabelText } = renderComponent(sdk);
-    await wait(() => getByLabelText(/Commercetools Project Key/));
+    await waitFor(() => getByLabelText(/Commercetools Project Key/));
     [
       [/Commercetools Project Key/, 'some-key'],
       [/Client ID/, '12345'],

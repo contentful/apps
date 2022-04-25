@@ -1,5 +1,5 @@
 import React from 'react';
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 import { Product } from '../../interfaces';
 import { ProductSelectionListItem } from './ProductSelectionListItem';
 import { OtherProductsCounter } from './OtherProductsCounter';

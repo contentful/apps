@@ -1,7 +1,8 @@
 import React from 'react';
-import tokens from '@contentful/forma-36-tokens';
-import { Tooltip } from '@contentful/forma-36-react-components';
-import { css } from '@emotion/css';
+import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
+
+import { Tooltip } from '@contentful/f36-components';
 
 export interface Props {
   productCount: number;
@@ -40,7 +41,7 @@ export const OtherProductsCounter = (props: Props) => (
   <Tooltip
     targetWrapperClassName={styles.tooltip}
     content={`${props.productCount} more`}
-    place="bottom"
+    placement="bottom"
   >
     <div className={styles.label}>
       <span>+{props.productCount}</span>

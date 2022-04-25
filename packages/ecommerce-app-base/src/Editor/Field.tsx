@@ -1,17 +1,18 @@
-import * as React from 'react';
-import { Button } from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
-import { css } from '@emotion/css';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
-import { SortableComponent } from './SortableComponent';
-import {
-  ProductPreviewsFn,
-  OpenDialogFn,
-  DisabledPredicateFn,
-  MakeCTAFn,
-  Integration,
-} from '../interfaces';
+import { Button } from '@contentful/f36-components';
+import { ShoppingCartIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
+import * as React from 'react';
 import { FieldsSkuTypes } from '../AppConfig/fields';
+import {
+  DisabledPredicateFn,
+  Integration,
+  MakeCTAFn,
+  OpenDialogFn,
+  ProductPreviewsFn,
+} from '../interfaces';
+import { SortableComponent } from './SortableComponent';
 
 interface Props {
   sdk: FieldExtensionSDK;
@@ -135,11 +136,11 @@ export default class Field extends React.Component<Props, State> {
         <div className={styles.container}>
           <img src={this.props.logo} alt="Logo" className={styles.logo} />
           <Button
-            icon="ShoppingCart"
-            buttonType="muted"
+            startIcon={<ShoppingCartIcon />}
+            variant="secondary"
             size="small"
             onClick={this.onDialogOpen}
-            disabled={isDisabled}
+            isDisabled={isDisabled}
           >
             {this.props.makeCTA(sdk.field.type, skuType)}
           </Button>

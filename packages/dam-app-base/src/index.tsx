@@ -1,20 +1,15 @@
-import * as React from 'react';
-import { render } from 'react-dom';
-
 import {
+  AppExtensionSDK,
+  DialogExtensionSDK,
+  FieldExtensionSDK,
   init,
   locations,
-  FieldExtensionSDK,
-  DialogExtensionSDK,
-  AppExtensionSDK,
 } from '@contentful/app-sdk';
-
-import '@contentful/forma-36-react-components/dist/styles.css';
-import '@contentful/forma-36-fcss/dist/styles.css';
-
-import Field from './Editor/Field';
+import { GlobalStyles } from '@contentful/f36-components';
+import * as React from 'react';
+import { render } from 'react-dom';
 import AppConfig from './AppConfig/AppConfig';
-
+import Field from './Editor/Field';
 import { Integration } from './interfaces';
 
 export function setup(integration: Integration) {
@@ -27,29 +22,35 @@ export function setup(integration: Integration) {
 
     if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
       render(
-        <Field
-          sdk={sdk as FieldExtensionSDK}
-          cta={integration.cta}
-          logo={integration.logo}
-          makeThumbnail={integration.makeThumbnail}
-          openDialog={integration.openDialog}
-          isDisabled={integration.isDisabled}
-        />,
+        <>
+          <GlobalStyles />
+          <Field
+            sdk={sdk as FieldExtensionSDK}
+            cta={integration.cta}
+            logo={integration.logo}
+            makeThumbnail={integration.makeThumbnail}
+            openDialog={integration.openDialog}
+            isDisabled={integration.isDisabled}
+          />
+        </>,
         root
       );
     }
 
     if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
       render(
-        <AppConfig
-          name={integration.name}
-          sdk={sdk as AppExtensionSDK}
-          parameterDefinitions={integration.parameterDefinitions}
-          validateParameters={integration.validateParameters}
-          logo={integration.logo}
-          color={integration.color}
-          description={integration.description}
-        />,
+        <>
+          <GlobalStyles />
+          <AppConfig
+            name={integration.name}
+            sdk={sdk as AppExtensionSDK}
+            parameterDefinitions={integration.parameterDefinitions}
+            validateParameters={integration.validateParameters}
+            logo={integration.logo}
+            color={integration.color}
+            description={integration.description}
+          />
+        </>,
         root
       );
     }

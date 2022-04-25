@@ -1,19 +1,9 @@
+import { Checkbox, Flex, Form, Paragraph, Radio, Subheading } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
 import * as React from 'react';
-import tokens from '@contentful/forma-36-tokens';
-import { css } from '@emotion/css';
-import {
-  Form,
-  Subheading,
-  CheckboxField,
-  Typography,
-  FieldGroup,
-  Flex,
-  RadioButtonField,
-  Paragraph,
-} from '@contentful/forma-36-react-components';
-
-import { ContentType, CompatibleFields, SelectedFields, FieldsSkuTypes } from './fields';
 import { Integration } from '../interfaces';
+import { CompatibleFields, ContentType, FieldsSkuTypes, SelectedFields } from './fields';
 
 interface Props {
   contentTypes: ContentType[];
@@ -103,58 +93,56 @@ export default class FieldSelector extends React.Component<Props, State> {
     const defaultSkuType = skuTypes.find((skuType) => skuType.default === true)?.id;
 
     return (
-      <Typography>
-        {contentTypes.map((ct) => {
-          const fields = compatibleFields[ct.sys.id];
-          return (
-            <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
-              <Subheading>{ct.name}</Subheading>
-              <Form>
-                {fields.map((field) => (
-                  <FieldGroup key={field.id}>
-                    <CheckboxField
-                      id={`field-box-${ct.sys.id}-${field.id}`}
-                      labelText={field.name}
-                      helpText={`${
-                        field.type === 'Symbol' ? 'Short text' : 'Short text, list'
-                      } · Field ID: ${field.id}`}
-                      checked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                      onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
-                    />
-                    {skuTypes.length > 0 && (selectedFields[ct.sys.id] || []).includes(field.id) ? (
-                      <>
-                        <Flex>
-                          {skuTypes.map((skuType) => (
-                            <RadioButtonField
-                              key={skuType.id}
-                              id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
-                              name={`skuType-${ct.sys.id}-${field.id}`}
-                              value={skuType.id}
-                              labelText={skuType.name}
-                              className="f36-margin-left--l"
-                              checked={
-                                (fieldSkuTypes[ct.sys.id]?.[field.id] ?? defaultSkuType) ===
-                                skuType.id
-                              }
-                              onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}
-                            />
-                          ))}
-                        </Flex>
-                        {changedSkuTypes?.[ct.sys.id]?.[field.id] === true ? (
-                          <Paragraph className="f36-margin-left--l f36-margin-top--s">
-                            Note: Changing SKU type can cause problems with existing entries relying
-                            on the old SKU type.
-                          </Paragraph>
-                        ) : null}
-                      </>
-                    ) : null}
-                  </FieldGroup>
-                ))}
-              </Form>
-            </div>
-          );
-        })}
-      </Typography>
+      <>
+        {contentTypes.map((ct) => (
+          <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
+            <Subheading>{ct.name}</Subheading>
+            <Form>
+              {compatibleFields[ct.sys.id].map((field) => (
+                <Flex flexDirection="column" gap="spacingXs" key={field.id}>
+                  <Checkbox
+                    id={`field-box-${ct.sys.id}-${field.id}`}
+                    helpText={`${
+                      field.type === 'Symbol' ? 'Short text' : 'Short text, list'
+                    } · Field ID: ${field.id}`}
+                    isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
+                    onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
+                  >
+                    {field.name}
+                  </Checkbox>
+                  {skuTypes.length > 0 && (selectedFields[ct.sys.id] || []).includes(field.id) ? (
+                    <>
+                      <Flex>
+                        {skuTypes.map((skuType) => (
+                          <Radio
+                            id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
+                            name={`skuType-${ct.sys.id}-${field.id}`}
+                            value={skuType.id}
+                            isChecked={
+                              (fieldSkuTypes[ct.sys.id]?.[field.id] ?? defaultSkuType) ===
+                              skuType.id
+                            }
+                            onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}
+                            className="f36-margin-left--l"
+                          >
+                            {skuType.name}
+                          </Radio>
+                        ))}
+                      </Flex>
+                      {changedSkuTypes?.[ct.sys.id]?.[field.id] === true ? (
+                        <Paragraph className="f36-margin-left--l f36-margin-top--s">
+                          Note: Changing SKU type can cause problems with existing entries relying
+                          on the old SKU type.
+                        </Paragraph>
+                      ) : null}
+                    </>
+                  ) : null}
+                </Flex>
+              ))}
+            </Form>
+          </div>
+        ))}
+      </>
     );
   }
 }

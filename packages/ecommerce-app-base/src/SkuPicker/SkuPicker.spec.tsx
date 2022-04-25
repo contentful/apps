@@ -58,8 +58,8 @@ describe('SkuPicker', () => {
   afterEach(cleanup);
 
   it('should render successfully with no products selected', async () => {
-    const { container } = await renderComponent(defaultProps);
-    expect(container).toMatchSnapshot();
+    const { getByTestId } = await renderComponent(defaultProps);
+    expect(getByTestId('sku-search')).toBeInTheDocument();
   });
 
   describe('when it has infinite scrolling mode pagination', () => {

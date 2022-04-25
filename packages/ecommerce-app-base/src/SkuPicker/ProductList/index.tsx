@@ -1,6 +1,6 @@
 import React from 'react';
-import tokens from '@contentful/forma-36-tokens';
-import { css } from '@emotion/css';
+import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
 import { Product } from '../../interfaces';
 import { ProductListItem } from './ProductListItem';
 

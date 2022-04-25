@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  node: circleci/node@5.0.2
+
 commands:
   publish:
     steps:
@@ -38,10 +41,11 @@ commands:
 jobs:
   apps:
     docker:
-      - image: cimg/node:14.18
+      - image: cimg/base:stable
     resource_class: medium+
     steps:
       - checkout
+      - node/install
       - run:
           name: Install dependencies
           command: |
@@ -67,9 +71,10 @@ jobs:
 
   test-ts-example:
     docker:
-        - image: cimg/node:16.14.0
+      - image: cimg/base:stable
     steps:
       - checkout
+      - node/install
       - run:
           name: Install dependencies
           command: cd examples/typescript && npm i
@@ -82,9 +87,10 @@ jobs:
 
   test-js-example:
     docker:
-        - image: cimg/node:16.14.0
+      - image: cimg/base:stable
     steps:
       - checkout
+      - node/install
       - run:
           name: Install dependencies
           command: cd examples/javascript && npm i

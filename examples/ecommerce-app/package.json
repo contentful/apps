@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/ecommerce-app-base": "2.6.89",
+    "@contentful/ecommerce-app-base": "3.0.0",
     "@contentful/f36-components": "4.4.1",
     "cross-env": "7.0.3",
     "react": "17.0.2",
