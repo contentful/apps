@@ -31,5 +31,5 @@ export const createSignedThumbnailUrl = (
 ) => {
   const domain = muxDomain ?? 'mux.com';
   const token = sign(playbackId, signingKeyId, signingKeyPrivate, 't');
-  return `https://image.${muxDomain}/${playbackId}/thumbnail.jpg?token=${token}`;
+  return `https://image.${domain}/${playbackId}/thumbnail.jpg?token=${token}`;
 };
