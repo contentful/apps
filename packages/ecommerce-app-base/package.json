@@ -1,7 +1,7 @@
 {
   "name": "@contentful/ecommerce-app-base",
   "description": "Library to quickly build an app to integrate your e-commerce system of choice with Contentful",
-  "version": "2.6.93",
+  "version": "2.6.94",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
@@ -20,9 +20,9 @@
     "@types/array-move": "2.0.0",
     "@types/jest": "27.4.1",
     "@types/lodash": "4.14.179",
-    "@types/node": "17.0.25",
+    "@types/node": "17.0.26",
     "@types/react": "17.0.43",
-    "@types/react-dom": "17.0.13",
+    "@types/react-dom": "17.0.15",
     "@types/react-sortable-hoc": "0.7.1",
     "jest": "27.5.1",
     "react": "17.0.2",
@@ -30,15 +30,13 @@
     "rimraf": "3.0.2",
     "ts-jest": "27.1.4",
     "typedoc": "0.22.15",
-    "typedoc-plugin-markdown": "3.12.0",
+    "typedoc-plugin-markdown": "3.12.1",
     "typescript": "4.6.3"
   },
   "dependencies": {
     "@contentful/app-sdk": "^4.0.0",
-    "@contentful/f36-components": "^4.0.0",
-    "@contentful/f36-tokens": "^4.0.0",
     "array-move": "^3.0.0",
-    "contentful-management": "^9.0.0",
+    "contentful-management": "^10.0.0",
     "emotion": "^10.0.0",
     "lodash": "^4.0.0",
     "react-sortable-hoc": "^2.0.0"
