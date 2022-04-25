@@ -303,8 +303,8 @@ export class App extends React.Component<AppProps, AppState> {
     const { muxDomain } = this.props.sdk.parameters.installation as InstallationParams;
     const domain = muxDomain ? muxDomain : 'mux.com';
     this.setState({
-      playbackUrl: `https://stream.${muxDomain}/${playbackId}.m3u8`,
-      posterUrl: `https://image.${muxDomain}/${playbackId}/thumbnail.jpg`,
+      playbackUrl: `https://stream.${domain}/${playbackId}.m3u8`,
+      posterUrl: `https://image.${domain}/${playbackId}/thumbnail.jpg`,
     });
   };
 
