@@ -23,7 +23,8 @@ describe('SortableList', () => {
   afterEach(cleanup);
 
   it('should render successfully', async () => {
-    const component = renderComponent(defaultProps);
-    expect(component.container).toMatchSnapshot();
+    const { queryAllByTestId } = renderComponent(defaultProps);
+
+    expect(queryAllByTestId('sortable-list-item')).toHaveLength(productPreviews.length);
   });
 });

@@ -1,9 +1,12 @@
 import React from 'react';
-import { Button } from '@contentful/forma-36-react-components';
 import clamp from 'lodash/clamp';
 import range from 'lodash/range';
 import { doubleChevron } from '../iconsInBase64';
 import { styles } from './styles';
+
+import { Button } from '@contentful/f36-components';
+
+import { ChevronLeftIcon, ChevronRightIcon } from '@contentful/f36-icons';
 
 export interface Props {
   activePage: number;
@@ -42,17 +45,17 @@ export function Paginator(props: Props) {
     <div className={className}>
       <Button
         className={styles.button}
-        buttonType="muted"
-        disabled={hasOnlyOnePage || activePageIsAtPaginatorStart}
+        variant="secondary"
+        isDisabled={hasOnlyOnePage || activePageIsAtPaginatorStart}
         onClick={() => setActivePage(1)}
       >
         <img className={styles.chevronLeft} src={doubleChevron} alt="right" />
       </Button>
       <Button
-        icon="ChevronLeft"
+        startIcon={<ChevronLeftIcon />}
         className={styles.button}
-        buttonType="muted"
-        disabled={hasOnlyOnePage || activePageIsAtPaginatorStart}
+        variant="secondary"
+        isDisabled={hasOnlyOnePage || activePageIsAtPaginatorStart}
         onClick={() => setActivePage(activePage - 1)}
       />
       {getPagesRange(activePage, pageCount).map((pageIndex) => {
@@ -61,7 +64,7 @@ export function Paginator(props: Props) {
           <Button
             onClick={() => setActivePage(page)}
             className={styles.button}
-            buttonType={page === activePage ? 'primary' : 'muted'}
+            variant={page === activePage ? 'primary' : 'secondary'}
             testId={page === activePage ? 'active' : `inactive-${page}`}
             key={pageIndex}
           >
@@ -70,16 +73,16 @@ export function Paginator(props: Props) {
         );
       })}
       <Button
-        icon="ChevronRight"
-        buttonType="muted"
+        startIcon={<ChevronRightIcon />}
+        variant="secondary"
         className={styles.button}
-        disabled={hasOnlyOnePage || activePageIsAtPaginatorEnd}
+        isDisabled={hasOnlyOnePage || activePageIsAtPaginatorEnd}
         onClick={() => setActivePage(activePage + 1)}
       />
       <Button
-        buttonType="muted"
+        variant="secondary"
         className={styles.button}
-        disabled={hasOnlyOnePage || activePageIsAtPaginatorEnd}
+        isDisabled={hasOnlyOnePage || activePageIsAtPaginatorEnd}
         onClick={() => setActivePage(pageCount)}
       >
         <img className={styles.chevronRight} src={doubleChevron} alt="right" />

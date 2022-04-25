@@ -5,13 +5,14 @@ import {
   Heading,
   Paragraph,
   Note,
-  Typography,
-  TextField,
   Form,
   TextLink,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
-import { css } from '@emotion/css';
+  FormControl,
+  Flex,
+  TextInput,
+} from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
 
 import FieldSelector from './FieldSelector';
 
@@ -167,11 +168,10 @@ export default class AppConfig extends React.Component<Props, State> {
       <>
         <div className={styles.background(this.props.color)} />
         <div className={styles.body}>
-          <Typography>
-            <Heading>About {this.props.name}</Heading>
-            <Paragraph>{this.props.description}</Paragraph>
-            <hr className={styles.splitter} />
-          </Typography>
+          <Heading>About {this.props.name}</Heading>
+          <Paragraph>{this.props.description}</Paragraph>
+          <hr className={styles.splitter} />
+
           {this.renderApp()}
         </div>
         <div className={styles.icon}>
@@ -209,79 +209,78 @@ export default class AppConfig extends React.Component<Props, State> {
     return (
       <>
         {hasConfigurationOptions && (
-          <Typography>
+          <>
             <Heading>Configuration</Heading>
             <Form>
               {parameterDefinitions.map((def) => {
                 const key = `config-input-${def.id}`;
 
                 return (
-                  <TextField
-                    required={def.required}
-                    key={key}
-                    id={key}
-                    name={key}
-                    labelText={def.name}
-                    textInputProps={{
-                      width: def.type === 'Symbol' ? 'large' : 'medium',
-                      type: def.type === 'Symbol' ? 'text' : 'number',
-                      maxLength: 255,
-                    }}
-                    helpText={def.description}
-                    value={parameters[def.id]}
-                    onChange={this.onParameterChange.bind(this, def.id)}
-                  />
+                  <FormControl key={key} id={key}>
+                    <FormControl.Label>{def.name}</FormControl.Label>
+                    <TextInput
+                      name={key}
+                      width={def.type === 'Symbol' ? 'large' : 'medium'}
+                      type={def.type === 'Symbol' ? 'text' : 'number'}
+                      maxLength={255}
+                      isRequired={def.required}
+                      value={parameters[def.id]}
+                      onChange={this.onParameterChange.bind(this, def.id)}
+                    />
+                    <Flex justifyContent="space-between">
+                      <FormControl.HelpText>{def.description}</FormControl.HelpText>
+                      <FormControl.Counter />
+                    </Flex>
+                  </FormControl>
                 );
               })}
             </Form>
             <hr className={styles.splitter} />
-          </Typography>
+          </>
         )}
-        <Typography>
-          <Heading>Assign to fields</Heading>
-          {contentTypes.length > 0 ? (
+        <Heading>Assign to fields</Heading>
+        {contentTypes.length > 0 ? (
+          <Paragraph>
+            This app can only be used with <strong>Short text</strong> or{' '}
+            <strong>Short text, list</strong> fields. Select which fields you’d like to enable for
+            this app.
+          </Paragraph>
+        ) : (
+          <>
             <Paragraph>
               This app can only be used with <strong>Short text</strong> or{' '}
-              <strong>Short text, list</strong> fields. Select which fields you’d like to enable for
-              this app.
+              <strong>Short text, list</strong> fields.
             </Paragraph>
-          ) : (
-            <>
-              <Paragraph>
-                This app can only be used with <strong>Short text</strong> or{' '}
-                <strong>Short text, list</strong> fields.
-              </Paragraph>
-              <Note noteType="warning">
-                There are <strong>no content types with Short text or Short text, list</strong>{' '}
-                fields in this environment. You can add one in your{' '}
-                <TextLink
-                  linkType="primary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={
-                    environment === 'master'
-                      ? `https://app.contentful.com/spaces/${space}/content_types`
-                      : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-                  }
-                >
-                  content model
-                </TextLink>{' '}
-                and assign it to the app from this screen.
-              </Note>
-            </>
-          )}
-          {appReady === true ? (
-            <FieldSelector
-              contentTypes={contentTypes}
-              compatibleFields={compatibleFields}
-              selectedFields={selectedFields}
-              onSelectedFieldsChange={this.onSelectedFieldsChange}
-              fieldSkuTypes={fieldSkuTypes}
-              onFieldSkuTypesChange={this.onFieldSkuTypesChange}
-              skuTypes={skuTypes}
-            />
-          ) : null}
-        </Typography>
+            <Note variant="warning">
+              There are <strong>no content types with Short text or Short text, list</strong> fields
+              in this environment. You can add one in your{' '}
+              <TextLink
+                variant="primary"
+                target="_blank"
+                rel="noopener noreferrer"
+                href={
+                  environment === 'master'
+                    ? `https://app.contentful.com/spaces/${space}/content_types`
+                    : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+                }
+              >
+                content model
+              </TextLink>{' '}
+              and assign it to the app from this screen.
+            </Note>
+          </>
+        )}
+        {appReady && (
+          <FieldSelector
+            contentTypes={contentTypes}
+            compatibleFields={compatibleFields}
+            selectedFields={selectedFields}
+            onSelectedFieldsChange={this.onSelectedFieldsChange}
+            fieldSkuTypes={fieldSkuTypes}
+            onFieldSkuTypesChange={this.onFieldSkuTypesChange}
+            skuTypes={skuTypes}
+          />
+        )}
       </>
     );
   }

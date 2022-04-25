@@ -1,35 +1,31 @@
-import * as React from 'react';
-
 import { AppExtensionSDK, CollectionResponse } from '@contentful/app-sdk';
 import {
-  Heading,
-  Paragraph,
-  Note,
-  Typography,
-  TextField,
+  Flex,
   Form,
-  SelectField,
+  FormControl,
+  Heading,
+  Note,
   Option,
+  Paragraph,
+  Select,
+  TextInput,
   TextLink,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
-import { css } from '@emotion/css';
-
-import FieldSelector from './FieldSelector';
-
-import { toInputParameters, toExtensionParameters } from './parameters';
-
-import {
-  getCompatibleFields,
-  editorInterfacesToSelectedFields,
-  selectedFieldsToTargetState,
-  EditorInterface,
-  ContentType,
-  CompatibleFields,
-  SelectedFields,
-} from './fields';
-
+} from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
+import * as React from 'react';
 import { Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
+import {
+  CompatibleFields,
+  ContentType,
+  EditorInterface,
+  editorInterfacesToSelectedFields,
+  getCompatibleFields,
+  SelectedFields,
+  selectedFieldsToTargetState,
+} from './fields';
+import FieldSelector from './FieldSelector';
+import { toExtensionParameters, toInputParameters } from './parameters';
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -155,11 +151,9 @@ export default class AppConfig extends React.Component<Props, State> {
       <>
         <div className={styles.background(this.props.color)} />
         <div className={styles.body}>
-          <Typography>
-            <Heading>About {this.props.name}</Heading>
-            <Paragraph>{this.props.description}</Paragraph>
-            <hr className={styles.splitter} />
-          </Typography>
+          <Heading>About {this.props.name}</Heading>
+          <Paragraph>{this.props.description}</Paragraph>
+          <hr className={styles.splitter} />
           {this.renderApp()}
         </div>
         <div className={styles.icon}>
@@ -190,22 +184,22 @@ export default class AppConfig extends React.Component<Props, State> {
   buildSelectField = (key: string, def: Record<string, any>) => {
     const values = def.value.split(',');
     return (
-      <SelectField
-        labelText={def.name}
-        id={key}
-        name={key}
-        required={def.required}
-        helpText={def.description}
-        key={key}
-        onChange={this.onParameterChange.bind(this, def.id)}
-        value={this.state.parameters[def.id]}
-      >
-        {values.map((currValue: string) => (
-          <Option value={currValue} key={currValue}>
-            {currValue}
-          </Option>
-        ))}
-      </SelectField>
+      <FormControl key={key} id={key}>
+        <FormControl.Label>{def.name}</FormControl.Label>
+        <Select
+          name={key}
+          isRequired={def.required}
+          onChange={this.onParameterChange.bind(this, def.id)}
+          value={this.state.parameters[def.id]}
+        >
+          {values.map((currValue: string) => (
+            <Option value={currValue} key={currValue}>
+              {currValue}
+            </Option>
+          ))}
+        </Select>
+        <FormControl.HelpText>{def.description}</FormControl.HelpText>
+      </FormControl>
     );
   };
 
@@ -219,7 +213,7 @@ export default class AppConfig extends React.Component<Props, State> {
     return (
       <>
         {hasConfigurationOptions && (
-          <Typography>
+          <>
             <Heading>Configuration</Heading>
             <Form>
               {parameterDefinitions.map((def) => {
@@ -228,66 +222,65 @@ export default class AppConfig extends React.Component<Props, State> {
                   return this.buildSelectField(key, def);
                 } else {
                   return (
-                    <TextField
-                      required={def.required}
-                      key={key}
-                      id={key}
-                      name={key}
-                      labelText={def.name}
-                      textInputProps={{
-                        width: def.type === 'Symbol' ? 'large' : 'medium',
-                        type: def.type === 'Symbol' ? 'text' : 'number',
-                        maxLength: 255,
-                      }}
-                      helpText={def.description}
-                      value={parameters[def.id]}
-                      onChange={this.onParameterChange.bind(this, def.id)}
-                    />
+                    <FormControl key={key} id={key}>
+                      <FormControl.Label>{def.name}</FormControl.Label>
+                      <TextInput
+                        name={key}
+                        width={def.type === 'Symbol' ? 'large' : 'medium'}
+                        type={def.type === 'Symbol' ? 'text' : 'number'}
+                        maxLength={255}
+                        isRequired={def.required}
+                        value={parameters[def.id]}
+                        onChange={this.onParameterChange.bind(this, def.id)}
+                      />
+                      <Flex justifyContent="space-between">
+                        <FormControl.HelpText>{def.description}</FormControl.HelpText>
+                        <FormControl.Counter />
+                      </Flex>
+                    </FormControl>
                   );
                 }
               })}
             </Form>
             <hr className={styles.splitter} />
-          </Typography>
+          </>
         )}
-        <Typography>
-          <Heading>Assign to fields</Heading>
-          {contentTypes.length > 0 ? (
+        <Heading>Assign to fields</Heading>
+        {contentTypes.length > 0 ? (
+          <Paragraph>
+            This app can only be used with <strong>JSON object</strong> fields. Select which JSON
+            fields you’d like to enable for this app.
+          </Paragraph>
+        ) : (
+          <>
             <Paragraph>
-              This app can only be used with <strong>JSON object</strong> fields. Select which JSON
-              fields you’d like to enable for this app.
+              This app can be used only with <strong>JSON object</strong> fields.
             </Paragraph>
-          ) : (
-            <>
-              <Paragraph>
-                This app can be used only with <strong>JSON object</strong> fields.
-              </Paragraph>
-              <Note noteType="warning">
-                There are <strong>no content types with JSON object</strong> fields in this
-                environment. You can add one in your{' '}
-                <TextLink
-                  linkType="primary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={
-                    environment === 'master'
-                      ? `https://app.contentful.com/spaces/${space}/content_types`
-                      : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-                  }
-                >
-                  content model
-                </TextLink>{' '}
-                and assign it to the app from this screen.
-              </Note>
-            </>
-          )}
-          <FieldSelector
-            contentTypes={contentTypes}
-            compatibleFields={compatibleFields}
-            selectedFields={selectedFields}
-            onSelectedFieldsChange={this.onSelectedFieldsChange}
-          />
-        </Typography>
+            <Note variant="warning">
+              There are <strong>no content types with JSON object</strong> fields in this
+              environment. You can add one in your{' '}
+              <TextLink
+                variant="primary"
+                target="_blank"
+                rel="noopener noreferrer"
+                href={
+                  environment === 'master'
+                    ? `https://app.contentful.com/spaces/${space}/content_types`
+                    : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+                }
+              >
+                content model
+              </TextLink>{' '}
+              and assign it to the app from this screen.
+            </Note>
+          </>
+        )}
+        <FieldSelector
+          contentTypes={contentTypes}
+          compatibleFields={compatibleFields}
+          selectedFields={selectedFields}
+          onSelectedFieldsChange={this.onSelectedFieldsChange}
+        />
       </>
     );
   }

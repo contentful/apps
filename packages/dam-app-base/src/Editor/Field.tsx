@@ -1,10 +1,13 @@
 import * as React from 'react';
-import { Button, Note, TextLink } from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
-import { css } from '@emotion/css';
+import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { SortableComponent } from './SortableComponent';
 import { ThumbnailFn, OpenDialogFn, DisabledPredicateFn, Asset } from '../interfaces';
+
+import { Button, Note, TextLink } from '@contentful/f36-components';
+
+import { AssetIcon } from '@contentful/f36-icons';
 
 interface Props {
   sdk: FieldExtensionSDK;
@@ -97,9 +100,9 @@ export default class Field extends React.Component<Props, State> {
 
     if (!valid) {
       return (
-        <Note noteType="warning" title="Field value is incompatibile">
+        <Note variant="warning" title="Field value is incompatibile">
           The JSON object stored in this field cannot be managed with this App.
-          <TextLink onClick={() => this.setState({ value: [], valid: true })}>
+          <TextLink as="button" onClick={() => this.setState({ value: [], valid: true })}>
             I want to override the value using the App
           </TextLink>
           .
@@ -127,11 +130,11 @@ export default class Field extends React.Component<Props, State> {
         <div className={styles.container}>
           <img src={this.props.logo} alt="Logo" className={styles.logo} />
           <Button
-            icon="Asset"
-            buttonType="muted"
+            startIcon={<AssetIcon />}
+            variant="secondary"
             size="small"
             onClick={this.onDialogOpen}
-            disabled={isDisabled}
+            isDisabled={isDisabled}
           >
             {this.props.cta}
           </Button>

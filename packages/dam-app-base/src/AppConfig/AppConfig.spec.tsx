@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, cleanup, wait, fireEvent } from '@testing-library/react';
+import { render, cleanup, waitFor, fireEvent } from '@testing-library/react';
 
 import { AppExtensionSDK } from '@contentful/app-sdk';
 
@@ -64,7 +64,7 @@ describe('AppConfig', () => {
   it('renders app before installation', async () => {
     const sdk = makeSdkMock();
     const { getByLabelText } = renderComponent(sdk);
-    await wait(() => getByLabelText(/Cloud name/));
+    await waitFor(() => getByLabelText(/Cloud name/));
 
     [
       [/Cloud name/, ''],
@@ -104,7 +104,7 @@ describe('AppConfig', () => {
     });
 
     const { getByLabelText } = renderComponent(sdk);
-    await wait(() => getByLabelText(/Cloud name/));
+    await waitFor(() => getByLabelText(/Cloud name/));
 
     [
       [/Cloud name/, 'test-cloud'],
@@ -127,7 +127,7 @@ describe('AppConfig', () => {
   it('updates configuration', async () => {
     const sdk = makeSdkMock();
     const { getByLabelText } = renderComponent(sdk);
-    await wait(() => getByLabelText(/Cloud name/));
+    await waitFor(() => getByLabelText(/Cloud name/));
     [
       [/Cloud name/, 'test-cloud'],
       [/API key/, 'test-api-key'],

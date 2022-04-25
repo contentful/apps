@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 import noop from 'lodash/noop';
-import { Tooltip, Icon } from '@contentful/forma-36-react-components';
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 import { Product } from '../../interfaces';
+
+import { Icon, Tooltip } from '@contentful/f36-components';
+
+import { CloseIcon, ErrorCircleIcon, AssetIcon } from '@contentful/f36-icons';
 
 export interface Props {
   product: Product;
@@ -97,7 +100,7 @@ export const ProductSelectionListItem = (props: Props) => {
   const productIsMissing = !product.name;
 
   return (
-    <div className={styles.productWrapper}>
+    <div className={styles.productWrapper} data-testid="product-selection-list-item">
       <div
         role="switch"
         aria-checked={true}
@@ -107,13 +110,13 @@ export const ProductSelectionListItem = (props: Props) => {
         data-test-id={`selection-preview-${product.sku}`}
         onClick={() => selectProduct(product.sku)}
       >
-        <Tooltip content={productIsMissing ? 'Product missing' : product.name} place="bottom">
+        <Tooltip content={productIsMissing ? 'Product missing' : product.name} placement="bottom">
           <div className={styles.removeIcon}>
-            <Icon color="white" icon="Close" />
+            <CloseIcon variant="white" />
           </div>
           {imageHasErrored && (
             <div className={styles.errorImage}>
-              <Icon icon={productIsMissing ? 'ErrorCircle' : 'Asset'} />
+              <Icon as={productIsMissing ? ErrorCircleIcon : AssetIcon} />
             </div>
           )}
           {!imageHasErrored && (
