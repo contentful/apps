@@ -112,7 +112,7 @@ function transformAsset(asset) {
     thumbnails: thumbnails,
     original: asset.originalUrl,
     videoPreviewURLs: asset.previewUrls || [],
-    tags:asset.tags
+    tags: asset.tags
   };
 }
 
