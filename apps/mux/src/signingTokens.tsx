@@ -18,8 +18,9 @@ export const createSignedPlaybackUrl = (
   signingKeyPrivate: string,
   muxDomain: string
 ) => {
+  const domain = muxDomain ?? 'mux.com';
   const token = sign(playbackId, signingKeyId, signingKeyPrivate, 'v');
-  return `https://stream.${muxDomain}/${playbackId}.m3u8?token=${token}`;
+  return `https://stream.${domain}/${playbackId}.m3u8?token=${token}`;
 };
 
 export const createSignedThumbnailUrl = (
@@ -28,6 +29,7 @@ export const createSignedThumbnailUrl = (
   signingKeyPrivate: string,
   muxDomain: string
 ) => {
+  const domain = muxDomain ?? 'mux.com';
   const token = sign(playbackId, signingKeyId, signingKeyPrivate, 't');
   return `https://image.${muxDomain}/${playbackId}/thumbnail.jpg?token=${token}`;
 };
