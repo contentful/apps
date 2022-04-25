@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.65...@contentful/dam-app-base@2.0.0) (2022-04-25)
+
+
+* feat!: Upgrade to Forma36 v4 (#890) ([b7a2494](https://github.com/contentful/apps/commit/b7a2494810420e7837e3361473ade87c591a4682)), closes [#890](https://github.com/contentful/apps/issues/890)
+
+
+### BREAKING CHANGES
+
+* Upgrade to Forma36 v4
+
+
+
+
+
 ## [1.3.65](https://github.com/contentful/apps/compare/@contentful/dam-app-base@1.3.64...@contentful/dam-app-base@1.3.65) (2022-04-22)
 
 
