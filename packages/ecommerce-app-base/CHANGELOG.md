@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.4](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.3...@contentful/ecommerce-app-base@3.0.4) (2022-04-27)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/f36-tokens from 4.0.0 to 4.0.1 ([#1183](https://github.com/contentful/apps/issues/1183)) ([bf705c1](https://github.com/contentful/apps/commit/bf705c167eddfb74dac30d6fc01fdad3c6ab0e4c))
+
+
+
+
+
 ## [3.0.3](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.2...@contentful/ecommerce-app-base@3.0.3) (2022-04-27)
 
 
