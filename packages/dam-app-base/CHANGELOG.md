@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.2](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.1...@contentful/dam-app-base@2.0.2) (2022-04-29)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/f36-tokens from 4.0.0 to 4.0.1 ([#1183](https://github.com/contentful/apps/issues/1183)) ([bf705c1](https://github.com/contentful/apps/commit/bf705c167eddfb74dac30d6fc01fdad3c6ab0e4c))
+* **deps:** bump contentful-management from 10.0.0 to 10.1.1 ([#1182](https://github.com/contentful/apps/issues/1182)) ([f7e5cee](https://github.com/contentful/apps/commit/f7e5ceef3ae2a1675895746d8144daeb1be15c04))
+* **deps:** bump contentful-management from 10.1.1 to 10.1.4 ([#1191](https://github.com/contentful/apps/issues/1191)) ([70ee65e](https://github.com/contentful/apps/commit/70ee65eb0e2bdc0f21a6dfdd0f4d88fc8200a9f8))
+
+
+
+
+
 ## [2.0.1](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.0...@contentful/dam-app-base@2.0.1) (2022-04-25)
 
 **Note:** Version bump only for package @contentful/dam-app-base
