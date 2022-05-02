@@ -18,3 +18,37 @@
 
 * This gets deployed and hosted by Contentful
 
+## Object Version
+
+Updates to the stored field data should increase the version.
+
+### v2
+
+```json
+{
+    "version": 2,
+    "uploadId": string,
+    "assetId": string,
+    "signedPlaybackId": string, // If signed playback enabled.
+    "playbackId": string,
+    "ready": bool,
+    "ratio": string,
+    "max_stored_resolution": string,
+    "max_stored_frame_rate": number,
+    "duration": number,
+    "audioOnly": bool
+}
+```
+
+### v1
+
+```json
+{
+    "uploadId": string,
+    "assetId": string,
+    "signedPlaybackId": string, // If signed playback enabled.
+    "playbackId": string,
+    "ready": bool,
+    "ratio": string,
+}
+```
