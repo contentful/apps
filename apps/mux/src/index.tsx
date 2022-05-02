@@ -29,6 +29,7 @@ interface AppProps {
 }
 
 interface MuxContentfulObject {
+  version: number;
   uploadId: string;
   assetId: string;
   playbackId?: string;
@@ -186,6 +187,7 @@ export class App extends React.Component<AppProps, AppState> {
 
   resetField = async () => {
     await this.props.sdk.field.setValue({
+      version: 2,
       uploadId: undefined,
       assetId: undefined,
       playbackId: undefined,
@@ -247,7 +249,6 @@ export class App extends React.Component<AppProps, AppState> {
       const upload = createUpload({
         file,
         endpoint,
-        chunkSize: 5120, // Uploads the file in ~5mb chunks
       });
 
       upload.on('error', this.onUploadError);
@@ -375,6 +376,7 @@ export class App extends React.Component<AppProps, AppState> {
         : false;
 
     await this.props.sdk.field.setValue({
+      version: 2,
       uploadId: this.state.value.uploadId,
       assetId: this.state.value.assetId,
       playbackId: (publicPlayback && publicPlayback.id) || undefined,
