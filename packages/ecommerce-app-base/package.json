@@ -18,7 +18,7 @@
     "@testing-library/jest-dom": "5.16.4",
     "@testing-library/react": "12.1.5",
     "@types/array-move": "2.0.0",
-    "@types/jest": "27.4.1",
+    "@types/jest": "27.5.0",
     "@types/lodash": "4.14.182",
     "@types/node": "17.0.31",
     "@types/react": "17.0.43",
