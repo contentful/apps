@@ -20,6 +20,13 @@ interface State {
   changedSkuTypes: Record<string, Record<string, boolean>>;
 }
 
+const styles = {
+  helpText: css({
+    marginLeft: tokens.spacingL,
+    marginTop: tokens.spacingS
+  })
+}
+
 export default class FieldSelector extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -99,7 +106,7 @@ export default class FieldSelector extends React.Component<Props, State> {
             <Subheading>{ct.name}</Subheading>
             <Form>
               {compatibleFields[ct.sys.id].map((field) => (
-                <Flex flexDirection="column" gap="spacingXs" key={field.id}>
+                <Flex marginTop="spacingM" flexDirection="column" gap="spacingXs" key={field.id}>
                   <Checkbox
                     id={`field-box-${ct.sys.id}-${field.id}`}
                     helpText={`${
@@ -112,7 +119,7 @@ export default class FieldSelector extends React.Component<Props, State> {
                   </Checkbox>
                   {skuTypes.length > 0 && (selectedFields[ct.sys.id] || []).includes(field.id) ? (
                     <>
-                      <Flex>
+                      <Flex gap="spacingL">
                         {skuTypes.map((skuType) => (
                           <Radio
                             id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
@@ -123,14 +130,13 @@ export default class FieldSelector extends React.Component<Props, State> {
                               skuType.id
                             }
                             onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}
-                            className="f36-margin-left--l"
                           >
                             {skuType.name}
                           </Radio>
                         ))}
                       </Flex>
                       {changedSkuTypes?.[ct.sys.id]?.[field.id] === true ? (
-                        <Paragraph className="f36-margin-left--l f36-margin-top--s">
+                        <Paragraph className={styles.helpText}>
                           Note: Changing SKU type can cause problems with existing entries relying
                           on the old SKU type.
                         </Paragraph>
