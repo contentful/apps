@@ -180,7 +180,7 @@ export const SortableListItem = SortableElement<Props>(
             <IconButton
               aria-label="Delete"
               icon={<CloseIcon />}
-              variant="secondary"
+              variant="transparent"
               onClick={onDelete}
             />
           </div>
