@@ -19,24 +19,27 @@ function makeCTA(fieldType) {
 
 function validateParameters(parameters) {
   if (parameters.clientId.length < 1) {
-    return 'Provide your Commerce Layer client ID.';
+    return 'Provide your Sales Channel client ID.';
   }
 
-  if (parameters.apiEndpoint.length < 1) {
-    return 'Provide the Commerce Layer API endpoint.';
+  if (parameters.apiEndpoint.length < 1 || !parameters.scope.startsWith('https://')) {
+    return 'Provide a valid Sales Channel API endpoint.';
+  }
+
+  if (parameters.scope.length < 1 || !parameters.scope.startsWith('market:') || !parameters.scope.startsWith('stock_location:')) {
+    return 'Provide a valid Sales Channel scope.';
   }
 
   return null;
 }
 
 async function getAccessToken(clientId, endpoint, scope) {
-  console.log({scope})
   if (!accessToken) {
     /* eslint-disable-next-line require-atomic-updates */
     accessToken = (
       await CLayerAuth.getIntegrationToken({
         clientId,
-        endpoint,
+        endpoint: endpoint.startsWith('https://') ? endpoint : `https://${endpoint}`,
         // The empty client secret is needed for legacy reasons, as the
         // CLayerAuth SDK will throw if not present. By setting to empty
         // string we prevent the SDK exception and the value is ignored
@@ -90,8 +93,6 @@ const fetchProductPreviews = async function fetchProductPreviews(skus, config) {
   }
 
   const PREVIEWS_PER_PAGE = 25;
-
-  console.log({config})
 
   const {clientId, apiEndpoint, scope} = config;
   const accessToken = await getAccessToken(clientId, apiEndpoint, scope);
