@@ -3,10 +3,10 @@ import difference from 'lodash/difference';
 import chunk from 'lodash/chunk';
 import flatMap from 'lodash/flatMap';
 
-import { setup, renderSkuPicker } from '@contentful/ecommerce-app-base';
+import {setup, renderSkuPicker} from '@contentful/ecommerce-app-base';
 
 import logo from './logo.svg';
-import { dataTransformer } from './dataTransformer';
+import {dataTransformer} from './dataTransformer';
 
 const DIALOG_ID = 'root';
 const PER_PAGE = 20;
@@ -29,7 +29,8 @@ function validateParameters(parameters) {
   return null;
 }
 
-async function getAccessToken(clientId, endpoint) {
+async function getAccessToken(clientId, endpoint, scope) {
+  console.log({scope})
   if (!accessToken) {
     /* eslint-disable-next-line require-atomic-updates */
     accessToken = (
@@ -41,6 +42,7 @@ async function getAccessToken(clientId, endpoint) {
         // string we prevent the SDK exception and the value is ignored
         // by the Commerce Layer Auth API.
         clientSecret: '',
+        scope
       })
     ).accessToken;
   }
@@ -61,8 +63,8 @@ async function fetchSKUs(installationParams, search, pagination) {
     throw new Error(validationError);
   }
 
-  const { clientId, apiEndpoint } = installationParams;
-  const accessToken = await getAccessToken(clientId, apiEndpoint);
+  const {clientId, apiEndpoint, scope} = installationParams;
+  const accessToken = await getAccessToken(clientId, apiEndpoint, scope);
 
   const URL = `${apiEndpoint}/api/skus?page[size]=${PER_PAGE}&page[number]=${
     pagination.offset / PER_PAGE + 1
@@ -89,8 +91,10 @@ const fetchProductPreviews = async function fetchProductPreviews(skus, config) {
 
   const PREVIEWS_PER_PAGE = 25;
 
-  const { clientId, apiEndpoint } = config;
-  const accessToken = await getAccessToken(clientId, apiEndpoint);
+  console.log({config})
+
+  const {clientId, apiEndpoint, scope} = config;
+  const accessToken = await getAccessToken(clientId, apiEndpoint, scope);
 
   // Commerce Layer's API automatically paginated results for collection endpoints.
   // Here we account for the edge case where the user has picked more than 25
@@ -110,14 +114,14 @@ const fetchProductPreviews = async function fetchProductPreviews(skus, config) {
 
   const results = await Promise.all(resultPromises);
 
-  const foundProducts = flatMap(results, ({ data }) =>
+  const foundProducts = flatMap(results, ({data}) =>
     data.map(dataTransformer(config.apiEndpoint))
   );
 
   const missingProducts = difference(
     skus,
     foundProducts.map((product) => product.sku)
-  ).map((sku) => ({ sku, isMissing: true, image: '', name: '', id: '' }));
+  ).map((sku) => ({sku, isMissing: true, image: '', name: '', id: ''}));
 
   return [...foundProducts, ...missingProducts];
 };
@@ -178,17 +182,24 @@ setup({
     {
       id: 'clientId',
       name: 'Client ID',
-      description: 'The client ID',
+      description: 'The client ID of your Sales Channel',
       type: 'Symbol',
       required: true,
     },
     {
       id: 'apiEndpoint',
       name: 'API Endpoint',
-      description: 'The Commerce Layer API endpoint',
+      description: 'Sales Channel API endpoint (e.g., "https://acme.commercelayer.io")',
       type: 'Symbol',
       required: true,
     },
+    {
+      id: 'scope',
+      name: 'Scope',
+      description: 'Allowed scope for Sales Channel (e.g., "market:1234")',
+      type: 'Symbol',
+      required: true,
+    }
   ],
   fetchProductPreviews,
   renderDialog,
