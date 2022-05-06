@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "^4.0.0",
-    "@contentful/f36-components": "^4.0.0",
+    "@contentful/f36-components": "^4.0.42",
     "@contentful/f36-tokens": "^4.0.0",
     "array-move": "^3.0.0",
     "contentful-management": "^10.0.0",
