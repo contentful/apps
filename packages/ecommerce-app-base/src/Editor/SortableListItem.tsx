@@ -26,12 +26,14 @@ const IMAGE_SIZE = 48;
 
 const styles = {
   card: css({
-    display: 'flex',
     padding: 0,
     position: 'relative',
     ':not(:first-of-type)': css({
       marginTop: tokens.spacingXs,
     }),
+  }),
+  cardInner: css({
+    display: 'flex',
   }),
   imageWrapper: (imageHasLoaded: boolean) =>
     css({
@@ -127,9 +129,11 @@ export const SortableListItem = SortableElement<Props>(
       <Card
         data-testid="sortable-list-item"
         className={styles.card}
+        // @ts-ignore
+        withDragHandle
         dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}
       >
-        <>
+        <div className={styles.cardInner}>
           {!imageHasLoaded && !imageHasErrored && product.image && (
             <SkeletonContainer className={styles.skeletonImage}>
               <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
@@ -165,7 +169,7 @@ export const SortableListItem = SortableElement<Props>(
               <Subheading className={styles.sku}>{product.displaySKU ?? product.sku}</Subheading>
             )}
           </section>
-        </>
+        </div>
         {!disabled && (
           <div className={styles.actions}>
             {product.externalLink && (
@@ -176,7 +180,7 @@ export const SortableListItem = SortableElement<Props>(
             <IconButton
               aria-label="Delete"
               icon={<CloseIcon />}
-              variant="secondary"
+              variant="transparent"
               onClick={onDelete}
             />
           </div>
