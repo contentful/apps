@@ -23,9 +23,9 @@ interface State {
 const styles = {
   helpText: css({
     marginLeft: tokens.spacingL,
-    marginTop: tokens.spacingS
-  })
-}
+    marginTop: tokens.spacingS,
+  }),
+};
 
 export default class FieldSelector extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -122,6 +122,7 @@ export default class FieldSelector extends React.Component<Props, State> {
                       <Flex gap="spacingL">
                         {skuTypes.map((skuType) => (
                           <Radio
+                            key={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
                             id={`skuType-${ct.sys.id}-${field.id}-${skuType.id}`}
                             name={`skuType-${ct.sys.id}-${field.id}`}
                             value={skuType.id}
