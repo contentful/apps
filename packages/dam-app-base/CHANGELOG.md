@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.5](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.4...@contentful/dam-app-base@2.0.5) (2022-05-09)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 10.2.0 to 10.3.0 ([#1224](https://github.com/contentful/apps/issues/1224)) ([ce9738c](https://github.com/contentful/apps/commit/ce9738cb0919363c55637266da355a8de0c17444))
+* **deps:** bump contentful-management from 10.3.0 to 10.3.1 ([#1229](https://github.com/contentful/apps/issues/1229)) ([06deeb9](https://github.com/contentful/apps/commit/06deeb9d0c6d48f0074df4a9a1e1baa4b9d8c746))
+* increase minimum forma 36 version ([#1234](https://github.com/contentful/apps/issues/1234)) ([33786b3](https://github.com/contentful/apps/commit/33786b38b0ff143cf1ad24a8d6ba87a82ea52c82))
+
+
+
+
+
 ## [2.0.4](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.3...@contentful/dam-app-base@2.0.4) (2022-05-03)
 
 

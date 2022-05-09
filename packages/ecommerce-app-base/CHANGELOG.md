@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.11](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.10...@contentful/ecommerce-app-base@3.0.11) (2022-05-09)
+
+
+### Bug Fixes
+
+* increase minimum forma 36 version ([#1234](https://github.com/contentful/apps/issues/1234)) ([33786b3](https://github.com/contentful/apps/commit/33786b38b0ff143cf1ad24a8d6ba87a82ea52c82))
+
+
+
+
+
 ## [3.0.10](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.9...@contentful/ecommerce-app-base@3.0.10) (2022-05-06)
 
 
