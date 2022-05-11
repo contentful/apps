@@ -31,7 +31,7 @@ function validateParameters(parameters) {
     !parameters.scope.startsWith('market:') ||
     !parameters.scope.startsWith('stock_location:')
   ) {
-    return 'Provide a valid Sales Channel scope.';
+    return 'Provide a valid Sales Channel scope. Please ask your admin to update configuration.';
   }
 
   return null;
