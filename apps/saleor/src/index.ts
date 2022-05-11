@@ -41,6 +41,7 @@ const renderDialog = async (sdk: DialogExtensionSDK) => {
 const openDialog = async (sdk: FieldExtensionSDK, currentValue: any, parameters: ClientConfig) => {
   const skus = await sdk.dialogs.openCurrentApp({
     title: makeCTA(sdk.field.type),
+    // @ts-expect-error Incompatible types
     parameters,
     ...dialogConfig,
   });
