@@ -1,6 +1,7 @@
 .player {
   width: 100%;
   height: auto;
+  margin:1em 0;
 }
 
 .player video {
