@@ -1,6 +1,6 @@
 {
   "name": "@contentful/cloudinary-assets",
-  "version": "1.5.40",
+  "version": "1.5.41",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",

@@ -1,6 +1,6 @@
 {
   "name": "@contentful/commercetools",
-  "version": "1.8.6",
+  "version": "1.8.7",
   "private": true,
   "devDependencies": {
     "@testing-library/react": "8.0.4",
