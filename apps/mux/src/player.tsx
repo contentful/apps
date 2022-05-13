@@ -8,6 +8,7 @@ interface PlayerProps {
   playbackUrl: string;
   posterUrl: string;
   ratio: string;
+  audioOnly: boolean;
   onReady: () => void;
 }
 
@@ -51,7 +52,7 @@ class Player extends React.Component<PlayerProps, {}> {
   };
 
   getHeight = () => {
-    if (!this.playerRef.current) return;
+    if (!this.playerRef.current || this.props.audioOnly) return;
     return this.playerRef.current.offsetWidth * this.convertRatio();
   };
 
