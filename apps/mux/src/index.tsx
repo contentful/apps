@@ -11,7 +11,6 @@ import Player from './player';
 import DeleteButton from './deleteButton';
 import ApiClient from './apiClient';
 import { createSignedPlaybackUrl, createSignedThumbnailUrl } from './signingTokens';
-//import { values } from 'lodash';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -21,7 +20,6 @@ interface InstallationParams {
   muxEnableSignedUrls: boolean;
   muxSigningKeyId?: string;
   muxSigningKeyPrivate?: string;
-  muxDomain?: string;
 }
 
 interface AppProps {
@@ -29,7 +27,6 @@ interface AppProps {
 }
 
 interface MuxContentfulObject {
-  version: number;
   uploadId: string;
   assetId: string;
   playbackId?: string;
@@ -37,10 +34,6 @@ interface MuxContentfulObject {
   ready: boolean;
   ratio: string;
   error: string;
-  max_stored_resolution: string;
-  max_stored_frame_rate: number;
-  audioOnly: boolean;
-  duration: number;
 }
 
 interface AppState {
@@ -160,9 +153,10 @@ export class App extends React.Component<AppProps, AppState> {
 
     const result = await this.props.sdk.dialogs.openConfirm({
       title: 'Are you sure you want to delete this asset?',
-      message: 'This will remove the asset in Contentful, but remain in Mux.',
+      message:
+        'This will remove the asset in Mux and in Contentful. There is no way to recover your video, make sure you have a backup if you think you may want to use it again.',
       intent: 'negative',
-      confirmLabel: 'Yes, Remove',
+      confirmLabel: 'Yes, delete this asset',
       cancelLabel: 'Cancel',
     });
 
@@ -186,7 +180,6 @@ export class App extends React.Component<AppProps, AppState> {
 
   resetField = async () => {
     await this.props.sdk.field.setValue({
-      version: 2,
       uploadId: undefined,
       assetId: undefined,
       playbackId: undefined,
@@ -194,10 +187,6 @@ export class App extends React.Component<AppProps, AppState> {
       ready: undefined,
       ratio: undefined,
       error: undefined,
-      max_stored_resolution: undefined,
-      max_stored_frame_rate: undefined,
-      duration: undefined,
-      audioOnly: undefined,
     });
     this.setState({ error: false, errorShowResetAction: false });
   };
@@ -248,6 +237,7 @@ export class App extends React.Component<AppProps, AppState> {
       const upload = createUpload({
         file,
         endpoint,
+        chunkSize: 5120, // Uploads the file in ~5mb chunks
       });
 
       upload.on('error', this.onUploadError);
@@ -300,16 +290,14 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   setPublicPlayback = (playbackId: string) => {
-    const { muxDomain } = this.props.sdk.parameters.installation as InstallationParams;
-    const domain = muxDomain ? muxDomain : 'mux.com';
     this.setState({
-      playbackUrl: `https://stream.${domain}/${playbackId}.m3u8`,
-      posterUrl: `https://image.${domain}/${playbackId}/thumbnail.jpg`,
+      playbackUrl: `https://stream.mux.com/${playbackId}.m3u8`,
+      posterUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg`,
     });
   };
 
   setSignedPlayback = async (signedPlaybackId: string) => {
-    const { muxSigningKeyId, muxSigningKeyPrivate, muxDomain } = this.props.sdk.parameters
+    const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
       .installation as InstallationParams;
     if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
       this.setState({
@@ -323,14 +311,12 @@ export class App extends React.Component<AppProps, AppState> {
       playbackUrl: createSignedPlaybackUrl(
         signedPlaybackId,
         muxSigningKeyId!,
-        muxSigningKeyPrivate!,
-        muxDomain!
+        muxSigningKeyPrivate!
       ),
       posterUrl: createSignedThumbnailUrl(
         signedPlaybackId,
         muxSigningKeyId!,
-        muxSigningKeyPrivate!,
-        muxDomain!
+        muxSigningKeyPrivate!
       ),
     });
   };
@@ -369,23 +355,13 @@ export class App extends React.Component<AppProps, AppState> {
       ({ policy }: { policy: string }) => policy === 'signed'
     );
 
-    const audioOnly =
-      'max_stored_resolution' in asset && asset.max_stored_resolution === 'Audio only'
-        ? true
-        : false;
-
     await this.props.sdk.field.setValue({
-      version: 2,
       uploadId: this.state.value.uploadId,
       assetId: this.state.value.assetId,
       playbackId: (publicPlayback && publicPlayback.id) || undefined,
       signedPlaybackId: (signedPlayback && signedPlayback.id) || undefined,
       ready: asset.status === 'ready',
       ratio: asset.aspect_ratio,
-      max_stored_resolution: asset.max_stored_resolution,
-      max_stored_frame_rate: asset.max_stored_frame_rate,
-      duration: asset.duration,
-      audioOnly: audioOnly,
       error: assetError,
     });
 
@@ -465,7 +441,6 @@ export class App extends React.Component<AppProps, AppState> {
               posterUrl={this.state.posterUrl}
               ratio={this.state.value.ratio}
               onReady={this.onPlayerReady}
-              audioOnly={this.state.value.audioOnly}
             />
             {this.state.value.assetId ? (
               <DeleteButton requestDeleteAsset={this.requestDeleteAsset} />
