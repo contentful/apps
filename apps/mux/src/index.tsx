@@ -11,7 +11,6 @@ import Player from './player';
 import DeleteButton from './deleteButton';
 import ApiClient from './apiClient';
 import { createSignedPlaybackUrl, createSignedThumbnailUrl } from './signingTokens';
-import { values } from 'lodash';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
