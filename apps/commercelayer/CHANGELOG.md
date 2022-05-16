@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.61](https://github.com/contentful/apps/compare/@contentful/commercelayer-products@1.5.60...@contentful/commercelayer-products@1.5.61) (2022-05-16)
+
+
+### Bug Fixes
+
+* EXT-3750 introduce scope for token requests ([#1233](https://github.com/contentful/apps/issues/1233)) ([730185c](https://github.com/contentful/apps/commit/730185c1c6c0d0aa1632019af373c8eb5ed83b39))
+
+
+
+
+
 ## [1.5.60](https://github.com/contentful/apps/compare/@contentful/commercelayer-products@1.5.59...@contentful/commercelayer-products@1.5.60) (2022-05-13)
 
 **Note:** Version bump only for package @contentful/commercelayer-products
