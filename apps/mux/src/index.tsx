@@ -158,10 +158,10 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     const result = await this.props.sdk.dialogs.openConfirm({
-      title: 'Are you sure you want to delete this asset?',
+      title: 'Are you sure you want to remove this asset?',
       message: 'This will remove the asset in Contentful, but remain in Mux.',
       intent: 'negative',
-      confirmLabel: 'Yes, Remove',
+      confirmLabel: 'Yes, remove',
       cancelLabel: 'Cancel',
     });
 
@@ -233,6 +233,18 @@ export class App extends React.Component<AppProps, AppState> {
     return muxUpload.url;
   };
 
+  getChunkSize = () => {
+    const chunkSize = 1024 * 100; // 100mb chunks default.
+    const connection = navigator.connection;
+    if (!connection) return chunkSize;
+    if (
+      ('effectiveType' in connection && connection.effectiveType === '4g') ||
+      ('rtt' in connection && connection.rtt < 100)
+    ) {
+      return 1024 * 500; // 500mb.
+    }
+  };
+
   onChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files && e.currentTarget.files[0];
     this.setState({ uploadProgress: 1 });
@@ -247,6 +259,7 @@ export class App extends React.Component<AppProps, AppState> {
       const upload = createUpload({
         file,
         endpoint,
+        chunkSize: this.getChunkSize(),
       });
 
       upload.on('error', this.onUploadError);
