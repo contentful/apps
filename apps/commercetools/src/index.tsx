@@ -1,37 +1,59 @@
-import './vendor/ct-picker.min.js';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { setup } from '@contentful/ecommerce-app-base';
+import { fetchPreviews } from './api';
+import { PARAMETER_DEFINITIONS, validateParameters } from './config';
+import { SKU_TYPES } from './constants';
+import { renderDialog } from './dialog';
+import logo from './logo.svg';
+import { ConfigurationParameters } from './types';
 
-import * as React from 'react';
-import { render } from 'react-dom';
-import { renderDialog } from './renderDialog';
+function makeCTA(fieldType: string, skuType?: string) {
+  const isArray = fieldType === 'Array';
+  const beingSelected =
+    skuType === 'category'
+      ? isArray
+        ? 'categories'
+        : 'a category'
+      : isArray
+      ? 'products'
+      : 'a product';
+  return `Select ${beingSelected}`;
+}
 
-import {
-  init,
-  locations,
-  FieldExtensionSDK,
-  DialogExtensionSDK,
-  AppExtensionSDK,
-} from '@contentful/app-sdk';
-
-import '@contentful/forma-36-react-components/dist/styles.css';
-import '@contentful/forma-36-fcss/dist/styles.css';
-
-import Field from './Editor/Field';
-import AppConfig from './AppConfig';
-
-import './index.css';
-
-init((sdk) => {
-  const root = document.getElementById('root');
-
-  if (sdk.location.is(locations.LOCATION_DIALOG)) {
-    renderDialog(sdk as DialogExtensionSDK);
+async function openDialog(
+  sdk: FieldExtensionSDK,
+  currentValue: string | string[],
+  config: ConfigurationParameters & {
+    fieldValue?: string | string[];
+    fieldType?: string;
+    skuType?: string;
   }
+) {
+  const skus = await sdk.dialogs.openCurrentApp({
+    allowHeightOverflow: true,
+    position: 'center',
+    title: makeCTA(sdk.field.type, config.skuType),
+    shouldCloseOnOverlayClick: true,
+    shouldCloseOnEscapePress: true,
+    parameters: config as any,
+    width: 1400,
+  });
 
-  if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
-    render(<Field sdk={sdk as FieldExtensionSDK} />, root);
-  }
+  return Array.isArray(skus) ? skus : [];
+}
 
-  if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-    render(<AppConfig sdk={sdk as AppExtensionSDK} />, root);
-  }
+setup({
+  makeCTA,
+  name: 'commercetools',
+  logo,
+  color: '#213c45',
+  description:
+    'The commercetools app allows editors to select products from their commercetools account and reference them inside of Contentful entries.',
+  parameterDefinitions: PARAMETER_DEFINITIONS,
+  skuTypes: SKU_TYPES,
+  validateParameters,
+  fetchProductPreviews: fetchPreviews,
+  renderDialog,
+  isDisabled: () => false,
+  openDialog,
 });
