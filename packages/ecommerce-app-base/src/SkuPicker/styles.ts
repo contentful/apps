@@ -27,6 +27,7 @@ export const styles = {
     borderBottom: `1px solid ${tokens.gray300}`,
     display: 'flex',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
     padding: tokens.spacingL,
 
     [`@media screen and (min-height: ${STICKY_HEADER_BREAKPOINT}px)`]: {
