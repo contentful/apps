@@ -70,7 +70,6 @@ export const styles = {
     display: 'flex',
   }),
   loadMoreButton: css({
-    width: '100%',
     marginTop: tokens.spacingXs,
   }),
 };
