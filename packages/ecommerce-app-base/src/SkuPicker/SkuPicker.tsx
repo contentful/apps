@@ -210,6 +210,7 @@ export class SkuPicker extends Component<Props, State> {
               variant="transparent"
               testId="infinite-scrolling-pagination"
               onClick={this.loadMoreProducts}
+              isFullWidth
             >
               Load more
             </Button>

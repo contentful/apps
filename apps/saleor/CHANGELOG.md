@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.65](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.64...@contentful/saleor@1.6.65) (2022-05-25)
+
+**Note:** Version bump only for package @contentful/saleor
+
+
+
+
+
 ## [1.6.64](https://github.com/contentful/apps/compare/@contentful/saleor@1.6.63...@contentful/saleor@1.6.64) (2022-05-20)
 
 **Note:** Version bump only for package @contentful/saleor
