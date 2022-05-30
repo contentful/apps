@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.66](https://github.com/contentful/apps/compare/@contentful/commercelayer-products@1.5.65...@contentful/commercelayer-products@1.5.66) (2022-05-30)
+
+
+### Bug Fixes
+
+* Validate parameters and allow empty scope for retro compatibility ([#1286](https://github.com/contentful/apps/issues/1286)) ([5f98f42](https://github.com/contentful/apps/commit/5f98f42d51e684d96d209c538a6d7c1e2ca5d214))
+
+
+
+
+
 ## [1.5.65](https://github.com/contentful/apps/compare/@contentful/commercelayer-products@1.5.64...@contentful/commercelayer-products@1.5.65) (2022-05-30)
 
 **Note:** Version bump only for package @contentful/commercelayer-products
