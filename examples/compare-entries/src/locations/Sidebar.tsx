@@ -88,7 +88,7 @@ const Sidebar = () => {
           });
         }}
       >
-        Compare with Environment
+        Compare with environment
       </Button>
     </Stack>
   );
