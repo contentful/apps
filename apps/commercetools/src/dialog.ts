@@ -41,7 +41,7 @@ export async function renderDialog(sdk: DialogExtensionSDK) {
   document.body.appendChild(container);
 
   // @ts-expect-error
-  const skuType = sdk.parameters?.invocation?.skuType;
+  const skuType = sdk.parameters?.invocation?.skuType as SkuType;
 
   renderSkuPicker(DIALOG_ID, {
     sdk,
@@ -50,6 +50,7 @@ export async function renderDialog(sdk: DialogExtensionSDK) {
     searchDelay: 750,
     skuType,
     makeSaveBtnText: makeSaveBtnText(skuType),
+    hideSearch: skuType === 'category',
   });
 
   sdk.window.startAutoResizer();
