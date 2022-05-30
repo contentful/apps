@@ -22,13 +22,13 @@ function validateParameters(parameters) {
     return 'Provide your Sales Channel client ID.';
   }
 
-  if (parameters.apiEndpoint.length < 1 || !parameters.scope.startsWith('https://')) {
+  if (parameters.apiEndpoint.length < 1 || !parameters.apiEndpoint.startsWith('https://')) {
     return 'Provide a valid Sales Channel API endpoint.';
   }
 
   if (
-    parameters.scope.length < 1 ||
-    !parameters.scope.startsWith('market:') ||
+    parameters.scope.length > 1 &&
+    !parameters.scope.startsWith('market:') &&
     !parameters.scope.startsWith('stock_location:')
   ) {
     return 'Provide a valid Sales Channel scope. Please ask your admin to update configuration.';
@@ -187,7 +187,7 @@ setup({
     {
       id: 'clientId',
       name: 'Client ID',
-      description: 'The client ID of your Sales Channel',
+      description: 'The client ID of your Sales Channel.',
       type: 'Symbol',
       required: true,
     },
@@ -203,7 +203,7 @@ setup({
       name: 'Scope',
       description: 'Allowed scope for Sales Channel (e.g., "market:1234")',
       type: 'Symbol',
-      required: true,
+      required: false,
     },
   ],
   fetchProductPreviews,
