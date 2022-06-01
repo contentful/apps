@@ -71,7 +71,6 @@ const Sidebar = () => {
             allowHeightOverflow: true,
             shouldCloseOnOverlayClick: true,
             shouldCloseOnEscapePress: true,
-            minHeight: 400,
             width: 'fullWidth',
             parameters: {
               leftEntry: {
