@@ -1,3 +1,6 @@
+body {
+    overflow: hidden;
+}
 html,
 body,
 div {
@@ -8,9 +11,7 @@ div {
   font: inherit;
   vertical-align: baseline;
 }
-#root {
-    overflow: hidden;
-}
+
 .progress {
   margin-bottom: 16px;
   height: 12px;
