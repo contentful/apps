@@ -9,6 +9,10 @@ div {
   vertical-align: baseline;
 }
 
+body {
+    overflow-y: scroll;
+}
+
 .progress {
   margin-bottom: 16px;
   height: 12px;
