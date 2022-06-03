@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.20...@contentful/ecommerce-app-base@3.1.0) (2022-06-03)
+
+
+### Features
+
+* add `hideSearch` option to SkuPicker ([#1289](https://github.com/contentful/apps/issues/1289)) ([0dee0bd](https://github.com/contentful/apps/commit/0dee0bd73fbe9e6b750b663c08a86ea4c576a10a))
+
+
+
+
+
 ## [3.0.20](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.19...@contentful/ecommerce-app-base@3.0.20) (2022-06-02)
 
 
