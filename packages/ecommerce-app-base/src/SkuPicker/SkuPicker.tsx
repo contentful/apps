@@ -27,6 +27,7 @@ export interface Props {
   searchDelay?: number;
   skuType?: string;
   makeSaveBtnText?: MakeSaveBtnTextFn;
+  hideSearch?: boolean;
 }
 
 interface State {
@@ -154,7 +155,7 @@ export class SkuPicker extends Component<Props, State> {
 
   render() {
     const { search, pagination, products, selectedProducts, selectedSKUs } = this.state;
-    const { makeSaveBtnText = defaultGetSaveBtnText, skuType } = this.props;
+    const { makeSaveBtnText = defaultGetSaveBtnText, skuType, hideSearch = false } = this.props;
     const infiniteScrollingPaginationMode = 'hasNextPage' in pagination;
     const pageCount = Math.ceil(pagination.total / pagination.limit);
 
@@ -162,16 +163,20 @@ export class SkuPicker extends Component<Props, State> {
       <>
         <header className={styles.header}>
           <div className={styles.leftsideControls}>
-            <TextInput
-              placeholder="Search for a product..."
-              type="search"
-              name="sku-search"
-              id="sku-search"
-              testId="sku-search"
-              value={search}
-              onChange={(event) => this.setSearch((event.target as HTMLInputElement).value)}
-            />
-            <SearchIcon variant="muted" />
+            {!hideSearch && (
+              <>
+                <TextInput
+                  placeholder="Search for a product..."
+                  type="search"
+                  name="sku-search"
+                  id="sku-search"
+                  testId="sku-search"
+                  value={search}
+                  onChange={(event) => this.setSearch((event.target as HTMLInputElement).value)}
+                />
+                <SearchIcon variant="muted" />
+              </>
+            )}
             {!!pagination.total && (
               <span className={styles.total}>
                 Total results: {pagination.total.toLocaleString()}
@@ -210,6 +215,7 @@ export class SkuPicker extends Component<Props, State> {
               variant="transparent"
               testId="infinite-scrolling-pagination"
               onClick={this.loadMoreProducts}
+              isFullWidth
             >
               Load more
             </Button>

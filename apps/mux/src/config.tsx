@@ -349,7 +349,7 @@ class Config extends React.Component<ConfigProps, IState> {
           </Form>
           <hr className="config-splitter" />
           <Paragraph>
-            Custom Domain (if enabled) for dashboard playback. Otherwise leave as mux.com
+            Custom Media Domain (if enabled) for dashboard playback. Otherwise leave as mux.com
           </Paragraph>
           <TextField
             required

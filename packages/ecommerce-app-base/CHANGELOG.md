@@ -3,6 +3,63 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.20...@contentful/ecommerce-app-base@3.1.0) (2022-06-03)
+
+
+### Features
+
+* add `hideSearch` option to SkuPicker ([#1289](https://github.com/contentful/apps/issues/1289)) ([0dee0bd](https://github.com/contentful/apps/commit/0dee0bd73fbe9e6b750b663c08a86ea4c576a10a))
+
+
+
+
+
+## [3.0.20](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.19...@contentful/ecommerce-app-base@3.0.20) (2022-06-02)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/f36-components from 4.9.0 to 4.10.0 ([#1323](https://github.com/contentful/apps/issues/1323)) ([622e0c5](https://github.com/contentful/apps/commit/622e0c54048be188bf48c6646d7760425a9ccf92))
+
+
+
+
+
+## [3.0.19](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.18...@contentful/ecommerce-app-base@3.0.19) (2022-06-01)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+
+
+
+
+## [3.0.18](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.17...@contentful/ecommerce-app-base@3.0.18) (2022-05-31)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+
+
+
+
+## [3.0.17](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.16...@contentful/ecommerce-app-base@3.0.17) (2022-05-30)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+
+
+
+
+## [3.0.16](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.15...@contentful/ecommerce-app-base@3.0.16) (2022-05-25)
+
+
+### Bug Fixes
+
+* UI fixes ([#1282](https://github.com/contentful/apps/issues/1282)) ([6331dba](https://github.com/contentful/apps/commit/6331dba7ad53cbcae9b014282e734b67d1d9ef5a))
+
+
+
+
+
 ## [3.0.15](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.14...@contentful/ecommerce-app-base@3.0.15) (2022-05-20)
 
 
