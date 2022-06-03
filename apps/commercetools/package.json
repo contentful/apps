@@ -13,7 +13,7 @@
     "@commercetools/sdk-client-v2": "1.4.0",
     "@contentful/app-scripts": "0.8.45",
     "@contentful/app-sdk": "4.4.0",
-    "@contentful/ecommerce-app-base": "3.0.15",
+    "@contentful/ecommerce-app-base": "3.1.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-scripts": "4.0.3"
