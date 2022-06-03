@@ -18,7 +18,8 @@ Before we publish an entry of that content type, we want to make sure the slug h
 
 Publishing can only ever be prevented by
 
-- not having enough permissions, or
+- not having enough permissions,
+- an unresolved Task, or
 - the entry not being valid.
 
 Both approaches can be used to solve our issue e.g. we can use our custom App to add a tag "Invalid" to the entry which then blocks publishing via a custom role.
