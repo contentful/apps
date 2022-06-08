@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.2](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.1...@contentful/ecommerce-app-base@3.1.2) (2022-06-08)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 10.6.1 to 10.6.2 ([#1354](https://github.com/contentful/apps/issues/1354)) ([af21e5a](https://github.com/contentful/apps/commit/af21e5a9fb791030d0747ea292e1ab6ee34858d1))
+
+
+
+
+
 ## [3.1.1](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.0...@contentful/ecommerce-app-base@3.1.1) (2022-06-06)
 
 
