@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.2](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.1...@contentful/ecommerce-app-base@3.1.2) (2022-06-08)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 10.6.1 to 10.6.2 ([#1354](https://github.com/contentful/apps/issues/1354)) ([af21e5a](https://github.com/contentful/apps/commit/af21e5a9fb791030d0747ea292e1ab6ee34858d1))
+
+
+
+
+
+## [3.1.1](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.0...@contentful/ecommerce-app-base@3.1.1) (2022-06-06)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 10.6.0 to 10.6.1 ([#1346](https://github.com/contentful/apps/issues/1346)) ([f5ccf2e](https://github.com/contentful/apps/commit/f5ccf2eaa017a23cb5b20d80d91ca04d1fa991ff))
+
+
+
+
+
+# [3.1.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.20...@contentful/ecommerce-app-base@3.1.0) (2022-06-03)
+
+
+### Features
+
+* add `hideSearch` option to SkuPicker ([#1289](https://github.com/contentful/apps/issues/1289)) ([0dee0bd](https://github.com/contentful/apps/commit/0dee0bd73fbe9e6b750b663c08a86ea4c576a10a))
+
+
+
+
+
+## [3.0.20](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.19...@contentful/ecommerce-app-base@3.0.20) (2022-06-02)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/f36-components from 4.9.0 to 4.10.0 ([#1323](https://github.com/contentful/apps/issues/1323)) ([622e0c5](https://github.com/contentful/apps/commit/622e0c54048be188bf48c6646d7760425a9ccf92))
+
+
+
+
+
 ## [3.0.19](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.0.18...@contentful/ecommerce-app-base@3.0.19) (2022-06-01)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base

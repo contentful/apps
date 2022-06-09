@@ -24,6 +24,7 @@ const Sidebar = () => {
         appDefinitionId: sdk.ids.app!,
       })
       .then((installations) => {
+        setEnvironmentId(installations.includes.Environment[0].sys.id);
         setEnvironments(installations.includes.Environment);
       });
   }, [cma.appDefinition, cma.space, sdk]);
@@ -52,14 +53,12 @@ const Sidebar = () => {
   return (
     <Stack flexDirection="column" alignItems="flex-start">
       <Select onChange={(e) => setEnvironmentId(e.target.value)}>
-        {environments
-          .filter((environment) => environment.sys.id !== sdk.ids.environment)
-          .map((environment) => (
-            <Select.Option key={environment.sys.id} value={environment.sys.id}>
-              {spaces.find((space) => space.sys.id === environment.sys.space.sys.id)?.name!} /{' '}
-              {environment.name}
-            </Select.Option>
-          ))}
+        {environments.map((environment) => (
+          <Select.Option key={environment.sys.id} value={environment.sys.id}>
+            {spaces.find((space) => space.sys.id === environment.sys.space.sys.id)?.name!} /{' '}
+            {environment.name}
+          </Select.Option>
+        ))}
       </Select>
       <Button
         onClick={() => {
