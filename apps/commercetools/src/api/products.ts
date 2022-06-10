@@ -23,8 +23,11 @@ export async function fetchProductPreviews(
   skus: string[],
   config: ConfigurationParameters
 ): Promise<Product[]> {
-  const client = createClient(config);
+  if (skus.length === 0) {
+    return [];
+  }
 
+  const client = createClient(config);
   const response = await client
     .productProjections()
     .search()
