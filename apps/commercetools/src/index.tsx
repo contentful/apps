@@ -5,7 +5,7 @@ import { PARAMETER_DEFINITIONS, validateParameters } from './config';
 import { SKU_TYPES } from './constants';
 import { renderDialog } from './dialog';
 import logo from './logo.svg';
-import { ConfigurationParameters, SkuType } from './types';
+import { ConfigurationParameters } from './types';
 
 function makeCTA(fieldType: string, skuType?: string) {
   const isArray = fieldType === 'Array';
