@@ -5,24 +5,20 @@ import { PARAMETER_DEFINITIONS, validateParameters } from './config';
 import { SKU_TYPES } from './constants';
 import { renderDialog } from './dialog';
 import logo from './logo.svg';
-import { ConfigurationParameters } from './types';
+import { ConfigurationParameters, SkuType } from './types';
 
 function makeCTA(fieldType: string, skuType?: string) {
   const isArray = fieldType === 'Array';
-  const beingSelected =
-    skuType === 'category'
-      ? isArray
-        ? 'categories'
-        : 'a category'
-      : isArray
-      ? 'products'
-      : 'a product';
-  return `Select ${beingSelected}`;
+  if (skuType === 'category') {
+    return `Select ${isArray ? 'categories' : 'a category'}`;
+  } else {
+    return `Select ${isArray ? 'products' : 'a product'}`;
+  }
 }
 
 async function openDialog(
   sdk: FieldExtensionSDK,
-  currentValue: string | string[],
+  _currentValue: string | string[],
   config: ConfigurationParameters & {
     fieldValue?: string | string[];
     fieldType?: string;
