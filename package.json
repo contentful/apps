@@ -20,7 +20,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "lerna": "5.1.1"
+    "lerna": "5.1.2"
   },
   "lint-staged": {
     "*.{t,j}s?(x)": [
