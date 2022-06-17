@@ -2,7 +2,7 @@
   "name": "@contentful/apps",
   "private": true,
   "devDependencies": {
-    "prettier": "2.7.0",
+    "prettier": "2.7.1",
     "husky": "^8.0.0",
     "lint-staged": "^13.0.0"
   },
