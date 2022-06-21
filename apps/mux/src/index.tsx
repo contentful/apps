@@ -3,14 +3,18 @@ import { render } from 'react-dom';
 import { Note, Paragraph, Spinner, Button, TextLink } from '@contentful/forma-36-react-components';
 import { init, locations, AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
 import { createUpload } from '@mux/upchunk';
+import MuxPlayer from '@mux-elements/mux-player-react';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
 import Config from './config';
-import Player from './player';
 import DeleteButton from './deleteButton';
 import ApiClient from './apiClient';
-import { createSignedPlaybackUrl, createSignedThumbnailUrl } from './signingTokens';
+import {
+  createSignedPlaybackToken,
+  createSignedThumbnailToken,
+  createSignedStoryboardToken,
+} from './signingTokens';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -48,8 +52,9 @@ interface AppState {
   error: string | false;
   errorShowResetAction: boolean | false;
   isDeleting: boolean | false;
-  playbackUrl?: string;
-  posterUrl?: string;
+  playbackToken?: string;
+  posterToken?: string;
+  storyboardToken?: string;
 }
 
 export class App extends React.Component<AppProps, AppState> {
@@ -122,11 +127,8 @@ export class App extends React.Component<AppProps, AppState> {
 
       if (this.state.value.ready) {
         await this.checkForValidAsset();
-        if (this.state.value.playbackId) {
-          this.setPublicPlayback(this.state.value.playbackId);
-        }
         if (this.state.value.signedPlaybackId) {
-          await this.setSignedPlayback(this.state.value.signedPlaybackId);
+          this.setSignedPlayback(this.state.value.signedPlaybackId);
         }
         return;
       }
@@ -311,17 +313,8 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
-  setPublicPlayback = (playbackId: string) => {
-    const { muxDomain } = this.props.sdk.parameters.installation as InstallationParams;
-    const domain = muxDomain ? muxDomain : 'mux.com';
-    this.setState({
-      playbackUrl: `https://stream.${domain}/${playbackId}.m3u8`,
-      posterUrl: `https://image.${domain}/${playbackId}/thumbnail.jpg`,
-    });
-  };
-
   setSignedPlayback = async (signedPlaybackId: string) => {
-    const { muxSigningKeyId, muxSigningKeyPrivate, muxDomain } = this.props.sdk.parameters
+    const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
       .installation as InstallationParams;
     if (!(muxSigningKeyId && muxSigningKeyPrivate)) {
       this.setState({
@@ -332,17 +325,20 @@ export class App extends React.Component<AppProps, AppState> {
       return;
     }
     this.setState({
-      playbackUrl: createSignedPlaybackUrl(
+      playbackToken: createSignedPlaybackToken(
         signedPlaybackId,
         muxSigningKeyId!,
-        muxSigningKeyPrivate!,
-        muxDomain!
+        muxSigningKeyPrivate!
       ),
-      posterUrl: createSignedThumbnailUrl(
+      posterToken: createSignedThumbnailToken(
         signedPlaybackId,
         muxSigningKeyId!,
-        muxSigningKeyPrivate!,
-        muxDomain!
+        muxSigningKeyPrivate!
+      ),
+      storyboardToken: createSignedStoryboardToken(
+        signedPlaybackId,
+        muxSigningKeyId!,
+        muxSigningKeyPrivate!
       ),
     });
   };
@@ -401,9 +397,7 @@ export class App extends React.Component<AppProps, AppState> {
       error: assetError,
     });
 
-    if (publicPlayback) {
-      this.setPublicPlayback(publicPlayback.id);
-    } else if (signedPlayback) {
+    if (signedPlayback) {
       this.setSignedPlayback(signedPlayback.id);
     }
 
@@ -457,7 +451,9 @@ export class App extends React.Component<AppProps, AppState> {
         );
       }
 
-      if (this.state.value.ready && this.state.playbackUrl && this.state.posterUrl) {
+      const { muxDomain } = this.props.sdk.parameters.installation as InstallationParams;
+
+      if (this.state.value.ready && (this.state.value.playbackId || this.state.playbackToken)) {
         return (
           <div>
             {this.isUsingSigned() && (
@@ -472,12 +468,21 @@ export class App extends React.Component<AppProps, AppState> {
                 </TextLink>
               </Note>
             )}
-            <Player
-              playbackUrl={this.state.playbackUrl}
-              posterUrl={this.state.posterUrl}
-              ratio={this.state.value.ratio}
-              onReady={this.onPlayerReady}
-              audioOnly={this.state.value.audioOnly}
+            <MuxPlayer
+              style={{ height: '100%', width: '100%' }}
+              playbackId={this.state.value.playbackId || this.state.value.signedPlaybackId}
+              streamType="on-demand"
+              poster={this.state.value.audioOnly ? '#' : undefined}
+              custom-media-domain={muxDomain || undefined}
+              metadata={{
+                player_name: 'Contentful-Dashboard-Player',
+                viewer_user_id: 'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
+              }}
+              tokens={{
+                playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
+                thumbnail: this.isUsingSigned() ? this.state.posterToken : undefined,
+                storyboard: this.isUsingSigned() ? this.state.storyboardToken : undefined,
+              }}
             />
             {this.state.value.assetId ? (
               <DeleteButton requestDeleteAsset={this.requestDeleteAsset} />

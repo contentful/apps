@@ -1,12 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import Adapter from 'enzyme-adapter-react-16';
-// import nock from 'nock';
 import 'isomorphic-fetch';
-
 import * as React from 'react';
 import { mount, shallow, configure } from 'enzyme';
-
 import { App } from './';
 
 configure({ adapter: new Adapter() });
@@ -22,6 +18,7 @@ const SDK_MOCK = {
     installation: {
       muxAccessTokenId: 'abcd1234',
       muxAccessTokenSecret: 'efgh5678',
+      muxDomain: 'mux.com',
     },
   },
   field: {
@@ -44,6 +41,7 @@ const SDK_MOCK_WITH_SIGNED_URLS = {
         muxSigningKeyId: 'signing-key-id',
         muxSigningKeyPrivate: keyPrivate,
         muxEnableSignedUrls: true,
+        muxDomain: 'mux.com',
       },
     },
   },
@@ -72,7 +70,7 @@ test('displays an upload form before the user does anything', () => {
   expect(wrapper.find('input').prop('type')).toBe('file');
 });
 
-test('displays a player when the state has a playbackUrl and posterUrl', async () => {
+test('displays a player when the state has a playback ID', async () => {
   const mockedSdk = {
     ...SDK_MOCK,
     field: {
@@ -87,15 +85,10 @@ test('displays a player when the state has a playbackUrl and posterUrl', async (
 
   const wrapper = await shallow(<App sdk={mockedSdk as any} />);
   wrapper.instance().forceUpdate();
-  await (wrapper.instance() as App).setPublicPlayback('test-playbackId123');
-  expect(wrapper.state('playbackUrl')).toEqual('https://stream.mux.com/test-playbackId123.m3u8');
-  expect(wrapper.state('posterUrl')).toEqual(
-    'https://image.mux.com/test-playbackId123/thumbnail.jpg'
-  );
-  expect(wrapper.find('Player')).toHaveLength(1);
+  expect(wrapper.find('ForwardRef')).toHaveLength(1);
 });
 
-test('displays a player when the state has a signed playbackUrl and signed posterUrl', async () => {
+test('displays a player when the state has a playback, poster and storyboard token.', async () => {
   const mockedSdk = {
     ...SDK_MOCK_WITH_SIGNED_URLS,
     field: {
@@ -103,7 +96,7 @@ test('displays a player when the state has a signed playbackUrl and signed poste
       getValue: () => ({
         ready: true,
         assetId: 'test-assetId123',
-        playbackId: 'test-playbackId123',
+        signedPlaybackId: 'test-playbackId123',
       }),
     },
   };
@@ -111,13 +104,10 @@ test('displays a player when the state has a signed playbackUrl and signed poste
   const wrapper = await shallow(<App sdk={mockedSdk as any} />);
   wrapper.instance().forceUpdate();
   await (wrapper.instance() as App).setSignedPlayback('test-playbackId123');
-  expect(wrapper.state('playbackUrl')).toMatch(
-    'https://stream.mux.com/test-playbackId123.m3u8?token='
-  );
-  expect(wrapper.state('posterUrl')).toMatch(
-    'https://image.mux.com/test-playbackId123/thumbnail.jpg?token='
-  );
-  expect(wrapper.find('Player')).toHaveLength(1);
+  expect(wrapper.state('playbackToken')).not.toBe('');
+  expect(wrapper.state('posterToken')).not.toBe('');
+  expect(wrapper.state('storyboardToken')).not.toBe('');
+  expect(wrapper.find('ForwardRef')).toHaveLength(1);
 });
 
 test('displays an error when we have a signed playbackId but no signing keys', async () => {
@@ -139,7 +129,7 @@ test('displays an error when we have a signed playbackId but no signing keys', a
   expect(wrapper.state('error')).toEqual(
     'Error: this asset was created with a signed playback ID, but signing keys do not exist for your account'
   );
-  expect(wrapper.find('Player')).toHaveLength(0);
+  expect(wrapper.find('MuxPlayer')).toHaveLength(0);
 });
 
 test('displays an error if the asset is errored', () => {

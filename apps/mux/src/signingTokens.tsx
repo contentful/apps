@@ -11,25 +11,25 @@ const sign = (playbackId: string, signingKeyId: string, signingKeyPrivate: strin
     noTimestamp: true,
     expiresIn: '12h',
   });
-
-export const createSignedPlaybackUrl = (
+export const createSignedPlaybackToken = (
   playbackId: string,
   signingKeyId: string,
-  signingKeyPrivate: string,
-  muxDomain: string
+  signingKeyPrivate: string
 ) => {
-  const domain = muxDomain ? muxDomain : 'mux.com';
-  const token = sign(playbackId, signingKeyId, signingKeyPrivate, 'v');
-  return `https://stream.${domain}/${playbackId}.m3u8?token=${token}`;
+  return sign(playbackId, signingKeyId, signingKeyPrivate, 'v');
 };
 
-export const createSignedThumbnailUrl = (
+export const createSignedThumbnailToken = (
   playbackId: string,
   signingKeyId: string,
-  signingKeyPrivate: string,
-  muxDomain: string
+  signingKeyPrivate: string
 ) => {
-  const domain = muxDomain ? muxDomain : 'mux.com';
-  const token = sign(playbackId, signingKeyId, signingKeyPrivate, 't');
-  return `https://image.${domain}/${playbackId}/thumbnail.jpg?token=${token}`;
+  return sign(playbackId, signingKeyId, signingKeyPrivate, 't');
+};
+export const createSignedStoryboardToken = (
+  playbackId: string,
+  signingKeyId: string,
+  signingKeyPrivate: string
+) => {
+  return sign(playbackId, signingKeyId, signingKeyPrivate, 's');
 };
