@@ -1,6 +1,6 @@
 {
   "name": "@contentful/mux-contentful-uploader",
-  "version": "1.8.6",
+  "version": "1.9.0",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
@@ -24,8 +24,8 @@
     "@contentful/forma-36-fcss": "0.0.35",
     "@contentful/forma-36-react-components": "3.79.2",
     "@contentful/forma-36-tokens": "0.5.3",
-    "@mux/upchunk": "2.3.1",
     "@mux-elements/mux-player-react": "^0.1.0-beta.17",
+    "@mux/upchunk": "2.3.1",
     "@types/jsonwebtoken": "8.5.0",
     "core-js": "3.0.1",
     "jsonwebtoken": "8.5.1",
