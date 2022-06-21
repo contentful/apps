@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.9.0](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.8.6...@contentful/mux-contentful-uploader@1.9.0) (2022-06-21)
+
+
+### Features
+
+* Mux Player for dashboard playback ([#1320](https://github.com/contentful/apps/issues/1320)) ([f8027c7](https://github.com/contentful/apps/commit/f8027c7c4e8754077ee6f89bd15f7dcde36d9f3b))
+
+
+
+
+
+## [1.8.6](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.8.5...@contentful/mux-contentful-uploader@1.8.6) (2022-06-20)
+
+**Note:** Version bump only for package @contentful/mux-contentful-uploader
+
+
+
+
+
+## [1.8.5](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.8.4...@contentful/mux-contentful-uploader@1.8.5) (2022-06-06)
+
+**Note:** Version bump only for package @contentful/mux-contentful-uploader
+
+
+
+
+
 ## [1.8.4](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.8.3...@contentful/mux-contentful-uploader@1.8.4) (2022-06-02)
 
 **Note:** Version bump only for package @contentful/mux-contentful-uploader
