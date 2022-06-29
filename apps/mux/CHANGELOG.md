@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.5](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.9.4...@contentful/mux-contentful-uploader@1.9.5) (2022-06-29)
+
+
+### Bug Fixes
+
+* disable sourcemaps ([#1411](https://github.com/contentful/apps/issues/1411)) ([4b0b803](https://github.com/contentful/apps/commit/4b0b803ead101ad4a9fcadb3f0672eb47f784813))
+
+
+
+
+
 ## [1.9.4](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.9.3...@contentful/mux-contentful-uploader@1.9.4) (2022-06-29)
 
 **Note:** Version bump only for package @contentful/mux-contentful-uploader
