@@ -473,10 +473,12 @@ export class App extends React.Component<AppProps, AppState> {
               playbackId={this.state.value.playbackId || this.state.value.signedPlaybackId}
               streamType="on-demand"
               poster={this.state.value.audioOnly ? '#' : undefined}
-              custom-media-domain={muxDomain || undefined}
+              customDomain={muxDomain || undefined}
+              audio={this.state.value.audioOnly}
               metadata={{
-                player_name: 'Contentful-Dashboard-Player',
+                player_name: 'Contentful Admin Dashboard',
                 viewer_user_id: 'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
+                page_type: 'Preview Player',
               }}
               tokens={{
                 playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
