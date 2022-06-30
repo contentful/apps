@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.7](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.6...@contentful/netlify-build-and-preview@1.8.7) (2022-06-30)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/f36-components from 4.0.44 to 4.10.5 ([#1413](https://github.com/contentful/apps/issues/1413)) ([291fcf7](https://github.com/contentful/apps/commit/291fcf71b15a9c1a375eafae318e133c537a1a53))
+
+
+
+
+
 ## [1.8.6](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.5...@contentful/netlify-build-and-preview@1.8.6) (2022-06-01)
 
 **Note:** Version bump only for package @contentful/netlify-build-and-preview
