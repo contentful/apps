@@ -42,7 +42,8 @@ init((sdk) => {
   // In the initial version of the app `fieldsConfig` was used.
   // Ecommerce app base stores the same information in `skuTypes`
   // To avoid breaking changes we need to migrate the parameters on-the-fly
-  sdk.parameters.installation.skuTypes = sdk.parameters.installation.fieldsConfig;
+  sdk.parameters.installation.skuTypes =
+    sdk.parameters.installation.skuTypes ?? sdk.parameters.installation.fieldsConfig;
 
   setup({
     makeCTA,
