@@ -186,20 +186,7 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   resetField = async () => {
-    await this.props.sdk.field.setValue({
-      version: 2,
-      uploadId: undefined,
-      assetId: undefined,
-      playbackId: undefined,
-      signedPlaybackId: undefined,
-      ready: undefined,
-      ratio: undefined,
-      error: undefined,
-      max_stored_resolution: undefined,
-      max_stored_frame_rate: undefined,
-      duration: undefined,
-      audioOnly: undefined,
-    });
+    await this.props.sdk.field.setValue(undefined);
     this.setState({ error: false, errorShowResetAction: false });
   };
 
