@@ -18,7 +18,7 @@
     "emotion": "10.0.14",
     "lodash.get": "4.4.2",
     "lodash.uniqby": "4.7.0",
-    "prop-types": "15.7.2",
+    "prop-types": "15.8.1",
     "pubnub": "4.24.3",
     "react": "16.8.6",
     "react-dom": "16.8.6",
