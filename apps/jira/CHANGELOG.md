@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.9](https://github.com/contentful/apps/compare/@contentful/jira@1.9.8...@contentful/jira@1.9.9) (2022-07-04)
+
+
+### Bug Fixes
+
+* **deps:** bump prop-types from 15.7.2 to 15.8.1 ([#1423](https://github.com/contentful/apps/issues/1423)) ([cf052bb](https://github.com/contentful/apps/commit/cf052bbe4847bfbbed261f08612abe9a47af5e6b))
+
+
+
+
+
 ## [1.9.8](https://github.com/contentful/apps/compare/@contentful/jira@1.9.7...@contentful/jira@1.9.8) (2022-06-30)
 
 **Note:** Version bump only for package @contentful/jira

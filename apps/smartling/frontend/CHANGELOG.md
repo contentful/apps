@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.11](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.10...@contentful/smartling-frontend@1.7.11) (2022-07-04)
+
+
+### Bug Fixes
+
+* **deps:** bump prop-types from 15.7.2 to 15.8.1 ([#1423](https://github.com/contentful/apps/issues/1423)) ([cf052bb](https://github.com/contentful/apps/commit/cf052bbe4847bfbbed261f08612abe9a47af5e6b))
+
+
+
+
+
 ## [1.7.10](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.9...@contentful/smartling-frontend@1.7.10) (2022-06-01)
 
 **Note:** Version bump only for package @contentful/smartling-frontend

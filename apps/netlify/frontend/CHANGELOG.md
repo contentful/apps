@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.8](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.7...@contentful/netlify-build-and-preview@1.8.8) (2022-07-04)
+
+
+### Bug Fixes
+
+* **deps:** bump prop-types from 15.7.2 to 15.8.1 ([#1423](https://github.com/contentful/apps/issues/1423)) ([cf052bb](https://github.com/contentful/apps/commit/cf052bbe4847bfbbed261f08612abe9a47af5e6b))
+
+
+
+
+
 ## [1.8.7](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.6...@contentful/netlify-build-and-preview@1.8.7) (2022-06-30)
 
 

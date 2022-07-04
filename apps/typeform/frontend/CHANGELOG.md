@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.12](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.11...@contentful/typeform-frontend@1.5.12) (2022-07-04)
+
+
+### Bug Fixes
+
+* **deps:** bump prop-types from 15.7.2 to 15.8.1 ([#1423](https://github.com/contentful/apps/issues/1423)) ([cf052bb](https://github.com/contentful/apps/commit/cf052bbe4847bfbbed261f08612abe9a47af5e6b))
+
+
+
+
+
 ## [1.5.11](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.10...@contentful/typeform-frontend@1.5.11) (2022-07-04)
 
 **Note:** Version bump only for package @contentful/typeform-frontend
