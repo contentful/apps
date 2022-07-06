@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.6](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.5...@contentful/jira-app@1.7.6) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-tokens from 0.11.0 to 0.11.2 ([#1430](https://github.com/contentful/apps/issues/1430)) ([ece5420](https://github.com/contentful/apps/commit/ece54203bb25b1ce91617fd02252beadbff31561))
+
+
+
+
+
 ## [1.7.5](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.4...@contentful/jira-app@1.7.5) (2022-07-04)
 
 

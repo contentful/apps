@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.12](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.11...@contentful/smartling-frontend@1.7.12) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-tokens from 0.11.0 to 0.11.2 ([#1430](https://github.com/contentful/apps/issues/1430)) ([ece5420](https://github.com/contentful/apps/commit/ece54203bb25b1ce91617fd02252beadbff31561))
+* **deps:** bump whatwg-fetch from 3.0.0 to 3.6.2 ([#1433](https://github.com/contentful/apps/issues/1433)) ([765e34a](https://github.com/contentful/apps/commit/765e34aefaa0cc273db7ac3dbae9d7b1153dfe98))
+
+
+
+
+
 ## [1.7.11](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.10...@contentful/smartling-frontend@1.7.11) (2022-07-04)
 
 

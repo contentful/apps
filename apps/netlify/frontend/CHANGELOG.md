@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.9](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.8...@contentful/netlify-build-and-preview@1.8.9) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump whatwg-fetch from 3.0.0 to 3.6.2 ([#1433](https://github.com/contentful/apps/issues/1433)) ([765e34a](https://github.com/contentful/apps/commit/765e34aefaa0cc273db7ac3dbae9d7b1153dfe98))
+
+
+
+
+
 ## [1.8.8](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.7...@contentful/netlify-build-and-preview@1.8.8) (2022-07-04)
 
 
