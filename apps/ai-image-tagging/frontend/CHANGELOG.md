@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.12](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-frontend@1.5.11...@contentful/ai-image-tagging-frontend@1.5.12) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#1437](https://github.com/contentful/apps/issues/1437)) ([0d4d25c](https://github.com/contentful/apps/commit/0d4d25c506c27993ed9134e1de88c4a68ed98acf))
+
+
+
+
+
 ## [1.5.11](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-frontend@1.5.10...@contentful/ai-image-tagging-frontend@1.5.11) (2022-07-06)
 
 

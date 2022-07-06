@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.15](https://github.com/contentful/apps/compare/@contentful/jira@1.9.14...@contentful/jira@1.9.15) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#1437](https://github.com/contentful/apps/issues/1437)) ([0d4d25c](https://github.com/contentful/apps/commit/0d4d25c506c27993ed9134e1de88c4a68ed98acf))
+
+
+
+
+
 ## [1.9.14](https://github.com/contentful/apps/compare/@contentful/jira@1.9.13...@contentful/jira@1.9.14) (2022-07-06)
 
 **Note:** Version bump only for package @contentful/jira
