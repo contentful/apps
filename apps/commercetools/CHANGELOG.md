@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.3](https://github.com/contentful/apps/compare/@contentful/commercetools@1.9.2...@contentful/commercetools@1.9.3) (2022-07-06)
+
+
+### Bug Fixes
+
+* parameterize api url ([#1439](https://github.com/contentful/apps/issues/1439)) ([aee0b38](https://github.com/contentful/apps/commit/aee0b386f178d654b9a1cebcf84d46187486e3e4))
+
+
+
+
+
 ## [1.9.2](https://github.com/contentful/apps/compare/@contentful/commercetools@1.9.1...@contentful/commercetools@1.9.2) (2022-07-01)
 
 
