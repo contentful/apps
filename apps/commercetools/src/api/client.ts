@@ -6,7 +6,7 @@ export function createClient(config: ConfigurationParameters) {
   const ctpClient = new ClientBuilder()
     .withProjectKey(config.projectKey!)
     .withHttpMiddleware({
-      host: 'https://api.europe-west1.gcp.commercetools.com',
+      host: config.apiEndpoint!,
     })
     .withClientCredentialsFlow({
       host: config.authApiEndpoint!,
