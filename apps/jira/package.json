@@ -1,6 +1,6 @@
 {
   "name": "@contentful/jira",
-  "version": "1.9.17",
+  "version": "1.9.18",
   "private": true,
   "devDependencies": {
     "concurrently": "5.3.0",
