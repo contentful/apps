@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.11](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.10...@contentful/netlify-build-and-preview@1.8.11) (2022-07-11)
+
+
+### Bug Fixes
+
+* **deps:** revert pubnub from 7.2.0 to 4.24.3 ([#1465](https://github.com/contentful/apps/issues/1465)) ([4293f67](https://github.com/contentful/apps/commit/4293f6715b6a238122160f72f6afd12f47057ffe))
+
+
+
+
+
 ## [1.8.10](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.9...@contentful/netlify-build-and-preview@1.8.10) (2022-07-11)
 
 
