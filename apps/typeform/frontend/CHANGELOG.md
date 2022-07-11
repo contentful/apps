@@ -3,6 +3,90 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.17](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.16...@contentful/typeform-frontend@1.5.17) (2022-07-11)
+
+
+### Bug Fixes
+
+* **deps:** bump jest-environment-jsdom from 25.1.0 to 28.1.2 ([#1457](https://github.com/contentful/apps/issues/1457)) ([2326d64](https://github.com/contentful/apps/commit/2326d64510730848de0a5a4b0d33841b06a0ad57))
+
+
+
+
+
+## [1.5.16](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.15...@contentful/typeform-frontend@1.5.16) (2022-07-08)
+
+**Note:** Version bump only for package @contentful/typeform-frontend
+
+
+
+
+
+## [1.5.15](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.14...@contentful/typeform-frontend@1.5.15) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#1437](https://github.com/contentful/apps/issues/1437)) ([0d4d25c](https://github.com/contentful/apps/commit/0d4d25c506c27993ed9134e1de88c4a68ed98acf))
+
+
+
+
+
+## [1.5.14](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.13...@contentful/typeform-frontend@1.5.14) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-tokens from 0.11.0 to 0.11.2 ([#1430](https://github.com/contentful/apps/issues/1430)) ([ece5420](https://github.com/contentful/apps/commit/ece54203bb25b1ce91617fd02252beadbff31561))
+* **deps:** bump whatwg-fetch from 3.0.0 to 3.6.2 ([#1433](https://github.com/contentful/apps/issues/1433)) ([765e34a](https://github.com/contentful/apps/commit/765e34aefaa0cc273db7ac3dbae9d7b1153dfe98))
+
+
+
+
+
+## [1.5.13](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.12...@contentful/typeform-frontend@1.5.13) (2022-07-05)
+
+
+### Bug Fixes
+
+* **deps:** bump @typeform/embed from 0.16.0 to 1.36.0 ([#1428](https://github.com/contentful/apps/issues/1428)) ([c8f927d](https://github.com/contentful/apps/commit/c8f927df23254680eb761b219176883b061e6ecc))
+
+
+
+
+
+## [1.5.12](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.11...@contentful/typeform-frontend@1.5.12) (2022-07-04)
+
+
+### Bug Fixes
+
+* **deps:** bump prop-types from 15.7.2 to 15.8.1 ([#1423](https://github.com/contentful/apps/issues/1423)) ([cf052bb](https://github.com/contentful/apps/commit/cf052bbe4847bfbbed261f08612abe9a47af5e6b))
+
+
+
+
+
+## [1.5.11](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.10...@contentful/typeform-frontend@1.5.11) (2022-07-04)
+
+**Note:** Version bump only for package @contentful/typeform-frontend
+
+
+
+
+
+## [1.5.10](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.9...@contentful/typeform-frontend@1.5.10) (2022-07-01)
+
+
+### Bug Fixes
+
+* **deps:** bump @types/lodash from 4.14.149 to 4.14.182 ([#1417](https://github.com/contentful/apps/issues/1417)) ([bb6d1b5](https://github.com/contentful/apps/commit/bb6d1b51f09daf940438397d0463c4bc87af6821))
+* **deps:** bump jsdom from 16.5.0 to 20.0.0 ([#1418](https://github.com/contentful/apps/issues/1418)) ([9b2fda8](https://github.com/contentful/apps/commit/9b2fda8175e583c2f3b43596832513db22ccaebb))
+
+
+
+
+
 ## [1.5.9](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.8...@contentful/typeform-frontend@1.5.9) (2022-06-24)
 
 **Note:** Version bump only for package @contentful/typeform-frontend

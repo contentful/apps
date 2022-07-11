@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.11](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.10...@contentful/netlify-build-and-preview@1.8.11) (2022-07-11)
+
+
+### Bug Fixes
+
+* **deps:** revert pubnub from 7.2.0 to 4.24.3 ([#1465](https://github.com/contentful/apps/issues/1465)) ([4293f67](https://github.com/contentful/apps/commit/4293f6715b6a238122160f72f6afd12f47057ffe))
+
+
+
+
+
+## [1.8.10](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.9...@contentful/netlify-build-and-preview@1.8.10) (2022-07-11)
+
+
+### Bug Fixes
+
+* **deps:** bump pubnub from 4.24.3 to 7.2.0 ([#1460](https://github.com/contentful/apps/issues/1460)) ([cfca9fd](https://github.com/contentful/apps/commit/cfca9fd0e0154838c74525d569673db14d35e6d3))
+
+
+
+
+
+## [1.8.9](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.8...@contentful/netlify-build-and-preview@1.8.9) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump whatwg-fetch from 3.0.0 to 3.6.2 ([#1433](https://github.com/contentful/apps/issues/1433)) ([765e34a](https://github.com/contentful/apps/commit/765e34aefaa0cc273db7ac3dbae9d7b1153dfe98))
+
+
+
+
+
+## [1.8.8](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.7...@contentful/netlify-build-and-preview@1.8.8) (2022-07-04)
+
+
+### Bug Fixes
+
+* **deps:** bump prop-types from 15.7.2 to 15.8.1 ([#1423](https://github.com/contentful/apps/issues/1423)) ([cf052bb](https://github.com/contentful/apps/commit/cf052bbe4847bfbbed261f08612abe9a47af5e6b))
+
+
+
+
+
 ## [1.8.7](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.6...@contentful/netlify-build-and-preview@1.8.7) (2022-06-30)
 
 

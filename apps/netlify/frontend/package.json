@@ -1,6 +1,6 @@
 {
   "name": "@contentful/netlify-build-and-preview",
-  "version": "1.8.7",
+  "version": "1.8.11",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
@@ -18,12 +18,12 @@
     "emotion": "10.0.14",
     "lodash.get": "4.4.2",
     "lodash.uniqby": "4.7.0",
-    "prop-types": "15.7.2",
+    "prop-types": "15.8.1",
     "pubnub": "4.24.3",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-scripts": "4.0.3",
-    "whatwg-fetch": "3.0.0"
+    "whatwg-fetch": "3.6.2"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",

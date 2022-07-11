@@ -3,6 +3,98 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.18](https://github.com/contentful/apps/compare/@contentful/jira@1.9.17...@contentful/jira@1.9.18) (2022-07-08)
+
+
+### Bug Fixes
+
+* **deps:** bump aws-sdk from 2.814.0 to 2.1170.0 ([#1450](https://github.com/contentful/apps/issues/1450)) ([58efda4](https://github.com/contentful/apps/commit/58efda44f8e2075dd3c7ed2908cc06dd8376221f))
+
+
+
+
+
+## [1.9.17](https://github.com/contentful/apps/compare/@contentful/jira@1.9.16...@contentful/jira@1.9.17) (2022-07-08)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.9.16](https://github.com/contentful/apps/compare/@contentful/jira@1.9.15...@contentful/jira@1.9.16) (2022-07-07)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.9.15](https://github.com/contentful/apps/compare/@contentful/jira@1.9.14...@contentful/jira@1.9.15) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#1437](https://github.com/contentful/apps/issues/1437)) ([0d4d25c](https://github.com/contentful/apps/commit/0d4d25c506c27993ed9134e1de88c4a68ed98acf))
+
+
+
+
+
+## [1.9.14](https://github.com/contentful/apps/compare/@contentful/jira@1.9.13...@contentful/jira@1.9.14) (2022-07-06)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.9.13](https://github.com/contentful/apps/compare/@contentful/jira@1.9.12...@contentful/jira@1.9.13) (2022-07-06)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.9.12](https://github.com/contentful/apps/compare/@contentful/jira@1.9.11...@contentful/jira@1.9.12) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-tokens from 0.11.0 to 0.11.2 ([#1430](https://github.com/contentful/apps/issues/1430)) ([ece5420](https://github.com/contentful/apps/commit/ece54203bb25b1ce91617fd02252beadbff31561))
+
+
+
+
+
+## [1.9.11](https://github.com/contentful/apps/compare/@contentful/jira@1.9.10...@contentful/jira@1.9.11) (2022-07-05)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.9.10](https://github.com/contentful/apps/compare/@contentful/jira@1.9.9...@contentful/jira@1.9.10) (2022-07-05)
+
+**Note:** Version bump only for package @contentful/jira
+
+
+
+
+
+## [1.9.9](https://github.com/contentful/apps/compare/@contentful/jira@1.9.8...@contentful/jira@1.9.9) (2022-07-04)
+
+
+### Bug Fixes
+
+* **deps:** bump prop-types from 15.7.2 to 15.8.1 ([#1423](https://github.com/contentful/apps/issues/1423)) ([cf052bb](https://github.com/contentful/apps/commit/cf052bbe4847bfbbed261f08612abe9a47af5e6b))
+
+
+
+
+
 ## [1.9.8](https://github.com/contentful/apps/compare/@contentful/jira@1.9.7...@contentful/jira@1.9.8) (2022-06-30)
 
 **Note:** Version bump only for package @contentful/jira

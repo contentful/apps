@@ -1,4 +1,4 @@
-import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { FieldExtensionSDK, init } from '@contentful/app-sdk';
 import { setup } from '@contentful/ecommerce-app-base';
 import { fetchPreviews } from './api';
 import { PARAMETER_DEFINITIONS, validateParameters } from './config';
@@ -38,18 +38,26 @@ async function openDialog(
   return Array.isArray(skus) ? skus : [];
 }
 
-setup({
-  makeCTA,
-  name: 'commercetools',
-  logo,
-  color: '#213c45',
-  description:
-    'The commercetools app allows editors to select products from their commercetools account and reference them inside of Contentful entries.',
-  parameterDefinitions: PARAMETER_DEFINITIONS,
-  skuTypes: SKU_TYPES,
-  validateParameters,
-  fetchProductPreviews: fetchPreviews,
-  renderDialog,
-  isDisabled: () => false,
-  openDialog,
+init((sdk) => {
+  // In the initial version of the app `fieldsConfig` was used.
+  // Ecommerce app base stores the same information in `skuTypes`
+  // To avoid breaking changes we need to migrate the parameters on-the-fly
+  sdk.parameters.installation.skuTypes =
+    sdk.parameters.installation.skuTypes ?? sdk.parameters.installation.fieldsConfig;
+
+  setup({
+    makeCTA,
+    name: 'commercetools',
+    logo,
+    color: '#213c45',
+    description:
+      'The commercetools app allows editors to select products from their commercetools account and reference them inside of Contentful entries.',
+    parameterDefinitions: PARAMETER_DEFINITIONS,
+    skuTypes: SKU_TYPES,
+    validateParameters,
+    fetchProductPreviews: fetchPreviews,
+    renderDialog,
+    isDisabled: () => false,
+    openDialog,
+  });
 });

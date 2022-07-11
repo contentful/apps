@@ -3,6 +3,55 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.9](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.8...@contentful/jira-app@1.7.9) (2022-07-08)
+
+**Note:** Version bump only for package @contentful/jira-app
+
+
+
+
+
+## [1.7.8](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.7...@contentful/jira-app@1.7.8) (2022-07-07)
+
+**Note:** Version bump only for package @contentful/jira-app
+
+
+
+
+
+## [1.7.7](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.6...@contentful/jira-app@1.7.7) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#1437](https://github.com/contentful/apps/issues/1437)) ([0d4d25c](https://github.com/contentful/apps/commit/0d4d25c506c27993ed9134e1de88c4a68ed98acf))
+
+
+
+
+
+## [1.7.6](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.5...@contentful/jira-app@1.7.6) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-tokens from 0.11.0 to 0.11.2 ([#1430](https://github.com/contentful/apps/issues/1430)) ([ece5420](https://github.com/contentful/apps/commit/ece54203bb25b1ce91617fd02252beadbff31561))
+
+
+
+
+
+## [1.7.5](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.4...@contentful/jira-app@1.7.5) (2022-07-04)
+
+
+### Bug Fixes
+
+* **deps:** bump prop-types from 15.7.2 to 15.8.1 ([#1423](https://github.com/contentful/apps/issues/1423)) ([cf052bb](https://github.com/contentful/apps/commit/cf052bbe4847bfbbed261f08612abe9a47af5e6b))
+
+
+
+
+
 ## [1.7.4](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.3...@contentful/jira-app@1.7.4) (2022-06-01)
 
 **Note:** Version bump only for package @contentful/jira-app

@@ -3,6 +3,59 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.15](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.14...@contentful/smartling-frontend@1.7.15) (2022-07-08)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 7.42.1 to 10.8.0 ([#1448](https://github.com/contentful/apps/issues/1448)) ([9d3d298](https://github.com/contentful/apps/commit/9d3d298ba80993a2e35fe14eca0455cb9449d2f8))
+
+
+
+
+
+## [1.7.14](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.13...@contentful/smartling-frontend@1.7.14) (2022-07-07)
+
+**Note:** Version bump only for package @contentful/smartling-frontend
+
+
+
+
+
+## [1.7.13](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.12...@contentful/smartling-frontend@1.7.13) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-react-components ([#1437](https://github.com/contentful/apps/issues/1437)) ([0d4d25c](https://github.com/contentful/apps/commit/0d4d25c506c27993ed9134e1de88c4a68ed98acf))
+
+
+
+
+
+## [1.7.12](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.11...@contentful/smartling-frontend@1.7.12) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-tokens from 0.11.0 to 0.11.2 ([#1430](https://github.com/contentful/apps/issues/1430)) ([ece5420](https://github.com/contentful/apps/commit/ece54203bb25b1ce91617fd02252beadbff31561))
+* **deps:** bump whatwg-fetch from 3.0.0 to 3.6.2 ([#1433](https://github.com/contentful/apps/issues/1433)) ([765e34a](https://github.com/contentful/apps/commit/765e34aefaa0cc273db7ac3dbae9d7b1153dfe98))
+
+
+
+
+
+## [1.7.11](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.10...@contentful/smartling-frontend@1.7.11) (2022-07-04)
+
+
+### Bug Fixes
+
+* **deps:** bump prop-types from 15.7.2 to 15.8.1 ([#1423](https://github.com/contentful/apps/issues/1423)) ([cf052bb](https://github.com/contentful/apps/commit/cf052bbe4847bfbbed261f08612abe9a47af5e6b))
+
+
+
+
+
 ## [1.7.10](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.9...@contentful/smartling-frontend@1.7.10) (2022-06-01)
 
 **Note:** Version bump only for package @contentful/smartling-frontend

@@ -5,7 +5,7 @@ export interface ConfigurationParameters {
   apiEndpoint?: string;
   authApiEndpoint?: string;
   locale?: string;
-  fieldsConfig?: Record<string, Record<string, SkuType | undefined> | undefined>;
+  skuTypes?: Record<string, Record<string, SkuType | undefined> | undefined>;
 }
 
 export type SkuType = 'product' | 'category';
