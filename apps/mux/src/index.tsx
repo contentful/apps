@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { Note, Paragraph, Spinner, Button, TextLink } from '@contentful/forma-36-react-components';
 import { init, locations, AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
 import { createUpload } from '@mux/upchunk';
-import MuxPlayer from '@mux-elements/mux-player-react';
+import MuxPlayer from '@mux/mux-player-react';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
