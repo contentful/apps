@@ -12,11 +12,12 @@
 ## Contentful app setup
 
 * Use the Mux (dev) contentful app and make sure it is pointed to http://localhost:3000 for development
+* Create a development app in Contentful. Try to only select the resources needed.
 * You will have to go into your browser settings and disable mixed content warnings for this to work
-* (Undocumented) Contentful uses Conventional Commits.
-* (Undocumented) Squash commit history.
-* (Undocumented) Use Node 14, not the current LTS as the docs say.
-* (Undocumented) Use prettier for formatting.
+* Contentful uses Conventional Commits.
+* Squash commit history.
+* Use Node 14, not the current LTS as the docs say.
+* Use prettier for formatting.
 
 ## Deploy
 

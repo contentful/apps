@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { Note, Paragraph, Spinner, Button, TextLink } from '@contentful/forma-36-react-components';
 import { init, locations, AppExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
 import { createUpload } from '@mux/upchunk';
-import MuxPlayer from '@mux-elements/mux-player-react';
+import MuxPlayer from '@mux/mux-player-react';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 
@@ -186,20 +186,7 @@ export class App extends React.Component<AppProps, AppState> {
   };
 
   resetField = async () => {
-    await this.props.sdk.field.setValue({
-      version: 2,
-      uploadId: undefined,
-      assetId: undefined,
-      playbackId: undefined,
-      signedPlaybackId: undefined,
-      ready: undefined,
-      ratio: undefined,
-      error: undefined,
-      max_stored_resolution: undefined,
-      max_stored_frame_rate: undefined,
-      duration: undefined,
-      audioOnly: undefined,
-    });
+    await this.props.sdk.field.setValue(undefined);
     this.setState({ error: false, errorShowResetAction: false });
   };
 
@@ -473,10 +460,12 @@ export class App extends React.Component<AppProps, AppState> {
               playbackId={this.state.value.playbackId || this.state.value.signedPlaybackId}
               streamType="on-demand"
               poster={this.state.value.audioOnly ? '#' : undefined}
-              custom-media-domain={muxDomain || undefined}
+              customDomain={muxDomain || undefined}
+              audio={this.state.value.audioOnly}
               metadata={{
-                player_name: 'Contentful-Dashboard-Player',
+                player_name: 'Contentful Admin Dashboard',
                 viewer_user_id: 'user' in this.props.sdk ? this.props.sdk.user.sys.id : undefined,
+                page_type: 'Preview Player',
               }}
               tokens={{
                 playback: this.isUsingSigned() ? this.state.playbackToken : undefined,
