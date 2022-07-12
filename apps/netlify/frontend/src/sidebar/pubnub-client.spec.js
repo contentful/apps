@@ -30,11 +30,17 @@ describe('pubnub-client', () => {
       history: jest.fn(() => Promise.resolve('PUBNUB HISTORY RESULT')),
     };
 
-    PubNub.mockImplementation(() => pubNubMock);
+    PubNub.mockImplementationOnce(() => pubNubMock);
   });
 
   describe('start', () => {
-    it('creates a PubNub instance, registers a listener and subscribes to a channel', () => {
+    it('creates a PubNub instance', () => {
+      const pubsub = createPubSub('channel', (x) => x, jest.requireActual('pubnub'));
+
+      expect(pubsub.start).not.toThrow();
+    });
+
+    it('registers a listener and subscribes to a channel', () => {
       const pubsub = createPubSub('channel', (x) => x);
 
       pubsub.start();
@@ -43,6 +49,7 @@ describe('pubnub-client', () => {
       expect(PubNub).toHaveBeenCalledWith({
         publishKey: expect.any(String),
         subscribeKey: expect.any(String),
+        uuid: expect.any(String),
       });
 
       expect(pubNubMock.addListener).toHaveBeenCalledTimes(1);

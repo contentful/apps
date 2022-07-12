@@ -1,4 +1,5 @@
 import PubNub from 'pubnub';
+import { v4 as uuid } from 'uuid';
 
 import { PUBNUB_PUBLISH_KEY, PUBNUB_SUBSCRIBE_KEY } from '../constants';
 
@@ -27,7 +28,7 @@ function normalize(message, timetoken, normalizeFn) {
   }
 }
 
-export function createPubSub(channel, normalizeFn) {
+export function createPubSub(channel, normalizeFn, PubNubClient = PubNub) {
   const channels = [channel];
   const state = { listeners: [] };
 
@@ -40,9 +41,10 @@ export function createPubSub(channel, normalizeFn) {
   };
 
   function start() {
-    state.instance = new PubNub({
+    state.instance = new PubNubClient({
       publishKey: PUBNUB_PUBLISH_KEY,
       subscribeKey: PUBNUB_SUBSCRIBE_KEY,
+      uuid: uuid(),
     });
 
     state.mainListener = {
