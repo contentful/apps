@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.83](https://github.com/contentful/apps/compare/@contentful/shopify-sku@1.8.82...@contentful/shopify-sku@1.8.83) (2022-07-12)
+
+**Note:** Version bump only for package @contentful/shopify-sku
+
+
+
+
+
 ## [1.8.82](https://github.com/contentful/apps/compare/@contentful/shopify-sku@1.8.81...@contentful/shopify-sku@1.8.82) (2022-07-06)
 
 **Note:** Version bump only for package @contentful/shopify-sku

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.15](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.14...@contentful/dam-app-base@2.0.15) (2022-07-12)
+
+
+### Bug Fixes
+
+* **deps:** bump contentful-management from 7.42.1 to 10.8.0 ([#1448](https://github.com/contentful/apps/issues/1448)) ([9d3d298](https://github.com/contentful/apps/commit/9d3d298ba80993a2e35fe14eca0455cb9449d2f8))
+
+
+
+
+
 ## [2.0.14](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.13...@contentful/dam-app-base@2.0.14) (2022-07-06)
 
 **Note:** Version bump only for package @contentful/dam-app-base
