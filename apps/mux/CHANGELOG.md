@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.8](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.9.7...@contentful/mux-contentful-uploader@1.9.8) (2022-07-12)
+
+
+### Bug Fixes
+
+* correctly reset fields, player adjustments, and iframe auto sizer changes ([#1416](https://github.com/contentful/apps/issues/1416)) ([91437d8](https://github.com/contentful/apps/commit/91437d8ad592f13a4df8c5320cf8902d614ceca2))
+
+
+
+
+
 ## [1.9.7](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.9.6...@contentful/mux-contentful-uploader@1.9.7) (2022-07-12)
 
 **Note:** Version bump only for package @contentful/mux-contentful-uploader
