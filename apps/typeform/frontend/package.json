@@ -1,6 +1,6 @@
 {
   "name": "@contentful/typeform-frontend",
-  "version": "1.5.17",
+  "version": "1.5.18",
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
