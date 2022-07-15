@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.20](https://github.com/contentful/apps/compare/@contentful/jira@1.9.19...@contentful/jira@1.9.20) (2022-07-15)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-fcss from 0.3.3 to 0.3.5 ([#1487](https://github.com/contentful/apps/issues/1487)) ([d83c7a0](https://github.com/contentful/apps/commit/d83c7a0f48a6940a98c48906274821371bf1e9ce))
+
+
+
+
+
 ## [1.9.19](https://github.com/contentful/apps/compare/@contentful/jira@1.9.18...@contentful/jira@1.9.19) (2022-07-14)
 
 

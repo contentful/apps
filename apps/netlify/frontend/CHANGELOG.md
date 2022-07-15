@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.16](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.15...@contentful/netlify-build-and-preview@1.8.16) (2022-07-15)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/forma-36-fcss from 0.3.3 to 0.3.5 ([#1487](https://github.com/contentful/apps/issues/1487)) ([d83c7a0](https://github.com/contentful/apps/commit/d83c7a0f48a6940a98c48906274821371bf1e9ce))
+
+
+
+
+
 ## [1.8.15](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.14...@contentful/netlify-build-and-preview@1.8.15) (2022-07-12)
 
 
