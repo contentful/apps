@@ -38,6 +38,7 @@ const getMockSdk = () => ({
         getValue: jest.fn(() => 'preview-slug'),
       },
     },
+    save: jest.fn(() => Promise.resolve()),
   },
   window: {
     startAutoResizer: jest.fn(),
@@ -82,6 +83,7 @@ describe('Gatsby App Sidebar', () => {
     );
 
     await new Promise((res) => setTimeout(res, 2000));
+    expect(mockSdk.entry.save).not.toBeCalled()
     expect(mockFetch).toBeCalledWith(WEBHOOK_URL, expect.anything());
     expect(mockWindowOpen).toBeCalledWith(PREVIEW_URL);
   });
@@ -105,8 +107,8 @@ describe('Gatsby App Sidebar', () => {
       })
     );
 
-    await new Promise((res) => setTimeout(res, 3000));
-
+    await new Promise((res) => setTimeout(res, 1));
+    expect(mockSdk.entry.save).toBeCalled()
     expect(mockFetch).toBeCalledWith(WEBHOOK_URL, expect.anything());
     /**
      * The expected url should be in the form of:
