@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.10](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.9...@contentful/image-focal-point@1.6.10) (2022-07-18)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.4.0 to 4.9.0 ([#1478](https://github.com/contentful/apps/issues/1478)) ([02b8dc2](https://github.com/contentful/apps/commit/02b8dc2396ff48c98052b0203c7d13197ecf6310))
+
+
+
+
+
 ## [1.6.9](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.8...@contentful/image-focal-point@1.6.9) (2022-06-01)
 
 **Note:** Version bump only for package @contentful/image-focal-point

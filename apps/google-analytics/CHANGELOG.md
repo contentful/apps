@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.8](https://github.com/contentful/apps/compare/@contentful/google-analytics@1.5.7...@contentful/google-analytics@1.5.8) (2022-07-18)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.4.0 to 4.9.0 ([#1478](https://github.com/contentful/apps/issues/1478)) ([02b8dc2](https://github.com/contentful/apps/commit/02b8dc2396ff48c98052b0203c7d13197ecf6310))
+
+
+
+
+
 ## [1.5.7](https://github.com/contentful/apps/compare/@contentful/google-analytics@1.5.6...@contentful/google-analytics@1.5.7) (2022-06-02)
 
 **Note:** Version bump only for package @contentful/google-analytics

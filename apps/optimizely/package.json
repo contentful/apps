@@ -1,6 +1,6 @@
 {
   "name": "@contentful/optimizely",
-  "version": "1.6.9",
+  "version": "1.6.10",
   "private": true,
   "devDependencies": {
     "cross-env": "7.0.3"
