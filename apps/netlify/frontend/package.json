@@ -9,7 +9,7 @@
     "identity-obj-proxy": "3.0.0"
   },
   "dependencies": {
-    "@contentful/app-sdk": "4.4.0",
+    "@contentful/app-sdk": "4.9.0",
     "@contentful/f36-components": "^4.0.43",
     "@contentful/f36-icons": "^4.1.1",
     "@contentful/f36-tokens": "^4.0.0",

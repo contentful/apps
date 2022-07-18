@@ -9,7 +9,7 @@
     "fetch-mock": "9.0.0-beta.2"
   },
   "dependencies": {
-    "@contentful/app-sdk": "4.4.0",
+    "@contentful/app-sdk": "4.9.0",
     "@contentful/forma-36-fcss": "0.3.5",
     "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.2",
