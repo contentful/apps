@@ -71,20 +71,6 @@ export default class Sidebar extends React.Component {
     this.buildSlug();
   };
 
-  entryWasUpdatedInLastXSeconds = (seconds) => {
-    const maxMillis = seconds * 1000;
-
-    const content = this.props.sdk.entry.getSys();
-
-    // updatedAt has the timezone on it as an iso8601 date, so getTime() will return unix time
-    const updatedTime = new Date(content.updatedAt).getTime();
-    const now = Date.now();
-
-    const millisSinceUpdated = now - updatedTime;
-
-    return millisSinceUpdated <= maxMillis;
-  };
-
   legacyOnSysChanged = () => {
     this.buildSlug();
     if (this.debounceInterval) {
@@ -236,56 +222,14 @@ export default class Sidebar extends React.Component {
 
     this.setState({ buttonDisabled: true });
 
-    let contentfulSavedRecently = this.entryWasUpdatedInLastXSeconds(5);
-
-    if (!contentfulSavedRecently) {
-      let waitForSave = true;
-      let totalLoopsWaited = 0;
-      while (waitForSave) {
-        contentfulSavedRecently = this.entryWasUpdatedInLastXSeconds(5);
-        // 50 totalLoopsWaited === 5 seconds === (100 ms * 60)
-        if (totalLoopsWaited >= 50 || contentfulSavedRecently) {
-          waitForSave = false;
-        } else {
-          totalLoopsWaited++;
-          // Contentful takes a few seconds to save. If we do not wait a bit for this, then the Gatsby preview may be started and finish before any content is even saved on the Contentful side
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-      }
-    }
-
+    await this.sdk.entry.save()
     this.refreshPreview();
 
     let previewUrl = this.getPreviewUrl();
     console.info(`opening preview url ${previewUrl}`);
     window.open(previewUrl, GATSBY_PREVIEW_TAB_ID);
 
-    if (!contentfulSavedRecently) {
-      // Wait to see if Contentful saves new data async
-      const interval = setInterval(() => {
-        const newPreviewUrl = this.getPreviewUrl();
-
-        if (previewUrl !== newPreviewUrl) {
-          clearInterval(interval);
-
-          previewUrl = newPreviewUrl;
-
-          console.info(`new preview url ${newPreviewUrl}`);
-          window.open(previewUrl, GATSBY_PREVIEW_TAB_ID);
-
-          this.refreshPreview();
-          this.setState({ buttonDisabled: false });
-        }
-      }, 1000);
-
-      // after 5 seconds stop waiting for Contentful to save data
-      setTimeout(() => {
-        clearInterval(interval);
-        this.setState({ buttonDisabled: false });
-      }, 5000);
-    } else {
-      this.setState({ buttonDisabled: false });
-    }
+    this.setState({ buttonDisabled: false });
   };
 
   render = () => {
