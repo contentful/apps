@@ -2,7 +2,7 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 
 ## Config Location
 
-Due to a bug in Next.js the config location doesn't load in development mode. The bug has been reported in Next.js' GitHub repository: https://github.com/vercel/next.js/issues/18028.
+Due to a bug in Next.js, the config location doesn't load in development mode. The bug has been reported in Next.js' GitHub repository: https://github.com/vercel/next.js/issues/18028.
 The config location works when creating a production build.
 
 ## Available Scripts
