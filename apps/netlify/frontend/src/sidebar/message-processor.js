@@ -1,4 +1,4 @@
-import { format, distanceInWordsToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 
 import {
   EVENT_TRIGGERED,
@@ -77,7 +77,7 @@ export function isDuplicate(msg, previousMessages) {
 function createFormattedTimeString(date) {
   const d = new Date(date);
 
-  return `${distanceInWordsToNow(d)} ago at ${format(d, 'h:mm:ss A')}`;
+  return `${formatDistanceToNow(d)} ago at ${format(d, 'h:mm:ss a..aa')}`;
 }
 
 export function messageToState(msg) {
