@@ -6,7 +6,7 @@
   "devDependencies": {
     "@testing-library/react": "11.2.5",
     "cross-env": "7.0.3",
-    "fetch-mock": "9.0.0-beta.2"
+    "fetch-mock": "9.11.0"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.9.0",

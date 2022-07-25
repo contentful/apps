@@ -156,7 +156,7 @@ describe('AITagView', () => {
       fetchMock.get(`/tags/${expectedPath}`, { tags: ['ai-tag-1', 'ai-tag-2', 'ai-tag-3'] });
     });
 
-    afterEach(fetchMock.reset);
+    afterEach(() => fetchMock.reset());
 
     it('should fetch tags and render them on btn click', async () => {
       const appView = renderComponent(sdk);
