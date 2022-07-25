@@ -47,6 +47,7 @@ export default class BasePagination {
     const nextProducts = noProductsFetchedYet
       ? await this._fetchProducts(search)
       : await this._fetchNextPage(this.products);
+
     this.hasNextProductPage = nextProducts.length === PER_PAGE;
 
     const newProducts = differenceBy(nextProducts, this.products, 'id');
@@ -70,7 +71,10 @@ export default class BasePagination {
    * and now want to render the next page.
    */
   async _fetchNextPage(products) {
-    return (await this.shopifyClient.fetchNextPage(products)).model;
+
+    const response = (await this.shopifyClient.fetchNextPage(products)).model;
+    const nextProducts = response.map((res) => { return { ...res, id: Buffer.from(res.id).toString('base64') } })
+    return nextProducts
   }
 
   _resetPagination() {

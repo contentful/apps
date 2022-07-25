@@ -89,12 +89,17 @@ class Pagination {
    */
   async _fetchProducts(search) {
     const query = { query: `variants:['sku:${search}'] OR title:${search}` };
-    return await this.shopifyClient.product.fetchQuery({
+
+    // converting the 'gid://shopify/ProductVariant/41' to base64 format as API format changed from 2022-04 version
+    const response = await this.shopifyClient.product.fetchQuery({
       first: PER_PAGE,
       sortBy: 'TITLE',
       reverse: true,
       ...(search.length && query),
     });
+
+    const products = response.map((res) => { return { ...res, id: Buffer.from(res.id).toString('base64') } })
+    return products
   }
 
   /**
@@ -102,7 +107,11 @@ class Pagination {
    * and now want to render the next page.
    */
   async _fetchNextPage(products) {
-    return (await this.shopifyClient.fetchNextPage(products)).model;
+    // return (await this.shopifyClient.fetchNextPage(products)).model;
+
+    const response = (await this.shopifyClient.fetchNextPage(products)).model;
+    const nextProductVariants = response.map((res) => { return { ...res, id: Buffer.from(res.id).toString('base64') } })
+    return nextProductVariants
   }
 
   _resetPagination() {

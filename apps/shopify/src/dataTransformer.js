@@ -11,6 +11,8 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
   const image = get(collection, ['image', 'src'], '');
   const handle = get(collection, ['handle'], undefined);
 
+
+
   let externalLink;
 
   if (apiEndpoint) {
@@ -20,12 +22,12 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
         collectionIdDecoded && collectionIdDecoded.slice(collectionIdDecoded.lastIndexOf('/') + 1);
 
       if (apiEndpoint && collectionId) {
-        externalLink = `https://${apiEndpoint}${
-          last(apiEndpoint) === '/' ? '' : '/'
-        }admin/collections/${collectionId}`;
+        externalLink = `https://${apiEndpoint}${last(apiEndpoint) === '/' ? '' : '/'
+          }admin/collections/${collectionId}`;
       }
-    } catch {}
+    } catch { }
   }
+
 
   return {
     id: collection.id,
@@ -53,11 +55,10 @@ export const productDataTransformer = (product, apiEndpoint) => {
         productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
 
       if (apiEndpoint && productId) {
-        externalLink = `https://${apiEndpoint}${
-          last(apiEndpoint) === '/' ? '' : '/'
-        }admin/products/${productId}`;
+        externalLink = `https://${apiEndpoint}${last(apiEndpoint) === '/' ? '' : '/'
+          }admin/products/${productId}`;
       }
-    } catch {}
+    } catch { }
   }
 
   return {
@@ -94,7 +95,8 @@ export const productsToVariantsTransformer = (products) =>
       const variants = product.variants.map((variant) => ({
         ...variant,
         variantSKU: variant.sku,
-        sku: variant.id,
+        // converting the 'gid://shopify/ProductVariant/41' to base64 format as API format changed from 2022-04 version
+        sku: Buffer.from(variant.id).toString('base64'),
         productId: product.id,
         title:
           variant.title === DEFAULT_SHOPIFY_VARIANT_TITLE
@@ -107,25 +109,24 @@ export const productsToVariantsTransformer = (products) =>
 
 export const previewsToProductVariants =
   ({ apiEndpoint }) =>
-  ({ sku, id, image, product, title }) => {
-    const productIdDecoded = atob(product.id);
-    const productId =
-      productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
-    return {
-      id,
-      image: get(image, ['src'], ''),
-      // TODO: Remove sku:id when @contentful/ecommerce-app-base supports internal IDs
-      // as an alternative piece of info to persist instead of the SKU.
-      // For now this is a temporary hack.
-      sku: id,
-      displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${id}`,
-      productId: product.id,
-      name: title === DEFAULT_SHOPIFY_VARIANT_TITLE ? product.title : `${product.title} (${title})`,
-      ...(apiEndpoint &&
-        productId && {
-          externalLink: `https://${apiEndpoint}${
-            last(apiEndpoint) === '/' ? '' : '/'
-          }admin/products/${productId}`,
+    ({ sku, id, image, product, title }) => {
+      const productIdDecoded = atob(product.id);
+      const productId =
+        productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
+      return {
+        id,
+        image: get(image, ['src'], ''),
+        // TODO: Remove sku:id when @contentful/ecommerce-app-base supports internal IDs
+        // as an alternative piece of info to persist instead of the SKU.
+        // For now this is a temporary hack.
+        sku: id,
+        displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${id}`,
+        productId: product.id,
+        name: title === DEFAULT_SHOPIFY_VARIANT_TITLE ? product.title : `${product.title} (${title})`,
+        ...(apiEndpoint &&
+          productId && {
+          externalLink: `https://${apiEndpoint}${last(apiEndpoint) === '/' ? '' : '/'
+            }admin/products/${productId}`,
         }),
+      };
     };
-  };
