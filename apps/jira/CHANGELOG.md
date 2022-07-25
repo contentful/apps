@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.27](https://github.com/contentful/apps/compare/@contentful/jira@1.9.26...@contentful/jira@1.9.27) (2022-07-25)
+
+
+### Bug Fixes
+
+* **deps:** bump aws-sdk from 2.1179.0 to 2.1181.0 ([#1541](https://github.com/contentful/apps/issues/1541)) ([4f7a916](https://github.com/contentful/apps/commit/4f7a916b9bd68d70153025b33f46936da17a0e03))
+
+
+
+
+
 ## [1.9.26](https://github.com/contentful/apps/compare/@contentful/jira@1.9.25...@contentful/jira@1.9.26) (2022-07-21)
 
 
