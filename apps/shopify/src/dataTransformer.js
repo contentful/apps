@@ -51,10 +51,10 @@ export const productDataTransformer = (product, apiEndpoint) => {
   const sku = get(product, ['variants', 0, 'sku'], undefined);
   let externalLink;
 
-  let productIdDecoded
+
   if (apiEndpoint) {
     try {
-      productIdDecoded = !isBase64(product.id) ? btoa(product.id) : product.id
+      const productIdDecoded = atob(product.id);
       const productId =
         productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
 
@@ -65,12 +65,13 @@ export const productDataTransformer = (product, apiEndpoint) => {
     } catch { }
   }
 
+  const productId = !isBase64(product.id) ? btoa(product.id) : product.id;
 
   return {
-    id: productIdDecoded,
+    id: productId,
     image,
     name: product.title,
-    displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${productIdDecoded}`,
+    displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${productId}`,
     sku: product.id,
     ...(externalLink ? { externalLink } : {}),
   };

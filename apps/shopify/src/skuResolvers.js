@@ -46,13 +46,13 @@ export const fetchCollectionPreviews = async (skus, config) => {
 
   const response = (await shopifyClient.collection.fetchAll(250))
 
-  const collections = response.map((res) => { return { ...res, id: !isBase64(res.id) ? res.id : atob(res.id) } })
-    .filter((collection) =>
-      validIds.includes(collection.id)
-    );
+  const collections = response.map((res) => { return { ...res, id: !isBase64(res.id) ? btoa(res.id) : res.id } })
+  // .filter((collection) =>
+  //   validIds.includes(collection.id)
+  // );
 
   return validIds.map((validId) => {
-    const collection = collections.find((collection) => collection.id === validId);
+    const collection = collections.find((collection) => collection.id === btoa(validId));
     return collection
       ? collectionDataTransformer(collection, config.apiEndpoint)
       : {
@@ -77,17 +77,14 @@ export const fetchProductPreviews = async (skus, config) => {
     return [];
   }
 
-  // const skus = skus.map((res) => { return { ...res, id: !isBase64(res.id)? btoa(res.id): res.id} })
-
   const validIds = filterValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
   const response = await shopifyClient.product.fetchMultiple(validIds);
-
-  const products = response.map((res) => { return { ...res, id: !isBase64(res.id) ? res.id : atob(res.id) } })
+  const products = response.map((res) => { return { ...res, id: !isBase64(res.id) ? btoa(res.id) : res.id } })
 
   return validIds.map((validId) => {
 
-    const product = products.find((product) => product?.id === validId);
+    const product = products.find((product) => product?.id === btoa(validId));
 
     return product
       ? productDataTransformer(product, config.apiEndpoint)
@@ -152,7 +149,7 @@ export const fetchProductVariantPreviews = async (skus, config) => {
     .filter(identity)
     .map((node) => {
       node.id = !isBase64(node.id) ? btoa(node.id) : node.id
-      node.product.id = !isBase64(node.product.id) ? btoa(node.id) : node.product.id
+      node.product.id = !isBase64(node.product.id) ? btoa(node.product.id) : node.product.id
       return node
     })
 
