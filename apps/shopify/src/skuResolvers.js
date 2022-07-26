@@ -83,16 +83,11 @@ export const fetchProductPreviews = async (skus, config) => {
   const shopifyClient = await makeShopifyClient(config);
   const response = await shopifyClient.product.fetchMultiple(validIds);
 
-  console.log('validIds', validIds)
-
   const products = response.map((res) => { return { ...res, id: !isBase64(res.id) ? res.id : atob(res.id) } })
-  console.log('products', products)
 
   return validIds.map((validId) => {
 
     const product = products.find((product) => product?.id === validId);
-
-    console.log('product', product)
 
     return product
       ? productDataTransformer(product, config.apiEndpoint)
