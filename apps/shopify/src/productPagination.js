@@ -1,5 +1,7 @@
 import { productDataTransformer } from './dataTransformer';
 import BasePagination from './basePagination';
+import isBase64 from './utils/isBase64';
+import btoa from './utils/btoa'
 
 const makePagination = async (sdk) => {
   const pagination = new BasePagination({
@@ -14,9 +16,7 @@ const makePagination = async (sdk) => {
         reverse: true,
         ...(search.length && query),
       });
-      // converting the 'gid://shopify/ProductVariant/41' to base64 format as API format changed from 2022-04 version
-
-      const products = response.map((res) => { return { ...res, id: Buffer.from(res.id).toString('base64') } })
+      const products = response.map((res) => { return { ...res, id: !isBase64(res.id) ? btoa(res.id) : res.id } })
       return products
     },
   });

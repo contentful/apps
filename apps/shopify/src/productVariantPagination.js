@@ -3,6 +3,8 @@ import uniqBy from 'lodash/uniqBy';
 import sortBy from 'lodash/sortBy';
 import { productVariantDataTransformer, productsToVariantsTransformer } from './dataTransformer';
 import { makeShopifyClient } from './skuResolvers';
+import isBase64 from './utils/isBase64';
+import btoa from './utils/btoa'
 
 const PER_PAGE = 20;
 
@@ -98,7 +100,7 @@ class Pagination {
       ...(search.length && query),
     });
 
-    const products = response.map((res) => { return { ...res, id: Buffer.from(res.id).toString('base64') } })
+    const products = response.map((res) => { return { ...res, id: !isBase64(res.id) ? btoa(res.id) : res.id } })
     return products
   }
 
@@ -110,7 +112,7 @@ class Pagination {
     // return (await this.shopifyClient.fetchNextPage(products)).model;
 
     const response = (await this.shopifyClient.fetchNextPage(products)).model;
-    const nextProductVariants = response.map((res) => { return { ...res, id: Buffer.from(res.id).toString('base64') } })
+    const nextProductVariants = response.map((res) => { return { ...res, id: !isBase64(res.id) ? btoa(res.id) : res.id } })
     return nextProductVariants
   }
 

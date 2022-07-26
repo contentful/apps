@@ -10,6 +10,10 @@ import { productDataTransformer, collectionDataTransformer } from './dataTransfo
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
 import { DEFAULT_SHOPIFY_API_VERSION } from './constants';
+import isBase64 from './utils/isBase64';
+import btoa from './utils/btoa'
+import atob from './utils/atob'
+
 
 export async function makeShopifyClient(config) {
   const validationError = validateParameters(config);
@@ -39,10 +43,13 @@ export const fetchCollectionPreviews = async (skus, config) => {
 
   const validIds = filterValidIds(skus, 'Collection');
   const shopifyClient = await makeShopifyClient(config);
-  const collections = (await shopifyClient.collection.fetchAll(250)).filter((collection) =>
-    validIds.includes(collection.id)
-  );
-  
+
+  const response = (await shopifyClient.collection.fetchAll(250))
+
+  const collections = response.map((res) => { return { ...res, id: !isBase64(res.id) ? res.id : atob(res.id) } })
+    .filter((collection) =>
+      validIds.includes(collection.id)
+    );
 
   return validIds.map((validId) => {
     const collection = collections.find((collection) => collection.id === validId);
@@ -70,12 +77,22 @@ export const fetchProductPreviews = async (skus, config) => {
     return [];
   }
 
+  // const skus = skus.map((res) => { return { ...res, id: !isBase64(res.id)? btoa(res.id): res.id} })
+
   const validIds = filterValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
-  const products = await shopifyClient.product.fetchMultiple(skus);
+  const response = await shopifyClient.product.fetchMultiple(validIds);
+
+  console.log('validIds', validIds)
+
+  const products = response.map((res) => { return { ...res, id: !isBase64(res.id) ? res.id : atob(res.id) } })
+  console.log('products', products)
 
   return validIds.map((validId) => {
+
     const product = products.find((product) => product?.id === validId);
+
+    console.log('product', product)
 
     return product
       ? productDataTransformer(product, config.apiEndpoint)
@@ -139,8 +156,8 @@ export const fetchProductVariantPreviews = async (skus, config) => {
   const nodes = get(data, ['data', 'nodes'], [])
     .filter(identity)
     .map((node) => {
-      node.id = Buffer.from(node.id).toString('base64')
-      node.product.id = Buffer.from(node.product.id).toString('base64')
+      node.id = !isBase64(node.id) ? btoa(node.id) : node.id
+      node.product.id = !isBase64(node.product.id) ? btoa(node.id) : node.product.id
       return node
     })
 
@@ -175,6 +192,7 @@ export const makeCollectionSearchResolver = async (sdk) => {
 };
 
 export const filterValidIds = (skus, skuType) => {
+
   const validIds = skus
     .map((sku) => {
       try {
@@ -190,7 +208,7 @@ export const filterValidIds = (skus, skuType) => {
     /** changed to unencodedId  as API format changed and in future support for base64 will be removed so 
         passing the gid based format to the API for fetching the productVariant for particular product */
     .map(({ unencodedId }) => unencodedId);
-    return validIds
+  return validIds
 }
 
 /**

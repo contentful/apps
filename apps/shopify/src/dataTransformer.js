@@ -2,6 +2,9 @@ import get from 'lodash/get';
 import last from 'lodash/last';
 import flatten from 'lodash/flatten';
 import { DEFAULT_SHOPIFY_VARIANT_TITLE } from './constants';
+import isBase64 from './utils/isBase64';
+import atob from './utils/atob'
+import btoa from './utils/btoa'
 
 /**
  * Transforms the API response of Shopify collections into
@@ -48,9 +51,10 @@ export const productDataTransformer = (product, apiEndpoint) => {
   const sku = get(product, ['variants', 0, 'sku'], undefined);
   let externalLink;
 
+  let productIdDecoded
   if (apiEndpoint) {
     try {
-      const productIdDecoded = atob(product.id);
+      productIdDecoded = !isBase64(product.id) ? btoa(product.id) : product.id
       const productId =
         productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
 
@@ -61,11 +65,12 @@ export const productDataTransformer = (product, apiEndpoint) => {
     } catch { }
   }
 
+
   return {
-    id: product.id,
+    id: productIdDecoded,
     image,
     name: product.title,
-    displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${product.id}`,
+    displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${productIdDecoded}`,
     sku: product.id,
     ...(externalLink ? { externalLink } : {}),
   };
@@ -96,7 +101,7 @@ export const productsToVariantsTransformer = (products) =>
         ...variant,
         variantSKU: variant.sku,
         // converting the 'gid://shopify/ProductVariant/41' to base64 format as API format changed from 2022-04 version
-        sku: Buffer.from(variant.id).toString('base64'),
+        sku: !isBase64(variant.id) ? btoa(variant.id) : variant.id,
         productId: product.id,
         title:
           variant.title === DEFAULT_SHOPIFY_VARIANT_TITLE

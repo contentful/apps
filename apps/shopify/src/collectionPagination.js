@@ -1,5 +1,7 @@
 import { collectionDataTransformer } from './dataTransformer';
 import BasePagination from './basePagination';
+import isBase64 from './utils/isBase64';
+import btoa from './utils/btoa'
 
 const makePagination = async (sdk) => {
   const pagination = new BasePagination({
@@ -15,8 +17,8 @@ const makePagination = async (sdk) => {
         ...(search.length && query),
       });
 
+      const collections = response.map((res) => { return { ...res, id: !isBase64(res.id) ? btoa(res.id) : res.id } })
 
-      const collections = response.map((res) => { return { ...res, id: Buffer.from(res.id).toString('base64') } })
       return collections
 
     },
