@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../__tests__/mocks';
-import Dialog from '@/pages/locations/Dialog';
+import Dialog from '@/components/locations/Dialog';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,

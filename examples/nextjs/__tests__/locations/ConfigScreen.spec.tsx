@@ -1,7 +1,7 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../__tests__/mocks';
-import ConfigScreen from '@/pages/locations/ConfigScreen';
+import ConfigScreen from '@/components/locations/ConfigScreen';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
