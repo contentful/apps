@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.22](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.21...@contentful/netlify-build-and-preview@1.8.22) (2022-07-26)
+
+
+### Bug Fixes
+
+* **deps:** bump date-fns from 2.28.0 to 2.29.1 ([#1549](https://github.com/contentful/apps/issues/1549)) ([0dab673](https://github.com/contentful/apps/commit/0dab6731518c0c95829cd80b28d2f495db0ea498))
+
+
+
+
+
 ## [1.8.21](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.20...@contentful/netlify-build-and-preview@1.8.21) (2022-07-26)
 
 
