@@ -1,15 +1,15 @@
 {
   "name": "@contentful/ai-image-tagging-frontend",
-  "version": "1.5.15",
+  "version": "1.5.17",
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
     "@testing-library/react": "11.2.5",
     "cross-env": "7.0.3",
-    "fetch-mock": "9.0.0-beta.2"
+    "fetch-mock": "9.11.0"
   },
   "dependencies": {
-    "@contentful/app-sdk": "4.9.0",
+    "@contentful/app-sdk": "4.10.0",
     "@contentful/forma-36-fcss": "0.3.5",
     "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.2",

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.55](https://github.com/contentful/apps/compare/@contentful/dropbox-assets@1.6.54...@contentful/dropbox-assets@1.6.55) (2022-07-25)
+
+**Note:** Version bump only for package @contentful/dropbox-assets
+
+
+
+
+
 ## [1.6.54](https://github.com/contentful/apps/compare/@contentful/dropbox-assets@1.6.53...@contentful/dropbox-assets@1.6.54) (2022-07-22)
 
 **Note:** Version bump only for package @contentful/dropbox-assets
