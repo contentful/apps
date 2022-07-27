@@ -1,7 +1,6 @@
 import { productDataTransformer } from './dataTransformer';
 import BasePagination from './basePagination';
-import isBase64 from './utils/isBase64';
-import btoa from './utils/btoa'
+import checkAndConvertToBase64 from './utils/checkAndConvertToBase64'
 
 const makePagination = async (sdk) => {
   const pagination = new BasePagination({
@@ -16,7 +15,7 @@ const makePagination = async (sdk) => {
         reverse: true,
         ...(search.length && query),
       });
-      const products = response.map((res) => { return { ...res, id: !isBase64(res.id) ? btoa(res.id) : res.id } })
+      const products = response.map((res) => { return checkAndConvertToBase64(res) })
       return products
     },
   });

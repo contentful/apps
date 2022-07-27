@@ -13,6 +13,7 @@ import { DEFAULT_SHOPIFY_API_VERSION } from './constants';
 import isBase64 from './utils/isBase64';
 import btoa from './utils/btoa'
 import atob from './utils/atob'
+import checkAndConvertToBase64 from './utils/checkAndConvertToBase64'
 
 
 export async function makeShopifyClient(config) {
@@ -46,7 +47,7 @@ export const fetchCollectionPreviews = async (skus, config) => {
 
   const response = (await shopifyClient.collection.fetchAll(250))
 
-  const collections = response.map((res) => { return { ...res, id: !isBase64(res.id) ? btoa(res.id) : res.id } })
+  const collections = response.map((res) => { return checkAndConvertToBase64(res) })
   // .filter((collection) =>
   //   validIds.includes(collection.id)
   // );
@@ -80,8 +81,7 @@ export const fetchProductPreviews = async (skus, config) => {
   const validIds = filterValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
   const response = await shopifyClient.product.fetchMultiple(validIds);
-  const products = response.map((res) => { return { ...res, id: !isBase64(res.id) ? btoa(res.id) : res.id } })
-
+  const products = response.map((res) => { return checkAndConvertToBase64(res) })
   return validIds.map((validId) => {
 
     const product = products.find((product) => product?.id === btoa(validId));
