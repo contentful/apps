@@ -10,10 +10,8 @@ import { productDataTransformer, collectionDataTransformer } from './dataTransfo
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
 import { DEFAULT_SHOPIFY_API_VERSION } from './constants';
-import isBase64 from './utils/isBase64';
-import btoa from './utils/btoa'
-import atob from './utils/atob'
-import checkAndConvertToBase64 from './utils/checkAndConvertToBase64'
+import { isBase64, btoa, atob, checkAndConvertToBase64 } from './utils/base64'
+
 
 
 export async function makeShopifyClient(config) {
@@ -43,6 +41,7 @@ export const fetchCollectionPreviews = async (skus, config) => {
   }
 
   const validIds = filterValidIds(skus, 'Collection');
+
   const shopifyClient = await makeShopifyClient(config);
 
   const response = (await shopifyClient.collection.fetchAll(250))

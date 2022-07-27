@@ -3,7 +3,7 @@ import uniqBy from 'lodash/uniqBy';
 import sortBy from 'lodash/sortBy';
 import { productVariantDataTransformer, productsToVariantsTransformer } from './dataTransformer';
 import { makeShopifyClient } from './skuResolvers';
-import checkAndConvertToBase64 from './utils/checkAndConvertToBase64'
+import { checkAndConvertToBase64 } from './utils/base64'
 
 const PER_PAGE = 20;
 
@@ -92,15 +92,15 @@ class Pagination {
     const query = { query: `variants:['sku:${search}'] OR title:${search}` };
 
     // converting the 'gid://shopify/ProductVariant/41' to base64 format as API format changed from 2022-04 version
-    const response = await this.shopifyClient.product.fetchQuery({
+    const products = await this.shopifyClient.product.fetchQuery({
       first: PER_PAGE,
       sortBy: 'TITLE',
       reverse: true,
       ...(search.length && query),
     });
 
-    const products = response.map((res) => { return checkAndConvertToBase64(res) })
-    return products
+    return products.map((product) => checkAndConvertToBase64(product))
+
   }
 
   /**
@@ -110,9 +110,9 @@ class Pagination {
   async _fetchNextPage(products) {
     // return (await this.shopifyClient.fetchNextPage(products)).model;
 
-    const response = (await this.shopifyClient.fetchNextPage(products)).model;
-    const nextProductVariants = response.map((res) => { return checkAndConvertToBase64(res) })
-    return nextProductVariants
+    const nextProductVariants = (await this.shopifyClient.fetchNextPage(products)).model;
+    return nextProductVariants.map((nextProductVariant) => checkAndConvertToBase64(nextProductVariant))
+
   }
 
   _resetPagination() {

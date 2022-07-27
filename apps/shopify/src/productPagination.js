@@ -1,6 +1,6 @@
 import { productDataTransformer } from './dataTransformer';
 import BasePagination from './basePagination';
-import checkAndConvertToBase64 from './utils/checkAndConvertToBase64'
+import { checkAndConvertToBase64 } from './utils/base64'
 
 const makePagination = async (sdk) => {
   const pagination = new BasePagination({

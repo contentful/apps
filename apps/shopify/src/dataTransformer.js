@@ -2,9 +2,8 @@ import get from 'lodash/get';
 import last from 'lodash/last';
 import flatten from 'lodash/flatten';
 import { DEFAULT_SHOPIFY_VARIANT_TITLE } from './constants';
-import isBase64 from './utils/isBase64';
-import atob from './utils/atob'
-import btoa from './utils/btoa'
+import { atob , isBase64} from './utils/base64'
+
 
 /**
  * Transforms the API response of Shopify collections into
