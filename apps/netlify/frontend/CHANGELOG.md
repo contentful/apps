@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.23](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.22...@contentful/netlify-build-and-preview@1.8.23) (2022-07-27)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.9.0 to 4.10.0 ([#1557](https://github.com/contentful/apps/issues/1557)) ([4088504](https://github.com/contentful/apps/commit/408850440ff3622bae1df3606f6911d68b1fbd7e))
+
+
+
+
+
 ## [1.8.22](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.21...@contentful/netlify-build-and-preview@1.8.22) (2022-07-26)
 
 

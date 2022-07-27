@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.27](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.26...@contentful/typeform-frontend@1.5.27) (2022-07-27)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.9.0 to 4.10.0 ([#1557](https://github.com/contentful/apps/issues/1557)) ([4088504](https://github.com/contentful/apps/commit/408850440ff3622bae1df3606f6911d68b1fbd7e))
+
+
+
+
+
 ## [1.5.26](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.25...@contentful/typeform-frontend@1.5.26) (2022-07-26)
 
 
