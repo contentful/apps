@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.16](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.15...@contentful/jira-app@1.7.16) (2022-07-29)
+
+**Note:** Version bump only for package @contentful/jira-app
+
+
+
+
+
 ## [1.7.15](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.14...@contentful/jira-app@1.7.15) (2022-07-27)
 
 
