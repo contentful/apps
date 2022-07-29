@@ -10,7 +10,7 @@ import { productDataTransformer, collectionDataTransformer } from './dataTransfo
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
 import { SHOPIFY_API_VERSION } from './constants';
-import { convertStringToBase64, checkAndConvertToBase64 } from './utils/base64';
+import { convertStringToBase64, convertIdToBase64 } from './utils/base64';
 
 export async function makeShopifyClient(config) {
   const validationError = validateParameters(config);
@@ -44,9 +44,9 @@ export const fetchCollectionPreviews = async (skus, config) => {
   const shopifyClient = await makeShopifyClient(config);
 
   const response = await shopifyClient.collection.fetchAll(250);
-
+  //converting to base64 as still storing base64 in db
   const collections = response.map((res) => {
-    return checkAndConvertToBase64(res);
+    return convertIdToBase64(res);
   });
 
   return validIds.map((validId) => {
@@ -80,8 +80,9 @@ export const fetchProductPreviews = async (skus, config) => {
   const validIds = filterAndCovertValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
   const response = await shopifyClient.product.fetchMultiple(validIds);
+  //converting to base64 as still storing base64 in db
   const products = response.map((res) => {
-    return checkAndConvertToBase64(res);
+    return convertIdToBase64(res);
   });
   return validIds.map((validId) => {
     const product = products.find((product) => product?.id === convertStringToBase64(validId));
@@ -145,9 +146,10 @@ export const fetchProductVariantPreviews = async (skus, config) => {
 
   const data = await res.json();
 
+  //converting to base64 as still storing base64 in db
   const nodes = get(data, ['data', 'nodes'], [])
     .filter(identity)
-    .map((node) => checkAndConvertToBase64(node));
+    .map((node) => convertIdToBase64(node));
 
   const variantPreviews = nodes.map(previewsToProductVariants(config));
   const missingVariants = difference(

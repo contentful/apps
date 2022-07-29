@@ -2,7 +2,7 @@ import get from 'lodash/get';
 import last from 'lodash/last';
 import flatten from 'lodash/flatten';
 import { DEFAULT_SHOPIFY_VARIANT_TITLE } from './constants';
-import { convertBase64ToString, isBase64 } from './utils/base64';
+import { convertBase64ToString, convertStringToBase64 } from './utils/base64';
 
 /**
  * Transforms the API response of Shopify collections into
@@ -61,7 +61,7 @@ export const productDataTransformer = (product, apiEndpoint) => {
     } catch {}
   }
 
-  const productId = !isBase64(product.id) ? btoa(product.id) : product.id;
+  const productId = convertStringToBase64(product.id);
 
   return {
     id: productId,
@@ -98,7 +98,7 @@ export const productsToVariantsTransformer = (products) =>
         ...variant,
         variantSKU: variant.sku,
         // converting the 'gid://shopify/ProductVariant/41' to base64 format as API format changed from 2022-04 version
-        sku: !isBase64(variant.id) ? btoa(variant.id) : variant.id,
+        sku: convertStringToBase64(variant.id),
         productId: product.id,
         title:
           variant.title === DEFAULT_SHOPIFY_VARIANT_TITLE

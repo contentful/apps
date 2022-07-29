@@ -1,6 +1,6 @@
 import { productDataTransformer } from './dataTransformer';
 import BasePagination from './basePagination';
-import { checkAndConvertToBase64 } from './utils/base64'
+import { convertIdToBase64 } from './utils/base64';
 
 const makePagination = async (sdk) => {
   const pagination = new BasePagination({
@@ -15,8 +15,11 @@ const makePagination = async (sdk) => {
         reverse: true,
         ...(search.length && query),
       });
-      const products = response.map((res) => { return checkAndConvertToBase64(res) })
-      return products
+      //converting to base64 as still storing base64 in db
+      const products = response.map((res) => {
+        return convertIdToBase64(res);
+      });
+      return products;
     },
   });
   await pagination.init();

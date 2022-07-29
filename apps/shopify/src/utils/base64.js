@@ -16,17 +16,10 @@ export const convertStringToBase64 = (str) => {
   }
 };
 
-export const checkAndConvertToBase64 = (res) => {
-  return { ...res, id: convertStringToBase64(res.id) };
-};
-
-export const isBase64 = (str) => {
-  if (str === '' || str.trim() === '') {
-    return false;
-  }
-  try {
-    return window.btoa(window.atob(str)) === str;
-  } catch (err) {
-    return false;
-  }
+export const convertIdToBase64 = (res) => {
+  return {
+    ...res,
+    id: convertStringToBase64(res.id),
+    product: res.product && { ...res.product, id: convertStringToBase64(res.product.id) },
+  };
 };
