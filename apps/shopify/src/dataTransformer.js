@@ -2,8 +2,7 @@ import get from 'lodash/get';
 import last from 'lodash/last';
 import flatten from 'lodash/flatten';
 import { DEFAULT_SHOPIFY_VARIANT_TITLE } from './constants';
-import { atob , isBase64} from './utils/base64'
-
+import { convertBase64ToString, isBase64 } from './utils/base64';
 
 /**
  * Transforms the API response of Shopify collections into
@@ -13,23 +12,21 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
   const image = get(collection, ['image', 'src'], '');
   const handle = get(collection, ['handle'], undefined);
 
-
-
   let externalLink;
 
   if (apiEndpoint) {
     try {
-      const collectionIdDecoded = atob(collection.id);
+      const collectionIdDecoded = convertBase64ToString(collection.id);
       const collectionId =
         collectionIdDecoded && collectionIdDecoded.slice(collectionIdDecoded.lastIndexOf('/') + 1);
 
       if (apiEndpoint && collectionId) {
-        externalLink = `https://${apiEndpoint}${last(apiEndpoint) === '/' ? '' : '/'
-          }admin/collections/${collectionId}`;
+        externalLink = `https://${apiEndpoint}${
+          last(apiEndpoint) === '/' ? '' : '/'
+        }admin/collections/${collectionId}`;
       }
-    } catch { }
+    } catch {}
   }
-
 
   return {
     id: collection.id,
@@ -50,18 +47,18 @@ export const productDataTransformer = (product, apiEndpoint) => {
   const sku = get(product, ['variants', 0, 'sku'], undefined);
   let externalLink;
 
-
   if (apiEndpoint) {
     try {
-      const productIdDecoded = atob(product.id);
+      const productIdDecoded = convertBase64ToString(product.id);
       const productId =
         productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
 
       if (apiEndpoint && productId) {
-        externalLink = `https://${apiEndpoint}${last(apiEndpoint) === '/' ? '' : '/'
-          }admin/products/${productId}`;
+        externalLink = `https://${apiEndpoint}${
+          last(apiEndpoint) === '/' ? '' : '/'
+        }admin/products/${productId}`;
       }
-    } catch { }
+    } catch {}
   }
 
   const productId = !isBase64(product.id) ? btoa(product.id) : product.id;
@@ -114,24 +111,25 @@ export const productsToVariantsTransformer = (products) =>
 
 export const previewsToProductVariants =
   ({ apiEndpoint }) =>
-    ({ sku, id, image, product, title }) => {
-      const productIdDecoded = atob(product.id);
-      const productId =
-        productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
-      return {
-        id,
-        image: get(image, ['src'], ''),
-        // TODO: Remove sku:id when @contentful/ecommerce-app-base supports internal IDs
-        // as an alternative piece of info to persist instead of the SKU.
-        // For now this is a temporary hack.
-        sku: id,
-        displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${id}`,
-        productId: product.id,
-        name: title === DEFAULT_SHOPIFY_VARIANT_TITLE ? product.title : `${product.title} (${title})`,
-        ...(apiEndpoint &&
-          productId && {
-          externalLink: `https://${apiEndpoint}${last(apiEndpoint) === '/' ? '' : '/'
-            }admin/products/${productId}`,
+  ({ sku, id, image, product, title }) => {
+    const productIdDecoded = convertBase64ToString(product.id);
+    const productId =
+      productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
+    return {
+      id,
+      image: get(image, ['src'], ''),
+      // TODO: Remove sku:id when @contentful/ecommerce-app-base supports internal IDs
+      // as an alternative piece of info to persist instead of the SKU.
+      // For now this is a temporary hack.
+      sku: id,
+      displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${id}`,
+      productId: product.id,
+      name: title === DEFAULT_SHOPIFY_VARIANT_TITLE ? product.title : `${product.title} (${title})`,
+      ...(apiEndpoint &&
+        productId && {
+          externalLink: `https://${apiEndpoint}${
+            last(apiEndpoint) === '/' ? '' : '/'
+          }admin/products/${productId}`,
         }),
-      };
     };
+  };
