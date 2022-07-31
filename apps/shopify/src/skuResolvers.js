@@ -39,15 +39,13 @@ export const fetchCollectionPreviews = async (skus, config) => {
     return [];
   }
 
-  const validIds = filterAndCovertValidIds(skus, 'Collection');
+  const validIds = filterAndDecodeValidIds(skus, 'Collection');
 
   const shopifyClient = await makeShopifyClient(config);
 
   const response = await shopifyClient.collection.fetchAll(250);
   //converting to base64 as still storing base64 in db
-  const collections = response.map((res) => {
-    return convertIdToBase64(res);
-  });
+  const collections = response.map((res) => convertIdToBase64(res));
 
   return validIds.map((validId) => {
     const collection = collections.find(
@@ -56,10 +54,10 @@ export const fetchCollectionPreviews = async (skus, config) => {
     return collection
       ? collectionDataTransformer(collection, config.apiEndpoint)
       : {
-          sku: validId,
+          sku: convertIdToBase64(validId),
           isMissing: true,
           image: '',
-          id: validId,
+          id: convertIdToBase64(validId),
           name: '',
         };
   });
@@ -77,23 +75,21 @@ export const fetchProductPreviews = async (skus, config) => {
     return [];
   }
 
-  const validIds = filterAndCovertValidIds(skus, 'Product');
+  const validIds = filterAndDecodeValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
   const response = await shopifyClient.product.fetchMultiple(validIds);
   //converting to base64 as still storing base64 in db
-  const products = response.map((res) => {
-    return convertIdToBase64(res);
-  });
+  const products = response.map((res) => convertIdToBase64(res));
   return validIds.map((validId) => {
     const product = products.find((product) => product?.id === convertStringToBase64(validId));
 
     return product
       ? productDataTransformer(product, config.apiEndpoint)
       : {
-          sku: validId,
+          sku: convertStringToBase64(validId),
           isMissing: true,
           image: '',
-          id: validId,
+          id: convertStringToBase64(validId),
           name: '',
         };
   });
@@ -111,7 +107,7 @@ export const fetchProductVariantPreviews = async (skus, config) => {
     return [];
   }
 
-  const validIds = filterAndCovertValidIds(skus, 'ProductVariant');
+  const validIds = filterAndDecodeValidIds(skus, 'ProductVariant');
   const queryIds = validIds.map((sku) => `"${sku}"`).join(',');
   const query = `
   {
@@ -181,7 +177,7 @@ export const makeCollectionSearchResolver = async (sdk) => {
   return (search) => pagination.fetchNext(search);
 };
 
-export const filterAndCovertValidIds = (skus, skuType) => {
+export const filterAndDecodeValidIds = (skus, skuType) => {
   const validIds = skus
     .map((sku) => {
       try {

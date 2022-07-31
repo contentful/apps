@@ -107,8 +107,6 @@ class Pagination {
    * and now want to render the next page.
    */
   async _fetchNextPage(products) {
-    // return (await this.shopifyClient.fetchNextPage(products)).model;
-
     const nextProductVariants = (await this.shopifyClient.fetchNextPage(products)).model;
     return nextProductVariants.map((nextProductVariant) => convertIdToBase64(nextProductVariant));
   }

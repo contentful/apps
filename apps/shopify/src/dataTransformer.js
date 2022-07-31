@@ -61,13 +61,11 @@ export const productDataTransformer = (product, apiEndpoint) => {
     } catch {}
   }
 
-  const productId = convertStringToBase64(product.id);
-
   return {
-    id: productId,
+    id: convertStringToBase64(product.id),
     image,
     name: product.title,
-    displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${productId}`,
+    displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${convertStringToBase64(product.id)}`,
     sku: product.id,
     ...(externalLink ? { externalLink } : {}),
   };
