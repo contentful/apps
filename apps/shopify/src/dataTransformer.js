@@ -62,10 +62,10 @@ export const productDataTransformer = (product, apiEndpoint) => {
   }
 
   return {
-    id: convertStringToBase64(product.id),
+    id: product.id,
     image,
     name: product.title,
-    displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${convertStringToBase64(product.id)}`,
+    displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${product.id}`,
     sku: product.id,
     ...(externalLink ? { externalLink } : {}),
   };
@@ -95,6 +95,7 @@ export const productsToVariantsTransformer = (products) =>
       const variants = product.variants.map((variant) => ({
         ...variant,
         variantSKU: variant.sku,
+        id: convertStringToBase64(variant.id),
         // converting the 'gid://shopify/ProductVariant/41' to base64 format as API format changed from 2022-04 version
         sku: convertStringToBase64(variant.id),
         productId: product.id,
