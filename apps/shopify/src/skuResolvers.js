@@ -10,7 +10,7 @@ import { productDataTransformer, collectionDataTransformer } from './dataTransfo
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
 import { SHOPIFY_API_VERSION } from './constants';
-import { convertStringToBase64, convertIdToBase64 } from './utils/base64';
+import { convertStringToBase64, convertToBase64, convertBase64ToString } from './utils/base64';
 
 export async function makeShopifyClient(config) {
   const validationError = validateParameters(config);
@@ -44,8 +44,7 @@ export const fetchCollectionPreviews = async (skus, config) => {
   const shopifyClient = await makeShopifyClient(config);
 
   const response = await shopifyClient.collection.fetchAll(250);
-  //converting to base64 as still storing base64 in db
-  const collections = response.map((res) => convertIdToBase64(res));
+  const collections = response.map((res) => convertToBase64(res));
 
   return validIds.map((validId) => {
     const collection = collections.find(
@@ -54,10 +53,10 @@ export const fetchCollectionPreviews = async (skus, config) => {
     return collection
       ? collectionDataTransformer(collection, config.apiEndpoint)
       : {
-          sku: convertIdToBase64(validId),
+          sku: convertToBase64(validId),
           isMissing: true,
           image: '',
-          id: convertIdToBase64(validId),
+          id: convertToBase64(validId),
           name: '',
         };
   });
@@ -78,8 +77,7 @@ export const fetchProductPreviews = async (skus, config) => {
   const validIds = filterAndDecodeValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
   const response = await shopifyClient.product.fetchMultiple(validIds);
-  //converting to base64 as still storing base64 in db
-  const products = response.map((res) => convertIdToBase64(res));
+  const products = response.map((res) => convertToBase64(res));
   return validIds.map((validId) => {
     const product = products.find((product) => product?.id === convertStringToBase64(validId));
 
@@ -142,10 +140,9 @@ export const fetchProductVariantPreviews = async (skus, config) => {
 
   const data = await res.json();
 
-  //converting to base64 as still storing base64 in db
   const nodes = get(data, ['data', 'nodes'], [])
     .filter(identity)
-    .map((node) => convertIdToBase64(node));
+    .map((node) => convertToBase64(node));
 
   const variantPreviews = nodes.map(previewsToProductVariants(config));
   const missingVariants = difference(
@@ -182,16 +179,13 @@ export const filterAndDecodeValidIds = (skus, skuType) => {
     .map((sku) => {
       try {
         // If not valid base64 window.atob will throw
-        const decodedId = atob(sku);
-        return { decodedId };
+        const decodedId = convertBase64ToString(sku);
+        return decodedId;
       } catch (error) {
         return null;
       }
     })
-    .filter((sku) => sku && new RegExp(`^gid.*${skuType}`).test(sku.decodedId))
-    /** changed to unencodedId  as API format changed and in future support for base64 will be removed so 
-        passing the gid based format to the API for fetching the productVariant for particular product */
-    .map(({ decodedId }) => decodedId);
+    .filter((decodedId) => decodedId && new RegExp(`^gid.*${skuType}`).test(decodedId));
   return validIds;
 };
 

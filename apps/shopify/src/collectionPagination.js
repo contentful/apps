@@ -1,6 +1,6 @@
 import { collectionDataTransformer } from './dataTransformer';
 import BasePagination from './basePagination';
-import { convertIdToBase64 } from './utils/base64';
+import { convertToBase64 } from './utils/base64';
 
 const makePagination = async (sdk) => {
   const pagination = new BasePagination({
@@ -15,9 +15,7 @@ const makePagination = async (sdk) => {
         reverse: true,
         ...(search.length && query),
       });
-
-      //converting to base64 as still storing base64 in db
-      return collections.map((collection) => convertIdToBase64(collection));
+      return collections.map((collection) => convertToBase64(collection));
     },
   });
   await pagination.init();

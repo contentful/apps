@@ -16,7 +16,7 @@ export const convertStringToBase64 = (str) => {
   }
 };
 
-export const convertIdToBase64 = (res) => {
+export const convertToBase64 = (res) => {
   return {
     ...res,
     id: convertStringToBase64(res.id),

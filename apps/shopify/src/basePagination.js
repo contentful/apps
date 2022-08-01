@@ -1,6 +1,6 @@
 import differenceBy from 'lodash/differenceBy';
 import { makeShopifyClient } from './skuResolvers';
-import { convertIdToBase64 } from './utils/base64';
+import { convertToBase64 } from './utils/base64';
 
 const PER_PAGE = 20;
 
@@ -73,8 +73,7 @@ export default class BasePagination {
    */
   async _fetchNextPage(products) {
     const nextPage = (await this.shopifyClient.fetchNextPage(products)).model;
-    //converting to base64 as still storing base64 in db
-    return nextPage.map((product) => convertIdToBase64(product));
+    return nextPage.map((product) => convertToBase64(product));
   }
 
   _resetPagination() {
