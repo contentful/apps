@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.8.24](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.23...@contentful/netlify-build-and-preview@1.8.24) (2022-08-02)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/f36-icons from 4.12.0 to 4.13.0 ([#1566](https://github.com/contentful/apps/issues/1566)) ([e1f6ba7](https://github.com/contentful/apps/commit/e1f6ba7b054b49cfaa3ba058235879b4d92d9076))
+
+
+
+
+
 ## [1.8.23](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.22...@contentful/netlify-build-and-preview@1.8.23) (2022-07-27)
 
 
