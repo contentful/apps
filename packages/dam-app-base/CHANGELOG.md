@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.19](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.18...@contentful/dam-app-base@2.0.19) (2022-08-03)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.10.0 to 4.11.1 ([#1572](https://github.com/contentful/apps/issues/1572)) ([3c68e13](https://github.com/contentful/apps/commit/3c68e139cf87650e820c190eabc98f62e0434b89))
+* **deps:** bump @contentful/app-sdk from 4.9.0 to 4.10.0 ([#1557](https://github.com/contentful/apps/issues/1557)) ([4088504](https://github.com/contentful/apps/commit/408850440ff3622bae1df3606f6911d68b1fbd7e))
+* **deps:** bump @contentful/f36-components from 4.10.5 to 4.12.0 ([#1547](https://github.com/contentful/apps/issues/1547)) ([c5d582b](https://github.com/contentful/apps/commit/c5d582b46026b4057f40540f1e54ed52e27d0c74))
+* **deps:** bump contentful-management from 10.9.1 to 10.10.0 ([#1567](https://github.com/contentful/apps/issues/1567)) ([409cf07](https://github.com/contentful/apps/commit/409cf078ab2b6ea7457c3c504e9e84b3083a1b25))
+
+
+
+
+
 ## [2.0.18](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.17...@contentful/dam-app-base@2.0.18) (2022-07-25)
 
 
