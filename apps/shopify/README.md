@@ -1,16 +1,5 @@
+# Persisted Object IDs
 
-# Migration of Shopify API version to latest stable version
+The app persists base64 encoded object IDs. These can be decoded by the users e.g. by using [`atob(...)`](https://developer.mozilla.org/en-US/docs/Web/API/atob). A decoded object ID looks the following: `gid://shopify/Product/1`.
 
-We have migrated to latest stable i.e. 2022-04.
-
-There are some [breaking changes](https://shopify.dev/api/release-notes/2022-04#breaking-changes) in this new stable version in which the below change was crashing our migration
-
-* Non-encoded object IDs in the GraphQL Storefront API instead of base 64 encoded IDs in the API response
-* (`Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzE=` -> `gid://shopify/Product/1`)
-
-  
-# Actions taken to make our app stable for future 
-
-* In order to make app stable and support further versions we are currently converting the non-encoded object IDs(`gid://shopify/Product/1`) to Base64 encoded IDs(`Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzE`) and storing it in our database.
-
-* Sending decoded version of Base64 encoded IDs(`gid://shopify/Product/1`) as arguments to fields and mutations to support coming versions as sending Base64 version will be [deprecated](https://shopify.dev/api/examples/object-ids#migrate-your-app) in coming versions.
+Before Shopify API version 2022-04, the Shopify API returned and accepted encoded object IDs. To ensure backwards compatibility, the app keeps storing object IDs in base64 encoded format even though the Shopify API doesn't accept these IDs anymore (see [here](https://shopify.dev/api/release-notes/2022-04#breaking-changes)).
