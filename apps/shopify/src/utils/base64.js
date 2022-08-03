@@ -16,10 +16,17 @@ export const convertStringToBase64 = (str) => {
   }
 };
 
-export const convertToBase64 = (res) => {
+export const convertProductToBase64 = (res) => {
   return {
     ...res,
     id: convertStringToBase64(res.id),
     product: res.product && { ...res.product, id: convertStringToBase64(res.product.id) },
+  };
+};
+
+export const convertCollectionToBase64 = (res) => {
+  return {
+    ...res,
+    id: convertStringToBase64(res.id),
   };
 };

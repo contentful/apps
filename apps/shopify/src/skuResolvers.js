@@ -10,7 +10,12 @@ import { productDataTransformer, collectionDataTransformer } from './dataTransfo
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
 import { SHOPIFY_API_VERSION } from './constants';
-import { convertStringToBase64, convertToBase64, convertBase64ToString } from './utils/base64';
+import {
+  convertStringToBase64,
+  convertBase64ToString,
+  convertCollectionToBase64,
+  convertProductToBase64,
+} from './utils/base64';
 
 export async function makeShopifyClient(config) {
   const validationError = validateParameters(config);
@@ -44,7 +49,7 @@ export const fetchCollectionPreviews = async (skus, config) => {
   const shopifyClient = await makeShopifyClient(config);
 
   const response = await shopifyClient.collection.fetchAll(250);
-  const collections = response.map((res) => convertToBase64(res));
+  const collections = response.map((res) => convertCollectionToBase64(res));
 
   return validIds.map((validId) => {
     const collection = collections.find(
@@ -53,10 +58,10 @@ export const fetchCollectionPreviews = async (skus, config) => {
     return collection
       ? collectionDataTransformer(collection, config.apiEndpoint)
       : {
-          sku: convertToBase64(validId),
+          sku: convertStringToBase64(validId),
           isMissing: true,
           image: '',
-          id: convertToBase64(validId),
+          id: convertStringToBase64(validId),
           name: '',
         };
   });
@@ -77,7 +82,7 @@ export const fetchProductPreviews = async (skus, config) => {
   const validIds = filterAndDecodeValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
   const response = await shopifyClient.product.fetchMultiple(validIds);
-  const products = response.map((res) => convertToBase64(res));
+  const products = response.map((res) => convertProductToBase64(res));
   return validIds.map((validId) => {
     const product = products.find((product) => product?.id === convertStringToBase64(validId));
 
@@ -142,7 +147,7 @@ export const fetchProductVariantPreviews = async (skus, config) => {
 
   const nodes = get(data, ['data', 'nodes'], [])
     .filter(identity)
-    .map((node) => convertToBase64(node));
+    .map((node) => convertProductToBase64(node));
 
   const variantPreviews = nodes.map(previewsToProductVariants(config));
   const missingVariants = difference(

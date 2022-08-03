@@ -96,7 +96,6 @@ export const productsToVariantsTransformer = (products) =>
         ...variant,
         variantSKU: variant.sku,
         id: convertStringToBase64(variant.id),
-        // converting the 'gid://shopify/ProductVariant/41' to base64 format as API format changed from 2022-04 version
         sku: convertStringToBase64(variant.id),
         productId: product.id,
         title:

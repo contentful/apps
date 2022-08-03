@@ -3,7 +3,7 @@ import uniqBy from 'lodash/uniqBy';
 import sortBy from 'lodash/sortBy';
 import { productVariantDataTransformer, productsToVariantsTransformer } from './dataTransformer';
 import { makeShopifyClient } from './skuResolvers';
-import { convertToBase64 } from './utils/base64';
+import { convertProductToBase64 } from './utils/base64';
 
 const PER_PAGE = 20;
 
@@ -97,7 +97,7 @@ class Pagination {
       ...(search.length && query),
     });
 
-    return products.map((product) => convertToBase64(product));
+    return products.map((product) => convertProductToBase64(product));
   }
 
   /**
@@ -106,7 +106,9 @@ class Pagination {
    */
   async _fetchNextPage(products) {
     const nextProductVariants = (await this.shopifyClient.fetchNextPage(products)).model;
-    return nextProductVariants.map((nextProductVariant) => convertToBase64(nextProductVariant));
+    return nextProductVariants.map((nextProductVariant) =>
+      convertProductToBase64(nextProductVariant)
+    );
   }
 
   _resetPagination() {
