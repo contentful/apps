@@ -1,5 +1,20 @@
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
+## How to use
+
+Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+
+```bash
+# npx
+npx create-contentful-app <app-name> --example vite-react
+
+# npm
+npm init contentful-app <app-name> --example vite-react
+
+# Yarn
+yarn create contentful-app <app-name> --example vite-react
+```
+
 ## Available Scripts
 
 In the project directory, you can run:
