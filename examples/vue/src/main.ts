@@ -1,18 +1,19 @@
-import { createApp } from "vue";
+import { createApp } from 'vue';
 
-import { init, locations } from "@contentful/app-sdk";
+import { init, locations } from '@contentful/app-sdk';
 
-import AppConfig from "./locations/AppConfig.vue";
-import Field from "./locations/Field.vue";
-import Sidebar from "./locations/Sidebar.vue";
-import Entry from "./locations/Entry.vue";
-import Dialog from "./locations/Dialog.vue";
-import Page from "./locations/Page.vue";
-import LocalhostWarning from "./components/LocalhostWarning.vue";
+import AppConfig from './locations/AppConfig.vue';
+import Field from './locations/Field.vue';
+import Sidebar from './locations/Sidebar.vue';
+import Entry from './locations/Entry.vue';
+import Dialog from './locations/Dialog.vue';
+import Page from './locations/Page.vue';
+import Home from './locations/Home.vue';
+import LocalhostWarning from './components/LocalhostWarning.vue';
 
 if (process.env.NODE_ENV === 'development' && window.self === window.top) {
   // You can remove this if block before deploying your app
-  createApp(LocalhostWarning).mount("#app");
+  createApp(LocalhostWarning).mount('#app');
 } else {
   init((sdk) => {
     const locationsMap = {
@@ -22,15 +23,14 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
       [locations.LOCATION_ENTRY_FIELD]: Field,
       [locations.LOCATION_DIALOG]: Dialog,
       [locations.LOCATION_APP_CONFIG]: AppConfig,
+      [locations.LOCATION_APP_CONFIG]: Home,
     };
 
     // Select a component depending on a location in which the app is rendered.
     Object.entries(locationsMap).forEach(([locationKey, Component]) => {
       if (sdk.location.is(locationKey)) {
-        createApp(Component, { sdk }).mount("#app");
+        createApp(Component, { sdk }).mount('#app');
       }
     });
   });
-
 }
-

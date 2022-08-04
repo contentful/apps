@@ -6,6 +6,7 @@ import EntryEditor from '@/components/locations/EntryEditor';
 import Dialog from '@/components/locations/Dialog';
 import Sidebar from '@/components/locations/Sidebar';
 import Page from '@/components/locations/Page';
+import Home from '@/components/locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 const ComponentLocationSettings = {
@@ -15,6 +16,7 @@ const ComponentLocationSettings = {
   [locations.LOCATION_DIALOG]: Dialog,
   [locations.LOCATION_ENTRY_SIDEBAR]: Sidebar,
   [locations.LOCATION_PAGE]: Page,
+  [locations.LOCATION_PAGE]: Home,
 };
 
 const App = () => {
