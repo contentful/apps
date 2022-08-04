@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
       [locations.LOCATION_ENTRY_FIELD]: Field,
       [locations.LOCATION_DIALOG]: Dialog,
       [locations.LOCATION_APP_CONFIG]: AppConfig,
-      [locations.LOCATION_APP_CONFIG]: Home,
+      [locations.LOCATION_HOME]: Home,
     };
 
     // Select a component depending on a location in which the app is rendered.

@@ -16,7 +16,7 @@ const ComponentLocationSettings = {
   [locations.LOCATION_DIALOG]: Dialog,
   [locations.LOCATION_ENTRY_SIDEBAR]: Sidebar,
   [locations.LOCATION_PAGE]: Page,
-  [locations.LOCATION_PAGE]: Home,
+  [locations.LOCATION_HOME]: Home,
 };
 
 const App = () => {
