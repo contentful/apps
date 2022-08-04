@@ -9,6 +9,13 @@ import { productDataTransformer, collectionDataTransformer } from './dataTransfo
 
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
+import { SHOPIFY_API_VERSION } from './constants';
+import {
+  convertStringToBase64,
+  convertBase64ToString,
+  convertCollectionToBase64,
+  convertProductToBase64,
+} from './utils/base64';
 
 export async function makeShopifyClient(config) {
   const validationError = validateParameters(config);
@@ -21,6 +28,7 @@ export async function makeShopifyClient(config) {
   return Client.buildClient({
     domain: apiEndpoint,
     storefrontAccessToken,
+    apiVersion: SHOPIFY_API_VERSION,
   });
 }
 
@@ -36,21 +44,24 @@ export const fetchCollectionPreviews = async (skus, config) => {
     return [];
   }
 
+  const validIds = filterAndDecodeValidIds(skus, 'Collection');
+
   const shopifyClient = await makeShopifyClient(config);
-  const collections = (await shopifyClient.collection.fetchAll(250)).filter((collection) =>
-    skus.includes(collection.id)
-  );
 
-  return skus.map((sku) => {
-    const collection = collections.find((collection) => collection.id === sku);
+  const response = await shopifyClient.collection.fetchAll(250);
+  const collections = response.map((res) => convertCollectionToBase64(res));
 
+  return validIds.map((validId) => {
+    const collection = collections.find(
+      (collection) => collection.id === convertStringToBase64(validId)
+    );
     return collection
       ? collectionDataTransformer(collection, config.apiEndpoint)
       : {
-          sku,
+          sku: convertStringToBase64(validId),
           isMissing: true,
           image: '',
-          id: sku,
+          id: convertStringToBase64(validId),
           name: '',
         };
   });
@@ -68,19 +79,20 @@ export const fetchProductPreviews = async (skus, config) => {
     return [];
   }
 
+  const validIds = filterAndDecodeValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
-  const products = await shopifyClient.product.fetchMultiple(skus);
-
-  return skus.map((sku) => {
-    const product = products.find((product) => product?.id === sku);
+  const response = await shopifyClient.product.fetchMultiple(validIds);
+  const products = response.map((res) => convertProductToBase64(res));
+  return validIds.map((validId) => {
+    const product = products.find((product) => product?.id === convertStringToBase64(validId));
 
     return product
       ? productDataTransformer(product, config.apiEndpoint)
       : {
-          sku,
+          sku: convertStringToBase64(validId),
           isMissing: true,
           image: '',
-          id: sku,
+          id: convertStringToBase64(validId),
           name: '',
         };
   });
@@ -98,19 +110,7 @@ export const fetchProductVariantPreviews = async (skus, config) => {
     return [];
   }
 
-  const validIds = skus
-    .map((sku) => {
-      try {
-        // If not valid base64 window.atob will throw
-        const unencodedId = atob(sku);
-        return { unencodedId, sku };
-      } catch (error) {
-        return null;
-      }
-    })
-    .filter((sku) => sku && /^gid.*ProductVariant/.test(sku.unencodedId))
-    .map(({ sku }) => sku);
-
+  const validIds = filterAndDecodeValidIds(skus, 'ProductVariant');
   const queryIds = validIds.map((sku) => `"${sku}"`).join(',');
   const query = `
   {
@@ -133,7 +133,7 @@ export const fetchProductVariantPreviews = async (skus, config) => {
 
   const { apiEndpoint, storefrontAccessToken } = config;
 
-  const res = await window.fetch(`https://${apiEndpoint}/api/2019-10/graphql`, {
+  const res = await window.fetch(`https://${apiEndpoint}/api/${SHOPIFY_API_VERSION}/graphql`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -145,7 +145,9 @@ export const fetchProductVariantPreviews = async (skus, config) => {
 
   const data = await res.json();
 
-  const nodes = get(data, ['data', 'nodes'], []).filter(identity);
+  const nodes = get(data, ['data', 'nodes'], [])
+    .filter(identity)
+    .map((node) => convertProductToBase64(node));
 
   const variantPreviews = nodes.map(previewsToProductVariants(config));
   const missingVariants = difference(
@@ -175,6 +177,21 @@ export const makeProductSearchResolver = async (sdk) => {
 export const makeCollectionSearchResolver = async (sdk) => {
   const pagination = await makeCollectionPagination(sdk);
   return (search) => pagination.fetchNext(search);
+};
+
+export const filterAndDecodeValidIds = (skus, skuType) => {
+  const validIds = skus
+    .map((sku) => {
+      try {
+        // If not valid base64 window.atob will throw
+        const decodedId = convertBase64ToString(sku);
+        return decodedId;
+      } catch (error) {
+        return null;
+      }
+    })
+    .filter((decodedId) => decodedId && new RegExp(`^gid.*${skuType}`).test(decodedId));
+  return validIds;
 };
 
 /**

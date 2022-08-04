@@ -3,6 +3,7 @@ import uniqBy from 'lodash/uniqBy';
 import sortBy from 'lodash/sortBy';
 import { productVariantDataTransformer, productsToVariantsTransformer } from './dataTransformer';
 import { makeShopifyClient } from './skuResolvers';
+import { convertProductToBase64 } from './utils/base64';
 
 const PER_PAGE = 20;
 
@@ -89,12 +90,14 @@ class Pagination {
    */
   async _fetchProducts(search) {
     const query = { query: `variants:['sku:${search}'] OR title:${search}` };
-    return await this.shopifyClient.product.fetchQuery({
+    const products = await this.shopifyClient.product.fetchQuery({
       first: PER_PAGE,
       sortBy: 'TITLE',
       reverse: true,
       ...(search.length && query),
     });
+
+    return products.map((product) => convertProductToBase64(product));
   }
 
   /**
@@ -102,7 +105,10 @@ class Pagination {
    * and now want to render the next page.
    */
   async _fetchNextPage(products) {
-    return (await this.shopifyClient.fetchNextPage(products)).model;
+    const nextProductVariants = (await this.shopifyClient.fetchNextPage(products)).model;
+    return nextProductVariants.map((nextProductVariant) =>
+      convertProductToBase64(nextProductVariant)
+    );
   }
 
   _resetPagination() {

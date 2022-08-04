@@ -2,6 +2,7 @@ import get from 'lodash/get';
 import last from 'lodash/last';
 import flatten from 'lodash/flatten';
 import { DEFAULT_SHOPIFY_VARIANT_TITLE } from './constants';
+import { convertBase64ToString, convertStringToBase64 } from './utils/base64';
 
 /**
  * Transforms the API response of Shopify collections into
@@ -15,7 +16,7 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
 
   if (apiEndpoint) {
     try {
-      const collectionIdDecoded = atob(collection.id);
+      const collectionIdDecoded = convertBase64ToString(collection.id);
       const collectionId =
         collectionIdDecoded && collectionIdDecoded.slice(collectionIdDecoded.lastIndexOf('/') + 1);
 
@@ -48,7 +49,7 @@ export const productDataTransformer = (product, apiEndpoint) => {
 
   if (apiEndpoint) {
     try {
-      const productIdDecoded = atob(product.id);
+      const productIdDecoded = convertBase64ToString(product.id);
       const productId =
         productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
 
@@ -94,7 +95,8 @@ export const productsToVariantsTransformer = (products) =>
       const variants = product.variants.map((variant) => ({
         ...variant,
         variantSKU: variant.sku,
-        sku: variant.id,
+        id: convertStringToBase64(variant.id),
+        sku: convertStringToBase64(variant.id),
         productId: product.id,
         title:
           variant.title === DEFAULT_SHOPIFY_VARIANT_TITLE
@@ -108,7 +110,7 @@ export const productsToVariantsTransformer = (products) =>
 export const previewsToProductVariants =
   ({ apiEndpoint }) =>
   ({ sku, id, image, product, title }) => {
-    const productIdDecoded = atob(product.id);
+    const productIdDecoded = convertBase64ToString(product.id);
     const productId =
       productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
     return {

@@ -2,6 +2,7 @@
 // returned with this unfortunate title, and there is no other way to check
 // whether the returned variant is the default one or not
 export const DEFAULT_SHOPIFY_VARIANT_TITLE = 'Default Title';
+export const SHOPIFY_API_VERSION = '2022-04';
 
 export const SKU_TYPES = [
   {
