@@ -1,0 +1,16 @@
+<html lang="en">
+<head>
+<title>My First Websit</title>
+</head>
+
+<body>
+<h1>My first website</h1>
+<p>I'm stoked to build a website</p>
+
+
+</body>
+
+
+
+
+</html>
