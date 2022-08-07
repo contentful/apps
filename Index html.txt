@@ -1,6 +1,6 @@
 <html lang="en">
 <head>
-<title>My First website</title>
+<title>My First Websit</title>
 <link rel="stylesheet" href="styles.css"
 </head>
 
