@@ -4,7 +4,7 @@
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
-    "@testing-library/react": "11.2.5",
+    "@testing-library/react": "12.1.5",
     "cross-env": "7.0.3",
     "fetch-mock": "9.11.0"
   },
