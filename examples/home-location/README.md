@@ -1,4 +1,6 @@
-This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
+# Home location example
+This example shows how an app with a home location can be built.
+It creates a simple dashboard with information about your space and stats about your content
 
 ## How to use
 
@@ -6,13 +8,13 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app  --typescript
+npx create-contentful-app --example home-location
 
 # npm
-npm init contentful-app  --typescript
+npm init contentful-app  --example home-location
 
 # Yarn
-yarn create contentful-app  --typescript
+yarn create contentful-app  --example home-location
 ```
 
 ## Available Scripts
