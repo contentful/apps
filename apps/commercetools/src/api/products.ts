@@ -19,40 +19,70 @@ function productTransformer({ projectKey, locale }: ConfigurationParameters) {
   };
 }
 
-export async function fetchProductPreviews(
+async function fetchAllProductPreviews(
+  client: ReturnType<typeof createClient>,
+  products: ProductProjection[] = [],
   skus: string[],
-  config: ConfigurationParameters
-): Promise<Product[]> {
+  pagination?: { offset: number }
+): Promise<ProductProjection[]> {
   if (skus.length === 0) {
     return [];
   }
 
-  const client = createClient(config);
+  const STEP = 20;
+  let nextPageProducts: ProductProjection[] = [];
+
   const response = await client
     .productProjections()
     .search()
     .get({
       queryArgs: {
         'filter.query': [`variants.sku:${skus.map((sku) => `"${sku}"`).join(',')}`],
+        offset: pagination?.offset,
       },
     })
     .execute();
 
   if (response.statusCode === 200) {
-    const products = response.body.results.map(productTransformer(config));
-    const foundSKUs = products.map((product: Product) => product.sku);
-    const missingProducts = skus
-      .filter((sku) => !foundSKUs.includes(sku))
-      .map((sku) => ({
-        sku,
-        image: '',
-        id: '',
-        name: '',
-        isMissing: true,
-      }));
-    return [...products, ...missingProducts];
+    const hasNextPage = response.body.offset + response.body.count < response.body.total!;
+
+    if (hasNextPage) {
+      nextPageProducts = await fetchAllProductPreviews(
+        client,
+        [...products, ...response.body.results],
+        skus,
+        {
+          offset: response.body.offset + STEP,
+        }
+      );
+
+      return [...products, ...nextPageProducts];
+    }
+
+    return [...products, ...response.body.results];
   }
   throw new Error(`Request failed with status ${response.statusCode}`);
+}
+
+export async function fetchProductPreviews(
+  skus: string[],
+  config: ConfigurationParameters
+): Promise<Product[]> {
+  const client = createClient(config);
+  const products = (await fetchAllProductPreviews(client, [], skus)).map(
+    productTransformer(config)
+  );
+  const foundSKUs = products.map((product: Product) => product.sku);
+  const missingProducts = skus
+    .filter((sku) => !foundSKUs.includes(sku))
+    .map((sku) => ({
+      sku,
+      image: '',
+      id: '',
+      name: '',
+      isMissing: true,
+    }));
+  return [...products, ...missingProducts];
 }
 
 export async function fetchProducts(
