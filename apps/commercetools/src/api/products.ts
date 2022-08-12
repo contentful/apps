@@ -3,6 +3,8 @@ import { Product, Pagination } from '@contentful/ecommerce-app-base';
 import { ConfigurationParameters } from '../types';
 import { createClient } from './client';
 
+const FETCH_STEP = 40;
+
 function productTransformer({ projectKey, locale }: ConfigurationParameters) {
   return (item: ProductProjection): Product => {
     const id = item.id ?? '';
@@ -29,7 +31,6 @@ async function fetchAllProductPreviews(
     return [];
   }
 
-  const STEP = 20;
   let nextPageProducts: ProductProjection[] = [];
 
   const response = await client
@@ -39,27 +40,24 @@ async function fetchAllProductPreviews(
       queryArgs: {
         'filter.query': [`variants.sku:${skus.map((sku) => `"${sku}"`).join(',')}`],
         offset: pagination?.offset,
+        limit: FETCH_STEP,
       },
     })
     .execute();
 
   if (response.statusCode === 200) {
     const hasNextPage = response.body.offset + response.body.count < response.body.total!;
+    const combinedResults = [...products, ...response.body.results];
 
     if (hasNextPage) {
-      nextPageProducts = await fetchAllProductPreviews(
-        client,
-        [...products, ...response.body.results],
-        skus,
-        {
-          offset: response.body.offset + STEP,
-        }
-      );
+      nextPageProducts = await fetchAllProductPreviews(client, combinedResults, skus, {
+        offset: response.body.offset + response.body.limit,
+      });
 
       return [...products, ...nextPageProducts];
     }
 
-    return [...products, ...response.body.results];
+    return combinedResults;
   }
   throw new Error(`Request failed with status ${response.statusCode}`);
 }
