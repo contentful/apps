@@ -3,7 +3,7 @@ import { Product, Pagination } from '@contentful/ecommerce-app-base';
 import { ConfigurationParameters } from '../types';
 import { createClient } from './client';
 
-const FETCH_LIMIT = 100;
+const MAX_LIMIT = 500;
 
 function productTransformer({ projectKey, locale }: ConfigurationParameters) {
   return (item: ProductProjection): Product => {
@@ -21,67 +21,41 @@ function productTransformer({ projectKey, locale }: ConfigurationParameters) {
   };
 }
 
-async function fetchAllProductPreviews(
-  client: ReturnType<typeof createClient>,
-  products: ProductProjection[] = [],
+export async function fetchProductPreviews(
   skus: string[],
-  pagination?: { offset?: number; limit?: number }
-): Promise<ProductProjection[]> {
+  config: ConfigurationParameters
+): Promise<Product[]> {
   if (skus.length === 0) {
     return [];
   }
 
-  let nextPageProducts: ProductProjection[] = [];
-
+  const client = createClient(config);
   const response = await client
     .productProjections()
     .search()
     .get({
       queryArgs: {
         'filter.query': [`variants.sku:${skus.map((sku) => `"${sku}"`).join(',')}`],
-        offset: pagination?.offset || 0,
-        limit: pagination?.limit || FETCH_LIMIT,
+        limit: MAX_LIMIT,
       },
     })
     .execute();
 
-  if (response.statusCode === 200 && response.body.total) {
-    const hasNextPage = response.body.offset + response.body.count < response.body.total;
-    const combinedResults = [...products, ...response.body.results];
-
-    if (hasNextPage) {
-      nextPageProducts = await fetchAllProductPreviews(client, combinedResults, skus, {
-        offset: response.body.count,
-        limit: response.body.total - response.body.count,
-      });
-
-      return [...products, ...nextPageProducts];
-    }
-
-    return combinedResults;
+  if (response.statusCode === 200) {
+    const products = response.body.results.map(productTransformer(config));
+    const foundSKUs = products.map((product: Product) => product.sku);
+    const missingProducts = skus
+      .filter((sku) => !foundSKUs.includes(sku))
+      .map((sku) => ({
+        sku,
+        image: '',
+        id: '',
+        name: '',
+        isMissing: true,
+      }));
+    return [...products, ...missingProducts];
   }
   throw new Error(`Request failed with status ${response.statusCode}`);
-}
-
-export async function fetchProductPreviews(
-  skus: string[],
-  config: ConfigurationParameters
-): Promise<Product[]> {
-  const client = createClient(config);
-  const products = (await fetchAllProductPreviews(client, [], skus)).map(
-    productTransformer(config)
-  );
-  const foundSKUs = products.map((product: Product) => product.sku);
-  const missingProducts = skus
-    .filter((sku) => !foundSKUs.includes(sku))
-    .map((sku) => ({
-      sku,
-      image: '',
-      id: '',
-      name: '',
-      isMissing: true,
-    }));
-  return [...products, ...missingProducts];
 }
 
 export async function fetchProducts(
