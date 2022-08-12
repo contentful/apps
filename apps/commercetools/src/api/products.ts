@@ -3,7 +3,7 @@ import { Product, Pagination } from '@contentful/ecommerce-app-base';
 import { ConfigurationParameters } from '../types';
 import { createClient } from './client';
 
-const FETCH_STEP = 40;
+const FETCH_LIMIT = 100;
 
 function productTransformer({ projectKey, locale }: ConfigurationParameters) {
   return (item: ProductProjection): Product => {
@@ -25,7 +25,7 @@ async function fetchAllProductPreviews(
   client: ReturnType<typeof createClient>,
   products: ProductProjection[] = [],
   skus: string[],
-  offset: number = 0
+  pagination?: { offset?: number; limit?: number }
 ): Promise<ProductProjection[]> {
   if (skus.length === 0) {
     return [];
@@ -39,23 +39,21 @@ async function fetchAllProductPreviews(
     .get({
       queryArgs: {
         'filter.query': [`variants.sku:${skus.map((sku) => `"${sku}"`).join(',')}`],
-        offset,
-        limit: FETCH_STEP,
+        offset: pagination?.offset || 0,
+        limit: pagination?.limit || FETCH_LIMIT,
       },
     })
     .execute();
 
-  if (response.statusCode === 200) {
-    const hasNextPage = response.body.offset + response.body.count < response.body.total!;
+  if (response.statusCode === 200 && response.body.total) {
+    const hasNextPage = response.body.offset + response.body.count < response.body.total;
     const combinedResults = [...products, ...response.body.results];
 
     if (hasNextPage) {
-      nextPageProducts = await fetchAllProductPreviews(
-        client,
-        combinedResults,
-        skus,
-        response.body.offset + response.body.limit
-      );
+      nextPageProducts = await fetchAllProductPreviews(client, combinedResults, skus, {
+        offset: response.body.count,
+        limit: response.body.total - response.body.count,
+      });
 
       return [...products, ...nextPageProducts];
     }
