@@ -25,7 +25,7 @@ async function fetchAllProductPreviews(
   client: ReturnType<typeof createClient>,
   products: ProductProjection[] = [],
   skus: string[],
-  pagination?: { offset: number }
+  offset: number = 0
 ): Promise<ProductProjection[]> {
   if (skus.length === 0) {
     return [];
@@ -39,7 +39,7 @@ async function fetchAllProductPreviews(
     .get({
       queryArgs: {
         'filter.query': [`variants.sku:${skus.map((sku) => `"${sku}"`).join(',')}`],
-        offset: pagination?.offset,
+        offset,
         limit: FETCH_STEP,
       },
     })
@@ -50,9 +50,12 @@ async function fetchAllProductPreviews(
     const combinedResults = [...products, ...response.body.results];
 
     if (hasNextPage) {
-      nextPageProducts = await fetchAllProductPreviews(client, combinedResults, skus, {
-        offset: response.body.offset + response.body.limit,
-      });
+      nextPageProducts = await fetchAllProductPreviews(
+        client,
+        combinedResults,
+        skus,
+        response.body.offset + response.body.limit
+      );
 
       return [...products, ...nextPageProducts];
     }
