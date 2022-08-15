@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.29](https://github.com/contentful/apps/compare/@contentful/functions@1.4.28...@contentful/functions@1.4.29) (2022-08-15)
+
+
+### Bug Fixes
+
+* **deps:** bump aws-sdk from 2.1192.0 to 2.1194.0 ([#1608](https://github.com/contentful/apps/issues/1608)) ([fc99fd5](https://github.com/contentful/apps/commit/fc99fd580654a1f46b72347c494210870305cda5))
+
+
+
+
+
 ## [1.4.28](https://github.com/contentful/apps/compare/@contentful/functions@1.4.27...@contentful/functions@1.4.28) (2022-08-11)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@contentful/smartling-frontend",
-  "version": "1.7.26",
+  "version": "1.7.27",
   "main": "build/index.html",
   "devDependencies": {
     "@testing-library/react": "8.0.4",
