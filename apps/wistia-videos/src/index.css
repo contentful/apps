@@ -1,0 +1,19 @@
+html,
+body,
+div {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+.dropdown {
+  box-shadow: none;
+  width: 100%;
+}
+
+.dropdown-list li {
+  border-bottom: 1px solid rgb(229, 235, 237);
+}
