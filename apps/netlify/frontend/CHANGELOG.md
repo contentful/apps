@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.9.0](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.29...@contentful/netlify-build-and-preview@1.9.0) (2022-08-17)
+
+
+### Features
+
+* increase max configs to 20 ([#1634](https://github.com/contentful/apps/issues/1634)) ([7b79088](https://github.com/contentful/apps/commit/7b79088158b0f3dd0712f596ca62cc777069ce0a)), closes [#1623](https://github.com/contentful/apps/issues/1623)
+
+
+
+
+
 ## [1.8.29](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.28...@contentful/netlify-build-and-preview@1.8.29) (2022-08-17)
 
 
