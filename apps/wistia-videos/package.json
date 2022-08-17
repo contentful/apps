@@ -1,13 +1,14 @@
 {
   "name": "wistia-videos",
   "version": "0.1.0",
+  "homepage": "./",
   "private": true,
   "dependencies": {
+    "@contentful/app-scripts": "^1.1.19",
     "@contentful/app-sdk": "4.9.0",
     "@contentful/forma-36-react-components": "^3.100.7",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-scripts": "5.0.1",
     "styled-components": "^5.3.3"
   },
   "scripts": {
@@ -38,6 +39,7 @@
     "typescript": "4.7.4",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "@types/styled-components": "^5.1.15"
+    "@types/styled-components": "^5.1.15",
+    "react-scripts": "4.0.3"
   }
 }
