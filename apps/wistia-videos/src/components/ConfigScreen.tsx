@@ -217,7 +217,7 @@ const Config = (props: ConfigProps) => {
                   </Paragraph>
                 </Flex>
                 {!!parameters.excludedProjects?.length && (
-                  <Flex marginBottom="spacingM" flexWrap="wrap" fullHeight>
+                  <Flex marginBottom="spacingM" flexWrap="wrap">
                     {parameters.excludedProjects.map((item) => (
                       <Pill
                         style={{ width: 200, marginRight: 10, marginBottom: 10 }}
