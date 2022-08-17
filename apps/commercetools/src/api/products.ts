@@ -3,6 +3,8 @@ import { Product, Pagination } from '@contentful/ecommerce-app-base';
 import { ConfigurationParameters } from '../types';
 import { createClient } from './client';
 
+const MAX_LIMIT = 500;
+
 function productTransformer({ projectKey, locale }: ConfigurationParameters) {
   return (item: ProductProjection): Product => {
     const id = item.id ?? '';
@@ -34,6 +36,7 @@ export async function fetchProductPreviews(
     .get({
       queryArgs: {
         'filter.query': [`variants.sku:${skus.map((sku) => `"${sku}"`).join(',')}`],
+        limit: MAX_LIMIT,
       },
     })
     .execute();

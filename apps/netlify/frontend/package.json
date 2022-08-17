@@ -1,9 +1,9 @@
 {
   "name": "@contentful/netlify-build-and-preview",
-  "version": "1.8.26",
+  "version": "1.8.29",
   "private": true,
   "devDependencies": {
-    "@contentful/app-scripts": "1.1.17",
+    "@contentful/app-scripts": "1.1.19",
     "@testing-library/react": "8.0.4",
     "cross-env": "7.0.3",
     "identity-obj-proxy": "3.0.0"
