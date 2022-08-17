@@ -13,6 +13,7 @@
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "start:https": "cross-env BROWSER=none HTTPS=true SSL_CRT_FILE=../../server.crt SSL_KEY_FILE=../../server.key react-scripts start",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 6StWOM1AZBDHDjynDkm1iz --token ${CONTENTFUL_CMA_TOKEN}",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
