@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.1](https://github.com/contentful/apps/compare/@contentful/bynder-assets@1.10.0...@contentful/bynder-assets@1.10.1) (2022-08-22)
+
+
+### Bug Fixes
+
+* revert bynder due to login issues ([#1641](https://github.com/contentful/apps/issues/1641)) ([cf368cc](https://github.com/contentful/apps/commit/cf368cc9529874f2fb7cf1a89090341e760c6548))
+
+
+
+
+
 # [1.10.0](https://github.com/contentful/apps/compare/@contentful/bynder-assets@1.9.25...@contentful/bynder-assets@1.10.0) (2022-08-19)
 
 
