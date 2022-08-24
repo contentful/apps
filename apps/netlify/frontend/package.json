@@ -22,7 +22,7 @@
     "pubnub": "7.2.0",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-scripts": "4.0.3",
+    "react-scripts": "5.0.1",
     "uuid": "8.3.2",
     "whatwg-fetch": "3.6.2"
   },
