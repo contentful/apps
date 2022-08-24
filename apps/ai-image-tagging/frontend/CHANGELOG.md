@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.20](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-frontend@1.5.19...@contentful/ai-image-tagging-frontend@1.5.20) (2022-08-24)
+
+**Note:** Version bump only for package @contentful/ai-image-tagging-frontend
+
+
+
+
+
 ## [1.5.19](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-frontend@1.5.18...@contentful/ai-image-tagging-frontend@1.5.19) (2022-08-24)
 
 
