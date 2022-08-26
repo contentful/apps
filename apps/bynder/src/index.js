@@ -5,9 +5,8 @@ import logo from './logo.svg';
 
 const CTA = 'Select a file on Bynder';
 
-const BYNDER_BASE_URL = 'https://ucv.bynder.com';
+const BYNDER_BASE_URL = 'https://d8ejoa1fys2rk.cloudfront.net';
 const BYNDER_SDK_URL = `${BYNDER_BASE_URL}/5.0.5/modules/compactview/bynder-compactview-3-latest.js`;
-
 
 const FIELDS_TO_PERSIST = [
   'archive',
@@ -245,7 +244,8 @@ setup({
       type: 'List',
       value: 'MultiSelect,SingleSelect,SingleSelectFile',
       default: 'MultiSelect',
-      description: 'Set the Compact View to allow multiple or single asset selection at a time. "SingleSelectFile" is the only mode that allows a specific derivative to be selected. See https://developer-docs.bynder.com/ui-components for more info on Modes.',
+      description:
+        'Set the Compact View to allow multiple or single asset selection at a time. "SingleSelectFile" is the only mode that allows a specific derivative to be selected. See https://developer-docs.bynder.com/ui-components for more info on Modes.',
       required: true,
     },
   ],
