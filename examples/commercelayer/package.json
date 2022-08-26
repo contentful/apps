@@ -5,7 +5,7 @@
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
     "cross-env": "7.0.3",
-    "react-scripts": "4.0.3"
+    "react-scripts": "5.0.1"
   },
   "dependencies": {
     "@commercelayer/js-auth": "2.0.1",
@@ -16,9 +16,7 @@
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1ENTlXR17q1veUn74QF9ns --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
+    "build": "react-scripts build"
   },
   "eslintConfig": {
     "extends": "react-app"

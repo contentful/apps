@@ -3,6 +3,77 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.3](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.2...@contentful/netlify-build-and-preview@1.9.3) (2022-08-24)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/f36-components from 4.13.0 to 4.15.0 ([#1652](https://github.com/contentful/apps/issues/1652)) ([6e41107](https://github.com/contentful/apps/commit/6e4110771a8616a0087a25d085dcafbdde418530))
+
+
+
+
+
+## [1.9.2](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.1...@contentful/netlify-build-and-preview@1.9.2) (2022-08-24)
+
+
+### Bug Fixes
+
+* **deps:** bump date-fns from 2.29.1 to 2.29.2 ([#1648](https://github.com/contentful/apps/issues/1648)) ([e0dc3c5](https://github.com/contentful/apps/commit/e0dc3c535401d1b70f6865234d0f68d3df708532))
+
+
+
+
+
+## [1.9.1](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.0...@contentful/netlify-build-and-preview@1.9.1) (2022-08-24)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.11.1 to 4.12.0 ([#1646](https://github.com/contentful/apps/issues/1646)) ([659f03a](https://github.com/contentful/apps/commit/659f03ade77269a0e9487f6a2ef8ab29e0952e4c))
+
+
+
+
+
+# [1.9.0](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.29...@contentful/netlify-build-and-preview@1.9.0) (2022-08-17)
+
+
+### Features
+
+* increase max configs to 20 ([#1634](https://github.com/contentful/apps/issues/1634)) ([7b79088](https://github.com/contentful/apps/commit/7b79088158b0f3dd0712f596ca62cc777069ce0a)), closes [#1623](https://github.com/contentful/apps/issues/1623)
+
+
+
+
+
+## [1.8.29](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.28...@contentful/netlify-build-and-preview@1.8.29) (2022-08-17)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/f36-icons from 4.13.0 to 4.15.0 ([#1633](https://github.com/contentful/apps/issues/1633)) ([e7a38bb](https://github.com/contentful/apps/commit/e7a38bb52425d7e6d7c4f73ad0e72660cd58d4f2))
+
+
+
+
+
+## [1.8.28](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.27...@contentful/netlify-build-and-preview@1.8.28) (2022-08-17)
+
+**Note:** Version bump only for package @contentful/netlify-build-and-preview
+
+
+
+
+
+## [1.8.27](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.26...@contentful/netlify-build-and-preview@1.8.27) (2022-08-16)
+
+**Note:** Version bump only for package @contentful/netlify-build-and-preview
+
+
+
+
+
 ## [1.8.26](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.8.25...@contentful/netlify-build-and-preview@1.8.26) (2022-08-03)
 
 
