@@ -3,33 +3,6 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [1.7.20](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.19...@contentful/jira-app@1.7.20) (2022-08-24)
-
-
-### Bug Fixes
-
-* **deps:** bump @contentful/app-sdk from 4.11.1 to 4.12.0 ([#1646](https://github.com/contentful/apps/issues/1646)) ([659f03a](https://github.com/contentful/apps/commit/659f03ade77269a0e9487f6a2ef8ab29e0952e4c))
-
-
-
-
-
-## [1.7.19](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.18...@contentful/jira-app@1.7.19) (2022-08-17)
-
-**Note:** Version bump only for package @contentful/jira-app
-
-
-
-
-
-## [1.7.18](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.17...@contentful/jira-app@1.7.18) (2022-08-11)
-
-**Note:** Version bump only for package @contentful/jira-app
-
-
-
-
-
 ## [1.7.17](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.16...@contentful/jira-app@1.7.17) (2022-08-03)
 
 
