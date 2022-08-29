@@ -9,7 +9,9 @@ function productTransformer({ projectKey, locale }: ConfigurationParameters) {
   return (item: ProductProjection): Product => {
     const id = item.id ?? '';
     const externalLink =
-      (projectKey && id && `https://mc.commercetools.com/${projectKey}/products/${id}/general`) ||
+      (projectKey &&
+        id &&
+        `https://mc.europe-west1.gcp.commercetools.com/${projectKey}/products/${id}/general`) ||
       '';
     return {
       id,
