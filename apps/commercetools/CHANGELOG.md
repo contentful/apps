@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.1](https://github.com/contentful/apps/compare/@contentful/commercetools@1.10.0...@contentful/commercetools@1.10.1) (2022-08-29)
+
+
+### Bug Fixes
+
+* show slugs instead of ids ([#1663](https://github.com/contentful/apps/issues/1663)) ([ea08a9f](https://github.com/contentful/apps/commit/ea08a9fe086e9f0e33fd36b94361942de6a7e66a))
+
+
+
+
+
 # [1.10.0](https://github.com/contentful/apps/compare/@contentful/commercetools@1.9.5...@contentful/commercetools@1.10.0) (2022-08-12)
 
 
