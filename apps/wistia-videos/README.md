@@ -1,34 +1,19 @@
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
-## Available Scripts
+## Overview
 
-In the project directory, you can run:
+The Wistia app connects your Wistia projects to Contentful, allowing you to add a new field for Wistia videos. This field allows you to search through your Wistia videos, select the video you want to embed, and directly embed it without the need to copy an embed code from Wistia. You can also select which projects show up in Contentful, sharing only the videos you want to allow in your Contentful space.
 
-#### `npm start`
+## Requirements
 
-Creates or updates your app definition in contentful, and runs the app in development mode.
-Open your app to view it in the browser.
+To use this app, you will need:
 
-The page will reload if you make edits.
-You will also see any lint errors in the console.
+- A Wistia account with at least one video, on any Wistia plan
+- A Wistia read only API token allowing access to all project and video data
+- A Contentful space on any plan
+- A content type with a JSON field
 
-#### `npm run build`
+## Further resources
 
-Builds the app for production to the `build` folder.
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.
-Your app is ready to be deployed!
-
-## Libraries to use
-
-To make your app look and feel like Contentful use the following libraries:
-
-- [Forma 36](https://f36.contentful.com/) – Contentful's design system
-- [Contentful Field Editors](https://www.contentful.com/developers/docs/extensibility/field-editors/) – Contentful's field editor React components
-
-## Learn More
-
-[Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.
-
-Create Contentful App uses [Create React App](https://create-react-app.dev/). You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started) and how to further customize your app.
+- To install the app in your contentful space, visit [this link](https://www.contentful.com/marketplace/app/wistia/)
+- For documentation on setting the app up take a look at [this article](https://www.contentful.com/help/wistia-app/)
