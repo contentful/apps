@@ -160,7 +160,7 @@ function renderDialog(sdk) {
   script.addEventListener('load', () => {
     window.BynderCompactView.open({
       language: 'en_US',
-      mode: compactViewMode ? compactViewMode : 'MultiSelect',
+      mode: compactViewMode ?? 'MultiSelect',
       assetTypes: types,
       portal: { url: bynderURL, editable: true },
       assetFieldSelection: FIELD_SELECTION,
