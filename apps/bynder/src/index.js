@@ -242,10 +242,9 @@ setup({
       id: 'compactViewMode',
       name: 'Compact View Mode',
       type: 'List',
-      value: 'MultiSelect,SingleSelect,SingleSelectFile',
+      value: 'MultiSelect,SingleSelectFile',
       default: 'MultiSelect',
-      description:
-        'Set the Compact View to allow multiple or single asset selection at a time. "SingleSelectFile" is the only mode that allows a specific derivative to be selected. See https://developer-docs.bynder.com/ui-components for more info on Modes.',
+      description: '"SingleSelectFile" allows you to select a specific derivative.',
       required: true,
     },
   ],
