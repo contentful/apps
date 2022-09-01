@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.11.0](https://github.com/contentful/apps/compare/@contentful/bynder-assets@1.10.4...@contentful/bynder-assets@1.11.0) (2022-09-01)
+
+
+### Features
+
+* upgrade bynder from compactview 2 to 3 ([#1664](https://github.com/contentful/apps/issues/1664)) ([0a8842e](https://github.com/contentful/apps/commit/0a8842ea70737f218c8aba284f84ef1ae14b7b25))
+
+
+
+
+
 ## [1.10.4](https://github.com/contentful/apps/compare/@contentful/bynder-assets@1.10.3...@contentful/bynder-assets@1.10.4) (2022-09-01)
 
 **Note:** Version bump only for package @contentful/bynder-assets
