@@ -1,22 +1,5 @@
-/* eslint-disable jsx-a11y/media-has-caption */
-
 import React from 'react';
 
-import '@contentful/forma-36-react-components/dist/styles.css';
-import '@contentful/forma-36-fcss/dist/styles.css';
-import {
-  Heading,
-  Subheading,
-  Note,
-  Form,
-  TextField,
-  CheckboxField,
-  Paragraph,
-  Typography,
-  FieldGroup,
-  TextLink,
-  Spinner,
-} from '@contentful/forma-36-react-components';
 import { AppExtensionSDK, AppConfigAPI, SpaceAPI } from '@contentful/app-sdk';
 import {
   editorInterfacesToSelectedFields,
@@ -27,9 +10,22 @@ import {
   CompatibleFields,
   SelectedFields,
 } from '@contentful/dam-app-base';
-import MuxLogoSvg from './mux-logo.svg';
+import MuxLogoSvg from '../images/mux-logo.svg';
 import './config.css';
-import ApiClient from './apiClient';
+import ApiClient from '../util/apiClient';
+
+import {
+  Checkbox,
+  Form,
+  Note,
+  Spinner,
+  FormControl,
+  TextInput,
+  TextLink,
+  Heading,
+  Paragraph,
+  Subheading,
+} from '@contentful/f36-components';
 
 interface ConfigProps {
   sdk: AppExtensionSDK;
@@ -41,6 +37,7 @@ interface IParameters {
   muxEnableSignedUrls?: boolean;
   muxSigningKeyId?: string;
   muxSigningKeyPrivate?: string;
+  muxEnableAudioNormalize?: boolean;
   muxDomain?: string;
 }
 
@@ -141,6 +138,26 @@ class Config extends React.Component<ConfigProps, IState> {
     return this.state.parameters.muxAccessTokenId && this.state.parameters.muxAccessTokenSecret;
   };
 
+  toggleNormalize = async (enabled: boolean) => {
+    if (!enabled) {
+      this.setState({
+        parameters: {
+          ...this.state.parameters,
+          muxEnableAudioNormalize: false,
+        },
+      });
+      return;
+    } else {
+      this.setState({
+        parameters: {
+          ...this.state.parameters,
+          muxEnableAudioNormalize: true,
+        },
+      });
+      return;
+    }
+  };
+
   toggleSignedUrls = async (enabled: boolean) => {
     if (!enabled) {
       this.setState({
@@ -199,6 +216,7 @@ class Config extends React.Component<ConfigProps, IState> {
         muxAccessTokenSecret,
         muxEnableSignedUrls,
         muxSigningKeyId,
+        muxEnableAudioNormalize,
         muxDomain,
       },
       contentTypes,
@@ -209,7 +227,7 @@ class Config extends React.Component<ConfigProps, IState> {
       <React.Fragment>
         <div className="config-background" />
         <div className="config-body">
-          <Typography>
+          <React.Fragment>
             <Heading>About Mux</Heading>
             <Paragraph>
               This app connects to Mux and allows you to upload videos to your content in
@@ -222,10 +240,10 @@ class Config extends React.Component<ConfigProps, IState> {
               </TextLink>
               .
             </Paragraph>
-          </Typography>
+          </React.Fragment>
           <hr className="config-splitter" />
-          <Typography>
-            <Form spacing="default">
+          <React.Fragment>
+            <Form>
               <Heading>API credentials</Heading>
               <Paragraph>
                 These can be obtained by clicking 'Generate new token' in the{' '}
@@ -238,37 +256,37 @@ class Config extends React.Component<ConfigProps, IState> {
                 </TextLink>
                 . Note that you must be an admin in your Mux account.
               </Paragraph>
-              <TextField
-                required
-                name="mux-access-token"
-                id="mux-access-token"
-                labelText="Mux access token"
-                value={muxAccessTokenId || ''}
-                onChange={(e) =>
-                  this.setState({
-                    parameters: {
-                      ...this.state.parameters,
-                      muxAccessTokenId: (e.target as HTMLTextAreaElement).value,
-                    },
-                  })
-                }
-              />
-              <TextField
-                required
-                name="mux-token-secret"
-                id="mux-token-secret"
-                labelText="Mux token secret"
-                value={muxAccessTokenSecret || ''}
-                onChange={(e) =>
-                  this.setState({
-                    parameters: {
-                      ...this.state.parameters,
-                      muxAccessTokenSecret: (e.target as HTMLTextAreaElement).value,
-                    },
-                  })
-                }
-                textInputProps={{ type: 'password' }}
-              />
+              <FormControl id="mux-access-token" isRequired>
+                <FormControl.Label>Mux access token</FormControl.Label>
+                <TextInput
+                  name="mux-access-token"
+                  value={muxAccessTokenId || ''}
+                  onChange={(e) =>
+                    this.setState({
+                      parameters: {
+                        ...this.state.parameters,
+                        muxAccessTokenId: (e.target as HTMLTextAreaElement).value,
+                      },
+                    })
+                  }
+                />
+              </FormControl>
+              <FormControl id="mux-token-secret" isRequired>
+                <FormControl.Label>Mux token secret</FormControl.Label>
+                <TextInput
+                  name="mux-token-secret"
+                  value={muxAccessTokenSecret || ''}
+                  onChange={(e) =>
+                    this.setState({
+                      parameters: {
+                        ...this.state.parameters,
+                        muxAccessTokenSecret: (e.target as HTMLTextAreaElement).value,
+                      },
+                    })
+                  }
+                  type="password"
+                />
+              </FormControl>
               <hr className="config-splitter" />
               <Heading>Assign to fields</Heading>
               <Paragraph>
@@ -285,34 +303,33 @@ class Config extends React.Component<ConfigProps, IState> {
                       {compatibleFields[contentTypeId].length &&
                         compatibleFields[contentTypeId].map(({ id: fieldId, name: fieldName }) => {
                           return (
-                            <FieldGroup key={fieldId}>
-                              <CheckboxField
-                                labelText={fieldName}
-                                helpText={`Field ID: ${fieldId}`}
-                                name={`${contentTypeId}-${fieldName}`}
-                                value={fieldId}
-                                id={fieldId}
-                                checked={this.isChecked(contentTypeId, fieldId)}
-                                onChange={(e) =>
-                                  this.assignToField(
-                                    contentTypeId,
-                                    fieldId,
-                                    (e.target as HTMLInputElement).checked
-                                  )
-                                }
-                              />
-                            </FieldGroup>
+                            <Checkbox
+                              id={fieldId}
+                              helpText={`Field ID: ${fieldId}`}
+                              name={`${contentTypeId}-${fieldName}`}
+                              value={fieldId}
+                              isChecked={this.isChecked(contentTypeId, fieldId)}
+                              onChange={(e) =>
+                                this.assignToField(
+                                  contentTypeId,
+                                  fieldId,
+                                  (e.target as HTMLInputElement).checked
+                                )
+                              }
+                            >
+                              {fieldName}
+                            </Checkbox>
                           );
                         })}
                     </div>
                   );
                 })}
             </Form>
-          </Typography>
+          </React.Fragment>
           <hr className="config-splitter" />
-          <Form spacing="default">
-            <Heading>Advanced: Signed URLs</Heading>
-            <Note noteType="warning" title="This is an advanced feature">
+          <Form>
+            <Heading marginBottom="none">Advanced: Signed URLs</Heading>
+            <Note variant="warning" title="This is an advanced feature">
               If you want to support signed urls you must read and understand{' '}
               <TextLink
                 href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
@@ -324,22 +341,23 @@ class Config extends React.Component<ConfigProps, IState> {
               . To use signed URLs in your application you will have to generate valid JSON web
               tokens (JWT) on your server.
             </Note>
-            <CheckboxField
-              labelText="Enable signed URLs"
-              helpText=""
-              name="mux-enable-signed-urls"
+            <Checkbox
               id="mux-enable-signed_urls"
-              checked={muxEnableSignedUrls}
-              disabled={!this.haveApiCredentials()}
+              helpText=""
+              isDisabled={!this.haveApiCredentials()}
+              name="mux-enable-signed-urls"
+              isChecked={muxEnableSignedUrls}
               onChange={(e) => this.toggleSignedUrls((e.target as HTMLInputElement).checked)}
-            />
+            >
+              Enable signed URLs
+            </Checkbox>
             {this.state.isEnablingSignedUrls && (
-              <Paragraph>
+              <Paragraph marginBottom="none">
                 <Spinner size="small" /> Creating signing keys
               </Paragraph>
             )}
             {muxEnableSignedUrls && muxSigningKeyId && (
-              <Paragraph>
+              <Paragraph marginBottom="none">
                 The signing key ID that contentful will use is{' '}
                 {this.state.parameters.muxSigningKeyId}. This key is only used for previewing
                 content in the Contentful UI. You should generate a different key to use in your
@@ -348,26 +366,38 @@ class Config extends React.Component<ConfigProps, IState> {
             )}
           </Form>
           <hr className="config-splitter" />
-          <Paragraph>
+          <Checkbox
+            id="mux-enable-audio-normalize"
+            helpText="Adjust audio levels on videos after upload to standard audio levels."
+            name="mux-enable-audio-normalize"
+            isChecked={muxEnableAudioNormalize}
+            onChange={(e) => this.toggleNormalize((e.target as HTMLInputElement).checked)}
+          >
+            Enable Audio Normalization
+          </Checkbox>
+          <hr className="config-splitter" />
+          <Paragraph marginBottom="none">
             Custom Media Domain (if enabled) for dashboard playback. Otherwise leave as mux.com
           </Paragraph>
-          <TextField
-            required
-            name="mux-domain"
-            id="mux-domain"
-            labelText="Mux Domain"
-            value={muxDomain || 'mux.com'}
-            onChange={(e) =>
-              this.setState({
-                parameters: {
-                  ...this.state.parameters,
-                  muxDomain: (e.target as HTMLTextAreaElement).value,
-                },
-              })
-            }
-          />
+          <FormControl id="mux-domain" isRequired>
+            <FormControl.Label>Mux Domain</FormControl.Label>
+            <TextInput
+              name="mux-domain"
+              value={muxDomain || 'mux.com'}
+              onChange={(e) =>
+                this.setState({
+                  parameters: {
+                    ...this.state.parameters,
+                    muxDomain: (e.target as HTMLTextAreaElement).value,
+                  },
+                })
+              }
+            />
+          </FormControl>
           <hr className="config-splitter" />
-          <Paragraph>After entering your API credentials, click 'Install' above.</Paragraph>
+          <Paragraph marginBottom="none">
+            After entering your API credentials, click 'Install' or 'Save' above.
+          </Paragraph>
         </div>
         <div className="config-logo-bottom">
           <img alt="Mux Logo" src={MuxLogoSvg} />
