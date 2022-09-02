@@ -15,9 +15,9 @@ import {
 } from '@contentful/f36-components';
 import { Form, FormControl, Checkbox, TextInput } from '@contentful/f36-forms';
 
-import MuxPlayer from '@mux/mux-player-react';
-import { MuxUploaderDrop } from '@mux/mux-uploader-react';
-import MuxUploader from '@mux/mux-uploader-react';
+import MuxPlayer from '@mux/mux-player-react/dist/index.cjs';
+import MuxUploader from '@mux/mux-uploader-react/dist/index.cjs';
+import { MuxUploaderDrop } from '@mux/mux-uploader-react/dist/index.cjs';
 
 import Config from './locations/config';
 import ApiClient from './util/apiClient';
@@ -103,10 +103,18 @@ export class App extends React.Component<AppProps, AppState> {
       });
       return false;
     }
+    if (res.status === 404) {
+      this.setState({
+        error: 'Error: The video was not found.',
+        errorShowResetAction: true,
+      });
+      return false;
+    }
 
     if (!res.ok) {
       this.setState({
         error: 'API Check Error: ' + res.statusText,
+        errorShowResetAction: true,
       });
       return false;
     }
