@@ -28,11 +28,14 @@ import {
   selectedFieldsToTargetState,
   validateParameters,
   getToken,
+  resetLocalStorage,
 } from '../utils';
 import { styles } from './styles';
 
 // @ts-ignore 2307
 import logo from './config-screen-logo.svg';
+
+const AUTH_ERROR_CODES = [401, 403];
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -100,6 +103,13 @@ export class AppConfig extends React.Component<Props, State> {
           Authorization: `Bearer ${this.state.accessToken}`,
         },
       });
+
+      if (AUTH_ERROR_CODES.includes(response.status)) {
+        resetLocalStorage();
+        this.setState({ accessToken: '' });
+        return;
+      }
+
       const result: WorkspacesResponse = await response.json();
       this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
     } catch (_error) {
