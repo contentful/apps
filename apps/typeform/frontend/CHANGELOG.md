@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.40](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.39...@contentful/typeform-frontend@1.5.40) (2022-09-08)
+
+
+### Bug Fixes
+
+* clear token when workspace fetching returns 401 or 403 ([#1690](https://github.com/contentful/apps/issues/1690)) ([8521af5](https://github.com/contentful/apps/commit/8521af500e7e97b669144f76ca173227c2b3dbd1))
+
+
+
+
+
 ## [1.5.39](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.38...@contentful/typeform-frontend@1.5.39) (2022-09-08)
 
 
