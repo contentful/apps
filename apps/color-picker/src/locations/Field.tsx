@@ -23,6 +23,9 @@ const Field = () => {
   );
   const customColorPicker = useRef<HTMLInputElement>(null);
 
+  // @ts-ignore
+  const theme = sdk.parameters.installation.themes[0];
+
   useEffect(() => {
     if (!isOpen) {
       sdk.window.updateHeight(HEIGHT_DEFAULT);
@@ -37,10 +40,7 @@ const Field = () => {
       HEIGHT_BASE + customItemHeight + theme.colors.length * HEIGHT_ITEM;
 
     sdk.window.updateHeight(calculatedHeight <= 400 ? calculatedHeight : 400);
-  }, [isOpen]);
-
-  // @ts-ignore
-  const theme = sdk.parameters.installation.themes[0];
+  }, [isOpen, sdk, theme]);
 
   return (
     <Form>
