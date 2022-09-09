@@ -38,7 +38,7 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.1.21",
+    "@contentful/app-scripts": "1.1.22",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "12.1.5",
     "@tsconfig/create-react-app": "1.0.2",
@@ -47,7 +47,7 @@
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.3",
     "cross-env": "7.0.3",
-    "typescript": "4.8.2"
+    "typescript": "4.8.3"
   },
   "homepage": "."
 }
