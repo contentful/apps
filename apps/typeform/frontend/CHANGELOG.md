@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.41](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.40...@contentful/typeform-frontend@1.5.41) (2022-09-12)
+
+
+### Bug Fixes
+
+* **deps:** bump jest-environment-jsdom from 29.0.2 to 29.0.3 ([#1717](https://github.com/contentful/apps/issues/1717)) ([b99a1c7](https://github.com/contentful/apps/commit/b99a1c7db7dfed5e58dbc49e613e23c3a17986ac))
+
+
+
+
+
 ## [1.5.40](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.39...@contentful/typeform-frontend@1.5.40) (2022-09-08)
 
 
