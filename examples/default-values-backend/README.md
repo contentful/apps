@@ -9,7 +9,7 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 npx create-contentful-app  --example default-values-backend
 
 # npm
-npm init contentful-app  --example default-values-backend
+npm init contentful-app -- --example default-values-backend
 
 # Yarn
 yarn create contentful-app  --example default-values-backend
