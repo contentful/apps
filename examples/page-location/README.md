@@ -7,13 +7,13 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app  --example page-location
+npx create-contentful-app --example page-location
 
 # npm
 npm init contentful-app -- --example page-location
 
 # Yarn
-yarn create contentful-app  --example page-location
+yarn create contentful-app --example page-location
 ```
 
 ## How to use
