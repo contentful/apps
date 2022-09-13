@@ -6,13 +6,13 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app  --example vite-react
+npx create-contentful-app --example vite-react
 
 # npm
-npm init contentful-app  --example vite-react
+npm init contentful-app --example vite-react
 
 # Yarn
-yarn create contentful-app  --example vite-react
+yarn create contentful-app --example vite-react
 ```
 
 ## Available Scripts
