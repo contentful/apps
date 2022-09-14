@@ -16,6 +16,8 @@ updates:
     prefix-development: "chore"
     include: "scope"
   ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
     - dependency-name: "@contentful/app-sdk"
 
 - package-ecosystem: npm
@@ -25,14 +27,13 @@ updates:
     time: "00:00"
     timezone: UTC
   open-pull-requests-limit: 15
-  update_types:
-    - "semver:patch"
-    - "semver:minor"
   commit-message:
     prefix: "fix"
     prefix-development: "chore"
     include: "scope"
   ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
     - dependency-name: "emotion"
       versions:
         - ">=11"
@@ -44,14 +45,13 @@ updates:
     time: "00:00"
     timezone: UTC
   open-pull-requests-limit: 15
-  update_types:
-    - "semver:patch"
-    - "semver:minor"
   commit-message:
     prefix: "fix"
     prefix-development: "chore"
     include: "scope"
   ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
     - dependency-name: "emotion"
       versions:
         - ">=11"
