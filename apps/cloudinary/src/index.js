@@ -2,6 +2,7 @@ import pick from 'lodash/pick';
 import { Cloudinary as cloudinaryCore } from 'cloudinary-core';
 
 import { setup } from '@contentful/dam-app-base';
+import { loadScript } from './utils';
 
 import logo from './logo.svg';
 
@@ -70,7 +71,9 @@ function makeThumbnail(resource, config) {
   return [url, alt];
 }
 
-function renderDialog(sdk) {
+async function renderDialog(sdk) {
+  await loadScript('https://media-library.cloudinary.com/global/all.js');
+
   const { cloudinary } = window;
   const config = sdk.parameters.invocation;
 
