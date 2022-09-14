@@ -8,6 +8,7 @@
     "react-scripts": "4.0.3"
   },
   "dependencies": {
+    "@contentful/app-sdk": "4.10.0",
     "@contentful/dam-app-base": "^2.0.24",
     "cloudinary-core": "2.8.0",
     "core-js": "3.1.4",
