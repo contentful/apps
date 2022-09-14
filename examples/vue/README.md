@@ -8,13 +8,13 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app  --example vue
+npx create-contentful-app --example vue
 
 # npm
-npm init contentful-app  --example vue
+npm init contentful-app -- --example vue
 
 # Yarn
-yarn create contentful-app  --example vue
+yarn create contentful-app --example vue
 ```
 
 ## Type Support for `.vue` Imports in TS

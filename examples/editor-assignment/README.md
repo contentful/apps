@@ -8,13 +8,13 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app  --example editor-assignment
+npx create-contentful-app --example editor-assignment
 
 # npm
-npm init contentful-app  --example editor-assignment
+npm init contentful-app -- --example editor-assignment
 
 # Yarn
-yarn create contentful-app  --example editor-assignment
+yarn create contentful-app --example editor-assignment
 ```
 
 

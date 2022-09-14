@@ -6,13 +6,13 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app  --example default-values-backend
+npx create-contentful-app --example default-values-backend
 
 # npm
 npm init contentful-app -- --example default-values-backend
 
 # Yarn
-yarn create contentful-app  --example default-values-backend
+yarn create contentful-app --example default-values-backend
 ```
 
 A demo App that will prefill certain values when an entry is created.

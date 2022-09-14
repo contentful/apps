@@ -6,13 +6,13 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app  --example nextjs
+npx create-contentful-app --example nextjs
 
 # npm
-npm init contentful-app  --example nextjs
+npm init contentful-app -- --example nextjs
 
 # Yarn
-yarn create contentful-app  --example nextjs
+yarn create contentful-app --example nextjs
 ```
 
 ## Config Location
