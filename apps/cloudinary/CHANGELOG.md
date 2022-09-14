@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.64](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.63...@contentful/cloudinary-assets@1.5.64) (2022-09-14)
+
+
+### Bug Fixes
+
+* **cloudinary:** temporarily downgrade App SDK ([#1739](https://github.com/contentful/apps/issues/1739)) ([6e200f8](https://github.com/contentful/apps/commit/6e200f80033e54afdbf30c5cc916e1b5c11cde00))
+
+
+
+
+
 ## [1.5.63](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.62...@contentful/cloudinary-assets@1.5.63) (2022-09-09)
 
 **Note:** Version bump only for package @contentful/cloudinary-assets
