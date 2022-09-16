@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.6.0](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.64...@contentful/cloudinary-assets@1.6.0) (2022-09-16)
+
+
+### Features
+
+* **cloudinary:** only fetch media library when required ([#1738](https://github.com/contentful/apps/issues/1738)) ([2fea403](https://github.com/contentful/apps/commit/2fea403a2475622027d36754112c2b54f89f3243))
+
+
+
+
+
 ## [1.5.64](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.63...@contentful/cloudinary-assets@1.5.64) (2022-09-14)
 
 
