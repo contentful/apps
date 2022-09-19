@@ -1,5 +1,3 @@
-/** @jsxImportSource @emotion/react */
-
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import {
   Button,
@@ -13,9 +11,27 @@ import {
 import { ExternalLinkIcon, PlusIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { css, Global } from '@emotion/react';
+import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
 import SwatchEditor from '../components/SwatchEditor';
+
+const styles = {
+  body: css({
+    backgroundColor: tokens.gray100,
+    minHeight: '100vh',
+  }),
+  overflowHidden: css({
+    overflow: 'hidden',
+  }),
+  appearanceSettingsImage: css({
+    marginRight: '-64px',
+    paddingLeft: '16px',
+    height: '195px',
+  }),
+  cardColumn: css({
+    width: '600px',
+  }),
+};
 
 export interface AppInstallationParameters {
   themes: Theme[];
@@ -124,23 +140,13 @@ const ConfigScreen = () => {
       flexDirection="column"
       paddingTop="spacing2Xl"
       paddingBottom="spacing2Xl"
-      style={{ backgroundColor: tokens.gray100, minHeight: '100%' }}
+      className={styles.body}
     >
-      <Global
-        styles={css`
-          body,
-          html,
-          #root {
-            height: 100%;
-          }
-        `}
-      />
-
       <Flex
         flexDirection="column"
         gap="spacingM"
         paddingBottom="spacingL"
-        style={{ width: 600 }}
+        className={styles.cardColumn}
       >
         <Card>
           <div>
@@ -170,11 +176,7 @@ const ConfigScreen = () => {
           </div>
         </Card>
         {isInstalled ? (
-          <Card
-            css={css`
-              overflow: hidden;
-            `}
-          >
+          <Card className={styles.overflowHidden}>
             <Flex flexDirection="row" alignItems="center">
               <Flex
                 gap="spacingXs"
@@ -201,21 +203,12 @@ const ConfigScreen = () => {
                   Edit content model
                 </TextLink>
               </Flex>
-              <Flex
-                flexShrink={0}
-                css={css`
-                  margin-right: -64px;
-                  padding-left: 16px;
-                `}
-              >
-                <img
-                  src="./appearance-settings.png"
-                  alt="Appearance settings"
-                  css={css`
-                    height: 195px;
-                  `}
-                />
-              </Flex>
+
+              <img
+                src="./appearance-settings.png"
+                alt="Appearance settings"
+                className={styles.appearanceSettingsImage}
+              />
             </Flex>
           </Card>
         ) : (

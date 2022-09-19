@@ -1,12 +1,36 @@
-/** @jsxImportSource @emotion/react */
-
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { Button, Flex, Form, Menu } from '@contentful/f36-components';
 import { ChevronDownIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
-import { css } from '@emotion/react';
+import { css } from 'emotion';
 import { useEffect, useRef, useState } from 'react';
+
+const styles = {
+  displayNone: css({
+    display: 'none',
+  }),
+  colorBox: (color: string) =>
+    css({
+      display: 'inline-block',
+      width: '16px',
+      height: '16px',
+      boxShadow: 'inset 0 0 0 1px rgba(0, 0, 0, 0.1)',
+      backgroundColor: color,
+      borderRadius: '4px',
+    }),
+  hexValue: css({
+    color: tokens.gray500,
+    fontVariantNumeric: 'tabular-nums',
+    width: '70px',
+    display: 'inline-block',
+    textAlign: 'left',
+  }),
+  menuList: css({
+    width: 'calc(100% - 2px)', // -2px to keep borders visible
+    left: 0,
+  }),
+};
 
 // Dropdown + margin top + box shadow
 const HEIGHT_DEFAULT = 41;
@@ -51,66 +75,28 @@ const Field = () => {
         <Menu.Trigger>
           <Button endIcon={<ChevronDownIcon />} isFullWidth>
             <Flex alignItems="center" gap="spacingXs">
-              <span
-                css={css`
-                  width: 16px;
-                  height: 16px;
-                  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
-                  background-color: ${value?.value || '#ffffff'};
-                  display: flex;
-                  border-radius: 4px;
-                `}
-              />
-              <span
-                css={css`
-                  display: flex;
-                  gap: ${tokens.spacing2Xs};
-                `}
-              >
-                {value?.name || 'Invalid'}{' '}
-                <span
-                  css={css`
-                    color: ${tokens.gray500};
-                    font-variant-numeric: tabular-nums;
-                    width: 70px;
-                    display: inline-block;
-                    text-align: left;
-                  `}
-                >
-                  {value?.value || ''}
-                </span>
-              </span>
+              <span className={styles.colorBox(value?.value ?? '#ffffff')} />
+              <Flex gap="spacing2Xs">
+                {value?.name ?? 'Invalid'}{' '}
+                <span className={styles.hexValue}>{value?.value ?? ''}</span>
+              </Flex>
             </Flex>
           </Button>
         </Menu.Trigger>
-        <Menu.List
-          css={css`
-            width: calc(100% - 2px);
-            left: 0;
-          `}
-        >
+        <Menu.List className={styles.menuList}>
           {theme.colors.map((color: Color) => (
             <Menu.Item key={color.id} onClick={() => setValue(color)}>
               <Flex alignItems="center" gap="spacingXs">
-                <span
-                  css={css`
-                    width: 16px;
-                    height: 16px;
-                    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
-                    background-color: ${color.value};
-                    display: flex;
-                    border-radius: 4px;
-                  `}
-                />
+                <span className={styles.colorBox(color.value)} />
                 {color.name}
               </Flex>
             </Menu.Item>
           ))}
-          {sdk.parameters.instance.withCustomValue ? (
+          {sdk.parameters.instance.withCustomValue && (
             <Menu.Item onClick={() => customColorPicker?.current?.click()}>
               Other...
             </Menu.Item>
-          ) : null}
+          )}
         </Menu.List>
       </Menu>
       <input
@@ -123,9 +109,7 @@ const Field = () => {
         }
         type="color"
         id="customColor"
-        css={css`
-          display: none;
-        `}
+        className={styles.displayNone}
         ref={customColorPicker}
       ></input>
     </Form>

@@ -7,6 +7,16 @@ import {
 } from '@contentful/f36-components';
 import { DeleteIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
+
+const styles = {
+  displayNone: css({
+    display: 'none',
+  }),
+  nameInput: css({
+    width: '150px',
+  }),
+};
 
 interface SwatchEditorProps {
   swatch: Color;
@@ -23,7 +33,10 @@ export default function SwatchEditor({
     <div>
       <FormControl marginBottom="spacingM">
         <Flex gap={tokens.spacingXs} alignItems="center">
-          <FormControl.Label htmlFor="SwatchEditor" style={{ display: 'none' }}>
+          <FormControl.Label
+            htmlFor="SwatchEditor"
+            className={styles.displayNone}
+          >
             Color
           </FormControl.Label>
           <input
@@ -39,7 +52,7 @@ export default function SwatchEditor({
             value={swatch.name}
             onChange={(e) => onChange({ ...swatch, name: e.target.value })}
             isRequired
-            style={{ width: 150 }}
+            className={styles.nameInput}
           />
           <IconButton
             variant="transparent"
