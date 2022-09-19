@@ -25,6 +25,7 @@ import {
   Heading,
   Paragraph,
   Subheading,
+  Box,
 } from '@contentful/f36-components';
 
 interface ConfigProps {
@@ -227,120 +228,118 @@ class Config extends React.Component<ConfigProps, IState> {
       <React.Fragment>
         <div className="config-background" />
         <div className="config-body">
-          <React.Fragment>
-            <Heading>About Mux</Heading>
-            <Paragraph>
-              This app connects to Mux and allows you to upload videos to your content in
-              Contentful. After entering your API Credentials then choose which JSON fields in your
-              content model you would like to configure for Mux Video. For those configured fields
-              you'll get a video uploader in the Contentful UI. Your videos will be transcoded,
-              stored and delivered by{' '}
-              <TextLink href="https://mux.com" rel="noopener noreferrer" target="_blank">
-                Mux
-              </TextLink>
-              .
-            </Paragraph>
-          </React.Fragment>
-          <hr className="config-splitter" />
-          <React.Fragment>
-            <Form>
-              <Heading>API credentials</Heading>
-              <Paragraph>
-                These can be obtained by clicking 'Generate new token' in the{' '}
-                <TextLink
-                  href="https://dashboard.mux.com/settings/access-tokens"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  settings on your dashboard
-                </TextLink>
-                . Note that you must be an admin in your Mux account.
-              </Paragraph>
-              <FormControl id="mux-access-token" isRequired>
-                <FormControl.Label>Mux access token</FormControl.Label>
-                <TextInput
-                  name="mux-access-token"
-                  value={muxAccessTokenId || ''}
-                  onChange={(e) =>
-                    this.setState({
-                      parameters: {
-                        ...this.state.parameters,
-                        muxAccessTokenId: (e.target as HTMLTextAreaElement).value,
-                      },
-                    })
-                  }
-                />
-              </FormControl>
-              <FormControl id="mux-token-secret" isRequired>
-                <FormControl.Label>Mux token secret</FormControl.Label>
-                <TextInput
-                  name="mux-token-secret"
-                  value={muxAccessTokenSecret || ''}
-                  onChange={(e) =>
-                    this.setState({
-                      parameters: {
-                        ...this.state.parameters,
-                        muxAccessTokenSecret: (e.target as HTMLTextAreaElement).value,
-                      },
-                    })
-                  }
-                  type="password"
-                />
-              </FormControl>
-              <hr className="config-splitter" />
-              <Heading>Assign to fields</Heading>
-              <Paragraph>
-                This app is meant to be used with <strong>JSON object</strong> fields. Select which
-                JSON fields you'd like to enable for this app.
-              </Paragraph>
-              {Object.keys(compatibleFields || {})
-                .filter((contentTypeId) => compatibleFields[contentTypeId].length)
-                .map((contentTypeId) => {
-                  const contentType = contentTypes.find(({ sys }) => sys.id === contentTypeId);
-                  return (
-                    <div key={contentTypeId}>
-                      <Subheading>{contentType && contentType.name}</Subheading>
-                      {compatibleFields[contentTypeId].length &&
-                        compatibleFields[contentTypeId].map(({ id: fieldId, name: fieldName }) => {
-                          return (
-                            <Checkbox
-                              id={fieldId}
-                              helpText={`Field ID: ${fieldId}`}
-                              name={`${contentTypeId}-${fieldName}`}
-                              value={fieldId}
-                              isChecked={this.isChecked(contentTypeId, fieldId)}
-                              onChange={(e) =>
-                                this.assignToField(
-                                  contentTypeId,
-                                  fieldId,
-                                  (e.target as HTMLInputElement).checked
-                                )
-                              }
-                            >
-                              {fieldName}
-                            </Checkbox>
-                          );
-                        })}
-                    </div>
-                  );
-                })}
-            </Form>
-          </React.Fragment>
+          <Heading>About Mux</Heading>
+          <Paragraph>
+            This app connects to Mux and allows you to upload videos to your content in Contentful.
+            After entering your API Credentials then choose which JSON fields in your content model
+            you would like to configure for Mux Video. For those configured fields you'll get a
+            video uploader in the Contentful UI. Your videos will be transcoded, stored and
+            delivered by{' '}
+            <TextLink href="https://mux.com" rel="noopener noreferrer" target="_blank">
+              Mux
+            </TextLink>
+            .
+          </Paragraph>
           <hr className="config-splitter" />
           <Form>
-            <Heading marginBottom="none">Advanced: Signed URLs</Heading>
-            <Note variant="warning" title="This is an advanced feature">
-              If you want to support signed urls you must read and understand{' '}
+            <Heading>API credentials</Heading>
+            <Paragraph>
+              These can be obtained by clicking 'Generate new token' in the{' '}
               <TextLink
-                href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
+                href="https://dashboard.mux.com/settings/access-tokens"
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                this guide
+                settings on your dashboard
               </TextLink>
-              . To use signed URLs in your application you will have to generate valid JSON web
-              tokens (JWT) on your server.
-            </Note>
+              . Note that you must be an admin in your Mux account.
+            </Paragraph>
+            <FormControl id="mux-access-token" isRequired>
+              <FormControl.Label>Mux access token</FormControl.Label>
+              <TextInput
+                name="mux-access-token"
+                value={muxAccessTokenId || ''}
+                onChange={(e) =>
+                  this.setState({
+                    parameters: {
+                      ...this.state.parameters,
+                      muxAccessTokenId: (e.target as HTMLTextAreaElement).value,
+                    },
+                  })
+                }
+              />
+            </FormControl>
+            <FormControl id="mux-token-secret" isRequired>
+              <FormControl.Label>Mux token secret</FormControl.Label>
+              <TextInput
+                name="mux-token-secret"
+                value={muxAccessTokenSecret || ''}
+                onChange={(e) =>
+                  this.setState({
+                    parameters: {
+                      ...this.state.parameters,
+                      muxAccessTokenSecret: (e.target as HTMLTextAreaElement).value,
+                    },
+                  })
+                }
+                type="password"
+              />
+            </FormControl>
+            <hr className="config-splitter" />
+            <Heading>Assign to fields</Heading>
+            <Paragraph>
+              This app is meant to be used with <strong>JSON object</strong> fields. Select which
+              JSON fields you'd like to enable for this app.
+            </Paragraph>
+            {Object.keys(compatibleFields || {})
+              .filter((contentTypeId) => compatibleFields[contentTypeId].length)
+              .map((contentTypeId) => {
+                const contentType = contentTypes.find(({ sys }) => sys.id === contentTypeId);
+                return (
+                  <div key={contentTypeId}>
+                    <Subheading>{contentType && contentType.name}</Subheading>
+                    {compatibleFields[contentTypeId].length &&
+                      compatibleFields[contentTypeId].map(({ id: fieldId, name: fieldName }) => {
+                        return (
+                          <Checkbox
+                            id={fieldId}
+                            helpText={`Field ID: ${fieldId}`}
+                            name={`${contentTypeId}-${fieldName}`}
+                            value={fieldId}
+                            isChecked={this.isChecked(contentTypeId, fieldId)}
+                            onChange={(e) =>
+                              this.assignToField(
+                                contentTypeId,
+                                fieldId,
+                                (e.target as HTMLInputElement).checked
+                              )
+                            }
+                          >
+                            {fieldName}
+                          </Checkbox>
+                        );
+                      })}
+                  </div>
+                );
+              })}
+          </Form>
+          <hr className="config-splitter" />
+          <Form>
+            <Heading marginBottom="none">Advanced: Signed URLs</Heading>
+            <Box marginTop="spacingM" paddingBottom="spacingM">
+              <Note variant="warning" title="This is an advanced feature">
+                If you want to support signed urls you must read and understand{' '}
+                <TextLink
+                  href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  this guide
+                </TextLink>
+                . To use signed URLs in your application you will have to generate valid JSON web
+                tokens (JWT) on your server.
+              </Note>
+            </Box>
             <Checkbox
               id="mux-enable-signed_urls"
               helpText=""
