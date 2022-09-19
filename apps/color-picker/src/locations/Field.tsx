@@ -4,7 +4,7 @@ import { ChevronDownIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Color, Theme } from '../types';
 
 const styles = {
@@ -38,14 +38,16 @@ const HEIGHT_DEFAULT = 41;
 const HEIGHT_BASE = 52 + 4 + 14;
 const HEIGHT_ITEM = 36;
 
+type FieldValue = Color | string;
+
 const Field = () => {
   const sdk = useSDK<FieldExtensionSDK>();
   const [isOpen, setIsOpen] = useState(false);
-  const [value, setValue] = useFieldValue<Color>(
-    sdk.field.id,
-    sdk.field.locale
-  );
+  const [value, setValue] = useFieldValue<FieldValue>();
   const customColorPicker = useRef<HTMLInputElement>(null);
+
+  const storeHexValue = sdk.field.type === 'Symbol';
+  const allowCustomValue = sdk.parameters.instance.withCustomValue;
 
   // @ts-ignore
   const theme: Theme = sdk.parameters.installation.themes[0];
@@ -66,6 +68,22 @@ const Field = () => {
     sdk.window.updateHeight(calculatedHeight <= 400 ? calculatedHeight : 400);
   }, [isOpen, sdk, theme]);
 
+  const name = useMemo(() => {
+    if (storeHexValue) {
+      const color = theme.colors.find((c) => c.value === (value as string));
+      if (color) {
+        return color.name;
+      }
+      if (allowCustomValue) {
+        return 'Custom';
+      } else {
+        return 'Invalid';
+      }
+    } else {
+      return (value as Color).name ?? 'Invalid';
+    }
+  }, [allowCustomValue, storeHexValue, theme.colors, value]);
+
   return (
     <Form>
       <Menu
@@ -76,24 +94,34 @@ const Field = () => {
         <Menu.Trigger>
           <Button endIcon={<ChevronDownIcon />} isFullWidth>
             <Flex alignItems="center" gap="spacingXs">
-              <span className={styles.colorBox(value?.value ?? '#ffffff')} />
+              <span
+                className={styles.colorBox(
+                  (typeof value === 'string' ? value : value?.value) ??
+                    '#ffffff'
+                )}
+              />
               <Flex gap="spacing2Xs">
-                {value?.name ?? 'Invalid'}{' '}
-                <span className={styles.hexValue}>{value?.value ?? ''}</span>
+                {name}{' '}
+                <span className={styles.hexValue}>
+                  {(typeof value === 'string' ? value : value?.value) ?? ''}
+                </span>
               </Flex>
             </Flex>
           </Button>
         </Menu.Trigger>
         <Menu.List className={styles.menuList}>
           {theme.colors.map((color: Color) => (
-            <Menu.Item key={color.id} onClick={() => setValue(color)}>
+            <Menu.Item
+              key={color.id}
+              onClick={() => setValue(storeHexValue ? color.value : color)}
+            >
               <Flex alignItems="center" gap="spacingXs">
                 <span className={styles.colorBox(color.value)} />
                 {color.name}
               </Flex>
             </Menu.Item>
           ))}
-          {sdk.parameters.instance.withCustomValue && (
+          {allowCustomValue && (
             <Menu.Item onClick={() => customColorPicker?.current?.click()}>
               Other...
             </Menu.Item>
@@ -112,7 +140,7 @@ const Field = () => {
         id="customColor"
         className={styles.displayNone}
         ref={customColorPicker}
-      ></input>
+      />
     </Form>
   );
 };
