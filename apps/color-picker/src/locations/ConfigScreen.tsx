@@ -81,7 +81,7 @@ const ConfigScreen = () => {
     const index = parameters.themes[0].colors.findIndex(
       (i) => i.id === swatch.id
     );
-    let newTheme = parameters.themes[0];
+    const newTheme = parameters.themes[0];
     newTheme.colors[index] = swatch;
 
     setParameters({
