@@ -1,13 +1,13 @@
-import React from 'react';
 import {
-  FormControl,
-  TextInput,
-  IconButton,
   Flex,
+  FormControl,
+  IconButton,
+  TextInput,
 } from '@contentful/f36-components';
 import { DeleteIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
+import { Color } from '../types';
 
 const styles = {
   displayNone: css({

@@ -5,6 +5,7 @@ import tokens from '@contentful/f36-tokens';
 import { useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { useEffect, useRef, useState } from 'react';
+import { Color, Theme } from '../types';
 
 const styles = {
   displayNone: css({
@@ -47,7 +48,7 @@ const Field = () => {
   const customColorPicker = useRef<HTMLInputElement>(null);
 
   // @ts-ignore
-  const theme = sdk.parameters.installation.themes[0];
+  const theme: Theme = sdk.parameters.installation.themes[0];
 
   useEffect(() => {
     if (!isOpen) {

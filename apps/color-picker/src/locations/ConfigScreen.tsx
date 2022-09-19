@@ -14,6 +14,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
 import SwatchEditor from '../components/SwatchEditor';
+import { AppInstallationParameters, Color } from '../types';
 
 const styles = {
   body: css({
@@ -32,10 +33,6 @@ const styles = {
     width: '600px',
   }),
 };
-
-export interface AppInstallationParameters {
-  themes: Theme[];
-}
 
 const ConfigScreen = () => {
   const [isInstalled, setIsInstalled] = useState(false);
