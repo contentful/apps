@@ -7,7 +7,6 @@ import tokens from '@contentful/f36-tokens';
 import { useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { css } from '@emotion/react';
 import { useEffect, useRef, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 // Dropdown + margin top + box shadow
 const HEIGHT_DEFAULT = 41;
@@ -117,7 +116,7 @@ const Field = () => {
       <input
         onChange={(e) =>
           setValue({
-            id: uuidv4(),
+            id: window.crypto.randomUUID(),
             name: 'Custom',
             value: e.target.value,
           })

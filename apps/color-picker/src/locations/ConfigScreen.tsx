@@ -15,7 +15,6 @@ import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { css, Global } from '@emotion/react';
 import { useCallback, useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import SwatchEditor from '../components/SwatchEditor';
 
 export interface AppInstallationParameters {
@@ -43,7 +42,7 @@ const ConfigScreen = () => {
           ...parameters.themes[0],
           colors: [
             ...parameters.themes[0].colors,
-            { id: uuidv4(), name: '', value: '#0088cc' },
+            { id: window.crypto.randomUUID(), name: '', value: '#0088cc' },
           ],
         },
       ],

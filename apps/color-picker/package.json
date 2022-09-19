@@ -9,7 +9,6 @@
     "@contentful/react-apps-toolkit": "1.2.6",
     "@emotion/react": "11.10.4",
     "@tsconfig/create-react-app": "1.0.2",
-    "@types/uuid": "8.3.4",
     "contentful-management": "8.2.2",
     "emotion": "10.0.27",
     "react": "17.0.2",
@@ -21,7 +20,6 @@
     "build": "react-scripts build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 4Vy3oAINwRgnxakoTz06tG --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
-  
   },
   "eslintConfig": {
     "extends": "react-app"
