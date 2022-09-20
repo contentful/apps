@@ -123,7 +123,7 @@ const Field = () => {
           ))}
           {allowCustomValue && (
             <Menu.Item onClick={() => customColorPicker?.current?.click()}>
-              Other...
+              Custom...
             </Menu.Item>
           )}
         </Menu.List>
