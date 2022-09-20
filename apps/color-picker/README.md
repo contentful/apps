@@ -6,11 +6,11 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 
 The Color Picker app allows you to select colors within Contentful fields.
 
-![Preview](https://images.ctfassets.net/mf6b5ontip4l/fvO5tcYDsD6Xh45Okj4IV/6809be7c6d7e81db62b5ca2bb176b028/Screenshot_2022-09-06_at_19.01.43.png?fm=jpg)
+![Preview](./docs/screenshot.png)
 
 ## JSON response
 
-Here's an example of the field response:
+When assigned to a JSON field, the app stored the value in the following format:
 
 ```json
 {
