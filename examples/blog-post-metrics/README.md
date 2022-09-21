@@ -9,7 +9,7 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 npx create-contentful-app --example blog-post-metrics
 
 # npm
-npm init contentful-app --example blog-post-metrics
+npm init contentful-app -- --example blog-post-metrics
 
 # Yarn
 yarn create contentful-app --example blog-post-metrics

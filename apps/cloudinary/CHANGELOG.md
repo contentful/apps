@@ -3,6 +3,52 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.1](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.6.0...@contentful/cloudinary-assets@1.6.1) (2022-09-21)
+
+**Note:** Version bump only for package @contentful/cloudinary-assets
+
+
+
+
+
+# [1.6.0](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.64...@contentful/cloudinary-assets@1.6.0) (2022-09-16)
+
+
+### Features
+
+* **cloudinary:** only fetch media library when required ([#1738](https://github.com/contentful/apps/issues/1738)) ([2fea403](https://github.com/contentful/apps/commit/2fea403a2475622027d36754112c2b54f89f3243))
+
+
+
+
+
+## [1.5.64](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.63...@contentful/cloudinary-assets@1.5.64) (2022-09-14)
+
+
+### Bug Fixes
+
+* **cloudinary:** temporarily downgrade App SDK ([#1739](https://github.com/contentful/apps/issues/1739)) ([6e200f8](https://github.com/contentful/apps/commit/6e200f80033e54afdbf30c5cc916e1b5c11cde00))
+
+
+
+
+
+## [1.5.63](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.62...@contentful/cloudinary-assets@1.5.63) (2022-09-09)
+
+**Note:** Version bump only for package @contentful/cloudinary-assets
+
+
+
+
+
+## [1.5.62](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.61...@contentful/cloudinary-assets@1.5.62) (2022-09-06)
+
+**Note:** Version bump only for package @contentful/cloudinary-assets
+
+
+
+
+
 ## [1.5.61](https://github.com/contentful/apps/compare/@contentful/cloudinary-assets@1.5.60...@contentful/cloudinary-assets@1.5.61) (2022-09-01)
 
 **Note:** Version bump only for package @contentful/cloudinary-assets

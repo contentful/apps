@@ -11,10 +11,10 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 npx create-contentful-app --example home-location
 
 # npm
-npm init contentful-app  --example home-location
+npm init contentful-app -- --example home-location
 
 # Yarn
-yarn create contentful-app  --example home-location
+yarn create contentful-app --example home-location
 ```
 
 ## Available Scripts

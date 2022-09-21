@@ -10,13 +10,13 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app  --example custom-validation
+npx create-contentful-app --example custom-validation
 
 # npm
-npm init contentful-app  --example custom-validation
+npm init contentful-app -- --example custom-validation
 
 # Yarn
-yarn create contentful-app  --example custom-validation
+yarn create contentful-app --example custom-validation
 ```
 
 ## Problem description

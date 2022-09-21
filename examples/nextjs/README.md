@@ -6,19 +6,14 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app  --example nextjs
+npx create-contentful-app --example nextjs
 
 # npm
-npm init contentful-app  --example nextjs
+npm init contentful-app -- --example nextjs
 
 # Yarn
-yarn create contentful-app  --example nextjs
+yarn create contentful-app --example nextjs
 ```
-
-## Config Location
-
-Due to a bug in Next.js, the config location doesn't load in development mode. The bug has been reported in Next.js' GitHub repository: https://github.com/vercel/next.js/issues/18028.
-The config location works when creating a production build.
 
 ## Available Scripts
 

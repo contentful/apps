@@ -3,6 +3,73 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.43](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.42...@contentful/typeform-frontend@1.5.43) (2022-09-20)
+
+
+### Bug Fixes
+
+* **deps:** bump @types/lodash from 4.14.184 to 4.14.185 ([#1758](https://github.com/contentful/apps/issues/1758)) ([206cb63](https://github.com/contentful/apps/commit/206cb63039f0ee8adbc7cf925c029431fae4e9e1))
+* **deps:** bump core-js from 3.25.1 to 3.25.2 ([#1759](https://github.com/contentful/apps/issues/1759)) ([3ce3ace](https://github.com/contentful/apps/commit/3ce3ace1eb0132a0e4ba70b619daa59f50bd2688))
+
+
+
+
+
+## [1.5.42](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.41...@contentful/typeform-frontend@1.5.42) (2022-09-14)
+
+
+### Bug Fixes
+
+* **deps:** bump @typeform/embed from 1.37.0 to 1.37.1 ([#1732](https://github.com/contentful/apps/issues/1732)) ([7906002](https://github.com/contentful/apps/commit/7906002f144fec6c7c569e8fd2c7ae2a0b9a6c6b))
+
+
+
+
+
+## [1.5.41](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.40...@contentful/typeform-frontend@1.5.41) (2022-09-12)
+
+
+### Bug Fixes
+
+* **deps:** bump jest-environment-jsdom from 29.0.2 to 29.0.3 ([#1717](https://github.com/contentful/apps/issues/1717)) ([b99a1c7](https://github.com/contentful/apps/commit/b99a1c7db7dfed5e58dbc49e613e23c3a17986ac))
+
+
+
+
+
+## [1.5.40](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.39...@contentful/typeform-frontend@1.5.40) (2022-09-08)
+
+
+### Bug Fixes
+
+* clear token when workspace fetching returns 401 or 403 ([#1690](https://github.com/contentful/apps/issues/1690)) ([8521af5](https://github.com/contentful/apps/commit/8521af500e7e97b669144f76ca173227c2b3dbd1))
+
+
+
+
+
+## [1.5.39](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.38...@contentful/typeform-frontend@1.5.39) (2022-09-08)
+
+
+### Bug Fixes
+
+* **deps:** bump core-js from 3.25.0 to 3.25.1 ([#1703](https://github.com/contentful/apps/issues/1703)) ([8890f5f](https://github.com/contentful/apps/commit/8890f5ffacd7f8585ed5339f2f984134aadba5db))
+
+
+
+
+
+## [1.5.38](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.37...@contentful/typeform-frontend@1.5.38) (2022-09-06)
+
+
+### Bug Fixes
+
+* **deps:** bump jest-environment-jsdom from 29.0.1 to 29.0.2 ([#1701](https://github.com/contentful/apps/issues/1701)) ([75830e9](https://github.com/contentful/apps/commit/75830e915d5d0d7b7d45a36de55877f9b96daacd))
+
+
+
+
+
 ## [1.5.37](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.36...@contentful/typeform-frontend@1.5.37) (2022-09-01)
 
 **Note:** Version bump only for package @contentful/typeform-frontend
