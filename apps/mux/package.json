@@ -3,53 +3,57 @@
   "version": "1.9.20",
   "private": true,
   "devDependencies": {
-    "@contentful/app-scripts": "0.8.11",
-    "@types/enzyme": "3.9.1",
-    "@types/enzyme-adapter-react-16": "1.0.6",
-    "@types/jest": "24.0.15",
-    "@types/react": "16.8.22",
-    "@types/react-dom": "16.8.4",
-    "@types/webpack-env": "1.13.9",
+    "@contentful/app-scripts": "^1.1.20",
+    "@testing-library/jest-dom": "5.16.5",
+    "@testing-library/react": "12.1.5",
+    "@testing-library/user-event": "14.4.3",
+    "@types/jest": "28.1.7",
+    "@types/node": "18.7.14",
+    "@types/react": "17.0.39",
+    "@types/react-dom": "17.0.11",
+    "@types/webpack-env": "1.18.0",
+    "@types/jsonwebtoken": "8.5.9",
+    "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "@typescript-eslint/parser": "^5.36.1",
     "cross-env": "7.0.3",
-    "enzyme": "3.11.0",
-    "enzyme-adapter-react-16": "1.15.3",
-    "isomorphic-fetch": "2.2.1",
-    "jest-environment-enzyme": "7.1.2",
-    "jest-enzyme": "7.1.2",
-    "typescript": "3.5.2"
+    "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@contentful/app-sdk": "4.9.0",
-    "@contentful/dam-app-base": "^2.0.25",
-    "@contentful/forma-36-fcss": "0.0.35",
-    "@contentful/forma-36-react-components": "3.79.2",
-    "@contentful/forma-36-tokens": "0.5.3",
-    "@mux/mux-player-react": "^0.1.0-beta.23",
-    "@mux/upchunk": "2.3.1",
-    "@types/jsonwebtoken": "8.5.0",
-    "core-js": "3.0.1",
+    "@contentful/app-sdk": "4.12.0",
+    "@contentful/dam-app-base": "2.0.25",
+    "@contentful/f36-components": "4.17.0",
+    "@contentful/react-apps-toolkit": "1.2.6",
+    "@mux/mux-player-react": "0.1.0-beta.28",
+    "@mux/mux-uploader-react": "0.1.0-beta.8",
     "jsonwebtoken": "8.5.1",
-    "prop-types": "15.7.2",
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-error-overlay": "6.0.9",
     "react-scripts": "4.0.3"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "tsc": "tsc -p ./ --noEmit",
-    "test": "TZ=UTC react-scripts test",
-    "test:ci": "react-scripts test",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5l4WmuXdhJGcADHfCm1v4k --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
   "eslintConfig": {
     "extends": "react-app"
   },
-  "browserslist": [
-    "last 5 Chrome version",
-    "> 1%",
-    "not ie <= 11"
-  ],
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "homepage": "."
 }
