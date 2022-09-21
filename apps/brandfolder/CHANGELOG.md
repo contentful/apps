@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.63](https://github.com/contentful/apps/compare/@contentful/brandfolder-assets@1.9.62...@contentful/brandfolder-assets@1.9.63) (2022-09-21)
+
+**Note:** Version bump only for package @contentful/brandfolder-assets
+
+
+
+
+
 ## [1.9.62](https://github.com/contentful/apps/compare/@contentful/brandfolder-assets@1.9.61...@contentful/brandfolder-assets@1.9.62) (2022-09-09)
 
 **Note:** Version bump only for package @contentful/brandfolder-assets
