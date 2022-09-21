@@ -54,9 +54,7 @@ You only need entries with a `title` field. This is an example content type setu
 
 ### App Setup
 
-For a small demo, you can just install the publicly available app [here](https://app.contentful.com/deeplink?link=apps&id=Dcc7QJVP4zGCTcPwGoeCx).
-
-Else, you would need to have an App Definition with App Config location enabled
+To run an app you would need to have an App Definition with App Config location enabled
 
 ![App Definition - Location](./docs/app-config-1.png)
 
