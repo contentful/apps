@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.10.0](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.9.20...@contentful/mux-contentful-uploader@1.10.0) (2022-09-21)
+
+
+### Features
+
+* Adding captions, drag and drop upload, url and Mux ID inputs, a… ([#1684](https://github.com/contentful/apps/issues/1684)) ([9ebf026](https://github.com/contentful/apps/commit/9ebf026798f76080cb042801fe8ae575b99bf157))
+
+
+
+
+
 ## [1.9.20](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.9.19...@contentful/mux-contentful-uploader@1.9.20) (2022-09-21)
 
 **Note:** Version bump only for package @contentful/mux-contentful-uploader
