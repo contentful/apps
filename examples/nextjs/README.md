@@ -15,11 +15,6 @@ npm init contentful-app -- --example nextjs
 yarn create contentful-app --example nextjs
 ```
 
-## Config Location
-
-Due to a bug in Next.js, the config location doesn't load in development mode. The bug has been reported in Next.js' GitHub repository: https://github.com/vercel/next.js/issues/18028.
-The config location works when creating a production build.
-
 ## Available Scripts
 
 In the project directory, you can run:
