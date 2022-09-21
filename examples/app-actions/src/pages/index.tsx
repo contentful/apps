@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 
 import { Flex } from '@contentful/f36-core';
 import { Paragraph, Heading } from '@contentful/f36-typography';
-import { FormControl, Select, TextInput } from '@contentful/f36-forms';
+import { FormControl, Select } from '@contentful/f36-forms';
 import tokens from '@contentful/f36-tokens';
 
 import { AppExtensionSDK } from '@contentful/app-sdk';
@@ -43,6 +43,10 @@ interface AppInstallationParameters {
   targetLanguage: string;
 }
 
+const defaultParams = {
+  targetLanguage: 'mandalorian',
+};
+
 const Home = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters | null>(null);
   const [sdk, setSDK] = useState<AppExtensionSDK | null>(null);
@@ -81,7 +85,8 @@ const Home = () => {
         return;
       }
 
-      setParameters(await sdk.app.getParameters());
+      const params: AppInstallationParameters | null = await sdk.app.getParameters();
+      setParameters(params || defaultParams);
 
       sdk.app.setReady();
     })();
@@ -124,4 +129,4 @@ const Home = () => {
   );
 };
 
-export default typeof window !== 'undefined' ? Home : null;
+export default Home;
