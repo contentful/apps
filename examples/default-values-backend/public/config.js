@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 
 import { init, locations } from '@contentful/app-sdk';
-import '@contentful/forma-36-react-components/dist/styles.css';
-import '@contentful/forma-36-fcss/dist/styles.css';
-import { Heading, Note, Form, TextField, Option } from '@contentful/forma-36-react-components';
+import { Heading, Note, Form, TextInput } from '@contentful/f36-components';
 
 class Config extends Component {
   constructor(props) {
@@ -25,15 +23,15 @@ class Config extends Component {
     return (
       <Form id="app-config">
         <Heading>Default values App</Heading>
-        <Note noteType="primary" title="About the app">
+        <Note title="About the app">
           Set a default title for an example content type!
         </Note>
-        <TextField
+        <TextInput
           name="default value"
           labelText="Default value"
           value={this.state.parameters.defaultValue}
           onChange={(e) => this.setState({ parameters: { defaultValue: e.target.value } })}
-        ></TextField>
+        ></TextInput>
       </Form>
     );
   }
