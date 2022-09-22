@@ -20,8 +20,6 @@ const parseHeaders = (headers: IncomingHttpHeaders = {}): Record<string, string>
   return result;
 };
 
-const parseBody = (x: unknown) => (typeof x === 'string' ? x : JSON.stringify(x));
-
 interface MakeContentfulContextMiddlewareOptions {
   appDefinitionId: string;
   signingSecret: string;
@@ -42,7 +40,7 @@ export function contentfulContext({
         method: request.method as CanonicalRequest['method'],
         path: request.url,
         headers,
-        body: parseBody(request.body),
+        body: request.body,
       },
       DEFAULT_TTL
     );
