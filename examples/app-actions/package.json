@@ -10,16 +10,18 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "4.12.1",
-    "@contentful/f36-components": "4.8.2",
+    "@contentful/f36-components": "4.12.0",
+    "@contentful/f36-tokens": "4.0.1",
     "@contentful/node-apps-toolkit": "2.0.2",
+    "@contentful/react-apps-toolkit": "1.2.7",
     "@emotion/css": "11.9.0",
     "contentful-management": "10.4.0",
     "emotion": "11.0.0",
     "got": "12.0.4",
     "http-status-codes": "2.2.0",
     "next": "12.3.1",
-    "react": "18.1.0",
-    "react-dom": "18.1.0"
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^4.7.0",

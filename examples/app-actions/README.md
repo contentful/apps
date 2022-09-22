@@ -14,7 +14,7 @@ App Actions utilize existing features of the App Framework, such as being secure
 This example outlines how these pieces work together.
 
 You can find more information 
-[here](https://ctf-doc-app-branch-feat-ext-3188.netlify.app/developers/docs/references/content-management-api/#/reference/app-actions).
+[here](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/app-actions).
 
 # About this Example
 

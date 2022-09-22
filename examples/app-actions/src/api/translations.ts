@@ -1,10 +1,10 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 
-import { runMiddleware, sendError } from '../../lib/utils';
-import { loadConfiguration } from '../../lib/config';
-import { contentfulContext } from '../../lib/contentful-context';
-import { translate } from '../../lib/translate';
+import { runMiddleware, sendError } from '../lib/utils';
+import { loadConfiguration } from '../lib/config';
+import { contentfulContext } from '../lib/contentful-context';
+import { translate } from '../lib/translate';
 
 const contentfulContextMiddleware = contentfulContext(loadConfiguration());
 
@@ -20,7 +20,7 @@ export default async function handler(request: Request, response: Response) {
   const body = JSON.parse(stringBody);
 
   // Simple validation of the payload.
-  // The action we have configured for this endpoint has category `EntryList`,
+  // The action we have configured for this endpoint has category `Entries`,
   // meaning we are going to get a list of comma separated entry ids in `body.entryIds`
   if (!body || !body.entryIds || typeof body.entryIds !== 'string') {
     return sendError(StatusCodes.BAD_REQUEST, { response, details: '`body.entryIds` is invalid' });
