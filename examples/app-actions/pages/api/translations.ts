@@ -1,10 +1,10 @@
 import { StatusCodes } from 'http-status-codes';
 import { Request, Response } from 'express';
 
-import { runMiddleware, sendError } from '../lib/utils';
-import { loadConfiguration } from '../lib/config';
-import { contentfulContext } from '../lib/contentful-context';
-import { translate } from '../lib/translate';
+import { runMiddleware, sendError } from '../../src/lib/utils';
+import { loadConfiguration } from '../../src/lib/config';
+import { contentfulContext } from '../../src/lib/contentful-context';
+import { translate } from '../../src/lib/translate';
 
 const contentfulContextMiddleware = contentfulContext(loadConfiguration());
 
