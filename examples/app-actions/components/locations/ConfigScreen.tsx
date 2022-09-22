@@ -41,7 +41,9 @@ interface AppInstallationParameters {
 }
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters | null>(null);
+  const [parameters, setParameters] = useState<AppInstallationParameters>({
+    targetLanguage: 'mandalorian',
+  });
   const sdk = useSDK<AppExtensionSDK>();
 
   const onConfigure = useCallback(async () => {
