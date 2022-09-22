@@ -1,6 +1,6 @@
 {
   "name": "@contentful/jira-app",
-  "version": "1.7.22",
+  "version": "1.7.23",
   "private": true,
   "devDependencies": {
     "@testing-library/react": "8.0.4",
