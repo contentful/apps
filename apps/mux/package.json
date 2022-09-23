@@ -19,10 +19,10 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@contentful/app-sdk": "^4.12.0",
-    "@contentful/dam-app-base": "^2.0.25",
-    "@contentful/f36-components": "^4.17.0",
-    "@contentful/react-apps-toolkit": "^1.2.6",
+    "@contentful/app-sdk": "4.12.0",
+    "@contentful/dam-app-base": "2.0.25",
+    "@contentful/f36-components": "4.17.0",
+    "@contentful/react-apps-toolkit": "1.2.6",
     "@mux/mux-player-react": "0.1.0-beta.28",
     "@mux/mux-uploader-react": "0.1.0-beta.8",
     "jsonwebtoken": "8.5.1",
