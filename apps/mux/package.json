@@ -19,10 +19,10 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@contentful/app-sdk": "4.12.0",
-    "@contentful/dam-app-base": "2.0.25",
-    "@contentful/f36-components": "4.17.0",
-    "@contentful/react-apps-toolkit": "1.2.6",
+    "@contentful/app-sdk": "^4.12.0",
+    "@contentful/dam-app-base": "^2.0.25",
+    "@contentful/f36-components": "^4.17.0",
+    "@contentful/react-apps-toolkit": "^1.2.6",
     "@mux/mux-player-react": "0.1.0-beta.28",
     "@mux/mux-uploader-react": "0.1.0-beta.8",
     "jsonwebtoken": "8.5.1",
@@ -37,8 +37,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "upload": "contentful-app-scripts upload --bundle-dir ./build",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+    "deploy": "contentful-app-scripts upload --bundle-dir ./build",
+    "deploy-ci": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
   "eslintConfig": {
     "extends": "react-app"
