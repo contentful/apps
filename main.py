@@ -4,19 +4,30 @@
                 Code, Run and Debug Python program online.
 Write your code in this editor and press "Debug" button to debug program.
 
-''
+'''
 """
 
->>>print("Hello World", print("Aaa,aaA,Baa,aaB")
->> print("0-9", print("A-Z"), print("a-z")
->>> small_letters =map(chr, range(ord('a'), ord('z')+1))
->>> an = small_letters[0:(ord('n')-ord('a')+1)]
-print( "  ".join('an'))
-abcdefghijkmn
->>> print( "  ".join(small_letters[0::2]))...
-""
-''
-print("y = x+emc^2")
-"""
-#"main.Python"
+print("Hello World")
+class Account:
+def_init_(self):
+self.balance=0
+print('Your Account is Created.')
+def deposit(self):
+amount=int(input('Enter the amount to deposit:'))
+self.balance+=amount
+print('Your New Balance =%d' %self.balance)
+def withdraw(self):
+amount=int(input('Enter the amount to withdraw:'))
+if(amount>self.balance):
+print('Insufficient Balance!')
+else:
+self.balance-=amount
+print('Your Remaining Balance =%d' %self.balance)
+def enquiry(self):
+print('Your Balance =%d' %self.balance)
+account= Account()
+account.deposit()
+account.withdraw()
+account.enquiry()
 '''
+"""
