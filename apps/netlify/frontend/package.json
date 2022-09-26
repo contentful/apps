@@ -3,7 +3,7 @@
   "version": "1.9.17",
   "private": true,
   "devDependencies": {
-    "@contentful/app-scripts": "1.1.23",
+    "@contentful/app-scripts": "1.1.24",
     "@testing-library/react": "8.0.4",
     "cross-env": "7.0.3",
     "identity-obj-proxy": "3.0.0"
