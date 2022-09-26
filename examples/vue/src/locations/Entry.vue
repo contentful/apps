@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import type { EditorExtensionSDK } from "@contentful/app-sdk";
+import type { EditorExtensionSDK } from '@contentful/app-sdk';
 
 defineProps<{ sdk: EditorExtensionSDK }>();
 </script>

@@ -3,8 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
-import type { AppExtensionSDK } from "@contentful/app-sdk";
+import { onMounted } from 'vue';
+import type { AppExtensionSDK } from '@contentful/app-sdk';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppInstallationParameters {}
@@ -34,8 +34,7 @@ const onConfigure = async () => {
 props.sdk.app.onConfigure(() => onConfigure());
 
 onMounted(async () => {
-  const params: AppInstallationParameters | null =
-    await props.sdk.app.getParameters();
+  const params: AppInstallationParameters | null = await props.sdk.app.getParameters();
   parameters = params || parameters;
   await props.sdk.app.setReady();
 });
