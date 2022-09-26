@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.1](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.10.0...@contentful/mux-contentful-uploader@1.10.1) (2022-09-26)
+
+
+### Bug Fixes
+
+* change deploy script naming ([#1775](https://github.com/contentful/apps/issues/1775)) ([cac3a35](https://github.com/contentful/apps/commit/cac3a355c742e2a88aaa8867e132ba247432e5e6))
+
+
+
+
+
 # [1.10.0](https://github.com/contentful/apps/compare/@contentful/mux-contentful-uploader@1.9.20...@contentful/mux-contentful-uploader@1.10.0) (2022-09-21)
 
 
