@@ -6,6 +6,7 @@
 import { onMounted } from "vue";
 import type { AppExtensionSDK } from "@contentful/app-sdk";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppInstallationParameters {}
 
 const props = defineProps<{ sdk: AppExtensionSDK }>();
