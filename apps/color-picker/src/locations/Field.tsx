@@ -86,48 +86,41 @@ const Field = () => {
 
   return (
     <Form>
-      <Menu
-        isOpen={isOpen}
-        onOpen={() => setIsOpen(true)}
-        onClose={() => setIsOpen(false)}
-      >
-        <Menu.Trigger>
-          <Button endIcon={<ChevronDownIcon />} isFullWidth>
-            <Flex alignItems="center" gap="spacingXs">
-              <span
-                className={styles.colorBox(
-                  (typeof value === 'string' ? value : value?.value) ??
-                    '#ffffff'
-                )}
-              />
-              <Flex gap="spacing2Xs">
-                {name}{' '}
-                <span className={styles.hexValue}>
-                  {(typeof value === 'string' ? value : value?.value) ?? ''}
-                </span>
-              </Flex>
-            </Flex>
-          </Button>
-        </Menu.Trigger>
-        <Menu.List className={styles.menuList}>
-          {theme.colors.map((color: Color) => (
-            <Menu.Item
-              key={color.id}
-              onClick={() => setValue(storeHexValue ? color.value : color)}
-            >
-              <Flex alignItems="center" gap="spacingXs">
-                <span className={styles.colorBox(color.value)} />
-                {color.name}
-              </Flex>
-            </Menu.Item>
-          ))}
-          {allowCustomValue && (
-            <Menu.Item onClick={() => customColorPicker?.current?.click()}>
-              Custom...
-            </Menu.Item>
-          )}
-        </Menu.List>
-      </Menu>
+      {theme.colors.length === 0 ? (
+        <MenuButton
+          name={name}
+          value={value}
+          onClick={() => customColorPicker?.current?.click()}
+        />
+      ) : (
+        <Menu
+          isOpen={isOpen}
+          onOpen={() => setIsOpen(true)}
+          onClose={() => setIsOpen(false)}
+        >
+          <Menu.Trigger>
+            <MenuButton showChevron name={name} value={value} />
+          </Menu.Trigger>
+          <Menu.List className={styles.menuList}>
+            {theme.colors.map((color: Color) => (
+              <Menu.Item
+                key={color.id}
+                onClick={() => setValue(storeHexValue ? color.value : color)}
+              >
+                <Flex alignItems="center" gap="spacingXs">
+                  <span className={styles.colorBox(color.value)} />
+                  {color.name}
+                </Flex>
+              </Menu.Item>
+            ))}
+            {allowCustomValue && (
+              <Menu.Item onClick={() => customColorPicker?.current?.click()}>
+                Custom...
+              </Menu.Item>
+            )}
+          </Menu.List>
+        </Menu>
+      )}
       <input
         onChange={(e) =>
           setValue({
@@ -144,5 +137,36 @@ const Field = () => {
     </Form>
   );
 };
+
+interface MenuButtonProps {
+  showChevron?: boolean;
+  name: string;
+  value?: FieldValue;
+  onClick?: () => void;
+}
+
+function MenuButton({ showChevron, name, value, onClick }: MenuButtonProps) {
+  return (
+    <Button
+      endIcon={showChevron ? <ChevronDownIcon /> : undefined}
+      isFullWidth
+      onClick={onClick}
+    >
+      <Flex alignItems="center" gap="spacingXs">
+        <span
+          className={styles.colorBox(
+            (typeof value === 'string' ? value : value?.value) ?? '#ffffff'
+          )}
+        />
+        <Flex gap="spacing2Xs">
+          {name}{' '}
+          <span className={styles.hexValue}>
+            {(typeof value === 'string' ? value : value?.value) ?? ''}
+          </span>
+        </Flex>
+      </Flex>
+    </Button>
+  );
+}
 
 export default Field;
