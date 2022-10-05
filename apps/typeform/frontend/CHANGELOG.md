@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.46](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.45...@contentful/typeform-frontend@1.5.46) (2022-10-05)
+
+
+### Bug Fixes
+
+* **deps:** bump @types/lodash from 4.14.185 to 4.14.186 ([#1813](https://github.com/contentful/apps/issues/1813)) ([ac5d0b3](https://github.com/contentful/apps/commit/ac5d0b37f4c8b337227546cbc154f057537c6fa9))
+* **deps:** bump core-js from 3.25.3 to 3.25.5 ([#1807](https://github.com/contentful/apps/issues/1807)) ([1cbbcc2](https://github.com/contentful/apps/commit/1cbbcc25cb2225858ce8bb5ae3d62d56098a5d27))
+* **deps:** bump jest-environment-jsdom from 29.0.3 to 29.1.2 ([#1812](https://github.com/contentful/apps/issues/1812)) ([b2cc626](https://github.com/contentful/apps/commit/b2cc626e68b52a993d272472c449590721cadb56))
+* **deps:** bump jsdom from 20.0.0 to 20.0.1 ([#1810](https://github.com/contentful/apps/issues/1810)) ([3e47b48](https://github.com/contentful/apps/commit/3e47b48a0f44faaefc1b95861713157de2990b8c))
+
+
+
+
+
 ## [1.5.45](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.44...@contentful/typeform-frontend@1.5.45) (2022-09-26)
 
 
