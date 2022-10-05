@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.24](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.23...@contentful/jira-app@1.7.24) (2022-10-05)
+
+
+### Bug Fixes
+
+* **deps:** bump react and react-dom ([#1806](https://github.com/contentful/apps/issues/1806)) ([74a7d23](https://github.com/contentful/apps/commit/74a7d234db58b426f938b5cd52fa2c272c395753))
+
+
+
+
+
 ## [1.7.23](https://github.com/contentful/apps/compare/@contentful/jira-app@1.7.22...@contentful/jira-app@1.7.23) (2022-09-22)
 
 **Note:** Version bump only for package @contentful/jira-app
