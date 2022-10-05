@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FieldExtensionSDK } from "@contentful/app-sdk";
+import type { FieldExtensionSDK } from '@contentful/app-sdk';
 
 defineProps<{ sdk: FieldExtensionSDK }>();
 </script>

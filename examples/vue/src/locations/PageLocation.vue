@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PageExtensionSDK } from "@contentful/app-sdk";
+import type { PageExtensionSDK } from '@contentful/app-sdk';
 
 defineProps<{ sdk: PageExtensionSDK }>();
 </script>
