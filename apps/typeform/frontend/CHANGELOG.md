@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.48](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.47...@contentful/typeform-frontend@1.5.48) (2022-10-06)
+
+
+### Bug Fixes
+
+* **deps:** bump @typeform/embed from 1.37.1 to 1.38.0 ([#1757](https://github.com/contentful/apps/issues/1757)) ([71465e6](https://github.com/contentful/apps/commit/71465e6125ecccee26e09a27664be72f3016da64))
+
+
+
+
+
 ## [1.5.47](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.46...@contentful/typeform-frontend@1.5.47) (2022-10-05)
 
 
