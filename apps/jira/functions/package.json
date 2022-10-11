@@ -1,6 +1,6 @@
 {
   "name": "@contentful/functions",
-  "version": "1.4.42",
+  "version": "1.4.43",
   "main": "index.js",
   "private": true,
   "scripts": {
