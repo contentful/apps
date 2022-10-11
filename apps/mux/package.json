@@ -1,6 +1,6 @@
 {
   "name": "@contentful/mux-contentful-uploader",
-  "version": "1.10.1",
+  "version": "1.10.2",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "^1.1.20",
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "4.12.0",
-    "@contentful/dam-app-base": "2.0.25",
+    "@contentful/dam-app-base": "^2.0.26",
     "@contentful/f36-components": "4.17.0",
     "@contentful/react-apps-toolkit": "1.2.6",
     "@mux/mux-player-react": "0.1.0-beta.28",
