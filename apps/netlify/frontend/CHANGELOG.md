@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.27](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.26...@contentful/netlify-build-and-preview@1.9.27) (2022-10-17)
+
+### Bug Fixes
+
+- **deps:** bump emotion from 10.0.14 to 10.0.27 ([#1852](https://github.com/contentful/apps/issues/1852)) ([119bf11](https://github.com/contentful/apps/commit/119bf11b6827e6200326024c9b84fe04bca2d278))
+
 ## [1.9.26](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.25...@contentful/netlify-build-and-preview@1.9.26) (2022-10-14)
 
 **Note:** Version bump only for package @contentful/netlify-build-and-preview

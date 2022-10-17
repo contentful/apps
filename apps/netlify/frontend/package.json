@@ -1,6 +1,6 @@
 {
   "name": "@contentful/netlify-build-and-preview",
-  "version": "1.9.26",
+  "version": "1.9.27",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.1.30",
