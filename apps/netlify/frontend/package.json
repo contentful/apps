@@ -15,7 +15,7 @@
     "@contentful/f36-tokens": "^4.0.0",
     "@contentful/forma-36-fcss": "0.3.5",
     "date-fns": "2.29.3",
-    "emotion": "10.0.14",
+    "emotion": "10.0.27",
     "lodash.get": "4.4.2",
     "lodash.uniqby": "4.7.0",
     "prop-types": "15.8.1",
