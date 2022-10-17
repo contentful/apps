@@ -5,12 +5,13 @@ import { createClient } from './client';
 
 const MAX_LIMIT = 500;
 
-function productTransformer({ projectKey, locale, apiEndpoint }: ConfigurationParameters) {
-  const baseUrl = apiEndpoint?.split('api.')[1];
+function productTransformer({ projectKey, locale, mcUrl }: ConfigurationParameters) {
   return (item: ProductProjection): Product => {
+    const merchantCenterBaseUrl =
+      mcUrl && mcUrl.length > 0 ? mcUrl : 'https://mc.europe-west1.gcp.commercetools.com';
     const id = item.id ?? '';
     const externalLink =
-      (projectKey && id && `https://mc.${baseUrl}/${projectKey}/products/${id}/general`) || '';
+      (projectKey && id && `${merchantCenterBaseUrl}/${projectKey}/products/${id}/general`) || '';
     return {
       id,
       image: item.masterVariant?.images?.[0]?.url ?? '',
