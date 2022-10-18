@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.7.41](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.40...@contentful/smartling-frontend@1.7.41) (2022-10-18)
+
+### Bug Fixes
+
+- **deps:** bump contentful-management from 10.18.0 to 10.18.1 ([#1858](https://github.com/contentful/apps/issues/1858)) ([511addf](https://github.com/contentful/apps/commit/511addf47b7ced6d72ac59c830433244944a1ee4))
+
 ## [1.7.40](https://github.com/contentful/apps/compare/@contentful/smartling-frontend@1.7.39...@contentful/smartling-frontend@1.7.40) (2022-10-14)
 
 ### Bug Fixes
