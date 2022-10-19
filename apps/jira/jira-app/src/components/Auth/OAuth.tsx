@@ -1,6 +1,7 @@
 import React from 'react';
-import { Button, Paragraph } from '@contentful/forma-36-react-components';
 import constants from '../../constants';
+
+import { Button, Paragraph } from '@contentful/f36-components';
 
 interface Props {
   setToken: (token: string) => void;
@@ -50,13 +51,13 @@ export default class OAuth extends React.Component<Props> {
     return (
       <div data-test-id="oauth-content">
         {this.props.proactiveWarning && (
-          <Paragraph className="paragraph-light">
+          <Paragraph marginBottom="none" className="paragraph-light">
             Your Jira session will expire soon. Reauthenticate now to continue uninterrupted.
             <br />
             <br />
           </Paragraph>
         )}
-        <Button onClick={this.executeOauth} buttonType="primary" isFullWidth testId="oauth-button">
+        <Button onClick={this.executeOauth} variant="primary" isFullWidth testId="oauth-button">
           {this.props.proactiveWarning ? 'Reauthenticate' : 'Connect to Jira'}
         </Button>
       </div>

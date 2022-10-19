@@ -1,14 +1,7 @@
 import React from 'react';
-import {
-  Typography,
-  Heading,
-  Paragraph,
-  Select,
-  Option,
-  TextInput,
-  Card,
-} from '@contentful/forma-36-react-components';
 import { JiraCloudResource, CloudProject } from '../../../interfaces';
+
+import { Card, Select, TextInput, Heading, Paragraph } from '@contentful/f36-components';
 
 // using lodash.debouce basically breaks test with infinite timers
 const debounce = function (fn: Function, timeout: number): Function {
@@ -65,7 +58,7 @@ export default class InstanceStep extends React.Component<Props, State> {
     const { resources, pickResource, selectedResource, projects, selectedProject } = this.props;
 
     return (
-      <Typography>
+      <React.Fragment>
         <Heading>Configure</Heading>
         <Paragraph>Select the Jira site and project you want to connect</Paragraph>
         <div className="jira-config" data-test-id="instance-step">
@@ -75,20 +68,18 @@ export default class InstanceStep extends React.Component<Props, State> {
             // @ts-ignore: 2339
             onChange={(e) => pickResource(e.target.value)}
             isDisabled={resources.length === 1}
-            width="full"
             value={selectedResource || ''}
           >
-            <Option value="">Select a site</Option>
+            <Select.Option value="">Select a site</Select.Option>
             {resources.map((r) => (
-              <Option key={r.id} value={r.id}>
+              <Select.Option key={r.id} value={r.id}>
                 {r.url.replace('https://', '')}
-              </Option>
+              </Select.Option>
             ))}
           </Select>
 
           <div className="search-projects">
             <TextInput
-              width="full"
               placeholder={selectedProject ? selectedProject.name : 'Search for a project'}
               value={this.state.inputValue}
               onChange={(ev) => {
@@ -117,7 +108,7 @@ export default class InstanceStep extends React.Component<Props, State> {
             </div>
           </div>
         </div>
-      </Typography>
+      </React.Fragment>
     );
   }
 }

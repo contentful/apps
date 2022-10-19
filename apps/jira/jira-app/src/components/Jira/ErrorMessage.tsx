@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { Note, TextLink } from '@contentful/forma-36-react-components';
 import { IssuesResponse } from '../../interfaces';
+
+import { Note, TextLink } from '@contentful/f36-components';
 
 interface Props {
   errorType: IssuesResponse['error'];
@@ -11,16 +12,18 @@ interface Props {
 export default function ErrorMessage({ errorType, signOut }: Props) {
   if (errorType === 'unauthorized_error') {
     return (
-      <Note noteType="negative" title="Unauthorized">
+      <Note variant="negative" title="Unauthorized">
         Your Jira account does not have permission to view the issues in this project.{' '}
-        <TextLink onClick={signOut}>Sign out</TextLink>
+        <TextLink as="button" onClick={signOut}>
+          Sign out
+        </TextLink>
       </Note>
     );
   }
 
   if (errorType === 'general_error') {
     return (
-      <Note noteType="warning" title="Error">
+      <Note variant="warning" title="Error">
         An error occured while communicating with Jira. Please reload the page.
       </Note>
     );

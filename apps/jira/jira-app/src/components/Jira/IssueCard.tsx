@@ -2,15 +2,9 @@ import React from 'react';
 import { TagType } from '@contentful/forma-36-react-components/dist/components/Tag/Tag';
 import { FormattedIssue } from '../../interfaces';
 
-import {
-  Card,
-  Tooltip,
-  Tag,
-  CardActions,
-  DropdownList,
-  DropdownListItem,
-  TextLink,
-} from '@contentful/forma-36-react-components';
+import { CardActions, DropdownList, DropdownListItem } from '@contentful/forma-36-react-components';
+
+import { Badge, Card, TextLink, Tooltip } from '@contentful/f36-components';
 
 const statusColors: { [key: string]: TagType } = {
   'medium-gray': 'primary',
@@ -33,9 +27,9 @@ const IssueCard = ({ issue, onRemoveClick }: Props) => {
     <Card className="jira-ticket">
       <div className="primary">
         <div className="top">
-          <Tag tagType={statusColors[issue.status.statusCategory.colorName]} className="tag">
+          <Badge variant={statusColors[issue.status.statusCategory.colorName]} className="tag">
             {issue.status.name}
-          </Tag>
+          </Badge>
           <CardActions>
             <DropdownList>
               <DropdownListItem onClick={openInJira}>Open in Jira</DropdownListItem>
@@ -44,30 +38,28 @@ const IssueCard = ({ issue, onRemoveClick }: Props) => {
           </CardActions>
         </div>
         <div data-test-id="issue-summary">
-          <TextLink onClick={openInJira} className="summary">
+          <TextLink as="button" onClick={openInJira} className="summary">
             {issue.summary}
           </TextLink>
         </div>
       </div>
       <div className="meta">
         <div className="status">
-          <Tooltip place="right" content={issue.issuetype.name}>
+          <Tooltip placement="right" content={issue.issuetype.name}>
             <img className="type" src={issue.issuetype.iconUrl} alt={issue.issuetype.name} />
           </Tooltip>
-          {
-            issue.priority && (
-              <Tooltip place="right" content={`${issue.priority.name} priority`}>
-                <img src={issue.priority.iconUrl} alt={issue.priority.name} height={22} />
-              </Tooltip>
-            )
-          }
+          {issue.priority && (
+            <Tooltip placement="right" content={`${issue.priority.name} priority`}>
+              <img src={issue.priority.iconUrl} alt={issue.priority.name} height={22} />
+            </Tooltip>
+          )}
         </div>
         <div className="details">
-          <TextLink onClick={openInJira}>
+          <TextLink as="button" onClick={openInJira}>
             <span className="key">{issue.key}</span>
           </TextLink>
           {issue.assignee ? (
-            <Tooltip place="left" content={`Assignee: ${issue.assignee.displayName}`}>
+            <Tooltip placement="left" content={`Assignee: ${issue.assignee.displayName}`}>
               <img
                 className="avatar"
                 src={issue.assignee.avatarUrls['24x24']}

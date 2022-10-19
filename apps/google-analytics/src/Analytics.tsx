@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { Select, DisplayText, Paragraph } from '@contentful/forma-36-react-components';
 
 import Timeline from './Timeline';
 import styles from './styles';
 import { formatLargeNumbers, DAY_IN_MS, getDateRangeInterval, getErrorNotification } from './utils';
 import { RangeOption, AnalyticsProps, AnalyticsState, ChartData, GapiError } from './typings';
+
+import { Select, DisplayText, Paragraph } from '@contentful/f36-components';
 
 const RANGE_OPTIONS: RangeOption[] = [
   { label: 'Last 24 hours', startDaysAgo: 1, endDaysAgo: 0 },
@@ -79,8 +80,10 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
       <>
         <div className={styles.header}>
           <div className={loading ? styles.pageViewsLoading : styles.pageViews}>
-            <DisplayText size="large">{formattedPageViews}</DisplayText>
-            <Paragraph>pageviews</Paragraph>
+            <DisplayText marginBottom="none" size="large">
+              {formattedPageViews}
+            </DisplayText>
+            <Paragraph marginBottom="none">pageviews</Paragraph>
           </div>
           <Select
             name="range"

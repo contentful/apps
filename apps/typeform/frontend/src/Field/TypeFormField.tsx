@@ -1,12 +1,15 @@
 import React, { useEffect, useReducer } from 'react';
 import { FieldExtensionSDK, AppExtensionSDK } from '@contentful/app-sdk';
-import { Select, Option, TextLink, Note, Tooltip } from '@contentful/forma-36-react-components';
 import { TypeFormResponse, FormOption, InstallationParameters } from '../typings';
 import { TypeformOAuth } from '../Auth/TypeformOAuth';
 import { styles } from './styles';
 // @ts-ignore 2307
 import logo from './typeform-icon.svg';
 import { isUserAuthenticated, getToken, resetLocalStorage } from '../utils';
+
+import { Note, Select, TextLink, Tooltip } from '@contentful/f36-components';
+
+import { EditIcon, EntryIcon } from '@contentful/f36-icons';
 
 interface Props {
   sdk: FieldExtensionSDK & AppExtensionSDK;
@@ -197,7 +200,7 @@ export function TypeFormField({ sdk }: Props) {
 
   if (error) {
     return (
-      <Note noteType="negative">
+      <Note variant="negative">
         We could not fetch your typeforms. Please make sure you have selected a valid Typeform
         workspace and are logged in.
       </Note>
@@ -206,7 +209,7 @@ export function TypeFormField({ sdk }: Props) {
 
   const PreviewButton = (
     <div className={styles.previewButton(!selectedForm.isPublic)}>
-      <TextLink onClick={openDialog} disabled={!selectedForm.isPublic}>
+      <TextLink as="button" onClick={openDialog} isDisabled={!selectedForm.isPublic}>
         <svg width="16" height="16" viewBox="0 0 24 24">
           <path d="M0 0h24v24H0z" fill="none" />
           <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
@@ -221,13 +224,13 @@ export function TypeFormField({ sdk }: Props) {
       <div className={styles.field}>
         <img alt="TypeForm Logo" src={logo} className={styles.logo} />
         <Select onChange={onChange} value={value} data-test-id="typeform-select">
-          <Option key="" value="">
+          <Select.Option key="" value="">
             {forms.length === 0 ? 'No forms available' : 'Choose a typeform'}
-          </Option>
+          </Select.Option>
           {forms.map((form) => (
-            <Option key={form.id} value={form.href}>
+            <Select.Option key={form.id} value={form.href}>
               {form.name}
-            </Option>
+            </Select.Option>
           ))}
         </Select>
       </div>
@@ -236,10 +239,10 @@ export function TypeFormField({ sdk }: Props) {
           <TextLink
             href={`https://admin.typeform.com/form/${selectedForm.id}/create`}
             target="_blank"
-            icon="Edit"
+            icon={<EditIcon />}
             rel="noopener noreferrer"
             className={styles.editButton}
-            disabled={!value}
+            isDisabled={!value}
           >
             Edit
           </TextLink>
@@ -247,9 +250,9 @@ export function TypeFormField({ sdk }: Props) {
             PreviewButton
           ) : (
             <Tooltip
-              containerElement="span"
+              as="span"
               content="You can not preview this typeform because it is private"
-              place="right"
+              placement="right"
             >
               {PreviewButton}
             </Tooltip>
@@ -257,7 +260,7 @@ export function TypeFormField({ sdk }: Props) {
           <TextLink
             href={`https://admin.typeform.com/form/${selectedForm.id}/results`}
             target="_blank"
-            icon="Entry"
+            icon={<EntryIcon />}
             rel="noopener noreferrer"
             className={styles.editButton}
           >
@@ -266,9 +269,12 @@ export function TypeFormField({ sdk }: Props) {
         </div>
       )}
       {hasStaleData && (
-        <Note noteType="negative">
+        <Note variant="negative">
           The typeform you have selected in Contentful no longer exists in your workspace.{' '}
-          <TextLink onClick={() => dispatch({ type: ACTION_TYPES.RESET })}>Clear field</TextLink>.
+          <TextLink as="button" onClick={() => dispatch({ type: ACTION_TYPES.RESET })}>
+            Clear field
+          </TextLink>
+          .
         </Note>
       )}
     </React.Fragment>

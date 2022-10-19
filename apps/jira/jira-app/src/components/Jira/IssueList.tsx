@@ -1,12 +1,8 @@
 import React from 'react';
-import {
-  SkeletonContainer,
-  SkeletonBodyText,
-  Paragraph,
-  Typography,
-} from '@contentful/forma-36-react-components';
 import IssueCard from './IssueCard';
 import { FormattedIssue } from '../../interfaces';
+
+import { SkeletonContainer, SkeletonBodyText, Paragraph } from '@contentful/f36-components';
 
 interface Props {
   issues: FormattedIssue[];
@@ -28,9 +24,9 @@ export default class IssueList extends React.Component<Props> {
 
     if (!issues.length) {
       return (
-        <Typography>
+        <React.Fragment>
           <Paragraph className="paragraph-light">No Jira issues are linked to this entry</Paragraph>
-        </Typography>
+        </React.Fragment>
       );
     }
 

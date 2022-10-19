@@ -9,8 +9,9 @@ import AppConfig from './AppConfig';
 import Analytics from './Analytics';
 import { SidebarExtensionState, SidebarExtensionProps, Gapi, SavedParams } from './typings';
 import styles from './styles';
-import { Paragraph, TextLink } from '@contentful/forma-36-react-components';
 import { docsUrl } from './utils';
+
+import { TextLink, Paragraph } from '@contentful/f36-components';
 
 export class SidebarExtension extends React.Component<
   SidebarExtensionProps,
@@ -78,7 +79,7 @@ export class SidebarExtension extends React.Component<
     const { clientId, viewId } = parameters.installation as SavedParams;
 
     const helpTextNode = helpText && (
-      <Paragraph className={styles.lightText}>
+      <Paragraph marginBottom="none" className={styles.lightText}>
         {helpText}. See{' '}
         <TextLink target="_blank" rel="noopener noreferer" href={docsUrl}>
           this app&apos;s docs
@@ -140,7 +141,7 @@ export class SidebarExtension extends React.Component<
 
     if (!isContentTypeConfigured) {
       return (
-        <Paragraph className={styles.lightText}>
+        <Paragraph marginBottom="none" className={styles.lightText}>
           The {contentTypeName} content type hasn&apos;t been configured for use with this app. It
           must have a field of type short text and must be added to the list of content types in
           this app&apos;s configuration.
@@ -150,7 +151,7 @@ export class SidebarExtension extends React.Component<
 
     if (!hasSlug) {
       return (
-        <Paragraph className={styles.lightText}>
+        <Paragraph marginBottom="none" className={styles.lightText}>
           This {contentTypeName} entry doesn&apos;t have a valid slug field.
         </Paragraph>
       );
@@ -158,7 +159,7 @@ export class SidebarExtension extends React.Component<
 
     if (!entry.getSys().publishedAt) {
       return (
-        <Paragraph className={styles.lightText}>
+        <Paragraph marginBottom="none" className={styles.lightText}>
           This {contentTypeName} entry hasn&apos;t been published.
         </Paragraph>
       );

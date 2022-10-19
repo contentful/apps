@@ -6,8 +6,9 @@ import { AppConfig } from '../AppConfig';
 import { styles } from '../AppConfig/styles';
 // @ts-ignore 2307
 import logo from '../AppConfig/config-screen-logo.svg';
-import { Typography, Paragraph, Heading, TextLink } from '@contentful/forma-36-react-components';
 import { getToken, tokenIsExpired, tokenWillExpireSoon, resetLocalStorage } from '../utils';
+
+import { TextLink, Heading, Paragraph } from '@contentful/f36-components';
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -52,7 +53,7 @@ export default function AuthWrapper({ sdk }: Props) {
           <div className={styles.background('#262627')}>
             <div className={styles.body}>
               <div className={styles.authConfig}>
-                <Typography>
+                <React.Fragment>
                   <Heading>Connect to Typeform</Heading>
                   <Paragraph className={styles.aboutP}>
                     The{' '}
@@ -65,7 +66,7 @@ export default function AuthWrapper({ sdk }: Props) {
                     </TextLink>{' '}
                     app allows you to reference your forms from Typeform without leaving Contentful.
                   </Paragraph>
-                </Typography>
+                </React.Fragment>
                 <TypeformOAuth
                   buttonType="primary"
                   sdk={sdk}

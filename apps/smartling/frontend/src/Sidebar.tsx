@@ -1,19 +1,22 @@
 import React from 'react';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
+import smartlingClient from './smartlingClient';
+
 import {
-  Icon,
+  Badge,
   Button,
-  Paragraph,
-  Tag,
   Card,
-  Tooltip,
-  TextLink,
+  Icon,
+  Note,
   SkeletonContainer,
   SkeletonImage,
   Spinner,
-  Note,
-} from '@contentful/forma-36-react-components';
-import smartlingClient from './smartlingClient';
+  TextLink,
+  Tooltip,
+  Paragraph,
+} from '@contentful/f36-components';
+
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 interface Props {
   sdk: SidebarExtensionSDK;
@@ -212,12 +215,12 @@ export default class Sidebar extends React.Component<Props, State> {
     const requestButton = (
       <Button
         testId="request-translation"
-        buttonType="muted"
+        variant="secondary"
         isFullWidth
         className="request-translation"
         onClick={() => window.open(smartlingLink)}
       >
-        <Icon icon="ExternalLink" color="secondary" /> Request Translation
+        <ExternalLinkIcon variant="secondary" /> Request Translation
       </Button>
     );
 
@@ -226,7 +229,7 @@ export default class Sidebar extends React.Component<Props, State> {
         <>
           <Button
             testId="open-dialog"
-            buttonType="primary"
+            variant="primary"
             isFullWidth
             className="signin"
             onClick={() => this.runAuthFlow()}
@@ -259,16 +262,18 @@ export default class Sidebar extends React.Component<Props, State> {
         : smartlingEntry.translationSubmissions.slice(0, SUBS_TO_SHOW);
 
       statusTag = (
-        <Tag className="job-status" tagType={getStatusColor(smartlingEntry.assetStatus)}>
+        <Badge className="job-status" variant={getStatusColor(smartlingEntry.assetStatus)}>
           {smartlingEntry.assetStatus}
-        </Tag>
+        </Badge>
       );
 
       if (subsToShow.length) {
         smartlingBody = (
           <div className="smartling-entry">
             <div className="submission-list">
-              <Paragraph className="info-p">Translation submissions</Paragraph>
+              <Paragraph marginBottom="none" className="info-p">
+                Translation submissions
+              </Paragraph>
               {subsToShow.map((sub) => (
                 <Card
                   key={sub.submissionId}
@@ -286,9 +291,9 @@ export default class Sidebar extends React.Component<Props, State> {
                     )}
                   </div>
                   <div className="status">
-                    <Tag className="tag" tagType={getStatusColor(sub.status)}>
+                    <Badge className="tag" variant={getStatusColor(sub.status)}>
                       {formatSubmissionStatus(sub.status)}
-                    </Tag>
+                    </Badge>
                     <br />
                     {showSubmittedByStatus(sub.status) && (
                       <div className="date">Submitted {formatDate(sub.submitted)}</div>
@@ -297,7 +302,7 @@ export default class Sidebar extends React.Component<Props, State> {
                 </Card>
               ))}
               {!showAllSubs && (
-                <TextLink onClick={this.onShowAll} className="show-all">
+                <TextLink as="button" onClick={this.onShowAll} className="show-all">
                   Show all ({smartlingEntry.translationSubmissions.length})
                 </TextLink>
               )}
@@ -310,13 +315,13 @@ export default class Sidebar extends React.Component<Props, State> {
       }
     } else if (generalError) {
       statusTag = (
-        <Tag className="job-status" tagType="negative">
+        <Badge className="job-status" variant="negative">
           Disconnected
-        </Tag>
+        </Badge>
       );
 
       smartlingBody = (
-        <Note title="Connection error" noteType="negative" className="general-error">
+        <Note title="Connection error" variant="negative" className="general-error">
           Please ensure that you have access to the connected Smartling project.
           <br />
           <TextLink
@@ -334,7 +339,9 @@ export default class Sidebar extends React.Component<Props, State> {
       <>
         <div className="smartling-status">
           <div>
-            <Paragraph className="info-p">Smartling status</Paragraph>
+            <Paragraph marginBottom="none" className="info-p">
+              Smartling status
+            </Paragraph>
           </div>
           <div>{statusTag}</div>
         </div>

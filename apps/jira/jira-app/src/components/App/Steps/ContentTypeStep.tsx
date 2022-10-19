@@ -1,13 +1,7 @@
 import React from 'react';
-import {
-  Typography,
-  Heading,
-  FieldGroup,
-  CheckboxField,
-  Paragraph,
-  Note,
-  TextLink,
-} from '@contentful/forma-36-react-components';
+import { FieldGroup } from '@contentful/forma-36-react-components';
+
+import { Checkbox, Note, TextLink, Heading, Paragraph } from '@contentful/f36-components';
 
 interface Props {
   space: string;
@@ -41,10 +35,10 @@ const ContentTypeStep = ({
   let contentToRender;
   if (sortedContentTypes.length === 0) {
     contentToRender = (
-      <Note noteType="warning">
+      <Note variant="warning">
         There are <strong>no content types</strong> in this environment. You can add a{' '}
         <TextLink
-          linkType="primary"
+          variant="primary"
           target="_blank"
           rel="noopener noreferrer"
           href={
@@ -62,28 +56,27 @@ const ContentTypeStep = ({
     contentToRender = (
       <FieldGroup>
         {sortedContentTypes.map((ct) => (
-          <CheckboxField
-            onChange={() => selectCt(ct.id)}
-            labelText={ct.name}
-            name={ct.name}
-            checked={selectedContentTypes.includes(ct.id)}
-            value={ct.id}
+          <Checkbox
             id={ct.name}
-            key={ct.id}
-            data-test-id={`ct-item-${ct.id}`}
-          />
+            name={ct.name}
+            value={ct.id}
+            isChecked={selectedContentTypes.includes(ct.id)}
+            onChange={() => selectCt(ct.id)}
+          >
+            {ct.name}
+          </Checkbox>
         ))}
       </FieldGroup>
     );
   }
   return (
-    <Typography>
+    <React.Fragment>
       <Heading>Assign to content types</Heading>
       <Paragraph>Pick the content types where Jira will install to the sidebar.</Paragraph>
       <div className="content-types-config" data-test-id="content-types">
         {contentToRender}
       </div>
-    </Typography>
+    </React.Fragment>
   );
 };
 

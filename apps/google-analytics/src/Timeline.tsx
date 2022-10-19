@@ -2,12 +2,6 @@ import * as React from 'react';
 import { formatDate } from './utils';
 import styles from './styles';
 import {
-  SkeletonImage,
-  TextLink,
-  SkeletonContainer,
-  Paragraph,
-} from '@contentful/forma-36-react-components';
-import {
   TimelineProps,
   TimelineState,
   ChartData,
@@ -15,6 +9,10 @@ import {
   DataChart,
   GapiError,
 } from './typings';
+
+import { SkeletonContainer, SkeletonImage, TextLink, Paragraph } from '@contentful/f36-components';
+
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 const CHART_HEIGHT = 200;
 const externalUrlBase = 'https://analytics.google.com/analytics/web/#/report/content-pages';
@@ -150,9 +148,16 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
         </SkeletonContainer>
         {this.dataChart ? (
           <>
-            <Paragraph className={styles.slug}>{pagePath}</Paragraph>
+            <Paragraph marginBottom="none" className={styles.slug}>
+              {pagePath}
+            </Paragraph>
             {viewUrl ? (
-              <TextLink href={viewUrl} target="_blank" rel="noopener noreferer" icon="ExternalLink">
+              <TextLink
+                href={viewUrl}
+                target="_blank"
+                rel="noopener noreferer"
+                icon={<ExternalLinkIcon />}
+              >
                 Open in Google Analytics
               </TextLink>
             ) : null}

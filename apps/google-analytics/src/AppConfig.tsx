@@ -1,21 +1,21 @@
 import * as React from 'react';
 import sortBy from 'lodash/sortBy';
-import {
-  Typography,
-  Heading,
-  Paragraph,
-  TextField,
-  TextLink,
-  Button,
-  Select,
-  FormLabel,
-  TextInput,
-} from '@contentful/forma-36-react-components';
+import { FormLabel } from '@contentful/forma-36-react-components';
 import styles from './styles';
 import { AppConfigParams, AppConfigState, AllContentTypes, ContentTypes } from './typings';
 import { getAndUpdateSavedParams } from './utils';
 import { ContentType, EditorInterface, CollectionResponse } from '@contentful/app-sdk';
 import { ReactComponent as GoogleLogo } from './ga-logo.svg';
+
+import {
+  Button,
+  Select,
+  FormControl,
+  TextInput as TextInput1,
+  TextLink,
+  Heading,
+  Paragraph,
+} from '@contentful/f36-components';
 
 export default class AppConfig extends React.Component<AppConfigParams, AppConfigState> {
   state: AppConfigState = {
@@ -221,7 +221,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         <div className={styles.background} />
         <div className={styles.body}>
           <div>
-            <Typography>
+            <React.Fragment>
               <Heading className={styles.spaced}>About Google Analytics</Heading>
 
               <Paragraph>
@@ -236,49 +236,48 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                 </TextLink>
                 .
               </Paragraph>
-            </Typography>
+            </React.Fragment>
           </div>
 
           <hr className={styles.splitter} />
 
-          <Typography>
+          <React.Fragment>
             <Heading className={styles.spaced}>Configuration</Heading>
 
-            <TextField
-              labelText="Client ID"
-              name="clientId"
-              id="clientId"
-              required
-              value={this.state.clientId}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                this.setState({ clientId: event.target.value.trim() })
-              }
-              helpText="Client ID of the Google Cloud OAuth application"
-              className={styles.spaced}
-              textInputProps={{
-                type: 'text',
-                placeholder: 'XXXXXXXX-XXXXXXXX.apps.googleusercontent.com',
-              }}
-            />
-            <TextField
-              labelText="View ID"
-              required
-              name="viewId"
-              id="viewId"
-              value={this.state.viewId}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                this.setState({ viewId: event.target.value.trim() })
-              }
-              helpText="The ID of the Google Analytics view you want to query"
-              textInputProps={{
-                type: 'text',
-              }}
-            />
-          </Typography>
+            <FormControl className={styles.spaced} id="clientId" isRequired>
+              <FormControl.Label>Client ID</FormControl.Label>
+              <TextInput
+                name="clientId"
+                value={this.state.clientId}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  this.setState({ clientId: event.target.value.trim() })
+                }
+                type="text"
+                placeholder="XXXXXXXX-XXXXXXXX.apps.googleusercontent.com"
+              />
+              <FormControl.HelpText>
+                Client ID of the Google Cloud OAuth application
+              </FormControl.HelpText>
+            </FormControl>
+            <FormControl id="viewId" isRequired>
+              <FormControl.Label>View ID</FormControl.Label>
+              <TextInput
+                name="viewId"
+                value={this.state.viewId}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  this.setState({ viewId: event.target.value.trim() })
+                }
+                type="text"
+              />
+              <FormControl.HelpText>
+                The ID of the Google Analytics view you want to query
+              </FormControl.HelpText>
+            </FormControl>
+          </React.Fragment>
 
           <hr className={styles.splitter} />
 
-          <Typography>
+          <React.Fragment>
             <Heading className={styles.spaced}>Assign to content types</Heading>
             <Paragraph className={styles.spaced}>
               Select which content types will show the Google Analytics functionality in the
@@ -331,7 +330,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   name={'slugField-' + index}
                   id={'slugField-' + index}
                   isDisabled={!key}
-                  hasError={key ? !slugField : false}
+                  isInvalid={key ? !slugField : false}
                   value={slugField}
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                     this.handleContentTypeFieldChange(key, 'slugField', event.target.value)
@@ -352,25 +351,27 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   name={'urlPrefix-' + index}
                   id={'urlPrefix-' + index}
                   value={urlPrefix}
-                  disabled={!key}
+                  isDisabled={!key}
                   onChange={(event) =>
                     this.handleContentTypeFieldChange(key, 'urlPrefix', event.target.value)
                   }
                 />
 
-                <TextLink onClick={() => this.removeContentType(key)}>Remove</TextLink>
+                <TextLink as="button" onClick={() => this.removeContentType(key)}>
+                  Remove
+                </TextLink>
               </div>
             ))}
 
             <Button
               type="button"
-              buttonType="muted"
-              disabled={Object.values(contentTypes).some((ct) => !ct.slugField)}
+              variant="secondary"
+              isDisabled={Object.values(contentTypes).some((ct) => !ct.slugField)}
               onClick={() => this.addContentType()}
             >
               {hasSelectedContentTypes ? 'Add another content type' : 'Add a content type'}
             </Button>
-          </Typography>
+          </React.Fragment>
         </div>
 
         <div className={styles.logo}>

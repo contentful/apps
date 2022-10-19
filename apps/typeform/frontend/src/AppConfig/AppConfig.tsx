@@ -1,16 +1,7 @@
 import React from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import get from 'lodash/get';
-import {
-  Heading,
-  Paragraph,
-  Typography,
-  TextLink,
-  Select,
-  Option,
-  FormLabel,
-  Note,
-} from '@contentful/forma-36-react-components';
+import { FormLabel } from '@contentful/forma-36-react-components';
 import FieldSelector from './FieldSelector';
 import {
   CompatibleFields,
@@ -34,6 +25,8 @@ import { styles } from './styles';
 
 // @ts-ignore 2307
 import logo from './config-screen-logo.svg';
+
+import { Note, Select, TextLink, Heading, Paragraph } from '@contentful/f36-components';
 
 const AUTH_ERROR_CODES = [401, 403];
 
@@ -181,7 +174,7 @@ export class AppConfig extends React.Component<Props, State> {
         <div className={styles.body}>
           <div>
             <div>
-              <Typography>
+              <React.Fragment>
                 <Heading>About Typeform</Heading>
                 <Paragraph className={styles.aboutP}>
                   The{' '}
@@ -194,11 +187,11 @@ export class AppConfig extends React.Component<Props, State> {
                   </TextLink>{' '}
                   app allows you to reference your forms from Typeform without leaving Contentful.
                 </Paragraph>
-              </Typography>
+              </React.Fragment>
               <hr className={styles.splitter} />
             </div>
             <div>
-              <Typography>
+              <React.Fragment>
                 <Heading>Configuration</Heading>
                 <FormLabel htmlFor="workspaceId" required>
                   Typeform workspace
@@ -207,22 +200,22 @@ export class AppConfig extends React.Component<Props, State> {
                   id="workspaceId"
                   name="workspaceId"
                   onChange={(event: any) => this.setWorkSpaceId(event.currentTarget.value)}
-                  hasError={workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
+                  isInvalid={workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
                   value={selectedWorkspaceId}
                   data-test-id="typeform-select"
                 >
-                  <Option key="" value="">
+                  <Select.Option key="" value="">
                     {workspaces.length === 0 ? 'No workspaces available' : 'Choose workspace'}
-                  </Option>
+                  </Select.Option>
                   {workspaces.map((workspace) => (
-                    <Option key={workspace.id} value={workspace.id}>
+                    <Select.Option key={workspace.id} value={workspace.id}>
                       {workspace.name}
-                    </Option>
+                    </Select.Option>
                   ))}
                 </Select>
-              </Typography>
+              </React.Fragment>
               <hr className={styles.splitter} />
-              <Typography>
+              <React.Fragment>
                 <Heading>Assign to content types</Heading>
                 {contentTypes.length > 0 ? (
                   <>
@@ -238,11 +231,11 @@ export class AppConfig extends React.Component<Props, State> {
                     />
                   </>
                 ) : (
-                  <Note noteType="warning">
+                  <Note variant="warning">
                     There are <strong>no content types with fields of type Short Text</strong>{' '}
                     fields in this environment. You can add one in your{' '}
                     <TextLink
-                      linkType="primary"
+                      variant="primary"
                       target="_blank"
                       rel="noopener noreferrer"
                       href={
@@ -256,7 +249,7 @@ export class AppConfig extends React.Component<Props, State> {
                     and assign it to the app from this screen.
                   </Note>
                 )}
-              </Typography>
+              </React.Fragment>
             </div>
           </div>
         </div>

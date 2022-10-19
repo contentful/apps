@@ -1,17 +1,18 @@
-import React, { Component, ChangeEvent } from "react";
-import { AppExtensionSDK } from "contentful-ui-extensions-sdk";
+import React, { Component, ChangeEvent } from 'react';
+import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { Tabs, Tab } from '@contentful/forma-36-react-components';
+import logoUrl from '../assets/logo.png';
+import sidebarScreenshotUrl from '../assets/sidebar.png';
+
 import {
   Card,
-  TextField,
   Form,
+  Note,
+  FormControl,
+  TextInput,
   TextLink,
   Paragraph,
-  Note,
-  Tabs,
-  Tab,
-} from "@contentful/forma-36-react-components";
-import logoUrl from "../assets/logo.png";
-import sidebarScreenshotUrl from "../assets/sidebar.png";
+} from '@contentful/f36-components';
 
 export interface AppInstallationParameters {
   cpaToken: string;
@@ -30,8 +31,8 @@ interface ConfigState {
 
 const TABS = [
   {
-    id: "configuration",
-    label: "Configuration",
+    id: 'configuration',
+    label: 'Configuration',
     render: ({
       sdk,
       state,
@@ -42,54 +43,49 @@ const TABS = [
       onInputChange: (event: ChangeEvent) => void;
     }) => (
       <>
-        <Paragraph>
-          The GraphQL Playground app enabled developers and content creators to
-          write GraphQL queries right next to their content.
+        <Paragraph marginBottom="none">
+          The GraphQL Playground app enabled developers and content creators to write GraphQL
+          queries right next to their content.
         </Paragraph>
         <Form>
-          <Paragraph style={{ marginTop: "1em" }}>
+          <Paragraph marginBottom="none" style={{ marginTop: '1em' }}>
             <TextLink
               href={`https://app.contentful.com/spaces/${sdk.ids.space}/api/keys`}
               target="_blank"
               rel="noopener"
             >
               Create a new pair of API keys
-            </TextLink>{" "}
+            </TextLink>{' '}
             and save the Content Preview API token below:
           </Paragraph>
-          <TextField
-            name="cpaToken"
-            id="cpaToken"
-            labelText="CPA token"
-            required
-            value={state.parameters.cpaToken}
-            onChange={onInputChange}
-          />
+          <FormControl id="cpaToken" isRequired>
+            <FormControl.Label>CPA token</FormControl.Label>
+            <TextInput name="cpaToken" value={state.parameters.cpaToken} onChange={onInputChange} />
+          </FormControl>
           <Note>
-            The CPA (Content Preview API) token allows you to also access
-            preview data when using GraphQL playground.
+            The CPA (Content Preview API) token allows you to also access preview data when using
+            GraphQL playground.
           </Note>
         </Form>
       </>
     ),
   },
   {
-    id: "sidebar-config",
-    label: "Sidebar",
+    id: 'sidebar-config',
+    label: 'Sidebar',
     render: () => (
       <>
-        <Paragraph>
-          To enable GraphQL playground in the content entry sidebar head over to
-          the content model section and select the GraphQL Playground widget. It
-          will be available only if you configure and install the application
-          correctly.
+        <Paragraph marginBottom="none">
+          To enable GraphQL playground in the content entry sidebar head over to the content model
+          section and select the GraphQL Playground widget. It will be available only if you
+          configure and install the application correctly.
         </Paragraph>
         <img
           src={sidebarScreenshotUrl}
           alt="Screenshot of the sidebar configuration of a content type"
         />
-        <Note style={{ marginTop: "1em" }}>
-          You can learn more about the sidebar location{" "}
+        <Note style={{ marginTop: '1em' }}>
+          You can learn more about the sidebar location{' '}
           <TextLink
             href="https://www.contentful.com/developers/docs/extensibility/app-framework/locations/#entry-sidebar"
             target="blank"
@@ -103,17 +99,13 @@ const TABS = [
     ),
   },
   {
-    id: "feedback",
-    label: "Feedback",
+    id: 'feedback',
+    label: 'Feedback',
     render: () => (
       <>
-        <Paragraph>
-          If you have any feedback don't hesitate to{" "}
-          <TextLink
-            href="https://github.com/contentful/apps"
-            target="_blank"
-            rel="noopener"
-          >
+        <Paragraph marginBottom="none">
+          If you have any feedback don't hesitate to{' '}
+          <TextLink href="https://github.com/contentful/apps" target="_blank" rel="noopener">
             open an issue on GitHub
           </TextLink>
           . We're open for contributions, too. 🙈
@@ -128,7 +120,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
 
   constructor(props: ConfigProps) {
     super(props);
-    this.state = { currentTab: "configuration", parameters: { cpaToken: "" } };
+    this.state = { currentTab: 'configuration', parameters: { cpaToken: '' } };
     this.sdk = props.sdk;
 
     // `onConfigure` allows to configure a callback to be
@@ -142,14 +134,11 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     // If the app is not installed yet, `parameters` will be `null`.
     const parameters: AppInstallationParameters | null = await this.props.sdk.app.getParameters();
 
-    this.setState(
-      parameters ? { ...this.state, parameters } : this.state,
-      () => {
-        // Once preparation has finished, call `setReady` to hide
-        // the loading screen and present the app to a user.
-        this.props.sdk.app.setReady();
-      }
-    );
+    this.setState(parameters ? { ...this.state, parameters } : this.state, () => {
+      // Once preparation has finished, call `setReady` to hide
+      // the loading screen and present the app to a user.
+      this.props.sdk.app.setReady();
+    });
   }
 
   // save and install
@@ -158,7 +147,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
       const currentAppState = await this.sdk.app.getCurrentState();
 
       if (!this.state.parameters.cpaToken) {
-        this.sdk.notifier.error("Please define the Content Preview API token.");
+        this.sdk.notifier.error('Please define the Content Preview API token.');
         return false;
       }
 
@@ -194,11 +183,11 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     const { currentTab } = this.state;
 
     return (
-      <Card style={{ maxWidth: "38em", margin: "3em auto" }}>
+      <Card style={{ maxWidth: '38em', margin: '3em auto' }}>
         <img
           src={logoUrl}
           alt="GraphlQL Playground Logo"
-          style={{ height: "5em", display: "block" }}
+          style={{ height: '5em', display: 'block' }}
         />
         <Tabs role="navigation" withDivider>
           {TABS.map(({ id, label }) => (
@@ -217,8 +206,8 @@ export default class Config extends Component<ConfigProps, ConfigState> {
           <div
             key={id}
             style={{
-              display: id === currentTab ? "block" : "none",
-              padding: "1em",
+              display: id === currentTab ? 'block' : 'none',
+              padding: '1em',
             }}
           >
             {render({

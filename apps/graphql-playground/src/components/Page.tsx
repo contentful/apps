@@ -1,7 +1,8 @@
-import React from "react";
-import { PageExtensionSDK } from "contentful-ui-extensions-sdk";
-import { Card, Note } from "@contentful/forma-36-react-components";
-import GqlPlayground from "./GqlPlayground";
+import React from 'react';
+import { PageExtensionSDK } from 'contentful-ui-extensions-sdk';
+import GqlPlayground from './GqlPlayground';
+
+import { Card, Note } from '@contentful/f36-components';
 
 interface PageProps {
   sdk: PageExtensionSDK;
@@ -19,10 +20,10 @@ const Page = (props: PageProps) => {
   return cpaToken ? (
     <GqlPlayground {...{ cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }} />
   ) : (
-    <Card style={{ margin: "1em" }}>
-      <Note noteType="warning">
-        To use GraphQL playground. Please define the CPA installation parameter
-        in your app configuration.
+    <Card style={{ margin: '1em' }}>
+      <Note variant="warning">
+        To use GraphQL playground. Please define the CPA installation parameter in your app
+        configuration.
       </Note>
     </Card>
   );

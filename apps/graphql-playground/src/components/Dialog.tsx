@@ -1,7 +1,10 @@
-import React from "react";
-import { DialogExtensionSDK } from "contentful-ui-extensions-sdk";
-import GqlPlayground from "./GqlPlayground";
-import { Button } from "@contentful/forma-36-react-components";
+import React from 'react';
+import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
+import GqlPlayground from './GqlPlayground';
+
+import { Button } from '@contentful/f36-components';
+
+import { CloseIcon } from '@contentful/f36-icons';
 
 interface DialogProps {
   sdk: DialogExtensionSDK;
@@ -20,7 +23,7 @@ const Dialog = (props: DialogProps) => {
   const spaceEnvironmentAlias = sdk.ids.environmentAlias;
 
   sdk.window.updateHeight(800);
-  document.addEventListener("keydown", (event) => {
+  document.addEventListener('keydown', (event) => {
     if (event.keyCode === 27) {
       sdk.close();
     }
@@ -29,15 +32,15 @@ const Dialog = (props: DialogProps) => {
   return (
     <>
       <Button
-        buttonType="primary"
+        variant="primary"
         className="dialogCloseBtn"
-        icon="Close"
+        startIcon={<CloseIcon />}
         onClick={() => sdk.close()}
         size="small"
         type="button"
-        style={{ position: "absolute", top: "1em", right: "4em", zIndex: 1 }}
+        style={{ position: 'absolute', top: '1em', right: '4em', zIndex: 1 }}
       >
-        Close{" "}
+        Close{' '}
       </Button>
       <GqlPlayground {...{ entry, cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }} />;
     </>
