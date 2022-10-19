@@ -2,13 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
-import { Heading, Typography, Paragraph } from '@contentful/forma-36-react-components';
 
 import Connect from './Connect';
 import Config from './Config';
 import OptimizelyLogo from './OptimizelyLogo';
 import SectionSplitter from '../EditorPage/subcomponents/section-splitter';
 import { VARIATION_CONTAINER_ID } from './constants';
+
+import { Heading, Paragraph } from '@contentful/f36-components';
 
 const styles = {
   body: css({
@@ -290,7 +291,7 @@ export default class AppPage extends React.Component {
         <div className={styles.background} />
         <div className={styles.body}>
           <div>
-            <Typography>
+            <React.Fragment>
               <Heading>Connect Optimizely</Heading>
               {!this.props.client ? (
                 <Connect openAuth={this.props.openAuth} />
@@ -303,7 +304,7 @@ export default class AppPage extends React.Component {
                   </Paragraph>
                 </>
               )}
-            </Typography>
+            </React.Fragment>
           </div>
           {!!this.props.client && (
             <>

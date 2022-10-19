@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, TextInput, TextLink } from '@contentful/forma-36-react-components';
 
 import { styles } from './styles';
+
+import { Button, TextInput, TextLink } from '@contentful/f36-components';
 
 const FocalPointView = ({ focalPoint, showFocalPointDialog, resetFocalPoint }) => {
   const value = focalPoint ? `x: ${focalPoint.x}px / y: ${focalPoint.y}px` : 'Focal point not set';
@@ -11,17 +12,16 @@ const FocalPointView = ({ focalPoint, showFocalPointDialog, resetFocalPoint }) =
     <div className={styles.container}>
       <TextInput
         className={styles.input}
-        width="large"
         type="text"
         id="focal-point"
         testId="focal-point"
-        value={value}
-        disabled
+        defaultValue={value}
+        isDisabled
       />
-      <Button className={styles.button} buttonType="muted" onClick={showFocalPointDialog}>
+      <Button className={styles.button} variant="secondary" onClick={showFocalPointDialog}>
         Set focal point
       </Button>
-      <TextLink linkType="primary" onClick={() => resetFocalPoint()}>
+      <TextLink as="button" variant="primary" onClick={() => resetFocalPoint()}>
         Reset focal point
       </TextLink>
     </div>

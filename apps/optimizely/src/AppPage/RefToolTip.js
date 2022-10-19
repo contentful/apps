@@ -1,6 +1,9 @@
 import React from 'react';
-import { Tooltip, Icon } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
+
+import { Icon, Tooltip } from '@contentful/f36-components';
+
+import { HelpCircleIcon } from '@contentful/f36-icons';
 
 const styles = {
   tooltip: css({
@@ -19,9 +22,9 @@ export default function RefToolTip() {
       <Tooltip
         className={styles.tooltip}
         content="This field can have a variation container assigned to it by default because it has no explicit validations"
-        place="right"
+        placement="right"
       >
-        <Icon color="muted" icon="HelpCircle" />
+        <HelpCircleIcon variant="muted" />
       </Tooltip>
     </div>
   );

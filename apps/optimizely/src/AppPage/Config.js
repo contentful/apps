@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { SkeletonContainer, SkeletonBodyText } from '@contentful/forma-36-react-components';
 import SectionSplitter from '../EditorPage/subcomponents/section-splitter';
 import Projects from './Projects';
 import ContentTypes from './ContentTypes';
+
+import { SkeletonContainer, SkeletonBodyText } from '@contentful/f36-components';
 
 export default class Config extends React.Component {
   static propTypes = {

@@ -1,12 +1,17 @@
 import React from 'react';
-import { List, ListItem, Heading, Paragraph } from '@contentful/forma-36-react-components';
 import { Divider } from '../Divider';
 import { styles } from './styles';
 
+import { List, ListItem, Heading, Paragraph } from '@contentful/f36-components';
+
 export const ConfigurationContent = () => (
   <>
-    <Heading className={styles.heading}>Getting started</Heading>
-    <Paragraph>Follow the next steps to create a new image entry with AI generated tags:</Paragraph>
+    <Heading marginBottom="none" className={styles.heading}>
+      Getting started
+    </Heading>
+    <Paragraph marginBottom="none">
+      Follow the next steps to create a new image entry with AI generated tags:
+    </Paragraph>
     <List className={styles.list}>
       <ListItem>Go to the &quot;Content&quot; page</ListItem>
       <ListItem>
@@ -15,7 +20,7 @@ export const ConfigurationContent = () => (
       </ListItem>
       <ListItem>Fill in the required fields and publish</ListItem>
     </List>
-    <Paragraph className={styles.paragraph}>
+    <Paragraph marginBottom="none" className={styles.paragraph}>
       Follow the next steps to reference the newly created image with AI Image Tagging in another
       content type:
     </Paragraph>
@@ -40,8 +45,10 @@ export const ConfigurationContent = () => (
       </ListItem>
     </List>
     <Divider />
-    <Heading className={styles.heading}>Uninstallation and cleanup</Heading>
-    <Paragraph>
+    <Heading marginBottom="none" className={styles.heading}>
+      Uninstallation and cleanup
+    </Heading>
+    <Paragraph marginBottom="none">
       If you uninstall the AI Image Tagging app you will have to manually clean up the content type
       we created for you during the installation. To do that follow the next steps:
     </Paragraph>

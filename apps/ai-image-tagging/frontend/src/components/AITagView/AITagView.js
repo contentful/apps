@@ -1,15 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  CheckboxField,
-  TextInput,
-  Pill,
-  Button,
-  Note,
-} from '@contentful/forma-36-react-components';
 import get from 'lodash.get';
 
 import { styles } from './styles';
+
+import { Button, Checkbox, Note, Pill, TextInput } from '@contentful/f36-components';
 
 async function callAPI(url) {
   const res = await fetch(`/tags/${url}`);
@@ -146,8 +141,7 @@ export class AITagView extends React.Component {
         <TextInput
           testId="image-tag"
           placeholder="Type a tag and press enter"
-          width="large"
-          disabled={this.state.isMissingImage}
+          isDisabled={this.state.isMissingImage}
           value={this.state.value}
           onChange={this.updateValue}
           onKeyPress={this.addTag}
@@ -163,28 +157,29 @@ export class AITagView extends React.Component {
           ))}
         </div>
         {hasImageError && (
-          <Note noteType="warning" className={styles.fileWarning}>
+          <Note variant="warning" className={styles.fileWarning}>
             {imageErrorMsg}
           </Note>
         )}
         <Button
           id="fetch-tag-btn"
           className={styles.btn}
-          buttonType="primary"
+          variant="primary"
           type="button"
-          disabled={this.state.isMissingImage || hasImageError}
-          loading={this.state.isFetchingTags}
+          isDisabled={this.state.isMissingImage || hasImageError}
+          isLoading={this.state.isFetchingTags}
           onClick={this.fetchTags}
         >
           Auto-tag from AI
         </Button>
-        <CheckboxField
+        <Checkbox
           id="overwrite-tags"
-          labelText="Overwrite existing tags"
-          disabled={this.state.isMissingImage || hasImageError}
-          checked={this.state.overwrite}
+          isDisabled={this.state.isMissingImage || hasImageError}
+          isChecked={this.state.overwrite}
           onChange={this.toggleOverwrite}
-        />
+        >
+          Overwrite existing tags
+        </Checkbox>
       </div>
     );
   }

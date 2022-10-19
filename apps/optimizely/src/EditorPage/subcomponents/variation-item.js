@@ -2,20 +2,14 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { css } from 'emotion';
 import useInterval from '@use-it/interval';
-import {
-  Paragraph,
-  Subheading,
-  EntryCard,
-  DropdownList,
-  DropdownListItem,
-  Note,
-  TextLink,
-} from '@contentful/forma-36-react-components';
+import { DropdownList, DropdownListItem } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { SDKContext, GlobalStateContext } from './all-context';
 import VariationSelect from './variation-select';
 import VariationStats from './variations-stats';
 import { getAdditionalEntryInformation } from './utils';
+
+import { EntryCard, Note, TextLink, Paragraph, Subheading } from '@contentful/f36-components';
 
 const styles = {
   variationContainer: css({
@@ -97,8 +91,8 @@ export function SelectedReference(props) {
 
   if (error) {
     return (
-      <Note noteType="warning" title="Entry is missing" className={styles.missingNote}>
-        <TextLink linkType="secondary" onClick={props.onRemoveClick}>
+      <Note variant="warning" title="Entry is missing" className={styles.missingNote}>
+        <TextLink as="button" variant="secondary" onClick={props.onRemoveClick}>
           Remove missing entry
         </TextLink>
       </Note>
@@ -141,11 +135,11 @@ export default function VariationItem(props) {
     <div className={styles.variationContainer}>
       {props.variation && (
         <React.Fragment>
-          <Subheading className={styles.variationTitle}>
+          <Subheading marginBottom="none" className={styles.variationTitle}>
             {variation.key} <small>({getPercentOfTraffic(variation)}% of traffic)</small>
           </Subheading>
           {variation.description && (
-            <Paragraph className={styles.variationDescription}>
+            <Paragraph marginBottom="none" className={styles.variationDescription}>
               Description: {variation.description}
             </Paragraph>
           )}

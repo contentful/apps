@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Subheading, Modal } from '@contentful/forma-36-react-components';
 
 import { FocalPoint } from '../FocalPoint';
 import { ImagePreviewWithFocalPoint } from '../ImagePreviewWithFocalPoint';
 
 import { MAX_PREVIEW_WRAPPER_SIZE, styles } from './styles';
+
+import { Button, Modal, Subheading } from '@contentful/f36-components';
 
 export class FocalPointDialog extends Component {
   static propTypes = {
@@ -99,7 +100,9 @@ export class FocalPointDialog extends Component {
         <Modal.Content>
           <div className={styles.modalContent}>
             <div>
-              <Subheading className={styles.subheading}>Select position of focal point</Subheading>
+              <Subheading marginBottom="none" className={styles.subheading}>
+                Select position of focal point
+              </Subheading>
               <div className={styles.previewWrapper}>
                 <div
                   className={styles.previewImg}
@@ -121,7 +124,7 @@ export class FocalPointDialog extends Component {
               </div>
             </div>
             <div className={styles.focalPointDemo}>
-              <Subheading className={styles.subheading}>
+              <Subheading marginBottom="none" className={styles.subheading}>
                 Preview for different screen sizes
               </Subheading>
               <div className={styles.displayFlex}>
@@ -154,10 +157,10 @@ export class FocalPointDialog extends Component {
           </div>
         </Modal.Content>
         <Modal.Controls>
-          <Button onClick={() => this.props.onSave(this.state.focalPoint)} buttonType="positive">
+          <Button onClick={() => this.props.onSave(this.state.focalPoint)} variant="positive">
             Save
           </Button>
-          <Button onClick={this.props.onClose} buttonType="muted">
+          <Button onClick={this.props.onClose} variant="secondary">
             Close
           </Button>
         </Modal.Controls>

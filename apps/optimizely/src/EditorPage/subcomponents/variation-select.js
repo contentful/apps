@@ -1,14 +1,13 @@
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import {
-  TextLink,
-  Dropdown,
-  DropdownList,
-  DropdownListItem,
-} from '@contentful/forma-36-react-components';
+import { Dropdown, DropdownList, DropdownListItem } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
 import { GlobalStateContext } from './all-context';
+
+import { TextLink } from '@contentful/f36-components';
+
+import { PlusIcon, LinkIcon } from '@contentful/f36-icons';
 
 const styles = {
   container: css({
@@ -36,7 +35,8 @@ export default function VariationSelect(props) {
           }}
           toggleElement={
             <TextLink
-              icon="Plus"
+              as="button"
+              icon={<PlusIcon />}
               onClick={() => {
                 setShowDropdown(true);
               }}
@@ -62,7 +62,7 @@ export default function VariationSelect(props) {
         </Dropdown>
       </div>
       <div className={styles.item}>
-        <TextLink icon="Link" onClick={props.onLinkExistingClick}>
+        <TextLink as="button" icon={<LinkIcon />} onClick={props.onLinkExistingClick}>
           Link an existing entry
         </TextLink>
       </div>

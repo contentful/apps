@@ -4,22 +4,20 @@ import tokens from '@contentful/forma-36-tokens';
 import { VARIATION_CONTAINER_ID } from './constants';
 import { hasReferenceFieldsLinkingToEntry } from './ReferenceForm';
 import { css } from 'emotion';
-import {
-  Heading,
-  Paragraph,
-  Button,
-  Table,
-  TableRow,
-  TableCell,
-  TextLink,
-  SelectField,
-  Option,
-  Modal,
-  Typography,
-  SectionHeading,
-} from '@contentful/forma-36-react-components';
 import ReferenceField, { hasFieldLinkValidations } from './ReferenceField';
 import RefToolTip from './RefToolTip';
+
+import {
+  Button,
+  Modal,
+  FormControl,
+  Select,
+  Table,
+  TextLink,
+  Heading,
+  Paragraph,
+  SectionHeading,
+} from '@contentful/f36-components';
 
 const styles = {
   table: css({
@@ -138,13 +136,13 @@ export default function ContentTypes({
 
   return (
     <>
-      <Typography>
+      <React.Fragment>
         <Heading>Content types</Heading>
         <Paragraph>Select the content types for which you want to enable A/B testing</Paragraph>
         <Button
-          buttonType="muted"
+          variant="secondary"
           onClick={() => toggleModal(true)}
-          disabled={!addableContentTypes.length}
+          isDisabled={!addableContentTypes.length}
           testId="add-content"
         >
           Add content type
@@ -165,36 +163,40 @@ export default function ContentTypes({
             </tbody>
           </Table>
         ) : null}
-      </Typography>
+      </React.Fragment>
       <Modal title="Add content type" isShown={modalOpen} onClose={closeModal}>
         {({ title, onClose }) => (
           <React.Fragment>
             <Modal.Header title={title} onClose={onClose} />
             <Modal.Content>
-              <Typography>
+              <React.Fragment>
                 <Paragraph>
                   Select the content type and the reference fields you want to enable for
                   experimentation. You&rsquo;ll be able to change this later.
                 </Paragraph>
-                <SelectField
+                <FormControl
                   id="content-types"
-                  name="content-types"
-                  labelText="Content Type"
-                  selectProps={{ width: 'medium', isDisabled: isEditMode }}
-                  onChange={(e) => onSelectContentType(e.target.value)}
-                  value={selectedContentType || ''}
+                  isRequired
                   testId="content-type-selector"
-                  required
+                  isDisabled={isEditMode}
                 >
-                  <Option value="" disabled>
-                    Select content type
-                  </Option>
-                  {addableContentTypes.map((ct) => (
-                    <Option key={ct.sys.id} value={ct.sys.id}>
-                      {ct.name}
-                    </Option>
-                  ))}
-                </SelectField>
+                  <FormControl.Label>Content Type</FormControl.Label>
+                  <Select
+                    name="content-types"
+                    value={selectedContentType || ''}
+                    onChange={(e) => onSelectContentType(e.target.value)}
+                    width="medium"
+                  >
+                    <Select.Option value="" disabled>
+                      Select content type
+                    </Select.Option>
+                    {addableContentTypes.map((ct) => (
+                      <Select.Option key={ct.sys.id} value={ct.sys.id}>
+                        {ct.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </FormControl>
                 {referenceFields.length > 0 && (
                   <>
                     <SectionHeading className={styles.sectionHeading}>
@@ -214,17 +216,17 @@ export default function ContentTypes({
                     </div>
                   </>
                 )}
-              </Typography>
+              </React.Fragment>
             </Modal.Content>
             <Modal.Controls>
               <Button
-                disabled={!selectedContentType}
+                isDisabled={!selectedContentType}
                 onClick={addContentTypeCloseModal}
-                buttonType="positive"
+                variant="positive"
               >
                 Save
               </Button>
-              <Button onClick={onClose} buttonType="muted">
+              <Button onClick={onClose} variant="secondary">
                 Close
               </Button>
             </Modal.Controls>
@@ -263,11 +265,11 @@ function ContentTypeRow({
   let anyDisabled = false;
 
   return (
-    <TableRow>
-      <TableCell className={styles.contentTypeRow}>
+    <Table.Row>
+      <Table.Cell className={styles.contentTypeRow}>
         <strong>{contentType.name}</strong>
-      </TableCell>
-      <TableCell className={styles.contentTypeRow}>
+      </Table.Cell>
+      <Table.Cell className={styles.contentTypeRow}>
         {referencesToShow.map((id) => {
           const field = contentType.fields.find((f) => f.id === id) || {};
           const disabled = !hasFieldLinkValidations(field);
@@ -282,21 +284,22 @@ function ContentTypeRow({
             </div>
           );
         })}
-      </TableCell>
-      <TableCell className={styles.contentTypeRow}>
-        <TextLink onClick={() => onEdit(contentTypeId)} className={styles.link}>
+      </Table.Cell>
+      <Table.Cell className={styles.contentTypeRow}>
+        <TextLink as="button" onClick={() => onEdit(contentTypeId)} className={styles.link}>
           Edit
         </TextLink>
         {!anyDisabled && (
           <TextLink
+            as="button"
             onClick={() => onClickDelete(contentTypeId)}
             className={styles.link}
-            linkType="negative"
+            variant="negative"
           >
             Delete
           </TextLink>
         )}
-      </TableCell>
-    </TableRow>
+      </Table.Cell>
+    </Table.Row>
   );
 }

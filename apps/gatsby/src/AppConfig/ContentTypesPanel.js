@@ -1,22 +1,20 @@
+import { FieldGroup, FormLabel } from '@contentful/forma-36-react-components';
+import React, { useState } from 'react';
+
 import {
   Button,
   Flex,
-  FieldGroup,
   List,
   ListItem,
   Modal,
   Note,
-  Option,
-  Paragraph,
-  SkeletonBodyText,
-  SkeletonContainer,
   Select,
-  TextLink,
+  SkeletonContainer,
+  SkeletonBodyText,
   TextInput,
-  Typography,
-  FormLabel,
-} from '@contentful/forma-36-react-components';
-import React, { useState } from 'react';
+  TextLink,
+  Paragraph,
+} from '@contentful/f36-components';
 
 const sortContentTypesAlphabetically = (contentTypes) => {
   const sorted = contentTypes.sort((type1, type2) => {
@@ -38,7 +36,7 @@ const ContentTypesSkeleton = () => (
 );
 
 const NoContentTypes = ({ space, environment }) => (
-  <Note noteType="warning">
+  <Note variant="warning">
     There are no content types available in this environment. You can add one
     <TextLink
       target="_blank"
@@ -62,12 +60,11 @@ const UrlInput = ({ urlConstructors, id, onSlugInput, placeholder, disabled }) =
   const value = valueIndex !== -1 ? urlConstructors[valueIndex].slug : '';
   return (
     <TextInput
-      disabled={disabled}
+      isDisabled={disabled}
       id={id}
       value={value}
       onChange={(event) => onSlugInput(id, event.target.value)}
       placeholder={placeholder}
-      width={'full'}
     />
   );
 };
@@ -130,12 +127,11 @@ export const ContentTypesSelection = ({
                   onContentTypeToggle(event.target.value, focusValue);
                   event.target.blur(); //Have to blur target for correct focus value in the case dropdown is changed multiple times
                 }}
-                width={'medium'}
               >
                 {sortedContentTypes.map(({ name, sys }) => (
-                  <Option key={`option - ${sys.id}`} value={sys.id} label={name}>
+                  <Select.Option key={`option - ${sys.id}`} value={sys.id} label={name}>
                     {name}
-                  </Option>
+                  </Select.Option>
                 ))}
               </Select>
             </Flex>
@@ -149,7 +145,8 @@ export const ContentTypesSelection = ({
             </Flex>
             <Flex>
               <TextLink
-                linkType="negative"
+                as="button"
+                variant="negative"
                 onClick={() => updateModalState({ open: true, id: sys.id })}
               >
                 Remove
@@ -169,24 +166,23 @@ export const ContentTypesSelection = ({
                 selectorTypeToggle();
               }}
               defaultValue
-              width={'medium'}
               key={'placeholder'}
             >
-              <Option disabled value>
+              <Select.Option disabled value>
                 {'Select a content type'}
-              </Option>
+              </Select.Option>
               {sortedContentTypes.map(({ name, sys }) => {
                 // Check if the type is already selected so it can be disabled if so
                 const selected = fullEnabledTypes.findIndex((type) => type.name === name) !== -1;
                 return (
-                  <Option
+                  <Select.Option
                     disabled={selected}
                     key={sys.id}
                     value={sys.id}
                     label={`${name}${selected ? ' – already selected' : ''}`}
                   >
                     {name}
-                  </Option>
+                  </Select.Option>
                 );
               })}
             </Select>
@@ -200,7 +196,7 @@ export const ContentTypesSelection = ({
             />
           </Flex>
           <Flex>
-            <TextLink linkType="negative" onClick={() => selectorTypeToggle()}>
+            <TextLink as="button" variant="negative" onClick={() => selectorTypeToggle()}>
               Remove
             </TextLink>
           </Flex>
@@ -209,7 +205,7 @@ export const ContentTypesSelection = ({
 
       {/* Button to add a new content type */}
       <Flex justifyContent="left" marginTop="spacingXl">
-        <Button buttonType="muted" disabled={selectorType} onClick={() => selectorTypeToggle()}>
+        <Button variant="secondary" isDisabled={selectorType} onClick={() => selectorTypeToggle()}>
           Add content type
         </Button>
       </Flex>
@@ -222,7 +218,7 @@ export const ContentTypesSelection = ({
             <Modal.Controls position={'left'}>
               <Flex marginTop={'spacingXl'}>
                 <Button
-                  buttonType="positive"
+                  variant="positive"
                   onClick={() => {
                     disableContentType(modalState.id);
                     modalReset();
@@ -230,7 +226,7 @@ export const ContentTypesSelection = ({
                 >
                   Remove
                 </Button>
-                <Button buttonType="muted" onClick={() => modalReset()}>
+                <Button variant="secondary" onClick={() => modalReset()}>
                   Do not remove
                 </Button>
               </Flex>
@@ -254,7 +250,7 @@ const ContentTypesPanel = ({
   space,
   environment,
 }) => (
-  <Typography>
+  <React.Fragment>
     <FormLabel>Slug Configuration</FormLabel>
     <Paragraph>
       You may need to define slugs for content types if CMS Preview is unable to route editors to
@@ -301,7 +297,7 @@ const ContentTypesPanel = ({
         selectorType={selectorType}
       />
     </FieldGroup>
-  </Typography>
+  </React.Fragment>
 );
 
 export default ContentTypesPanel;

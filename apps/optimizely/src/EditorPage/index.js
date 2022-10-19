@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { css } from 'emotion';
 import useMethods from 'use-methods';
 import tokens from '@contentful/forma-36-tokens';
-import { Note, Paragraph, Modal } from '@contentful/forma-36-react-components';
 import StatusBar from './subcomponents/status-bar';
 import ReferencesSection from './subcomponents/references-section';
 import ExperimentSection from './subcomponents/experiment-section';
@@ -14,6 +13,8 @@ import { SDKContext, GlobalStateContext } from './subcomponents/all-context';
 import prepareReferenceInfo, { COMBINED_LINK_VALIDATION_CONFLICT } from './reference-info';
 import useInterval from '@use-it/interval';
 import ConnectButton from '../ConnectButton';
+
+import { Modal, Note, Paragraph } from '@contentful/f36-components';
 
 const styles = {
   root: css({
@@ -300,7 +301,7 @@ export default function EditorPage(props) {
   const { combinedLinkValidationType } = state.referenceInfo || {};
   if (combinedLinkValidationType === COMBINED_LINK_VALIDATION_CONFLICT) {
     return (
-      <Note noteType="negative" title="Conflict">
+      <Note variant="negative" title="Conflict">
         Validations of reference fields in incoming references yield conflicting references for the
         Variation Container. Loosen validations or change incoming references so there is at least
         one shared Content Type validation.
@@ -312,7 +313,7 @@ export default function EditorPage(props) {
     <SDKContext.Provider value={props.sdk}>
       <GlobalStateContext.Provider value={globalState}>
         <Modal title="Connect with Optimizely" isShown={!props.client}>
-          <Paragraph className={styles.paragraph} testId="reconnect-optimizely">
+          <Paragraph marginBottom="none" className={styles.paragraph} testId="reconnect-optimizely">
             Your Optimizely session has expired. Reconnect to continue editing.
           </Paragraph>
           <ConnectButton openAuth={props.openAuth} />
@@ -326,7 +327,7 @@ export default function EditorPage(props) {
           />
           <SectionSplitter />
           {showAuth && (
-            <Note noteType="warning" className={styles.paragraph}>
+            <Note variant="warning" className={styles.paragraph}>
               Your Optimizely session will expire soon. Click here to{' '}
               <a onClick={props.openAuth} className={styles.link} data-test-id="preemptive-connect">
                 connect with Optimizely.

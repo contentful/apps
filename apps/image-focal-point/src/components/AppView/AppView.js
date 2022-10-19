@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import camelCase from 'lodash.camelcase';
-import { Heading, Typography, Paragraph } from '@contentful/forma-36-react-components';
 
 import { ConfigurationContent } from './ConfigurationContent';
 import { InstallationContent } from './InstallationContent';
@@ -9,6 +8,8 @@ import { Divider } from '../Divider';
 import { styles } from './styles';
 
 import appLogo from './app-logo.svg';
+
+import { Heading, Paragraph } from '@contentful/f36-components';
 
 const makeContentType = (contentTypeId, contentTypeName) => ({
   sys: {
@@ -143,7 +144,7 @@ export class AppView extends Component {
       <>
         <div className={styles.background} />
         <div className={styles.body}>
-          <Typography>
+          <React.Fragment>
             <Heading className={styles.heading}>About Image Focal Point</Heading>
             <Paragraph>
               The Image Focal Point app allows you to associate focal point data with uploaded image
@@ -160,7 +161,7 @@ export class AppView extends Component {
                 onContentTypeIdChange={this.onContentTypeIdChange}
               />
             )}
-          </Typography>
+          </React.Fragment>
         </div>
         <div className={styles.logo}>
           <img src={appLogo} alt="logo" />

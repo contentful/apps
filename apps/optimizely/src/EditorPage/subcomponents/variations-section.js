@@ -1,15 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { css } from 'emotion';
-import {
-  Heading,
-  Paragraph,
-  SkeletonContainer,
-  SkeletonBodyText,
-} from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { ExperimentType } from './prop-types';
 import VariationItem from './variation-item';
+
+import {
+  SkeletonContainer,
+  SkeletonBodyText,
+  Heading,
+  Paragraph,
+} from '@contentful/f36-components';
 
 const styles = {
   container: css({
@@ -24,7 +25,9 @@ const styles = {
 function Container(props) {
   return (
     <React.Fragment>
-      <Heading element="h2">Variations:</Heading>
+      <Heading marginBottom="none" as="h2">
+        Variations:
+      </Heading>
       <div className={styles.container}>{props.children}</div>
     </React.Fragment>
   );
@@ -67,7 +70,7 @@ export default function VariationsSection(props) {
   if (!props.experiment) {
     return (
       <Container>
-        <Paragraph>To see variations, select an experiment.</Paragraph>
+        <Paragraph marginBottom="none">To see variations, select an experiment.</Paragraph>
       </Container>
     );
   }
@@ -80,7 +83,7 @@ export default function VariationsSection(props) {
 
   return (
     <Container>
-      <Paragraph>
+      <Paragraph marginBottom="none">
         Content created in this experiment is only available for this experiment.
       </Paragraph>
       {mappedVariations.map((item) => (
@@ -97,10 +100,12 @@ export default function VariationsSection(props) {
       ))}
       {unmappedReferences.length > 0 && (
         <React.Fragment>
-          <Heading element="h3" className={styles.unassignedHeader}>
+          <Heading marginBottom="none" as="h3" className={styles.unassignedHeader}>
             Unassigned content
           </Heading>
-          <Paragraph>These entries have no corresponding variations in Optimizely.</Paragraph>
+          <Paragraph marginBottom="none">
+            These entries have no corresponding variations in Optimizely.
+          </Paragraph>
           {unmappedReferences.map((item) => (
             <VariationItem
               sys={item.sys}

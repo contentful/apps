@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Heading, Paragraph, TextField } from '@contentful/forma-36-react-components';
 import { styles } from './styles';
+
+import { FormControl, TextInput, Heading, Paragraph } from '@contentful/f36-components';
 
 export function InstallationContent({
   allContentTypesIds,
@@ -20,40 +21,56 @@ export function InstallationContent({
 
   return (
     <>
-      <Heading className={styles.heading}>Configuration</Heading>
-      <Paragraph>
+      <Heading marginBottom="none" className={styles.heading}>
+        Configuration
+      </Heading>
+      <Paragraph marginBottom="none">
         To help you get started, we are going to create a content type for you with a title field,
         an image field and a focal point field.
       </Paragraph>
-      <TextField
+      <FormControl
         className={styles.input}
-        labelText="Content type name"
-        name="contentTypeName"
-        textInputProps={{
-          placeholder: 'e.g. Image with Focal Point',
-          testId: 'content-type-name-input',
-        }}
-        helpText="You can use this content type to wrap images with focal point data"
-        value={contentTypeName}
-        onChange={onContentTypeNameChange}
         testId="content-type-name"
         id="content-type-name"
-        validationMessage={validationMessageName}
-        required
-      />
-      <TextField
+        isRequired
+        isInvalid={validationMessageName}
+      >
+        <FormControl.Label>Content type name</FormControl.Label>
+        <TextInput
+          name="contentTypeName"
+          value={contentTypeName}
+          onChange={onContentTypeNameChange}
+          placeholder="e.g. Image with Focal Point"
+          testId="content-type-name-input"
+        />
+        <FormControl.HelpText>
+          You can use this content type to wrap images with focal point data
+        </FormControl.HelpText>
+        {validationMessageName && (
+          <FormControl.ValidationMessage>{validationMessageName}</FormControl.ValidationMessage>
+        )}
+      </FormControl>
+      <FormControl
         className={styles.input}
-        labelText="Content type ID"
-        name="contentTypeId"
-        helpText="The ID is generated from the name, you can also set it manually"
-        value={contentTypeId}
-        onChange={onContentTypeIdChange}
-        id="content-type-id"
         testId="content-type-id"
-        textInputProps={{ testId: 'content-type-id-input' }}
-        validationMessage={validationMessageId}
-        required
-      />
+        id="content-type-id"
+        isRequired
+        isInvalid={validationMessageId}
+      >
+        <FormControl.Label>Content type ID</FormControl.Label>
+        <TextInput
+          name="contentTypeId"
+          value={contentTypeId}
+          onChange={onContentTypeIdChange}
+          testId="content-type-id-input"
+        />
+        <FormControl.HelpText>
+          The ID is generated from the name, you can also set it manually
+        </FormControl.HelpText>
+        {validationMessageId && (
+          <FormControl.ValidationMessage>{validationMessageId}</FormControl.ValidationMessage>
+        )}
+      </FormControl>
     </>
   );
 }

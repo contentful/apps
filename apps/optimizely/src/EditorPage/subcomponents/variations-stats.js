@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import get from 'lodash.get';
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
-import { Button } from '@contentful/forma-36-react-components';
+
+import { Button } from '@contentful/f36-components';
 
 const styles = {
   container: css({
@@ -82,7 +83,7 @@ export default function VariationStats(props) {
             label="visitors"
           />
         </div>
-        <Button buttonType="muted" href={url} target="_blank">
+        <Button as="a" variant="secondary" href={url} target="_blank">
           See all results
         </Button>
       </div>

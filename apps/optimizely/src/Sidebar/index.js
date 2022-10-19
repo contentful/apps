@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
+
+import { Button } from '@contentful/f36-components';
 
 const styles = {
   button: css({
@@ -43,10 +44,11 @@ export default function Sidebar(props) {
   return (
     <div data-test-id="sidebar">
       <Button
-        buttonType="primary"
+        as="a"
+        variant="primary"
         isFullWidth
         className={styles.button}
-        disabled={!experimentId}
+        isDisabled={!experimentId}
         href={getExperimentUrl(projectId, experimentId)}
         target="_blank"
         data-test-id="view-experiment"
@@ -54,7 +56,8 @@ export default function Sidebar(props) {
         View in Optimizely
       </Button>
       <Button
-        buttonType="muted"
+        as="a"
+        variant="secondary"
         isFullWidth
         className={styles.button}
         target="_blank"
