@@ -1,6 +1,6 @@
 {
   "name": "contentful-color-picker",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "4.12.0",
