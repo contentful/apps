@@ -106,13 +106,17 @@ const Field = () => {
         </Menu>
       )}
       <input
-        onChange={(e) =>
-          setValue({
-            id: window.crypto.randomUUID(),
-            name: 'Custom',
-            value: e.target.value,
-          })
-        }
+        onChange={(e) => {
+          if (storeHexValue) {
+            setValue(e.target.value);
+          } else {
+            setValue({
+              id: window.crypto.randomUUID(),
+              name: 'Custom',
+              value: e.target.value,
+            });
+          }
+        }}
         type="color"
         id="customColor"
         className={styles.displayNone}
