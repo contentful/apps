@@ -1,31 +1,15 @@
 import { FieldExtensionSDK } from '@contentful/app-sdk';
-import { Button, Flex, Form, Menu } from '@contentful/f36-components';
-import { ChevronDownIcon } from '@contentful/f36-icons';
-import tokens from '@contentful/f36-tokens';
+import { Flex, Form, Menu } from '@contentful/f36-components';
 import { useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ColorBox } from '../components/ColorBox';
+import { SelectColorButton } from '../components/SelectColorButton';
 import { Color, Theme } from '../types';
 
 const styles = {
   displayNone: css({
     display: 'none',
-  }),
-  colorBox: (color: string) =>
-    css({
-      display: 'inline-block',
-      width: '16px',
-      height: '16px',
-      boxShadow: 'inset 0 0 0 1px rgba(0, 0, 0, 0.1)',
-      backgroundColor: color,
-      borderRadius: '4px',
-    }),
-  hexValue: css({
-    color: tokens.gray500,
-    fontVariantNumeric: 'tabular-nums',
-    width: '70px',
-    display: 'inline-block',
-    textAlign: 'left',
   }),
   menuList: css({
     width: 'calc(100% - 2px)', // -2px to keep borders visible
@@ -87,7 +71,7 @@ const Field = () => {
   return (
     <Form>
       {theme.colors.length === 0 ? (
-        <MenuButton
+        <SelectColorButton
           name={name}
           value={value}
           onClick={() => customColorPicker?.current?.click()}
@@ -99,7 +83,7 @@ const Field = () => {
           onClose={() => setIsOpen(false)}
         >
           <Menu.Trigger>
-            <MenuButton showChevron name={name} value={value} />
+            <SelectColorButton showChevron name={name} value={value} />
           </Menu.Trigger>
           <Menu.List className={styles.menuList}>
             {theme.colors.map((color: Color) => (
@@ -108,7 +92,7 @@ const Field = () => {
                 onClick={() => setValue(storeHexValue ? color.value : color)}
               >
                 <Flex alignItems="center" gap="spacingXs">
-                  <span className={styles.colorBox(color.value)} />
+                  <ColorBox color={value} />
                   {color.name}
                 </Flex>
               </Menu.Item>
@@ -137,36 +121,5 @@ const Field = () => {
     </Form>
   );
 };
-
-interface MenuButtonProps {
-  showChevron?: boolean;
-  name: string;
-  value?: FieldValue;
-  onClick?: () => void;
-}
-
-function MenuButton({ showChevron, name, value, onClick }: MenuButtonProps) {
-  return (
-    <Button
-      endIcon={showChevron ? <ChevronDownIcon /> : undefined}
-      isFullWidth
-      onClick={onClick}
-    >
-      <Flex alignItems="center" gap="spacingXs">
-        <span
-          className={styles.colorBox(
-            (typeof value === 'string' ? value : value?.value) ?? '#ffffff'
-          )}
-        />
-        <Flex gap="spacing2Xs">
-          {name}{' '}
-          <span className={styles.hexValue}>
-            {(typeof value === 'string' ? value : value?.value) ?? ''}
-          </span>
-        </Flex>
-      </Flex>
-    </Button>
-  );
-}
 
 export default Field;
