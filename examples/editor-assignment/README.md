@@ -2,6 +2,21 @@
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 !["Config screen view"](https://user-images.githubusercontent.com/3318312/163389377-2e6c8148-a98f-4627-a099-65b7141b1182.png)
 
+## How to use
+
+Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+
+```bash
+# npx
+npx create-contentful-app --example editor-assignment
+
+# npm
+npm init contentful-app -- --example editor-assignment
+
+# Yarn
+yarn create contentful-app --example editor-assignment
+```
+
 
 ## Available Scripts
 

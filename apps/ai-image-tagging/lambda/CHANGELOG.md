@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.21](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-lambda@1.4.20...@contentful/ai-image-tagging-lambda@1.4.21) (2022-10-05)
+
+**Note:** Version bump only for package @contentful/ai-image-tagging-lambda
+
+
+
+
+
+## [1.4.20](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-lambda@1.4.19...@contentful/ai-image-tagging-lambda@1.4.20) (2022-08-24)
+
+**Note:** Version bump only for package @contentful/ai-image-tagging-lambda
+
+
+
+
+
+## [1.4.19](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-lambda@1.4.18...@contentful/ai-image-tagging-lambda@1.4.19) (2022-08-24)
+
+**Note:** Version bump only for package @contentful/ai-image-tagging-lambda
+
+
+
+
+
+## [1.4.18](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-lambda@1.4.17...@contentful/ai-image-tagging-lambda@1.4.18) (2022-08-03)
+
+**Note:** Version bump only for package @contentful/ai-image-tagging-lambda
+
+
+
+
+
 ## [1.4.17](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-lambda@1.4.16...@contentful/ai-image-tagging-lambda@1.4.17) (2022-07-27)
 
 **Note:** Version bump only for package @contentful/ai-image-tagging-lambda

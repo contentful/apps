@@ -1,6 +1,6 @@
 {
   "name": "@contentful/bynder-assets",
-  "version": "1.9.24",
+  "version": "1.11.5",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "0.8.11",
@@ -8,7 +8,7 @@
     "react-scripts": "4.0.3"
   },
   "dependencies": {
-    "@contentful/dam-app-base": "^2.0.18",
+    "@contentful/dam-app-base": "^2.0.27",
     "react": "16.12.0",
     "react-dom": "16.12.0"
   },

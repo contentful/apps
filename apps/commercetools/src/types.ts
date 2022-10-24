@@ -4,6 +4,7 @@ export interface ConfigurationParameters {
   clientSecret?: string;
   apiEndpoint?: string;
   authApiEndpoint?: string;
+  mcUrl?: string;
   locale?: string;
   skuTypes?: Record<string, Record<string, SkuType | undefined> | undefined>;
 }

@@ -6,7 +6,7 @@ import logo from './logo.svg';
 const CTA = 'Select a file on Bynder';
 
 const BYNDER_BASE_URL = 'https://d8ejoa1fys2rk.cloudfront.net';
-const BYNDER_SDK_URL = `${BYNDER_BASE_URL}/5.0.5/modules/compactview/bynder-compactview-2-latest.js`;
+const BYNDER_SDK_URL = `${BYNDER_BASE_URL}/5.0.5/modules/compactview/bynder-compactview-3-latest.js`;
 
 const FIELDS_TO_PERSIST = [
   'archive',
@@ -31,6 +31,7 @@ const FIELDS_TO_PERSIST = [
   'width',
   'videoPreviewURLs',
   'tags',
+  'selectedFile',
 ];
 
 const FIELD_SELECTION = `
@@ -79,7 +80,7 @@ function prepareBynderHTML() {
   `;
 }
 
-function transformAsset(asset) {
+function transformAsset(asset, selected) {
   const thumbnails = {
     webimage: asset.files.webImage?.url,
     thul: asset.files.thumbnail?.url,
@@ -112,7 +113,8 @@ function transformAsset(asset) {
     thumbnails: thumbnails,
     original: asset.originalUrl,
     videoPreviewURLs: asset.previewUrls || [],
-    tags: asset.tags
+    tags: asset.tags,
+    selectedFile: selected.selectedFile,
   };
 }
 
@@ -124,7 +126,7 @@ function checkMessageEvent(e) {
 
 function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
-  const { assetTypes, bynderURL } = config;
+  const { assetTypes, bynderURL, compactViewMode } = config;
 
   let types = [];
   if (!assetTypes) {
@@ -151,14 +153,14 @@ function renderDialog(sdk) {
   window.addEventListener('message', checkMessageEvent);
 
   function onSuccess(assets, selected) {
-    sdk.close(Array.isArray(assets) ? assets.map(transformAsset) : []);
+    sdk.close(Array.isArray(assets) ? assets.map((asset) => transformAsset(asset, selected)) : []);
     window.removeEventListener('message', checkMessageEvent);
   }
 
   script.addEventListener('load', () => {
     window.BynderCompactView.open({
       language: 'en_US',
-      mode: 'MultiSelect',
+      mode: compactViewMode ?? 'MultiSelect',
       assetTypes: types,
       portal: { url: bynderURL, editable: true },
       assetFieldSelection: FIELD_SELECTION,
@@ -234,6 +236,15 @@ setup({
       name: 'Asset types',
       description: 'Choose which types of assets can be selected.',
       default: validAssetTypes.join(','),
+      required: true,
+    },
+    {
+      id: 'compactViewMode',
+      name: 'Compact View Mode',
+      type: 'List',
+      value: 'MultiSelect,SingleSelectFile',
+      default: 'MultiSelect',
+      description: '"SingleSelectFile" allows you to select a specific derivative.',
       required: true,
     },
   ],

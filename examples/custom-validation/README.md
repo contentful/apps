@@ -4,6 +4,21 @@ When accessing data via Contentful it is important that the consumer can expect 
 
 This example shows how a custom app can be used to build a custom entry validation.
 
+## How to use
+
+Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+
+```bash
+# npx
+npx create-contentful-app --example custom-validation
+
+# npm
+npm init contentful-app -- --example custom-validation
+
+# Yarn
+yarn create contentful-app --example custom-validation
+```
+
 ## Problem description
 
 Our example content type has three fields:

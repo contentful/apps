@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "pages/api/translations.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
+}

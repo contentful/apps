@@ -9,9 +9,10 @@ function categoryTransformer({ projectKey, locale }: ConfigurationParameters) {
     return {
       id,
       sku: id,
+      displaySKU: item.slug[locale ?? 'en'] ?? id,
       name: item.name?.[locale ?? 'en'] ?? '',
       image: item.assets?.[0]?.sources?.[0]?.uri ?? '',
-      externalLink: `https://mc.commercetools.com/${projectKey}/products/${id}/general`,
+      externalLink: `https://mc.europe-west1.gcp.commercetools.com/${projectKey}/categories/${id}/general`,
     };
   };
 }
@@ -48,9 +49,9 @@ export async function fetchCategoryPreviews(
   if (response.statusCode === 200) {
     const products = response.body.results.map(categoryTransformer(config));
 
-    const foundSKUs = products.map((product: Product) => product.sku);
+    const foundSKUs = products.map((product: Product) => product.id);
     const missingProducts = [
-      ...validIds.filter((sku) => !foundSKUs.includes(sku)),
+      ...validIds.filter((id) => !foundSKUs.includes(id)),
       ...invalidIds,
     ].map((sku) => ({
       sku,

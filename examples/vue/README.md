@@ -2,6 +2,21 @@
 
 This template should help get you started developing an app for Contentful with Vue 3 in Vite.
 
+## How to use
+
+Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+
+```bash
+# npx
+npx create-contentful-app --example vue
+
+# npm
+npm init contentful-app -- --example vue
+
+# Yarn
+yarn create contentful-app --example vue
+```
+
 ## Type Support for `.vue` Imports in TS
 
 TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.

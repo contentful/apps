@@ -3,6 +3,21 @@ This example shows how an app with a page location can be built. It creates a si
 
 ## How to use
 
+Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+
+```bash
+# npx
+npx create-contentful-app --example page-location
+
+# npm
+npm init contentful-app -- --example page-location
+
+# Yarn
+yarn create contentful-app --example page-location
+```
+
+## How to use
+
 Install it and run:
 
 ```bash

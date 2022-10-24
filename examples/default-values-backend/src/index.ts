@@ -161,7 +161,7 @@ const addDefaultDataOnEntryCreation = async (request: Hapi.Request, h: Hapi.Resp
     } else {
       throw new Error('failed to set default values' + (await res.text()));
     }
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
     throw new Error(e);
   }

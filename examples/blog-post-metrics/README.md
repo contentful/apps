@@ -1,5 +1,20 @@
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
+## How to use
+
+Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+
+```bash
+# npx
+npx create-contentful-app --example blog-post-metrics
+
+# npm
+npm init contentful-app -- --example blog-post-metrics
+
+# Yarn
+yarn create contentful-app --example blog-post-metrics
+```
+
 ## Available Scripts
 
 In the project directory, you can run:

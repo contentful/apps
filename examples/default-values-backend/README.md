@@ -1,5 +1,20 @@
 # Contentful Backend Demo APP
 
+## How to use
+
+Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+
+```bash
+# npx
+npx create-contentful-app --example default-values-backend
+
+# npm
+npm init contentful-app -- --example default-values-backend
+
+# Yarn
+yarn create contentful-app --example default-values-backend
+```
+
 A demo App that will prefill certain values when an entry is created.
 
 The purpose of this demo is to show how backend Apps can be setup and used.

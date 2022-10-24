@@ -38,6 +38,14 @@ export const PARAMETER_DEFINITIONS: ParameterDefinition[] = [
     required: true,
   },
   {
+    id: 'mcUrl',
+    name: 'Merchant Center URL',
+    description:
+      'The Merchant Center URL. Defaults to https://mc.europe-west1.gcp.commercetools.com',
+    type: 'Symbol',
+    required: false,
+  },
+  {
     id: 'locale',
     name: 'commercetools data locale',
     description: 'The commercetools data locale to display',

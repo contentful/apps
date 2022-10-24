@@ -1,6 +1,6 @@
 {
   "name": "@contentful/smartling-frontend",
-  "version": "1.7.22",
+  "version": "1.7.41",
   "main": "build/index.html",
   "devDependencies": {
     "@testing-library/react": "8.0.4",
@@ -8,7 +8,7 @@
     "@types/lodash.get": "^4.4.6",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
-    "@types/webpack-env": "1.17.0",
+    "@types/webpack-env": "1.18.0",
     "cross-env": "^7.0.3",
     "fetch-mock": "^9.0.0-beta.2",
     "jest-fetch-mock": "^3.0.1",
@@ -25,16 +25,16 @@
     "test:dev": "TZ=UTC react-scripts test"
   },
   "dependencies": {
-    "@contentful/app-sdk": "4.10.0",
+    "@contentful/app-sdk": "4.12.0",
     "@contentful/forma-36-fcss": "^0.3.3",
     "@contentful/forma-36-react-components": "^3.93.2",
     "@contentful/forma-36-tokens": "^0.11.0",
-    "contentful-management": "10.9.1",
+    "contentful-management": "10.18.1",
     "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts": "^4.0.3"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "^5.0.1"
   },
   "private": true,
   "eslintConfig": {

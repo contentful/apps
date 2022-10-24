@@ -3,6 +3,47 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.21](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-frontend@1.5.20...@contentful/ai-image-tagging-frontend@1.5.21) (2022-10-05)
+
+
+### Bug Fixes
+
+* **deps:** bump react and react-dom ([#1806](https://github.com/contentful/apps/issues/1806)) ([74a7d23](https://github.com/contentful/apps/commit/74a7d234db58b426f938b5cd52fa2c272c395753))
+
+
+
+
+
+## [1.5.20](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-frontend@1.5.19...@contentful/ai-image-tagging-frontend@1.5.20) (2022-08-24)
+
+**Note:** Version bump only for package @contentful/ai-image-tagging-frontend
+
+
+
+
+
+## [1.5.19](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-frontend@1.5.18...@contentful/ai-image-tagging-frontend@1.5.19) (2022-08-24)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.11.1 to 4.12.0 ([#1646](https://github.com/contentful/apps/issues/1646)) ([659f03a](https://github.com/contentful/apps/commit/659f03ade77269a0e9487f6a2ef8ab29e0952e4c))
+
+
+
+
+
+## [1.5.18](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-frontend@1.5.17...@contentful/ai-image-tagging-frontend@1.5.18) (2022-08-03)
+
+
+### Bug Fixes
+
+* **deps:** bump @contentful/app-sdk from 4.10.0 to 4.11.1 ([#1572](https://github.com/contentful/apps/issues/1572)) ([3c68e13](https://github.com/contentful/apps/commit/3c68e139cf87650e820c190eabc98f62e0434b89))
+
+
+
+
+
 ## [1.5.17](https://github.com/contentful/apps/compare/@contentful/ai-image-tagging-frontend@1.5.16...@contentful/ai-image-tagging-frontend@1.5.17) (2022-07-27)
 
 

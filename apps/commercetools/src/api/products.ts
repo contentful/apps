@@ -3,12 +3,15 @@ import { Product, Pagination } from '@contentful/ecommerce-app-base';
 import { ConfigurationParameters } from '../types';
 import { createClient } from './client';
 
-function productTransformer({ projectKey, locale }: ConfigurationParameters) {
+const MAX_LIMIT = 500;
+
+function productTransformer({ projectKey, locale, mcUrl }: ConfigurationParameters) {
   return (item: ProductProjection): Product => {
+    const merchantCenterBaseUrl =
+      mcUrl && mcUrl.length > 0 ? mcUrl : 'https://mc.europe-west1.gcp.commercetools.com';
     const id = item.id ?? '';
     const externalLink =
-      (projectKey && id && `https://mc.commercetools.com/${projectKey}/products/${id}/general`) ||
-      '';
+      (projectKey && id && `${merchantCenterBaseUrl}/${projectKey}/products/${id}/general`) || '';
     return {
       id,
       image: item.masterVariant?.images?.[0]?.url ?? '',
@@ -34,6 +37,7 @@ export async function fetchProductPreviews(
     .get({
       queryArgs: {
         'filter.query': [`variants.sku:${skus.map((sku) => `"${sku}"`).join(',')}`],
+        limit: MAX_LIMIT,
       },
     })
     .execute();

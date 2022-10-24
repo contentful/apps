@@ -1,5 +1,6 @@
 import differenceBy from 'lodash/differenceBy';
 import { makeShopifyClient } from './skuResolvers';
+import { convertProductToBase64 } from './utils/base64';
 
 const PER_PAGE = 20;
 
@@ -47,6 +48,7 @@ export default class BasePagination {
     const nextProducts = noProductsFetchedYet
       ? await this._fetchProducts(search)
       : await this._fetchNextPage(this.products);
+
     this.hasNextProductPage = nextProducts.length === PER_PAGE;
 
     const newProducts = differenceBy(nextProducts, this.products, 'id');
@@ -70,7 +72,8 @@ export default class BasePagination {
    * and now want to render the next page.
    */
   async _fetchNextPage(products) {
-    return (await this.shopifyClient.fetchNextPage(products)).model;
+    const nextPage = (await this.shopifyClient.fetchNextPage(products)).model;
+    return nextPage.map((product) => convertProductToBase64(product));
   }
 
   _resetPagination() {
