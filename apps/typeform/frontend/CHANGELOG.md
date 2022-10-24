@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.50](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.49...@contentful/typeform-frontend@1.5.50) (2022-10-24)
+
+### Bug Fixes
+
+- **deps:** bump core-js from 3.25.5 to 3.26.0 ([#1875](https://github.com/contentful/apps/issues/1875)) ([418ed60](https://github.com/contentful/apps/commit/418ed608cad5931a6b3b8913bfea1b5a4a1f1f37))
+
 ## [1.5.49](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.48...@contentful/typeform-frontend@1.5.49) (2022-10-20)
 
 ### Bug Fixes
