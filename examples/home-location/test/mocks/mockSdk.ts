@@ -6,7 +6,7 @@ const mockSdk: any = {
     getCurrentState: jest.fn(),
   },
   ids: {
-    app: "test-app",
+    app: 'test-app',
   },
 };
 
