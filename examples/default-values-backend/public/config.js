@@ -23,9 +23,7 @@ class Config extends Component {
     return (
       <Form id="app-config">
         <Heading>Default values App</Heading>
-        <Note title="About the app">
-          Set a default title for an example content type!
-        </Note>
+        <Note title="About the app">Set a default title for an example content type!</Note>
         <TextInput
           name="default value"
           labelText="Default value"

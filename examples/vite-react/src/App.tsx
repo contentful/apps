@@ -7,6 +7,7 @@ import EntryEditor from './locations/EntryEditor';
 import Field from './locations/Field';
 import Page from './locations/Page';
 import Sidebar from './locations/Sidebar';
+import Home from './locations/Home';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -15,6 +16,7 @@ const ComponentLocationSettings = {
   [locations.LOCATION_DIALOG]: Dialog,
   [locations.LOCATION_ENTRY_SIDEBAR]: Sidebar,
   [locations.LOCATION_PAGE]: Page,
+  [locations.LOCATION_HOME]: Home,
 };
 
 const App = () => {
