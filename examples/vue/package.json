@@ -10,7 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@contentful/app-sdk": "4.9.0",
+    "@contentful/app-sdk": "4.13.0",
     "vue": "^3.2.31"
   },
   "devDependencies": {
