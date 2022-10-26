@@ -99,7 +99,7 @@ const Field = () => {
                 onClick={() => setValue(storeHexValue ? color.value : color)}
               >
                 <Flex alignItems="center" gap="spacingXs">
-                  <ColorBox color={value} />
+                  <ColorBox color={color} />
                   {color.name}
                 </Flex>
               </Menu.Item>
