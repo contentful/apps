@@ -22,7 +22,7 @@ const HEIGHT_DEFAULT = 41;
 const HEIGHT_BASE = 52 + 4 + 14;
 const HEIGHT_ITEM = 36;
 
-type FieldValue = Color | string;
+type FieldValue = Color | string | undefined;
 
 const Field = () => {
   const sdk = useSDK<FieldExtensionSDK>();
@@ -52,21 +52,28 @@ const Field = () => {
     sdk.window.updateHeight(calculatedHeight <= 400 ? calculatedHeight : 400);
   }, [isOpen, sdk, theme]);
 
-  const name = useMemo(() => {
-    if (storeHexValue) {
-      const color = theme.colors.find((c) => c.value === (value as string));
-      if (color) {
-        return color.name;
-      }
-      if (allowCustomValue) {
-        return 'Custom';
-      } else {
+  const name = useMemo<string>(() => {
+    switch (typeof value) {
+      case 'string':
+        const color = theme.colors.find((c) => c.value === value);
+        if (color) {
+          return color.name;
+        }
+
+        if (allowCustomValue) {
+          return 'Custom';
+        } else {
+          return 'Invalid';
+        }
+
+      case 'object':
+        return value.name;
+
+      case 'undefined':
+      default:
         return 'Invalid';
-      }
-    } else {
-      return (value as Color).name ?? 'Invalid';
     }
-  }, [allowCustomValue, storeHexValue, theme.colors, value]);
+  }, [allowCustomValue, theme.colors, value]);
 
   return (
     <Form>
