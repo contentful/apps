@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.4](https://github.com/contentful/apps/compare/contentful-color-picker@0.2.3...contentful-color-picker@0.2.4) (2022-10-26)
+
+### Bug Fixes
+
+- use correct color for box in dropdown ([#1897](https://github.com/contentful/apps/issues/1897)) ([9f8236a](https://github.com/contentful/apps/commit/9f8236a04b7d2e43a2a407c93cf43780343009d8))
+
 ## [0.2.3](https://github.com/contentful/apps/compare/contentful-color-picker@0.2.2...contentful-color-picker@0.2.3) (2022-10-26)
 
 ### Bug Fixes
