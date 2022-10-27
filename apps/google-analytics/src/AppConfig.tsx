@@ -10,6 +10,7 @@ import {
   Select,
   FormLabel,
   TextInput,
+  Note,
 } from '@contentful/forma-36-react-components';
 import styles from './styles';
 import { AppConfigParams, AppConfigState, AllContentTypes, ContentTypes } from './typings';
@@ -223,6 +224,40 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
           <div>
             <Typography>
               <Heading className={styles.spaced}>About Google Analytics</Heading>
+
+              <Note noteType="negative" title="Deprecation notice" className={styles.spaced}>
+                <Paragraph className={styles.slimSpaced}>
+                  Google has{' '}
+                  <TextLink
+                    href="https://developers.googleblog.com/2021/08/gsi-jsweb-deprecation.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    deprecated the library
+                  </TextLink>{' '}
+                  Contentful uses to link your Contentful space to a Google Analytics dashboard and
+                  display page view reports alongside your Contentful entries.
+                </Paragraph>
+
+                <Paragraph className={styles.slimSpaced}>
+                  As a result,{' '}
+                  <strong>
+                    the Google Analytics app will no longer function correctly if you're installing
+                    it after July 29, 2022
+                  </strong>
+                  . Existing installations are not affected by this deprecation.
+                </Paragraph>
+
+                <Paragraph>
+                  <TextLink
+                    href="https://www.contentful.com/help/deprecation-notice-google-analytics-app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Read more details here.
+                  </TextLink>
+                </Paragraph>
+              </Note>
 
               <Paragraph>
                 This app allows you to view pageview analytics of a Contentful entry in the editor
