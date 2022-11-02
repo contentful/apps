@@ -4,6 +4,15 @@ import * as express from 'serverless-express/express';
 import * as path from 'path';
 import fetch from 'node-fetch';
 import { Issuer } from 'openid-client';
+import { URL } from 'url';
+
+function requestProxier(proxyUrl: string, proxyPathPrefix = '') {
+  return async (req: express.Request, res: express.Response) => {
+    const url = new URL(path.join(proxyPathPrefix, req.url), proxyUrl);
+    const response = await fetch(url.href);
+    response.body.pipe(res);
+  };
+}
 
 export function makeApp(fetchFn: any, issuer: any) {
   const app = express() as Express;
@@ -107,10 +116,20 @@ export function makeApp(fetchFn: any, issuer: any) {
     );
   });
 
-  app.use(
-    '/frontend',
-    express.static(path.dirname(require.resolve('@contentful/smartling-frontend')))
-  );
+  if (process.env.LOCAL_DEV === 'true' && process.env.FRONTEND_URL) {
+    // in development mode, proxy requests to the frontend development server running at FRONTEND_URL
+    app.use('/frontend', requestProxier(process.env.FRONTEND_URL));
+
+    // in development mode, static assets are expressed as relative paths, which is served
+    // under the backend and thus also needs to be proxied
+    app.use('/static', requestProxier(process.env.FRONTEND_URL, 'static'));
+  } else {
+    // in production mode, frontend requests are served from the static smartling-frontend build folder
+    app.use(
+      '/frontend',
+      express.static(path.dirname(require.resolve('@contentful/smartling-frontend')))
+    );
+  }
 
   app.use((_req, res) => res.status(404).send('Not found'));
 
