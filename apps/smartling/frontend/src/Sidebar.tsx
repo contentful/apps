@@ -125,19 +125,24 @@ function submissionStatusLongText(status: string) {
     case 'new':
       return `The asset is in the process of being sent for a new translation request. For example, if changes
         were made to the source content and your Contentful Connector is configured to automatically send the
-        new content for translation. The asset could be sitting in submission queue or sitting in Awaiting Authorization`;
+        new content for translation. The asset could be sitting in submission queue or sitting in Awaiting Authorization.`;
     case 'in progress':
     case 'in_progress':
-      return 'The asset has been successfully sent to Smartling from Contentful, and the translation process has commenced but is not yet completed. If there is a case where translations are complete, but a network issue occurs, the translations will remain in progress until the Contentful Connector delivers the translations to Contentful on a successful retry.';
+      return `The asset has been successfully sent to Smartling from Contentful, and the translation process
+        has commenced but is not yet completed. If there is a case where translations are complete, but a network
+        issue occurs, the translations will remain in progress until the Contentful Connector delivers the translations
+        to Contentful on a successful retry.`;
     case 'canceled':
     case 'cancelled':
-      return 'The job associated with this asset has been cancelled';
+      return 'The job associated with this asset has been cancelled.';
     case 'completed':
       return 'Translations were successfully delivered from Smartling to Contentful.';
     case 'failed':
-      return 'The asset submission failed, or the translation delivery failed. A number of reasons can result in a failed status, but some of the most common are due to invalid regex causing placeholder issues, or the target languages are disabled in Contentful.';
+      return `The asset submission failed, or the translation delivery failed. A number of reasons can result in a
+        failed status, but some of the most common are due to invalid regex causing placeholder issues, or the target
+        languages are disabled in Contentful.`;
     default:
-      return 'This status is unknown';
+      return 'This status is unknown.';
   }
 }
 
