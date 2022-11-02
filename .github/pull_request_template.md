@@ -1,22 +1,11 @@
-_A one or two sentence high-level summary of the change_
-
 ## Purpose
-
-_Why are we introducing this change now? What problem does it solve? What is the story/background for it?_
+<!-- Why are we introducing this change now? What problem does it solve? What is the story/background for it? -->
 
 ## Approach
-
-_Why did we do it the way we did? Did we consider alternatives? What other implementation details or artifacts (screenshots etc.) would help reviewers contextualize change?_
-
-## Deployment
-
-_Are there any deployment-related tasks, concerns or risks we should be mindful of?_
+<!-- Why did we do it the way we did? Did we consider alternatives? What other implementation details or artifacts (screenshots etc.) would help reviewers contextualize change? -->
 
 ## Dependencies and/or References
+<!-- Where can we get more insights about this change? (Tickets, wiki pages or links to other places/docs -- no private/internal links please) -->
 
-_Where can we get more insights about this change? (Tickets, wiki pages or links to other places/docs) Any related PRs?_
-
-## Reminders
-
-* [Write good pull requests!](https://seesparkbox.com/foundry/github_pull_requests_for_everyone) 👼
-* [Be a good reviewer!](https://seesparkbox.com/foundry/stop_giving_depressing_code_reviews) 🧐
+## Deployment
+<!-- (Optional) Are there any deployment-related tasks, concerns or risks we should be mindful of? -->
