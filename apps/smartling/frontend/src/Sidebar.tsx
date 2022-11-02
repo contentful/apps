@@ -130,8 +130,8 @@ function submissionStatusLongText(status: string) {
     case 'in_progress':
       return `The asset has been successfully sent to Smartling from Contentful, and the translation process
         has commenced but is not yet completed. If there is a case where translations are complete, but a network
-        issue occurs, the translations will remain in progress until the Contentful Connector delivers the translations
-        to Contentful on a successful retry.`;
+        issue occurs, the translations will remain in progress until Smartling delivers the translations to Contentful
+        on a successful retry.`;
     case 'canceled':
     case 'cancelled':
       return 'The job associated with this asset has been cancelled.';
