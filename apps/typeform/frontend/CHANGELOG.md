@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.52](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.51...@contentful/typeform-frontend@1.5.52) (2022-11-03)
+
+### Bug Fixes
+
+- **deps:** bump jsdom from 20.0.1 to 20.0.2 ([#1927](https://github.com/contentful/apps/issues/1927)) ([04d0ad8](https://github.com/contentful/apps/commit/04d0ad8ec2af2c0174c4b963509a9d9c56b05946))
+
 ## [1.5.51](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.50...@contentful/typeform-frontend@1.5.51) (2022-10-28)
 
 ### Bug Fixes
