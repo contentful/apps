@@ -12,6 +12,7 @@ import {
   SkeletonImage,
   Spinner,
   Note,
+  Flex,
 } from '@contentful/forma-36-react-components';
 import smartlingClient from './smartlingClient';
 
@@ -115,6 +116,34 @@ function sortSubs(a: Submission, b: Submission) {
   }
 
   return 0;
+}
+
+function submissionStatusLongText(status: string) {
+  switch (status.toLowerCase()) {
+    case 'not translated':
+      return `The asset has never been submitted for translation`;
+    case 'new':
+      return `The asset is in the process of being sent for a new translation request. For example, if changes
+        were made to the source content and your Contentful Connector is configured to automatically send the
+        new content for translation. The asset could be sitting in submission queue or sitting in Awaiting Authorization.`;
+    case 'in progress':
+    case 'in_progress':
+      return `The asset has been successfully sent to Smartling from Contentful, and the translation process
+        has commenced but is not yet completed. If there is a case where translations are complete, but a network
+        issue occurs, the translations will remain in progress until Smartling delivers the translations to Contentful
+        on a successful retry.`;
+    case 'canceled':
+    case 'cancelled':
+      return 'The job associated with this asset has been cancelled.';
+    case 'completed':
+      return 'Translations were successfully delivered from Smartling to Contentful.';
+    case 'failed':
+      return `The asset submission failed, or the translation delivery failed. A number of reasons can result in a
+        failed status, but some of the most common are due to invalid regex causing placeholder issues, or the target
+        languages are disabled in Contentful.`;
+    default:
+      return 'This status is unknown.';
+  }
 }
 
 function formatSmartlingEntry(entry: SmartlingContentfulEntry): SmartlingContentfulEntry {
@@ -259,9 +288,18 @@ export default class Sidebar extends React.Component<Props, State> {
         : smartlingEntry.translationSubmissions.slice(0, SUBS_TO_SHOW);
 
       statusTag = (
-        <Tag className="job-status" tagType={getStatusColor(smartlingEntry.assetStatus)}>
-          {smartlingEntry.assetStatus}
-        </Tag>
+        <Flex justifyContent="start" alignItems="bottom">
+          <Tag className="job-status" tagType={getStatusColor(smartlingEntry.assetStatus)}>
+            {smartlingEntry.assetStatus}
+          </Tag>
+          <Tooltip
+            place="top"
+            targetWrapperClassName="tooltip"
+            content={submissionStatusLongText(smartlingEntry.assetStatus)}
+          >
+            <Icon icon="InfoCircle" />
+          </Tooltip>
+        </Flex>
       );
 
       if (subsToShow.length) {
@@ -340,6 +378,16 @@ export default class Sidebar extends React.Component<Props, State> {
         </div>
         {requestButton}
         {smartlingBody}
+        <Paragraph className="smartling-more-info">
+          <TextLink
+            href="https://help.smartling.com/hc/en-us/articles/360000546974-Contentful-Connector-Overview"
+            target="_blank"
+            rel="noopener"
+          >
+            Learn how Smartling works with Contentful&nbsp;
+            <Icon size="tiny" icon="ExternalLink" color="secondary" />
+          </TextLink>
+        </Paragraph>
       </>
     );
   }
