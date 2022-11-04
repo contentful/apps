@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.46](https://github.com/contentful/apps/compare/@contentful/smartling-lambda@1.4.45...@contentful/smartling-lambda@1.4.46) (2022-11-04)
+
+**Note:** Version bump only for package @contentful/smartling-lambda
+
 ## [1.4.45](https://github.com/contentful/apps/compare/@contentful/smartling-lambda@1.4.44...@contentful/smartling-lambda@1.4.45) (2022-11-04)
 
 **Note:** Version bump only for package @contentful/smartling-lambda
