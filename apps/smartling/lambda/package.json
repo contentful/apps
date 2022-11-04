@@ -3,7 +3,7 @@
   "version": "1.4.45",
   "private": true,
   "scripts": {
-    "start": "LOCAL_DEV=true ts-node src/index.ts",
+    "start": "LOCAL_DEV=true FRONTEND_URL=http://localhost:3000 ts-node src/index.ts",
     "build": "rimraf built && tsc",
     "lint": "tslint --project ./tsconfig.json",
     "test": "jest --watch",
