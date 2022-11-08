@@ -95,3 +95,9 @@ npm run start
 
 * Both the frontend and the backend provide tests, which can be executed with `npm run test` 
 * The frontend uses [snapshot testing](https://jestjs.io/docs/snapshot-testing). To update snapshots after changing the interface use `npm run test -- -u`
+
+## Other Helpful Resources
+
+* [Smartling App Marketplace listing](https://www.contentful.com/marketplace/app/smartling/)
+* [Contentful help center page for Smartling](https://www.contentful.com/help/smartling-app/)
+* [Contentful Connector overview (from Smartling)](https://help.smartling.com/hc/en-us/articles/360000546974-Contentful-Connector-Overview)
