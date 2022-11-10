@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.58](https://github.com/contentful/apps/compare/@contentful/functions@1.4.57...@contentful/functions@1.4.58) (2022-11-10)
+
+**Note:** Version bump only for package @contentful/functions
+
 ## [1.4.57](https://github.com/contentful/apps/compare/@contentful/functions@1.4.56...@contentful/functions@1.4.57) (2022-11-09)
 
 ### Bug Fixes
