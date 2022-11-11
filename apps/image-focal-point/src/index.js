@@ -52,9 +52,9 @@ export class App extends React.Component {
     const value = e.currentTarget.value;
     this.setState({ value });
     if (value) {
-      this.props.sdk.field.setValue(value);
+      this.props.sdk.field.setValue(value, this.findProperLocale());
     } else {
-      this.props.sdk.field.removeValue();
+      this.props.sdk.field.removeValue(this.findProperLocale());
     }
   };
 
@@ -78,7 +78,7 @@ export class App extends React.Component {
           focalPoint,
         },
       }),
-      () => this.props.sdk.field.setValue(this.state.value)
+      () => this.props.sdk.field.setValue(this.state.value, this.findProperLocale())
     );
   };
 
@@ -89,8 +89,8 @@ export class App extends React.Component {
 
     try {
       const imageField = entry.fields[IMAGE_FIELD_ID];
-      const asset = await space.getAsset(imageField.getValue().sys.id);
-      const file = asset.fields.file[this.findProperLocale()];
+      const asset = await space.getAsset(imageField.getValue(this.findProperLocale()).sys.id);
+      const file = asset.fields.file[this.props.sdk.locales.default];
       const imageUrl = file.url;
       const isOfImageMimeType = /image\/.*/.test(file.contentType);
 
