@@ -59,11 +59,11 @@ export class App extends React.Component {
   };
 
   findProperLocale() {
-    if (this.props.sdk.entry.fields[this.props.sdk.field.id].type === 'Link') {
-      return this.props.sdk.locales.default;
-    }
+    const imageField = this.props.sdk.entry.fields[IMAGE_FIELD_ID];
 
-    return this.props.sdk.field.locale;
+    return imageField.locales.includes(this.props.sdk.field.locale)
+      ? this.props.sdk.field.locale
+      : this.props.sdk.locales.default;
   }
 
   resetFocalPoint = () => {
@@ -90,7 +90,9 @@ export class App extends React.Component {
     try {
       const imageField = entry.fields[IMAGE_FIELD_ID];
       const asset = await space.getAsset(imageField.getValue(this.findProperLocale()).sys.id);
-      const file = asset.fields.file[this.props.sdk.locales.default];
+      const file =
+        asset.fields.file[this.findProperLocale()] ??
+        asset.fields.file[this.props.sdk.locales.default];
       const imageUrl = file.url;
       const isOfImageMimeType = /image\/.*/.test(file.contentType);
 
