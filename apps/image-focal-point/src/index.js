@@ -52,9 +52,9 @@ export class App extends React.Component {
     const value = e.currentTarget.value;
     this.setState({ value });
     if (value) {
-      this.props.sdk.field.setValue(value, this.findProperLocale());
+      this.props.sdk.field.setValue(value);
     } else {
-      this.props.sdk.field.removeValue(this.findProperLocale());
+      this.props.sdk.field.removeValue();
     }
   };
 
@@ -78,7 +78,7 @@ export class App extends React.Component {
           focalPoint,
         },
       }),
-      () => this.props.sdk.field.setValue(this.state.value, this.findProperLocale())
+      () => this.props.sdk.field.setValue(this.state.value)
     );
   };
 
