@@ -1,6 +1,6 @@
 service: sls-apps-netlify-build
 
-frameworkVersion: ">=2.0.0 <3.0.0"
+frameworkVersion: '>=2.0.0 <3.0.0'
 variablesResolutionMode: 20210326
 
 plugins:
@@ -23,14 +23,14 @@ custom:
     domainName: ${self:custom.domainName.${env:STAGE, 'test'}}
     stage: ${env:STAGE, 'test'}
     createRoute53Record: true
-    endpointType: "edge"
+    endpointType: 'edge'
     securityPolicy: tls_1_2
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   stage: ${env:STAGE, 'test'}
-  region: "us-east-1"
+  region: 'us-east-1'
   lambdaHashingVersion: 20201221
   deploymentBucket:
     name: cf-apps-serverless-deployment
