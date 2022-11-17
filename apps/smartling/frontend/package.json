@@ -25,11 +25,11 @@
     "test:dev": "TZ=UTC react-scripts test"
   },
   "dependencies": {
-    "@contentful/app-sdk": "4.12.0",
-    "@contentful/forma-36-fcss": "^0.3.3",
-    "@contentful/forma-36-react-components": "^3.93.2",
-    "@contentful/forma-36-tokens": "^0.11.0",
-    "contentful-management": "10.21.1",
+    "@contentful/app-sdk": "4.13.0",
+    "@contentful/forma-36-fcss": "^0.3.5",
+    "@contentful/forma-36-react-components": "^3.100.7",
+    "@contentful/forma-36-tokens": "^0.11.2",
+    "contentful-management": "10.20.1",
     "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
