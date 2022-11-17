@@ -3,6 +3,16 @@
   "version": "1.4.62",
   "main": "index.js",
   "private": true,
+  "scripts": {
+    "build": "rimraf built && tsc",
+    "lint": "tslint --project ./tsconfig.json",
+    "lint-fix": "tslint --project ./tsconfig.json --fix",
+    "test": "ts-mocha '**/*.spec.ts'",
+    "test:ci": "npm run test",
+    "deploy": "sls deploy --stage $STAGE",
+    "deploy:test": "npm run deploy",
+    "start": "npm run build && serverless offline --httpPort 3000"
+  },
   "dependencies": {
     "aws-sdk": "^2.814.0",
     "node-fetch": "^2.6.7"
