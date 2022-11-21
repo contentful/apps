@@ -1,6 +1,6 @@
 {
   "name": "@contentful/google-analytics",
-  "version": "1.5.10",
+  "version": "1.5.11",
   "private": true,
   "devDependencies": {
     "@testing-library/react": "8.0.4",

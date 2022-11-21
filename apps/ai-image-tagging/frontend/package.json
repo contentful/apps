@@ -1,6 +1,6 @@
 {
   "name": "@contentful/ai-image-tagging-frontend",
-  "version": "1.5.23",
+  "version": "1.5.24",
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
