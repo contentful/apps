@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.34](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.33...@contentful/ecommerce-app-base@3.1.34) (2022-11-21)
+
+### Bug Fixes
+
+- **deps:** bump @types/lodash from 4.14.188 to 4.14.189 ([#2002](https://github.com/contentful/apps/issues/2002)) ([902e3bf](https://github.com/contentful/apps/commit/902e3bfbe5fddfb27021b0fbbe60ae6f2867836e))
+
 ## [3.1.33](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.32...@contentful/ecommerce-app-base@3.1.33) (2022-11-21)
 
 ### Bug Fixes

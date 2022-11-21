@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.62](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.61...@contentful/typeform-frontend@1.5.62) (2022-11-21)
+
+### Bug Fixes
+
+- **deps:** bump @types/lodash from 4.14.188 to 4.14.189 ([#2002](https://github.com/contentful/apps/issues/2002)) ([902e3bf](https://github.com/contentful/apps/commit/902e3bfbe5fddfb27021b0fbbe60ae6f2867836e))
+
 ## [1.5.61](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.60...@contentful/typeform-frontend@1.5.61) (2022-11-21)
 
 **Note:** Version bump only for package @contentful/typeform-frontend
