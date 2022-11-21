@@ -14,28 +14,26 @@ function requestProxier(proxyUrl: string, proxyPathPrefix = '') {
   };
 }
 
+async function makeClient(issuer: any) {
+  const { Client } = await issuer.discover(
+    'https://sso.smartling.com/auth/realms/Smartling/.well-known/openid-configuration'
+  );
+
+  const { CLIENT_ID, CLIENT_SECRET } = process.env;
+
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error('CLIENT_ID and/or CLIENT_SECRET were not provided!');
+  }
+
+  return new Client({
+    client_id: process.env.CLIENT_ID,
+    client_secret: process.env.CLIENT_SECRET,
+  });
+}
+
 export function makeApp(fetchFn: any, issuer: any) {
   const app = express() as Express;
 
-  // tslint:disable-next-line
-  async function makeClient() {
-    const { Client } = await issuer.discover(
-      'https://sso.smartling.com/auth/realms/Smartling/.well-known/openid-configuration'
-    );
-
-    const { CLIENT_ID, CLIENT_SECRET } = process.env;
-
-    if (!CLIENT_ID || !CLIENT_SECRET) {
-      throw new Error('CLIENT_ID and/or CLIENT_SECRET were not provided!');
-    }
-
-    return new Client({
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-    });
-  }
-
-  // @ts-ignore
   app.get('/', async (req, res) => {
     if (!req.query.code) {
       console.error('No auth code was provided during Smartling OAuth handshake!');
@@ -49,7 +47,7 @@ export function makeApp(fetchFn: any, issuer: any) {
       return;
     }
 
-    const client = await makeClient();
+    const client = await makeClient(issuer);
 
     try {
       const params = client.callbackParams(req);
@@ -79,7 +77,7 @@ export function makeApp(fetchFn: any, issuer: any) {
       return;
     }
 
-    const client = await makeClient();
+    const client = await makeClient(issuer);
 
     try {
       const data = await client.refresh(refresh_token);
