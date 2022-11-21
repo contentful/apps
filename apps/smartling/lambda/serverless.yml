@@ -17,7 +17,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs16.x
   stage: ${opt:stage, 'test'}
   region: 'us-east-1'
   deploymentBucket:
@@ -36,8 +36,8 @@ functions:
     environment:
       CLIENT_ID: ${env:SMARTLING_CLIENT_ID}
       CLIENT_SECRET: ${env:SMARTLING_CLIENT_SECRET}
-    handler: built/index.api 
-    events: 
+    handler: built/index.api
+    events:
       - http:
           path: /
           method: GET

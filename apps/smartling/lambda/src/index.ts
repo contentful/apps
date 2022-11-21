@@ -14,25 +14,25 @@ function requestProxier(proxyUrl: string, proxyPathPrefix = '') {
   };
 }
 
+async function makeClient(issuer: any) {
+  const { Client } = await issuer.discover(
+    'https://sso.smartling.com/auth/realms/Smartling/.well-known/openid-configuration'
+  );
+
+  const { CLIENT_ID, CLIENT_SECRET } = process.env;
+
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error('CLIENT_ID and/or CLIENT_SECRET were not provided!');
+  }
+
+  return new Client({
+    client_id: process.env.CLIENT_ID,
+    client_secret: process.env.CLIENT_SECRET,
+  });
+}
+
 export function makeApp(fetchFn: any, issuer: any) {
   const app = express() as Express;
-
-  async function makeClient() {
-    const { Client } = await issuer.discover(
-      'https://sso.smartling.com/auth/realms/Smartling/.well-known/openid-configuration'
-    );
-
-    const { CLIENT_ID, CLIENT_SECRET } = process.env;
-
-    if (!CLIENT_ID || !CLIENT_SECRET) {
-      throw new Error('CLIENT_ID and/or CLIENT_SECRET were not provided!');
-    }
-
-    return new Client({
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-    });
-  }
 
   app.get('/', async (req, res) => {
     if (!req.query.code) {
@@ -47,7 +47,7 @@ export function makeApp(fetchFn: any, issuer: any) {
       return;
     }
 
-    const client = await makeClient();
+    const client = await makeClient(issuer);
 
     try {
       const params = client.callbackParams(req);
@@ -57,6 +57,7 @@ export function makeApp(fetchFn: any, issuer: any) {
         `/frontend/index.html?access_token=${data.access_token}&refresh_token=${data.refresh_token}`
       );
     } catch (e) {
+      // @ts-ignore
       console.error('Smartling OAuth failed with message: ', e.message);
 
       res.redirect(
@@ -67,6 +68,7 @@ export function makeApp(fetchFn: any, issuer: any) {
     }
   });
 
+  // @ts-ignore
   app.get('/refresh', async (req, res) => {
     const { refresh_token } = req.query;
 
@@ -75,23 +77,25 @@ export function makeApp(fetchFn: any, issuer: any) {
       return;
     }
 
-    const client = await makeClient();
+    const client = await makeClient(issuer);
 
     try {
       const data = await client.refresh(refresh_token);
       res.json({ access_token: data.access_token });
     } catch (e) {
+      // @ts-ignore
       if (e.error === 'invalid_grant') {
         res.status(401).json({ message: 'Invalid or expired refresh_token was provided' });
         return;
       }
-
+      // @ts-ignore
       console.error('Smartling refresh failed unexpectedly with error: ', e.message);
 
       res.sendStatus(500);
     }
   });
 
+  // @ts-ignore
   app.get('/entry', async (req, res) => {
     const { entryId, projectId, spaceId } = req.query;
 
@@ -110,6 +114,7 @@ export function makeApp(fetchFn: any, issuer: any) {
     res.status(smartlingRes.status).json(data.response);
   });
 
+  // @ts-ignore
   app.get('/openauth', (_req, res) => {
     res.redirect(
       `https://sso.smartling.com/auth/realms/Smartling/protocol/openid-connect/auth?response_type=code&client_id=${process.env.CLIENT_ID}`
@@ -131,6 +136,7 @@ export function makeApp(fetchFn: any, issuer: any) {
     );
   }
 
+  // @ts-ignore
   app.use((_req, res) => res.status(404).send('Not found'));
 
   return app;

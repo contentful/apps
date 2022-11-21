@@ -65,13 +65,36 @@ describe('AppPage', () => {
   });
 
   it('should render the AppPage with Features and connect button', () => {
-    const { container } = render(<AppPage {...basicProps} />);
+    const sdk = {
+      ...basicProps.sdk,
+      space: {
+        getContentTypes: jest.fn(() => Promise.resolve(contentTypesData)),
+      },
+      app: {
+        setReady: jest.fn(),
+        getParameters: jest.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
+        onConfigure: jest.fn((fn) => {}),
+      },
+    };
+    const props = { ...basicProps, sdk };
+    const { container } = render(<AppPage {...props} />);
 
     expect(container).toMatchSnapshot();
   });
 
   it('should render the AppPage loading when first connected to Optimizely', () => {
-    const props = { ...basicProps, accessToken: '123' };
+    const sdk = {
+      ...basicProps.sdk,
+      space: {
+        getContentTypes: jest.fn(() => Promise.resolve(contentTypesData)),
+      },
+      app: {
+        setReady: jest.fn(),
+        getParameters: jest.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
+        onConfigure: jest.fn((fn) => {}),
+      },
+    };
+    const props = { ...basicProps, accessToken: '123', sdk };
 
     const { container } = render(<AppPage {...props} />);
 
