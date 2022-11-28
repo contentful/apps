@@ -33,7 +33,7 @@
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 66frtrAqmWSowDJzQNDiD --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy": "echo: package error, not deploying",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
