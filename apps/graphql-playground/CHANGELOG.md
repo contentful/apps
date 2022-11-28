@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.7](https://github.com/contentful/apps/compare/@contentful/graphql-playground@0.2.6...@contentful/graphql-playground@0.2.7) (2022-11-28)
+
+### Bug Fixes
+
+- [] temporarily disable deploys for graphql playground ([#2079](https://github.com/contentful/apps/issues/2079)) ([f018162](https://github.com/contentful/apps/commit/f018162a52102add5e5f1c10c496ac14e5a07273))
+
 ## [0.2.6](https://github.com/contentful/apps/compare/@contentful/graphql-playground@0.2.5...@contentful/graphql-playground@0.2.6) (2022-11-21)
 
 **Note:** Version bump only for package @contentful/graphql-playground
