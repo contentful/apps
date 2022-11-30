@@ -126,6 +126,10 @@ function checkMessageEvent(e) {
 
 function renderDialog(sdk) {
   const config = sdk.parameters.invocation;
+
+  // Important: `compactViewMode` is a legacy config parameter that was removed from the parameterDefinitions
+  // list. It is referenced here for temporary backward compatibility, for apps that previously chose a configuration
+  // value.
   const { assetTypes, bynderURL, compactViewMode } = config;
 
   let types = [];
@@ -160,7 +164,12 @@ function renderDialog(sdk) {
   script.addEventListener('load', () => {
     window.BynderCompactView.open({
       language: 'en_US',
+
+      // Note: `compactViewMode` is a deprecated parameter which will be removed in the near future. It is
+      // still used here for backwards compatibility -- our view mode respects any previous configuration
+      // a customer made. Later, we will just use `'MultiSelect'` for everyone.
       mode: compactViewMode ?? 'MultiSelect',
+
       assetTypes: types,
       portal: { url: bynderURL, editable: true },
       assetFieldSelection: FIELD_SELECTION,
@@ -236,15 +245,6 @@ setup({
       name: 'Asset types',
       description: 'Choose which types of assets can be selected.',
       default: validAssetTypes.join(','),
-      required: true,
-    },
-    {
-      id: 'compactViewMode',
-      name: 'Compact View Mode',
-      type: 'List',
-      value: 'MultiSelect,SingleSelectFile',
-      default: 'MultiSelect',
-      description: '"SingleSelectFile" allows you to select a specific derivative.',
       required: true,
     },
   ],
