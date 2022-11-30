@@ -96,6 +96,7 @@ export function TypeFormField({ sdk }: Props) {
         sdk.field.removeValue();
         return {
           ...state,
+          loading: false,
           value: '',
           hasStaleData: false,
           selectedForm: initialState.selectedForm,
