@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.65](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.64...@contentful/typeform-frontend@1.5.65) (2022-12-01)
+
+### Bug Fixes
+
+- **deps:** bump @types/lodash from 4.14.190 to 4.14.191 ([#2097](https://github.com/contentful/apps/issues/2097)) ([290174f](https://github.com/contentful/apps/commit/290174fd64a96965c0cfda22bdb56e05e4b786b8))
+- reset loading state on state reset ([#2080](https://github.com/contentful/apps/issues/2080)) ([4f7e634](https://github.com/contentful/apps/commit/4f7e634ea72729138a0fb405445714d897a966fd))
+
 ## [1.5.64](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.63...@contentful/typeform-frontend@1.5.64) (2022-11-24)
 
 ### Bug Fixes
