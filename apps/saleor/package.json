@@ -1,6 +1,6 @@
 {
   "name": "@contentful/saleor",
-  "version": "1.6.110",
+  "version": "1.6.111",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.2.1",
