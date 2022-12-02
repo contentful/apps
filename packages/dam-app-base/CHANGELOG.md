@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.32](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.31...@contentful/dam-app-base@2.0.32) (2022-12-02)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.21.5 to 4.21.7 ([#2018](https://github.com/contentful/apps/issues/2018)) ([0be2218](https://github.com/contentful/apps/commit/0be2218d19b5e4763c3e44332b5ec9df26c1fe6f))
+- **deps:** bump @contentful/f36-components from 4.21.7 to 4.22.0 ([#2043](https://github.com/contentful/apps/issues/2043)) ([71e94cc](https://github.com/contentful/apps/commit/71e94ccda5d39bc96309bacae596e81ed5c94015))
+- **deps:** bump @contentful/f36-components from 4.22.0 to 4.23.1 ([#2047](https://github.com/contentful/apps/issues/2047)) ([c91c41a](https://github.com/contentful/apps/commit/c91c41a50414da368870035c636416ef42a08171))
+- **deps:** bump @contentful/f36-components from 4.23.1 to 4.23.2 ([#2072](https://github.com/contentful/apps/issues/2072)) ([e571b5d](https://github.com/contentful/apps/commit/e571b5dcf57188bad6dd683c16b5b27210f36bd4))
+- **deps:** bump @contentful/f36-components from 4.23.2 to 4.23.3 ([#2124](https://github.com/contentful/apps/issues/2124)) ([dc45a4c](https://github.com/contentful/apps/commit/dc45a4c974fe293e658ff62f0cd2eea4c18e4c04))
+- **deps:** bump contentful-management from 10.20.1 to 10.21.1 ([#2031](https://github.com/contentful/apps/issues/2031)) ([7196480](https://github.com/contentful/apps/commit/719648036608ded33d451008e81fbb570a9d3435))
+- **deps:** bump contentful-management from 10.20.1 to 10.21.2 ([#2044](https://github.com/contentful/apps/issues/2044)) ([857abf5](https://github.com/contentful/apps/commit/857abf5ebd7ff7e8a45c8134dcfa01642596bfa0))
+- **deps:** bump contentful-management from 10.21.2 to 10.21.4 ([#2064](https://github.com/contentful/apps/issues/2064)) ([9d05e1b](https://github.com/contentful/apps/commit/9d05e1b50a1ab637470c97c8a6b66487c9ea9d85))
+- **deps:** bump contentful-management from 10.21.4 to 10.21.5 ([#2090](https://github.com/contentful/apps/issues/2090)) ([7f56c48](https://github.com/contentful/apps/commit/7f56c4862beec5316b03ec3d09da0e43384eb6f1))
+
 ## [2.0.31](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.30...@contentful/dam-app-base@2.0.31) (2022-11-14)
 
 ### Bug Fixes
