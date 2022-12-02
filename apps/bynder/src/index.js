@@ -244,7 +244,7 @@ setup({
       type: 'List',
       value: 'MultiSelect,SingleSelectFile',
       default: 'MultiSelect',
-      description: '"SingleSelectFile" allows you to select a specific derivative.',
+      description: '"MultiSelect is the best choice for most customers. If you specifically need access to transformations, use SingleSelectFile. Note that you will need to change your frontend to use transform base URLs to load images in SingleSelectFile mode."',
       required: true,
     },
   ],
