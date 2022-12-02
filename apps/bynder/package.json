@@ -1,6 +1,6 @@
 {
   "name": "@contentful/bynder-assets",
-  "version": "1.11.10",
+  "version": "1.11.11",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.2.0",

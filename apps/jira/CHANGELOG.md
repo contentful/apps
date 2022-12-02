@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.83](https://github.com/contentful/apps/compare/@contentful/jira@1.9.82...@contentful/jira@1.9.83) (2022-12-02)
+
+**Note:** Version bump only for package @contentful/jira
+
 ## [1.9.82](https://github.com/contentful/apps/compare/@contentful/jira@1.9.81...@contentful/jira@1.9.82) (2022-12-02)
 
 ### Bug Fixes
