@@ -244,7 +244,7 @@ setup({
       type: 'List',
       value: 'MultiSelect,SingleSelectFile',
       default: 'MultiSelect',
-      description: '"SingleSelectFile" allows you to select a specific derivative.',
+      description: '"MultiSelect is the best choice for most customers. If you specifically need access to dynamic transformations, use SingleSelectFile mode. (Note that with SingleSelectFile mode, you will likely need to change your frontend to reference the specific transformations chosen by your content editors.)',
       required: true,
     },
   ],
