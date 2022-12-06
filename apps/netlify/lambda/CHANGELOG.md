@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.7](https://github.com/contentful/apps/compare/@contentful/netlify-build-action-lambda@1.3.6...@contentful/netlify-build-action-lambda@1.3.7) (2022-12-06)
+
+**Note:** Version bump only for package @contentful/netlify-build-action-lambda
+
 ## [1.3.6](https://github.com/contentful/apps/compare/@contentful/netlify-build-action-lambda@1.3.5...@contentful/netlify-build-action-lambda@1.3.6) (2022-12-02)
 
 **Note:** Version bump only for package @contentful/netlify-build-action-lambda
