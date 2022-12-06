@@ -2,23 +2,28 @@ version: 2.1
 
 orbs:
   node: circleci/node@5.0.2
+  vault: contentful/vault@1
 
 commands:
   publish:
     steps:
+      - vault/get-secrets:
+          template-preset: "semantic-release"
       - run:
           name: Setup NPM
           command: |
             echo $'@contentful:registry=https://registry.npmjs.org/
             //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
-      - run: git config --global user.email "prd-dev-workflows+ecosystem-bot@contentful.com"
-      - run: git config --global user.name "contentful-ecosystem-bot"
+      - run: git config --global user.email "${GIT_AUTHOR_EMAIL}"
+      - run: git config --global user.name "${GIT_AUTHOR_NAME}"
       - run:
           name: Publish packages
           command: npm run publish-packages
 
   deploy:
     steps:
+      - vault/get-secrets:
+          template-preset: "aws-push-artifacts"
       - run:
           name: Install awscli
           command: |
@@ -105,6 +110,8 @@ workflows:
   version: 2
   test-deploy:
     jobs:
-      - apps
+      - apps:
+          context:
+            - vault
       - test-ts-example
       - test-js-example
