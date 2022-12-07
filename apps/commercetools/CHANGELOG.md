@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.5](https://github.com/contentful/apps/compare/@contentful/commercetools@1.10.4...@contentful/commercetools@1.10.5) (2022-12-07)
+
+**Note:** Version bump only for package @contentful/commercetools
+
 ## [1.10.4](https://github.com/contentful/apps/compare/@contentful/commercetools@1.10.3...@contentful/commercetools@1.10.4) (2022-12-02)
 
 **Note:** Version bump only for package @contentful/commercetools
