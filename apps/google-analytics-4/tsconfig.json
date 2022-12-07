@@ -1,12 +1,6 @@
 {
   "extends": "@tsconfig/create-react-app/tsconfig.json",
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
   },
   "include": [
     "src"
