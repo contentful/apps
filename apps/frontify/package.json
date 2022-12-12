@@ -1,6 +1,6 @@
 {
   "name": "@contentful/frontify-assets",
-  "version": "1.5.72",
+  "version": "1.5.73",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.2.0",
@@ -8,7 +8,7 @@
     "react-scripts": "4.0.3"
   },
   "dependencies": {
-    "@contentful/dam-app-base": "^2.0.32",
+    "@contentful/dam-app-base": "^2.0.33",
     "react": "16.12.0",
     "react-dom": "16.12.0"
   },
