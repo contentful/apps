@@ -18,9 +18,6 @@ describe('Config Screen component', () => {
   it('shows config screen', async () => {
     const { getByText } = renderedComponent;
 
-    // install the app
-    await mockSdk.app.onConfigure.mock.calls[0][0]();
-
     expect(getByText('About Google Analytics for Contentful')).toBeInTheDocument();
   });
 
