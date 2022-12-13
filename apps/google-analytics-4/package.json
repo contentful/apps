@@ -5,10 +5,12 @@
   "dependencies": {
     "@contentful/app-sdk": "4.13.0",
     "@contentful/f36-components": "4.23.3",
+    "@contentful/f36-icons": "^4.23.2",
     "@contentful/f36-tokens": "4.0.1",
     "@contentful/react-apps-toolkit": "1.2.10",
     "contentful-management": "10.21.6",
     "emotion": "10.0.27",
+    "lodash": "^4.17.21",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-scripts": "5.0.1"
@@ -44,6 +46,7 @@
     "@testing-library/react": "12.1.5",
     "@tsconfig/create-react-app": "1.0.3",
     "@types/jest": "29.2.4",
+    "@types/lodash": "^4.14.191",
     "@types/node": "18.11.11",
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.3",

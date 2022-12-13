@@ -1,68 +1,183 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
+import { Heading, Form, Paragraph } from '@contentful/f36-components';
 import { css } from 'emotion';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import tokens from '@contentful/f36-tokens';
+import { omitBy } from 'lodash';
 
-export interface AppInstallationParameters {}
+import FormControlServiceAccountKeyFile from '../components/FormControlServiceAccountKeyFile';
+import type { AppInstallationParameters, ServiceAccountKey, ServiceAccountKeyId } from '../types';
+
+export const emptyServiceAccountKey = {
+  type: '',
+  project_id: '',
+  private_key_id: '',
+  private_key: '',
+  client_email: '',
+  client_id: '',
+  auth_uri: '',
+  token_uri: '',
+  auth_provider_x509_cert_url: '',
+  client_x509_cert_url: '',
+};
+
+const emptyServiceAccountKeyId = {
+  id: '',
+  clientEmail: '',
+  clientId: '',
+  projectId: '',
+};
+
+const googleAnalyticsBrand = {
+  primaryColor: '#E8710A',
+  url: 'https://www.google.com/analytics',
+};
+
+const styles = {
+  body: css({
+    height: 'auto',
+    minHeight: '65vh',
+    margin: '0 auto',
+    marginTop: tokens.spacingXl,
+    padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
+    maxWidth: tokens.contentWidthText,
+    backgroundColor: tokens.colorWhite,
+    zIndex: 2,
+    boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
+    borderRadius: '2px',
+  }),
+  background: css({
+    display: 'block',
+    position: 'absolute',
+    zIndex: -1,
+    top: 0,
+    width: '100%',
+    height: '300px',
+    backgroundColor: googleAnalyticsBrand.primaryColor,
+  }),
+  section: css({
+    margin: `${tokens.spacingXl} 0`,
+  }),
+  splitter: css({
+    marginTop: tokens.spacingL,
+    marginBottom: tokens.spacingL,
+    border: 0,
+    height: '1px',
+    backgroundColor: tokens.gray300,
+  }),
+  sectionHeading: css({
+    fontSize: tokens.fontSizeL,
+    marginBottom: tokens.spacing2Xs,
+  }),
+  serviceAccountKeyFormControl: css({
+    marginBottom: tokens.spacing2Xl,
+  }),
+  icon: css({
+    display: 'flex',
+    justifyContent: 'center',
+    img: {
+      display: 'block',
+      width: '170px',
+      margin: `${tokens.spacingXl} 0`,
+    },
+  }),
+};
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [parameters, setParameters] = useState<AppInstallationParameters>({
+    serviceAccountKey: emptyServiceAccountKey,
+    serviceAccountKeyId: emptyServiceAccountKeyId,
+  });
+  const [newServiceAccountKey, setNewServiceAccountKey] = useState<ServiceAccountKey | null>(null);
+  const [newServiceAccountKeyId, setNewServiceAccountKeyId] = useState<ServiceAccountKeyId | null>(
+    null
+  );
+
   const sdk = useSDK<AppExtensionSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
 
   const onConfigure = useCallback(async () => {
-    // This method will be called when a user clicks on "Install"
-    // or "Save" in the configuration screen.
-    // for more details see https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/#register-an-app-configuration-hook
-
-    // Get current the state of EditorInterface and other entities
-    // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
-    return {
-      // Parameters to be persisted as the app configuration.
+    const newServiceKeyParameters = {
+      serviceAccountKey: newServiceAccountKey,
+      serviceAccountKeyId: newServiceAccountKeyId,
+    };
+
+    const newParameters = Object.assign(
+      {},
       parameters,
-      // In case you don't want to submit any update to app
-      // locations, you can just pass the currentState as is
+      omitBy(newServiceKeyParameters, (val) => val === null)
+    );
+
+    setParameters(newParameters);
+
+    return {
+      parameters: newParameters,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [newServiceAccountKey, newServiceAccountKeyId, parameters, sdk]);
 
   useEffect(() => {
-    // `onConfigure` allows to configure a callback to be
-    // invoked when a user attempts to install the app or update
-    // its configuration.
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
   useEffect(() => {
     (async () => {
-      // Get current parameters of the app.
-      // If the app is not installed yet, `parameters` will be `null`.
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       if (currentParameters) {
         setParameters(currentParameters);
       }
 
-      // Once preparation has finished, call `setReady` to hide
-      // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
   }, [sdk]);
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
-      <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
-      </Form>
-    </Flex>
+    <>
+      <div className={styles.background} />
+
+      <div className={styles.body}>
+        <Heading>About Google Analytics for Contentful</Heading>
+        <Paragraph>
+          The Google Analytics app displays realtime page-based analytics data from your
+          organization's Google Analytics properties alongside relevant content entries.
+        </Paragraph>
+
+        <hr className={styles.splitter} />
+
+        <Form>
+          <Heading as="h2" className={styles.sectionHeading}>
+            Authorization Credentials
+          </Heading>
+          <Paragraph>
+            Authorize this application to access page analytics data from your organiation's Google
+            Analytics account.
+          </Paragraph>
+          <FormControlServiceAccountKeyFile
+            setServiceAccountKey={setNewServiceAccountKey}
+            setServiceAccountKeyId={setNewServiceAccountKeyId}
+            currentServiceAccountKeyId={
+              parameters.serviceAccountKeyId === emptyServiceAccountKeyId
+                ? null
+                : parameters.serviceAccountKeyId
+            }
+            className={styles.serviceAccountKeyFormControl}
+          />
+          <Heading as="h2" className={styles.sectionHeading}>
+            Configuration
+          </Heading>
+          <Paragraph>Configure your Google Analytics app installation.</Paragraph>
+        </Form>
+      </div>
+
+      <div className={styles.icon}>
+        <a href={googleAnalyticsBrand.url} target="_blank" rel="noopener noreferrer">
+          <img src="./images/google-analytics-logo.png" alt="Google Analytics" />
+        </a>
+      </div>
+    </>
   );
 };
 
