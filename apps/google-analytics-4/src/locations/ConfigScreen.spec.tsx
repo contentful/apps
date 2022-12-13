@@ -1,6 +1,6 @@
 import React from 'react';
 import ConfigScreen from './ConfigScreen';
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../test/mocks';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
@@ -9,14 +9,27 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Config Screen component', () => {
-  it('Component text exists', async () => {
-    const { getByText } = render(<ConfigScreen />);
+  let renderedComponent: RenderResult;
 
-    // simulate the user clicking the install button
+  beforeEach(() => {
+    renderedComponent = render(<ConfigScreen />);
+  });
+
+  it('shows config screen', async () => {
+    const { getByText } = renderedComponent;
+
+    // install the app
     await mockSdk.app.onConfigure.mock.calls[0][0]();
 
-    expect(
-      getByText('Welcome to your contentful app. This is your config page.')
-    ).toBeInTheDocument();
+    expect(getByText('About Google Analytics for Contentful')).toBeInTheDocument();
+  });
+
+  it('can be installed', async () => {
+    const { getByText } = renderedComponent;
+
+    // install the app
+    await mockSdk.app.onConfigure.mock.calls[0][0]();
+
+    expect(getByText('About Google Analytics for Contentful')).toBeInTheDocument();
   });
 });
