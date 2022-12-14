@@ -2,10 +2,32 @@ import { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Heading, Form, Paragraph } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { omitBy } from 'lodash';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import tokens from '@contentful/f36-tokens';
 
-export interface AppInstallationParameters {}
+import FormControlServiceAccountKey from '../components/FormControlServiceAccountKey';
+import type { AppInstallationParameters, ServiceAccountKey, ServiceAccountKeyId } from '../types';
+
+export const emptyServiceAccountKey: ServiceAccountKey = {
+  type: '',
+  project_id: '',
+  private_key_id: '',
+  private_key: '',
+  client_email: '',
+  client_id: '',
+  auth_uri: '',
+  token_uri: '',
+  auth_provider_x509_cert_url: '',
+  client_x509_cert_url: '',
+};
+
+const emptyServiceAccountKeyId: ServiceAccountKeyId = {
+  id: '',
+  clientEmail: '',
+  clientId: '',
+  projectId: '',
+};
 
 const googleAnalyticsBrand = {
   primaryColor: '#E8710A',
@@ -64,17 +86,37 @@ const styles = {
 };
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [parameters, setParameters] = useState<AppInstallationParameters>({
+    serviceAccountKey: emptyServiceAccountKey,
+    serviceAccountKeyId: emptyServiceAccountKeyId,
+  });
+  const [newServiceAccountKey, setNewServiceAccountKey] = useState<ServiceAccountKey | null>(null);
+  const [newServiceAccountKeyId, setNewServiceAccountKeyId] = useState<ServiceAccountKeyId | null>(
+    null
+  );
   const sdk = useSDK<AppExtensionSDK>();
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    return {
+    const newServiceKeyParameters = {
+      serviceAccountKey: newServiceAccountKey,
+      serviceAccountKeyId: newServiceAccountKeyId,
+    };
+
+    const newParameters = Object.assign(
+      {},
       parameters,
+      omitBy(newServiceKeyParameters, (val) => val === null)
+    );
+
+    setParameters(newParameters);
+
+    return {
+      parameters: newParameters,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [newServiceAccountKey, newServiceAccountKeyId, parameters, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -114,8 +156,16 @@ const ConfigScreen = () => {
             Analytics account.
           </Paragraph>
 
-          {/* This div will subsequently be replaced with the actual key upload form control */}
-          <div>FORM CONTROL HERE</div>
+          <FormControlServiceAccountKey
+            setServiceAccountKey={setNewServiceAccountKey}
+            setServiceAccountKeyId={setNewServiceAccountKeyId}
+            currentServiceAccountKeyId={
+              parameters.serviceAccountKeyId === emptyServiceAccountKeyId
+                ? null
+                : parameters.serviceAccountKeyId
+            }
+            className={styles.serviceAccountKeyFormControl}
+          />
 
           <Heading as="h2" className={styles.sectionHeading}>
             Configuration
