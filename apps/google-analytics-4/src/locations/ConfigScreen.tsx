@@ -1,68 +1,135 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
+import { Heading, Form, Paragraph } from '@contentful/f36-components';
 import { css } from 'emotion';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import tokens from '@contentful/f36-tokens';
 
 export interface AppInstallationParameters {}
+
+const googleAnalyticsBrand = {
+  primaryColor: '#E8710A',
+  url: 'https://www.google.com/analytics',
+  logoImage: './images/google-analytics-logo.png',
+};
+
+const styles = {
+  body: css({
+    height: 'auto',
+    minHeight: '65vh',
+    margin: '0 auto',
+    marginTop: tokens.spacingXl,
+    padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
+    maxWidth: tokens.contentWidthText,
+    backgroundColor: tokens.colorWhite,
+    zIndex: 2,
+    boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
+    borderRadius: '2px',
+  }),
+  background: css({
+    display: 'block',
+    position: 'absolute',
+    zIndex: -1,
+    top: 0,
+    width: '100%',
+    height: '300px',
+    backgroundColor: googleAnalyticsBrand.primaryColor,
+  }),
+  section: css({
+    margin: `${tokens.spacingXl} 0`,
+  }),
+  splitter: css({
+    marginTop: tokens.spacingL,
+    marginBottom: tokens.spacingL,
+    border: 0,
+    height: '1px',
+    backgroundColor: tokens.gray300,
+  }),
+  sectionHeading: css({
+    fontSize: tokens.fontSizeL,
+    marginBottom: tokens.spacing2Xs,
+  }),
+  serviceAccountKeyFormControl: css({
+    marginBottom: tokens.spacing2Xl,
+  }),
+  icon: css({
+    display: 'flex',
+    justifyContent: 'center',
+    img: {
+      display: 'block',
+      width: '170px',
+      margin: `${tokens.spacingXl} 0`,
+    },
+  }),
+};
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<AppExtensionSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
 
   const onConfigure = useCallback(async () => {
-    // This method will be called when a user clicks on "Install"
-    // or "Save" in the configuration screen.
-    // for more details see https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/#register-an-app-configuration-hook
-
-    // Get current the state of EditorInterface and other entities
-    // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
     return {
-      // Parameters to be persisted as the app configuration.
       parameters,
-      // In case you don't want to submit any update to app
-      // locations, you can just pass the currentState as is
       targetState: currentState,
     };
   }, [parameters, sdk]);
 
   useEffect(() => {
-    // `onConfigure` allows to configure a callback to be
-    // invoked when a user attempts to install the app or update
-    // its configuration.
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
   useEffect(() => {
     (async () => {
-      // Get current parameters of the app.
-      // If the app is not installed yet, `parameters` will be `null`.
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       if (currentParameters) {
         setParameters(currentParameters);
       }
 
-      // Once preparation has finished, call `setReady` to hide
-      // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
   }, [sdk]);
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
-      <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
-      </Form>
-    </Flex>
+    <>
+      <div className={styles.background} />
+
+      <div className={styles.body}>
+        <Heading>About Google Analytics for Contentful</Heading>
+        <Paragraph>
+          The Google Analytics app displays realtime page-based analytics data from your
+          organization's Google Analytics properties alongside relevant content entries.
+        </Paragraph>
+
+        <hr className={styles.splitter} />
+
+        <Form>
+          <Heading as="h2" className={styles.sectionHeading}>
+            Authorization Credentials
+          </Heading>
+          <Paragraph>
+            Authorize this application to access page analytics data from your organiation's Google
+            Analytics account.
+          </Paragraph>
+
+          {/* This div will subsequently be replaced with the actual key upload form control */}
+          <div>FORM CONTROL HERE</div>
+
+          <Heading as="h2" className={styles.sectionHeading}>
+            Configuration
+          </Heading>
+          <Paragraph>Configure your Google Analytics app installation.</Paragraph>
+        </Form>
+      </div>
+
+      <div className={styles.icon}>
+        <a href={googleAnalyticsBrand.url} target="_blank" rel="noopener noreferrer">
+          <img src={googleAnalyticsBrand.logoImage} alt="Google Analytics" />
+        </a>
+      </div>
+    </>
   );
 };
 
