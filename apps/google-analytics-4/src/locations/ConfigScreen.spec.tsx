@@ -64,4 +64,24 @@ describe('Config Screen component', () => {
       })
     );
   });
+
+  it('prevents the app from being installed with an valid service key file', async () => {
+    const user = userEvent.setup();
+    render(<ConfigScreen />);
+
+    const keyFileInputBox = screen.getByLabelText('Google Service Account Key File');
+
+    // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
+    // actually better recreates likely user behavior as a bonus
+    await user.click(keyFileInputBox);
+    await user.paste('{ "foo": "bar" }');
+
+    let result;
+    await act(async () => {
+      result = await saveAppInstallation();
+    });
+
+    // false result prevents parameters save
+    expect(result).toEqual(false);
+  });
 });
