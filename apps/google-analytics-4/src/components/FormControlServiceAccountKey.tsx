@@ -115,28 +115,28 @@ const FormControlServiceAccountKey = ({
 
   const setValidServiceAccountKey = useCallback(
     (newServiceAccountKey: ServiceAccountKey | null) => {
-      setFormControlState({
-        isInvalid: false,
-        errorMessage: '',
-      });
       setServiceAccountKey(newServiceAccountKey);
       setServiceAccountKeyId(
         newServiceAccountKey
           ? convertServiceAccountKeyToServiceAccountKeyId(newServiceAccountKey)
           : null
       );
+      setFormControlState({
+        isInvalid: false,
+        errorMessage: '',
+      });
     },
     [setFormControlState, setServiceAccountKey, setServiceAccountKeyId]
   );
 
   const setInvalidServiceAccountKey = useCallback(
     (errorMessage: string) => {
+      setServiceAccountKey(null);
+      setServiceAccountKeyId(null);
       setFormControlState({
         isInvalid: true,
         errorMessage,
       });
-      setServiceAccountKey(null);
-      setServiceAccountKeyId(null);
     },
     [setFormControlState, setServiceAccountKey, setServiceAccountKeyId]
   );
@@ -154,6 +154,7 @@ const FormControlServiceAccountKey = ({
 
   useEffect(() => {
     const trimmedFieldValue = serviceAccountKeyFile.trim();
+
     if (trimmedFieldValue === '') {
       setValidServiceAccountKey(null);
       return;
