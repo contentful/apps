@@ -30,6 +30,7 @@ interface FormControlState {
 interface FormControlServideAccountKeyFileProps {
   setServiceAccountKey: (serviceAccountKey: ServiceAccountKey | null) => void;
   setServiceAccountKeyId: (serviceAccountKey: ServiceAccountKeyId | null) => void;
+  setIsInvalid: (isInvalid: boolean) => void;
   currentServiceAccountKeyId: ServiceAccountKeyId | null;
   className?: string;
 }
@@ -101,6 +102,7 @@ function assertServiceAccountKey(value: any): asserts value is ServiceAccountKey
 const FormControlServiceAccountKey = ({
   setServiceAccountKey,
   setServiceAccountKeyId,
+  setIsInvalid,
   currentServiceAccountKeyId,
   className,
 }: FormControlServideAccountKeyFileProps) => {
@@ -138,6 +140,10 @@ const FormControlServiceAccountKey = ({
     },
     [setFormControlState, setServiceAccountKey, setServiceAccountKeyId]
   );
+
+  useEffect(() => {
+    setIsInvalid(formControlState.isInvalid);
+  }, [formControlState.isInvalid, setIsInvalid]);
 
   useEffect(() => {
     if (currentServiceAccountKeyId) {

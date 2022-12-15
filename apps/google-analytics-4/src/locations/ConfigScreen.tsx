@@ -9,26 +9,6 @@ import tokens from '@contentful/f36-tokens';
 import FormControlServiceAccountKey from '../components/FormControlServiceAccountKey';
 import type { AppInstallationParameters, ServiceAccountKey, ServiceAccountKeyId } from '../types';
 
-export const emptyServiceAccountKey: ServiceAccountKey = {
-  type: '',
-  project_id: '',
-  private_key_id: '',
-  private_key: '',
-  client_email: '',
-  client_id: '',
-  auth_uri: '',
-  token_uri: '',
-  auth_provider_x509_cert_url: '',
-  client_x509_cert_url: '',
-};
-
-const emptyServiceAccountKeyId: ServiceAccountKeyId = {
-  id: '',
-  clientEmail: '',
-  clientId: '',
-  projectId: '',
-};
-
 const googleAnalyticsBrand = {
   primaryColor: '#E8710A',
   url: 'https://www.google.com/analytics',
@@ -87,17 +67,26 @@ const styles = {
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
-    serviceAccountKey: emptyServiceAccountKey,
-    serviceAccountKeyId: emptyServiceAccountKeyId,
+    serviceAccountKey: null,
+    serviceAccountKeyId: null,
   });
+
   const [newServiceAccountKey, setNewServiceAccountKey] = useState<ServiceAccountKey | null>(null);
   const [newServiceAccountKeyId, setNewServiceAccountKeyId] = useState<ServiceAccountKeyId | null>(
     null
   );
+  const [isInvalidServiceAccountKeyFile, setIsInvalidServiceAccountKeyFile] =
+    useState<boolean>(false);
+
   const sdk = useSDK<AppExtensionSDK>();
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+
+    if (isInvalidServiceAccountKeyFile) {
+      sdk.notifier.error('Invalid service account key file. See field error for details');
+      return false;
+    }
 
     const newServiceKeyParameters = {
       serviceAccountKey: newServiceAccountKey,
@@ -116,7 +105,13 @@ const ConfigScreen = () => {
       parameters: newParameters,
       targetState: currentState,
     };
-  }, [newServiceAccountKey, newServiceAccountKeyId, parameters, sdk]);
+  }, [
+    newServiceAccountKey,
+    newServiceAccountKeyId,
+    isInvalidServiceAccountKeyFile,
+    parameters,
+    sdk,
+  ]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -152,18 +147,15 @@ const ConfigScreen = () => {
             Authorization Credentials
           </Heading>
           <Paragraph>
-            Authorize this application to access page analytics data from your organiation's Google
+            Authorize this application to access page analytics data from your organization's Google
             Analytics account.
           </Paragraph>
 
           <FormControlServiceAccountKey
             setServiceAccountKey={setNewServiceAccountKey}
             setServiceAccountKeyId={setNewServiceAccountKeyId}
-            currentServiceAccountKeyId={
-              parameters.serviceAccountKeyId === emptyServiceAccountKeyId
-                ? null
-                : parameters.serviceAccountKeyId
-            }
+            setIsInvalid={setIsInvalidServiceAccountKeyFile}
+            currentServiceAccountKeyId={parameters.serviceAccountKeyId}
             className={styles.serviceAccountKeyFormControl}
           />
 
