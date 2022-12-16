@@ -164,12 +164,7 @@ const ConfigScreen = () => {
               />
             ))}
 
-            <Button
-              size="small"
-              startIcon={<PlusIcon />}
-              onClick={addSwatch}
-              isDisabled={parameters.themes[0].colors.length >= 25}
-            >
+            <Button size="small" startIcon={<PlusIcon />} onClick={addSwatch}>
               Add color
             </Button>
           </div>
