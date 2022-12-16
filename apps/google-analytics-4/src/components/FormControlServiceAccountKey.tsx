@@ -35,6 +35,7 @@ interface FormControlServideAccountKeyFileProps {
   setServiceAccountKey: (serviceAccountKey: ServiceAccountKey | null) => void;
   setServiceAccountKeyId: (serviceAccountKey: ServiceAccountKeyId | null) => void;
   setIsInvalid: (isInvalid: boolean) => void;
+  isRequired: boolean;
   currentServiceAccountKeyId: ServiceAccountKeyId | null;
   className?: string;
 }
@@ -60,6 +61,7 @@ const FormControlServiceAccountKey = ({
   setServiceAccountKey,
   setServiceAccountKeyId,
   setIsInvalid,
+  isRequired,
   currentServiceAccountKeyId,
   className,
 }: FormControlServideAccountKeyFileProps) => {
@@ -143,8 +145,13 @@ const FormControlServiceAccountKey = ({
   };
 
   const formControl = (
-    <FormControl marginTop="spacingL" id="accountCredentialsFile">
-      <FormControl.Label>Google Service Account Key File</FormControl.Label>
+    <FormControl
+      marginTop="spacingL"
+      id="accountCredentialsFile"
+      isInvalid={formControlState.isInvalid}
+      isRequired={isRequired}
+    >
+      <FormControl.Label isRequired={isRequired}>Google Service Account Key File</FormControl.Label>
       <Textarea
         name="accountCredentialsFile"
         placeholder={placeholderText}
@@ -152,24 +159,23 @@ const FormControlServiceAccountKey = ({
         className={styles.credentialsInput}
         value={serviceAccountKeyFile}
         onChange={onKeyFileTextareaChange}
-        isInvalid={formControlState.isInvalid}
       />
       {formControlState.isInvalid ? (
         <FormControl.ValidationMessage>
           Error: {formControlState.errorMessage}
         </FormControl.ValidationMessage>
+      ) : serviceAccountKeyFile ? (
+        <Flex marginTop="spacingXs" alignItems="center">
+          <Flex isInline={true} alignItems="center">
+            <CheckCircleIcon variant="positive" />{' '}
+            <Text as="p" marginLeft="spacing2Xs" fontColor="gray700">
+              Service account key file is valid
+            </Text>
+          </Flex>
+        </Flex>
       ) : (
         <FormControl.HelpText>
-          {serviceAccountKeyFile ? (
-            <Flex isInline={true} alignItems="center">
-              <CheckCircleIcon variant="positive" />{' '}
-              <Text marginLeft="spacing2Xs" fontColor="gray700">
-                Service account key file is valid
-              </Text>
-            </Flex>
-          ) : (
-            'Paste the contents of your service account key file above'
-          )}
+          Paste the contents of your service account key file above
         </FormControl.HelpText>
       )}
 
