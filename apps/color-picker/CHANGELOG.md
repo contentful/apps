@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.6](https://github.com/contentful/apps/compare/contentful-color-picker@0.2.5...contentful-color-picker@0.2.6) (2022-12-16)
+
+### Bug Fixes
+
+- remove the 25 color limit ([#2200](https://github.com/contentful/apps/issues/2200)) ([b53920a](https://github.com/contentful/apps/commit/b53920a85f76bc5b237139698bb3a1dbc2c77510))
+
 ## [0.2.5](https://github.com/contentful/apps/compare/contentful-color-picker@0.2.4...contentful-color-picker@0.2.5) (2022-11-21)
 
 **Note:** Version bump only for package contentful-color-picker
