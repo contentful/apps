@@ -77,6 +77,8 @@ const ConfigScreen = () => {
   );
   const [isInvalidServiceAccountKeyFile, setIsInvalidServiceAccountKeyFile] =
     useState<boolean>(false);
+  const [serviceAccountKeyFileIsRequired, setServiceAccountKeyFileIsRequired] =
+    useState<boolean>(false);
 
   const sdk = useSDK<AppExtensionSDK>();
 
@@ -85,6 +87,11 @@ const ConfigScreen = () => {
 
     if (isInvalidServiceAccountKeyFile) {
       sdk.notifier.error('Invalid service account key file. See field error for details');
+      return false;
+    }
+
+    if (serviceAccountKeyFileIsRequired && !newServiceAccountKeyId) {
+      sdk.notifier.error('A valid service account key file is required');
       return false;
     }
 
@@ -100,6 +107,7 @@ const ConfigScreen = () => {
     );
 
     setParameters(newParameters);
+    setServiceAccountKeyFileIsRequired(false);
 
     return {
       parameters: newParameters,
@@ -108,6 +116,7 @@ const ConfigScreen = () => {
   }, [
     newServiceAccountKey,
     newServiceAccountKeyId,
+    serviceAccountKeyFileIsRequired,
     isInvalidServiceAccountKeyFile,
     parameters,
     sdk,
@@ -123,6 +132,11 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
+        setServiceAccountKeyFileIsRequired(false);
+      } else {
+        // per the documentation, `null` means app is not installed, thus we will require
+        // the key file
+        setServiceAccountKeyFileIsRequired(true);
       }
 
       sdk.app.setReady();
@@ -156,6 +170,7 @@ const ConfigScreen = () => {
             setServiceAccountKeyId={setNewServiceAccountKeyId}
             setIsInvalid={setIsInvalidServiceAccountKeyFile}
             currentServiceAccountKeyId={parameters.serviceAccountKeyId}
+            isRequired={serviceAccountKeyFileIsRequired}
             className={styles.serviceAccountKeyFormControl}
           />
 
