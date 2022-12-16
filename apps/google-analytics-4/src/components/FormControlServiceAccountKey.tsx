@@ -225,6 +225,7 @@ const FormControlServiceAccountKey = ({
         icon={isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
         alignIcon="start"
         onClick={() => setIsExpanded(!isExpanded)}
+        testId="keyFileFieldExpander"
       >
         Replace with new Service Account Key
       </TextLink>
