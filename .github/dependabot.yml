@@ -16,6 +16,9 @@ updates:
     - dependency-name: "*"
       update-types: ["version-update:semver-major"]
     - dependency-name: "@contentful/app-sdk"
+    - dependency-name: "serverless"
+      versions:
+        - ">=3"
 
 - package-ecosystem: npm
   directory: "/examples/typescript"
