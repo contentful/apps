@@ -1,6 +1,6 @@
 {
   "name": "@contentful/cloudinary-assets",
-  "version": "1.6.12",
+  "version": "1.6.13",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.2.0",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "4.10.0",
-    "@contentful/dam-app-base": "^2.0.33",
+    "@contentful/dam-app-base": "^2.0.34",
     "cloudinary-core": "2.8.0",
     "core-js": "3.1.4",
     "react": "16.12.0",
