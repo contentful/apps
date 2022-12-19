@@ -8,6 +8,7 @@
     "@contentful/f36-tokens": "4.0.1",
     "@contentful/react-apps-toolkit": "1.2.10",
     "@testing-library/user-event": "^14.4.3",
+    "@types/lodash": "^4.14.191",
     "contentful-management": "10.21.6",
     "emotion": "10.0.27",
     "lodash": "^4.17.21",
