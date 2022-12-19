@@ -2,26 +2,12 @@ import React from 'react';
 import ConfigScreen from './ConfigScreen';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { mockCma, mockSdk, validServiceKeyFile } from '../../test/mocks';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
-
-const validServiceKeyFile = {
-  type: 'service_account',
-  project_id: 'PROJECT_ID',
-  private_key_id: 'PRIVATE_KEY_ID',
-  private_key: '----- PRIVATE_KEY-----',
-  client_email: 'example4@PROJECT_ID.iam.gserviceaccount.com',
-  client_id: 'CLIENT_ID',
-  auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-  token_uri: 'https://oauth2.googleapis.com/token',
-  auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-  client_x509_cert_url:
-    'https://www.googleapis.com/robot/v1/metadata/x509/example4%40PROJECT_ID.iam.gserviceaccount.com',
-};
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
 const saveAppInstallation = async () => {
