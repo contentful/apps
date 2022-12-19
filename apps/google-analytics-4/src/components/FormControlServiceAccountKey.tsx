@@ -151,7 +151,7 @@ const FormControlServiceAccountKey = ({
       isInvalid={formControlState.isInvalid}
       isRequired={isRequired}
     >
-      <FormControl.Label isRequired={isRequired}>Google Service Account Key File</FormControl.Label>
+      <FormControl.Label>Google Service Account Key File</FormControl.Label>
       <Textarea
         name="accountCredentialsFile"
         placeholder={placeholderText}

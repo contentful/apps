@@ -81,8 +81,6 @@ describe('Config Screen component (not installed)', () => {
       result = await saveAppInstallation();
     });
 
-    console.log(mockSdk.app.getParameters());
-
     // false result prevents parameters save
     expect(result).toEqual(false);
   });
