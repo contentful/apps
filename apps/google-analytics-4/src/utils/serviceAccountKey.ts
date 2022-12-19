@@ -17,18 +17,21 @@ const keysOfServiceAccountKey: Array<keyof ServiceAccountKey> = [
 ];
 
 function assertServiceAccountKey(value: any): asserts value is ServiceAccountKey {
-  if (value?.type !== 'service_account')
+  if (value?.type !== 'service_account') {
     throw new AssertionError("Key file `type` must be 'service_account'");
+  }
 
   const missingKeys = reject(keysOfServiceAccountKey, (key) => key in value);
-  if (missingKeys.length > 0)
+  if (missingKeys.length > 0) {
     throw new AssertionError(`Key file is missing the following keys: ${missingKeys.join(', ')}`);
+  }
 
   const notStringValues = reject(keysOfServiceAccountKey, (key) => typeof value[key] === 'string');
-  if (notStringValues.length > 0)
+  if (notStringValues.length > 0) {
     throw new AssertionError(
       `Key file has invalid values at the following keys: ${notStringValues.join(', ')}`
     );
+  }
 }
 
 export const convertKeyFileToServiceAccountKey = (keyFile: string): ServiceAccountKey => {
