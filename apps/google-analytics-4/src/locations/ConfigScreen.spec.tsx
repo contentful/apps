@@ -21,7 +21,7 @@ const validServiceKeyId: ServiceAccountKeyId = {
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
 const saveAppInstallation = async () => {
   // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
-  return await mockSdk.app.onConfigure.mock.calls.slice(-1)[0][0]();
+  return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 };
 
 describe('Config Screen component (not installed)', () => {
