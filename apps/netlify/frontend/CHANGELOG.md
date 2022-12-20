@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.58](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.57...@contentful/netlify-build-and-preview@1.9.58) (2022-12-20)
+
+**Note:** Version bump only for package @contentful/netlify-build-and-preview
+
 ## [1.9.57](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.56...@contentful/netlify-build-and-preview@1.9.57) (2022-12-16)
 
 **Note:** Version bump only for package @contentful/netlify-build-and-preview
