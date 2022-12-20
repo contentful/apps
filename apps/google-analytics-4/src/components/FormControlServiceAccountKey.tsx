@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import {
   Collapse,
   Flex,
@@ -19,24 +19,17 @@ import { css } from 'emotion';
 
 import tokens from '@contentful/f36-tokens';
 import InstalledServiceAccountKey from './InstalledServiceAccountKey';
-import {
-  convertServiceAccountKeyToServiceAccountKeyId,
-  convertKeyFileToServiceAccountKey,
-  AssertionError,
-} from '../utils/serviceAccountKey';
-import type { ServiceAccountKey, ServiceAccountKeyId } from '../types';
-
-interface FormControlState {
-  isInvalid: boolean;
-  errorMessage: string;
-}
+import type { ServiceAccountKeyId } from '../types';
 
 interface FormControlServideAccountKeyFileProps {
-  setServiceAccountKey: (serviceAccountKey: ServiceAccountKey | null) => void;
-  setServiceAccountKeyId: (serviceAccountKey: ServiceAccountKeyId | null) => void;
-  setIsInvalid: (isInvalid: boolean) => void;
+  isValid: boolean;
+  errorMessage: string;
   isRequired: boolean;
+  isExpanded: boolean;
   currentServiceAccountKeyId: ServiceAccountKeyId | null;
+  serviceAccountKeyFile: string;
+  onKeyFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onExpanderClick: React.MouseEventHandler<HTMLButtonElement>;
   className?: string;
 }
 
@@ -58,97 +51,21 @@ const placeholderText = `{
 }`;
 
 const FormControlServiceAccountKey = ({
-  setServiceAccountKey,
-  setServiceAccountKeyId,
-  setIsInvalid,
   isRequired,
+  isValid,
+  isExpanded,
+  errorMessage,
   currentServiceAccountKeyId,
+  serviceAccountKeyFile,
+  onKeyFileChange,
+  onExpanderClick,
   className,
 }: FormControlServideAccountKeyFileProps) => {
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [serviceAccountKeyFile, setServiceAccountKeyFile] = useState<string>('');
-  const [formControlState, setFormControlState] = useState<FormControlState>({
-    isInvalid: false,
-    errorMessage: '',
-  });
-
-  const setValidServiceAccountKey = useCallback(
-    (newServiceAccountKey: ServiceAccountKey | null) => {
-      setServiceAccountKey(newServiceAccountKey);
-      setServiceAccountKeyId(
-        newServiceAccountKey
-          ? convertServiceAccountKeyToServiceAccountKeyId(newServiceAccountKey)
-          : null
-      );
-      setFormControlState({
-        isInvalid: false,
-        errorMessage: '',
-      });
-    },
-    [setFormControlState, setServiceAccountKey, setServiceAccountKeyId]
-  );
-
-  const setInvalidServiceAccountKey = useCallback(
-    (errorMessage: string) => {
-      setServiceAccountKey(null);
-      setServiceAccountKeyId(null);
-      setFormControlState({
-        isInvalid: true,
-        errorMessage,
-      });
-    },
-    [setFormControlState, setServiceAccountKey, setServiceAccountKeyId]
-  );
-
-  useEffect(() => {
-    setIsInvalid(formControlState.isInvalid);
-  }, [formControlState.isInvalid, setIsInvalid]);
-
-  useEffect(() => {
-    if (currentServiceAccountKeyId) {
-      setServiceAccountKeyFile('');
-      setIsExpanded(false);
-    }
-  }, [currentServiceAccountKeyId]);
-
-  useEffect(() => {
-    const trimmedFieldValue = serviceAccountKeyFile.trim();
-
-    if (trimmedFieldValue === '') {
-      setValidServiceAccountKey(null);
-      return;
-    }
-
-    let newServiceAccountKey: ServiceAccountKey;
-    try {
-      newServiceAccountKey = convertKeyFileToServiceAccountKey(trimmedFieldValue);
-    } catch (e) {
-      if (
-        // failed assertions about key file contents
-        e instanceof AssertionError ||
-        // could not parse as JSON
-        e instanceof SyntaxError
-      ) {
-        setInvalidServiceAccountKey(e.message);
-      } else {
-        console.error(e);
-        setInvalidServiceAccountKey('An unknown error occurred');
-      }
-      return;
-    }
-
-    setValidServiceAccountKey(newServiceAccountKey);
-  }, [serviceAccountKeyFile, setValidServiceAccountKey, setInvalidServiceAccountKey]);
-
-  const onKeyFileTextareaChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setServiceAccountKeyFile(event.target.value);
-  };
-
   const formControl = (
     <FormControl
       marginTop="spacingL"
       id="accountCredentialsFile"
-      isInvalid={formControlState.isInvalid}
+      isInvalid={!isValid}
       isRequired={isRequired}
     >
       <FormControl.Label>Google Service Account Key File</FormControl.Label>
@@ -158,27 +75,26 @@ const FormControlServiceAccountKey = ({
         rows={10}
         className={styles.credentialsInput}
         value={serviceAccountKeyFile}
-        onChange={onKeyFileTextareaChange}
+        onChange={onKeyFileChange}
       />
-      {formControlState.isInvalid ? (
-        <FormControl.ValidationMessage>
-          Error: {formControlState.errorMessage}
-        </FormControl.ValidationMessage>
-      ) : serviceAccountKeyFile ? (
-        <Flex marginTop="spacingXs" alignItems="center">
-          <Flex isInline={true} alignItems="center">
-            <CheckCircleIcon variant="positive" />{' '}
-            <Text as="p" marginLeft="spacing2Xs" fontColor="gray700">
-              Service account key file is valid
-            </Text>
+      {isValid ? (
+        serviceAccountKeyFile ? (
+          <Flex marginTop="spacingXs" alignItems="center">
+            <Flex isInline={true} alignItems="center">
+              <CheckCircleIcon variant="positive" />{' '}
+              <Text as="p" marginLeft="spacing2Xs" fontColor="gray700">
+                Service account key file is valid
+              </Text>
+            </Flex>
           </Flex>
-        </Flex>
+        ) : (
+          <FormControl.HelpText>
+            Paste the contents of your service account key file above
+          </FormControl.HelpText>
+        )
       ) : (
-        <FormControl.HelpText>
-          Paste the contents of your service account key file above
-        </FormControl.HelpText>
+        <FormControl.ValidationMessage>Error: {errorMessage}</FormControl.ValidationMessage>
       )}
-
       <div className={styles.credentialsExplanation}>
         <Note variant="primary" className={styles.credentialsNote}>
           Follow{' '}
@@ -224,7 +140,7 @@ const FormControlServiceAccountKey = ({
         variant="primary"
         icon={isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
         alignIcon="start"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={onExpanderClick}
         testId="keyFileFieldExpander"
       >
         Replace with new Service Account Key

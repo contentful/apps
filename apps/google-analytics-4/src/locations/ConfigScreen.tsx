@@ -7,6 +7,11 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import tokens from '@contentful/f36-tokens';
 
 import FormControlServiceAccountKey from '../components/FormControlServiceAccountKey';
+import {
+  convertServiceAccountKeyToServiceAccountKeyId,
+  convertKeyFileToServiceAccountKey,
+  AssertionError,
+} from '../utils/serviceAccountKey';
 import type { AppInstallationParameters, ServiceAccountKey, ServiceAccountKeyId } from '../types';
 
 const googleAnalyticsBrand = {
@@ -70,22 +75,78 @@ const ConfigScreen = () => {
     serviceAccountKey: null,
     serviceAccountKeyId: null,
   });
-
   const [newServiceAccountKey, setNewServiceAccountKey] = useState<ServiceAccountKey | null>(null);
   const [newServiceAccountKeyId, setNewServiceAccountKeyId] = useState<ServiceAccountKeyId | null>(
     null
   );
-  const [isInvalidServiceAccountKeyFile, setIsInvalidServiceAccountKeyFile] =
-    useState<boolean>(false);
+
+  const [serviceAccountKeyFile, setServiceAccountKeyFile] = useState<string>('');
+  const [serviceAccountKeyFileErrorMessage, setServiceAccountKeyFileErrorMessage] =
+    useState<string>('');
+  const [serviceAccountKeyFileIsValid, setServiceAccountKeyFileIsValid] = useState<boolean>(true);
   const [serviceAccountKeyFileIsRequired, setServiceAccountKeyFileIsRequired] =
+    useState<boolean>(false);
+  const [serviceAccountKeyFormControlIsExpanded, setServiceAccountKeyFormControlIsExpanded] =
     useState<boolean>(false);
 
   const sdk = useSDK<AppExtensionSDK>();
 
+  const setValidServiceAccountKey = (newServiceAccountKey: ServiceAccountKey | null) => {
+    setNewServiceAccountKey(newServiceAccountKey);
+    setNewServiceAccountKeyId(
+      newServiceAccountKey
+        ? convertServiceAccountKeyToServiceAccountKeyId(newServiceAccountKey)
+        : null
+    );
+    setServiceAccountKeyFileErrorMessage('');
+    setServiceAccountKeyFileIsValid(true);
+  };
+
+  const setInvalidServiceAccountKey = (errorMessage: string) => {
+    setNewServiceAccountKey(null);
+    setNewServiceAccountKeyId(null);
+    setServiceAccountKeyFileErrorMessage(errorMessage);
+    setServiceAccountKeyFileIsValid(false);
+  };
+
+  const onExpanderClick = () => {
+    setServiceAccountKeyFormControlIsExpanded(!serviceAccountKeyFormControlIsExpanded);
+  };
+
+  const onKeyFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setServiceAccountKeyFile(event.target.value);
+
+    const trimmedFieldValue = event.target.value;
+    if (trimmedFieldValue === '') {
+      setValidServiceAccountKey(null);
+      return;
+    }
+
+    let newServiceAccountKey: ServiceAccountKey;
+    try {
+      newServiceAccountKey = convertKeyFileToServiceAccountKey(trimmedFieldValue);
+    } catch (e) {
+      if (
+        // failed assertions about key file contents
+        e instanceof AssertionError ||
+        // could not parse as JSON
+        e instanceof SyntaxError
+      ) {
+        setInvalidServiceAccountKey(e.message);
+      } else {
+        console.error(e);
+        setInvalidServiceAccountKey('An unknown error occurred');
+      }
+      return;
+    }
+
+    setValidServiceAccountKey(newServiceAccountKey);
+  };
+
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    if (isInvalidServiceAccountKeyFile) {
+    if (!serviceAccountKeyFileIsValid) {
       sdk.notifier.error('Invalid service account key file. See field error for details');
       return false;
     }
@@ -108,6 +169,8 @@ const ConfigScreen = () => {
 
     setParameters(newParameters);
     setServiceAccountKeyFileIsRequired(false);
+    setServiceAccountKeyFormControlIsExpanded(false);
+    setServiceAccountKeyFile('');
 
     return {
       parameters: newParameters,
@@ -117,7 +180,7 @@ const ConfigScreen = () => {
     newServiceAccountKey,
     newServiceAccountKeyId,
     serviceAccountKeyFileIsRequired,
-    isInvalidServiceAccountKeyFile,
+    serviceAccountKeyFileIsValid,
     parameters,
     sdk,
   ]);
@@ -166,11 +229,14 @@ const ConfigScreen = () => {
           </Paragraph>
 
           <FormControlServiceAccountKey
-            setServiceAccountKey={setNewServiceAccountKey}
-            setServiceAccountKeyId={setNewServiceAccountKeyId}
-            setIsInvalid={setIsInvalidServiceAccountKeyFile}
-            currentServiceAccountKeyId={parameters.serviceAccountKeyId}
             isRequired={serviceAccountKeyFileIsRequired}
+            isValid={serviceAccountKeyFileIsValid}
+            isExpanded={serviceAccountKeyFormControlIsExpanded}
+            errorMessage={serviceAccountKeyFileErrorMessage}
+            currentServiceAccountKeyId={parameters.serviceAccountKeyId}
+            serviceAccountKeyFile={serviceAccountKeyFile}
+            onKeyFileChange={onKeyFileChange}
+            onExpanderClick={onExpanderClick}
             className={styles.serviceAccountKeyFormControl}
           />
 
