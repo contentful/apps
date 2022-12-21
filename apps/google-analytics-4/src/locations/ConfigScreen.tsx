@@ -2,10 +2,17 @@ import { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Heading, Form, Paragraph } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { omitBy } from 'lodash';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import tokens from '@contentful/f36-tokens';
 
-export interface AppInstallationParameters {}
+import FormControlServiceAccountKey from '../components/FormControlServiceAccountKey';
+import {
+  convertServiceAccountKeyToServiceAccountKeyId,
+  convertKeyFileToServiceAccountKey,
+  AssertionError,
+} from '../utils/serviceAccountKey';
+import type { AppInstallationParameters, ServiceAccountKey, ServiceAccountKeyId } from '../types';
 
 const googleAnalyticsBrand = {
   primaryColor: '#E8710A',
@@ -64,17 +71,119 @@ const styles = {
 };
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [parameters, setParameters] = useState<AppInstallationParameters>({
+    serviceAccountKey: null,
+    serviceAccountKeyId: null,
+  });
+  const [newServiceAccountKey, setNewServiceAccountKey] = useState<ServiceAccountKey | null>(null);
+  const [newServiceAccountKeyId, setNewServiceAccountKeyId] = useState<ServiceAccountKeyId | null>(
+    null
+  );
+
+  const [serviceAccountKeyFile, setServiceAccountKeyFile] = useState<string>('');
+  const [serviceAccountKeyFileErrorMessage, setServiceAccountKeyFileErrorMessage] =
+    useState<string>('');
+  const [serviceAccountKeyFileIsValid, setServiceAccountKeyFileIsValid] = useState<boolean>(true);
+  const [serviceAccountKeyFileIsRequired, setServiceAccountKeyFileIsRequired] =
+    useState<boolean>(false);
+  const [serviceAccountKeyFormControlIsExpanded, setServiceAccountKeyFormControlIsExpanded] =
+    useState<boolean>(false);
+
   const sdk = useSDK<AppExtensionSDK>();
+
+  const setValidServiceAccountKey = (newServiceAccountKey: ServiceAccountKey | null) => {
+    setNewServiceAccountKey(newServiceAccountKey);
+    setNewServiceAccountKeyId(
+      newServiceAccountKey
+        ? convertServiceAccountKeyToServiceAccountKeyId(newServiceAccountKey)
+        : null
+    );
+    setServiceAccountKeyFileErrorMessage('');
+    setServiceAccountKeyFileIsValid(true);
+  };
+
+  const setInvalidServiceAccountKey = (errorMessage: string) => {
+    setNewServiceAccountKey(null);
+    setNewServiceAccountKeyId(null);
+    setServiceAccountKeyFileErrorMessage(errorMessage);
+    setServiceAccountKeyFileIsValid(false);
+  };
+
+  const onExpanderClick = () => {
+    setServiceAccountKeyFormControlIsExpanded(!serviceAccountKeyFormControlIsExpanded);
+  };
+
+  const onKeyFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setServiceAccountKeyFile(event.target.value);
+
+    const trimmedFieldValue = event.target.value;
+    if (trimmedFieldValue === '') {
+      setValidServiceAccountKey(null);
+      return;
+    }
+
+    let newServiceAccountKey: ServiceAccountKey;
+    try {
+      newServiceAccountKey = convertKeyFileToServiceAccountKey(trimmedFieldValue);
+    } catch (e) {
+      if (
+        // failed assertions about key file contents
+        e instanceof AssertionError ||
+        // could not parse as JSON
+        e instanceof SyntaxError
+      ) {
+        setInvalidServiceAccountKey(e.message);
+      } else {
+        console.error(e);
+        setInvalidServiceAccountKey('An unknown error occurred');
+      }
+      return;
+    }
+
+    setValidServiceAccountKey(newServiceAccountKey);
+  };
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    return {
+    if (!serviceAccountKeyFileIsValid) {
+      sdk.notifier.error('Invalid service account key file. See field error for details');
+      return false;
+    }
+
+    if (serviceAccountKeyFileIsRequired && !newServiceAccountKeyId) {
+      sdk.notifier.error('A valid service account key file is required');
+      return false;
+    }
+
+    const newServiceKeyParameters = {
+      serviceAccountKey: newServiceAccountKey,
+      serviceAccountKeyId: newServiceAccountKeyId,
+    };
+
+    const newParameters = Object.assign(
+      {},
       parameters,
+      omitBy(newServiceKeyParameters, (val) => val === null)
+    );
+
+    setParameters(newParameters);
+    setServiceAccountKeyFileIsRequired(false);
+    setServiceAccountKeyFormControlIsExpanded(false);
+    setServiceAccountKeyFile('');
+
+    return {
+      parameters: newParameters,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [
+    newServiceAccountKey,
+    newServiceAccountKeyId,
+    serviceAccountKeyFileIsRequired,
+    serviceAccountKeyFileIsValid,
+    parameters,
+    sdk,
+  ]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -86,6 +195,11 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
+        setServiceAccountKeyFileIsRequired(false);
+      } else {
+        // per the documentation, `null` means app is not installed, thus we will require
+        // the key file
+        setServiceAccountKeyFileIsRequired(true);
       }
 
       sdk.app.setReady();
@@ -110,12 +224,21 @@ const ConfigScreen = () => {
             Authorization Credentials
           </Heading>
           <Paragraph>
-            Authorize this application to access page analytics data from your organiation's Google
+            Authorize this application to access page analytics data from your organization's Google
             Analytics account.
           </Paragraph>
 
-          {/* This div will subsequently be replaced with the actual key upload form control */}
-          <div>FORM CONTROL HERE</div>
+          <FormControlServiceAccountKey
+            isRequired={serviceAccountKeyFileIsRequired}
+            isValid={serviceAccountKeyFileIsValid}
+            isExpanded={serviceAccountKeyFormControlIsExpanded}
+            errorMessage={serviceAccountKeyFileErrorMessage}
+            currentServiceAccountKeyId={parameters.serviceAccountKeyId}
+            serviceAccountKeyFile={serviceAccountKeyFile}
+            onKeyFileChange={onKeyFileChange}
+            onExpanderClick={onExpanderClick}
+            className={styles.serviceAccountKeyFormControl}
+          />
 
           <Heading as="h2" className={styles.sectionHeading}>
             Configuration
