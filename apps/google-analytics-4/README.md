@@ -19,6 +19,11 @@ Contentful Marketplace App that displays page-based analytics from Google Analyt
 * The Smartling app is built on top of Contentful's [app framework](https://www.smartling.com/software/integrations/contentful/).
 * The app itself is a React application that provides a Sidebar widget and App Config widget, used within Contentful's app framework.
 
+### Authorization
+
+> **IMPORTANT**: In the current development stage this app implementes insecure plaintext storage of access credentials. Before release credentials will be stored via a secure, encrypted solution. -- Dec 8, 2022
+* This app uses [service accounts](https://cloud.google.com/iam/docs/understanding-service-accounts) to provision access to users' analytics data. These credentials are used to fetch data from the organization's analytics account on behalf of all users.
+
 ### Google Analytics Data
 
 * For analytics data, the app uses Google's [Analytics Data API](https://developers.google.com/analytics/devguides/reporting/data/v1)
