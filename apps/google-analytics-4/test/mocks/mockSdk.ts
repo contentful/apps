@@ -8,6 +8,9 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
+  notifier: {
+    error: jest.fn(),
+  },
 };
 
 export { mockSdk };
