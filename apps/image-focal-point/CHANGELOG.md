@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.6.16](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.15...@contentful/image-focal-point@1.6.16) (2022-12-21)
+
+### Bug Fixes
+
+- [] Scale SVG images properly in Image Focal Point app ([#2215](https://github.com/contentful/apps/issues/2215)) ([80531e8](https://github.com/contentful/apps/commit/80531e82c7a7b571b15f18cf7d133bf13391009c))
+
 ## [1.6.15](https://github.com/contentful/apps/compare/@contentful/image-focal-point@1.6.14...@contentful/image-focal-point@1.6.15) (2022-12-07)
 
 **Note:** Version bump only for package @contentful/image-focal-point

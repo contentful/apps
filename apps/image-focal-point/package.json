@@ -1,6 +1,6 @@
 {
   "name": "@contentful/image-focal-point",
-  "version": "1.6.15",
+  "version": "1.6.16",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.2.0",
