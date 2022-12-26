@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.69](https://github.com/contentful/apps/compare/@contentful/typeform-lambda@1.5.68...@contentful/typeform-lambda@1.5.69) (2022-12-26)
+
+**Note:** Version bump only for package @contentful/typeform-lambda
+
 ## [1.5.68](https://github.com/contentful/apps/compare/@contentful/typeform-lambda@1.5.67...@contentful/typeform-lambda@1.5.68) (2022-12-20)
 
 **Note:** Version bump only for package @contentful/typeform-lambda
