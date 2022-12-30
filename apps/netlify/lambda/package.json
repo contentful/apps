@@ -1,7 +1,7 @@
 {
   "name": "@contentful/netlify-build-action-lambda",
   "private": true,
-  "version": "1.3.9",
+  "version": "1.3.10",
   "author": "Contentful GmbH",
   "license": "MIT",
   "scripts": {
