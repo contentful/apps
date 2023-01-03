@@ -16,7 +16,7 @@ Contentful Marketplace App that displays page-based analytics from Google Analyt
 
 ### General
 
-* The Smartling app is built on top of Contentful's [app framework](https://www.smartling.com/software/integrations/contentful/).
+* The Google Anlaytics App app is built on top of Contentful's [app framework](https://www.smartling.com/software/integrations/contentful/).
 * The app itself is a React application that provides a Sidebar widget and App Config widget, used within Contentful's app framework.
 
 ### Authorization
@@ -29,14 +29,22 @@ Contentful Marketplace App that displays page-based analytics from Google Analyt
 * For analytics data, the app uses Google's [Analytics Data API](https://developers.google.com/analytics/devguides/reporting/data/v1)
 * For API access to Google, the app uses the [Google API Client Library for JavaScript](https://github.com/google/google-api-javascript-client)
 
+### Lambda
+
+* This app requires a backend to make secure API calls to the Goolge Analytics Data API.
+* The backend runs as an AWS lambda
 
 ## Local Development
 
-To develop this app local, there are a few prerequisites you will want to have in place:
+To develop this app locally, there are a few prerequisites you will want to have in place:
 
 * An Google Analytics 4 property in an active Google Analytics account. You will also need to have Google Analytics gathering data on a public website somewhere in order to generate metrics you can use to display and test.
 * A Contentful organization and space
 * A development definition of the app itself
+
+### Frontend
+
+The frontend lives in the `frontend/` folder.
 
 To install or update the app locally:
 
@@ -56,7 +64,13 @@ To run the test in CI (no watch):
 npm run test-ci
 ```
 
-## Available Scripts
+
+### Backend (Lambda)
+
+The backend lives in the `lambda/` folder.
+
+
+### Available Scripts
 
 Note: This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
