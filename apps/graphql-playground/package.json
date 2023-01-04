@@ -1,6 +1,6 @@
 {
   "name": "@contentful/graphql-playground",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "private": true,
   "devDependencies": {
     "@contentful/app-scripts": "1.2.0",
