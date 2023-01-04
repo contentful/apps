@@ -1,6 +1,6 @@
 {
   "name": "@contentful/smartling-lambda",
-  "version": "1.4.66",
+  "version": "1.4.68",
   "private": true,
   "scripts": {
     "start": "LOCAL_DEV=true FRONTEND_URL=http://localhost:3000 ts-node src/index.ts",
