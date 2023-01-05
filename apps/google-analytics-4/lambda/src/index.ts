@@ -1,7 +1,4 @@
 import app from './app';
+import serverless from 'serverless-http';
 
-const port = 3000;
-
-app.listen(port, () => {
-  console.log(`Express server is listening at http://localhost:${port}`);
-});
+export const handler = serverless(app);
