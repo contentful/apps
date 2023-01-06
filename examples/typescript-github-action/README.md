@@ -6,13 +6,13 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app --typescript
+npx create-contentful-app --example typescript-github-action
 
 # npm
-npm init contentful-app -- --typescript
+npm init contentful-app -- --example typescript-github-action
 
 # Yarn
-yarn create contentful-app --typescript
+yarn create contentful-app --example typescript-github-action
 ```
 
 ## Available Scripts
