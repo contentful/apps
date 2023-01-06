@@ -32,7 +32,7 @@ const Field = () => {
 
   const storeHexValue = sdk.field.type === 'Symbol';
   const allowCustomValue = sdk.parameters.instance.withCustomValue;
-
+  const allowRemoval = sdk.parameters.instance.allowRemoval;
   // @ts-ignore
   const theme: Theme = sdk.parameters.installation.themes[0];
 
@@ -77,7 +77,7 @@ const Field = () => {
 
   return (
     <Form>
-      {theme.colors.length === 0 ? (
+      {theme.colors.length === 0 || !allowRemoval ? (
         <SelectColorButton
           name={name}
           value={value}
@@ -107,6 +107,11 @@ const Field = () => {
             {allowCustomValue && (
               <Menu.Item onClick={() => customColorPicker?.current?.click()}>
                 Custom...
+              </Menu.Item>
+            )}
+            {allowRemoval && (
+              <Menu.Item onClick={() => setValue(undefined)}>
+                Remove Selection
               </Menu.Item>
             )}
           </Menu.List>
