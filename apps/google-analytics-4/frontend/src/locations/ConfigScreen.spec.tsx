@@ -1,6 +1,5 @@
-import React from 'react';
 import ConfigScreen from './ConfigScreen';
-import { act, findByText, getByText, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockCma, mockSdk, validServiceKeyFile } from '../../test/mocks';
 
