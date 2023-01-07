@@ -1,7 +1,9 @@
-import { Badge, Box, Flex, Heading, TextLink } from '@contentful/f36-components';
+import { Badge, Box, Flex, Heading, Skeleton, TextLink } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
+import { useEffect, useState } from 'react';
+import { Api, ApiError, Credentials } from '../services/api';
 
 import type { ServiceAccountKeyId } from '../types';
 
@@ -34,6 +36,31 @@ interface InstalledServiceAccountKeyProps {
 }
 
 const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAccountKeyProps) => {
+  const [credentialsData, setCredentialsData] = useState<Credentials | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      const api = new Api();
+      try {
+        const response = await api.getCredentials();
+        setCredentialsData(response);
+        setError('');
+      } catch (e) {
+        setCredentialsData(null);
+        if (e instanceof ApiError) {
+          setError(e.message);
+        } else {
+          console.error(e);
+          setError('An unknown error occurred');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, []);
+
   if (!serviceAccountKeyId) {
     return null;
   }
@@ -61,10 +88,16 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
           <Box as="code">{serviceAccountKeyId.id}</Box>
         </dd>
         <dt>Status</dt>
-
-        {/* TODO: do a real check for active state -- requires the lambda backend */}
         <dd>
-          <Badge variant="positive">active</Badge>
+          {isLoading ? (
+            <Skeleton.Container svgHeight={21}>
+              <Skeleton.DisplayText lineHeight={21} />
+            </Skeleton.Container>
+          ) : error === '' ? (
+            <Badge variant="positive">{credentialsData?.status}</Badge>
+          ) : (
+            <Badge variant="secondary">unknown</Badge>
+          )}
         </dd>
       </dl>
     </Box>
