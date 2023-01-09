@@ -87,3 +87,5 @@ export class Api {
     return new URL(url);
   }
 }
+
+export const api = new Api();

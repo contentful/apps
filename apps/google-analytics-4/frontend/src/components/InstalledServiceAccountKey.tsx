@@ -3,7 +3,7 @@ import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { useEffect, useState } from 'react';
-import { Api, ApiError, Credentials } from '../services/api';
+import { api, ApiError, Credentials } from '../services/api';
 
 import type { ServiceAccountKeyId } from '../types';
 
@@ -42,7 +42,6 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
 
   useEffect(() => {
     (async () => {
-      const api = new Api();
       try {
         const response = await api.getCredentials();
         setCredentialsData(response);
