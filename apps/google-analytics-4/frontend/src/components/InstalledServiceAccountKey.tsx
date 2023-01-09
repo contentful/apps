@@ -38,7 +38,7 @@ interface InstalledServiceAccountKeyProps {
 const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAccountKeyProps) => {
   const [credentialsData, setCredentialsData] = useState<Credentials | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -46,7 +46,7 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
       try {
         const response = await api.getCredentials();
         setCredentialsData(response);
-        setError('');
+        setError(null);
       } catch (e) {
         setCredentialsData(null);
         if (e instanceof ApiError) {
@@ -93,7 +93,7 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
             <Skeleton.Container svgHeight={21}>
               <Skeleton.DisplayText lineHeight={21} />
             </Skeleton.Container>
-          ) : error === '' ? (
+          ) : error === null ? (
             <Badge variant="positive">{credentialsData?.status}</Badge>
           ) : (
             <Badge variant="secondary">unknown</Badge>
