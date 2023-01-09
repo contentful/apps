@@ -15,8 +15,7 @@ const styles = {
     width: '70px',
     display: 'inline-block',
     textAlign: 'left',
-  }),
-  buttonGroup: css({width: '100%'})
+  })
 };
 
 interface MenuButtonProps {
@@ -35,7 +34,7 @@ function _SelectColorButton(
   const allowRemoval = sdk.parameters.instance.allowRemoval;
 
   return (
-    <ButtonGroup withDivider className={styles.buttonGroup}>
+    <ButtonGroup withDivider>
       <Button
         endIcon={showChevron ? <ChevronDownIcon /> : undefined}
         isFullWidth
