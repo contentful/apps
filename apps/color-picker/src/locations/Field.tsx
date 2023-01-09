@@ -32,7 +32,6 @@ const Field = () => {
 
   const storeHexValue = sdk.field.type === 'Symbol';
   const allowCustomValue = sdk.parameters.instance.withCustomValue;
-  const allowRemoval = sdk.parameters.instance.allowRemoval;
   // @ts-ignore
   const theme: Theme = sdk.parameters.installation.themes[0];
 
@@ -77,11 +76,12 @@ const Field = () => {
 
   return (
     <Form>
-      {theme.colors.length === 0 || !allowRemoval ? (
+      {theme.colors.length === 0 ? (
         <SelectColorButton
           name={name}
           value={value}
           onClick={() => customColorPicker?.current?.click()}
+          onRemovalClick={() => setValue(undefined)}
         />
       ) : (
         <Menu
@@ -90,7 +90,10 @@ const Field = () => {
           onClose={() => setIsOpen(false)}
         >
           <Menu.Trigger>
-            <SelectColorButton showChevron name={name} value={value} />
+            <SelectColorButton 
+              showChevron name={name} 
+              value={value}
+              onRemovalClick={() => setValue(undefined)} />
           </Menu.Trigger>
           <Menu.List className={styles.menuList}>
             {theme.colors.map((color: Color) => (
@@ -107,11 +110,6 @@ const Field = () => {
             {allowCustomValue && (
               <Menu.Item onClick={() => customColorPicker?.current?.click()}>
                 Custom...
-              </Menu.Item>
-            )}
-            {allowRemoval && (
-              <Menu.Item onClick={() => setValue(undefined)}>
-                Remove Selection
               </Menu.Item>
             )}
           </Menu.List>
