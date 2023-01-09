@@ -73,31 +73,17 @@ function validateResponseStatus(response: Response): void {
 
 export class Api {
   readonly baseUrl: string;
-  readonly baseUrlPathPrefix: string;
 
   constructor() {
     this.baseUrl = config.backendApiUrl;
-
-    // some stages are included as the path, since the URL() constructor ignores
-    // these we have to manually join the path in
-    this.baseUrlPathPrefix = new URL(this.baseUrl).pathname;
   }
 
   async getCredentials(): Promise<Credentials> {
-    return await fetchFromApi<Credentials>(this.requestUrl('/api/credentials'), ZCredentials);
+    return await fetchFromApi<Credentials>(this.requestUrl('api/credentials'), ZCredentials);
   }
 
   private requestUrl(apiPath: string): URL {
-    const fullApiPath = this.fullApiPath(apiPath);
-    return new URL(fullApiPath, this.baseUrl);
-  }
-
-  private fullApiPath(apiPath: string): string {
-    return (
-      [this.baseUrlPathPrefix, apiPath]
-        // remove one or more '/' from the front, and one or more '/' from the back of each segment
-        .map((p) => p.trim().replace(/(^[/]*|[/]*$)/g, ''))
-        .join('/')
-    );
+    const url = `${this.baseUrl}/${apiPath}`;
+    return new URL(url);
   }
 }
