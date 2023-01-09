@@ -1,0 +1,22 @@
+service: google-analytics
+frameworkVersion: '3'
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 8080
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+
+functions:
+  api:
+    handler: build/index.handler
+    events:
+      - http:
+          path: /{any+}
+          method: ANY
+
