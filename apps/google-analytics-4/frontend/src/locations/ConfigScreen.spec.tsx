@@ -1,4 +1,3 @@
-import React from 'react';
 import ConfigScreen from './ConfigScreen';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -160,6 +159,11 @@ describe('Config Screen component (installed)', () => {
     await act(async () => {
       result = await saveAppInstallation();
     });
+
+    // for now we need to wait for the key status to load before finishing with the test, otherwise
+    // it exits too early and the promise is left open, leading the react testing library to complain
+    // In the future, we probably want to cancel the useEffect or something similar!
+    await screen.findByText('active');
 
     // result should reflect the same parameters that were loaded, since no change
     // was made by the user
