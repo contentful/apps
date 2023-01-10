@@ -1,0 +1,20 @@
+on: [push]
+
+jobs:
+  deploy_job:
+    runs-on: ubuntu-latest
+    name: Deploy app to Contentful
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - run: npm ci
+      - run: npm run build
+      - uses: contentful/actions-app-deploy@v1
+        with:
+          organization-id: ${{ secrets.ORGANIZATION_ID }}
+          app-definition-id: ${{ secrets.APP_DEFINITION_ID }}
+          access-token: ${{ secrets.ACCESS_TOKEN }}
+          folder: build
