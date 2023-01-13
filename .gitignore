@@ -8,3 +8,4 @@ dist
 tags
 **/.coverage/**
 lerna-debug.log
+.eslintcache
