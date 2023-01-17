@@ -192,7 +192,6 @@ const ConfigScreen = () => {
   useEffect(() => {
     (async () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
-      console.log(currentParameters)
       if (currentParameters) {
         setParameters(currentParameters);
         setServiceAccountKeyFileIsRequired(false);
