@@ -1,0 +1,90 @@
+service: sls-apps-slack-backend
+
+frameworkVersion: '>=2.0.0 <3.0.0'
+variablesResolutionMode: 20210326
+
+plugins:
+  - serverless-domain-manager
+  - serverless-offline
+
+custom: ${file(./config/serverless.${opt:stage, 'dev'}.yml):variables}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: 'us-east-1'
+  timeout: 30
+  lambdaHashingVersion: 20201221
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: ${self:custom.deploymentPrefix}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+          Resource: 'arn:aws:dynamodb:*:*:table/${self:custom.tableName}*'
+package:
+  patterns:
+    - 'built/**'
+    - '!.git/**'
+    - '!**/*.ts'
+
+functions:
+  slack-app-api:
+    handler: build/index.handler
+    description: Slack App Backend
+    environment:
+      DYNAMO_ENDPOINT: ${self:custom.dynamoEndpoint}
+      DYNAMO_TABLE_NAME: ${self:custom.tableName}
+      SLACK_CLIENT_ID: ${self:custom.oauthCredentials.client_id}
+      SLACK_CLIENT_SECRET: ${self:custom.oauthCredentials.client_secret}
+      SLACK_SIGNING_SECRET: ${self:custom.slackSigningSecret.signing_secret}
+      FRONTEND_URL: ${self:custom.frontendUrl}
+      WORKFLOWS_URL: ${self:custom.workflowsUrl}
+      BACKEND_URL: https://${self:custom.customDomain.domainName}/api
+      SIGNING_SECRET: ${self:custom.signingSecret.signing_secret}
+      PRIVATE_APP_KEY: ${self:custom.app.privateKey}
+      APP_ID: ${self:custom.app.id}
+      SERVERLESS_PATH_PREFIX: ${self:custom.serverless.pathPrefix}
+      BASE_URL: ${self:custom.baseUrl}
+    events:
+      - http:
+          method: ANY
+          path: /api/{proxy+}
+
+resources:
+  Resources:
+    TokenTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+          - AttributeName: typ
+            AttributeType: S
+          - AttributeName: slackWorkspaceId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+          - AttributeName: typ
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: by-slack-workspace-id
+            KeySchema:
+              - AttributeName: typ
+                KeyType: HASH
+              - AttributeName: slackWorkspaceId
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+        BillingMode: PAY_PER_REQUEST

@@ -1,0 +1,57 @@
+{
+  "name": "slack-app",
+  "version": "1.0.0",
+  "description": "The Contentful Slack App Repository contains the code responsible for the official Slack App in the Contentful Marketplace.",
+  "main": "index.js",
+  "scripts": {
+    "start:lambda": "yarn workspace lambda run start",
+    "start:frontend": "yarn workspace slack-frontend run start",
+    "build": "SKIP_PREFLIGHT_CHECK=true yarn workspaces run build",
+    "start": "concurrently -n lambda,app \"yarn run start:lambda\" \"yarn run start:frontend\"",
+    "prettier:check": "prettier --check '**/*.{jsx,js,ts,tsx}'",
+    "prettier:fix": "prettier --write '**/*.{jsx,js,ts,tsx}'",
+    "lint": "yarn workspaces run lint",
+    "deploy": "yarn workspaces run deploy",
+    "deploy-test": "yarn workspaces run deploy-test",
+    "lint:all": "yarn prettier:check && yarn lint",
+    "test": "yarn workspaces run test",
+    "dev": "node ./scripts/dev.js",
+    "create_table": "node ./scripts/create_table",
+    "docs": "node ./scripts/openapi.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/contentful/slack-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/contentful/slack-app/issues"
+  },
+  "homepage": "https://github.com/contentful/slack-app#readme",
+  "devDependencies": {
+    "@contentful/eslint-config-extension": "^0.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "concurrently": "^7.6.0",
+    "eslint": "^8.31.0",
+    "js-yaml": "4.1.0",
+    "ngrok": "4.3.3",
+    "prettier": "^2.8.1",
+    "swagger-jsdoc": "^6.2.7",
+    "yarn": "^1.22.19"
+  },
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "slack-frontend",
+      "lambda"
+    ],
+    "nohoist": [
+      "**/@types/node"
+    ]
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1288.0"
+  }
+}
