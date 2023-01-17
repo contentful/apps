@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Collapse,
   Flex,
   FormControl,
-  Note,
+  Heading,
   Paragraph,
   Text,
   Textarea,
@@ -13,7 +13,6 @@ import {
   CheckCircleIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  ExternalLinkTrimmedIcon,
 } from '@contentful/f36-icons';
 import { css } from 'emotion';
 
@@ -44,6 +43,10 @@ const styles = {
   credentialsExplanation: css({
     marginTop: tokens.spacingL,
   }),
+  sectionHeading: css({
+    fontSize: tokens.fontSizeL,
+    marginBottom: tokens.spacing2Xs,
+  })
 };
 
 const placeholderText = `{
@@ -103,6 +106,9 @@ const FormControlServiceAccountKey = ({
 
   return currentServiceAccountKeyId ? (
     <div className={className}>
+      <Heading as="h2" className={styles.sectionHeading}>
+        Authorization Credentials
+      </Heading>
       <InstalledServiceAccountKey serviceAccountKeyId={currentServiceAccountKeyId} />
       <TextLink
         as="button"
