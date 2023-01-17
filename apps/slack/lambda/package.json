@@ -20,6 +20,8 @@
   "license": "MIT",
   "description": "",
   "devDependencies": {
+    "@contentful/eslint-config-extension": "^0.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@tsconfig/node14": "^1.0.3",
     "@types/aws-lambda": "^8.10.109",
     "@types/aws-sdk": "^2.7.0",
@@ -30,6 +32,7 @@
     "@types/node": "^14.18.36",
     "@types/sinon": "^10.0.13",
     "chai": "^4.3.7",
+    "eslint": "^7.12.1",
     "mocha": "^10.2.0",
     "ngrok": "4.3.3",
     "prettier": "^2.8.1",

@@ -1,12 +1,11 @@
-import { AppExtensionSDK, CanonicalRequest } from '@contentful/app-sdk';
-import { PlainClientAPI } from 'contentful-management';
+import { AppExtensionSDK, CanonicalRequest, CMAClient } from '@contentful/app-sdk';
 import { BACKEND_BASE_URL } from './constants';
 import { ConnectedWorkspace, SlackChannel, SlackChannelSimplified } from './workspace.store';
 import { getEnvironmentName } from './utils';
 
 const makeSignedRequest = async (
   canonicalRequest: CanonicalRequest,
-  { appDefinitionId, cma }: { appDefinitionId: string; cma: PlainClientAPI }
+  { appDefinitionId, cma }: { appDefinitionId: string; cma: CMAClient }
 ) => {
   // When run locally, backend base url has a prefix. This makes sure we're signing the right thing
   const signedPath = new URL(`${BACKEND_BASE_URL}${canonicalRequest.path}`).pathname;
@@ -31,7 +30,7 @@ export const apiClient = {
   getWorkspace: async (
     sdk: AppExtensionSDK,
     workspaceId: string,
-    cma: PlainClientAPI
+    cma: CMAClient
   ): Promise<ConnectedWorkspace> => {
     const req = {
       method: 'GET' as const,
@@ -52,7 +51,7 @@ export const apiClient = {
   getChannels: async (
     sdk: AppExtensionSDK,
     workspaceId: string,
-    cma: PlainClientAPI
+    cma: CMAClient
   ): Promise<SlackChannel[] | undefined> => {
     return makeSignedRequest(
       {
@@ -68,11 +67,7 @@ export const apiClient = {
     );
   },
 
-  createAuthToken: async (
-    sdk: AppExtensionSDK,
-    cma: PlainClientAPI,
-    temporaryRefreshToken: string
-  ) => {
+  createAuthToken: async (sdk: AppExtensionSDK, cma: CMAClient, temporaryRefreshToken: string) => {
     return makeSignedRequest(
       {
         method: 'POST',
