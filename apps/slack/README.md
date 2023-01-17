@@ -111,7 +111,7 @@ This sections explains how to run the Slack app locally.
 
 ### Frontend
 
-- Set the following variables in `slack-frontend/.env.development`:
+- Set the following variables in `frontend/.env.development`:
   - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (Basic Information -> App Credentials -> Client ID)
   - `REACT_APP_BACKEND_BASE_URL`: The ngrok URL
 - Run the frontend with `yarn run start:frontend`

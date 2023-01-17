@@ -4,7 +4,7 @@ RUN apk add --update --no-cache openssh build-base python3 bash git && rm -rf /v
 
 WORKDIR /app
 
-COPY package.json yarn.lock slack-frontend/package.json lambda/package.json /app/
+COPY package.json yarn.lock frontend/package.json lambda/package.json /app/
 
 ENV NODE_ENV development
 

@@ -8,5 +8,5 @@ build
 .pnp.*
 lambda/.serverless
 lambda/config/serverless.dev.yml
-slack-frontend/.env.development
+frontend/.env.development
 lambda/private-key.pem
