@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { Heading, SectionHeading, Form, Paragraph, Flex, Button } from '@contentful/f36-components';
+import { Heading, Form, Paragraph } from '@contentful/f36-components';
 import { css } from 'emotion';
 import { omitBy } from 'lodash';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -51,10 +51,6 @@ const styles = {
     border: 0,
     height: '1px',
     backgroundColor: tokens.gray300,
-  }),
-  sectionHeading: css({
-    fontSize: tokens.fontSizeL,
-    marginBottom: tokens.spacing2Xs,
   }),
   serviceAccountKeyFormControl: css({
     marginBottom: tokens.spacing2Xl,
@@ -220,13 +216,6 @@ const ConfigScreen = () => {
         <hr className={styles.splitter} />
 
         <Form>
-          {/* <Heading as="h2" className={styles.sectionHeading}>
-            Authorization Credentials
-          </Heading>
-          <Paragraph>
-            Authorize this application to access page analytics data from your organization's Google
-            Analytics account.
-          </Paragraph> */}
 
           <FormControlServiceAccountKey
             isRequired={serviceAccountKeyFileIsRequired}
