@@ -3,18 +3,13 @@ import {
     Heading,
     Collapse,
     Flex,
-    FormControl,
     Note,
     Paragraph,
-    Text,
-    Textarea,
     TextLink,
 } from '@contentful/f36-components';
 import {
-    CheckCircleIcon,
     ChevronDownIcon,
     ChevronRightIcon,
-    ExternalLinkTrimmedIcon,
 } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
@@ -36,10 +31,10 @@ const QuickStartGuide = () => {
         <>
             <Heading as="h2" className={styles.sectionHeading}>Quickstart (Recommended)</Heading>
             <Paragraph>
-                Create a new Cloud Platform project, automatically enable the Google Analytics Data API, and create a service account all at once. 
+                Create a new Cloud Platform project, automatically enable the Google Analytics Data API, and create a service account all at once.
             </Paragraph>
             <Paragraph>
-            This will open a window that will guide you through the process on the Google side and allow you to download a JSON file. Paste the contents of that JSON file below.
+                This will open a window that will guide you through the process on the Google side and allow you to download a JSON file. Paste the contents of that JSON file below.
 
             </Paragraph>
             <Paragraph>
@@ -67,7 +62,7 @@ const QuickStartGuide = () => {
                 Manual Setup (for advanced users)
             </TextLink>
             <Collapse isExpanded={expanded}>
-            <Paragraph marginTop="spacingM">If you feel confident setting up a service account manually, we recommend following this guide: // TBD</Paragraph>
+                <Paragraph marginTop="spacingM">If you feel confident setting up a service account manually, we recommend following this guide: // TBD</Paragraph>
 
             </Collapse>
 
