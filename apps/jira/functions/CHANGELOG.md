@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.95](https://github.com/contentful/apps/compare/@contentful/functions@1.4.94...@contentful/functions@1.4.95) (2023-01-13)
+
+### Bug Fixes
+
+- **deps:** bump aws-sdk from 2.1293.0 to 2.1294.0 ([#2315](https://github.com/contentful/apps/issues/2315)) ([c7c1e60](https://github.com/contentful/apps/commit/c7c1e60b98d506f7708e406be9f7d4b6288a6c55))
+
+## [1.4.94](https://github.com/contentful/apps/compare/@contentful/functions@1.4.93...@contentful/functions@1.4.94) (2023-01-12)
+
+### Bug Fixes
+
+- **deps:** bump aws-sdk from 2.1292.0 to 2.1293.0 ([#2313](https://github.com/contentful/apps/issues/2313)) ([f55f594](https://github.com/contentful/apps/commit/f55f59490809ebc3f4c49054dfa63c073b734883))
+
+## [1.4.93](https://github.com/contentful/apps/compare/@contentful/functions@1.4.92...@contentful/functions@1.4.93) (2023-01-11)
+
+### Bug Fixes
+
+- **deps:** bump aws-sdk from 2.1289.0 to 2.1290.0 ([#2303](https://github.com/contentful/apps/issues/2303)) ([9271260](https://github.com/contentful/apps/commit/927126002bd93db12e926e8664915de735f2b60c))
+- **deps:** bump aws-sdk from 2.1290.0 to 2.1291.0 ([#2304](https://github.com/contentful/apps/issues/2304)) ([3ecefbf](https://github.com/contentful/apps/commit/3ecefbf4315a18095f902a600053ab65b82d56cd))
+- **deps:** bump aws-sdk from 2.1291.0 to 2.1292.0 ([#2307](https://github.com/contentful/apps/issues/2307)) ([d2d764c](https://github.com/contentful/apps/commit/d2d764ca5a5f3bbd2c9bc13308793f74244f8950))
+
 ## [1.4.92](https://github.com/contentful/apps/compare/@contentful/functions@1.4.91...@contentful/functions@1.4.92) (2023-01-06)
 
 ### Bug Fixes
