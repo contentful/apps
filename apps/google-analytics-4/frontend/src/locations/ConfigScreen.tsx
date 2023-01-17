@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { Heading, Form, Paragraph } from '@contentful/f36-components';
+import { Heading, SectionHeading, Form, Paragraph, Flex, Button } from '@contentful/f36-components';
 import { css } from 'emotion';
 import { omitBy } from 'lodash';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -192,7 +192,7 @@ const ConfigScreen = () => {
   useEffect(() => {
     (async () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
-
+      console.log(currentParameters)
       if (currentParameters) {
         setParameters(currentParameters);
         setServiceAccountKeyFileIsRequired(false);
@@ -217,16 +217,17 @@ const ConfigScreen = () => {
           organization's Google Analytics properties alongside relevant content entries.
         </Paragraph>
 
+
         <hr className={styles.splitter} />
 
         <Form>
-          <Heading as="h2" className={styles.sectionHeading}>
+          {/* <Heading as="h2" className={styles.sectionHeading}>
             Authorization Credentials
           </Heading>
           <Paragraph>
             Authorize this application to access page analytics data from your organization's Google
             Analytics account.
-          </Paragraph>
+          </Paragraph> */}
 
           <FormControlServiceAccountKey
             isRequired={serviceAccountKeyFileIsRequired}
@@ -239,11 +240,6 @@ const ConfigScreen = () => {
             onExpanderClick={onExpanderClick}
             className={styles.serviceAccountKeyFormControl}
           />
-
-          <Heading as="h2" className={styles.sectionHeading}>
-            Configuration
-          </Heading>
-          <Paragraph>Configure your Google Analytics app installation.</Paragraph>
         </Form>
       </div>
 
@@ -252,6 +248,7 @@ const ConfigScreen = () => {
           <img src={googleAnalyticsBrand.logoImage} alt="Google Analytics" />
         </a>
       </div>
+
     </>
   );
 };

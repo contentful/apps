@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Collapse,
   Flex,
@@ -20,6 +20,7 @@ import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 import InstalledServiceAccountKey from './InstalledServiceAccountKey';
 import type { ServiceAccountKeyId } from '../types';
+import QuickStartGuide from './QuickStartGuide';
 
 interface FormControlServideAccountKeyFileProps {
   isValid: boolean;
@@ -61,6 +62,7 @@ const FormControlServiceAccountKey = ({
   onExpanderClick,
   className,
 }: FormControlServideAccountKeyFileProps) => {
+
   const formControl = (
     <FormControl
       marginTop="spacingL"
@@ -95,40 +97,7 @@ const FormControlServiceAccountKey = ({
       ) : (
         <FormControl.ValidationMessage>Error: {errorMessage}</FormControl.ValidationMessage>
       )}
-      <div className={styles.credentialsExplanation}>
-        <Note variant="primary" className={styles.credentialsNote}>
-          Follow{' '}
-          <TextLink
-            icon={<ExternalLinkTrimmedIcon />}
-            alignIcon="end"
-            href="https://cloud.google.com/iam/docs/understanding-service-accounts"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            these detailed instructions
-          </TextLink>{' '}
-          to create a service account in Google and obtain the required service account key file.
-          When you are finished, copy and paste the entire contents of this file into the "Service
-          Account Key File" field above.
-        </Note>
-        <Paragraph>
-          To use the Google Analytics app, you will need to provision a{' '}
-          <TextLink
-            icon={<ExternalLinkTrimmedIcon />}
-            alignIcon="end"
-            href="https://cloud.google.com/iam/docs/understanding-service-accounts"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Google Cloud service account
-          </TextLink>{' '}
-          for which you enable <i>read access</i> to your organization's Google Analytics data.
-        </Paragraph>
-        <Paragraph>
-          After configuring the service account, you'll download a set of credentials that
-          Contentful will use to access Google Analytics data on this service account's behalf.
-        </Paragraph>
-      </div>
+
     </FormControl>
   );
 
@@ -145,10 +114,18 @@ const FormControlServiceAccountKey = ({
       >
         Replace with new Service Account Key
       </TextLink>
-      <Collapse isExpanded={isExpanded}>{formControl}</Collapse>
+      <Collapse isExpanded={isExpanded}>
+        <Paragraph marginTop="spacingS">
+          <QuickStartGuide />
+          {formControl}
+        </Paragraph>
+      </Collapse>
     </div>
   ) : (
-    formControl
+    <>
+      <QuickStartGuide />
+      {formControl}
+    </>
   );
 };
 
