@@ -10,7 +10,7 @@
     "format": "prettier --write '**/*.{jsx,js,ts,tsx}'",
     "start": "npm run build && serverless offline",
     "deploy": "sls deploy --stage $STAGE",
-    "deploy-test": "sls deploy --stage test",
+    "deploy:test": "sls deploy --stage test",
     "dev": "node ./scripts/dev.js",
     "create_table": "node ./scripts/create_table",
     "docs": "node ./scripts/openapi.js"

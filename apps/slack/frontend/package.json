@@ -16,13 +16,13 @@
   },
   "scripts": {
     "start": "PORT=1234 cross-env BROWSER=none react-scripts start",
-    "build": "rm -rf ./build && react-scripts build",
+    "build": "REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST STAGE='test'  react-scripts build",
     "test": "SKIP_PREFLIGHT_CHECK=true react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint --ext .ts,.tsx,.js,.jsx,.svg ./",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/slack --acl public-read",
-    "deploy-test": "aws s3 sync ./build ${STATIC_S3_BASE}/slack-test --acl public-read"
+    "deploy:test": "aws s3 sync ./build ${STATIC_S3_BASE}/slack-test --acl public-read"
   },
   "browserslist": {
     "production": [
