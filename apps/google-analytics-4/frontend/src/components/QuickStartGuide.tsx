@@ -62,8 +62,15 @@ const QuickStartGuide = () => {
                 Manual Setup (for advanced users)
             </TextLink>
             <Collapse isExpanded={expanded}>
-                <Paragraph marginTop="spacingM">If you feel confident setting up a service account manually, we recommend following this guide: // TBD</Paragraph>
-
+                <Paragraph marginTop="spacingM">If you feel confident setting up a service account manually, we recommend following this guide:
+                    <TextLink
+                        variant="primary"
+                        href="https://docs.google.com/document/d/1h3Oo90jpv1TBvp3_HKSPvEiY3MsglcxnpL5c1-iB0NM/edit?usp=sharing"
+                        target="_blank">
+                        Set up Service Accounts Manually
+                    </TextLink>
+                </Paragraph>
+                {/* TODO: replace with real link when we have it */}
             </Collapse>
 
         </>
