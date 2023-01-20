@@ -14,9 +14,8 @@ provider:
 
 functions:
   api:
-    handler: build/index.handler
+    handler: build/src/index.handler
     events:
       - http:
           path: /{any+}
           method: ANY
-
