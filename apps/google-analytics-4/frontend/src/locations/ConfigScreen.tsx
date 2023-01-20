@@ -213,8 +213,8 @@ const ConfigScreen = () => {
       <div className={styles.body}>
         <Heading>About Google Analytics for Contentful</Heading>
         <Paragraph>
-          The Google Analytics app displays realtime page-based analytics data from your
-          organization's Google Analytics properties alongside relevant content entries.
+          The Google Analytics app displays real-time page-based analytics data from your
+          organization’s Google Analytics properties alongside relevant content entries.
         </Paragraph>
 
         <hr className={styles.splitter} />
@@ -224,7 +224,7 @@ const ConfigScreen = () => {
             Authorization Credentials
           </Heading>
           <Paragraph>
-            Authorize this application to access page analytics data from your organization's Google
+            Authorize this application to access page analytics data from your organization’s Google
             Analytics account.
           </Paragraph>
 
