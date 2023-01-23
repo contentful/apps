@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@contentful/node-apps-toolkit": "^2.0.4",
     "@tsconfig/node18": "^1.0.1",
     "@types/chai": "^4.3.4",
     "@types/chai-http": "^4.2.0",

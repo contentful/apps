@@ -1,3 +1,7 @@
-const mockCma: any = {};
+const mockCma: any = {
+  appSignedRequest: {
+    create: () => ({}),
+  },
+};
 
 export { mockCma };
