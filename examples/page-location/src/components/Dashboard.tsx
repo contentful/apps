@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
 import { ContentType, PageExtensionSDK } from '@contentful/app-sdk';
-import { TabPanel, Heading, Paragraph } from '@contentful/forma-36-react-components';
+import { Heading, Paragraph, Grid, Box } from '@contentful/f36-components';
 
 import Collection from './Collection';
 import CollectionList from './CollectionList';
+import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 
 interface DashboardProps {
-  sdk: PageExtensionSDK;
   contentTypes: ContentType[];
 }
 
@@ -18,7 +18,9 @@ interface CollectionsState {
   recent: any[] | null;
 }
 
-export default function Dashboard({ sdk, contentTypes }: DashboardProps) {
+export default function Dashboard({ contentTypes }: DashboardProps) {
+  const sdk = useSDK<PageExtensionSDK>();
+  const cma = useCMA();
   const [data, setData] = useState<CollectionsState>({
     total: null,
     published: null,
@@ -30,26 +32,27 @@ export default function Dashboard({ sdk, contentTypes }: DashboardProps) {
     async function fetchData() {
       // Fetch some basic statistics.
       const [total, published, scheduled] = await Promise.all([
-        sdk.space
-          .getEntries()
-          .then((entries) => entries.total)
+        cma.entry
+          .getMany({})
+          .then((entries) => entries.total || 0)
           .catch(() => 0),
         sdk.space
           .getPublishedEntries()
-          .then((entries) => entries.total)
+          .then((entries) => entries.total || 0)
           .catch(() => 0),
-        sdk.space
-          .getAllScheduledActions()
-          .then((entries) => entries.length)
+        cma.scheduledActions
+          .getMany({ environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment })
+          .then((actions) => actions.items.length)
           .catch(() => 0),
+        ,
       ]);
 
       setData({ ...data, total, published, scheduled });
 
       // Fetch some entries were last updated by the current user.
-      const recent = await sdk.space
-        .getEntries({ 'sys.updatedBy.sys.id': sdk.user.sys.id, limit: 3 })
-        .then((entries) => entries.items)
+      const recent = await cma.entry
+        .getMany({ query: { 'sys.updatedBy.sys.id': sdk.user.sys.id, limit: 3 } })
+        .then((resp) => resp.items)
         .catch(() => []);
 
       // Set the final data. Loading complete.
@@ -60,22 +63,22 @@ export default function Dashboard({ sdk, contentTypes }: DashboardProps) {
   }, []);
 
   return (
-    <TabPanel id="dashboard" className="f36-margin-top--xl">
-      <div id="collections">
+    <Box marginTop="spacingXl">
+      <Grid columns="1fr 1fr 1fr" columnGap="spacingM">
         <Collection label="Total entries" value={data.total} />
         <Collection label="Published entries" value={data.published} />
         <Collection label="Scheduled entries" value={data.scheduled} />
-      </div>
+      </Grid>
 
-      <div className="f36-margin-top--xl">
-        <Heading element="h2">Your recent work</Heading>
+      <Box marginTop="spacingXl">
+        <Heading as="h2">Your recent work</Heading>
         <Paragraph>These entries were most recently updated by you.</Paragraph>
         <CollectionList
           contentTypes={contentTypes}
           entries={data.recent}
           onClickItem={(entryId) => sdk.navigator.openEntry(entryId)}
         />
-      </div>
-    </TabPanel>
+      </Box>
+    </Box>
   );
 }

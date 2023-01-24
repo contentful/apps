@@ -6,7 +6,7 @@ import {
   Paragraph,
   SkeletonDisplayText,
   SkeletonContainer,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
 
 interface CollectionProps {
   value: number | null;
@@ -16,9 +16,9 @@ interface CollectionProps {
 export default function Collection({ value, label }: CollectionProps) {
   return (
     <Card>
-      <DisplayText element="h2" size="large">
+      <DisplayText as="h2" marginBottom="none" size="large">
         {value === null ? (
-          <SkeletonContainer>
+          <SkeletonContainer svgHeight="48px">
             <SkeletonDisplayText numberOfLines={1} />
           </SkeletonContainer>
         ) : (
