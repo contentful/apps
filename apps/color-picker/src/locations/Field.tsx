@@ -69,10 +69,16 @@ const Field = () => {
         return value.name;
 
       case 'undefined':
+        if (sdk.field.required) {
+          return 'Invalid';
+        } else {
+          return 'Select a color…';
+        }
+
       default:
         return 'Invalid';
     }
-  }, [allowCustomValue, theme.colors, value]);
+  }, [allowCustomValue, sdk.field.required, theme.colors, value]);
 
   return (
     <Form>
@@ -81,7 +87,7 @@ const Field = () => {
           name={name}
           value={value}
           onClick={() => customColorPicker?.current?.click()}
-          onRemovalClick={() => setValue(undefined)}
+          onClearClick={() => setValue(undefined)}
         />
       ) : (
         <Menu
@@ -90,10 +96,12 @@ const Field = () => {
           onClose={() => setIsOpen(false)}
         >
           <Menu.Trigger>
-            <SelectColorButton 
-              showChevron name={name} 
+            <SelectColorButton
+              showChevron
+              name={name}
               value={value}
-              onRemovalClick={() => setValue(undefined)} />
+              onClearClick={() => setValue(undefined)}
+            />
           </Menu.Trigger>
           <Menu.List className={styles.menuList}>
             {theme.colors.map((color: Color) => (

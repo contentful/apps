@@ -15,7 +15,15 @@ const styles = {
     width: '70px',
     display: 'inline-block',
     textAlign: 'left',
-  })
+  }),
+  buttonGroup: css({
+    width: '100%',
+    justifyContent: 'stretch',
+  }),
+  pickerButton: css({
+    maxWidth: '100%',
+    flexGrow: 1,
+  }),
 };
 
 interface MenuButtonProps {
@@ -23,21 +31,20 @@ interface MenuButtonProps {
   name: string;
   value?: Color | string;
   onClick?: () => void;
-  onRemovalClick?: () => void;
+  onClearClick?: () => void;
 }
 
 function _SelectColorButton(
-  { showChevron, name, value, onClick, onRemovalClick }: MenuButtonProps,
+  { showChevron, name, value, onClick, onClearClick }: MenuButtonProps,
   ref: Ref<HTMLButtonElement>
 ) {
   const sdk = useSDK<FieldExtensionSDK>();
-  const allowRemoval = sdk.parameters.instance.allowRemoval;
 
   return (
-    <ButtonGroup withDivider>
+    <ButtonGroup withDivider className={styles.buttonGroup}>
       <Button
         endIcon={showChevron ? <ChevronDownIcon /> : undefined}
-        isFullWidth
+        className={styles.pickerButton}
         onClick={onClick}
         ref={ref}
       >
@@ -51,11 +58,15 @@ function _SelectColorButton(
           </Flex>
         </Flex>
       </Button>
-      {allowRemoval && 
-        <Button variant="secondary" startIcon={<CloseIcon />} onClick={onRemovalClick}>
+      {!sdk.field.required && value !== undefined && (
+        <Button
+          variant="secondary"
+          startIcon={<CloseIcon />}
+          onClick={onClearClick}
+        >
           Clear
         </Button>
-      }
+      )}
     </ButtonGroup>
   );
 }
