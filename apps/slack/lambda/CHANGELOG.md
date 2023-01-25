@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.4](https://github.com/contentful/apps/compare/lambda@1.1.3...lambda@1.1.4) (2023-01-25)
+
+### Bug Fixes
+
+- Ignore serverless upgrades [] ([#2372](https://github.com/contentful/apps/issues/2372)) ([20b3f49](https://github.com/contentful/apps/commit/20b3f4969c69571cc0040a3d02ee3f817fda8288))
+
 ## [1.1.3](https://github.com/contentful/apps/compare/lambda@1.1.2...lambda@1.1.3) (2023-01-25)
 
 **Note:** Version bump only for package lambda
