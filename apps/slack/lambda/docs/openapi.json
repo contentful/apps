@@ -1,0 +1,232 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Slack App",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/actions": {
+      "post": {
+        "description": "Endpoint to be called when action is triggered from the generated slack message.\nSlack, by default, generates a message with a button and general practise is to return 200 for a noop button\n",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/oauth": {
+      "get": {
+        "description": "OAuth redirect route.\nIt handles Slack OAuth callback and renders an HTML page performing\nclient redirect (as Slack does not support 3xx as valid response).\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "description": "Slack OAuth code"
+          },
+          {
+            "in": "query",
+            "name": "spaceId",
+            "description": "Contentful space where Slack App is installed"
+          },
+          {
+            "in": "query",
+            "name": "environmentId",
+            "description": "Contentful environment where Slack App is installed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "422": {
+            "description": "Unprocessable Entity. URL query parameters are missing or invalid",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 422,
+                  "message": "UnprocessableEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokens": {
+      "post": {
+        "description": "Saves tokens at the end of the Contentful Slack App installation process.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Refresh token received from the initial OAuth response."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "token": "SLACK_TOKEN"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found. Thrown when the request validation fails.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "Not Found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity. Body parameters are missing or invalid",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 422,
+                  "message": "UnprocessableEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/spaces/{spaceId}/environments/{environmentId}/workspaces/{workspaceId}": {
+      "get": {
+        "description": "Fetch Slack workspace information",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "spaceId",
+            "description": "Contentful space where Slack App is installed"
+          },
+          {
+            "in": "path",
+            "name": "environmentId",
+            "description": "Contentful environment where Slack App is installed"
+          },
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "description": "Slack Workspace whose information is required"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "WORKSPACE_ID",
+                  "name": "My workspace",
+                  "icon": {
+                    "image_34": "https://icons.com/icon.png"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Thrown when the workspace does not exist or the request verification fails.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "NotFound"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity. Path parameters are missing or invalid",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 422,
+                  "message": "UnprocessableEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/spaces/{spaceId}/environments/{environmentId}/workspaces/{workspaceId}/channels": {
+      "get": {
+        "description": "Fetch channels for a given registered workspace",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "spaceId",
+            "description": "Contentful space where Slack App is installed"
+          },
+          {
+            "in": "path",
+            "name": "environmentId",
+            "description": "Contentful environment where Slack App is installed"
+          },
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "description": "Slack Workspace whose information is required"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "CHANNEL_ID",
+                    "name": "#my-channel"
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Thrown when the workspace does not exist or the request verification fails.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 404,
+                  "message": "NotFound"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity. Path parameters are missing or invalid",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": 422,
+                  "message": "UnprocessableEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "tags": []
+}
