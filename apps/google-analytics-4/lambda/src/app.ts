@@ -1,4 +1,5 @@
 import express from 'express';
+import { errorMiddleware } from './errors/middleware';
 import { GoogleApi } from './services/google-api';
 import { ServiceAccountKeyFile } from './types';
 const app = express();
@@ -17,6 +18,8 @@ app.get('/api/account_summaries', async (_req, res) => {
   const result = await googleApi.listAccountSummaries();
   res.status(200).json(result);
 });
+
+app.use(errorMiddleware);
 
 // TODO: Get the actual service account key file when request verification is introduced
 function getServiceAccountKeyFile(): ServiceAccountKeyFile {
