@@ -1,0 +1,22 @@
+variables:
+  myStage: 'test'
+  oauthCredentials: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/test/oauth-credentials}
+  signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/test/signing-secret}
+  tableName: sls-apps-slack-backend-test-TokenTable
+  dynamoEndpoint: dynamodb.${aws:region}.amazonaws.com
+  frontendUrl: 'https://slack-test.ctfapps.net/index.html'
+  workflowsUrl: ${env:STAGING_WORKFLOWS_URL}
+  baseUrl: ${env:STAGING_CMA_HOST}
+  app:
+    privateKey: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/test/private-key}
+    id: '5A8DUVf2gpsEbYv68T0E1n'
+  customDomain:
+    domainName: slack-api-test.ctfapps.net
+    stage: test
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+  serverless:
+    pathPrefix: ''
+  slackSigningSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/test/slack-signing-secret}
+  deploymentPrefix: sls-apps-slack-backend-test
