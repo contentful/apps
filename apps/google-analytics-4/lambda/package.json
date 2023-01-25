@@ -1,13 +1,16 @@
 {
-  "name": "lambda",
-  "version": "1.0.0",
+  "name": "@contentful/google-analytics-4-lambda",
+  "version": "0.1.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
+    "debug": "SLS_DEBUG=* node inspect ./node_modules/serverless/bin/serverless.js offline",
     "build": "rimraf ./build && tsc",
     "lint": "eslint .",
     "start:dev": "nodemon",
     "test": "TS_NODE_TRANSPILE_ONLY=1 mocha",
+    "test:debug": "TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
     "test:watch": "TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test"
   },
   "keywords": [],
