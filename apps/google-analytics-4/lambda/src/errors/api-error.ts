@@ -1,4 +1,4 @@
-export class ApiError<T> extends Error {
+export class ApiError<T = Record<string, unknown>> extends Error {
   errorType: string;
   status: number;
   details?: T;
