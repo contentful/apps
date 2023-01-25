@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.11](https://github.com/contentful/apps/compare/@contentful/graphql-playground@0.2.10...@contentful/graphql-playground@0.2.11) (2023-01-25)
+
+**Note:** Version bump only for package @contentful/graphql-playground
+
 ## [0.2.10](https://github.com/contentful/apps/compare/@contentful/graphql-playground@0.2.9...@contentful/graphql-playground@0.2.10) (2023-01-04)
 
 **Note:** Version bump only for package @contentful/graphql-playground
