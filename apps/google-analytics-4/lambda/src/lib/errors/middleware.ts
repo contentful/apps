@@ -10,7 +10,7 @@ export const errorMiddleware: ErrorRequestHandler = (error, _request, response, 
     } else {
       response
         .status(500)
-        .send({ errorType: 'ServerError', message: 'Internal Server Error', details: {} });
+        .send({ errorType: 'ServerError', message: 'Internal Server Error', details: null });
     }
   }
   next();

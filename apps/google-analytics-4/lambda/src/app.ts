@@ -1,8 +1,23 @@
 import express from 'express';
-import { errorMiddleware } from './errors/middleware';
-import { GoogleApi } from './services/google-api';
+import { ApiError } from './lib/errors/api-error';
+import { ApiErrorMap, apiErrorMapper } from './lib/errors/api-error-mapper';
+import { errorMiddleware } from './lib/errors/middleware';
+import {
+  GoogleApi,
+  GoogleApiClientError,
+  GoogleApiError,
+  GoogleApiServerError,
+} from './services/google-api';
 import { ServiceAccountKeyFile } from './types';
 const app = express();
+
+// Maps an error class name -> a handler function that takes the error of that type as input and returns
+// a correctly configured API error as output.
+const errorClassToApiErrorMap: ApiErrorMap = {
+  GoogleApiError: (e: GoogleApiError) => new ApiError(e.details, e.name, e.httpStatus),
+  GoogleApiClientError: (e: GoogleApiClientError) => new ApiError(e.details, e.name, e.httpStatus),
+  GoogleApiServerError: (e: GoogleApiServerError) => new ApiError(e.details, e.name, e.httpStatus),
+};
 
 app.get('/health', function (_req, res) {
   res.status(204).send();
@@ -19,6 +34,7 @@ app.get('/api/account_summaries', async (_req, res) => {
   res.status(200).json(result);
 });
 
+app.use(apiErrorMapper(errorClassToApiErrorMap));
 app.use(errorMiddleware);
 
 // TODO: Get the actual service account key file when request verification is introduced

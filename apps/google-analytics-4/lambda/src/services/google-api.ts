@@ -1,11 +1,30 @@
 import { AnalyticsAdminServiceClient, protos } from '@google-analytics/admin';
 import { GoogleAuthOptions } from 'google-auth-library';
 import { Status } from 'google-gax';
+import { HttpCodeToRpcCodeMap } from 'google-gax/build/src/status';
 import { ServiceAccountKeyFile } from '../types';
 
+interface GoogleApiErrorParams {
+  code: Status;
+  details: string;
+  httpStatus: number;
+}
+
 export class GoogleApiError extends Error {
-  code?: string;
-  details?: string;
+  code: Status;
+  details: string;
+  httpStatus: number;
+
+  constructor(
+    message: ConstructorParameters<typeof Error>[0],
+    options: ConstructorParameters<typeof Error>[1],
+    errorParams: GoogleApiErrorParams
+  ) {
+    super(message, options);
+    this.code = errorParams.code;
+    this.details = errorParams.details;
+    this.httpStatus = errorParams.httpStatus;
+  }
 }
 export class GoogleApiServerError extends GoogleApiError {}
 export class GoogleApiClientError extends GoogleApiError {}
@@ -32,25 +51,51 @@ interface GoogleError {
   details: string;
 }
 
-export function throwGoogleApiError(e: Error): never {
-  let error: GoogleApiError;
+const httpStatusFromGoogleRpcStatus = (status: Status, fallbackStatus = 500): number => {
+  for (const [httpStatus, googleStatus] of HttpCodeToRpcCodeMap) {
+    if (googleStatus === status) {
+      return httpStatus;
+    }
+  }
+  return fallbackStatus;
+};
 
+export function throwGoogleApiError(e: Error): never {
   if (!isGoogleError(e)) {
-    throw new GoogleApiError(e.message, { cause: e });
+    throw new GoogleApiError(
+      e.message,
+      { cause: e },
+      {
+        code: Status.UNKNOWN,
+        details: e.message,
+        httpStatus: 500, // we don't know what happened so we'll assume it's a server error
+      }
+    );
   }
 
   if (clientErrorStatuses.includes(e.code)) {
-    error = new GoogleApiClientError(e.message, { cause: e });
+    throw new GoogleApiClientError(
+      e.message,
+      { cause: e },
+      {
+        code: e.code,
+        details: e.details,
+        httpStatus: httpStatusFromGoogleRpcStatus(e.code),
+      }
+    );
   } else {
     // we'll assume that any GoogleErrors (with a code) that aren't client errors
-    // are server errors of some kind
-    error = new GoogleApiServerError(e.message, { cause: e });
+    // are server errors of some kind ¯\_(ツ)_/¯
+    throw new GoogleApiServerError(
+      e.message,
+      { cause: e },
+      {
+        code: e.code,
+        details: e.details,
+        httpStatus: httpStatusFromGoogleRpcStatus(e.code),
+      }
+    );
   }
-
-  error.code = Status[e.code];
-  error.details = e.details;
-
-  throw error;
 }
 
 // parses the runtime error objects thrown directly by the Google API

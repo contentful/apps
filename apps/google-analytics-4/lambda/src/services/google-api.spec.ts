@@ -87,7 +87,7 @@ describe('throwGoogleApiError', () => {
       }
       expect(error).to.be.an.instanceof(GoogleApiServerError);
       expect(error).to.have.property('cause', someError);
-      expect(error).to.have.property('code', 'UNAVAILABLE');
+      expect(error).to.have.property('code', Status.UNAVAILABLE);
       expect(error).to.have.property('details', someError.details);
     });
   });
@@ -104,7 +104,7 @@ describe('throwGoogleApiError', () => {
       }
       expect(error).to.be.an.instanceof(GoogleApiClientError);
       expect(error).to.have.property('cause', someError);
-      expect(error).to.have.property('code', 'UNAUTHENTICATED');
+      expect(error).to.have.property('code', Status.UNAUTHENTICATED);
       expect(error).to.have.property('details', mockGoogleErrors.invalidAuthentication.details);
     });
   });
