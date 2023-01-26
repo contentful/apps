@@ -1,4 +1,4 @@
-export class ApiError<T = Record<string, unknown>> extends Error {
+export class ApiError<T extends Record<string, unknown>> extends Error {
   errorType: string;
   status: number;
   details?: T;
@@ -23,12 +23,12 @@ export class ApiError<T = Record<string, unknown>> extends Error {
     return {
       message: this.message,
       errorType: this.errorType,
-      details: this.details || {},
+      details: this.details || null,
     };
   }
 }
 
-export const isApiError = (e: Error): e is ApiError<unknown> => {
+export const isApiError = <T extends Record<string, unknown>>(e: Error): e is ApiError<T> => {
   if (!('errorType' in e)) {
     return false;
   }
