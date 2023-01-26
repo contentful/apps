@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "PORT=1234 cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "build": "REACT_APP_BACKEND_BASE_URL=$REACT_APP_SLACK_BACKEND_BASE_URL react-scripts build",
     "test": "SKIP_PREFLIGHT_CHECK=true react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint --ext .ts,.tsx,.js,.jsx,.svg ./",
