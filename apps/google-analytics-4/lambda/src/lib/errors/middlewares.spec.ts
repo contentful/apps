@@ -3,7 +3,7 @@ import Express from 'express';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
-import { apiErrorHandler, ApiErrorMap, apiErrorMapper } from './middleware';
+import { apiErrorHandler, ApiErrorMap, apiErrorMapper } from './middlewares';
 import { ApiError } from './api-error';
 
 describe('apiErrorHandler', () => {

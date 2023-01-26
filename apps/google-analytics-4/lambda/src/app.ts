@@ -1,6 +1,6 @@
 import express from 'express';
 import { ApiError } from './lib/errors/api-error';
-import { apiErrorHandler, ApiErrorMap, apiErrorMapper } from './lib/errors/middleware';
+import { apiErrorHandler, ApiErrorMap, apiErrorMapper } from './lib/errors/middlewares';
 import {
   GoogleApi,
   GoogleApiClientError,
