@@ -1,7 +1,6 @@
 import express from 'express';
 import { ApiError } from './lib/errors/api-error';
-import { ApiErrorMap, apiErrorMapper } from './lib/errors/api-error-mapper';
-import { errorMiddleware } from './lib/errors/middleware';
+import { apiErrorHandler, ApiErrorMap, apiErrorMapper } from './lib/errors/middleware';
 import {
   GoogleApi,
   GoogleApiClientError,
@@ -35,7 +34,7 @@ app.get('/api/account_summaries', async (_req, res) => {
 });
 
 app.use(apiErrorMapper(errorClassToApiErrorMap));
-app.use(errorMiddleware);
+app.use(apiErrorHandler);
 
 // TODO: Get the actual service account key file when request verification is introduced
 function getServiceAccountKeyFile(): ServiceAccountKeyFile {

@@ -1,7 +1,15 @@
 import { ErrorRequestHandler } from 'express';
-import { isApiError } from './api-error';
+import { isApiError, ApiError } from './api-error';
 
-export const errorMiddleware: ErrorRequestHandler = (error, _request, response, next) => {
+// Very intentional use of any in the type below. we're allowing the error map to define callbacks
+// that can except an argument of _any_ type, for the purposes of the map. The callbacks themselves
+// will still need to be internally type safe! This just allows us to add attributes to this map
+// without getting stuck on a type incompatibility error. (FWIW unknown is considered an
+// incompatbile assignment)
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+export type ApiErrorMap = Record<string, (e: any) => ApiError<Record<string, unknown>>>;
+
+export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, next) => {
   if (error) {
     console.log(JSON.stringify(error));
 
@@ -14,4 +22,17 @@ export const errorMiddleware: ErrorRequestHandler = (error, _request, response, 
     }
   }
   next();
+};
+
+export const apiErrorMapper = (errorMap: ApiErrorMap): ErrorRequestHandler => {
+  return (error, _request, _response, next) => {
+    if (error) {
+      const errorName = error.constructor.name as keyof typeof errorMap;
+      if (errorName in errorMap) {
+        return next(errorMap[errorName](error));
+      }
+      return next(error);
+    }
+    next();
+  };
 };
