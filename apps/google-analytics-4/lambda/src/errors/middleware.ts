@@ -1,5 +1,4 @@
 import { ErrorRequestHandler } from 'express';
-import { Status } from 'google-gax';
 import { isApiError } from './api-error';
 
 export const errorMiddleware: ErrorRequestHandler = (error, _request, response, next) => {
