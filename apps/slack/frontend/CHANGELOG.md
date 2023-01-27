@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.5](https://github.com/contentful/apps/compare/slack-frontend@0.2.4...slack-frontend@0.2.5) (2023-01-27)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.24.1 to 4.26.0 ([#2388](https://github.com/contentful/apps/issues/2388)) ([a2c9d93](https://github.com/contentful/apps/commit/a2c9d93bc38b312ecc3ab3200d5f33a6ebc66283))
+
 ## [0.2.4](https://github.com/contentful/apps/compare/slack-frontend@0.2.3...slack-frontend@0.2.4) (2023-01-27)
 
 **Note:** Version bump only for package slack-frontend
