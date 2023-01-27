@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Box,
   Collapse,
   Flex,
   FormControl,
@@ -9,11 +10,7 @@ import {
   Textarea,
   TextLink,
 } from '@contentful/f36-components';
-import {
-  CheckCircleIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-} from '@contentful/f36-icons';
+import { CheckCircleIcon, ChevronDownIcon, ChevronRightIcon } from '@contentful/f36-icons';
 import { css } from 'emotion';
 
 import tokens from '@contentful/f36-tokens';
@@ -46,7 +43,13 @@ const styles = {
   sectionHeading: css({
     fontSize: tokens.fontSizeL,
     marginBottom: tokens.spacing2Xs,
-  })
+  }),
+  newServiceKeyInput: css({
+    padding: tokens.spacingM,
+    backgroundColor: tokens.blue100,
+    marginTop: tokens.spacingXl,
+    marginBottom: tokens.spacingL,
+  }),
 };
 
 const placeholderText = `{
@@ -65,7 +68,6 @@ const FormControlServiceAccountKey = ({
   onExpanderClick,
   className,
 }: FormControlServideAccountKeyFileProps) => {
-
   const formControl = (
     <FormControl
       marginTop="spacingL"
@@ -100,7 +102,6 @@ const FormControlServiceAccountKey = ({
       ) : (
         <FormControl.ValidationMessage>Error: {errorMessage}</FormControl.ValidationMessage>
       )}
-
     </FormControl>
   );
 
@@ -121,10 +122,10 @@ const FormControlServiceAccountKey = ({
         Replace with new Service Account Key
       </TextLink>
       <Collapse isExpanded={isExpanded}>
-        <Paragraph marginTop="spacingS">
+        <Box className={styles.newServiceKeyInput}>
           <QuickStartGuide />
           {formControl}
-        </Paragraph>
+        </Box>
       </Collapse>
     </div>
   ) : (
