@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.4](https://github.com/contentful/apps/compare/slack-frontend@0.2.3...slack-frontend@0.2.4) (2023-01-27)
+
+**Note:** Version bump only for package slack-frontend
+
 ## [0.2.3](https://github.com/contentful/apps/compare/slack-frontend@0.2.2...slack-frontend@0.2.3) (2023-01-26)
 
 ### Bug Fixes
