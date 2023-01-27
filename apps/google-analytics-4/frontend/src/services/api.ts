@@ -4,8 +4,26 @@ import { config } from '../config';
 const ZCredentials = z.object({
   status: z.string(),
 });
-
 export type Credentials = z.infer<typeof ZCredentials>;
+
+const ZPropertySummary = z.object({
+  property: z.string(),
+  displayName: z.string(),
+  propertyType: z.string(),
+});
+export type PropertySummary = z.infer<typeof ZPropertySummary>;
+
+const ZAccountSummary = z.object({
+  name: z.string(),
+  account: z.string(),
+  displayName: z.string(),
+  propertySummaries: z.array(ZPropertySummary),
+});
+
+export type AccountSummary = z.infer<typeof ZAccountSummary>;
+
+const ZAccountSummaries = z.array(ZAccountSummary);
+export type AccountSummaries = z.infer<typeof ZAccountSummaries>;
 
 export class ApiError extends Error {}
 export class ApiServerError extends ApiError {}
@@ -80,6 +98,13 @@ export class Api {
 
   async getCredentials(): Promise<Credentials> {
     return await fetchFromApi<Credentials>(this.requestUrl('api/credentials'), ZCredentials);
+  }
+
+  async listAccountSummaries(): Promise<AccountSummaries> {
+    return await fetchFromApi<AccountSummaries>(
+      this.requestUrl('api/account_summaries'),
+      ZAccountSummaries
+    );
   }
 
   private requestUrl(apiPath: string): URL {
