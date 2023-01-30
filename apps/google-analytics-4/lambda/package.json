@@ -29,6 +29,7 @@
     "chai": "^4.3.7",
     "chai-http": "^4.3.0",
     "eslint": "^8.30.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "mocha": "^10.2.0",
     "nodemon": "^2.0.20",
     "rimraf": "^3.0.2",
