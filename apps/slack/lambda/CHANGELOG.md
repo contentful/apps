@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.8](https://github.com/contentful/apps/compare/lambda@1.1.7...lambda@1.1.8) (2023-01-30)
+
+### Bug Fixes
+
+- **deps:** bump aws-sdk from 2.1303.0 to 2.1304.0 ([#2395](https://github.com/contentful/apps/issues/2395)) ([be8f7de](https://github.com/contentful/apps/commit/be8f7de0815e05c23a1b8904109a81f2a564b7b3))
+
 ## [1.1.7](https://github.com/contentful/apps/compare/lambda@1.1.6...lambda@1.1.7) (2023-01-27)
 
 **Note:** Version bump only for package lambda
