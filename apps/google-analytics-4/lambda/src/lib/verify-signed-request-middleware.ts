@@ -8,6 +8,7 @@ import express from 'express';
 import { InvalidSignature } from '../lib/errors/invalid-signature';
 import { UnableToVerifyRequest } from '../lib/errors/unable-to-verify-request';
 import { IncomingHttpHeaders } from 'http';
+import { HttpMethod } from 'googleapis-common';
 
 export const verifySignedRequestMiddleware = (
   req: express.Request,
@@ -38,13 +39,13 @@ export const verifySignedRequestMiddleware = (
   next();
 };
 
-const makeCanonicalReq = (req: express.Request) => {
+const makeCanonicalReq = (req: express.Request): CanonicalRequest => {
   const requiredHeaders = requestSigningHeaders(req.headers);
 
-  return <CanonicalRequest>{
-    method: req.method,
+  return {
+    method: req.method as HttpMethod,
     path: `/${process.env.STAGE}${req.originalUrl}`,
-    headers: requiredHeaders,
+    headers: requiredHeaders as { [_: string]: string },
   };
 };
 

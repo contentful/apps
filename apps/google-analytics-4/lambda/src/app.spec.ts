@@ -16,7 +16,6 @@ describe('app', () => {
   let mockClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
 
   beforeEach(() => {
-    // TODO: set headers and fully test signature verification later
     sinon.stub(NodeAppsToolkit, 'verifyRequest').get(() => {
       return () => true;
     });

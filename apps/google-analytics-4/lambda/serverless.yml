@@ -5,7 +5,7 @@ plugins:
   - serverless-offline
 
 custom:
-  environment: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
+  environment: ${file(./config/serverless-env.${opt:stage, self:provider.stage}.yml)}
   serverless-offline:
     httpPort: 8080
 
@@ -18,7 +18,7 @@ functions:
   api:
     environment:
       SIGNING_SECRET: ${self:custom.environment.SIGNING_SECRET}
-      STAGE: ${opt:stage, 'dev'}
+      STAGE: ${opt:stage, self:provider.stage}
     handler: build/src/index.handler
     events:
       - http:

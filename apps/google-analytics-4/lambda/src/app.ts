@@ -13,7 +13,7 @@ import { verifySignedRequestMiddleware } from './lib/verify-signed-request-middl
 import { InvalidSignature } from './lib/errors/invalid-signature';
 import { UnableToVerifyRequest } from './lib/errors/unable-to-verify-request';
 
-dotenv.config(); // TODO: load env vars from .env.local
+dotenv.config();
 
 const app = express();
 
