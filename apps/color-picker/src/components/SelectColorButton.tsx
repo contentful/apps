@@ -1,6 +1,8 @@
-import { Button, Flex } from '@contentful/f36-components';
-import { ChevronDownIcon } from '@contentful/f36-icons';
+import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { Button, ButtonGroup, Flex } from '@contentful/f36-components';
+import { ChevronDownIcon, CloseIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import { forwardRef, Ref } from 'react';
 import { Color } from '../types';
@@ -14,6 +16,14 @@ const styles = {
     display: 'inline-block',
     textAlign: 'left',
   }),
+  buttonGroup: css({
+    width: '100%',
+    justifyContent: 'stretch',
+  }),
+  pickerButton: css({
+    maxWidth: '100%',
+    flexGrow: 1,
+  }),
 };
 
 interface MenuButtonProps {
@@ -21,29 +31,43 @@ interface MenuButtonProps {
   name: string;
   value?: Color | string;
   onClick?: () => void;
+  onClearClick?: () => void;
 }
 
 function _SelectColorButton(
-  { showChevron, name, value, onClick }: MenuButtonProps,
+  { showChevron, name, value, onClick, onClearClick }: MenuButtonProps,
   ref: Ref<HTMLButtonElement>
 ) {
+  const sdk = useSDK<FieldExtensionSDK>();
+
   return (
-    <Button
-      endIcon={showChevron ? <ChevronDownIcon /> : undefined}
-      isFullWidth
-      onClick={onClick}
-      ref={ref}
-    >
-      <Flex alignItems="center" gap="spacingXs">
-        <ColorBox color={value} />
-        <Flex gap="spacing2Xs">
-          {name}{' '}
-          <span className={styles.hexValue}>
-            {(typeof value === 'string' ? value : value?.value) ?? ''}
-          </span>
+    <ButtonGroup withDivider className={styles.buttonGroup}>
+      <Button
+        endIcon={showChevron ? <ChevronDownIcon /> : undefined}
+        className={styles.pickerButton}
+        onClick={onClick}
+        ref={ref}
+      >
+        <Flex alignItems="center" gap="spacingXs">
+          <ColorBox color={value} />
+          <Flex gap="spacing2Xs">
+            {name}{' '}
+            <span className={styles.hexValue}>
+              {(typeof value === 'string' ? value : value?.value) ?? ''}
+            </span>
+          </Flex>
         </Flex>
-      </Flex>
-    </Button>
+      </Button>
+      {!sdk.field.required && value !== undefined && (
+        <Button
+          variant="secondary"
+          startIcon={<CloseIcon />}
+          onClick={onClearClick}
+        >
+          Clear
+        </Button>
+      )}
+    </ButtonGroup>
   );
 }
 
