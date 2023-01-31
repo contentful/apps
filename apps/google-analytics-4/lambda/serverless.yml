@@ -5,15 +5,20 @@ plugins:
   - serverless-offline
 
 custom:
+  environment: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
   serverless-offline:
     httpPort: 8080
 
 provider:
   name: aws
+  stage: ${opt:stage, 'dev'}
   runtime: nodejs18.x
 
 functions:
   api:
+    environment:
+      SIGNING_SECRET: ${self:custom.environment.SIGNING_SECRET}
+      STAGE: ${opt:stage, 'dev'}
     handler: build/src/index.handler
     events:
       - http:

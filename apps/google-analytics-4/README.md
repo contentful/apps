@@ -69,6 +69,15 @@ npm run test-ci
 
 The backend lives in the `lambda/` folder.
 
+#### Secrets
+
+You will need to create a dev secrets file by running:
+
+```
+cp lambda/config/serverless-env.dev.yml{.example,}
+```
+
+Once this git-ignored file is present, get the Google Analytics app signing secret key out of our Team Integration's 1password vault and replace `<APP_SIGNING_KEY_GOES_HERE>` with the secret.
 
 ### Available Scripts
 
