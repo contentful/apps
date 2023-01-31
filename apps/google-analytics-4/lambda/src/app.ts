@@ -34,7 +34,7 @@ app.options('/*', function (req, res, _next) {
       'X-Contentful-App-ID',
     ].join(', ')
   );
-  res.send(200);
+  res.sendStatus(204);
 });
 // validate signed requests
 app.use(['/api/credentials', '/api/account_summaries'], verifySignedRequestMiddleware);

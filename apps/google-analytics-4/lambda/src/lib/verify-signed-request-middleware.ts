@@ -1,4 +1,4 @@
-import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
+import { verifyRequest } from '@contentful/node-apps-toolkit';
 import {
   CanonicalRequest,
   ContentfulContextHeader,
@@ -17,9 +17,10 @@ export const verifySignedRequestMiddleware = (
   const signingSecret = (process.env.SIGNING_SECRET || '').trim();
   const canonicalReq = makeCanonicalReq(req);
   let isValidReq = false;
+  const TTL = 60; // TTL for signed requests (in seconds)
 
   try {
-    isValidReq = NodeAppsToolkit.verifyRequest(signingSecret, canonicalReq, 60); // 60 second TTL
+    isValidReq = verifyRequest(signingSecret, canonicalReq, TTL);
   } catch (e) {
     console.error(e);
     throw new UnableToVerifyRequest('Unable to verify request', {
