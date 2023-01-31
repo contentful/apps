@@ -3,7 +3,8 @@ import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { useEffect, useState } from 'react';
-import { api, ApiError, Credentials } from '../services/api';
+import { Api, ApiError, Credentials } from '../services/api';
+import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 
 import type { ServiceAccountKeyId } from '../types';
 
@@ -39,10 +40,13 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
   const [credentialsData, setCredentialsData] = useState<Credentials | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const sdk = useSDK();
+  const cma = useCMA();
 
   useEffect(() => {
     (async () => {
       try {
+        const api = new Api(sdk.ids.app!, cma);
         const response = await api.getCredentials();
         setCredentialsData(response);
         setError(null);
@@ -58,7 +62,7 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, [cma, sdk.ids.app]);
 
   if (!serviceAccountKeyId) {
     return null;
