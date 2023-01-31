@@ -8,11 +8,19 @@ import {
 } from '../test/mocks/googleApi';
 import app from './app';
 import { GoogleApi } from './services/google-api';
+import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 
 chai.use(chaiHttp);
 
 describe('app', () => {
   let mockClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
+
+  beforeEach(() => {
+    // TODO: set headers and fully test signature verification later
+    sinon.stub(NodeAppsToolkit, 'verifyRequest').get(() => {
+      return () => true;
+    });
+  });
 
   describe('GET /health', () => {
     it('responds with 204', async () => {

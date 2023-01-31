@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { config } from '../config';
+import fetchWithSignedRequest from '../helpers/signed-requests';
+import { PlainClientAPI } from 'contentful-management';
 
 const ZCredentials = z.object({
   status: z.string(),
@@ -11,17 +13,26 @@ export class ApiError extends Error {}
 export class ApiServerError extends ApiError {}
 export class ApiClientError extends ApiError {}
 
-export async function fetchFromApi<T>(apiUrl: URL, schema: z.ZodTypeAny): Promise<T> {
-  const response = await fetchResponse(apiUrl);
+export async function fetchFromApi<T>(
+  apiUrl: URL,
+  schema: z.ZodTypeAny,
+  appDefinitionId: string,
+  cma: PlainClientAPI
+): Promise<T> {
+  const response = await fetchResponse(apiUrl, appDefinitionId, cma);
   validateResponseStatus(response);
   const responseJson = await jsonFromResponse(response);
   parseResponseJson(responseJson, schema);
   return responseJson;
 }
 
-async function fetchResponse(url: URL): Promise<Response> {
+async function fetchResponse(
+  url: URL,
+  appDefinitionId: string,
+  cma: PlainClientAPI
+): Promise<Response> {
   try {
-    return await fetch(url);
+    return await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', {});
   } catch (e) {
     if (e instanceof TypeError) {
       const errorMessage = e.message;
@@ -73,13 +84,22 @@ function validateResponseStatus(response: Response): void {
 
 export class Api {
   readonly baseUrl: string;
+  readonly appDefinitionId: string;
+  readonly cma: PlainClientAPI;
 
-  constructor() {
+  constructor(appDefinitionId: string, cma: PlainClientAPI) {
     this.baseUrl = config.backendApiUrl;
+    this.cma = cma;
+    this.appDefinitionId = appDefinitionId;
   }
 
   async getCredentials(): Promise<Credentials> {
-    return await fetchFromApi<Credentials>(this.requestUrl('api/credentials'), ZCredentials);
+    return await fetchFromApi<Credentials>(
+      this.requestUrl('api/credentials'),
+      ZCredentials,
+      this.appDefinitionId,
+      this.cma
+    );
   }
 
   private requestUrl(apiPath: string): URL {
@@ -87,5 +107,3 @@ export class Api {
     return new URL(url);
   }
 }
-
-export const api = new Api();
