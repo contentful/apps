@@ -25,7 +25,7 @@ import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { byChannelName } from '../utils';
 
-const NOTIFICATION_LIMIT = 8;
+const NOTIFICATION_LIMIT = 15;
 
 interface Props {
   workspace: ConnectedWorkspace;
