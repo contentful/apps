@@ -1,9 +1,9 @@
-import { Badge, Box, Flex, Heading, Skeleton, TextLink } from '@contentful/f36-components';
+import { Badge, Box, Flex, Heading, Note, Skeleton, TextLink } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { useEffect, useState } from 'react';
-import { api, ApiError, Credentials } from '../services/api';
+import { api, ApiError, Credentials, GoogleApiError } from '../services/api';
 
 import type { ServiceAccountKeyId } from '../types';
 
@@ -28,7 +28,11 @@ const styles = {
     '& dd': {
       marginBottom: tokens.spacingS,
     },
+
   }),
+  errorNote: css({
+    marginTop: tokens.spacing2Xs
+  })
 };
 
 interface InstalledServiceAccountKeyProps {
@@ -39,15 +43,23 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
   const [credentialsData, setCredentialsData] = useState<Credentials | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState(0)
 
   useEffect(() => {
     (async () => {
       try {
         const response = await api.getCredentials();
+        const accountSum = await api.listAccountSummaries();
+        debugger;
         setCredentialsData(response);
         setError(null);
       } catch (e) {
+
         setCredentialsData(null);
+        if (e instanceof GoogleApiError) {
+          console.log(e.details)
+          setErrorCode(e.code)
+        }
         if (e instanceof ApiError) {
           setError(e.message);
         } else {
@@ -62,6 +74,12 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
 
   if (!serviceAccountKeyId) {
     return null;
+  }
+
+  const errorTextByCode = (code: number) => {
+    if (code === 16) return <p>Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See <a href="https://developers.google.com/identity/sign-in/web/devconsole-project" target="_blank">https://developers.google.com/identity/sign-in/web/devconsole-project</a>.</p>;
+    else if (code === 7) return <p>Google Analytics Admin API has not been used in this project before or it is disabled. Enable it by visiting <a href="https://console.developers.google.com/apis/api/analyticsadmin.googleapis.com/overview" target="_blank">https://console.developers.google.com/apis/api/analyticsadmin.googleapis.com/overview</a> then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.</p>;
+    else return <p>Unknown error with the API occurred.</p>;
   }
 
   return (
@@ -94,6 +112,11 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
             </Skeleton.Container>
           ) : error === null ? (
             <Badge variant="positive">{credentialsData?.status}</Badge>
+          ) : errorCode ? (
+            <>
+              <Badge variant="warning">Inactive</Badge>
+              <Note variant="neutral" className={styles.errorNote}>{errorTextByCode(errorCode)}</Note>
+            </>
           ) : (
             <Badge variant="secondary">unknown</Badge>
           )}
