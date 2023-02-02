@@ -32,7 +32,6 @@ const Field = () => {
 
   const storeHexValue = sdk.field.type === 'Symbol';
   const allowCustomValue = sdk.parameters.instance.withCustomValue;
-
   // @ts-ignore
   const theme: Theme = sdk.parameters.installation.themes[0];
 
@@ -70,10 +69,16 @@ const Field = () => {
         return value.name;
 
       case 'undefined':
+        if (sdk.field.required) {
+          return 'Invalid';
+        } else {
+          return 'Select a color…';
+        }
+
       default:
         return 'Invalid';
     }
-  }, [allowCustomValue, theme.colors, value]);
+  }, [allowCustomValue, sdk.field.required, theme.colors, value]);
 
   return (
     <Form>
@@ -82,6 +87,7 @@ const Field = () => {
           name={name}
           value={value}
           onClick={() => customColorPicker?.current?.click()}
+          onClearClick={() => setValue(undefined)}
         />
       ) : (
         <Menu
@@ -90,7 +96,12 @@ const Field = () => {
           onClose={() => setIsOpen(false)}
         >
           <Menu.Trigger>
-            <SelectColorButton showChevron name={name} value={value} />
+            <SelectColorButton
+              showChevron
+              name={name}
+              value={value}
+              onClearClick={() => setValue(undefined)}
+            />
           </Menu.Trigger>
           <Menu.List className={styles.menuList}>
             {theme.colors.map((color: Color) => (

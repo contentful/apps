@@ -1,0 +1,58 @@
+{
+  "name": "slack-frontend",
+  "version": "0.2.6",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "^4.14.1",
+    "@contentful/f36-components": "^4.26.0",
+    "@contentful/f36-tokens": "^4.0.0",
+    "@contentful/f36-workbench": "^4.21.0",
+    "@contentful/react-apps-toolkit": "^1.2.13",
+    "contentful-management": "^10.26.0",
+    "emotion": "^10.0.27",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "zustand": "^4.2.0"
+  },
+  "scripts": {
+    "start": "PORT=1234 cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
+    "test": "SKIP_PREFLIGHT_CHECK=true react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint --ext .ts,.tsx,.js,.jsx,.svg ./",
+    "upload": "contentful-app-scripts upload --bundle-dir ./build",
+    "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/slack --acl public-read",
+    "deploy:test": "aws s3 sync ./build ${STATIC_S3_BASE}/slack-test --acl public-read"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^1.6.0",
+    "@contentful/eslint-config-extension": "^0.4.3",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^12.1.4",
+    "@types/jest": "^29.2.5",
+    "@types/node": "^14.18.36",
+    "@types/react": "^17.0.43",
+    "@types/react-dom": "^18.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "cross-env": "^7.0.3",
+    "eslint-plugin-jest": "^27.2.0",
+    "eslint-plugin-jsx-a11y": "^6.6.1",
+    "eslint-plugin-react": "^7.31.11",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "react-scripts": "^5.0.1",
+    "typescript": "^4.9.4"
+  },
+  "homepage": "."
+}

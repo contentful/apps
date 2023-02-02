@@ -1,0 +1,12 @@
+.idea
+.DS_Store
+node_modules
+yarn-error.log
+build
+.yarn
+.yarnrc
+.pnp.*
+lambda/.serverless
+lambda/config/serverless.dev.yml
+frontend/.env.development
+lambda/private-key.pem

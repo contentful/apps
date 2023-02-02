@@ -1,6 +1,6 @@
 {
   "name": "@contentful/smartling-lambda",
-  "version": "1.4.69",
+  "version": "1.4.71",
   "private": true,
   "scripts": {
     "start": "LOCAL_DEV=true FRONTEND_URL=http://localhost:3000 ts-node src/index.ts",
@@ -12,7 +12,7 @@
     "deploy:test": "npm run deploy"
   },
   "dependencies": {
-    "@contentful/smartling-frontend": "^1.7.69",
+    "@contentful/smartling-frontend": "^1.7.71",
     "@types/express": "^4.17.2",
     "@types/jest": "^27.5.2",
     "node-fetch": "^2.6.1",

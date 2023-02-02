@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.71](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.70...@contentful/netlify-build-and-preview@1.9.71) (2023-01-30)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-icons from 4.23.2 to 4.24.0 ([#2393](https://github.com/contentful/apps/issues/2393)) ([0ce87fa](https://github.com/contentful/apps/commit/0ce87fa7c720e786c68030e1c39651e29df4d0c3))
+
+## [1.9.70](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.69...@contentful/netlify-build-and-preview@1.9.70) (2023-01-27)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.24.1 to 4.26.0 ([#2388](https://github.com/contentful/apps/issues/2388)) ([a2c9d93](https://github.com/contentful/apps/commit/a2c9d93bc38b312ecc3ab3200d5f33a6ebc66283))
+
+## [1.9.69](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.68...@contentful/netlify-build-and-preview@1.9.69) (2023-01-26)
+
+**Note:** Version bump only for package @contentful/netlify-build-and-preview
+
+## [1.9.68](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.67...@contentful/netlify-build-and-preview@1.9.68) (2023-01-25)
+
+**Note:** Version bump only for package @contentful/netlify-build-and-preview
+
+## [1.9.67](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.66...@contentful/netlify-build-and-preview@1.9.67) (2023-01-24)
+
+**Note:** Version bump only for package @contentful/netlify-build-and-preview
+
+## [1.9.66](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.65...@contentful/netlify-build-and-preview@1.9.66) (2023-01-19)
+
+**Note:** Version bump only for package @contentful/netlify-build-and-preview
+
 ## [1.9.65](https://github.com/contentful/apps/compare/@contentful/netlify-build-and-preview@1.9.64...@contentful/netlify-build-and-preview@1.9.65) (2023-01-13)
 
 ### Bug Fixes

@@ -1,0 +1,22 @@
+variables:
+  myStage: 'prd'
+  oauthCredentials: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/prd/oauth-credentials}
+  signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/prd/signing-secret}
+  tableName: sls-apps-slack-backend-prd-TokenTable
+  dynamoEndpoint: dynamodb.${aws:region}.amazonaws.com
+  frontendUrl: 'https://slack.ctfapps.net/index.html'
+  workflowsUrl: 'https://17a00aa2-860a-4c54-849b-d831f0198a13.ctfcloud.net'
+  baseUrl: "https://api.contentful.com"
+  app:
+    privateKey: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/prd/private-key}
+    id: '7ir40h24qLGSQWJ6JCS3sk'
+  customDomain:
+    domainName: slack-api.ctfapps.net
+    stage: prd
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+  serverless:
+    pathPrefix: ''
+  slackSigningSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/slack/prd/slack-signing-secret}
+  deploymentPrefix: sls-apps-slack-backend

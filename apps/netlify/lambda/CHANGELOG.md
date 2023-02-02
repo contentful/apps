@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.13](https://github.com/contentful/apps/compare/@contentful/netlify-build-action-lambda@1.3.12...@contentful/netlify-build-action-lambda@1.3.13) (2023-01-27)
+
+**Note:** Version bump only for package @contentful/netlify-build-action-lambda
+
+## [1.3.12](https://github.com/contentful/apps/compare/@contentful/netlify-build-action-lambda@1.3.11...@contentful/netlify-build-action-lambda@1.3.12) (2023-01-24)
+
+**Note:** Version bump only for package @contentful/netlify-build-action-lambda
+
+## [1.3.11](https://github.com/contentful/apps/compare/@contentful/netlify-build-action-lambda@1.3.10...@contentful/netlify-build-action-lambda@1.3.11) (2023-01-24)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/node-apps-toolkit from 2.0.3 to 2.0.4 ([#2344](https://github.com/contentful/apps/issues/2344)) ([19e2b2b](https://github.com/contentful/apps/commit/19e2b2b7b31107dff9589a6808fe35e152ba5dd8))
+
 ## [1.3.10](https://github.com/contentful/apps/compare/@contentful/netlify-build-action-lambda@1.3.9...@contentful/netlify-build-action-lambda@1.3.10) (2022-12-30)
 
 **Note:** Version bump only for package @contentful/netlify-build-action-lambda
