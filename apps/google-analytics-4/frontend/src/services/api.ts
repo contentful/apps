@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { config } from '../config';
 import fetchWithSignedRequest from '../helpers/signed-requests';
 import { PlainClientAPI } from 'contentful-management';
+import { ServiceAccountKeyId, ServiceAccountKey } from '../types';
 
 const ZCredentials = z.object({
   status: z.string(),
@@ -85,12 +86,21 @@ function validateResponseStatus(response: Response): void {
 export class Api {
   readonly baseUrl: string;
   readonly appDefinitionId: string;
+  readonly serviceAccountKeyId: ServiceAccountKeyId;
+  readonly serviceAccountKey: ServiceAccountKey;
   readonly cma: PlainClientAPI;
 
-  constructor(appDefinitionId: string, cma: PlainClientAPI) {
+  constructor(
+    appDefinitionId: string,
+    cma: PlainClientAPI,
+    serviceAccountKeyId: ServiceAccountKeyId,
+    serviceAccountKey: ServiceAccountKey
+  ) {
     this.baseUrl = config.backendApiUrl;
-    this.cma = cma;
     this.appDefinitionId = appDefinitionId;
+    this.cma = cma;
+    this.serviceAccountKeyId = serviceAccountKeyId;
+    this.serviceAccountKey = serviceAccountKey;
   }
 
   async getCredentials(): Promise<Credentials> {
