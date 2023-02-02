@@ -23,14 +23,20 @@ app.get('/health', function (_req, res) {
 });
 
 app.get('/api/credentials', (_req, res) => {
-  res.status(200).json({ status: 'active' });
+  res.status(200).json({data: { status: 'active' } });
 });
 
 app.get('/api/account_summaries', async (_req, res) => {
-  const serviceAccountKeyFile = getServiceAccountKeyFile();
-  const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
-  const result = await googleApi.listAccountSummaries();
-  res.status(200).json(result);
+  try {
+    const serviceAccountKeyFile = getServiceAccountKeyFile();
+    const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
+    const result = await googleApi.listAccountSummaries();
+    res.status(200).json({data: result});
+  } catch (e) {
+    if (e instanceof GoogleApiClientError) {
+      res.status(e.httpStatus).json({errors: e});
+    }
+  }
 });
 
 app.use(apiErrorMapper(errorClassToApiErrorMap));

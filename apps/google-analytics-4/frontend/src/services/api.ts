@@ -25,24 +25,53 @@ export type AccountSummary = z.infer<typeof ZAccountSummary>;
 const ZAccountSummaries = z.array(ZAccountSummary);
 export type AccountSummaries = z.infer<typeof ZAccountSummaries>;
 
-export class ApiError extends Error {}
-export class ApiServerError extends ApiError {}
-export class ApiClientError extends ApiError {}
+export class ApiError extends Error { }
+export class ApiServerError extends ApiError { }
+export class ApiClientError extends ApiError { }
+export class GoogleApiError extends ApiError {
+  code: number;
+  details: string;
+  name: string;
 
-export async function fetchFromApi<T>(apiUrl: URL, schema: z.ZodTypeAny): Promise<T> {
-  const response = await fetchResponse(apiUrl);
-  validateResponseStatus(response);
-  const responseJson = await jsonFromResponse(response);
-  parseResponseJson(responseJson, schema);
-  return responseJson;
+  constructor({code, details, name} = {code: 0, details: '', name:''}) {
+    super();
+    this.code = code;
+    this.details = details;
+    this.name = name;
+  }
 }
 
-async function fetchResponse(url: URL): Promise<Response> {
+export async function fetchFromApi<T>(apiUrl: URL, schema: z.ZodTypeAny): Promise<T> {
+  const { response, data } = await fetchResponse<T>(apiUrl);
+  validateResponseStatus(response);
+  parseResponseJson(data, schema);
+  return data;
+}
+
+async function fetchResponse<T>(url: URL): Promise<{ response: Response, data: T }> {
   try {
-    return await fetch(url);
+    const response = await fetch(url);
+    const { data, errors } = await response.json();
+    if (errors) {
+      if (errors.code) {
+        const googleApiError = new GoogleApiError(errors);
+        throw googleApiError
+      }
+      else {
+        throw errors;
+      }
+    } else {
+      return { response, data };
+    }
   } catch (e) {
     if (e instanceof TypeError) {
       const errorMessage = e.message;
+      console.error(e);
+      throw new ApiError(errorMessage);
+    }
+    else if (e instanceof SyntaxError) {
+      const errorMessage = `Invalid JSON response: ${e.message}`;
+      console.error(errorMessage);
       console.error(e);
       throw new ApiError(errorMessage);
     }
@@ -59,20 +88,6 @@ function parseResponseJson(responseJson: any, schema: z.ZodTypeAny) {
       console.error(errorMessage);
       console.error(e.message);
       console.error(responseJson);
-      throw new ApiError(errorMessage);
-    }
-    throw e;
-  }
-}
-
-async function jsonFromResponse(response: Response): Promise<any> {
-  try {
-    return await response.json();
-  } catch (e) {
-    if (e instanceof SyntaxError) {
-      const errorMessage = `Invalid JSON response: ${e.message}`;
-      console.error(errorMessage);
-      console.error(response);
       throw new ApiError(errorMessage);
     }
     throw e;

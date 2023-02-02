@@ -50,14 +50,11 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
       try {
         const response = await api.getCredentials();
         const accountSum = await api.listAccountSummaries();
-        debugger;
         setCredentialsData(response);
         setError(null);
       } catch (e) {
-
         setCredentialsData(null);
         if (e instanceof GoogleApiError) {
-          console.log(e.details)
           setErrorCode(e.code)
         }
         if (e instanceof ApiError) {
