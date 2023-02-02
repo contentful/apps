@@ -27,8 +27,17 @@ describe('useApi', () => {
   });
 
   describe('when keys are not passed but they exist in sdk.parameters', () => {
+    let originalParameters = mockCma.parameters;
+
     beforeEach(() => {
-      jest.replacePropty();
+      mockSdk.parameters.installation = {
+        serviceAccountKey: validServiceKeyFile,
+        serviceAccountKeyId: validServiceKeyId,
+      };
+    });
+
+    afterEach(() => {
+      mockSdk.parameters = originalParameters;
     });
 
     it('provides an Api instance to children', () => {
