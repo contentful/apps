@@ -138,6 +138,6 @@ export class Api {
     headerValue: ServiceAccountKeyId | ServiceAccountKey
   ): string {
     const jsonString = JSON.stringify(headerValue);
-    return Buffer.from(jsonString, 'utf8').toString('base64');
+    return window.btoa(jsonString);
   }
 }

@@ -6,16 +6,16 @@ async function fetchWithSignedRequest(
   appDefinitionId: string,
   cma: PlainClientAPI,
   method: CreateAppSignedRequestProps['method'] = 'GET',
-  headers: Record<string, string> = {}
+  unsignedHeaders: Record<string, string> = {}
 ): Promise<Response> {
   const req = {
     url: url,
     method: method,
-    headers: headers,
+    headers: {},
   };
 
   // add request verification signing secret to request headers
-  const { additionalHeaders } = await cma.appSignedRequest.create(
+  const { additionalHeaders: signedHeaders } = await cma.appSignedRequest.create(
     {
       appDefinitionId: appDefinitionId,
     },
@@ -25,7 +25,7 @@ async function fetchWithSignedRequest(
       path: new URL(req.url).pathname,
     }
   );
-  Object.assign(req.headers, additionalHeaders);
+  Object.assign(req.headers, unsignedHeaders, signedHeaders);
 
   return fetch(req.url, req);
 }

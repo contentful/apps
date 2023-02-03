@@ -5,12 +5,19 @@ import sinon, { SinonStubbedInstance } from 'sinon';
 import {
   mockAnalyticsAdminServiceClient,
   validServiceAccountKeyFile,
+  validServiceAccountKeyFileBase64,
+  validServiceAccountKeyIdBase64,
 } from '../test/mocks/googleApi';
 import app from './app';
 import { GoogleApi } from './services/google-api';
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 
 chai.use(chaiHttp);
+
+const serviceAccountKeyHeaders = {
+  'x-contentful-serviceaccountkeyid': validServiceAccountKeyIdBase64,
+  'x-contentful-serviceaccountkey': validServiceAccountKeyFileBase64,
+};
 
 describe('app', () => {
   let mockClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
@@ -31,12 +38,18 @@ describe('app', () => {
 
   describe('GET /api/credentials', () => {
     it('responds with 200', async () => {
-      const response = await chai.request(app).get('/api/credentials');
+      const response = await chai
+        .request(app)
+        .get('/api/credentials')
+        .set(serviceAccountKeyHeaders);
       expect(response).to.have.status(200);
     });
 
     it('returns the expected response body', async () => {
-      const response = await chai.request(app).get('/api/credentials');
+      const response = await chai
+        .request(app)
+        .get('/api/credentials')
+        .set(serviceAccountKeyHeaders);
       expect(response.body).to.have.property('status', 'active');
     });
   });
@@ -51,12 +64,18 @@ describe('app', () => {
     });
 
     it('responds with 200', async () => {
-      const response = await chai.request(app).get('/api/account_summaries');
+      const response = await chai
+        .request(app)
+        .get('/api/account_summaries')
+        .set(serviceAccountKeyHeaders);
       expect(response).to.have.status(200);
     });
 
     it('returns the expected response body', async () => {
-      const response = await chai.request(app).get('/api/account_summaries');
+      const response = await chai
+        .request(app)
+        .get('/api/account_summaries')
+        .set(serviceAccountKeyHeaders);
       expect(response.body[0]).to.have.property('propertySummaries');
     });
   });
