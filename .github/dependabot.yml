@@ -21,6 +21,78 @@ updates:
         - ">=3"
 
 - package-ecosystem: npm
+  directory: "/apps/ai-image-tagging/lambda"
+  schedule:
+    interval: daily
+    time: "00:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "serverless"
+      versions:
+        - ">=3"
+
+- package-ecosystem: npm
+  directory: "/apps/slack/lambda"
+  schedule:
+    interval: daily
+    time: "00:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "serverless"
+      versions:
+        - ">=3"
+
+- package-ecosystem: npm
+  directory: "/apps/jira/functions"
+  schedule:
+    interval: daily
+    time: "00:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "serverless"
+      versions:
+        - ">=3"
+
+- package-ecosystem: npm
+  directory: "/apps/netlify/lambda"
+  schedule:
+    interval: daily
+    time: "00:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "serverless"
+      versions:
+        - ">=3"
+
+- package-ecosystem: npm
   directory: "/examples/typescript"
   schedule:
     interval: daily
