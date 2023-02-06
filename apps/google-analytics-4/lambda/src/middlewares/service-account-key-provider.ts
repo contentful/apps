@@ -44,14 +44,14 @@ function assertServiceAccountKeyId(value: unknown): asserts value is ServiceAcco
   for (const requiredField of requiredFields) {
     if (!value || typeof value !== 'object' || !(requiredField in value)) {
       throw new InvalidServiceAccountKey(
-        `'${requiredField}' is missing from Service Account Key header`
+        `'${requiredField}' is missing from Service Account Key Id header`
       );
     }
 
     // @ts-expect-error we just confirmed above that requiredField is in value
     if (typeof value[requiredField] !== 'string') {
       throw new InvalidServiceAccountKey(
-        `'${requiredField}' must be a string in Service Account Key header`
+        `'${requiredField}' must be a string in Service Account Key Id header`
       );
     }
   }
@@ -62,15 +62,13 @@ function assertServiceAccountKeyFile(value: unknown): asserts value is ServiceAc
   const requiredFields = ['client_email', 'project_id', 'private_key'];
   for (const requiredField of requiredFields) {
     if (!value || typeof value !== 'object' || !(requiredField in value)) {
-      throw new InvalidServiceAccountKey(
-        `'${requiredField}' is missing from Service Account Key header`
-      );
+      throw new InvalidServiceAccountKey(`'${requiredField}' is missing from Service Account Key`);
     }
 
     // @ts-expect-error we just confirmed above that requiredField is in value
     if (typeof value[requiredField] !== 'string') {
       throw new InvalidServiceAccountKey(
-        `'${requiredField}' must be a string in Service Account Key header`
+        `'${requiredField}' must be a string in Service Account Key`
       );
     }
   }
