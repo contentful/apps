@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.10](https://github.com/contentful/apps/compare/lambda@1.1.9...lambda@1.1.10) (2023-02-06)
+
+### Bug Fixes
+
+- **deps:** bump @slack/web-api from 6.8.0 to 6.8.1 ([#2416](https://github.com/contentful/apps/issues/2416)) ([007c94b](https://github.com/contentful/apps/commit/007c94bdd5efbd3216ba2af4a2be5b88ed761211))
+- **deps:** bump @types/express in /apps/slack/lambda ([#2441](https://github.com/contentful/apps/issues/2441)) ([6196832](https://github.com/contentful/apps/commit/6196832c63a109d5c8755ebf24a7c53794aabc47))
+- **deps:** bump aws-sdk from 2.1305.0 to 2.1306.0 ([#2406](https://github.com/contentful/apps/issues/2406)) ([136c7b4](https://github.com/contentful/apps/commit/136c7b4b5dc4e460c0eee9780ed22660e2844d50))
+- **deps:** bump aws-sdk from 2.1306.0 to 2.1307.0 ([#2415](https://github.com/contentful/apps/issues/2415)) ([c2b61c3](https://github.com/contentful/apps/commit/c2b61c3e8ca3d2a8cda62495bdc0d46e473618c1))
+- **deps:** bump aws-sdk from 2.1307.0 to 2.1308.0 ([#2428](https://github.com/contentful/apps/issues/2428)) ([ba25a08](https://github.com/contentful/apps/commit/ba25a08dfe328c9df8f073d45d2c13f7a39e163b))
+- **deps:** bump aws-sdk from 2.1308.0 to 2.1309.0 ([#2432](https://github.com/contentful/apps/issues/2432)) ([77b2c45](https://github.com/contentful/apps/commit/77b2c4540730da3b1cf1442c309710b2898dcd9e))
+- **deps:** bump contentful-management from 10.27.2 to 10.27.4 ([#2418](https://github.com/contentful/apps/issues/2418)) ([f254fd7](https://github.com/contentful/apps/commit/f254fd71eff7fdd5682ecbb07e2df0403806fea0))
+- **deps:** bump contentful-management from 10.27.4 to 10.28.0 ([#2431](https://github.com/contentful/apps/issues/2431)) ([e575fba](https://github.com/contentful/apps/commit/e575fba49738222c1dc5f1a9f348aec0935acbf1))
+- **deps:** bump contentful-management from 10.28.0 to 10.28.1 ([#2438](https://github.com/contentful/apps/issues/2438)) ([0613110](https://github.com/contentful/apps/commit/0613110f205c8a42108f3a92782ba43f6619a412))
+- **deps:** bump contentful-management in /apps/slack/lambda ([#2449](https://github.com/contentful/apps/issues/2449)) ([9ca59e6](https://github.com/contentful/apps/commit/9ca59e669a4d8fe3ccf7ddbd70516ab3de65bb86))
+
 ## [1.1.9](https://github.com/contentful/apps/compare/lambda@1.1.8...lambda@1.1.9) (2023-01-31)
 
 ### Bug Fixes

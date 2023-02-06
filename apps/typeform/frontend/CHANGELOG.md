@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.75](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.74...@contentful/typeform-frontend@1.5.75) (2023-02-06)
+
+**Note:** Version bump only for package @contentful/typeform-frontend
+
 ## [1.5.74](https://github.com/contentful/apps/compare/@contentful/typeform-frontend@1.5.73...@contentful/typeform-frontend@1.5.74) (2023-01-27)
 
 ### Bug Fixes

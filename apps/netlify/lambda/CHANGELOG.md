@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.14](https://github.com/contentful/apps/compare/@contentful/netlify-build-action-lambda@1.3.13...@contentful/netlify-build-action-lambda@1.3.14) (2023-02-06)
+
+### Bug Fixes
+
+- **deps:** bump aws-serverless-express in /apps/netlify/lambda ([#2439](https://github.com/contentful/apps/issues/2439)) ([a042b2d](https://github.com/contentful/apps/commit/a042b2df9a2cddd146316b31f23fc84ae2bc6431))
+- **deps:** bump node-fetch from 2.6.1 to 2.6.9 in /apps/netlify/lambda ([#2446](https://github.com/contentful/apps/issues/2446)) ([571ee62](https://github.com/contentful/apps/commit/571ee62c7017d185a0d854f6be501167d5313d5a))
+
 ## [1.3.13](https://github.com/contentful/apps/compare/@contentful/netlify-build-action-lambda@1.3.12...@contentful/netlify-build-action-lambda@1.3.13) (2023-01-27)
 
 **Note:** Version bump only for package @contentful/netlify-build-action-lambda

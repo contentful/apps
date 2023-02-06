@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.9.124](https://github.com/contentful/apps/compare/@contentful/jira@1.9.123...@contentful/jira@1.9.124) (2023-02-06)
+
+### Bug Fixes
+
+- **deps:** bump aws-sdk from 2.1305.0 to 2.1306.0 ([#2406](https://github.com/contentful/apps/issues/2406)) ([136c7b4](https://github.com/contentful/apps/commit/136c7b4b5dc4e460c0eee9780ed22660e2844d50))
+- **deps:** bump aws-sdk from 2.1306.0 to 2.1307.0 ([#2415](https://github.com/contentful/apps/issues/2415)) ([c2b61c3](https://github.com/contentful/apps/commit/c2b61c3e8ca3d2a8cda62495bdc0d46e473618c1))
+- **deps:** bump aws-sdk from 2.1307.0 to 2.1308.0 ([#2428](https://github.com/contentful/apps/issues/2428)) ([ba25a08](https://github.com/contentful/apps/commit/ba25a08dfe328c9df8f073d45d2c13f7a39e163b))
+- **deps:** bump aws-sdk from 2.1308.0 to 2.1309.0 ([#2432](https://github.com/contentful/apps/issues/2432)) ([77b2c45](https://github.com/contentful/apps/commit/77b2c4540730da3b1cf1442c309710b2898dcd9e))
+- **deps:** bump node-fetch and @types/node-fetch in /apps/jira/functions ([#2445](https://github.com/contentful/apps/issues/2445)) ([c4c6d48](https://github.com/contentful/apps/commit/c4c6d48f353a1a74774eacd7ac51eadc6c0c1a36))
+
 ## [1.9.123](https://github.com/contentful/apps/compare/@contentful/jira@1.9.122...@contentful/jira@1.9.123) (2023-01-31)
 
 ### Bug Fixes

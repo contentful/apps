@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.7](https://github.com/contentful/apps/compare/slack-frontend@0.2.6...slack-frontend@0.2.7) (2023-02-06)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/react-apps-toolkit from 1.2.14 to 1.2.15 ([#2402](https://github.com/contentful/apps/issues/2402)) ([9ea73cf](https://github.com/contentful/apps/commit/9ea73cff811efc7c6a330e61e74d6c72e29a1c77))
+- **deps:** bump contentful-management from 10.27.2 to 10.27.4 ([#2418](https://github.com/contentful/apps/issues/2418)) ([f254fd7](https://github.com/contentful/apps/commit/f254fd71eff7fdd5682ecbb07e2df0403806fea0))
+- **deps:** bump contentful-management from 10.27.4 to 10.28.0 ([#2431](https://github.com/contentful/apps/issues/2431)) ([e575fba](https://github.com/contentful/apps/commit/e575fba49738222c1dc5f1a9f348aec0935acbf1))
+- **deps:** bump contentful-management from 10.28.0 to 10.28.1 ([#2438](https://github.com/contentful/apps/issues/2438)) ([0613110](https://github.com/contentful/apps/commit/0613110f205c8a42108f3a92782ba43f6619a412))
+
 ## [0.2.6](https://github.com/contentful/apps/compare/slack-frontend@0.2.5...slack-frontend@0.2.6) (2023-01-30)
 
 **Note:** Version bump only for package slack-frontend
