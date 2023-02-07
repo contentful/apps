@@ -1,21 +1,14 @@
 import ConfigScreen from './ConfigScreen';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mockCma, mockSdk, validServiceKeyFile } from '../../test/mocks';
+import { mockCma, mockSdk, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
 
-import type { ServiceAccountKey, ServiceAccountKeyId } from '../types';
+import type { ServiceAccountKey } from '../types';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
-
-const validServiceKeyId: ServiceAccountKeyId = {
-  id: validServiceKeyFile.private_key_id,
-  clientId: validServiceKeyFile.client_id,
-  clientEmail: validServiceKeyFile.client_id,
-  projectId: validServiceKeyFile.project_id,
-};
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
 const saveAppInstallation = async () => {

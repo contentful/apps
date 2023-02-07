@@ -1,7 +1,13 @@
 import { AnalyticsAdminServiceClient } from '@google-analytics/admin';
 import sinon, { SinonStubbedInstance } from 'sinon';
+import { ServiceAccountKeyFile, ServiceAccountKeyId } from '../../src/types';
 
-export const validServiceAccountKeyFile = {
+const encodeObj = (obj: unknown) => {
+  const jsonStr = JSON.stringify(obj);
+  return Buffer.from(jsonStr).toString('base64');
+};
+
+export const validServiceAccountKeyFile: ServiceAccountKeyFile = {
   type: 'service_account',
   project_id: 'mock-project-id',
   private_key_id: 'mock-private-key-id',
@@ -14,6 +20,16 @@ export const validServiceAccountKeyFile = {
   client_x509_cert_url:
     'https://www.googleapis.com/robot/v1/metadata/x509/mock-client-email%40mock-project-id.iam.gserviceaccount.com',
 };
+
+export const validServiceAccountKeyId: ServiceAccountKeyId = {
+  id: validServiceAccountKeyFile.private_key_id,
+  clientId: validServiceAccountKeyFile.client_id,
+  clientEmail: validServiceAccountKeyFile.client_id,
+  projectId: validServiceAccountKeyFile.project_id,
+};
+
+export const validServiceAccountKeyFileBase64 = encodeObj(validServiceAccountKeyFile);
+export const validServiceAccountKeyIdBase64 = encodeObj(validServiceAccountKeyId);
 
 export const mockAccountSummary = {
   propertySummaries: [

@@ -20,7 +20,12 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 describe('InstalledServiceAccountKey', () => {
   it('can render the basic form', async () => {
     await act(async () => {
-      render(<InstalledServiceAccountKey serviceAccountKeyId={validServiceKeyId} />);
+      render(
+        <InstalledServiceAccountKey
+          serviceAccountKeyId={validServiceKeyId}
+          serviceAccountKey={validServiceKeyFile}
+        />
+      );
     });
 
     expect(screen.getByText('Installed Google Service Account Key')).toBeInTheDocument();
