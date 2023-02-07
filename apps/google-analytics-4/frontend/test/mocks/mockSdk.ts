@@ -11,6 +11,10 @@ const mockSdk: any = {
   notifier: {
     error: jest.fn(),
   },
+  parameters: {
+    installation: {},
+    instance: {},
+  },
 };
 
 export { mockSdk };
