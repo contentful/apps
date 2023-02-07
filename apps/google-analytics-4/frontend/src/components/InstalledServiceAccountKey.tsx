@@ -3,9 +3,10 @@ import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { useEffect, useState } from 'react';
-import { api, ApiError, Credentials, GoogleApiError } from '../services/api';
+import { ApiError, Credentials, GoogleApiError } from '../services/api';
 
-import type { ServiceAccountKeyId } from '../types';
+import type { ServiceAccountKey, ServiceAccountKeyId } from '../types';
+import { useApi } from '../hooks/useApi';
 
 const styles = {
   serviceAccountDetails: css({
@@ -36,14 +37,23 @@ const styles = {
 };
 
 interface InstalledServiceAccountKeyProps {
-  serviceAccountKeyId: ServiceAccountKeyId | null;
+  serviceAccountKeyId: ServiceAccountKeyId;
+  serviceAccountKey: ServiceAccountKey;
 }
 
-const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAccountKeyProps) => {
+const InstalledServiceAccountKey = ({
+  serviceAccountKeyId,
+  serviceAccountKey,
+}: InstalledServiceAccountKeyProps) => {
   const [credentialsData, setCredentialsData] = useState<Credentials | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [errorCode, setErrorCode] = useState(0)
+
+  // NOTE: Due to a bug installation parameters are not available at sdk.parameters.installation form the config screen
+  // location. Therefore we must pass down the values directly to the useApi hook. If the bug is fixed this won't be
+  // necessary
+  const api = useApi(serviceAccountKeyId, serviceAccountKey);
 
   useEffect(() => {
     (async () => {
@@ -67,7 +77,7 @@ const InstalledServiceAccountKey = ({ serviceAccountKeyId }: InstalledServiceAcc
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, [api]);
 
   if (!serviceAccountKeyId) {
     return null;

@@ -11,7 +11,7 @@ export type ApiErrorMap = Record<string, (e: any) => ApiError<Record<string, unk
 
 export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, next) => {
   if (error) {
-    console.log(JSON.stringify(error));
+    console.error(JSON.stringify(error));
 
     if (isApiError(error)) {
       response.status(error.status).send(error.toJSON());
@@ -21,6 +21,7 @@ export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, 
         .send({ errorType: 'ServerError', message: 'Internal Server Error', details: null });
     }
   }
+
   next();
 };
 
@@ -29,6 +30,7 @@ export const apiErrorMapper = (errorMap: ApiErrorMap): ErrorRequestHandler => {
     if (error) {
       const errorName = error.constructor.name as keyof typeof errorMap;
       if (errorName in errorMap) {
+        console.error(error);
         return next(errorMap[errorName](error));
       }
       return next(error);

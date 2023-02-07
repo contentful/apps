@@ -1,9 +1,15 @@
 import { z } from 'zod';
 import { config } from '../config';
+import fetchWithSignedRequest from '../helpers/signed-requests';
+import { PlainClientAPI } from 'contentful-management';
+import { ServiceAccountKeyId, ServiceAccountKey } from '../types';
 
 const ZCredentials = z.object({
   status: z.string(),
 });
+
+type Headers = Record<string, string>;
+
 export type Credentials = z.infer<typeof ZCredentials>;
 
 const ZPropertySummary = z.object({
@@ -41,28 +47,28 @@ export class GoogleApiError extends ApiError {
   }
 }
 
-export async function fetchFromApi<T>(apiUrl: URL, schema: z.ZodTypeAny): Promise<T> {
-  const { response, data } = await fetchResponse<T>(apiUrl);
+export async function fetchFromApi<T>(
+  apiUrl: URL,
+  schema: z.ZodTypeAny,
+  appDefinitionId: string,
+  cma: PlainClientAPI,
+  headers: Headers = {}
+): Promise<T> {
+  const response = await fetchResponse(apiUrl, appDefinitionId, cma, headers);
   validateResponseStatus(response);
-  parseResponseJson(data, schema);
-  return data;
+  const responseJson = await jsonFromResponse(response);
+  parseResponseJson(responseJson, schema);
+  return responseJson;
 }
 
-async function fetchResponse<T>(url: URL): Promise<{ response: Response, data: T }> {
+async function fetchResponse(
+  url: URL,
+  appDefinitionId: string,
+  cma: PlainClientAPI,
+  headers: Headers
+): Promise<Response> {
   try {
-    const response = await fetch(url);
-    const { data, errors } = await response.json();
-    if (errors) {
-      if (errors.code) {
-        const googleApiError = new GoogleApiError(errors);
-        throw googleApiError
-      }
-      else {
-        throw errors;
-      }
-    } else {
-      return { response, data };
-    }
+    return await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', headers);
   } catch (e) {
     if (e instanceof TypeError) {
       const errorMessage = e.message;
@@ -94,6 +100,20 @@ function parseResponseJson(responseJson: any, schema: z.ZodTypeAny) {
   }
 }
 
+async function jsonFromResponse(response: Response): Promise<any> {
+  try {
+    return await response.json();
+  } catch (e) {
+    if (e instanceof SyntaxError) {
+      const errorMessage = `Invalid JSON response: ${e.message}`;
+      console.error(errorMessage);
+      console.error(response);
+      throw new ApiError(errorMessage);
+    }
+    throw e;
+  }
+}
+
 function validateResponseStatus(response: Response): void {
   if (response.status >= 500) {
     console.error(response);
@@ -106,19 +126,41 @@ function validateResponseStatus(response: Response): void {
 
 export class Api {
   readonly baseUrl: string;
+  readonly appDefinitionId: string;
+  readonly serviceAccountKeyId: ServiceAccountKeyId;
+  readonly serviceAccountKey: ServiceAccountKey;
+  readonly cma: PlainClientAPI;
 
-  constructor() {
+  constructor(
+    appDefinitionId: string,
+    cma: PlainClientAPI,
+    serviceAccountKeyId: ServiceAccountKeyId,
+    serviceAccountKey: ServiceAccountKey
+  ) {
     this.baseUrl = config.backendApiUrl;
+    this.appDefinitionId = appDefinitionId;
+    this.cma = cma;
+    this.serviceAccountKeyId = serviceAccountKeyId;
+    this.serviceAccountKey = serviceAccountKey;
   }
 
   async getCredentials(): Promise<Credentials> {
-    return await fetchFromApi<Credentials>(this.requestUrl('api/credentials'), ZCredentials);
+    return await fetchFromApi<Credentials>(
+      this.requestUrl('api/credentials'),
+      ZCredentials,
+      this.appDefinitionId,
+      this.cma,
+      this.serviceAccountKeyHeaders
+    );
   }
 
   async listAccountSummaries(): Promise<AccountSummaries> {
     return await fetchFromApi<AccountSummaries>(
       this.requestUrl('api/account_summaries'),
-      ZAccountSummaries
+      ZCredentials,
+      this.appDefinitionId,
+      this.cma,
+      this.serviceAccountKeyHeaders
     );
   }
 
@@ -126,6 +168,23 @@ export class Api {
     const url = `${this.baseUrl}/${apiPath}`;
     return new URL(url);
   }
-}
 
-export const api = new Api();
+  private get serviceAccountKeyHeaders(): Headers {
+    return {
+      'x-contentful-serviceaccountkeyid': this.encodeServiceAccountHeaderValue(
+        this.serviceAccountKeyId
+      ),
+      'x-contentful-serviceaccountkey': this.encodeServiceAccountHeaderValue(
+        this.serviceAccountKey
+      ),
+    };
+  }
+
+  // stringify + base64encode the header value so it can be packaged into header safely
+  private encodeServiceAccountHeaderValue(
+    headerValue: ServiceAccountKeyId | ServiceAccountKey
+  ): string {
+    const jsonString = JSON.stringify(headerValue);
+    return window.btoa(jsonString);
+  }
+}

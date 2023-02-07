@@ -19,7 +19,7 @@ import { css } from 'emotion';
 
 import tokens from '@contentful/f36-tokens';
 import InstalledServiceAccountKey from './InstalledServiceAccountKey';
-import type { ServiceAccountKeyId } from '../types';
+import type { ServiceAccountKey, ServiceAccountKeyId } from '../types';
 
 interface FormControlServideAccountKeyFileProps {
   isValid: boolean;
@@ -27,6 +27,7 @@ interface FormControlServideAccountKeyFileProps {
   isRequired: boolean;
   isExpanded: boolean;
   currentServiceAccountKeyId: ServiceAccountKeyId | null;
+  currentServiceAccountKey: ServiceAccountKey | null;
   serviceAccountKeyFile: string;
   onKeyFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onExpanderClick: React.MouseEventHandler<HTMLButtonElement>;
@@ -56,6 +57,7 @@ const FormControlServiceAccountKey = ({
   isExpanded,
   errorMessage,
   currentServiceAccountKeyId,
+  currentServiceAccountKey,
   serviceAccountKeyFile,
   onKeyFileChange,
   onExpanderClick,
@@ -132,9 +134,12 @@ const FormControlServiceAccountKey = ({
     </FormControl>
   );
 
-  return currentServiceAccountKeyId ? (
+  return currentServiceAccountKeyId && currentServiceAccountKey ? (
     <div className={className}>
-      <InstalledServiceAccountKey serviceAccountKeyId={currentServiceAccountKeyId} />
+      <InstalledServiceAccountKey
+        serviceAccountKeyId={currentServiceAccountKeyId}
+        serviceAccountKey={currentServiceAccountKey}
+      />
       <TextLink
         as="button"
         variant="primary"
