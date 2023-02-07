@@ -1,6 +1,6 @@
 {
-  "name": "@contentful/functions",
-  "version": "1.4.106",
+  "name": "@contentful/jira-functions",
+  "version": "1.4.107",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "start": "npm run build && serverless offline --httpPort 3000"
   },
   "dependencies": {
-    "aws-sdk": "^2.814.0",
+    "aws-sdk": "^2.1310.0",
     "node-fetch": "^2.6.9"
   },
   "devDependencies": {
