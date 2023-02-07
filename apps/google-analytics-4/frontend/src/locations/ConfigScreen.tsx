@@ -234,6 +234,7 @@ const ConfigScreen = () => {
             isExpanded={serviceAccountKeyFormControlIsExpanded}
             errorMessage={serviceAccountKeyFileErrorMessage}
             currentServiceAccountKeyId={parameters.serviceAccountKeyId}
+            currentServiceAccountKey={parameters.serviceAccountKey}
             serviceAccountKeyFile={serviceAccountKeyFile}
             onKeyFileChange={onKeyFileChange}
             onExpanderClick={onExpanderClick}
