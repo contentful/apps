@@ -2,10 +2,13 @@ import { z } from 'zod';
 import { config } from '../config';
 import fetchWithSignedRequest from '../helpers/signed-requests';
 import { PlainClientAPI } from 'contentful-management';
+import { ServiceAccountKeyId, ServiceAccountKey } from '../types';
 
 const ZCredentials = z.object({
   status: z.string(),
 });
+
+type Headers = Record<string, string>;
 
 export type Credentials = z.infer<typeof ZCredentials>;
 
@@ -17,9 +20,10 @@ export async function fetchFromApi<T>(
   apiUrl: URL,
   schema: z.ZodTypeAny,
   appDefinitionId: string,
-  cma: PlainClientAPI
+  cma: PlainClientAPI,
+  headers: Headers = {}
 ): Promise<T> {
-  const response = await fetchResponse(apiUrl, appDefinitionId, cma);
+  const response = await fetchResponse(apiUrl, appDefinitionId, cma, headers);
   validateResponseStatus(response);
   const responseJson = await jsonFromResponse(response);
   parseResponseJson(responseJson, schema);
@@ -29,10 +33,11 @@ export async function fetchFromApi<T>(
 async function fetchResponse(
   url: URL,
   appDefinitionId: string,
-  cma: PlainClientAPI
+  cma: PlainClientAPI,
+  headers: Headers
 ): Promise<Response> {
   try {
-    return await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', {});
+    return await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', headers);
   } catch (e) {
     if (e instanceof TypeError) {
       const errorMessage = e.message;
@@ -85,12 +90,21 @@ function validateResponseStatus(response: Response): void {
 export class Api {
   readonly baseUrl: string;
   readonly appDefinitionId: string;
+  readonly serviceAccountKeyId: ServiceAccountKeyId;
+  readonly serviceAccountKey: ServiceAccountKey;
   readonly cma: PlainClientAPI;
 
-  constructor(appDefinitionId: string, cma: PlainClientAPI) {
+  constructor(
+    appDefinitionId: string,
+    cma: PlainClientAPI,
+    serviceAccountKeyId: ServiceAccountKeyId,
+    serviceAccountKey: ServiceAccountKey
+  ) {
     this.baseUrl = config.backendApiUrl;
-    this.cma = cma;
     this.appDefinitionId = appDefinitionId;
+    this.cma = cma;
+    this.serviceAccountKeyId = serviceAccountKeyId;
+    this.serviceAccountKey = serviceAccountKey;
   }
 
   async getCredentials(): Promise<Credentials> {
@@ -98,12 +112,32 @@ export class Api {
       this.requestUrl('api/credentials'),
       ZCredentials,
       this.appDefinitionId,
-      this.cma
+      this.cma,
+      this.serviceAccountKeyHeaders
     );
   }
 
   private requestUrl(apiPath: string): URL {
     const url = `${this.baseUrl}/${apiPath}`;
     return new URL(url);
+  }
+
+  private get serviceAccountKeyHeaders(): Headers {
+    return {
+      'x-contentful-serviceaccountkeyid': this.encodeServiceAccountHeaderValue(
+        this.serviceAccountKeyId
+      ),
+      'x-contentful-serviceaccountkey': this.encodeServiceAccountHeaderValue(
+        this.serviceAccountKey
+      ),
+    };
+  }
+
+  // stringify + base64encode the header value so it can be packaged into header safely
+  private encodeServiceAccountHeaderValue(
+    headerValue: ServiceAccountKeyId | ServiceAccountKey
+  ): string {
+    const jsonString = JSON.stringify(headerValue);
+    return window.btoa(jsonString);
   }
 }

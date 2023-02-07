@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { rest } from 'msw';
 import { server } from '../../test/mocks/api/server';
 import { Api, ApiClientError, ApiError, ApiServerError, fetchFromApi } from './api';
-import { mockCma } from '../../test/mocks';
+import { mockCma, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
 
 describe('fetchFromApi()', () => {
   const ZSomeSchema = z.object({ foo: z.string() });
@@ -109,8 +109,8 @@ describe('Api', () => {
   describe('getCredentials()', () => {
     const appDefinitionId = 'abc123xyz';
 
-    it('returns a set of credentials', async () => {
-      const api = new Api(appDefinitionId, mockCma);
+    it('calls fetchApi with the correct parameters', async () => {
+      const api = new Api(appDefinitionId, mockCma, validServiceKeyId, validServiceKeyFile);
       const result = await api.getCredentials();
       expect(result).toEqual(expect.objectContaining({ status: 'active' }));
     });
