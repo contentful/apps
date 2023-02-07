@@ -15,21 +15,21 @@
   },
   "dependencies": {
     "aws-sdk": "^2.814.0",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.9"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.36",
     "@types/chai": "^4.2.6",
     "@types/mocha": "^9.1.1",
     "@types/node": "^12.12.14",
-    "@types/node-fetch": "^2.5.4",
-    "@types/request": "^2.48.3",
+    "@types/node-fetch": "^2.6.2",
+    "@types/request": "^2.48.8",
     "@types/sinon-chai": "^3.2.3",
     "mocha": "^10.0.0",
-    "nock": "^11.7.0",
-    "rimraf": "^3.0.0",
-    "serverless": "2.57.0",
-    "serverless-domain-manager": "3.3.1",
+    "nock": "^11.9.1",
+    "rimraf": "^3.0.2",
+    "serverless": "2.72.3",
+    "serverless-domain-manager": "3.3.2",
     "serverless-offline": "^8.8.0",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
@@ -39,6 +39,6 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
     "tslint-no-unused-expression-chai": "^0.1.4",
-    "typescript": "^3.7.2"
+    "typescript": "^3.9.10"
   }
 }
