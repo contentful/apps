@@ -1,5 +1,5 @@
 {
-  "name": "lambda",
+  "name": "slack-lambda",
   "private": true,
   "version": "1.1.9",
   "main": "index.js",
