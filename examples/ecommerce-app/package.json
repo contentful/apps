@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@contentful/app-scripts": "1.7.2",
     "@contentful/ecommerce-app-base": "3.0.0",
     "@contentful/f36-components": "4.4.1",
     "cross-env": "7.0.3",
@@ -13,7 +14,9 @@
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
+    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
   "browserslist": {
     "production": [
