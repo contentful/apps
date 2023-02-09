@@ -23,7 +23,6 @@ import { apiClient } from '../requests';
 import { ChannelNote } from './ChannelNote';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { byChannelName } from '../utils';
 
 const NOTIFICATION_LIMIT = 15;
 
