@@ -57,7 +57,7 @@ const Field = () => {
           title={albumData.name}
           src={albumData.image}
           actions={[
-            <MenuItem key="remove" onClick={() => setAlbumData(null)}>
+            <MenuItem key="remove" onClick={() => setAlbumData(undefined)}>
               Remove
             </MenuItem>,
           ]}
