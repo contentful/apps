@@ -6,7 +6,7 @@
     "npm": ">= 8.0.0 < 9.0.0"
   },
   "devDependencies": {
-    "prettier": "2.8.3",
+    "prettier": "2.8.4",
     "husky": "^8.0.0",
     "lint-staged": "^13.0.0"
   },
@@ -19,7 +19,7 @@
     "test": "lerna run test:ci --concurrency=1 --stream",
     "deploy": "lerna run deploy --concurrency=3",
     "deploy:test": "lerna run deploy:test --concurrency=3",
-    "publish-packages": "lerna version --conventional-commits --create-release github --yes && lerna publish from-git --yes",
+    "publish-packages": "lerna version --conventional-commits --no-private --force-git-tag --create-release github --yes && lerna publish from-git --yes",
     "prettier": "prettier --no-editorconfig --no-error-on-unmatched-pattern --write {apps,packages,examples}/**/*.{js,jsx,ts,tsx}",
     "prepare": "husky install"
   },
