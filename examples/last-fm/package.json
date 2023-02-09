@@ -16,7 +16,6 @@
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
@@ -39,8 +38,6 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.2.4",
-    "@testing-library/jest-dom": "5.16.5",
-    "@testing-library/react": "12.1.5",
     "@tsconfig/create-react-app": "1.0.3",
     "@types/jest": "29.2.3",
     "@types/node": "18.11.9",
