@@ -19,7 +19,7 @@ const Field = () => {
   const sdk = useSDK<FieldExtensionSDK>();
   useAutoResizer();
   const [albumSearch, setAlbumSearch] = useState<string>('');
-  const [albumData, setAlbumData] = useFieldValue<Album | null>();
+  const [albumData, setAlbumData] = useFieldValue<Album | undefined>();
 
   const openDialog = async () => {
     const album = await sdk.dialogs.openCurrentApp({
