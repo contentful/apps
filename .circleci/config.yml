@@ -50,9 +50,14 @@ jobs:
     resource_class: medium+
     steps:
         - checkout
-        - node/install
         - vault/get-secrets:
             template-preset: "aws-push-artifacts"
+        - node/install
+        - run:
+            name: Install dependencies
+            command: |
+              npm ci
+              npm run bootstrap:ci
         - run:
             name: Install awscli
             command: |
@@ -86,6 +91,11 @@ jobs:
           template-preset: "aws-push-artifacts"
       - checkout
       - node/install
+      - run:
+          name: Install dependencies
+          command: |
+            npm ci
+            npm run bootstrap:ci
       - run:
           name: Install awscli
           command: |
