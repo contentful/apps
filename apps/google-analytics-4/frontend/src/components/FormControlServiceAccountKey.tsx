@@ -103,7 +103,7 @@ const FormControlServiceAccountKey = ({
           <TextLink
             icon={<ExternalLinkTrimmedIcon />}
             alignIcon="end"
-            href="https://cloud.google.com/iam/docs/understanding-service-accounts"
+            href="https://www.contentful.com/help/google-analytics-service-account-setup/"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -118,7 +118,7 @@ const FormControlServiceAccountKey = ({
           <TextLink
             icon={<ExternalLinkTrimmedIcon />}
             alignIcon="end"
-            href="https://cloud.google.com/iam/docs/understanding-service-accounts"
+            href="https://www.contentful.com/help/google-analytics-service-account-setup/"
             target="_blank"
             rel="noopener noreferrer"
           >
