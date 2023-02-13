@@ -8,6 +8,25 @@ const ZCredentials = z.object({
   status: z.string(),
 });
 
+const ZPropertySummary = z.object({
+  property: z.string(),
+  displayName: z.string(),
+  propertyType: z.string(),
+});
+export type PropertySummary = z.infer<typeof ZPropertySummary>;
+
+const ZAccountSummary = z.object({
+  name: z.string(),
+  account: z.string(),
+  displayName: z.string(),
+  propertySummaries: z.array(ZPropertySummary),
+});
+
+export type AccountSummary = z.infer<typeof ZAccountSummary>;
+
+const ZAccountSummaries = z.array(ZAccountSummary);
+export type AccountSummaries = z.infer<typeof ZAccountSummaries>;
+
 type Headers = Record<string, string>;
 
 export type Credentials = z.infer<typeof ZCredentials>;
@@ -120,6 +139,16 @@ export class Api {
   private requestUrl(apiPath: string): URL {
     const url = `${this.baseUrl}/${apiPath}`;
     return new URL(url);
+  }
+
+  async listAccountSummaries(): Promise<AccountSummaries> {
+    return await fetchFromApi<AccountSummaries>(
+      this.requestUrl('api/account_summaries'),
+      ZAccountSummaries,
+      this.appDefinitionId,
+      this.cma,
+      this.serviceAccountKeyHeaders
+    );
   }
 
   private get serviceAccountKeyHeaders(): Headers {

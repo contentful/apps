@@ -3,6 +3,7 @@ import { rest } from 'msw';
 import { server } from '../../test/mocks/api/server';
 import { Api, ApiClientError, ApiError, ApiServerError, fetchFromApi } from './api';
 import { mockCma, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
+import { mockAccountSummary } from '../../test/mocks/api/mockData';
 
 describe('fetchFromApi()', () => {
   const ZSomeSchema = z.object({ foo: z.string() });
@@ -113,6 +114,14 @@ describe('Api', () => {
       const api = new Api(appDefinitionId, mockCma, validServiceKeyId, validServiceKeyFile);
       const result = await api.getCredentials();
       expect(result).toEqual(expect.objectContaining({ status: 'active' }));
+    });
+  });
+
+  describe('listAccountSummaries()', () => {
+    it('returns a set of credentials', async () => {
+      const api = new Api();
+      const result = await api.listAccountSummaries();
+      expect(result).toEqual(expect.arrayContaining([expect.objectContaining(mockAccountSummary)]));
     });
   });
 });
