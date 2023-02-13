@@ -70,18 +70,23 @@ app.get('/api/credentials', (_req, res) => {
   res.status(200).json({ status: 'active' });
 });
 
-app.get('/api/account_summaries', async (req, res) => {
-  const serviceAccountKeyFile = req.serviceAccountKey;
+app.get('/api/account_summaries', async (req, res, next) => {
+  try {
+    const serviceAccountKeyFile = req.serviceAccountKey;
 
-  if (serviceAccountKeyFile === undefined) {
-    // intentional runtime error because the middleware already handles this. typescript
-    // just doesn't realize
-    throw new Error('missing service account key value');
+    if (serviceAccountKeyFile === undefined) {
+      // intentional runtime error because the middleware already handles this. typescript
+      // just doesn't realize
+      throw new Error('missing service account key value');
+    }
+
+    const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
+    const result = await googleApi.listAccountSummaries();
+    res.status(200).json(result);
+  } catch (err) {
+    // pass to apiErrorHandler
+    next(err)
   }
-
-  const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
-  const result = await googleApi.listAccountSummaries();
-  res.status(200).json(result);
 });
 
 // catch and handle errors

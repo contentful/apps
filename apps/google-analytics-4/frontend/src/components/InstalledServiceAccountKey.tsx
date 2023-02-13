@@ -1,4 +1,4 @@
-import { Badge, Box, Flex, Heading, Skeleton, TextLink } from '@contentful/f36-components';
+import { Badge, Box, Flex, Heading, Skeleton, TextLink, Note } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
@@ -30,6 +30,9 @@ const styles = {
       marginBottom: tokens.spacingS,
     },
   }),
+  errorNote: css({
+    marginTop: tokens.spacing2Xs
+  })
 };
 
 interface InstalledServiceAccountKeyProps {
@@ -53,9 +56,13 @@ const InstalledServiceAccountKey = ({
   useEffect(() => {
     (async () => {
       try {
-        const response = await api.getCredentials();
-        setCredentialsData(response);
-        setError(null);
+        const credentials = await api.getCredentials();
+        const accountSummaries = await api.listAccountSummaries();
+        setCredentialsData(credentials);
+        if (accountSummaries.length === 0 ) {
+          throw new ApiError("You need to make sure your service account is added to the property you want to connect this space to. Right now, your service account isn't connected to any Analytics properties.")
+        }
+        else setError(null);
       } catch (e) {
         setCredentialsData(null);
         if (e instanceof ApiError) {
@@ -105,8 +112,11 @@ const InstalledServiceAccountKey = ({
           ) : error === null ? (
             <Badge variant="positive">{credentialsData?.status}</Badge>
           ) : (
-            <Badge variant="secondary">unknown</Badge>
-          )}
+            <>
+              <Badge variant="warning">Inactive</Badge>
+              <Note variant="neutral" className={styles.errorNote}>{error}</Note>
+            </>
+          ) }
         </dd>
       </dl>
     </Box>

@@ -56,11 +56,16 @@ async function fetchResponse(
   headers: Headers
 ): Promise<Response> {
   try {
-    return await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', headers);
+    const signedResponse = await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', headers);
+    if (!signedResponse.ok) {
+      const { errors } = await signedResponse.json();
+      throw new ApiError(errors.message);
+    }
+    else return signedResponse;
+
   } catch (e) {
     if (e instanceof TypeError) {
       const errorMessage = e.message;
-      console.error(e);
       throw new ApiError(errorMessage);
     }
     throw e;

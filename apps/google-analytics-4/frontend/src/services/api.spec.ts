@@ -118,8 +118,10 @@ describe('Api', () => {
   });
 
   describe('listAccountSummaries()', () => {
+    const appDefinitionId = 'abc123xyz';
+
     it('returns a set of credentials', async () => {
-      const api = new Api();
+      const api = new Api(appDefinitionId, mockCma, validServiceKeyId, validServiceKeyFile);
       const result = await api.listAccountSummaries();
       expect(result).toEqual(expect.arrayContaining([expect.objectContaining(mockAccountSummary)]));
     });
