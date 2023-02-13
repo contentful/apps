@@ -49,6 +49,8 @@ jobs:
       - image: cimg/base:stable
     resource_class: medium+
     steps:
+        - checkout
+        - node/install
         - vault/get-secrets:
             template-preset: "aws-push-artifacts"
         - run:
@@ -82,6 +84,8 @@ jobs:
     steps:
       - vault/get-secrets:
           template-preset: "aws-push-artifacts"
+      - checkout
+      - node/install
       - run:
           name: Install awscli
           command: |
@@ -94,6 +98,7 @@ jobs:
                 REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
                 REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
                 npm run build
+      - publish
       - run:
           name: Deploy apps to prod
           command: |
