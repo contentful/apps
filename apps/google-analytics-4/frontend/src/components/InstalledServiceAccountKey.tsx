@@ -48,7 +48,6 @@ const InstalledServiceAccountKey = ({
   const [credentialsData, setCredentialsData] = useState<Credentials | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [errorCode, setErrorCode] = useState(0)
 
   // NOTE: Due to a bug installation parameters are not available at sdk.parameters.installation form the config screen
   // location. Therefore we must pass down the values directly to the useApi hook. If the bug is fixed this won't be
@@ -58,15 +57,15 @@ const InstalledServiceAccountKey = ({
   useEffect(() => {
     (async () => {
       try {
-        const response = await api.getCredentials();
-        const accountSum = await api.listAccountSummaries();
-        setCredentialsData(response);
-        setError(null);
+        const credentials = await api.getCredentials();
+        const accountSummaries = await api.listAccountSummaries();
+        setCredentialsData(credentials);
+        if (accountSummaries.length === 0 ) {
+          throw new ApiError("You need to make sure your service account is added to the property you want to connect this space to. Right now, your service account isn't connected to any Analytics properties.")
+        }
+        else setError(null);
       } catch (e) {
         setCredentialsData(null);
-        if (e instanceof GoogleApiError) {
-          setErrorCode(e.code)
-        }
         if (e instanceof ApiError) {
           setError(e.message);
         } else {
@@ -81,12 +80,6 @@ const InstalledServiceAccountKey = ({
 
   if (!serviceAccountKeyId) {
     return null;
-  }
-
-  const errorTextByCode = (code: number) => {
-    if (code === 16) return <p>Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See <a href="https://developers.google.com/identity/sign-in/web/devconsole-project" target="_blank">https://developers.google.com/identity/sign-in/web/devconsole-project</a>.</p>;
-    else if (code === 7) return <p>Google Analytics Admin API has not been used in this project before or it is disabled. Enable it by visiting <a href="https://console.developers.google.com/apis/api/analyticsadmin.googleapis.com/overview" target="_blank">https://console.developers.google.com/apis/api/analyticsadmin.googleapis.com/overview</a> then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.</p>;
-    else return <p>Unknown error with the API occurred.</p>;
   }
 
   return (
@@ -119,14 +112,12 @@ const InstalledServiceAccountKey = ({
             </Skeleton.Container>
           ) : error === null ? (
             <Badge variant="positive">{credentialsData?.status}</Badge>
-          ) : errorCode ? (
+          ) : (
             <>
               <Badge variant="warning">Inactive</Badge>
-              <Note variant="neutral" className={styles.errorNote}>{errorTextByCode(errorCode)}</Note>
+              <Note variant="neutral" className={styles.errorNote}>{error}</Note>
             </>
-          ) : (
-            <Badge variant="secondary">unknown</Badge>
-          )}
+          ) }
         </dd>
       </dl>
     </Box>

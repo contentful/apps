@@ -39,7 +39,7 @@ export class GoogleApiError extends ApiError {
   details: string;
   name: string;
 
-  constructor({code, details, name} = {code: 0, details: '', name:''}) {
+  constructor({ code, details, name } = { code: 0, details: '', name: '' }) {
     super();
     this.code = code;
     this.details = details;
@@ -68,11 +68,16 @@ async function fetchResponse(
   headers: Headers
 ): Promise<Response> {
   try {
-    return await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', headers);
+    const signedResponse = await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', headers);
+    if (!signedResponse.ok) {
+      const { errors } = await signedResponse.json();
+      throw new ApiError(errors.message);
+    }
+    else return signedResponse;
+
   } catch (e) {
     if (e instanceof TypeError) {
       const errorMessage = e.message;
-      console.error(e);
       throw new ApiError(errorMessage);
     }
     else if (e instanceof SyntaxError) {
@@ -157,7 +162,7 @@ export class Api {
   async listAccountSummaries(): Promise<AccountSummaries> {
     return await fetchFromApi<AccountSummaries>(
       this.requestUrl('api/account_summaries'),
-      ZCredentials,
+      ZAccountSummaries,
       this.appDefinitionId,
       this.cma,
       this.serviceAccountKeyHeaders
