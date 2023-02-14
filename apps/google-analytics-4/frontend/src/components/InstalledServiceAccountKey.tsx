@@ -3,7 +3,7 @@ import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { useEffect, useState } from 'react';
-import { ApiError, Credentials } from '../services/api';
+import { ApiError } from '../services/api';
 
 import type { ServiceAccountKey, ServiceAccountKeyId } from '../types';
 import { useApi } from '../hooks/useApi';
@@ -106,7 +106,7 @@ const InstalledServiceAccountKey = ({
               <Skeleton.DisplayText lineHeight={21} />
             </Skeleton.Container>
           ) : !error ? (
-            <Badge variant="positive">Active</Badge>
+            <Badge variant="positive">active</Badge>
           ) : (
             <>
               <Badge variant="warning">Inactive</Badge>
