@@ -19,17 +19,10 @@ div {
   max-width: 690px;
 }
 
-#collections {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
-}
-
 .cr-pointer {
   cursor: pointer;
 }
 
-/* Fix skeleton height */
-#collections svg {
-  height: 43px;
+.entity-loading {
+  max-height: 72px;
 }

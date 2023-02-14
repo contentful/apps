@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { EntrySys, ContentType } from '@contentful/app-sdk';
-import { EntityList, EntityListItem, HelpText } from '@contentful/forma-36-react-components';
+import { ContentEntitySys, ContentType } from '@contentful/app-sdk';
+import { Box, EntityList, EntityListItem, HelpText } from '@contentful/f36-components';
 
-function getEntryStatus(entrySys: EntrySys) {
+function getEntryStatus(entrySys: ContentEntitySys) {
   if (!!entrySys.archivedVersion) {
     return 'archived';
   } else if (!!entrySys.publishedVersion && entrySys.version == entrySys.publishedVersion + 1) {
@@ -28,44 +28,52 @@ export default function CollectionList({
   // Loading state.
   if (!entries) {
     return (
-      <EntityList className="f36-margin-top--m">
-        {Array(3)
-          .fill('')
-          .map((_, i) => (
-            <EntityListItem key={i} title="loading" isLoading />
-          ))}
-      </EntityList>
+      <Box marginTop="spacingM">
+        <EntityList>
+          {Array(3)
+            .fill('')
+            .map((_, i) => (
+              <EntityListItem key={i} title="loading" className="entity-loading" isLoading />
+            ))}
+        </EntityList>
+      </Box>
     );
   }
 
   if (entries.length) {
     return (
-      <EntityList className="f36-margin-top--m">
-        {entries.map((entry: any) => {
-          const contentType =
-            contentTypes.length &&
-            contentTypes.find((ct) => ct.sys.id === entry.sys.contentType.sys.id);
-          return (
-            <EntityListItem
-              className="cr-pointer"
-              entityType="entry"
-              onClick={() => onClickItem(entry.sys.id)}
-              key={entry.sys.id}
-              title={
-                (contentType &&
-                  entry.fields[contentType.displayField] &&
-                  entry.fields[contentType.displayField]['en-US']) ||
-                'Untitled'
-              }
-              status={getEntryStatus(entry.sys)}
-              contentType={contentType ? contentType.name : entry.sys.contentType.type}
-            />
-          );
-        })}
-      </EntityList>
+      <Box marginTop="spacingM">
+        <EntityList>
+          {entries.map((entry: any) => {
+            const contentType =
+              contentTypes.length &&
+              contentTypes.find((ct) => ct.sys.id === entry.sys.contentType.sys.id);
+            return (
+              <EntityListItem
+                className="cr-pointer"
+                entityType="entry"
+                onClick={() => onClickItem(entry.sys.id)}
+                key={entry.sys.id}
+                title={
+                  (contentType &&
+                    entry.fields[contentType.displayField] &&
+                    entry.fields[contentType.displayField]['en-US']) ||
+                  'Untitled'
+                }
+                status={getEntryStatus(entry.sys)}
+                contentType={contentType ? contentType.name : entry.sys.contentType.type}
+              />
+            );
+          })}
+        </EntityList>
+      </Box>
     );
   }
 
   // No entries found (after fetching/loading).
-  return <HelpText className="f36-margin-top--m">No entries found.</HelpText>;
+  return (
+    <Box marginTop="spacingM">
+      <HelpText>No entries found.</HelpText>
+    </Box>
+  );
 }
