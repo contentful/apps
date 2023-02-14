@@ -35,9 +35,9 @@ describe('apiErrorHandler', () => {
     it('returns a generic 500 error', async () => {
       const response = await chai.request(app).get('/test');
       expect(response).to.have.status(500);
-      expect(response.body).to.have.property('errorType', 'ServerError');
-      expect(response.body).to.have.property('message', 'Internal Server Error');
-      expect(response.body).to.have.property('details');
+      expect(response.body.errors).to.have.property('errorType', 'ServerError');
+      expect(response.body.errors).to.have.property('message', 'Internal Server Error');
+      expect(response.body.errors).to.have.property('details');
     });
   });
 
@@ -51,9 +51,9 @@ describe('apiErrorHandler', () => {
     it('returns an error with the same status code and properties', async () => {
       const response = await chai.request(app).get('/test');
       expect(response).to.have.status(403);
-      expect(response.body).to.have.property('errorType', 'MyError');
-      expect(response.body).to.have.property('message', 'boom!');
-      expect(response.body.details).to.have.property('foo', 'bar');
+      expect(response.body.errors).to.have.property('errorType', 'MyError');
+      expect(response.body.errors).to.have.property('message', 'boom!');
+      expect(response.body.errors.details).to.have.property('foo', 'bar');
     });
   });
 });
