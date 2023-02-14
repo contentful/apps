@@ -44,7 +44,6 @@ const InstalledServiceAccountKey = ({
   serviceAccountKeyId,
   serviceAccountKey,
 }: InstalledServiceAccountKeyProps) => {
-  const [credentialsData, setCredentialsData] = useState<Credentials | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,16 +55,12 @@ const InstalledServiceAccountKey = ({
   useEffect(() => {
     (async () => {
       try {
-        const credentials = await api.getCredentials();
-        setCredentialsData(credentials);
-
         const accountSummaries = await api.listAccountSummaries();
         if (accountSummaries.length === 0 ) {
-          throw new ApiError("")
+          throw new ApiError("You need to make sure your service account is added to the property you want to connect this space to. Right now, your service account isn't connected to any Analytics properties.")
         }
         else setError(null);
       } catch (e) {
-        setCredentialsData(null);
         if (e instanceof ApiError) {
           setError(e.message);
         } else {
@@ -110,8 +105,8 @@ const InstalledServiceAccountKey = ({
             <Skeleton.Container svgHeight={21}>
               <Skeleton.DisplayText lineHeight={21} />
             </Skeleton.Container>
-          ) : error === null ? (
-            <Badge variant="positive">{credentialsData?.status}</Badge>
+          ) : !error ? (
+            <Badge variant="positive">Active</Badge>
           ) : (
             <>
               <Badge variant="warning">Inactive</Badge>
