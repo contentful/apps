@@ -1,4 +1,5 @@
 import { ErrorRequestHandler } from 'express';
+import { GoogleApiClientError, GoogleApiError } from '../../services/google-api';
 import { isApiError, ApiError } from './api-error';
 
 // Very intentional use of any in the type below. we're allowing the error map to define callbacks
@@ -11,14 +12,12 @@ export type ApiErrorMap = Record<string, (e: any) => ApiError<Record<string, unk
 
 export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, next) => {
   if (error) {
-    console.error(JSON.stringify(error));
-
     if (isApiError(error)) {
-      response.status(error.status).send(error.toJSON());
+      response.status(error.status).send({errors: error.toJSON()});
     } else {
       response
         .status(500)
-        .send({ errorType: 'ServerError', message: 'Internal Server Error', details: null });
+        .send({errors: { errorType: 'ServerError', message: 'Internal Server Error', details: null }});
     }
   }
 
@@ -26,6 +25,7 @@ export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, 
 };
 
 export const apiErrorMapper = (errorMap: ApiErrorMap): ErrorRequestHandler => {
+
   return (error, _request, _response, next) => {
     if (error) {
       const errorName = error.constructor.name as keyof typeof errorMap;
