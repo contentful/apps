@@ -57,10 +57,11 @@ const InstalledServiceAccountKey = ({
     (async () => {
       try {
         const credentials = await api.getCredentials();
-        const accountSummaries = await api.listAccountSummaries();
         setCredentialsData(credentials);
+
+        const accountSummaries = await api.listAccountSummaries();
         if (accountSummaries.length === 0 ) {
-          throw new ApiError("You need to make sure your service account is added to the property you want to connect this space to. Right now, your service account isn't connected to any Analytics properties.")
+          throw new ApiError("")
         }
         else setError(null);
       } catch (e) {
