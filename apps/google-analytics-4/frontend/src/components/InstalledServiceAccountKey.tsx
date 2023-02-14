@@ -1,9 +1,9 @@
-import { Badge, Box, Flex, Heading, Skeleton, TextLink } from '@contentful/f36-components';
+import { Badge, Box, Flex, Heading, Skeleton, TextLink, Note } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { useEffect, useState } from 'react';
-import { ApiError, Credentials } from '../services/api';
+import { ApiError } from '../services/api';
 
 import type { ServiceAccountKey, ServiceAccountKeyId } from '../types';
 import { useApi } from '../hooks/useApi';
@@ -30,6 +30,9 @@ const styles = {
       marginBottom: tokens.spacingS,
     },
   }),
+  errorNote: css({
+    marginTop: tokens.spacing2Xs
+  })
 };
 
 interface InstalledServiceAccountKeyProps {
@@ -41,7 +44,6 @@ const InstalledServiceAccountKey = ({
   serviceAccountKeyId,
   serviceAccountKey,
 }: InstalledServiceAccountKeyProps) => {
-  const [credentialsData, setCredentialsData] = useState<Credentials | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,11 +55,12 @@ const InstalledServiceAccountKey = ({
   useEffect(() => {
     (async () => {
       try {
-        const response = await api.getCredentials();
-        setCredentialsData(response);
-        setError(null);
+        const accountSummaries = await api.listAccountSummaries();
+        if (accountSummaries.length === 0 ) {
+          throw new ApiError("You need to make sure your service account is added to the property you want to connect this space to. Right now, your service account isn't connected to any Analytics properties.")
+        }
+        else setError(null);
       } catch (e) {
-        setCredentialsData(null);
         if (e instanceof ApiError) {
           setError(e.message);
         } else {
@@ -102,11 +105,14 @@ const InstalledServiceAccountKey = ({
             <Skeleton.Container svgHeight={21}>
               <Skeleton.DisplayText lineHeight={21} />
             </Skeleton.Container>
-          ) : error === null ? (
-            <Badge variant="positive">{credentialsData?.status}</Badge>
+          ) : !error ? (
+            <Badge variant="positive">active</Badge>
           ) : (
-            <Badge variant="secondary">unknown</Badge>
-          )}
+            <>
+              <Badge variant="warning">Inactive</Badge>
+              <Note variant="neutral" className={styles.errorNote}>{error}</Note>
+            </>
+          ) }
         </dd>
       </dl>
     </Box>
