@@ -35,7 +35,6 @@ describe('apiErrorHandler', () => {
     it('returns a generic 500 error', async () => {
       const response = await chai.request(app).get('/test');
       expect(response).to.have.status(500);
-      console.log(response.body)
       expect(response.body.errors).to.have.property('errorType', 'ServerError');
       expect(response.body.errors).to.have.property('message', 'Internal Server Error');
       expect(response.body.errors).to.have.property('details');
