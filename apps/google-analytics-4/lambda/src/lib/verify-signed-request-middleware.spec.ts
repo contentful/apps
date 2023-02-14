@@ -31,7 +31,7 @@ describe('verifySignedRequestMiddleware', () => {
     it('returns 403 Unauthorized', async () => {
       const response = await chai.request(app).get('/api/credentials');
       expect(response).to.have.status(403);
-      expect(response.body).to.have.property(
+      expect(response.body.errors).to.have.property(
         'message',
         'Request does not have a valid request signature. See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
       );
