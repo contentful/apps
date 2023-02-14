@@ -1,22 +1,15 @@
-# Logs
-logs
-*.log
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# production
+/dist
+
+# misc
+.DS_Store
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# dotenv environment variables file
-.env
-.contentfulrc.json
-
-# Parcel-bundler cache
-.cache
-
-# Dependency directories
-node_modules/
-
-# Coverage
-.coverage
-
-# Build
-dist

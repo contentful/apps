@@ -1,23 +1,21 @@
 import React, { useEffect } from 'react';
 
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { Note } from '@contentful/forma-36-react-components';
+import { Box, Note } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
-interface ConfigProps {
-  sdk: AppExtensionSDK;
-}
-
-export default function Config({ sdk }: ConfigProps) {
+export const Config = () => {
+  const sdk = useSDK<AppExtensionSDK>();
   useEffect(() => {
     sdk.app.setReady();
   }, []);
 
   return (
-    <div>
-      <Note className="f36-margin-top--xl">
+    <Box marginTop="spacingXl">
+      <Note>
         This is an example app, it has no configuration. Hit 'install' in the top right corner to
         continue.
       </Note>
-    </div>
+    </Box>
   );
-}
+};
