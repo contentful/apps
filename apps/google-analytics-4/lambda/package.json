@@ -12,7 +12,6 @@
     "test": "TS_NODE_TRANSPILE_ONLY=1 mocha",
     "test:debug": "TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
     "test:watch": "TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test",
-    // "deploy": "sls deploy",
     "deploy:test": "SLS_DEBUG=* STAGE=test sls deploy"
   },
   "keywords": [],
