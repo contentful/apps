@@ -19,7 +19,7 @@ import { css } from 'emotion';
 
 import tokens from '@contentful/f36-tokens';
 import InstalledServiceAccountKey from './InstalledServiceAccountKey';
-import type { ServiceAccountKey, ServiceAccountKeyId } from '../types';
+import type { ServiceAccountKey, ServiceAccountKeyId } from '../../../types';
 
 interface FormControlServideAccountKeyFileProps {
   isValid: boolean;

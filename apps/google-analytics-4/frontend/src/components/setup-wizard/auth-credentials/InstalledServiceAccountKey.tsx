@@ -3,10 +3,10 @@ import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { useEffect, useState } from 'react';
-import { ApiError } from '../services/api';
+import { ApiError } from '../../../services/api';
 
-import type { ServiceAccountKey, ServiceAccountKeyId } from '../types';
-import { useApi } from '../hooks/useApi';
+import type { ServiceAccountKey, ServiceAccountKeyId } from '../../../types';
+import { useApi } from '../../../hooks/useApi';
 
 const styles = {
   serviceAccountDetails: css({

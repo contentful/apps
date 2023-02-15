@@ -1,9 +1,9 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import InstalledServiceAccountKey from './InstalledServiceAccountKey';
-import { mockCma, mockSdk, validServiceKeyFile } from '../../test/mocks';
+import { mockCma, mockSdk, validServiceKeyFile } from '../../../../test/mocks';
 
-import type { ServiceAccountKeyId } from '../types';
+import type { ServiceAccountKeyId } from '../../../types';
 
 const validServiceKeyId: ServiceAccountKeyId = {
   id: validServiceKeyFile.private_key_id,
