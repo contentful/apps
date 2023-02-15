@@ -1,5 +1,5 @@
 service: google-analytics
-frameworkVersion: '3' #might need to switch to '>=2.0.0 <3.0.0'
+frameworkVersion: '3'
 
 variablesResolutionMode: 20210326
 
@@ -9,7 +9,7 @@ plugins:
 
 custom:
   signingSecret:
-    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/prd/signing-secret} #assuming these will exist
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/prd/signing-secret}
     test: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/test/signing-secret}
   appIdentityKey:
     prd: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/prd/app-identity-key}
@@ -21,7 +21,7 @@ custom:
     prd: 5eHTUt9pILTGjYk3VFE9ta
     test: yourTestId
   customDomain:
-    domainName: ${self:custom.domainName.${env:STAGE, 'test'}} # do we need this?
+    domainName: ${self:custom.domainName.${env:STAGE, 'test'}}
     stage: ${env:STAGE, 'test'}
     createRoute53Record: true
     endpointType: 'edge'
@@ -35,8 +35,8 @@ provider:
   stage: ${env:STAGE, 'test'}
   region: 'us-east-1'
   timeout: 30
-  lambdaHashingVersion: 20201221 # is this the correct version
-  deploymentBucket: # what is this, do we need it?
+  lambdaHashingVersion: 20201221
+  deploymentBucket:
     name: cf-apps-serverless-deployment
   deploymentPrefix: sls-apps-ga4-build
   # iam:
