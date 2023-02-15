@@ -1,26 +1,105 @@
 service: google-analytics
-frameworkVersion: '3'
+frameworkVersion: '3' #might need to switch to '>=2.0.0 <3.0.0'
+
+variablesResolutionMode: 20210326
 
 plugins:
+  - serverless-domain-manager
   - serverless-offline
 
 custom:
-  environment: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
+  signingSecret:
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/prd/signing-secret} #assuming these will exist
+    test: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/test/signing-secret}
+  appIdentityKey:
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/prd/app-identity-key}
+    test: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/test/app-identity-key}
+  domainName:
+    prd: ga4-build.ctfapps.net
+    test: ga4-build-test.ctfapps.net
+  appDefinitionId:
+    prd: 5eHTUt9pILTGjYk3VFE9ta
+    test: yourTestId
+  customDomain:
+    domainName: ${self:custom.domainName.${env:STAGE, 'test'}} # do we need this?
+    stage: ${env:STAGE, 'test'}
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
   serverless-offline:
     httpPort: 8080
 
 provider:
   name: aws
-  stage: ${opt:stage, 'dev'}
   runtime: nodejs18.x
+  stage: ${env:STAGE, 'test'}
+  region: 'us-east-1'
+  timeout: 30
+  lambdaHashingVersion: 20201221 # is this the correct version
+  deploymentBucket: # what is this, do we need it?
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: sls-apps-ga4-build
+  # iam:
+  #   role:
+  #     statements:
+  #       - Effect: Allow
+  #         Action:
+  #           - dynamodb:DescribeTable
+  #           - dynamodb:GetItem
+  #           - dynamodb:PutItem
+  #           - dynamodb:UpdateItem
+  #           - dynamodb:Query
+  #         Resource: 'arn:aws:dynamodb:*:*:table/${self:custom.tableName}*'
 
 functions:
   api:
+    description: GA4 App Backend
     environment:
-      SIGNING_SECRET: ${self:custom.environment.SIGNING_SECRET}
-      STAGE: ${opt:stage, 'dev'}
+      # DYNAMO_ENDPOINT: ${self:custom.dynamoEndpoint}
+      # DYNAMO_TABLE_NAME: ${self:custom.tableName}
+      GA4_CLIENT_ID: ${self:custom.oauthCredentials.client_id}
+      GA4_CLIENT_SECRET: ${self:custom.oauthCredentials.client_secret}
+      GA4_SIGNING_SECRET: ${self:custom.ga4SigningSecret.signing_secret}
+      FRONTEND_URL: ${self:custom.frontendUrl}
+      WORKFLOWS_URL: ${self:custom.workflowsUrl}
+      BACKEND_URL: https://${self:custom.customDomain.domainName}/api
+      SIGNING_SECRET: ${self:custom.signingSecret.signing_secret}
+      PRIVATE_APP_KEY: ${self:custom.app.privateKey}
+      APP_ID: ${self:custom.app.id}
+      SERVERLESS_PATH_PREFIX: ${self:custom.serverless.pathPrefix}
+      BASE_URL: ${self:custom.baseUrl}
     handler: build/src/index.handler
     events:
       - http:
           path: /{any+}
           method: ANY
+
+# resources:
+#   Resources:
+#     TokenTable:
+#       Type: AWS::DynamoDB::Table
+#       Properties:
+#         TableName: ${self:custom.tableName}
+#         AttributeDefinitions:
+#           - AttributeName: uuid
+#             AttributeType: S
+#           - AttributeName: typ
+#             AttributeType: S
+#           - AttributeName: ga4WorkspaceId
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: uuid
+#             KeyType: HASH
+#           - AttributeName: typ
+#             KeyType: RANGE
+#         GlobalSecondaryIndexes: #no idea past here
+#           - IndexName: by-ga4-workspace-id
+#             KeySchema:
+#               - AttributeName: typ
+#                 KeyType: HASH
+#               - AttributeName: ga4WorkspaceId
+#                 KeyType: RANGE
+#             Projection:
+#               ProjectionType: ALL
+
+#         BillingMode: PAY_PER_REQUEST
