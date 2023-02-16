@@ -30,10 +30,22 @@ const InstalledServiceAccountCard = (props: Props) => {
     const verifyAccountSummaries = async () => {
       try {
         const accountSummaries = await api.listAccountSummaries();
+        console.log(accountSummaries)
+
+        const accounts = await api.listAccounts();
+        console.log(accounts)
+
+        // Cases 
+        // 1. Empty accounts (could be because of API Failures or no properties being set)
         if (accountSummaries.length === 0) {
-          throw new ApiError("You need to make sure your service account is added to the property you want to connect this space to. Right now, your service account isn't connected to any Analytics properties.")
+          // TODO: add link to instructions on how to add a user to Google Analytics account/property
+          //  - will require moving this error type to Note component content in a map or something
+          throw new ApiError("Ensure your service account is added to the Google Analytics property you want to connect to. Right now, your service account isn't connected to any properties.")
         }
-        else setError(null);
+        else {
+
+          setError(null);
+        }
       } catch (e) {
         if (e instanceof ApiError) {
           setError(e.message);
