@@ -1,7 +1,7 @@
 service: google-analytics
 frameworkVersion: '3'
 
-variablesResolutionMode: 20210326
+# variablesResolutionMode: 20210326 # only needed for framework v >3
 
 plugins:
   - serverless-domain-manager
@@ -38,7 +38,7 @@ provider:
   stage: ${env:STAGE, 'test'}
   region: 'us-east-1'
   timeout: 30
-  lambdaHashingVersion: 20201221
+  # lambdaHashingVersion: 20201221  # only needed for framework v >3
   deploymentBucket:
     name: cf-apps-serverless-deployment
   deploymentPrefix: sls-apps-ga4-build
