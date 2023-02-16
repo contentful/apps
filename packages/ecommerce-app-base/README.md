@@ -2,9 +2,9 @@
 
 # ecommerce-app-base
 
-`@contentful/ecommerce-app-base` is a library that helps you to quickly build an app to integrate your e-commerce system of choice with Contentful. Many e-commerce integrations are very similar, therefore this library provides the boilerplate for your app and you only need to add the code for your specific service.
+`@contentful/ecommerce-app-base` is a library that helps you quickly build an app to integrate your e-commerce system of choice with Contentful. Many e-commerce integrations are very similar, therefore this library provides the boilerplate for your app and you only need to add the code for your specific service.
 
-This library creates an app which can be used in the entry field location to select stock keeping units (sku) from your e-commerce service. The library also provides a configuration screen for an easy customization.
+This library creates an app which can be used in the entry field location to select stock keeping units (sku) from your e-commerce service. The library also provides a configuration screen for easy customization.
 
 ## Usage
 
