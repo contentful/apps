@@ -1,5 +1,5 @@
 import { act, render, screen } from '@testing-library/react';
-import SetupServiceAccountCard from 'components/config-screen/api-access/service-account/SetupServiceAccountCard';
+import SetupServiceAccountCard from 'components/config-screen/api-access/setup/SetupServiceAccountCard';
 import { validServiceKeyFile } from '../../../../../test/mocks';
 
 describe('Setup Google Service Account Details page', () => {

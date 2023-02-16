@@ -1,10 +1,12 @@
 import { z } from 'zod';
 import { rest } from 'msw';
 import { server } from '../../test/mocks/api/server';
-import { Api, ApiClientError, ApiError, ApiServerError, fetchFromApi } from './api';
+import { Api, ApiError } from './api';
 import { mockCma, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
 import { mockAccountSummary } from '../../test/mocks/api/mockData';
 import { ContentfulContext } from 'types';
+import { fetchFromApi } from 'apis/fetchApi';
+import { runReportData } from '../../../lambda/public/sampleData/MockData';
 
 describe('fetchFromApi()', () => {
   const ZSomeSchema = z.object({ foo: z.string() });
@@ -63,7 +65,7 @@ describe('fetchFromApi()', () => {
     it('throws an ApiServerError', async () => {
       await expect(
         fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma)
-      ).rejects.toThrow(ApiServerError);
+      ).rejects.toThrow(ApiError);
     });
   });
 
@@ -79,7 +81,7 @@ describe('fetchFromApi()', () => {
     it('throws an ApiClientError', async () => {
       await expect(
         fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma)
-      ).rejects.toThrow(ApiClientError);
+      ).rejects.toThrow(ApiError);
     });
   });
 
@@ -156,6 +158,27 @@ describe('Api', () => {
       const api = new Api(contentfulContext, mockCma, validServiceKeyId, validServiceKeyFile);
       const result = await api.listAccountSummaries();
       expect(result).toEqual(expect.arrayContaining([expect.objectContaining(mockAccountSummary)]));
+    });
+  });
+
+  describe('getRunReportData()', () => {
+    const contentfulContext: ContentfulContext = {
+      app: 'appDefinitionId',
+      contentType: 'contentType',
+      entry: 'entryId',
+      environment: 'environmentId',
+      environmentAlias: 'master',
+      field: 'fieldId',
+      location: 'app-config',
+      organization: 'organizationId',
+      space: 'spaceId',
+      user: 'userId',
+    };
+
+    it('returns a set of data from ga4', async () => {
+      const api = new Api(contentfulContext, mockCma, validServiceKeyId, validServiceKeyFile);
+      const result = await api.getRunReportData();
+      expect(result).toEqual(runReportData);
     });
   });
 });

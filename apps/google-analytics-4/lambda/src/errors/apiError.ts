@@ -1,3 +1,17 @@
+// TODO: more comprehensive recognization of known failures (ie. Stale/bad account data, lambda unavailable, transient, non-transient errors, timeouts)
+// NOTE: This needs to be in sync with the frontend client - ie copy and pasted
+export const ERROR_TYPE_MAP = {
+  unknown: 'Unknown',
+  unexpected: 'Unexpected Response from Server',
+  failedFetch: 'Failed fetch',
+  malformedApiResponse: 'Invalid response API',
+  invalidJson: 'Invalid json from API',
+  disabledAdminApi: 'Disabled Admin Api',
+  disabledDataApi: 'Disabled Data Api',
+  noAccountsOrPropertiesFound: 'No accounts/properties found',
+  invalidServiceAccount: 'Invalid service account',
+};
+
 export class ApiError<T extends Record<string, unknown>> extends Error {
   errorType: string;
   status: number;
@@ -23,6 +37,7 @@ export class ApiError<T extends Record<string, unknown>> extends Error {
     return {
       message: this.message,
       errorType: this.errorType,
+      status: this.status,
       details: this.details || null,
     };
   }

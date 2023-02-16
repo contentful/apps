@@ -9,22 +9,17 @@ import {
   mockGoogleErrors,
   validServiceAccountKeyFile,
 } from '../../test/mocks/googleApi';
-import {
-  GoogleApi,
-  GoogleApiClientError,
-  GoogleApiError,
-  GoogleApiServerError,
-  throwGoogleApiError,
-} from './googleApi';
+import { GoogleApiError, handleGoogleAdminApiError } from './googleApiUtils';
+import { GoogleApiService } from './googleApiService';
 
 describe('GoogleApi', () => {
-  let googleApi: GoogleApi;
+  let googleApi: GoogleApiService;
   let mockAdminClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
   let mockDataClient: SinonStubbedInstance<BetaAnalyticsDataClient>;
 
   beforeEach(() => {
     mockAdminClient = mockAnalyticsAdminServiceClient();
-    googleApi = new GoogleApi(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
+    googleApi = new GoogleApiService(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
   });
 
   describe('listAccountSummaries', () => {
@@ -40,10 +35,10 @@ describe('GoogleApi', () => {
     beforeEach(() => {
       mockAdminClient = mockAnalyticsAdminServiceClient();
       mockAdminClient.listAccountSummaries.rejects(someError);
-      googleApi = new GoogleApi(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
+      googleApi = new GoogleApiService(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
     });
 
-    it('throws a GoogleApiServerError', async () => {
+    it('throws a GoogleApiError', async () => {
       let error: Error | undefined = undefined;
       try {
         await googleApi.listAccountSummaries();
@@ -63,7 +58,7 @@ describe('throwGoogleApiError', () => {
     it('throws a GoogleApiError', async () => {
       let error: Error | undefined = undefined;
       try {
-        throwGoogleApiError(someError);
+        handleGoogleAdminApiError(someError);
       } catch (e) {
         error = e as Error;
       }
@@ -80,14 +75,14 @@ describe('throwGoogleApiError', () => {
       details: 'Some server error',
     };
 
-    it('throws a GoogleApiServerError', async () => {
+    it('throws a GoogleApiError', async () => {
       let error: Error | undefined = undefined;
       try {
-        throwGoogleApiError(someError);
+        handleGoogleAdminApiError(someError);
       } catch (e) {
         error = e as Error;
       }
-      expect(error).to.be.an.instanceof(GoogleApiServerError);
+      expect(error).to.be.an.instanceof(GoogleApiError);
       expect(error).to.have.property('cause', someError);
       expect(error).to.have.property('code', Status.UNAVAILABLE);
       expect(error).to.have.property('details', someError.details);
@@ -97,14 +92,14 @@ describe('throwGoogleApiError', () => {
   describe('when passed a GoogleError with unauthenticated code', () => {
     const someError = mockGoogleErrors.invalidAuthentication;
 
-    it('throws a GoogleApiClientError', async () => {
+    it('throws a GoogleApiError', async () => {
       let error: Error | undefined = undefined;
       try {
-        throwGoogleApiError(someError);
+        handleGoogleAdminApiError(someError);
       } catch (e) {
         error = e as Error;
       }
-      expect(error).to.be.an.instanceof(GoogleApiClientError);
+      expect(error).to.be.an.instanceof(GoogleApiError);
       expect(error).to.have.property('cause', someError);
       expect(error).to.have.property('code', Status.UNAUTHENTICATED);
       expect(error).to.have.property('details', mockGoogleErrors.invalidAuthentication.details);

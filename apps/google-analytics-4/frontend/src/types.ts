@@ -1,8 +1,8 @@
 import { IdsAPI } from '@contentful/app-sdk';
 
 export interface AppInstallationParameters {
-  serviceAccountKey: ServiceAccountKey | null;
-  serviceAccountKeyId: ServiceAccountKeyId | null;
+  serviceAccountKey: ServiceAccountKey;
+  serviceAccountKeyId: ServiceAccountKeyId;
 }
 
 // TODO: get this exported from the SDK
@@ -78,3 +78,15 @@ export interface RunReportResponse {
 }
 
 export type DateRangeType = 'lastWeek' | 'lastDay' | 'lastMonth';
+export interface AccountSummariesType {
+  displayName: string;
+  name: string;
+  account: string;
+  propertySummaries: PropertySummariesType[];
+}
+
+export interface PropertySummariesType {
+  displayName: string;
+  property: string;
+  propertyType: string;
+}

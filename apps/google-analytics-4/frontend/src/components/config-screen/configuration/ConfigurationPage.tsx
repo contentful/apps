@@ -1,4 +1,3 @@
-import React from 'react';
 import { Stack, Box, Subheading, Paragraph } from '@contentful/f36-components';
 
 export default function ConfigurationPage() {
