@@ -1,9 +1,9 @@
-import ConfigScreen from './ConfigScreen';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mockCma, mockSdk, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
+import HomeAnalyticsPage from 'components/config-screen/HomeAnalyticsPage';
+import { ServiceAccountKey } from 'types';
+import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../test/mocks';
 
-import type { ServiceAccountKey } from '../types';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -17,21 +17,13 @@ const saveAppInstallation = async () => {
 };
 
 describe('Config Screen component (not installed)', () => {
-  it('can render the basic form', async () => {
-    await act(async () => {
-      render(<ConfigScreen />);
-    });
-
-    expect(screen.getByText('About Google Analytics for Contentful')).toBeInTheDocument();
-  });
-
   it('allows the app to be installed with a valid service key file', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(<ConfigScreen />);
+      render(<HomeAnalyticsPage />);
     });
 
-    const keyFileInputBox = screen.getByLabelText(/Service Account Key File/i);
+    const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
@@ -58,10 +50,10 @@ describe('Config Screen component (not installed)', () => {
   it('prevents the app from being installed with invalid service key file', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(<ConfigScreen />);
+      render(<HomeAnalyticsPage />);
     });
 
-    const keyFileInputBox = screen.getByLabelText(/Service Account Key File/i);
+    const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
@@ -79,7 +71,7 @@ describe('Config Screen component (not installed)', () => {
 
   it('prevents the app from being installed if no service key file is provided', async () => {
     await act(async () => {
-      render(<ConfigScreen />);
+      render(<HomeAnalyticsPage />);
     });
 
     let result;
@@ -92,7 +84,7 @@ describe('Config Screen component (not installed)', () => {
   });
 });
 
-describe('Config Screen component (installed)', () => {
+describe('Installed Service Account Key', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
       serviceAccountKey: validServiceKeyFile,
@@ -102,22 +94,22 @@ describe('Config Screen component (installed)', () => {
 
   it('can render the basic form', async () => {
     await act(async () => {
-      render(<ConfigScreen />);
+      render(<HomeAnalyticsPage />);
     });
 
-    expect(screen.getByText('About Google Analytics for Contentful')).toBeInTheDocument();
+    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
   });
 
   it('overrides the saved values if a new key file is provided', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(<ConfigScreen />);
+      render(<HomeAnalyticsPage />);
     });
 
-    const fieldExpander = screen.getByTestId('keyFileFieldExpander');
+    const editServiceAccountButton = screen.getByTestId('editServiceAccountButton');
 
-    await user.click(fieldExpander);
-    const keyFileInputBox = screen.getByLabelText(/Service Account Key File/i);
+    await user.click(editServiceAccountButton);
+    const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
     await waitFor(() => user.click(keyFileInputBox));
 
     const newServiceKeyFile: ServiceAccountKey = {
@@ -145,7 +137,7 @@ describe('Config Screen component (installed)', () => {
 
   it('does not require key file on save', async () => {
     await act(async () => {
-      render(<ConfigScreen />);
+      render(<HomeAnalyticsPage />);
     });
 
     let result;
