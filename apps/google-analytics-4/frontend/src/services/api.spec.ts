@@ -4,6 +4,7 @@ import { server } from '../../test/mocks/api/server';
 import { Api, ApiClientError, ApiError, ApiServerError, fetchFromApi } from './api';
 import { mockCma, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
 import { mockAccountSummary } from '../../test/mocks/api/mockData';
+import { runReportData } from '../../../lambda/public/sampleData/MockData';
 
 describe('fetchFromApi()', () => {
   const ZSomeSchema = z.object({ foo: z.string() });
@@ -52,7 +53,7 @@ describe('fetchFromApi()', () => {
     it('throws an ApiServerError', async () => {
       await expect(
         fetchFromApi<SomeSchema>(url, ZSomeSchema, appDefinitionId, mockCma)
-      ).rejects.toThrow(ApiServerError);
+      ).rejects.toThrow(ApiError);
     });
   });
 
@@ -68,7 +69,7 @@ describe('fetchFromApi()', () => {
     it('throws an ApiClientError', async () => {
       await expect(
         fetchFromApi<SomeSchema>(url, ZSomeSchema, appDefinitionId, mockCma)
-      ).rejects.toThrow(ApiClientError);
+      ).rejects.toThrow(ApiError);
     });
   });
 
@@ -124,6 +125,22 @@ describe('Api', () => {
       const api = new Api(appDefinitionId, mockCma, validServiceKeyId, validServiceKeyFile);
       const result = await api.listAccountSummaries();
       expect(result).toEqual(expect.arrayContaining([expect.objectContaining(mockAccountSummary)]));
+    });
+  });
+
+  describe('getPageData()', () => {
+    const appDefinitionId = 'abc123xyz';
+
+    it('returns a set of page data', async () => {
+      const api = new Api(appDefinitionId, mockCma, validServiceKeyId, validServiceKeyFile);
+      const result = await api.getPageData();
+      const pagedData = runReportData as any;
+      pagedData['res'] = {
+        "ok": true,
+        "status": 200,
+        "statusText": "OK",
+      };
+      expect(result).toEqual(pagedData)
     });
   });
 });

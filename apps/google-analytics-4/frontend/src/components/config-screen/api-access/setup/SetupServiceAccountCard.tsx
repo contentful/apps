@@ -28,15 +28,17 @@ export default function SetupServiceAccountCard(props: Props) {
     serviceAccountKeyFile,
     onKeyFileChange,
     isInEditMode,
-    onCancelGoogleAccountDetails
+    onCancelGoogleAccountDetails,
   } = props;
 
   return (
     <Stack spacing='spacingL' flexDirection='column'>
       <Card>
-        <Flex justifyContent="space-between" marginBottom='spacingL'>
+        <Flex alignItems="center" marginBottom="spacingM" justifyContent="space-between">
           <Paragraph marginBottom='none'><b >Google Service Account Details</b></Paragraph>
-          {isInEditMode && <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onCancelGoogleAccountDetails}>Cancel</TextLink>}
+          {isInEditMode && (
+            <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onCancelGoogleAccountDetails}>Cancel</TextLink>
+          )}
         </Flex>
         <Box marginBottom='spacingM'>
           <Note variant="primary">

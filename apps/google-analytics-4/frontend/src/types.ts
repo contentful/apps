@@ -1,6 +1,8 @@
+import { ContentTypeProps, ContentFields } from "contentful-management";
+
 export interface AppInstallationParameters {
-  serviceAccountKey: ServiceAccountKey | null;
-  serviceAccountKeyId: ServiceAccountKeyId | null;
+  serviceAccountKey: ServiceAccountKey;
+  serviceAccountKeyId: ServiceAccountKeyId;
 }
 
 export interface ServiceAccountKey {
@@ -51,3 +53,15 @@ export interface RunReportResponse {
 }
 
 export type DateRangeType = 'lastWeek' | 'lastDay' | 'lastMonth';
+export interface AccountSummariesType {
+  displayName: string;
+  name: string;
+  account: string;
+  propertySummaries: PropertySummariesType[];
+}
+
+export interface PropertySummariesType {
+  displayName: string;
+  property: string;
+  propertyType: string;
+}

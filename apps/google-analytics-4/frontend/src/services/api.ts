@@ -22,10 +22,18 @@ const ZAccountSummary = z.object({
   propertySummaries: z.array(ZPropertySummary),
 });
 
-export type AccountSummary = z.infer<typeof ZAccountSummary>;
+// TODO: Once we nail down our custom error architecture, update this
+const ZCustomApiError = z.object({
+  errors: z.any(),
+  res: z.any(),
+});
+export type CustomApiError = z.infer<typeof ZCustomApiError>;
 
-const ZAccountSummaries = z.array(ZAccountSummary);
-export type AccountSummaries = z.infer<typeof ZAccountSummaries>;
+const ZAccountSummariesSchema = z.array(ZAccountSummary).or(ZCustomApiError)
+const ZAccountSummariesWithError = ZAccountSummariesSchema.and(ZCustomApiError)
+export type AccountSummariesWithError = z.infer<typeof ZAccountSummariesWithError>;
+
+const ZPageDataQuery = z.object({});
 
 type Headers = Record<string, string>;
 
@@ -43,8 +51,8 @@ export async function fetchFromApi<T>(
   headers: Headers = {}
 ): Promise<T> {
   const response = await fetchResponse(apiUrl, appDefinitionId, cma, headers);
-  validateResponseStatus(response);
   const responseJson = await jsonFromResponse(response);
+  decorateResponseJson(response, responseJson);
   parseResponseJson(responseJson, schema);
   return responseJson;
 }
@@ -57,12 +65,7 @@ async function fetchResponse(
 ): Promise<Response> {
   try {
     const signedResponse = await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', headers);
-    if (!signedResponse.ok) {
-      const { errors } = await signedResponse.json();
-      throw new ApiError(errors.message);
-    }
-    else return signedResponse;
-
+    return signedResponse;
   } catch (e) {
     if (e instanceof TypeError) {
       const errorMessage = e.message;
@@ -89,7 +92,8 @@ function parseResponseJson(responseJson: any, schema: z.ZodTypeAny) {
 
 async function jsonFromResponse(response: Response): Promise<any> {
   try {
-    return await response.json();
+    const json = await response.json();
+    return json;
   } catch (e) {
     if (e instanceof SyntaxError) {
       const errorMessage = `Invalid JSON response: ${e.message}`;
@@ -101,13 +105,11 @@ async function jsonFromResponse(response: Response): Promise<any> {
   }
 }
 
-function validateResponseStatus(response: Response): void {
-  if (response.status >= 500) {
-    console.error(response);
-    throw new ApiServerError(`An unknown server error occurred. Status: ${response.status}`);
-  } else if (response.status >= 400) {
-    console.error(response);
-    throw new ApiClientError(`An unknown client error occurred. Status: ${response.status}`);
+function decorateResponseJson(response: Response, responseJson: any): any {
+  responseJson.res = {
+    ok: response.ok,
+    status: response.status,
+    statusText: response.statusText,
   }
 }
 
@@ -146,10 +148,23 @@ export class Api {
     return new URL(url);
   }
 
-  async listAccountSummaries(): Promise<AccountSummaries> {
-    return await fetchFromApi<AccountSummaries>(
+  async listAccountSummaries(): Promise<AccountSummariesWithError> {
+    return await fetchFromApi(
       this.requestUrl('api/account_summaries'),
-      ZAccountSummaries,
+      ZAccountSummariesSchema,
+      this.appDefinitionId,
+      this.cma,
+      this.serviceAccountKeyHeaders
+    );
+  }
+
+
+  // TODO: When we actually hook this up to the sidebar chart, we will need to update this type and schema (similar to the listAccountSummaries pattern)
+  // It's currently typed like this to provide maximum flexibility until we actually integrate with the chart
+  async getPageData(): Promise<CustomApiError> {
+    return await fetchFromApi(
+      this.requestUrl('api/run_report'),
+      ZPageDataQuery,
       this.appDefinitionId,
       this.cma,
       this.serviceAccountKeyHeaders

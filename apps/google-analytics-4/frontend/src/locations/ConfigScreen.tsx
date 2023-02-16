@@ -1,10 +1,10 @@
 import React from 'react'
-import HomeAnalyticsPage from 'components/config-screen/HomeAnalyticsPage';
+import GoogleAnalyticsConfigPage from 'components/config-screen/GoogleAnalyticsConfigPage';
 
 const ConfigScreen = () => {
 
   return (
-    <HomeAnalyticsPage />
+    <GoogleAnalyticsConfigPage />
   );
 };
 

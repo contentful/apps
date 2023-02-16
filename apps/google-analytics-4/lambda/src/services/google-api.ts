@@ -29,8 +29,8 @@ export class GoogleApiError extends Error {
     this.httpStatus = errorParams.httpStatus;
   }
 }
-export class GoogleApiServerError extends GoogleApiError {}
-export class GoogleApiClientError extends GoogleApiError {}
+export class GoogleApiServerError extends GoogleApiError { }
+export class GoogleApiClientError extends GoogleApiError { }
 
 const clientErrorStatuses = [
   Status.INVALID_ARGUMENT,
