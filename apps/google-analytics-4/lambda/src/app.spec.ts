@@ -11,6 +11,7 @@ import {
 import app from './app';
 import { GoogleApi } from './services/google-api';
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
+import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
 chai.use(chaiHttp);
 
@@ -20,7 +21,8 @@ const serviceAccountKeyHeaders = {
 };
 
 describe('app', () => {
-  let mockClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
+  let mockAdminClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
+  let mockDataClient: SinonStubbedInstance<BetaAnalyticsDataClient>;
 
   beforeEach(() => {
     // TODO: set headers and fully test signature verification later
@@ -58,8 +60,8 @@ describe('app', () => {
     let googleApi: GoogleApi;
 
     beforeEach(() => {
-      mockClient = mockAnalyticsAdminServiceClient();
-      googleApi = new GoogleApi(validServiceAccountKeyFile, mockClient);
+      mockAdminClient = mockAnalyticsAdminServiceClient();
+      googleApi = new GoogleApi(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
       sinon.stub(GoogleApi, 'fromServiceAccountKeyFile').returns(googleApi);
     });
 

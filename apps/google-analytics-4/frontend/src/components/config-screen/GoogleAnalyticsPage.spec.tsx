@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import HomeAnalyticsPage from 'components/config-screen/HomeAnalyticsPage';
+import HomeAnalyticsPage from 'components/config-screen/GoogleAnalyticsPage';
 import { ServiceAccountKey } from 'types';
 import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../test/mocks';
 

@@ -13,6 +13,7 @@ interface Props {
   onKeyFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   isInEditMode: boolean;
   onCancelGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
+  onSaveGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
 }
 
 const placeholderText = `{
@@ -28,15 +29,23 @@ export default function SetupServiceAccountCard(props: Props) {
     serviceAccountKeyFile,
     onKeyFileChange,
     isInEditMode,
-    onCancelGoogleAccountDetails
+    onCancelGoogleAccountDetails,
+    onSaveGoogleAccountDetails
   } = props;
 
   return (
     <Stack spacing='spacingL' flexDirection='column'>
       <Card>
-        <Flex justifyContent="space-between" marginBottom='spacingL'>
+        <Flex alignItems="center" justifyContent="space-between">
           <Paragraph marginBottom='none'><b >Google Service Account Details</b></Paragraph>
-          {isInEditMode && <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onCancelGoogleAccountDetails}>Cancel</TextLink>}
+          {isInEditMode && (
+            <Flex justifyContent="space-between" marginBottom='spacingL'>
+              <Box paddingRight='spacingXs'>
+                <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onCancelGoogleAccountDetails}>Cancel</TextLink>
+              </Box>
+              <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onSaveGoogleAccountDetails}>Save</TextLink>
+            </Flex>
+          )}
         </Flex>
         <Box marginBottom='spacingM'>
           <Note variant="primary">

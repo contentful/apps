@@ -44,8 +44,8 @@ app.options('/*', function (_req, res) {
 });
 
 // validate signed requests
-app.use(['/api/credentials', '/api/account_summaries'], verifySignedRequestMiddleware);
-app.use(['/api/credentials', '/api/account_summaries'], serviceAccountKeyProvider);
+app.use(['/api/credentials', '/api/account_summaries', '/api/page_data'], verifySignedRequestMiddleware);
+app.use(['/api/credentials', '/api/account_summaries', '/api/page_data'], serviceAccountKeyProvider);
 
 // serve static files for sample data
 app.use(express.static('public'));
@@ -90,6 +90,27 @@ app.get('/api/account_summaries', async (req, res, next) => {
     next(err);
   }
 });
+
+
+app.get('/api/page_data', async (req, res, next) => {
+  try {
+    console.log('Hits API endpoint')
+    console.log(req.params)
+    const serviceAccountKeyFile = req.serviceAccountKey;
+
+    // intentional runtime error because the middleware already handles this. typescript
+    // just doesn't realize
+    if (serviceAccountKeyFile === undefined) throw new Error('missing service account key value');
+
+    const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
+    const result = await googleApi.runReport("properties/275538046", "/en-US/article/how-do-I-use-google-pay");
+    res.status(200).json(result);
+  } catch (err) {
+    // pass to apiErrorHandler
+    next(err);
+  }
+});
+
 
 // catch and handle errors
 app.use(apiErrorMapper(errorClassToApiErrorMap));

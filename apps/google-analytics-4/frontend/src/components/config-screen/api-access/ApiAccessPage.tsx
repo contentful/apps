@@ -1,61 +1,67 @@
-import React from 'react';
-import InstalledServiceAccountCard from './service-account/InstalledServiceAccountCard';
-import SetupServiceAccountCard from './service-account/SetupServiceAccountCard';
+import React, { useState } from 'react';
+import InstalledServiceAccountCard from 'components/config-screen/api-access/display/DisplayServiceAccountCard';
+import SetupServiceAccountCard from 'components/config-screen/api-access/setup/SetupServiceAccountCard';
 import { Subheading, Paragraph, Stack } from '@contentful/f36-components';
-import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
+import useKeyService from 'hooks/useKeyService';
 
 interface Props {
-  isValid: boolean;
-  errorMessage: string;
-  isRequired: boolean;
-  currentServiceAccountKeyId: ServiceAccountKeyId | null;
-  currentServiceAccountKey: ServiceAccountKey | null;
-  serviceAccountKeyFile: string;
-  onKeyFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  isInEditMode: boolean;
-  onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
-  onCancelGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
+  onAccountSummariesFetch: Function;
 }
 
 const ApiAccessPage = (props: Props) => {
-  const {
-    isRequired,
-    isValid,
-    errorMessage,
-    currentServiceAccountKeyId,
-    currentServiceAccountKey,
-    serviceAccountKeyFile,
-    onKeyFileChange,
-    isInEditMode,
-    onEditGoogleAccountDetails,
-    onCancelGoogleAccountDetails
-  } = props
+  const { onAccountSummariesFetch } = props
+  const { parameters, serviceAccountKeyFile, serviceAccountKeyFileErrorMessage, serviceAccountKeyFileIsValid, serviceAccountKeyFileIsRequired, handleKeyFileChange } = useKeyService();
+
+  const [isInEditMode, setIsInEditMode] = useState<boolean>(false);
+
+
+  const handleKeyFileChangeEventWrapper = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleKeyFileChange(event.target.value);
+  };
+
+  const handleEditGoogleAccountDetails = () => {
+    setIsInEditMode(true);
+  }
+
+  const handleCancelGoogleAccountDetails = () => {
+    handleKeyFileChange('');
+    setIsInEditMode(false);
+  }
+
+  const handleSaveGoogleAccountDetails = () => {
+    // Save stuff to local storage (mainly json blob) and probably the lambda/db on aws
+    setIsInEditMode(false);
+  }
+
 
   return (
     <Stack spacing='spacingL' flexDirection='column' alignItems='flex-start' >
-      <Subheading marginBottom='none'>
-        API Access
-      </Subheading>
-      <Paragraph marginBottom='none'>
-        Authorize this application to access page analytics data from your organization’s Google
-        Analytics account
-      </Paragraph>
+      <div>
+        <Subheading marginBottom='none'>
+          API Access
+        </Subheading>
+        <Paragraph marginBottom='none'>
+          Authorize this application to access Google Analytics Admin & Data APIs
+        </Paragraph>
+      </div>
       {
-        !isInEditMode && currentServiceAccountKeyId && currentServiceAccountKey ? (
+        !isInEditMode && parameters && parameters.serviceAccountKeyId && parameters.serviceAccountKey ? (
           <InstalledServiceAccountCard
-            onEditGoogleAccountDetails={onEditGoogleAccountDetails}
-            serviceAccountKeyId={currentServiceAccountKeyId}
-            serviceAccountKey={currentServiceAccountKey}
+            onEditGoogleAccountDetails={handleEditGoogleAccountDetails}
+            serviceAccountKeyId={parameters.serviceAccountKeyId}
+            serviceAccountKey={parameters.serviceAccountKey}
+            onAccountSummariesFetch={onAccountSummariesFetch}
           />
         ) : (
           <SetupServiceAccountCard
-            isRequired={isRequired}
-            isValid={isValid}
-            errorMessage={errorMessage}
+            isRequired={serviceAccountKeyFileIsRequired}
+            isValid={serviceAccountKeyFileIsValid}
+            errorMessage={serviceAccountKeyFileErrorMessage}
             serviceAccountKeyFile={serviceAccountKeyFile}
-            onKeyFileChange={onKeyFileChange}
+            onKeyFileChange={handleKeyFileChangeEventWrapper}
             isInEditMode={isInEditMode}
-            onCancelGoogleAccountDetails={onCancelGoogleAccountDetails}
+            onCancelGoogleAccountDetails={handleCancelGoogleAccountDetails}
+            onSaveGoogleAccountDetails={handleSaveGoogleAccountDetails}
           />
         )
       }

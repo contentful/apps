@@ -3,6 +3,7 @@ import { GoogleAuthOptions } from 'google-auth-library';
 import { Status } from 'google-gax';
 import { HttpCodeToRpcCodeMap } from 'google-gax/build/src/status';
 import { ServiceAccountKeyFile } from '../types';
+import {BetaAnalyticsDataClient} from '@google-analytics/data';
 
 interface GoogleApiErrorParams {
   code: Status;
@@ -123,21 +124,28 @@ function isGoogleError(e: Error): e is GoogleError {
 export class GoogleApi {
   readonly serviceAccountKeyFile: ServiceAccountKeyFile;
   readonly analyticsAdminServiceClient: AnalyticsAdminServiceClient;
+  readonly betaAnalyticsDataClient: BetaAnalyticsDataClient;
 
   static fromServiceAccountKeyFile(serviceAccountKeyFile: ServiceAccountKeyFile): GoogleApi {
     const analyticsAdminServiceClient = new AnalyticsAdminServiceClient({
       credentials: makeCredentials(serviceAccountKeyFile),
       projectId: serviceAccountKeyFile.project_id,
     });
-    return new GoogleApi(serviceAccountKeyFile, analyticsAdminServiceClient);
+    const betaAnalyticsDataClient = new BetaAnalyticsDataClient({
+      credentials: makeCredentials(serviceAccountKeyFile),
+      projectId: serviceAccountKeyFile.project_id,
+    });
+    return new GoogleApi(serviceAccountKeyFile, analyticsAdminServiceClient, betaAnalyticsDataClient);
   }
 
   constructor(
     serviceAccountKeyFile: ServiceAccountKeyFile,
-    analyticsAdminServiceClient: AnalyticsAdminServiceClient
+    analyticsAdminServiceClient: AnalyticsAdminServiceClient,
+    betaAnalyticsDataClient: BetaAnalyticsDataClient
   ) {
     this.serviceAccountKeyFile = serviceAccountKeyFile;
     this.analyticsAdminServiceClient = analyticsAdminServiceClient;
+    this.betaAnalyticsDataClient = betaAnalyticsDataClient;
   }
 
   async listAccountSummaries(): Promise<protos.google.analytics.admin.v1alpha.IAccountSummary[]> {
@@ -145,9 +153,75 @@ export class GoogleApi {
     return accountSummaries;
   }
 
+  async listAccounts(): Promise<any> {
+    return await this.fetchAccounts();
+  }
+
+  // Runs a simple report.
+  async runReport(property: any, slug: any) {
+    console.log("Run Report")
+    try {
+      const [response] = await this.betaAnalyticsDataClient.runReport({
+        property: property,
+        dateRanges: [
+          {
+            startDate: '2023-02-20',
+            endDate: 'today',
+          },
+        ],
+        dimensions: [
+          {
+            name: 'date',
+          },
+        ],
+        metrics: [
+          {
+            name: 'screenPageViews',
+          },
+          {
+            name: 'totalUsers',
+          },
+          {
+            name: 'screenPageViewsPerUser',
+          },
+        ],
+        dimensionFilter: { // unifiedPagePathScreen
+          filter: {
+            fieldName: 'unifiedPagePathScreen',
+            stringFilter: {
+              value: slug
+            },
+          }
+        },
+      });
+
+      return response
+    } catch (e) {
+      if (e instanceof Error) {
+        throwGoogleApiError(e);
+      }
+      throw e;
+    }
+
+
+  }
+
+
   private async fetchAccountSummaries() {
     try {
+      await this.runReport('properties/abc123xyz', 'bar')
       return await this.analyticsAdminServiceClient.listAccountSummaries();
+    } catch (e) {
+      if (e instanceof Error) {
+        throwGoogleApiError(e);
+      }
+      throw e;
+    }
+  }
+  
+  private async fetchAccounts() {
+    try {
+      return await this.analyticsAdminServiceClient.listAccounts();
     } catch (e) {
       if (e instanceof Error) {
         throwGoogleApiError(e);
