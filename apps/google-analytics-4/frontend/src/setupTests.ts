@@ -14,6 +14,7 @@ afterAll(() => server.close());
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
+
 afterEach(() => {
   jest.spyOn(console, 'error').mockRestore();
 });
