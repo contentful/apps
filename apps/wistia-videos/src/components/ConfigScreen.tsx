@@ -66,7 +66,6 @@ const Config = (props: ConfigProps) => {
     if (parameters.apiBearerToken) {
       getProjects();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parameters.apiBearerToken]);
 
   // Initial load for config page
