@@ -2,21 +2,7 @@ import React from 'react';
 import Field from './Field';
 import { render } from '@testing-library/react';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
-
-const mockSdk = {
-  window: {
-    startAutoResizer: jest.fn(),
-  },
-  parameters: {
-    installation: {
-      excludedProject: [],
-      apiBearerToken: '',
-    },
-  },
-  field: {
-    getValue: jest.fn(),
-  },
-};
+import { mockSdk } from '../test/mocks';
 
 describe('Field component', () => {
   it('Component text exists', () => {
