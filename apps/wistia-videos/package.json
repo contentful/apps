@@ -51,6 +51,7 @@
     ]
   },
   "devDependencies": {
+    "@contentful/app-scripts": "^1.7.10",
     "eslint-config-airbnb": "^18.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
