@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.42](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.41...@contentful/ecommerce-app-base@3.1.42) (2023-02-17)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.24.0 to 4.24.1 ([#2316](https://github.com/contentful/apps/issues/2316)) ([00c0d31](https://github.com/contentful/apps/commit/00c0d31962e37c975ba7c9477079154e149e388d))
+- **deps:** bump @contentful/f36-components from 4.24.1 to 4.26.0 ([#2388](https://github.com/contentful/apps/issues/2388)) ([a2c9d93](https://github.com/contentful/apps/commit/a2c9d93bc38b312ecc3ab3200d5f33a6ebc66283))
+- **deps:** bump contentful-management from 10.26.0 to 10.27.0 ([#2340](https://github.com/contentful/apps/issues/2340)) ([d949c60](https://github.com/contentful/apps/commit/d949c60d0140210236458a16e9eedc400773f64f))
+- **deps:** bump contentful-management from 10.27.0 to 10.27.2 ([#2396](https://github.com/contentful/apps/issues/2396)) ([fe54066](https://github.com/contentful/apps/commit/fe54066790a81200577f3e1ff42182e5b6444434))
+- **deps:** bump contentful-management from 10.27.2 to 10.27.4 ([#2418](https://github.com/contentful/apps/issues/2418)) ([f254fd7](https://github.com/contentful/apps/commit/f254fd71eff7fdd5682ecbb07e2df0403806fea0))
+- **deps:** bump contentful-management from 10.27.4 to 10.28.0 ([#2431](https://github.com/contentful/apps/issues/2431)) ([e575fba](https://github.com/contentful/apps/commit/e575fba49738222c1dc5f1a9f348aec0935acbf1))
+- **deps:** bump contentful-management from 10.28.0 to 10.28.1 ([#2438](https://github.com/contentful/apps/issues/2438)) ([0613110](https://github.com/contentful/apps/commit/0613110f205c8a42108f3a92782ba43f6619a412))
+- **deps:** bump contentful-management from 10.29.0 to 10.29.1 ([#2466](https://github.com/contentful/apps/issues/2466)) ([6fe9240](https://github.com/contentful/apps/commit/6fe92404fb7302e66584feffe4c262e1c9384389))
+- **deps:** bump contentful-management from 10.29.1 to 10.29.3 ([#2522](https://github.com/contentful/apps/issues/2522)) ([3f5a1ac](https://github.com/contentful/apps/commit/3f5a1ac393b81b515259e0a3111536996456f282))
+
 ## [3.1.41](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.40...@contentful/ecommerce-app-base@3.1.41) (2023-01-11)
 
 ### Bug Fixes
