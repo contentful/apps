@@ -12,7 +12,6 @@ const mockSdk = {
       excludedProject: [],
       apiBearerToken: '',
     },
-    instance: {},
   },
   field: {
     getValue: jest.fn(),
