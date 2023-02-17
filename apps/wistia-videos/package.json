@@ -1,0 +1,60 @@
+{
+  "name": "wistia-videos",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "^4.16.0",
+    "@contentful/dam-app-base": "^2.0.32",
+    "@contentful/field-editor-single-line": "^1.1.8",
+    "@contentful/field-editor-test-utils": "^1.2.4",
+    "@contentful/forma-36-fcss": "^0.3.5",
+    "@contentful/forma-36-react-components": "^3.100.7",
+    "@contentful/forma-36-tokens": "^0.11.2",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^12.0.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/jest": "^29.4.0",
+    "@types/node": "^18.13.0",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@types/styled-components": "^5.1.26",
+    "array-move": "^4.0.0",
+    "cross-env": "^7.0.3",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^3.0.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "react-scripts": "5.0.1",
+    "react-sortable-hoc": "^2.0.0",
+    "styled-components": "^5.3.6",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "test-ci": "CI=true react-scripts test",
+    "eject": "react-scripts eject",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 6StWOM1AZBDHDjynDkm1iz --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "eslint-config-airbnb": "^18.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0"
+  }
+}
