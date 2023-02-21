@@ -1,6 +1,7 @@
 {
   "name": "wistia-videos",
   "version": "0.1.0",
+  "homepage": "./",
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.16.0",
