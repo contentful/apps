@@ -9,10 +9,12 @@
     "@contentful/react-apps-toolkit": "1.2.10",
     "@testing-library/user-event": "14.4.3",
     "@types/lodash": "4.14.191",
+    "chart.js": "^4.2.1",
     "contentful-management": "10.21.6",
     "emotion": "10.0.27",
     "lodash": "4.17.21",
     "react": "17.0.2",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "17.0.2",
     "react-scripts": "5.0.1",
     "zod": "3.20.2"
