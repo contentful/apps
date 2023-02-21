@@ -9,26 +9,26 @@ plugins:
 
 custom:
   signingSecret:
-    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/prd/signing-secret}
-    test: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/test/signing-secret}
-  appIdentityKey:
-    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/prd/app-identity-key}
-    test: ${ssm:/aws/reference/secretsmanager/ci/apps/ga4-build-action/test/app-identity-key}
+    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/prd/signing-secret}
+    test: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/test/signing-secret}
+  # appIdentityKey:
+  #   prd: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/prd/app-identity-key}
+  #   test: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/test/app-identity-key}
   domainName:
-    prd: ga4-build.ctfapps.net
-    test: ga4-build-test.ctfapps.net
-  appDefinitionId:
-    prd: 5DlxOS0KvGS1Wk362xgvbN
-    test: yourTestId
+    prd: google-analytics-4.ctfapps.net
+    test: google-analytics-4-test.ctfapps.net
+  # appDefinitionId:
+  #   prd: 5DlxOS0KvGS1Wk362xgvbN
+  #   test: yourTestId
   customDomain:
     domainName: ${self:custom.domainName.${env:STAGE, 'test'}}
     stage: ${env:STAGE, 'test'}
     createRoute53Record: true
     endpointType: 'edge'
     securityPolicy: tls_1_2
-  frontendUrl: 
-    prd: 'https://ga4.ctfapps.net/index.html'
-    test: 'http://localhost:3000'
+  # frontendUrl: 
+  #   prd: 'https://ga4.ctfapps.net/index.html'
+  #   test: 'http://localhost:3000'
   serverless-offline:
     httpPort: 8080
 
@@ -60,16 +60,14 @@ functions:
     environment:
       # DYNAMO_ENDPOINT: ${self:custom.dynamoEndpoint}
       # DYNAMO_TABLE_NAME: ${self:custom.tableName}
-      GA4_CLIENT_ID: ${self:custom.oauthCredentials.client_id}
-      GA4_CLIENT_SECRET: ${self:custom.oauthCredentials.client_secret}
-      GA4_SIGNING_SECRET: ${self:custom.ga4SigningSecret.signing_secret}
-      FRONTEND_URL: ${self:custom.frontendUrl.${env:STAGE, 'test'}}
-      WORKFLOWS_URL: ${self:custom.workflowsUrl}
-      BACKEND_URL: https://${self:custom.customDomain.domainName}/api
-      SIGNING_SECRET: ${self:custom.signingSecret.signing_secret}
-      PRIVATE_APP_KEY: ${self:custom.app.privateKey}
-      APP_ID: ${self:custom.appDefinitionId.prd}
-      BASE_URL: ${self:custom.baseUrl}
+      # GA4_CLIENT_ID: ${self:custom.oauthCredentials.client_id}
+      # GA4_CLIENT_SECRET: ${self:custom.oauthCredentials.client_secret}
+      # FRONTEND_URL: ${self:custom.frontendUrl.${env:STAGE, 'test'}}
+      # BACKEND_URL: https://${self:custom.customDomain.domainName}/${env:STAGE, 'test'}/api
+      SIGNING_SECRET: ${self:custom.signingSecret.${env:STAGE, 'test'}}
+      # PRIVATE_APP_KEY: ${self:custom.app.privateKey}
+      # APP_ID: ${self:custom.appDefinitionId.prd}
+      STAGE: ${env:STAGE, 'test'}
     handler: build/src/index.handler
     events:
       - http:
