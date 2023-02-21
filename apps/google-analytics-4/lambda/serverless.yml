@@ -18,7 +18,7 @@ custom:
     prd: ga4-build.ctfapps.net
     test: ga4-build-test.ctfapps.net
   appDefinitionId:
-    prd: 5eHTUt9pILTGjYk3VFE9ta
+    prd: 5DlxOS0KvGS1Wk362xgvbN
     test: yourTestId
   customDomain:
     domainName: ${self:custom.domainName.${env:STAGE, 'test'}}
