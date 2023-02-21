@@ -79,4 +79,16 @@ describe('app', () => {
       expect(response.body[0]).to.have.property('propertySummaries');
     });
   });
+
+  describe('GET /sampleData/runReportResponse', () => {
+    it('responds with 200 for sample with views data', async () => {
+      const response = await chai.request(app).get('/sampleData/runReportResponseHasViews.json');
+      expect(response).to.have.status(200);
+    });
+
+    it('responds with 200 for sample with no views data', async () => {
+      const response = await chai.request(app).get('/sampleData/runReportResponseNoViews.json');
+      expect(response).to.have.status(200);
+    });
+  });
 });
