@@ -8,7 +8,6 @@ import {
   GoogleApiError,
   GoogleApiServerError,
 } from './services/google-api';
-import { ServiceAccountKeyFile } from './types';
 import { verifySignedRequestMiddleware } from './lib/verify-signed-request-middleware';
 import { InvalidSignature } from './lib/errors/invalid-signature';
 import { UnableToVerifyRequest } from './lib/errors/unable-to-verify-request';
@@ -48,6 +47,9 @@ app.options('/*', function (_req, res) {
 app.use(['/api/credentials', '/api/account_summaries'], verifySignedRequestMiddleware);
 app.use(['/api/credentials', '/api/account_summaries'], serviceAccountKeyProvider);
 
+// serve static files for sample data
+app.use(express.static('public'));
+
 // Maps an error class name -> a handler function that takes the error of that type as input and returns
 // a correctly configured API error as output.
 const errorClassToApiErrorMap: ApiErrorMap = {
@@ -85,7 +87,7 @@ app.get('/api/account_summaries', async (req, res, next) => {
     res.status(200).json(result);
   } catch (err) {
     // pass to apiErrorHandler
-    next(err)
+    next(err);
   }
 });
 
