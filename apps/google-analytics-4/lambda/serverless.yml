@@ -29,7 +29,7 @@ provider:
   timeout: 30
   deploymentBucket:
     name: cf-apps-serverless-deployment
-  deploymentPrefix: sls-apps-ga4-build
+  deploymentPrefix: sls-apps-ga4
 
 functions:
   api:
