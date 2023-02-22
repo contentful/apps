@@ -156,16 +156,6 @@ export class Api {
     );
   }
 
-  async listAccounts(): Promise<AccountSummaries> {
-    return await fetchFromApi<AccountSummaries>(
-      this.requestUrl('api/accounts'),
-      ZAccountSummaries,
-      this.appDefinitionId,
-      this.cma,
-      this.serviceAccountKeyHeaders
-    );
-  }
-
   private get serviceAccountKeyHeaders(): Headers {
     return {
       'x-contentful-serviceaccountkeyid': this.encodeServiceAccountHeaderValue(

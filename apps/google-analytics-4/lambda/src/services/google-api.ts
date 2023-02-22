@@ -145,9 +145,24 @@ export class GoogleApi {
     return accountSummaries;
   }
 
+  async listAccounts(): Promise<any> {
+    return await this.fetchAccounts();
+  }
+
   private async fetchAccountSummaries() {
     try {
       return await this.analyticsAdminServiceClient.listAccountSummaries();
+    } catch (e) {
+      if (e instanceof Error) {
+        throwGoogleApiError(e);
+      }
+      throw e;
+    }
+  }
+  
+  private async fetchAccounts() {
+    try {
+      return await this.analyticsAdminServiceClient.listAccounts();
     } catch (e) {
       if (e instanceof Error) {
         throwGoogleApiError(e);
