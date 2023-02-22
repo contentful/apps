@@ -2,6 +2,7 @@ import React from 'react';
 import { Paragraph } from '@contentful/f36-components';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import LineChart from 'components/LineChart';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
@@ -11,7 +12,15 @@ const Sidebar = () => {
   */
   // const cma = useCMA();
 
-  return <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>;
+  const mockData = [1000, -500, 500, 230];
+  const mockLabels = ['January', 'February', 'March', 'April'];
+
+  return (
+    <>
+      <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>
+      <LineChart dataValues={mockData} xAxesLabels={mockLabels} />
+    </>
+  );
 };
 
 export default Sidebar;
