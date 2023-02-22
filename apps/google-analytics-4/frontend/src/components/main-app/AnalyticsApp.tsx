@@ -1,6 +1,6 @@
 import { useAutoResizer, useFieldValue } from '@contentful/react-apps-toolkit';
-import ChartFooter from 'components/main-app/ChartFooter';
-import ChartHeader from 'components/main-app/ChartHeader';
+import ChartFooter from 'components/main-app/ChartFooter/ChartFooter';
+import ChartHeader from 'components/main-app/ChartHeader/ChartHeader';
 import { useEffect, useState } from 'react';
 import { RunReportResponse } from 'types';
 import { config } from '../../config';
