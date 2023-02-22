@@ -1,0 +1,51 @@
+{
+  "name": "@contentful/google-analytics-4-lambda",
+  "version": "0.1.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "debug": "SLS_DEBUG=* node inspect ./node_modules/serverless/bin/serverless.js offline",
+    "build": "rimraf ./build && tsc",
+    "lint": "eslint .",
+    "start:dev": "nodemon",
+    "test": "TS_NODE_TRANSPILE_ONLY=1 mocha",
+    "test:debug": "TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
+    "test:watch": "TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@contentful/node-apps-toolkit": "^2.0.4",
+    "@tsconfig/node18": "^1.0.1",
+    "@types/chai": "^4.3.4",
+    "@types/chai-http": "^4.2.0",
+    "@types/express": "^4.17.15",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.11.17",
+    "@types/sinon": "^10.0.13",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "chai": "^4.3.7",
+    "chai-http": "^4.3.0",
+    "eslint": "^8.30.0",
+    "mocha": "^10.2.0",
+    "nodemon": "^2.0.20",
+    "rimraf": "^3.0.2",
+    "serverless": "^3.26.0",
+    "serverless-offline": "^12.0.4",
+    "sinon": "^15.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@google-analytics/admin": "^4.3.1",
+    "@grpc/grpc-js": "^1.8.4",
+    "express": "^4.18.2",
+    "google-auth-library": "^8.7.0",
+    "google-gax": "^3.5.2",
+    "googleapis": "^110.0.0",
+    "serverless-http": "^3.1.0"
+  }
+}
