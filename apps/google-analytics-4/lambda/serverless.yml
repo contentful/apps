@@ -2,41 +2,23 @@ service: google-analytics
 frameworkVersion: '3'
 
 plugins:
-  - serverless-domain-manager
   - serverless-offline
 
 custom:
-  signingSecret:
-    prd: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/prd/signing-secret}
-    test: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/test/signing-secret}
-  domainName:
-    prd: google-analytics-4.ctfapps.net
-    test: google-analytics-4-test.ctfapps.net
-  customDomain:
-    domainName: ${self:custom.domainName.${env:STAGE, 'test'}}
-    stage: ${env:STAGE, 'test'}
-    createRoute53Record: true
-    endpointType: 'edge'
-    securityPolicy: tls_1_2
+  environment: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
   serverless-offline:
     httpPort: 8080
 
 provider:
   name: aws
+  stage: ${opt:stage, 'dev'}
   runtime: nodejs18.x
-  stage: ${env:STAGE, 'test'}
-  region: 'us-east-1'
-  timeout: 30
-  deploymentBucket:
-    name: cf-apps-serverless-deployment
-  deploymentPrefix: sls-apps-ga4
 
 functions:
   api:
-    description: GA4 App Backend
     environment:
-      SIGNING_SECRET: ${self:custom.signingSecret.${env:STAGE, 'test'}}
-      STAGE: ${env:STAGE, 'test'}
+      SIGNING_SECRET: ${self:custom.environment.SIGNING_SECRET}
+      STAGE: ${opt:stage, 'dev'}
     handler: build/src/index.handler
     events:
       - http:
