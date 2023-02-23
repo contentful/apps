@@ -1,4 +1,4 @@
-service: google-analytics
+service: sls-apps-google-analytics-4
 frameworkVersion: '3'
 
 plugins:
@@ -29,7 +29,7 @@ provider:
   timeout: 30
   deploymentBucket:
     name: cf-apps-serverless-deployment
-  deploymentPrefix: sls-apps-ga4
+  deploymentPrefix: sls-apps-google-analytics-4
 
 functions:
   api:
