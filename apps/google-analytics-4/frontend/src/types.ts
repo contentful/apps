@@ -22,3 +22,30 @@ export interface ServiceAccountKeyId {
   projectId: string;
   clientId: string;
 }
+
+export interface Row {
+  dimensionValues: { value: string; oneValue: string }[];
+  metricValues: { value: string; oneValue: string }[];
+}
+
+export interface RunReportResponse {
+  dimensionHeaders: { name: string }[];
+  metricHeaders: {
+    name: string;
+    type: string;
+  }[];
+  rows: Row[];
+  totals: Row[];
+  maximums: Row[];
+  minimums: Row[];
+  rowCount: number;
+  metadata: {
+    currencyCode: string;
+    dataLossFromOtherRow: boolean;
+    timeZone: string;
+    _currencyCode: string;
+    _timeZone: string;
+  };
+  propertyQuota: null;
+  kind: string;
+}
