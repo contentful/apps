@@ -94,7 +94,7 @@ const Field = (props: FieldProps) => {
 
   const getDropdownData = (searchTerm: string) => {
     const newDropdownData = [...data].filter((item: WistiaItem) =>
-      item.name.toLowerCase().includes(searchTerm.toLocaleLowerCase())
+      item.name.toLowerCase().includes(searchTerm.toLocaleLowerCase()) || item.hashed_id?.includes(searchTerm.toLowerCase())
     );
     return newDropdownData;
   };
