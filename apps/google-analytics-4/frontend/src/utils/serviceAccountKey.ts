@@ -42,9 +42,7 @@ export const convertKeyFileToServiceAccountKey = (keyFile: string): ServiceAccou
   return pick(parsedKeyFile, keysOfServiceAccountKey);
 };
 
-export const convertServiceAccountKeyToServiceAccountKeyId = (
-  serviceAccountKey: ServiceAccountKey
-): ServiceAccountKeyId => ({
+export const convertServiceAccountKeyToServiceAccountKeyId = (serviceAccountKey: ServiceAccountKey): ServiceAccountKeyId => ({
   id: serviceAccountKey.private_key_id,
   clientEmail: serviceAccountKey.client_email,
   clientId: serviceAccountKey.client_id,

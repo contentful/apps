@@ -1,8 +1,9 @@
-import React from 'react';
-import InstalledServiceAccountCard from './service-account/InstalledServiceAccountCard';
-import SetupServiceAccountCard from './service-account/SetupServiceAccountCard';
+import React, { useState } from 'react';
+import InstalledServiceAccountCard from 'components/config-screen/api-access/installed/InstalledServiceAccountCard';
+import SetupServiceAccountCard from 'components/config-screen/api-access/setup/SetupServiceAccountCard';
 import { Subheading, Paragraph, Stack } from '@contentful/f36-components';
 import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
+import { InstallationErrorType } from 'components/config-screen/GoogleAnalyticsPage';
 
 interface Props {
   isValid: boolean;
@@ -15,6 +16,9 @@ interface Props {
   isInEditMode: boolean;
   onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
   onCancelGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
+  onAccountSummariesFetch: Function;
+  installationErrors: InstallationErrorType[];
+  onInstallationErrors: Function;
 }
 
 const ApiAccessPage = (props: Props) => {
@@ -28,7 +32,10 @@ const ApiAccessPage = (props: Props) => {
     onKeyFileChange,
     isInEditMode,
     onEditGoogleAccountDetails,
-    onCancelGoogleAccountDetails
+    onCancelGoogleAccountDetails,
+    onAccountSummariesFetch,
+    onInstallationErrors,
+    installationErrors,
   } = props
 
   return (
@@ -46,6 +53,9 @@ const ApiAccessPage = (props: Props) => {
             onEditGoogleAccountDetails={onEditGoogleAccountDetails}
             serviceAccountKeyId={currentServiceAccountKeyId}
             serviceAccountKey={currentServiceAccountKey}
+            onAccountSummariesFetch={onAccountSummariesFetch}
+            installationErrors={installationErrors}
+            onInstallationErrors={onInstallationErrors}
           />
         ) : (
           <SetupServiceAccountCard

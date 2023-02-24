@@ -1,5 +1,5 @@
 import React from 'react'
-import HomeAnalyticsPage from 'components/config-screen/HomeAnalyticsPage';
+import HomeAnalyticsPage from 'components/config-screen/GoogleAnalyticsPage';
 
 const ConfigScreen = () => {
 

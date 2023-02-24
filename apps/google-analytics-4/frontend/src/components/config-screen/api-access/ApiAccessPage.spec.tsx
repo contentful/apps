@@ -15,6 +15,10 @@ describe('Config Screen component (not installed)', () => {
         isInEditMode={false}
         onEditGoogleAccountDetails={() => { }}
         onCancelGoogleAccountDetails={() => { }}
+        onAccountSummariesFetch={() => { }}
+        installationErrors={[]}
+        onInstallationErrors={() => { }}
+
       />);
     });
 
