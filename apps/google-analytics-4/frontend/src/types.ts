@@ -23,7 +23,7 @@ export interface ServiceAccountKeyId {
   clientId: string;
 }
 
-export interface Row {
+interface Row {
   dimensionValues: { value: string; oneValue: string }[];
   metricValues: { value: string; oneValue: string }[];
 }
@@ -49,3 +49,5 @@ export interface RunReportResponse {
   propertyQuota: null;
   kind: string;
 }
+
+export type DateRangeType = 'lastWeek' | 'lastDay' | 'lastMonth';

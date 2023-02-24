@@ -1,13 +1,13 @@
 import { useAutoResizer, useFieldValue } from '@contentful/react-apps-toolkit';
-import ChartFooter from 'components/sidebar/ChartFooter';
-import ChartHeader from 'components/sidebar/ChartHeader';
+import ChartFooter from 'components/main-app/ChartFooter';
+import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
 import { RunReportResponse } from 'types';
 import { config } from '../../config';
 
-export default function SidebarAnalytics() {
+const AnalyticsApp = () => {
   const [runReportResponse, setRunReportResponse] = useState<RunReportResponse | undefined>();
-  const [slugValue] = useFieldValue<string | undefined>('slug');
+  const [slugValue] = useFieldValue<string>('slug');
 
   useAutoResizer();
 
@@ -25,7 +25,7 @@ export default function SidebarAnalytics() {
   const pageViews =
     runReportResponse &&
     runReportResponse.rows.reduce((acc, val) => {
-      const metric = Number(val.metricValues[0].value);
+      const metric = +val.metricValues[0].value;
       return acc + metric;
     }, 0);
 
@@ -34,13 +34,12 @@ export default function SidebarAnalytics() {
   return (
     <>
       <ChartHeader
-        metricName={metricName !== undefined ? metricName : ''}
-        metricValue={pageViews !== undefined ? pageViews.toString() : ''}
+        metricName={metricName ? metricName : ''}
+        metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
       />
-      <ChartFooter
-        slugName={slugValue !== undefined ? slugValue : ''}
-        viewUrl="https://analytics.google.com/"
-      />
+      <ChartFooter slugName={slugValue ? slugValue : ''} viewUrl="https://analytics.google.com/" />
     </>
   );
-}
+};
+
+export default AnalyticsApp;

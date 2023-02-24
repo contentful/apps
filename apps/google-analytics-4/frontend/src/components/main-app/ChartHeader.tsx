@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { Box, DisplayText, Flex, Paragraph, Select } from '@contentful/f36-components';
+import { DateRangeType } from 'types';
 
 interface Props {
   metricName: string;
   metricValue: string;
 }
 
-export default function ChartHeader(props: Props) {
+const ChartHeader = (props: Props) => {
   const { metricName, metricValue } = props;
 
-  const [dateSelection, setDateSelection] = useState('lastWeek');
+  const [dateSelection, setDateSelection] = useState<DateRangeType>('lastWeek');
 
   const handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) =>
-    setDateSelection(event.target.value);
+    setDateSelection(event.target.value as DateRangeType);
 
   return (
     <Flex
@@ -34,4 +35,6 @@ export default function ChartHeader(props: Props) {
       </Select>
     </Flex>
   );
-}
+};
+
+export default ChartHeader;
