@@ -1,5 +1,9 @@
 {
-  "dimensionHeaders": [],
+  "dimensionHeaders": [
+    {
+      "name": "date"
+    }
+  ],
   "metricHeaders": [
     {
       "name": "screenPageViews",
@@ -8,10 +12,127 @@
   ],
   "rows": [
     {
-      "dimensionValues": [],
+      "dimensionValues": [
+        {
+          "value": "20230217",
+          "oneValue": "value"
+        }
+      ],
       "metricValues": [
         {
-          "value": "11492",
+          "value": "51",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230220",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "42",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230222",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "18",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230215",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "9",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230223",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "7",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230216",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "6",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230221",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "6",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230218",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "1",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230219",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "1",
           "oneValue": "value"
         }
       ]
@@ -20,7 +141,7 @@
   "totals": [],
   "maximums": [],
   "minimums": [],
-  "rowCount": 1,
+  "rowCount": 9,
   "metadata": {
     "dataLossFromOtherRow": false,
     "currencyCode": "USD",
