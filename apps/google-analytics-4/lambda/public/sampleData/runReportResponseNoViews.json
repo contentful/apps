@@ -1,6 +1,15 @@
 {
-  "dimensionHeaders": [],
-  "metricHeaders": [],
+  "dimensionHeaders": [
+    {
+      "name": "date"
+    }
+  ],
+  "metricHeaders": [
+    {
+      "name": "screenPageViews",
+      "type": "TYPE_INTEGER"
+    }
+  ],
   "rows": [],
   "totals": [],
   "maximums": [],
