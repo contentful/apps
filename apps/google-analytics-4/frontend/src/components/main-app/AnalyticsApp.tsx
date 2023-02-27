@@ -31,6 +31,8 @@ const AnalyticsApp = () => {
 
   const metricName = runReportResponse && runReportResponse.metricHeaders[0].name;
 
+  debugger;
+
   return (
     <>
       <ChartHeader
