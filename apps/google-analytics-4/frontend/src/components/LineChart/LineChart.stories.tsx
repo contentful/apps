@@ -25,5 +25,5 @@ const mockLabels = ['January', 'February', 'March', 'April'];
 Primary.args = {
   dataValues: mockData,
   xAxisLabels: mockLabels,
-  tooltipMetricLabel: 'Page views:'
+  tooltipMetricLabel: 'Page views:',
 };

@@ -5,7 +5,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import LocalhostWarning from './LocalhostWarning';
 
 export default {
-  title: 'Components/Common/LocalhostWarning',
+  title: 'Apps/Components/LocalhostWarning',
   component: LocalhostWarning,
 } as ComponentMeta<typeof LocalhostWarning>;
 

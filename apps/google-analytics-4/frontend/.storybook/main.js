@@ -1,3 +1,30 @@
+const webpack = require('webpack');
+
+const injectVars = Object.keys(process.env).reduce((c, key) => {
+  if (/^NEXT_PUBLIC_/.test(key)) {
+    c[`process.env.${key}`] = JSON.stringify(process.env[key]);
+  }
+  return c;
+}, {});
+
+function injectEnv(definitions) {
+  const env = 'process.env';
+
+  if (!definitions[env]) {
+    return {
+      ...definitions,
+      [env]: JSON.stringify(
+        Object.fromEntries(
+          Object.entries(definitions)
+            .filter(([key]) => key.startsWith(env))
+            .map(([key, value]) => [key.substring(env.length + 1), JSON.parse(value)])
+        )
+      ),
+    };
+  }
+  return definitions;
+}
+
 module.exports = {
   stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
   addons: [
@@ -12,22 +39,25 @@ module.exports = {
   },
   env: (config) => ({
     ...config,
-    REACT_APP_BACKEND_API_URL: 'An environment variable configured in Storybook',
+    REACT_APP_BACKEND_API_URL: 'Mock Storybook environment variable',
   }),
-  // env: (config) => ({
-  //   ...config,
-  //   REACT_APP_BACKEND_API_URL: process.env.REACT_APP_BACKEND_API_URL,
-  // }),
-  // webpackFinal: async config => {
-  //   // find the DefinePlugin
-  //   const plugin = config.plugins.find(plugin => plugin.definitions?.['process.env']);
-  //   // add my env vars
-  //   Object.keys(appConfig).forEach(key => {
-  //     plugin.definitions['process.env'][key] = JSON.stringify(appConfig[key]);
-  //   });
-  // },
-  // env: (config) => ({
-  //   ...config,
-  //   STORYBOOK_ENV: true,
-  // }),
+  webpackFinal: (config) => {
+    config.plugins = config.plugins.reduce((c, plugin) => {
+      if (plugin instanceof webpack.DefinePlugin) {
+        return [
+          ...c,
+          new webpack.DefinePlugin(
+            injectEnv({
+              ...plugin.definitions,
+              ...injectVars,
+            })
+          ),
+        ];
+      }
+
+      return [...c, plugin];
+    }, []);
+
+    return config;
+  },
 };
