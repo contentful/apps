@@ -1,4 +1,5 @@
 import { AnalyticsAdminServiceClient } from '@google-analytics/admin';
+import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import { expect } from 'chai';
 import { Status } from 'google-gax';
 import { SinonStubbedInstance } from 'sinon';
@@ -18,11 +19,12 @@ import {
 
 describe('GoogleApi', () => {
   let googleApi: GoogleApi;
-  let mockClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
+  let mockAdminClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
+  let mockDataClient: SinonStubbedInstance<BetaAnalyticsDataClient>;
 
   beforeEach(() => {
-    mockClient = mockAnalyticsAdminServiceClient();
-    googleApi = new GoogleApi(validServiceAccountKeyFile, mockClient);
+    mockAdminClient = mockAnalyticsAdminServiceClient();
+    googleApi = new GoogleApi(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
   });
 
   describe('listAccountSummaries', () => {
@@ -36,9 +38,9 @@ describe('GoogleApi', () => {
     const someError = new Error('boom!');
 
     beforeEach(() => {
-      mockClient = mockAnalyticsAdminServiceClient();
-      mockClient.listAccountSummaries.rejects(someError);
-      googleApi = new GoogleApi(validServiceAccountKeyFile, mockClient);
+      mockAdminClient = mockAnalyticsAdminServiceClient();
+      mockAdminClient.listAccountSummaries.rejects(someError);
+      googleApi = new GoogleApi(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
     });
 
     it('throws a GoogleApiServerError', async () => {

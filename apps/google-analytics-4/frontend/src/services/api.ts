@@ -22,6 +22,11 @@ const ZAccountSummary = z.object({
   propertySummaries: z.array(ZPropertySummary),
 });
 
+const ZPageDataQuery = z.object({
+  slug: z.string(),
+});
+export type PageDataQuery = z.infer<typeof ZPageDataQuery>;
+
 export type AccountSummary = z.infer<typeof ZAccountSummary>;
 
 const ZAccountSummaries = z.array(ZAccountSummary);
@@ -156,6 +161,16 @@ export class Api {
     );
   }
 
+  async getPageData(): Promise<any> {
+    return await fetchFromApi<any>(
+      this.requestUrl('api/page_data'),
+      ZPageDataQuery,
+      this.appDefinitionId,
+      this.cma,
+      this.serviceAccountKeyHeaders
+    );
+  }
+  
   private get serviceAccountKeyHeaders(): Headers {
     return {
       'x-contentful-serviceaccountkeyid': this.encodeServiceAccountHeaderValue(

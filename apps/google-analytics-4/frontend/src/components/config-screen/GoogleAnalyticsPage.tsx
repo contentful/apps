@@ -69,9 +69,13 @@ const HomeAnalyticsPage = () => {
           onInstallationErrors={handleInstallationErrors}
         />
         <Splitter />
-        {accountsSummaries.length > 0 && installationErrors.length === 0 && (
+        {accountsSummaries.length > 0 && installationErrors.length === 0 && parameters.serviceAccountKeyId && parameters.serviceAccountKey && (
           <>
-            <ConfigurationPage accountsSummaries={accountsSummaries} isInEditMode={isInEditMode}/>
+            <ConfigurationPage
+              accountsSummaries={accountsSummaries}
+              isInEditMode={isInEditMode}
+              serviceAccountKeyId={parameters.serviceAccountKeyId}
+              serviceAccountKey={parameters.serviceAccountKey} />
             <Splitter />
           </>
         )}
