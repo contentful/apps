@@ -32,6 +32,7 @@ module.exports = {
     '@storybook/addon-essentials',
     '@storybook/addon-interactions',
     '@storybook/preset-create-react-app',
+    '@storybook/addon-a11y',
   ],
   framework: '@storybook/react',
   core: {
@@ -40,6 +41,7 @@ module.exports = {
   env: (config) => ({
     ...config,
     REACT_APP_BACKEND_API_URL: 'Mock Storybook environment variable',
+    REACT_APP_RELEASE: 'Mock Storybook environment variable',
   }),
   webpackFinal: (config) => {
     config.plugins = config.plugins.reduce((c, plugin) => {

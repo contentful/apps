@@ -5,7 +5,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import InstalledServiceAccountKey from './InstalledServiceAccountKey';
 
 export default {
-  title: 'Components/InstalledServiceAccountKey',
+  title: 'Core/InstalledServiceAccountKey',
   component: InstalledServiceAccountKey,
 } as ComponentMeta<typeof InstalledServiceAccountKey>;
 
