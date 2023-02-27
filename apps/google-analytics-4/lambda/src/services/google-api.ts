@@ -178,15 +178,21 @@ export class GoogleApi {
           {
             name: 'screenPageViews',
           },
+          {
+            name: 'totalUsers',
+          },
+          {
+            name: 'screenPageViewsPerUser',
+          },
         ],
-        // dimensionFilter: {
-        //   filter: {
-        //     fieldName: 'page',
-        //     stringFilter: {
-        //       value: slug
-        //     },
-        //   }
-        // },
+        dimensionFilter: { // unifiedPagePathScreen
+          filter: {
+            fieldName: 'unifiedPagePathScreen',
+            stringFilter: {
+              value: slug
+            },
+          }
+        },
       });
 
       return response

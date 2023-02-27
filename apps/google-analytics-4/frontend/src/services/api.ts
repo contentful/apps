@@ -23,6 +23,8 @@ const ZAccountSummary = z.object({
 });
 
 const ZPageDataQuery = z.object({
+  property: z.string(),
+  prefix: z.string(),
   slug: z.string(),
 });
 export type PageDataQuery = z.infer<typeof ZPageDataQuery>;

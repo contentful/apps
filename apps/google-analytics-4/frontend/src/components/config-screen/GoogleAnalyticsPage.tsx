@@ -40,6 +40,12 @@ const HomeAnalyticsPage = () => {
     handleKeyFileChange('');
     setIsInEditMode(false);
   }
+
+  const handleSaveGoogleAccountDetails = () => {
+    // Save stuff to local storage (mainly json blob) and probably the lambda/db on aws
+    setIsInEditMode(false);
+  }
+
   const { parameters, serviceAccountKeyFile, serviceAccountKeyFileErrorMessage, serviceAccountKeyFileIsValid, serviceAccountKeyFileIsRequired, handleKeyFileChange } = useKeyService({ onCancelGoogleAccountDetails: handleEditGoogleAccountDetails });
 
   const handleKeyFileChangeEventWrapper = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +70,7 @@ const HomeAnalyticsPage = () => {
           isInEditMode={isInEditMode}
           onEditGoogleAccountDetails={handleEditGoogleAccountDetails}
           onCancelGoogleAccountDetails={handleCancelGoogleAccountDetails}
+          onSaveGoogleAccountDetails={handleSaveGoogleAccountDetails}
           onAccountSummariesFetch={handleAccountSummariesFetch}
           installationErrors={installationErrors}
           onInstallationErrors={handleInstallationErrors}

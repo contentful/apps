@@ -95,16 +95,15 @@ app.get('/api/account_summaries', async (req, res, next) => {
 app.get('/api/page_data', async (req, res, next) => {
   try {
     console.log('Hits API endpoint')
+    console.log(req.params)
     const serviceAccountKeyFile = req.serviceAccountKey;
 
-    if (serviceAccountKeyFile === undefined) {
-      // intentional runtime error because the middleware already handles this. typescript
-      // just doesn't realize
-      throw new Error('missing service account key value');
-    }
+    // intentional runtime error because the middleware already handles this. typescript
+    // just doesn't realize
+    if (serviceAccountKeyFile === undefined) throw new Error('missing service account key value');
 
     const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
-    const result = await googleApi.runReport("properties/251933629", "/en-US/sunshiny-day");
+    const result = await googleApi.runReport("properties/275538046", "/en-US/article/how-do-I-use-google-pay");
     res.status(200).json(result);
   } catch (err) {
     // pass to apiErrorHandler

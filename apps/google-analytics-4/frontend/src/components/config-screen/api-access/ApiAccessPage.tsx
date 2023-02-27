@@ -16,6 +16,7 @@ interface Props {
   isInEditMode: boolean;
   onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
   onCancelGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
+  onSaveGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
   onAccountSummariesFetch: Function;
   installationErrors: InstallationErrorType[];
   onInstallationErrors: Function;
@@ -33,6 +34,7 @@ const ApiAccessPage = (props: Props) => {
     isInEditMode,
     onEditGoogleAccountDetails,
     onCancelGoogleAccountDetails,
+    onSaveGoogleAccountDetails,
     onAccountSummariesFetch,
     onInstallationErrors,
     installationErrors,
@@ -66,6 +68,7 @@ const ApiAccessPage = (props: Props) => {
             onKeyFileChange={onKeyFileChange}
             isInEditMode={isInEditMode}
             onCancelGoogleAccountDetails={onCancelGoogleAccountDetails}
+            onSaveGoogleAccountDetails={onSaveGoogleAccountDetails}
           />
         )
       }

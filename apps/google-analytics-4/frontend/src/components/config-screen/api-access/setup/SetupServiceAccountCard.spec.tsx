@@ -12,6 +12,7 @@ describe('Setup Google Service Account Details page', () => {
         serviceAccountKeyFile={JSON.stringify(validServiceKeyFile)}
         onKeyFileChange={() => { }}
         onCancelGoogleAccountDetails={() => { }}
+        onSaveGoogleAccountDetails={() => { }}
         isInEditMode={false}
       />);
     });
