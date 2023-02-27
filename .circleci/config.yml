@@ -169,6 +169,7 @@ workflows:
             branches:
               only:
                 - master
+                - staging
       - deploy-prod:
           context:
             - vault

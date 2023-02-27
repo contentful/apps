@@ -1,0 +1,27 @@
+{
+  "dimensionHeaders": [
+    {
+      "name": "date"
+    }
+  ],
+  "metricHeaders": [
+    {
+      "name": "screenPageViews",
+      "type": "TYPE_INTEGER"
+    }
+  ],
+  "rows": [],
+  "totals": [],
+  "maximums": [],
+  "minimums": [],
+  "rowCount": 0,
+  "metadata": {
+    "dataLossFromOtherRow": false,
+    "currencyCode": "USD",
+    "_currencyCode": "currencyCode",
+    "timeZone": "Europe/Berlin",
+    "_timeZone": "timeZone"
+  },
+  "propertyQuota": null,
+  "kind": "analyticsData#runReport"
+}
