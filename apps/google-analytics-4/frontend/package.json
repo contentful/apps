@@ -4,9 +4,11 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "4.13.0",
-    "@contentful/f36-components": "4.23.3",
+    "@contentful/f36-components": "4.26.0",
     "@contentful/f36-tokens": "4.0.1",
-    "@contentful/react-apps-toolkit": "1.2.10",
+    "@contentful/react-apps-toolkit": "1.2.15",
+    "@sentry/react": "^7.38.0",
+    "@sentry/tracing": "^7.38.0",
     "@testing-library/user-event": "14.4.3",
     "@types/lodash": "4.14.191",
     "chart.js": "^4.2.1",
@@ -20,10 +22,10 @@
     "zod": "3.20.6"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "test-ci": "CI=true react-scripts test",
+    "start": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) cross-env BROWSER=none react-scripts start",
+    "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
+    "test": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts test",
+    "test-ci": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) CI=true react-scripts test",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5DlxOS0KvGS1Wk362xgvbN --token ${CONTENTFUL_CMA_TOKEN}",
