@@ -8,6 +8,7 @@ const Sidebar = () => {
   // const cma = useCMA();
 
   return <SidebarAnalytics />;
+
 };
 
 export default Sidebar;
