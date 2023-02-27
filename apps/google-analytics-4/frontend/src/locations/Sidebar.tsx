@@ -1,14 +1,7 @@
-import SidebarAnalytics from 'components/sidebar/SidebarAnalytics';
+import AnalyticsApp from 'components/main-app/AnalyticsApp';
 
 const Sidebar = () => {
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
-
-  return <SidebarAnalytics />;
-
+  return <AnalyticsApp />;
 };
 
 export default Sidebar;
