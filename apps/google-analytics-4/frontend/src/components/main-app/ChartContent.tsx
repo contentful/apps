@@ -1,13 +1,12 @@
-import { DateRangeType, Row, RunReportResponse } from '@/types';
-import LineChart from './LineChart/LineChart';
+import { Row, RunReportResponse } from '@/types';
+import LineChart from './line-chart/LineChart';
 
 interface Props {
     pageViewData: RunReportResponse;
-    dateRange: DateRangeType;
 }
 
 const ChartContent = (props: Props) => {
-    const { pageViewData, dateRange } = props;
+    const { pageViewData } = props;
 
     const parseRowViews = (): number[] => {
         return pageViewData.rows.map((r: Row) => +r.metricValues[0].value)

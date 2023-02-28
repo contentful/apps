@@ -8,9 +8,9 @@ import ChartContent from './ChartContent';
 
 const AnalyticsApp = () => {
   const [runReportResponse, setRunReportResponse] = useState<RunReportResponse>({} as RunReportResponse);
-  const [pageViewData, setPageViewData] = useState<RunReportResponse>(runReportResponse)
-  const [slugValue] = useFieldValue<string>('slug');
+  const [pageViewData, setPageViewData] = useState<RunReportResponse>(runReportResponse);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek')
+  const [slugValue] = useFieldValue<string>('slug');
   useAutoResizer();
 
   useEffect(() => {
@@ -18,21 +18,16 @@ const AnalyticsApp = () => {
 
     async function fetchData() {
       const response = await fetch(`${baseUrl}/sampleData/runReportResponseHasViews.json`);
-      if (response.ok) setRunReportResponse(await response.json());
+      if (response.ok) {
+        setRunReportResponse(await response.json());
+      }
     }
 
     fetchData();
   }, []);
 
-  useEffect(() => sliceByDateRange(dateRange), [dateRange, runReportResponse])
-
-  const handleDateRangeChange = (e: DateRangeType) => {
-    setDateRange(e);
-    sliceByDateRange(e)
-  }
-
-  const sliceByDateRange = (dateRange: DateRangeType) => {
-    if (runReportResponse.rowCount) {
+  useEffect(() => {
+    const sliceByDateRange = (dateRange: DateRangeType): RunReportResponse => {
       let newRows: Row[] = [];
       switch (dateRange) {
         case 'lastDay':
@@ -45,9 +40,21 @@ const AnalyticsApp = () => {
           newRows = runReportResponse.rows.slice(0, 28);
           break;
       }
-      setPageViewData({ ...runReportResponse, rows: [...newRows] });
+      return { ...runReportResponse, rows: [...newRows] };
+
     }
+    if (runReportResponse.rowCount) {
+      const newData = sliceByDateRange(dateRange);
+      setPageViewData(newData)
+    }
+  }, [dateRange, runReportResponse])
+
+
+  const handleDateRangeChange = (e: DateRangeType) => {
+    setDateRange(e);
   }
+
+
 
   const pageViews =
     runReportResponse.rows &&
@@ -65,7 +72,7 @@ const AnalyticsApp = () => {
         metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
         handleChange={handleDateRangeChange}
       />
-      {pageViewData.rowCount ? <ChartContent pageViewData={pageViewData} dateRange={dateRange} /> : null}
+      {pageViewData.rowCount ? <ChartContent pageViewData={pageViewData} /> : <>There are no pageviews to show for this range</>}
       <ChartFooter slugName={slugValue ? slugValue : ''} viewUrl="https://analytics.google.com/" />
     </>
   );
