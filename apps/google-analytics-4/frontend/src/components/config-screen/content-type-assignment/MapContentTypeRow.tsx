@@ -8,7 +8,7 @@ interface Props {
   contentTypes: ContentTypeProps[]
 }
 
-export default function ContentTypeOptionRow(props: Props) {
+export default function MapContentTypeRow(props: Props) {
   const { contentTypes } = props;
 
   const [selectedContentType, setSelectedContentType] = useState<ContentTypeProps>();
@@ -27,25 +27,34 @@ export default function ContentTypeOptionRow(props: Props) {
     setSelectedFields(_selectedField);
   }
 
+  const handleRemoveButton = () => {
+    
+  }
+
   return (
-    <Stack marginBottom='none' spacing="spacingS">
+    <Stack marginBottom='none' spacing="spacingS" alignItems='baseline'>
       <Box style={{ minWidth: '200px' }}>
-        <SimpleDropdown selectId='contentTypeSelect' formTitle='Content Type' isDisabled={false} onSelectionChange={handleContentTypeSelection}>
-          {contentTypes.map((contentType) => {
-            return (<Select.Option key={contentType.sys.id} value={JSON.stringify(contentType)}>{`${contentType.name}`}</Select.Option>)
-          })}
-        </SimpleDropdown>
-      </Box>
-      <Box style={{ minWidth: '200px' }}>
-        <SimpleDropdown selectId='fieldSelect' formTitle='Field' isDisabled={!selectedContentType} onSelectionChange={handleFieldSelection}>
-          {fields.map((field) => {
-            return (<Select.Option key={field.id} value={JSON.stringify(field)}>{`${field.name}`}</Select.Option>)
-          })}
-        </SimpleDropdown>
+        <FormControl>
+          <Select defaultValue="" isDisabled={false} onChange={handleContentTypeSelection}>
+            <Select.Option value="" isDisabled />
+            {contentTypes.map((contentType) => {
+              return (<Select.Option key={contentType.sys.id} value={JSON.stringify(contentType)}>{`${contentType.name}`}</Select.Option>)
+            })}
+          </Select>
+        </FormControl>
       </Box>
       <Box style={{ minWidth: '200px' }}>
         <FormControl>
-          <FormControl.Label>Url Prefix</FormControl.Label>
+          <Select defaultValue="" isDisabled={!selectedContentType} onChange={handleFieldSelection}>
+            <Select.Option value="" isDisabled />
+            {fields.map((field) => {
+              return (<Select.Option key={field.id} value={JSON.stringify(field)}>{`${field.name}`}</Select.Option>)
+            })}
+          </Select>
+        </FormControl>
+      </Box>
+      <Box style={{ minWidth: '200px' }}>
+        <FormControl>
           <TextInput
             value={urlPrefix}
             name="urlPrefix"
@@ -54,7 +63,7 @@ export default function ContentTypeOptionRow(props: Props) {
           />
         </FormControl>
       </Box>
-      <Button>Remove</Button>
+      <Button onClick={handleRemoveButton} variant='negative'>Remove</Button>
     </Stack>
   )
 }

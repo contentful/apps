@@ -3,7 +3,7 @@ import { GoogleAuthOptions } from 'google-auth-library';
 import { Status } from 'google-gax';
 import { HttpCodeToRpcCodeMap } from 'google-gax/build/src/status';
 import { ServiceAccountKeyFile } from '../types';
-import {BetaAnalyticsDataClient} from '@google-analytics/data';
+import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
 interface GoogleApiErrorParams {
   code: Status;
@@ -27,8 +27,8 @@ export class GoogleApiError extends Error {
     this.httpStatus = errorParams.httpStatus;
   }
 }
-export class GoogleApiServerError extends GoogleApiError {}
-export class GoogleApiClientError extends GoogleApiError {}
+export class GoogleApiServerError extends GoogleApiError { }
+export class GoogleApiClientError extends GoogleApiError { }
 
 const clientErrorStatuses = [
   Status.INVALID_ARGUMENT,
@@ -153,39 +153,29 @@ export class GoogleApi {
     return accountSummaries;
   }
 
-  async listAccounts(): Promise<any> {
-    return await this.fetchAccounts();
-  }
+  async runReport(property: string, slug: string, startDate?: string, endDate?: string, dimensions?: string[], metrics?: string[]) {
+    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+    const DEFAULT_DIMENSIONS = [
+      'date',
+    ]
+    const DEFAULT_METRICS = [
+      'screenPageViews',
+      'totalUsers',
+      'screenPageViewsPerUser',
+    ]
 
-  // Runs a simple report.
-  async runReport(property: any, slug: any) {
-    console.log("Run Report")
     try {
       const [response] = await this.betaAnalyticsDataClient.runReport({
         property: property,
         dateRanges: [
           {
-            startDate: '2023-02-20',
-            endDate: 'today',
+            startDate: startDate ?? (new Date(Date.now() - ONE_WEEK)).toISOString().split('T')[0],
+            endDate: endDate ?? 'today',
           },
         ],
-        dimensions: [
-          {
-            name: 'date',
-          },
-        ],
-        metrics: [
-          {
-            name: 'screenPageViews',
-          },
-          {
-            name: 'totalUsers',
-          },
-          {
-            name: 'screenPageViewsPerUser',
-          },
-        ],
-        dimensionFilter: { // unifiedPagePathScreen
+        dimensions: (dimensions || DEFAULT_DIMENSIONS).map((dimension) => { return { name: dimension } }),
+        metrics: (metrics || DEFAULT_METRICS).map((metric) => { return { name: metric } }),
+        dimensionFilter: {
           filter: {
             fieldName: 'unifiedPagePathScreen',
             stringFilter: {
@@ -202,13 +192,12 @@ export class GoogleApi {
       }
       throw e;
     }
-
-
   }
 
 
   private async fetchAccountSummaries() {
     try {
+      await this.runReport('properties/abc123xyz', 'bar')
       return await this.analyticsAdminServiceClient.listAccountSummaries();
     } catch (e) {
       if (e instanceof Error) {
@@ -217,7 +206,7 @@ export class GoogleApi {
       throw e;
     }
   }
-  
+
   private async fetchAccounts() {
     try {
       return await this.analyticsAdminServiceClient.listAccounts();

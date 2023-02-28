@@ -3,19 +3,20 @@ import { Stack, Box, Subheading, Paragraph, Select, Card } from '@contentful/f36
 import SimpleDropdown from 'components/common/SimpleDropdown'
 import { ContentFields, ContentTypeProps, createClient, KeyValueMap } from 'contentful-management';
 import { useApi } from 'hooks/useApi';
-import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
+import { ServiceAccountKeyId, ServiceAccountKey, ContentTypeMappingType } from 'types';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import ContentTypeOptionRow from 'components/config-screen/assign-content-type/ContentTypeOptionRow';
+import MapContentTypeRow from 'components/config-screen/content-type-assignment/MapContentTypeRow';
 import useKeyService from 'hooks/useKeyService';
-import ConfigureContentTypeCard from 'components/config-screen/assign-content-type/ConfigureContentTypeCard';
-import DisplayContentTypeCard from 'components/config-screen/assign-content-type/DisplayContentTypeCard';
+import SetupContentTypeCard from 'components/config-screen/content-type-assignment/SetupContentTypeCard';
+import DisplayContentTypeCard from 'components/config-screen/content-type-assignment/DisplayContentTypeCard';
 
 interface Props {
 }
 
 export default function AssignContentTypePage(props: Props) {
   const [isInEditContentTypeMode, setIsInEditContentTypeMode] = useState<boolean>(false);
+  const [contentTypeMappings, setContentTypeMappings] = useState<ContentTypeMappingType[]>([]);
 
   const { parameters } = useKeyService();
   console.log(parameters)
@@ -32,7 +33,8 @@ export default function AssignContentTypePage(props: Props) {
   }
 
   // Save to local storage? and then eventually some RDS db?
-  const handleSaveContentType = () => {
+  const handleSaveContentType = (_contentTypeMappings: ContentTypeMappingType[]) => {
+    setContentTypeMappings(_contentTypeMappings)
     setIsInEditContentTypeMode(false)
   }
 
@@ -45,13 +47,12 @@ export default function AssignContentTypePage(props: Props) {
       {parameters && parameters.serviceAccountKeyId && parameters.serviceAccountKey &&
         <Card>
           {isInEditContentTypeMode ?
-            <ConfigureContentTypeCard
+            <SetupContentTypeCard
               onCancelContentType={handleCancelContentType}
               onSaveContentType={handleSaveContentType}
             />
             :
             <DisplayContentTypeCard
-              onTestContentType={handleTestContentType}
               onEditContentType={handleEditContentType}
               serviceAccountKeyId={parameters.serviceAccountKeyId}
               serviceAccountKey={parameters.serviceAccountKey}

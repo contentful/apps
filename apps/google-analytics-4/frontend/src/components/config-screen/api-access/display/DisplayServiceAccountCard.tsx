@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Badge, Box, Flex, TextLink, Note, Card, Stack, Paragraph, FormControl, Spinner, List, BadgeVariant, IconButton, Select } from '@contentful/f36-components';
+import { Badge, Box, Flex, TextLink, Note, Card, Stack, Paragraph, FormControl, Spinner, List, BadgeVariant, IconButton, Select, Button } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon, CycleIcon, CheckCircleIcon, ErrorCircleIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ApiError } from 'services/api';
@@ -122,8 +122,12 @@ const InstalledServiceAccountCard = (props: Props) => {
     return installationErrors.map((error: InstallationErrorType) => {
       return (
         <>
-          <Badge variant={error.badgeVariant}>{error.badgeText}</Badge>
-          <Note variant={error.badgeVariant as any} >{error.description}
+          {/* // if any errors show all badges 
+          // otherwise show one positive confirmation badge */}
+          <Note variant="positive">Admin API Enabled</Note>
+          <Note variant="warning">Data API Disabled</Note>
+          <Note variant="negative">{error.badgeText}</Note>
+          {/* <Note variant={error.badgeVariant as any} >{error.description}
             {' '}
             <TextLink
               icon={<ExternalLinkTrimmedIcon />}
@@ -145,7 +149,7 @@ const InstalledServiceAccountCard = (props: Props) => {
               document
             </TextLink>
             .
-          </Note>
+          </Note> */}
         </>
       )
     })
@@ -153,23 +157,18 @@ const InstalledServiceAccountCard = (props: Props) => {
 
   return (
     <Card>
-
-      <Flex justifyContent="space-between" marginBottom='spacingS'>
+      <Flex justifyContent="space-between" marginBottom='none'>
         <Paragraph marginBottom='none' marginTop='spacingXs'><b>Google Service Account Details</b></Paragraph>
         <Flex justifyContent="space-between" marginBottom='spacingL'>
           <Box paddingRight='spacingXs' paddingTop='spacingXs'>
             <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onEditGoogleAccountDetails}>Edit</TextLink>
           </Box>
-          {isLoading ?
-            <Spinner variant="default" /> :
-            <IconButton
-              variant="transparent"
-              size="small"
-              aria-label="refresh-button"
-              onClick={verifyAccountSummaries}
-              icon={<CycleIcon />}
-            />
-          }
+          <Box style={{ minWidth: '60px', minHeight: '30px' }}>
+            {isLoading ?
+              <Spinner variant="default" /> :
+              <Button variant="primary" size="small" onClick={verifyAccountSummaries}>Test</Button>
+            }
+          </Box>
         </Flex>
       </Flex>
       <FormControl>

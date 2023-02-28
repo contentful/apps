@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import InstalledServiceAccountCard from 'components/config-screen/api-access/installed/InstalledServiceAccountCard';
+import InstalledServiceAccountCard from 'components/config-screen/api-access/display/DisplayServiceAccountCard';
 import SetupServiceAccountCard from 'components/config-screen/api-access/setup/SetupServiceAccountCard';
 import { Subheading, Paragraph, Stack } from '@contentful/f36-components';
 import useKeyService from 'hooks/useKeyService';
@@ -36,13 +36,14 @@ const ApiAccessPage = (props: Props) => {
 
   return (
     <Stack spacing='spacingL' flexDirection='column' alignItems='flex-start' >
-      <Subheading marginBottom='none'>
-        API Access
-      </Subheading>
-      <Paragraph marginBottom='none'>
-        Authorize this application to access page analytics data from your organization’s Google
-        Analytics account
-      </Paragraph>
+      <div>
+        <Subheading marginBottom='none'>
+          API Access
+        </Subheading>
+        <Paragraph marginBottom='none'>
+          Authorize this application to access Google Analytics Admin & Data APIs
+        </Paragraph>
+      </div>
       {
         !isInEditMode && parameters && parameters.serviceAccountKeyId && parameters.serviceAccountKey ? (
           <InstalledServiceAccountCard

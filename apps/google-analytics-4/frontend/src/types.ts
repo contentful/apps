@@ -1,3 +1,5 @@
+import { ContentTypeProps, ContentFields } from "contentful-management";
+
 export interface AppInstallationParameters {
   serviceAccountKey: ServiceAccountKey;
   serviceAccountKeyId: ServiceAccountKeyId;
@@ -21,4 +23,23 @@ export interface ServiceAccountKeyId {
   clientEmail: string;
   projectId: string;
   clientId: string;
+}
+
+export interface AccountSummariesType {
+  displayName: string;
+  name: string;
+  account: string;
+  propertySummaries: PropertySummariesType[];
+}
+
+export interface PropertySummariesType {
+  displayName: string;
+  property: string;
+  propertyType: string;
+}
+
+export interface ContentTypeMappingType {
+  contentType: ContentTypeProps,
+  field: ContentFields,
+  urlPrefix: string
 }
