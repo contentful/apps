@@ -14,69 +14,13 @@
     {
       "dimensionValues": [
         {
-          "value": "20230217",
-          "oneValue": "value"
-        }
-      ],
-      "metricValues": [
-        {
-          "value": "51",
-          "oneValue": "value"
-        }
-      ]
-    },
-    {
-      "dimensionValues": [
-        {
-          "value": "20230220",
-          "oneValue": "value"
-        }
-      ],
-      "metricValues": [
-        {
-          "value": "42",
-          "oneValue": "value"
-        }
-      ]
-    },
-    {
-      "dimensionValues": [
-        {
-          "value": "20230222",
-          "oneValue": "value"
-        }
-      ],
-      "metricValues": [
-        {
-          "value": "18",
-          "oneValue": "value"
-        }
-      ]
-    },
-    {
-      "dimensionValues": [
-        {
           "value": "20230215",
           "oneValue": "value"
         }
       ],
       "metricValues": [
         {
-          "value": "9",
-          "oneValue": "value"
-        }
-      ]
-    },
-    {
-      "dimensionValues": [
-        {
-          "value": "20230223",
-          "oneValue": "value"
-        }
-      ],
-      "metricValues": [
-        {
-          "value": "14",
+          "value": "25",
           "oneValue": "value"
         }
       ]
@@ -98,13 +42,13 @@
     {
       "dimensionValues": [
         {
-          "value": "20230221",
+          "value": "20230217",
           "oneValue": "value"
         }
       ],
       "metricValues": [
         {
-          "value": "6",
+          "value": "51",
           "oneValue": "value"
         }
       ]
@@ -133,6 +77,62 @@
       "metricValues": [
         {
           "value": "5",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230220",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "42",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230221",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "6",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230222",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "18",
+          "oneValue": "value"
+        }
+      ]
+    },
+    {
+      "dimensionValues": [
+        {
+          "value": "20230223",
+          "oneValue": "value"
+        }
+      ],
+      "metricValues": [
+        {
+          "value": "14",
           "oneValue": "value"
         }
       ]

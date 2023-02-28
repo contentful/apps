@@ -2,13 +2,14 @@ import { useAutoResizer, useFieldValue } from '@contentful/react-apps-toolkit';
 import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
-import { RunReportResponse } from 'types';
+import { DateRangeType, RunReportResponse } from 'types';
 import { config } from '../../config';
 import ChartContent from './ChartContent';
 
 const AnalyticsApp = () => {
   const [runReportResponse, setRunReportResponse] = useState<RunReportResponse>({} as RunReportResponse);
   const [slugValue] = useFieldValue<string>('slug');
+  const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek')
   useAutoResizer();
 
   useEffect(() => {
@@ -21,6 +22,10 @@ const AnalyticsApp = () => {
 
     fetchData();
   }, []);
+
+  const handleDateRangeChange = (e: DateRangeType) => {
+    setDateRange(e);
+  }
 
   const pageViews =
     runReportResponse.rows &&
@@ -36,8 +41,9 @@ const AnalyticsApp = () => {
       <ChartHeader
         metricName={metricName ? metricName : ''}
         metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
+        handleChange={handleDateRangeChange}
       />
-      {runReportResponse.rowCount ? <ChartContent pageViewData={runReportResponse} /> : null}
+      {runReportResponse.rowCount ? <ChartContent pageViewData={runReportResponse} dateRange={dateRange} /> : null}
       <ChartFooter slugName={slugValue ? slugValue : ''} viewUrl="https://analytics.google.com/" />
     </>
   );
