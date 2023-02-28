@@ -1,2 +1,9 @@
 SIGNING_SECRET: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/test/signing-secret}
-DOMAIN_NAME: google-analytics-4-test.ctfapps.net
+customDomain:
+    domainName: google-analytics-4-test.ctfapps.net
+    stage: test
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+  serverless-offline:
+    httpPort: 8080

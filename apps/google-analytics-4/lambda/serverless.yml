@@ -5,17 +5,7 @@ plugins:
   - serverless-domain-manager
   - serverless-offline
 
-customParams: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
-
-custom:
-  customDomain:
-    domainName: ${self:customParams.DOMAIN_NAME}
-    stage: ${opt:stage, 'dev'}
-    createRoute53Record: true
-    endpointType: 'edge'
-    securityPolicy: tls_1_2
-  serverless-offline:
-    httpPort: 8080
+custom: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
 
 provider:
   name: aws
@@ -31,7 +21,7 @@ functions:
   api:
     description: GA4 App Backend
     environment:
-      SIGNING_SECRET: ${self:customParams.SIGNING_SECRET}
+      SIGNING_SECRET: ${self:custom.SIGNING_SECRET}
       STAGE: ${opt:stage, 'dev'}
     handler: build/src/index.handler
     events:
