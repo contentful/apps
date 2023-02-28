@@ -11,6 +11,7 @@ import {
 import app from './app';
 import { GoogleApi } from './services/google-api';
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
+import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
 chai.use(chaiHttp);
 
@@ -20,7 +21,8 @@ const serviceAccountKeyHeaders = {
 };
 
 describe('app', () => {
-  let mockClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
+  let mockAdminClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
+  let mockDataClient: SinonStubbedInstance<BetaAnalyticsDataClient>;
 
   beforeEach(() => {
     // TODO: set headers and fully test signature verification later
@@ -54,12 +56,13 @@ describe('app', () => {
     });
   });
 
+  // TODO: These test need to be updated once we have everything configured
   describe('GET /api/account_summaries', () => {
     let googleApi: GoogleApi;
 
     beforeEach(() => {
-      mockClient = mockAnalyticsAdminServiceClient();
-      googleApi = new GoogleApi(validServiceAccountKeyFile, mockClient);
+      mockAdminClient = mockAnalyticsAdminServiceClient();
+      googleApi = new GoogleApi(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
       sinon.stub(GoogleApi, 'fromServiceAccountKeyFile').returns(googleApi);
     });
 
@@ -80,7 +83,9 @@ describe('app', () => {
     });
   });
 
-  describe('GET /sampleData/runReportResponse', () => {
+  describe('GET /api/run_report', () => {
+
+
     it('responds with 200 for sample with views data', async () => {
       const response = await chai.request(app).get('/sampleData/runReportResponseHasViews.json');
       expect(response).to.have.status(200);

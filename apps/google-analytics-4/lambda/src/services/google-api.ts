@@ -3,6 +3,7 @@ import { GoogleAuthOptions } from 'google-auth-library';
 import { Status } from 'google-gax';
 import { HttpCodeToRpcCodeMap } from 'google-gax/build/src/status';
 import { ServiceAccountKeyFile } from '../types';
+import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
 interface GoogleApiErrorParams {
   code: Status;
@@ -26,8 +27,8 @@ export class GoogleApiError extends Error {
     this.httpStatus = errorParams.httpStatus;
   }
 }
-export class GoogleApiServerError extends GoogleApiError {}
-export class GoogleApiClientError extends GoogleApiError {}
+export class GoogleApiServerError extends GoogleApiError { }
+export class GoogleApiClientError extends GoogleApiError { }
 
 const clientErrorStatuses = [
   Status.INVALID_ARGUMENT,
@@ -123,21 +124,28 @@ function isGoogleError(e: Error): e is GoogleError {
 export class GoogleApi {
   readonly serviceAccountKeyFile: ServiceAccountKeyFile;
   readonly analyticsAdminServiceClient: AnalyticsAdminServiceClient;
+  readonly betaAnalyticsDataClient: BetaAnalyticsDataClient;
 
   static fromServiceAccountKeyFile(serviceAccountKeyFile: ServiceAccountKeyFile): GoogleApi {
     const analyticsAdminServiceClient = new AnalyticsAdminServiceClient({
       credentials: makeCredentials(serviceAccountKeyFile),
       projectId: serviceAccountKeyFile.project_id,
     });
-    return new GoogleApi(serviceAccountKeyFile, analyticsAdminServiceClient);
+    const betaAnalyticsDataClient = new BetaAnalyticsDataClient({
+      credentials: makeCredentials(serviceAccountKeyFile),
+      projectId: serviceAccountKeyFile.project_id,
+    });
+    return new GoogleApi(serviceAccountKeyFile, analyticsAdminServiceClient, betaAnalyticsDataClient);
   }
 
   constructor(
     serviceAccountKeyFile: ServiceAccountKeyFile,
-    analyticsAdminServiceClient: AnalyticsAdminServiceClient
+    analyticsAdminServiceClient: AnalyticsAdminServiceClient,
+    betaAnalyticsDataClient: BetaAnalyticsDataClient
   ) {
     this.serviceAccountKeyFile = serviceAccountKeyFile;
     this.analyticsAdminServiceClient = analyticsAdminServiceClient;
+    this.betaAnalyticsDataClient = betaAnalyticsDataClient;
   }
 
   async listAccountSummaries(): Promise<protos.google.analytics.admin.v1alpha.IAccountSummary[]> {
@@ -145,9 +153,63 @@ export class GoogleApi {
     return accountSummaries;
   }
 
+  async runReport(property: string, slug: string, startDate?: string, endDate?: string, dimensions?: string[], metrics?: string[]) {
+    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+    const DEFAULT_DIMENSIONS = [
+      'date',
+    ]
+    const DEFAULT_METRICS = [
+      'screenPageViews',
+      'totalUsers',
+      'screenPageViewsPerUser',
+    ]
+
+    try {
+      const [response] = await this.betaAnalyticsDataClient.runReport({
+        property: property,
+        dateRanges: [
+          {
+            startDate: startDate ?? (new Date(Date.now() - ONE_WEEK)).toISOString().split('T')[0],
+            endDate: endDate ?? 'today',
+          },
+        ],
+        dimensions: (dimensions || DEFAULT_DIMENSIONS).map((dimension) => { return { name: dimension } }),
+        metrics: (metrics || DEFAULT_METRICS).map((metric) => { return { name: metric } }),
+        dimensionFilter: {
+          filter: {
+            fieldName: 'unifiedPagePathScreen',
+            stringFilter: {
+              value: slug
+            },
+          }
+        },
+      });
+
+      return response
+    } catch (e) {
+      if (e instanceof Error) {
+        throwGoogleApiError(e);
+      }
+      throw e;
+    }
+  }
+
+
   private async fetchAccountSummaries() {
     try {
+      await this.runReport('properties/abc123xyz', 'bar')
       return await this.analyticsAdminServiceClient.listAccountSummaries();
+    } catch (e) {
+      if (e instanceof Error) {
+        throwGoogleApiError(e);
+      }
+      throw e;
+    }
+  }
+
+  private async fetchAccounts() {
+    try {
+      return await this.analyticsAdminServiceClient.listAccounts();
     } catch (e) {
       if (e instanceof Error) {
         throwGoogleApiError(e);
