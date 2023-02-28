@@ -3,15 +3,20 @@ import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
 import { DateRangeType, Row, RunReportResponse } from 'types';
-import DateRange from '@/helpers/dateRange.enum';
+import DateRange from '../../helpers/dateRange.enum';
 import { config } from '../../config';
+import { styles } from './AnalyticsApp.styles'
 import ChartContent from './ChartContent';
+import { Flex } from '@contentful/f36-components';
+
 
 const AnalyticsApp = () => {
   const [runReportResponse, setRunReportResponse] = useState<RunReportResponse>({} as RunReportResponse);
   const [pageViewData, setPageViewData] = useState<RunReportResponse>(runReportResponse);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek')
   const [slugValue] = useFieldValue<string>('slug');
+  const [loading, setLoading] = useState<boolean>(true);
+
   useAutoResizer();
 
   useEffect(() => {
@@ -46,7 +51,8 @@ const AnalyticsApp = () => {
     }
     if (runReportResponse.rowCount) {
       const newData = sliceByDateRange(dateRange);
-      setPageViewData(newData)
+      setPageViewData(newData);
+      setLoading(false)
     }
   }, [dateRange, runReportResponse])
 
@@ -66,13 +72,20 @@ const AnalyticsApp = () => {
 
   return (
     <>
-      <ChartHeader
-        metricName={metricName ? metricName : ''}
-        metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
-        handleChange={handleDateRangeChange}
-      />
-      {pageViewData.rowCount ? <ChartContent pageViewData={pageViewData} /> : <>There are no pageviews to show for this range</>}
-      <ChartFooter slugName={slugValue ? slugValue : ''} viewUrl="https://analytics.google.com/" />
+      {loading ?
+        <Flex justifyContent="center" alignItems="center" className={styles.wrapper}>
+          <div className={styles.loader}></div>
+        </Flex> :
+        <>
+          <ChartHeader
+            metricName={metricName ? metricName : ''}
+            metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
+            handleChange={handleDateRangeChange}
+          />
+          {pageViewData.rowCount ? <ChartContent pageViewData={pageViewData} /> : <>There are no pageviews to show for this range</>}
+          <ChartFooter slugName={slugValue ? slugValue : ''} viewUrl="https://analytics.google.com/" />
+        </>
+      }
     </>
   );
 };
