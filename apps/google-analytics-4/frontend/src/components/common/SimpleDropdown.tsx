@@ -4,23 +4,22 @@ import { FormControl, Select } from '@contentful/f36-components'
 interface Props {
   children: any;
   selectId: string;
+  isRequired?: boolean,
   formTitle: string;
-  helpText: string;
   isDisabled?: boolean
   onSelectionChange: React.ChangeEventHandler<HTMLSelectElement>;
 }
 
 export default function SimpleDropdown(props: Props) {
-  const { selectId, children, onSelectionChange, formTitle, helpText, isDisabled } = props
+  const { selectId, children, onSelectionChange, isRequired, formTitle, isDisabled } = props
 
   return (
-    <FormControl isRequired>
+    <FormControl isRequired={isRequired ?? false}>
       <FormControl.Label>{formTitle}</FormControl.Label>
       <Select id={selectId} defaultValue="" isDisabled={isDisabled} onChange={onSelectionChange}>
-        <Select.Option value="" isDisabled> Please select an option... </Select.Option>
+        <Select.Option value="" isDisabled />
         {children}
       </Select>
-      <FormControl.HelpText>{helpText}</FormControl.HelpText>
     </FormControl>
   )
 }

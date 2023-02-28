@@ -7,6 +7,7 @@ import ConfigurationPage from 'components/config-screen/configuration/Configurat
 import AboutSection from 'components/config-screen/header/AboutSection';
 import useKeyService from 'components/../hooks/useKeyService';
 import { BadgeVariant, Box } from '@contentful/f36-components';
+import AssignContentTypePage from 'components/config-screen/assign-content-type/AssignContentTypePage';
 
 export interface InstallationErrorType {
   type: INSTALLATION_ERROR_ENUMS,
@@ -81,11 +82,20 @@ const HomeAnalyticsPage = () => {
             <ConfigurationPage
               accountsSummaries={accountsSummaries}
               isInEditMode={isInEditMode}
-              serviceAccountKeyId={parameters.serviceAccountKeyId}
-              serviceAccountKey={parameters.serviceAccountKey} />
+            />
             <Splitter />
           </>
         )}
+        {accountsSummaries.length > 0 && installationErrors.length === 0 && parameters.serviceAccountKeyId && parameters.serviceAccountKey && (
+          <>
+            <AssignContentTypePage
+              isInEditMode={isInEditMode}
+              serviceAccountKeyId={parameters.serviceAccountKeyId}
+              serviceAccountKey={parameters.serviceAccountKey}
+            />
+          </>
+        )}
+        <Splitter />
       </Box>
 
       <GoogleAnalyticsIcon />

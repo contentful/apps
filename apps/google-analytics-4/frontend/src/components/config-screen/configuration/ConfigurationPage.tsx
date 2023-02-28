@@ -6,55 +6,19 @@ import { MenuIcon, CycleIcon, CheckCircleIcon, ArrowForwardTrimmedIcon } from '@
 import { Collection, ContentFields, ContentTypeProps, KeyValueMap, LocaleProps } from 'contentful-management';
 import SimpleDropdown from 'components/common/SimpleDropdown';
 import { createClient } from 'contentful-management'
-import { useApi } from 'hooks/useApi';
-import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
 
 interface Props {
   accountsSummaries: any[],
   isInEditMode: boolean,
-  serviceAccountKeyId: ServiceAccountKeyId,
-  serviceAccountKey: ServiceAccountKey,
 }
 
 export default function ConfigurationPage(props: Props) {
-  const { accountsSummaries, isInEditMode, serviceAccountKeyId, serviceAccountKey } = props;
-  const [properties, setProperties] = useState<any[]>([]);
+  const { accountsSummaries, isInEditMode } = props;
 
   const [selectedAccount, setSelectedAccount] = useState<any>();
   const [selectedProperty, setSelectedProperty] = useState<any>();
-  const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
-  const [selectedContentTypeId, setSelectedContentTypeId] = useState<string>('');
-  const [fields, setFields] = useState<ContentFields<KeyValueMap>[]>([]);
-  const [selectedField, setSelectedFields] = useState<string>('');
-  const [defaultEnvLocal, setDefaultEnvLocal] = useState<string>('');
-  const [slug, setSlug] = useState<any>();
+
   const [isInEditConfigurationMode, setIsInEditConfigurationMode] = useState<boolean>(false);
-
-  const api = useApi(serviceAccountKeyId, serviceAccountKey);
-  // const [contentFields, setContentFields] = useState<ContentFields<KeyValueMap>[]>([]);
-  // const [selectedContentField, setSelectedContentField] = useState<ContentFields<KeyValueMap>>();
-
-  const sdk = useSDK<AppExtensionSDK>();
-
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-  )
-
-  useEffect(() => {
-    const getContentTypes = async () => {
-      // Check if this has the 100 item limit
-      const space = await cma.getSpace(sdk.ids.space);
-      const environment = await space.getEnvironment(sdk.ids.environment)
-      const locales = await environment.getLocales()
-      const defaultLocale = locales.items.find(l => l.default)
-      if (defaultLocale) setDefaultEnvLocal(defaultLocale.code);
-      const _contentTypes = await environment.getContentTypes();
-      console.log(_contentTypes)
-      setContentTypes(_contentTypes.items);
-    }
-
-    getContentTypes();
-  }, [isInEditMode, sdk.ids.environment, sdk.ids.space])
 
   const handlePropertySelection = (event: any) => {
     const _selectedProperty = JSON.parse(event.target.value);
@@ -77,23 +41,6 @@ export default function ConfigurationPage(props: Props) {
     setIsInEditConfigurationMode(false)
   }
 
-  // const openSdkDialog = (): string => {
-  //   console.log(selectedContentTypeId)
-  //   const dialog = sdk.dialogs.selectSingleEntry({
-  //     contentTypes: [selectedContentTypeId],
-  //   }).then(async (selectedEntry: any) => {
-  //     const fetchedAccountSummaries = await api.getPageData();
-  //     console.log('Account summaries: ', accountsSummaries)
-  //     console.log('Page Data: ', fetchedAccountSummaries)
-  //     console.log('selectedField', selectedField)
-  //     console.log('defaultEnvLocal', defaultEnvLocal)
-  //     console.log('selectedEntry', selectedEntry)
-  //     console.log(selectedEntry.fields[selectedField][defaultEnvLocal]) // value from that field on a specific entry record
-  //   });
-
-  //   if (!dialog) return ""
-  //   return "Dialog Completed?"
-  // }
   console.log(accountsSummaries)
 
 
@@ -169,21 +116,7 @@ export default function ConfigurationPage(props: Props) {
             </FormControl>
           </>
         }
-        {/* <SimpleDropdown selectId='contentTypeSelect' formTitle='Content Type Selection' helpText='Please select a content type' isDisabled={false} onSelectionChange={handleContentTypeSelection}>
-          {contentTypes.map((contentType) => {
-            return (<Select.Option value={contentType.sys.id}>{`${contentType.name}`}</Select.Option>)
-          })}
-        </SimpleDropdown>
-
-        <SimpleDropdown selectId='fieldSelect' formTitle='Field Selection' helpText='Please select a field' isDisabled={!selectedContentTypeId} onSelectionChange={handleFieldSelection}>
-          {fields.map((field) => {
-            return (<Select.Option value={field.id}>{`${field.name}`}</Select.Option>)
-          })}
-        </SimpleDropdown> */}
       </Card>
-
-      {/* Remove??? */}
-      {/* <Button onClick={openSdkDialog} isDisabled={!selectedField}>Select Entry</Button> */}
     </Stack>
   )
 }
