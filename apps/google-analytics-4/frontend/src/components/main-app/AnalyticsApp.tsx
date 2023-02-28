@@ -4,11 +4,11 @@ import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
 import { RunReportResponse } from 'types';
 import { config } from '../../config';
+import ChartContent from './ChartContent';
 
 const AnalyticsApp = () => {
-  const [runReportResponse, setRunReportResponse] = useState<RunReportResponse | undefined>();
+  const [runReportResponse, setRunReportResponse] = useState<RunReportResponse>({} as RunReportResponse);
   const [slugValue] = useFieldValue<string>('slug');
-
   useAutoResizer();
 
   useEffect(() => {
@@ -16,22 +16,20 @@ const AnalyticsApp = () => {
 
     async function fetchData() {
       const response = await fetch(`${baseUrl}/sampleData/runReportResponseHasViews.json`);
-      setRunReportResponse(await response.json());
+      if (response.ok) setRunReportResponse(await response.json());
     }
 
     fetchData();
   }, []);
 
   const pageViews =
-    runReportResponse &&
+    runReportResponse.rows &&
     runReportResponse.rows.reduce((acc, val) => {
       const metric = +val.metricValues[0].value;
       return acc + metric;
     }, 0);
 
-  const metricName = runReportResponse && runReportResponse.metricHeaders[0].name;
-
-  debugger;
+  const metricName = runReportResponse.metricHeaders && runReportResponse.metricHeaders[0].name;
 
   return (
     <>
@@ -39,6 +37,7 @@ const AnalyticsApp = () => {
         metricName={metricName ? metricName : ''}
         metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
       />
+      {runReportResponse.rowCount ? <ChartContent pageViewData={runReportResponse} /> : null}
       <ChartFooter slugName={slugValue ? slugValue : ''} viewUrl="https://analytics.google.com/" />
     </>
   );

@@ -76,7 +76,7 @@
       ],
       "metricValues": [
         {
-          "value": "7",
+          "value": "14",
           "oneValue": "value"
         }
       ]
@@ -90,7 +90,7 @@
       ],
       "metricValues": [
         {
-          "value": "6",
+          "value": "9",
           "oneValue": "value"
         }
       ]
@@ -118,7 +118,7 @@
       ],
       "metricValues": [
         {
-          "value": "1",
+          "value": "25",
           "oneValue": "value"
         }
       ]
@@ -132,7 +132,7 @@
       ],
       "metricValues": [
         {
-          "value": "1",
+          "value": "5",
           "oneValue": "value"
         }
       ]
