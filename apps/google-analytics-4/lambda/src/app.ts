@@ -21,6 +21,15 @@ dotenv.config(); // TODO: load env vars from .env.local
 
 const app = express();
 
+interface RunReportParamsType {
+  propertyId: string;
+  slug: string;
+  startDate: string;
+  endDate: string;
+  dimensions: string[];
+  metrics: string[];
+}
+
 // allow all OPTIONS requests
 app.options('/*', function (_req, res) {
   res.header('Access-Control-Allow-Origin', '*');
@@ -44,8 +53,8 @@ app.options('/*', function (_req, res) {
 });
 
 // validate signed requests
-app.use(['/api/credentials', '/api/account_summaries'], verifySignedRequestMiddleware);
-app.use(['/api/credentials', '/api/account_summaries'], serviceAccountKeyProvider);
+app.use(['/api/credentials', '/api/account_summaries', '/api/run_report'], verifySignedRequestMiddleware);
+app.use(['/api/credentials', '/api/account_summaries', '/api/run_report'], serviceAccountKeyProvider);
 
 // serve static files for sample data
 app.use(express.static('public'));
@@ -84,6 +93,24 @@ app.get('/api/account_summaries', async (req, res, next) => {
 
     const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
     const result = await googleApi.listAccountSummaries();
+    res.status(200).json(result);
+  } catch (err) {
+    // pass to apiErrorHandler
+    next(err);
+  }
+});
+
+app.get('/api/run_report', async (req, res, next) => {
+  try {
+    const serviceAccountKeyFile = req.serviceAccountKey;
+    const { propertyId, slug, startDate, endDate, dimensions, metrics } = req.params as RunReportParamsType;
+
+    // intentional runtime error because the middleware already handles this. typescript
+    // just doesn't realize
+    if (serviceAccountKeyFile === undefined) throw new Error('missing service account key value');
+
+    const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
+    const result = await googleApi.runReport(propertyId, slug, startDate, endDate, dimensions, metrics);
     res.status(200).json(result);
   } catch (err) {
     // pass to apiErrorHandler
