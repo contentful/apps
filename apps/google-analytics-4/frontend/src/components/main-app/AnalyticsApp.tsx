@@ -3,6 +3,7 @@ import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
 import { DateRangeType, Row, RunReportResponse } from 'types';
+import DateRange from '@/helpers/dateRange.enum';
 import { config } from '../../config';
 import ChartContent from './ChartContent';
 
@@ -30,13 +31,13 @@ const AnalyticsApp = () => {
     const sliceByDateRange = (dateRange: DateRangeType): RunReportResponse => {
       let newRows: Row[] = [];
       switch (dateRange) {
-        case 'lastDay':
+        case DateRange.LastDay:
           newRows = runReportResponse.rows.slice(0, 2);
           break;
-        case 'lastWeek':
+        case DateRange.LastWeek:
           newRows = runReportResponse.rows.slice(0, 7);
           break;
-        case 'lastMonth':
+        case DateRange.LastMonth:
           newRows = runReportResponse.rows.slice(0, 28);
           break;
       }
