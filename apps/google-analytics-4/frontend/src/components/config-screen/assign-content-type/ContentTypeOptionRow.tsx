@@ -6,11 +6,10 @@ import { ServiceAccountKeyId, ServiceAccountKey } from 'types'
 
 interface Props {
   contentTypes: ContentTypeProps[]
-  isSavedRow: boolean
 }
 
 export default function ContentTypeOptionRow(props: Props) {
-  const { contentTypes, isSavedRow } = props;
+  const { contentTypes } = props;
 
   const [selectedContentType, setSelectedContentType] = useState<ContentTypeProps>();
   const [fields, setFields] = useState<ContentFields[]>([]);
@@ -33,14 +32,14 @@ export default function ContentTypeOptionRow(props: Props) {
       <Box style={{ minWidth: '200px' }}>
         <SimpleDropdown selectId='contentTypeSelect' formTitle='Content Type' isDisabled={false} onSelectionChange={handleContentTypeSelection}>
           {contentTypes.map((contentType) => {
-            return (<Select.Option value={JSON.stringify(contentType)}>{`${contentType.name}`}</Select.Option>)
+            return (<Select.Option key={contentType.sys.id} value={JSON.stringify(contentType)}>{`${contentType.name}`}</Select.Option>)
           })}
         </SimpleDropdown>
       </Box>
       <Box style={{ minWidth: '200px' }}>
         <SimpleDropdown selectId='fieldSelect' formTitle='Field' isDisabled={!selectedContentType} onSelectionChange={handleFieldSelection}>
           {fields.map((field) => {
-            return (<Select.Option value={JSON.stringify(field)}>{`${field.name}`}</Select.Option>)
+            return (<Select.Option key={field.id} value={JSON.stringify(field)}>{`${field.name}`}</Select.Option>)
           })}
         </SimpleDropdown>
       </Box>
@@ -55,7 +54,6 @@ export default function ContentTypeOptionRow(props: Props) {
           />
         </FormControl>
       </Box>
-      {!isSavedRow && <Button>Save</Button>}
       <Button>Remove</Button>
     </Stack>
   )

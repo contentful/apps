@@ -6,10 +6,6 @@ import { AppInstallationParameters, ServiceAccountKey, ServiceAccountKeyId } fro
 import { convertServiceAccountKeyToServiceAccountKeyId, convertKeyFileToServiceAccountKey, AssertionError } from 'utils/serviceAccountKey';
 import omitBy from 'lodash/omitBy';
 
-interface Props {
-  onCancelGoogleAccountDetails: Function
-}
-
 interface KeyServiceInfoType {
   parameters: AppInstallationParameters,
   serviceAccountKeyFile: string,
@@ -19,12 +15,11 @@ interface KeyServiceInfoType {
   handleKeyFileChange: Function,
 }
 
-export default function useKeyService(props: Props): KeyServiceInfoType {
-  const { onCancelGoogleAccountDetails } = props;
+export default function useKeyService(): KeyServiceInfoType {
 
-  const [parameters, setParameters] = useState<AppInstallationParameters>({ serviceAccountKey: null, serviceAccountKeyId: null });
-  const [newServiceAccountKey, setNewServiceAccountKey] = useState<ServiceAccountKey | null>(null);
-  const [newServiceAccountKeyId, setNewServiceAccountKeyId] = useState<ServiceAccountKeyId | null>(null);
+  const [parameters, setParameters] = useState<AppInstallationParameters>({} as AppInstallationParameters);
+  const [newServiceAccountKey, setNewServiceAccountKey] = useState<ServiceAccountKey>();
+  const [newServiceAccountKeyId, setNewServiceAccountKeyId] = useState<ServiceAccountKeyId>();
   const [serviceAccountKeyFile, setServiceAccountKeyFile] = useState<string>('');
   const [serviceAccountKeyFileErrorMessage, setServiceAccountKeyFileErrorMessage] = useState<string>('');
   const [serviceAccountKeyFileIsValid, setServiceAccountKeyFileIsValid] = useState<boolean>(true);
@@ -56,7 +51,6 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
       omitBy(newServiceKeyParameters, (val) => val === null)
     );
 
-    onCancelGoogleAccountDetails();
     setParameters(newParameters);
     setServiceAccountKeyFileIsRequired(false);
     setServiceAccountKeyFile('');
@@ -66,7 +60,6 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
       targetState: currentState,
     };
   }, [
-    onCancelGoogleAccountDetails,
     newServiceAccountKey,
     newServiceAccountKeyId,
     serviceAccountKeyFileIsRequired,
@@ -81,7 +74,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
 
   useEffect(() => {
     const setupAppInstallationParameters = async () => {
-      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
+      const currentParameters: AppInstallationParameters = await sdk.app.getParameters() ?? {} as AppInstallationParameters
 
       if (currentParameters) {
         setParameters(currentParameters);
@@ -98,53 +91,45 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     setupAppInstallationParameters();
   }, [sdk]);
 
-  const setValidServiceAccountKey = (newServiceAccountKey: ServiceAccountKey | null) => {
+  const handleValidServiceAccountKey = (newServiceAccountKey: ServiceAccountKey | undefined) => {
     setNewServiceAccountKey(newServiceAccountKey);
     setNewServiceAccountKeyId(
       newServiceAccountKey
         ? convertServiceAccountKeyToServiceAccountKeyId(newServiceAccountKey)
-        : null
+        : undefined
     );
     setServiceAccountKeyFileErrorMessage('');
     setServiceAccountKeyFileIsValid(true);
   };
 
-  const setInvalidServiceAccountKey = (errorMessage: string) => {
-    setNewServiceAccountKey(null);
-    setNewServiceAccountKeyId(null);
+  const handleInvalidServiceAccountKey = (errorMessage: string) => {
+    setNewServiceAccountKey(undefined);
+    setNewServiceAccountKeyId(undefined);
     setServiceAccountKeyFileErrorMessage(errorMessage);
     setServiceAccountKeyFileIsValid(false);
   };
-
 
   const handleKeyFileChange = (keyFile: string) => {
     setServiceAccountKeyFile(keyFile);
 
     const trimmedFieldValue = keyFile;
     if (trimmedFieldValue === '') {
-      setValidServiceAccountKey(null);
+      handleValidServiceAccountKey(undefined);
       return;
     }
 
-    let newServiceAccountKey: ServiceAccountKey;
     try {
-      newServiceAccountKey = convertKeyFileToServiceAccountKey(trimmedFieldValue);
+      const newServiceAccountKey = convertKeyFileToServiceAccountKey(trimmedFieldValue);
+      handleValidServiceAccountKey(newServiceAccountKey);
     } catch (e) {
-      if (
-        // failed assertions about key file contents
-        e instanceof AssertionError ||
-        // could not parse as JSON
-        e instanceof SyntaxError
-      ) {
-        setInvalidServiceAccountKey(e.message);
+      // failed assertions about key file contents or could not parse as JSON
+      if (e instanceof AssertionError || e instanceof SyntaxError) {
+        handleInvalidServiceAccountKey(e.message);
       } else {
         console.error(e);
-        setInvalidServiceAccountKey('An unknown error occurred');
+        handleInvalidServiceAccountKey('An unknown error occurred');
       }
-      return;
     }
-
-    setValidServiceAccountKey(newServiceAccountKey);
   };
 
   return {

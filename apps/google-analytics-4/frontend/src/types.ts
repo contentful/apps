@@ -1,6 +1,6 @@
 export interface AppInstallationParameters {
-  serviceAccountKey: ServiceAccountKey | null;
-  serviceAccountKeyId: ServiceAccountKeyId | null;
+  serviceAccountKey: ServiceAccountKey;
+  serviceAccountKeyId: ServiceAccountKeyId;
 }
 
 export interface ServiceAccountKey {

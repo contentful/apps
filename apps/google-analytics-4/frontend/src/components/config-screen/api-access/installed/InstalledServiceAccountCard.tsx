@@ -12,8 +12,6 @@ interface Props {
   serviceAccountKey: ServiceAccountKey;
   onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>;
   onAccountSummariesFetch: Function;
-  installationErrors: InstallationErrorType[];
-  onInstallationErrors: Function;
 }
 
 // TODO:
@@ -22,17 +20,14 @@ interface Props {
 // USE ga analytics resopnse for disabled Api key
 
 const InstalledServiceAccountCard = (props: Props) => {
-  const {
-    serviceAccountKeyId,
-    serviceAccountKey,
-    onEditGoogleAccountDetails,
-    onAccountSummariesFetch,
-    installationErrors,
-    onInstallationErrors,
-  } = props
+  const { serviceAccountKeyId, serviceAccountKey, onEditGoogleAccountDetails, onAccountSummariesFetch } = props
 
   const [isLoading, setIsLoading] = useState(true);
+  const [installationErrors, setInstallationErrors] = useState<InstallationErrorType[]>([])
 
+  const handleInstallationErrors = (_installationErrors: InstallationErrorType[]) => {
+    setInstallationErrors(_installationErrors)
+  }
   // NOTE: Due to a bug installation parameters are not available at sdk.parameters.installation form the config screen
   // location. Therefore we must pass down the values directly to the useApi hook. If the bug is fixed this won't be
   // necessary
@@ -110,7 +105,7 @@ const InstalledServiceAccountCard = (props: Props) => {
         _errors.push(_error)
       }
     } finally {
-      onInstallationErrors(_errors)
+      handleInstallationErrors(_errors)
       setIsLoading(false);
     }
   }
@@ -158,41 +153,41 @@ const InstalledServiceAccountCard = (props: Props) => {
 
   return (
     <Card>
-      <Flex justifyContent="space-between" marginBottom='spacingS'>
-        <Paragraph marginBottom='none'><b>Google Service Account Details</b></Paragraph>
-        <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onEditGoogleAccountDetails}>Edit</TextLink>
-      </Flex>
 
+      <Flex justifyContent="space-between" marginBottom='spacingS'>
+        <Paragraph marginBottom='none' marginTop='spacingXs'><b>Google Service Account Details</b></Paragraph>
+        <Flex justifyContent="space-between" marginBottom='spacingL'>
+          <Box paddingRight='spacingXs' paddingTop='spacingXs'>
+            <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onEditGoogleAccountDetails}>Edit</TextLink>
+          </Box>
+          {isLoading ?
+            <Spinner variant="default" /> :
+            <IconButton
+              variant="transparent"
+              size="small"
+              aria-label="refresh-button"
+              onClick={verifyAccountSummaries}
+              icon={<CycleIcon />}
+            />
+          }
+        </Flex>
+      </Flex>
       <FormControl>
         <FormControl.Label marginBottom="none">Service Account</FormControl.Label>
         <Paragraph>
-          <Flex alignItems="center" justifyContent="space-between">
-            <Flex alignItems="center">
-              <Box paddingRight='spacingS'>
-                <TextLink
-                  icon={<ExternalLinkTrimmedIcon />}
-                  alignIcon="end"
-                  href={`https://console.cloud.google.com/iam-admin/serviceaccounts/details/${serviceAccountKeyId.clientId}?project=${serviceAccountKeyId.projectId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {serviceAccountKeyId.clientEmail}
-                </TextLink>
-              </Box>
-              {isLoading ? <Spinner variant="default" /> : installationErrors.filter(e => e.type === INSTALLATION_ERROR_ENUMS.adminApi).length === 0 ? <CheckCircleIcon variant="positive" /> : <ErrorCircleIcon variant="negative" />}
-            </Flex>
-            <Box>
-              {isLoading ?
-                <Spinner variant="default" /> :
-                <IconButton
-                  variant="transparent"
-                  size="small"
-                  aria-label="refresh-button"
-                  onClick={verifyAccountSummaries}
-                  icon={<CycleIcon />}
-                />
-              }
+          <Flex alignItems="center">
+            <Box paddingRight='spacingS'>
+              <TextLink
+                icon={<ExternalLinkTrimmedIcon />}
+                alignIcon="end"
+                href={`https://console.cloud.google.com/iam-admin/serviceaccounts/details/${serviceAccountKeyId.clientId}?project=${serviceAccountKeyId.projectId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {serviceAccountKeyId.clientEmail}
+              </TextLink>
             </Box>
+            {isLoading ? <Spinner variant="default" /> : installationErrors.filter(e => e.type === INSTALLATION_ERROR_ENUMS.adminApi).length === 0 ? <CheckCircleIcon variant="positive" /> : <ErrorCircleIcon variant="negative" />}
           </Flex>
         </Paragraph>
       </FormControl>

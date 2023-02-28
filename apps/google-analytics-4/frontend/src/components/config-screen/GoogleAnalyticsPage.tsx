@@ -5,7 +5,6 @@ import Splitter from 'components/common/Splitter';
 import ApiAccessPage from 'components/config-screen/api-access/ApiAccessPage';
 import ConfigurationPage from 'components/config-screen/configuration/ConfigurationPage';
 import AboutSection from 'components/config-screen/header/AboutSection';
-import useKeyService from 'components/../hooks/useKeyService';
 import { BadgeVariant, Box } from '@contentful/f36-components';
 import AssignContentTypePage from 'components/config-screen/assign-content-type/AssignContentTypePage';
 
@@ -21,37 +20,11 @@ export interface InstallationErrorType {
 export enum INSTALLATION_ERROR_ENUMS { unknown, adminApi, dataApi, noAccounts, noProperties }
 
 const HomeAnalyticsPage = () => {
-  const [isInEditMode, setIsInEditMode] = useState<boolean>(false);
   const [accountsSummaries, setAccountsSummaries] = useState<any[]>([]);
-  const [installationErrors, setInstallationErrors] = useState<InstallationErrorType[]>([])
-
-  const handleInstallationErrors = (_installationErrors: InstallationErrorType[]) => {
-    setInstallationErrors(_installationErrors)
-  }
 
   const handleAccountSummariesFetch = (_accountSummaries: any[]) => {
     setAccountsSummaries(_accountSummaries)
   }
-
-  const handleEditGoogleAccountDetails = () => {
-    setIsInEditMode(true);
-  }
-
-  const handleCancelGoogleAccountDetails = () => {
-    handleKeyFileChange('');
-    setIsInEditMode(false);
-  }
-
-  const handleSaveGoogleAccountDetails = () => {
-    // Save stuff to local storage (mainly json blob) and probably the lambda/db on aws
-    setIsInEditMode(false);
-  }
-
-  const { parameters, serviceAccountKeyFile, serviceAccountKeyFileErrorMessage, serviceAccountKeyFileIsValid, serviceAccountKeyFileIsRequired, handleKeyFileChange } = useKeyService({ onCancelGoogleAccountDetails: handleEditGoogleAccountDetails });
-
-  const handleKeyFileChangeEventWrapper = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleKeyFileChange(event.target.value);
-  };
 
   return (
     <>
@@ -61,40 +34,16 @@ const HomeAnalyticsPage = () => {
         <AboutSection />
         <Splitter />
         <ApiAccessPage
-          isValid={serviceAccountKeyFileIsValid}
-          isRequired={serviceAccountKeyFileIsRequired}
-          errorMessage={serviceAccountKeyFileErrorMessage}
-          currentServiceAccountKeyId={parameters.serviceAccountKeyId}
-          currentServiceAccountKey={parameters.serviceAccountKey}
-          serviceAccountKeyFile={serviceAccountKeyFile}
-          onKeyFileChange={handleKeyFileChangeEventWrapper}
-          isInEditMode={isInEditMode}
-          onEditGoogleAccountDetails={handleEditGoogleAccountDetails}
-          onCancelGoogleAccountDetails={handleCancelGoogleAccountDetails}
-          onSaveGoogleAccountDetails={handleSaveGoogleAccountDetails}
           onAccountSummariesFetch={handleAccountSummariesFetch}
-          installationErrors={installationErrors}
-          onInstallationErrors={handleInstallationErrors}
         />
         <Splitter />
-        {accountsSummaries.length > 0 && installationErrors.length === 0 && parameters.serviceAccountKeyId && parameters.serviceAccountKey && (
-          <>
-            <ConfigurationPage
-              accountsSummaries={accountsSummaries}
-              isInEditMode={isInEditMode}
-            />
-            <Splitter />
-          </>
+        {accountsSummaries.length > 0 && (
+          <ConfigurationPage
+            accountsSummaries={accountsSummaries}
+          />
         )}
-        {accountsSummaries.length > 0 && installationErrors.length === 0 && parameters.serviceAccountKeyId && parameters.serviceAccountKey && (
-          <>
-            <AssignContentTypePage
-              isInEditMode={isInEditMode}
-              serviceAccountKeyId={parameters.serviceAccountKeyId}
-              serviceAccountKey={parameters.serviceAccountKey}
-            />
-          </>
-        )}
+        <Splitter />
+        <AssignContentTypePage />
         <Splitter />
       </Box>
 

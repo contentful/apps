@@ -9,11 +9,10 @@ import { createClient } from 'contentful-management'
 
 interface Props {
   accountsSummaries: any[],
-  isInEditMode: boolean,
 }
 
 export default function ConfigurationPage(props: Props) {
-  const { accountsSummaries, isInEditMode } = props;
+  const { accountsSummaries } = props;
 
   const [selectedAccount, setSelectedAccount] = useState<any>();
   const [selectedProperty, setSelectedProperty] = useState<any>();
@@ -31,6 +30,8 @@ export default function ConfigurationPage(props: Props) {
 
   const handleEditConfigurationButton = () => {
     setIsInEditConfigurationMode(true)
+  }
+  const handleTestConfigurationButton = () => {
   }
 
   const handleCancelConfigurationButton = () => {
@@ -55,7 +56,9 @@ export default function ConfigurationPage(props: Props) {
         {isInEditConfigurationMode || (!selectedAccount && !selectedProperty) ?
           <>
             <Flex alignItems="center" justifyContent="space-between">
-              <Paragraph marginBottom='none'><b >Google Analytics Configuration</b></Paragraph>
+              <Box paddingBottom='spacingL'>
+                <Paragraph marginBottom='none'><b>Google Analytics Configuration</b></Paragraph>
+              </Box>
               <Flex justifyContent="space-between" marginBottom='spacingL'>
                 <Box paddingRight='spacingXs'>
                   <TextLink testId='cancelConfigurationButton' as="button" variant='primary' onClick={handleCancelConfigurationButton}>Cancel</TextLink>
@@ -93,7 +96,12 @@ export default function ConfigurationPage(props: Props) {
           <>
             <Flex justifyContent="space-between" marginBottom='spacingS'>
               <Paragraph marginBottom='none'><b>Google Analytics Configuration</b></Paragraph>
-              <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={handleEditConfigurationButton}>Edit</TextLink>
+              <Flex justifyContent="space-between" marginBottom='spacingL'>
+                <Box paddingRight='spacingXs'>
+                  <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={handleEditConfigurationButton}>Edit</TextLink>
+                </Box>
+                <TextLink testId='saveConfigurationButton' as="button" variant='primary' onClick={handleTestConfigurationButton}>Test</TextLink>
+              </Flex>
             </Flex>
             <FormControl>
               <FormControl.Label marginBottom="none">Current Account</FormControl.Label>
