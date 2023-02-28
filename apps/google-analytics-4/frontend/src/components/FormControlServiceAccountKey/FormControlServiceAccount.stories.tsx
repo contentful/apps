@@ -5,7 +5,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import FormControlServiceAccountKey from './FormControlServiceAccountKey';
 
 export default {
-  title: 'Analytics/Google Analytics 4/FormControlServiceAccountKey',
+  title: 'Analytics/Google Analytics 4/Components/FormControlServiceAccountKey',
   component: FormControlServiceAccountKey,
 } as ComponentMeta<typeof FormControlServiceAccountKey>;
 

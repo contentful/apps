@@ -1,4 +1,4 @@
-import AnalyticsApp from 'components/main-app/AnalyticsApp';
+import AnalyticsApp from 'components/main-app/AnalyticsApp/AnalyticsApp';
 
 const Sidebar = () => {
   return <AnalyticsApp />;

@@ -8,7 +8,7 @@ const mockSlugName = 'my-page';
 const mockViewUrl = 'https://contentful.com';
 
 export default {
-  title: 'Analytics/Components/ChartFooter',
+  title: 'Analytics/Google Analytics 4/Components/ChartFooter',
   component: ChartFooter,
 } as ComponentMeta<typeof ChartFooter>;
 

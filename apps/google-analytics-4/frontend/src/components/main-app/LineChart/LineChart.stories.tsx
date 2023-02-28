@@ -5,7 +5,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import LineChart from './LineChart';
 
 export default {
-  title: 'Analytics/Components/LineChart',
+  title: 'Core/LineChart',
   component: LineChart,
   decorators: [
     (Story) => (
@@ -25,5 +25,12 @@ const mockLabels = ['January', 'February', 'March', 'April'];
 Primary.args = {
   dataValues: mockData,
   xAxisLabels: mockLabels,
-  tooltipMetricLabel: 'Page views:'
+  tooltipMetricLabel: 'Page views:',
+};
+
+Primary.parameters = {
+  design: {
+    type: 'figma',
+    url: 'https://www.figma.com/file/LKQ4FJ4bTnCSjedbRpk931/Sample-File',
+  },
 };

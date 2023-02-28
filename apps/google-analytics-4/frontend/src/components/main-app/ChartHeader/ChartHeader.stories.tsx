@@ -8,7 +8,7 @@ const mockMetricName = 'pageviews';
 const mockMetricValue = '150';
 
 export default {
-  title: 'Analytics/Components/ChartHeader',
+  title: 'Analytics/Google Analytics 4/Components/ChartHeader',
   component: ChartHeader,
 } as ComponentMeta<typeof ChartHeader>;
 

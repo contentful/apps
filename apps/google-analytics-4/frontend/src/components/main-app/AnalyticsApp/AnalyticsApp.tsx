@@ -3,7 +3,8 @@ import ChartFooter from 'components/main-app/ChartFooter/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader/ChartHeader';
 import { useEffect, useState } from 'react';
 import { RunReportResponse } from 'types';
-import { config } from '../../config';
+import { config } from '../../../config';
+import LineChart from '../LineChart/LineChart';
 
 const AnalyticsApp = () => {
   const [runReportResponse, setRunReportResponse] = useState<RunReportResponse | undefined>();
@@ -31,6 +32,9 @@ const AnalyticsApp = () => {
 
   const metricName = runReportResponse && runReportResponse.metricHeaders[0].name;
 
+  const mockData = [1000, -500, 500, 230];
+  const mockLabels = ['January', 'February', 'March', 'April'];
+
   return (
     <>
       <ChartHeader
@@ -38,6 +42,7 @@ const AnalyticsApp = () => {
         metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
       />
       <ChartFooter slugName={slugValue ? slugValue : ''} viewUrl="https://analytics.google.com/" />
+      <LineChart dataValues={mockData} xAxisLabels={mockLabels} tooltipMetricLabel="Page views" />
     </>
   );
 };
