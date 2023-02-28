@@ -54,8 +54,6 @@ const AnalyticsApp = () => {
     setDateRange(e);
   }
 
-
-
   const pageViews =
     runReportResponse.rows &&
     runReportResponse.rows.reduce((acc, val) => {
