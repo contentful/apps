@@ -31,9 +31,9 @@ type Headers = Record<string, string>;
 
 export type Credentials = z.infer<typeof ZCredentials>;
 
-export class ApiError extends Error {}
-export class ApiServerError extends ApiError {}
-export class ApiClientError extends ApiError {}
+export class ApiError extends Error { }
+export class ApiServerError extends ApiError { }
+export class ApiClientError extends ApiError { }
 
 export async function fetchFromApi<T>(
   apiUrl: URL,

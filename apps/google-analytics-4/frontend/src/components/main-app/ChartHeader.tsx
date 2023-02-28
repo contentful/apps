@@ -5,15 +5,18 @@ import { DateRangeType } from 'types';
 interface Props {
   metricName: string;
   metricValue: string;
+  handleChange: Function
 }
 
 const ChartHeader = (props: Props) => {
-  const { metricName, metricValue } = props;
+  const { metricName, metricValue, handleChange } = props;
 
   const [dateSelection, setDateSelection] = useState<DateRangeType>('lastWeek');
 
-  const handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) =>
+  const handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setDateSelection(event.target.value as DateRangeType);
+    handleChange(event.target.value as DateRangeType);
+  }
 
   return (
     <Flex
