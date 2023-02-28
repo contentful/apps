@@ -1,5 +1,5 @@
 service: sls-apps-google-analytics-4
-frameworkVersion: '3'
+frameworkVersion: '>=2.0.0 <3.0.0'
 
 plugins:
   - serverless-domain-manager
