@@ -23,7 +23,7 @@ export interface ServiceAccountKeyId {
   clientId: string;
 }
 
-interface Row {
+export interface Row {
   dimensionValues: { value: string; oneValue: string }[];
   metricValues: { value: string; oneValue: string }[];
 }
