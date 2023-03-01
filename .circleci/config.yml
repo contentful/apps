@@ -159,6 +159,8 @@ jobs:
           command: cd examples/javascript && npm run test
   
   notify-sentry-deploy:
+    docker:
+      - image: cimg/base:stable
     environment:
       SENTRY_ORG: contenful
       SENTRY_PROJECT: marketplace-apps
