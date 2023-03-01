@@ -84,8 +84,6 @@ describe('app', () => {
   });
 
   describe('GET /api/run_report', () => {
-
-
     it('responds with 200 for sample with views data', async () => {
       const response = await chai.request(app).get('/sampleData/runReportResponseHasViews.json');
       expect(response).to.have.status(200);

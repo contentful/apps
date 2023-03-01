@@ -20,17 +20,17 @@ export class GoogleApiError extends Error {
     message: ConstructorParameters<typeof Error>[0],
     options: ConstructorParameters<typeof Error>[1],
     errorParams: GoogleApiErrorParams,
-    name: string,
+    name: string
   ) {
     super(message, options);
-    this.name = name
+    this.name = name;
     this.code = errorParams.code;
     this.details = errorParams.details;
     this.httpStatus = errorParams.httpStatus;
   }
 }
-export class GoogleApiServerError extends GoogleApiError { }
-export class GoogleApiClientError extends GoogleApiError { }
+export class GoogleApiServerError extends GoogleApiError {}
+export class GoogleApiClientError extends GoogleApiError {}
 
 const clientErrorStatuses = [
   Status.INVALID_ARGUMENT,
@@ -48,9 +48,9 @@ const clientErrorStatuses = [
 // the interface Google provides does not actually match their
 // run time error objects!
 export const GoogleErrorApiErrorTypes = {
-  AdminAPI: "AdminApiError",
-  DataAPI: "DataApiError"
-}
+  AdminAPI: 'AdminApiError',
+  DataAPI: 'DataApiError',
+};
 
 interface GoogleError {
   name: string;
@@ -145,7 +145,11 @@ export class GoogleApi {
       credentials: makeCredentials(serviceAccountKeyFile),
       projectId: serviceAccountKeyFile.project_id,
     });
-    return new GoogleApi(serviceAccountKeyFile, analyticsAdminServiceClient, betaAnalyticsDataClient);
+    return new GoogleApi(
+      serviceAccountKeyFile,
+      analyticsAdminServiceClient,
+      betaAnalyticsDataClient
+    );
   }
 
   constructor(
@@ -163,39 +167,44 @@ export class GoogleApi {
     return accountSummaries;
   }
 
-  async runReport(property: string, slug: string, startDate?: string, endDate?: string, dimensions?: string[], metrics?: string[]) {
+  async runReport(
+    property: string,
+    slug: string,
+    startDate?: string,
+    endDate?: string,
+    dimensions?: string[],
+    metrics?: string[]
+  ) {
     const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
-    const DEFAULT_DIMENSIONS = [
-      'date',
-    ]
-    const DEFAULT_METRICS = [
-      'screenPageViews',
-      'totalUsers',
-      'screenPageViewsPerUser',
-    ]
+    const DEFAULT_DIMENSIONS = ['date'];
+    const DEFAULT_METRICS = ['screenPageViews', 'totalUsers', 'screenPageViewsPerUser'];
 
     try {
       const [response] = await this.betaAnalyticsDataClient.runReport({
         property: property,
         dateRanges: [
           {
-            startDate: startDate ?? (new Date(Date.now() - ONE_WEEK)).toISOString().split('T')[0],
+            startDate: startDate ?? new Date(Date.now() - ONE_WEEK).toISOString().split('T')[0], // extracts YYYY-MM-DD from ISO string
             endDate: endDate ?? 'today',
           },
         ],
-        dimensions: (dimensions || DEFAULT_DIMENSIONS).map((dimension) => { return { name: dimension } }),
-        metrics: (metrics || DEFAULT_METRICS).map((metric) => { return { name: metric } }),
+        dimensions: (dimensions || DEFAULT_DIMENSIONS).map((dimension) => {
+          return { name: dimension };
+        }),
+        metrics: (metrics || DEFAULT_METRICS).map((metric) => {
+          return { name: metric };
+        }),
         dimensionFilter: {
           filter: {
             fieldName: 'unifiedPagePathScreen',
             stringFilter: {
-              value: slug
+              value: slug,
             },
-          }
+          },
         },
       });
 
-      return response
+      return response;
     } catch (e) {
       if (e instanceof Error) {
         e.name = GoogleErrorApiErrorTypes.DataAPI;
