@@ -159,8 +159,6 @@ jobs:
           command: cd examples/javascript && npm run test
   
   notify-sentry-deploy:
-    executor:
-    # Specify executor for running deploy job
     environment:
       SENTRY_ORG: contenful
       SENTRY_PROJECT: marketplace-apps
