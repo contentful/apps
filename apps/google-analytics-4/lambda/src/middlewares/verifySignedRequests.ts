@@ -4,16 +4,12 @@ import {
   ContentfulContextHeader,
   ContentfulHeader,
 } from '@contentful/node-apps-toolkit/lib/requests/typings';
-import express from 'express';
-import { InvalidSignature } from '../lib/errors/invalid-signature';
-import { UnableToVerifyRequest } from '../lib/errors/unable-to-verify-request';
+import { NextFunction, Request, Response } from 'express';
+import { InvalidSignature } from '../lib/errors/invalidSignature';
+import { UnableToVerifyRequest } from '../lib/errors/unableToVerifyRequest';
 import { IncomingHttpHeaders } from 'http';
 
-export const verifySignedRequestMiddleware = (
-  req: express.Request,
-  _res: express.Response,
-  next: express.NextFunction
-) => {
+export const verifySignedRequestMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   const signingSecret = (process.env.SIGNING_SECRET || '').trim();
   const canonicalReq = makeCanonicalReq(req);
   let isValidReq = false;
@@ -37,7 +33,7 @@ export const verifySignedRequestMiddleware = (
   next();
 };
 
-const makeCanonicalReq = (req: express.Request) => {
+const makeCanonicalReq = (req: Request) => {
   const requiredHeaders = requestSigningHeaders(req.headers);
 
   return <CanonicalRequest>{
