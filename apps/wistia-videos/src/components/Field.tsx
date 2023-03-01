@@ -8,6 +8,7 @@ import {
   TextInput,
   Spinner,
   Card,
+  Button,
 } from '@contentful/forma-36-react-components';
 import styled from 'styled-components';
 // import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc';
@@ -133,6 +134,11 @@ const Field = (props: FieldProps) => {
                   ))}
                 </Grid>
               </Flex>
+              <Flex>
+                <Button>Load More Videos</Button>
+
+              </Flex>
+
 
               {sdk.field.getValue() && sdk.field.getValue().items.length > 0 && (
                 <Flex flexDirection={'column'} marginTop={'spacingL'}>
