@@ -5,7 +5,16 @@ plugins:
   - serverless-domain-manager
   - serverless-offline
 
-custom: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
+custom: 
+  SIGNING_SECRET: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/test/signing-secret}
+  customDomain:
+      domainName: google-analytics-4-test.ctfapps.net
+      stage: test
+      createRoute53Record: true
+      endpointType: 'edge'
+      securityPolicy: tls_1_2
+    serverless-offline:
+      httpPort: 8080
 
 provider:
   name: aws
