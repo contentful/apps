@@ -19,9 +19,11 @@ export class GoogleApiError extends Error {
   constructor(
     message: ConstructorParameters<typeof Error>[0],
     options: ConstructorParameters<typeof Error>[1],
-    errorParams: GoogleApiErrorParams
+    errorParams: GoogleApiErrorParams,
+    name: string,
   ) {
     super(message, options);
+    this.name = name
     this.code = errorParams.code;
     this.details = errorParams.details;
     this.httpStatus = errorParams.httpStatus;
@@ -45,6 +47,11 @@ const clientErrorStatuses = [
 // our own interface to match the shape of a GoogleError, since
 // the interface Google provides does not actually match their
 // run time error objects!
+export const GoogleErrorApiErrorTypes = {
+  AdminAPI: "AdminApiError",
+  DataAPI: "DataApiError"
+}
+
 interface GoogleError {
   name: string;
   message: string;
@@ -70,7 +77,8 @@ export function throwGoogleApiError(e: Error): never {
         code: Status.UNKNOWN,
         details: e.message,
         httpStatus: 500, // we don't know what happened so we'll assume it's a server error
-      }
+      },
+      e.name
     );
   }
 
@@ -82,7 +90,8 @@ export function throwGoogleApiError(e: Error): never {
         code: e.code,
         details: e.details,
         httpStatus: httpStatusFromGoogleRpcStatus(e.code),
-      }
+      },
+      e.name
     );
   } else {
     // we'll assume that any GoogleErrors (with a code) that aren't client errors
@@ -94,7 +103,8 @@ export function throwGoogleApiError(e: Error): never {
         code: e.code,
         details: e.details,
         httpStatus: httpStatusFromGoogleRpcStatus(e.code),
-      }
+      },
+      e.name
     );
   }
 }
@@ -188,30 +198,19 @@ export class GoogleApi {
       return response
     } catch (e) {
       if (e instanceof Error) {
+        e.name = GoogleErrorApiErrorTypes.DataAPI;
         throwGoogleApiError(e);
       }
       throw e;
     }
   }
-
 
   private async fetchAccountSummaries() {
     try {
-      await this.runReport('properties/abc123xyz', 'bar')
       return await this.analyticsAdminServiceClient.listAccountSummaries();
     } catch (e) {
       if (e instanceof Error) {
-        throwGoogleApiError(e);
-      }
-      throw e;
-    }
-  }
-
-  private async fetchAccounts() {
-    try {
-      return await this.analyticsAdminServiceClient.listAccounts();
-    } catch (e) {
-      if (e instanceof Error) {
+        e.name = GoogleErrorApiErrorTypes.AdminAPI;
         throwGoogleApiError(e);
       }
       throw e;
