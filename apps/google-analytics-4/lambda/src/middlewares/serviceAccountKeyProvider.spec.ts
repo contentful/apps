@@ -5,7 +5,7 @@ import {
   InvalidServiceAccountKey,
   MissingServiceAccountKeyHeader,
   serviceAccountKeyProvider,
-} from './service-account-key-provider';
+} from './serviceAccountKeyProvider';
 import {
   validServiceAccountKeyFile,
   validServiceAccountKeyFileBase64,
