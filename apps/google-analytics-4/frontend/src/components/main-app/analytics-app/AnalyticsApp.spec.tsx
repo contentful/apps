@@ -8,7 +8,10 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useFieldValue: () => 'fieldValue',
 }));
 
-const { findByTestId, getByTestId, getByText } = screen;
+const { findByTestId, getByTestId, getByText, findByText } = screen;
+
+const SELECT_TEST_ID = 'cf-ui-select';
+const NOTE_TEST_ID = 'cf-ui-note';
 
 describe('AnalyticsApp', () => {
   it('mounts data', async () => {
@@ -22,7 +25,7 @@ describe('AnalyticsApp', () => {
 
     render(<AnalyticsApp />);
 
-    const dropdown = await findByTestId('cf-ui-select');
+    const dropdown = await findByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
 
     expect(dropdown).toBeVisible();
@@ -40,12 +43,30 @@ describe('AnalyticsApp', () => {
 
     render(<AnalyticsApp />);
 
-    const dropdown = await findByTestId('cf-ui-select');
-    const warningNote = getByTestId('cf-ui-note');
+    const dropdown = getByTestId(SELECT_TEST_ID);
+    const warningNote = getByTestId(NOTE_TEST_ID);
     const noteText = getByText('There are no pageviews to show for this range');
 
     expect(dropdown).toBeVisible();
     expect(warningNote).toBeVisible();
+    expect(noteText).toBeVisible();
+  });
+
+  it('mounts with error message when fetch error thrown', async () => {
+    jest
+      .spyOn(global, 'fetch')
+      .mockImplementation(
+        jest.fn(() => Promise.reject({ message: 'mock Api error' })) as jest.Mock
+      );
+
+    render(<AnalyticsApp />);
+
+    const dropdown = getByTestId(SELECT_TEST_ID);
+    const errorNote = getByTestId(NOTE_TEST_ID);
+    const noteText = await findByText('mock Api error');
+
+    expect(dropdown).toBeVisible();
+    expect(errorNote).toBeVisible();
     expect(noteText).toBeVisible();
   });
 });

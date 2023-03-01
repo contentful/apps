@@ -34,7 +34,7 @@ const AnalyticsApp = () => {
           setRunReportResponse(await response.json());
         }
       } catch (e) {
-        setError(error);
+        setError(e as Error);
         setLoading(false);
       }
     }
