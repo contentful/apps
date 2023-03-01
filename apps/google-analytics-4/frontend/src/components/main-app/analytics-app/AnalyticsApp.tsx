@@ -3,10 +3,10 @@ import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
 import { DateRangeType, Row, RunReportResponse } from 'types';
-import DateRange from '../../helpers/dateRange.enum';
-import { config } from '../../config';
+import DateRange from '../../../helpers/dateRange.enum';
+import { config } from '../../../config';
 import { styles } from './AnalyticsApp.styles';
-import ChartContent from './ChartContent';
+import ChartContent from '../ChartContent';
 import { Flex, Note } from '@contentful/f36-components';
 
 const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytic data at this time.';
@@ -28,16 +28,15 @@ const AnalyticsApp = () => {
     const baseUrl = config.backendApiUrl;
 
     async function fetchData() {
-      fetch(`${baseUrl}/sampleData/runReportResponseHasViews.json`)
-        .then(async (response) => {
-          if (response.ok) {
-            setRunReportResponse(await response.json());
-          }
-        })
-        .catch((error) => {
-          setError(error);
-          setLoading(false);
-        });
+      try {
+        const response = await fetch(`${baseUrl}/sampleData/runReportResponseHasViews.json`);
+        if (response.ok) {
+          setRunReportResponse(await response.json());
+        }
+      } catch (e) {
+        setError(error);
+        setLoading(false);
+      }
     }
 
     fetchData();
@@ -104,7 +103,10 @@ const AnalyticsApp = () => {
             handleChange={handleDateRangeChange}
           />
           {renderChartContent()}
-          <ChartFooter slugName={''} viewUrl="https://analytics.google.com/" />
+          <ChartFooter
+            slugName={slugValue ? slugValue : ''}
+            viewUrl="https://analytics.google.com/"
+          />
         </>
       )}
     </>
