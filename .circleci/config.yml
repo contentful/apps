@@ -3,7 +3,6 @@ version: 2.1
 orbs:
   node: circleci/node@5.0.2
   vault: contentful/vault@1
-  ghpr: narrativescience/ghpr@1.1.6 # See https://circleci.com/developer/orbs/orb/narrativescience/ghpr?version=1.1.6
 
 commands:
   publish:
@@ -30,7 +29,6 @@ jobs:
     steps:
       - checkout
       - node/install
-      - ghpr/get-pr-info  # decorate build with Github-specific env vars
       - run:
           name: Install dependencies
           command: |
