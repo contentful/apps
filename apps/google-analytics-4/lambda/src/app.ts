@@ -1,5 +1,4 @@
 import express from 'express';
-import { apiErrorMap } from './apiErrorMap';
 import Middleware from './middlewares';
 import { ApiRouter, HealthRouter } from './routers';
 
@@ -20,7 +19,7 @@ app.use('/health', HealthRouter);
 app.use('/api', ApiRouter);
 
 // catch and handle errors
-app.use(Middleware.apiErrorMapper(apiErrorMap));
+app.use(Middleware.apiErrorMapper);
 app.use(Middleware.apiErrorHandler);
 
 export default app;
