@@ -1,9 +1,10 @@
 SIGNING_SECRET: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/prd/signing-secret}
 customDomain:
-    domainName: google-analytics-4.ctfapps.net
-    stage: prd
-    createRoute53Record: true
-    endpointType: 'edge'
-    securityPolicy: tls_1_2
-  serverless-offline:
-    httpPort: 8080
+  domainName: google-analytics-4.ctfapps.net
+  stage: prd
+  createRoute53Record: true
+  endpointType: 'edge'
+  securityPolicy: tls_1_2
+serverless-offline:
+  httpPort: 8080
+deploymentPrefix: sls-apps-google-analytics-4
