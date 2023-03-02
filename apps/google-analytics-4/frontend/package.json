@@ -27,14 +27,15 @@
   "scripts": {
     "start": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) cross-env BROWSER=none react-scripts start",
     "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
-    "test": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts test",
+    "test": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts test --setupFilesAfterEnv ./src/setupTests.ts",
     "test-ci": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) CI=true react-scripts test",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5DlxOS0KvGS1Wk362xgvbN --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
     "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public"
+    "build-storybook": "build-storybook -s public",
+    "chromatic": "npx chromatic --project-token=598871c6bdb9"
   },
   "eslintConfig": {
     "extends": "react-app",
@@ -83,11 +84,14 @@
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.3",
     "babel-plugin-named-exports-order": "^0.0.2",
+    "chromatic": "^6.17.1",
     "cross-env": "7.0.3",
     "msw": "0.49.2",
     "prop-types": "^15.8.1",
     "typescript": "4.9.3",
     "webpack": "^5.75.0"
   },
-  "homepage": "."
+  "homepage": "http://.",
+  "readme": "ERROR: No README data found!",
+  "_id": "@contentful/google-analytics-4@0.1.0"
 }

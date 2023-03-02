@@ -34,6 +34,7 @@ module.exports = {
     '@storybook/preset-create-react-app',
     '@storybook/addon-a11y',
     'storybook-addon-designs',
+    '@storybook/testing-react',
   ],
   framework: '@storybook/react',
   core: {
@@ -62,5 +63,19 @@ module.exports = {
     }, []);
 
     return config;
+  },
+  refs: {
+    // 'contentful-design-system': {
+    //   title: "Forma 36 Design Library",
+    //   url: "https://f36-storybook.contentful.com"
+    // },
+    'experience-packages': {
+      title: 'Experience Packages',
+      url: 'https://experience-components.netlify.app/',
+    },
+    //  ' design-system': {
+    //     title: "Design System",
+    //     url: "https://f36-storybook.contentful.com"
+    //   }
   },
 };

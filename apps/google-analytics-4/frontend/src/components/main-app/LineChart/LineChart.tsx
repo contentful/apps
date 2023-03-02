@@ -24,7 +24,7 @@ ChartJS.defaults.font.weight = tokens.fontWeightMedium.toString();
 ChartJS.defaults.borderColor = tokens.gray200;
 ChartJS.defaults.datasets.line.borderColor = tokens.colorPrimary;
 
-interface Props {
+export interface Props {
   dataValues: number[];
   xAxisLabels: string[];
   tooltipMetricLabel: string;

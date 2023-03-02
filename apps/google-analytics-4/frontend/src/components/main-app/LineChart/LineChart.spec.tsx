@@ -1,19 +1,10 @@
-import LineChart from './LineChart';
 import { render } from '@testing-library/react';
-
-const mockDataValues = [1000, -500, 500, 230];
-const mockXAxisLabels = ['January', 'February', 'March', 'April'];
-const mockTooltipMetricLabel = 'Page views';
+import { Primary } from './LineChart.stories';
+import { Props } from './LineChart';
 
 describe('LineChart component', () => {
   it('mounts', () => {
-    render(
-      <LineChart
-        dataValues={mockDataValues}
-        xAxisLabels={mockXAxisLabels}
-        tooltipMetricLabel={mockTooltipMetricLabel}
-      />
-    );
+    render(<Primary {...(Primary.args as Props)} />);
 
     const chart = document.querySelector('canvas');
 
