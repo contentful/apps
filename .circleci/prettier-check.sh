@@ -6,7 +6,7 @@
 
 # make sure origin/master is populated, to run comparison against
 git fetch origin master
-CHANGED_FILES=$(git diff --name-only HEAD origin/master *.{ts,tsx,js,jsx} | xargs)
+CHANGED_FILES=$(git diff --name-only HEAD origin/master | egrep --color=no "\.[jt]s(x)?$" | xargs)
 echo $CHANGED_FILES
 
 echo "Running 'prettier -l' against changed files to check for problems..."

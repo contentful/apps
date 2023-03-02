@@ -30,13 +30,13 @@ jobs:
       - checkout
       - node/install
       - run:
+          name: Check for prettier violations 
+          command: ./.circleci/prettier-check.sh
+      - run:
           name: Install dependencies
           command: |
             npm ci
             npm run bootstrap:ci
-      - run:
-          name: Check for prettier violations 
-          command: ./.circleci/prettier-check.sh
       - run:
           name: Lint
           command: npm run lint
