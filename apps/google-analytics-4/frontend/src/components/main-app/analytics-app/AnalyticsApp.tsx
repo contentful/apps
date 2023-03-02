@@ -24,8 +24,6 @@ const AnalyticsApp = () => {
 
   useAutoResizer();
 
-  const cancelLoading = () => setTimeout(() => setLoading(false), 100);
-
   useEffect(() => {
     const baseUrl = config.backendApiUrl;
 
