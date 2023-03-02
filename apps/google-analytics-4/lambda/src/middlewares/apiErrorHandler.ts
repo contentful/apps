@@ -1,5 +1,5 @@
 import { ErrorRequestHandler } from 'express';
-import { isApiError, ApiError } from '../lib/errors/apiError';
+import { isApiError, ApiError } from '../errors/apiError';
 
 // Very intentional use of any in the type below. we're allowing the error map to define callbacks
 // that can except an argument of _any_ type, for the purposes of the map. The callbacks themselves
