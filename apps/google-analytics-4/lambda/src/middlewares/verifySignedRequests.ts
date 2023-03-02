@@ -5,8 +5,8 @@ import {
   ContentfulHeader,
 } from '@contentful/node-apps-toolkit/lib/requests/typings';
 import { NextFunction, Request, Response } from 'express';
-import { InvalidSignature } from '../lib/errors/invalidSignature';
-import { UnableToVerifyRequest } from '../lib/errors/unableToVerifyRequest';
+import { InvalidSignature } from '../errors/invalidSignature';
+import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
 import { IncomingHttpHeaders } from 'http';
 
 export const verifySignedRequestMiddleware = (req: Request, _res: Response, next: NextFunction) => {

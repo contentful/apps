@@ -4,7 +4,7 @@ import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import sinon from 'sinon';
 import { apiErrorHandler, ApiErrorMap, apiErrorMapper } from './apiErrorHandler';
-import { ApiError } from '../lib/errors/apiError';
+import { ApiError } from '../errors/apiError';
 
 describe('apiErrorHandler', () => {
   chai.use(chaiHttp);
