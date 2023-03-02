@@ -7,5 +7,7 @@
       "@shared/*": ["../../shared/*"]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src"
+, "src/setupTests.ts"  ]
 }
