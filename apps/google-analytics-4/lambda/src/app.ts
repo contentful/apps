@@ -17,7 +17,7 @@ app.use(apiRouteConstraint, Middleware.serviceAccountKeyProvider);
 app.use(express.static('public'));
 
 app.use('/health', HealthRouter);
-app.use('/api', ApiRouter)
+app.use('/api', ApiRouter);
 
 // catch and handle errors
 app.use(Middleware.apiErrorMapper(apiErrorMap));
