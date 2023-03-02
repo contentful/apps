@@ -5,6 +5,7 @@
 # rules.
 
 CHANGED_FILES=$(git diff --name-only HEAD origin/master *.{ts,tsx,js,jsx} | xargs)
+echo $CHANGED_FILES
 
 echo "Running 'prettier -l' against changed files to check for problems..."
 echo ""
@@ -14,4 +15,4 @@ test -n "$PRETTIER_OUTPUT" && echo "prettier violations found:"
 echo "$PRETTIER_OUTPUT"
 
 # exit 1 if output (i.e. prettier violations found), 0 if no output (i.e. no prettier violations found)
-test -n "$PRETTIER_OUTPUT"
+test -z "$PRETTIER_OUTPUT"
