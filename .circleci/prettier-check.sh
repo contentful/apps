@@ -13,6 +13,7 @@ echo "Running 'prettier -l' against changed files to check for problems..."
 echo ""
 
 PRETTIER_OUTPUT=$(npx prettier -l $CHANGED_FILES)
+echo ""
 test -n "$PRETTIER_OUTPUT" && echo "prettier violations found:"
 echo "$PRETTIER_OUTPUT"
 
