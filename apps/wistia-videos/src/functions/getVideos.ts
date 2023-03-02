@@ -1,4 +1,6 @@
-export const fetchProjects = async (bearerToken) => {
+import { Project, ProjectReduced, ProjectVideo } from '../components/helpers/types';
+
+export const fetchProjects = async (bearerToken: string) => {
   const projects = await (
     await fetch(`https://api.wistia.com/v1/projects.json`, {
       headers: {
@@ -6,7 +8,6 @@ export const fetchProjects = async (bearerToken) => {
       },
     })
   ).json();
-
   if (projects.error) {
     return {
       success: false,
@@ -15,7 +16,7 @@ export const fetchProjects = async (bearerToken) => {
     };
   }
 
-  const reducedProject = projects.map(({ id, hashedId, name }) => {
+  const reducedProject = projects.map(({ id, hashedId, name }: ProjectReduced) => {
     return { id, hashedId, name };
   });
 
@@ -25,20 +26,25 @@ export const fetchProjects = async (bearerToken) => {
   };
 };
 
-export const fetchVideos = async (excludedProjects, bearerToken) => {
+export const fetchVideos = async (
+  excludedProjects: Project[],
+  bearerToken: string,
+  page?: number
+) => {
   const projectsResponse = await fetchProjects(bearerToken);
   if (projectsResponse.success) {
     console.info('Succesfully fetched the Wistia projects.');
     const { projects } = projectsResponse;
     // Map through projects and return ids to retrieve all the videos from each project. Filter out the projects selected to be excluded
     const projectIds = projects
-      .map((item) => item.hashedId)
-      .filter((id) => {
-        const include = excludedProjects.findIndex((project) => project.hashedId === id) === -1;
+      .map((item: Project) => item.hashedId)
+      .filter((id: string) => {
+        const include =
+          excludedProjects.findIndex((project: Project) => project.hashedId === id) === -1;
         return include;
       });
     const mappedProjects = await Promise.all(
-      projectIds.map(async (id) => {
+      projectIds.map(async (id: string) => {
         const project = await (
           await fetch(`https://api.wistia.com/v1/projects/${id}.json`, {
             headers: {
@@ -46,7 +52,7 @@ export const fetchVideos = async (excludedProjects, bearerToken) => {
             },
           })
         ).json();
-        const mappedVideos = project.medias.map((video) => ({
+        const mappedVideos = project.medias.map((video: ProjectVideo) => ({
           ...video,
           project: {
             id,

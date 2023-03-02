@@ -113,7 +113,7 @@ const Config = (props: ConfigProps) => {
 
   const getProjects: () => void = async () => {
     setLoadingStatus(true);
-    const response = await fetchProjects(parameters.apiBearerToken);
+    const response = await fetchProjects(parameters.apiBearerToken || '');
     if (response.success) {
       Notification.success('Your connection to the Wistia Data API is working.');
       // set the projects in the state (don't save all the projects in the config parameters to prevent

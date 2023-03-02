@@ -136,9 +136,7 @@ const Field = (props: FieldProps) => {
               </Flex>
               <Flex>
                 <Button>Load More Videos</Button>
-
               </Flex>
-
 
               {sdk.field.getValue() && sdk.field.getValue().items.length > 0 && (
                 <Flex flexDirection={'column'} marginTop={'spacingL'}>
