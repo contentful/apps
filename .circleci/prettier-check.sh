@@ -1,8 +1,10 @@
 #! /bin/sh
-# Runs a prettier check against changed files on the current branch compared against a base branch. By
-# default uses `GITHUB_PR_BASE_BRANCH` as the base, which will be the branch being merged to in CI. The
+# Runs a prettier check against changed files on the current branch compared against master.The
 # purpose of this script is to fail if a change gets passed the commit hooks which enforce prettier
 # rules.
+
+# kill switch if for some reason this script inadvertently blocks the build
+test -n "$SKIP_PRETTIER_CHECK" && exit 0
 
 CHANGED_FILES=$(git diff --name-only HEAD origin/master | egrep --color=no "\.[jt]s(x)?$" | xargs)
 echo $CHANGED_FILES
