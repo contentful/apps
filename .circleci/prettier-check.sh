@@ -7,6 +7,8 @@
 CHANGED_FILES=$(git diff --name-only HEAD origin/master | egrep --color=no "\.[jt]s(x)?$" | xargs)
 echo $CHANGED_FILES
 
+test -z "$CHANGED_FILES" && echo "No files for prettier to check. Skipping..." && exit 0
+
 echo "Running 'prettier -l' against changed files to check for problems..."
 echo ""
 
