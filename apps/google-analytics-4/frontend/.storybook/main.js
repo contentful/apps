@@ -69,13 +69,13 @@ module.exports = {
     //   title: "Forma 36 Design Library",
     //   url: "https://f36-storybook.contentful.com"
     // },
-    'experience-packages': {
-      title: 'Experience Packages',
-      url: 'https://experience-components.netlify.app/',
+    // 'experience-packages': {
+    //   title: 'Experience Packages',
+    //   url: 'https://5ccbc373887ca40020446347-yldsqjoxzb.chromatic.com',
+    // },
+    ' design-system': {
+      title: 'Design System',
+      url: 'https://5ccbc373887ca40020446347-yldsqjoxzb.chromatic.com',
     },
-    //  ' design-system': {
-    //     title: "Design System",
-    //     url: "https://f36-storybook.contentful.com"
-    //   }
   },
 };
