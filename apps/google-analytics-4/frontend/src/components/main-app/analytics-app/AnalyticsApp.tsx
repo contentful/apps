@@ -3,14 +3,14 @@ import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
 import { DateRangeType, Row, RunReportResponse } from 'types';
-import DateRange from '../../../helpers/dateRange.enum';
-import { config } from '../../../config';
+import DateRange from 'helpers/dateRange.enum';
+import { config } from 'config';
 import { styles } from './AnalyticsApp.styles';
-import ChartContent from '../ChartContent';
+import ChartContent from 'components/main-app/ChartContent';
 import { Flex, Note } from '@contentful/f36-components';
 
 const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytic data at this time.';
-const EMPTY_DATA_MSG = 'There are no pageviews to show for this range';
+const EMPTY_DATA_MSG = 'There are no page views to show for this range';
 
 const AnalyticsApp = () => {
   const [runReportResponse, setRunReportResponse] = useState<RunReportResponse>(
@@ -24,6 +24,8 @@ const AnalyticsApp = () => {
 
   useAutoResizer();
 
+  const cancelLoading = () => setTimeout(() => setLoading(false), 100);
+
   useEffect(() => {
     const baseUrl = config.backendApiUrl;
 
@@ -35,7 +37,7 @@ const AnalyticsApp = () => {
         }
       } catch (e) {
         setError(e as Error);
-        setLoading(false);
+        cancelLoading();
       }
     }
 
@@ -63,7 +65,7 @@ const AnalyticsApp = () => {
       setPageViewData(newData);
     }
 
-    setLoading(false);
+    cancelLoading();
   }, [dateRange, runReportResponse]);
 
   const handleDateRangeChange = (e: DateRangeType) => {
