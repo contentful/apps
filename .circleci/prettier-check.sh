@@ -4,8 +4,6 @@
 # purpose of this script is to fail if a change gets passed the commit hooks which enforce prettier
 # rules.
 
-# make sure origin/master is populated, to run comparison against
-git fetch origin master
 CHANGED_FILES=$(git diff --name-only HEAD origin/master | egrep --color=no "\.[jt]s(x)?$" | xargs)
 echo $CHANGED_FILES
 
