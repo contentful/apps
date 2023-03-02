@@ -1,6 +1,6 @@
 service: sls-apps-google-analytics-4
 
-frameworkVersion: '>=3.0.0 <4.0.0'
+frameworkVersion: '>=2.0.0 <3.0.0'
 variablesResolutionMode: 20210326
 
 plugins:

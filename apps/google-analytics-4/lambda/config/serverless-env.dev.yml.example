@@ -1,1 +1,10 @@
 SIGNING_SECRET: <APP_SIGNING_KEY_GOES_HERE>
+customDomain:
+  domainName: google-analytics-4-test.ctfapps.net
+  stage: dev
+  createRoute53Record: true
+  endpointType: 'edge'
+  securityPolicy: tls_1_2
+serverless-offline:
+  httpPort: 8080
+deploymentPrefix: sls-apps-google-analytics-4
