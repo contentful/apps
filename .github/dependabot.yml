@@ -5,7 +5,7 @@ updates:
   directory: "/"
   schedule:
     interval: daily
-    time: "00:00"
+    time: "03:00"
     timezone: UTC
   open-pull-requests-limit: 15
   commit-message:
@@ -24,7 +24,7 @@ updates:
   directory: "/apps/ai-image-tagging/lambda"
   schedule:
     interval: daily
-    time: "00:00"
+    time: "03:00"
     timezone: UTC
   open-pull-requests-limit: 15
   commit-message:
@@ -42,7 +42,7 @@ updates:
   directory: "/apps/slack/lambda"
   schedule:
     interval: daily
-    time: "00:00"
+    time: "03:00"
     timezone: UTC
   open-pull-requests-limit: 15
   commit-message:
@@ -60,7 +60,7 @@ updates:
   directory: "/apps/jira/functions"
   schedule:
     interval: daily
-    time: "00:00"
+    time: "03:00"
     timezone: UTC
   open-pull-requests-limit: 15
   commit-message:
@@ -78,7 +78,7 @@ updates:
   directory: "/apps/netlify/lambda"
   schedule:
     interval: daily
-    time: "00:00"
+    time: "03:00"
     timezone: UTC
   open-pull-requests-limit: 15
   commit-message:
@@ -96,7 +96,7 @@ updates:
   directory: "/examples/typescript"
   schedule:
     interval: daily
-    time: "00:00"
+    time: "03:00"
     timezone: UTC
   open-pull-requests-limit: 15
   commit-message:
@@ -114,7 +114,7 @@ updates:
   directory: "/examples/javascript"
   schedule:
     interval: daily
-    time: "00:00"
+    time: "03:00"
     timezone: UTC
   open-pull-requests-limit: 15
   commit-message:
