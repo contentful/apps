@@ -43,9 +43,9 @@ describe('AnalyticsApp', () => {
 
     render(<AnalyticsApp />);
 
-    const dropdown = getByTestId(SELECT_TEST_ID);
+    const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
-    const noteText = getByText('There are no pageviews to show for this range');
+    const noteText = getByText('There are no page views to show for this range');
 
     expect(dropdown).toBeVisible();
     expect(warningNote).toBeVisible();
@@ -61,8 +61,9 @@ describe('AnalyticsApp', () => {
 
     render(<AnalyticsApp />);
 
-    const dropdown = getByTestId(SELECT_TEST_ID);
+    const dropdown = await findByTestId(SELECT_TEST_ID);
     const errorNote = getByTestId(NOTE_TEST_ID);
+
     const noteText = await findByText('mock Api error');
 
     expect(dropdown).toBeVisible();

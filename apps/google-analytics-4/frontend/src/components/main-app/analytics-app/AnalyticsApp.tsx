@@ -24,8 +24,6 @@ const AnalyticsApp = () => {
 
   useAutoResizer();
 
-  const cancelLoading = () => setTimeout(() => setLoading(false), 100);
-
   useEffect(() => {
     const baseUrl = config.backendApiUrl;
 
@@ -37,8 +35,9 @@ const AnalyticsApp = () => {
         }
       } catch (e) {
         setError(e as Error);
-        cancelLoading();
       }
+
+      setLoading(false);
     }
 
     fetchData();
@@ -64,8 +63,6 @@ const AnalyticsApp = () => {
       const newData = sliceByDateRange(dateRange);
       setPageViewData(newData);
     }
-
-    cancelLoading();
   }, [dateRange, runReportResponse]);
 
   const handleDateRangeChange = (e: DateRangeType) => {
