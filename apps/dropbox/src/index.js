@@ -12,7 +12,7 @@ const FIELDS_TO_PERSIST = [
   'link',
   'id',
   'icon',
-];
+]
 
 function makeThumbnail(file) {
   const url = file.thumbnailLink.split('?')[0] + '?bounding_box=256&mode=fit';
