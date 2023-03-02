@@ -1,22 +1,13 @@
 service: sls-apps-google-analytics-4
 
-frameworkVersion: '>=3.0.0'
+frameworkVersion: '>=2.0.0 <3.0.0'
 variablesResolutionMode: 20210326
 
 plugins:
   - serverless-domain-manager
   - serverless-offline
 
-custom: 
-  SIGNING_SECRET: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/test/signing-secret}
-  customDomain:
-    domainName: google-analytics-4-test.ctfapps.net
-    stage: test
-    createRoute53Record: true
-    endpointType: 'edge'
-    securityPolicy: tls_1_2
-  serverless-offline:
-      httpPort: 8080
+custom: ${file(./config/serverless.${opt:stage, 'dev'}.yml):variables}
 
 provider:
   name: aws
@@ -27,7 +18,7 @@ provider:
   timeout: 30
   deploymentBucket:
     name: cf-apps-serverless-deployment
-  deploymentPrefix: sls-apps-google-analytics-4
+  deploymentPrefix: ${self:custom.deploymentPrefix}
 
 functions:
   api:
