@@ -6,7 +6,7 @@ import {
   InvalidServiceAccountKey,
   MissingServiceAccountKeyHeader,
 } from './middlewares/serviceAccountKeyProvider';
-import { GoogleApiClientError, GoogleApiError, GoogleApiServerError } from './services/google-api';
+import { GoogleApiClientError, GoogleApiError, GoogleApiServerError } from './services/googleApi';
 
 export const apiErrorMap: ApiErrorMap = {
   GoogleApiError: (e: GoogleApiError) => new ApiError(e.details, e.name, e.httpStatus),

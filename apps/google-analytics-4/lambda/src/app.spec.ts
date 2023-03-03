@@ -9,7 +9,7 @@ import {
   validServiceAccountKeyIdBase64,
 } from '../test/mocks/googleApi';
 import app from './app';
-import { GoogleApi } from './services/google-api';
+import { GoogleApi } from './services/googleApi';
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 

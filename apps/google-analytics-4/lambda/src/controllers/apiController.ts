@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { RunReportParamsType } from '../types';
-import { GoogleApi } from '../services/google-api';
+import { GoogleApi } from '../services/googleApi';
 
 const ApiController = {
   credentials: (_req: Request, res: Response) => {
