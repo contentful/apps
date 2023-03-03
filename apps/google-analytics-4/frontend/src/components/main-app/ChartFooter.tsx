@@ -19,8 +19,7 @@ const ChartFooter = (props: Props) => {
           href={viewUrl}
           target="_blank"
           rel="noopener noreferer"
-          icon={<ExternalLinkIcon />}
-        >
+          icon={<ExternalLinkIcon />}>
           Open in Google Analytics
         </TextLink>
       ) : null}

@@ -1,6 +1,6 @@
-import React from 'react'
-import tokens from '@contentful/f36-tokens'
-import { css } from 'emotion'
+import React from 'react';
+import tokens from '@contentful/f36-tokens';
+import { css } from 'emotion';
 
 const styles = {
   splitter: css({
@@ -10,10 +10,8 @@ const styles = {
     height: '2px',
     backgroundColor: tokens.gray300,
   }),
-}
+};
 
 export default function Splitter() {
-  return (
-    <hr className={styles.splitter} />
-  )
+  return <hr className={styles.splitter} />;
 }

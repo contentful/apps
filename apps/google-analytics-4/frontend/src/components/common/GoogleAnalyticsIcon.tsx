@@ -42,11 +42,10 @@ const styles = {
 
 export default function GoogleAnalyticsIcon() {
   return (
-
     <div className={styles.icon}>
       <a href={googleAnalyticsBrand.url} target="_blank" rel="noopener noreferrer">
         <img src={googleAnalyticsBrand.logoImage} alt="Google Analytics" />
       </a>
     </div>
-  )
+  );
 }
