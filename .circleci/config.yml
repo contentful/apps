@@ -1,10 +1,33 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.0.2
   vault: contentful/vault@1
 
+defaults: &defaults
+  docker:
+    - image: cimg/node:lts
+  resource_class: medium+
+  working_directory: ~/project
+
+fast_checkout: &fast_checkout
+  attach_workspace:
+    at: ~/project
+
 commands:
+  install-build-test-examples:
+    steps:
+      - checkout:
+          path: ~/project
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Build
+          command: npm run build
+      - run:
+          name: Test
+          command: npm run test
+      
   publish:
     steps:
       - vault/get-secrets:
@@ -22,13 +45,11 @@ commands:
           command: npm run publish-packages
 
 jobs:
-  apps-test:
-    docker:
-      - image: cimg/base:stable
-    resource_class: medium+
+  build:
+    <<: *defaults
     steps:
+      - *fast_checkout
       - checkout
-      - node/install
       - run:
           name: Check for prettier violations
           command: |
@@ -45,24 +66,21 @@ jobs:
       - run:
           name: Build
           command: npm run build
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - apps
+  test:
+    <<: *defaults
+    steps:
+      - *fast_checkout
       - run:
           name: Test
           command: npm run test
-
-  deploy-staging:
-    docker:
-      - image: cimg/base:stable
-    resource_class: medium+
+  deploy:
+    <<: *defaults
     steps:
-      - checkout
-      - vault/get-secrets:
-          template-preset: 'aws-push-artifacts'
-      - node/install
-      - run:
-          name: Install dependencies
-          command: |
-            npm ci
-            npm run bootstrap:ci
+      - *fast_checkout
       - run:
           name: Install awscli
           command: |
@@ -70,22 +88,30 @@ jobs:
             sudo apt-get install python3-pip python3-dev
             sudo pip3 install awscli
       - run:
-          name: Build
-          command: |
-            REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
-            REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-            npm run build
-      - run:
           name: Deploy apps to staging
-          command: |
-            STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
-                STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
-                REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
-                REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-                STAGE='test' npm run deploy:test
+          command: npm run
+          # command: |
+            # STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
+                # STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
+                # REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
+                # REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
+                # STAGE='test' npm run deploy:test
       - run:
           name: Invalidate Slack staging cloudfront distribution
-          command: aws cloudfront create-invalidation --distribution-id $SLACK_TEST_CLOUDFRONT_DIST_ID --paths "/*"
+          # command: aws cloudfront create-invalidation --distribution-id $SLACK_TEST_CLOUDFRONT_DIST_ID --paths "/*"
+          command: aws -h
+
+  test-ts-examples:
+    <<: *defaults
+    working_directory: ~/project/examples/typescript
+    steps:
+      - install-build-test-examples
+
+  test-js-examples:
+    <<: *defaults
+    working_directory: ~/project/examples/javascript
+    steps:
+      - install-build-test-examples
 
   deploy-prod:
     docker:
@@ -126,38 +152,6 @@ jobs:
           name: Invalidate Slack cloudfront distribution
           command: aws cloudfront create-invalidation --distribution-id $SLACK_PRD_CLOUDFRONT_DIST_ID --paths "/*"
 
-  test-ts-example:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - node/install
-      - run:
-          name: Install dependencies
-          command: cd examples/typescript && npm ci
-      - run:
-          name: Build
-          command: cd examples/typescript && npm run build
-      - run:
-          name: Test
-          command: cd examples/typescript && npm run test
-
-  test-js-example:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - checkout
-      - node/install
-      - run:
-          name: Install dependencies
-          command: cd examples/javascript && npm ci
-      - run:
-          name: Build
-          command: cd examples/javascript && npm run build
-      - run:
-          name: Test
-          command: cd examples/javascript && npm run test
-
   notify-sentry-deploy:
     docker:
       - image: cimg/base:stable
@@ -180,38 +174,26 @@ jobs:
 
 workflows:
   version: 2
-  test-deploy:
+  build-test-deploy:
     jobs:
-      - apps-test:
+      - build:
           context:
             - vault
-      - deploy-staging:
-          context:
-            - vault
-          requires:
-            - apps-test
-          filters:
-            branches:
-              only:
-                - master
-                - staging
-      - deploy-prod:
+      - test:
           context:
             - vault
           requires:
-            - apps-test
-          filters:
-            branches:
-              only:
-                - master
-      - notify-sentry-deploy:
+            - build
+      # - publish:
+          # context:
+            # - vault
+          # requires:
+            # - build
+      - deploy:
           context:
             - vault
           requires:
-            - deploy-prod
-          filters:
-            branches:
-              only:
-                - master
-      - test-ts-example
-      - test-js-example
+            - build
+          branches:
+            only:
+              - refactor/improve-build
