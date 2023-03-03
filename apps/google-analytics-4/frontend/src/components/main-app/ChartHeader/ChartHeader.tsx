@@ -5,7 +5,7 @@ import { DateRangeType } from 'types';
 interface Props {
   metricName: string;
   metricValue: string;
-  handleChange: Function
+  handleChange: Function;
 }
 
 const ChartHeader = (props: Props) => {
@@ -16,15 +16,14 @@ const ChartHeader = (props: Props) => {
   const handleOnChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setDateSelection(event.target.value as DateRangeType);
     handleChange(event.target.value as DateRangeType);
-  }
+  };
 
   return (
     <Flex
       justifyContent="space-between"
       alignItems="flex-end"
       marginBottom="spacingXs"
-      id="chart-header"
-    >
+      id="chart-header">
       <Box>
         <DisplayText marginBottom="none" size="large">
           {metricValue}

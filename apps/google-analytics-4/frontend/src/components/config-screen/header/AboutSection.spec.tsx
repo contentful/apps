@@ -1,4 +1,4 @@
-import AboutSection from "./AboutSection";
+import AboutSection from './AboutSection';
 import { act, render, screen } from '@testing-library/react';
 
 describe('About header for the Analytics Config Page', () => {

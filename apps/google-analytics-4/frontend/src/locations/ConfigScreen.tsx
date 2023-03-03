@@ -1,11 +1,8 @@
-import React from 'react'
+import React from 'react';
 import HomeAnalyticsPage from 'components/config-screen/HomeAnalyticsPage';
 
 const ConfigScreen = () => {
-
-  return (
-    <HomeAnalyticsPage />
-  );
+  return <HomeAnalyticsPage />;
 };
 
 export default ConfigScreen;
