@@ -4,7 +4,6 @@ import HomeAnalyticsPage from 'components/config-screen/HomeAnalyticsPage';
 import { ServiceAccountKey } from 'types';
 import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../test/mocks';
 
-
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,

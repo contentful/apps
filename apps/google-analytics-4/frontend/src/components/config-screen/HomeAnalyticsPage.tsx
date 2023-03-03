@@ -1,15 +1,20 @@
 import { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { Box } from '@contentful/f36-components';
-import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon'; import omitBy from 'lodash/omitBy';
+import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
+import omitBy from 'lodash/omitBy';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { styles } from 'components/config-screen/HomeAnalytics.styles'
+import { styles } from 'components/config-screen/HomeAnalytics.styles';
 import Splitter from 'components/common/Splitter';
 import ApiAccessPage from 'components/config-screen/api-access/ApiAccessPage';
 import ConfigurationPage from 'components/config-screen/configuration/ConfigurationPage';
 import AboutSection from 'components/config-screen/header/AboutSection';
 import { AppInstallationParameters, ServiceAccountKey, ServiceAccountKeyId } from 'types';
-import { convertServiceAccountKeyToServiceAccountKeyId, convertKeyFileToServiceAccountKey, AssertionError } from 'utils/serviceAccountKey';
+import {
+  convertServiceAccountKeyToServiceAccountKeyId,
+  convertKeyFileToServiceAccountKey,
+  AssertionError,
+} from 'utils/serviceAccountKey';
 
 const HomeAnalyticsPage = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
@@ -91,7 +96,7 @@ const HomeAnalyticsPage = () => {
       }
 
       sdk.app.setReady();
-    }
+    };
 
     setupAppInstallationParameters();
   }, [sdk]);
@@ -150,12 +155,12 @@ const HomeAnalyticsPage = () => {
 
   const handleEditGoogleAccountDetails = () => {
     setIsInEditMode(true);
-  }
+  };
 
   const handleCancelGoogleAccountDetails = () => {
     handleKeyFileChange('');
     setIsInEditMode(false);
-  }
+  };
 
   return (
     <>

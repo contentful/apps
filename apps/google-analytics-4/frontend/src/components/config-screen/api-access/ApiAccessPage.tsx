@@ -13,8 +13,8 @@ interface Props {
   serviceAccountKeyFile: string;
   onKeyFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   isInEditMode: boolean;
-  onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
-  onCancelGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
+  onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>;
+  onCancelGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 const ApiAccessPage = (props: Props) => {
@@ -28,39 +28,35 @@ const ApiAccessPage = (props: Props) => {
     onKeyFileChange,
     isInEditMode,
     onEditGoogleAccountDetails,
-    onCancelGoogleAccountDetails
-  } = props
+    onCancelGoogleAccountDetails,
+  } = props;
 
   return (
-    <Stack spacing='spacingL' flexDirection='column' alignItems='flex-start' >
-      <Subheading marginBottom='none'>
-        API Access
-      </Subheading>
-      <Paragraph marginBottom='none'>
+    <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
+      <Subheading marginBottom="none">API Access</Subheading>
+      <Paragraph marginBottom="none">
         Authorize this application to access page analytics data from your organization’s Google
         Analytics account
       </Paragraph>
-      {
-        !isInEditMode && currentServiceAccountKeyId && currentServiceAccountKey ? (
-          <InstalledServiceAccountCard
-            onEditGoogleAccountDetails={onEditGoogleAccountDetails}
-            serviceAccountKeyId={currentServiceAccountKeyId}
-            serviceAccountKey={currentServiceAccountKey}
-          />
-        ) : (
-          <SetupServiceAccountCard
-            isRequired={isRequired}
-            isValid={isValid}
-            errorMessage={errorMessage}
-            serviceAccountKeyFile={serviceAccountKeyFile}
-            onKeyFileChange={onKeyFileChange}
-            isInEditMode={isInEditMode}
-            onCancelGoogleAccountDetails={onCancelGoogleAccountDetails}
-          />
-        )
-      }
+      {!isInEditMode && currentServiceAccountKeyId && currentServiceAccountKey ? (
+        <InstalledServiceAccountCard
+          onEditGoogleAccountDetails={onEditGoogleAccountDetails}
+          serviceAccountKeyId={currentServiceAccountKeyId}
+          serviceAccountKey={currentServiceAccountKey}
+        />
+      ) : (
+        <SetupServiceAccountCard
+          isRequired={isRequired}
+          isValid={isValid}
+          errorMessage={errorMessage}
+          serviceAccountKeyFile={serviceAccountKeyFile}
+          onKeyFileChange={onKeyFileChange}
+          isInEditMode={isInEditMode}
+          onCancelGoogleAccountDetails={onCancelGoogleAccountDetails}
+        />
+      )}
     </Stack>
-  )
+  );
 };
 
 export default ApiAccessPage;

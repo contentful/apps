@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Badge, Box, Flex, TextLink, Note, Card, Stack, Paragraph, FormControl, Spinner } from '@contentful/f36-components';
+import {
+  Badge,
+  Box,
+  Flex,
+  TextLink,
+  Note,
+  Card,
+  Stack,
+  Paragraph,
+  FormControl,
+  Spinner,
+} from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ApiError } from 'services/api';
@@ -12,11 +23,7 @@ interface Props {
 }
 
 const InstalledServiceAccountCard = (props: Props) => {
-  const {
-    serviceAccountKeyId,
-    serviceAccountKey,
-    onEditGoogleAccountDetails
-  } = props
+  const { serviceAccountKeyId, serviceAccountKey, onEditGoogleAccountDetails } = props;
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +38,10 @@ const InstalledServiceAccountCard = (props: Props) => {
       try {
         const accountSummaries = await api.listAccountSummaries();
         if (accountSummaries.length === 0) {
-          throw new ApiError("You need to make sure your service account is added to the property you want to connect this space to. Right now, your service account isn't connected to any Analytics properties.")
-        }
-        else setError(null);
+          throw new ApiError(
+            "You need to make sure your service account is added to the property you want to connect this space to. Right now, your service account isn't connected to any Analytics properties."
+          );
+        } else setError(null);
       } catch (e) {
         if (e instanceof ApiError) {
           setError(e.message);
@@ -44,7 +52,7 @@ const InstalledServiceAccountCard = (props: Props) => {
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
     verifyAccountSummaries();
   }, [api]);
@@ -55,9 +63,17 @@ const InstalledServiceAccountCard = (props: Props) => {
 
   return (
     <Card>
-      <Flex justifyContent="space-between" marginBottom='spacingL'>
-        <Paragraph marginBottom='none'><b >Google Service Account Details</b></Paragraph>
-        <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onEditGoogleAccountDetails}>Edit</TextLink>
+      <Flex justifyContent="space-between" marginBottom="spacingL">
+        <Paragraph marginBottom="none">
+          <b>Google Service Account Details</b>
+        </Paragraph>
+        <TextLink
+          testId="editServiceAccountButton"
+          as="button"
+          variant="primary"
+          onClick={onEditGoogleAccountDetails}>
+          Edit
+        </TextLink>
       </Flex>
 
       <FormControl>
@@ -68,8 +84,7 @@ const InstalledServiceAccountCard = (props: Props) => {
             alignIcon="end"
             href={`https://console.cloud.google.com/iam-admin/serviceaccounts/details/${serviceAccountKeyId.clientId}?project=${serviceAccountKeyId.projectId}`}
             target="_blank"
-            rel="noopener noreferrer"
-          >
+            rel="noopener noreferrer">
             {serviceAccountKeyId.clientEmail}
           </TextLink>
         </Paragraph>
@@ -88,7 +103,11 @@ const InstalledServiceAccountCard = (props: Props) => {
           ) : !error ? (
             <Badge variant="positive">active</Badge>
           ) : (
-            <Stack spacing='spacingL' marginBottom="none" alignItems='flex-start' flexDirection='column'>
+            <Stack
+              spacing="spacingL"
+              marginBottom="none"
+              alignItems="flex-start"
+              flexDirection="column">
               <Badge variant="warning">Inactive</Badge>
               <Note variant="neutral">{error}</Note>
             </Stack>
