@@ -7,6 +7,7 @@ plugins:
   - serverless-offline
 
 custom:
+  sentryDSN: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):sentryDSN}
   signingSecret: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):signingSecret}
   customDomain:
     domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
@@ -32,7 +33,10 @@ functions:
     description: GA4 App Backend
     environment:
       SIGNING_SECRET: ${self:custom.signingSecret}
+      SENTRY_DSN: ${self:custom.sentryDSN}
       STAGE: ${opt:stage, 'dev'}
+      NODE_ENV: ${env:NODE_ENV, 'development'}
+      RELEASE_VERSION: ${env:CIRCLE_SHA1, 'undefined'}
     handler: build/src/index.handler
     events:
       - http:
