@@ -194,6 +194,7 @@ workflows:
             - vault
           requires:
             - build
-          branches:
-            only:
-              - refactor/improve-build
+          filters:
+            branches:
+              only:
+                - refactor/improve-build
