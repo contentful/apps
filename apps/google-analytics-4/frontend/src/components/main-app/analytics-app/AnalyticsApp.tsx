@@ -9,7 +9,7 @@ import { styles } from './AnalyticsApp.styles';
 import ChartContent from 'components/main-app/ChartContent';
 import { Flex, Note } from '@contentful/f36-components';
 
-const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytic data at this time.';
+const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
 const EMPTY_DATA_MSG = 'There are no page views to show for this range';
 
 const AnalyticsApp = () => {
