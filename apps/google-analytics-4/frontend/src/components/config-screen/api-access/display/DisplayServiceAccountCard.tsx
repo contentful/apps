@@ -15,6 +15,7 @@ import {
 import { ExternalLinkTrimmedIcon, CheckCircleIcon, ErrorCircleIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
+import { ApiError, ApiGA4Error } from 'services/api';
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
@@ -81,10 +82,35 @@ const DisplayServiceAccountCard = (props: Props) => {
       setUnspecifiedAdminError(undefined)
       setIsLoading(false);
     }
-  
-  // It wants to add onAccountSummariesChange as a dependency but this will cause an infinite re-render
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // It wants to add onAccountSummariesChange as a dependency but this will cause an infinite re-render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api]);
+
+  const isApiGA4Error = (error: any): error is ApiGA4Error => {
+    return true;
+  }
+  
+  // const isApiGA4Error = (error: any): error is ApiError => {
+  //   return true;
+  //   if (!('errorType' in error)) {
+  //     return false;
+  //   }
+
+  //   if (typeof error.errorType !== 'string') {
+  //     return false;
+  //   }
+
+  //   if (!('status' in error)) {
+  //     return false;
+  //   }
+
+  //   if (typeof error.status !== 'number') {
+  //     return false;
+  //   }
+
+  //   return true;
+  // }
 
   const verifyDataApi = useCallback(async () => {
     try {
@@ -99,12 +125,17 @@ const DisplayServiceAccountCard = (props: Props) => {
 
       setDataApiError(undefined);
       setUnspecifiedDataError(undefined)
-    } catch (e: any) {
-      setUnspecifiedDataError({
-        details: null,
-        errorType: GoogleErrorApiErrorTypes.AdminAPI,
-        message: 'Unknown Google Admin API Error',
-      });
+    } catch (e) {
+      if (isApiGA4Error(e)) {
+        console.log(e);
+      }
+      else {
+        setUnspecifiedDataError({
+          details: null,
+          errorType: GoogleErrorApiErrorTypes.AdminAPI,
+          message: 'Unknown Google Admin API Error',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -123,7 +154,7 @@ const DisplayServiceAccountCard = (props: Props) => {
   }, [verifyAdminApi, verifyDataApi]);
 
   const handleApiTestClick = () => {
-    verifyAdminApi();
+    // verifyAdminApi();
     verifyDataApi();
   };
 

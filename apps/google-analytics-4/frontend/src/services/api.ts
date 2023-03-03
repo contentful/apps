@@ -8,6 +8,12 @@ const ZCredentials = z.object({
   status: z.string(),
 });
 
+const ApiErrorZodSchema = z.object({
+  errorType: z.string(),
+  message: z.string(),
+  details: z.any(),
+});
+
 const ZPropertySummary = z.object({
   property: z.string(),
   displayName: z.string(),
@@ -39,9 +45,30 @@ type Headers = Record<string, string>;
 
 export type Credentials = z.infer<typeof ZCredentials>;
 
-export class ApiError extends Error { }
-export class ApiServerError extends ApiError { }
-export class ApiClientError extends ApiError { }
+export class ApiError extends Error {
+  readonly errorType: string;
+  readonly status: number;
+  readonly details?: any;
+
+  constructor(responseJson: any) {
+    const { errors, status } = responseJson
+    super(errors.message);
+    this.errorType = errors.errorType;
+    this.details = errors.details;
+    this.status = status;
+  }
+}
+export class ApiErrorFake extends Error { }
+
+export class ApiGA4Error extends ApiErrorFake {
+  readonly res: any
+  constructor(res: any) {
+    super();
+    this.res = res;
+  }
+}
+
+export class UnknownError extends Error { }
 
 export async function fetchFromApi<T>(
   apiUrl: URL,
@@ -51,8 +78,9 @@ export async function fetchFromApi<T>(
   headers: Headers = {}
 ): Promise<T> {
   const response = await fetchResponse(apiUrl, appDefinitionId, cma, headers);
+  validateResponseStatus(response)
   const responseJson = await jsonFromResponse(response);
-  decorateResponseJson(response, responseJson);
+  // validateResponseStatus(responseJson, response.status)
   parseResponseJson(responseJson, schema);
   return responseJson;
 }
@@ -105,13 +133,22 @@ async function jsonFromResponse(response: Response): Promise<any> {
   }
 }
 
-function decorateResponseJson(response: Response, responseJson: any): any {
-  responseJson.res = {
-    ok: response.ok,
-    status: response.status,
-    statusText: response.statusText,
+function validateResponseStatus(response: Response): void {
+  if (response.status >= 400) {
+    console.error(response);
+    throw new ApiGA4Error(response);
   }
 }
+
+// function validateResponseStatus(responseJson: any, status: number): void {
+//   if (status >= 400) {
+//     ApiErrorZodSchema.parse(responseJson.errors)
+//     responseJson.status = status;
+//     console.log("TIME TO THROW")
+//     const error = new ApiError(responseJson);
+//     throw error
+//   }
+// }
 
 export class Api {
   readonly baseUrl: string;
