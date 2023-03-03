@@ -15,7 +15,7 @@ import {
   GoogleApiError,
   GoogleApiServerError,
   throwGoogleApiError,
-} from './google-api';
+} from './googleApi';
 
 describe('GoogleApi', () => {
   let googleApi: GoogleApi;
