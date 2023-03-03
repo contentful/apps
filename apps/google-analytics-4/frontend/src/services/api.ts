@@ -113,6 +113,16 @@ export class Api {
     );
   }
 
+  async runReports(): Promise<any> {
+    return await fetchFromApi<any>(
+      this.requestUrl('api/run_report'),
+      ZCredentials,
+      this.appDefinitionId,
+      this.cma,
+      this.serviceAccountKeyHeaders
+    );
+  }
+
   private get serviceAccountKeyHeaders(): Headers {
     return {
       'X-Contentful-ServiceAccountKeyId': this.encodeServiceAccountHeaderValue(
