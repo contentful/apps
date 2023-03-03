@@ -5,10 +5,10 @@ export class MissingServiceAccountKeyHeader extends Error {}
 export class InvalidServiceAccountKey extends Error {}
 
 export const serviceAccountKeyProvider: RequestHandler = (req, _res, next) => {
-  const serviceAccountKeyIdHeaderValue = req.headers['x-contentful-serviceaccountkeyid'];
+  const serviceAccountKeyIdHeaderValue = req.header('X-Contentful-ServiceAccountKeyId');
   if (!serviceAccountKeyIdHeaderValue || typeof serviceAccountKeyIdHeaderValue !== 'string') {
     throw new MissingServiceAccountKeyHeader(
-      "missing or incorrectly formatted header 'x-contentful-serviceaccountkeyid'"
+      "missing or incorrectly formatted header 'X-Contentful-ServiceAccountKeyId'"
     );
   }
   const serviceAccountKeyId = decodeServiceAccountHeader(serviceAccountKeyIdHeaderValue);
@@ -17,10 +17,10 @@ export const serviceAccountKeyProvider: RequestHandler = (req, _res, next) => {
 
   // Pulling the account key from the header will be removed later and replaced with fetching
   // the code directly from secret storage!
-  const serviceAccountKeyHeaderValue = req.headers['x-contentful-serviceaccountkey'];
+  const serviceAccountKeyHeaderValue = req.header('X-Contentful-ServiceAccountKey');
   if (!serviceAccountKeyHeaderValue || typeof serviceAccountKeyHeaderValue !== 'string') {
     throw new MissingServiceAccountKeyHeader(
-      "missing or incorrectly formatted header 'x-contentful-serviceaccountkey'"
+      "missing or incorrectly formatted header 'X-Contentful-ServiceAccountKey'"
     );
   }
   const serviceAccountKey = decodeServiceAccountHeader(serviceAccountKeyHeaderValue);
