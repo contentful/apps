@@ -8,7 +8,7 @@ commands:
   publish:
     steps:
       - vault/get-secrets:
-          template-preset: "semantic-release-ecosystem"
+          template-preset: 'semantic-release-ecosystem'
       - run:
           name: Setup NPM
           command: |
@@ -30,7 +30,7 @@ jobs:
       - checkout
       - node/install
       - run:
-          name: Check for prettier violations 
+          name: Check for prettier violations
           command: |
             git fetch origin master # circleci doesn't fetch master by default
             ./.circleci/prettier-check.sh
@@ -54,38 +54,38 @@ jobs:
       - image: cimg/base:stable
     resource_class: medium+
     steps:
-        - checkout
-        - vault/get-secrets:
-            template-preset: "aws-push-artifacts"
-        - node/install
-        - run:
-            name: Install dependencies
-            command: |
-              npm ci
-              npm run bootstrap:ci
-        - run:
-            name: Install awscli
-            command: |
-              sudo apt-get update
-              sudo apt-get install python3-pip python3-dev
-              sudo pip3 install awscli
-        - run:
-            name: Build
-            command: |
-                  REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
-                  REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-                  npm run build
-        - run:
-            name: Deploy apps to staging
-            command: |
-              STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
-                  STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
-                  REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
-                  REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-                  STAGE='test' npm run deploy:test
-        - run:
-            name: Invalidate Slack staging cloudfront distribution
-            command: aws cloudfront create-invalidation --distribution-id $SLACK_TEST_CLOUDFRONT_DIST_ID --paths "/*"
+      - checkout
+      - vault/get-secrets:
+          template-preset: 'aws-push-artifacts'
+      - node/install
+      - run:
+          name: Install dependencies
+          command: |
+            npm ci
+            npm run bootstrap:ci
+      - run:
+          name: Install awscli
+          command: |
+            sudo apt-get update
+            sudo apt-get install python3-pip python3-dev
+            sudo pip3 install awscli
+      - run:
+          name: Build
+          command: |
+            REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
+            REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
+            npm run build
+      - run:
+          name: Deploy apps to staging
+          command: |
+            STATIC_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1" \
+                STATIC_JIRA_S3_BASE="s3://cf-apps-static-dev/apps-test-$CIRCLE_SHA1/jira" \
+                REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
+                REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
+                STAGE='test' npm run deploy:test
+      - run:
+          name: Invalidate Slack staging cloudfront distribution
+          command: aws cloudfront create-invalidation --distribution-id $SLACK_TEST_CLOUDFRONT_DIST_ID --paths "/*"
 
   deploy-prod:
     docker:
@@ -93,7 +93,7 @@ jobs:
     resource_class: medium+
     steps:
       - vault/get-secrets:
-          template-preset: "aws-push-artifacts"
+          template-preset: 'aws-push-artifacts'
       - checkout
       - node/install
       - run:
@@ -110,9 +110,9 @@ jobs:
       - run:
           name: Build
           command: |
-                REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
-                REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
-                npm run build
+            REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
+            REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
+            npm run build
       - publish
       - run:
           name: Deploy apps to prod
@@ -157,12 +157,12 @@ jobs:
       - run:
           name: Test
           command: cd examples/javascript && npm run test
-  
+
   notify-sentry-deploy:
     docker:
       - image: cimg/base:stable
     environment:
-      SENTRY_ORG: contenful
+      SENTRY_ORG: contentful
       SENTRY_PROJECT: marketplace-apps
       SENTRY_ENVIRONMENT: production
     steps:
