@@ -8,7 +8,7 @@ plugins:
   - serverless-offline
 
 custom:
-  SIGNING_SECRET: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):SIGNING_SECRET}
+  signingSecret: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):signingSecret}
   customDomain:
     domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
     stage: ${opt:stage, 'dev'}
@@ -33,7 +33,7 @@ functions:
   api:
     description: GA4 App Backend
     environment:
-      SIGNING_SECRET: ${self:custom.SIGNING_SECRET}
+      SIGNING_SECRET: ${self:custom.signingSecret}
       STAGE: ${opt:stage, 'dev'}
     handler: build/src/index.handler
     events:
