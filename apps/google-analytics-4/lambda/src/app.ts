@@ -1,12 +1,24 @@
+import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
-import { apiErrorMap } from './apiErrorMap';
 import Middleware from './middlewares';
 import { ApiRouter, HealthRouter } from './routers';
 import { corsConfig } from './middlewares/corsConfig';
 
 const app = express();
 const apiRouteConstraint = ['/api/*'];
+
+// Initialize Sentry as early as possible
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  release: process.env.RELEASE_VERSION,
+});
+
+app.use(Middleware.setSentryContext);
+
+// IMPORTANT: The Sentry request handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
 // enable CORS on /api/* routes
 app.use(apiRouteConstraint, cors(corsConfig));
@@ -21,8 +33,13 @@ app.use(express.static('public'));
 app.use('/health', HealthRouter);
 app.use('/api', ApiRouter);
 
+// IMPORTANT: do our custom error mapping before the Sentry error handler
+app.use(Middleware.apiErrorMapper);
+
+// IMPORTANT: The Sentry error handler must be before any other error middleware and after all controllers
+app.use(Middleware.sentryErrorHandler);
+
 // catch and handle errors
-app.use(Middleware.apiErrorMapper(apiErrorMap));
 app.use(Middleware.apiErrorHandler);
 
 export default app;

@@ -2,7 +2,13 @@ import { z } from 'zod';
 import { config } from '../config';
 import fetchWithSignedRequest from '../helpers/signed-requests';
 import { PlainClientAPI } from 'contentful-management';
-import { ServiceAccountKeyId, ServiceAccountKey } from '../types';
+import {
+  ContentfulContext,
+  ServiceAccountKeyId,
+  ServiceAccountKey,
+  ContentfulContextHeaders,
+} from '../types';
+import { upperFirst } from 'lodash';
 
 const ZCredentials = z.object({
   status: z.string(),
@@ -111,19 +117,19 @@ function validateResponseStatus(response: Response): void {
 
 export class Api {
   readonly baseUrl: string;
-  readonly appDefinitionId: string;
+  readonly contentfulContext: ContentfulContext;
   readonly serviceAccountKeyId: ServiceAccountKeyId;
   readonly serviceAccountKey: ServiceAccountKey;
   readonly cma: PlainClientAPI;
 
   constructor(
-    appDefinitionId: string,
+    contentfulContext: ContentfulContext,
     cma: PlainClientAPI,
     serviceAccountKeyId: ServiceAccountKeyId,
     serviceAccountKey: ServiceAccountKey
   ) {
     this.baseUrl = config.backendApiUrl;
-    this.appDefinitionId = appDefinitionId;
+    this.contentfulContext = contentfulContext;
     this.cma = cma;
     this.serviceAccountKeyId = serviceAccountKeyId;
     this.serviceAccountKey = serviceAccountKey;
@@ -133,9 +139,12 @@ export class Api {
     return await fetchFromApi<Credentials>(
       this.requestUrl('api/credentials'),
       ZCredentials,
-      this.appDefinitionId,
+      this.contentfulContext.app!,
       this.cma,
-      this.serviceAccountKeyHeaders
+      {
+        ...this.serviceAccountKeyHeaders,
+        ...this.contentfulContextHeaders,
+      }
     );
   }
 
@@ -148,9 +157,12 @@ export class Api {
     return await fetchFromApi<AccountSummaries>(
       this.requestUrl('api/account_summaries'),
       ZAccountSummaries,
-      this.appDefinitionId,
+      this.contentfulContext.app!,
       this.cma,
-      this.serviceAccountKeyHeaders
+      {
+        ...this.serviceAccountKeyHeaders,
+        ...this.contentfulContextHeaders,
+      }
     );
   }
 
@@ -163,6 +175,16 @@ export class Api {
         this.serviceAccountKey
       ),
     };
+  }
+
+  private get contentfulContextHeaders() {
+    const headers: ContentfulContextHeaders = {};
+    for (const [key, value] of Object.entries(this.contentfulContext)) {
+      const headerKey = `X-Contentful-${upperFirst(key)}` as keyof ContentfulContextHeaders;
+      headers[headerKey] = value;
+    }
+
+    return headers;
   }
 
   // stringify + base64encode the header value so it can be packaged into header safely
