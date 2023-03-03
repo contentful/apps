@@ -98,17 +98,6 @@ export class Api {
     );
   }
 
-  async runReports(params: RunReportParamsType): Promise<any> {
-    // TYPE
-    console.log('serviceaccountheaders>>>>', this.serviceAccountKeyHeaders);
-    return await fetchFromApi<any>(
-      this.requestUrl(`api/run_report`),
-      ZCredentials,
-      this.appDefinitionId,
-      this.cma,
-      this.serviceAccountKeyHeaders
-    );
-  }
 
   async runReports(params: RunReportParamsType): Promise<any> {
     // TYPE
@@ -117,7 +106,10 @@ export class Api {
       ZCredentials,
       this.appDefinitionId,
       this.cma,
-      this.serviceAccountKeyHeaders
+      {
+        ...this.serviceAccountKeyHeaders,
+        ...this.contentfulContextHeaders,
+      }
     );
   }
 
