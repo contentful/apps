@@ -20,8 +20,8 @@ describe('apiErrorMapper', () => {
   beforeEach(() => {
     testRequest = {
       headers: {
-        'x-contentful-serviceaccountkeyid': validServiceAccountKeyIdBase64,
-        'x-contentful-serviceaccountkey': validServiceAccountKeyFileBase64,
+        'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
+        'X-Contentful-ServiceAccountKey': validServiceAccountKeyFileBase64,
       },
     } as unknown as Express.Request;
   });
@@ -38,8 +38,8 @@ describe('apiErrorMapper', () => {
   describe('when bad JSON is provided', () => {
     beforeEach(() => {
       testRequest.headers = {
-        'x-contentful-serviceaccountkeyid': 'Zm9vYmFy',
-        'x-contentful-serviceaccountkey': 'Zm9vYmFy',
+        'X-Contentful-ServiceAccountKeyId': 'Zm9vYmFy',
+        'X-Contentful-ServiceAccountKey': 'Zm9vYmFy',
       };
     });
 
@@ -53,8 +53,8 @@ describe('apiErrorMapper', () => {
   describe('when an improperly formed key is provided', () => {
     beforeEach(() => {
       testRequest.headers = {
-        'x-contentful-serviceaccountkeyid': 'eyJmb28iOiJiYXIifQ==',
-        'x-contentful-serviceaccountkey': 'eyJmb28iOiJiYXIifQ==',
+        'X-Contentful-ServiceAccountKeyId': 'eyJmb28iOiJiYXIifQ==',
+        'X-Contentful-ServiceAccountKey': 'eyJmb28iOiJiYXIifQ==',
       };
     });
 
