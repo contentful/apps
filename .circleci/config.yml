@@ -157,6 +157,26 @@ jobs:
       - run:
           name: Test
           command: cd examples/javascript && npm run test
+  
+  notify-sentry-deploy:
+    docker:
+      - image: cimg/base:stable
+    environment:
+      SENTRY_ORG: contenful
+      SENTRY_PROJECT: marketplace-apps
+      SENTRY_ENVIRONMENT: production
+    steps:
+      - checkout
+      - run:
+          name: Create release and notify Sentry of deploy
+          command: |
+            curl -sL https://sentry.io/get-cli/ | bash
+            export SENTRY_RELEASE=$(sentry-cli releases propose-version)
+            sentry-cli releases new -p $SENTRY_PROJECT $SENTRY_RELEASE
+            sentry-cli releases set-commits $SENTRY_RELEASE --auto
+            sentry-cli releases files $SENTRY_RELEASE upload-sourcemaps path-to-sourcemaps-if-applicable
+            sentry-cli releases finalize $SENTRY_RELEASE
+            sentry-cli releases deploys $SENTRY_RELEASE new -e $SENTRY_ENVIRONMENT
 
 workflows:
   version: 2
@@ -180,6 +200,15 @@ workflows:
             - vault
           requires:
             - apps-test
+          filters:
+            branches:
+              only:
+                - master
+      - notify-sentry-deploy:
+          context:
+            - vault
+          requires:
+            - deploy-prod
           filters:
             branches:
               only:
