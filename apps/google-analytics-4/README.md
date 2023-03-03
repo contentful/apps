@@ -1,46 +1,45 @@
-
 Contentful Marketplace App that displays page-based analytics from Google Analytics alongside Contentful content entries.
 
 ## Requirements
 
-* [Google Analytics 4](https://developers.google.com/analytics/devguides/collection/ga4) (Note: Google's deprecated Universal Analytics is not supported with this verison of the Google Analytics App)
+- [Google Analytics 4](https://developers.google.com/analytics/devguides/collection/ga4) (Note: Google's deprecated Universal Analytics is not supported with this verison of the Google Analytics App)
 
 ## Installation and Usage
 
-* Link to Marketplace app listing when ready
-* Link to Help Center documentation when ready
-* Link to any extra documentation or overview
-
+- Link to Marketplace app listing when ready
+- Link to Help Center documentation when ready
+- Link to any extra documentation or overview
 
 ## Technical Overview
 
 ### General
 
-* The Google Anlaytics App app is built on top of Contentful's [app framework](https://www.smartling.com/software/integrations/contentful/).
-* The app itself is a React application that provides a Sidebar widget and App Config widget, used within Contentful's app framework.
+- The Google Anlaytics App app is built on top of Contentful's [app framework](https://www.smartling.com/software/integrations/contentful/).
+- The app itself is a React application that provides a Sidebar widget and App Config widget, used within Contentful's app framework.
 
 ### Authorization
 
 > **IMPORTANT**: In the current development stage this app implementes insecure plaintext storage of access credentials. Before release credentials will be stored via a secure, encrypted solution. -- Dec 8, 2022
-* This app uses [service accounts](https://cloud.google.com/iam/docs/understanding-service-accounts) to provision access to users' analytics data. These credentials are used to fetch data from the organization's analytics account on behalf of all users.
+
+- This app uses [service accounts](https://cloud.google.com/iam/docs/understanding-service-accounts) to provision access to users' analytics data. These credentials are used to fetch data from the organization's analytics account on behalf of all users.
 
 ### Google Analytics Data
 
-* For analytics data, the app uses Google's [Analytics Data API](https://developers.google.com/analytics/devguides/reporting/data/v1)
-* For API access to Google, the app uses the [Google API Client Library for JavaScript](https://github.com/google/google-api-javascript-client)
+- For analytics data, the app uses Google's [Analytics Data API](https://developers.google.com/analytics/devguides/reporting/data/v1)
+- For API access to Google, the app uses the [Google API Client Library for JavaScript](https://github.com/google/google-api-javascript-client)
 
 ### Lambda
 
-* This app requires a backend to make secure API calls to the Goolge Analytics Data API.
-* The backend runs as an AWS lambda
+- This app requires a backend to make secure API calls to the Goolge Analytics Data API.
+- The backend runs as an AWS lambda
 
 ## Local Development
 
 To develop this app locally, there are a few prerequisites you will want to have in place:
 
-* An Google Analytics 4 property in an active Google Analytics account. You will also need to have Google Analytics gathering data on a public website somewhere in order to generate metrics you can use to display and test.
-* A Contentful organization and space
-* A development definition of the app itself
+- An Google Analytics 4 property in an active Google Analytics account. You will also need to have Google Analytics gathering data on a public website somewhere in order to generate metrics you can use to display and test.
+- A Contentful organization and space
+- A development definition of the app itself
 
 ### Frontend
 
@@ -63,7 +62,6 @@ To run the test in CI (no watch):
 ```sh
 npm run test-ci
 ```
-
 
 ### Backend (Lambda)
 
@@ -109,11 +107,11 @@ Read [here](https://www.contentful.com/developers/docs/extensibility/app-framewo
 
 #### `npm run upload-ci`
 
-Similar to `npm run upload` it will upload your app to contentful and activate it. The only difference is   
+Similar to `npm run upload` it will upload your app to contentful and activate it. The only difference is  
 that with this command all required arguments are read from the environment variables, for example when you add
 the upload command to your CI pipeline.
 
-For this command to work, the following environment variables must be set: 
+For this command to work, the following environment variables must be set:
 
 - `CONTENTFUL_ORG_ID` - The ID of your organization
 - `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
