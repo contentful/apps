@@ -7,7 +7,18 @@ plugins:
   - serverless-domain-manager
   - serverless-offline
 
-custom: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
+environment: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
+
+custom:
+  SIGNING_SECRET: ${self:environment.SIGNING_SECRET}
+  customDomain:
+    domainName: ${self:environment.domainName}
+    stage: ${opt:stage, 'dev'}
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+  serverless-offline:
+    httpPort: 8080
 
 provider:
   name: aws
@@ -18,7 +29,7 @@ provider:
   timeout: 30
   deploymentBucket:
     name: cf-apps-serverless-deployment
-  deploymentPrefix: ${self:custom.deploymentPrefix}
+  deploymentPrefix: sls-apps-google-analytics-4
 
 functions:
   api:

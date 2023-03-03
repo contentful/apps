@@ -12,8 +12,7 @@
     "test": "TS_NODE_TRANSPILE_ONLY=1 mocha",
     "test:debug": "TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
     "test:watch": "TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test",
-    "deploy:test": "sls deploy --stage test",
-    "deploy": "sls deploy --stage $STAGE"
+    "deploy:test": "sls deploy --stage test"
   },
   "keywords": [],
   "author": "",
