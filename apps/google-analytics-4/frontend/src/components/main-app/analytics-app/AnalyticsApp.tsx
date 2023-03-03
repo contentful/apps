@@ -2,17 +2,22 @@ import { useAutoResizer, useFieldValue } from '@contentful/react-apps-toolkit';
 import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
-import { DateRangeType, Row, RunReportResponse } from 'types';
+import { useApi } from 'hooks/useApi';
 import DateRange from 'helpers/dateRange.enum';
-import { config } from 'config';
+import ChartContent from './ChartContent';
+import { DateRangeType, Row, RunReportResponse,  ServiceAccountKeyId, ServiceAccountKey } from 'types';
 import { styles } from './AnalyticsApp.styles';
-import ChartContent from 'components/main-app/ChartContent';
 import { Flex, Note } from '@contentful/f36-components';
 
 const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
 const EMPTY_DATA_MSG = 'There are no page views to show for this range';
 
-const AnalyticsApp = () => {
+interface Props {
+  serviceAccountKeyId: ServiceAccountKeyId;
+  serviceAccountKey: ServiceAccountKey;
+}
+const AnalyticsApp = (props: Props) => {
+  const { serviceAccountKeyId, serviceAccountKey } = props;
   const [runReportResponse, setRunReportResponse] = useState<RunReportResponse>(
     {} as RunReportResponse
   );
@@ -22,14 +27,14 @@ const AnalyticsApp = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
 
+  const api = useApi(serviceAccountKeyId, serviceAccountKey);
+
   useAutoResizer();
 
   useEffect(() => {
-    const baseUrl = config.backendApiUrl;
-
     async function fetchData() {
       try {
-        const response = await fetch(`${baseUrl}/sampleData/runReportResponseHasViews.json`);
+        const response = await api.runReports();
         if (response.ok) {
           setRunReportResponse(await response.json());
         }
@@ -41,7 +46,7 @@ const AnalyticsApp = () => {
     }
 
     fetchData();
-  }, []);
+  }, [api]);
 
   useEffect(() => {
     const sliceByDateRange = (dateRange: DateRangeType): RunReportResponse => {
@@ -62,6 +67,7 @@ const AnalyticsApp = () => {
     if (runReportResponse.rowCount) {
       const newData = sliceByDateRange(dateRange);
       setPageViewData(newData);
+      setLoading(false);
     }
   }, [dateRange, runReportResponse]);
 
