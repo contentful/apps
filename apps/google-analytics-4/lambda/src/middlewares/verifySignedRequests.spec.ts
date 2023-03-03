@@ -11,8 +11,8 @@ import {
 chai.use(chaiHttp);
 
 const serviceAccountKeyHeaders = {
-  'x-contentful-serviceaccountkeyid': validServiceAccountKeyIdBase64,
-  'x-contentful-serviceaccountkey': validServiceAccountKeyFileBase64,
+  'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
+  'X-Contentful-ServiceAccountKey': validServiceAccountKeyFileBase64,
 };
 
 describe('verifySignedRequestMiddleware', () => {

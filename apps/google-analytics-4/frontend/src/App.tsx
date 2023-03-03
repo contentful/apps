@@ -9,6 +9,8 @@ import Sidebar from './locations/Sidebar';
 import Page from './locations/Page';
 import Home from './locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { contentfulContext } from './helpers/contentfulContext';
+import { upperFirst } from 'lodash';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -33,26 +35,15 @@ const App = () => {
           // user: "6iUaAfJg2ZoKe4oEYF7kxe"
           if (sdk.ids.user) scope.setUser({ id: sdk.ids.user });
 
-          for (const [key, value] of Object.entries(sdk.ids)) {
-            // app: "5eHTUt9pILTGjYk3VFE9ta"
-            // contentType: "product"
-            // entry: "4w6Hx5RgIO2uiNcgxpqj6l"
-            // environment: "gary.hepting"
-            // field: "sku"
-            // organization: "6xdLsz6lCsk0yPOccSsDK7"
-            // space: "30x8uoqewkkz"
-            // user: "6iUaAfJg2ZoKe4oEYF7kxe"
-            if (value) scope.setTag(`x-contentful-${key}`, value);
+          for (const [key, value] of Object.entries(contentfulContext(sdk))) {
+            if (value) scope.setTag(`X-Contentful-${upperFirst(key)}`, value);
           }
-
-          // location: "app-config"
-          if (location) scope.setTag('x-contentful-location', location);
         });
 
         return component;
       }
     }
-  }, [sdk.location, sdk.ids]);
+  }, [sdk]);
 
   return Component ? <Component /> : null;
 };
