@@ -15,7 +15,7 @@ import {
 import { ExternalLinkTrimmedIcon, CheckCircleIcon, ErrorCircleIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
-import { ApiError, ApiGA4Error } from 'services/api';
+import { ApiGA4Error } from 'services/api';
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
@@ -90,27 +90,6 @@ const DisplayServiceAccountCard = (props: Props) => {
   const isApiGA4Error = (error: any): error is ApiGA4Error => {
     return true;
   }
-  
-  // const isApiGA4Error = (error: any): error is ApiError => {
-  //   return true;
-  //   if (!('errorType' in error)) {
-  //     return false;
-  //   }
-
-  //   if (typeof error.errorType !== 'string') {
-  //     return false;
-  //   }
-
-  //   if (!('status' in error)) {
-  //     return false;
-  //   }
-
-  //   if (typeof error.status !== 'number') {
-  //     return false;
-  //   }
-
-  //   return true;
-  // }
 
   const verifyDataApi = useCallback(async () => {
     try {
@@ -127,7 +106,8 @@ const DisplayServiceAccountCard = (props: Props) => {
       setUnspecifiedDataError(undefined)
     } catch (e) {
       if (isApiGA4Error(e)) {
-        console.log(e);
+        const foo = e.res // ApiGA4Error
+        console.log(foo);
       }
       else {
         setUnspecifiedDataError({
