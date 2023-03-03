@@ -7,12 +7,10 @@ plugins:
   - serverless-domain-manager
   - serverless-offline
 
-environment: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
-
 custom:
-  SIGNING_SECRET: ${self:environment.SIGNING_SECRET}
+  SIGNING_SECRET: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):SIGNING_SECRET}
   customDomain:
-    domainName: ${self:environment.domainName}
+    domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
     stage: ${opt:stage, 'dev'}
     createRoute53Record: true
     endpointType: 'edge'
