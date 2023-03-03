@@ -4,6 +4,7 @@ import { server } from '../../test/mocks/api/server';
 import { Api, ApiClientError, ApiError, ApiServerError, fetchFromApi } from './api';
 import { mockCma, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
 import { mockAccountSummary } from '../../test/mocks/api/mockData';
+import { ContentfulContext } from 'types';
 
 describe('fetchFromApi()', () => {
   const ZSomeSchema = z.object({ foo: z.string() });

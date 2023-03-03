@@ -31,9 +31,9 @@ type Headers = Record<string, string>;
 
 export type Credentials = z.infer<typeof ZCredentials>;
 
-export class ApiError extends Error { }
-export class ApiServerError extends ApiError { }
-export class ApiClientError extends ApiError { }
+export class ApiError extends Error {}
+export class ApiServerError extends ApiError {}
+export class ApiClientError extends ApiError {}
 
 export async function fetchFromApi<T>(
   apiUrl: URL,
@@ -60,9 +60,7 @@ async function fetchResponse(
     if (!signedResponse.ok) {
       const { errors } = await signedResponse.json();
       throw new ApiError(errors.message);
-    }
-    else return signedResponse;
-
+    } else return signedResponse;
   } catch (e) {
     if (e instanceof TypeError) {
       const errorMessage = e.message;
@@ -158,10 +156,10 @@ export class Api {
 
   private get serviceAccountKeyHeaders(): Headers {
     return {
-      'x-contentful-serviceaccountkeyid': this.encodeServiceAccountHeaderValue(
+      'X-Contentful-ServiceAccountKeyId': this.encodeServiceAccountHeaderValue(
         this.serviceAccountKeyId
       ),
-      'x-contentful-serviceaccountkey': this.encodeServiceAccountHeaderValue(
+      'X-Contentful-ServiceAccountKey': this.encodeServiceAccountHeaderValue(
         this.serviceAccountKey
       ),
     };

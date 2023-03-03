@@ -49,13 +49,13 @@ const contentfulSigningHeaderKeys = [
 ];
 
 interface ContentfulSignedHeaders {
-  'x-contentful-timestamp': string;
-  'x-contentful-signed-headers': string;
-  'x-contentful-signature': string;
-  'x-contentful-user-id': string;
-  'x-contentful-space-id': string;
-  'x-contentful-environment-id': string;
-  'x-contentful-app-id': string;
+  'X-Contentful-Timestamp': string;
+  'X-Contentful-Signed-Headers': string;
+  'X-Contentful-Signature': string;
+  'X-Contentful-User-Id': string;
+  'X-Contentful-Space-Id': string;
+  'X-Contentful-Environment-Id': string;
+  'X-Contentful-App-Id': string;
   [key: string]: string;
 }
 
@@ -67,7 +67,7 @@ function requestSigningHeaders(headers: IncomingHttpHeaders): Partial<Contentful
     if (typeof headers[header] === 'string') {
       requiredSignatureHeaders[header] = headers[header] as string;
     } else {
-      throw new UnableToVerifyRequest('Headers that are not a string');
+      throw new UnableToVerifyRequest(`Header ${header} is not a string`);
     }
   }
 
