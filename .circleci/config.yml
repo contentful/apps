@@ -30,6 +30,11 @@ jobs:
       - checkout
       - node/install
       - run:
+          name: Check for prettier violations 
+          command: |
+            git fetch origin master # circleci doesn't fetch master by default
+            ./.circleci/prettier-check.sh
+      - run:
           name: Install dependencies
           command: |
             npm ci
