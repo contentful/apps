@@ -45,7 +45,7 @@ commands:
           command: npm run publish-packages
 
 jobs:
-  build:
+  install:
     <<: *defaults
     steps:
       - *fast_checkout
@@ -63,6 +63,14 @@ jobs:
       - run:
           name: Lint
           command: npm run lint
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - '*'
+  build:
+    <<: *defaults
+    steps:
+      - *fast_checkout
       - run:
           name: Build
           command: npm run build
@@ -176,14 +184,19 @@ workflows:
   version: 2
   build-test-deploy:
     jobs:
+      - install:
+          context:
+            - vault
       - build:
           context:
             - vault
+          requires:
+            - install
       - test:
           context:
             - vault
           requires:
-            - build
+            - install
       # - publish:
           # context:
             # - vault
@@ -194,6 +207,7 @@ workflows:
             - vault
           requires:
             - test
+            - build
           filters:
             branches:
               only:
