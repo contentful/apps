@@ -69,7 +69,7 @@ jobs:
       - persist_to_workspace:
           root: ~/project
           paths:
-            - apps
+            - '*'
   test:
     <<: *defaults
     steps:
@@ -193,7 +193,7 @@ workflows:
           context:
             - vault
           requires:
-            - build
+            - test
           filters:
             branches:
               only:
