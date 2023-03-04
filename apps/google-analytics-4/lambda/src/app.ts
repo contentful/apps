@@ -1,9 +1,12 @@
+import * as dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import { apiErrorMap } from './apiErrorMap';
 import Middleware from './middlewares';
 import { ApiRouter, HealthRouter } from './routers';
 import { corsConfig } from './middlewares/corsConfig';
+
+dotenv.config();
 
 const app = express();
 const apiRouteConstraint = ['/api/*'];

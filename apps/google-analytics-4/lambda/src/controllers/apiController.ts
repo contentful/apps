@@ -22,7 +22,6 @@ const ApiController = {
       const result = await googleApi.listAccountSummaries();
       res.status(200).json(result);
     } catch (err) {
-      // pass to apiErrorHandler
       next(err);
     }
   },
@@ -48,7 +47,6 @@ const ApiController = {
       );
       res.status(200).json(result);
     } catch (err) {
-      // pass to apiErrorHandler
       next(err);
     }
   },

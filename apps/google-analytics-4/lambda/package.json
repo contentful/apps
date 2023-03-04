@@ -5,13 +5,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "debug": "SLS_DEBUG=* node inspect ./node_modules/serverless/bin/serverless.js offline",
-    "build": "rimraf ./build && tsc",
+    "debug": "RELEASE_VERSION=$(git rev-parse --short HEAD) SLS_DEBUG=* node inspect ./node_modules/serverless/bin/serverless.js offline",
+    "build": "RELEASE_VERSION=$(git rev-parse --short HEAD) rimraf ./build && tsc",
     "lint": "eslint .",
-    "start:dev": "nodemon",
-    "test": "TS_NODE_TRANSPILE_ONLY=1 mocha",
-    "test:debug": "TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
-    "test:watch": "TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test"
+    "start:dev": "RELEASE_VERSION=$(git rev-parse --short HEAD) nodemon",
+    "test": "RELEASE_VERSION=$(git rev-parse --short HEAD) TS_NODE_TRANSPILE_ONLY=1 mocha",
+    "test:debug": "RELEASE_VERSION=$(git rev-parse --short HEAD) TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
+    "test:watch": "RELEASE_VERSION=$(git rev-parse --short HEAD) TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +30,7 @@
     "@typescript-eslint/parser": "^5.47.0",
     "chai": "^4.3.7",
     "chai-http": "^4.3.0",
+    "dotenv": "^16.0.3",
     "eslint": "^8.30.0",
     "mocha": "^10.2.0",
     "nodemon": "^2.0.20",
