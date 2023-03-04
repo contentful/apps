@@ -5,7 +5,10 @@
     "paths": {
       "@/*": ["./*"],
       "@shared/*": ["../shared/*"]
-    }
+    },
+    "sourceMap": true,
+    "inlineSources": true,
+    "sourceRoot": "/src"
   },
   "include": ["src", "test"],
   "exclude": ["node_modules"]
