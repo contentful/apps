@@ -1,15 +1,6 @@
 service: sls-apps-google-analytics-4
 
-# At the time of writing, there is a known issue with serverless variable resolution
-# in repos with multiple serverless.yml files and external configuration files.
-# variablesResolutionMode: 20210326 simulates serverless 3 var res, w/o
-# introducing this bug.
-# In the future this can likely be changed to:
-# frameworkVersion: '>=3.0.0 <4.0.0'
-# + package.json version changes to serverless, serverless-domain-manager,
-# and serverless-offline.
-frameworkVersion: '>=2.0.0 <3.0.0'
-variablesResolutionMode: 20210326
+frameworkVersion: '>=3.0.0 <4.0.0'
 
 plugins:
   - serverless-domain-manager
@@ -31,7 +22,6 @@ provider:
   runtime: nodejs18.x
   stage: ${opt:stage, 'dev'}
   region: 'us-east-1'
-  lambdaHashingVersion: 20201221
   timeout: 30
   deploymentBucket:
     name: cf-apps-serverless-deployment
