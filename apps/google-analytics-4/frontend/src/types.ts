@@ -78,6 +78,14 @@ export interface RunReportResponse {
   propertyQuota: null;
   kind: string;
 }
+export interface RunReportParamsType {
+  propertyId: string;
+  slug: string;
+  startDate: string;
+  endDate: string;
+  dimensions: string[];
+  metrics: string[];
+}
 
 export type DateRangeType = 'lastWeek' | 'lastDay' | 'lastMonth';
 export interface AccountSummariesType {

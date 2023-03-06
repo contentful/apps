@@ -12,6 +12,7 @@ import {
   AccountSummaries,
   RunReportData,
 } from 'apis/apiTypes';
+import { upperFirst } from 'lodash';
 
 export class ApiError extends Error {
   details: string;
@@ -83,9 +84,11 @@ export class Api {
     );
   }
 
-  async runReports(): Promise<any> {
+  async runReports(params: RunReportParamsType): Promise<any> {
+    // TYPE
+    console.log('serviceaccountheaders>>>>', this.serviceAccountKeyHeaders);
     return await fetchFromApi<any>(
-      this.requestUrl('api/run_report'),
+      this.requestUrl(`api/run_report`),
       ZCredentials,
       this.appDefinitionId,
       this.cma,
