@@ -28,6 +28,7 @@ const ApiController = {
   },
 
   run_report: async (req: Request, res: Response, next: NextFunction) => {
+    console.log('reaching request>>>>>>', req.params);
     try {
       const serviceAccountKeyFile = req.serviceAccountKey;
       const { propertyId, slug, startDate, endDate, dimensions, metrics } =
