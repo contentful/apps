@@ -4,7 +4,7 @@ import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
 import { useApi } from 'hooks/useApi';
 import DateRange from 'helpers/dateRange.enum';
-import ChartContent from './ChartContent';
+import ChartContent from '../ChartContent';
 import { DateRangeType, Row, RunReportResponse,  ServiceAccountKeyId, ServiceAccountKey } from 'types';
 import { styles } from './AnalyticsApp.styles';
 import { Flex, Note } from '@contentful/f36-components';
