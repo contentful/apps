@@ -1,23 +1,47 @@
-service: google-analytics
-frameworkVersion: '3'
+service: sls-apps-google-analytics-4
+
+# At the time of writing, there is a known issue with serverless variable resolution
+# in repos with multiple serverless.yml files and external configuration files.
+# variablesResolutionMode: 20210326 simulates serverless 3 var res, w/o
+# introducing this bug.
+# In the future this can likely be changed to:
+# frameworkVersion: '>=3.0.0 <4.0.0'
+# + package.json version changes to serverless, serverless-domain-manager,
+# and serverless-offline.
+frameworkVersion: '>=2.0.0 <3.0.0'
+variablesResolutionMode: 20210326
 
 plugins:
+  - serverless-domain-manager
   - serverless-offline
 
 custom:
-  environment: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml)}
+  signingSecret: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):signingSecret}
+  customDomain:
+    domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
+    stage: ${opt:stage, 'dev'}
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
   serverless-offline:
     httpPort: 8080
 
 provider:
   name: aws
-  stage: ${opt:stage, 'dev'}
   runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: 'us-east-1'
+  lambdaHashingVersion: 20201221
+  timeout: 30
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: sls-apps-google-analytics-4
 
 functions:
   api:
+    description: GA4 App Backend
     environment:
-      SIGNING_SECRET: ${self:custom.environment.SIGNING_SECRET}
+      SIGNING_SECRET: ${self:custom.signingSecret}
       STAGE: ${opt:stage, 'dev'}
     handler: build/src/index.handler
     events:
