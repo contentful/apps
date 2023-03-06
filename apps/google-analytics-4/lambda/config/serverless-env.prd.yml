@@ -1,1 +1,2 @@
-SIGNING_SECRET: ${env:SIGNING_SECRET}
+signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/prd/signing-secret}
+domainName: google-analytics-4.ctfapps.net

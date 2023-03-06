@@ -11,13 +11,13 @@
     "start:dev": "nodemon",
     "test": "TS_NODE_TRANSPILE_ONLY=1 mocha",
     "test:debug": "TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
-    "test:watch": "TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test"
+    "test:watch": "TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test",
+    "deploy:test": "sls deploy --stage test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@contentful/node-apps-toolkit": "^2.0.4",
     "@tsconfig/node18": "^1.0.1",
     "@types/chai": "^4.3.4",
     "@types/chai-http": "^4.2.0",
@@ -34,14 +34,15 @@
     "mocha": "^10.2.0",
     "nodemon": "^2.0.20",
     "rimraf": "^3.0.2",
-    "serverless": "^3.26.0",
-    "serverless-domain-manager": "^6.4.3",
-    "serverless-offline": "^12.0.4",
+    "serverless": "2.72.3",
+    "serverless-domain-manager": "^6.4.4",
+    "serverless-offline": "8.8.1",
     "sinon": "^15.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4"
   },
   "dependencies": {
+    "@contentful/node-apps-toolkit": "^2.0.4",
     "@google-analytics/admin": "^4.3.1",
     "@google-analytics/data": "^3.2.1",
     "@grpc/grpc-js": "^1.8.4",
