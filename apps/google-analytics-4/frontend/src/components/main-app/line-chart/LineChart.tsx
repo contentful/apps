@@ -34,12 +34,7 @@ interface Props {
 }
 
 const LineChart = (props: Props) => {
-  const {
-    dataValues,
-    xAxisLabels,
-    tooltipMetricLabel = 'Page views',
-    accessibilityLabel = 'Analytics line chart',
-  } = props;
+  const { dataValues, xAxisLabels, tooltipMetricLabel, accessibilityLabel } = props;
 
   const data: ChartData<'line'> = {
     labels: xAxisLabels,
