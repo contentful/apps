@@ -15,6 +15,7 @@
     "bootstrap:ci": "lerna bootstrap --ci --concurrency=3",
     "clean": "lerna clean",
     "lint": "lerna run lint --concurrency=3",
+    "sls:print": "lerna run sls:print --concurrency=3",
     "build": "lerna run build --concurrency=1 --stream",
     "test": "lerna run test:ci --concurrency=1 --stream",
     "deploy": "lerna run deploy --concurrency=3",
