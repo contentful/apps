@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { ErrorRequestHandler } from 'express';
 import { isApiError, ApiError } from '../errors/apiError';
 
@@ -14,6 +15,8 @@ export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, 
     if (isApiError(error)) {
       response.status(error.status).send({ errors: error.toJSON() });
     } else {
+      console.error('ERROR: ', error);
+      Sentry.captureException(error);
       response.status(500).send({
         errors: { errorType: 'ServerError', message: 'Internal Server Error', details: null },
       });
