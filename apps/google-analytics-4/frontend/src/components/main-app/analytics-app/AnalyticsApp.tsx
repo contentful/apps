@@ -127,17 +127,9 @@ const AnalyticsApp = (props: Props) => {
 
   const renderChartContent = () => {
     if (error) {
-      return (
-        <Note className={styles.note} variant="negative">
-          <p className={styles.noteContent}>{error?.message || DEFAULT_ERR_MSG}</p>
-        </Note>
-      );
+      return <Note variant="negative">{error?.message || DEFAULT_ERR_MSG}</Note>;
     } else if (!pageViewData.rowCount) {
-      return (
-        <Note className={styles.note} variant="warning">
-          <p className={styles.noteContent}>{EMPTY_DATA_MSG}</p>
-        </Note>
-      );
+      return <Note variant="warning">{EMPTY_DATA_MSG}</Note>;
     }
 
     return <ChartContent pageViewData={pageViewData} />;
