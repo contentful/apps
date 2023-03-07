@@ -1,6 +1,5 @@
 import { config } from '../config';
 import { PlainClientAPI } from 'contentful-management';
-import { ServiceAccountKeyId, ServiceAccountKey } from '../types';
 import { fetchFromApi } from 'apis/fetchApi';
 import {
   Headers,
@@ -12,6 +11,12 @@ import {
   AccountSummaries,
   RunReportData,
 } from 'apis/apiTypes';
+  import { ContentfulContext,
+  ServiceAccountKeyId,
+  ServiceAccountKey,
+  ContentfulContextHeaders,
+  RunReportParamsType,
+} from '../types';
 import { upperFirst } from 'lodash';
 
 export class ApiError extends Error {
@@ -98,29 +103,17 @@ export class Api {
     );
   }
 
-
   async runReports(params: RunReportParamsType): Promise<any> {
     // TYPE
     return await fetchFromApi<any>(
       this.requestUrl(`api/run_report`, params),
       ZCredentials,
-      this.appDefinitionId,
+      this.contentfulContext.app!,
       this.cma,
       {
         ...this.serviceAccountKeyHeaders,
         ...this.contentfulContextHeaders,
       }
-    );
-  }
-
-  async runReports(params: RunReportParamsType): Promise<any> {
-    // TYPE
-    return await fetchFromApi<any>(
-      this.requestUrl(`api/run_report`, params),
-      ZCredentials,
-      this.appDefinitionId,
-      this.cma,
-      this.serviceAccountKeyHeaders
     );
   }
 
