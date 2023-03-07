@@ -35,14 +35,6 @@ jobs:
             git fetch origin master # circleci doesn't fetch master by default
             ./.circleci/prettier-check.sh
       - run:
-          name: Print and test serverless vars
-          command: |
-            if [[ $CIRCLE_BRANCH == "master" ]] ; then
-              npm run sls:print --stage prd
-            else
-              npm run sls:print --stage test
-            fi
-      - run:
           name: Install dependencies
           command: |
             npm ci
@@ -50,6 +42,14 @@ jobs:
       - run:
           name: Lint
           command: npm run lint
+      - run:
+          name: Print and test serverless vars
+          command: |
+            if [[ $CIRCLE_BRANCH == "master" ]] ; then
+              npm run sls:print --stage prd
+            else
+              npm run sls:print --stage test
+            fi
       - run:
           name: Build
           command: npm run build
