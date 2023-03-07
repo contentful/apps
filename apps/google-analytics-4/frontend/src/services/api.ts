@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { config } from '../config';
+import { config } from '../../../shared/config';
 import fetchWithSignedRequest from '../helpers/signed-requests';
 import { PlainClientAPI } from 'contentful-management';
 import {

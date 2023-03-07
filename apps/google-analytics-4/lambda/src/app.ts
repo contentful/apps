@@ -4,15 +4,16 @@ import cors from 'cors';
 import Middleware from './middlewares';
 import { ApiRouter, HealthRouter } from './routers';
 import { corsConfig } from './middlewares/corsConfig';
+import { config } from '@/../shared/config';
 
 const app = express();
 const apiRouteConstraint = ['/api/*'];
 
 // Initialize Sentry as early as possible
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV,
-  release: process.env.RELEASE_VERSION,
+  dsn: config.sentryDSN,
+  environment: config.environment,
+  release: config.release,
 });
 
 app.use(Middleware.setSentryContext);
