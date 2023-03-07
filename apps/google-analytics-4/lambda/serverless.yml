@@ -7,7 +7,7 @@ plugins:
   - serverless-offline
 
 custom:
-  sentryDSN: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):sentryDSN}
+  sentryDSN: https://b8f524eae7c446fb8071476431426640@o2239.ingest.sentry.io/4504725335834624
   signingSecret: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):signingSecret}
   customDomain:
     domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
