@@ -28,11 +28,10 @@ const ApiController = {
   },
 
   run_report: async (req: Request, res: Response, next: NextFunction) => {
-    console.log('reaching request>>>>>>', req.params);
     try {
       const serviceAccountKeyFile = req.serviceAccountKey;
       const { propertyId, slug, startDate, endDate, dimensions, metrics } =
-        req.params as unknown as RunReportParamsType;
+        req.query as unknown as RunReportParamsType;
 
       // intentional runtime error because the middleware already handles this. typescript
       // just doesn't realize

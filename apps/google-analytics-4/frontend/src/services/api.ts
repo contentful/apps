@@ -57,9 +57,23 @@ export class Api {
     );
   }
 
-  private requestUrl(apiPath: string): URL {
+  appendQueryParams = (url: URL, queryParams: any) => {
+    Object.keys(queryParams).forEach((key) => url.searchParams.append(key, queryParams[key]));
+    return url;
+  };
+
+  private requestUrl(apiPath: string, queryParams?: any): URL {
+    // if (queryParams) {
+    //   const { startDate, endDate, propertyId, metrics, dimensions, slug } = queryParams;
+    //   const params = ':startDate/:endDate/:propertyId/:slug'
+    //   const url = `${this.baseUrl}/${apiPath}/${startDate}`;
+    //   // const newUrl = new URL(url);
+    // } else {
     const url = `${this.baseUrl}/${apiPath}`;
-    return new URL(url);
+    const newUrl = new URL(url);
+    if (queryParams) this.appendQueryParams(newUrl, queryParams);
+    return newUrl;
+    // }
   }
 
   async listAccountSummaries(): Promise<AccountSummaries> {
@@ -98,9 +112,8 @@ export class Api {
 
   async runReports(params: RunReportParamsType): Promise<any> {
     // TYPE
-    console.log('serviceaccountheaders>>>>', this.serviceAccountKeyHeaders);
     return await fetchFromApi<any>(
-      this.requestUrl(`api/run_report`),
+      this.requestUrl(`api/run_report`, params),
       ZCredentials,
       this.appDefinitionId,
       this.cma,

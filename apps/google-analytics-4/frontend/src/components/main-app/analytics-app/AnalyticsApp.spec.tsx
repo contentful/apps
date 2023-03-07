@@ -1,17 +1,27 @@
 import AnalyticsApp from './AnalyticsApp';
 import { render, screen } from '@testing-library/react';
+import { mockSdk, mockCma } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => jest.fn(),
   useFieldValue: () => 'fieldValue',
+  useSDK: () => mockSdk,
+  useCMA: () => mockCma,
 }));
+
+// jest.mock('hooks/useApi', () => {
+//   return jest.fn(() => ({
+//      useApi: () => jest.fn()
+//   }))
+// })
 
 const { findByTestId, getByTestId, getByText, findByText } = screen;
 
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
+const MOCK_PROPERTY_ID = '12345';
 
 describe('AnalyticsApp', () => {
   it('mounts data', async () => {
@@ -23,7 +33,7 @@ describe('AnalyticsApp', () => {
         ) as jest.Mock
       );
 
-    render(<AnalyticsApp />);
+    render(<AnalyticsApp propertyId={MOCK_PROPERTY_ID} />);
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
@@ -41,7 +51,7 @@ describe('AnalyticsApp', () => {
         ) as jest.Mock
       );
 
-    render(<AnalyticsApp />);
+    render(<AnalyticsApp propertyId={MOCK_PROPERTY_ID} />);
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
@@ -59,7 +69,7 @@ describe('AnalyticsApp', () => {
         jest.fn(() => Promise.reject({ message: 'mock Api error' })) as jest.Mock
       );
 
-    render(<AnalyticsApp />);
+    render(<AnalyticsApp propertyId={MOCK_PROPERTY_ID} />);
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const errorNote = getByTestId(NOTE_TEST_ID);

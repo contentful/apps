@@ -3,26 +3,42 @@ import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState } from 'react';
 import { useApi } from 'hooks/useApi';
-import DateRange from 'helpers/dateRange.enum';
+import getRangeDates, { DateRange } from 'helpers/handle-date-range/handle-date-range';
 import ChartContent from '../ChartContent';
-import { DateRangeType, Row, RunReportResponse,  ServiceAccountKeyId, ServiceAccountKey } from 'types';
+import {
+  DateRangeType,
+  Row,
+  RunReportResponse,
+  ServiceAccountKeyId,
+  ServiceAccountKey,
+} from 'types';
 import { styles } from './AnalyticsApp.styles';
 import { Flex, Note } from '@contentful/f36-components';
 
 const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
 const EMPTY_DATA_MSG = 'There are no page views to show for this range';
 
-const RANGE_OPTIONS = {
-  lastDay: { startDaysAgo: 1, endDaysAgo: 0 },
-  lastWeek: { startDaysAgo: 7, endDaysAgo: 0 },
-  lastMonth: { startDaysAgo: 28, endDaysAgo: 0 },
-};
+// const daysBreakpoints = [
+//   { lowerLimit: 29, interval: 'nthWeek' },
+//   { lowerLimit: 5, interval: 'date' },
+//   { lowerLimit: -Infinity, interval: 'dateHour' }
+// ];
 
-const DAY_IN_MS = 1000 * 60 * 60 * 24;
+// const getDateRangeInterval = (start: Date, end: Date) => {
+//   const nDays = (end.valueOf() - start.valueOf()) / DAY_IN_MS;
+
+//   for (const breakpoint of daysBreakpoints) {
+//     if (nDays >= breakpoint.lowerLimit) {
+//       return breakpoint.interval;
+//     }
+//   }
+
+//   return '';
+// }
 
 interface Props {
-  serviceAccountKeyId: ServiceAccountKeyId;
-  serviceAccountKey: ServiceAccountKey;
+  serviceAccountKeyId?: ServiceAccountKeyId;
+  serviceAccountKey?: ServiceAccountKey;
   propertyId: string;
 }
 const AnalyticsApp = (props: Props) => {
@@ -32,7 +48,7 @@ const AnalyticsApp = (props: Props) => {
   );
   const [pageViewData, setPageViewData] = useState<RunReportResponse>(runReportResponse);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek');
-  const [startEndDates, setStartEndDates] = useState<any>({}); // TYPE
+  const [startEndDates, setStartEndDates] = useState<any>(getRangeDates('lastWeek')); // TYPE
   // const [slugValue] = useFieldValue<string>('slug');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
@@ -40,18 +56,6 @@ const AnalyticsApp = (props: Props) => {
   const api = useApi(serviceAccountKeyId, serviceAccountKey);
 
   useAutoResizer();
-
-  const getRangeDates = () => {
-    const selectedRange = RANGE_OPTIONS[dateRange];
-    const today = new Date().valueOf();
-
-    return {
-      startEnd: {
-        start: new Date(today - DAY_IN_MS * selectedRange.startDaysAgo),
-        end: new Date(today - DAY_IN_MS * selectedRange.endDaysAgo),
-      },
-    };
-  };
 
   const reportRequestParams = {
     startDate: startEndDates.start,
@@ -98,11 +102,15 @@ const AnalyticsApp = (props: Props) => {
     };
     if (runReportResponse.rowCount) {
       const newData = sliceByDateRange(dateRange);
-      setStartEndDates(getRangeDates());
+      setStartEndDates(getRangeDates(dateRange));
       setPageViewData(newData);
       setLoading(false);
     }
   }, [dateRange, runReportResponse]);
+
+  useEffect(() => {
+    setStartEndDates(getRangeDates(dateRange));
+  }, [dateRange]);
 
   const handleDateRangeChange = (e: DateRangeType) => {
     setDateRange(e);
