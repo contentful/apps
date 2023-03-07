@@ -29,6 +29,15 @@ jobs:
     steps:
       - checkout
       - node/install
+       - run:
+          name: 'Setup Env Variables'
+          command: |
+              if [[ $CIRCLE_BRANCH == "master" ]] ; then
+                echo "export STAGE=prd" >> $BASH_ENV
+              else
+                echo "export STAGE=test" >> $BASH_ENV
+              fi
+              source $BASH_ENV
       - run:
           name: Check for prettier violations
           command: |
@@ -44,7 +53,7 @@ jobs:
           command: npm run lint
       - run:
           name: Print and test serverless vars
-          command: npm run sls:print
+          command: npm run sls:print --stage $STAGE
       - run:
           name: Build
           command: npm run build
