@@ -39,9 +39,12 @@ export const verifySignedRequestMiddleware = (req: Request, _res: Response, next
 const makeCanonicalReq = (req: Request) => {
   const requiredHeaders = requestSigningHeaders(req.headers);
 
+  // TODO: make this stage prefixing logic better? (yuck)
+  const pathPrefix = process.env.STAGE !== 'prd' ? `/${process.env.stage}` : '';
+
   return <CanonicalRequest>{
     method: req.method,
-    path: `/${process.env.STAGE !== 'prd' ? process.env.STAGE : ''}${req.originalUrl}`, // TODO: make this stage prefixing logic better? (yuck)
+    path: `${pathPrefix}${req.originalUrl}`, // note: req.originalUrl starts with a `/`
     headers: requiredHeaders,
   };
 };
