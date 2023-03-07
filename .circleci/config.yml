@@ -30,19 +30,18 @@ jobs:
       - checkout
       - node/install
       - run:
-          name: Setup Env Variables
-          command: |
-            if [[ $CIRCLE_BRANCH == "master" ]] ; then
-              echo "export STAGE=prd" >> $BASH_ENV
-            else
-              echo "export STAGE=test" >> $BASH_ENV
-            fi
-            source $BASH_ENV
-      - run:
           name: Check for prettier violations
           command: |
             git fetch origin master # circleci doesn't fetch master by default
             ./.circleci/prettier-check.sh
+      - run:
+          name: Print and test serverless vars
+          command: |
+            if [[ $CIRCLE_BRANCH == "master" ]] ; then
+              npm run sls:print --stage prd
+            else
+              npm run sls:print --stage test
+            fi
       - run:
           name: Install dependencies
           command: |
@@ -51,9 +50,6 @@ jobs:
       - run:
           name: Lint
           command: npm run lint
-      - run:
-          name: Print and test serverless vars
-          command: npm run sls:print --stage $STAGE
       - run:
           name: Build
           command: npm run build
