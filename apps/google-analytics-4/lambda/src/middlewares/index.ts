@@ -4,6 +4,7 @@ import { serviceAccountKeyProvider } from './serviceAccountKeyProvider';
 import { verifySignedRequestMiddleware } from './verifySignedRequests';
 import { setSentryContext } from './setSentryContext';
 import { isApiError } from '../errors/apiError';
+import { apiErrorMap } from '../apiErrorMap';
 
 const Middleware = {
   setSentryContext: setSentryContext,
@@ -14,7 +15,7 @@ const Middleware = {
       return !isApiError(error);
     },
   }),
-  apiErrorMapper: apiErrorMapper,
+  apiErrorMapper: apiErrorMapper(apiErrorMap),
   apiErrorHandler: apiErrorHandler,
 };
 

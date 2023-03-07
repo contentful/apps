@@ -41,7 +41,7 @@ const makeCanonicalReq = (req: Request) => {
 
   return <CanonicalRequest>{
     method: req.method,
-    path: `/${process.env.STAGE}${req.originalUrl}`,
+    path: `/${process.env.STAGE !== 'prd' ? process.env.STAGE : ''}${req.originalUrl}`, // TODO: make this stage prefixing logic better? (yuck)
     headers: requiredHeaders,
   };
 };
@@ -65,7 +65,10 @@ interface ContentfulSignedHeaders {
 function requestSigningHeaders(headers: IncomingHttpHeaders): Partial<ContentfulSignedHeaders> {
   const requiredSignatureHeaders = {} as Partial<ContentfulSignedHeaders>;
   for (const header of contentfulSigningHeaderKeys) {
-    if (!headers[header]) continue;
+    if (!headers[header]) {
+      console.log('missing request signing header: ', header);
+      continue;
+    }
 
     if (typeof headers[header] === 'string') {
       requiredSignatureHeaders[header] = headers[header] as string;
