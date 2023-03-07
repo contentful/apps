@@ -70,6 +70,9 @@ jobs:
             sudo apt-get install python3-pip python3-dev
             sudo pip3 install awscli
       - run:
+          name: Print and test serverless vars
+          command: npm run sls:print
+      - run:
           name: Build
           command: |
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
