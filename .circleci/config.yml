@@ -43,6 +43,9 @@ jobs:
           name: Lint
           command: npm run lint
       - run:
+          name: Print and test serverless vars
+          command: npm run sls:print
+      - run:
           name: Build
           command: npm run build
       - run:
@@ -69,9 +72,6 @@ jobs:
             sudo apt-get update
             sudo apt-get install python3-pip python3-dev
             sudo pip3 install awscli
-      - run:
-          name: Print and test serverless vars
-          command: npm run sls:print
       - run:
           name: Build
           command: |
