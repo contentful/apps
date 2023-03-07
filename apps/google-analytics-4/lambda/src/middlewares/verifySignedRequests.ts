@@ -14,6 +14,9 @@ export const verifySignedRequestMiddleware = (req: Request, _res: Response, next
   const canonicalReq = makeCanonicalReq(req);
   let isValidReq = false;
 
+  console.log('signingSecret', signingSecret.replace(/.(?=.{4})/g, '*'));
+  console.log('canonicalReq', canonicalReq);
+
   try {
     isValidReq = NodeAppsToolkit.verifyRequest(signingSecret, canonicalReq, 60); // 60 second TTL
   } catch (e) {
