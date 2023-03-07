@@ -29,15 +29,15 @@ jobs:
     steps:
       - checkout
       - node/install
-       - run:
-          name: 'Setup Env Variables'
+      - run:
+          name: Setup Env Variables
           command: |
-              if [[ $CIRCLE_BRANCH == "master" ]] ; then
-                echo "export STAGE=prd" >> $BASH_ENV
-              else
-                echo "export STAGE=test" >> $BASH_ENV
-              fi
-              source $BASH_ENV
+            if [[ $CIRCLE_BRANCH == "master" ]] ; then
+              echo "export STAGE=prd" >> $BASH_ENV
+            else
+              echo "export STAGE=test" >> $BASH_ENV
+            fi
+            source $BASH_ENV
       - run:
           name: Check for prettier violations
           command: |
