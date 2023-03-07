@@ -115,9 +115,8 @@ export class Api {
 
   async runReports(params: RunReportParamsType): Promise<any> {
     // TYPE
-    console.log('serviceaccountheaders>>>>', this.serviceAccountKeyHeaders);
     return await fetchFromApi<any>(
-      this.requestUrl(`api/run_report`),
+      this.requestUrl(`api/run_report`, params),
       ZCredentials,
       this.appDefinitionId,
       this.cma,
