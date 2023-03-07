@@ -5,17 +5,16 @@ export interface AppInstallationParameters {
   serviceAccountKeyId: ServiceAccountKeyId | null;
 }
 
-export interface ContentfulContext {
+// TODO: get this exported from the SDK
+declare type EntryScopedIds = 'field' | 'entry' | 'contentType';
+
+export interface ContentfulContext extends Omit<IdsAPI, EntryScopedIds> {
   app?: string;
+  location?: string;
+  // EntryScopedIds are not always present, but are conditionally when the location is entry field/sidebar/editor
   contentType?: string;
   entry?: string;
-  environment: string;
-  environmentAlias?: string;
   field?: string;
-  location?: string;
-  organization: string;
-  space: string;
-  user: string;
 }
 
 export interface ContentfulContextHeaders {

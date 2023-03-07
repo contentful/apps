@@ -10,7 +10,17 @@ describe('fetchFromApi()', () => {
   const ZSomeSchema = z.object({ foo: z.string() });
   type SomeSchema = z.infer<typeof ZSomeSchema>;
   const url = new URL('http://example.com/foo');
-  const appDefinitionId = 'abc123xyz';
+  const contentfulContext = {
+    app: 'appDefinitionId',
+    contentType: 'contentType',
+    entry: 'entryId',
+    environment: 'environmentId',
+    field: 'fieldId',
+    location: 'app-config',
+    organization: 'organizationId',
+    space: 'spaceId',
+    user: 'userId',
+  };
 
   beforeEach(() => {
     server.use(
@@ -21,7 +31,7 @@ describe('fetchFromApi()', () => {
   });
 
   it('returns the correctly typed data', async () => {
-    const result = await fetchFromApi<SomeSchema>(url, ZSomeSchema, appDefinitionId, mockCma);
+    const result = await fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma);
     expect(result).toEqual(expect.objectContaining({ foo: 'bar' }));
   });
 
@@ -36,7 +46,7 @@ describe('fetchFromApi()', () => {
 
     it('throws an ApiServerError', async () => {
       await expect(
-        fetchFromApi<SomeSchema>(url, ZSomeSchema, appDefinitionId, mockCma)
+        fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma)
       ).rejects.toThrow(ApiError);
     });
   });
@@ -52,7 +62,7 @@ describe('fetchFromApi()', () => {
 
     it('throws an ApiServerError', async () => {
       await expect(
-        fetchFromApi<SomeSchema>(url, ZSomeSchema, appDefinitionId, mockCma)
+        fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma)
       ).rejects.toThrow(ApiServerError);
     });
   });
@@ -68,7 +78,7 @@ describe('fetchFromApi()', () => {
 
     it('throws an ApiClientError', async () => {
       await expect(
-        fetchFromApi<SomeSchema>(url, ZSomeSchema, appDefinitionId, mockCma)
+        fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma)
       ).rejects.toThrow(ApiClientError);
     });
   });
@@ -84,7 +94,7 @@ describe('fetchFromApi()', () => {
 
     it('throws an ApiError', async () => {
       await expect(
-        fetchFromApi<SomeSchema>(url, ZSomeSchema, appDefinitionId, mockCma)
+        fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma)
       ).rejects.toThrow(ApiError);
     });
   });
@@ -100,7 +110,7 @@ describe('fetchFromApi()', () => {
 
     it('throws an ApiError', async () => {
       await expect(
-        fetchFromApi<SomeSchema>(url, ZSomeSchema, appDefinitionId, mockCma)
+        fetchFromApi<SomeSchema>(url, ZSomeSchema, contentfulContext.app, mockCma)
       ).rejects.toThrow(ApiError);
     });
   });
@@ -109,20 +119,41 @@ describe('fetchFromApi()', () => {
 // Note: mocked http responses are set up using msw in tests/mocks/api/handler
 describe('Api', () => {
   describe('getCredentials()', () => {
-    const appDefinitionId = 'abc123xyz';
+    const contentfulContext = {
+      app: 'appDefinitionId',
+      contentType: 'contentType',
+      entry: 'entryId',
+      environment: 'environmentId',
+      field: 'fieldId',
+      location: 'app-config',
+      organization: 'organizationId',
+      space: 'spaceId',
+      user: 'userId',
+    };
 
     it('calls fetchApi with the correct parameters', async () => {
-      const api = new Api(appDefinitionId, mockCma, validServiceKeyId, validServiceKeyFile);
+      const api = new Api(contentfulContext, mockCma, validServiceKeyId, validServiceKeyFile);
       const result = await api.getCredentials();
       expect(result).toEqual(expect.objectContaining({ status: 'active' }));
     });
   });
 
   describe('listAccountSummaries()', () => {
-    const appDefinitionId = 'abc123xyz';
+    const contentfulContext: ContentfulContext = {
+      app: 'appDefinitionId',
+      contentType: 'contentType',
+      entry: 'entryId',
+      environment: 'environmentId',
+      environmentAlias: 'master',
+      field: 'fieldId',
+      location: 'app-config',
+      organization: 'organizationId',
+      space: 'spaceId',
+      user: 'userId',
+    };
 
     it('returns a set of credentials', async () => {
-      const api = new Api(appDefinitionId, mockCma, validServiceKeyId, validServiceKeyFile);
+      const api = new Api(contentfulContext, mockCma, validServiceKeyId, validServiceKeyFile);
       const result = await api.listAccountSummaries();
       expect(result).toEqual(expect.arrayContaining([expect.objectContaining(mockAccountSummary)]));
     });
