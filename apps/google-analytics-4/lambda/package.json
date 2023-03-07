@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "start:dev": "NODE_ENV=development CIRCLE_SHA1=$(git rev-parse --short HEAD) nodemon",
     "test": "NODE_ENV=test CIRCLE_SHA1=$(git rev-parse --short HEAD) TS_NODE_TRANSPILE_ONLY=1 mocha",
+    "test:ci": "NODE_ENV=test CIRCLE_SHA1=$(git rev-parse --short HEAD) TS_NODE_TRANSPILE_ONLY=1 CI=true mocha",
     "test:debug": "NODE_ENV=test CIRCLE_SHA1=$(git rev-parse --short HEAD) TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
     "test:watch": "NODE_ENV=test CIRCLE_SHA1=$(git rev-parse --short HEAD) TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test",
     "deploy:test": "NODE_ENV=test CIRCLE_SHA1=$(git rev-parse --short HEAD) sls deploy --stage test",
