@@ -46,9 +46,9 @@ jobs:
           name: Print and test serverless vars
           command: |
             if [[ $CIRCLE_BRANCH == "master" ]] ; then
-              npm run sls:print --stage prd
+              npm run sls-print --stage prd
             else
-              npm run sls:print --stage test
+              npm run sls-print --stage test
             fi
       - run:
           name: Build
