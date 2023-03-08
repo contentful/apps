@@ -1,5 +1,6 @@
 import Express from 'express';
 import { expect } from 'chai';
+import { createRequest } from 'node-mocks-http';
 import sinon from 'sinon';
 import {
   InvalidServiceAccountKey,
@@ -13,17 +14,17 @@ import {
   validServiceAccountKeyIdBase64,
 } from '../../test/mocks/googleApi';
 
-describe('apiErrorMapper', () => {
+describe('serviceAccountKeyProvider', () => {
   const next = sinon.stub();
   let testRequest: Express.Request;
 
   beforeEach(() => {
-    testRequest = {
+    testRequest = createRequest({
       headers: {
         'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
         'X-Contentful-ServiceAccountKey': validServiceAccountKeyFileBase64,
       },
-    } as unknown as Express.Request;
+    });
   });
 
   it('sets the service account properties on the request object', () => {
@@ -37,10 +38,12 @@ describe('apiErrorMapper', () => {
 
   describe('when bad JSON is provided', () => {
     beforeEach(() => {
-      testRequest.headers = {
-        'X-Contentful-ServiceAccountKeyId': 'Zm9vYmFy',
-        'X-Contentful-ServiceAccountKey': 'Zm9vYmFy',
-      };
+      testRequest = createRequest({
+        headers: {
+          'X-Contentful-ServiceAccountKeyId': 'Zm9vYmFy',
+          'X-Contentful-ServiceAccountKey': 'Zm9vYmFy',
+        },
+      });
     });
 
     it('throws InvalidServiceAccountKey', () => {
@@ -52,10 +55,12 @@ describe('apiErrorMapper', () => {
 
   describe('when an improperly formed key is provided', () => {
     beforeEach(() => {
-      testRequest.headers = {
-        'X-Contentful-ServiceAccountKeyId': 'eyJmb28iOiJiYXIifQ==',
-        'X-Contentful-ServiceAccountKey': 'eyJmb28iOiJiYXIifQ==',
-      };
+      testRequest = createRequest({
+        headers: {
+          'X-Contentful-ServiceAccountKeyId': 'eyJmb28iOiJiYXIifQ==',
+          'X-Contentful-ServiceAccountKey': 'eyJmb28iOiJiYXIifQ==',
+        },
+      });
     });
 
     it('throws InvalidServiceAccountKey', () => {
@@ -67,7 +72,9 @@ describe('apiErrorMapper', () => {
 
   describe('when no service account headers are provided', () => {
     beforeEach(() => {
-      testRequest.headers = {};
+      testRequest = createRequest({
+        headers: {},
+      });
     });
 
     it('sets the values top null', () => {
