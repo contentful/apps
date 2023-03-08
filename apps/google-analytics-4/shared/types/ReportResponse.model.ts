@@ -4,19 +4,21 @@ export interface RunReportResponse {
     name: string;
     type: string;
   }[];
-  rows: {
-    dimensionValues: [];
-    metricValues: [
-      {
-        value: number;
-        oneValue: string;
-      }
-    ];
-  }[];
+  rows:
+    | {
+        dimensionValues: [];
+        metricValues: [
+          {
+            value: number;
+            oneValue: string;
+          }
+        ];
+      }[]
+    | [];
   totals: [];
   maximums: [];
   minimums: [];
-  rowCount: 1;
+  rowCount: number;
   metadata: {
     dataLossFromOtherRow: boolean;
     currencyCode: string;

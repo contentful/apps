@@ -49,7 +49,7 @@ const AnalyticsApp = (props: Props) => {
   const [pageViewData, setPageViewData] = useState<RunReportResponse>(runReportResponse);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek');
   const [startEndDates, setStartEndDates] = useState<any>(getRangeDates('lastWeek')); // TYPE
-  // const [slugValue] = useFieldValue<string>('slug');
+  const [slugValue] = useFieldValue<string>('slug');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
 
@@ -61,10 +61,9 @@ const AnalyticsApp = (props: Props) => {
     startDate: startEndDates.start,
     endDate: startEndDates.end,
     propertyId,
-    slug: '',
     dimensions: [],
-    metrics: ['screenPageViews'],
-    // slug: slugValue
+    metrics: [],
+    slug: slugValue || '',
   };
 
   useEffect(() => {
@@ -150,10 +149,10 @@ const AnalyticsApp = (props: Props) => {
           />
           {renderChartContent()}
 
-          {/* <ChartFooter
+          <ChartFooter
             slugName={slugValue ? slugValue : ''}
             viewUrl="https://analytics.google.com/"
-          /> */}
+          />
         </>
       )}
     </>

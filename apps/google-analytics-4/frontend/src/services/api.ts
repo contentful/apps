@@ -107,7 +107,7 @@ export class Api {
     // TYPE
     return await fetchFromApi<any>(
       this.requestUrl(`api/run_report`, params),
-      ZCredentials,
+      ZRunReport,
       this.contentfulContext.app!,
       this.cma,
       {
