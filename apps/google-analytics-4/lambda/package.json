@@ -35,6 +35,7 @@
     "chai-http": "^4.3.0",
     "eslint": "^8.30.0",
     "mocha": "^10.2.0",
+    "node-mocks-http": "^1.12.1",
     "nodemon": "^2.0.20",
     "rimraf": "^3.0.2",
     "serverless": "^3.28.1",
