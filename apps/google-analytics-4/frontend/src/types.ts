@@ -4,6 +4,7 @@ export interface AppInstallationParameters {
   serviceAccountKey: ServiceAccountKey;
   serviceAccountKeyId: ServiceAccountKeyId;
   contentTypes: ContentTypes;
+  savedPropertyId: string;
 }
 
 // TODO: get this exported from the SDK
@@ -90,6 +91,13 @@ export interface PropertySummariesType {
   displayName: string;
   property: string;
   propertyType: string;
+  parent: string;
+}
+
+export interface FlattenedPropertiesType {
+  propertyId: string;
+  propertyName: string;
+  accountName: string;
 }
 
 export interface ContentTypeValue {
