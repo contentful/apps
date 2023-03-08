@@ -29,6 +29,8 @@ jobs:
     steps:
       - checkout
       - node/install
+      - vault/get-secrets:
+          template-preset: 'aws-push-artifacts'
       - run:
           name: Check for prettier violations
           command: |
@@ -42,6 +44,9 @@ jobs:
       - run:
           name: Lint
           command: npm run lint
+      - run:
+          name: Verify project configurations
+          command: npm run verify-config
       - run:
           name: Build
           command: npm run build
