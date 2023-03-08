@@ -15,12 +15,19 @@
     "test:watch": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test -r dotenv/config",
     "deploy:test": "NODE_ENV=test CIRCLE_SHA1=$(git rev-parse --short HEAD) sls deploy --stage test",
     "deploy": "NODE_ENV=production CIRCLE_SHA1=$(git rev-parse --short HEAD) sls deploy --stage $STAGE",
-    "verify-config": "STAGE=$(test \"$CIRCLE_BRANCH\" = 'master' && echo 'prd' || echo 'test'); sls print --stage $STAGE"
+    "verify-config": "STAGE=$(test \"$CIRCLE_BRANCH\" = 'master' && echo 'prd' || echo 'test'); sls print --stage $STAGE",
+    "sentry-create-release": "sentry-cli releases --log-level=debug new -p marketplace-apps $CIRCLE_SHA1",
+    "sentry-set-commits": "sentry-cli releases --log-level=debug set-commits --auto $CIRCLE_SHA1",
+    "sentry-upload-source-maps": "sentry-cli releases --log-level=debug files $CIRCLE_SHA1 upload-sourcemaps --ext ts --ext tsx --ext map ./src ./build",
+    "sentry-finalize-release": "sentry-cli releases --log-level=debug finalize $CIRCLE_SHA1",
+    "sentry-deploy": "sentry-cli releases --log-level=debug deploys $CIRCLE_SHA1 new -e production",
+    "post-deploy": "npm run -s sentry-create-release && npm run -s sentry-set-commits && npm run -s sentry-upload-source-maps && npm run -s sentry-finalize-release && npm run -s sentry-deploy"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@sentry/cli": "^2.14.4",
     "@tsconfig/node18": "^1.0.1",
     "@types/chai": "^4.3.4",
     "@types/chai-http": "^4.2.0",
