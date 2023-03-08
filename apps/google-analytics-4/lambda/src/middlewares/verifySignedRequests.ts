@@ -3,9 +3,10 @@ import { CanonicalRequest } from '@contentful/node-apps-toolkit/lib/requests/typ
 import { NextFunction, Request, Response } from 'express';
 import { InvalidSignature } from '../errors/invalidSignature';
 import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
+import { config } from '../config';
 
 export const verifySignedRequestMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-  const signingSecret = (process.env.SIGNING_SECRET || '').trim();
+  const signingSecret = config.signingSecret;
   const canonicalReq = makeCanonicalReq(req);
   let isValidReq = false;
 
