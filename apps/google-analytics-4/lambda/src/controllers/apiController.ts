@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { RunReportParamsType } from '../types';
-import { GoogleApi } from '../services/googleApi';
+import { GoogleApiService } from '../services/googleApiService';
 
 const ApiController = {
   credentials: (_req: Request, res: Response) => {
@@ -18,7 +18,7 @@ const ApiController = {
         throw new Error('missing service account key value');
       }
 
-      const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
+      const googleApi = GoogleApiService.fromServiceAccountKeyFile(serviceAccountKeyFile);
       const result = await googleApi.listAccountSummaries();
       res.status(200).json(result);
     } catch (err) {
@@ -37,7 +37,7 @@ const ApiController = {
       // just doesn't realize
       if (serviceAccountKeyFile === undefined) throw new Error('missing service account key value');
 
-      const googleApi = GoogleApi.fromServiceAccountKeyFile(serviceAccountKeyFile);
+      const googleApi = GoogleApiService.fromServiceAccountKeyFile(serviceAccountKeyFile);
       const result = await googleApi.runReport(
         propertyId,
         slug,

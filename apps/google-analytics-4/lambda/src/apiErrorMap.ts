@@ -6,12 +6,10 @@ import {
   InvalidServiceAccountKey,
   MissingServiceAccountKeyHeader,
 } from './middlewares/serviceAccountKeyProvider';
-import { GoogleApiClientError, GoogleApiError, GoogleApiServerError } from './services/googleApi';
+import { GoogleApiError } from './services/googleApiUtils';
 
 export const apiErrorMap: ApiErrorMap = {
-  GoogleApiError: (e: GoogleApiError) => new ApiError(e.details, e.name, e.httpStatus),
-  GoogleApiClientError: (e: GoogleApiClientError) => new ApiError(e.details, e.name, e.httpStatus),
-  GoogleApiServerError: (e: GoogleApiServerError) => new ApiError(e.details, e.name, e.httpStatus),
+  GoogleApiError: (e: GoogleApiError) => new ApiError(e.details, e.errorType, e.status),
   InvalidSignature: (e: InvalidSignature) => new ApiError(e.message, e.name, 403),
   UnableToVerifyRequest: (e: UnableToVerifyRequest) => new ApiError(e.message, e.name, 422),
   MissingServiceAccountKeyHeader: (e: MissingServiceAccountKeyHeader) =>

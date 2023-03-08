@@ -9,7 +9,7 @@ import {
   validServiceAccountKeyIdBase64,
 } from '../test/mocks/googleApi';
 import app from './app';
-import { GoogleApi } from './services/googleApi';
+import { GoogleApiService } from './services/googleApiService';
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
@@ -58,12 +58,12 @@ describe('app', () => {
 
   // TODO: These test need to be updated once we have everything configured
   describe('GET /api/account_summaries', () => {
-    let googleApi: GoogleApi;
+    let googleApi: GoogleApiService;
 
     beforeEach(() => {
       mockAdminClient = mockAnalyticsAdminServiceClient();
-      googleApi = new GoogleApi(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
-      sinon.stub(GoogleApi, 'fromServiceAccountKeyFile').returns(googleApi);
+      googleApi = new GoogleApiService(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
+      sinon.stub(GoogleApiService, 'fromServiceAccountKeyFile').returns(googleApi);
     });
 
     it('responds with 200', async () => {

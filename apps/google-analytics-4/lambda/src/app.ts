@@ -4,6 +4,7 @@ import cors from 'cors';
 import Middleware from './middlewares';
 import { ApiRouter, HealthRouter } from './routers';
 import { corsConfig } from './middlewares/corsConfig';
+import { apiErrorMap } from './apiErrorMap';
 
 const app = express();
 const apiRouteConstraint = ['/api/*'];
@@ -34,12 +35,10 @@ app.use('/health', HealthRouter);
 app.use('/api', ApiRouter);
 
 // IMPORTANT: do our custom error mapping before the Sentry error handler
-app.use(Middleware.apiErrorMapper);
+app.use(Middleware.apiErrorMapper(apiErrorMap));
+app.use(Middleware.apiErrorHandler);
 
 // IMPORTANT: The Sentry error handler must be before any other error middleware and after all controllers
 app.use(Middleware.sentryErrorHandler);
-
-// catch and handle errors
-app.use(Middleware.apiErrorHandler);
 
 export default app;
