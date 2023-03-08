@@ -14,7 +14,7 @@
     "test:watch": "NODE_ENV=test CIRCLE_SHA1=$(git rev-parse --short HEAD) TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test",
     "deploy:test": "NODE_ENV=test CIRCLE_SHA1=$(git rev-parse --short HEAD) sls deploy --stage test",
     "deploy": "NODE_ENV=production CIRCLE_SHA1=$(git rev-parse --short HEAD) sls deploy --stage $STAGE",
-    "verify-config": "STAGE=$(test \"$CIRCLE_BRANCH\" = 'master' && echo 'prd' || echo 'test'); sls-print --stage $STAGE"
+    "verify-config": "STAGE=$(test \"$CIRCLE_BRANCH\" = 'master' && echo 'prd' || echo 'test'); sls print --stage $STAGE"
   },
   "keywords": [],
   "author": "",
