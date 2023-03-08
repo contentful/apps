@@ -41,9 +41,10 @@ interface Props {
   serviceAccountKeyId?: ServiceAccountKeyId;
   serviceAccountKey?: ServiceAccountKey;
   propertyId: string;
+  reportSlug: string;
 }
 const AnalyticsApp = (props: Props) => {
-  const { serviceAccountKeyId, serviceAccountKey, propertyId } = props;
+  const { serviceAccountKeyId, serviceAccountKey, propertyId, reportSlug } = props;
   const [runReportResponse, setRunReportResponse] = useState<RunReportData>({} as RunReportData);
   const [pageViewData, setPageViewData] = useState<RunReportData>(runReportResponse);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek');
@@ -62,7 +63,7 @@ const AnalyticsApp = (props: Props) => {
     propertyId,
     dimensions: [],
     metrics: [],
-    slug: slugValue || '',
+    slug: reportSlug,
   };
 
   useEffect(() => {

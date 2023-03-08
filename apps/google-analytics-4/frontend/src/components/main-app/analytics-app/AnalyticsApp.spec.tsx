@@ -21,7 +21,6 @@ const { findByTestId, getByTestId, getByText, findByText } = screen;
 
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
-const MOCK_PROPERTY_ID = '12345';
 
 describe('AnalyticsApp', () => {
   it('mounts data', async () => {
@@ -33,7 +32,7 @@ describe('AnalyticsApp', () => {
         ) as jest.Mock
       );
 
-    render(<AnalyticsApp propertyId={MOCK_PROPERTY_ID} />);
+    render(<AnalyticsApp propertyId="" reportSlug="" />);
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
@@ -51,7 +50,7 @@ describe('AnalyticsApp', () => {
         ) as jest.Mock
       );
 
-    render(<AnalyticsApp propertyId={MOCK_PROPERTY_ID} />);
+    render(<AnalyticsApp propertyId="" reportSlug="" />);
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
@@ -69,7 +68,7 @@ describe('AnalyticsApp', () => {
         jest.fn(() => Promise.reject({ message: 'mock Api error' })) as jest.Mock
       );
 
-    render(<AnalyticsApp propertyId={MOCK_PROPERTY_ID} />);
+    render(<AnalyticsApp propertyId="" reportSlug="" />);
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const errorNote = getByTestId(NOTE_TEST_ID);

@@ -36,6 +36,8 @@ interface Props {
 export default function useKeyService(props: Props): KeyServiceInfoType {
   const { onSaveGoogleAccountDetails } = props;
 
+  const [isConfigureScreen, setIsConfigureScreen] = useState<boolean>(false); //TYPE
+
   const [parameters, setParameters] = useState<AppInstallationParameters>(
     {} as AppInstallationParameters
   );
@@ -54,11 +56,39 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
   const sdk = useSDK<AppExtensionSDK>();
 
   const onConfigure = useCallback(async () => {
-    const currentState = await sdk.app.getCurrentState();
+    if (isConfigureScreen) {
+      const currentState = await sdk.app.getCurrentState();
 
-    if (!serviceAccountKeyFileIsValid) {
-      sdk.notifier.error('Invalid service account key file. See field error for details');
-      return false;
+      if (!serviceAccountKeyFileIsValid) {
+        sdk.notifier.error('Invalid service account key file. See field error for details');
+        return false;
+      }
+
+      if (serviceAccountKeyFileIsRequired && !newServiceAccountKeyId) {
+        sdk.notifier.error('A valid service account key file is required');
+        return false;
+      }
+
+      const newServiceKeyParameters = {
+        serviceAccountKey: newServiceAccountKey,
+        serviceAccountKeyId: newServiceAccountKeyId,
+      };
+
+      const newParameters = Object.assign(
+        {},
+        parameters,
+        omitBy(newServiceKeyParameters, (val) => val === null)
+      );
+
+      setParameters(newParameters);
+      if (onSaveGoogleAccountDetails) onSaveGoogleAccountDetails();
+      setServiceAccountKeyFileIsRequired(false);
+      setServiceAccountKeyFile('');
+
+      return {
+        parameters: newParameters,
+        targetState: currentState,
+      };
     }
 
     if (serviceAccountKeyFileIsRequired && !newServiceAccountKeyId) {
@@ -97,13 +127,14 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
   ]);
 
   useEffect(() => {
-    sdk.app.onConfigure(() => onConfigure());
+    if (isConfigureScreen) sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
   useEffect(() => {
     const setupAppInstallationParameters = async () => {
+      const sdkObj = isConfigureScreen ? sdk.app : sdk.contentType;
       const currentParameters: AppInstallationParameters =
-        (await sdk.app.getParameters()) ?? ({} as AppInstallationParameters);
+        (await sdk[sdkObj].parameters) ?? ({} as AppInstallationParameters);
 
       if (currentParameters) {
         setParameters(currentParameters);
@@ -117,7 +148,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
         setServiceAccountKeyFileIsRequired(true);
       }
 
-      sdk.app.setReady();
+      if (isConfigureScreen) sdk.app.setReady();
     };
 
     setupAppInstallationParameters();
