@@ -45,13 +45,8 @@ jobs:
           name: Lint
           command: npm run lint
       - run:
-          name: Print and test serverless vars
-          command: |
-            if [[ $CIRCLE_BRANCH == "master" ]] ; then
-              npm run sls-print
-            else
-              npm run sls-print:test
-            fi
+          name: Verify project configurations
+          command: npm run verify-config
       - run:
           name: Build
           command: npm run build
