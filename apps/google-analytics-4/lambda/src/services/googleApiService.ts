@@ -58,7 +58,7 @@ export class GoogleApiService {
 
     try {
       const [response] = await this.betaAnalyticsDataClient.runReport({
-        property: property,
+        property: `properties/${property}`,
         dateRanges: [
           {
             startDate: startDate ?? new Date(Date.now() - ONE_WEEK).toISOString().split('T')[0], // extracts YYYY-MM-DD from ISO string
