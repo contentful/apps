@@ -5,6 +5,7 @@ import {
   ServiceAccountKey,
   ContentfulContext,
   ContentfulContextHeaders,
+  RunReportParamsType,
 } from '../types';
 import { fetchFromApi } from 'apis/fetchApi';
 import {
@@ -65,9 +66,23 @@ export class Api {
     );
   }
 
-  private requestUrl(apiPath: string): URL {
+  appendQueryParams = (url: URL, queryParams: any) => {
+    Object.keys(queryParams).forEach((key) => url.searchParams.append(key, queryParams[key]));
+    return url;
+  };
+
+  private requestUrl(apiPath: string, queryParams?: any): URL {
+    // if (queryParams) {
+    //   const { startDate, endDate, propertyId, metrics, dimensions, slug } = queryParams;
+    //   const params = ':startDate/:endDate/:propertyId/:slug'
+    //   const url = `${this.baseUrl}/${apiPath}/${startDate}`;
+    //   // const newUrl = new URL(url);
+    // } else {
     const url = `${this.baseUrl}/${apiPath}`;
-    return new URL(url);
+    const newUrl = new URL(url);
+    if (queryParams) this.appendQueryParams(newUrl, queryParams);
+    return newUrl;
+    // }
   }
 
   async listAccountSummaries(): Promise<AccountSummaries> {
@@ -82,9 +97,9 @@ export class Api {
 
   // TODO: When we actually hook this up to the sidebar chart, we will need to update this type and schema (similar to the listAccountSummaries pattern)
   // It's currently typed like this to provide maximum flexibility until we actually integrate with the chart
-  async getRunReportData(): Promise<RunReportData> {
+  async runReports(params?: RunReportParamsType): Promise<RunReportData> {
     return await fetchFromApi(
-      this.requestUrl('api/run_report'),
+      this.requestUrl('api/run_report', params),
       ZRunReportData,
       this.contentfulContext.app!,
       this.cma,

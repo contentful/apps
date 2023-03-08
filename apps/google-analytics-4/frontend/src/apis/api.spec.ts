@@ -161,7 +161,7 @@ describe('Api', () => {
     });
   });
 
-  describe('getRunReportData()', () => {
+  describe('runReports()', () => {
     const contentfulContext: ContentfulContext = {
       app: 'appDefinitionId',
       contentType: 'contentType',
@@ -177,7 +177,7 @@ describe('Api', () => {
 
     it('returns a set of data from ga4', async () => {
       const api = new Api(contentfulContext, mockCma, validServiceKeyId, validServiceKeyFile);
-      const result = await api.getRunReportData();
+      const result = await api.runReports();
       expect(result).toEqual(runReportData);
     });
   });

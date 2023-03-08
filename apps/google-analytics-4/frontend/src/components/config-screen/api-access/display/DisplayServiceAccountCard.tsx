@@ -95,7 +95,7 @@ const DisplayServiceAccountCard = (props: Props) => {
   const verifyDataApi = useCallback(async () => {
     try {
       setIsLoading(true);
-      await api.getRunReportData();
+      await api.runReports();
       setDataApiError(undefined);
     } catch (e: any) {
       if (isApiErrorType(e)) handleApiError(e);

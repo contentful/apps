@@ -14,6 +14,7 @@ import {
 } from 'types';
 import { styles } from './AnalyticsApp.styles';
 import { Flex, Note } from '@contentful/f36-components';
+import { RunReportData } from '@/apis/apiTypes';
 
 const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
 const EMPTY_DATA_MSG = 'There are no page views to show for this range';
@@ -43,10 +44,8 @@ interface Props {
 }
 const AnalyticsApp = (props: Props) => {
   const { serviceAccountKeyId, serviceAccountKey, propertyId } = props;
-  const [runReportResponse, setRunReportResponse] = useState<RunReportResponse>(
-    {} as RunReportResponse
-  );
-  const [pageViewData, setPageViewData] = useState<RunReportResponse>(runReportResponse);
+  const [runReportResponse, setRunReportResponse] = useState<RunReportData>({} as RunReportData);
+  const [pageViewData, setPageViewData] = useState<RunReportData>(runReportResponse);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek');
   const [startEndDates, setStartEndDates] = useState<any>(getRangeDates('lastWeek')); // TYPE
   const [slugValue] = useFieldValue<string>('slug');
@@ -69,10 +68,8 @@ const AnalyticsApp = (props: Props) => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await api.runReports(reportRequestParams);
-        if (response.ok) {
-          setRunReportResponse(await response.json());
-        }
+        const reportData = await api.runReports(reportRequestParams);
+        setRunReportResponse(reportData);
       } catch (e) {
         setError(e as Error);
       }

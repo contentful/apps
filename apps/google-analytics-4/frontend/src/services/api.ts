@@ -1,5 +1,6 @@
 import { config } from '../config';
 import { PlainClientAPI } from 'contentful-management';
+import { ServiceAccountKeyId, ServiceAccountKey } from '../types';
 import { fetchFromApi } from 'apis/fetchApi';
 import {
   Headers,
@@ -11,13 +12,6 @@ import {
   AccountSummaries,
   RunReportData,
 } from 'apis/apiTypes';
-  import { ContentfulContext,
-  ServiceAccountKeyId,
-  ServiceAccountKey,
-  ContentfulContextHeaders,
-  RunReportParamsType,
-} from '../types';
-import { upperFirst } from 'lodash';
 
 export class ApiError extends Error {
   details: string;
@@ -62,23 +56,9 @@ export class Api {
     );
   }
 
-  appendQueryParams = (url: URL, queryParams: any) => {
-    Object.keys(queryParams).forEach((key) => url.searchParams.append(key, queryParams[key]));
-    return url;
-  };
-
-  private requestUrl(apiPath: string, queryParams?: any): URL {
-    // if (queryParams) {
-    //   const { startDate, endDate, propertyId, metrics, dimensions, slug } = queryParams;
-    //   const params = ':startDate/:endDate/:propertyId/:slug'
-    //   const url = `${this.baseUrl}/${apiPath}/${startDate}`;
-    //   // const newUrl = new URL(url);
-    // } else {
+  private requestUrl(apiPath: string): URL {
     const url = `${this.baseUrl}/${apiPath}`;
-    const newUrl = new URL(url);
-    if (queryParams) this.appendQueryParams(newUrl, queryParams);
-    return newUrl;
-    // }
+    return new URL(url);
   }
 
   async listAccountSummaries(): Promise<AccountSummaries> {
@@ -100,20 +80,6 @@ export class Api {
       this.appDefinitionId,
       this.cma,
       this.serviceAccountKeyHeaders
-    );
-  }
-
-  async runReports(params: RunReportParamsType): Promise<any> {
-    // TYPE
-    return await fetchFromApi<any>(
-      this.requestUrl(`api/run_report`, params),
-      ZRunReport,
-      this.contentfulContext.app!,
-      this.cma,
-      {
-        ...this.serviceAccountKeyHeaders,
-        ...this.contentfulContextHeaders,
-      }
     );
   }
 
