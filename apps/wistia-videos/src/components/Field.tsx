@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { WistiaItem } from './ConfigScreen';
 import { fetchProjects, fetchVideos } from '../functions/getVideos';
-import { Project } from './helpers/types';
+import { Project, WistiaError } from '../components/helpers/types';
 
 interface FieldProps {
   sdk: FieldExtensionSDK;
@@ -42,8 +42,29 @@ const Field = (props: FieldProps) => {
 
   // Set inital state based on field values
   useEffect(() => {
-    const fetchPagedVideos = () => {
+    const fetchPagedVideos = async () => {
       const page = 1;
+      try {
+        const projectIds = await getProjectIds(
+          parameters.excludedProjects,
+          parameters.apiBearerToken
+        );
+        const videos = await fetchVideos(projectIds, parameters.apiBearerToken);
+        if (videos.length) {
+          updateData(videos || []);
+          filterDropdownData(videos || []);
+          updateLoadingStatus(false);
+        } else {
+          setError('There are no videos in your Wistia space');
+        }
+      } catch (error) {
+        console.log(error);
+        debugger;
+        if (error instanceof WistiaError) {
+          setError(error.message);
+        }
+        updateLoadingStatus(false);
+      }
     };
 
     const fieldValues = sdk.field.getValue();
@@ -54,20 +75,8 @@ const Field = (props: FieldProps) => {
     );
 
     const parameters: any = sdk.parameters.installation;
-    (async () => {
-      const videosRequest =
-        (await fetchVideos(parameters.excludedProjects, parameters.apiBearerToken)) || [];
-      if (videosRequest.response.success) {
-        updateData(videosRequest.videos || []);
-        filterDropdownData(videosRequest.videos || []);
-        updateLoadingStatus(false);
-      }
 
-      if (videosRequest.response.success === false && videosRequest.response.error) {
-        setError(videosRequest.response.error);
-        updateLoadingStatus(false);
-      }
-    })();
+    fetchPagedVideos();
   }, [sdk.field, sdk.parameters.installation]);
 
   // Function to update selected video ids
@@ -81,13 +90,17 @@ const Field = (props: FieldProps) => {
     setNewValues(updatedIds);
   };
 
-  const getVideos = async (excludedProjects: Project[], bearerToken: string) => {
+  const getProjectIds = async (
+    excludedProjects: Project[],
+    bearerToken: string
+  ): Promise<string[]> => {
     const projectsResponse = await fetchProjects(bearerToken);
-    if (projectsResponse.success) {
+    let projectIds = [];
+    if (projectsResponse) {
       console.info('Succesfully fetched the Wistia projects.');
       const { projects } = projectsResponse;
       // Map through projects and return ids to retrieve all the videos from each project. Filter out the projects selected to be excluded
-      const projectIds = projects
+      projectIds = projects
         .map((item: Project) => item.hashedId)
         .filter((id: string) => {
           const include =
@@ -95,12 +108,13 @@ const Field = (props: FieldProps) => {
           return include;
         });
     } else {
-      console.info(`Impossible to fetch the projects: ${projectsResponse.error}`);
-      return {
-        response: projectsResponse,
-        videos: [],
-      };
+      console.info(`Impossible to fetch the projects: ${projectsResponse}`);
     }
+    return projectIds; // need to figure out error handling
+  };
+
+  const getVideos = async (excludedProjects: Project[], bearerToken: string, page?: number) => {
+    const videos = await fetchVideos([], bearerToken, page);
   };
 
   // set field value with updated state
@@ -150,8 +164,7 @@ const Field = (props: FieldProps) => {
                       <Card
                         onClick={() => updateVideoIds(item.id)}
                         style={{ height: '100px', padding: '7px' }}
-                        selected={selectedIds.findIndex((id) => item.id === id) !== -1}
-                      >
+                        selected={selectedIds.findIndex((id) => item.id === id) !== -1}>
                         <StyledImageContainer>
                           <img src={item.thumbnail.url} alt={item.name} />
                         </StyledImageContainer>

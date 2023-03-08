@@ -1,4 +1,4 @@
-import { Project, ProjectReduced, ProjectVideo } from '../components/helpers/types';
+import { Project, ProjectReduced, ProjectVideo, WistiaError } from '../components/helpers/types';
 
 export const fetchProjects = async (bearerToken: string) => {
   const projects = await (
@@ -9,21 +9,16 @@ export const fetchProjects = async (bearerToken: string) => {
     })
   ).json();
   if (projects.error) {
+    throw new WistiaError({ message: projects.error, code: projects.code });
+  } else {
+    const reducedProject = projects.map(({ id, hashedId, name }: ProjectReduced) => {
+      return { id, hashedId, name };
+    });
+
     return {
-      success: false,
-      error: projects.error,
-      code: projects.code,
+      projects: reducedProject,
     };
   }
-
-  const reducedProject = projects.map(({ id, hashedId, name }: ProjectReduced) => {
-    return { id, hashedId, name };
-  });
-
-  return {
-    success: true,
-    projects: reducedProject,
-  };
 };
 
 export const fetchVideos = async (projectIds: string[], bearerToken: string, page?: number) => {
@@ -47,8 +42,5 @@ export const fetchVideos = async (projectIds: string[], bearerToken: string, pag
   );
   // Flatten array of arrays
   const videos = mappedProjects.flat(1);
-  return {
-    response: projectsResponse,
-    videos,
-  };
+  return videos;
 };

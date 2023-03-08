@@ -36,3 +36,18 @@ export interface ProjectVideo {
     height: number;
   };
 }
+
+interface WistiaResponse {
+  message: string;
+  code?: string;
+}
+
+export class WistiaError implements WistiaResponse {
+  message: string;
+  code?: string;
+
+  constructor(options: WistiaResponse) {
+    this.message = options.message;
+    this.code = options.code;
+  }
+}

@@ -16,6 +16,7 @@ import {
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import { fetchProjects } from '../functions/getVideos';
+import { WistiaError } from './helpers/types';
 
 export interface AppInstallationParameters {
   apiBearerToken?: string;
@@ -112,24 +113,26 @@ const Config = (props: ConfigProps) => {
   };
 
   const getProjects: () => void = async () => {
-    setLoadingStatus(true);
-    const response = await fetchProjects(parameters.apiBearerToken || '');
-    if (response.success) {
+    try {
+      setLoadingStatus(true);
+      const response = await fetchProjects(parameters.apiBearerToken || '');
       Notification.success('Your connection to the Wistia Data API is working.');
       // set the projects in the state (don't save all the projects in the config parameters to prevent
       // the config object to become very large and reach the size limit)
       setFetchedProjects(response.projects);
       setShowButton(false);
       setRequiredMessage('');
-    } else {
-      Notification.error(`Connection to Wistia Data API failed: ${response.error}`);
-      console.log(`Connection to Wistia Data API failed: ${response.error}`);
-      setFetchedProjects([]);
-      if (response?.code && response?.error) {
-        setRequiredMessage(response?.error);
+      setLoadingStatus(false);
+    } catch (error) {
+      if (error instanceof WistiaError) {
+        Notification.error(`Connection to Wistia Data API failed: ${error.message}`);
+        console.log(`Connection to Wistia Data API failed: ${error.message}`);
+        setFetchedProjects([]);
+        if (error.code && error.message) {
+          setRequiredMessage(error.message);
+        }
       }
     }
-    setLoadingStatus(false);
   };
 
   const removeExcludedProject = (id: string) => {
@@ -192,8 +195,7 @@ const Config = (props: ConfigProps) => {
             <TextLink
               href="https://wistia.com/support/account-and-billing/setup#api-access"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               How to find your access bearer token
             </TextLink>
           </Flex>
@@ -233,8 +235,7 @@ const Config = (props: ConfigProps) => {
                     isOpen
                     isFullWidth
                     isAutoalignmentEnabled={false}
-                    position={'bottom-left'}
-                  >
+                    position={'bottom-left'}>
                     <DropdownList className={'dropdown-list'} maxHeight={500}>
                       {fetchedProjects.map((item) => (
                         <DropdownListItem
@@ -244,8 +245,7 @@ const Config = (props: ConfigProps) => {
                               (project) => project.hashedId === item?.hashedId
                             ) !== -1
                           }
-                          key={`key-${item.id}`}
-                        >
+                          key={`key-${item.id}`}>
                           {item.name}
                         </DropdownListItem>
                       ))}
