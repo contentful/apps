@@ -1,5 +1,5 @@
 import { ErrorRequestHandler } from 'express';
-import { isApiError, ApiError } from './api-error';
+import { isApiError, ApiError } from '../errors/apiError';
 
 // Very intentional use of any in the type below. we're allowing the error map to define callbacks
 // that can except an argument of _any_ type, for the purposes of the map. The callbacks themselves
@@ -12,11 +12,11 @@ export type ApiErrorMap = Record<string, (e: any) => ApiError<Record<string, unk
 export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, next) => {
   if (error) {
     if (isApiError(error)) {
-      response.status(error.status).send({errors: error.toJSON()});
+      response.status(error.status).send({ errors: error.toJSON() });
     } else {
-      response
-        .status(500)
-        .send({errors: { errorType: 'ServerError', message: 'Internal Server Error', details: null }});
+      response.status(500).send({
+        errors: { errorType: 'ServerError', message: 'Internal Server Error', details: null },
+      });
     }
   }
 
@@ -24,7 +24,6 @@ export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, 
 };
 
 export const apiErrorMapper = (errorMap: ApiErrorMap): ErrorRequestHandler => {
-
   return (error, _request, _response, next) => {
     if (error) {
       const errorName = error.constructor.name as keyof typeof errorMap;

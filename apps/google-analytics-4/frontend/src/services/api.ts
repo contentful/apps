@@ -1,113 +1,28 @@
-import { z } from 'zod';
 import { config } from '../config';
-import fetchWithSignedRequest from '../helpers/signed-requests';
 import { PlainClientAPI } from 'contentful-management';
 import { ServiceAccountKeyId, ServiceAccountKey } from '../types';
+import { fetchFromApi } from 'apis/fetchApi';
+import {
+  Headers,
+  ApiErrorType,
+  Credentials,
+  ZAccountSummaries,
+  ZRunReportData,
+  ZCredentials,
+  AccountSummaries,
+  RunReportData,
+} from 'apis/apiTypes';
 
-const ZCredentials = z.object({
-  status: z.string(),
-});
+export class ApiError extends Error {
+  details: string;
+  status: number;
+  errorType: string;
 
-const ZPropertySummary = z.object({
-  property: z.string(),
-  displayName: z.string(),
-  propertyType: z.string(),
-});
-export type PropertySummary = z.infer<typeof ZPropertySummary>;
-
-const ZAccountSummary = z.object({
-  name: z.string(),
-  account: z.string(),
-  displayName: z.string(),
-  propertySummaries: z.array(ZPropertySummary),
-});
-
-export type AccountSummary = z.infer<typeof ZAccountSummary>;
-
-const ZAccountSummaries = z.array(ZAccountSummary);
-export type AccountSummaries = z.infer<typeof ZAccountSummaries>;
-
-type Headers = Record<string, string>;
-
-export type Credentials = z.infer<typeof ZCredentials>;
-
-export class ApiError extends Error { }
-export class ApiServerError extends ApiError { }
-export class ApiClientError extends ApiError { }
-
-export async function fetchFromApi<T>(
-  apiUrl: URL,
-  schema: z.ZodTypeAny,
-  appDefinitionId: string,
-  cma: PlainClientAPI,
-  headers: Headers = {}
-): Promise<T> {
-  const response = await fetchResponse(apiUrl, appDefinitionId, cma, headers);
-  validateResponseStatus(response);
-  const responseJson = await jsonFromResponse(response);
-  parseResponseJson(responseJson, schema);
-  return responseJson;
-}
-
-async function fetchResponse(
-  url: URL,
-  appDefinitionId: string,
-  cma: PlainClientAPI,
-  headers: Headers
-): Promise<Response> {
-  try {
-    const signedResponse = await fetchWithSignedRequest(url, appDefinitionId, cma, 'GET', headers);
-    if (!signedResponse.ok) {
-      const { errors } = await signedResponse.json();
-      throw new ApiError(errors.message);
-    }
-    else return signedResponse;
-
-  } catch (e) {
-    if (e instanceof TypeError) {
-      const errorMessage = e.message;
-      throw new ApiError(errorMessage);
-    }
-    throw e;
-  }
-}
-
-function parseResponseJson(responseJson: any, schema: z.ZodTypeAny) {
-  try {
-    schema.parse(responseJson);
-  } catch (e) {
-    if (e instanceof z.ZodError) {
-      const errorMessage = 'Invalid response from API';
-      console.error(errorMessage);
-      console.error(e.message);
-      console.error(responseJson);
-      throw new ApiError(errorMessage);
-    }
-    throw e;
-  }
-}
-
-async function jsonFromResponse(response: Response): Promise<any> {
-  try {
-    return await response.json();
-  } catch (e) {
-    if (e instanceof SyntaxError) {
-      const errorMessage = `Invalid JSON response: ${e.message}`;
-      console.error(errorMessage);
-      console.error(response);
-      throw new ApiError(errorMessage);
-    }
-    throw e;
-  }
-}
-
-function validateResponseStatus(response: Response): void {
-  if (response.status >= 500) {
-    console.error(response);
-    throw new ApiServerError(`An unknown server error occurred. Status: ${response.status}`);
-  } else if (response.status >= 400) {
-    console.error(response);
-    throw new ApiClientError(`An unknown client error occurred. Status: ${response.status}`);
+  constructor(res: ApiErrorType) {
+    super(res.message);
+    this.errorType = res.errorType;
+    this.details = res.details;
+    this.status = res.status;
   }
 }
 
@@ -147,7 +62,7 @@ export class Api {
   }
 
   async listAccountSummaries(): Promise<AccountSummaries> {
-    return await fetchFromApi<AccountSummaries>(
+    return await fetchFromApi(
       this.requestUrl('api/account_summaries'),
       ZAccountSummaries,
       this.appDefinitionId,
@@ -156,12 +71,24 @@ export class Api {
     );
   }
 
+  // TODO: When we actually hook this up to the sidebar chart, we will need to update this type and schema (similar to the listAccountSummaries pattern)
+  // It's currently typed like this to provide maximum flexibility until we actually integrate with the chart
+  async getRunReportData(): Promise<RunReportData> {
+    return await fetchFromApi(
+      this.requestUrl('api/run_report'),
+      ZRunReportData,
+      this.appDefinitionId,
+      this.cma,
+      this.serviceAccountKeyHeaders
+    );
+  }
+
   private get serviceAccountKeyHeaders(): Headers {
     return {
-      'x-contentful-serviceaccountkeyid': this.encodeServiceAccountHeaderValue(
+      'X-Contentful-ServiceAccountKeyId': this.encodeServiceAccountHeaderValue(
         this.serviceAccountKeyId
       ),
-      'x-contentful-serviceaccountkey': this.encodeServiceAccountHeaderValue(
+      'X-Contentful-ServiceAccountKey': this.encodeServiceAccountHeaderValue(
         this.serviceAccountKey
       ),
     };

@@ -17,3 +17,12 @@ export interface ServiceAccountKeyId {
   projectId: string;
   clientId: string;
 }
+
+export interface RunReportParamsType {
+  propertyId: string;
+  slug: string;
+  startDate: string;
+  endDate: string;
+  dimensions: string[];
+  metrics: string[];
+}

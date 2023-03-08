@@ -3,15 +3,13 @@
   "compilerOptions": {
     "baseUrl": "src",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@shared/*": [
-        "../../shared/*"
-      ]
+      "@/*": ["./*"],
+      "@shared/*": ["../../shared/*"]
     },
+    "sourceMap": true,
+    "inlineSources": true,
+    "sourceRoot": "/src"
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src", "test"],
+  "exclude": ["node_modules"]
 }

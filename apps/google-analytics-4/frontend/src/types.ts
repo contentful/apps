@@ -1,6 +1,33 @@
+import { IdsAPI } from '@contentful/app-sdk';
+
 export interface AppInstallationParameters {
-  serviceAccountKey: ServiceAccountKey | null;
-  serviceAccountKeyId: ServiceAccountKeyId | null;
+  serviceAccountKey: ServiceAccountKey;
+  serviceAccountKeyId: ServiceAccountKeyId;
+}
+
+// TODO: get this exported from the SDK
+declare type EntryScopedIds = 'field' | 'entry' | 'contentType';
+
+export interface ContentfulContext extends Omit<IdsAPI, EntryScopedIds> {
+  app?: string;
+  location?: string;
+  // EntryScopedIds are not always present, but are conditionally when the location is entry field/sidebar/editor
+  contentType?: string;
+  entry?: string;
+  field?: string;
+}
+
+export interface ContentfulContextHeaders {
+  'X-Contentful-App'?: string;
+  'X-Contentful-ContentType'?: string;
+  'X-Contentful-Entry'?: string;
+  'X-Contentful-Environment'?: string;
+  'X-Contentful-EnvironmentAlias'?: string;
+  'X-Contentful-Field'?: string;
+  'X-Contentful-Location'?: string;
+  'X-Contentful-Organization'?: string;
+  'X-Contentful-Space'?: string;
+  'X-Contentful-User'?: string;
 }
 
 export interface ServiceAccountKey {
@@ -51,3 +78,15 @@ export interface RunReportResponse {
 }
 
 export type DateRangeType = 'lastWeek' | 'lastDay' | 'lastMonth';
+export interface AccountSummariesType {
+  displayName: string;
+  name: string;
+  account: string;
+  propertySummaries: PropertySummariesType[];
+}
+
+export interface PropertySummariesType {
+  displayName: string;
+  property: string;
+  propertyType: string;
+}

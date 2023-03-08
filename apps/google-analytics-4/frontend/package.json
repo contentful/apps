@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "4.13.0",
-    "@contentful/f36-components": "4.26.0",
+    "@contentful/f36-components": "4.27.0",
     "@contentful/f36-tokens": "4.0.1",
     "@contentful/react-apps-toolkit": "1.2.15",
     "@sentry/react": "^7.38.0",
@@ -21,7 +21,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "17.0.2",
     "react-scripts": "5.0.1",
-    "zod": "3.20.6"
+    "zod": "3.21.4"
   },
   "scripts": {
     "start": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) cross-env BROWSER=none react-scripts start",

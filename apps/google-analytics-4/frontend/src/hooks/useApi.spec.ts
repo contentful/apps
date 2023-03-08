@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import React, { FunctionComponent } from 'react';
 import { mockCma, mockSdk, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
-import { Api } from '../services/api';
+import { Api } from '../apis/api';
 import { useApi } from './useApi';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({

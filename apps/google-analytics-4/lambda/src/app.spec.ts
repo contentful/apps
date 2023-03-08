@@ -9,15 +9,15 @@ import {
   validServiceAccountKeyIdBase64,
 } from '../test/mocks/googleApi';
 import app from './app';
-import { GoogleApi } from './services/google-api';
+import { GoogleApiService } from './services/googleApiService';
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
 chai.use(chaiHttp);
 
 const serviceAccountKeyHeaders = {
-  'x-contentful-serviceaccountkeyid': validServiceAccountKeyIdBase64,
-  'x-contentful-serviceaccountkey': validServiceAccountKeyFileBase64,
+  'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
+  'X-Contentful-ServiceAccountKey': validServiceAccountKeyFileBase64,
 };
 
 describe('app', () => {
@@ -58,12 +58,12 @@ describe('app', () => {
 
   // TODO: These test need to be updated once we have everything configured
   describe('GET /api/account_summaries', () => {
-    let googleApi: GoogleApi;
+    let googleApi: GoogleApiService;
 
     beforeEach(() => {
       mockAdminClient = mockAnalyticsAdminServiceClient();
-      googleApi = new GoogleApi(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
-      sinon.stub(GoogleApi, 'fromServiceAccountKeyFile').returns(googleApi);
+      googleApi = new GoogleApiService(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
+      sinon.stub(GoogleApiService, 'fromServiceAccountKeyFile').returns(googleApi);
     });
 
     it('responds with 200', async () => {
@@ -84,8 +84,6 @@ describe('app', () => {
   });
 
   describe('GET /api/run_report', () => {
-
-
     it('responds with 200 for sample with views data', async () => {
       const response = await chai.request(app).get('/sampleData/runReportResponseHasViews.json');
       expect(response).to.have.status(200);

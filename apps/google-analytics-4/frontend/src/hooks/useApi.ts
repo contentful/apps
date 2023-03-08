@@ -1,7 +1,8 @@
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { useMemo } from 'react';
-import { Api } from '../services/api';
+import { Api } from '../apis/api';
 import { ServiceAccountKey, ServiceAccountKeyId } from '../types';
+import { contentfulContext } from '../helpers/contentfulContext';
 
 export function useApi(
   serviceAccountKeyId?: ServiceAccountKeyId,
@@ -15,8 +16,6 @@ export function useApi(
   // NOTE: The service account key file here will later be removed when it's moved to secret storage
   const accountKey = serviceAccountKey || sdk.parameters.installation.serviceAccountKey;
 
-  const appDefinitionId = sdk.ids.app;
-
   if (!accountKeyId) {
     throw new Error('No ServiceAccountKeyId provided or found in installation parameters');
   }
@@ -25,13 +24,9 @@ export function useApi(
     throw new Error('No ServiceAccountKey provided or found in installation parameters');
   }
 
-  if (!appDefinitionId) {
-    throw new Error('No appDefinitionId found in sdk');
-  }
-
   const api = useMemo(() => {
-    return new Api(appDefinitionId, cma, accountKeyId, accountKey);
-  }, [cma, accountKeyId, accountKey, appDefinitionId]);
+    return new Api(contentfulContext(sdk), cma, accountKeyId, accountKey);
+  }, [cma, accountKeyId, accountKey, sdk]);
 
   return api;
 }

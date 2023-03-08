@@ -1,5 +1,5 @@
-import React from 'react'
-import { Box, Heading, Paragraph } from '@contentful/f36-components'
+import React from 'react';
+import { Box, Heading, Paragraph } from '@contentful/f36-components';
 
 export default function AboutSection() {
   return (
@@ -10,5 +10,5 @@ export default function AboutSection() {
         organization’s Google Analytics properties alongside relevant content entries.
       </Paragraph>
     </Box>
-  )
+  );
 }

@@ -1,9 +1,17 @@
-import React from 'react'
-import { Stack, Card, Paragraph, FormControl, Textarea, Flex, Note, TextLink, Text, Box } from '@contentful/f36-components';
+import React from 'react';
 import {
-  CheckCircleIcon,
-  ExternalLinkTrimmedIcon,
-} from '@contentful/f36-icons';
+  Stack,
+  Card,
+  Paragraph,
+  FormControl,
+  Textarea,
+  Flex,
+  Note,
+  TextLink,
+  Text,
+  Box,
+} from '@contentful/f36-components';
+import { CheckCircleIcon, ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 
 interface Props {
   isValid: boolean;
@@ -12,7 +20,7 @@ interface Props {
   serviceAccountKeyFile: string;
   onKeyFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   isInEditMode: boolean;
-  onCancelGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>
+  onCancelGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 const placeholderText = `{
@@ -28,17 +36,27 @@ export default function SetupServiceAccountCard(props: Props) {
     serviceAccountKeyFile,
     onKeyFileChange,
     isInEditMode,
-    onCancelGoogleAccountDetails
+    onCancelGoogleAccountDetails,
   } = props;
 
   return (
-    <Stack spacing='spacingL' flexDirection='column'>
+    <Stack spacing="spacingL" flexDirection="column">
       <Card>
-        <Flex justifyContent="space-between" marginBottom='spacingL'>
-          <Paragraph marginBottom='none'><b >Google Service Account Details</b></Paragraph>
-          {isInEditMode && <TextLink testId='editServiceAccountButton' as="button" variant='primary' onClick={onCancelGoogleAccountDetails}>Cancel</TextLink>}
+        <Flex alignItems="center" marginBottom="spacingM" justifyContent="space-between">
+          <Paragraph marginBottom="none">
+            <b>Google Service Account Details</b>
+          </Paragraph>
+          {isInEditMode && (
+            <TextLink
+              testId="cancelServiceAccountButton"
+              as="button"
+              variant="primary"
+              onClick={onCancelGoogleAccountDetails}>
+              Cancel
+            </TextLink>
+          )}
         </Flex>
-        <Box marginBottom='spacingM'>
+        <Box marginBottom="spacingM">
           <Note variant="primary">
             Follow{' '}
             <TextLink
@@ -46,8 +64,7 @@ export default function SetupServiceAccountCard(props: Props) {
               alignIcon="end"
               href="https://www.contentful.com/help/google-analytics-service-account-setup/"
               target="_blank"
-              rel="noopener noreferrer"
-            >
+              rel="noopener noreferrer">
               these detailed instructions
             </TextLink>{' '}
             to create a service account in Google and obtain the required service account key file.
@@ -59,8 +76,7 @@ export default function SetupServiceAccountCard(props: Props) {
           id="accountCredentialsFile"
           isInvalid={!isValid}
           isRequired={isRequired}
-          marginBottom={!isInEditMode ? 'none' : 'spacingM'}
-        >
+          marginBottom={!isInEditMode ? 'none' : 'spacingM'}>
           <FormControl.Label>Private Key File</FormControl.Label>
           <Textarea
             name="accountCredentialsFile"
@@ -89,22 +105,21 @@ export default function SetupServiceAccountCard(props: Props) {
           )}
         </FormControl>
       </Card>
-      <Paragraph marginBottom='none'>
+      <Paragraph marginBottom="none">
         To use the Google Analytics app, you will need to provision a{' '}
         <TextLink
           icon={<ExternalLinkTrimmedIcon />}
           alignIcon="end"
           href="https://www.contentful.com/help/google-analytics-service-account-setup/"
           target="_blank"
-          rel="noopener noreferrer"
-        >
+          rel="noopener noreferrer">
           Google Cloud service account
         </TextLink>{' '}
         for which you enable <i>read access</i> to your organization's Google Analytics data.
       </Paragraph>
-      <Paragraph marginBottom='none'>
-        After configuring the service account, you'll download a set of credentials that
-        Contentful will use to access Google Analytics data on this service account's behalf.
+      <Paragraph marginBottom="none">
+        After configuring the service account, you'll download a set of credentials that Contentful
+        will use to access Google Analytics data on this service account's behalf.
       </Paragraph>
     </Stack>
   );
