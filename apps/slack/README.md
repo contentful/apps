@@ -89,6 +89,9 @@ This sections explains how to run the Slack app locally.
 ### General
 
 - Start ngrok with `ngrok https 3000`
+
+[//]: # "we might consider having a shared account for this, so that each user isn't using a separate app"
+
 - Create a new Slack app [here](https://api.slack.com/apps)
   - Add the ngrok URL as redirect URL (Features -> OAuth & Permissions -> Redirect URLs)
   - Enable token rotation (Features -> OAuth & Permissions)
@@ -101,10 +104,14 @@ This sections explains how to run the Slack app locally.
   - Enable config location
   - Eneable request verification and store the secret in `lambda/config/serverless.dev.yml` (`signingSecret` -> `signing_secret`)
   - Create a key pair. Save the private key at `lamba/private-key.pem`
-- Configure Slack
+- Configure Slack (https://api.slack.com/apps)
   - Store Client ID and Client Secret (Basic Information -> App Credentials) in `lambda/config/serverless.dev.yml` (`oauthCredentials` -> `client_id` / `client_secret`)
   - Store Signing Secret (Basic Information -> App Credentials) in `lambda/config/serverless.dev.yml` (`slackSigningSecret` -> `signing_secret`)
 - Add the ngrok URL to in the `lambda/config/serverless.dev.yml` (`customDomain` -> `domainName`). Remove the `https://` from the URL. Add a trailing `/dev` to the URL (e.g.: `domainName: be25-95-91-246-99.ngrok.io/dev`)
+- `cd` into lambda
+- run `npm install && npm run start` in /lambda
+
+// Ignore below
 - Start a docker container with a local DynamoDB instance using `make start-backend`
 - If you start the project for the first time, run `yarn create_table` in the container
 - Run `yarn start:lambda` in the container
@@ -114,4 +121,5 @@ This sections explains how to run the Slack app locally.
 - Set the following variables in `frontend/.env.development`:
   - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (Basic Information -> App Credentials -> Client ID)
   - `REACT_APP_BACKEND_BASE_URL`: The ngrok URL
-- Run the frontend with `yarn run start:frontend`
+- `cd` into /frontend
+- Run the frontend with `npm run start`
