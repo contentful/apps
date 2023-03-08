@@ -39,9 +39,12 @@ export const verifySignedRequestMiddleware = (req: Request, _res: Response, next
 const makeCanonicalReq = (req: Request) => {
   const requiredHeaders = requestSigningHeaders(req.headers);
 
+  // TODO: make this stage prefixing logic better? (yuck)
+  const pathPrefix = process.env.STAGE !== 'prd' ? `/${process.env.stage}` : '';
+
   return <CanonicalRequest>{
     method: req.method,
-    path: `/${process.env.STAGE !== 'prd' ? process.env.STAGE : ''}${req.originalUrl}`, // TODO: make this stage prefixing logic better? (yuck)
+    path: `${pathPrefix}${req.originalUrl}`, // note: req.originalUrl starts with a `/`
     headers: requiredHeaders,
   };
 };
@@ -52,22 +55,21 @@ const contentfulSigningHeaderKeys = [
 ];
 
 interface ContentfulSignedHeaders {
-  'X-Contentful-Timestamp': string;
-  'X-Contentful-Signed-Headers': string;
-  'X-Contentful-Signature': string;
-  'X-Contentful-User-Id': string;
-  'X-Contentful-Space-Id': string;
-  'X-Contentful-Environment-Id': string;
-  'X-Contentful-App-Id': string;
+  'x-contentful-timestamp': string;
+  'x-contentful-signed-headers': string;
+  'x-contentful-signature': string;
+  'x-contentful-user-id': string;
+  'x-contentful-space-id': string;
+  'x-contentful-environment-id': string;
+  'x-contentful-app-id': string;
   [key: string]: string;
 }
 
-function requestSigningHeaders(headers: IncomingHttpHeaders): Partial<ContentfulSignedHeaders> {
-  const requiredSignatureHeaders = {} as Partial<ContentfulSignedHeaders>;
+function requestSigningHeaders(headers: IncomingHttpHeaders): ContentfulSignedHeaders {
+  const requiredSignatureHeaders = {} as ContentfulSignedHeaders;
   for (const header of contentfulSigningHeaderKeys) {
     if (!headers[header]) {
-      console.log('missing request signing header: ', header);
-      continue;
+      throw new UnableToVerifyRequest(`Missing requiredSignatureHeader: ${header}`);
     }
 
     if (typeof headers[header] === 'string') {
