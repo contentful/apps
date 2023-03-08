@@ -14,7 +14,8 @@ import styled from 'styled-components';
 // import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { WistiaItem } from './ConfigScreen';
-import { fetchVideos } from '../functions/getVideos';
+import { fetchProjects, fetchVideos } from '../functions/getVideos';
+import { Project } from './helpers/types';
 
 interface FieldProps {
   sdk: FieldExtensionSDK;
@@ -41,6 +42,10 @@ const Field = (props: FieldProps) => {
 
   // Set inital state based on field values
   useEffect(() => {
+    const fetchPagedVideos = () => {
+      const page = 1;
+    };
+
     const fieldValues = sdk.field.getValue();
     setIds(
       fieldValues !== undefined && fieldValues.items.length > 0
@@ -74,6 +79,28 @@ const Field = (props: FieldProps) => {
 
     setIds(updatedIds);
     setNewValues(updatedIds);
+  };
+
+  const getVideos = async (excludedProjects: Project[], bearerToken: string) => {
+    const projectsResponse = await fetchProjects(bearerToken);
+    if (projectsResponse.success) {
+      console.info('Succesfully fetched the Wistia projects.');
+      const { projects } = projectsResponse;
+      // Map through projects and return ids to retrieve all the videos from each project. Filter out the projects selected to be excluded
+      const projectIds = projects
+        .map((item: Project) => item.hashedId)
+        .filter((id: string) => {
+          const include =
+            excludedProjects.findIndex((project: Project) => project.hashedId === id) === -1;
+          return include;
+        });
+    } else {
+      console.info(`Impossible to fetch the projects: ${projectsResponse.error}`);
+      return {
+        response: projectsResponse,
+        videos: [],
+      };
+    }
   };
 
   // set field value with updated state
