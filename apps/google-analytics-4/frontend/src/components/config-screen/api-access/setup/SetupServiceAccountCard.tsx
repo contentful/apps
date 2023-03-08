@@ -42,13 +42,13 @@ export default function SetupServiceAccountCard(props: Props) {
   return (
     <Stack spacing="spacingL" flexDirection="column">
       <Card>
-        <Flex justifyContent="space-between" marginBottom="spacingL">
+        <Flex alignItems="center" marginBottom="spacingM" justifyContent="space-between">
           <Paragraph marginBottom="none">
             <b>Google Service Account Details</b>
           </Paragraph>
           {isInEditMode && (
             <TextLink
-              testId="editServiceAccountButton"
+              testId="cancelServiceAccountButton"
               as="button"
               variant="primary"
               onClick={onCancelGoogleAccountDetails}>

@@ -1,6 +1,6 @@
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { useMemo } from 'react';
-import { Api } from '../services/api';
+import { Api } from '../apis/api';
 import { ServiceAccountKey, ServiceAccountKeyId } from '../types';
 import { contentfulContext } from '../helpers/contentfulContext';
 
