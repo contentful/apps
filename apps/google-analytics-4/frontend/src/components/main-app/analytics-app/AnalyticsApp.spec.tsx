@@ -11,11 +11,12 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
-// jest.mock('hooks/useApi', () => {
-//   return jest.fn(() => ({
-//      useApi: () => jest.fn()
-//   }))
-// })
+const mockApi = jest.fn();
+jest.mock('hooks/useApi', () => ({
+  useApi: () => ({
+    runReports: mockApi,
+  }),
+}));
 
 const { findByTestId, getByTestId, getByText, findByText } = screen;
 
@@ -24,13 +25,7 @@ const NOTE_TEST_ID = 'cf-ui-note';
 
 describe('AnalyticsApp', () => {
   it('mounts data', async () => {
-    jest
-      .spyOn(global, 'fetch')
-      .mockImplementation(
-        jest.fn(() =>
-          Promise.resolve({ ok: true, json: () => Promise.resolve(runReportResponseHasViews) })
-        ) as jest.Mock
-      );
+    mockApi.mockImplementation(() => runReportResponseHasViews);
 
     render(<AnalyticsApp propertyId="" reportSlug="" />);
 
@@ -42,13 +37,7 @@ describe('AnalyticsApp', () => {
   });
 
   it('mounts with warning message when no data', async () => {
-    jest
-      .spyOn(global, 'fetch')
-      .mockImplementation(
-        jest.fn(() =>
-          Promise.resolve({ ok: true, json: () => Promise.resolve(runReportResponseNoView) })
-        ) as jest.Mock
-      );
+    mockApi.mockImplementation(() => runReportResponseNoView);
 
     render(<AnalyticsApp propertyId="" reportSlug="" />);
 
@@ -62,11 +51,7 @@ describe('AnalyticsApp', () => {
   });
 
   it('mounts with error message when fetch error thrown', async () => {
-    jest
-      .spyOn(global, 'fetch')
-      .mockImplementation(
-        jest.fn(() => Promise.reject({ message: 'mock Api error' })) as jest.Mock
-      );
+    mockApi.mockRejectedValue(() => new Error('mock Api error'));
 
     render(<AnalyticsApp propertyId="" reportSlug="" />);
 

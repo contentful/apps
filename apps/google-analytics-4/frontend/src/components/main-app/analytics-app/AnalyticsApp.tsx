@@ -54,7 +54,7 @@ const AnalyticsApp = (props: Props) => {
     }
 
     fetchData();
-  }, [api, reportRequestParams.startDate, reportRequestParams.endDate, reportSlug]);
+  }, [api.runReports, reportRequestParams.startDate, reportRequestParams.endDate, reportSlug]);
 
   useEffect(() => {
     if (runReportResponse.rowCount) {
