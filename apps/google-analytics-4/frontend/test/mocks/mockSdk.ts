@@ -15,6 +15,9 @@ const mockSdk: any = {
     installation: {},
     instance: {},
   },
+  location: {
+    is: jest.fn().mockReturnValue(true),
+  },
 };
 
 export { mockSdk };
