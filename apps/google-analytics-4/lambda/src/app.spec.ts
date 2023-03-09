@@ -15,6 +15,8 @@ import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
 chai.use(chaiHttp);
 
+const sandbox = sinon.createSandbox();
+
 const serviceAccountKeyHeaders = {
   'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
   'X-Contentful-ServiceAccountKey': validServiceAccountKeyFileBase64,
@@ -26,9 +28,13 @@ describe('app', () => {
 
   beforeEach(() => {
     // TODO: set headers and fully test signature verification later
-    sinon.stub(NodeAppsToolkit, 'verifyRequest').get(() => {
+    sandbox.stub(NodeAppsToolkit, 'verifyRequest').get(() => {
       return () => true;
     });
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   describe('GET /health', () => {
@@ -63,7 +69,7 @@ describe('app', () => {
     beforeEach(() => {
       mockAdminClient = mockAnalyticsAdminServiceClient();
       googleApi = new GoogleApiService(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
-      sinon.stub(GoogleApiService, 'fromServiceAccountKeyFile').returns(googleApi);
+      sandbox.stub(GoogleApiService, 'fromServiceAccountKeyFile').returns(googleApi);
     });
 
     it('responds with 200', async () => {
