@@ -154,7 +154,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     };
 
     setupAppInstallationParameters();
-  }, [sdk]);
+  }, [sdk, isConfigureScreen]);
 
   const handleValidServiceAccountKey = (newServiceAccountKey: ServiceAccountKey | undefined) => {
     setNewServiceAccountKey(newServiceAccountKey);
