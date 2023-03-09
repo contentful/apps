@@ -57,7 +57,7 @@ const AnalyticsApp = (props: Props) => {
     }
 
     fetchData();
-  }, [api.runReports, reportRequestParams]);
+  }, [api, reportRequestParams]);
 
   useEffect(() => {
     if (runReportResponse.rowCount) {
