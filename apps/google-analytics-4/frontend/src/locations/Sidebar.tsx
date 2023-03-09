@@ -1,8 +1,7 @@
 import AnalyticsApp from 'components/main-app/analytics-app/AnalyticsApp';
 import useKeyService from 'hooks/useKeyService';
 
-const hardCodedPropertyId = 'properties/275538046';
-const hardCodedSlug = '/en-US';
+// TO DO: Add propertyId and reportSlug logic
 
 const Sidebar = () => {
   const { parameters } = useKeyService({});
@@ -13,8 +12,8 @@ const Sidebar = () => {
     <AnalyticsApp
       serviceAccountKeyId={serviceAccountKeyId}
       serviceAccountKey={serviceAccountKey}
-      propertyId={hardCodedPropertyId}
-      reportSlug={hardCodedSlug}
+      propertyId=""
+      reportSlug=""
     />
   );
 };

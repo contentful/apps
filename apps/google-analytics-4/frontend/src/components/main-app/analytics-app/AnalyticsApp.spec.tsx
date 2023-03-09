@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { mockSdk, mockCma } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
+import { ServiceAccountKey, ServiceAccountKeyId } from '@/types';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => jest.fn(),
@@ -23,11 +24,21 @@ const { findByTestId, getByTestId, getByText, findByText } = screen;
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
 
+const renderAnalyticApp = () =>
+  render(
+    <AnalyticsApp
+      serviceAccountKey={{} as unknown as ServiceAccountKey}
+      serviceAccountKeyId={{} as unknown as ServiceAccountKeyId}
+      propertyId=""
+      reportSlug=""
+    />
+  );
+
 describe('AnalyticsApp', () => {
   it('mounts data', async () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
 
-    render(<AnalyticsApp propertyId="" reportSlug="" />);
+    renderAnalyticApp();
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
@@ -39,7 +50,7 @@ describe('AnalyticsApp', () => {
   it('mounts with warning message when no data', async () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
 
-    render(<AnalyticsApp propertyId="" reportSlug="" />);
+    renderAnalyticApp();
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
@@ -53,7 +64,7 @@ describe('AnalyticsApp', () => {
   it('mounts with error message when fetch error thrown', async () => {
     mockApi.mockRejectedValue(() => new Error('mock Api error'));
 
-    render(<AnalyticsApp propertyId="" reportSlug="" />);
+    renderAnalyticApp();
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const errorNote = getByTestId(NOTE_TEST_ID);

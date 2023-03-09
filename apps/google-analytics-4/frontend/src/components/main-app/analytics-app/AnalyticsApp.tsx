@@ -14,8 +14,8 @@ const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
 const EMPTY_DATA_MSG = 'There are no page views to show for this range';
 
 interface Props {
-  serviceAccountKeyId?: ServiceAccountKeyId;
-  serviceAccountKey?: ServiceAccountKey;
+  serviceAccountKeyId: ServiceAccountKeyId;
+  serviceAccountKey: ServiceAccountKey;
   propertyId: string;
   reportSlug: string;
 }
