@@ -1,6 +1,12 @@
-import { Project, ProjectReduced, ProjectVideo, WistiaError } from '../components/helpers/types';
+import {
+  Project,
+  ProjectReduced,
+  WistiaError,
+  WistiaVideo,
+  WistiaProject,
+} from '../components/helpers/types';
 
-export const fetchProjects = async (bearerToken: string) => {
+export const fetchProjects = async (bearerToken: string): Promise<WistiaProject[]> => {
   const projects = await (
     await fetch(`https://api.wistia.com/v1/projects.json`, {
       headers: {
@@ -11,17 +17,19 @@ export const fetchProjects = async (bearerToken: string) => {
   if (projects.error) {
     throw new WistiaError({ message: projects.error, code: projects.code });
   } else {
-    const reducedProject = projects.map(({ id, hashedId, name }: ProjectReduced) => {
+    const reducedProjects = projects.map(({ id, hashedId, name }: ProjectReduced) => {
       return { id, hashedId, name };
     });
 
-    return {
-      projects: reducedProject,
-    };
+    return reducedProjects;
   }
 };
 
-export const fetchVideos = async (projectIds: string[], bearerToken: string, page?: number) => {
+export const fetchVideos = async (
+  projectIds: string[],
+  bearerToken: string,
+  page?: number
+): Promise<WistiaVideo[]> => {
   const mappedProjects = await Promise.all(
     projectIds.map(async (id: string) => {
       const project = await (
@@ -31,7 +39,7 @@ export const fetchVideos = async (projectIds: string[], bearerToken: string, pag
           },
         })
       ).json();
-      const mappedVideos = project.medias.map((video: ProjectVideo) => ({
+      const mappedVideos = project.medias.map((video: WistiaVideo) => ({
         ...video,
         project: {
           id,

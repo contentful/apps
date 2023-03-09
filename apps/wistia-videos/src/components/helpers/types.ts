@@ -19,7 +19,7 @@ export interface Project {
   description: string;
 }
 
-export interface ProjectVideo {
+export interface WistiaVideo {
   id: number;
   name: string;
   type: string;
@@ -27,6 +27,7 @@ export interface ProjectVideo {
   updated: string;
   duration: number;
   hashed_id: string;
+  hashedId: string;
   description: string;
   progress: number;
   status: string;
@@ -34,6 +35,17 @@ export interface ProjectVideo {
     url: string;
     width: number;
     height: number;
+  };
+}
+
+export interface WistiaProject {
+  id: number;
+  name: string;
+  hashedId: string;
+  hashed_id?: string;
+  duration?: string;
+  thumbnail: {
+    url: string;
   };
 }
 

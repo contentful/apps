@@ -16,32 +16,21 @@ import {
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import { fetchProjects } from '../functions/getVideos';
-import { WistiaError } from './helpers/types';
+import { WistiaError, WistiaProject } from './helpers/types';
 
 export interface AppInstallationParameters {
   apiBearerToken?: string;
-  excludedProjects?: WistiaItem[];
+  excludedProjects?: WistiaProject[];
 }
 
 interface ConfigProps {
   sdk: AppExtensionSDK;
 }
 
-export interface WistiaItem {
-  id: number;
-  name: string;
-  hashedId: string;
-  hashed_id?: string;
-  duration?: string;
-  thumbnail: {
-    url: string;
-  };
-}
-
 const Config = (props: ConfigProps) => {
   const [requiredMessage, setRequiredMessage] = useState('');
   const [showButton, setShowButton] = useState(true);
-  const [fetchedProjects, setFetchedProjects] = useState<WistiaItem[]>();
+  const [fetchedProjects, setFetchedProjects] = useState<WistiaProject[]>();
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     apiBearerToken: '',
     excludedProjects: [],
@@ -119,7 +108,7 @@ const Config = (props: ConfigProps) => {
       Notification.success('Your connection to the Wistia Data API is working.');
       // set the projects in the state (don't save all the projects in the config parameters to prevent
       // the config object to become very large and reach the size limit)
-      setFetchedProjects(response.projects);
+      setFetchedProjects(response);
       setShowButton(false);
       setRequiredMessage('');
       setLoadingStatus(false);
@@ -148,7 +137,7 @@ const Config = (props: ConfigProps) => {
     return;
   };
 
-  const addExcludedProject = (item: WistiaItem) => {
+  const addExcludedProject = (item: WistiaProject) => {
     if (
       parameters.excludedProjects?.findIndex((project) => project.hashedId === item.hashedId) !== -1
     ) {

@@ -13,7 +13,7 @@ import {
 import styled from 'styled-components';
 // import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
-import { WistiaItem } from './ConfigScreen';
+import { WistiaProject, WistiaVideo } from '../components/helpers/types';
 import { fetchProjects, fetchVideos } from '../functions/getVideos';
 import { Project, WistiaError } from '../components/helpers/types';
 
@@ -33,27 +33,40 @@ const StyledImageContainer = styled.div`
 
 const Field = (props: FieldProps) => {
   const { sdk } = props;
-  const [data, updateData] = useState<WistiaItem[] | []>([]);
+  const [data, updateData] = useState<WistiaVideo[] | []>([]);
   const [selectedIds, setIds] = useState<number[]>([]);
-  const [dropdownData, filterDropdownData] = useState<WistiaItem[] | []>([]);
+  const [dropdownData, filterDropdownData] = useState<WistiaVideo[] | []>([]);
   const [loading, updateLoadingStatus] = useState(true);
+  const [projectIds, setProjectIds] = useState<string[]>([]);
+  const [parameters, setParameters] = useState({});
   const [error, setError] = useState(null || '');
+  let page = 1;
+  let additionalVideos: WistiaVideo[] = [];
   sdk.window.startAutoResizer();
+
+  const fetchPagedVideos = async (
+    projectIds: string[],
+    parameters: any,
+    page?: number
+  ): Promise<WistiaVideo[]> => {
+    return await fetchVideos(projectIds, parameters.apiBearerToken, page);
+  };
 
   // Set inital state based on field values
   useEffect(() => {
-    const fetchPagedVideos = async () => {
-      const page = 1;
+    const fetchInitialVideos = async (page?: number) => {
       try {
+        const parameters: any = sdk.parameters.installation;
         const projectIds = await getProjectIds(
           parameters.excludedProjects,
           parameters.apiBearerToken
         );
-        const videos = await fetchVideos(projectIds, parameters.apiBearerToken);
+        setProjectIds(projectIds);
+        setParameters(parameters);
+        const videos = await fetchPagedVideos(projectIds, parameters);
         if (videos.length) {
-          updateData(videos || []);
-          filterDropdownData(videos || []);
-          updateLoadingStatus(false);
+          updateData(videos);
+          filterDropdownData(videos);
         } else {
           setError('There are no videos in your Wistia space');
         }
@@ -63,21 +76,33 @@ const Field = (props: FieldProps) => {
         if (error instanceof WistiaError) {
           setError(error.message);
         }
-        updateLoadingStatus(false);
       }
     };
 
     const fieldValues = sdk.field.getValue();
     setIds(
       fieldValues !== undefined && fieldValues.items.length > 0
-        ? fieldValues.items.map((item: WistiaItem) => item.id)
+        ? fieldValues.items.map((item: WistiaProject) => item.id)
         : []
     );
 
-    const parameters: any = sdk.parameters.installation;
-
-    fetchPagedVideos();
+    fetchInitialVideos();
+    updateLoadingStatus(false);
   }, [sdk.field, sdk.parameters.installation]);
+
+  useEffect(() => {
+    // need to fetch based on new data, not initial data
+    // maybe not use an effect?
+    if (data.length > 100) {
+      (async () => {
+        page += 1;
+        additionalVideos = [
+          ...additionalVideos,
+          ...(await fetchPagedVideos(projectIds, parameters, page)),
+        ];
+      })();
+    }
+  }, [data]);
 
   // Function to update selected video ids
   const updateVideoIds = (id: any) => {
@@ -95,26 +120,16 @@ const Field = (props: FieldProps) => {
     bearerToken: string
   ): Promise<string[]> => {
     const projectsResponse = await fetchProjects(bearerToken);
-    let projectIds = [];
-    if (projectsResponse) {
-      console.info('Succesfully fetched the Wistia projects.');
-      const { projects } = projectsResponse;
-      // Map through projects and return ids to retrieve all the videos from each project. Filter out the projects selected to be excluded
-      projectIds = projects
-        .map((item: Project) => item.hashedId)
-        .filter((id: string) => {
-          const include =
-            excludedProjects.findIndex((project: Project) => project.hashedId === id) === -1;
-          return include;
-        });
-    } else {
-      console.info(`Impossible to fetch the projects: ${projectsResponse}`);
-    }
-    return projectIds; // need to figure out error handling
-  };
-
-  const getVideos = async (excludedProjects: Project[], bearerToken: string, page?: number) => {
-    const videos = await fetchVideos([], bearerToken, page);
+    console.info('Succesfully fetched the Wistia projects.');
+    const projects = projectsResponse;
+    // Map through projects and return ids to retrieve all the videos from each project. Filter out the projects selected to be excluded
+    return projects
+      .map((item: WistiaProject) => item.hashedId)
+      .filter((id: string) => {
+        const include =
+          excludedProjects.findIndex((project: Project) => project.hashedId === id) === -1;
+        return include;
+      });
   };
 
   // set field value with updated state
@@ -135,7 +150,7 @@ const Field = (props: FieldProps) => {
   };
 
   const getDropdownData = (searchTerm: string) => {
-    const newDropdownData = [...data].filter((item: WistiaItem) =>
+    const newDropdownData = [...data].filter((item: WistiaVideo) =>
       item.name.toLowerCase().includes(searchTerm.toLocaleLowerCase())
     );
     return newDropdownData;
@@ -159,6 +174,9 @@ const Field = (props: FieldProps) => {
               </Flex>
               <Flex style={{ width: '100%', height: '380px', overflow: 'scroll' }}>
                 <Grid columns={3} columnGap={'spacingS'} rowGap={'spacingS'}>
+                  {
+                    //need to slice data based on load more
+                  }
                   {[...dropdownData].map((item) => (
                     <GridItem key={item.id}>
                       <Card
@@ -182,7 +200,7 @@ const Field = (props: FieldProps) => {
                 <Flex flexDirection={'column'} marginTop={'spacingL'}>
                   <Paragraph style={{ marginBottom: 10 }}>Selected Videos</Paragraph>
                   <Flex flexWrap={'wrap'}>
-                    {sdk.field.getValue().items.map((item: WistiaItem) => {
+                    {sdk.field.getValue().items.map((item: WistiaVideo) => {
                       const fullItem = data.find((i) => item.id === i.id);
                       return (
                         <Pill
