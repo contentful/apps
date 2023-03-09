@@ -26,8 +26,8 @@ const ChartContent = (props: Props) => {
       <LineChart
         dataValues={parseRowViews()}
         xAxisLabels={parseRowDates()}
-        tooltipMetricLabel='Page views'
-        accessibilityLabel='Analytics line chart'
+        tooltipMetricLabel="Page views"
+        accessibilityLabel="Analytics line chart"
       />
     </>
   );
