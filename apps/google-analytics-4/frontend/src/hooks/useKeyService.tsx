@@ -132,9 +132,11 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
 
   useEffect(() => {
     const setupAppInstallationParameters = async () => {
-      const sdkObj = isConfigureScreen ? sdk.app : sdk.contentType;
+      const appParameters = isConfigureScreen
+        ? sdk.app.getParameters()
+        : sdk.contentType.parameters;
       const currentParameters: AppInstallationParameters =
-        (await sdk[sdkObj].parameters) ?? ({} as AppInstallationParameters);
+        (await appParameters) ?? ({} as AppInstallationParameters);
 
       if (currentParameters) {
         setParameters(currentParameters);

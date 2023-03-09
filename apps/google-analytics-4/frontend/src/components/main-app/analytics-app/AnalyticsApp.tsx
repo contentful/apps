@@ -61,8 +61,8 @@ const AnalyticsApp = (props: Props) => {
     startDate: startEndDates.start,
     endDate: startEndDates.end,
     propertyId,
-    dimensions: [],
-    metrics: [],
+    dimensions: ['date'],
+    metrics: ['screenPageViews'],
     slug: reportSlug,
   };
 

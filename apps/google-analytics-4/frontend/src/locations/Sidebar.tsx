@@ -2,6 +2,7 @@ import AnalyticsApp from 'components/main-app/analytics-app/AnalyticsApp';
 import useKeyService from 'hooks/useKeyService';
 
 const hardCodedPropertyId = 'properties/354125506';
+const hardCodedSlug = 'pretendSlug';
 
 const Sidebar = () => {
   const { parameters } = useKeyService({});
@@ -13,7 +14,7 @@ const Sidebar = () => {
       serviceAccountKeyId={serviceAccountKeyId}
       serviceAccountKey={serviceAccountKey}
       propertyId={hardCodedPropertyId}
-      reportSlug=""
+      reportSlug={hardCodedSlug}
     />
   );
 };

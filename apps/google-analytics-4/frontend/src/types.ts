@@ -83,8 +83,8 @@ export interface RunReportParamsType {
   slug: string;
   startDate: string;
   endDate: string;
-  dimensions: string[];
-  metrics: string[];
+  dimensions: string | string[];
+  metrics: string | string[];
 }
 
 export type DateRangeType = 'lastWeek' | 'lastDay' | 'lastMonth';
