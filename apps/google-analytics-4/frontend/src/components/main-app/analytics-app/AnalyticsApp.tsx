@@ -107,6 +107,7 @@ const AnalyticsApp = (props: Props) => {
             metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
             handleChange={handleDateRangeChange}
           />
+
           {renderChartContent()}
 
           <ChartFooter

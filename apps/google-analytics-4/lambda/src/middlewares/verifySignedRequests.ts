@@ -10,6 +10,9 @@ export const verifySignedRequestMiddleware = (req: Request, _res: Response, next
   const canonicalReq = makeCanonicalReq(req);
   let isValidReq = false;
 
+  console.log('signingSecret', signingSecret.replace(/.(?=.{4})/g, '*'));
+  console.log('canonicalReq', canonicalReq);
+
   try {
     isValidReq = NodeAppsToolkit.verifyRequest(signingSecret, canonicalReq, 60); // 60 second TTL
   } catch (e) {
@@ -19,12 +22,12 @@ export const verifySignedRequestMiddleware = (req: Request, _res: Response, next
     });
   }
 
-  // if (!isValidReq) {
-  //   throw new InvalidSignature(
-  //     'Request does not have a valid request signature. ' +
-  //       'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
-  //   );
-  // }
+  if (!isValidReq) {
+    throw new InvalidSignature(
+      'Request does not have a valid request signature. ' +
+        'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
+    );
+  }
 
   next();
 };

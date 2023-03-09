@@ -149,7 +149,7 @@ export type GapiError = {
     domain: string;
     reason: string;
   }[];
-  status?: string;
+  status: string;
   message: string;
   code: number;
 };
