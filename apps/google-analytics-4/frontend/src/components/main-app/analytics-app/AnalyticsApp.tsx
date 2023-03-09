@@ -79,7 +79,7 @@ const AnalyticsApp = (props: Props) => {
     }
 
     fetchData();
-  }, [api]);
+  }, [api, reportRequestParams.startDate, reportRequestParams.endDate, reportSlug]);
 
   useEffect(() => {
     const sliceByDateRange = (dateRange: DateRangeType): RunReportResponse => {
