@@ -1,7 +1,7 @@
 import { useAutoResizer, useFieldValue } from '@contentful/react-apps-toolkit';
 import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useApi } from 'hooks/useApi';
 import getRangeDates from 'helpers/handle-date-range/handle-date-range';
 import ChartContent from '../ChartContent';
@@ -32,14 +32,17 @@ const AnalyticsApp = (props: Props) => {
 
   useAutoResizer();
 
-  const reportRequestParams = {
-    startDate: startEndDates.start,
-    endDate: startEndDates.end,
-    propertyId,
-    dimensions: ['date'],
-    metrics: ['screenPageViews'],
-    slug: reportSlug,
-  };
+  const reportRequestParams = useMemo(
+    () => ({
+      startDate: startEndDates.start,
+      endDate: startEndDates.end,
+      propertyId,
+      dimensions: ['date'],
+      metrics: ['screenPageViews'],
+      slug: reportSlug,
+    }),
+    [startEndDates.start, startEndDates.end, reportSlug, propertyId]
+  );
 
   useEffect(() => {
     async function fetchData() {
@@ -54,7 +57,7 @@ const AnalyticsApp = (props: Props) => {
     }
 
     fetchData();
-  }, [api.runReports, reportRequestParams.startDate, reportRequestParams.endDate, reportSlug]);
+  }, [api.runReports, reportRequestParams]);
 
   useEffect(() => {
     if (runReportResponse.rowCount) {
