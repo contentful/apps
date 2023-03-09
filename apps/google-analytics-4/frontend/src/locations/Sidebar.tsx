@@ -1,8 +1,8 @@
 import AnalyticsApp from 'components/main-app/analytics-app/AnalyticsApp';
 import useKeyService from 'hooks/useKeyService';
 
-const hardCodedPropertyId = 'properties/354125506';
-const hardCodedSlug = 'pretendSlug';
+const hardCodedPropertyId = 'properties/275538046';
+const hardCodedSlug = '/en-US';
 
 const Sidebar = () => {
   const { parameters } = useKeyService({});
