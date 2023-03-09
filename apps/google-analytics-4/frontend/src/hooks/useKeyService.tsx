@@ -1,13 +1,18 @@
 import { useCallback, useState, useEffect } from 'react';
 import { AppExtensionSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppInstallationParameters, ServiceAccountKey, ServiceAccountKeyId } from 'types';
+import {
+  AppInstallationParameters,
+  ServiceAccountKey,
+  ServiceAccountKeyId,
+  ContentTypeEntries,
+  ContentTypeEntry,
+} from 'types';
 import {
   convertServiceAccountKeyToServiceAccountKeyId,
   convertKeyFileToServiceAccountKey,
   AssertionError,
 } from 'utils/serviceAccountKey';
-import omitBy from 'lodash/omitBy';
 
 interface KeyServiceInfoType {
   parameters: AppInstallationParameters;
@@ -15,7 +20,12 @@ interface KeyServiceInfoType {
   serviceAccountKeyFileErrorMessage: string;
   serviceAccountKeyFileIsValid: boolean;
   serviceAccountKeyFileIsRequired: boolean;
+  contentTypeEntries: ContentTypeEntries;
   handleKeyFileChange: Function;
+  handleContentTypeChange: (prevKey: string, newKey: string) => void;
+  handleContentTypeFieldChange: (key: string, field: string, value: string) => void;
+  handleAddContentType: () => void;
+  handleRemoveContentType: (key: string) => void;
 }
 
 interface Props {
@@ -37,6 +47,10 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
   const [serviceAccountKeyFileIsRequired, setServiceAccountKeyFileIsRequired] =
     useState<boolean>(false);
 
+  const [contentTypeEntries, setContentTypeEntries] = useState<ContentTypeEntries>(
+    {} as ContentTypeEntries
+  );
+
   const sdk = useSDK<AppExtensionSDK>();
 
   const onConfigure = useCallback(async () => {
@@ -52,24 +66,19 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
       return false;
     }
 
-    const newServiceKeyParameters = {
-      serviceAccountKey: newServiceAccountKey,
-      serviceAccountKeyId: newServiceAccountKeyId,
+    const newInstallationParameters = {
+      serviceAccountKey: newServiceAccountKey ?? parameters.serviceAccountKey,
+      serviceAccountKeyId: newServiceAccountKeyId ?? parameters.serviceAccountKeyId,
+      contentTypes: contentTypeEntries,
     };
 
-    const newParameters = Object.assign(
-      {},
-      parameters,
-      omitBy(newServiceKeyParameters, (val) => val === null)
-    );
-
-    setParameters(newParameters);
+    setParameters(newInstallationParameters);
     if (onSaveGoogleAccountDetails) onSaveGoogleAccountDetails();
     setServiceAccountKeyFileIsRequired(false);
     setServiceAccountKeyFile('');
 
     return {
-      parameters: newParameters,
+      parameters: newInstallationParameters,
       targetState: currentState,
     };
   }, [
@@ -81,6 +90,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     newServiceAccountKey,
     parameters,
     onSaveGoogleAccountDetails,
+    contentTypeEntries,
   ]);
 
   useEffect(() => {
@@ -95,6 +105,9 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
       if (currentParameters) {
         setParameters(currentParameters);
         setServiceAccountKeyFileIsRequired(false);
+        if (currentParameters?.contentTypes) {
+          setContentTypeEntries(currentParameters.contentTypes);
+        }
       } else {
         // per the documentation, `null` means app is not installed, thus we will require
         // the key file
@@ -148,12 +161,60 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     }
   };
 
+  const handleContentTypeChange = (prevKey: string, newKey: string) => {
+    const newContentTypes: ContentTypeEntries = {};
+
+    for (const [prop, value] of Object.entries(contentTypeEntries)) {
+      if (prop === prevKey) {
+        newContentTypes[newKey as keyof typeof contentTypeEntries] = {
+          slugField: '',
+          urlPrefix: value.urlPrefix,
+        };
+      } else {
+        newContentTypes[prop] = value;
+      }
+    }
+
+    setContentTypeEntries(newContentTypes);
+  };
+
+  const handleContentTypeFieldChange = (key: string, field: string, value: string) => {
+    const currentContentTypeFields: ContentTypeEntry = contentTypeEntries[key];
+
+    setContentTypeEntries({
+      ...contentTypeEntries,
+      [key]: {
+        ...currentContentTypeFields,
+        [field]: value,
+      },
+    });
+  };
+
+  const handleAddContentType = () => {
+    setContentTypeEntries({
+      ...contentTypeEntries,
+      '': { slugField: '', urlPrefix: '' },
+    });
+  };
+
+  const handleRemoveContentType = (key: string) => {
+    const updatedContentTypeEntries = { ...contentTypeEntries };
+    delete updatedContentTypeEntries[key];
+
+    setContentTypeEntries(updatedContentTypeEntries);
+  };
+
   return {
-    parameters: parameters,
-    serviceAccountKeyFile: serviceAccountKeyFile,
-    serviceAccountKeyFileErrorMessage: serviceAccountKeyFileErrorMessage,
-    serviceAccountKeyFileIsValid: serviceAccountKeyFileIsValid,
-    serviceAccountKeyFileIsRequired: serviceAccountKeyFileIsRequired,
-    handleKeyFileChange: handleKeyFileChange,
+    parameters,
+    serviceAccountKeyFile,
+    serviceAccountKeyFileErrorMessage,
+    serviceAccountKeyFileIsValid,
+    serviceAccountKeyFileIsRequired,
+    contentTypeEntries,
+    handleKeyFileChange,
+    handleContentTypeChange,
+    handleContentTypeFieldChange,
+    handleAddContentType,
+    handleRemoveContentType,
   };
 }

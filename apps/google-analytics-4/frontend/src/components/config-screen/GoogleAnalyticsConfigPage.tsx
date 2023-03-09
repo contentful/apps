@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { AppExtensionSDK } from '@contentful/app-sdk';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
 import { styles } from 'components/config-screen/GoogleAnalytics.styles';
 import Splitter from 'components/common/Splitter';
@@ -12,10 +14,35 @@ const GoogleAnalyticsConfigPage = () => {
   // Adding this because this be resolved and used in INTEG-168
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);
+  const [isAppInstalled, setIsAppInstalled] = useState<boolean>();
 
   const handleAccountSummariesChange = (_accountSummaries: any[]) => {
     setAccountsSummaries(_accountSummaries);
   };
+
+  const sdk = useSDK<AppExtensionSDK>();
+
+  useEffect(() => {
+    const getIsAppInstalled = async () => {
+      const isInstalled = await sdk.app.isInstalled();
+
+      setIsAppInstalled(isInstalled);
+
+      sdk.app.setReady();
+    };
+
+    getIsAppInstalled();
+  }, [sdk]);
+
+  const onConfigurationCompleted = useCallback(() => {
+    if (!isAppInstalled) {
+      setIsAppInstalled(true);
+    }
+  }, [isAppInstalled]);
+
+  useEffect(() => {
+    sdk.app.onConfigurationCompleted(() => onConfigurationCompleted());
+  }, [sdk, onConfigurationCompleted]);
 
   return (
     <>
@@ -24,8 +51,12 @@ const GoogleAnalyticsConfigPage = () => {
         <AboutSection />
         <Splitter />
         <ApiAccessPage onAccountSummariesChange={handleAccountSummariesChange} />
-        <Splitter />
-        <AssignContentTypePage />
+        {isAppInstalled && (
+          <>
+            <Splitter />
+            <AssignContentTypePage />
+          </>
+        )}
       </Box>
 
       <GoogleAnalyticsIcon />

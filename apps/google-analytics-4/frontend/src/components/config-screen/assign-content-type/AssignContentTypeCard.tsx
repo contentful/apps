@@ -22,10 +22,10 @@ interface Props {
 
 const styles = {
   contentTypeItem: css({
-    flexBasis: '100%',
+    flex: 4,
   }),
-  hidden: css({
-    visibility: 'hidden',
+  removeItem: css({
+    flex: 1,
   }),
 };
 
@@ -58,9 +58,7 @@ const AssignContentTypeCard = (props: Props) => {
               <FormControl.Label>URL prefix</FormControl.Label>
             </FormControl>
           </Box>
-          <Box>
-            <TextLink className={styles.hidden}>Remove</TextLink>
-          </Box>
+          <Box className={styles.removeItem}></Box>
         </Stack>
       ) : null}
       {Object.entries(contentTypeEntries).map(([key, { slugField, urlPrefix }], index) => {
@@ -120,7 +118,7 @@ const AssignContentTypeCard = (props: Props) => {
                 value={urlPrefix}
               />
             </Box>
-            <Box>
+            <Box className={styles.removeItem}>
               <TextLink onClick={() => onRemoveContentType(key)}>Remove</TextLink>
             </Box>
           </Stack>
