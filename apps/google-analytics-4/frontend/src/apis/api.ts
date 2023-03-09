@@ -78,7 +78,6 @@ export class Api {
     const newUrl = new URL(url);
     if (queryParams) this.appendQueryParams(newUrl, queryParams);
     return newUrl;
-    // }
   }
 
   async listAccountSummaries(): Promise<AccountSummaries> {
