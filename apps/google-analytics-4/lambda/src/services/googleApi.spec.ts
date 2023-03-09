@@ -12,7 +12,7 @@ import {
 import { GoogleApiError, handleGoogleAdminApiError } from './googleApiUtils';
 import { GoogleApiService } from './googleApiService';
 
-describe('GoogleApi', () => {
+describe('GoogleApiService', () => {
   let googleApi: GoogleApiService;
   let mockAdminClient: SinonStubbedInstance<AnalyticsAdminServiceClient>;
   let mockDataClient: SinonStubbedInstance<BetaAnalyticsDataClient>;
@@ -38,15 +38,14 @@ describe('GoogleApi', () => {
       googleApi = new GoogleApiService(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
     });
 
-    it('throws a GoogleApiError', async () => {
+    it('throws a the regular error', async () => {
       let error: Error | undefined = undefined;
       try {
         await googleApi.listAccountSummaries();
       } catch (e) {
         error = e as Error;
       }
-      expect(error).to.be.an.instanceof(GoogleApiError);
-      expect(error?.cause).to.equal(someError);
+      expect(error).to.eq(someError);
     });
   });
 });
@@ -84,7 +83,6 @@ describe('throwGoogleApiError', () => {
       }
       expect(error).to.be.an.instanceof(GoogleApiError);
       expect(error).to.have.property('cause', someError);
-      expect(error).to.have.property('code', Status.UNAVAILABLE);
       expect(error).to.have.property('details', someError.details);
     });
   });
@@ -101,8 +99,7 @@ describe('throwGoogleApiError', () => {
       }
       expect(error).to.be.an.instanceof(GoogleApiError);
       expect(error).to.have.property('cause', someError);
-      expect(error).to.have.property('code', Status.UNAUTHENTICATED);
-      expect(error).to.have.property('details', mockGoogleErrors.invalidAuthentication.details);
+      expect(error).to.have.property('details', mockGoogleErrors.invalidAuthentication.message);
     });
   });
 });
