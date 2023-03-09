@@ -1,5 +1,4 @@
 import { useCallback, useState, useEffect } from 'react';
-import { AppExtensionSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import {
   AppInstallationParameters,
@@ -128,7 +127,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
 
   useEffect(() => {
     if (isConfigureScreen) sdk.app.onConfigure(() => onConfigure());
-  }, [sdk, onConfigure]);
+  }, [sdk, onConfigure, isConfigureScreen]);
 
   useEffect(() => {
     const setupAppInstallationParameters = async () => {
