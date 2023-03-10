@@ -94,6 +94,7 @@ describe('Config Screen component (not installed)', () => {
         serviceAccountKey: undefined,
         serviceAccountKeyId: undefined,
         contentTypes: {},
+        savedPropertyId: '',
       },
       targetState: undefined,
     });

@@ -9,10 +9,9 @@ import AboutSection from 'components/config-screen/header/AboutSection';
 import { AccountSummariesType } from 'types';
 import { Box } from '@contentful/f36-components';
 import AssignContentTypeSection from 'components/config-screen/assign-content-type/AssignContentTypeSection';
+import MapAccountPropertySection from 'components/config-screen/map-account-property/MapAccountPropertySection';
 
 const GoogleAnalyticsConfigPage = () => {
-  // Adding this because this be resolved and used in INTEG-168
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);
   const [isAppInstalled, setIsAppInstalled] = useState<boolean>();
 
@@ -51,10 +50,13 @@ const GoogleAnalyticsConfigPage = () => {
         <AboutSection />
         <Splitter />
         <ApiAccessSection onAccountSummariesChange={handleAccountSummariesChange} />
+        <Splitter />
         {isAppInstalled && (
           <>
+            <MapAccountPropertySection accountsSummaries={accountsSummaries} />
             <Splitter />
             <AssignContentTypeSection />
+            <Splitter />
           </>
         )}
       </Box>
