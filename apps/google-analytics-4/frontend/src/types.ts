@@ -3,7 +3,7 @@ import { IdsAPI } from '@contentful/app-sdk';
 export interface AppInstallationParameters {
   serviceAccountKey: ServiceAccountKey;
   serviceAccountKeyId: ServiceAccountKeyId;
-  contentTypes: ContentTypeEntries;
+  contentTypes: ContentTypes;
 }
 
 // TODO: get this exported from the SDK
@@ -92,22 +92,28 @@ export interface PropertySummariesType {
   propertyType: string;
 }
 
-export interface ContentTypeEntry {
+export interface ContentTypeValue {
   slugField: string;
   urlPrefix: string;
 }
 
-export interface ContentTypeEntries {
-  [key: string]: ContentTypeEntry;
+export interface ContentTypes {
+  [key: string]: ContentTypeValue;
+}
+
+export type ContentTypeEntries = [string, ContentTypeValue][];
+
+interface AllContentTypeValue {
+  name: string;
+  fields: {
+    id: string;
+    name: string;
+    type: string;
+  }[];
 }
 
 export interface AllContentTypes {
-  [key: string]: {
-    name: string;
-    fields: {
-      id: string;
-      name: string;
-      type: string;
-    }[];
-  };
+  [key: string]: AllContentTypeValue;
 }
+
+export type AllContentTypeEntries = [string, AllContentTypeValue][];

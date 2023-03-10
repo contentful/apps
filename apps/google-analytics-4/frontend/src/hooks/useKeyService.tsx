@@ -5,8 +5,8 @@ import {
   AppInstallationParameters,
   ServiceAccountKey,
   ServiceAccountKeyId,
-  ContentTypeEntries,
-  ContentTypeEntry,
+  ContentTypes,
+  ContentTypeValue,
 } from 'types';
 import {
   convertServiceAccountKeyToServiceAccountKeyId,
@@ -20,7 +20,7 @@ interface KeyServiceInfoType {
   serviceAccountKeyFileErrorMessage: string;
   serviceAccountKeyFileIsValid: boolean;
   serviceAccountKeyFileIsRequired: boolean;
-  contentTypeEntries: ContentTypeEntries;
+  contentTypes: ContentTypes;
   handleKeyFileChange: Function;
   handleContentTypeChange: (prevKey: string, newKey: string) => void;
   handleContentTypeFieldChange: (key: string, field: string, value: string) => void;
@@ -47,9 +47,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
   const [serviceAccountKeyFileIsRequired, setServiceAccountKeyFileIsRequired] =
     useState<boolean>(false);
 
-  const [contentTypeEntries, setContentTypeEntries] = useState<ContentTypeEntries>(
-    {} as ContentTypeEntries
-  );
+  const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
 
   const sdk = useSDK<AppExtensionSDK>();
 
@@ -69,7 +67,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     const newInstallationParameters = {
       serviceAccountKey: newServiceAccountKey ?? parameters.serviceAccountKey,
       serviceAccountKeyId: newServiceAccountKeyId ?? parameters.serviceAccountKeyId,
-      contentTypes: contentTypeEntries,
+      contentTypes: contentTypes,
     };
 
     setParameters(newInstallationParameters);
@@ -90,7 +88,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     newServiceAccountKey,
     parameters,
     onSaveGoogleAccountDetails,
-    contentTypeEntries,
+    contentTypes,
   ]);
 
   useEffect(() => {
@@ -106,7 +104,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
         setParameters(currentParameters);
         setServiceAccountKeyFileIsRequired(false);
         if (currentParameters?.contentTypes) {
-          setContentTypeEntries(currentParameters.contentTypes);
+          setContentTypes(currentParameters.contentTypes);
         }
       } else {
         // per the documentation, `null` means app is not installed, thus we will require
@@ -162,11 +160,11 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
   };
 
   const handleContentTypeChange = (prevKey: string, newKey: string) => {
-    const newContentTypes: ContentTypeEntries = {};
+    const newContentTypes: ContentTypes = {};
 
-    for (const [prop, value] of Object.entries(contentTypeEntries)) {
+    for (const [prop, value] of Object.entries(contentTypes)) {
       if (prop === prevKey) {
-        newContentTypes[newKey as keyof typeof contentTypeEntries] = {
+        newContentTypes[newKey as keyof typeof contentTypes] = {
           slugField: '',
           urlPrefix: value.urlPrefix,
         };
@@ -175,14 +173,14 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
       }
     }
 
-    setContentTypeEntries(newContentTypes);
+    setContentTypes(newContentTypes);
   };
 
   const handleContentTypeFieldChange = (key: string, field: string, value: string) => {
-    const currentContentTypeFields: ContentTypeEntry = contentTypeEntries[key];
+    const currentContentTypeFields: ContentTypeValue = contentTypes[key];
 
-    setContentTypeEntries({
-      ...contentTypeEntries,
+    setContentTypes({
+      ...contentTypes,
       [key]: {
         ...currentContentTypeFields,
         [field]: value,
@@ -191,17 +189,17 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
   };
 
   const handleAddContentType = () => {
-    setContentTypeEntries({
-      ...contentTypeEntries,
+    setContentTypes({
+      ...contentTypes,
       '': { slugField: '', urlPrefix: '' },
     });
   };
 
   const handleRemoveContentType = (key: string) => {
-    const updatedContentTypeEntries = { ...contentTypeEntries };
-    delete updatedContentTypeEntries[key];
+    const updatedContentTypes = { ...contentTypes };
+    delete updatedContentTypes[key];
 
-    setContentTypeEntries(updatedContentTypeEntries);
+    setContentTypes(updatedContentTypes);
   };
 
   return {
@@ -210,7 +208,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     serviceAccountKeyFileErrorMessage,
     serviceAccountKeyFileIsValid,
     serviceAccountKeyFileIsRequired,
-    contentTypeEntries,
+    contentTypes,
     handleKeyFileChange,
     handleContentTypeChange,
     handleContentTypeFieldChange,

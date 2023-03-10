@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Paragraph, Stack, Subheading } from '@contentful/f36-components';
-import { AllContentTypes } from 'types';
+import { AllContentTypes, AllContentTypeEntries, ContentTypeEntries } from 'types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 import sortBy from 'lodash/sortBy';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -8,9 +8,9 @@ import { AppExtensionSDK } from '@contentful/app-sdk';
 import { ContentTypeProps, createClient } from 'contentful-management';
 import useKeyService from 'hooks/useKeyService';
 
-const AssignContentTypePage = () => {
+const AssignContentTypeSection = () => {
   const {
-    contentTypeEntries,
+    contentTypes,
     handleContentTypeChange,
     handleContentTypeFieldChange,
     handleAddContentType,
@@ -18,6 +18,13 @@ const AssignContentTypePage = () => {
   } = useKeyService({});
 
   const [allContentTypes, setAllContentTypes] = useState<AllContentTypes>({} as AllContentTypes);
+  const [allContentTypeEntries, setAllContentTypeEntries] = useState<AllContentTypeEntries>(
+    [] as AllContentTypeEntries
+  );
+  const [hasContentTypes, setHasContentTypes] = useState<boolean>(false);
+  const [contentTypeEntries, setHasContentTypeEntries] = useState<ContentTypeEntries>(
+    [] as ContentTypeEntries
+  );
 
   const sdk = useSDK<AppExtensionSDK>();
 
@@ -52,10 +59,16 @@ const AssignContentTypePage = () => {
       );
 
       setAllContentTypes(formattedContentTypes);
+      setAllContentTypeEntries(Object.entries(formattedContentTypes));
     };
 
     getContentTypes();
   }, [sdk]);
+
+  useEffect(() => {
+    setHasContentTypes(Object.keys(contentTypes).length ? true : false);
+    setHasContentTypeEntries(Object.entries(contentTypes));
+  }, [contentTypes]);
 
   return (
     <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
@@ -67,6 +80,9 @@ const AssignContentTypePage = () => {
       </Paragraph>
       <AssignContentTypeCard
         allContentTypes={allContentTypes}
+        allContentTypeEntries={allContentTypeEntries}
+        contentTypes={contentTypes}
+        hasContentTypes={hasContentTypes}
         contentTypeEntries={contentTypeEntries}
         onContentTypeChange={handleContentTypeChange}
         onContentTypeFieldChange={handleContentTypeFieldChange}
@@ -77,4 +93,4 @@ const AssignContentTypePage = () => {
   );
 };
 
-export default AssignContentTypePage;
+export default AssignContentTypeSection;

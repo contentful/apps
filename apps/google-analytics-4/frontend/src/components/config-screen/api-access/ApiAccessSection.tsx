@@ -8,7 +8,7 @@ interface Props {
   onAccountSummariesChange: Function;
 }
 
-const ApiAccessPage = (props: Props) => {
+const ApiAccessSection = (props: Props) => {
   const { onAccountSummariesChange } = props;
 
   const {
@@ -72,4 +72,4 @@ const ApiAccessPage = (props: Props) => {
   );
 };
 
-export default ApiAccessPage;
+export default ApiAccessSection;

@@ -9,15 +9,22 @@ import {
   TextLink,
 } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { AllContentTypes, ContentTypeEntries } from 'types';
+import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeEntries } from 'types';
 
-interface Props {
+interface AssignContentTypeCardProps {
   allContentTypes: AllContentTypes;
+  allContentTypeEntries: AllContentTypeEntries;
+  contentTypes: ContentTypes;
+  hasContentTypes: boolean;
   contentTypeEntries: ContentTypeEntries;
   onContentTypeChange: (prevKey: string, newKey: string) => void;
   onContentTypeFieldChange: (key: string, field: string, value: string) => void;
   onAddContentType: () => void;
   onRemoveContentType: (key: string) => void;
+}
+
+interface HeaderLabelProps {
+  label: string;
 }
 
 const styles = {
@@ -29,9 +36,12 @@ const styles = {
   }),
 };
 
-const AssignContentTypeCard = (props: Props) => {
+const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
   const {
     allContentTypes,
+    allContentTypeEntries,
+    contentTypes,
+    hasContentTypes,
     contentTypeEntries,
     onContentTypeChange,
     onContentTypeFieldChange,
@@ -41,27 +51,15 @@ const AssignContentTypeCard = (props: Props) => {
 
   return (
     <Card>
-      {Object.keys(contentTypeEntries).length ? (
+      {hasContentTypes ? (
         <Stack marginBottom="none" spacing="spacingXs">
-          <Box className={styles.contentTypeItem}>
-            <FormControl marginBottom="none">
-              <FormControl.Label>Content type</FormControl.Label>
-            </FormControl>
-          </Box>
-          <Box className={styles.contentTypeItem}>
-            <FormControl marginBottom="none">
-              <FormControl.Label>Slug field</FormControl.Label>
-            </FormControl>
-          </Box>
-          <Box className={styles.contentTypeItem}>
-            <FormControl marginBottom="none">
-              <FormControl.Label>URL prefix</FormControl.Label>
-            </FormControl>
-          </Box>
+          <HeaderLabel label="Content type" />
+          <HeaderLabel label="Slug field" />
+          <HeaderLabel label="URL prefix" />
           <Box className={styles.removeItem}></Box>
         </Stack>
       ) : null}
-      {Object.entries(contentTypeEntries).map(([key, { slugField, urlPrefix }], index) => {
+      {contentTypeEntries.map(([key, { slugField, urlPrefix }], index) => {
         return (
           <Stack spacing="spacingXs" paddingBottom="spacingS" key={key}>
             <Box className={styles.contentTypeItem}>
@@ -75,8 +73,8 @@ const AssignContentTypeCard = (props: Props) => {
                 <Select.Option value="" isDisabled>
                   Select content type
                 </Select.Option>
-                {Object.entries(allContentTypes)
-                  .filter(([type]) => type === key || !contentTypeEntries[type])
+                {allContentTypeEntries
+                  .filter(([type]) => type === key || !contentTypes[type])
                   .map(([type, { name: typeName }]) => {
                     return (
                       <Select.Option value={type} key={`type-${type}`}>
@@ -124,12 +122,22 @@ const AssignContentTypeCard = (props: Props) => {
           </Stack>
         );
       })}
-      <Button
-        onClick={onAddContentType}
-        isDisabled={Object.values(contentTypeEntries).some((entries) => !entries.slugField)}>
-        {Object.keys(contentTypeEntries).length ? 'Add another content type' : 'Add a content type'}
+      <Button onClick={onAddContentType}>
+        {hasContentTypes ? 'Add another content type' : 'Add a content type'}
       </Button>
     </Card>
+  );
+};
+
+const HeaderLabel = (props: HeaderLabelProps) => {
+  const { label } = props;
+
+  return (
+    <Box className={styles.contentTypeItem}>
+      <FormControl marginBottom="none">
+        <FormControl.Label>{label}</FormControl.Label>
+      </FormControl>
+    </Box>
   );
 };
 

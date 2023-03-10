@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { AllContentTypes, ContentTypeEntries } from '@/types';
+import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeEntries } from '@/types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 
 const allContentTypes: AllContentTypes = {
@@ -15,19 +15,26 @@ const allContentTypes: AllContentTypes = {
   },
 };
 
-const contentTypeEntries: ContentTypeEntries = {
+const allContentTypeEntries: AllContentTypeEntries = Object.entries(allContentTypes);
+
+const contentTypes: ContentTypes = {
   course: {
     slugField: 'slug',
     urlPrefix: '/about',
   },
 };
 
+const contentTypeEntries: ContentTypeEntries = Object.entries(contentTypes);
+
 describe('Assign Content Type Card for Config Screen', () => {
   it('can render the add content type button when there is no saved content type entry', () => {
     render(
       <AssignContentTypeCard
         allContentTypes={{}}
-        contentTypeEntries={{}}
+        allContentTypeEntries={[]}
+        contentTypes={{}}
+        hasContentTypes={false}
+        contentTypeEntries={[]}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
         onAddContentType={() => {}}
@@ -42,6 +49,9 @@ describe('Assign Content Type Card for Config Screen', () => {
     render(
       <AssignContentTypeCard
         allContentTypes={allContentTypes}
+        allContentTypeEntries={allContentTypeEntries}
+        contentTypes={contentTypes}
+        hasContentTypes={true}
         contentTypeEntries={contentTypeEntries}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
