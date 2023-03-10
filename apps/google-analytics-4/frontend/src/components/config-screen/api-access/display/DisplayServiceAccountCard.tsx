@@ -62,6 +62,7 @@ const DisplayServiceAccountCard = (props: Props) => {
         setDataApiError(undefined);
         break;
       default:
+        setUnknownError(error);
         throw new Error('Unhandled error exception');
     }
   };
@@ -74,7 +75,10 @@ const DisplayServiceAccountCard = (props: Props) => {
       setAdminApiError(undefined);
     } catch (e: any) {
       if (isApiErrorType(e)) handleApiError(e);
-      else throw new Error('Unhandled error exception');
+      else {
+        setUnknownError(e);
+        throw new Error('Unhandled error exception');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +99,10 @@ const DisplayServiceAccountCard = (props: Props) => {
       setDataApiError(undefined);
     } catch (e: any) {
       if (isApiErrorType(e)) handleApiError(e);
-      else throw new Error('Unhandled error exception');
+      else {
+        setUnknownError(e);
+        throw new Error('Unhandled error exception');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -114,6 +121,7 @@ const DisplayServiceAccountCard = (props: Props) => {
   const handleApiTestClick = () => {
     verifyAdminApi();
     verifyDataApi();
+    setUnknownError(undefined);
   };
 
   interface BadgeNoteType {

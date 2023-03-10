@@ -26,6 +26,7 @@ interface KeyServiceInfoType {
   handleContentTypeFieldChange: (key: string, field: string, value: string) => void;
   handleAddContentType: () => void;
   handleRemoveContentType: (key: string) => void;
+  handlePropertyChange: Function;
 }
 
 interface Props {
@@ -46,6 +47,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
   const [serviceAccountKeyFileIsValid, setServiceAccountKeyFileIsValid] = useState<boolean>(true);
   const [serviceAccountKeyFileIsRequired, setServiceAccountKeyFileIsRequired] =
     useState<boolean>(false);
+  const [savedPropertyId, setSavedPropertyId] = useState<string>('');
 
   const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
 
@@ -68,6 +70,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
       serviceAccountKey: newServiceAccountKey ?? parameters.serviceAccountKey,
       serviceAccountKeyId: newServiceAccountKeyId ?? parameters.serviceAccountKeyId,
       contentTypes: contentTypes,
+      savedPropertyId: savedPropertyId,
     };
 
     setParameters(newInstallationParameters);
@@ -80,15 +83,17 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
       targetState: currentState,
     };
   }, [
+    contentTypes,
+    newServiceAccountKey,
+    newServiceAccountKeyId,
+    onSaveGoogleAccountDetails,
+    parameters.serviceAccountKey,
+    parameters.serviceAccountKeyId,
+    savedPropertyId,
     sdk.app,
     sdk.notifier,
-    serviceAccountKeyFileIsValid,
     serviceAccountKeyFileIsRequired,
-    newServiceAccountKeyId,
-    newServiceAccountKey,
-    parameters,
-    onSaveGoogleAccountDetails,
-    contentTypes,
+    serviceAccountKeyFileIsValid,
   ]);
 
   useEffect(() => {
@@ -134,6 +139,10 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     setNewServiceAccountKeyId(undefined);
     setServiceAccountKeyFileErrorMessage(errorMessage);
     setServiceAccountKeyFileIsValid(false);
+  };
+
+  const handlePropertyChange = (_selectedPropertyId: string) => {
+    setSavedPropertyId(_selectedPropertyId);
   };
 
   const handleKeyFileChange = (keyFile: string) => {
@@ -214,5 +223,6 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     handleContentTypeFieldChange,
     handleAddContentType,
     handleRemoveContentType,
+    handlePropertyChange,
   };
 }
