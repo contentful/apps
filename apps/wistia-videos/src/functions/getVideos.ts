@@ -33,7 +33,7 @@ export const fetchVideos = async (
   const mappedProjects = await Promise.all(
     projectIds.map(async (id: string) => {
       const project = await (
-        await fetch(`https://api.wistia.com/v1/projects/${id}.json${page ? 'page=' + page : ''}`, {
+        await fetch(`https://api.wistia.com/v1/projects/${id}.json${page ? '?page=' + page : ''}`, {
           headers: {
             Authorization: `Bearer ${bearerToken}`,
           },
