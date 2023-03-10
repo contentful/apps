@@ -3,7 +3,7 @@ import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState, useMemo } from 'react';
 import { useApi } from 'hooks/useApi';
-import getRangeDates from '@/helpers/DateRangeHelpers/DateRangeHelpers';
+import getRangeDates from 'helpers/DateRangeHelpers/DateRangeHelpers';
 import ChartContent from '../ChartContent';
 import { DateRangeType, ServiceAccountKeyId, ServiceAccountKey } from 'types';
 import { styles } from './AnalyticsApp.styles';
