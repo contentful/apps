@@ -24,7 +24,7 @@ const { findByTestId, getByTestId, getByText, findByText } = screen;
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
 
-const renderAnalyticApp = () =>
+const renderAnalyticsApp = () =>
   render(
     <AnalyticsApp
       serviceAccountKey={{} as unknown as ServiceAccountKey}
@@ -38,7 +38,7 @@ describe('AnalyticsApp', () => {
   it('mounts data', async () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
 
-    renderAnalyticApp();
+    renderAnalyticsApp();
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
@@ -50,7 +50,7 @@ describe('AnalyticsApp', () => {
   it('mounts with warning message when no data', async () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
 
-    renderAnalyticApp();
+    renderAnalyticsApp();
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
@@ -64,7 +64,7 @@ describe('AnalyticsApp', () => {
   it('mounts with error message when fetch error thrown', async () => {
     mockApi.mockRejectedValue(() => new Error('mock Api error'));
 
-    renderAnalyticApp();
+    renderAnalyticsApp();
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const errorNote = getByTestId(NOTE_TEST_ID);
