@@ -37,11 +37,8 @@ const Field = (props: FieldProps) => {
   const [selectedIds, setIds] = useState<number[]>([]);
   const [dropdownData, filterDropdownData] = useState<WistiaVideo[] | []>([]);
   const [loading, updateLoadingStatus] = useState(true);
-  const [projectIds, setProjectIds] = useState<string[]>([]);
-  const [parameters, setParameters] = useState({});
   const [error, setError] = useState(null || '');
-  let page = 1;
-  let additionalVideos: WistiaVideo[] = [];
+  let end = 0;
   sdk.window.startAutoResizer();
 
   const fetchPagedVideos = async (
@@ -54,28 +51,35 @@ const Field = (props: FieldProps) => {
 
   // Set inital state based on field values
   useEffect(() => {
-    const fetchInitialVideos = async (page?: number) => {
+    const fetchInitialVideos = async () => {
       try {
         const parameters: any = sdk.parameters.installation;
         const projectIds = await getProjectIds(
           parameters.excludedProjects,
           parameters.apiBearerToken
         );
-        setProjectIds(projectIds);
-        setParameters(parameters);
-        const videos = await fetchPagedVideos(projectIds, parameters);
-        if (videos.length) {
+        let videos = await fetchPagedVideos(projectIds, parameters);
+
+        if (videos.length === 100) {
+          // just get the second page of results, will figure out n pages in a follow-up
+          videos = [
+            ...videos,
+            ...(await fetchPagedVideos(projectIds, parameters.apiBearerToken, 2)),
+          ];
           updateData(videos);
           filterDropdownData(videos);
-        } else {
+        } else if (videos.length === 0) {
           setError('There are no videos in your Wistia space');
+        } else {
+          updateData(videos);
+          filterDropdownData(videos);
         }
       } catch (error) {
-        console.log(error);
-        debugger;
         if (error instanceof WistiaError) {
           setError(error.message);
         }
+      } finally {
+        updateLoadingStatus(false);
       }
     };
 
@@ -87,22 +91,7 @@ const Field = (props: FieldProps) => {
     );
 
     fetchInitialVideos();
-    updateLoadingStatus(false);
   }, [sdk.field, sdk.parameters.installation]);
-
-  useEffect(() => {
-    // need to fetch based on new data, not initial data
-    // maybe not use an effect?
-    if (data.length > 100) {
-      (async () => {
-        page += 1;
-        additionalVideos = [
-          ...additionalVideos,
-          ...(await fetchPagedVideos(projectIds, parameters, page)),
-        ];
-      })();
-    }
-  }, [data]);
 
   // Function to update selected video ids
   const updateVideoIds = (id: any) => {
@@ -119,9 +108,8 @@ const Field = (props: FieldProps) => {
     excludedProjects: Project[],
     bearerToken: string
   ): Promise<string[]> => {
-    const projectsResponse = await fetchProjects(bearerToken);
+    const projects = await fetchProjects(bearerToken);
     console.info('Succesfully fetched the Wistia projects.');
-    const projects = projectsResponse;
     // Map through projects and return ids to retrieve all the videos from each project. Filter out the projects selected to be excluded
     return projects
       .map((item: WistiaProject) => item.hashedId)
@@ -174,10 +162,7 @@ const Field = (props: FieldProps) => {
               </Flex>
               <Flex style={{ width: '100%', height: '380px', overflow: 'scroll' }}>
                 <Grid columns={3} columnGap={'spacingS'} rowGap={'spacingS'}>
-                  {
-                    //need to slice data based on load more
-                  }
-                  {[...dropdownData].map((item) => (
+                  {[...dropdownData].slice(0, end).map((item) => (
                     <GridItem key={item.id}>
                       <Card
                         onClick={() => updateVideoIds(item.id)}
@@ -192,9 +177,16 @@ const Field = (props: FieldProps) => {
                   ))}
                 </Grid>
               </Flex>
-              <Flex>
-                <Button>Load More Videos</Button>
-              </Flex>
+              {dropdownData.length < end ? (
+                <Flex>
+                  <Button
+                    onClick={() => {
+                      end += 100;
+                    }}>
+                    Load More Videos
+                  </Button>
+                </Flex>
+              ) : null}
 
               {sdk.field.getValue() && sdk.field.getValue().items.length > 0 && (
                 <Flex flexDirection={'column'} marginTop={'spacingL'}>
