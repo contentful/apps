@@ -25,7 +25,6 @@ export interface RunReportParamsType {
   endDate: string;
   dimensions: string | string[];
   metrics: string | string[];
-  sortResponse: boolean;
 }
 
 export type ReportRowType = {
