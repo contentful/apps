@@ -37,8 +37,8 @@ const Field = (props: FieldProps) => {
   const [selectedIds, setIds] = useState<number[]>([]);
   const [dropdownData, filterDropdownData] = useState<WistiaVideo[] | []>([]);
   const [loading, updateLoadingStatus] = useState(true);
+  const [end, setEnd] = useState(100);
   const [error, setError] = useState(null || '');
-  let end = 0;
   sdk.window.startAutoResizer();
 
   const fetchPagedVideos = async (
@@ -59,7 +59,6 @@ const Field = (props: FieldProps) => {
           parameters.apiBearerToken
         );
         let videos = await fetchPagedVideos(projectIds, parameters);
-
         if (videos.length === 100) {
           // just get the second page of results, will figure out n pages in a follow-up
           videos = [
@@ -160,33 +159,37 @@ const Field = (props: FieldProps) => {
                   placeholder="Search for a video"
                 />
               </Flex>
-              <Flex style={{ width: '100%', height: '380px', overflow: 'scroll' }}>
-                <Grid columns={3} columnGap={'spacingS'} rowGap={'spacingS'}>
-                  {[...dropdownData].slice(0, end).map((item) => (
-                    <GridItem key={item.id}>
-                      <Card
-                        onClick={() => updateVideoIds(item.id)}
-                        style={{ height: '100px', padding: '7px' }}
-                        selected={selectedIds.findIndex((id) => item.id === id) !== -1}>
-                        <StyledImageContainer>
-                          <img src={item.thumbnail.url} alt={item.name} />
-                        </StyledImageContainer>
-                      </Card>
-                      <Paragraph>{item.name}</Paragraph>
-                    </GridItem>
-                  ))}
-                </Grid>
-              </Flex>
-              {dropdownData.length < end ? (
+              <Flex
+                flexDirection={'column'}
+                style={{ width: '100%', height: '380px', overflow: 'scroll' }}>
                 <Flex>
-                  <Button
-                    onClick={() => {
-                      end += 100;
-                    }}>
-                    Load More Videos
-                  </Button>
+                  <Grid columns={3} columnGap={'spacingS'} rowGap={'spacingS'}>
+                    {[...dropdownData].slice(0, end).map((item) => (
+                      <GridItem key={item.id}>
+                        <Card
+                          onClick={() => updateVideoIds(item.id)}
+                          style={{ height: '100px', padding: '7px' }}
+                          selected={selectedIds.findIndex((id) => item.id === id) !== -1}>
+                          <StyledImageContainer>
+                            <img src={item.thumbnail.url} alt={item.name} />
+                          </StyledImageContainer>
+                        </Card>
+                        <Paragraph>{item.name}</Paragraph>
+                      </GridItem>
+                    ))}
+                  </Grid>
                 </Flex>
-              ) : null}
+                {dropdownData.length > end ? (
+                  <Flex flexDirection="column" marginTop="spacingM">
+                    <Button
+                      onClick={() => {
+                        setEnd(end + 100);
+                      }}>
+                      Load More Videos
+                    </Button>
+                  </Flex>
+                ) : null}
+              </Flex>
 
               {sdk.field.getValue() && sdk.field.getValue().items.length > 0 && (
                 <Flex flexDirection={'column'} marginTop={'spacingL'}>
