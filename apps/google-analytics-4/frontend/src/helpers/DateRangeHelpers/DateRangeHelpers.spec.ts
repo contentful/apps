@@ -1,5 +1,5 @@
 import { DateRangeType } from '@/types';
-import getRangeDates, { RANGE_OPTIONS } from './handle-date-range';
+import getRangeDates, { RANGE_OPTIONS } from './DateRangeHelpers';
 
 const MS_PER_DAY = 86400000;
 

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { mockSdk, mockCma } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
-import { ServiceAccountKey, ServiceAccountKeyId } from '@/types';
+import { ServiceAccountKey, ServiceAccountKeyId } from 'types';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => jest.fn(),

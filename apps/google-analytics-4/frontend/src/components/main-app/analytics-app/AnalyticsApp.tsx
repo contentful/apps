@@ -3,12 +3,12 @@ import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState, useMemo } from 'react';
 import { useApi } from 'hooks/useApi';
-import getRangeDates from 'helpers/handle-date-range/handle-date-range';
+import getRangeDates from '@/helpers/DateRangeHelpers/DateRangeHelpers';
 import ChartContent from '../ChartContent';
 import { DateRangeType, ServiceAccountKeyId, ServiceAccountKey } from 'types';
 import { styles } from './AnalyticsApp.styles';
 import { Flex, Note } from '@contentful/f36-components';
-import { RunReportData } from '@/apis/apiTypes';
+import { RunReportData } from 'apis/apiTypes';
 
 const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
 const EMPTY_DATA_MSG = 'There are no page views to show for this range';
@@ -45,7 +45,7 @@ const AnalyticsApp = (props: Props) => {
   );
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchRunReportData() {
       try {
         const reportData = await api.runReports(reportRequestParams);
         setRunReportResponse(reportData);
@@ -56,7 +56,7 @@ const AnalyticsApp = (props: Props) => {
       setLoading(false);
     }
 
-    fetchData();
+    fetchRunReportData();
   }, [api, reportRequestParams]);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ const AnalyticsApp = (props: Props) => {
     if (error) {
       return (
         <Note className={styles.note} variant="negative">
-          <p className={styles.noteContent}>{error?.message || DEFAULT_ERR_MSG}</p>
+          <p className={styles.noteContent}>{error.message || DEFAULT_ERR_MSG}</p>
         </Note>
       );
     } else if (!runReportResponse.rowCount) {

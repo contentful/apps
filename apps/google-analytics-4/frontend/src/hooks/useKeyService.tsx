@@ -35,7 +35,7 @@ interface Props {
 export default function useKeyService(props: Props): KeyServiceInfoType {
   const { onSaveGoogleAccountDetails } = props;
 
-  const [isConfigureScreen, setIsConfigureScreen] = useState<boolean>(false); //TYPE
+  const [isConfigureScreen, setIsConfigureScreen] = useState<boolean>(false);
 
   const [parameters, setParameters] = useState<AppInstallationParameters>(
     {} as AppInstallationParameters
