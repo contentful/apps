@@ -61,18 +61,13 @@ const AnalyticsApp = (props: Props) => {
 
   useEffect(() => {
     if (runReportResponse.rowCount) {
-      setStartEndDates(getRangeDates(dateRange));
       setRunReportResponse(runReportResponse);
-      setLoading(false);
     }
   }, [dateRange, runReportResponse]);
 
-  useEffect(() => {
-    setStartEndDates(getRangeDates(dateRange));
-  }, [dateRange]);
-
   const handleDateRangeChange = (e: DateRangeType) => {
     setDateRange(e);
+    setStartEndDates(getRangeDates(e));
   };
 
   const pageViews =
