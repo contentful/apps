@@ -1,5 +1,5 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
-import ApiAccessPage from './ApiAccessPage';
+import ApiAccessSection from './ApiAccessSection';
 import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { ServiceAccountKey } from '@/types';
@@ -18,7 +18,7 @@ const saveAppInstallation = async () => {
 describe('Config Screen component (not installed)', () => {
   it('can render the about section', async () => {
     await act(async () => {
-      render(<ApiAccessPage onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
     });
 
     expect(screen.getByText('API Access')).toBeInTheDocument();
@@ -29,7 +29,7 @@ describe('Config Screen component (not installed)', () => {
   it('allows the app to be installed with a valid service key file', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(<ApiAccessPage onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
     });
 
     const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
@@ -59,7 +59,7 @@ describe('Config Screen component (not installed)', () => {
   it('prevents the app from being installed with invalid service key file', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(<ApiAccessPage onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
     });
 
     const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
@@ -80,7 +80,7 @@ describe('Config Screen component (not installed)', () => {
 
   it('prevents the app from being installed if no service key file is provided', async () => {
     await act(async () => {
-      render(<ApiAccessPage onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
     });
 
     let result;
@@ -90,7 +90,11 @@ describe('Config Screen component (not installed)', () => {
 
     // false result prevents parameters save
     expect(result).toEqual({
-      parameters: { serviceAccountKey: undefined, serviceAccountKeyId: undefined },
+      parameters: {
+        serviceAccountKey: undefined,
+        serviceAccountKeyId: undefined,
+        contentTypes: {},
+      },
       targetState: undefined,
     });
   });
@@ -107,7 +111,7 @@ describe('Installed Service Account Key', () => {
   it('overrides the saved values if a new key file is provided', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(<ApiAccessPage onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
     });
 
     const editServiceAccountButton = screen.getByTestId('editServiceAccountButton');
@@ -141,7 +145,7 @@ describe('Installed Service Account Key', () => {
 
   it('does not require key file on save', async () => {
     await act(async () => {
-      render(<ApiAccessPage onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
     });
 
     let result;
@@ -150,7 +154,7 @@ describe('Installed Service Account Key', () => {
     });
 
     await act(async () => {
-      render(<ApiAccessPage onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
     });
   });
 });
