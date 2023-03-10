@@ -27,7 +27,6 @@ export interface WistiaVideo {
   updated: string;
   duration: number;
   hashed_id: string;
-  hashedId: string;
   description: string;
   progress: number;
   status: string;
@@ -42,7 +41,6 @@ export interface WistiaProject {
   id: number;
   name: string;
   hashedId: string;
-  hashed_id?: string;
   duration?: string;
   thumbnail: {
     url: string;
