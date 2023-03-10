@@ -1,9 +1,8 @@
 import AnalyticsApp from './AnalyticsApp';
-import { render, screen } from '@testing-library/react';
-import { mockSdk, mockCma } from '../../../../test/mocks';
+import { act, render, screen } from '@testing-library/react';
+import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
-import { ServiceAccountKey, ServiceAccountKeyId } from 'types';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => jest.fn(),
@@ -24,20 +23,28 @@ const { findByTestId, getByTestId, getByText, findByText } = screen;
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
 
-const renderAnalyticsApp = () =>
-  render(
-    <AnalyticsApp
-      serviceAccountKey={{} as unknown as ServiceAccountKey}
-      serviceAccountKeyId={{} as unknown as ServiceAccountKeyId}
-      propertyId=""
-      reportSlug=""
-    />
-  );
+const renderAnalyticsApp = async () =>
+  await act(async () => {
+    render(
+      <AnalyticsApp
+        serviceAccountKeyId={validServiceKeyId}
+        serviceAccountKey={validServiceKeyFile}
+        propertyId=""
+        reportSlug=""
+      />
+    );
+  });
 
 describe('AnalyticsApp', () => {
+  beforeEach(() => {
+    mockSdk.app.getParameters.mockReturnValue({
+      serviceAccountKey: validServiceKeyFile,
+      serviceAccountKeyId: validServiceKeyId,
+    });
+  });
+
   it('mounts data', async () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
-
     renderAnalyticsApp();
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
@@ -49,7 +56,6 @@ describe('AnalyticsApp', () => {
 
   it('mounts with warning message when no data', async () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
-
     renderAnalyticsApp();
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
@@ -61,18 +67,11 @@ describe('AnalyticsApp', () => {
     expect(noteText).toBeVisible();
   });
 
-  it('mounts with error message when fetch error thrown', async () => {
-    mockApi.mockRejectedValue(() => new Error('mock Api error'));
-
+  it('renders nothing when it has no response', async () => {
     renderAnalyticsApp();
 
-    const dropdown = await findByTestId(SELECT_TEST_ID);
-    const errorNote = getByTestId(NOTE_TEST_ID);
-
-    const noteText = await findByText('mock Api error');
-
-    expect(dropdown).toBeVisible();
-    expect(errorNote).toBeVisible();
-    expect(noteText).toBeVisible();
+    expect(screen.queryByTestId(SELECT_TEST_ID)).toBeNull();
+    expect(screen.queryByTestId(NOTE_TEST_ID)).toBeNull();
+    expect(screen.queryByTestId('mock Api error')).toBeNull();
   });
 });
