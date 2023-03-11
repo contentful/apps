@@ -1,6 +1,6 @@
 import { AnalyticsAdminServiceClient, protos } from '@google-analytics/admin';
 import { GoogleAuthOptions } from 'google-auth-library';
-import { ServiceAccountKeyFile } from '../types';
+import { ServiceAccountKeyFile, ReportRowType } from '../types';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import {
   isGoogleError,
@@ -44,6 +44,16 @@ export class GoogleApiService {
     return accountSummaries;
   }
 
+  sortReportResponse = (rows: ReportRowType[]) => {
+    rows.filter(
+      (row: ReportRowType) => row.dimensionValues?.length && row.dimensionValues[0].value
+    );
+
+    rows.sort((v1: ReportRowType, v2: ReportRowType) => {
+      return Number(v1.dimensionValues[0].value) - Number(v2.dimensionValues[0].value);
+    });
+  };
+
   async runReport(
     property: string,
     slug: string,
@@ -58,7 +68,7 @@ export class GoogleApiService {
 
     try {
       const [response] = await this.betaAnalyticsDataClient.runReport({
-        property: property,
+        property,
         dateRanges: [
           {
             startDate: startDate ?? new Date(Date.now() - ONE_WEEK).toISOString().split('T')[0], // extracts YYYY-MM-DD from ISO string
@@ -81,6 +91,7 @@ export class GoogleApiService {
         },
       });
 
+      if (response.rows) this.sortReportResponse(response.rows as unknown as ReportRowType[]);
       return response;
     } catch (e: any) {
       if (isGoogleError(e)) handleGoogleDataApiError(e);

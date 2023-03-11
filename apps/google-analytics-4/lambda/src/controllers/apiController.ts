@@ -31,7 +31,10 @@ const ApiController = {
     try {
       const serviceAccountKeyFile = req.serviceAccountKey;
       const { propertyId, slug, startDate, endDate, dimensions, metrics } =
-        req.params as unknown as RunReportParamsType;
+        req.query as unknown as RunReportParamsType;
+
+      const formatArrays = (param: string | string[]) =>
+        Array.isArray(param) ? param : param.split(',');
 
       // intentional runtime error because the middleware already handles this. typescript
       // just doesn't realize
@@ -43,8 +46,8 @@ const ApiController = {
         slug,
         startDate,
         endDate,
-        dimensions,
-        metrics
+        formatArrays(dimensions),
+        formatArrays(metrics)
       );
       res.status(200).json(result);
     } catch (err) {

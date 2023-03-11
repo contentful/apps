@@ -16,7 +16,7 @@ export interface RunReportResponse {
   totals: [];
   maximums: [];
   minimums: [];
-  rowCount: 1;
+  rowCount: number;
   metadata: {
     dataLossFromOtherRow: boolean;
     currencyCode: string;
