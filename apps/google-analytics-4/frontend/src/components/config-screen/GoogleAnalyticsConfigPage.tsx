@@ -13,7 +13,7 @@ import MapAccountPropertySection from 'components/config-screen/map-account-prop
 
 const GoogleAnalyticsConfigPage = () => {
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);
-  const [isAppInstalled, setIsAppInstalled] = useState<boolean>();
+  const [isAppInstalled, setIsAppInstalled] = useState<boolean>(false);
 
   const handleAccountSummariesChange = (_accountSummaries: any[]) => {
     setAccountsSummaries(_accountSummaries);
@@ -49,7 +49,10 @@ const GoogleAnalyticsConfigPage = () => {
       <Box className={styles.body}>
         <AboutSection />
         <Splitter />
-        <ApiAccessSection onAccountSummariesChange={handleAccountSummariesChange} />
+        <ApiAccessSection
+          isAppInstalled={isAppInstalled}
+          onAccountSummariesChange={handleAccountSummariesChange}
+        />
         <Splitter />
         {isAppInstalled && (
           <>
