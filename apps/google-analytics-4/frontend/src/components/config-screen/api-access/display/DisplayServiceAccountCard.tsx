@@ -173,7 +173,10 @@ const DisplayServiceAccountCard = (props: Props) => {
       );
     } else if (unknownError) {
       return (
-        <RenderSimpleBadgeNote badgeLabel="Unknown Error" noteMessage={unknownError.message} />
+        <RenderSimpleBadgeNote
+          badgeLabel="Unknown Error"
+          noteMessage={'An unexpected error has occurred.'}
+        />
       );
     }
 
