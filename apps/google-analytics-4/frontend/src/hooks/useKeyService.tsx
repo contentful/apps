@@ -21,6 +21,7 @@ interface KeyServiceInfoType {
   serviceAccountKeyFileIsValid: boolean;
   serviceAccountKeyFileIsRequired: boolean;
   contentTypes: ContentTypes;
+  loadingParameters: boolean;
   handleKeyFileChange: Function;
   handleContentTypeChange: (prevKey: string, newKey: string) => void;
   handleContentTypeFieldChange: (key: string, field: string, value: string) => void;
@@ -50,11 +51,13 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
   const [savedPropertyId, setSavedPropertyId] = useState<string>('');
 
   const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
+  const [loadingParameters, setLoadingParameters] = useState<boolean>(true);
 
   const sdk = useSDK<AppExtensionSDK>();
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+    const contentTypeKeys = Object.keys(contentTypes);
 
     if (!serviceAccountKeyFileIsValid) {
       sdk.notifier.error('Invalid service account key file. See field error for details');
@@ -63,6 +66,11 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
 
     if (serviceAccountKeyFileIsRequired && !newServiceAccountKeyId) {
       sdk.notifier.error('A valid service account key file is required');
+      return false;
+    }
+
+    if (contentTypeKeys.some((key) => !key)) {
+      sdk.notifier.error('Please complete or remove the incomplete content type rows');
       return false;
     }
 
@@ -117,6 +125,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
         setServiceAccountKeyFileIsRequired(true);
       }
 
+      setLoadingParameters(false);
       sdk.app.setReady();
     };
 
@@ -218,6 +227,7 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     serviceAccountKeyFileIsValid,
     serviceAccountKeyFileIsRequired,
     contentTypes,
+    loadingParameters,
     handleKeyFileChange,
     handleContentTypeChange,
     handleContentTypeFieldChange,

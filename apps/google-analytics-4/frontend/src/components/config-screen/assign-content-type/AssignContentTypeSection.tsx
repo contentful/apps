@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Paragraph, Stack, Subheading } from '@contentful/f36-components';
+import { Paragraph, Stack, Subheading, Button, Spinner } from '@contentful/f36-components';
 import { AllContentTypes, AllContentTypeEntries, ContentTypeEntries } from 'types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 import sortBy from 'lodash/sortBy';
@@ -11,6 +11,7 @@ import useKeyService from 'hooks/useKeyService';
 const AssignContentTypeSection = () => {
   const {
     contentTypes,
+    loadingParameters,
     handleContentTypeChange,
     handleContentTypeFieldChange,
     handleAddContentType,
@@ -25,6 +26,8 @@ const AssignContentTypeSection = () => {
   const [contentTypeEntries, setHasContentTypeEntries] = useState<ContentTypeEntries>(
     [] as ContentTypeEntries
   );
+  const [hasIncompleteContentTypes, setHasIncompleteContentTypes] = useState<boolean>(false);
+  const [loadingAllContentTypes, setLoadingAllContentTypes] = useState<boolean>(true);
 
   const sdk = useSDK<AppExtensionSDK>();
 
@@ -60,6 +63,7 @@ const AssignContentTypeSection = () => {
 
       setAllContentTypes(formattedContentTypes);
       setAllContentTypeEntries(Object.entries(formattedContentTypes));
+      setLoadingAllContentTypes(false);
     };
 
     getContentTypes();
@@ -68,6 +72,9 @@ const AssignContentTypeSection = () => {
   useEffect(() => {
     setHasContentTypes(Object.keys(contentTypes).length ? true : false);
     setHasContentTypeEntries(Object.entries(contentTypes));
+    setHasIncompleteContentTypes(
+      Object.entries(contentTypes).some(([contentTypeId]) => !contentTypeId)
+    );
   }, [contentTypes]);
 
   return (
@@ -78,17 +85,26 @@ const AssignContentTypeSection = () => {
         Specify the slug field that is used for URL generation in your application. Optionally,
         specify a prefix for the slug.
       </Paragraph>
-      <AssignContentTypeCard
-        allContentTypes={allContentTypes}
-        allContentTypeEntries={allContentTypeEntries}
-        contentTypes={contentTypes}
-        hasContentTypes={hasContentTypes}
-        contentTypeEntries={contentTypeEntries}
-        onContentTypeChange={handleContentTypeChange}
-        onContentTypeFieldChange={handleContentTypeFieldChange}
-        onAddContentType={handleAddContentType}
-        onRemoveContentType={handleRemoveContentType}
-      />
+      {!loadingParameters && !loadingAllContentTypes ? (
+        <>
+          {hasContentTypes && (
+            <AssignContentTypeCard
+              allContentTypes={allContentTypes}
+              allContentTypeEntries={allContentTypeEntries}
+              contentTypes={contentTypes}
+              contentTypeEntries={contentTypeEntries}
+              onContentTypeChange={handleContentTypeChange}
+              onContentTypeFieldChange={handleContentTypeFieldChange}
+              onRemoveContentType={handleRemoveContentType}
+            />
+          )}
+          <Button onClick={handleAddContentType} isDisabled={hasIncompleteContentTypes}>
+            {hasContentTypes ? 'Add another content type' : 'Add a content type'}
+          </Button>
+        </>
+      ) : (
+        <Spinner variant="primary" />
+      )}
     </Stack>
   );
 };

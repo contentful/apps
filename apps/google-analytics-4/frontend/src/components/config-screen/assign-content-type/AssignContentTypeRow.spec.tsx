@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeEntries } from '@/types';
-import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
+import { AllContentTypes, AllContentTypeEntries, ContentTypes } from 'types';
+import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
 
 const allContentTypes: AllContentTypes = {
   course: {
@@ -38,40 +38,53 @@ const contentTypes: ContentTypes = {
   },
 };
 
-const contentTypeEntries: ContentTypeEntries = Object.entries(contentTypes);
-
 describe('Assign Content Type Card for Config Screen', () => {
-  it('can render the field labels when there is a saved content type entry', () => {
+  it('shows invalid and disabled inputs when content type is empty', () => {
     render(
-      <AssignContentTypeCard
+      <AssignContentTypeRow
+        contentTypeEntry={[
+          '',
+          {
+            slugField: '',
+            urlPrefix: '',
+          },
+        ]}
+        index={0}
         allContentTypes={allContentTypes}
         allContentTypeEntries={allContentTypeEntries}
         contentTypes={contentTypes}
-        contentTypeEntries={contentTypeEntries}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
         onRemoveContentType={() => {}}
       />
     );
 
-    expect(screen.getByText('Content type')).toBeVisible();
-    expect(screen.getByText('Slug field')).toBeVisible();
-    expect(screen.getByText('URL prefix')).toBeVisible();
+    expect(screen.getByTestId('noStatus')).toBeVisible();
+    expect(screen.getByTestId('contentTypeSelect')).toBeInvalid();
+    expect(screen.getByTestId('slugFieldSelect')).toBeDisabled();
+    expect(screen.getByTestId('urlPrefixInput')).toBeDisabled();
   });
 
-  it('can render the correct number of saved content types', () => {
+  it('can render a warning icon when slug field is not selected', () => {
     render(
-      <AssignContentTypeCard
+      <AssignContentTypeRow
+        contentTypeEntry={[
+          'category',
+          {
+            slugField: '',
+            urlPrefix: '',
+          },
+        ]}
+        index={0}
         allContentTypes={allContentTypes}
         allContentTypeEntries={allContentTypeEntries}
         contentTypes={contentTypes}
-        contentTypeEntries={contentTypeEntries}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
         onRemoveContentType={() => {}}
       />
     );
 
-    expect(screen.getAllByTestId('contentTypeRow').length).toBe(2);
+    expect(screen.getByTestId('warningIcon')).toBeVisible();
   });
 });
