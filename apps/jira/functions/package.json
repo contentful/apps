@@ -30,7 +30,7 @@
     "rimraf": "^3.0.2",
     "serverless": "2.72.3",
     "serverless-domain-manager": "3.3.2",
-    "serverless-offline": "^8.8.0",
+    "serverless-offline": "^12.0.4",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
     "ts-mocha": "^10.0.0",
