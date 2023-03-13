@@ -10,9 +10,11 @@ import { GoogleApiError } from './services/googleApiUtils';
 
 export const apiErrorMap: ApiErrorMap = {
   GoogleApiError: (e: GoogleApiError) => new ApiError(e.details, e.errorType, e.status),
-  InvalidSignature: (e: InvalidSignature) => new ApiError(e.message, e.name, 403),
-  UnableToVerifyRequest: (e: UnableToVerifyRequest) => new ApiError(e.message, e.name, 422),
+  InvalidSignature: (e: InvalidSignature) => new ApiError(e.message, 'InvalidSignature', 403),
+  UnableToVerifyRequest: (e: UnableToVerifyRequest) =>
+    new ApiError(e.message, 'UnableToVerifyRequest', 422),
   MissingServiceAccountKeyHeader: (e: MissingServiceAccountKeyHeader) =>
-    new ApiError(e.message, e.name, 400),
-  InvalidServiceAccountKey: (e: InvalidServiceAccountKey) => new ApiError(e.message, e.name, 400),
+    new ApiError(e.message, 'MissingServiceAccountKeyHeader', 400),
+  InvalidServiceAccountKey: (e: InvalidServiceAccountKey) =>
+    new ApiError(e.message, 'InvalidServiceAccountKey', 400),
 };
