@@ -22,6 +22,7 @@ interface Props {
   serviceAccountKey: ServiceAccountKey;
   onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>;
   onAccountSummariesChange: Function;
+  isAppInstalled: boolean;
 }
 
 const DisplayServiceAccountCard = (props: Props) => {
@@ -30,6 +31,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     serviceAccountKey,
     onEditGoogleAccountDetails,
     onAccountSummariesChange,
+    isAppInstalled,
   } = props;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -89,8 +91,9 @@ const DisplayServiceAccountCard = (props: Props) => {
     };
 
     // It wants to add onAccountSummariesChange as a dependency but this will cause an infinite re-render
+    // isAppInstalled is needed as a dependency to trigger this called once the app is installed succesffully
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [api]);
+  }, [api, isAppInstalled]);
 
   const verifyDataApi = useCallback(async () => {
     try {
@@ -111,7 +114,10 @@ const DisplayServiceAccountCard = (props: Props) => {
       setDataApiError(undefined);
       setIsLoading(false);
     };
-  }, [api]);
+
+    // isAppInstalled is needed as a dependency to trigger this called once the app is installed succesffully
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api, isAppInstalled]);
 
   useEffect(() => {
     verifyAdminApi();

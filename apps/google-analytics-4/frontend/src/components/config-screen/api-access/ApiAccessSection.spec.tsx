@@ -18,10 +18,12 @@ const saveAppInstallation = async () => {
 describe('Config Screen component (not installed)', () => {
   it('can render the about section', async () => {
     await act(async () => {
-      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection isAppInstalled={false} onAccountSummariesChange={() => {}} />);
     });
 
     expect(screen.getByText('API Access')).toBeInTheDocument();
+    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
+    expect(screen.getByText('Private Key File')).toBeInTheDocument();
   });
 });
 
@@ -29,7 +31,7 @@ describe('Config Screen component (not installed)', () => {
   it('allows the app to be installed with a valid service key file', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection isAppInstalled={false} onAccountSummariesChange={() => {}} />);
     });
 
     const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
@@ -54,12 +56,16 @@ describe('Config Screen component (not installed)', () => {
         }),
       })
     );
+    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
+    expect(screen.getByText('Service Account')).toBeInTheDocument();
+    expect(screen.getByText('Key ID')).toBeInTheDocument();
+    expect(screen.getByText('Status')).toBeInTheDocument();
   });
 
   it('prevents the app from being installed with invalid service key file', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection isAppInstalled={false} onAccountSummariesChange={() => {}} />);
     });
 
     const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
@@ -76,11 +82,13 @@ describe('Config Screen component (not installed)', () => {
 
     // false result prevents parameters save
     expect(result).toEqual(false);
+    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
+    expect(screen.getByText('Private Key File')).toBeInTheDocument();
   });
 
   it('prevents the app from being installed if no service key file is provided', async () => {
     await act(async () => {
-      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection isAppInstalled={false} onAccountSummariesChange={() => {}} />);
     });
 
     let result;
@@ -98,6 +106,8 @@ describe('Config Screen component (not installed)', () => {
       },
       targetState: undefined,
     });
+    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
+    expect(screen.getByText('Private Key File')).toBeInTheDocument();
   });
 });
 
@@ -112,7 +122,7 @@ describe('Installed Service Account Key', () => {
   it('overrides the saved values if a new key file is provided', async () => {
     const user = userEvent.setup();
     await act(async () => {
-      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection isAppInstalled={true} onAccountSummariesChange={() => {}} />);
     });
 
     const editServiceAccountButton = screen.getByTestId('editServiceAccountButton');
@@ -142,11 +152,15 @@ describe('Installed Service Account Key', () => {
         }),
       })
     );
+    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
+    expect(screen.getByText('Service Account')).toBeInTheDocument();
+    expect(screen.getByText('Key ID')).toBeInTheDocument();
+    expect(screen.getByText('Status')).toBeInTheDocument();
   });
 
   it('does not require key file on save', async () => {
     await act(async () => {
-      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection isAppInstalled={false} onAccountSummariesChange={() => {}} />);
     });
 
     let result;
@@ -155,7 +169,7 @@ describe('Installed Service Account Key', () => {
     });
 
     await act(async () => {
-      render(<ApiAccessSection onAccountSummariesChange={() => {}} />);
+      render(<ApiAccessSection isAppInstalled={false} onAccountSummariesChange={() => {}} />);
     });
   });
 });
