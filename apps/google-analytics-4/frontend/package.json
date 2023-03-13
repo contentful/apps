@@ -33,7 +33,7 @@
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5DlxOS0KvGS1Wk362xgvbN --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
     "sentry-create-release": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug new -p marketplace-apps $REACT_APP_RELEASE",
-    "sentry-set-commits": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug set-commits --auto $REACT_APP_RELEASE",
+    "sentry-set-commits": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $REACT_APP_RELEASE",
     "sentry-upload-source-maps": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug files $REACT_APP_RELEASE upload-sourcemaps --ext ts --ext tsx --ext map ./src ./build",
     "sentry-finalize-release": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug finalize $REACT_APP_RELEASE",
     "sentry-deploy": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug deploys $REACT_APP_RELEASE new -e production",
