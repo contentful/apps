@@ -14,6 +14,8 @@ async function fetchWithSignedRequest(
     headers: {},
   };
 
+  const rootRelativeUrl = req.url.pathname + req.url.search;
+
   // add request verification signing secret to request headers
   const { additionalHeaders: signedHeaders } = await cma.appSignedRequest.create(
     {
@@ -22,7 +24,7 @@ async function fetchWithSignedRequest(
     {
       method: req.method,
       headers: req.headers,
-      path: new URL(req.url).pathname,
+      path: rootRelativeUrl,
     }
   );
   Object.assign(req.headers, unsignedHeaders, signedHeaders);
