@@ -1,22 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Paragraph, Stack, Subheading } from '@contentful/f36-components';
-import { AllContentTypes, AllContentTypeEntries, ContentTypeEntries } from 'types';
+import {
+  AllContentTypes,
+  AllContentTypeEntries,
+  ContentTypeEntries,
+  ContentTypes,
+  ContentTypeValue,
+} from 'types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 import sortBy from 'lodash/sortBy';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { ContentTypeProps, createClient, KeyValueMap } from 'contentful-management';
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { ContentTypeProps, createClient } from 'contentful-management';
-import useKeyService from 'hooks/useKeyService';
+import { useSDK } from '@contentful/react-apps-toolkit';
+interface Props {
+  mergeSdkParameters: Function;
+  onIsValidContentTypeAssignment: Function;
+  parameters: KeyValueMap;
+}
 
-const AssignContentTypeSection = () => {
-  const {
-    contentTypes,
-    handleContentTypeChange,
-    handleContentTypeFieldChange,
-    handleAddContentType,
-    handleRemoveContentType,
-  } = useKeyService({});
+const AssignContentTypeSection = (props: Props) => {
+  const { mergeSdkParameters, onIsValidContentTypeAssignment, parameters } = props;
 
+  const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
   const [allContentTypes, setAllContentTypes] = useState<AllContentTypes>({} as AllContentTypes);
   const [allContentTypeEntries, setAllContentTypeEntries] = useState<AllContentTypeEntries>(
     [] as AllContentTypeEntries
@@ -27,6 +32,56 @@ const AssignContentTypeSection = () => {
   );
 
   const sdk = useSDK<AppExtensionSDK>();
+
+  useEffect(() => {
+    if (parameters.savedContentTypes) onIsValidContentTypeAssignment(true);
+  }, [onIsValidContentTypeAssignment, parameters.savedContentTypes]);
+
+  const handleContentTypeChange = (prevKey: string, newKey: string) => {
+    const newContentTypes: ContentTypes = {};
+
+    for (const [prop, value] of Object.entries(contentTypes)) {
+      if (prop === prevKey) {
+        newContentTypes[newKey as keyof typeof contentTypes] = {
+          slugField: '',
+          urlPrefix: value.urlPrefix,
+        };
+      } else {
+        newContentTypes[prop] = value;
+      }
+    }
+
+    setContentTypes(newContentTypes);
+  };
+
+  const handleContentTypeFieldChange = (key: string, field: string, value: string) => {
+    const currentContentTypeFields: ContentTypeValue = contentTypes[key];
+
+    setContentTypes({
+      ...contentTypes,
+      [key]: {
+        ...currentContentTypeFields,
+        [field]: value,
+      },
+    });
+    const _parameters = { contentTypes: contentTypes };
+    mergeSdkParameters(_parameters);
+    onIsValidContentTypeAssignment(true);
+  };
+
+  const handleAddContentType = () => {
+    setContentTypes({
+      ...contentTypes,
+      '': { slugField: '', urlPrefix: '' },
+    });
+  };
+
+  const handleRemoveContentType = (key: string) => {
+    const updatedContentTypes = { ...contentTypes };
+    delete updatedContentTypes[key];
+
+    setContentTypes(updatedContentTypes);
+  };
 
   useEffect(() => {
     const getContentTypes = async () => {
