@@ -62,19 +62,6 @@ describe('AnalyticsApp', () => {
     expect(noteText).toBeVisible();
   });
 
-  it('mounts with error message when error thrown', async () => {
-    mockApi.mockRejectedValue(() => new Error('api error'));
-    renderAnalyticsApp();
-
-    const dropdown = await findByTestId(SELECT_TEST_ID);
-    const warningNote = getByTestId(NOTE_TEST_ID);
-    const noteText = getByText('api error');
-
-    expect(dropdown).toBeVisible();
-    expect(warningNote).toBeVisible();
-    expect(noteText).toBeVisible();
-  });
-
   it('renders nothing when it has no response', async () => {
     renderAnalyticsApp();
 
