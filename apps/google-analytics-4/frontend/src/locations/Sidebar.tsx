@@ -9,13 +9,13 @@ const Sidebar = () => {
     sdk.parameters.installation;
 
   const currentContentType = sdk.contentType.sys.id;
-  const contentTypeSlug = contentTypes[currentContentType].urlPrefix.trim();
+  const slugFieldInfo = contentTypes[currentContentType];
 
   const api = useApi(serviceAccountKeyId, serviceAccountKey);
 
   return (
     <>
-      <AnalyticsApp api={api} propertyId={savedPropertyId} reportSlug={contentTypeSlug} />
+      <AnalyticsApp api={api} propertyId={savedPropertyId} slugFieldInfo={slugFieldInfo} />
     </>
   );
 };

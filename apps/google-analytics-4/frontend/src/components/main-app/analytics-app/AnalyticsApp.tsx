@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Api } from 'apis/api';
 import getRangeDates from 'helpers/DateRangeHelpers/DateRangeHelpers';
 import ChartContent from '../ChartContent';
-import { DateRangeType } from 'types';
+import { DateRangeType, ContentTypeValue } from 'types';
 import { styles } from './AnalyticsApp.styles';
 import { Flex, Note } from '@contentful/f36-components';
 import { RunReportData } from 'apis/apiTypes';
@@ -16,18 +16,21 @@ const EMPTY_DATA_MSG = 'There are no page views to show for this range';
 interface Props {
   api: Api;
   propertyId: string;
-  reportSlug: string;
+  slugFieldInfo: ContentTypeValue;
 }
 const AnalyticsApp = (props: Props) => {
-  const { api, propertyId, reportSlug } = props;
+  const { api, propertyId, slugFieldInfo } = props;
+  const { slugField, urlPrefix } = slugFieldInfo;
   const [runReportResponse, setRunReportResponse] = useState<RunReportData>({} as RunReportData);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek');
   const [startEndDates, setStartEndDates] = useState<any>(getRangeDates('lastWeek')); // TYPE
-  const [slugValue] = useFieldValue<string>('slug');
+  const [slugValue] = useFieldValue<string>(slugField);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
 
   useAutoResizer();
+
+  const reportSlug = `${urlPrefix || ''}${slugValue || ''}`;
 
   const reportRequestParams = useMemo(
     () => ({

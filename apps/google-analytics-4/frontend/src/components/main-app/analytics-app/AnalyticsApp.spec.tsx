@@ -22,7 +22,11 @@ const NOTE_TEST_ID = 'cf-ui-note';
 const renderAnalyticsApp = async () =>
   await act(async () => {
     render(
-      <AnalyticsApp api={{ runReports: mockApi } as unknown as Api} propertyId="" reportSlug="" />
+      <AnalyticsApp
+        api={{ runReports: mockApi } as unknown as Api}
+        propertyId=""
+        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
+      />
     );
   });
 
