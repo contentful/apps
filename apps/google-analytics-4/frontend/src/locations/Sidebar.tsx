@@ -1,20 +1,22 @@
 import AnalyticsApp from 'components/main-app/analytics-app/AnalyticsApp';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { useApi } from 'hooks/useApi';
 
-// TO DO: Add propertyId and reportSlug logic
+const hardCodedSlug = '/en-US';
 
 const Sidebar = () => {
   const sdk = useSDK<any>();
 
-  const { serviceAccountKey, serviceAccountKeyId } = sdk.parameters;
+  const { serviceAccountKey, serviceAccountKeyId, savedPropertyId } = sdk.parameters.installation;
+
+  const api = useApi(serviceAccountKeyId, serviceAccountKey);
 
   return (
-    <AnalyticsApp
-      serviceAccountKeyId={serviceAccountKeyId}
-      serviceAccountKey={serviceAccountKey}
-      propertyId=""
-      reportSlug=""
-    />
+    <>
+      {savedPropertyId && (
+        <AnalyticsApp api={api} propertyId={savedPropertyId} reportSlug={hardCodedSlug} />
+      )}
+    </>
   );
 };
 

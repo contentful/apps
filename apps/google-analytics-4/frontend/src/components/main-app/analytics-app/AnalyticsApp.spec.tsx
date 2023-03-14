@@ -1,5 +1,6 @@
 import AnalyticsApp from './AnalyticsApp';
 import { act, render, screen } from '@testing-library/react';
+import { Api } from 'apis/api';
 import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
@@ -12,11 +13,11 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 const mockApi = jest.fn();
-jest.mock('hooks/useApi', () => ({
-  useApi: () => ({
-    runReports: mockApi,
-  }),
-}));
+// jest.mock('hooks/useApi', () => ({
+//   useApi: () => ({
+//     runReports: mockApi,
+//   }),
+// }));
 
 const { findByTestId, getByTestId, getByText, findByText } = screen;
 
@@ -26,12 +27,7 @@ const NOTE_TEST_ID = 'cf-ui-note';
 const renderAnalyticsApp = async () =>
   await act(async () => {
     render(
-      <AnalyticsApp
-        serviceAccountKeyId={validServiceKeyId}
-        serviceAccountKey={validServiceKeyFile}
-        propertyId=""
-        reportSlug=""
-      />
+      <AnalyticsApp api={{ runReports: mockApi } as unknown as Api} propertyId="" reportSlug="" />
     );
   });
 
