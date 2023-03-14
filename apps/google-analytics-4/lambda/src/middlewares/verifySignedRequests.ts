@@ -42,7 +42,7 @@ const makeCanonicalReq = (req: Request) => {
 
   return <CanonicalRequest>{
     method: req.method,
-    path: `${pathPrefix}${req.originalUrl}`, // note: req.originalUrl starts with a `/`
+    path: `${pathPrefix}${req.originalUrl}`, // note: req.originalUrl starts with a `/` and includes the full path & query string
     headers: headers,
   };
 };
