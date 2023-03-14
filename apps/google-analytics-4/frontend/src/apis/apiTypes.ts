@@ -68,26 +68,19 @@ export type RunReportData = z.infer<typeof ZRunReportData>;
 // NOTE: This needs to be in sync with the lambda - ie copy and pasted
 export const ERROR_TYPE_MAP = {
   unknown: 'Unknown',
-  unexpected: 'Unexpected Response from Server',
-  failedFetch: 'Failed fetch',
-  malformedApiResponse: 'Invalid response API',
-  invalidJson: 'Invalid json from API',
-  disabledAdminApi: 'Disabled Admin Api',
-  disabledDataApi: 'Disabled Data Api',
-  noAccountsOrPropertiesFound: 'No accounts/properties found',
-  invalidServiceAccount: 'Invalid service account',
+  unexpected: 'Unexpected',
+  failedFetch: 'FailedFetch',
+  malformedApiResponse: 'MalformedApiResponse',
+  invalidJson: 'InvalidJson',
+  disabledAdminApi: 'DisabledAdminApi',
+  disabledDataApi: 'DisabledDataApi',
+  noAccountsOrPropertiesFound: 'NoAccountsOrPropertiesFound',
+  invalidServiceAccount: 'InvalidServiceAccount',
 };
-
-const ZErrorTypesType = z.union([
-  z.literal(ERROR_TYPE_MAP.unknown),
-  z.literal(ERROR_TYPE_MAP.disabledAdminApi),
-  z.literal(ERROR_TYPE_MAP.disabledDataApi),
-  z.literal(ERROR_TYPE_MAP.noAccountsOrPropertiesFound),
-]);
 
 export const ZApiError = z.object({
   details: z.any(),
-  errorType: ZErrorTypesType,
+  errorType: z.string(),
   message: z.string(),
   status: z.number(),
 });

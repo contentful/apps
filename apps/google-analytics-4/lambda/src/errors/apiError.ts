@@ -2,14 +2,14 @@
 // NOTE: This needs to be in sync with the frontend client - ie copy and pasted
 export const ERROR_TYPE_MAP = {
   unknown: 'Unknown',
-  unexpected: 'Unexpected Response from Server',
-  failedFetch: 'Failed fetch',
-  malformedApiResponse: 'Invalid response API',
-  invalidJson: 'Invalid json from API',
-  disabledAdminApi: 'Disabled Admin Api',
-  disabledDataApi: 'Disabled Data Api',
-  noAccountsOrPropertiesFound: 'No accounts/properties found',
-  invalidServiceAccount: 'Invalid service account',
+  unexpected: 'Unexpected',
+  failedFetch: 'FailedFetch',
+  malformedApiResponse: 'MalformedApiResponse',
+  invalidJson: 'InvalidJson',
+  disabledAdminApi: 'DisabledAdminApi',
+  disabledDataApi: 'DisabledDataApi',
+  noAccountsOrPropertiesFound: 'NoAccountsOrPropertiesFound',
+  invalidServiceAccount: 'InvalidServiceAccount',
 };
 
 export class ApiError<T extends Record<string, unknown>> extends Error {
