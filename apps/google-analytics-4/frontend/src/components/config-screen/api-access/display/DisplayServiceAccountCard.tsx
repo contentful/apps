@@ -47,9 +47,6 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   const handleApiError = (error: ApiErrorType) => {
     switch (error.errorType) {
-      case ERROR_TYPE_MAP.unknown:
-        setUnknownError(error);
-        throw new Error(error.message);
       case ERROR_TYPE_MAP.invalidServiceAccount:
         setInvalidServiceAccountError(error);
         break;
@@ -65,7 +62,7 @@ const DisplayServiceAccountCard = (props: Props) => {
         break;
       default:
         setUnknownError(error);
-        throw new Error('Unhandled error exception');
+        throw error;
     }
   };
 
@@ -79,7 +76,7 @@ const DisplayServiceAccountCard = (props: Props) => {
       if (isApiErrorType(e)) handleApiError(e);
       else {
         setUnknownError(e);
-        throw new Error('Unhandled error exception');
+        throw e;
       }
     } finally {
       setIsLoading(false);
@@ -104,7 +101,7 @@ const DisplayServiceAccountCard = (props: Props) => {
       if (isApiErrorType(e)) handleApiError(e);
       else {
         setUnknownError(e);
-        throw new Error('Unhandled error exception');
+        throw e;
       }
     } finally {
       setIsLoading(false);
@@ -181,7 +178,9 @@ const DisplayServiceAccountCard = (props: Props) => {
       return (
         <RenderSimpleBadgeNote
           badgeLabel="Unknown Error"
-          noteMessage={'An unexpected error has occurred.'}
+          noteMessage={
+            'An unknown error occurred. You can try the action again in a few minutes, or contact support if the error persists.'
+          }
         />
       );
     }
