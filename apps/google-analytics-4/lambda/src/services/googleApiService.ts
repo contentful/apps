@@ -53,20 +53,20 @@ export class GoogleApiService {
     );
 
   mapDates = (startDate: string, endDate: string) => {
-    var arr = [];
-    const dt = new Date(new Date(startDate).setUTCHours(0, 0, 0, 0));
+    const dates = [];
+    const date = new Date(new Date(startDate).setUTCHours(0, 0, 0, 0));
     const end = new Date(new Date(endDate).setUTCHours(0, 0, 0, 0));
 
-    while (dt <= end) {
-      arr.push(new Date(dt));
-      dt.setUTCDate(dt.getUTCDate() + 1);
+    while (date <= end) {
+      dates.push(new Date(date));
+      date.setUTCDate(date.getUTCDate() + 1);
     }
 
-    return arr;
+    return dates;
   };
 
   supplementDates = (rows: ReportRowType[], _startDate?: string, _endDate?: string) => {
-    let supplementedReportRows = [] as ReportRowType[];
+    const supplementedReportRows = [] as ReportRowType[];
 
     const startDate = _startDate || this.formatDate(new Date(Date.now() - ONE_WEEK));
     const endDate = _endDate || this.formatDate(new Date(Date.now()));
