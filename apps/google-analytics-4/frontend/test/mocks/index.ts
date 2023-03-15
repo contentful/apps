@@ -1,4 +1,11 @@
-import { ServiceAccountKey, ServiceAccountKeyId } from '../../src/types';
+import { ContentTypeProps } from 'contentful-management';
+import {
+  ServiceAccountKey,
+  ServiceAccountKeyId,
+  AllContentTypes,
+  ContentTypes,
+  EditorInterfaceAssignment,
+} from 'types';
 
 export { mockCma } from './mockCma';
 export { mockSdk } from './mockSdk';
@@ -23,3 +30,177 @@ export const validServiceKeyId: ServiceAccountKeyId = {
   clientEmail: validServiceKeyFile.client_id,
   projectId: validServiceKeyFile.project_id,
 };
+
+export const mockContentTypes: ContentTypes = {
+  course: {
+    slugField: 'slug',
+    urlPrefix: '/about',
+  },
+  category: {
+    slugField: 'title',
+    urlPrefix: '',
+  },
+  layout: {
+    slugField: 'title',
+    urlPrefix: '',
+  },
+};
+
+export const mockAllContentTypesIncomplete: AllContentTypes = {
+  layout: {
+    name: 'Layout',
+    fields: [
+      {
+        id: 'title',
+        name: 'Title',
+        type: 'Symbol',
+      },
+      {
+        id: 'slug',
+        name: 'Slug',
+        type: 'Symbol',
+      },
+    ],
+  },
+  category: {
+    name: 'Category',
+    fields: [
+      {
+        id: 'slug',
+        name: 'Slug',
+        type: 'Symbol',
+      },
+    ],
+  },
+};
+
+export const mockAllContentTypesComplete: AllContentTypes = {
+  layout: {
+    name: 'Layout',
+    fields: [
+      {
+        id: 'title',
+        name: 'Title',
+        type: 'Symbol',
+      },
+      {
+        id: 'slug',
+        name: 'Slug',
+        type: 'Symbol',
+      },
+    ],
+  },
+  category: {
+    name: 'Category',
+    fields: [
+      {
+        id: 'title',
+        name: 'Title',
+        type: 'Symbol',
+      },
+      {
+        id: 'slug',
+        name: 'Slug',
+        type: 'Symbol',
+      },
+    ],
+  },
+  course: {
+    name: 'Course',
+    fields: [
+      {
+        id: 'title',
+        name: 'Title',
+        type: 'Symbol',
+      },
+      {
+        id: 'slug',
+        name: 'Slug',
+        type: 'Symbol',
+      },
+    ],
+  },
+};
+
+export const mockEditorInterfaceIncomplete: EditorInterfaceAssignment = {
+  category: {
+    sidebar: {
+      position: 1,
+    },
+  },
+  course: {
+    sidebar: {
+      position: 1,
+    },
+  },
+};
+
+export const mockEditorInterfaceComplete: EditorInterfaceAssignment = {
+  ...mockEditorInterfaceIncomplete,
+  layout: {
+    sidebar: {
+      position: 1,
+    },
+  },
+};
+
+export const mockContentTypeItems: ContentTypeProps[] = [
+  {
+    sys: {
+      space: {
+        sys: {
+          type: 'Link',
+          linkType: 'Space',
+          id: 'abc123',
+        },
+      },
+      id: 'layout',
+      type: 'ContentType',
+      createdAt: '2023-01-18T01:12:58.781Z',
+      updatedAt: '2023-03-14T21:34:26.800Z',
+      environment: {
+        sys: {
+          id: 'abc123',
+          type: 'Link',
+          linkType: 'Environment',
+        },
+      },
+      version: 4,
+    },
+    displayField: 'title',
+    name: 'Layout',
+    description: '',
+    fields: [
+      {
+        id: 'title',
+        name: 'Title',
+        type: 'Symbol',
+        localized: false,
+        required: true,
+        validations: [],
+        disabled: false,
+        omitted: false,
+      },
+      {
+        id: 'slug',
+        name: 'Slug',
+        type: 'Symbol',
+        localized: false,
+        required: true,
+        validations: [],
+        disabled: false,
+        omitted: false,
+      },
+      {
+        disabled: false,
+        id: 'duration',
+        localized: false,
+        name: 'Duration',
+        omitted: false,
+        required: false,
+        type: 'Integer',
+        validations: [],
+      },
+    ],
+  },
+];

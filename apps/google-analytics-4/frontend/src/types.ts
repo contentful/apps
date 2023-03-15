@@ -133,3 +133,7 @@ export interface AllContentTypes {
 }
 
 export type AllContentTypeEntries = [string, AllContentTypeValue][];
+
+export interface EditorInterfaceAssignment {
+  [key: string]: { sidebar: { position: number } };
+}

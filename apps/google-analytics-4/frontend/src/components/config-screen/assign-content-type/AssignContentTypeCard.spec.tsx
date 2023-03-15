@@ -1,52 +1,19 @@
 import { render, screen } from '@testing-library/react';
-import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeEntries } from '@/types';
+import { AllContentTypeEntries, ContentTypeEntries } from 'types';
+import { mockAllContentTypesComplete, mockContentTypes } from '../../../../test/mocks';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 
-const allContentTypes: AllContentTypes = {
-  course: {
-    name: 'Course',
-    fields: [
-      {
-        id: 'slug',
-        name: 'Slug',
-        type: 'Symbol',
-      },
-    ],
-  },
-  category: {
-    name: 'Category',
-    fields: [
-      {
-        id: 'title',
-        name: 'Title',
-        type: 'Symbol',
-      },
-    ],
-  },
-};
+const allContentTypeEntries: AllContentTypeEntries = Object.entries(mockAllContentTypesComplete);
 
-const allContentTypeEntries: AllContentTypeEntries = Object.entries(allContentTypes);
-
-const contentTypes: ContentTypes = {
-  course: {
-    slugField: 'slug',
-    urlPrefix: '/about',
-  },
-  category: {
-    slugField: 'title',
-    urlPrefix: '',
-  },
-};
-
-const contentTypeEntries: ContentTypeEntries = Object.entries(contentTypes);
+const contentTypeEntries: ContentTypeEntries = Object.entries(mockContentTypes);
 
 describe('Assign Content Type Card for Config Screen', () => {
   it('can render the field labels when there is a saved content type entry', () => {
     render(
       <AssignContentTypeCard
-        allContentTypes={allContentTypes}
+        allContentTypes={mockAllContentTypesComplete}
         allContentTypeEntries={allContentTypeEntries}
-        contentTypes={contentTypes}
+        contentTypes={mockContentTypes}
         contentTypeEntries={contentTypeEntries}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
@@ -62,9 +29,9 @@ describe('Assign Content Type Card for Config Screen', () => {
   it('can render the correct number of saved content types', () => {
     render(
       <AssignContentTypeCard
-        allContentTypes={allContentTypes}
+        allContentTypes={mockAllContentTypesComplete}
         allContentTypeEntries={allContentTypeEntries}
-        contentTypes={contentTypes}
+        contentTypes={mockContentTypes}
         contentTypeEntries={contentTypeEntries}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
@@ -72,6 +39,6 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    expect(screen.getAllByTestId('contentTypeRow').length).toBe(2);
+    expect(screen.getAllByTestId('contentTypeRow').length).toBe(3);
   });
 });

@@ -1,18 +1,26 @@
 import { useCallback, useState, useEffect } from 'react';
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { AppExtensionSDK, AppState } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { ContentTypeProps, createClient } from 'contentful-management';
 import {
   AppInstallationParameters,
   ServiceAccountKey,
   ServiceAccountKeyId,
   ContentTypes,
   ContentTypeValue,
+  AllContentTypes,
+  AllContentTypeEntries,
 } from 'types';
 import {
   convertServiceAccountKeyToServiceAccountKeyId,
   convertKeyFileToServiceAccountKey,
   AssertionError,
 } from 'utils/serviceAccountKey';
+import {
+  assignAppToContentTypeSidebar,
+  syncContentTypes,
+  sortAndFormatContentTypes,
+} from 'utils/contentTypes';
 
 interface KeyServiceInfoType {
   parameters: AppInstallationParameters;
@@ -22,6 +30,9 @@ interface KeyServiceInfoType {
   serviceAccountKeyFileIsRequired: boolean;
   contentTypes: ContentTypes;
   loadingParameters: boolean;
+  allContentTypes: AllContentTypes;
+  allContentTypeEntries: AllContentTypeEntries;
+  loadingAllContentTypes: boolean;
   handleKeyFileChange: Function;
   handleContentTypeChange: (prevKey: string, newKey: string) => void;
   handleContentTypeFieldChange: (key: string, field: string, value: string) => void;
@@ -51,7 +62,12 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
   const [savedPropertyId, setSavedPropertyId] = useState<string>('');
 
   const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
-  const [loadingParameters, setLoadingParameters] = useState<boolean>(true);
+  const [loadingContentTypes, setLoadingContentTypes] = useState<boolean>(true);
+  const [allContentTypes, setAllContentTypes] = useState<AllContentTypes>({} as AllContentTypes);
+  const [allContentTypeEntries, setAllContentTypeEntries] = useState<AllContentTypeEntries>(
+    [] as AllContentTypeEntries
+  );
+  const [loadingAllContentTypes, setLoadingAllContentTypes] = useState<boolean>(true);
 
   const sdk = useSDK<AppExtensionSDK>();
 
@@ -86,9 +102,18 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     setServiceAccountKeyFileIsRequired(false);
     setServiceAccountKeyFile('');
 
+    const sidebarAssignments = assignAppToContentTypeSidebar(contentTypeKeys, 1);
+
+    const newAppState: AppState = {
+      EditorInterface: {
+        ...currentState?.EditorInterface,
+        ...sidebarAssignments,
+      },
+    };
+
     return {
       parameters: newInstallationParameters,
-      targetState: currentState,
+      targetState: newAppState,
     };
   }, [
     contentTypes,
@@ -116,16 +141,36 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
       if (currentParameters) {
         setParameters(currentParameters);
         setServiceAccountKeyFileIsRequired(false);
-        if (currentParameters?.contentTypes) {
-          setContentTypes(currentParameters.contentTypes);
-        }
       } else {
         // per the documentation, `null` means app is not installed, thus we will require
         // the key file
         setServiceAccountKeyFileIsRequired(true);
       }
 
-      setLoadingParameters(false);
+      if (currentParameters?.contentTypes) {
+        const cma = createClient({ apiAdapter: sdk.cmaAdapter });
+        const space = await cma.getSpace(sdk.ids.space);
+        const environment = await space.getEnvironment(sdk.ids.environment);
+        const contentTypes = await environment.getContentTypes();
+        const currentState = await sdk.app.getCurrentState();
+
+        const contentTypeItems = contentTypes.items as ContentTypeProps[];
+        const allContentTypeItems = sortAndFormatContentTypes(contentTypeItems);
+        setAllContentTypes(allContentTypeItems);
+        setAllContentTypeEntries(Object.entries(allContentTypeItems));
+        setLoadingAllContentTypes(false);
+
+        const editorInterfaceResponse = currentState?.EditorInterface ?? {};
+        const updatedContentTypes = syncContentTypes(
+          currentParameters.contentTypes,
+          allContentTypeItems,
+          editorInterfaceResponse
+        );
+
+        setContentTypes(updatedContentTypes);
+        setLoadingContentTypes(false);
+      }
+
       sdk.app.setReady();
     };
 
@@ -227,7 +272,10 @@ export default function useKeyService(props: Props): KeyServiceInfoType {
     serviceAccountKeyFileIsValid,
     serviceAccountKeyFileIsRequired,
     contentTypes,
-    loadingParameters,
+    loadingParameters: loadingContentTypes,
+    allContentTypes,
+    allContentTypeEntries,
+    loadingAllContentTypes,
     handleKeyFileChange,
     handleContentTypeChange,
     handleContentTypeFieldChange,

@@ -104,7 +104,7 @@ describe('Config Screen component (not installed)', () => {
         contentTypes: {},
         savedPropertyId: '',
       },
-      targetState: undefined,
+      targetState: { EditorInterface: {} },
     });
     expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
     expect(screen.getByText('Private Key File')).toBeInTheDocument();
