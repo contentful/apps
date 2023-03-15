@@ -14,7 +14,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 const mockApi = jest.fn();
 
-const { findByTestId, getByTestId, getByText, findByText } = screen;
+const { findByTestId, getByTestId, getByText } = screen;
 
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
