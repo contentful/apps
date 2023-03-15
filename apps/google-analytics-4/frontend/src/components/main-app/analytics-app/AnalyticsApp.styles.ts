@@ -39,4 +39,15 @@ export const styles = {
     width: '100px',
     margin: 'auto',
   }),
+  note: css({
+    overflow: 'hidden',
+    marginBottom: tokens.spacingM,
+  }),
+  noteContent: css({
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 4,
+    WebkitBoxOrient: 'vertical',
+  }),
 };

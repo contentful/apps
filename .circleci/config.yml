@@ -29,6 +29,8 @@ jobs:
     steps:
       - checkout
       - node/install
+      - vault/get-secrets:
+          template-preset: 'aws-push-artifacts'
       - run:
           name: Check for prettier violations
           command: |
@@ -42,6 +44,9 @@ jobs:
       - run:
           name: Lint
           command: npm run lint
+      - run:
+          name: Verify project configurations
+          command: npm run verify-config
       - run:
           name: Build
           command: npm run build
@@ -123,6 +128,9 @@ jobs:
                 REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
                 STAGE='prd' npm run deploy
       - run:
+          name: Post Deploy
+          command: npm run post-deploy
+      - run:
           name: Invalidate Slack cloudfront distribution
           command: aws cloudfront create-invalidation --distribution-id $SLACK_PRD_CLOUDFRONT_DIST_ID --paths "/*"
 
@@ -158,26 +166,6 @@ jobs:
           name: Test
           command: cd examples/javascript && npm run test
 
-  notify-sentry-deploy:
-    docker:
-      - image: cimg/base:stable
-    environment:
-      SENTRY_ORG: contentful
-      SENTRY_PROJECT: marketplace-apps
-      SENTRY_ENVIRONMENT: production
-    steps:
-      - checkout
-      - run:
-          name: Create release and notify Sentry of deploy
-          command: |
-            curl -sL https://sentry.io/get-cli/ | bash
-            export SENTRY_RELEASE=$(sentry-cli releases propose-version)
-            sentry-cli releases new -p $SENTRY_PROJECT $SENTRY_RELEASE
-            sentry-cli releases set-commits $SENTRY_RELEASE --auto
-            sentry-cli releases files $SENTRY_RELEASE upload-sourcemaps path-to-sourcemaps-if-applicable
-            sentry-cli releases finalize $SENTRY_RELEASE
-            sentry-cli releases deploys $SENTRY_RELEASE new -e $SENTRY_ENVIRONMENT
-
 workflows:
   version: 2
   test-deploy:
@@ -200,15 +188,6 @@ workflows:
             - vault
           requires:
             - apps-test
-          filters:
-            branches:
-              only:
-                - master
-      - notify-sentry-deploy:
-          context:
-            - vault
-          requires:
-            - deploy-prod
           filters:
             branches:
               only:

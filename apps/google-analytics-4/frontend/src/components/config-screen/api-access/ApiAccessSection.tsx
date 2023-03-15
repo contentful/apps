@@ -6,10 +6,11 @@ import useKeyService from 'hooks/useKeyService';
 
 interface Props {
   onAccountSummariesChange: Function;
+  isAppInstalled: boolean;
 }
 
-const ApiAccessPage = (props: Props) => {
-  const { onAccountSummariesChange } = props;
+const ApiAccessSection = (props: Props) => {
+  const { onAccountSummariesChange, isAppInstalled } = props;
 
   const {
     parameters,
@@ -56,6 +57,7 @@ const ApiAccessPage = (props: Props) => {
           serviceAccountKeyId={parameters.serviceAccountKeyId}
           serviceAccountKey={parameters.serviceAccountKey}
           onAccountSummariesChange={onAccountSummariesChange}
+          isAppInstalled={isAppInstalled}
         />
       ) : (
         <SetupServiceAccountCard
@@ -72,4 +74,4 @@ const ApiAccessPage = (props: Props) => {
   );
 };
 
-export default ApiAccessPage;
+export default ApiAccessSection;

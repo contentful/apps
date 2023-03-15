@@ -15,7 +15,12 @@ export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, 
       response.status(error.status).send({ errors: error.toJSON() });
     } else {
       response.status(500).send({
-        errors: { errorType: 'ServerError', message: 'Internal Server Error', details: null },
+        errors: {
+          errorType: 'ServerError',
+          message: 'Internal Server Error',
+          details: null,
+          status: 500,
+        },
       });
     }
   }

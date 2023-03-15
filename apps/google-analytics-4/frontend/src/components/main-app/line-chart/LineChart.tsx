@@ -18,7 +18,9 @@ const ACCESSIBILITY_LABEL = 'Analytics line chart';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip);
 
-ChartJS.defaults.font.size = parseRemToPxInt(tokens.fontSizeS);
+const defaultFontSize = parseRemToPxInt(tokens.fontSizeS);
+
+ChartJS.defaults.font.size = defaultFontSize;
 ChartJS.defaults.font.family = tokens.fontStackPrimary;
 ChartJS.defaults.font.weight = tokens.fontWeightMedium.toString();
 ChartJS.defaults.borderColor = tokens.gray200;
@@ -27,8 +29,8 @@ ChartJS.defaults.datasets.line.borderColor = tokens.colorPrimary;
 interface Props {
   dataValues: number[];
   xAxisLabels: string[];
-  tooltipMetricLabel: string;
-  accessibilityLabel: string;
+  tooltipMetricLabel?: string;
+  accessibilityLabel?: string;
 }
 
 const LineChart = (props: Props) => {
@@ -52,16 +54,16 @@ const LineChart = (props: Props) => {
         padding: parseRemToPxInt(tokens.spacingXs),
         titleMarginBottom: parseRemToPxInt(tokens.spacing2Xs),
         titleFont: {
-          size: 9,
+          size: defaultFontSize,
         },
         bodyFont: {
-          size: 8,
+          size: defaultFontSize,
           // TO:DO once font weight is added to F36, replace with token
           weight: '700',
         },
         displayColors: false,
         callbacks: {
-          beforeBody: () => tooltipMetricLabel,
+          title: () => tooltipMetricLabel,
         },
       },
     },

@@ -15,10 +15,12 @@
     "bootstrap:ci": "lerna bootstrap --ci --concurrency=3",
     "clean": "lerna clean",
     "lint": "lerna run lint --concurrency=3",
+    "verify-config": "lerna run verify-config --concurrency=3",
     "build": "lerna run build --concurrency=1 --stream",
     "test": "lerna run test:ci --concurrency=1 --stream",
     "deploy": "lerna run deploy --concurrency=3",
     "deploy:test": "lerna run deploy:test --concurrency=3",
+    "post-deploy": "lerna run post-deploy",
     "publish-packages": "lerna version --conventional-commits --no-private --force-git-tag --create-release github --yes && lerna publish from-git --yes",
     "prettier": "prettier --no-editorconfig --no-error-on-unmatched-pattern --write {apps,packages,examples}/**/*.{js,jsx,ts,tsx}",
     "prepare": "husky install"

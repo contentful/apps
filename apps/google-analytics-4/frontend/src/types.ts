@@ -3,6 +3,8 @@ import { IdsAPI } from '@contentful/app-sdk';
 export interface AppInstallationParameters {
   serviceAccountKey: ServiceAccountKey;
   serviceAccountKeyId: ServiceAccountKeyId;
+  contentTypes: ContentTypes;
+  savedPropertyId: string;
 }
 
 // TODO: get this exported from the SDK
@@ -76,6 +78,14 @@ export interface RunReportResponse {
   propertyQuota: null;
   kind: string;
 }
+export interface RunReportParamsType {
+  propertyId: string;
+  slug: string;
+  startDate: string;
+  endDate: string;
+  dimensions: string | string[];
+  metrics: string | string[];
+}
 
 export type DateRangeType = 'lastWeek' | 'lastDay' | 'lastMonth';
 export interface AccountSummariesType {
@@ -89,4 +99,37 @@ export interface PropertySummariesType {
   displayName: string;
   property: string;
   propertyType: string;
+  parent: string;
 }
+
+export interface FlattenedPropertiesType {
+  propertyId: string;
+  propertyName: string;
+  accountName: string;
+}
+
+export interface ContentTypeValue {
+  slugField: string;
+  urlPrefix: string;
+}
+
+export interface ContentTypes {
+  [key: string]: ContentTypeValue;
+}
+
+export type ContentTypeEntries = [string, ContentTypeValue][];
+
+interface AllContentTypeValue {
+  name: string;
+  fields: {
+    id: string;
+    name: string;
+    type: string;
+  }[];
+}
+
+export interface AllContentTypes {
+  [key: string]: AllContentTypeValue;
+}
+
+export type AllContentTypeEntries = [string, AllContentTypeValue][];

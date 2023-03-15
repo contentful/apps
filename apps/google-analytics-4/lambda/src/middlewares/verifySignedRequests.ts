@@ -3,14 +3,12 @@ import { CanonicalRequest } from '@contentful/node-apps-toolkit/lib/requests/typ
 import { NextFunction, Request, Response } from 'express';
 import { InvalidSignature } from '../errors/invalidSignature';
 import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
+import { config } from '../config';
 
 export const verifySignedRequestMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-  const signingSecret = (process.env.SIGNING_SECRET || '').trim();
+  const signingSecret = config.signingSecret;
   const canonicalReq = makeCanonicalReq(req);
   let isValidReq = false;
-
-  console.log('signingSecret', signingSecret.replace(/.(?=.{4})/g, '*'));
-  console.log('canonicalReq', canonicalReq);
 
   try {
     isValidReq = NodeAppsToolkit.verifyRequest(signingSecret, canonicalReq, 60); // 60 second TTL
@@ -44,7 +42,7 @@ const makeCanonicalReq = (req: Request) => {
 
   return <CanonicalRequest>{
     method: req.method,
-    path: `${pathPrefix}${req.originalUrl}`, // note: req.originalUrl starts with a `/`
+    path: `${pathPrefix}${req.originalUrl}`, // note: req.originalUrl starts with a `/` and includes the full path & query string
     headers: headers,
   };
 };

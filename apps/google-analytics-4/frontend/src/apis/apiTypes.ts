@@ -23,34 +23,64 @@ const ZAccountSummary = z.object({
 export const ZAccountSummaries = z.array(ZAccountSummary);
 export type AccountSummaries = z.infer<typeof ZAccountSummaries>;
 
-// TODO: Update once we know exactly the shape of the run report GA data
-export const ZRunReportData = z.object({});
+const ZRow = z.object({
+  dimensionValues: z.array(
+    z.object({
+      value: z.string(),
+      oneValue: z.string(),
+    })
+  ),
+  metricValues: z.array(
+    z.object({
+      value: z.string(),
+      oneValue: z.string(),
+    })
+  ),
+});
+
+export const ZRunReportData = z.object({
+  dimensionHeaders: z.array(z.object({ name: z.string() })),
+  metricHeaders: z.array(
+    z.object({
+      name: z.string(),
+      type: z.string(),
+    })
+  ),
+  rows: z.array(ZRow),
+  totals: z.array(ZRow),
+  maximums: z.array(ZRow),
+  minimums: z.array(ZRow),
+  rowCount: z.number(),
+  metadata: z.object({
+    currencyCode: z.string(),
+    dataLossFromOtherRow: z.boolean(),
+    timeZone: z.string(),
+    _currencyCode: z.string(),
+    _timeZone: z.string(),
+  }),
+  propertyQuota: z.null(),
+  kind: z.string(),
+});
+
 export type RunReportData = z.infer<typeof ZRunReportData>;
 
 // TODO: more comprehensive recognization of known failures (ie. Stale/bad account data, lambda unavailable, transient, non-transient errors, timeouts)
 // NOTE: This needs to be in sync with the lambda - ie copy and pasted
 export const ERROR_TYPE_MAP = {
   unknown: 'Unknown',
-  unexpected: 'Unexpected Response from Server',
-  failedFetch: 'Failed fetch',
-  malformedApiResponse: 'Invalid response API',
-  invalidJson: 'Invalid json from API',
-  disabledAdminApi: 'Disabled Admin Api',
-  disabledDataApi: 'Disabled Data Api',
-  noAccountsOrPropertiesFound: 'No accounts/properties found',
-  invalidServiceAccount: 'Invalid service account',
+  unexpected: 'Unexpected',
+  failedFetch: 'FailedFetch',
+  malformedApiResponse: 'MalformedApiResponse',
+  invalidJson: 'InvalidJson',
+  disabledAdminApi: 'DisabledAdminApi',
+  disabledDataApi: 'DisabledDataApi',
+  noAccountsOrPropertiesFound: 'NoAccountsOrPropertiesFound',
+  invalidServiceAccount: 'InvalidServiceAccount',
 };
-
-const ZErrorTypesType = z.union([
-  z.literal(ERROR_TYPE_MAP.unknown),
-  z.literal(ERROR_TYPE_MAP.disabledAdminApi),
-  z.literal(ERROR_TYPE_MAP.disabledDataApi),
-  z.literal(ERROR_TYPE_MAP.noAccountsOrPropertiesFound),
-]);
 
 export const ZApiError = z.object({
   details: z.any(),
-  errorType: ZErrorTypesType,
+  errorType: z.string(),
   message: z.string(),
   status: z.number(),
 });

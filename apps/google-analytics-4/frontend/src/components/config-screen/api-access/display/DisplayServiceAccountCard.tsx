@@ -22,6 +22,7 @@ interface Props {
   serviceAccountKey: ServiceAccountKey;
   onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>;
   onAccountSummariesChange: Function;
+  isAppInstalled: boolean;
 }
 
 const DisplayServiceAccountCard = (props: Props) => {
@@ -30,6 +31,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     serviceAccountKey,
     onEditGoogleAccountDetails,
     onAccountSummariesChange,
+    isAppInstalled,
   } = props;
 
   const [isLoading, setIsLoading] = useState(true);
@@ -45,9 +47,6 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   const handleApiError = (error: ApiErrorType) => {
     switch (error.errorType) {
-      case ERROR_TYPE_MAP.unknown:
-        setUnknownError(error);
-        throw new Error(error.message);
       case ERROR_TYPE_MAP.invalidServiceAccount:
         setInvalidServiceAccountError(error);
         break;
@@ -62,7 +61,8 @@ const DisplayServiceAccountCard = (props: Props) => {
         setDataApiError(undefined);
         break;
       default:
-        throw new Error('Unhandled error exception');
+        setUnknownError(error);
+        throw error;
     }
   };
 
@@ -74,7 +74,10 @@ const DisplayServiceAccountCard = (props: Props) => {
       setAdminApiError(undefined);
     } catch (e: any) {
       if (isApiErrorType(e)) handleApiError(e);
-      else throw new Error('Unhandled error exception');
+      else {
+        setUnknownError(e);
+        throw e;
+      }
     } finally {
       setIsLoading(false);
     }
@@ -85,17 +88,21 @@ const DisplayServiceAccountCard = (props: Props) => {
     };
 
     // It wants to add onAccountSummariesChange as a dependency but this will cause an infinite re-render
+    // isAppInstalled is needed as a dependency to trigger this called once the app is installed succesffully
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [api]);
+  }, [api, isAppInstalled]);
 
   const verifyDataApi = useCallback(async () => {
     try {
       setIsLoading(true);
-      await api.getRunReportData();
+      await api.runReports();
       setDataApiError(undefined);
     } catch (e: any) {
       if (isApiErrorType(e)) handleApiError(e);
-      else throw new Error('Unhandled error exception');
+      else {
+        setUnknownError(e);
+        throw e;
+      }
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +111,10 @@ const DisplayServiceAccountCard = (props: Props) => {
       setDataApiError(undefined);
       setIsLoading(false);
     };
-  }, [api]);
+
+    // isAppInstalled is needed as a dependency to trigger this called once the app is installed succesffully
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api, isAppInstalled]);
 
   useEffect(() => {
     verifyAdminApi();
@@ -114,6 +124,7 @@ const DisplayServiceAccountCard = (props: Props) => {
   const handleApiTestClick = () => {
     verifyAdminApi();
     verifyDataApi();
+    setUnknownError(undefined);
   };
 
   interface BadgeNoteType {
@@ -165,7 +176,12 @@ const DisplayServiceAccountCard = (props: Props) => {
       );
     } else if (unknownError) {
       return (
-        <RenderSimpleBadgeNote badgeLabel="Unknown Error" noteMessage={unknownError.message} />
+        <RenderSimpleBadgeNote
+          badgeLabel="Unknown Error"
+          noteMessage={
+            'An unknown error occurred. You can try the action again in a few minutes, or contact support if the error persists.'
+          }
+        />
       );
     }
 

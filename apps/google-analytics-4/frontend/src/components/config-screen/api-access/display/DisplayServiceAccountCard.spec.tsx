@@ -35,6 +35,7 @@ describe('Installed Service Account Card', () => {
           serviceAccountKey={validServiceKeyFile}
           onEditGoogleAccountDetails={() => {}}
           onAccountSummariesChange={() => {}}
+          isAppInstalled={true}
         />
       );
     });
