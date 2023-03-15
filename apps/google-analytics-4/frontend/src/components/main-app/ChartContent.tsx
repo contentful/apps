@@ -15,9 +15,11 @@ const ChartContent = (props: Props) => {
   const parseRowDates = (): string[] => {
     return pageViewData.rows.map((r: Row) => {
       const d = r.dimensionValues[0].value;
-      return new Date(
+      const utcDate = new Date(
         `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
-      ).toLocaleDateString('en-us', { month: 'short', day: 'numeric' });
+      ).toUTCString();
+      const [day, month] = utcDate.substring(5, 11).split(' ');
+      return `${month} ${day}`;
     });
   };
 
