@@ -44,16 +44,6 @@ export class GoogleApiService {
     return accountSummaries;
   }
 
-  sortReportResponse = (rows: ReportRowType[]) => {
-    rows.filter(
-      (row: ReportRowType) => row.dimensionValues?.length && row.dimensionValues[0].value
-    );
-
-    rows.sort((v1: ReportRowType, v2: ReportRowType) => {
-      return Number(v1.dimensionValues[0].value) - Number(v2.dimensionValues[0].value);
-    });
-  };
-
   async runReport(
     property: string,
     slug: string,
@@ -89,9 +79,18 @@ export class GoogleApiService {
             },
           },
         },
+        keepEmptyRows: true,
+        orderBys: [
+          {
+            desc: false,
+            dimension: {
+              dimensionName: 'date',
+              orderType: 'NUMERIC',
+            },
+          },
+        ],
       });
 
-      if (response.rows) this.sortReportResponse(response.rows as unknown as ReportRowType[]);
       return response;
     } catch (e: any) {
       if (isGoogleError(e)) handleGoogleDataApiError(e);
