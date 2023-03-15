@@ -41,14 +41,6 @@ const Field = (props: FieldProps) => {
   const [error, setError] = useState(null || '');
   sdk.window.startAutoResizer();
 
-  const fetchPagedVideos = async (
-    projectIds: string[],
-    parameters: any,
-    page?: number
-  ): Promise<WistiaVideo[]> => {
-    return await fetchVideos(projectIds, parameters.apiBearerToken, page);
-  };
-
   // Set inital state based on field values
   useEffect(() => {
     const fetchInitialVideos = async () => {
@@ -58,16 +50,8 @@ const Field = (props: FieldProps) => {
           parameters.excludedProjects,
           parameters.apiBearerToken
         );
-        let videos = await fetchPagedVideos(projectIds, parameters);
-        if (videos.length === 100) {
-          // just get the second page of results, will figure out n pages in a follow-up
-          videos = [
-            ...videos,
-            ...(await fetchPagedVideos(projectIds, parameters.apiBearerToken, 2)),
-          ];
-          updateData(videos);
-          filterDropdownData(videos);
-        } else if (videos.length === 0) {
+        let videos = await fetchVideos(projectIds, parameters.apiBearerToken);
+        if (videos.length === 0) {
           setError('There are no videos in your Wistia space');
         } else {
           updateData(videos);

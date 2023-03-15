@@ -25,21 +25,38 @@ export const fetchProjects = async (bearerToken: string): Promise<WistiaProject[
   }
 };
 
+const getTotalPages = (count: number) => {
+  return Math.ceil(count / 100);
+};
+
 export const fetchVideos = async (
   projectIds: string[],
-  bearerToken: string,
-  page?: number
+  bearerToken: string
 ): Promise<WistiaVideo[]> => {
   const mappedProjects = await Promise.all(
     projectIds.map(async (id: string) => {
       const project = await (
-        await fetch(`https://api.wistia.com/v1/projects/${id}.json${page ? '?page=' + page : ''}`, {
+        await fetch(`https://api.wistia.com/v1/projects/${id}.json`, {
           headers: {
             Authorization: `Bearer ${bearerToken}`,
           },
         })
       ).json();
-      const mappedVideos = project.medias.map((video: WistiaVideo) => ({
+      let videos = project.medias;
+      if (project.mediaCount > 100) {
+        // start at 2 since the first page is already gotten
+        for (let i = 2; i <= getTotalPages(project.mediaCount); i++) {
+          const additionalProject = await (
+            await fetch(`https://api.wistia.com/v1/projects/${id}.json?page=${i}`, {
+              headers: {
+                Authorization: `Bearer ${bearerToken}`,
+              },
+            })
+          ).json();
+          videos = [...videos, ...additionalProject.medias];
+        }
+      }
+      const mappedVideos = videos.map((video: WistiaVideo) => ({
         ...video,
         project: {
           id,
