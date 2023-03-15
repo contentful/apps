@@ -8,6 +8,7 @@ import {
   handleGoogleAdminApiError,
 } from './googleApiUtils';
 
+const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 export class GoogleApiService {
   readonly serviceAccountKeyFile: ServiceAccountKeyFile;
   readonly analyticsAdminServiceClient: AnalyticsAdminServiceClient;
@@ -44,6 +45,53 @@ export class GoogleApiService {
     return accountSummaries;
   }
 
+  formatDate = (dateValue: Date) => dateValue.toISOString().slice(0, 10).split('-').join('');
+
+  deriveDate = (dateValue: string) =>
+    new Date(
+      `${dateValue.substring(0, 4)}-${dateValue.substring(4, 6)}-${dateValue.substring(6, 8)}`
+    );
+
+  mapDates = (startDate: string, endDate: string) => {
+    var arr = [];
+    const dt = new Date(new Date(startDate).setUTCHours(0, 0, 0, 0));
+    const end = new Date(new Date(endDate).setUTCHours(0, 0, 0, 0));
+
+    while (dt <= end) {
+      arr.push(new Date(dt));
+      dt.setUTCDate(dt.getUTCDate() + 1);
+    }
+
+    return arr;
+  };
+
+  supplementDates = (rows: ReportRowType[], _startDate?: string, _endDate?: string) => {
+    let supplementedReportRows = [] as ReportRowType[];
+
+    const startDate = _startDate || this.formatDate(new Date(Date.now() - ONE_WEEK));
+    const endDate = _endDate || this.formatDate(new Date(Date.now()));
+
+    this.mapDates(startDate, endDate).forEach((date) => {
+      const foundRow = rows.find(
+        (row) => this.deriveDate(row.dimensionValues[0].value).getUTCDate() == date.getUTCDate()
+      );
+
+      if (foundRow) {
+        supplementedReportRows.push({
+          metricValues: foundRow.metricValues,
+          dimensionValues: foundRow.dimensionValues,
+        });
+      } else {
+        supplementedReportRows.push({
+          metricValues: [{ value: '0', oneValue: 'value' }],
+          dimensionValues: [{ value: this.formatDate(date), oneValue: 'value' }],
+        });
+      }
+    });
+
+    return supplementedReportRows;
+  };
+
   async runReport(
     property: string,
     slug: string,
@@ -52,16 +100,16 @@ export class GoogleApiService {
     dimensions?: string[],
     metrics?: string[]
   ) {
-    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
     const DEFAULT_DIMENSIONS = ['date'];
     const DEFAULT_METRICS = ['screenPageViews', 'totalUsers', 'screenPageViewsPerUser'];
+    const DEFAULT_START_DATE = new Date(Date.now() - ONE_WEEK).toISOString();
 
     try {
       const [response] = await this.betaAnalyticsDataClient.runReport({
         property,
         dateRanges: [
           {
-            startDate: startDate ?? new Date(Date.now() - ONE_WEEK).toISOString().split('T')[0], // extracts YYYY-MM-DD from ISO string
+            startDate: startDate ?? DEFAULT_START_DATE.split('T')[0], // extracts YYYY-MM-DD from ISO string
             endDate: endDate ?? 'today',
           },
         ],
@@ -91,7 +139,10 @@ export class GoogleApiService {
         ],
       });
 
-      return response;
+      return {
+        ...response,
+        ...{ rows: this.supplementDates(response.rows as ReportRowType[], startDate, endDate) },
+      };
     } catch (e: any) {
       if (isGoogleError(e)) handleGoogleDataApiError(e);
       else {
