@@ -5,6 +5,18 @@ import { GoogleApiService } from '../services/googleApiService';
 const formatArrays = (param: string | string[]) =>
   Array.isArray(param) ? param : param.split(',');
 
+const mapDates = (startDate: string, endDate: string) => {
+  var arr = [];
+  const dt = new Date(startDate);
+
+  while (dt <= new Date(endDate)) {
+    arr.push(new Date(dt));
+    dt.setDate(dt.getDate() + 1);
+  }
+
+  return arr;
+};
+
 const ApiController = {
   credentials: (_req: Request, res: Response) => {
     // TODO: actually verify the credentials
