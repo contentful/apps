@@ -229,13 +229,6 @@ const DisplayServiceAccountCard = (props: Props) => {
                 {serviceAccountKeyId.clientEmail}
               </TextLink>
             </Box>
-            {isLoading ? (
-              <Spinner variant="default" />
-            ) : adminApiError ? (
-              <ErrorCircleIcon variant="negative" />
-            ) : (
-              <CheckCircleIcon variant="positive" />
-            )}
           </Flex>
         </Paragraph>
       </FormControl>
