@@ -102,14 +102,14 @@ export class GoogleApiService {
   ) {
     const DEFAULT_DIMENSIONS = ['date'];
     const DEFAULT_METRICS = ['screenPageViews', 'totalUsers', 'screenPageViewsPerUser'];
-    const DEFAULT_START_DATE = new Date(Date.now() - ONE_WEEK).toISOString();
+    const DEFAULT_START_DATE = new Date(Date.now() - ONE_WEEK).toISOString().split('T')[0]; // extracts YYYY-MM-DD from ISO string
 
     try {
       const [response] = await this.betaAnalyticsDataClient.runReport({
         property,
         dateRanges: [
           {
-            startDate: startDate ?? DEFAULT_START_DATE.split('T')[0], // extracts YYYY-MM-DD from ISO string
+            startDate: startDate ?? DEFAULT_START_DATE,
             endDate: endDate ?? 'today',
           },
         ],
