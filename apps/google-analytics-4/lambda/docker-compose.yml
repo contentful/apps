@@ -38,10 +38,10 @@ services:
 
   lambda:
     build:
-      context: ./lambda
+      context: .
       dockerfile: Dockerfile
     volumes:
-      - './lambda:/usr/src/app'
+      - '.:/usr/src/app'
     ports:
       - 8080:8080
     environment:

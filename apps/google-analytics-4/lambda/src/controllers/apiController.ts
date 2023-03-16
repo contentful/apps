@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { RunReportParamsType } from '../types';
 import { GoogleApiService } from '../services/googleApiService';
+// import { DynamoDBService } from '../services/dynamoDbService';
 
 const formatArrays = (param: string | string[]) =>
   Array.isArray(param) ? param : param.split(',');
@@ -12,6 +13,25 @@ const ApiController = {
   },
 
   account_summaries: async (req: Request, res: Response, next: NextFunction) => {
+    // TODO: Add actual logic for lazy getting credentials TBD example usage below
+    // const dynamoDB = new DynamoDBService();
+    // const spaceId = req.get('x-contentful-space-id');
+    // const sharedCredentialsId = `${spaceId}-${req.serviceAccountKeyId?.id!}`;
+
+    // const sharedCredentials = await dynamoDB.getSharedCredentials({
+    //   sharedCredentialsId,
+    // });
+
+    // if (!sharedCredentials) {
+    //   const data = await dynamoDB.saveSharedCredentials({
+    //     sharedCredentialsId,
+    //     serviceKey: req.serviceAccountKey!,
+    //   });
+    //   console.log({ data });
+    // } else {
+    //   console.log({ sharedCredentials });
+    // }
+
     try {
       const serviceAccountKeyFile = req.serviceAccountKey;
 
