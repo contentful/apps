@@ -12,7 +12,7 @@ import {
   Spinner,
   Button,
 } from '@contentful/f36-components';
-import { ExternalLinkTrimmedIcon, CheckCircleIcon, ErrorCircleIcon } from '@contentful/f36-icons';
+import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
@@ -206,7 +206,7 @@ const DisplayServiceAccountCard = (props: Props) => {
           </Box>
           <Box style={{ minWidth: '60px', minHeight: '30px' }}>
             {isLoading ? (
-              <Spinner variant="default" />
+              <Spinner variant="primary" />
             ) : (
               <Button variant="primary" size="small" onClick={handleApiTestClick}>
                 Test
@@ -240,7 +240,7 @@ const DisplayServiceAccountCard = (props: Props) => {
       </FormControl>
       <FormControl marginBottom="none">
         <FormControl.Label marginBottom="none">Status</FormControl.Label>
-        <Paragraph>{isLoading ? <Spinner variant="default" /> : <RenderStatusInfo />}</Paragraph>
+        <Paragraph>{isLoading ? <Spinner variant="primary" /> : <RenderStatusInfo />}</Paragraph>
       </FormControl>
     </Card>
   );
