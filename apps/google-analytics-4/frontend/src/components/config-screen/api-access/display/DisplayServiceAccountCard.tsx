@@ -20,7 +20,7 @@ import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
   serviceAccountKey: ServiceAccountKey;
-  onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>;
+  onInEditModeChange: Function;
   onAccountSummariesChange: Function;
   isAppInstalled: boolean;
 }
@@ -29,7 +29,7 @@ const DisplayServiceAccountCard = (props: Props) => {
   const {
     serviceAccountKeyId,
     serviceAccountKey,
-    onEditGoogleAccountDetails,
+    onInEditModeChange,
     onAccountSummariesChange,
     isAppInstalled,
   } = props;
@@ -200,7 +200,7 @@ const DisplayServiceAccountCard = (props: Props) => {
               testId="editServiceAccountButton"
               as="button"
               variant="primary"
-              onClick={onEditGoogleAccountDetails}>
+              onClick={() => onInEditModeChange(true)}>
               Edit
             </TextLink>
           </Box>

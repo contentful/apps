@@ -33,7 +33,7 @@ describe('Installed Service Account Card', () => {
         <DisplayServiceAccountCard
           serviceAccountKeyId={validServiceKeyId}
           serviceAccountKey={validServiceKeyFile}
-          onEditGoogleAccountDetails={() => {}}
+          onInEditModeChange={() => {}}
           onAccountSummariesChange={() => {}}
           isAppInstalled={true}
         />
