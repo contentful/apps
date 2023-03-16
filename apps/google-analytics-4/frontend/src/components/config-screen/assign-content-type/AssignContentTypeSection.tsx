@@ -34,8 +34,8 @@ const AssignContentTypeSection = (props: Props) => {
   const sdk = useSDK<AppExtensionSDK>();
 
   useEffect(() => {
-    if (parameters.contentTypes) onIsValidContentTypeAssignment(true);
-  }, [onIsValidContentTypeAssignment, parameters.contentTypes]);
+    if (parameters.savedContentTypes) onIsValidContentTypeAssignment(true);
+  }, [onIsValidContentTypeAssignment, parameters.savedContentTypes]);
 
   const handleContentTypeChange = (prevKey: string, newKey: string) => {
     const newContentTypes: ContentTypes = {};

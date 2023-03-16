@@ -105,7 +105,7 @@ describe('Installed Service Account Key', () => {
       serviceAccountKey: validServiceKeyFile,
       serviceAccountKeyId: validServiceKeyId,
       propertyId: 'properties/1234',
-      contentTypes: {
+      savedContentTypes: {
         course: { slugField: 'shortDescription', urlPrefix: 'about' },
       },
     });
@@ -145,7 +145,7 @@ describe('Installed Service Account Key', () => {
           projectId: 'PROJECT_ID',
         },
         propertyId: 'properties/1234',
-        contentTypes: {
+        savedContentTypes: {
           course: { slugField: 'shortDescription', urlPrefix: 'about' },
         },
       },
