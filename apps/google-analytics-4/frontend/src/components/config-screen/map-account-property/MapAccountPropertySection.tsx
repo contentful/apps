@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Stack, Box, Subheading, Paragraph, Select, Spinner } from '@contentful/f36-components';
 import { AccountSummariesType, FlattenedPropertiesType } from 'types';
-import useKeyService from 'hooks/useKeyService';
-import { AppExtensionSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 
 interface Props {
   accountsSummaries: AccountSummariesType[];
+  parameters: KeyValueMap;
+  mergeSdkParameters: Function;
+  onIsValidAccountProperty: Function;
 }
 
 export default function MapAccountPropertySection(props: Props) {
-  const { accountsSummaries } = props;
-  const { handlePropertyChange } = useKeyService({});
-  const sdk = useSDK<AppExtensionSDK>();
+  const { accountsSummaries, parameters, mergeSdkParameters, onIsValidAccountProperty } = props;
 
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [flattenedProperties, setFlattenedProperties] = useState<FlattenedPropertiesType[]>([]);
@@ -20,14 +19,14 @@ export default function MapAccountPropertySection(props: Props) {
   const [loadingParameters, setLoadingParameters] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchParametersFromSdk = async () => {
-      const parameters = await sdk.app.getParameters();
-      if (parameters?.savedPropertyId) setSelectedPropertyId(parameters.savedPropertyId);
-      setLoadingParameters(false);
-    };
-
-    fetchParametersFromSdk();
-  }, [sdk]);
+    if (parameters.propertyId) {
+      setSelectedPropertyId(parameters.propertyId);
+      onIsValidAccountProperty(true);
+    } else {
+      onIsValidAccountProperty(false);
+    }
+    setLoadingParameters(false);
+  }, [onIsValidAccountProperty, parameters.propertyId]);
 
   useEffect(() => {
     const _flattenedProperties = [] as FlattenedPropertiesType[];
@@ -48,7 +47,8 @@ export default function MapAccountPropertySection(props: Props) {
   const handleSelectionChange = (e: any) => {
     const _selectedPropertyId = e.target.value;
     setSelectedPropertyId(_selectedPropertyId);
-    handlePropertyChange(_selectedPropertyId);
+    mergeSdkParameters({ propertyId: _selectedPropertyId });
+    onIsValidAccountProperty(true);
   };
 
   const shouldRenderDropdown = () => {

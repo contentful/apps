@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Stack,
   Card,
@@ -12,15 +12,21 @@ import {
   Box,
 } from '@contentful/f36-components';
 import { CheckCircleIcon, ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
+import { ServiceAccountKey, ServiceAccountKeyId } from 'types';
+import {
+  AssertionError,
+  convertKeyFileToServiceAccountKey,
+  convertServiceAccountKeyToServiceAccountKeyId,
+} from 'utils/serviceAccountKey';
+import { debounce } from 'lodash';
+import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 
 interface Props {
-  isValid: boolean;
-  errorMessage: string;
-  isRequired: boolean;
-  serviceAccountKeyFile: string;
-  onKeyFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   isInEditMode: boolean;
-  onCancelGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>;
+  mergeSdkParameters: Function;
+  parameters: KeyValueMap;
+  onIsValidServiceAccount: Function;
+  onInEditModeChange: Function;
 }
 
 const placeholderText = `{
@@ -30,14 +36,69 @@ const placeholderText = `{
 
 export default function SetupServiceAccountCard(props: Props) {
   const {
-    isValid,
-    errorMessage,
-    isRequired,
-    serviceAccountKeyFile,
-    onKeyFileChange,
+    mergeSdkParameters,
+    parameters,
     isInEditMode,
-    onCancelGoogleAccountDetails,
+    onInEditModeChange,
+    onIsValidServiceAccount,
   } = props;
+
+  const [keyFile, setKeyFile] = useState<string>();
+  const [serviceAccountKey, setServiceAccountKey] = useState<ServiceAccountKey>();
+  const [serviceAccountKeyId, setServiceAccountKeyId] = useState<ServiceAccountKeyId>();
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
+  useEffect(() => {
+    !errorMessage && parameters.serviceAccountKey && parameters.serviceAccountKeyId
+      ? onIsValidServiceAccount(true)
+      : onIsValidServiceAccount(false);
+
+    // This is a on page load check, not whenever parameters service accounts change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onIsValidServiceAccount]);
+
+  const handleKeyFileChange = (e: any) => {
+    setKeyFile(e.target.value);
+    const debHandleServiceKey = debounce(() => handleKeyFileToServiceAccount(e.target.value), 150);
+    debHandleServiceKey();
+  };
+
+  const handleKeyFileToServiceAccount = (keyfile: string) => {
+    try {
+      const _serviceAccountKey = convertKeyFileToServiceAccountKey(keyfile);
+      const _serviceAccountKeyId =
+        convertServiceAccountKeyToServiceAccountKeyId(_serviceAccountKey);
+      setServiceAccountKey(_serviceAccountKey);
+      setServiceAccountKeyId(_serviceAccountKeyId);
+      setErrorMessage('');
+
+      const _parameters = {
+        serviceAccountKey: _serviceAccountKey,
+        serviceAccountKeyId: _serviceAccountKeyId,
+      };
+
+      mergeSdkParameters(_parameters);
+      onIsValidServiceAccount(true);
+    } catch (e: any) {
+      onIsValidServiceAccount(false);
+      // failed assertions about key file contents or could not parse as JSON
+      if (e instanceof AssertionError || e instanceof SyntaxError) {
+        setErrorMessage(e.message);
+      } else {
+        console.error(e);
+        setErrorMessage('An unknown error occurred');
+      }
+    }
+  };
+
+  const handleCancelClick = () => {
+    setKeyFile('');
+    setServiceAccountKey(undefined);
+    setServiceAccountKeyId(undefined);
+    setErrorMessage('');
+    onInEditModeChange(false);
+    onIsValidServiceAccount(true);
+  };
 
   return (
     <Stack spacing="spacingL" flexDirection="column">
@@ -51,7 +112,7 @@ export default function SetupServiceAccountCard(props: Props) {
               testId="cancelServiceAccountButton"
               as="button"
               variant="primary"
-              onClick={onCancelGoogleAccountDetails}>
+              onClick={handleCancelClick}>
               Cancel
             </TextLink>
           )}
@@ -74,34 +135,32 @@ export default function SetupServiceAccountCard(props: Props) {
         </Box>
         <FormControl
           id="accountCredentialsFile"
-          isInvalid={!isValid}
-          isRequired={isRequired}
+          isInvalid={!serviceAccountKey || !serviceAccountKeyId}
+          isRequired={true}
           marginBottom={!isInEditMode ? 'none' : 'spacingM'}>
           <FormControl.Label>Private Key File</FormControl.Label>
           <Textarea
             name="accountCredentialsFile"
             placeholder={placeholderText}
             rows={10}
-            value={serviceAccountKeyFile}
-            onChange={onKeyFileChange}
+            value={keyFile}
+            onChange={handleKeyFileChange}
           />
-          {isValid ? (
-            serviceAccountKeyFile ? (
-              <Flex marginTop="spacingXs" alignItems="center">
-                <Flex isInline={true} alignItems="center">
-                  <CheckCircleIcon variant="positive" />
-                  <Text as="p" marginLeft="spacing2Xs" fontColor="gray700">
-                    Service account key file is valid
-                  </Text>
-                </Flex>
-              </Flex>
-            ) : (
-              <FormControl.HelpText>
-                Paste the service account key file (JSON) above
-              </FormControl.HelpText>
-            )
-          ) : (
+          {!keyFile ? (
+            <FormControl.HelpText>
+              Paste the service account key file (JSON) above
+            </FormControl.HelpText>
+          ) : errorMessage ? (
             <FormControl.ValidationMessage>Error: {errorMessage}</FormControl.ValidationMessage>
+          ) : (
+            <Flex marginTop="spacingXs" alignItems="center">
+              <Flex isInline={true} alignItems="center">
+                <CheckCircleIcon variant="positive" />
+                <Text as="p" marginLeft="spacing2Xs" fontColor="gray700">
+                  Service account key file is valid
+                </Text>
+              </Flex>
+            </Flex>
           )}
         </FormControl>
       </Card>

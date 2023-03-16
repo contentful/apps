@@ -1,18 +1,21 @@
 import { act, render, screen } from '@testing-library/react';
 import SetupServiceAccountCard from 'components/config-screen/api-access/setup/SetupServiceAccountCard';
-import { validServiceKeyFile } from '../../../../../test/mocks';
+import { mockSdk, mockCma } from '../../../../../test/mocks';
+
+jest.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+  useCMA: () => mockCma,
+}));
 
 describe('Setup Google Service Account Details page', () => {
   it('can render the about section', async () => {
     await act(async () => {
       render(
         <SetupServiceAccountCard
-          isValid={false}
-          errorMessage="error"
-          isRequired={true}
-          serviceAccountKeyFile={JSON.stringify(validServiceKeyFile)}
-          onKeyFileChange={() => {}}
-          onCancelGoogleAccountDetails={() => {}}
+          parameters={{}}
+          onIsValidServiceAccount={() => {}}
+          mergeSdkParameters={() => {}}
+          onInEditModeChange={() => {}}
           isInEditMode={false}
         />
       );
