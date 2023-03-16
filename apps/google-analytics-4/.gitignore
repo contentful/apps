@@ -22,3 +22,6 @@ lambda/config/serverless-env.dev.yml
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# dynamodb dev
+shared-local-instance.db
