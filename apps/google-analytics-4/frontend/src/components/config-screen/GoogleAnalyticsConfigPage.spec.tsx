@@ -104,8 +104,8 @@ describe('Installed Service Account Key', () => {
     mockSdk.app.getParameters.mockReturnValue({
       serviceAccountKey: validServiceKeyFile,
       serviceAccountKeyId: validServiceKeyId,
-      savedPropertyId: 'properties/1234',
-      savedContentTypes: {
+      propertyId: 'properties/1234',
+      contentTypes: {
         course: { slugField: 'shortDescription', urlPrefix: 'about' },
       },
     });
@@ -144,8 +144,8 @@ describe('Installed Service Account Key', () => {
           id: 'PRIVATE_KEY_ID',
           projectId: 'PROJECT_ID',
         },
-        savedPropertyId: 'properties/1234',
-        savedContentTypes: {
+        propertyId: 'properties/1234',
+        contentTypes: {
           course: { slugField: 'shortDescription', urlPrefix: 'about' },
         },
       },

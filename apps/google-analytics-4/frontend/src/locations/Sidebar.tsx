@@ -2,12 +2,13 @@ import AnalyticsApp from 'components/main-app/analytics-app/AnalyticsApp';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
 import { useApi } from 'hooks/useApi';
+import { AppInstallationParameters } from 'types';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
 
-  const { serviceAccountKey, serviceAccountKeyId, savedPropertyId, contentTypes } =
-    sdk.parameters.installation;
+  const { serviceAccountKey, serviceAccountKeyId, propertyId, contentTypes } = sdk.parameters
+    .installation as AppInstallationParameters;
 
   const currentContentType = sdk.contentType.sys.id;
   const slugFieldInfo = contentTypes[currentContentType];
@@ -16,7 +17,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <AnalyticsApp api={api} propertyId={savedPropertyId} slugFieldInfo={slugFieldInfo} />
+      <AnalyticsApp api={api} propertyId={propertyId} slugFieldInfo={slugFieldInfo} />
     </>
   );
 };
