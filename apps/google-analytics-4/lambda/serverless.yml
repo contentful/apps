@@ -17,6 +17,10 @@ custom:
     securityPolicy: tls_1_2
   serverless-offline:
     httpPort: 8080
+    host: 0.0.0.0
+  dynamoDbEndpoint: http://dynamodb:8000
+  dynamoDbtableName: sls-apps-ga4-backend-${opt:stage, 'dev'}-SharedCredentialsTable
+  dynamoDbSharedCredentialsSecretKey: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):dynamoDbSharedCredentialsSecretKey}
 
 provider:
   name: aws
@@ -27,6 +31,23 @@ provider:
   deploymentBucket:
     name: cf-apps-serverless-deployment
   deploymentPrefix: sls-apps-google-analytics-4
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [SharedCredentialsTable, Arn]
+  environment:
+    DYNAMODB_ENDPOINT: ${self:custom.dynamoDbEndpoint}
+    DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbtableName}
+    SHARED_CREDENTIALS_SECRET_KEY: ${self:custom.dynamoDbSharedCredentialsSecretKey}
 
 functions:
   api:
@@ -37,8 +58,25 @@ functions:
       STAGE: ${opt:stage, 'dev'}
       NODE_ENV: ${env:NODE_ENV, 'development'}
       RELEASE_VERSION: ${env:CIRCLE_SHA1, 'undefined'}
+      DYNAMODB_ENDPOINT: ${self:custom.dynamoDbEndpoint}
+      DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbtableName}
+      SHARED_CREDENTIALS_SECRET_KEY: ${self:custom.dynamoDbSharedCredentialsSecretKey}
     handler: build/src/index.handler
     events:
       - http:
           path: /{any+}
           method: ANY
+
+resources:
+  Resources:
+    SharedCredentialsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.dynamoDbtableName}
+        AttributeDefinitions:
+          - AttributeName: sharedCredentialsId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: sharedCredentialsId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
