@@ -17,8 +17,8 @@ export class ApiError<T extends Record<string, unknown>> extends Error {
   status: number;
   details?: T;
 
-  constructor(message: string, errorType: string, status: number, details?: T) {
-    super(message);
+  constructor(message: string, errorType: string, status: number, details?: T, cause?: Error) {
+    super(message, cause);
     this.errorType = errorType;
     this.status = status;
     this.details = details;

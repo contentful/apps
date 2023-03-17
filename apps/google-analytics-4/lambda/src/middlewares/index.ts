@@ -11,7 +11,14 @@ const Middleware = {
   serviceAccountKeyProvider: serviceAccountKeyProvider,
   sentryErrorHandler: Sentry.Handlers.errorHandler({
     shouldHandleError(error) {
-      return !isApiError(error);
+      if (isApiError(error)) {
+        // only report apiErrors that are related to request verification
+        return (
+          error.errorType === 'InvalidSignature' || error.errorType === 'UnableToVerifyRequest'
+        );
+      }
+
+      return true;
     },
   }),
   apiErrorMapper: apiErrorMapper,
