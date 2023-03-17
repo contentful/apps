@@ -39,10 +39,17 @@ const makeCanonicalReq = (req: Request) => {
 
   // TODO: make this stage prefixing logic better? (yuck)
   const pathPrefix = process.env.STAGE !== 'prd' ? `/${process.env.STAGE}` : '';
+  const fullPath = req.originalUrl.split('?')[0];
+  const signedPath = `${pathPrefix}${fullPath}`; // note: req.originalUrl starts with a `/` and includes the full path & query string
+
+  console.log('makeCanonicalRequest#pathPrefix', pathPrefix);
+  console.log('makeCanonicalRequest#req.originalUrl', req.originalUrl);
+  console.log('makeCanonicalRequest#fullPath', fullPath);
+  console.log('makeCanonicalRequest#signedPath', signedPath);
 
   return <CanonicalRequest>{
     method: req.method,
-    path: `${pathPrefix}${req.originalUrl}`, // note: req.originalUrl starts with a `/` and includes the full path & query string
+    path: signedPath,
     headers: headers,
   };
 };
