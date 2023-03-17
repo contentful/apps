@@ -114,7 +114,7 @@ const AnalyticsApp = (props: Props) => {
           {renderChartContent()}
 
           <ChartFooter
-            slugName={slugValue ? slugValue : ''}
+            slugName={`Page path: ${urlPrefix}${slugValue}` || ''}
             viewUrl="https://analytics.google.com/"
           />
         </>
