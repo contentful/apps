@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { AppExtensionSDK, AppState } from '@contentful/app-sdk';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
 import { styles } from 'components/config-screen/GoogleAnalytics.styles';
 import Splitter from 'components/common/Splitter';
@@ -11,6 +11,7 @@ import { Box } from '@contentful/f36-components';
 import AssignContentTypeSection from 'components/config-screen/assign-content-type/AssignContentTypeSection';
 import MapAccountPropertySection from 'components/config-screen/map-account-property/MapAccountPropertySection';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
+import { generateEditorInterfaceAssignments } from 'utils/contentTypes';
 
 export default function GoogleAnalyticsConfigPage() {
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);
@@ -58,11 +59,26 @@ export default function GoogleAnalyticsConfigPage() {
 
     setIsInEditMode(false);
 
-    const currentState = await sdk.app.getCurrentState();
+    const currentState: AppState | null = await sdk.app.getCurrentState();
+    const currentEditorInterface = currentState ? currentState.EditorInterface : {};
+    const contentTypeIds = Object.keys(parameters.contentTypes);
+    const newEditorInterfaceAssignments = generateEditorInterfaceAssignments(
+      currentEditorInterface,
+      contentTypeIds,
+      'sidebar',
+      1
+    );
+
+    const newAppState: AppState = {
+      EditorInterface: {
+        ...currentState?.EditorInterface,
+        ...newEditorInterfaceAssignments,
+      },
+    };
 
     return {
       parameters: parameters,
-      targetState: currentState,
+      targetState: newAppState,
     };
   }, [
     isAppInstalled,

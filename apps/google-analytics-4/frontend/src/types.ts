@@ -127,3 +127,7 @@ export interface AllContentTypes {
 }
 
 export type AllContentTypeEntries = [string, AllContentTypeValue][];
+
+export interface EditorInterfaceAssignment {
+  [key: string]: { [key: string]: { position: number } };
+}
