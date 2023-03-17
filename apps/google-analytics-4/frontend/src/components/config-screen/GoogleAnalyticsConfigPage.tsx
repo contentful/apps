@@ -133,9 +133,9 @@ export default function GoogleAnalyticsConfigPage() {
           onInEditModeChange={handleInEditModeChange}
           onIsValidServiceAccount={handleIsValidServiceAccount}
         />
-        <Splitter />
         {isAppInstalled && !isInEditMode && (
           <>
+            <Splitter />
             <MapAccountPropertySection
               accountsSummaries={accountsSummaries}
               parameters={parameters}
@@ -148,7 +148,6 @@ export default function GoogleAnalyticsConfigPage() {
               onIsValidContentTypeAssignment={handleIsValidContentTypeAssignment}
               parameters={parameters}
             />
-            <Splitter />
           </>
         )}
       </Box>
