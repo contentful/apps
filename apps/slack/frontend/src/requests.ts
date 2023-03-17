@@ -74,6 +74,7 @@ export const apiClient = {
         path: `/tokens`,
         headers: {
           'Content-Type': 'application/json',
+          'X-Contentful-Canonical-Environment-Id': sdk.ids.environment, // IMPORTANT: we MUST provide the backend with the canonical environment id, not the environment alias ID to ensure lookup in dynamo DB due to there being only one app installation
         },
         body: JSON.stringify({
           refreshToken: temporaryRefreshToken,

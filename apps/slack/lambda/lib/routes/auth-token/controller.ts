@@ -120,7 +120,9 @@ export class AuthTokenController {
    */
   post = asyncHandler(async (request, response) => {
     const spaceId = request.header('x-contentful-space-id');
-    const environmentId = request.header('x-contentful-environment-id');
+    const environmentId = request.header('x-contentful-canonical-environment-id');
+
+    // FIXME: we MUST use the canonical environment ID here, not an environment alias!
     if (!spaceId || !environmentId) {
       throw new NotFoundException();
     }
