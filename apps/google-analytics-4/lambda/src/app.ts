@@ -36,9 +36,9 @@ app.use('/api', ApiRouter);
 
 // IMPORTANT: do our custom error mapping before the Sentry error handler
 app.use(Middleware.apiErrorMapper(apiErrorMap));
-app.use(Middleware.apiErrorHandler);
-
-// IMPORTANT: The Sentry error handler must be before any other error middleware and after all controllers
+// IMPORTANT: The Sentry error handler must be after all controllers but before any other error handling middleware (with exception of our apiErrorMapper)
 app.use(Middleware.sentryErrorHandler);
+
+app.use(Middleware.apiErrorHandler);
 
 export default app;
