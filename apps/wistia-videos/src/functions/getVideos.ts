@@ -51,13 +51,15 @@ export const fetchVideos = async (
         const additionalProjectMedias: WistiaVideo[] = await Promise.all(
           Object.keys(new Array(getTotalPages(project.mediaCount)).fill(0)).map(
             async (page: string) => {
-              const response: Response =
-                await // start at 2nd page since 1st page is already gotten before this
-                await fetch(`https://api.wistia.com/v1/projects/${id}.json?page=${+page + 2}`, {
+              // start at 2nd page since 1st page is already gotten before this
+              const response: Response = await await fetch(
+                `https://api.wistia.com/v1/projects/${id}.json?page=${+page + 2}`,
+                {
                   headers: {
                     Authorization: `Bearer ${bearerToken}`,
                   },
-                });
+                }
+              );
               const responseJson = await response.json();
               return responseJson.medias;
             }
