@@ -115,7 +115,6 @@ const Config = (props: ConfigProps) => {
     } catch (error) {
       if (error instanceof WistiaError) {
         Notification.error(`Connection to Wistia Data API failed: ${error.message}`);
-        console.log(`Connection to Wistia Data API failed: ${error.message}`);
         setFetchedProjects([]);
         if (error.code && error.message) {
           setRequiredMessage(error.message);
