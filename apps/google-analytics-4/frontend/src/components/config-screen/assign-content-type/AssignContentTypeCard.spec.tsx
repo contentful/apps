@@ -27,35 +27,15 @@ const contentTypes: ContentTypes = {
 const contentTypeEntries: ContentTypeEntries = Object.entries(contentTypes);
 
 describe('Assign Content Type Card for Config Screen', () => {
-  it('can render the add content type button when there is no saved content type entry', () => {
-    render(
-      <AssignContentTypeCard
-        allContentTypes={{}}
-        allContentTypeEntries={[]}
-        contentTypes={{}}
-        hasContentTypes={false}
-        contentTypeEntries={[]}
-        onContentTypeChange={() => {}}
-        onContentTypeFieldChange={() => {}}
-        onAddContentType={() => {}}
-        onRemoveContentType={() => {}}
-      />
-    );
-
-    expect(screen.getByText('Add a content type')).toBeVisible();
-  });
-
   it('can render the field labels when there is a saved content type entry', () => {
     render(
       <AssignContentTypeCard
         allContentTypes={allContentTypes}
         allContentTypeEntries={allContentTypeEntries}
         contentTypes={contentTypes}
-        hasContentTypes={true}
         contentTypeEntries={contentTypeEntries}
         onContentTypeChange={() => {}}
         onContentTypeFieldChange={() => {}}
-        onAddContentType={() => {}}
         onRemoveContentType={() => {}}
       />
     );
@@ -63,5 +43,21 @@ describe('Assign Content Type Card for Config Screen', () => {
     expect(screen.getByText('Content type')).toBeVisible();
     expect(screen.getByText('Slug field')).toBeVisible();
     expect(screen.getByText('URL prefix')).toBeVisible();
+  });
+
+  it('can render the correct number of saved content types', () => {
+    render(
+      <AssignContentTypeCard
+        allContentTypes={allContentTypes}
+        allContentTypeEntries={allContentTypeEntries}
+        contentTypes={contentTypes}
+        contentTypeEntries={contentTypeEntries}
+        onContentTypeChange={() => {}}
+        onContentTypeFieldChange={() => {}}
+        onRemoveContentType={() => {}}
+      />
+    );
+
+    expect(screen.getAllByTestId('contentTypeRow').length).toBe(1);
   });
 });
