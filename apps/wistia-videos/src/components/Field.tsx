@@ -31,13 +31,15 @@ const StyledImageContainer = styled.div`
   }
 `;
 
+const VIDEOS_PER_PAGE = 100;
+
 const Field = (props: FieldProps) => {
   const { sdk } = props;
-  const [data, updateData] = useState<WistiaVideo[] | []>([]);
+  const [data, updateData] = useState<WistiaVideo[]>([]);
   const [selectedIds, setIds] = useState<number[]>([]);
-  const [dropdownData, filterDropdownData] = useState<WistiaVideo[] | []>([]);
+  const [dropdownData, filterDropdownData] = useState<WistiaVideo[]>([]);
   const [loading, updateLoadingStatus] = useState(true);
-  const [end, setEnd] = useState(100);
+  const [end, setEnd] = useState(VIDEOS_PER_PAGE);
   const [error, setError] = useState(null || '');
   sdk.window.startAutoResizer();
 
@@ -135,7 +137,7 @@ const Field = (props: FieldProps) => {
         </Paragraph>
       ) : (
         <>
-          {data?.length > 0 && !error ? (
+          {data?.length && !error ? (
             <Flex flexDirection={'column'} fullHeight={true}>
               <Flex marginBottom={'spacingS'}>
                 <TextInput

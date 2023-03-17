@@ -7,7 +7,7 @@ export interface ProjectReduced {
 export interface Project {
   id: number;
   name: string;
-  medias?: [];
+  medias: WistiaVideo[];
   mediaCount: number;
   created: string;
   updated: string;
@@ -42,6 +42,8 @@ export interface WistiaProject {
   name: string;
   hashedId: string;
   duration?: string;
+  medias: WistiaVideo[];
+  mediaCount: number;
   thumbnail: {
     url: string;
   };
