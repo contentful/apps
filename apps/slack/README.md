@@ -13,7 +13,7 @@ Click [here](https://app.contentful.com/deeplink?link=apps&id=7ir40h24qLGSQWJ6JC
 You can send Slack messages from your own App Framework backend app. For this to work, the Slack app has to be installed to your space environment and setup for the target Slack workspace and channel.
 
 ```javascript
-import { getManagementToken } from "@contentful/node-apps-toolkit";
+import { getManagementToken } from '@contentful/node-apps-toolkit';
 import { readFileSync } from 'fs';
 
 const APP_DEF_ID = 'app-def-id';
@@ -21,17 +21,18 @@ const SPACE_ID = 'space-id';
 const ENV_ID = 'env-id';
 
 // see https://www.contentful.com/developers/docs/extensibility/app-framework/app-keys/
-const privateKey = readFileSync("key.pem", { encoding: "utf8", });
+const privateKey = readFileSync('key.pem', { encoding: 'utf8' });
 const token = await getManagementToken(privateKey, {
   appInstallationId: APP_DEF_ID,
   spaceId: SPACE_ID,
   environmentId: ENV_ID,
 });
 
-const cma = createClient({ accessToken: token, },
+const cma = createClient(
+  { accessToken: token },
   {
-    type: "plain",
-    defaults: { spaceId: SPACE_ID, environmentId: ENV_ID, },
+    type: 'plain',
+    defaults: { spaceId: SPACE_ID, environmentId: ENV_ID },
   }
 );
 await cma.appAction.call({
@@ -39,9 +40,9 @@ await cma.appAction.call({
   body: {
     workspaceId: 'slack-workspace-id',
     channelId: 'channel-id',
-    message: 'This message was sent from my custom Contentful app'
-  }
-})
+    message: 'This message was sent from my custom Contentful app',
+  },
+});
 ```
 
 ## Support and feature requests
@@ -88,7 +89,7 @@ This sections explains how to run the Slack app locally.
 
 ### General
 
-- Start ngrok with `ngrok https 3000`
+- Start ngrok with `ngrok https 3000 --subdomain slack-backend-dev` (the `--subdomain` flagwill not work without paid ngrok account)
 - Create a new Slack app [here](https://api.slack.com/apps)
   - Add the ngrok URL as redirect URL (Features -> OAuth & Permissions -> Redirect URLs)
   - Enable token rotation (Features -> OAuth & Permissions)

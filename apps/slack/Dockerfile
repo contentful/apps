@@ -2,16 +2,14 @@ FROM node:14-alpine AS base
 
 RUN apk add --update --no-cache openssh build-base python3 bash git && rm -rf /var/cache/apk/*
 
-WORKDIR /app
+WORKDIR /app/lambda
 
-COPY package.json yarn.lock frontend/package.json lambda/package.json /app/
+COPY lambda/package.json /app/
 
 ENV NODE_ENV development
 
-RUN yarn
+RUN npm i
 
-COPY .git /app/.git
+COPY lambda /app/lambda
 
-COPY . /app
-
-CMD ["yarn", "start:lambda"]
+CMD ["npm", "run", "start"]
