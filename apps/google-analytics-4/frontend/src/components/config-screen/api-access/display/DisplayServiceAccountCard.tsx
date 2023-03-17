@@ -12,7 +12,7 @@ import {
   Spinner,
   Button,
 } from '@contentful/f36-components';
-import { ExternalLinkTrimmedIcon, CheckCircleIcon, ErrorCircleIcon } from '@contentful/f36-icons';
+import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
@@ -20,7 +20,7 @@ import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
   serviceAccountKey: ServiceAccountKey;
-  onEditGoogleAccountDetails: React.MouseEventHandler<HTMLButtonElement>;
+  onInEditModeChange: Function;
   onAccountSummariesChange: Function;
   isAppInstalled: boolean;
 }
@@ -29,12 +29,14 @@ const DisplayServiceAccountCard = (props: Props) => {
   const {
     serviceAccountKeyId,
     serviceAccountKey,
-    onEditGoogleAccountDetails,
+    onInEditModeChange,
     onAccountSummariesChange,
     isAppInstalled,
   } = props;
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingAdminApi, setIsLoadingAdminApi] = useState(true);
+  const [isLoadingDataApi, setIsLoadingDataApi] = useState(true);
+
   const [adminApiError, setAdminApiError] = useState<ApiErrorType>();
   const [dataApiError, setDataApiError] = useState<ApiErrorType>();
   const [invalidServiceAccountError, setInvalidServiceAccountError] = useState<ApiErrorType>();
@@ -68,7 +70,7 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   const verifyAdminApi = useCallback(async () => {
     try {
-      setIsLoading(true);
+      setIsLoadingAdminApi(true);
       const fetchedAccountSummaries = await api.listAccountSummaries();
       onAccountSummariesChange(fetchedAccountSummaries);
       setAdminApiError(undefined);
@@ -79,12 +81,12 @@ const DisplayServiceAccountCard = (props: Props) => {
         throw e;
       }
     } finally {
-      setIsLoading(false);
+      setIsLoadingAdminApi(false);
     }
 
     return () => {
       setAdminApiError(undefined);
-      setIsLoading(false);
+      setIsLoadingAdminApi(false);
     };
 
     // It wants to add onAccountSummariesChange as a dependency but this will cause an infinite re-render
@@ -94,7 +96,7 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   const verifyDataApi = useCallback(async () => {
     try {
-      setIsLoading(true);
+      setIsLoadingDataApi(true);
       await api.runReports();
       setDataApiError(undefined);
     } catch (e: any) {
@@ -104,12 +106,12 @@ const DisplayServiceAccountCard = (props: Props) => {
         throw e;
       }
     } finally {
-      setIsLoading(false);
+      setIsLoadingDataApi(false);
     }
 
     return () => {
       setDataApiError(undefined);
-      setIsLoading(false);
+      setIsLoadingDataApi(false);
     };
 
     // isAppInstalled is needed as a dependency to trigger this called once the app is installed succesffully
@@ -200,13 +202,13 @@ const DisplayServiceAccountCard = (props: Props) => {
               testId="editServiceAccountButton"
               as="button"
               variant="primary"
-              onClick={onEditGoogleAccountDetails}>
+              onClick={() => onInEditModeChange(true)}>
               Edit
             </TextLink>
           </Box>
           <Box style={{ minWidth: '60px', minHeight: '30px' }}>
-            {isLoading ? (
-              <Spinner variant="default" />
+            {isLoadingAdminApi && isLoadingDataApi ? (
+              <Spinner variant="primary" />
             ) : (
               <Button variant="primary" size="small" onClick={handleApiTestClick}>
                 Test
@@ -229,13 +231,6 @@ const DisplayServiceAccountCard = (props: Props) => {
                 {serviceAccountKeyId.clientEmail}
               </TextLink>
             </Box>
-            {isLoading ? (
-              <Spinner variant="default" />
-            ) : adminApiError ? (
-              <ErrorCircleIcon variant="negative" />
-            ) : (
-              <CheckCircleIcon variant="positive" />
-            )}
           </Flex>
         </Paragraph>
       </FormControl>
@@ -247,7 +242,13 @@ const DisplayServiceAccountCard = (props: Props) => {
       </FormControl>
       <FormControl marginBottom="none">
         <FormControl.Label marginBottom="none">Status</FormControl.Label>
-        <Paragraph>{isLoading ? <Spinner variant="default" /> : <RenderStatusInfo />}</Paragraph>
+        <Paragraph>
+          {isLoadingAdminApi && isLoadingDataApi ? (
+            <Spinner variant="primary" />
+          ) : (
+            <RenderStatusInfo />
+          )}
+        </Paragraph>
       </FormControl>
     </Card>
   );

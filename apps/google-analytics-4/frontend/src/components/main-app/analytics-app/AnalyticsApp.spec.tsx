@@ -1,5 +1,6 @@
 import AnalyticsApp from './AnalyticsApp';
 import { act, render, screen } from '@testing-library/react';
+import { Api } from 'apis/api';
 import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
@@ -12,13 +13,8 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 const mockApi = jest.fn();
-jest.mock('hooks/useApi', () => ({
-  useApi: () => ({
-    runReports: mockApi,
-  }),
-}));
 
-const { findByTestId, getByTestId, getByText, findByText } = screen;
+const { findByTestId, getByTestId, getByText } = screen;
 
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
@@ -27,10 +23,9 @@ const renderAnalyticsApp = async () =>
   await act(async () => {
     render(
       <AnalyticsApp
-        serviceAccountKeyId={validServiceKeyId}
-        serviceAccountKey={validServiceKeyFile}
+        api={{ runReports: mockApi } as unknown as Api}
         propertyId=""
-        reportSlug=""
+        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
       />
     );
   });
@@ -61,6 +56,19 @@ describe('AnalyticsApp', () => {
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
     const noteText = getByText('There are no page views to show for this range');
+
+    expect(dropdown).toBeVisible();
+    expect(warningNote).toBeVisible();
+    expect(noteText).toBeVisible();
+  });
+
+  it('mounts with error message when error thrown', async () => {
+    mockApi.mockRejectedValue(() => new Error('api error'));
+    renderAnalyticsApp();
+
+    const dropdown = await findByTestId(SELECT_TEST_ID);
+    const warningNote = getByTestId(NOTE_TEST_ID);
+    const noteText = getByText('api error');
 
     expect(dropdown).toBeVisible();
     expect(warningNote).toBeVisible();

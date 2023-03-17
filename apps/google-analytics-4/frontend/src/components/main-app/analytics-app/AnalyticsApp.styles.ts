@@ -9,6 +9,7 @@ const load = keyframes`
 	}
 `;
 
+const loaderWidth = 50;
 export const styles = {
   loader: css({
     height: '100%',
@@ -16,21 +17,18 @@ export const styles = {
     ':before': {
       content: "''",
       position: 'absolute',
-      top: 0,
-      right: 'auto',
-      bottom: 0,
-      left: 'auto',
+      top: `calc(50% - ${loaderWidth / 2}px)`,
+      left: `calc(50% - ${loaderWidth / 2}px)`,
       margin: 'auto',
-      height: '50px',
-      width: '50px',
-      borderWidth: '5px',
+      height: `${loaderWidth}px`,
+      width: `${loaderWidth}px`,
+      borderWidth: `${loaderWidth / 10}px`,
       borderStyle: 'solid',
       borderTopColor: `${tokens.blue500}`,
       borderRightColor: 'rgba(0, 0, 0, 0.1)',
       borderBottomColor: 'rgba(0, 0, 0, 0.1)',
       borderLeftColor: 'rgba(0, 0, 0, 0.1)',
       borderRadius: '100%',
-
       animation: `${load} 1s linear infinite`,
     },
   }),

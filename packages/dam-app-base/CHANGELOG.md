@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.40](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.38...@contentful/dam-app-base@2.0.40) (2023-03-17)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.26.0 to 4.27.0 ([#2693](https://github.com/contentful/apps/issues/2693)) ([a6f7cf9](https://github.com/contentful/apps/commit/a6f7cf96e901f384ddf1e50b17c2eb829d65966d))
+- **deps:** bump @contentful/f36-components from 4.27.0 to 4.28.0 ([#2738](https://github.com/contentful/apps/issues/2738)) ([8bb68d7](https://github.com/contentful/apps/commit/8bb68d73929120c86e454863398ea4bc738c6e24))
+- **deps:** bump @contentful/f36-components from 4.28.0 to 4.30.0 ([#2761](https://github.com/contentful/apps/issues/2761)) ([3813c9e](https://github.com/contentful/apps/commit/3813c9e546a587df5ec97e5ba16b16c0d1ee69b6))
+- **deps:** bump @contentful/f36-components from 4.30.0 to 4.30.2 ([#2806](https://github.com/contentful/apps/issues/2806)) ([c057f6e](https://github.com/contentful/apps/commit/c057f6ecc6e90b866f9d894424e50c3714843791))
+- **deps:** bump @contentful/f36-components from 4.30.2 to 4.30.3 ([#2820](https://github.com/contentful/apps/issues/2820)) ([40dee9f](https://github.com/contentful/apps/commit/40dee9fbad823e0bc22d8becd04a2ce18252b583))
+
+## [2.0.39](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.38...@contentful/dam-app-base@2.0.39) (2023-03-17)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.26.0 to 4.27.0 ([#2693](https://github.com/contentful/apps/issues/2693)) ([a6f7cf9](https://github.com/contentful/apps/commit/a6f7cf96e901f384ddf1e50b17c2eb829d65966d))
+- **deps:** bump @contentful/f36-components from 4.27.0 to 4.28.0 ([#2738](https://github.com/contentful/apps/issues/2738)) ([8bb68d7](https://github.com/contentful/apps/commit/8bb68d73929120c86e454863398ea4bc738c6e24))
+- **deps:** bump @contentful/f36-components from 4.28.0 to 4.30.0 ([#2761](https://github.com/contentful/apps/issues/2761)) ([3813c9e](https://github.com/contentful/apps/commit/3813c9e546a587df5ec97e5ba16b16c0d1ee69b6))
+- **deps:** bump @contentful/f36-components from 4.30.0 to 4.30.2 ([#2806](https://github.com/contentful/apps/issues/2806)) ([c057f6e](https://github.com/contentful/apps/commit/c057f6ecc6e90b866f9d894424e50c3714843791))
+- **deps:** bump @contentful/f36-components from 4.30.2 to 4.30.3 ([#2820](https://github.com/contentful/apps/issues/2820)) ([40dee9f](https://github.com/contentful/apps/commit/40dee9fbad823e0bc22d8becd04a2ce18252b583))
+
 ## [2.0.38](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.37...@contentful/dam-app-base@2.0.38) (2023-03-01)
 
 ### Bug Fixes

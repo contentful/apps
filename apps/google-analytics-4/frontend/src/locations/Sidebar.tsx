@@ -1,20 +1,24 @@
 import AnalyticsApp from 'components/main-app/analytics-app/AnalyticsApp';
 import { useSDK } from '@contentful/react-apps-toolkit';
-
-// TO DO: Add propertyId and reportSlug logic
+import { SidebarExtensionSDK } from '@contentful/app-sdk';
+import { useApi } from 'hooks/useApi';
+import { AppInstallationParameters } from 'types';
 
 const Sidebar = () => {
-  const sdk = useSDK<any>();
+  const sdk = useSDK<SidebarExtensionSDK>();
 
-  const { serviceAccountKey, serviceAccountKeyId } = sdk.parameters;
+  const { serviceAccountKey, serviceAccountKeyId, propertyId, contentTypes } = sdk.parameters
+    .installation as AppInstallationParameters;
+
+  const currentContentType = sdk.contentType.sys.id;
+  const slugFieldInfo = contentTypes[currentContentType];
+
+  const api = useApi(serviceAccountKeyId, serviceAccountKey);
 
   return (
-    <AnalyticsApp
-      serviceAccountKeyId={serviceAccountKeyId}
-      serviceAccountKey={serviceAccountKey}
-      propertyId=""
-      reportSlug=""
-    />
+    <>
+      <AnalyticsApp api={api} propertyId={propertyId} slugFieldInfo={slugFieldInfo} />
+    </>
   );
 };
 

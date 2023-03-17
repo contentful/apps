@@ -4,7 +4,7 @@ export interface AppInstallationParameters {
   serviceAccountKey: ServiceAccountKey;
   serviceAccountKeyId: ServiceAccountKeyId;
   contentTypes: ContentTypes;
-  savedPropertyId: string;
+  propertyId: string;
 }
 
 // TODO: get this exported from the SDK

@@ -1,35 +1,57 @@
 import { useEffect, useState } from 'react';
-import { Paragraph, Stack, Subheading } from '@contentful/f36-components';
-import { AllContentTypes, AllContentTypeEntries, ContentTypeEntries } from 'types';
+import { Paragraph, Stack, Subheading, Button, Spinner } from '@contentful/f36-components';
+import {
+  AllContentTypes,
+  AllContentTypeEntries,
+  ContentTypeEntries,
+  ContentTypes,
+  ContentTypeValue,
+} from 'types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
 import sortBy from 'lodash/sortBy';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { ContentTypeProps, createClient, KeyValueMap } from 'contentful-management';
 import { AppExtensionSDK } from '@contentful/app-sdk';
-import { ContentTypeProps, createClient } from 'contentful-management';
-import useKeyService from 'hooks/useKeyService';
+import { useSDK } from '@contentful/react-apps-toolkit';
+interface Props {
+  mergeSdkParameters: Function;
+  onIsValidContentTypeAssignment: Function;
+  parameters: KeyValueMap;
+}
 
-const AssignContentTypeSection = () => {
-  const {
-    contentTypes,
-    handleContentTypeChange,
-    handleContentTypeFieldChange,
-    handleAddContentType,
-    handleRemoveContentType,
-  } = useKeyService({});
+const AssignContentTypeSection = (props: Props) => {
+  const { mergeSdkParameters, onIsValidContentTypeAssignment, parameters } = props;
+
+  const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
+  const [loadingParameters, setLoadingParameters] = useState<boolean>(true);
+  const [hasContentTypes, setHasContentTypes] = useState<boolean>(false);
+  const [contentTypeEntries, setContentTypeEntries] = useState<ContentTypeEntries>(
+    [] as ContentTypeEntries
+  );
+  const [hasIncompleteContentTypes, setHasIncompleteContentTypes] = useState<boolean>(false);
 
   const [allContentTypes, setAllContentTypes] = useState<AllContentTypes>({} as AllContentTypes);
   const [allContentTypeEntries, setAllContentTypeEntries] = useState<AllContentTypeEntries>(
     [] as AllContentTypeEntries
   );
-  const [hasContentTypes, setHasContentTypes] = useState<boolean>(false);
-  const [contentTypeEntries, setHasContentTypeEntries] = useState<ContentTypeEntries>(
-    [] as ContentTypeEntries
-  );
+  const [loadingAllContentTypes, setLoadingAllContentTypes] = useState<boolean>(true);
 
   const sdk = useSDK<AppExtensionSDK>();
 
   useEffect(() => {
-    const getContentTypes = async () => {
+    if (parameters.contentTypes) setContentTypes(parameters.contentTypes);
+    setLoadingParameters(false);
+  }, [parameters.contentTypes]);
+
+  useEffect(() => {
+    setHasContentTypes(Object.keys(contentTypes).length ? true : false);
+    setContentTypeEntries(Object.entries(contentTypes));
+    setHasIncompleteContentTypes(
+      Object.entries(contentTypes).some(([contentTypeId]) => !contentTypeId)
+    );
+  }, [contentTypes]);
+
+  useEffect(() => {
+    const getAllContentTypes = async () => {
       const cma = createClient({ apiAdapter: sdk.cmaAdapter });
       const space = await cma.getSpace(sdk.ids.space);
       const environment = await space.getEnvironment(sdk.ids.environment);
@@ -60,15 +82,71 @@ const AssignContentTypeSection = () => {
 
       setAllContentTypes(formattedContentTypes);
       setAllContentTypeEntries(Object.entries(formattedContentTypes));
+      setLoadingAllContentTypes(false);
     };
 
-    getContentTypes();
+    getAllContentTypes();
   }, [sdk]);
 
-  useEffect(() => {
-    setHasContentTypes(Object.keys(contentTypes).length ? true : false);
-    setHasContentTypeEntries(Object.entries(contentTypes));
-  }, [contentTypes]);
+  const contentTypeHandler = (newContentTypes: ContentTypes) => {
+    setContentTypes(newContentTypes);
+    const _parameters = { contentTypes: newContentTypes };
+    mergeSdkParameters(_parameters);
+
+    // Do not allow saving an empty content type
+    const newContentTypeKeys = Object.keys(newContentTypes);
+    if (newContentTypeKeys.some((key) => !key)) {
+      onIsValidContentTypeAssignment(false);
+    } else {
+      onIsValidContentTypeAssignment(true);
+    }
+  };
+
+  const handleContentTypeChange = (prevKey: string, newKey: string) => {
+    const newContentTypes: ContentTypes = {};
+
+    for (const [prop, value] of Object.entries(contentTypes)) {
+      if (prop === prevKey) {
+        newContentTypes[newKey as keyof typeof contentTypes] = {
+          slugField: '',
+          urlPrefix: value.urlPrefix,
+        };
+      } else {
+        newContentTypes[prop] = value;
+      }
+    }
+
+    contentTypeHandler(newContentTypes);
+  };
+
+  const handleContentTypeFieldChange = (key: string, field: string, value: string) => {
+    const currentContentTypeFields: ContentTypeValue = contentTypes[key];
+    const newContentTypes: ContentTypes = {
+      ...contentTypes,
+      [key]: {
+        ...currentContentTypeFields,
+        [field]: value,
+      },
+    };
+
+    contentTypeHandler(newContentTypes);
+  };
+
+  const handleAddContentType = () => {
+    const newContentTypes: ContentTypes = {
+      ...contentTypes,
+      '': { slugField: '', urlPrefix: '' },
+    };
+
+    contentTypeHandler(newContentTypes);
+  };
+
+  const handleRemoveContentType = (key: string) => {
+    const newContentTypes = { ...contentTypes };
+    delete newContentTypes[key];
+
+    contentTypeHandler(newContentTypes);
+  };
 
   return (
     <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
@@ -78,17 +156,26 @@ const AssignContentTypeSection = () => {
         Specify the slug field that is used for URL generation in your application. Optionally,
         specify a prefix for the slug.
       </Paragraph>
-      <AssignContentTypeCard
-        allContentTypes={allContentTypes}
-        allContentTypeEntries={allContentTypeEntries}
-        contentTypes={contentTypes}
-        hasContentTypes={hasContentTypes}
-        contentTypeEntries={contentTypeEntries}
-        onContentTypeChange={handleContentTypeChange}
-        onContentTypeFieldChange={handleContentTypeFieldChange}
-        onAddContentType={handleAddContentType}
-        onRemoveContentType={handleRemoveContentType}
-      />
+      {!loadingParameters && !loadingAllContentTypes ? (
+        <>
+          {hasContentTypes && (
+            <AssignContentTypeCard
+              allContentTypes={allContentTypes}
+              allContentTypeEntries={allContentTypeEntries}
+              contentTypes={contentTypes}
+              contentTypeEntries={contentTypeEntries}
+              onContentTypeChange={handleContentTypeChange}
+              onContentTypeFieldChange={handleContentTypeFieldChange}
+              onRemoveContentType={handleRemoveContentType}
+            />
+          )}
+          <Button onClick={handleAddContentType} isDisabled={hasIncompleteContentTypes}>
+            {hasContentTypes ? 'Add another content type' : 'Add a content type'}
+          </Button>
+        </>
+      ) : (
+        <Spinner variant="primary" />
+      )}
     </Stack>
   );
 };

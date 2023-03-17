@@ -50,7 +50,14 @@ const ACCOUNT_SUMMARIES = [
 describe('Empty Account Properties mapping dropdown', () => {
   it('does not render the dropdown', async () => {
     await act(async () => {
-      render(<MapAccountPropertyPage accountsSummaries={[]} />);
+      render(
+        <MapAccountPropertyPage
+          accountsSummaries={[]}
+          parameters={{}}
+          mergeSdkParameters={() => {}}
+          onIsValidAccountProperty={() => {}}
+        />
+      );
     });
 
     expect(screen.getByText('Configuration')).toBeVisible();
@@ -61,7 +68,14 @@ describe('Empty Account Properties mapping dropdown', () => {
 describe('Account Properties mapping dropdown', () => {
   it('renders the dropdown', async () => {
     await act(async () => {
-      render(<MapAccountPropertyPage accountsSummaries={ACCOUNT_SUMMARIES} />);
+      render(
+        <MapAccountPropertyPage
+          accountsSummaries={ACCOUNT_SUMMARIES}
+          parameters={{}}
+          mergeSdkParameters={() => {}}
+          onIsValidAccountProperty={() => {}}
+        />
+      );
     });
 
     const propertiesDropdown = screen.getByTestId('accountPropertyDropdown');
