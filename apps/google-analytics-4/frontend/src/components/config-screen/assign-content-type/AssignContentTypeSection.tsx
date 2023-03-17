@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Paragraph, Stack, Subheading, Button, Spinner, Box } from '@contentful/f36-components';
+import { ContentTypeProps, createClient } from 'contentful-management';
+import { AppExtensionSDK, EditorInterface } from '@contentful/app-sdk';
+import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import {
   AllContentTypes,
   AllContentTypeEntries,
@@ -8,27 +12,34 @@ import {
   ContentTypeValue,
 } from 'types';
 import AssignContentTypeCard from 'components/config-screen/assign-content-type/AssignContentTypeCard';
-import sortBy from 'lodash/sortBy';
-import { ContentTypeProps, createClient, KeyValueMap } from 'contentful-management';
-import { AppExtensionSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { sortAndFormatAllContentTypes } from 'helpers/contentTypeHelpers/contentTypeHelpers';
 interface Props {
   mergeSdkParameters: Function;
   onIsValidContentTypeAssignment: Function;
   parameters: KeyValueMap;
+  currentEditorInterface: Partial<EditorInterface>;
+  originalParameters: KeyValueMap;
 }
 
 const AssignContentTypeSection = (props: Props) => {
-  const { mergeSdkParameters, onIsValidContentTypeAssignment, parameters } = props;
+  const {
+    mergeSdkParameters,
+    onIsValidContentTypeAssignment,
+    parameters,
+    currentEditorInterface,
+    originalParameters,
+  } = props;
 
+  // Content type state
   const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
-  const [loadingParameters, setLoadingParameters] = useState<boolean>(true);
+  const [loadingContentTypes, setLoadingContentTypes] = useState<boolean>(true);
   const [hasContentTypes, setHasContentTypes] = useState<boolean>(false);
   const [contentTypeEntries, setContentTypeEntries] = useState<ContentTypeEntries>(
     [] as ContentTypeEntries
   );
   const [hasIncompleteContentTypes, setHasIncompleteContentTypes] = useState<boolean>(false);
 
+  // All content type state
   const [allContentTypes, setAllContentTypes] = useState<AllContentTypes>({} as AllContentTypes);
   const [allContentTypeEntries, setAllContentTypeEntries] = useState<AllContentTypeEntries>(
     [] as AllContentTypeEntries
@@ -39,7 +50,7 @@ const AssignContentTypeSection = (props: Props) => {
 
   useEffect(() => {
     if (parameters.contentTypes) setContentTypes(parameters.contentTypes);
-    setLoadingParameters(false);
+    setLoadingContentTypes(false);
   }, [parameters.contentTypes]);
 
   useEffect(() => {
@@ -56,28 +67,9 @@ const AssignContentTypeSection = (props: Props) => {
       const space = await cma.getSpace(sdk.ids.space);
       const environment = await space.getEnvironment(sdk.ids.environment);
       const contentTypes = await environment.getContentTypes();
-      const contentTypeItems = contentTypes.items as ContentTypeProps[];
 
-      const sortedContentTypes = sortBy(contentTypeItems, ['name']);
-
-      const formattedContentTypes = sortedContentTypes.reduce(
-        (acc: AllContentTypes, contentType) => {
-          // only include short text fields in the slug field dropdown
-          const fields = sortBy(
-            contentType.fields.filter((field) => field.type === 'Symbol'),
-            ['name']
-          );
-
-          if (fields.length) {
-            acc[contentType.sys.id] = {
-              ...contentType,
-              fields,
-            };
-          }
-
-          return acc;
-        },
-        {}
+      const formattedContentTypes = sortAndFormatAllContentTypes(
+        contentTypes.items as ContentTypeProps[]
       );
 
       setAllContentTypes(formattedContentTypes);
@@ -93,13 +85,17 @@ const AssignContentTypeSection = (props: Props) => {
     const _parameters = { contentTypes: newContentTypes };
     mergeSdkParameters(_parameters);
 
-    // Do not allow saving an empty content type
-    const newContentTypeKeys = Object.keys(newContentTypes);
-    if (newContentTypeKeys.some((key) => !key)) {
-      onIsValidContentTypeAssignment(false);
-    } else {
-      onIsValidContentTypeAssignment(true);
+    // Do not allow saving an empty content type or one that was deleted
+    let hasValidContentTypes = true;
+
+    for (const contentType in newContentTypes) {
+      if (!contentType || !allContentTypeEntries.find((entry) => entry[0] === contentType)) {
+        hasValidContentTypes = false;
+        break;
+      }
     }
+
+    onIsValidContentTypeAssignment(hasValidContentTypes);
   };
 
   const handleContentTypeChange = (prevKey: string, newKey: string) => {
@@ -158,7 +154,7 @@ const AssignContentTypeSection = (props: Props) => {
           specify a prefix for the slug.
         </Paragraph>
       </Box>
-      {!loadingParameters && !loadingAllContentTypes ? (
+      {!loadingContentTypes && !loadingAllContentTypes ? (
         <>
           {hasContentTypes && (
             <AssignContentTypeCard
@@ -169,6 +165,8 @@ const AssignContentTypeSection = (props: Props) => {
               onContentTypeChange={handleContentTypeChange}
               onContentTypeFieldChange={handleContentTypeFieldChange}
               onRemoveContentType={handleRemoveContentType}
+              currentEditorInterface={currentEditorInterface}
+              originalParameters={originalParameters}
             />
           )}
           <Button onClick={handleAddContentType} isDisabled={hasIncompleteContentTypes}>

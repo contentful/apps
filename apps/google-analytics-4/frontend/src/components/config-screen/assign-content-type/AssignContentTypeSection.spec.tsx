@@ -17,6 +17,8 @@ describe('Assign Content Type Section for Config Screen', () => {
         mergeSdkParameters={() => {}}
         onIsValidContentTypeAssignment={() => {}}
         parameters={{}}
+        currentEditorInterface={{}}
+        originalParameters={{}}
       />
     );
 

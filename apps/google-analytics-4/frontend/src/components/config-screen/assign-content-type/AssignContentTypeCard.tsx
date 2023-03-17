@@ -1,5 +1,7 @@
 import { Box, Card, FormControl, Stack } from '@contentful/f36-components';
 import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
+import { EditorInterface } from '@contentful/app-sdk';
+import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeEntries } from 'types';
 import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
 
@@ -11,6 +13,8 @@ interface AssignContentTypeCardProps {
   onContentTypeChange: (prevKey: string, newKey: string) => void;
   onContentTypeFieldChange: (key: string, field: string, value: string) => void;
   onRemoveContentType: (key: string) => void;
+  currentEditorInterface: Partial<EditorInterface>;
+  originalParameters: KeyValueMap;
 }
 
 interface HeaderLabelProps {
@@ -38,6 +42,8 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
     onContentTypeChange,
     onContentTypeFieldChange,
     onRemoveContentType,
+    currentEditorInterface,
+    originalParameters,
   } = props;
 
   return (
@@ -61,6 +67,8 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
             onContentTypeChange={onContentTypeChange}
             onContentTypeFieldChange={onContentTypeFieldChange}
             onRemoveContentType={onRemoveContentType}
+            currentEditorInterface={currentEditorInterface}
+            originalParameters={originalParameters}
           />
         );
       })}

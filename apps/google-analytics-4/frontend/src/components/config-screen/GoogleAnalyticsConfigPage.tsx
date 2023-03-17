@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppExtensionSDK, AppState } from '@contentful/app-sdk';
+import { AppExtensionSDK, AppState, EditorInterface } from '@contentful/app-sdk';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
 import { styles } from 'components/config-screen/GoogleAnalytics.styles';
 import Splitter from 'components/common/Splitter';
@@ -11,7 +11,7 @@ import { Box } from '@contentful/f36-components';
 import AssignContentTypeSection from 'components/config-screen/assign-content-type/AssignContentTypeSection';
 import MapAccountPropertySection from 'components/config-screen/map-account-property/MapAccountPropertySection';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
-import { generateEditorInterfaceAssignments } from 'utils/contentTypes';
+import { generateEditorInterfaceAssignments } from 'helpers/contentTypeHelpers/contentTypeHelpers';
 
 export default function GoogleAnalyticsConfigPage() {
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);
@@ -21,6 +21,10 @@ export default function GoogleAnalyticsConfigPage() {
   const [isValidServiceAccount, setIsValidServiceAccount] = useState<boolean>(false);
   const [isValidAccountProperty, setIsValidAccountProperty] = useState<boolean>(true);
   const [isValidContentTypeAssignment, setIsValidContentTypeAssignment] = useState<boolean>(true);
+  const [currentEditorInterface, setCurrentEditorInterface] = useState<Partial<EditorInterface>>(
+    {} as Partial<EditorInterface>
+  );
+  const [originalParameters, setOriginalParameters] = useState<KeyValueMap>({});
 
   const sdk = useSDK<AppExtensionSDK>();
 
@@ -32,10 +36,24 @@ export default function GoogleAnalyticsConfigPage() {
   useEffect(() => {
     const fetchParametersFromSdk = async () => {
       const _parameters = await sdk.app.getParameters();
-      if (_parameters) setParameters(_parameters);
+      if (_parameters) {
+        setParameters(_parameters);
+        setOriginalParameters(_parameters);
+      }
     };
 
     fetchParametersFromSdk();
+  }, [sdk]);
+
+  useEffect(() => {
+    const fetchEditorInterfaceFromSdk = async () => {
+      const _currentState: AppState | null = await sdk.app.getCurrentState();
+      if (_currentState) {
+        setCurrentEditorInterface(_currentState ? _currentState.EditorInterface : {});
+      }
+    };
+
+    fetchEditorInterfaceFromSdk();
   }, [sdk]);
 
   const handleConfigure = useCallback(async () => {
@@ -59,8 +77,7 @@ export default function GoogleAnalyticsConfigPage() {
 
     setIsInEditMode(false);
 
-    const currentState: AppState | null = await sdk.app.getCurrentState();
-    const currentEditorInterface = currentState ? currentState.EditorInterface : {};
+    // Assign the app to the sidebar for saved content types
     const contentTypeIds = Object.keys(parameters.contentTypes);
     const newEditorInterfaceAssignments = generateEditorInterfaceAssignments(
       currentEditorInterface,
@@ -69,11 +86,11 @@ export default function GoogleAnalyticsConfigPage() {
       1
     );
 
+    setCurrentEditorInterface(newEditorInterfaceAssignments);
+    setOriginalParameters(parameters);
+
     const newAppState: AppState = {
-      EditorInterface: {
-        ...currentState?.EditorInterface,
-        ...newEditorInterfaceAssignments,
-      },
+      EditorInterface: newEditorInterfaceAssignments,
     };
 
     return {
@@ -88,7 +105,7 @@ export default function GoogleAnalyticsConfigPage() {
     isValidServiceAccount,
     parameters,
     sdk.notifier,
-    sdk.app,
+    currentEditorInterface,
   ]);
 
   useEffect(() => {
@@ -167,6 +184,8 @@ export default function GoogleAnalyticsConfigPage() {
               mergeSdkParameters={mergeSdkParameters}
               onIsValidContentTypeAssignment={handleIsValidContentTypeAssignment}
               parameters={parameters}
+              currentEditorInterface={currentEditorInterface}
+              originalParameters={originalParameters}
             />
           </>
         )}
