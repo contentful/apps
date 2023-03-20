@@ -1,5 +1,6 @@
 import { Row, RunReportResponse } from '@/types';
 import LineChart from './line-chart/LineChart';
+import { parseDayAndMonth } from 'helpers/DateHelpers/DateHelpers';
 
 interface Props {
   pageViewData: RunReportResponse;
@@ -14,11 +15,8 @@ const ChartContent = (props: Props) => {
 
   const parseRowDates = (): string[] => {
     return pageViewData.rows.map((r: Row) => {
-      const d = r.dimensionValues[0].value;
-      const utcDate = new Date(
-        `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
-      ).toUTCString();
-      const [day, month] = utcDate.substring(5, 11).split(' ');
+      const date = r.dimensionValues[0].value;
+      const { month, day } = parseDayAndMonth(date);
       return `${month} ${day}`;
     });
   };

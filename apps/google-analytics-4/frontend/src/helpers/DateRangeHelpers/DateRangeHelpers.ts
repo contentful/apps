@@ -14,8 +14,10 @@ export const RANGE_OPTIONS = {
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
+// date should be local to user in format of YYYY-MM-DD
 const formatDate = (date: Date) => {
-  return date.toISOString().slice(0, 10);
+  const localDate = date.toLocaleDateString().split('/');
+  return `${localDate[2]}-${localDate[0]}-${localDate[1]}`;
 };
 
 const getRangeDates = (dateRange: DateRangeType) => {
