@@ -7,7 +7,6 @@ import { AuthTokenRepository } from '../auth-token';
 import { MessagesRepository } from '../messages';
 import { EVENT_TEXT_MAP, MESSAGE_EMOJI_MAP } from './constants';
 import { getInstallationParametersFromCma } from '../../helpers/getInstallationParameters';
-
 export class EventsService {
   constructor(
     private readonly acceptedEvents: SlackAppEventKey[],
@@ -77,10 +76,29 @@ export class EventsService {
     const environmentId = eventBody.sys.environment.sys.id;
 
     const [{ token }, resolvedEntity] = await Promise.all([
-      this.authTokenRepository.get(workspaceId, {
-        spaceId,
-        environmentId,
-      }),
+      this.authTokenRepository
+        .get(workspaceId, {
+          spaceId,
+          environmentId,
+        })
+        .catch(async (e) => {
+          // try {
+          const cmaClient = await makeSpaceEnvClient(spaceId, environmentId);
+          // TODO: wtfmate? why can't we make this CMA request?
+          const environment = await cmaClient.environment.get({ spaceId, environmentId }); // results in 401
+          const canonicalEnvironmentId = environment.sys.aliasedEnvironment?.sys?.id;
+          if (canonicalEnvironmentId === undefined) throw e;
+
+          console.log('canonicalEnvironmentId', canonicalEnvironmentId);
+          // } catch {
+          //   throw e; // throw the original error
+          // }
+
+          return this.authTokenRepository.get(workspaceId, {
+            spaceId,
+            environmentId: canonicalEnvironmentId,
+          });
+        }),
       this.getResolvedEntity(spaceId, environmentId, eventKey, eventBody),
     ]);
 
