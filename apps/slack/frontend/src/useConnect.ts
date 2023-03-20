@@ -89,7 +89,7 @@ export const useConnect = () => {
 
   const startOAuth = () => {
     window.addEventListener('message', onMessage);
-    openPopup(makeOAuthURL(sdk.ids.space, getEnvironmentName(sdk.ids)), 700, 900);
+    openPopup(makeOAuthURL(sdk.ids.space, sdk.ids.environment), 700, 900); // do we need this?
   };
 
   return { startOAuth };

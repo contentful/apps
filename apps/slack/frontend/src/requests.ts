@@ -34,9 +34,7 @@ export const apiClient = {
   ): Promise<ConnectedWorkspace> => {
     const req = {
       method: 'GET' as const,
-      path: `/spaces/${sdk.ids.space}/environments/${getEnvironmentName(
-        sdk.ids
-      )}/workspaces/${workspaceId}`,
+      path: `/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/workspaces/${workspaceId}`, // do we need this?
       headers: {
         'Content-Type': 'application/json',
       },
@@ -56,9 +54,7 @@ export const apiClient = {
     return makeSignedRequest(
       {
         method: 'GET',
-        path: `/spaces/${sdk.ids.space}/environments/${getEnvironmentName(
-          sdk.ids
-        )}/workspaces/${workspaceId}/channels`,
+        path: `/spaces/${sdk.ids.space}/environments/${sdk.ids.environment}/workspaces/${workspaceId}/channels`, // do we need this?
         headers: {
           'Content-Type': 'application/json',
         },
