@@ -104,6 +104,7 @@ export interface PropertySummariesType {
 
 export interface FlattenedPropertiesType {
   propertyId: string;
+  accountId: string;
   propertyName: string;
   accountName: string;
 }
