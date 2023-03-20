@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.47](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.46...@contentful/ecommerce-app-base@3.1.47) (2023-03-20)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
 ## [3.1.46](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.44...@contentful/ecommerce-app-base@3.1.46) (2023-03-17)
 
 ### Bug Fixes
