@@ -7,7 +7,7 @@ import runReportResponseNoView from '../../../../../lambda/public/sampleData/run
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => jest.fn(),
-  useFieldValue: () => 'fieldValue',
+  useFieldValue: () => ['fieldValue'],
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
