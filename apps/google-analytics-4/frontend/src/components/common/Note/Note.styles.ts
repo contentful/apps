@@ -10,7 +10,7 @@ export const styles = {
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     display: '-webkit-box',
-    WebkitLineClamp: 4,
+    WebkitLineClamp: 6,
     WebkitBoxOrient: 'vertical',
   }),
 };
