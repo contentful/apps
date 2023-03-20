@@ -33,6 +33,8 @@ interface Props {
   accessibilityLabel?: string;
 }
 
+const Y_AXIS_SCALAR = 1.2;
+
 const LineChart = (props: Props) => {
   const { dataValues, xAxisLabels, tooltipMetricLabel, accessibilityLabel } = props;
 
@@ -47,6 +49,15 @@ const LineChart = (props: Props) => {
 
   const options: ChartOptions<'line'> = {
     responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        suggestedMax: Math.max(...dataValues) * Y_AXIS_SCALAR,
+        ticks: {
+          precision: 0,
+        },
+      },
+    },
     plugins: {
       tooltip: {
         backgroundColor: tokens.gray900,

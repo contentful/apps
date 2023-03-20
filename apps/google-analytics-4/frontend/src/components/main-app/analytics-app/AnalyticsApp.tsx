@@ -1,4 +1,4 @@
-import { useAutoResizer, useFieldValue } from '@contentful/react-apps-toolkit';
+import { useAutoResizer } from '@contentful/react-apps-toolkit';
 import ChartFooter from 'components/main-app/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState, useMemo } from 'react';
@@ -9,6 +9,7 @@ import { DateRangeType, ContentTypeValue } from 'types';
 import { styles } from './AnalyticsApp.styles';
 import { Flex, Note } from '@contentful/f36-components';
 import { RunReportData } from 'apis/apiTypes';
+import useGetFieldValue from 'hooks/useGetFieldValue';
 
 const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
 const EMPTY_DATA_MSG = 'There are no page views to show for this range';
@@ -24,9 +25,11 @@ const AnalyticsApp = (props: Props) => {
   const [runReportResponse, setRunReportResponse] = useState<RunReportData>({} as RunReportData);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek');
   const [startEndDates, setStartEndDates] = useState<any>(getRangeDates('lastWeek')); // TYPE
-  const [slugValue] = useFieldValue<string>(slugField);
+  const [slugValue, setSlugValue] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
+
+  const slugFieldValue = useGetFieldValue(slugField);
 
   useAutoResizer();
 
@@ -43,6 +46,10 @@ const AnalyticsApp = (props: Props) => {
     }),
     [startEndDates.start, startEndDates.end, reportSlug, propertyId]
   );
+
+  useEffect(() => {
+    setSlugValue(slugFieldValue);
+  }, [slugFieldValue]);
 
   useEffect(() => {
     async function fetchRunReportData() {
@@ -114,7 +121,7 @@ const AnalyticsApp = (props: Props) => {
           {renderChartContent()}
 
           <ChartFooter
-            slugName={slugValue ? slugValue : ''}
+            slugName={`Page path: ${urlPrefix}${slugValue}` || ''}
             viewUrl="https://analytics.google.com/"
           />
         </>
