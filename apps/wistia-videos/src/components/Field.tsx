@@ -13,7 +13,7 @@ import {
 import styled from 'styled-components';
 // import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
-import { WistiaProject, WistiaVideo } from '../components/helpers/types';
+import { ProjectReduced, WistiaProject, WistiaVideo } from '../components/helpers/types';
 import { fetchProjects, fetchVideos } from '../functions/getVideos';
 import { Project, WistiaError } from '../components/helpers/types';
 
@@ -31,7 +31,7 @@ const StyledImageContainer = styled.div`
   }
 `;
 
-const VIDEOS_PER_PAGE = 100;
+const VIDEOS_PER_PAGE = 500;
 
 const Field = (props: FieldProps) => {
   const { sdk } = props;
@@ -70,7 +70,7 @@ const Field = (props: FieldProps) => {
 
     const fieldValues = sdk.field.getValue();
     setIds(
-      fieldValues !== undefined && fieldValues.items.length > 0
+      fieldValues && fieldValues.items
         ? fieldValues.items.map((item: WistiaProject) => item.id)
         : []
     );
@@ -97,7 +97,7 @@ const Field = (props: FieldProps) => {
     console.info('Succesfully fetched the Wistia projects.');
     // Map through projects and return ids to retrieve all the videos from each project. Filter out the projects selected to be excluded
     return projects
-      .map((item: WistiaProject) => item.hashedId)
+      .map((item: ProjectReduced) => item.hashedId)
       .filter((id: string) => {
         const include =
           excludedProjects.findIndex((project: Project) => project.hashedId === id) === -1;
@@ -137,7 +137,7 @@ const Field = (props: FieldProps) => {
         </Paragraph>
       ) : (
         <>
-          {data?.length && !error ? (
+          {data.length && !error ? (
             <Flex flexDirection={'column'} fullHeight={true}>
               <Flex marginBottom={'spacingS'}>
                 <TextInput

@@ -6,25 +6,40 @@ import {
   WistiaProject,
 } from '../components/helpers/types';
 
-const VIDEOS_PER_PAGE = 100;
+const PROJECTS_PER_PAGE = 100;
+const VIDEOS_PER_PAGE = 500;
 
-export const fetchProjects = async (bearerToken: string): Promise<WistiaProject[]> => {
-  const projects = await (
-    await fetch(`https://api.wistia.com/v1/projects.json`, {
+const fetchProjectsJSON = async (
+  bearerToken: string,
+  page: number,
+  accumulated: WistiaProject[]
+): Promise<WistiaProject[]> => {
+  let projects = await (
+    await fetch(`https://api.wistia.com/v1/projects.json${page ? '?page=' + page : ''}`, {
       headers: {
         Authorization: `Bearer ${bearerToken}`,
       },
     })
   ).json();
+  accumulated = [...accumulated, ...projects];
   if (projects.error) {
     throw new WistiaError({ message: projects.error, code: projects.code });
-  } else {
-    const reducedProjects = projects.map(({ id, hashedId, name }: ProjectReduced) => {
-      return { id, hashedId, name };
-    });
-
-    return reducedProjects;
   }
+  // for the projects response, Wistia doesn't give us a `count` of available projects, so have to brute force it
+  else if (projects.length === PROJECTS_PER_PAGE) {
+    return fetchProjectsJSON(bearerToken, (page += 1), accumulated);
+  } else {
+    return accumulated;
+  }
+};
+
+export const fetchProjects = async (bearerToken: string): Promise<ProjectReduced[]> => {
+  let projects = await fetchProjectsJSON(bearerToken, 1, []);
+  const reducedProjects = projects.map(({ id, hashedId, name }: WistiaProject) => {
+    return { id, hashedId, name };
+  });
+
+  return reducedProjects;
 };
 
 const getTotalPages = (count: number) => {
@@ -44,30 +59,30 @@ export const fetchVideos = async (
           },
         })
       ).json();
-      let videos: WistiaVideo[] = project.medias;
-
       if (project.mediaCount > VIDEOS_PER_PAGE) {
         // create additional array so we can use promise.all and pattern match with above
+        const pageCount = getTotalPages(project.mediaCount) - 1;
+
+        const pagesToFetch = Array.from({ length: pageCount }, (_, i) => i + 2);
+
         const additionalProjectMedias: WistiaVideo[] = await Promise.all(
-          Object.keys(new Array(getTotalPages(project.mediaCount)).fill(0)).map(
-            async (page: string) => {
-              // start at 2nd page since 1st page is already gotten before this
-              const response: Response = await await fetch(
-                `https://api.wistia.com/v1/projects/${id}.json?page=${+page + 2}`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${bearerToken}`,
-                  },
-                }
-              );
-              const responseJson = await response.json();
-              return responseJson.medias;
-            }
-          )
+          pagesToFetch.map(async (page) => {
+            const response: Response = await fetch(
+              `https://api.wistia.com/v1/projects/${id}.json?page=${page}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${bearerToken}`,
+                },
+              }
+            );
+            const responseJson = await response.json();
+            return responseJson.medias;
+          })
         );
-        videos = [...videos, ...additionalProjectMedias.flat(1)];
+
+        project.medias = [...project.medias, ...additionalProjectMedias.flat(1)];
       }
-      const mappedVideos = videos.map((video: WistiaVideo) => ({
+      const mappedVideos = project.medias.map((video: WistiaVideo) => ({
         ...video,
         project: {
           id,

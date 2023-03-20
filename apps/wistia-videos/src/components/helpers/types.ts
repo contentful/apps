@@ -1,5 +1,5 @@
 export interface ProjectReduced {
-  id: string;
+  id: number;
   hashedId: string;
   name: string;
 }

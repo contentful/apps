@@ -16,11 +16,11 @@ import {
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import { fetchProjects } from '../functions/getVideos';
-import { WistiaError, WistiaProject } from './helpers/types';
+import { ProjectReduced, WistiaError, WistiaProject } from './helpers/types';
 
 export interface AppInstallationParameters {
   apiBearerToken?: string;
-  excludedProjects?: WistiaProject[];
+  excludedProjects?: ProjectReduced[];
 }
 
 interface ConfigProps {
@@ -30,7 +30,7 @@ interface ConfigProps {
 const Config = (props: ConfigProps) => {
   const [requiredMessage, setRequiredMessage] = useState('');
   const [showButton, setShowButton] = useState(true);
-  const [fetchedProjects, setFetchedProjects] = useState<WistiaProject[]>();
+  const [fetchedProjects, setFetchedProjects] = useState<ProjectReduced[]>();
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     apiBearerToken: '',
     excludedProjects: [],
@@ -136,7 +136,7 @@ const Config = (props: ConfigProps) => {
     return;
   };
 
-  const addExcludedProject = (item: WistiaProject) => {
+  const addExcludedProject = (item: ProjectReduced) => {
     if (
       parameters.excludedProjects?.findIndex((project) => project.hashedId === item.hashedId) !== -1
     ) {
