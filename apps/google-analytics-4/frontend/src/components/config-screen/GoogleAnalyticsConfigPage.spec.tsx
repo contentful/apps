@@ -33,7 +33,7 @@ describe('Google Analytics Page', () => {
       render(<GoogleAnalyticsConfigPage />);
     });
 
-    await screen.findByText('API Access');
+    await screen.findByText('API access');
     await screen.findByText('Google Service Account Details');
   });
 });

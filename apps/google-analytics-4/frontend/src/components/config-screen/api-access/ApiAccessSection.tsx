@@ -27,7 +27,7 @@ const ApiAccessSection = (props: Props) => {
   return (
     <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
       <div>
-        <Subheading marginBottom="none">API Access</Subheading>
+        <Subheading marginBottom="spacingXs">API access</Subheading>
         <Paragraph marginBottom="none">
           Authorize this application to access Google Analytics Admin & Data APIs
         </Paragraph>
