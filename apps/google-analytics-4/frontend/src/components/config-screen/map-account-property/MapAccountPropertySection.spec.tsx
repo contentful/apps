@@ -61,7 +61,7 @@ describe('Empty Account Properties mapping dropdown', () => {
     });
 
     expect(screen.getByText('Configuration')).toBeVisible();
-    expect(screen.queryByTestId('accountPropertyDropdown')).toBeNull();
+    expect(screen.queryByTestId('accountPropertyDropdown')).toBeVisible();
   });
 });
 
@@ -78,7 +78,7 @@ describe('Account Properties mapping dropdown', () => {
       );
     });
 
-    const propertiesDropdown = screen.getByTestId('accountPropertyDropdown');
+    const propertiesDropdown = screen.queryByTestId('accountPropertyDropdown');
 
     expect(screen.getByText('Configuration')).toBeVisible();
     expect(propertiesDropdown).toBeVisible();
