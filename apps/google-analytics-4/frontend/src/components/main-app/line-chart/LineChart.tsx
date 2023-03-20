@@ -74,7 +74,7 @@ const LineChart = (props: Props) => {
         },
         displayColors: false,
         callbacks: {
-          title: () => tooltipMetricLabel,
+          beforeBody: () => tooltipMetricLabel,
         },
       },
     },
