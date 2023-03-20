@@ -54,11 +54,14 @@ export class GoogleApiService {
   // returns YYYYMMDD format
   formatGADate = (dateValue: Date) => this.parseDate(dateValue).split('-').join('');
 
+  // builds Date object from YYYYMMDD format
   buildDateFromGADateFormat = (dateValue: string) =>
     new Date(
       `${dateValue.substring(0, 4)}-${dateValue.substring(4, 6)}-${dateValue.substring(6, 8)}`
     );
 
+  // builds a standarized date array, listing all dates between start and end dates provided.
+  // localization not required here, as this date array is locale agnostic.
   buildDateArray = (_startDate?: string, _endDate?: string) => {
     const startDate = _startDate || this.parseDate(new Date(Date.now() - ONE_WEEK));
     const endDate = _endDate || this.parseDate(new Date(Date.now()));
@@ -75,6 +78,8 @@ export class GoogleApiService {
     return dates;
   };
 
+  // hydrate data with missing data points.
+  // missing data points are dates that do not have a corresponding truthy metric value i.e 0.
   supplementDates = (rows: ReportRowType[], dateArray: Date[]) => {
     const supplementedReportRows = [] as ReportRowType[];
 
