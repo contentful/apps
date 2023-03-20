@@ -1,0 +1,144 @@
+import React, {Component} from 'react';
+import {AppExtensionSDK} from '@contentful/app-sdk';
+import {
+    Form,
+    Heading,
+    HelpText,
+    Paragraph,
+    SectionHeading,
+    TextField,
+    TextInput,
+    Typography
+} from '@contentful/forma-36-react-components';
+import {styles} from './styles';
+
+export interface AppInstallationParameters {
+    commerceUrl: string;
+    commerceUser: string;
+    commerceToken: string;
+}
+
+interface ConfigProps {
+    sdk: AppExtensionSDK;
+}
+
+interface ConfigState {
+    parameters: AppInstallationParameters;
+}
+
+export default class Config extends Component<ConfigProps, ConfigState> {
+    constructor(props: ConfigProps) {
+        super(props);
+        this.state = {parameters: {commerceUrl: '', commerceUser: '', commerceToken: ''}};
+
+        // `onConfigure` allows to configure a callback to be
+        // invoked when a user attempts to install the app or update
+        // its configuration.
+        props.sdk.app.onConfigure(() => this.onConfigure());
+    }
+
+    async componentDidMount() {
+        // Get current parameters of the app.
+        // If the app is not installed yet, `parameters` will be `null`.
+        const parameters: AppInstallationParameters | null = await this.props.sdk.app.getParameters();
+
+        this.setState(parameters ? {parameters} : this.state, () => {
+            // Once preparation has finished, call `setReady` to hide
+            // the loading screen and present the app to a user.
+            this.props.sdk.app.setReady();
+        });
+    }
+
+    onConfigure = async () => {
+        // This method will be called when a user clicks on "Install"
+        // or "Save" in the configuration screen.
+        // for more details see https://www.contentful.com/developers/docs/extensibility/ui-extensions/sdk-reference/#register-an-app-configuration-hook
+
+        // Get current the state of EditorInterface and other entities
+        // related to this app installation
+        const currentState = await this.props.sdk.app.getCurrentState();
+
+        return {
+            // Parameters to be persisted as the app configuration.
+            parameters: this.state.parameters,
+            // In case you don't want to submit any update to app
+            // locations, you can just pass the currentState as is
+            targetState: currentState,
+        };
+    };
+
+    updateCommerceFields = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.currentTarget;
+
+        this.setState(state => ({
+            parameters: { ...state.parameters, [name]: value }
+        }));
+    }
+
+    render() {
+        const {parameters} = this.state;
+        return (
+            <div className={styles.background}>
+                <div className={styles.body}>
+                    <Typography>
+                        <Heading>About Sap Commerce</Heading>
+                        <Paragraph>
+                            The sap commerce app allows editors to select commerce objects (eg: products) from their
+                            commerce
+                            app and reference them inside of Contentful entries.
+                        </Paragraph>
+
+                        <hr className={styles.splitter}/>
+
+                        <Heading>Configuration</Heading>
+                        <Form>
+                            <TextField
+                                required={true}
+                                labelText="SAP OCC URL"
+                                textInputProps={{
+                                    width: 'full',
+                                    maxLength: 255
+                                }}
+                                id="commerceUrl"
+                                name="commerceUrl"
+                                helpText="Provide your SAP Commerce OCC Url"
+                                value={parameters.commerceUrl}
+                                onChange={this.updateCommerceFields.bind(this)}
+                            />
+                            <TextField
+                                required={true}
+                                labelText="SAP Commerce Username"
+                                textInputProps={{
+                                    width: 'full',
+                                    maxLength: 255
+                                }}
+                                id="commerceUser"
+                                name="commerceUser"
+                                helpText="Username to connect to SAP commerce"
+                                value={parameters.commerceUser}
+                                onChange={this.updateCommerceFields.bind(this)}
+                            />
+                            <div>
+                                <SectionHeading element="h3" children="Password" className={styles.passwordLabel}/>
+                                <TextInput
+                                    required={true}
+                                    type="password"
+                                    id="commercePassword"
+                                    name="commercePassword"
+                                    value={parameters.commerceToken}
+                                    onChange={this.updateCommerceFields.bind(this)}
+                                />
+                                <HelpText children="Password for the user"/>
+                            </div>
+                        </Form>
+
+                        <hr className={styles.splitter}/>
+                    </Typography>
+                </div>
+                <div className={styles.icon}>
+                    {/*<img src={logo} alt="App logo" />*/}
+                </div>
+            </div>
+        );
+    }
+}
