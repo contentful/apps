@@ -58,8 +58,11 @@ export default function GoogleAnalyticsConfigPage() {
 
     setIsInEditMode(false);
 
+    const currentState = await sdk.app.getCurrentState();
+
     return {
       parameters: parameters,
+      targetState: currentState,
     };
   }, [
     isAppInstalled,
@@ -69,6 +72,7 @@ export default function GoogleAnalyticsConfigPage() {
     isValidServiceAccount,
     parameters,
     sdk.notifier,
+    sdk.app,
   ]);
 
   useEffect(() => {
