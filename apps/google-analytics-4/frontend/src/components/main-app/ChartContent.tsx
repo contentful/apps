@@ -1,5 +1,6 @@
 import { Row, RunReportResponse } from '@/types';
 import LineChart from './line-chart/LineChart';
+import { parseDayAndMonth } from 'helpers/DateHelpers/DateHelpers';
 
 interface Props {
   pageViewData: RunReportResponse;
@@ -14,10 +15,9 @@ const ChartContent = (props: Props) => {
 
   const parseRowDates = (): string[] => {
     return pageViewData.rows.map((r: Row) => {
-      const d = r.dimensionValues[0].value;
-      return new Date(
-        `${d.substring(0, 4)}-${d.substring(4, 6)}-${d.substring(6, 8)}`
-      ).toLocaleDateString('en-us', { month: 'short', day: 'numeric' });
+      const date = r.dimensionValues[0].value;
+      const { month, day } = parseDayAndMonth(date);
+      return `${month} ${day}`;
     });
   };
 
@@ -26,7 +26,7 @@ const ChartContent = (props: Props) => {
       <LineChart
         dataValues={parseRowViews()}
         xAxisLabels={parseRowDates()}
-        tooltipMetricLabel="Page views"
+        tooltipMetricLabel="Page views:"
         accessibilityLabel="Analytics line chart"
       />
     </>
