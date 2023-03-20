@@ -14,19 +14,20 @@ const fetchProjectsJSON = async (
   page: number,
   accumulated: WistiaProject[]
 ): Promise<WistiaProject[]> => {
-  let projects = await (
+  const projects = await (
     await fetch(`https://api.wistia.com/v1/projects.json${page ? '?page=' + page : ''}`, {
       headers: {
         Authorization: `Bearer ${bearerToken}`,
       },
     })
   ).json();
-  accumulated = [...accumulated, ...projects];
   if (projects.error) {
     throw new WistiaError({ message: projects.error, code: projects.code });
   }
+  accumulated = [...accumulated, ...projects];
+
   // for the projects response, Wistia doesn't give us a `count` of available projects, so have to brute force it
-  else if (projects.length === PROJECTS_PER_PAGE) {
+  if (projects.length === PROJECTS_PER_PAGE) {
     return fetchProjectsJSON(bearerToken, (page += 1), accumulated);
   } else {
     return accumulated;
@@ -34,7 +35,7 @@ const fetchProjectsJSON = async (
 };
 
 export const fetchProjects = async (bearerToken: string): Promise<ProjectReduced[]> => {
-  let projects = await fetchProjectsJSON(bearerToken, 1, []);
+  const projects = await fetchProjectsJSON(bearerToken, 1, []);
   const reducedProjects = projects.map(({ id, hashedId, name }: WistiaProject) => {
     return { id, hashedId, name };
   });
