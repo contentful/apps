@@ -11,7 +11,7 @@ const Sidebar = () => {
     .installation as AppInstallationParameters;
 
   const currentContentType = sdk.contentType.sys.id;
-  const slugFieldInfo = contentTypes[currentContentType];
+  const slugFieldInfo = contentTypes[currentContentType] ?? { slugField: '', urlPrefix: '' };
 
   const api = useApi(serviceAccountKeyId, serviceAccountKey);
 
