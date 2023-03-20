@@ -45,10 +45,14 @@ export class GoogleApiService {
     return accountSummaries;
   }
 
-  standardizeDate = (date: string | Date) => new Date(new Date(date).setUTCHours(0, 0, 0, 0));
+  standardizeDate = (dateValue: string | Date) =>
+    new Date(new Date(dateValue).setUTCHours(0, 0, 0, 0));
 
-  // ex: 20230319
-  formatGADate = (dateValue: Date) => dateValue.toISOString().slice(0, 10).split('-').join('');
+  // extracts YYYY-MM-DD from ISO string
+  parseDate = (dateValue: Date) => dateValue.toISOString().slice(0, 10);
+
+  // returns YYYYMMDD format
+  formatGADate = (dateValue: Date) => this.parseDate(dateValue).split('-').join('');
 
   buildDateFromGADateFormat = (dateValue: string) =>
     new Date(
@@ -56,8 +60,8 @@ export class GoogleApiService {
     );
 
   buildDateArray = (_startDate?: string, _endDate?: string) => {
-    const startDate = _startDate || this.formatGADate(new Date(Date.now() - ONE_WEEK));
-    const endDate = _endDate || this.formatGADate(new Date(Date.now()));
+    const startDate = _startDate || this.parseDate(new Date(Date.now() - ONE_WEEK));
+    const endDate = _endDate || this.parseDate(new Date(Date.now()));
 
     const dates = [];
     const date = this.standardizeDate(startDate);
@@ -106,7 +110,7 @@ export class GoogleApiService {
   ) {
     const DEFAULT_DIMENSIONS = ['date'];
     const DEFAULT_METRICS = ['screenPageViews', 'totalUsers', 'screenPageViewsPerUser'];
-    const DEFAULT_START_DATE = new Date(Date.now() - ONE_WEEK).toISOString().split('T')[0]; // extracts YYYY-MM-DD from ISO string
+    const DEFAULT_START_DATE = this.parseDate(new Date(Date.now() - ONE_WEEK));
 
     try {
       const [response] = await this.betaAnalyticsDataClient.runReport({
