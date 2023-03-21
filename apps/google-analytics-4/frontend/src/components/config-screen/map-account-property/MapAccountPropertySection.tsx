@@ -101,11 +101,9 @@ export default function MapAccountPropertySection(props: Props) {
             {sortedAccountSummaries.map((accountSummary: AccountSummariesType) => (
               <optgroup
                 label={`${accountSummary.displayName} (${getIdOnly(accountSummary.account)})`}
-                key={getIdOnly(accountSummary.account)}>
+                key={accountSummary.account}>
                 {accountSummary.propertySummaries.map((propertySummary) => (
-                  <Select.Option
-                    key={getIdOnly(propertySummary.property)}
-                    value={getIdOnly(propertySummary.property)}>
+                  <Select.Option key={propertySummary.property} value={propertySummary.property}>
                     {`${propertySummary.displayName} (${getIdOnly(propertySummary.property)}))`}
                   </Select.Option>
                 ))}
