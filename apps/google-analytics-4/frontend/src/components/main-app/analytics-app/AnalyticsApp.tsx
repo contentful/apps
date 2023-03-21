@@ -10,6 +10,7 @@ import { styles } from './AnalyticsApp.styles';
 import { Flex, Note } from '@contentful/f36-components';
 import { RunReportData } from 'apis/apiTypes';
 import useGetFieldValue from 'hooks/useGetFieldValue';
+import { pathJoin } from '../../../utils/pathJoin';
 
 const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
 const EMPTY_DATA_MSG = 'There are no page views to show for this range';
@@ -33,7 +34,7 @@ const AnalyticsApp = (props: Props) => {
 
   useAutoResizer();
 
-  const reportSlug = `${urlPrefix || ''}${slugValue || ''}`;
+  const reportSlug = `/${pathJoin(urlPrefix || '', slugValue || '')}`;
 
   const reportRequestParams = useMemo(
     () => ({
@@ -121,7 +122,7 @@ const AnalyticsApp = (props: Props) => {
           {renderChartContent()}
 
           <ChartFooter
-            slugName={`Page path: ${urlPrefix}${slugValue}` || ''}
+            slugName={`Page path: ${reportSlug}}`}
             viewUrl="https://analytics.google.com/"
           />
         </>
