@@ -64,6 +64,7 @@ export type ChecklistStatus = {
   ServiceKey: {
     success: ChecklistRow;
     invalid: ChecklistRow;
+    missing: ChecklistRow;
   };
   AdminApi: {
     success: ChecklistRow;
@@ -103,6 +104,14 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
       ),
       title: CHECKLIST_NAMES.serviceAccount,
       description: 'Invalid service account and service account key',
+      disabled: false,
+    },
+    missing: {
+      icon: getErrorIcon(
+        'We were unable to retrieve the private key from your service account key file. Please try reinstalling your service account key file. If the problem persists, contact support.'
+      ),
+      title: CHECKLIST_NAMES.serviceAccount,
+      description: 'Unable to retrieve service account key file.',
       disabled: false,
     },
   },
@@ -219,7 +228,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
 };
 
 export const getApiChecklistURLs = (parameters: KeyValueMap, apiError: boolean) => {
-  const projectId = parameters.serviceAccountKey['project_id'];
+  const projectId = parameters.serviceAccountKeyId['projectId'];
   return {
     adminApi: {
       title: apiError ? 'Enable Admin API' : 'Details',
@@ -234,7 +243,8 @@ export const getApiChecklistURLs = (parameters: KeyValueMap, apiError: boolean) 
 
 export const getServiceKeyChecklistStatus = (
   parameters: KeyValueMap,
-  invalidServiceAccountError: ApiErrorType | undefined
+  invalidServiceAccountError: ApiErrorType | undefined,
+  missingServiceAccountError: ApiErrorType | undefined
 ) => {
   const url = `https://console.cloud.google.com/iam-admin/serviceaccounts/details/${parameters.serviceAccountKeyId.clientId}?project=${parameters.serviceAccountKeyId.projectId}`;
   const title = invalidServiceAccountError ? 'Edit service account' : 'Details';
@@ -242,9 +252,13 @@ export const getServiceKeyChecklistStatus = (
     title: title,
     url: url,
   };
-  if (!invalidServiceAccountError)
+  if (invalidServiceAccountError) {
+    return { ...CHECKLIST_STATUSES.ServiceKey.invalid, checklistUrl: checklistUrl };
+  } else if (missingServiceAccountError) {
+    return { ...CHECKLIST_STATUSES.ServiceKey.missing };
+  } else {
     return { ...CHECKLIST_STATUSES.ServiceKey.success, checklistUrl: checklistUrl };
-  else return { ...CHECKLIST_STATUSES.ServiceKey.invalid, checklistUrl: checklistUrl };
+  }
 };
 
 export const getAdminApiErrorChecklistStatus = (

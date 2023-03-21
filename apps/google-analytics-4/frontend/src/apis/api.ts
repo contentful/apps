@@ -37,25 +37,22 @@ export class Api {
   readonly baseUrl: string;
   readonly contentfulContext: ContentfulContext;
   readonly serviceAccountKeyId: ServiceAccountKeyId;
-  readonly serviceAccountKey: ServiceAccountKey;
   readonly cma: PlainClientAPI;
 
   constructor(
     contentfulContext: ContentfulContext,
     cma: PlainClientAPI,
-    serviceAccountKeyId: ServiceAccountKeyId,
-    serviceAccountKey: ServiceAccountKey
+    serviceAccountKeyId: ServiceAccountKeyId
   ) {
     this.baseUrl = config.backendApiUrl;
     this.contentfulContext = contentfulContext;
     this.cma = cma;
     this.serviceAccountKeyId = serviceAccountKeyId;
-    this.serviceAccountKey = serviceAccountKey;
   }
 
-  async getCredentials(): Promise<Credentials> {
+  async getServiceAccountKeyFile(): Promise<Credentials> {
     return await fetchFromApi<Credentials>(
-      this.requestUrl('api/credentials'),
+      this.requestUrl('api/service_account_key_file'),
       ZCredentials,
       this.contentfulContext.app!,
       this.cma,
@@ -106,9 +103,6 @@ export class Api {
     return {
       'X-Contentful-ServiceAccountKeyId': this.encodeServiceAccountHeaderValue(
         this.serviceAccountKeyId
-      ),
-      'X-Contentful-ServiceAccountKey': this.encodeServiceAccountHeaderValue(
-        this.serviceAccountKey
       ),
     };
   }

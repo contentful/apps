@@ -15,7 +15,7 @@ import {
 } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
-import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
+import { ServiceAccountKeyId } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
 import { KeyValueMap } from 'contentful-management';
 import {
@@ -28,31 +28,33 @@ import ServiceAccountChecklist from 'components/config-screen/api-access/display
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
-  serviceAccountKey: ServiceAccountKey;
   onInEditModeChange: Function;
   onAccountSummariesChange: Function;
   isAppInstalled: boolean;
   parameters: KeyValueMap;
   onHasServiceCheckErrorsChange: Function;
+  isSavingPrivateKeyFile: boolean;
 }
 
 const DisplayServiceAccountCard = (props: Props) => {
   const {
     serviceAccountKeyId,
-    serviceAccountKey,
     onInEditModeChange,
     onAccountSummariesChange,
     isAppInstalled,
     parameters,
     onHasServiceCheckErrorsChange,
+    isSavingPrivateKeyFile,
   } = props;
 
   const [isLoadingAdminApi, setIsLoadingAdminApi] = useState(true);
   const [isLoadingDataApi, setIsLoadingDataApi] = useState(true);
 
+  // TODO: refactor this to use a single error state
   const [adminApiError, setAdminApiError] = useState<ApiErrorType>();
   const [dataApiError, setDataApiError] = useState<ApiErrorType>();
   const [invalidServiceAccountError, setInvalidServiceAccountError] = useState<ApiErrorType>();
+  const [missingServiceAccountError, setMissingServiceAccountError] = useState<ApiErrorType>();
   const [unknownError, setUnknownError] = useState<ApiErrorType>();
   const [ga4PropertiesError, setGa4PropertiesError] = useState<ApiErrorType>();
   const [showChecks, setShowChecks] = useState<boolean>(false);
@@ -66,12 +68,15 @@ const DisplayServiceAccountCard = (props: Props) => {
   // NOTE: Due to a bug installation parameters are not available at sdk.parameters.installation form the config screen
   // location. Therefore we must pass down the values directly to the useApi hook. If the bug is fixed this won't be
   // necessary
-  const api = useApi(serviceAccountKeyId, serviceAccountKey);
+  const api = useApi(serviceAccountKeyId);
 
   const handleApiError = (error: ApiErrorType) => {
     switch (error.errorType) {
       case ERROR_TYPE_MAP.invalidServiceAccount:
         setInvalidServiceAccountError(error);
+        break;
+      case ERROR_TYPE_MAP.missingServiceAccountKeyFile:
+        setMissingServiceAccountError(error);
         break;
       case ERROR_TYPE_MAP.disabledAdminApi:
         setAdminApiError(error);
@@ -206,7 +211,11 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   const RenderStatusInfo = () => {
     const configError =
-      invalidServiceAccountError || adminApiError || dataApiError || ga4PropertiesError;
+      invalidServiceAccountError ||
+      missingServiceAccountError ||
+      adminApiError ||
+      dataApiError ||
+      ga4PropertiesError;
     if (configError) {
       return isFirstSetup ? (
         <Badge variant="warning">Incomplete</Badge>
@@ -229,7 +238,7 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   return (
     <Card>
-      {isLoadingAdminApi || isLoadingDataApi ? (
+      {isSavingPrivateKeyFile || isLoadingAdminApi || isLoadingDataApi ? (
         <Skeleton.Container>
           <Skeleton.BodyText numberOfLines={8} />
         </Skeleton.Container>
@@ -250,7 +259,7 @@ const DisplayServiceAccountCard = (props: Props) => {
                 </TextLink>
               </Box>
               <Box>
-                {isLoadingAdminApi && isLoadingDataApi ? (
+                {isSavingPrivateKeyFile || (isLoadingAdminApi && isLoadingDataApi) ? (
                   <Spinner variant="primary" />
                 ) : (
                   <Button variant="primary" size="small" onClick={handleApiTestClick}>
@@ -309,7 +318,11 @@ const DisplayServiceAccountCard = (props: Props) => {
           {!unknownError && showChecks && (
             <ServiceAccountChecklist
               serviceAccountCheck={{
-                ...getServiceKeyChecklistStatus(parameters, invalidServiceAccountError),
+                ...getServiceKeyChecklistStatus(
+                  parameters,
+                  invalidServiceAccountError,
+                  missingServiceAccountError
+                ),
               }}
               adminApiCheck={{
                 ...getAdminApiErrorChecklistStatus(

@@ -77,6 +77,7 @@ export const ERROR_TYPE_MAP = {
   noAccountsOrPropertiesFound: 'NoAccountsOrPropertiesFound',
   invalidProperty: 'InvalidProperty',
   invalidServiceAccount: 'InvalidServiceAccount',
+  missingServiceAccountKeyFile: 'MissingServiceAccountKeyFile',
 };
 
 export const ZApiError = z.object({

@@ -50,7 +50,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(false, parameters, undefined, undefined),
@@ -77,7 +77,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(
@@ -110,12 +110,50 @@ describe('Service Account Checklist', () => {
     await screen.findAllByText(/Awaiting a correctly configured service account installation/);
   });
 
+  it('missing service account key', async () => {
+    await act(async () => {
+      render(
+        <ServiceAccountChecklist
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(parameters, undefined, {} as ApiErrorType),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(
+              false,
+              parameters,
+              invalidServiceAccountError,
+              undefined
+            ),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(
+              false,
+              parameters,
+              invalidServiceAccountError,
+              undefined
+            ),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(
+              false,
+              invalidServiceAccountError,
+              undefined,
+              undefined
+            ),
+          }}
+        />
+      );
+    });
+
+    await screen.findAllByText(/Unable to retrieve service account key file./);
+  });
+
   it('first time install with invalid service account key', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(
@@ -153,7 +191,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, {} as ApiErrorType),
+            ...getServiceKeyChecklistStatus(parameters, {} as ApiErrorType, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(
@@ -194,7 +232,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(true, parameters, undefined, adminApiError),
@@ -217,7 +255,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(true, parameters, undefined, undefined),
@@ -245,7 +283,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(true, parameters, undefined, undefined),
