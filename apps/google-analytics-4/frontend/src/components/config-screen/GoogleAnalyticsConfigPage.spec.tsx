@@ -118,7 +118,7 @@ describe('Installed Service Account Key', () => {
       render(<GoogleAnalyticsConfigPage />);
     });
 
-    const editServiceAccountButton = screen.getByTestId('editServiceAccountButton');
+    const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
 
     await user.click(editServiceAccountButton);
     const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
@@ -160,7 +160,7 @@ describe('Installed Service Account Key', () => {
       },
     });
 
-    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
+    expect(await screen.findByText('Google Service Account Details')).toBeInTheDocument();
     expect(screen.getByText('Service Account')).toBeInTheDocument();
     expect(screen.getByText('Key ID')).toBeInTheDocument();
     expect(screen.getByText('Status')).toBeInTheDocument();

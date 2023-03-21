@@ -9,6 +9,7 @@ export const ERROR_TYPE_MAP = {
   disabledAdminApi: 'DisabledAdminApi',
   disabledDataApi: 'DisabledDataApi',
   noAccountsOrPropertiesFound: 'NoAccountsOrPropertiesFound',
+  invalidProperty: 'InvalidProperty',
   invalidServiceAccount: 'InvalidServiceAccount',
 };
 

@@ -33,6 +33,7 @@ describe('Installed Service Account Card', () => {
         <DisplayServiceAccountCard
           serviceAccountKeyId={validServiceKeyId}
           serviceAccountKey={validServiceKeyFile}
+          parameters={{}}
           onInEditModeChange={() => {}}
           onAccountSummariesChange={() => {}}
           isAppInstalled={true}

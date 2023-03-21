@@ -43,6 +43,7 @@ const ApiAccessSection = (props: Props) => {
           serviceAccountKey={parameters.serviceAccountKey}
           onAccountSummariesChange={onAccountSummariesChange}
           isAppInstalled={isAppInstalled}
+          parameters={parameters}
         />
       ) : (
         <SetupServiceAccountCard

@@ -54,7 +54,7 @@ export function createThrowableErrorFromCommonErrors(e: any) {
       {
         details: e.message,
         status: httpStatusFromGoogleRpcStatus(e.code),
-        errorType: ERROR_TYPE_MAP.noAccountsOrPropertiesFound,
+        errorType: ERROR_TYPE_MAP.invalidProperty,
       }
     );
   } else if (e.code === Status.UNAUTHENTICATED) {

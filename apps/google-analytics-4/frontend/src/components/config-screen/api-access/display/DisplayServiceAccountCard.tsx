@@ -11,11 +11,14 @@ import {
   FormControl,
   Spinner,
   Button,
+  Skeleton,
 } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
+import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
+import { KeyValueMap } from 'contentful-management';
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
@@ -23,6 +26,7 @@ interface Props {
   onInEditModeChange: Function;
   onAccountSummariesChange: Function;
   isAppInstalled: boolean;
+  parameters: KeyValueMap;
 }
 
 const DisplayServiceAccountCard = (props: Props) => {
@@ -32,6 +36,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     onInEditModeChange,
     onAccountSummariesChange,
     isAppInstalled,
+    parameters,
   } = props;
 
   const [isLoadingAdminApi, setIsLoadingAdminApi] = useState(true);
@@ -41,6 +46,8 @@ const DisplayServiceAccountCard = (props: Props) => {
   const [dataApiError, setDataApiError] = useState<ApiErrorType>();
   const [invalidServiceAccountError, setInvalidServiceAccountError] = useState<ApiErrorType>();
   const [unknownError, setUnknownError] = useState<ApiErrorType>();
+  const [ga4PropertiesError, setGa4PropertiesError] = useState<ApiErrorType>();
+  const [showChecks, setShowChecks] = useState<boolean>(false);
 
   // NOTE: Due to a bug installation parameters are not available at sdk.parameters.installation form the config screen
   // location. Therefore we must pass down the values directly to the useApi hook. If the bug is fixed this won't be
@@ -58,7 +65,7 @@ const DisplayServiceAccountCard = (props: Props) => {
       case ERROR_TYPE_MAP.disabledDataApi:
         setDataApiError(error);
         break;
-      case ERROR_TYPE_MAP.noAccountsOrPropertiesFound:
+      case ERROR_TYPE_MAP.invalidProperty:
         setAdminApiError(undefined);
         setDataApiError(undefined);
         break;
@@ -73,6 +80,13 @@ const DisplayServiceAccountCard = (props: Props) => {
       setIsLoadingAdminApi(true);
       const fetchedAccountSummaries = await api.listAccountSummaries();
       onAccountSummariesChange(fetchedAccountSummaries);
+      fetchedAccountSummaries.length
+        ? setGa4PropertiesError(undefined)
+        : setGa4PropertiesError({
+            errorType: ERROR_TYPE_MAP.noAccountsOrPropertiesFound,
+            message: 'No accounts or properties could be found',
+            status: 500,
+          });
       setAdminApiError(undefined);
     } catch (e: any) {
       if (isApiErrorType(e)) handleApiError(e);
@@ -118,6 +132,12 @@ const DisplayServiceAccountCard = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api, isAppInstalled]);
 
+  const handleErrorChanges = useCallback(() => {
+    adminApiError || dataApiError || invalidServiceAccountError || ga4PropertiesError
+      ? setShowChecks(true)
+      : setShowChecks(false);
+  }, [adminApiError, dataApiError, ga4PropertiesError, invalidServiceAccountError]);
+
   useEffect(() => {
     verifyAdminApi();
     verifyDataApi();
@@ -127,11 +147,16 @@ const DisplayServiceAccountCard = (props: Props) => {
     verifyAdminApi();
     verifyDataApi();
     setUnknownError(undefined);
+    handleErrorChanges();
   };
+
+  useEffect(() => {
+    handleErrorChanges();
+  }, [handleErrorChanges]);
 
   interface BadgeNoteType {
     badgeLabel: string;
-    noteMessage: string;
+    noteMessage?: string;
   }
 
   // TODO: Update these Render functions (RenderSimpleBadgeNote, RenderStatusInfo) to have more robust error messages for the user to act upon
@@ -140,42 +165,14 @@ const DisplayServiceAccountCard = (props: Props) => {
     return (
       <Stack spacing="spacingL" marginBottom="none" alignItems="flex-start" flexDirection="column">
         <Badge variant="negative">{badgeLabel}</Badge>
-        <Note variant="warning">{noteMessage}</Note>
+        {noteMessage && <Note variant="warning">{noteMessage}</Note>}
       </Stack>
     );
   };
 
   const RenderStatusInfo = () => {
-    if (invalidServiceAccountError) {
-      return (
-        <RenderSimpleBadgeNote
-          badgeLabel="Invalid Service Account"
-          noteMessage={invalidServiceAccountError.message}
-        />
-      );
-    } else if (adminApiError && dataApiError) {
-      return (
-        <Stack
-          spacing="spacingL"
-          marginBottom="none"
-          alignItems="flex-start"
-          flexDirection="column">
-          <Flex gap="spacingS">
-            <Badge variant="negative">API Admin Error</Badge>
-            <Badge variant="negative">API Data Error</Badge>
-          </Flex>
-          <Note variant="warning">{adminApiError.message}</Note>
-          <Note variant="warning">{dataApiError.message}</Note>
-        </Stack>
-      );
-    } else if (adminApiError) {
-      return (
-        <RenderSimpleBadgeNote badgeLabel="Admin API Error" noteMessage={adminApiError.message} />
-      );
-    } else if (dataApiError) {
-      return (
-        <RenderSimpleBadgeNote badgeLabel="Data API Error" noteMessage={dataApiError.message} />
-      );
+    if (invalidServiceAccountError || adminApiError || dataApiError || ga4PropertiesError) {
+      return <RenderSimpleBadgeNote badgeLabel="Some checks were unsuccessful" />;
     } else if (unknownError) {
       return (
         <RenderSimpleBadgeNote
@@ -192,64 +189,94 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   return (
     <Card>
-      <Flex justifyContent="space-between" marginBottom="none">
-        <Paragraph marginBottom="none" marginTop="spacingXs">
-          <b>Google Service Account Details</b>
-        </Paragraph>
-        <Flex justifyContent="space-between" marginBottom="spacingL">
-          <Box paddingRight="spacingXs" paddingTop="spacingXs">
-            <TextLink
-              testId="editServiceAccountButton"
-              as="button"
-              variant="primary"
-              onClick={() => onInEditModeChange(true)}>
-              Edit
-            </TextLink>
-          </Box>
-          <Box style={{ minWidth: '60px', minHeight: '30px' }}>
-            {isLoadingAdminApi && isLoadingDataApi ? (
-              <Spinner variant="primary" />
-            ) : (
-              <Button variant="primary" size="small" onClick={handleApiTestClick}>
-                Test
-              </Button>
-            )}
-          </Box>
-        </Flex>
-      </Flex>
-      <FormControl>
-        <FormControl.Label marginBottom="none">Service Account</FormControl.Label>
-        <Paragraph>
-          <Flex alignItems="center">
-            <Box paddingRight="spacingS">
-              <TextLink
-                icon={<ExternalLinkTrimmedIcon />}
-                alignIcon="end"
-                href={`https://console.cloud.google.com/iam-admin/serviceaccounts/details/${serviceAccountKeyId.clientId}?project=${serviceAccountKeyId.projectId}`}
-                target="_blank"
-                rel="noopener noreferrer">
-                {serviceAccountKeyId.clientEmail}
-              </TextLink>
-            </Box>
+      {isLoadingAdminApi || isLoadingDataApi ? (
+        <Skeleton.Container>
+          <Skeleton.BodyText numberOfLines={8} />
+        </Skeleton.Container>
+      ) : (
+        <>
+          <Flex justifyContent="space-between" marginBottom="none">
+            <Paragraph marginBottom="none" marginTop="spacingXs">
+              <b>Google Service Account Details</b>
+            </Paragraph>
+            <Flex justifyContent="space-between" marginBottom="spacingL">
+              <Box paddingRight="spacingXs" paddingTop="spacingXs">
+                <TextLink
+                  testId="editServiceAccountButton"
+                  as="button"
+                  variant="primary"
+                  onClick={() => onInEditModeChange(true)}>
+                  Edit
+                </TextLink>
+              </Box>
+              <Box style={{ minWidth: '60px', minHeight: '30px' }}>
+                {isLoadingAdminApi && isLoadingDataApi ? (
+                  <Spinner variant="primary" />
+                ) : (
+                  <Button variant="primary" size="small" onClick={handleApiTestClick}>
+                    Test
+                  </Button>
+                )}
+              </Box>
+            </Flex>
           </Flex>
-        </Paragraph>
-      </FormControl>
-      <FormControl>
-        <FormControl.Label marginBottom="none">Key ID</FormControl.Label>
-        <Paragraph>
-          <Box as="code">{serviceAccountKeyId.id}</Box>
-        </Paragraph>
-      </FormControl>
-      <FormControl marginBottom="none">
-        <FormControl.Label marginBottom="none">Status</FormControl.Label>
-        <Paragraph>
-          {isLoadingAdminApi && isLoadingDataApi ? (
-            <Spinner variant="primary" />
-          ) : (
-            <RenderStatusInfo />
+          <FormControl>
+            <FormControl.Label marginBottom="none">Service Account</FormControl.Label>
+            <Paragraph>
+              <Flex alignItems="center">
+                <Box paddingRight="spacingS">
+                  <TextLink
+                    icon={<ExternalLinkTrimmedIcon />}
+                    alignIcon="end"
+                    href={`https://console.cloud.google.com/iam-admin/serviceaccounts/details/${serviceAccountKeyId.clientId}?project=${serviceAccountKeyId.projectId}`}
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    {serviceAccountKeyId.clientEmail}
+                  </TextLink>
+                </Box>
+              </Flex>
+            </Paragraph>
+          </FormControl>
+          <FormControl>
+            <FormControl.Label marginBottom="none">Key ID</FormControl.Label>
+            <Paragraph>
+              <Box as="code">{serviceAccountKeyId.id}</Box>
+            </Paragraph>
+          </FormControl>
+          <FormControl marginBottom="none">
+            <FormControl.Label marginBottom="none">Status</FormControl.Label>
+            <Paragraph>
+              <Flex>
+                <Box paddingRight="spacingS">
+                  <RenderStatusInfo />
+                </Box>
+                {!unknownError && (
+                  <Box>
+                    {showChecks ? (
+                      <TextLink as="button" variant="primary" onClick={() => setShowChecks(false)}>
+                        Hide all checks
+                      </TextLink>
+                    ) : (
+                      <TextLink as="button" variant="primary" onClick={() => setShowChecks(true)}>
+                        Show all checks
+                      </TextLink>
+                    )}
+                  </Box>
+                )}
+              </Flex>
+            </Paragraph>
+          </FormControl>
+          {!unknownError && showChecks && (
+            <ServiceAccountChecklist
+              adminApiError={adminApiError}
+              dataApiError={dataApiError}
+              invalidServiceAccountError={invalidServiceAccountError}
+              ga4PropertiesError={ga4PropertiesError}
+              parameters={parameters}
+            />
           )}
-        </Paragraph>
-      </FormControl>
+        </>
+      )}
     </Card>
   );
 };
