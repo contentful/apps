@@ -1,32 +1,34 @@
 import React from 'react';
-import { useSidebarSlug } from 'hooks/useSidebarSlug';
+import { useSidebarSlug } from 'hooks/useSidebarSlug/useSidebarSlug';
 import Note from 'components/common/Note/Note';
 import { ContentTypeValue } from 'types';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { SidebarExtensionSDK } from '@contentful/app-sdk';
+import { getContentTypeSpecificMsg, DEFAULT_CONTENT_MSG } from '../constants/noteMessages';
 
 interface Props {
   slugFieldInfo: ContentTypeValue;
 }
 
-const NO_SLUG_CONFIG_MSG = `The content type has not been configured for use with this app. It must have a field of type short text and must be added to the list of content types in
-this app's configuration.`;
-const NO_SLUG_CONTENT_MSG = 'This entry does not have a valid slug field.';
-const NOT_PUBLISHED_MSG = 'This entry has not yet been published.';
-const DEFAULT_CONTENT_MSG = 'Oops! Something went wrong with the slug field configuration.';
-
-const ErrorDisplay = (props: Props) => {
+const SlugWarningDisplay = (props: Props) => {
   const { slugFieldInfo } = props;
+  const sdk = useSDK<SidebarExtensionSDK>();
+  const contentTypeName = sdk.contentType.name;
 
   const { slugFieldIsConfigured, contentTypeHasSlugField, isPublished } =
     useSidebarSlug(slugFieldInfo);
 
+  const { noSlugConfigMsg, noSlugContentMsg, notPublishedMsg } =
+    getContentTypeSpecificMsg(contentTypeName);
+
   const renderBodyMsg = () => {
     switch (true) {
       case !slugFieldIsConfigured:
-        return NO_SLUG_CONFIG_MSG;
+        return noSlugConfigMsg;
       case !contentTypeHasSlugField:
-        return NO_SLUG_CONTENT_MSG;
+        return noSlugContentMsg;
       case !isPublished:
-        return NOT_PUBLISHED_MSG;
+        return notPublishedMsg;
       default:
         return DEFAULT_CONTENT_MSG;
     }
@@ -35,4 +37,4 @@ const ErrorDisplay = (props: Props) => {
   return <Note body={renderBodyMsg()} variant="warning" />;
 };
 
-export default ErrorDisplay;
+export default SlugWarningDisplay;

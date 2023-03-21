@@ -1,6 +1,12 @@
 import SlugWarningDisplay from './SlugWarningDisplay';
 import { render, screen } from '@testing-library/react';
-import * as useSidebarSlug from 'hooks/useSidebarSlug';
+import { mockSdk } from '../../../../test/mocks';
+import { getContentTypeSpecificMsg } from '../constants/noteMessages';
+import * as useSidebarSlug from 'hooks/useSidebarSlug/useSidebarSlug';
+
+jest.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 const useSidebarSlugMock = {
   reportSlug: '',
@@ -9,6 +15,8 @@ const useSidebarSlugMock = {
 };
 
 const { findByText } = screen;
+
+const { noSlugContentMsg, notPublishedMsg } = getContentTypeSpecificMsg('Category');
 
 describe('SlugWarningDisplay for the analytics app', () => {
   it('mounts with correct msg', async () => {
@@ -22,7 +30,7 @@ describe('SlugWarningDisplay for the analytics app', () => {
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: '', urlPrefix: '' }} />);
 
     const warningMsg = await findByText(
-      "The content type has not been configured for use with this app. It must have a field of type short text and must be added to the list of content types in this app's configuration."
+      "The Category content type has not been configured for use with this app. It must have a field of type short text and must be added to the list of content types in this app's configuration."
     );
     expect(warningMsg).toBeVisible();
   });
@@ -37,7 +45,7 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
-    const warningMsg = await findByText('This entry does not have a valid slug field.');
+    const warningMsg = await findByText(noSlugContentMsg);
     expect(warningMsg).toBeVisible();
   });
 
@@ -51,7 +59,7 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
-    const warningMsg = await findByText('This entry has not yet been published.');
+    const warningMsg = await findByText(notPublishedMsg);
 
     expect(warningMsg).toBeVisible();
   });
