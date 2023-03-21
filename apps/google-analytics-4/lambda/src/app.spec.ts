@@ -5,7 +5,6 @@ import sinon, { SinonStubbedInstance } from 'sinon';
 import {
   mockAnalyticsAdminServiceClient,
   validServiceAccountKeyFile,
-  validServiceAccountKeyFileBase64,
   validServiceAccountKeyIdBase64,
 } from '../test/mocks/googleApi';
 import app from './app';
@@ -19,7 +18,6 @@ const sandbox = sinon.createSandbox();
 
 const serviceAccountKeyHeaders = {
   'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
-  'X-Contentful-ServiceAccountKey': validServiceAccountKeyFileBase64,
 };
 
 describe('app', () => {

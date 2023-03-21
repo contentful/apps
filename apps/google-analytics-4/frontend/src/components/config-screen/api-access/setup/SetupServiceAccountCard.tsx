@@ -12,13 +12,13 @@ import {
   Box,
 } from '@contentful/f36-components';
 import { CheckCircleIcon, ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
-import { ServiceAccountKey, ServiceAccountKeyId } from 'types';
+import { ServiceAccountKeyId } from 'types';
 import {
   AssertionError,
   convertKeyFileToServiceAccountKey,
   convertServiceAccountKeyToServiceAccountKeyId,
 } from 'utils/serviceAccountKey';
-import { debounce } from 'lodash';
+import { debounce, isEqual } from 'lodash';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 
 interface Props {
@@ -27,6 +27,7 @@ interface Props {
   parameters: KeyValueMap;
   onIsValidServiceAccount: Function;
   onInEditModeChange: Function;
+  onKeyFileUpdate: Function;
 }
 
 const placeholderText = `{
@@ -41,21 +42,27 @@ export default function SetupServiceAccountCard(props: Props) {
     isInEditMode,
     onInEditModeChange,
     onIsValidServiceAccount,
+    onKeyFileUpdate,
   } = props;
 
   const [keyFile, setKeyFile] = useState<string>();
-  const [serviceAccountKey, setServiceAccountKey] = useState<ServiceAccountKey>();
   const [serviceAccountKeyId, setServiceAccountKeyId] = useState<ServiceAccountKeyId>();
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
-    !errorMessage && parameters.serviceAccountKey && parameters.serviceAccountKeyId
+    !errorMessage && parameters.serviceAccountKeyId
       ? onIsValidServiceAccount(true)
       : onIsValidServiceAccount(false);
 
     // This is a on page load check, not whenever parameters service accounts change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onIsValidServiceAccount]);
+
+  useEffect(() => {
+    if (!errorMessage && parameters.serviceAccountKeyId && keyFile) {
+      onKeyFileUpdate(JSON.parse(keyFile));
+    }
+  }, [errorMessage, keyFile, onKeyFileUpdate, parameters.serviceAccountKeyId]);
 
   const handleKeyFileChange = (e: any) => {
     setKeyFile(e.target.value);
@@ -68,12 +75,10 @@ export default function SetupServiceAccountCard(props: Props) {
       const _serviceAccountKey = convertKeyFileToServiceAccountKey(keyfile);
       const _serviceAccountKeyId =
         convertServiceAccountKeyToServiceAccountKeyId(_serviceAccountKey);
-      setServiceAccountKey(_serviceAccountKey);
       setServiceAccountKeyId(_serviceAccountKeyId);
       setErrorMessage('');
 
       const _parameters = {
-        serviceAccountKey: _serviceAccountKey,
         serviceAccountKeyId: _serviceAccountKeyId,
       };
 
@@ -93,7 +98,6 @@ export default function SetupServiceAccountCard(props: Props) {
 
   const handleCancelClick = () => {
     setKeyFile('');
-    setServiceAccountKey(undefined);
     setServiceAccountKeyId(undefined);
     setErrorMessage('');
     onInEditModeChange(false);
@@ -135,7 +139,7 @@ export default function SetupServiceAccountCard(props: Props) {
         </Box>
         <FormControl
           id="accountCredentialsFile"
-          isInvalid={!serviceAccountKey || !serviceAccountKeyId}
+          isInvalid={!keyFile || !serviceAccountKeyId}
           isRequired={true}
           marginBottom={!isInEditMode ? 'none' : 'spacingM'}>
           <FormControl.Label>Private Key File</FormControl.Label>

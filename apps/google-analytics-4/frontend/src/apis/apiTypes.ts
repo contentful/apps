@@ -76,6 +76,7 @@ export const ERROR_TYPE_MAP = {
   disabledDataApi: 'DisabledDataApi',
   noAccountsOrPropertiesFound: 'NoAccountsOrPropertiesFound',
   invalidServiceAccount: 'InvalidServiceAccount',
+  missingServiceAccountKeyFile: 'MissingServiceAccountKeyFile',
 };
 
 export const ZApiError = z.object({

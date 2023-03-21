@@ -9,8 +9,10 @@ interface Props {
   parameters: KeyValueMap;
   mergeSdkParameters: Function;
   isInEditMode: boolean;
+  isSavingPrivateKeyFile: boolean;
   onInEditModeChange: Function;
   onIsValidServiceAccount: Function;
+  onKeyFileUpdate: Function;
 }
 
 const ApiAccessSection = (props: Props) => {
@@ -20,8 +22,10 @@ const ApiAccessSection = (props: Props) => {
     parameters,
     mergeSdkParameters,
     isInEditMode,
+    isSavingPrivateKeyFile,
     onInEditModeChange,
     onIsValidServiceAccount,
+    onKeyFileUpdate,
   } = props;
 
   return (
@@ -32,15 +36,11 @@ const ApiAccessSection = (props: Props) => {
           Authorize this application to access Google Analytics Admin & Data APIs
         </Paragraph>
       </div>
-      {!isInEditMode &&
-      isAppInstalled &&
-      parameters &&
-      parameters.serviceAccountKeyId &&
-      parameters.serviceAccountKey ? (
+      {!isInEditMode && isAppInstalled && parameters && parameters.serviceAccountKeyId ? (
         <DisplayServiceAccountCard
+          isSavingPrivateKeyFile={isSavingPrivateKeyFile}
           onInEditModeChange={onInEditModeChange}
           serviceAccountKeyId={parameters.serviceAccountKeyId}
-          serviceAccountKey={parameters.serviceAccountKey}
           onAccountSummariesChange={onAccountSummariesChange}
           isAppInstalled={isAppInstalled}
         />
@@ -51,6 +51,7 @@ const ApiAccessSection = (props: Props) => {
           isInEditMode={isInEditMode}
           onInEditModeChange={onInEditModeChange}
           onIsValidServiceAccount={onIsValidServiceAccount}
+          onKeyFileUpdate={onKeyFileUpdate}
         />
       )}
     </Stack>

@@ -18,6 +18,11 @@ export interface ServiceAccountKeyId {
   clientId: string;
 }
 
+export interface DynamoDbSharedCredentials {
+  sharedCredentialsId: string;
+  value: ServiceAccountKeyFile;
+}
+
 export interface RunReportParamsType {
   propertyId: string;
   slug: string;

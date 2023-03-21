@@ -1,7 +1,7 @@
 import AnalyticsApp from './AnalyticsApp';
 import { act, render, screen } from '@testing-library/react';
 import { Api } from 'apis/api';
-import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
+import { mockSdk, mockCma, validServiceKeyId } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
 
@@ -33,7 +33,6 @@ const renderAnalyticsApp = async () =>
 describe('AnalyticsApp', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
-      serviceAccountKey: validServiceKeyFile,
       serviceAccountKeyId: validServiceKeyId,
     });
   });

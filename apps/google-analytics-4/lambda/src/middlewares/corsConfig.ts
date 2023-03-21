@@ -13,7 +13,6 @@ export const corsConfig = {
     'X-Contentful-App-ID',
     // ContentfulServiceAccountHeaders
     'X-Contentful-ServiceAccountKeyId',
-    'X-Contentful-ServiceAccountKey',
     // ContentfulContextHeaders
     'X-Contentful-App',
     'X-Contentful-ContentType',

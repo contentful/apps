@@ -8,8 +8,6 @@ import {
   serviceAccountKeyProvider,
 } from './serviceAccountKeyProvider';
 import {
-  validServiceAccountKeyFile,
-  validServiceAccountKeyFileBase64,
   validServiceAccountKeyId,
   validServiceAccountKeyIdBase64,
 } from '../../test/mocks/googleApi';
@@ -22,17 +20,12 @@ describe('serviceAccountKeyProvider', () => {
     testRequest = createRequest({
       headers: {
         'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
-        'X-Contentful-ServiceAccountKey': validServiceAccountKeyFileBase64,
       },
     });
   });
 
   it('sets the service account properties on the request object', () => {
     serviceAccountKeyProvider(testRequest, {} as Express.Response, next);
-    expect(testRequest.serviceAccountKey).to.have.property(
-      'private_key',
-      validServiceAccountKeyFile.private_key
-    );
     expect(testRequest.serviceAccountKeyId).to.have.property('id', validServiceAccountKeyId.id);
   });
 
@@ -41,7 +34,6 @@ describe('serviceAccountKeyProvider', () => {
       testRequest = createRequest({
         headers: {
           'X-Contentful-ServiceAccountKeyId': 'Zm9vYmFy',
-          'X-Contentful-ServiceAccountKey': 'Zm9vYmFy',
         },
       });
     });
@@ -58,7 +50,6 @@ describe('serviceAccountKeyProvider', () => {
       testRequest = createRequest({
         headers: {
           'X-Contentful-ServiceAccountKeyId': 'eyJmb28iOiJiYXIifQ==',
-          'X-Contentful-ServiceAccountKey': 'eyJmb28iOiJiYXIifQ==',
         },
       });
     });

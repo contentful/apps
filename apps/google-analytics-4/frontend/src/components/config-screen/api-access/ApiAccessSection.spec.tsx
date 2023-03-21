@@ -18,7 +18,9 @@ describe('Config Screen component (not installed)', () => {
           onIsValidServiceAccount={() => {}}
           mergeSdkParameters={() => {}}
           isInEditMode={false}
+          isSavingPrivateKeyFile={false}
           onInEditModeChange={() => {}}
+          onKeyFileUpdate={() => {}}
         />
       );
     });

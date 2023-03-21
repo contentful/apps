@@ -1,7 +1,6 @@
 import { IdsAPI } from '@contentful/app-sdk';
 
 export interface AppInstallationParameters {
-  serviceAccountKey: ServiceAccountKey;
   serviceAccountKeyId: ServiceAccountKeyId;
   contentTypes: ContentTypes;
   propertyId: string;

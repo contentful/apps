@@ -1,5 +1,6 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { config } from '../config';
+import { ServiceAccountKeyFile } from '../types';
 
 export async function encryptSharedCredentials(data: object): Promise<string> {
   const iv = randomBytes(16);
@@ -9,7 +10,7 @@ export async function encryptSharedCredentials(data: object): Promise<string> {
   return iv.toString('hex') + ':' + encrypted;
 }
 
-export async function decryptSharedCredentials(encrypted: string): Promise<object> {
+export async function decryptSharedCredentials(encrypted: string): Promise<ServiceAccountKeyFile> {
   const [ivHex, encryptedHex] = encrypted.split(':');
   const iv = Buffer.from(ivHex, 'hex');
   const decipher = createDecipheriv(

@@ -1,36 +1,40 @@
 import { RequestHandler } from 'express';
 import { ServiceAccountKeyFile, ServiceAccountKeyId } from '../types';
+import { DynamoDBService } from '../services/dynamoDbService';
 
 export class MissingServiceAccountKeyHeader extends Error {}
+export class MissingServiceAccountKeyFile extends Error {}
 export class InvalidServiceAccountKey extends Error {}
 
-export const serviceAccountKeyProvider: RequestHandler = (req, _res, next) => {
-  const serviceAccountKeyIdHeaderValue = req.header('X-Contentful-ServiceAccountKeyId');
-  if (!serviceAccountKeyIdHeaderValue || typeof serviceAccountKeyIdHeaderValue !== 'string') {
-    throw new MissingServiceAccountKeyHeader(
-      "missing or incorrectly formatted header 'X-Contentful-ServiceAccountKeyId'"
-    );
-  }
-  const serviceAccountKeyId = decodeServiceAccountHeader(serviceAccountKeyIdHeaderValue);
-  assertServiceAccountKeyId(serviceAccountKeyId);
-  req.serviceAccountKeyId = serviceAccountKeyId;
+export const serviceAccountKeyProvider: RequestHandler = async (req, _res, next) => {
+  try {
+    const serviceAccountKeyIdHeaderValue = req.header('X-Contentful-ServiceAccountKeyId');
+    if (!serviceAccountKeyIdHeaderValue || typeof serviceAccountKeyIdHeaderValue !== 'string') {
+      throw new MissingServiceAccountKeyHeader(
+        "missing or incorrectly formatted header 'X-Contentful-ServiceAccountKeyId'"
+      );
+    }
+    const serviceAccountKeyId = decodeServiceAccountHeader(serviceAccountKeyIdHeaderValue);
+    assertServiceAccountKeyId(serviceAccountKeyId);
+    req.serviceAccountKeyId = serviceAccountKeyId;
 
-  // Pulling the account key from the header will be removed later and replaced with fetching
-  // the code directly from secret storage!
-  const serviceAccountKeyHeaderValue = req.header('X-Contentful-ServiceAccountKey');
-  if (!serviceAccountKeyHeaderValue || typeof serviceAccountKeyHeaderValue !== 'string') {
-    throw new MissingServiceAccountKeyHeader(
-      "missing or incorrectly formatted header 'X-Contentful-ServiceAccountKey'"
-    );
-  }
-  const serviceAccountKey = decodeServiceAccountHeader(serviceAccountKeyHeaderValue);
-  assertServiceAccountKeyFile(serviceAccountKey);
-  req.serviceAccountKey = serviceAccountKey;
+    // fetch and decrypt serviceAccountKey from dynamoDB and add it to the request
+    const dynamoDB = new DynamoDBService();
+    const spaceId = req.header('X-Contentful-Space-Id');
+    const sharedCredentialsId = `${spaceId}-${serviceAccountKeyId}`;
+    const serviceAccountKey = await dynamoDB.getSharedCredentials(sharedCredentialsId);
+    if (serviceAccountKey !== null) {
+      assertServiceAccountKey(serviceAccountKey);
+      req.serviceAccountKey = serviceAccountKey;
+    }
 
-  next();
+    next();
+  } catch (err) {
+    next(err);
+  }
 };
 
-const decodeServiceAccountHeader = (value: string) => {
+export const decodeServiceAccountHeader = (value: string) => {
   const asciiStr = Buffer.from(value, 'base64').toString('ascii');
   try {
     return JSON.parse(asciiStr);
@@ -39,7 +43,7 @@ const decodeServiceAccountHeader = (value: string) => {
   }
 };
 
-function assertServiceAccountKeyId(value: unknown): asserts value is ServiceAccountKeyId {
+export function assertServiceAccountKeyId(value: unknown): asserts value is ServiceAccountKeyId {
   const requiredFields = ['clientEmail', 'projectId', 'id'];
   for (const requiredField of requiredFields) {
     if (!value || typeof value !== 'object' || !(requiredField in value)) {
@@ -58,7 +62,7 @@ function assertServiceAccountKeyId(value: unknown): asserts value is ServiceAcco
 }
 
 // This function will be removed when we transition to using secret storage
-function assertServiceAccountKeyFile(value: unknown): asserts value is ServiceAccountKeyFile {
+export function assertServiceAccountKey(value: unknown): asserts value is ServiceAccountKeyFile {
   const requiredFields = ['client_email', 'project_id', 'private_key'];
   for (const requiredField of requiredFields) {
     if (!value || typeof value !== 'object' || !(requiredField in value)) {
@@ -76,7 +80,7 @@ function assertServiceAccountKeyFile(value: unknown): asserts value is ServiceAc
 
 declare module 'http' {
   interface IncomingMessage {
-    serviceAccountKey?: ServiceAccountKeyFile;
     serviceAccountKeyId?: ServiceAccountKeyId;
+    serviceAccountKey?: ServiceAccountKeyFile;
   }
 }

@@ -42,14 +42,10 @@ const makeCanonicalReq = (req: Request) => {
   const fullPath = req.originalUrl.split('?')[0];
   const signedPath = `${pathPrefix}${fullPath}`; // note: req.originalUrl starts with a `/` and includes the full path & query string
 
-  console.log('makeCanonicalRequest#pathPrefix', pathPrefix);
-  console.log('makeCanonicalRequest#req.originalUrl', req.originalUrl);
-  console.log('makeCanonicalRequest#fullPath', fullPath);
-  console.log('makeCanonicalRequest#signedPath', signedPath);
-
   return <CanonicalRequest>{
     method: req.method,
     path: signedPath,
     headers: headers,
+    body: req.body.toString(),
   };
 };

@@ -102,7 +102,6 @@ describe('Config Screen component (not installed)', () => {
 describe('Installed Service Account Key', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
-      serviceAccountKey: validServiceKeyFile,
       serviceAccountKeyId: validServiceKeyId,
       propertyId: 'properties/1234',
       contentTypes: {
