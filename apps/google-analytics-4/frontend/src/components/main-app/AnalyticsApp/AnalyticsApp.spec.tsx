@@ -26,7 +26,7 @@ const renderAnalyticsApp = async () =>
     render(
       <AnalyticsApp
         api={{ runReports: mockApi } as unknown as Api}
-        propertyId=""
+        propertyId="properties/12345"
         slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
       />
     );
@@ -43,7 +43,7 @@ describe('AnalyticsApp with correct content types configured', () => {
       slugFieldIsConfigured: true,
       contentTypeHasSlugField: true,
       isPublished: true,
-      reportSlug: '',
+      reportSlug: 'report slug',
       slugFieldValue: '',
       isContentTypeWarning: false,
     }));
