@@ -121,10 +121,7 @@ const AnalyticsApp = (props: Props) => {
 
           {renderChartContent()}
 
-          <ChartFooter
-            slugName={`Page path: ${reportSlug}}`}
-            viewUrl="https://analytics.google.com/"
-          />
+          <ChartFooter slugName={reportSlug} viewUrl="https://analytics.google.com/" />
         </>
       )}
     </>
