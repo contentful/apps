@@ -28,7 +28,6 @@ export const validServiceAccountKeyId: ServiceAccountKeyId = {
   projectId: validServiceAccountKeyFile.project_id,
 };
 
-export const validServiceAccountKeyFileBase64 = encodeObj(validServiceAccountKeyFile);
 export const validServiceAccountKeyIdBase64 = encodeObj(validServiceAccountKeyId);
 
 export const mockAccountSummary = {

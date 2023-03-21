@@ -1,3 +1,4 @@
+import { ServiceAccountKey } from '@/types';
 import { CreateAppSignedRequestProps } from 'contentful-management/dist/typings/entities/app-signed-request';
 import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
 
@@ -6,12 +7,16 @@ async function fetchWithSignedRequest(
   appDefinitionId: string,
   cma: PlainClientAPI,
   method: CreateAppSignedRequestProps['method'] = 'GET',
-  unsignedHeaders: Record<string, string> = {}
+  unsignedHeaders: Record<string, string> = {},
+  body?: ServiceAccountKey
 ): Promise<Response> {
   const req = {
     url: url,
     method: method,
-    headers: {},
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: body ? JSON.stringify(body) : undefined,
   };
 
   const rootRelativePath = req.url.pathname;
@@ -25,8 +30,10 @@ async function fetchWithSignedRequest(
       method: req.method,
       headers: req.headers,
       path: rootRelativePath,
+      body: req.body,
     }
   );
+
   Object.assign(req.headers, unsignedHeaders, signedHeaders);
 
   return fetch(req.url, req);

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { rest } from 'msw';
 import { server } from '../../test/mocks/api/server';
 import { Api, ApiError } from './api';
-import { mockCma, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
+import { mockCma, validServiceKeyId } from '../../test/mocks';
 import { mockAccountSummary } from '../../test/mocks/api/mockData';
 import { ContentfulContext } from 'types';
 import { fetchFromApi } from 'apis/fetchApi';
@@ -134,7 +134,7 @@ describe('Api', () => {
     };
 
     it('calls fetchApi with the correct parameters', async () => {
-      const api = new Api(contentfulContext, mockCma, validServiceKeyId, validServiceKeyFile);
+      const api = new Api(contentfulContext, mockCma, validServiceKeyId);
       const result = await api.getCredentials();
       expect(result).toEqual(expect.objectContaining({ status: 'active' }));
     });
@@ -155,7 +155,7 @@ describe('Api', () => {
     };
 
     it('returns a set of credentials', async () => {
-      const api = new Api(contentfulContext, mockCma, validServiceKeyId, validServiceKeyFile);
+      const api = new Api(contentfulContext, mockCma, validServiceKeyId);
       const result = await api.listAccountSummaries();
       expect(result).toEqual(expect.arrayContaining([expect.objectContaining(mockAccountSummary)]));
     });
@@ -176,7 +176,7 @@ describe('Api', () => {
     };
 
     it('returns a set of data from ga4', async () => {
-      const api = new Api(contentfulContext, mockCma, validServiceKeyId, validServiceKeyFile);
+      const api = new Api(contentfulContext, mockCma, validServiceKeyId);
       const result = await api.runReports();
       expect(result).toEqual(runReportData);
     });

@@ -15,16 +15,17 @@ describe('Config Screen component (not installed)', () => {
           isAppInstalled={false}
           onAccountSummariesChange={() => {}}
           parameters={{}}
-          onIsValidServiceAccount={() => {}}
           mergeSdkParameters={() => {}}
           isInEditMode={false}
+          isSavingPrivateKeyFile={false}
           onInEditModeChange={() => {}}
+          onKeyFileUpdate={() => {}}
         />
       );
     });
 
     expect(screen.getByText('API access')).toBeInTheDocument();
     expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
-    expect(screen.getByText('Private Key File')).toBeInTheDocument();
+    expect(screen.getByText('Service Account Key')).toBeInTheDocument();
   });
 });

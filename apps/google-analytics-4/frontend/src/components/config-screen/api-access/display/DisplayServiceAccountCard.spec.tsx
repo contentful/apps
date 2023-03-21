@@ -22,7 +22,6 @@ export const apiPath = (path: string) => {
 describe('Installed Service Account Card', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
-      serviceAccountKey: validServiceKeyFile,
       serviceAccountKeyId: validServiceKeyId,
     });
   });
@@ -31,8 +30,8 @@ describe('Installed Service Account Card', () => {
     await act(async () => {
       render(
         <DisplayServiceAccountCard
+          isSavingPrivateKeyFile={false}
           serviceAccountKeyId={validServiceKeyId}
-          serviceAccountKey={validServiceKeyFile}
           onInEditModeChange={() => {}}
           onAccountSummariesChange={() => {}}
           isAppInstalled={true}
