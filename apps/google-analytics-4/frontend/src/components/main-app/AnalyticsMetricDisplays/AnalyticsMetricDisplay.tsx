@@ -26,10 +26,7 @@ const AnalyticsMetricDisplay = (props: Props) => {
 
       <ChartContent error={error} pageViewData={runReportResponse} />
 
-      <ChartFooter
-        slugName={reportSlug ? `Page path: ${reportSlug}` : ''}
-        viewUrl="https://analytics.google.com/"
-      />
+      <ChartFooter slugName={reportSlug} viewUrl="https://analytics.google.com/" />
     </>
   );
 };
