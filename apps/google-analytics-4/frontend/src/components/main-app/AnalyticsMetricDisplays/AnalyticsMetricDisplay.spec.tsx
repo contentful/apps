@@ -2,7 +2,7 @@ import AnalyticsMetricDisplay from './AnalyticsMetricDisplay';
 import { render, screen } from '@testing-library/react';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 
-const PAGE_VIEWS = 3;
+const PAGE_VIEWS = 0;
 const METRIC_NAME = 'screenPageViews';
 const SLUG = '/en-US';
 
