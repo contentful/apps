@@ -8,7 +8,7 @@ describe('Chart Footer for the analytics app', () => {
   it('can render the slug name', () => {
     render(<ChartFooter slugName={mockSlugName} viewUrl={mockViewUrl} />);
 
-    expect(screen.getByText('my-page')).toBeVisible();
+    expect(screen.getByText(/my-page/)).toBeVisible();
   });
 
   it('can render the link to open in Google Analytics', () => {
