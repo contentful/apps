@@ -104,7 +104,7 @@ export default function MapAccountPropertySection(props: Props) {
                 key={accountSummary.account}>
                 {accountSummary.propertySummaries.map((propertySummary) => (
                   <Select.Option key={propertySummary.property} value={propertySummary.property}>
-                    {`${propertySummary.displayName} (${getIdOnly(propertySummary.property)}))`}
+                    {`${propertySummary.displayName} (${getIdOnly(propertySummary.property)})`}
                   </Select.Option>
                 ))}
               </optgroup>
