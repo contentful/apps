@@ -29,7 +29,7 @@ const ChartContent = (props: Props) => {
       return <Note body={error?.message || DEFAULT_ERR_MSG} variant="negative" />;
     }
 
-    if (pageViewData.rows && !pageViewData.rows.length) {
+    if (!pageViewData.rowCount) {
       return <Note body={EMPTY_DATA_MSG} variant="warning" />;
     }
 

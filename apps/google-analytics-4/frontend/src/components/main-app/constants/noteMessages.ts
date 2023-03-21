@@ -3,8 +3,7 @@ export const EMPTY_DATA_MSG = 'There are no page views to show for this range.';
 export const DEFAULT_CONTENT_MSG = 'Oops! Something went wrong with the slug field configuration.';
 
 export const getContentTypeSpecificMsg = (contentTypeName: string) => ({
-  noSlugConfigMsg: `The ${contentTypeName} content type has not been configured for use with this app. It must have a field of type short text and must be added to the list of content types in
-    this app's configuration.`,
-  noSlugContentMsg: `This ${contentTypeName} entry does not have a valid slug field.`,
+  noSlugConfigMsg: `The Google Analytics 4 sidebar app cannot be displayed on this entry because the ${contentTypeName} content type has not been correctly configured. Please configure this content type on the app configuration page.`,
+  noSlugContentMsg: `This ${contentTypeName} entry does not have a valid slug field. Please add a field of type short text to this entry and configure it on the app configuration page.`,
   notPublishedMsg: `This ${contentTypeName} entry has not yet been published.`,
 });

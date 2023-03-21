@@ -16,7 +16,8 @@ const useSidebarSlugMock = {
 
 const { findByText } = screen;
 
-const { noSlugContentMsg, notPublishedMsg } = getContentTypeSpecificMsg('Category');
+const { noSlugConfigMsg, noSlugContentMsg, notPublishedMsg } =
+  getContentTypeSpecificMsg('Category');
 
 describe('SlugWarningDisplay for the analytics app', () => {
   it('mounts with correct msg', async () => {
@@ -29,9 +30,7 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: '', urlPrefix: '' }} />);
 
-    const warningMsg = await findByText(
-      "The Category content type has not been configured for use with this app. It must have a field of type short text and must be added to the list of content types in this app's configuration."
-    );
+    const warningMsg = await findByText(noSlugConfigMsg);
     expect(warningMsg).toBeVisible();
   });
 
