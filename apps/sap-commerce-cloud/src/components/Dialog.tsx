@@ -47,7 +47,6 @@ export default class Dialog extends React.Component<DialogProps, State> {
   };
 
   componentDidMount() {
-    console.log(get(this.props.sdk.parameters.invocation, 'fieldType', ''));
     this.loadBaseSites().then(() => {
       this.load();
     });

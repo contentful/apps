@@ -13,10 +13,6 @@ interface Props {
 }
 
 export class ProductList extends React.Component<Props> {
-  componentDidMount() {
-    console.log('Product List initiated');
-  }
-
   selectButtonClickEvent(sku: string) {
     const skuId = this.props.baseSite + ':' + sku;
     this.props.sdk.close([skuId]);
@@ -31,9 +27,7 @@ export class ProductList extends React.Component<Props> {
         {this.props.products.map((product, index) => {
           const checkboxValue = this.props.selectedProducts.includes(
             this.props.baseSite + ':' + product.sku
-          )
-            ? true
-            : false;
+          );
           return (
             <TableRow key={product.sku}>
               <TableCell>
