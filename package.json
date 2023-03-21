@@ -6,7 +6,7 @@
     "npm": ">= 8.0.0 < 9.0.0"
   },
   "devDependencies": {
-    "prettier": "2.8.5",
+    "prettier": "2.8.6",
     "husky": "^8.0.0",
     "lint-staged": "^13.0.0"
   },
