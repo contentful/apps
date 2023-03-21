@@ -52,8 +52,9 @@ const AnalyticsApp = (props: Props) => {
       setLoading(false);
     }
 
-    fetchRunReportData();
-  }, [api, reportRequestParams]);
+    if (reportSlug && propertyId && !isContentTypeWarning) fetchRunReportData();
+    else setTimeout(() => setLoading(false), 200);
+  }, [api, reportRequestParams, reportSlug, propertyId, isContentTypeWarning]);
 
   useEffect(() => {
     if (runReportResponse.rowCount) {
