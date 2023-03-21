@@ -6,7 +6,7 @@ import useGetFieldValue from '../useGetFieldValue';
 export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
   const sdk = useSDK<SidebarExtensionSDK>();
 
-  const { slugField, urlPrefix } = slugFieldInfo ?? {};
+  const { slugField, urlPrefix } = slugFieldInfo;
   const slugFieldValue = useGetFieldValue(slugField);
 
   const reportSlug = `${urlPrefix || ''}${slugFieldValue || ''}`;
