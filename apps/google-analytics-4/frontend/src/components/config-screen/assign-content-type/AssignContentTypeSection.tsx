@@ -150,12 +150,14 @@ const AssignContentTypeSection = (props: Props) => {
 
   return (
     <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
-      <Subheading marginBottom="none">Assign to content types</Subheading>
-      <Paragraph marginBottom="none">
-        Select which content types will show the Google Analytics functionality in the sidebar.
-        Specify the slug field that is used for URL generation in your application. Optionally,
-        specify a prefix for the slug.
-      </Paragraph>
+      <div>
+        <Subheading marginBottom="spacingXs">Content type configuration</Subheading>
+        <Paragraph marginBottom="none">
+          Select which content types will show the Google Analytics functionality in the sidebar.
+          Specify the slug field that is used for URL generation in your application. Optionally,
+          specify a prefix for the slug.
+        </Paragraph>
+      </div>
       {!loadingParameters && !loadingAllContentTypes ? (
         <>
           {hasContentTypes && (
