@@ -18,7 +18,7 @@ export default function MapAccountPropertySection(props: Props) {
   const { accountsSummaries, parameters, mergeSdkParameters, onIsValidAccountProperty } = props;
 
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
-  const [flattenedProperties, setFlattenedProperties] = useState<FlattenedPropertiesType[]>([]);
+  const [sortedAccountSummaries, setSortedAccountSummaries] = useState<AccountSummariesType[]>([]);
   const [loadingProperties, setLoadingProperties] = useState<boolean>(true);
   const [loadingParameters, setLoadingParameters] = useState<boolean>(true);
 
@@ -33,26 +33,17 @@ export default function MapAccountPropertySection(props: Props) {
   }, [onIsValidAccountProperty, parameters.propertyId]);
 
   useEffect(() => {
-    const _flattenedProperties = [] as FlattenedPropertiesType[];
+    accountsSummaries.sort((a, b) => {
+      return a.displayName < b.displayName ? -1 : a.displayName > b.displayName ? 1 : 0;
+    });
+
     accountsSummaries.forEach((accountSummary) => {
-      accountSummary.propertySummaries.forEach((propertySummary) => {
-        _flattenedProperties.push({
-          propertyId: getIdOnly(propertySummary.property),
-          accountId: getIdOnly(accountSummary.account),
-          propertyName: propertySummary.displayName,
-          accountName: accountSummary.displayName,
-        });
+      accountSummary.propertySummaries.sort((a, b) => {
+        return a.displayName < b.displayName ? -1 : a.displayName > b.displayName ? 1 : 0;
       });
     });
 
-    const alphabetizedProperties = _flattenedProperties.sort((v1, v2) => {
-      return v1.accountName.toLocaleLowerCase() < v2.accountName.toLocaleLowerCase() ||
-        v1.propertyName.toLocaleLowerCase() <= v2.propertyName.toLocaleLowerCase()
-        ? -1
-        : 1;
-    });
-
-    setFlattenedProperties(alphabetizedProperties);
+    setSortedAccountSummaries(accountsSummaries);
     setLoadingProperties(false);
   }, [accountsSummaries]);
 
@@ -65,7 +56,10 @@ export default function MapAccountPropertySection(props: Props) {
 
   const shouldRenderDropdown = () => {
     return (
-      !loadingProperties && !loadingParameters && accountsSummaries.length && flattenedProperties
+      !loadingProperties &&
+      !loadingParameters &&
+      accountsSummaries.length &&
+      sortedAccountSummaries.length
     );
   };
 
@@ -85,15 +79,19 @@ export default function MapAccountPropertySection(props: Props) {
             <Select.Option key="empty option" value="" isDisabled>
               Select a "[Analytics Account] {'>'} [Property]" option...
             </Select.Option>
-            {flattenedProperties.map((flattenedProperty: FlattenedPropertiesType) => {
-              return (
-                <Select.Option
-                  key={flattenedProperty.propertyId}
-                  value={flattenedProperty.propertyId}>
-                  {`${flattenedProperty.accountName} (${flattenedProperty.accountId}) > ${flattenedProperty.propertyName} (${flattenedProperty.propertyId})`}
-                </Select.Option>
-              );
-            })}
+            {sortedAccountSummaries.map((accountSummary: AccountSummariesType) => (
+              <optgroup
+                label={`${accountSummary.displayName} (${getIdOnly(accountSummary.account)})`}
+                key={getIdOnly(accountSummary.account)}>
+                {accountSummary.propertySummaries.map((propertySummary) => (
+                  <Select.Option
+                    key={getIdOnly(propertySummary.property)}
+                    value={getIdOnly(propertySummary.property)}>
+                    {`${propertySummary.displayName} (${getIdOnly(propertySummary.property)}))`}
+                  </Select.Option>
+                ))}
+              </optgroup>
+            ))}
           </Select>
         ) : (
           <Spinner variant="primary" />
