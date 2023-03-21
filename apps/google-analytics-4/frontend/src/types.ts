@@ -102,12 +102,6 @@ export interface PropertySummariesType {
   parent: string;
 }
 
-export interface FlattenedPropertiesType {
-  propertyId: string;
-  propertyName: string;
-  accountName: string;
-}
-
 export interface ContentTypeValue {
   slugField: string;
   urlPrefix: string;

@@ -60,7 +60,7 @@ describe('Empty Account Properties mapping dropdown', () => {
       );
     });
 
-    expect(screen.getByText('Configuration')).toBeVisible();
+    expect(screen.getByText('Google Analytics 4 property')).toBeVisible();
     expect(screen.queryByTestId('accountPropertyDropdown')).toBeNull();
   });
 });
@@ -80,7 +80,7 @@ describe('Account Properties mapping dropdown', () => {
 
     const propertiesDropdown = screen.getByTestId('accountPropertyDropdown');
 
-    expect(screen.getByText('Configuration')).toBeVisible();
+    expect(screen.getByText('Google Analytics 4 property')).toBeVisible();
     expect(propertiesDropdown).toBeVisible();
   });
 });
