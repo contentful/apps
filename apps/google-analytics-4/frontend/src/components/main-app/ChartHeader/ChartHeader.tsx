@@ -37,7 +37,7 @@ const ChartHeader = (props: Props) => {
         <DisplayText marginBottom="none" size="large">
           {metricValue}
         </DisplayText>
-        <Paragraph marginBottom="none">{metricName}</Paragraph>
+        <Paragraph marginBottom="none">{getMetricDisplayString(metricName)}</Paragraph>
       </Box>
       <Select id="daterange" name="daterange" value={dateSelection} onChange={handleOnChange}>
         <Select.Option value="lastDay">Last 24 hours</Select.Option>
