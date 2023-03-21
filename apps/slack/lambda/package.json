@@ -35,7 +35,7 @@
     "eslint": "^7.12.1",
     "mocha": "^10.2.0",
     "ngrok": "4.3.3",
-    "prettier": "^2.8.1",
+    "prettier": "^2.8.5",
     "rimraf": "^3.0.2",
     "serverless": "2.72.3",
     "serverless-domain-manager": "^6.4.4",
