@@ -22,16 +22,19 @@ const SlugWarningDisplay = (props: Props) => {
     getContentTypeSpecificMsg(contentTypeName);
 
   const renderBodyMsg = () => {
-    switch (true) {
-      case !slugFieldIsConfigured:
-        return noSlugConfigMsg;
-      case !contentTypeHasSlugField:
-        return noSlugContentMsg;
-      case !isPublished:
-        return notPublishedMsg;
-      default:
-        return DEFAULT_CONTENT_MSG;
+    if (!slugFieldIsConfigured) {
+      return noSlugConfigMsg;
     }
+
+    if (!contentTypeHasSlugField) {
+      return noSlugContentMsg;
+    }
+
+    if (!isPublished) {
+      return notPublishedMsg;
+    }
+
+    return DEFAULT_CONTENT_MSG;
   };
 
   return <Note body={renderBodyMsg()} variant="warning" />;
