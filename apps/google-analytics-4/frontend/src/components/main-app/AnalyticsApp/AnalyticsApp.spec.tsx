@@ -4,6 +4,7 @@ import { Api } from 'apis/api';
 import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
+import { getContentTypeSpecificMsg } from '../constants/noteMessages';
 import * as useSidebarSlug from 'hooks/useSidebarSlug/useSidebarSlug';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
@@ -97,8 +98,8 @@ describe('AnalyticsApp with correct content types configured', () => {
 describe('AnalyticsApp when content types are not configured correctly', () => {
   it('renders SlugWarningDisplay component when slug field is not configured', async () => {
     jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
-      slugFieldIsConfigured: false,
-      contentTypeHasSlugField: true,
+      slugFieldIsConfigured: true,
+      contentTypeHasSlugField: false,
       isPublished: true,
       reportSlug: '',
       slugFieldValue: '',
@@ -109,9 +110,7 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
 
     const dropdown = queryByTestId(SELECT_TEST_ID);
     const warningNote = await findByTestId(NOTE_TEST_ID);
-    const noteText = getByText(
-      "The content type has not been configured for use with this app. It must have a field of type short text and must be added to the list of content types in this app's configuration."
-    );
+    const noteText = getByText(getContentTypeSpecificMsg('Category').noSlugContentMsg);
 
     expect(dropdown).toBeFalsy();
     expect(warningNote).toBeVisible();
