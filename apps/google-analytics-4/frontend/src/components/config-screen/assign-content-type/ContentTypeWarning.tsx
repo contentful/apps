@@ -38,17 +38,6 @@ const ContentTypeWarning = (props: Props) => {
     const getTooltipContent = () => {
       let content = '';
 
-      // Error states
-      if (!contentTypeId) {
-        setWarningType(WarningTypes.Error);
-        content += NO_CONTENT_TYPE_ERR_MSG;
-      }
-
-      if (contentTypeId && !isContentTypeInOptions) {
-        setWarningType(WarningTypes.Error);
-        content += getContentTypeDeletedMsg(contentTypeId);
-      }
-
       // Warning states
       if (contentTypeId && !slugField) {
         setWarningType(WarningTypes.Warning);
@@ -63,6 +52,17 @@ const ContentTypeWarning = (props: Props) => {
       if (contentTypeId && isContentTypeInOptions && slugField && !isSlugFieldInOptions) {
         setWarningType(WarningTypes.Warning);
         content += getSlugFieldDeletedMsg(contentTypeId, slugField);
+      }
+
+      // Error states
+      if (!contentTypeId) {
+        setWarningType(WarningTypes.Error);
+        content += NO_CONTENT_TYPE_ERR_MSG;
+      }
+
+      if (contentTypeId && !isContentTypeInOptions) {
+        setWarningType(WarningTypes.Error);
+        content += getContentTypeDeletedMsg(contentTypeId);
       }
 
       if (!content) {

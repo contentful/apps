@@ -52,7 +52,7 @@ const props = {
   onContentTypeFieldChange: onContentTypeFieldChange,
   onRemoveContentType: onRemoveContentType,
   currentEditorInterface: {},
-  originalParameters: { contentTypes: {} },
+  originalContentTypes: {},
 };
 
 describe('Assign Content Type Card for Config Screen', () => {

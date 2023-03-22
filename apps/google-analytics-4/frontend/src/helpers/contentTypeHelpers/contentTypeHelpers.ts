@@ -11,7 +11,7 @@ export const generateEditorInterfaceAssignments = (
 ): EditorInterfaceAssignment => {
   const savedContentTypeAssignments = Object.keys(currentEditorInterface);
 
-  const newAssignments: any = { ...currentEditorInterface };
+  const newAssignments = { ...(currentEditorInterface as EditorInterfaceAssignment) };
 
   for (const key in currentEditorInterface) {
     if (!contentTypeIds.includes(key)) {

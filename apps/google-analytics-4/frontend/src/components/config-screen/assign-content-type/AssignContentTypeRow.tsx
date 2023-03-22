@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Box, Select, Stack, TextInput, TextLink } from '@contentful/f36-components';
 import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
 import { EditorInterface } from '@contentful/app-sdk';
-import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 import { AllContentTypes, AllContentTypeEntries, ContentTypes, ContentTypeValue } from 'types';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
 
@@ -16,7 +15,7 @@ interface Props {
   onContentTypeFieldChange: (key: string, field: string, value: string) => void;
   onRemoveContentType: (key: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
-  originalParameters: KeyValueMap;
+  originalContentTypes: ContentTypes;
 }
 
 const AssignContentTypeRow = (props: Props) => {
@@ -30,7 +29,7 @@ const AssignContentTypeRow = (props: Props) => {
     onContentTypeFieldChange,
     onRemoveContentType,
     currentEditorInterface,
-    originalParameters,
+    originalContentTypes,
   } = props;
 
   const [contentTypeId, { slugField, urlPrefix }] = contentTypeEntry;
@@ -42,13 +41,13 @@ const AssignContentTypeRow = (props: Props) => {
   const [isInSidebar, setIsInSidebar] = useState<boolean>(false);
 
   useEffect(() => {
-    const originalContentTypeIds = Object.keys(originalParameters.contentTypes);
+    const originalContentTypeIds = Object.keys(originalContentTypes);
     if (originalContentTypeIds.includes(contentTypeId)) {
       setIsSaved(true);
     } else {
       setIsSaved(false);
     }
-  }, [contentTypeId, originalParameters]);
+  }, [contentTypeId, originalContentTypes]);
 
   useEffect(() => {
     const savedSidebarLocations = Object.keys(currentEditorInterface);
@@ -60,27 +59,18 @@ const AssignContentTypeRow = (props: Props) => {
   }, [contentTypeId, currentEditorInterface]);
 
   useEffect(() => {
-    const getContentTypeOptions = () => {
-      const contentTypeOptions = allContentTypeEntries.filter(
-        ([type]) => type === contentTypeId || !contentTypes[type]
-      );
-      setContentTypeOptions(contentTypeOptions);
-
-      if (isSaved) {
-        setIsContentTypeInOptions(
-          contentTypeOptions.find((option) => option[0] === contentTypeId) ? true : false
+    const contentTypeOptions = allContentTypeEntries.filter(
+      ([type]) => type === contentTypeId || !contentTypes[type]
+    );
+    setContentTypeOptions(contentTypeOptions);
+    if (isSaved) {
+      setIsContentTypeInOptions(contentTypeOptions.some((option) => option[0] === contentTypeId));
+      if (slugField !== undefined) {
+        setIsSlugFieldInOptions(
+          allContentTypes[contentTypeId]?.fields.some((field) => field.id === slugField)
         );
-        if (slugField !== undefined) {
-          setIsSlugFieldInOptions(
-            allContentTypes[contentTypeId]?.fields.find((field) => field.id === slugField)
-              ? true
-              : false
-          );
-        }
       }
-    };
-
-    getContentTypeOptions();
+    }
   }, [allContentTypeEntries, contentTypeId, contentTypes, allContentTypes, isSaved, slugField]);
 
   const validateSelectedOption = (contentTypeId: string, slugField?: string) => {
@@ -88,14 +78,14 @@ const AssignContentTypeRow = (props: Props) => {
 
     if (
       slugField === undefined &&
-      contentTypeOptions.find((option) => option[0] === contentTypeId)
+      contentTypeOptions.some((option) => option[0] === contentTypeId)
     ) {
       value = contentTypeId;
     }
 
     if (
       slugField !== undefined &&
-      allContentTypes[contentTypeId]?.fields.find((field) => field.id === slugField)
+      allContentTypes[contentTypeId]?.fields.some((field) => field.id === slugField)
     ) {
       value = slugField;
     }

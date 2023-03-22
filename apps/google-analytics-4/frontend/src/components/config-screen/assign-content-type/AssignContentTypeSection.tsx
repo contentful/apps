@@ -18,7 +18,7 @@ interface Props {
   onIsValidContentTypeAssignment: Function;
   parameters: KeyValueMap;
   currentEditorInterface: Partial<EditorInterface>;
-  originalParameters: KeyValueMap;
+  originalContentTypes: ContentTypes;
 }
 
 const AssignContentTypeSection = (props: Props) => {
@@ -27,7 +27,7 @@ const AssignContentTypeSection = (props: Props) => {
     onIsValidContentTypeAssignment,
     parameters,
     currentEditorInterface,
-    originalParameters,
+    originalContentTypes,
   } = props;
 
   // Content type state
@@ -166,7 +166,7 @@ const AssignContentTypeSection = (props: Props) => {
               onContentTypeFieldChange={handleContentTypeFieldChange}
               onRemoveContentType={handleRemoveContentType}
               currentEditorInterface={currentEditorInterface}
-              originalParameters={originalParameters}
+              originalContentTypes={originalContentTypes}
             />
           )}
           <Button onClick={handleAddContentType} isDisabled={hasIncompleteContentTypes}>

@@ -38,7 +38,7 @@ describe('Assign Content Type Card for Config Screen', () => {
         onContentTypeFieldChange={() => {}}
         onRemoveContentType={() => {}}
         currentEditorInterface={{}}
-        originalParameters={{ contentTypes: {} }}
+        originalContentTypes={{}}
       />
     );
 
@@ -58,7 +58,7 @@ describe('Assign Content Type Card for Config Screen', () => {
         onContentTypeFieldChange={() => {}}
         onRemoveContentType={() => {}}
         currentEditorInterface={{}}
-        originalParameters={{ contentTypes: {} }}
+        originalContentTypes={{}}
       />
     );
 

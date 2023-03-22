@@ -78,7 +78,7 @@ export default function GoogleAnalyticsConfigPage() {
     setIsInEditMode(false);
 
     // Assign the app to the sidebar for saved content types
-    const contentTypeIds = Object.keys(parameters.contentTypes);
+    const contentTypeIds = Object.keys(parameters.contentTypes ?? {});
     const newEditorInterfaceAssignments = generateEditorInterfaceAssignments(
       currentEditorInterface,
       contentTypeIds,
@@ -185,7 +185,7 @@ export default function GoogleAnalyticsConfigPage() {
               onIsValidContentTypeAssignment={handleIsValidContentTypeAssignment}
               parameters={parameters}
               currentEditorInterface={currentEditorInterface}
-              originalParameters={originalParameters}
+              originalContentTypes={originalParameters.contentTypes ?? {}}
             />
           </>
         )}

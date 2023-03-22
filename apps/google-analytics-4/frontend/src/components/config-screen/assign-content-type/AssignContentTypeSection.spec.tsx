@@ -18,7 +18,7 @@ describe('Assign Content Type Section for Config Screen', () => {
         onIsValidContentTypeAssignment={() => {}}
         parameters={{}}
         currentEditorInterface={{}}
-        originalParameters={{}}
+        originalContentTypes={{}}
       />
     );
 
