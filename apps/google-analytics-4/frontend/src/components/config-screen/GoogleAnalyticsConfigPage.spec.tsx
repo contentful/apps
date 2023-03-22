@@ -149,6 +149,15 @@ describe('Installed Service Account Key', () => {
           course: { slugField: 'shortDescription', urlPrefix: 'about' },
         },
       },
+      targetState: {
+        EditorInterface: {
+          course: {
+            sidebar: {
+              position: 1,
+            },
+          },
+        },
+      },
     });
 
     expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();

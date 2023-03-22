@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AllContentTypes, AllContentTypeEntries, ContentTypes } from 'types';
 import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
 
@@ -38,6 +39,22 @@ const contentTypes: ContentTypes = {
   },
 };
 
+const onRemoveContentType = jest.fn();
+const onContentTypeChange = jest.fn();
+const onContentTypeFieldChange = jest.fn();
+
+const props = {
+  index: 0,
+  allContentTypes: allContentTypes,
+  allContentTypeEntries: allContentTypeEntries,
+  contentTypes: contentTypes,
+  onContentTypeChange: onContentTypeChange,
+  onContentTypeFieldChange: onContentTypeFieldChange,
+  onRemoveContentType: onRemoveContentType,
+  currentEditorInterface: {},
+  originalContentTypes: {},
+};
+
 describe('Assign Content Type Card for Config Screen', () => {
   it('shows invalid and disabled inputs when content type is empty', () => {
     render(
@@ -49,42 +66,117 @@ describe('Assign Content Type Card for Config Screen', () => {
             urlPrefix: '',
           },
         ]}
-        index={0}
-        allContentTypes={allContentTypes}
-        allContentTypeEntries={allContentTypeEntries}
-        contentTypes={contentTypes}
-        onContentTypeChange={() => {}}
-        onContentTypeFieldChange={() => {}}
-        onRemoveContentType={() => {}}
+        {...props}
       />
     );
 
-    expect(screen.getByTestId('noStatus')).toBeVisible();
     expect(screen.getByTestId('contentTypeSelect')).toBeInvalid();
     expect(screen.getByTestId('slugFieldSelect')).toBeDisabled();
     expect(screen.getByTestId('urlPrefixInput')).toBeDisabled();
   });
 
-  it('can render a warning icon when slug field is not selected', () => {
+  it('calls remove handler when remove link is clicked', async () => {
+    const user = userEvent.setup();
+
     render(
       <AssignContentTypeRow
         contentTypeEntry={[
-          'category',
+          '',
           {
             slugField: '',
             urlPrefix: '',
           },
         ]}
-        index={0}
-        allContentTypes={allContentTypes}
-        allContentTypeEntries={allContentTypeEntries}
-        contentTypes={contentTypes}
-        onContentTypeChange={() => {}}
-        onContentTypeFieldChange={() => {}}
-        onRemoveContentType={() => {}}
+        {...props}
       />
     );
 
-    expect(screen.getByTestId('warningIcon')).toBeVisible();
+    await user.click(screen.getByText('Remove'));
+
+    expect(onRemoveContentType).toHaveBeenCalled();
+  });
+
+  it('calls remove handler when remove link is clicked', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AssignContentTypeRow
+        contentTypeEntry={[
+          '',
+          {
+            slugField: '',
+            urlPrefix: '',
+          },
+        ]}
+        {...props}
+      />
+    );
+
+    await user.click(screen.getByText('Remove'));
+
+    expect(onRemoveContentType).toHaveBeenCalled();
+  });
+
+  it('calls change handler when content type selection is changed', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AssignContentTypeRow
+        contentTypeEntry={[
+          'course',
+          {
+            slugField: 'slug',
+            urlPrefix: '/about',
+          },
+        ]}
+        {...props}
+      />
+    );
+
+    await user.selectOptions(screen.getByTestId('contentTypeSelect'), ['course']);
+
+    expect(onContentTypeChange).toHaveBeenCalled();
+  });
+
+  it('calls field change handler when slug field selection is changed', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AssignContentTypeRow
+        contentTypeEntry={[
+          'course',
+          {
+            slugField: 'slug',
+            urlPrefix: '/about',
+          },
+        ]}
+        {...props}
+      />
+    );
+
+    await user.selectOptions(screen.getByTestId('slugFieldSelect'), ['slug']);
+
+    expect(onContentTypeFieldChange).toHaveBeenCalled();
+  });
+
+  it('calls field change handler when url prefix input is changed', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AssignContentTypeRow
+        contentTypeEntry={[
+          'course',
+          {
+            slugField: 'slug',
+            urlPrefix: '',
+          },
+        ]}
+        {...props}
+      />
+    );
+
+    await user.type(screen.getByTestId('urlPrefixInput'), '/en-US');
+
+    expect(onContentTypeFieldChange).toHaveBeenCalled();
   });
 });
