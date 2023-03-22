@@ -3,6 +3,7 @@ import Note from 'components/common/Note/Note';
 import LineChart from 'components/main-app/LineChart/LineChart';
 import { parseDayAndMonth } from 'helpers/DateHelpers/DateHelpers';
 import { DEFAULT_ERR_MSG, EMPTY_DATA_MSG } from '../constants/noteMessages';
+import { styles } from './ChartContent.styles';
 
 interface Props {
   pageViewData: RunReportResponse;
@@ -43,7 +44,7 @@ const ChartContent = (props: Props) => {
     );
   };
 
-  return renderChartContent();
+  return <div className={styles.root}>{renderChartContent()}</div>;
 };
 
 export default ChartContent;

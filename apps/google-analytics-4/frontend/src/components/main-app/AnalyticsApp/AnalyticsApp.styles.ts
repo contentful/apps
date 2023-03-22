@@ -33,7 +33,7 @@ export const styles = {
     },
   }),
   wrapper: css({
-    height: '100px',
+    height: '150px',
     width: '100px',
     margin: 'auto',
   }),
