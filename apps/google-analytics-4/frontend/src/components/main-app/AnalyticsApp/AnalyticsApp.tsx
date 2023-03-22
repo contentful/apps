@@ -97,6 +97,7 @@ const AnalyticsApp = (props: Props) => {
         reportSlug={reportSlug}
         pageViews={pageViews}
         error={error}
+        propertyId={propertyId}
       />
     );
   };
