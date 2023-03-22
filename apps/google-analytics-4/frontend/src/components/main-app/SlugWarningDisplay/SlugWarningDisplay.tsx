@@ -34,13 +34,13 @@ const SlugWarningDisplay = (props: Props) => {
   );
 
   const renderContent = () => {
-    const content = { bodyMsg: DEFAULT_CONTENT_MSG, children: <></> };
+    const content = { bodyMsg: DEFAULT_CONTENT_MSG, hyperLink: <></> };
     if (!slugFieldIsConfigured) {
       content.bodyMsg = noSlugConfigMsg;
-      content.children = linkToOpenConfigPage;
+      content.hyperLink = linkToOpenConfigPage;
     } else if (!contentTypeHasSlugField) {
       content.bodyMsg = noSlugContentMsg;
-      content.children = linkToOpenConfigPage;
+      content.hyperLink = linkToOpenConfigPage;
     } else if (!isPublished) {
       content.bodyMsg = notPublishedMsg;
     }
@@ -48,12 +48,17 @@ const SlugWarningDisplay = (props: Props) => {
     return content;
   };
 
-  const { bodyMsg, children } = renderContent();
+  const { bodyMsg, hyperLink } = renderContent();
 
   return (
-    <Note body={bodyMsg} variant="warning">
-      {children}
-    </Note>
+    <Note
+      body={
+        <>
+          {bodyMsg} {hyperLink}
+        </>
+      }
+      variant="warning"
+    />
   );
 };
 

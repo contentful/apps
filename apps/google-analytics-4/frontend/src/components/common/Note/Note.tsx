@@ -3,19 +3,15 @@ import { styles } from './Note.styles';
 import { Note as F36Note, NoteProps } from '@contentful/f36-components';
 
 interface Props {
-  body: string;
+  body: string | JSX.Element;
   variant: NoteProps['variant'];
-  children?: JSX.Element;
 }
 
 const Note = (props: Props) => {
-  const { body, variant = 'negative', children } = props;
+  const { body, variant = 'negative' } = props;
   return (
     <F36Note className={styles.note} variant={variant}>
-      <p className={styles.noteContent}>
-        {body}
-        {children}
-      </p>
+      <p className={styles.noteContent}>{body}</p>
     </F36Note>
   );
 };
