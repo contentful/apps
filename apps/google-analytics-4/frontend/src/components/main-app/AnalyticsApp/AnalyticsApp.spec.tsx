@@ -110,7 +110,7 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
 
     const dropdown = queryByTestId(SELECT_TEST_ID);
     const warningNote = await findByTestId(NOTE_TEST_ID);
-    const noteText = getByText(getContentTypeSpecificMsg('Category').noSlugContentMsg);
+    const noteText = getByText(getContentTypeSpecificMsg('Category', true).noSlugContentMsg.trim());
 
     expect(dropdown).toBeFalsy();
     expect(warningNote).toBeVisible();

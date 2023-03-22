@@ -15,4 +15,20 @@ describe('Note component', () => {
     expect(note).toBeVisible();
     expect(paragraph).toBeVisible();
   });
+
+  it('mounts with children', () => {
+    render(
+      <Note body={BODY} variant="warning">
+        <div>Child</div>
+      </Note>
+    );
+
+    const note = getByTestId('cf-ui-note');
+    const paragraph = getByText(BODY);
+    const children = getByText('Child');
+
+    expect(note).toBeVisible();
+    expect(paragraph).toBeVisible();
+    expect(children).toBeVisible();
+  });
 });
