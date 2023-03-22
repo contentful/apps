@@ -46,8 +46,7 @@ const Dialog = () => {
       <EntityList
         style={{
           width: '100%',
-        }}
-      >
+        }}>
         {album.map((item, i) => {
           return (
             <EntityList.Item
