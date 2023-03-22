@@ -18,6 +18,7 @@ import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
 import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
+import { KeyValueMap } from 'contentful-management';
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
@@ -25,6 +26,8 @@ interface Props {
   onInEditModeChange: Function;
   onAccountSummariesChange: Function;
   isAppInstalled: boolean;
+  parameters: KeyValueMap;
+  handleHasServiceCheckErrorsChange: Function;
 }
 
 const DisplayServiceAccountCard = (props: Props) => {
@@ -34,6 +37,8 @@ const DisplayServiceAccountCard = (props: Props) => {
     onInEditModeChange,
     onAccountSummariesChange,
     isAppInstalled,
+    parameters,
+    handleHasServiceCheckErrorsChange,
   } = props;
 
   const [isLoadingAdminApi, setIsLoadingAdminApi] = useState(true);
@@ -129,11 +134,21 @@ const DisplayServiceAccountCard = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api, isAppInstalled]);
 
-  useEffect(() => {}, [
+  useEffect(() => {
+    handleHasServiceCheckErrorsChange(
+      adminApiError ||
+        dataApiError ||
+        ga4PropertiesError ||
+        invalidServiceAccountError ||
+        unknownError
+    );
+  }, [
     adminApiError,
     dataApiError,
     ga4PropertiesError,
+    handleHasServiceCheckErrorsChange,
     invalidServiceAccountError,
+    unknownError,
   ]);
 
   const handleErrorChanges = useCallback(() => {
@@ -276,6 +291,7 @@ const DisplayServiceAccountCard = (props: Props) => {
               dataApiError={dataApiError}
               invalidServiceAccountError={invalidServiceAccountError}
               ga4PropertiesError={ga4PropertiesError}
+              parameters={parameters}
             />
           )}
         </>

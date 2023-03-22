@@ -34,18 +34,36 @@ describe('Service Account Checklist', () => {
           adminApiError={undefined}
           dataApiError={undefined}
           ga4PropertiesError={undefined}
+          parameters={{ propertyId: '123' }}
         />
       );
     });
 
-    await screen.findByText('Service Account Check');
-    await screen.findByText('Admin Api Check');
-    await screen.findByText('Data Api Check');
-    await screen.findByText('Google Analytics 4 Accounts and Properties Check');
-    await screen.findByText('Valid service account and service account key.');
-    await screen.findByText('Admin API successful connected.');
-    await screen.findByText('Data API successful connected.');
-    await screen.findByText('Google Analytics 4 accounts and properties found successfully.');
+    await screen.findByText('Service Account');
+    await screen.findByText('Admin api');
+    await screen.findByText('Data api');
+    await screen.findByText('GA4 Account Properties');
+    await screen.findAllByText(/Success!/);
+  });
+
+  it('installed with service account key', async () => {
+    await act(async () => {
+      render(
+        <ServiceAccountChecklist
+          invalidServiceAccountError={invalidServiceAccountError}
+          adminApiError={undefined}
+          dataApiError={undefined}
+          ga4PropertiesError={undefined}
+          parameters={{ propertyId: '123' }}
+        />
+      );
+    });
+
+    await screen.findByText(/Invalid service account and service account key/);
+    await screen.findAllByText(/Check will run once a valid key service is installed/);
+    await screen.findByText(
+      /This check will run with a valid service key and admin api connection/
+    );
   });
 
   it('invalid service account key', async () => {
@@ -56,14 +74,31 @@ describe('Service Account Checklist', () => {
           adminApiError={undefined}
           dataApiError={undefined}
           ga4PropertiesError={undefined}
+          parameters={{}}
         />
       );
     });
 
-    await screen.findByText('Invalid Service Account Error Message.');
+    await screen.findAllByText(/Awaiting a valid service account install/);
   });
 
-  it('admin api not enabled', async () => {
+  it('invalid service account key even when apis are enabled', async () => {
+    await act(async () => {
+      render(
+        <ServiceAccountChecklist
+          invalidServiceAccountError={invalidServiceAccountError}
+          adminApiError={adminApiError}
+          dataApiError={dataApiError}
+          ga4PropertiesError={undefined}
+          parameters={{}}
+        />
+      );
+    });
+
+    await screen.findAllByText(/Awaiting a valid service account install/);
+  });
+
+  it('does not have the admin api enabled', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
@@ -71,14 +106,15 @@ describe('Service Account Checklist', () => {
           adminApiError={adminApiError}
           dataApiError={undefined}
           ga4PropertiesError={undefined}
+          parameters={{}}
         />
       );
     });
 
-    await screen.findByText('Admin API Error Message.');
+    await screen.findByText(/Check will run once the Admin api is enabled/);
   });
 
-  it('data api not enabled', async () => {
+  it('does not have the data api enabled', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
@@ -86,14 +122,15 @@ describe('Service Account Checklist', () => {
           adminApiError={undefined}
           dataApiError={dataApiError}
           ga4PropertiesError={undefined}
+          parameters={{}}
         />
       );
     });
 
-    await screen.findByText('Data API Error Message.');
+    await screen.findByText(/Please enable the Data api to run this check/);
   });
 
-  it('has no found GA4 Accounrs or Properties', async () => {
+  it('has no found GA4 Accounts or Properties', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
@@ -101,10 +138,11 @@ describe('Service Account Checklist', () => {
           adminApiError={undefined}
           dataApiError={undefined}
           ga4PropertiesError={ga4PropertiesError}
+          parameters={{ propertyId: '123' }}
         />
       );
     });
 
-    await screen.findByText('No GA4 Properties Error Message.');
+    await screen.findByText(/There are no properties listed!/);
   });
 });

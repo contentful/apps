@@ -20,8 +20,13 @@ export default function GoogleAnalyticsConfigPage() {
   const [isValidServiceAccount, setIsValidServiceAccount] = useState<boolean>(false);
   const [isValidAccountProperty, setIsValidAccountProperty] = useState<boolean>(true);
   const [isValidContentTypeAssignment, setIsValidContentTypeAssignment] = useState<boolean>(true);
+  const [hasServiceCheckErrors, setHasServiceCheckErrors] = useState<boolean>(true);
 
   const sdk = useSDK<AppExtensionSDK>();
+
+  const handleHasServiceCheckErrorsChange = (hasErrors: boolean) => {
+    setHasServiceCheckErrors(hasErrors);
+  };
 
   /** SDK Parameters handlers/effects **/
   const mergeSdkParameters = (_parameters: KeyValueMap) => {
@@ -136,8 +141,9 @@ export default function GoogleAnalyticsConfigPage() {
           isInEditMode={isInEditMode}
           onInEditModeChange={handleInEditModeChange}
           onIsValidServiceAccount={handleIsValidServiceAccount}
+          handleHasServiceCheckErrorsChange={handleHasServiceCheckErrorsChange}
         />
-        {isAppInstalled && !isInEditMode && (
+        {isAppInstalled && !isInEditMode && !hasServiceCheckErrors && (
           <>
             <Splitter />
             <MapAccountPropertySection
