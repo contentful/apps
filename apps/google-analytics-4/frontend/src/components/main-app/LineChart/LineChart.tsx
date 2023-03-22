@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -37,6 +37,11 @@ const Y_AXIS_SCALAR = 1.2;
 
 const LineChart = (props: Props) => {
   const { dataValues, xAxisLabels, tooltipMetricLabel, accessibilityLabel } = props;
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const data: ChartData<'line'> = {
     labels: xAxisLabels,
@@ -49,6 +54,8 @@ const LineChart = (props: Props) => {
 
   const options: ChartOptions<'line'> = {
     responsive: true,
+    // no animation needed when mounting
+    animation: isMounted ? { duration: 1000 } : false,
     scales: {
       y: {
         beginAtZero: true,
