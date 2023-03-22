@@ -7,7 +7,6 @@ const useGetFieldValue = (fieldId: string) => {
     const [value] = useFieldValue<string>(fieldId);
     fieldValue = value ?? '';
   } catch (e) {
-    // TODO: address handling this error in INTEG-219
     console.error(e);
   }
 
