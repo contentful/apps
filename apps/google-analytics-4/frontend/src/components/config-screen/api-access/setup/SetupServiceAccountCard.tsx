@@ -12,7 +12,6 @@ import {
   Box,
 } from '@contentful/f36-components';
 import { CheckCircleIcon, ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
-import { ServiceAccountKey, ServiceAccountKeyId } from 'types';
 import {
   AssertionError,
   convertKeyFileToServiceAccountKey,
@@ -44,8 +43,6 @@ export default function SetupServiceAccountCard(props: Props) {
   } = props;
 
   const [keyFile, setKeyFile] = useState<string>();
-  const [serviceAccountKey, setServiceAccountKey] = useState<ServiceAccountKey>();
-  const [serviceAccountKeyId, setServiceAccountKeyId] = useState<ServiceAccountKeyId>();
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
@@ -68,8 +65,6 @@ export default function SetupServiceAccountCard(props: Props) {
       const _serviceAccountKey = convertKeyFileToServiceAccountKey(keyfile);
       const _serviceAccountKeyId =
         convertServiceAccountKeyToServiceAccountKeyId(_serviceAccountKey);
-      setServiceAccountKey(_serviceAccountKey);
-      setServiceAccountKeyId(_serviceAccountKeyId);
       setErrorMessage('');
 
       const _parameters = {
@@ -93,12 +88,14 @@ export default function SetupServiceAccountCard(props: Props) {
 
   const handleCancelClick = () => {
     setKeyFile('');
-    setServiceAccountKey(undefined);
-    setServiceAccountKeyId(undefined);
     setErrorMessage('');
     onInEditModeChange(false);
     onIsValidServiceAccount(true);
   };
+
+  // consider form value invalid if they've provided at least some text but a serviceAccountKey or serivceAccountKeyId has
+  // not been able to be generated successfully
+  const isInvalid = keyFile !== '' && errorMessage !== '';
 
   return (
     <Stack spacing="spacingL" flexDirection="column">
@@ -135,11 +132,12 @@ export default function SetupServiceAccountCard(props: Props) {
         </Box>
         <FormControl
           id="accountCredentialsFile"
-          isInvalid={!serviceAccountKey || !serviceAccountKeyId}
+          isInvalid={isInvalid}
           isRequired={true}
           marginBottom={!isInEditMode ? 'none' : 'spacingM'}>
           <FormControl.Label>Private Key File</FormControl.Label>
           <Textarea
+            spellCheck={false}
             name="accountCredentialsFile"
             placeholder={placeholderText}
             rows={10}
