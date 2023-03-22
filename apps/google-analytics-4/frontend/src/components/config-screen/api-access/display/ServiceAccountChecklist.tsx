@@ -10,6 +10,8 @@ import tokens from '@contentful/f36-tokens';
 import ChecklistSplitter from 'components/config-screen/api-access/display/ChecklistSplitter';
 import { KeyValueMap } from 'contentful-management';
 import GenericCheckRow from 'components/config-screen/api-access/display/GenericCheckRow';
+import { AppExtensionSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface Props {
   adminApiError: ApiErrorType | undefined;
@@ -27,8 +29,13 @@ const styles = {
 };
 
 const API_TYPES = {
-  adminApi: 'Admin api',
-  dataApi: 'Data api',
+  adminApi: 'Admin API',
+  dataApi: 'Data API',
+};
+
+export type CheckListURL = {
+  title: string;
+  url: string;
 };
 
 export default function ServiceAccountChecklist(props: Props) {
@@ -39,6 +46,20 @@ export default function ServiceAccountChecklist(props: Props) {
     ga4PropertiesError,
     parameters,
   } = props;
+
+  const getCheckListURls = (parameters: KeyValueMap) => {
+    const projectId = parameters.serviceAccountKey['project_id']
+    return {
+      adminApi: {
+        title: 'Enable Admin API',
+        url: `https://console.cloud.google.com/apis/api/analyticsadmin.googleapis.com/metrics?project=${projectId}`,
+      },
+      dataApi: {
+        title: 'Enable Data API',
+        url: `https://console.cloud.google.com/apis/api/analyticsdata.googleapis.com/metrics?project=${projectId}`,
+      },
+    };
+  };
 
   const [isFirstSetup, setIsFirstSetup] = useState<boolean>(false);
   useEffect(() => {
@@ -76,10 +97,13 @@ export default function ServiceAccountChecklist(props: Props) {
 
   const renderApiCheck = (type: string) => {
     const title = getApiType(type);
-    const error = title === API_TYPES.adminApi ? adminApiError : dataApiError;
+    const apiError = title === API_TYPES.adminApi ? adminApiError : dataApiError;
+    const checkListUrls = getCheckListURls(parameters);
+    const checkListUrl =
+      title === API_TYPES.adminApi ? checkListUrls.adminApi : checkListUrls.dataApi;
 
     // Success state
-    if (!invalidServiceAccountError && !error) {
+    if (!invalidServiceAccountError && !apiError) {
       return (
         <GenericCheckRow
           icon={
@@ -88,6 +112,7 @@ export default function ServiceAccountChecklist(props: Props) {
           title={title}
           description={'Success!'}
           style={styles.defaultRowStyle}
+          checkListUrl={checkListUrl}
         />
       );
     }
@@ -120,12 +145,12 @@ export default function ServiceAccountChecklist(props: Props) {
         <GenericCheckRow
           icon={<ClockIcon marginLeft="spacingXs" marginRight="spacingXs" variant="muted" />}
           title={title}
-          description={`Check will run once a valid key service is installed`}
+          description={`Check will run once a valid service key is installed`}
           style={styles.defaultRowStyle}
         />
       );
     }
-    if (error) {
+    if (apiError) {
       return (
         <GenericCheckRow
           icon={<ErrorCircleIcon marginLeft="spacingXs" marginRight="spacingXs" variant="muted" />}

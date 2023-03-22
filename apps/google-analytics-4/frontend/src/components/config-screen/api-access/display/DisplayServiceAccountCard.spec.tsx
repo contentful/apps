@@ -37,6 +37,7 @@ describe('Installed Service Account Card', () => {
           onInEditModeChange={() => {}}
           onAccountSummariesChange={() => {}}
           isAppInstalled={true}
+          onHasServiceCheckErrorsChange={() => {}}
         />
       );
     });

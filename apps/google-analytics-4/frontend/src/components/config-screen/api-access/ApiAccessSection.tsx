@@ -11,6 +11,7 @@ interface Props {
   isInEditMode: boolean;
   onInEditModeChange: Function;
   onIsValidServiceAccount: Function;
+  onHasServiceCheckErrorsChange: Function;
 }
 
 const ApiAccessSection = (props: Props) => {
@@ -22,6 +23,7 @@ const ApiAccessSection = (props: Props) => {
     isInEditMode,
     onInEditModeChange,
     onIsValidServiceAccount,
+    onHasServiceCheckErrorsChange,
   } = props;
 
   return (
@@ -44,6 +46,7 @@ const ApiAccessSection = (props: Props) => {
           onAccountSummariesChange={onAccountSummariesChange}
           isAppInstalled={isAppInstalled}
           parameters={parameters}
+          onHasServiceCheckErrorsChange={onHasServiceCheckErrorsChange}
         />
       ) : (
         <SetupServiceAccountCard

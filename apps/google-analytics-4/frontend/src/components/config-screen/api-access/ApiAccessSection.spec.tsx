@@ -19,6 +19,7 @@ describe('Config Screen component (not installed)', () => {
           mergeSdkParameters={() => {}}
           isInEditMode={false}
           onInEditModeChange={() => {}}
+          onHasServiceCheckErrorsChange={() => {}}
         />
       );
     });

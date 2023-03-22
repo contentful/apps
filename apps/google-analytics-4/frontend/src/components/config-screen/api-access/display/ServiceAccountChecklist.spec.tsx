@@ -60,7 +60,7 @@ describe('Service Account Checklist', () => {
     });
 
     await screen.findByText(/Invalid service account and service account key/);
-    await screen.findAllByText(/Check will run once a valid key service is installed/);
+    await screen.findAllByText(/Check will run once a valid service key is installed/);
     await screen.findByText(
       /This check will run with a valid service key and admin api connection/
     );

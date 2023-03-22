@@ -27,6 +27,7 @@ interface Props {
   onAccountSummariesChange: Function;
   isAppInstalled: boolean;
   parameters: KeyValueMap;
+  onHasServiceCheckErrorsChange: Function;
 }
 
 const DisplayServiceAccountCard = (props: Props) => {
@@ -37,6 +38,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     onAccountSummariesChange,
     isAppInstalled,
     parameters,
+    onHasServiceCheckErrorsChange,
   } = props;
 
   const [isLoadingAdminApi, setIsLoadingAdminApi] = useState(true);
@@ -131,6 +133,23 @@ const DisplayServiceAccountCard = (props: Props) => {
     // isAppInstalled is needed as a dependency to trigger this called once the app is installed succesffully
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api, isAppInstalled]);
+
+  useEffect(() => {
+    onHasServiceCheckErrorsChange(
+      adminApiError ||
+        dataApiError ||
+        ga4PropertiesError ||
+        invalidServiceAccountError ||
+        unknownError
+    );
+  }, [
+    adminApiError,
+    dataApiError,
+    ga4PropertiesError,
+    onHasServiceCheckErrorsChange,
+    invalidServiceAccountError,
+    unknownError,
+  ]);
 
   const handleErrorChanges = useCallback(() => {
     adminApiError || dataApiError || invalidServiceAccountError || ga4PropertiesError
