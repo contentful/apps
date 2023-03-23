@@ -9,7 +9,7 @@ function getEnvironmentVariable(environmentVariableName: string) {
 export const config = {
   signingSecret: getEnvironmentVariable('SIGNING_SECRET'),
   stage: getEnvironmentVariable('STAGE'),
-  awsRegion: getEnvironmentVariable('AWS_REGION'),
+  dynamoDbRegion: getEnvironmentVariable('DYNAMODB_REGION'),
   dynamoDbEndpoint: getEnvironmentVariable('DYNAMODB_ENDPOINT'),
   dynamoDbTableName: getEnvironmentVariable('DYNAMODB_TABLE_NAME'),
   sharedCredentialsSecretKey: getEnvironmentVariable('SHARED_CREDENTIALS_SECRET_KEY'),
