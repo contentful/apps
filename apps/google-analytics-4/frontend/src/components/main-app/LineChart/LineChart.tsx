@@ -13,7 +13,6 @@ import {
 import { Line } from 'react-chartjs-2';
 import tokens from '@contentful/f36-tokens';
 import { parseRemToPxInt } from 'helpers/parse-styling-token/parse-styling-token';
-import { styles } from './LineChart.styles';
 
 const ACCESSIBILITY_LABEL = 'Analytics line chart';
 
@@ -86,9 +85,7 @@ const LineChart = (props: Props) => {
   };
 
   return (
-    <div className={styles.root}>
-      <Line data={data} options={options} fallbackContent={accessibilityLabel} {...chartProps} />
-    </div>
+    <Line data={data} options={options} fallbackContent={accessibilityLabel} {...chartProps} />
   );
 };
 

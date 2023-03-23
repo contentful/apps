@@ -33,6 +33,7 @@ export const styles = {
     },
   }),
   wrapper: css({
+    // height of this loading wrapper matches height of ChartContent
     height: '160px',
     width: '100px',
     margin: 'auto',
