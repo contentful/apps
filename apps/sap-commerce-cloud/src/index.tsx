@@ -25,10 +25,10 @@ init((sdk) => {
       component: (
         <AppConfig
           sdk={sdk as AppExtensionSDK}
-          name="SAP Commerce App"
+          name="SAP Commerce Cloud App"
           description={`
-            The sap commerce app allows editors to select commerce objects (eg: products) from their
-            commerce app and reference them inside of Contentful entries.`}
+            The SAP Commerce Cloud app allows content creators to select products from their
+            SAP Commerce Cloud instance and reference them inside of Contentful entries.`}
           logo="https://images.ctfassets.net/lpjm8d10rkpy/6pMn4nHfKoOZGwFFcqaqqe/70272257dc1d2d0bbcc3ebdde13a7358/1493030643828.svg"
           color="212F3F"
           parameterDefinitions={[
