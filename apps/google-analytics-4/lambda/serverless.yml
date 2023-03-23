@@ -27,7 +27,7 @@ provider:
   name: aws
   runtime: nodejs18.x
   stage: ${opt:stage, 'dev'}
-  region: 'us-east-1'
+  region: ${self:custom.awsRegion}
   timeout: 30
   deploymentBucket:
     name: cf-apps-serverless-deployment
@@ -45,10 +45,6 @@ provider:
             - dynamodb:DeleteItem
           Resource:
             - Fn::GetAtt: [SharedCredentialsTable, Arn]
-  environment:
-    DYNAMODB_ENDPOINT: ${self:custom.dynamoDbEndpoint}
-    DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbtableName}
-    SHARED_CREDENTIALS_SECRET_KEY: ${self:custom.dynamoDbSharedCredentialsSecretKey}
 
 functions:
   api:
