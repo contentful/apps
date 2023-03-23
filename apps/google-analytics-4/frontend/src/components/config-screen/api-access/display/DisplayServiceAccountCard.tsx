@@ -17,8 +17,14 @@ import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId, ServiceAccountKey } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
-import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
 import { KeyValueMap } from 'contentful-management';
+import {
+  getAdminApiErrorChecklistStatus,
+  getDataApiErrorChecklistStatus,
+  getGa4PropertyErrorChecklistStatus,
+  getServiceKeyChecklistStatus,
+} from 'components/config-screen/api-access/display/ChecklistUtils';
+import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
@@ -50,6 +56,12 @@ const DisplayServiceAccountCard = (props: Props) => {
   const [unknownError, setUnknownError] = useState<ApiErrorType>();
   const [ga4PropertiesError, setGa4PropertiesError] = useState<ApiErrorType>();
   const [showChecks, setShowChecks] = useState<boolean>(false);
+  const [accountSummaries, setAccountsSummaries] = useState<any>([]);
+  const [isFirstSetup, setIsFirstSetup] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!parameters || !parameters.propertyId) setIsFirstSetup(true);
+  }, [parameters]);
 
   // NOTE: Due to a bug installation parameters are not available at sdk.parameters.installation form the config screen
   // location. Therefore we must pass down the values directly to the useApi hook. If the bug is fixed this won't be
@@ -81,6 +93,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     try {
       setIsLoadingAdminApi(true);
       const fetchedAccountSummaries = await api.listAccountSummaries();
+      setAccountsSummaries(fetchedAccountSummaries);
       onAccountSummariesChange(fetchedAccountSummaries);
       fetchedAccountSummaries.length
         ? setGa4PropertiesError(undefined)
@@ -140,7 +153,8 @@ const DisplayServiceAccountCard = (props: Props) => {
         dataApiError ||
         ga4PropertiesError ||
         invalidServiceAccountError ||
-        unknownError
+        unknownError ||
+        !accountSummaries.length
     );
   }, [
     adminApiError,
@@ -149,6 +163,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     onHasServiceCheckErrorsChange,
     invalidServiceAccountError,
     unknownError,
+    accountSummaries.length,
   ]);
 
   const handleErrorChanges = useCallback(() => {
@@ -190,7 +205,9 @@ const DisplayServiceAccountCard = (props: Props) => {
   };
 
   const RenderStatusInfo = () => {
-    if (invalidServiceAccountError || adminApiError || dataApiError || ga4PropertiesError) {
+    const configError =
+      invalidServiceAccountError || adminApiError || dataApiError || ga4PropertiesError;
+    if (configError) {
       return <RenderSimpleBadgeNote badgeLabel="Some checks were unsuccessful" />;
     } else if (unknownError) {
       return (
@@ -228,7 +245,7 @@ const DisplayServiceAccountCard = (props: Props) => {
                   Edit
                 </TextLink>
               </Box>
-              <Box style={{ minWidth: '60px', minHeight: '30px' }}>
+              <Box>
                 {isLoadingAdminApi && isLoadingDataApi ? (
                   <Spinner variant="primary" />
                 ) : (
@@ -286,13 +303,37 @@ const DisplayServiceAccountCard = (props: Props) => {
             </Paragraph>
           </FormControl>
           {!unknownError && showChecks && (
-            <ServiceAccountChecklist
-              adminApiError={adminApiError}
-              dataApiError={dataApiError}
-              invalidServiceAccountError={invalidServiceAccountError}
-              ga4PropertiesError={ga4PropertiesError}
-              parameters={parameters}
-            />
+            <>
+              <ServiceAccountChecklist
+                serviceAccountCheck={{
+                  ...getServiceKeyChecklistStatus(invalidServiceAccountError),
+                }}
+                adminApiCheck={{
+                  ...getAdminApiErrorChecklistStatus(
+                    isFirstSetup,
+                    parameters,
+                    invalidServiceAccountError,
+                    adminApiError
+                  ),
+                }}
+                dataApiCheck={{
+                  ...getDataApiErrorChecklistStatus(
+                    isFirstSetup,
+                    parameters,
+                    invalidServiceAccountError,
+                    dataApiError
+                  ),
+                }}
+                ga4PropertiesCheck={{
+                  ...getGa4PropertyErrorChecklistStatus(
+                    isFirstSetup,
+                    invalidServiceAccountError,
+                    adminApiError,
+                    ga4PropertiesError
+                  ),
+                }}
+              />
+            </>
           )}
         </>
       )}

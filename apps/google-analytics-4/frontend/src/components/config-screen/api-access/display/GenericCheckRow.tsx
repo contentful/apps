@@ -1,38 +1,46 @@
 import React from 'react';
 import { Box, Flex, Text, TextLink } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
-import { CheckListURL } from 'components/config-screen/api-access/display/ServiceAccountChecklist';
+import tokens from '@contentful/f36-tokens';
+import { ChecklistURL } from 'components/config-screen/api-access/display/ChecklistUtils';
 
 type Props = {
   icon: React.ReactNode;
   title: string;
   description: string;
-  style: any;
-  checkListUrl?: CheckListURL;
+  checklistUrl?: ChecklistURL;
+  disabled: boolean;
+  style: any
 };
 
-export default function GenericCheckRow(props: Props) {
-  const { icon, title, description, style, checkListUrl } = props;
+
+export default function GenericChecklistRow(props: Props) {
+  const { icon, title, description, checklistUrl, disabled, style } = props;
 
   return (
     <Box display="flex" style={style}>
       <Flex alignItems="center" justifyContent="space-between" flexGrow={1}>
         <Flex>
           {icon}
-          <Text marginRight="spacing2Xs" fontWeight="fontWeightDemiBold">
+          <Text
+            fontColor={disabled ? 'gray500' : 'gray800'}
+            marginRight="spacing2Xs"
+            fontWeight={disabled ? 'fontWeightMedium' : 'fontWeightDemiBold'}>
             {title}
           </Text>
-          <Text>- {description}</Text>
+          <Text fontWeight="fontWeightMedium" fontColor={disabled ? 'gray500' : 'gray800'}>
+            - {description}
+          </Text>
         </Flex>
-        {checkListUrl && (
+        {checklistUrl && (
           <Flex paddingRight="spacingS">
             <TextLink
               icon={<ExternalLinkTrimmedIcon />}
               alignIcon="end"
-              href={checkListUrl.url}
+              href={checklistUrl.url}
               target="_blank"
               rel="noopener noreferrer">
-              {checkListUrl.title}
+              {checklistUrl.title}
             </TextLink>
           </Flex>
         )}
