@@ -1,7 +1,7 @@
+import 'setimmediate';
 import PubNub from 'pubnub';
-jest.mock('pubnub');
-
 import { createPubSub } from '../../src/sidebar/pubnub-client';
+jest.mock('pubnub');
 
 const timetoken = '15641267505310000000';
 const timetoken2 = '15641267509990000000';
