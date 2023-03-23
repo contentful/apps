@@ -176,7 +176,7 @@ export default function GoogleAnalyticsConfigPage() {
           onIsValidServiceAccount={handleIsValidServiceAccount}
           onHasServiceCheckErrorsChange={handleHasServiceCheckErrorsChange}
         />
-        {isAppInstalled && !isInEditMode && !hasServiceCheckErrors && (
+        {isAppInstalled && (!hasServiceCheckErrors || parameters.propertyId) && (
           <>
             <Splitter />
             <MapAccountPropertySection

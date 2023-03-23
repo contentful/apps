@@ -1,6 +1,12 @@
 import { act, render, screen } from '@testing-library/react';
 import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
 import { ERROR_TYPE_MAP } from 'apis/apiTypes';
+import {
+  getServiceKeyChecklistStatus,
+  getAdminApiErrorChecklistStatus,
+  getDataApiErrorChecklistStatus,
+  getGa4PropertyErrorChecklistStatus,
+} from 'components/config-screen/api-access/display/ChecklistUtils';
 
 const invalidServiceAccountError = {
   errorType: ERROR_TYPE_MAP.invalidServiceAccount,
@@ -25,56 +31,111 @@ const ga4PropertiesError = {
   status: 500,
 };
 
+const parameters = {
+  propertyId: '1234',
+  serviceAccountKey: {
+    project_id: 'abc',
+  },
+};
+
 describe('Service Account Checklist', () => {
   it('is the active happy path', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
-          invalidServiceAccountError={undefined}
-          adminApiError={undefined}
-          dataApiError={undefined}
-          ga4PropertiesError={undefined}
-          parameters={{ propertyId: '123' }}
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(undefined),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(false, parameters, undefined, undefined),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(false, parameters, undefined, undefined),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(false, undefined, undefined, undefined),
+          }}
         />
       );
     });
 
     await screen.findByText('Service Account');
-    await screen.findByText('Admin api');
-    await screen.findByText('Data api');
-    await screen.findByText('GA4 Account Properties');
-    await screen.findAllByText(/Success!/);
+    screen.findByText('Admin api');
+    screen.findByText('Data api');
+    screen.findByText('GA4 Account Properties');
+    screen.findAllByText(/Success!/);
   });
 
-  it('installed with service account key', async () => {
+  it('installed with invalid service account key', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
-          invalidServiceAccountError={invalidServiceAccountError}
-          adminApiError={undefined}
-          dataApiError={undefined}
-          ga4PropertiesError={undefined}
-          parameters={{ propertyId: '123' }}
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(invalidServiceAccountError),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(
+              false,
+              parameters,
+              invalidServiceAccountError,
+              undefined
+            ),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(
+              false,
+              parameters,
+              invalidServiceAccountError,
+              undefined
+            ),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(
+              false,
+              invalidServiceAccountError,
+              undefined,
+              undefined
+            ),
+          }}
         />
       );
     });
 
     await screen.findByText(/Invalid service account and service account key/);
-    await screen.findAllByText(/Check will run once a valid service key is installed/);
-    await screen.findByText(
-      /This check will run with a valid service key and admin api connection/
-    );
+    screen.findAllByText(/Awaiting a valid service account install/);
   });
 
-  it('invalid service account key', async () => {
+  it('first time install with invalid service account key', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
-          invalidServiceAccountError={invalidServiceAccountError}
-          adminApiError={undefined}
-          dataApiError={undefined}
-          ga4PropertiesError={undefined}
-          parameters={{}}
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(invalidServiceAccountError),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(
+              true,
+              parameters,
+              invalidServiceAccountError,
+              undefined
+            ),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(
+              true,
+              parameters,
+              invalidServiceAccountError,
+              undefined
+            ),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(
+              true,
+              invalidServiceAccountError,
+              undefined,
+              undefined
+            ),
+          }}
         />
       );
     });
@@ -86,59 +147,110 @@ describe('Service Account Checklist', () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
-          invalidServiceAccountError={invalidServiceAccountError}
-          adminApiError={adminApiError}
-          dataApiError={dataApiError}
-          ga4PropertiesError={undefined}
-          parameters={{}}
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(invalidServiceAccountError),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(
+              true,
+              parameters,
+              invalidServiceAccountError,
+              adminApiError
+            ),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(
+              true,
+              parameters,
+              invalidServiceAccountError,
+              dataApiError
+            ),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(
+              true,
+              invalidServiceAccountError,
+              adminApiError,
+              undefined
+            ),
+          }}
         />
       );
     });
 
-    await screen.findAllByText(/Awaiting a valid service account install/);
+    await screen.findAllByText(/Invalid service account and service account key/);
+    screen.findAllByText(/Please enable the Admin API to run this check/);
+    screen.findAllByText(/Please enable the Data API to run this check/);
+    screen.findAllByText(/Check will run once the Admin API is enabled/);
   });
 
   it('does not have the admin api enabled', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
-          invalidServiceAccountError={undefined}
-          adminApiError={adminApiError}
-          dataApiError={undefined}
-          ga4PropertiesError={undefined}
-          parameters={{}}
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(undefined),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(true, parameters, undefined, adminApiError),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(true, parameters, undefined, undefined),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(true, undefined, adminApiError, undefined),
+          }}
         />
       );
     });
 
-    await screen.findByText(/Check will run once the Admin api is enabled/);
+    await screen.findByText(/Check will run once the Admin API is enabled/);
   });
 
   it('does not have the data api enabled', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
-          invalidServiceAccountError={undefined}
-          adminApiError={undefined}
-          dataApiError={dataApiError}
-          ga4PropertiesError={undefined}
-          parameters={{}}
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(undefined),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(true, parameters, undefined, undefined),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(true, parameters, undefined, dataApiError),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(
+              true,
+              invalidServiceAccountError,
+              undefined,
+              undefined
+            ),
+          }}
         />
       );
     });
 
-    await screen.findByText(/Please enable the Data api to run this check/);
+    await screen.findByText(/Please enable the Data API to run this check/);
   });
 
   it('has no found GA4 Accounts or Properties', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
-          invalidServiceAccountError={undefined}
-          adminApiError={undefined}
-          dataApiError={undefined}
-          ga4PropertiesError={ga4PropertiesError}
-          parameters={{ propertyId: '123' }}
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(undefined),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(true, parameters, undefined, undefined),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(true, parameters, undefined, undefined),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(true, undefined, undefined, ga4PropertiesError),
+          }}
         />
       );
     });
