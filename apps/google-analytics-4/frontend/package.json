@@ -14,7 +14,7 @@
     "@types/lodash": "4.14.191",
     "@types/react-chartjs-2": "^2.5.7",
     "chart.js": "^4.2.1",
-    "contentful-management": "10.31.0",
+    "contentful-management": "10.31.1",
     "emotion": "10.0.27",
     "lodash": "4.17.21",
     "react": "17.0.2",
