@@ -1,18 +1,14 @@
 import { useAutoResizer } from '@contentful/react-apps-toolkit';
-import ChartFooter from 'components/main-app/ChartFooter';
-import ChartHeader from 'components/main-app/ChartHeader';
 import { useEffect, useState, useMemo } from 'react';
 import { Api } from 'apis/api';
 import getRangeDates from 'helpers/DateRangeHelpers/DateRangeHelpers';
-import ChartContent from '../ChartContent';
 import { DateRangeType, ContentTypeValue } from 'types';
 import { styles } from './AnalyticsApp.styles';
-import { Flex, Note } from '@contentful/f36-components';
+import { Flex } from '@contentful/f36-components';
 import { RunReportData } from 'apis/apiTypes';
-import useGetFieldValue from 'hooks/useGetFieldValue';
-
-const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
-const EMPTY_DATA_MSG = 'There are no page views to show for this range';
+import { useSidebarSlug } from 'hooks/useSidebarSlug/useSidebarSlug';
+import SlugWarningDisplay from 'components/main-app/SlugWarningDisplay/SlugWarningDisplay';
+import AnalyticsMetricDisplay from 'components/main-app/AnalyticsMetricDisplays/AnalyticsMetricDisplay';
 
 interface Props {
   api: Api;
@@ -21,19 +17,16 @@ interface Props {
 }
 const AnalyticsApp = (props: Props) => {
   const { api, propertyId, slugFieldInfo } = props;
-  const { slugField, urlPrefix } = slugFieldInfo;
+
   const [runReportResponse, setRunReportResponse] = useState<RunReportData>({} as RunReportData);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek');
-  const [startEndDates, setStartEndDates] = useState<any>(getRangeDates('lastWeek')); // TYPE
-  const [slugValue, setSlugValue] = useState<string>('');
+  const [startEndDates, setStartEndDates] = useState<any>(getRangeDates('lastWeek'));
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
 
-  const slugFieldValue = useGetFieldValue(slugField);
+  const { reportSlug, isContentTypeWarning } = useSidebarSlug(slugFieldInfo);
 
   useAutoResizer();
-
-  const reportSlug = `${urlPrefix || ''}${slugValue || ''}`;
 
   const reportRequestParams = useMemo(
     () => ({
@@ -48,10 +41,6 @@ const AnalyticsApp = (props: Props) => {
   );
 
   useEffect(() => {
-    setSlugValue(slugFieldValue);
-  }, [slugFieldValue]);
-
-  useEffect(() => {
     async function fetchRunReportData() {
       try {
         const reportData = await api.runReports(reportRequestParams);
@@ -63,8 +52,9 @@ const AnalyticsApp = (props: Props) => {
       setLoading(false);
     }
 
-    fetchRunReportData();
-  }, [api, reportRequestParams]);
+    if (reportSlug && propertyId && !isContentTypeWarning) fetchRunReportData();
+    else setTimeout(() => setLoading(false), 200);
+  }, [api, reportRequestParams, reportSlug, propertyId, isContentTypeWarning]);
 
   useEffect(() => {
     if (runReportResponse.rowCount) {
@@ -86,48 +76,32 @@ const AnalyticsApp = (props: Props) => {
 
   const metricName = runReportResponse.metricHeaders && runReportResponse.metricHeaders[0].name;
 
-  const renderChartContent = () => {
-    if (error) {
+  const renderAnalyticContent = () => {
+    if (loading) {
       return (
-        <Note className={styles.note} variant="negative">
-          <p className={styles.noteContent}>{error.message || DEFAULT_ERR_MSG}</p>
-        </Note>
-      );
-    } else if (!runReportResponse.rowCount) {
-      return (
-        <Note className={styles.note} variant="warning">
-          <p className={styles.noteContent}>{EMPTY_DATA_MSG}</p>
-        </Note>
-      );
-    }
-
-    return <ChartContent pageViewData={runReportResponse} />;
-  };
-
-  return (
-    <>
-      {loading ? (
         <Flex justifyContent="center" alignItems="center" className={styles.wrapper}>
           <div className={styles.loader}></div>
         </Flex>
-      ) : (
-        <>
-          <ChartHeader
-            metricName={metricName ? metricName : ''}
-            metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
-            handleChange={handleDateRangeChange}
-          />
+      );
+    }
 
-          {renderChartContent()}
+    if (isContentTypeWarning) {
+      return <SlugWarningDisplay slugFieldInfo={slugFieldInfo} />;
+    }
 
-          <ChartFooter
-            slugName={`Page path: ${urlPrefix}${slugValue}` || ''}
-            viewUrl="https://analytics.google.com/"
-          />
-        </>
-      )}
-    </>
-  );
+    return (
+      <AnalyticsMetricDisplay
+        handleDateRangeChange={handleDateRangeChange}
+        runReportResponse={runReportResponse}
+        metricName={metricName}
+        reportSlug={reportSlug}
+        pageViews={pageViews}
+        error={error}
+      />
+    );
+  };
+
+  return renderAnalyticContent();
 };
 
 export default AnalyticsApp;

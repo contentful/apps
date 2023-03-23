@@ -102,12 +102,6 @@ export interface PropertySummariesType {
   parent: string;
 }
 
-export interface FlattenedPropertiesType {
-  propertyId: string;
-  propertyName: string;
-  accountName: string;
-}
-
 export interface ContentTypeValue {
   slugField: string;
   urlPrefix: string;
@@ -133,3 +127,9 @@ export interface AllContentTypes {
 }
 
 export type AllContentTypeEntries = [string, AllContentTypeValue][];
+
+export interface EditorInterfaceAssignment {
+  [key: string]: { [key: string]: { position: number } };
+}
+
+export type ContentWarningTypes = '' | 'error' | 'warning';

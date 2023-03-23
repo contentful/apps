@@ -4,6 +4,8 @@ import { Api } from 'apis/api';
 import { mockSdk, mockCma, validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
+import { getContentTypeSpecificMsg } from '../constants/noteMessages';
+import * as useSidebarSlug from 'hooks/useSidebarSlug/useSidebarSlug';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => jest.fn(),
@@ -14,7 +16,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 const mockApi = jest.fn();
 
-const { findByTestId, getByTestId, getByText } = screen;
+const { findByTestId, getByTestId, getByText, queryByTestId } = screen;
 
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
@@ -24,18 +26,27 @@ const renderAnalyticsApp = async () =>
     render(
       <AnalyticsApp
         api={{ runReports: mockApi } as unknown as Api}
-        propertyId=""
+        propertyId="properties/12345"
         slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
       />
     );
   });
 
-describe('AnalyticsApp', () => {
+describe('AnalyticsApp with correct content types configured', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
       serviceAccountKey: validServiceKeyFile,
       serviceAccountKeyId: validServiceKeyId,
     });
+
+    jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
+      slugFieldIsConfigured: true,
+      contentTypeHasSlugField: true,
+      isPublished: true,
+      reportSlug: 'report slug',
+      slugFieldValue: '',
+      isContentTypeWarning: false,
+    }));
   });
 
   it('mounts data', async () => {
@@ -55,7 +66,7 @@ describe('AnalyticsApp', () => {
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
-    const noteText = getByText('There are no page views to show for this range');
+    const noteText = getByText('There are no page views to show for this range.');
 
     expect(dropdown).toBeVisible();
     expect(warningNote).toBeVisible();
@@ -81,5 +92,28 @@ describe('AnalyticsApp', () => {
     expect(screen.queryByTestId(SELECT_TEST_ID)).toBeNull();
     expect(screen.queryByTestId(NOTE_TEST_ID)).toBeNull();
     expect(screen.queryByTestId('mock Api error')).toBeNull();
+  });
+});
+
+describe('AnalyticsApp when content types are not configured correctly', () => {
+  it('renders SlugWarningDisplay component when slug field is not configured', async () => {
+    jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
+      slugFieldIsConfigured: true,
+      contentTypeHasSlugField: false,
+      isPublished: true,
+      reportSlug: '',
+      slugFieldValue: '',
+      isContentTypeWarning: true,
+    }));
+    mockApi.mockImplementation(() => runReportResponseHasViews);
+    renderAnalyticsApp();
+
+    const dropdown = queryByTestId(SELECT_TEST_ID);
+    const warningNote = await findByTestId(NOTE_TEST_ID);
+    const noteText = getByText(getContentTypeSpecificMsg('Category', true).noSlugContentMsg.trim());
+
+    expect(dropdown).toBeFalsy();
+    expect(warningNote).toBeVisible();
+    expect(noteText).toBeVisible();
   });
 });

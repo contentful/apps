@@ -1,2 +1,3 @@
 signingSecret: <APP_SIGNING_KEY_GOES_HERE>
 domainName: google-analytics-4-test.ctfapps.net
+dynamoDbSharedCredentialsSecretKey: this-is-a-32-byte-secret-key1234

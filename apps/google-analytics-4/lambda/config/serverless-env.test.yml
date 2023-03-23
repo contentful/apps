@@ -1,2 +1,3 @@
-signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/test/signing-secret}
-domainName: google-analytics-4-test.ctfapps.net
+signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/prd/signing-secret}
+domainName: google-analytics-4.ctfapps.net
+dynamoDbSharedCredentialsSecretKey: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/prd/shared-credentials-secret-key}

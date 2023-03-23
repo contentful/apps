@@ -20,6 +20,9 @@ const mockSdk: any = {
   location: {
     is: jest.fn().mockReturnValue(true),
   },
+  contentType: {
+    name: 'Category',
+  },
 };
 
 export { mockSdk };

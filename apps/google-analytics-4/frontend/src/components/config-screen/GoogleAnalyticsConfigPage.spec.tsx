@@ -33,7 +33,7 @@ describe('Google Analytics Page', () => {
       render(<GoogleAnalyticsConfigPage />);
     });
 
-    await screen.findByText('API Access');
+    await screen.findByText('API access');
     await screen.findByText('Google Service Account Details');
   });
 });
@@ -147,6 +147,15 @@ describe('Installed Service Account Key', () => {
         propertyId: 'properties/1234',
         contentTypes: {
           course: { slugField: 'shortDescription', urlPrefix: 'about' },
+        },
+      },
+      targetState: {
+        EditorInterface: {
+          course: {
+            sidebar: {
+              position: 1,
+            },
+          },
         },
       },
     });

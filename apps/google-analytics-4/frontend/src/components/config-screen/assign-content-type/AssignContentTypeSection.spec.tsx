@@ -17,9 +17,11 @@ describe('Assign Content Type Section for Config Screen', () => {
         mergeSdkParameters={() => {}}
         onIsValidContentTypeAssignment={() => {}}
         parameters={{}}
+        currentEditorInterface={{}}
+        originalContentTypes={{}}
       />
     );
 
-    expect(screen.getByText('Assign to content types')).toBeVisible();
+    expect(screen.getByText('Content type configuration')).toBeVisible();
   });
 });

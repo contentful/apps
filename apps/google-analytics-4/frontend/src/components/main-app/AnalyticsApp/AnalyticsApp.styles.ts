@@ -33,19 +33,9 @@ export const styles = {
     },
   }),
   wrapper: css({
-    height: '100px',
+    // height of this loading wrapper matches height of ChartContent
+    height: '160px',
     width: '100px',
     margin: 'auto',
-  }),
-  note: css({
-    overflow: 'hidden',
-    marginBottom: tokens.spacingM,
-  }),
-  noteContent: css({
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
-    display: '-webkit-box',
-    WebkitLineClamp: 4,
-    WebkitBoxOrient: 'vertical',
   }),
 };

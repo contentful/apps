@@ -116,3 +116,25 @@ For this command to work, the following environment variables must be set:
 - `CONTENTFUL_ORG_ID` - The ID of your organization
 - `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
 - `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
+
+### Docker
+
+`DynamoDB` has been added as a resource, developing locally has been configured to use `Docker` & `Docker Compose`.
+
+To get started, use the following command in the root of the `lambda` directory:
+
+`make start-app`
+
+This will launch a local `DynamoDB` instance, as well as a development instance of the `lambda` with mounted volumes for nodemon changes to be picked up on save.
+
+To clean up resources after development, run:
+
+`make clean`
+
+Docker compose can also be used with a familiar command set:
+
+`docker compose up --build` will start services with flowing logs output
+
+`docker compose down` will stop all running instances of images
+
+`docker system prune -a` will remove all allocated memory for docker resources (should be last option for trouble shooting)

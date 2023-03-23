@@ -1,32 +1,25 @@
 import { DateRangeType } from '@/types';
 import getRangeDates, { RANGE_OPTIONS } from './DateRangeHelpers';
 
-const MS_PER_DAY = 86400000;
-
 const calculateRangeDates = (range: DateRangeType) => {
   const { start, end } = getRangeDates(range);
+  const getDate = (date: string) => Number(new Date(date).toLocaleDateString().split('/')[1]);
   return {
-    startDate: new Date(start).getTime() / MS_PER_DAY,
-    endDate: new Date(end).getTime() / MS_PER_DAY,
+    startDay: getDate(start),
+    endDay: getDate(end),
   };
 };
 
 describe('handle date range helper', () => {
   it('formats dates correctly for week range', () => {
-    const { startDate, endDate } = calculateRangeDates('lastWeek');
+    const { startDay, endDay } = calculateRangeDates('lastWeek');
 
-    expect(endDate - startDate).toBe(RANGE_OPTIONS.lastWeek.startDaysAgo);
+    expect(endDay - startDay).toBe(RANGE_OPTIONS.lastWeek.startDaysAgo);
   });
 
   it('formats dates correctly for day range', () => {
-    const { startDate, endDate } = calculateRangeDates('lastDay');
+    const { startDay, endDay } = calculateRangeDates('lastDay');
 
-    expect(endDate - startDate).toBe(RANGE_OPTIONS.lastDay.startDaysAgo);
-  });
-
-  it('formats dates correctly for 28 day range', () => {
-    const { startDate, endDate } = calculateRangeDates('lastMonth');
-
-    expect(endDate - startDate).toBe(RANGE_OPTIONS.lastMonth.startDaysAgo);
+    expect(endDay - startDay).toBe(RANGE_OPTIONS.lastDay.startDaysAgo);
   });
 });

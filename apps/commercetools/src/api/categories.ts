@@ -3,16 +3,20 @@ import { Pagination, Product } from '@contentful/ecommerce-app-base';
 import { ConfigurationParameters } from '../types';
 import { createClient } from './client';
 
-function categoryTransformer({ projectKey, locale }: ConfigurationParameters) {
+function categoryTransformer({ projectKey, locale, mcUrl }: ConfigurationParameters) {
   return (item: Category): Product => {
+    const merchantCenterBaseUrl =
+      mcUrl && mcUrl.length > 0 ? mcUrl : 'https://mc.europe-west1.gcp.commercetools.com';
     const id = item.id ?? '';
+    const externalLink =
+      (projectKey && id && `${merchantCenterBaseUrl}/${projectKey}/categories/${id}/general`) || '';
     return {
       id,
       sku: id,
       displaySKU: item.slug[locale ?? 'en'] ?? id,
       name: item.name?.[locale ?? 'en'] ?? '',
       image: item.assets?.[0]?.sources?.[0]?.uri ?? '',
-      externalLink: `https://mc.europe-west1.gcp.commercetools.com/${projectKey}/categories/${id}/general`,
+      externalLink,
     };
   };
 }
