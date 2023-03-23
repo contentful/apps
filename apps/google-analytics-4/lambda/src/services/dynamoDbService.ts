@@ -14,7 +14,7 @@ export class DynamoDBService {
 
   constructor(
     client = new DynamoDBClient({
-      region: config.dynamoDbRegion,
+      region: config.awsRegion,
       endpoint: config.dynamoDbEndpoint,
     })
   ) {
