@@ -18,16 +18,16 @@ custom:
   serverless-offline:
     httpPort: 8080
     host: 0.0.0.0
+  dynamoDbRegion: us-east-1
   dynamoDbEndpoint: http://dynamodb:8000
   dynamoDbtableName: sls-apps-ga4-backend-${opt:stage, 'dev'}-SharedCredentialsTable
   dynamoDbSharedCredentialsSecretKey: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):dynamoDbSharedCredentialsSecretKey}
-  awsRegion: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):awsRegion}
 
 provider:
   name: aws
   runtime: nodejs18.x
   stage: ${opt:stage, 'dev'}
-  region: ${self:custom.awsRegion}
+  region: ${self:custom.dynamoDbRegion}
   timeout: 30
   deploymentBucket:
     name: cf-apps-serverless-deployment
@@ -55,10 +55,10 @@ functions:
       STAGE: ${opt:stage, 'dev'}
       NODE_ENV: ${env:NODE_ENV, 'development'}
       RELEASE_VERSION: ${env:CIRCLE_SHA1, 'undefined'}
+      DYNAMODB_REGION: ${self:custom.dynamoDbRegion}
       DYNAMODB_ENDPOINT: ${self:custom.dynamoDbEndpoint}
       DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbtableName}
       SHARED_CREDENTIALS_SECRET_KEY: ${self:custom.dynamoDbSharedCredentialsSecretKey}
-      AWS_REGION: ${self:custom.awsRegion}
     handler: build/src/index.handler
     events:
       - http:
