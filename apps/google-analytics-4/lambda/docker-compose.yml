@@ -48,7 +48,6 @@ services:
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: local
       AWS_SECRET_ACCESS_KEY: local
-      DYNAMODB_REGION: us-east-1
       DYNAMO_TABLE_NAME: sls-apps-ga4-backend-dev-SharedCredentialsTable
       DYNAMO_ENDPOINT: http://dynamodb:8000
     depends_on:
