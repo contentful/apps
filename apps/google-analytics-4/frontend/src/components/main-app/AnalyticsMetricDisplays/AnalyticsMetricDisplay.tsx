@@ -3,6 +3,7 @@ import ChartFooter from 'components/main-app/ChartFooter/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader/ChartHeader';
 import ChartContent from '../ChartContent/ChartContent';
 import { RunReportResponse } from 'types';
+import { getExternalUrl } from 'helpers/externalUrlHelpers/externalUrlHelpers';
 
 interface Props {
   handleDateRangeChange: Function;
@@ -11,11 +12,23 @@ interface Props {
   pageViews: number;
   metricName: string;
   error?: Error;
+  propertyId: string;
 }
 
 const AnalyticsMetricDisplay = (props: Props) => {
-  const { handleDateRangeChange, runReportResponse, reportSlug, error, metricName, pageViews } =
-    props;
+  const {
+    handleDateRangeChange,
+    runReportResponse,
+    reportSlug,
+    error,
+    metricName,
+    pageViews,
+    propertyId,
+  } = props;
+
+  const propertyIdNumber = propertyId.split('/')[1] || '';
+  const viewUrl = getExternalUrl(propertyIdNumber, reportSlug);
+
   return (
     <>
       <ChartHeader
@@ -26,7 +39,7 @@ const AnalyticsMetricDisplay = (props: Props) => {
 
       <ChartContent error={error} pageViewData={runReportResponse} />
 
-      <ChartFooter slugName={reportSlug} viewUrl="https://analytics.google.com/" />
+      <ChartFooter slugName={reportSlug} viewUrl={viewUrl} />
     </>
   );
 };
