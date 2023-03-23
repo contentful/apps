@@ -29,8 +29,6 @@ jobs:
     steps:
       - checkout
       - node/install
-      - vault/get-secrets:
-          template-preset: 'aws-push-artifacts'
       - run:
           name: Check for prettier violations
           command: |
