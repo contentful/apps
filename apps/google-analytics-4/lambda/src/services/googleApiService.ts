@@ -86,7 +86,7 @@ export class GoogleApiService {
     dateArray.forEach((date) => {
       const foundRow = rows.find(
         (row) =>
-          this.buildDateFromGADateFormat(row.dimensionValues[0].value).getDate() == date.getDate()
+          this.buildDateFromGADateFormat(row.dimensionValues[0].value).valueOf() == date.valueOf()
       );
 
       if (foundRow) {
