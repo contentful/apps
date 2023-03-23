@@ -208,7 +208,11 @@ const DisplayServiceAccountCard = (props: Props) => {
     const configError =
       invalidServiceAccountError || adminApiError || dataApiError || ga4PropertiesError;
     if (configError) {
-      return <RenderSimpleBadgeNote badgeLabel="Some checks were unsuccessful" />;
+      return isFirstSetup ? (
+        <Badge variant="warning">Incomplete</Badge>
+      ) : (
+        <Badge variant="negative">"Some checks were unsuccessful"</Badge>
+      );
     } else if (unknownError) {
       return (
         <RenderSimpleBadgeNote
@@ -303,37 +307,35 @@ const DisplayServiceAccountCard = (props: Props) => {
             </Paragraph>
           </FormControl>
           {!unknownError && showChecks && (
-            <>
-              <ServiceAccountChecklist
-                serviceAccountCheck={{
-                  ...getServiceKeyChecklistStatus(invalidServiceAccountError),
-                }}
-                adminApiCheck={{
-                  ...getAdminApiErrorChecklistStatus(
-                    isFirstSetup,
-                    parameters,
-                    invalidServiceAccountError,
-                    adminApiError
-                  ),
-                }}
-                dataApiCheck={{
-                  ...getDataApiErrorChecklistStatus(
-                    isFirstSetup,
-                    parameters,
-                    invalidServiceAccountError,
-                    dataApiError
-                  ),
-                }}
-                ga4PropertiesCheck={{
-                  ...getGa4PropertyErrorChecklistStatus(
-                    isFirstSetup,
-                    invalidServiceAccountError,
-                    adminApiError,
-                    ga4PropertiesError
-                  ),
-                }}
-              />
-            </>
+            <ServiceAccountChecklist
+              serviceAccountCheck={{
+                ...getServiceKeyChecklistStatus(parameters, invalidServiceAccountError),
+              }}
+              adminApiCheck={{
+                ...getAdminApiErrorChecklistStatus(
+                  isFirstSetup,
+                  parameters,
+                  invalidServiceAccountError,
+                  adminApiError
+                ),
+              }}
+              dataApiCheck={{
+                ...getDataApiErrorChecklistStatus(
+                  isFirstSetup,
+                  parameters,
+                  invalidServiceAccountError,
+                  dataApiError
+                ),
+              }}
+              ga4PropertiesCheck={{
+                ...getGa4PropertyErrorChecklistStatus(
+                  isFirstSetup,
+                  invalidServiceAccountError,
+                  adminApiError,
+                  ga4PropertiesError
+                ),
+              }}
+            />
           )}
         </>
       )}

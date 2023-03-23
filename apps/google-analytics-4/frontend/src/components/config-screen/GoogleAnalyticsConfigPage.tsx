@@ -160,6 +160,10 @@ export default function GoogleAnalyticsConfigPage() {
     setIsInEditMode(_isInEditMode);
   };
 
+  const showPropertyDropdownAndContentTypeSection = () => {
+    return !hasServiceCheckErrors || parameters.propertyId;
+  };
+
   return (
     <>
       <Box className={styles.background} />
@@ -176,7 +180,7 @@ export default function GoogleAnalyticsConfigPage() {
           onIsValidServiceAccount={handleIsValidServiceAccount}
           onHasServiceCheckErrorsChange={handleHasServiceCheckErrorsChange}
         />
-        {isAppInstalled && (!hasServiceCheckErrors || parameters.propertyId) && (
+        {isAppInstalled && showPropertyDropdownAndContentTypeSection() && (
           <>
             <Splitter />
             <MapAccountPropertySection

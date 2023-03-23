@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, Flex, Text, TextLink } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
-import tokens from '@contentful/f36-tokens';
 import { ChecklistURL } from 'components/config-screen/api-access/display/ChecklistUtils';
 
 type Props = {
@@ -19,7 +18,7 @@ export default function GenericChecklistRow(props: Props) {
   return (
     <Box display="flex" style={style}>
       <Flex alignItems="center" justifyContent="space-between" flexGrow={1}>
-        <Flex>
+        <Flex alignItems="center">
           {icon}
           <Text
             fontColor={disabled ? 'gray500' : 'gray800'}
@@ -27,9 +26,7 @@ export default function GenericChecklistRow(props: Props) {
             fontWeight={disabled ? 'fontWeightMedium' : 'fontWeightDemiBold'}>
             {title}
           </Text>
-          <Text fontWeight="fontWeightMedium" fontColor={disabled ? 'gray500' : 'gray800'}>
-            - {description}
-          </Text>
+          <Text fontColor={disabled ? 'gray500' : 'gray800'}>- {description}</Text>
         </Flex>
         {checklistUrl && (
           <Flex paddingRight="spacingS">

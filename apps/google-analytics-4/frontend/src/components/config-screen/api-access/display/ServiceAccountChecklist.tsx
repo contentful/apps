@@ -15,10 +15,7 @@ const styles = {
     backgroundColor: tokens.gray100,
     border: `1px solid ${tokens.gray300}`,
   },
-  topRowStyle: {
-    borderBottom: 'none',
-  },
-  bottomRowStyle: {
+  nonTopRowStyle: {
     borderTop: 'none',
   },
 };
@@ -34,7 +31,7 @@ export default function ServiceAccountChecklist(props: Props) {
         description={serviceAccountCheck.description}
         checklistUrl={serviceAccountCheck.checklistUrl}
         disabled={serviceAccountCheck.disabled}
-        style={{ ...styles.defaultRowStyle, ...styles.topRowStyle }}
+        style={styles.defaultRowStyle}
       />
       <GenericChecklistRow
         icon={adminApiCheck.icon}
@@ -42,7 +39,7 @@ export default function ServiceAccountChecklist(props: Props) {
         description={adminApiCheck.description}
         checklistUrl={adminApiCheck.checklistUrl}
         disabled={adminApiCheck.disabled}
-        style={styles.defaultRowStyle}
+        style={{ ...styles.defaultRowStyle, ...styles.nonTopRowStyle }}
       />
       <GenericChecklistRow
         icon={dataApiCheck.icon}
@@ -50,7 +47,7 @@ export default function ServiceAccountChecklist(props: Props) {
         description={dataApiCheck.description}
         checklistUrl={dataApiCheck.checklistUrl}
         disabled={dataApiCheck.disabled}
-        style={styles.defaultRowStyle}
+        style={{ ...styles.defaultRowStyle, ...styles.nonTopRowStyle }}
       />
       <GenericChecklistRow
         icon={ga4PropertiesCheck.icon}
@@ -58,7 +55,7 @@ export default function ServiceAccountChecklist(props: Props) {
         description={ga4PropertiesCheck.description}
         checklistUrl={ga4PropertiesCheck.checklistUrl}
         disabled={ga4PropertiesCheck.disabled}
-        style={{ ...styles.defaultRowStyle, ...styles.bottomRowStyle }}
+        style={{ ...styles.defaultRowStyle, ...styles.nonTopRowStyle }}
       />
     </>
   );

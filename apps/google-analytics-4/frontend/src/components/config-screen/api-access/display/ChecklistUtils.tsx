@@ -6,16 +6,37 @@ import {
   ArrowForwardIcon,
 } from '@contentful/f36-icons';
 import { KeyValueMap } from 'contentful-management';
+import { Flex, Tooltip } from '@contentful/f36-components';
 
-const errorIcon = (
-  <ErrorCircleIcon marginLeft="spacingXs" marginRight="spacingXs" variant="negative" />
+const getErrorIcon = (msg: string) => (
+  <Tooltip placement="top" content={msg}>
+    <Flex alignItems="center">
+      <ErrorCircleIcon marginLeft="spacingXs" marginRight="spacingXs" variant="negative" />
+    </Flex>
+  </Tooltip>
 );
-const successIcon = (
-  <CheckCircleIcon marginLeft="spacingXs" marginRight="spacingXs" variant="positive" />
+const getSuccessIcon = (msg: string) => (
+  <Tooltip placement="top" content={msg}>
+    <Flex alignItems="center">
+      <CheckCircleIcon marginLeft="spacingXs" marginRight="spacingXs" variant="positive" />
+    </Flex>
+  </Tooltip>
 );
-const clockIcon = <ClockIcon marginLeft="spacingXs" marginRight="spacingXs" variant="muted" />;
-const arrowIcon = (
-  <ArrowForwardIcon marginLeft="spacingXs" marginRight="spacingXs" variant="muted" />
+
+const getClockIcon = (msg: string) => (
+  <Tooltip placement="top" content={msg}>
+    <Flex alignItems="center">
+      <ClockIcon marginLeft="spacingXs" marginRight="spacingXs" variant="muted" />
+    </Flex>
+  </Tooltip>
+);
+
+const getArrowIcon = (msg: string) => (
+  <Tooltip placement="top" content={msg}>
+    <Flex alignItems="center">
+      <ArrowForwardIcon marginLeft="spacingXs" marginRight="spacingXs" variant="muted" />
+    </Flex>
+  </Tooltip>
 );
 
 const CHECKLIST_NAMES = {
@@ -71,13 +92,15 @@ export type ChecklistStatus = {
 export const CHECKLIST_STATUSES: ChecklistStatus = {
   ServiceKey: {
     success: {
-      icon: successIcon,
+      icon: getSuccessIcon('Service account is correctly installed'),
       title: CHECKLIST_NAMES.serviceAccount,
       description: 'Success!',
       disabled: false,
     },
     invalid: {
-      icon: errorIcon,
+      icon: getErrorIcon(
+        'Failed to connect to your service account. Re-install your service account key if the problem persists'
+      ),
       title: CHECKLIST_NAMES.serviceAccount,
       description: 'Invalid service account and service account key',
       disabled: false,
@@ -85,117 +108,143 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
   },
   AdminApi: {
     success: {
-      icon: successIcon,
+      icon: getSuccessIcon('Admin API successfully enabled'),
       title: CHECKLIST_NAMES.adminApi,
       description: 'Success!',
       disabled: false,
     },
     firstTimeSetup: {
-      icon: arrowIcon,
+      icon: getArrowIcon('Please enable the Admin API to run this check'),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Please enable the Admin API to run this check',
+      description: 'Analytics Admin API is not yet enabled',
       disabled: false,
     },
     invalidServiceAccount: {
-      icon: clockIcon,
+      icon: getClockIcon(
+        'Service account errors detected, please install a correctly configured service account installation'
+      ),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Awaiting a valid service account install',
+      description: 'Awaiting a correctly configured service account installation',
       disabled: true,
     },
     error: {
-      icon: errorIcon,
+      icon: getErrorIcon('Failed to connect to the Admin API - did you enable the api?'),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Failed to connect to the Admin API - did you enable the api?',
+      description: 'Analytics Admin API must be enabled to use this app',
       disabled: false,
     },
   },
   DataApi: {
     success: {
-      icon: successIcon,
+      icon: getSuccessIcon('The Analytics Data API is enabled'),
       title: CHECKLIST_NAMES.dataApi,
       description: 'Success!',
       disabled: false,
     },
     firstTimeSetup: {
-      icon: arrowIcon,
+      icon: getArrowIcon('Please enable the Data API to run this check'),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Please enable the Data API to run this check',
+      description: 'Analytics Data API is not yet enabled',
       disabled: false,
     },
     invalidServiceAccount: {
-      icon: clockIcon,
+      icon: getClockIcon(
+        'Service account errors detected, please install a correctly configured service account installation'
+      ),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Awaiting a valid service account install',
+      description: 'Awaiting a correctly configured service account installation',
       disabled: true,
     },
     error: {
-      icon: errorIcon,
+      icon: getErrorIcon('Failed to connect to the Data API - did you enable the api?'),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Failed to connect to the Data API - did you enable the api?',
+      description: 'Analytics Data API must be enabled to use this app',
       disabled: false,
     },
   },
   GA4Properties: {
     success: {
-      icon: successIcon,
+      icon: getSuccessIcon(
+        'Your service account has access to assign a Google Analytics 4 property'
+      ),
       title: CHECKLIST_NAMES.ga4Properties,
       description: 'Success!',
       disabled: false,
+      checklistUrl: {
+        title: 'Details',
+        url: 'https://analytics.google.com/analytics/web/',
+      },
     },
     firstTimeSetup: {
-      icon: clockIcon,
+      icon: getClockIcon(`Check will run once the ${CHECKLIST_NAMES.adminApi} is enabled`),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: `Check will run once the ${CHECKLIST_NAMES.adminApi} is enabled`,
+      description: `Enable Analytics Admin API to run this check`,
       disabled: true,
     },
     invalidServiceAccount: {
-      icon: clockIcon,
+      icon: getClockIcon(
+        'Service account errors detected, please install a correctly configured service account installation'
+      ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Awaiting a valid service account install',
+      description: 'Awaiting a correctly configured service account installation',
       disabled: true,
     },
     adminApiError: {
-      icon: clockIcon,
+      icon: getClockIcon('This check requires the admin api to be enabled'),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Awaiting the admin api to be enabled',
+      description: 'Enable Analytics Admin API to run this check',
       disabled: true,
     },
     error: {
-      icon: errorIcon,
+      icon: getErrorIcon(
+        'The service account must have properties assigned to the account for this check to pass'
+      ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'There are no properties listed!',
+      description: 'Service account failed to access an Analytics property',
       disabled: false,
+      checklistUrl: {
+        title: 'Add GA4 properties',
+        url: 'https://analytics.google.com/analytics/web/',
+      },
     },
   },
   Other: {
     unknown: {
-      icon: errorIcon,
+      icon: getErrorIcon('Please contant support if an unknown error is seen.'),
       title: CHECKLIST_NAMES.unknown,
-      description: 'Unknown error',
+      description: 'An unknown error has occurred. Try again or contact support',
       disabled: true,
     },
   },
 };
 
-export const getCheckListURLs = (parameters: KeyValueMap) => {
+export const getApiChecklistURLs = (parameters: KeyValueMap, apiError: boolean) => {
   const projectId = parameters.serviceAccountKey['project_id'];
   return {
     adminApi: {
-      title: 'Enable Admin API',
+      title: apiError ? 'Enable Admin API' : 'Details',
       url: `https://console.cloud.google.com/apis/api/analyticsadmin.googleapis.com/metrics?project=${projectId}`,
     },
     dataApi: {
-      title: 'Enable Data API',
+      title: apiError ? 'Enable Data API' : 'Details',
       url: `https://console.cloud.google.com/apis/api/analyticsdata.googleapis.com/metrics?project=${projectId}`,
     },
   };
 };
 
 export const getServiceKeyChecklistStatus = (
+  parameters: KeyValueMap,
   invalidServiceAccountError: ApiErrorType | undefined
 ) => {
-  if (!invalidServiceAccountError) return CHECKLIST_STATUSES.ServiceKey.success;
-  else return CHECKLIST_STATUSES.ServiceKey.invalid;
+  const url = `https://console.cloud.google.com/iam-admin/serviceaccounts/details/${parameters.serviceAccountKeyId.clientId}?project=${parameters.serviceAccountKeyId.projectId}`;
+  const title = invalidServiceAccountError ? 'Edit service account' : 'Details';
+  const checklistUrl = {
+    title: title,
+    url: url,
+  };
+  if (!invalidServiceAccountError)
+    return { ...CHECKLIST_STATUSES.ServiceKey.success, checklistUrl: checklistUrl };
+  else return { ...CHECKLIST_STATUSES.ServiceKey.invalid, checklistUrl: checklistUrl };
 };
 
 export const getAdminApiErrorChecklistStatus = (
@@ -204,7 +253,7 @@ export const getAdminApiErrorChecklistStatus = (
   invalidServiceAccountError: ApiErrorType | undefined,
   apiError: ApiErrorType | undefined
 ): ChecklistRow => {
-  const checklistUrl = getCheckListURLs(parameters).adminApi;
+  const checklistUrl = getApiChecklistURLs(parameters, apiError ? true : false).adminApi;
   if (!invalidServiceAccountError && !apiError)
     return { ...CHECKLIST_STATUSES.AdminApi.success, checklistUrl: checklistUrl };
   if (isFirstSetup && (apiError || !invalidServiceAccountError))
@@ -220,7 +269,7 @@ export const getDataApiErrorChecklistStatus = (
   invalidServiceAccountError: ApiErrorType | undefined,
   apiError: ApiErrorType | undefined
 ): ChecklistRow => {
-  const checklistUrl = getCheckListURLs(parameters).dataApi;
+  const checklistUrl = getApiChecklistURLs(parameters, apiError ? true : false).dataApi;
   if (!invalidServiceAccountError && !apiError)
     return { ...CHECKLIST_STATUSES.DataApi.success, checklistUrl: checklistUrl };
   if (isFirstSetup && (apiError || !invalidServiceAccountError))

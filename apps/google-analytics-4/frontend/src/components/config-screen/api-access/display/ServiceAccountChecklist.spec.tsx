@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
-import { ERROR_TYPE_MAP } from 'apis/apiTypes';
+import { ApiErrorType, ERROR_TYPE_MAP } from 'apis/apiTypes';
 import {
   getServiceKeyChecklistStatus,
   getAdminApiErrorChecklistStatus,
@@ -36,6 +36,12 @@ const parameters = {
   serviceAccountKey: {
     project_id: 'abc',
   },
+  serviceAccountKeyId: {
+    clientEmail: 'test@ga4-test-377818.iam.gserviceaccount.com',
+    clientId: '1234',
+    id: 'abc',
+    projectId: 'ga4-test',
+  },
 };
 
 describe('Service Account Checklist', () => {
@@ -44,7 +50,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(false, parameters, undefined, undefined),
@@ -60,10 +66,10 @@ describe('Service Account Checklist', () => {
     });
 
     await screen.findByText('Service Account');
-    screen.findByText('Admin api');
-    screen.findByText('Data api');
-    screen.findByText('GA4 Account Properties');
-    screen.findAllByText(/Success!/);
+    await screen.findByText('Admin API');
+    await screen.findByText('Data API');
+    await screen.findByText('GA4 Account Properties');
+    await screen.findAllByText(/Success!/);
   });
 
   it('installed with invalid service account key', async () => {
@@ -71,7 +77,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(invalidServiceAccountError),
+            ...getServiceKeyChecklistStatus(parameters, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(
@@ -101,8 +107,7 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findByText(/Invalid service account and service account key/);
-    screen.findAllByText(/Awaiting a valid service account install/);
+    await screen.findAllByText(/Awaiting a correctly configured service account installation/);
   });
 
   it('first time install with invalid service account key', async () => {
@@ -110,7 +115,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(invalidServiceAccountError),
+            ...getServiceKeyChecklistStatus(parameters, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(
@@ -140,7 +145,7 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findAllByText(/Awaiting a valid service account install/);
+    await screen.findAllByText(/Awaiting a correctly configured service account installation/);
   });
 
   it('invalid service account key even when apis are enabled', async () => {
@@ -148,7 +153,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(invalidServiceAccountError),
+            ...getServiceKeyChecklistStatus(parameters, {} as ApiErrorType),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(
@@ -179,9 +184,9 @@ describe('Service Account Checklist', () => {
     });
 
     await screen.findAllByText(/Invalid service account and service account key/);
-    screen.findAllByText(/Please enable the Admin API to run this check/);
-    screen.findAllByText(/Please enable the Data API to run this check/);
-    screen.findAllByText(/Check will run once the Admin API is enabled/);
+    await screen.findAllByText(/Analytics Admin API is not yet enabled/);
+    await screen.findAllByText(/Analytics Data API is not yet enabled/);
+    await screen.findAllByText(/Enable Analytics Admin API to run this check/);
   });
 
   it('does not have the admin api enabled', async () => {
@@ -189,7 +194,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(true, parameters, undefined, adminApiError),
@@ -204,7 +209,7 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findByText(/Check will run once the Admin API is enabled/);
+    await screen.findByText(/Analytics Admin API is not yet enabled/);
   });
 
   it('does not have the data api enabled', async () => {
@@ -212,7 +217,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(true, parameters, undefined, undefined),
@@ -232,7 +237,7 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findByText(/Please enable the Data API to run this check/);
+    await screen.findByText(/Analytics Data API is not yet enabled/);
   });
 
   it('has no found GA4 Accounts or Properties', async () => {
@@ -240,7 +245,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(undefined),
+            ...getServiceKeyChecklistStatus(parameters, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(true, parameters, undefined, undefined),
@@ -255,6 +260,6 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findByText(/There are no properties listed!/);
+    await screen.findByText(/Service account failed to access an Analytics property/);
   });
 });
