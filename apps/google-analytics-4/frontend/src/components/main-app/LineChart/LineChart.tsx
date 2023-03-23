@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -84,13 +85,7 @@ const LineChart = (props: Props) => {
   };
 
   return (
-    <Line
-      updateMode="active"
-      data={data}
-      options={options}
-      fallbackContent={accessibilityLabel}
-      {...chartProps}
-    />
+    <Line data={data} options={options} fallbackContent={accessibilityLabel} {...chartProps} />
   );
 };
 
