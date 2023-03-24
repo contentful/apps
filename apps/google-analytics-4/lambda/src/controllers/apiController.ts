@@ -24,22 +24,26 @@ const requireServiceAccountKey = (serviceAccountKey?: ServiceAccountKeyFile) => 
 const ApiController = {
   credentials: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const serviceAccountKey = req.body;
-      assertServiceAccountKey(serviceAccountKey);
+      const serviceAccountKeyFile = req.body;
+      assertServiceAccountKey(serviceAccountKeyFile);
 
       if (!req.serviceAccountKeyId) {
         throw new Error('Missing serviceAccountKeyId'); // set by serviceAccountKeyProvider middleware
       }
 
       // added to request by serviceAccountKeyProvider middleware if resolved from dynamoDB
+      // TODO: DRY this up, it's also done in serviceAccountKeyProvider
       const spaceId = req.header('X-Contentful-Space-Id');
-      const publicKeyId = req.serviceAccountKeyId.id;
-      const sharedCredentialsId = `${spaceId}-${publicKeyId}`;
+      if (!spaceId) {
+        throw new Error('Missing X-Contentful-Space-Id header!');
+      }
+
       const dynamoDB = new DynamoDBService();
-      await dynamoDB.saveSharedCredentials({
-        sharedCredentialsId,
-        serviceKey: serviceAccountKey,
-      });
+      await dynamoDB.saveServiceAccountKeyFile(
+        spaceId,
+        req.serviceAccountKeyId,
+        serviceAccountKeyFile
+      );
 
       return res.send(200);
     } catch (err) {

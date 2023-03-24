@@ -120,7 +120,7 @@ describe('fetchFromApi()', () => {
 
 // Note: mocked http responses are set up using msw in tests/mocks/api/handler
 describe('Api', () => {
-  describe('getCredentials()', () => {
+  describe('getServiceAccountKeyFile()', () => {
     const contentfulContext = {
       app: 'appDefinitionId',
       contentType: 'contentType',
@@ -135,7 +135,7 @@ describe('Api', () => {
 
     it('calls fetchApi with the correct parameters', async () => {
       const api = new Api(contentfulContext, mockCma, validServiceKeyId);
-      const result = await api.getCredentials();
+      const result = await api.getServiceAccountKeyFile();
       expect(result).toEqual(expect.objectContaining({ status: 'active' }));
     });
   });

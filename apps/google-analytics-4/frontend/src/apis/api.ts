@@ -50,9 +50,9 @@ export class Api {
     this.serviceAccountKeyId = serviceAccountKeyId;
   }
 
-  async getCredentials(): Promise<Credentials> {
+  async getServiceAccountKeyFile(): Promise<Credentials> {
     return await fetchFromApi<Credentials>(
-      this.requestUrl('api/credentials'),
+      this.requestUrl('api/service_account_key_file'),
       ZCredentials,
       this.contentfulContext.app!,
       this.cma,

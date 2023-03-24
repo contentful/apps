@@ -18,12 +18,14 @@ export const serviceAccountKeyProvider: RequestHandler = async (req, _res, next)
     assertServiceAccountKeyId(serviceAccountKeyId);
     req.serviceAccountKeyId = serviceAccountKeyId;
 
+    const spaceId = req.header('X-Contentful-Space-Id');
+    if (!spaceId) {
+      throw new Error('Missing X-Contentful-Space-Id header!');
+    }
+
     // fetch and decrypt serviceAccountKey from dynamoDB and add it to the request
     const dynamoDB = new DynamoDBService();
-    const spaceId = req.header('X-Contentful-Space-Id');
-    const publicKeyId = req.serviceAccountKeyId.id;
-    const sharedCredentialsId = `${spaceId}-${publicKeyId}`;
-    const serviceAccountKey = await dynamoDB.getSharedCredentials(sharedCredentialsId);
+    const serviceAccountKey = await dynamoDB.getServiceAccountKeyFile(spaceId, serviceAccountKeyId);
     if (serviceAccountKey !== null) {
       assertServiceAccountKey(serviceAccountKey);
       req.serviceAccountKey = serviceAccountKey;

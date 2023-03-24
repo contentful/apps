@@ -9,7 +9,7 @@ export const apiPath = (path: string) => {
 };
 
 export const handlers = [
-  rest.get(apiPath('/api/credentials'), (_req, res, ctx) => {
+  rest.get(apiPath('/api/service_account_key_file'), (_req, res, ctx) => {
     return res(ctx.json({ status: 'active' }));
   }),
 
