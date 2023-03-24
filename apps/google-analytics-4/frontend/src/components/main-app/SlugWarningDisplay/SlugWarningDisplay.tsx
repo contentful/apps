@@ -7,7 +7,6 @@ import { SidebarExtensionSDK } from '@contentful/app-sdk';
 import { getContentTypeSpecificMsg, DEFAULT_CONTENT_MSG } from '../constants/noteMessages';
 import HyperLink from 'components/common/HyperLink/HyperLink';
 
-const HYPER_LINK_MSG = 'app configuration page.';
 interface Props {
   slugFieldInfo: ContentTypeValue;
 }
