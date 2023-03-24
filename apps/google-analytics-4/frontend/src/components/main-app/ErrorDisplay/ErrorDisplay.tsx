@@ -21,31 +21,31 @@ const ErrorDisplay = (props: Props) => {
 
   const openConfigPage = () => sdk.navigator.openAppConfig();
 
-  const handleApiError = (e: ApiErrorType) => {
-    switch (e.errorType) {
-      case ERROR_TYPE_MAP.invalidProperty:
-        setErrorMessage(
-          <HyperLink
-            body={INVALID_ARGUMENT_MSG}
-            substring="app configuration page."
-            onClick={openConfigPage}
-          />
-        );
-        break;
-      case ERROR_TYPE_MAP.disabledDataApi:
-        setErrorMessage(PERMISSION_DENIED_MSG);
-        break;
-      default:
-        throw e;
-    }
-  };
-
   useEffect(() => {
+    const handleApiError = (e: ApiErrorType) => {
+      switch (e.errorType) {
+        case ERROR_TYPE_MAP.invalidProperty:
+          setErrorMessage(
+            <HyperLink
+              body={INVALID_ARGUMENT_MSG}
+              substring="app configuration page."
+              onClick={openConfigPage}
+            />
+          );
+          break;
+        case ERROR_TYPE_MAP.disabledDataApi:
+          setErrorMessage(PERMISSION_DENIED_MSG);
+          break;
+        default:
+          throw e;
+      }
+    };
+
     if (isApiErrorType(error)) handleApiError(error);
     else {
       setErrorMessage(error.message || DEFAULT_ERR_MSG);
     }
-  }, [error, handleApiError]);
+  }, [error]);
 
   return <Note body={errorMessage} variant="negative" />;
 };
