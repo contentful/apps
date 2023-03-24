@@ -37,7 +37,7 @@ export async function makeShopifyClient(config) {
  *
  * Note: currently there is no way to fetch multiple collections by id
  * so we use fetchAll instead and then filter on the client. Besides the obvious disadvantage,
- * this could also fail if there are mo collections in the stroe than the pagination limit
+ * this could also fail if there are no collections in the store than the pagination limit
  */
 export const fetchCollectionPreviews = async (skus, config) => {
   if (!skus.length) {

@@ -1,8 +1,13 @@
 import get from 'lodash/get';
-import last from 'lodash/last';
 import flatten from 'lodash/flatten';
 import { DEFAULT_SHOPIFY_VARIANT_TITLE } from './constants';
 import { convertBase64ToString, convertStringToBase64 } from './utils/base64';
+
+/**
+ * Removes the protocol and trailing slash from a URL
+ * This is a QOL for users who copy-paste the URL from the browser
+ */
+const removeHttpsAndTrailingSlash = (url) => url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
 /**
  * Transforms the API response of Shopify collections into
@@ -21,9 +26,9 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
         collectionIdDecoded && collectionIdDecoded.slice(collectionIdDecoded.lastIndexOf('/') + 1);
 
       if (apiEndpoint && collectionId) {
-        externalLink = `https://${apiEndpoint}${
-          last(apiEndpoint) === '/' ? '' : '/'
-        }admin/collections/${collectionId}`;
+        externalLink = `https://${removeHttpsAndTrailingSlash(
+          apiEndpoint
+        )}/admin/collections/${collectionId}`;
       }
     } catch {}
   }
@@ -54,9 +59,9 @@ export const productDataTransformer = (product, apiEndpoint) => {
         productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
 
       if (apiEndpoint && productId) {
-        externalLink = `https://${apiEndpoint}${
-          last(apiEndpoint) === '/' ? '' : '/'
-        }admin/products/${productId}`;
+        externalLink = `https://${removeHttpsAndTrailingSlash(
+          apiEndpoint
+        )}/admin/products/${productId}`;
       }
     } catch {}
   }
@@ -125,9 +130,9 @@ export const previewsToProductVariants =
       name: title === DEFAULT_SHOPIFY_VARIANT_TITLE ? product.title : `${product.title} (${title})`,
       ...(apiEndpoint &&
         productId && {
-          externalLink: `https://${apiEndpoint}${
-            last(apiEndpoint) === '/' ? '' : '/'
-          }admin/products/${productId}`,
+          externalLink: `https://${removeHttpsAndTrailingSlash(
+            apiEndpoint
+          )}/admin/products/${productId}`,
         }),
     };
   };
