@@ -19,9 +19,8 @@ const ErrorDisplay = (props: Props) => {
   const [errorMessage, setErrorMessage] = useState<string | JSX.Element>('');
   const sdk = useSDK<SidebarExtensionSDK>();
 
-  const openConfigPage = () => sdk.navigator.openAppConfig();
-
   useEffect(() => {
+    const openConfigPage = () => sdk.navigator.openAppConfig();
     const handleApiError = (e: ApiErrorType) => {
       switch (e.errorType) {
         case ERROR_TYPE_MAP.invalidProperty:
