@@ -44,7 +44,7 @@ const ErrorDisplay = (props: Props) => {
     else {
       setErrorMessage(error.message || DEFAULT_ERR_MSG);
     }
-  }, [error]);
+  }, [error, sdk.navigator]);
 
   return <Note body={errorMessage} variant="negative" />;
 };
