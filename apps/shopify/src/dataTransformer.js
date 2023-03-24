@@ -10,6 +10,20 @@ import { convertBase64ToString, convertStringToBase64 } from './utils/base64';
 const removeHttpsAndTrailingSlash = (url) => url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
 /**
+ * Decodes the ID of a Shopify resource
+ * The ID is encoded in base64 and the actual ID is the last part of the string
+ * e.g. gid://shopify/Product/1234567890 -> 1234567890
+ */
+const decodeId = (id) => {
+  try {
+    const idDecoded = convertBase64ToString(id);
+    return idDecoded && idDecoded.slice(idDecoded.lastIndexOf('/') + 1);
+  } catch {
+    return undefined;
+  }
+};
+
+/**
  * Transforms the API response of Shopify collections into
  * the product schema expected by the SkuPicker component
  */
@@ -17,21 +31,11 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
   const image = get(collection, ['image', 'src'], '');
   const handle = get(collection, ['handle'], undefined);
 
-  let externalLink;
-
-  if (apiEndpoint) {
-    try {
-      const collectionIdDecoded = convertBase64ToString(collection.id);
-      const collectionId =
-        collectionIdDecoded && collectionIdDecoded.slice(collectionIdDecoded.lastIndexOf('/') + 1);
-
-      if (apiEndpoint && collectionId) {
-        externalLink = `https://${removeHttpsAndTrailingSlash(
-          apiEndpoint
-        )}/admin/collections/${collectionId}`;
-      }
-    } catch {}
-  }
+  const collectionId = decodeId(collection.id);
+  const externalLink =
+    apiEndpoint &&
+    collectionId &&
+    `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/collections/${collectionId}`;
 
   return {
     id: collection.id,
@@ -50,21 +54,12 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
 export const productDataTransformer = (product, apiEndpoint) => {
   const image = get(product, ['images', 0, 'src'], '');
   const sku = get(product, ['variants', 0, 'sku'], undefined);
-  let externalLink;
 
-  if (apiEndpoint) {
-    try {
-      const productIdDecoded = convertBase64ToString(product.id);
-      const productId =
-        productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
-
-      if (apiEndpoint && productId) {
-        externalLink = `https://${removeHttpsAndTrailingSlash(
-          apiEndpoint
-        )}/admin/products/${productId}`;
-      }
-    } catch {}
-  }
+  const productId = decodeId(product.id);
+  const externalLink =
+    apiEndpoint &&
+    productId &&
+    `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/products/${productId}`;
 
   return {
     id: product.id,
@@ -115,9 +110,12 @@ export const productsToVariantsTransformer = (products) =>
 export const previewsToProductVariants =
   ({ apiEndpoint }) =>
   ({ sku, id, image, product, title }) => {
-    const productIdDecoded = convertBase64ToString(product.id);
-    const productId =
-      productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
+    const productId = decodeId(product.id);
+    const externalLink =
+      apiEndpoint &&
+      productId &&
+      `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/products/${productId}`;
+
     return {
       id,
       image: get(image, ['src'], ''),
@@ -128,11 +126,6 @@ export const previewsToProductVariants =
       displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${id}`,
       productId: product.id,
       name: title === DEFAULT_SHOPIFY_VARIANT_TITLE ? product.title : `${product.title} (${title})`,
-      ...(apiEndpoint &&
-        productId && {
-          externalLink: `https://${removeHttpsAndTrailingSlash(
-            apiEndpoint
-          )}/admin/products/${productId}`,
-        }),
+      ...(externalLink ? { externalLink } : {}),
     };
   };
