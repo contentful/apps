@@ -25,8 +25,13 @@ export default function GoogleAnalyticsConfigPage() {
     {} as Partial<EditorInterface>
   );
   const [originalParameters, setOriginalParameters] = useState<KeyValueMap>({});
+  const [hasServiceCheckErrors, setHasServiceCheckErrors] = useState<boolean>(true);
 
   const sdk = useSDK<AppExtensionSDK>();
+
+  const handleHasServiceCheckErrorsChange = (hasErrors: boolean) => {
+    setHasServiceCheckErrors(hasErrors);
+  };
 
   /** SDK Parameters handlers/effects **/
   const mergeSdkParameters = (_parameters: KeyValueMap) => {
@@ -155,6 +160,10 @@ export default function GoogleAnalyticsConfigPage() {
     setIsInEditMode(_isInEditMode);
   };
 
+  const showPropertyDropdownAndContentTypeSection = () => {
+    return !hasServiceCheckErrors || parameters.propertyId;
+  };
+
   return (
     <>
       <Box className={styles.background} />
@@ -169,8 +178,9 @@ export default function GoogleAnalyticsConfigPage() {
           isInEditMode={isInEditMode}
           onInEditModeChange={handleInEditModeChange}
           onIsValidServiceAccount={handleIsValidServiceAccount}
+          onHasServiceCheckErrorsChange={handleHasServiceCheckErrorsChange}
         />
-        {isAppInstalled && !isInEditMode && (
+        {isAppInstalled && showPropertyDropdownAndContentTypeSection() && (
           <>
             <Splitter />
             <MapAccountPropertySection
