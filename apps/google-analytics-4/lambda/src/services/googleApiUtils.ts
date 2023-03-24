@@ -98,7 +98,6 @@ export function handleGoogleAdminApiError(e: any): never {
 }
 
 export function handleGoogleDataApiError(e: any): never {
-  console.log('e>>>>>>>>>>>>>>', e);
   // TODO: Find a way to have tighter distinguishing conditions.
   // Example: The PERMISSION_DENIED error is overloaded by two known actions
   //          1. data api disabled
