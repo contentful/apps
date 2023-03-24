@@ -5,6 +5,7 @@ export const styles = {
   note: css({
     overflow: 'hidden',
     marginBottom: tokens.spacingM,
+    wordBreak: 'break-word',
   }),
   noteContent: css({
     textOverflow: 'ellipsis',
