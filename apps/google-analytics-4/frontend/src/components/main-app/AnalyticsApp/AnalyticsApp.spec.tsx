@@ -4,7 +4,10 @@ import { Api } from 'apis/api';
 import { mockSdk, mockCma, validServiceKeyId } from '../../../../test/mocks';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 import runReportResponseNoView from '../../../../../lambda/public/sampleData/runReportResponseNoViews.json';
-import { getContentTypeSpecificMsg } from '../constants/noteMessages';
+import {
+  EMPTY_DATA_MSG,
+  getContentTypeSpecificMsg,
+} from 'components/main-app/constants/noteMessages';
 import * as useSidebarSlug from 'hooks/useSidebarSlug/useSidebarSlug';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
@@ -65,7 +68,7 @@ describe('AnalyticsApp with correct content types configured', () => {
 
     const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
-    const noteText = getByText('There are no page views to show for this range.');
+    const noteText = getByText(EMPTY_DATA_MSG);
 
     expect(dropdown).toBeVisible();
     expect(warningNote).toBeVisible();
@@ -105,11 +108,14 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
       isContentTypeWarning: true,
     }));
     mockApi.mockImplementation(() => runReportResponseHasViews);
+    const warningMessage = getContentTypeSpecificMsg('Category')
+      .noSlugContentMsg.replace('app configuration page.', '')
+      .trim();
     renderAnalyticsApp();
 
     const dropdown = queryByTestId(SELECT_TEST_ID);
     const warningNote = await findByTestId(NOTE_TEST_ID);
-    const noteText = getByText(getContentTypeSpecificMsg('Category', true).noSlugContentMsg.trim());
+    const noteText = getByText(warningMessage);
 
     expect(dropdown).toBeFalsy();
     expect(warningNote).toBeVisible();

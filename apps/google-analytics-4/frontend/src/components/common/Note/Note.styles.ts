@@ -4,7 +4,6 @@ import tokens from '@contentful/f36-tokens';
 export const styles = {
   note: css({
     overflow: 'hidden',
-    marginBottom: tokens.spacingM,
     wordBreak: 'break-word',
   }),
   noteContent: css({

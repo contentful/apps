@@ -16,7 +16,7 @@ const useSidebarSlugMock = {
 
 const HYPER_LINK_MSG = 'app configuration page.';
 
-const { findByText, getByText, queryByText, getByTestId } = screen;
+const { findByText, queryByText, getByTestId } = screen;
 
 const { noSlugConfigMsg, noSlugContentMsg, notPublishedMsg } =
   getContentTypeSpecificMsg('Category');
