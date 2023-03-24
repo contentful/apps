@@ -1,5 +1,6 @@
 export const DEFAULT_ERR_MSG = 'Oops! Cannot display the analytics data at this time.';
-export const EMPTY_DATA_MSG = 'There are no page views to show for this range.';
+export const EMPTY_DATA_MSG =
+  'There are no page views to show for this range. If this is not expected, assure your URL prefix and slug value accurately reflect a page path within your Google Analytics instance.';
 export const DEFAULT_CONTENT_MSG = 'Oops! Something went wrong with the slug field configuration.';
 
 export const getContentTypeSpecificMsg = (contentTypeName: string, isHyperlink?: boolean) => ({
