@@ -12,7 +12,6 @@ import { GoogleApiService } from './services/googleApiService';
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import { DynamoDBService } from './services/dynamoDbService';
-import { mockDynamoDBItems } from '../test/mocks/dynamoDbService';
 
 chai.use(chaiHttp);
 
@@ -44,21 +43,19 @@ describe('app', () => {
     });
   });
 
-  describe('PUT /api/credentials', () => {
+  describe('PUT /api/service_account_key_file', () => {
     describe('when the request body is a valid ServiceAccountKey', () => {
       describe('given a new ServiceAccountKey', () => {
         beforeEach(() => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (DynamoDBService.prototype.getSharedCredentials as any).resolves(null);
-          sandbox
-            .stub(DynamoDBService.prototype, 'saveSharedCredentials')
-            .resolves(mockDynamoDBItems);
+          (DynamoDBService.prototype.getServiceAccountKeyFile as any).resolves(null);
+          sandbox.stub(DynamoDBService.prototype, 'saveServiceAccountKeyFile').resolves();
         });
 
         it('responds with 200', async () => {
           const response = await chai
             .request(app)
-            .put('/api/credentials')
+            .put('/api/service_account_key_file')
             .set(serviceAccountKeyHeaders)
             .send(validServiceAccountKeyFile);
           expect(response).to.have.status(200);
@@ -67,15 +64,13 @@ describe('app', () => {
 
       describe('given an existing ServiceAccountKey', () => {
         beforeEach(() => {
-          sandbox
-            .stub(DynamoDBService.prototype, 'saveSharedCredentials')
-            .resolves(mockDynamoDBItems);
+          sandbox.stub(DynamoDBService.prototype, 'saveServiceAccountKeyFile').resolves();
         });
 
         it('responds with 200', async () => {
           const response = await chai
             .request(app)
-            .put('/api/credentials')
+            .put('/api/service_account_key_file')
             .set(serviceAccountKeyHeaders)
             .send(validServiceAccountKeyFile);
           expect(response).to.have.status(200);

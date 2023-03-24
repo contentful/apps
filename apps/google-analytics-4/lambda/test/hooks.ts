@@ -10,7 +10,7 @@ export const mochaHooks = {
   beforeEach() {
     // sinon.stub(console, 'error');
     sinon
-      .stub(DynamoDBService.prototype, 'getSharedCredentials')
+      .stub(DynamoDBService.prototype, 'getServiceAccountKeyFile')
       .resolves(validServiceAccountKeyFile);
   },
   afterEach() {

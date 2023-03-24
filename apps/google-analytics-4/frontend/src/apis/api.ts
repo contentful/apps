@@ -52,7 +52,7 @@ export class Api {
 
   async getCredentials(): Promise<Credentials> {
     return await fetchFromApi<Credentials>(
-      this.requestUrl('api/credentials'),
+      this.requestUrl('api/service_account_key_file'),
       ZCredentials,
       this.contentfulContext.app!,
       this.cma,

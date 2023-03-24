@@ -1,13 +1,9 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { config } from '../config';
-import { decryptSharedCredentials, encryptSharedCredentials } from './dynamoDbUtils';
-import { ServiceAccountKeyFile } from '../types';
-
-export interface SharedCredentialsInput {
-  sharedCredentialsId: string;
-  serviceKey: ServiceAccountKeyFile;
-}
+import { decrypt, encrypt } from './dynamoDbUtils';
+import { ServiceAccountKeyFile, ServiceAccountKeyId } from '../types';
+import { assertServiceAccountKey } from '../middlewares/serviceAccountKeyProvider';
 
 export class DynamoDBService {
   private dynamoDBDocumentClient: DynamoDBDocumentClient;
@@ -24,35 +20,57 @@ export class DynamoDBService {
     this.tableName = config.dynamoDbTableName;
   }
 
-  async getSharedCredentials(sharedCredentialsId: string): Promise<ServiceAccountKeyFile | null> {
+  constructTableRecordId(spaceId: string, serviceAccountKeyId: ServiceAccountKeyId): string {
+    return `${spaceId}-${serviceAccountKeyId.id}`;
+  }
+
+  async getServiceAccountKeyFile(
+    spaceId: string,
+    serviceAccountKeyId: ServiceAccountKeyId
+  ): Promise<ServiceAccountKeyFile | null> {
     const command = new GetCommand({
       TableName: this.tableName,
       Key: {
-        sharedCredentialsId,
+        id: this.constructTableRecordId(spaceId, serviceAccountKeyId),
       },
     });
 
     const data = await this.dynamoDBDocumentClient.send(command);
 
-    // TODO: make sure we understand the shape of this object under all contexts
     if (!data.Item) return null;
 
-    return decryptSharedCredentials(data.Item?.value);
+    const decryptedServiceAccountKeyFile = decrypt(
+      data.Item.encryptedServiceAccountKeyFile,
+      config.serviceAccountKeyEncryptionSecret
+    );
+
+    assertServiceAccountKey(decryptedServiceAccountKeyFile);
+
+    return decryptedServiceAccountKeyFile;
   }
 
-  async saveSharedCredentials(input: SharedCredentialsInput) {
-    const encryptedCredentials = await encryptSharedCredentials(input.serviceKey);
+  async saveServiceAccountKeyFile(
+    spaceId: string,
+    serviceAccountKeyId: ServiceAccountKeyId,
+    serviceAccountKeyFile: ServiceAccountKeyFile
+  ): Promise<void> {
+    if (serviceAccountKeyFile.private_key_id !== serviceAccountKeyId.id) {
+      throw new Error('Service Account Key ID does not match Service Account Key File!');
+    }
+
+    const encryptedServiceAccountKeyFile = await encrypt(
+      serviceAccountKeyFile,
+      config.serviceAccountKeyEncryptionSecret
+    );
 
     const command = new PutCommand({
       TableName: this.tableName,
       Item: {
-        sharedCredentialsId: input.sharedCredentialsId,
-        value: encryptedCredentials,
+        id: this.constructTableRecordId(spaceId, serviceAccountKeyId),
+        encryptedServiceAccountKeyFile,
       },
     });
 
-    const data = await this.dynamoDBDocumentClient.send(command);
-
-    return data;
+    await this.dynamoDBDocumentClient.send(command);
   }
 }

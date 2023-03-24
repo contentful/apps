@@ -26,7 +26,7 @@ services:
     image: amazon/aws-cli
     container_name: app-dynamodb_migrator
     working_dir: /home/dynamodblocal
-    command: dynamodb create-table --cli-input-json file://shared_credentials.json --endpoint-url http://dynamodb:8000
+    command: dynamodb create-table --cli-input-json file://service-account-keys-table.json --endpoint-url http://dynamodb:8000
     volumes:
       - ./schema:/home/dynamodblocal
     environment:
@@ -48,7 +48,7 @@ services:
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: local
       AWS_SECRET_ACCESS_KEY: local
-      DYNAMO_TABLE_NAME: sls-apps-ga4-backend-dev-SharedCredentialsTable
+      DYNAMO_TABLE_NAME: sls-apps-ga4-backend-dev-service-account-keys
       DYNAMO_ENDPOINT: http://dynamodb:8000
     depends_on:
       - dynamodb

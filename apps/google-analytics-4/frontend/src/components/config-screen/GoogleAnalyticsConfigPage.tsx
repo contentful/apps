@@ -63,7 +63,7 @@ export default function GoogleAnalyticsConfigPage() {
 
   const postServiceKeyFileToBackend = useCallback(
     async (validKeyFile: ServiceAccountKey) => {
-      const apiCredentialsUrl = new URL(`${config.backendApiUrl}/api/credentials`);
+      const apiCredentialsUrl = new URL(`${config.backendApiUrl}/api/service_account_key_file`);
       const encodedServiceAccountKeyId = window.btoa(
         JSON.stringify(convertServiceAccountKeyToServiceAccountKeyId(validKeyFile))
       );
