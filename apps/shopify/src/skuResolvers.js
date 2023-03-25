@@ -1,6 +1,5 @@
 import identity from 'lodash/identity';
 import difference from 'lodash/difference';
-import get from 'lodash/get';
 import Client from 'shopify-buy';
 import makeProductVariantPagination from './productVariantPagination';
 import makeProductPagination from './productPagination';
@@ -13,7 +12,11 @@ import {
 
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
-import { SHOPIFY_API_VERSION } from './constants';
+import {
+  SHOPIFY_API_VERSION,
+  SHOPIFY_ENTITY_LIMIT,
+  SHOPIFY_ENTITY_LIMIT_AS_INDEX,
+} from './constants';
 import {
   convertStringToBase64,
   convertBase64ToString,
@@ -47,7 +50,7 @@ export const fetchCollectionPreviews = async (skus, config) => {
   const validIds = filterAndDecodeValidIds(skus, 'Collection');
   const shopifyClient = await makeShopifyClient(config);
 
-  const response = await shopifyClient.collection.fetchAll(250);
+  const response = await shopifyClient.collection.fetchAll(SHOPIFY_ENTITY_LIMIT);
   if (response.length > 0) {
     while (response[response.length - 1].hasNextPage) {
       const nextPage = await shopifyClient.collection.fetchAll(
@@ -85,10 +88,12 @@ export const fetchProductPreviews = async (skus, config) => {
   const validIds = filterAndDecodeValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
 
-  const response = await shopifyClient.product.fetchMultiple(skus.slice(0, 250));
-  for (let i = 250; i < skus.length; i += 250) {
-    const nextPage = await shopifyClient.product.fetchMultiple(skus.slice(i, i + 250));
-    response.push(...nextPage);
+  const response = [];
+  for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT_AS_INDEX) {
+    const currentPage = await shopifyClient.product.fetchMultiple(
+      validIds.slice(i, i + SHOPIFY_ENTITY_LIMIT_AS_INDEX)
+    );
+    response.push(...currentPage);
   }
 
   const products = response.map((res) => convertProductToBase64(res));
@@ -159,15 +164,18 @@ export const fetchProductVariantPreviews = async (skus, config) => {
   }
 
   const validIds = filterAndDecodeValidIds(skus, 'ProductVariant');
-  const response = await _fetchProductVariantPreviews(validIds, config);
-  for (let i = 250; i < skus.length; i += 250) {
-    const nextPage = await _fetchProductVariantPreviews(skus.slice(i, i + 250), config);
-    response.data.nodes.push(...nextPage.data.nodes);
+
+  const response = [];
+  for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT_AS_INDEX) {
+    const currentPage = await _fetchProductVariantPreviews(
+      validIds.slice(i, i + SHOPIFY_ENTITY_LIMIT_AS_INDEX),
+      config
+    );
+    response.push(...currentPage.data.nodes);
+    console.log(response);
   }
 
-  const nodes = get(response, ['data', 'nodes'], [])
-    .filter(identity)
-    .map((node) => convertProductToBase64(node));
+  const nodes = response.filter(identity).map((node) => convertProductToBase64(node));
 
   const variantPreviews = nodes.map(previewsToProductVariants(config));
   const missingVariants = difference(
