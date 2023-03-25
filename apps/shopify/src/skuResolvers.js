@@ -89,7 +89,7 @@ export const fetchProductPreviews = async (skus, config) => {
   const shopifyClient = await makeShopifyClient(config);
 
   const response = [];
-  for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT_AS_INDEX) {
+  for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
     const currentPage = await shopifyClient.product.fetchMultiple(
       validIds.slice(i, i + SHOPIFY_ENTITY_LIMIT_AS_INDEX)
     );
@@ -166,7 +166,7 @@ export const fetchProductVariantPreviews = async (skus, config) => {
   const validIds = filterAndDecodeValidIds(skus, 'ProductVariant');
 
   const response = [];
-  for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT_AS_INDEX) {
+  for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
     const currentPage = await _fetchProductVariantPreviews(
       validIds.slice(i, i + SHOPIFY_ENTITY_LIMIT_AS_INDEX),
       config
