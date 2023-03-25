@@ -4,24 +4,25 @@ import { DEFAULT_SHOPIFY_VARIANT_TITLE } from './constants';
 import { convertBase64ToString, convertStringToBase64 } from './utils/base64';
 
 /**
- * Removes the protocol and trailing slash from a URL
- * This is a QOL for users who copy-paste the URL from the browser
- */
-const removeHttpsAndTrailingSlash = (url) => url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-
-/**
  * Decodes the ID of a Shopify resource
  * The ID is encoded in base64 and the actual ID is the last part of the string
  * e.g. gid://shopify/Product/1234567890 -> 1234567890
  */
-const decodeId = (id) => {
+export const decodeId = (sku) => {
   try {
-    const idDecoded = convertBase64ToString(id);
-    return idDecoded && idDecoded.slice(idDecoded.lastIndexOf('/') + 1);
+    const decodedId = convertBase64ToString(sku);
+    return decodedId && decodeId.slice(decodedId.lastIndexOf('/') + 1);
   } catch {
-    return undefined;
+    return null;
   }
 };
+
+/**
+ * Removes the protocol and trailing slash from a URL
+ * This is a QOL for users who copy-paste the URL from the browser
+ */
+export const removeHttpsAndTrailingSlash = (url) =>
+  url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 
 /**
  * Transforms the API response of Shopify collections into

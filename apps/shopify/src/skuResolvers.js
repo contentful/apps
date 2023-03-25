@@ -5,7 +5,11 @@ import Client from 'shopify-buy';
 import makeProductVariantPagination from './productVariantPagination';
 import makeProductPagination from './productPagination';
 import makeCollectionPagination from './collectionPagination';
-import { productDataTransformer, collectionDataTransformer } from './dataTransformer';
+import {
+  productDataTransformer,
+  collectionDataTransformer,
+  removeHttpsAndTrailingSlash,
+} from './dataTransformer';
 
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
@@ -26,7 +30,7 @@ export async function makeShopifyClient(config) {
   const { storefrontAccessToken, apiEndpoint } = config;
 
   return Client.buildClient({
-    domain: apiEndpoint,
+    domain: removeHttpsAndTrailingSlash(apiEndpoint),
     storefrontAccessToken,
     apiVersion: SHOPIFY_API_VERSION,
   });
@@ -34,10 +38,6 @@ export async function makeShopifyClient(config) {
 
 /**
  * Fetches the collection previews for the collections selected by the user.
- *
- * Note: currently there is no way to fetch multiple collections by id
- * so we use fetchAll instead and then filter on the client. Besides the obvious disadvantage,
- * this could also fail if there are no collections in the store than the pagination limit
  */
 export const fetchCollectionPreviews = async (skus, config) => {
   if (!skus.length) {
@@ -45,10 +45,18 @@ export const fetchCollectionPreviews = async (skus, config) => {
   }
 
   const validIds = filterAndDecodeValidIds(skus, 'Collection');
-
   const shopifyClient = await makeShopifyClient(config);
 
   const response = await shopifyClient.collection.fetchAll(250);
+  if (response.length > 0) {
+    while (response[response.length - 1].hasNextPage) {
+      const nextPage = await shopifyClient.collection.fetchAll(
+        response[response.length - 1].nextPage
+      );
+      response.push(...nextPage);
+    }
+  }
+
   const collections = response.map((res) => convertCollectionToBase64(res));
 
   return validIds.map((validId) => {
@@ -56,7 +64,7 @@ export const fetchCollectionPreviews = async (skus, config) => {
       (collection) => collection.id === convertStringToBase64(validId)
     );
     return collection
-      ? collectionDataTransformer(collection, config.apiEndpoint)
+      ? collectionDataTransformer(collection, removeHttpsAndTrailingSlash(config.apiEndpoint))
       : {
           sku: convertStringToBase64(validId),
           isMissing: true,
@@ -69,25 +77,27 @@ export const fetchCollectionPreviews = async (skus, config) => {
 
 /**
  * Fetches the product previews for the products selected by the user.
- *
- * Note: currently there is no way to cover the edge case where the user
- *       would have more than 250 products selected. In such a case their
- *       selection would be cut off after product no. 250.
  */
 export const fetchProductPreviews = async (skus, config) => {
   if (!skus.length) {
     return [];
   }
-
   const validIds = filterAndDecodeValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
-  const response = await shopifyClient.product.fetchMultiple(validIds);
+
+  const response = await shopifyClient.product.fetchMultiple(skus.slice(0, 250));
+  for (let i = 250; i < skus.length; i += 250) {
+    const nextPage = await shopifyClient.product.fetchMultiple(skus.slice(i, i + 250));
+    response.push(...nextPage);
+  }
+
   const products = response.map((res) => convertProductToBase64(res));
+
   return validIds.map((validId) => {
     const product = products.find((product) => product?.id === convertStringToBase64(validId));
 
     return product
-      ? productDataTransformer(product, config.apiEndpoint)
+      ? productDataTransformer(product, removeHttpsAndTrailingSlash(config.apiEndpoint))
       : {
           sku: convertStringToBase64(validId),
           isMissing: true,
@@ -99,18 +109,9 @@ export const fetchProductPreviews = async (skus, config) => {
 };
 
 /**
- * Fetches the product variant previews for the product variants selected by the user.
- *
- * Note: currently there is no way to cover the edge case where the user
- *       would have more than 250 variants selected. In such a case their
- *       selection would be cut off after variant no. 250.
+ * Fetches 250 product variant previews for the product selected by the user.
  */
-export const fetchProductVariantPreviews = async (skus, config) => {
-  if (!skus.length) {
-    return [];
-  }
-
-  const validIds = filterAndDecodeValidIds(skus, 'ProductVariant');
+const _fetchProductVariantPreviews = async (validIds, config) => {
   const queryIds = validIds.map((sku) => `"${sku}"`).join(',');
   const query = `
   {
@@ -132,8 +133,11 @@ export const fetchProductVariantPreviews = async (skus, config) => {
   `;
 
   const { apiEndpoint, storefrontAccessToken } = config;
+  const url = `https://${removeHttpsAndTrailingSlash(
+    apiEndpoint
+  )}/api/${SHOPIFY_API_VERSION}/graphql`;
 
-  const res = await window.fetch(`https://${apiEndpoint}/api/${SHOPIFY_API_VERSION}/graphql`, {
+  const response = await window.fetch(url, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -143,9 +147,25 @@ export const fetchProductVariantPreviews = async (skus, config) => {
     body: JSON.stringify({ query }),
   });
 
-  const data = await res.json();
+  return await response.json();
+};
 
-  const nodes = get(data, ['data', 'nodes'], [])
+/**
+ * Fetches the product variant previews for the product variants selected by the user.
+ */
+export const fetchProductVariantPreviews = async (skus, config) => {
+  if (!skus.length) {
+    return [];
+  }
+
+  const validIds = filterAndDecodeValidIds(skus, 'ProductVariant');
+  const response = await _fetchProductVariantPreviews(validIds, config);
+  for (let i = 250; i < skus.length; i += 250) {
+    const nextPage = await _fetchProductVariantPreviews(skus.slice(i, i + 250), config);
+    response.data.nodes.push(...nextPage.data.nodes);
+  }
+
+  const nodes = get(response, ['data', 'nodes'], [])
     .filter(identity)
     .map((node) => convertProductToBase64(node));
 
