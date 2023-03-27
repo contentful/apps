@@ -36,7 +36,7 @@ const ErrorDisplay = (props: Props) => {
           setErrorDisplay(PERMISSION_DENIED_MSG);
           break;
         default:
-          throw e;
+          setErrorDisplay(e.message);
       }
     };
 

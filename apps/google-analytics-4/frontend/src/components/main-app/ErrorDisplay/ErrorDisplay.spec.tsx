@@ -8,18 +8,17 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-const HYPER_LINK_MSG = 'app configuration page.';
-
 const { findByText, getByTestId } = screen;
 
 describe('ErrorDisplay', () => {
   it('mounts with correct msg and hyperlink when error is of type InvalidProperty', async () => {
+    const HYPER_LINK_COPY = 'app configuration page.';
     render(
       <ErrorDisplay
         error={
           new ApiError({
             details: '',
-            message: 'api Error',
+            message: '',
             status: 404,
             errorType: 'InvalidProperty',
           })
@@ -27,7 +26,7 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    const warningMsg = await findByText(INVALID_ARGUMENT_MSG.replace(HYPER_LINK_MSG, '').trim());
+    const warningMsg = await findByText(INVALID_ARGUMENT_MSG.replace(HYPER_LINK_COPY, '').trim());
     const hyperLink = getByTestId('cf-ui-text-link');
 
     expect(warningMsg).toBeVisible();
@@ -40,7 +39,7 @@ describe('ErrorDisplay', () => {
         error={
           new ApiError({
             details: '',
-            message: 'api Error',
+            message: '',
             status: 404,
             errorType: 'DisabledDataApi',
           })
@@ -53,10 +52,31 @@ describe('ErrorDisplay', () => {
     expect(warningMsg).toBeVisible();
   });
 
-  it('mounts with correct msg when error is not a specified Api Error Type ', async () => {
-    render(<ErrorDisplay error={new Error('random error')} />);
+  it('mounts with correct msg when error is of ApiError class but not an Error type explicitely handled', async () => {
+    const INTERNAL_ERR_MSG = 'Internal Server Error';
+    render(
+      <ErrorDisplay
+        error={
+          new ApiError({
+            details: '',
+            message: INTERNAL_ERR_MSG,
+            status: 500,
+            errorType: '',
+          })
+        }
+      />
+    );
 
-    const warningMsg = await findByText('random error');
+    const warningMsg = await findByText(INTERNAL_ERR_MSG);
+
+    expect(warningMsg).toBeVisible();
+  });
+
+  it('mounts with correct msg when error is not a specified Api Error Type ', async () => {
+    const ERR_MSG = 'random error';
+    render(<ErrorDisplay error={new Error(ERR_MSG)} />);
+
+    const warningMsg = await findByText(ERR_MSG);
 
     expect(warningMsg).toBeVisible();
   });
