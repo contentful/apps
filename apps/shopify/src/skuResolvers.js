@@ -48,11 +48,14 @@ export const fetchCollectionPreviews = async (skus, config) => {
 
   const response = await shopifyClient.collection.fetchAll(SHOPIFY_ENTITY_LIMIT);
   if (response.length > 0) {
-    while (response[response.length - 1].hasNextPage) {
+    let hasNextPage = response.length === SHOPIFY_ENTITY_LIMIT;
+    while (hasNextPage) {
       const nextPage = await shopifyClient.collection.fetchAll(
         response[response.length - 1].nextPage
       );
       response.push(...nextPage);
+
+      hasNextPage = nextPage.length === SHOPIFY_ENTITY_LIMIT;
     }
   }
 
