@@ -25,26 +25,26 @@ const SlugWarningDisplay = (props: Props) => {
     getContentTypeSpecificMsg(contentTypeName);
 
   const renderContent = () => {
-    const content = { bodyMsg: DEFAULT_CONTENT_MSG, hyperLink: true };
+    const content = { bodyMsg: DEFAULT_CONTENT_MSG, renderHyperLink: true };
     if (!slugFieldIsConfigured) {
       content.bodyMsg = noSlugConfigMsg;
     } else if (!contentTypeHasSlugField) {
       content.bodyMsg = noSlugContentMsg;
     } else if (!isPublished) {
       content.bodyMsg = notPublishedMsg;
-      content.hyperLink = false;
+      content.renderHyperLink = false;
     }
 
     return content;
   };
 
-  const { bodyMsg, hyperLink } = renderContent();
+  const { bodyMsg, renderHyperLink } = renderContent();
 
   return (
     <Note
       body={
         <>
-          {hyperLink ? (
+          {renderHyperLink ? (
             <HyperLink
               onClick={openConfigPage}
               body={bodyMsg}
