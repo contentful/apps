@@ -14,17 +14,17 @@ describe('Setup Google Service Account Details page', () => {
       render(
         <SetupServiceAccountCard
           parameters={{}}
-          onIsValidServiceAccount={() => {}}
           mergeSdkParameters={() => {}}
           onInEditModeChange={() => {}}
           isInEditMode={false}
+          onKeyFileUpdate={() => {}}
         />
       );
     });
 
     expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
     expect(screen.getByText('Paste the service account key file (JSON) above')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Private Key File/).getAttribute('aria-invalid')).toBeNull();
+    expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toBeNull();
   });
 
   it('renders an error state when invalid input', async () => {
@@ -34,15 +34,15 @@ describe('Setup Google Service Account Details page', () => {
       render(
         <SetupServiceAccountCard
           parameters={{}}
-          onIsValidServiceAccount={() => {}}
           mergeSdkParameters={() => {}}
           onInEditModeChange={() => {}}
           isInEditMode={false}
+          onKeyFileUpdate={() => {}}
         />
       );
     });
 
-    const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
+    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
@@ -50,7 +50,7 @@ describe('Setup Google Service Account Details page', () => {
     await user.paste(JSON.stringify({ foo: 'bar' }));
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/Private Key File/).getAttribute('aria-invalid')).toEqual(
+      expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toEqual(
         'true'
       );
       expect(screen.getByText(/Error:/)).toBeInTheDocument();
@@ -64,15 +64,15 @@ describe('Setup Google Service Account Details page', () => {
       render(
         <SetupServiceAccountCard
           parameters={{}}
-          onIsValidServiceAccount={() => {}}
           mergeSdkParameters={() => {}}
           onInEditModeChange={() => {}}
           isInEditMode={false}
+          onKeyFileUpdate={() => {}}
         />
       );
     });
 
-    const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
+    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
@@ -80,7 +80,7 @@ describe('Setup Google Service Account Details page', () => {
     await user.paste(JSON.stringify(validServiceKeyFile));
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/Private Key File/).getAttribute('aria-invalid')).toBeNull();
+      expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toBeNull();
       expect(screen.getByText('Service account key file is valid')).toBeInTheDocument();
     });
   });

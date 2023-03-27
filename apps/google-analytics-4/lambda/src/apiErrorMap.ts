@@ -4,6 +4,7 @@ import { UnableToVerifyRequest } from './errors/unableToVerifyRequest';
 import { ApiErrorMap } from './middlewares/apiErrorHandler';
 import {
   InvalidServiceAccountKey,
+  MissingServiceAccountKeyFile,
   MissingServiceAccountKeyHeader,
 } from './middlewares/serviceAccountKeyProvider';
 import { GoogleApiError } from './services/googleApiUtils';
@@ -15,6 +16,8 @@ export const apiErrorMap: ApiErrorMap = {
     new ApiError(e.message, 'UnableToVerifyRequest', 422),
   MissingServiceAccountKeyHeader: (e: MissingServiceAccountKeyHeader) =>
     new ApiError(e.message, 'MissingServiceAccountKeyHeader', 400),
+  MissingServiceAccountKeyFile: (e: MissingServiceAccountKeyFile) =>
+    new ApiError(e.message, 'MissingServiceAccountKeyFile', 400),
   InvalidServiceAccountKey: (e: InvalidServiceAccountKey) =>
     new ApiError(e.message, 'InvalidServiceAccountKey', 400),
 };

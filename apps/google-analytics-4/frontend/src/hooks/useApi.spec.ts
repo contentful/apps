@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import React, { FunctionComponent } from 'react';
-import { mockCma, mockSdk, validServiceKeyFile, validServiceKeyId } from '../../test/mocks';
+import { mockCma, mockSdk, validServiceKeyId } from '../../test/mocks';
 import { Api } from '../apis/api';
 import { useApi } from './useApi';
 
@@ -19,7 +19,7 @@ const renderTestComponent = (componentFn: FunctionComponent) => {
 describe('useApi', () => {
   it('provides an Api instance to children', () => {
     renderTestComponent(() => {
-      const api = useApi(validServiceKeyId, validServiceKeyFile);
+      const api = useApi(validServiceKeyId);
       testFn(api);
       return null;
     });
@@ -31,7 +31,6 @@ describe('useApi', () => {
 
     beforeEach(() => {
       mockSdk.parameters.installation = {
-        serviceAccountKey: validServiceKeyFile,
         serviceAccountKeyId: validServiceKeyId,
       };
     });

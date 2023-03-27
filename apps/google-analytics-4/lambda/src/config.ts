@@ -12,5 +12,7 @@ export const config = {
   awsRegion: getEnvironmentVariable('AWS_REGION'),
   dynamoDbEndpoint: getEnvironmentVariable('DYNAMODB_ENDPOINT'),
   dynamoDbTableName: getEnvironmentVariable('DYNAMODB_TABLE_NAME'),
-  sharedCredentialsSecretKey: getEnvironmentVariable('SHARED_CREDENTIALS_SECRET_KEY'),
+  serviceAccountKeyEncryptionSecret: getEnvironmentVariable(
+    'SERVICE_ACCOUNT_KEY_ENCRYPTION_SECRET'
+  ),
 };

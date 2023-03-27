@@ -42,14 +42,14 @@ const makeCanonicalReq = (req: Request) => {
   const fullPath = req.originalUrl.split('?')[0];
   const signedPath = `${pathPrefix}${fullPath}`; // note: req.originalUrl starts with a `/` and includes the full path & query string
 
-  console.log('makeCanonicalRequest#pathPrefix', pathPrefix);
-  console.log('makeCanonicalRequest#req.originalUrl', req.originalUrl);
-  console.log('makeCanonicalRequest#fullPath', fullPath);
-  console.log('makeCanonicalRequest#signedPath', signedPath);
+  // express.json() makes body always an object ({}), even if there is no body
+  // so we need to check if the body is empty and set it to undefined
+  const bodyOrUndefined = Object.keys(req.body).length === 0 ? undefined : JSON.stringify(req.body);
 
   return <CanonicalRequest>{
     method: req.method,
     path: signedPath,
     headers: headers,
+    body: bodyOrUndefined,
   };
 };

@@ -7,6 +7,7 @@ import { corsConfig } from './middlewares/corsConfig';
 import { apiErrorMap } from './apiErrorMap';
 
 const app = express();
+app.use(express.json());
 const apiRouteConstraint = ['/api/*'];
 
 // Initialize Sentry as early as possible

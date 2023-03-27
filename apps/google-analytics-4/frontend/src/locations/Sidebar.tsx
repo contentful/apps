@@ -7,13 +7,13 @@ import { AppInstallationParameters } from 'types';
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
 
-  const { serviceAccountKey, serviceAccountKeyId, propertyId, contentTypes } = sdk.parameters
+  const { serviceAccountKeyId, propertyId, contentTypes } = sdk.parameters
     .installation as AppInstallationParameters;
 
   const currentContentType = sdk.contentType.sys.id;
   const slugFieldInfo = contentTypes[currentContentType] ?? { slugField: '', urlPrefix: '' };
 
-  const api = useApi(serviceAccountKeyId, serviceAccountKey);
+  const api = useApi(serviceAccountKeyId);
 
   return (
     <>
