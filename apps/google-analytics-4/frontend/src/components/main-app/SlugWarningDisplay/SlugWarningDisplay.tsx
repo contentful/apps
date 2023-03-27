@@ -17,6 +17,17 @@ const SlugWarningDisplay = (props: Props) => {
   const contentTypeName = sdk.contentType.name;
 
   const openConfigPage = () => sdk.navigator.openAppConfig();
+  const appConfigPageHyperLink = (bodyMsg: string) => (
+    <HyperLink onClick={openConfigPage} body={bodyMsg} substring="app configuration page." />
+  );
+
+  const supportHyperLink = (
+    <HyperLink
+      body={DEFAULT_ERR_MSG}
+      substring="contact support."
+      hyperLinkHref="https://www.contentful.com/support/?utm_source=webapp&utm_medium=help-menu&utm_campaign=in-app-help"
+    />
+  );
 
   const { slugFieldIsConfigured, contentTypeHasSlugField, isPublished } =
     useSidebarSlug(slugFieldInfo);
@@ -25,39 +36,21 @@ const SlugWarningDisplay = (props: Props) => {
     getContentTypeSpecificMsg(contentTypeName);
 
   const renderContent = () => {
-    const content = { bodyMsg: DEFAULT_ERR_MSG, renderHyperLink: true };
+    const content: { bodyMsg: string | JSX.Element } = { bodyMsg: supportHyperLink };
     if (!slugFieldIsConfigured) {
-      content.bodyMsg = noSlugConfigMsg;
+      content.bodyMsg = appConfigPageHyperLink(noSlugConfigMsg);
     } else if (!contentTypeHasSlugField) {
-      content.bodyMsg = noSlugContentMsg;
+      content.bodyMsg = appConfigPageHyperLink(noSlugContentMsg);
     } else if (!isPublished) {
       content.bodyMsg = notPublishedMsg;
-      content.renderHyperLink = false;
     }
 
     return content;
   };
 
-  const { bodyMsg, renderHyperLink } = renderContent();
+  const { bodyMsg } = renderContent();
 
-  return (
-    <Note
-      body={
-        <>
-          {renderHyperLink ? (
-            <HyperLink
-              onClick={openConfigPage}
-              body={bodyMsg}
-              substring="app configuration page."
-            />
-          ) : (
-            bodyMsg
-          )}
-        </>
-      }
-      variant="warning"
-    />
-  );
+  return <Note body={bodyMsg} variant="warning" />;
 };
 
 export default SlugWarningDisplay;

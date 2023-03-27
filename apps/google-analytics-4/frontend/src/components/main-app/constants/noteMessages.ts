@@ -1,10 +1,11 @@
-export const DEFAULT_ERR_MSG = 'An unknown error has occurred. Please try again or contact support';
+export const DEFAULT_ERR_MSG =
+  'An unknown error has occurred. Please try again or contact support.';
 export const EMPTY_DATA_MSG =
-  'There are no page views to show for this range. If this is not expected, assure the URL prefix and slug value accurately reflect a page path within your Google Analytics account.';
+  'There are no page views to show for this range. If this is not expected, ensure the URL prefix and slug value accurately reflect a page path within your Google Analytics account.';
 export const INVALID_ARGUMENT_MSG =
-  'Invalid arguments provided. Please assure you have configured your property correctly on the app configuration page.';
+  'Invalid arguments provided. Please ensure you have configured your property correctly on the app configuration page.';
 export const PERMISSION_DENIED_MSG =
-  'Permission denied. Please either enable your Google Analytics Data API or assure you have valid permissions.';
+  'Permission denied. Please either enable your Google Analytics Data API or ensure you have valid permissions.';
 
 export const getContentTypeSpecificMsg = (contentTypeName: string) => ({
   noSlugConfigMsg: `The Google Analytics 4 sidebar app cannot be displayed on this entry because the ${contentTypeName} content type has not been correctly configured. Please configure this content type on the app configuration page.`,
