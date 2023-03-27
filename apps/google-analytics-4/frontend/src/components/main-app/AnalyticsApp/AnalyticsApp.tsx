@@ -2,7 +2,7 @@ import { useAutoResizer } from '@contentful/react-apps-toolkit';
 import { useEffect, useState, useMemo } from 'react';
 import { Api } from 'apis/api';
 import getRangeDates from 'helpers/DateRangeHelpers/DateRangeHelpers';
-import { DateRangeType, ContentTypeValue } from 'types';
+import { DateRangeType, StartEndDates, ContentTypeValue } from 'types';
 import { styles } from './AnalyticsApp.styles';
 import { Flex } from '@contentful/f36-components';
 import { RunReportData } from 'apis/apiTypes';
@@ -20,7 +20,7 @@ const AnalyticsApp = (props: Props) => {
 
   const [runReportResponse, setRunReportResponse] = useState<RunReportData>({} as RunReportData);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek');
-  const [startEndDates, setStartEndDates] = useState<any>(getRangeDates('lastWeek'));
+  const [startEndDates, setStartEndDates] = useState<StartEndDates>(getRangeDates('lastWeek'));
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
 
@@ -99,6 +99,7 @@ const AnalyticsApp = (props: Props) => {
         pageViews={pageViews}
         error={error}
         propertyId={propertyId}
+        startEndDates={startEndDates}
       />
     );
   };

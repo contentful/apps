@@ -2,7 +2,7 @@ import React from 'react';
 import ChartFooter from 'components/main-app/ChartFooter/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader/ChartHeader';
 import ChartContent from '../ChartContent/ChartContent';
-import { RunReportResponse } from 'types';
+import { RunReportResponse, StartEndDates } from 'types';
 import { getExternalUrl } from 'helpers/externalUrlHelpers/externalUrlHelpers';
 
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
   metricName: string;
   error?: Error;
   propertyId: string;
+  startEndDates: StartEndDates;
 }
 
 const AnalyticsMetricDisplay = (props: Props) => {
@@ -24,10 +25,11 @@ const AnalyticsMetricDisplay = (props: Props) => {
     metricName,
     pageViews,
     propertyId,
+    startEndDates,
   } = props;
 
   const propertyIdNumber = propertyId.split('/')[1] || '';
-  const viewUrl = getExternalUrl(propertyIdNumber, reportSlug);
+  const viewUrl = getExternalUrl(propertyIdNumber, reportSlug, startEndDates);
 
   return (
     <>

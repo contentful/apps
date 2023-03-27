@@ -18,6 +18,7 @@ describe('Analytics metric display components for the analytics app', () => {
         runReportResponse={runReportResponseHasViews}
         reportSlug="/en-US"
         propertyId=""
+        startEndDates={{ start: '2023-03-26', end: '2023-03-27' }}
       />
     );
 
