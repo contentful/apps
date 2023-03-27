@@ -1,18 +1,15 @@
 import identity from 'lodash/identity';
 import difference from 'lodash/difference';
+import get from 'lodash/get';
 import Client from 'shopify-buy';
 import makeProductVariantPagination from './productVariantPagination';
 import makeProductPagination from './productPagination';
 import makeCollectionPagination from './collectionPagination';
-import {
-  productDataTransformer,
-  collectionDataTransformer,
-  removeHttpsAndTrailingSlash,
-} from './dataTransformer';
+import { productDataTransformer, collectionDataTransformer } from './dataTransformer';
 
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
-import { SHOPIFY_API_VERSION, SHOPIFY_ENTITY_LIMIT } from './constants';
+import { SHOPIFY_API_VERSION } from './constants';
 import {
   convertStringToBase64,
   convertBase64ToString,
@@ -29,7 +26,7 @@ export async function makeShopifyClient(config) {
   const { storefrontAccessToken, apiEndpoint } = config;
 
   return Client.buildClient({
-    domain: removeHttpsAndTrailingSlash(apiEndpoint),
+    domain: apiEndpoint,
     storefrontAccessToken,
     apiVersion: SHOPIFY_API_VERSION,
   });
@@ -37,6 +34,10 @@ export async function makeShopifyClient(config) {
 
 /**
  * Fetches the collection previews for the collections selected by the user.
+ *
+ * Note: currently there is no way to fetch multiple collections by id
+ * so we use fetchAll instead and then filter on the client. Besides the obvious disadvantage,
+ * this could also fail if there are mo collections in the stroe than the pagination limit
  */
 export const fetchCollectionPreviews = async (skus, config) => {
   if (!skus.length) {
@@ -44,18 +45,10 @@ export const fetchCollectionPreviews = async (skus, config) => {
   }
 
   const validIds = filterAndDecodeValidIds(skus, 'Collection');
+
   const shopifyClient = await makeShopifyClient(config);
 
-  const response = await shopifyClient.collection.fetchAll(SHOPIFY_ENTITY_LIMIT);
-  if (response.length > 0) {
-    while (response[response.length - 1].hasNextPage) {
-      const nextPage = await shopifyClient.collection.fetchAll(
-        response[response.length - 1].nextPage
-      );
-      response.push(...nextPage);
-    }
-  }
-
+  const response = await shopifyClient.collection.fetchAll(250);
   const collections = response.map((res) => convertCollectionToBase64(res));
 
   return validIds.map((validId) => {
@@ -76,23 +69,20 @@ export const fetchCollectionPreviews = async (skus, config) => {
 
 /**
  * Fetches the product previews for the products selected by the user.
+ *
+ * Note: currently there is no way to cover the edge case where the user
+ *       would have more than 250 products selected. In such a case their
+ *       selection would be cut off after product no. 250.
  */
 export const fetchProductPreviews = async (skus, config) => {
   if (!skus.length) {
     return [];
   }
+
   const validIds = filterAndDecodeValidIds(skus, 'Product');
   const shopifyClient = await makeShopifyClient(config);
-
-  const requests = [];
-  for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
-    const currentIdPage = validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1));
-    requests.push(shopifyClient.product.fetchMultiple(currentIdPage));
-  }
-
-  const response = (await Promise.all(requests)).flat();
+  const response = await shopifyClient.product.fetchMultiple(validIds);
   const products = response.map((res) => convertProductToBase64(res));
-
   return validIds.map((validId) => {
     const product = products.find((product) => product?.id === convertStringToBase64(validId));
 
@@ -109,9 +99,18 @@ export const fetchProductPreviews = async (skus, config) => {
 };
 
 /**
- * Fetches 250 product variant previews for the product selected by the user.
+ * Fetches the product variant previews for the product variants selected by the user.
+ *
+ * Note: currently there is no way to cover the edge case where the user
+ *       would have more than 250 variants selected. In such a case their
+ *       selection would be cut off after variant no. 250.
  */
-const _fetchProductVariantPreviews = async (validIds, config) => {
+export const fetchProductVariantPreviews = async (skus, config) => {
+  if (!skus.length) {
+    return [];
+  }
+
+  const validIds = filterAndDecodeValidIds(skus, 'ProductVariant');
   const queryIds = validIds.map((sku) => `"${sku}"`).join(',');
   const query = `
   {
@@ -133,11 +132,8 @@ const _fetchProductVariantPreviews = async (validIds, config) => {
   `;
 
   const { apiEndpoint, storefrontAccessToken } = config;
-  const url = `https://${removeHttpsAndTrailingSlash(
-    apiEndpoint
-  )}/api/${SHOPIFY_API_VERSION}/graphql`;
 
-  const response = await window.fetch(url, {
+  const res = await window.fetch(`https://${apiEndpoint}/api/${SHOPIFY_API_VERSION}/graphql`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -147,27 +143,11 @@ const _fetchProductVariantPreviews = async (validIds, config) => {
     body: JSON.stringify({ query }),
   });
 
-  return await response.json();
-};
+  const data = await res.json();
 
-/**
- * Fetches the product variant previews for the product variants selected by the user.
- */
-export const fetchProductVariantPreviews = async (skus, config) => {
-  if (!skus.length) {
-    return [];
-  }
-
-  const validIds = filterAndDecodeValidIds(skus, 'ProductVariant');
-
-  const requests = [];
-  for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
-    const currentIdPage = validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1));
-    requests.push(_fetchProductVariantPreviews(currentIdPage, config));
-  }
-
-  const response = (await Promise.all(requests)).flatMap((res) => res.data.nodes);
-  const nodes = response.filter(identity).map((node) => convertProductToBase64(node));
+  const nodes = get(data, ['data', 'nodes'], [])
+    .filter(identity)
+    .map((node) => convertProductToBase64(node));
 
   const variantPreviews = nodes.map(previewsToProductVariants(config));
   const missingVariants = difference(
