@@ -159,7 +159,7 @@ export default function SetupServiceAccountCard(props: Props) {
       </Paragraph>
       <Paragraph marginBottom="none">
         After configuring the service account, you'll download a set of credentials that Contentful
-        will use to access Google Analytics data on this service account's behalf.
+        will use to access Google Analytics 4 data on this service account's behalf.
       </Paragraph>
     </Stack>
   );
