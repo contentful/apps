@@ -63,7 +63,7 @@ export const fetchCollectionPreviews = async (skus, config) => {
       (collection) => collection.id === convertStringToBase64(validId)
     );
     return collection
-      ? collectionDataTransformer(collection, removeHttpsAndTrailingSlash(config.apiEndpoint))
+      ? collectionDataTransformer(collection, config.apiEndpoint)
       : {
           sku: convertStringToBase64(validId),
           isMissing: true,
@@ -97,7 +97,7 @@ export const fetchProductPreviews = async (skus, config) => {
     const product = products.find((product) => product?.id === convertStringToBase64(validId));
 
     return product
-      ? productDataTransformer(product, removeHttpsAndTrailingSlash(config.apiEndpoint))
+      ? productDataTransformer(product, config.apiEndpoint)
       : {
           sku: convertStringToBase64(validId),
           isMissing: true,
