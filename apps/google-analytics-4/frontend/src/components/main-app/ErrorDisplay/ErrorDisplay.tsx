@@ -16,7 +16,7 @@ interface Props {
 
 const ErrorDisplay = (props: Props) => {
   const { error } = props;
-  const [errorMessage, setErrorMessage] = useState<string | JSX.Element>('');
+  const [errorDisplay, setErrorDisplay] = useState<string | JSX.Element>('');
   const sdk = useSDK<SidebarExtensionSDK>();
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const ErrorDisplay = (props: Props) => {
     const handleApiError = (e: ApiErrorType) => {
       switch (e.errorType) {
         case ERROR_TYPE_MAP.invalidProperty:
-          setErrorMessage(
+          setErrorDisplay(
             <HyperLink
               body={INVALID_ARGUMENT_MSG}
               substring="app configuration page."
@@ -33,7 +33,7 @@ const ErrorDisplay = (props: Props) => {
           );
           break;
         case ERROR_TYPE_MAP.disabledDataApi:
-          setErrorMessage(PERMISSION_DENIED_MSG);
+          setErrorDisplay(PERMISSION_DENIED_MSG);
           break;
         default:
           throw e;
@@ -42,11 +42,11 @@ const ErrorDisplay = (props: Props) => {
 
     if (isApiErrorType(error)) handleApiError(error);
     else {
-      setErrorMessage(error.message || DEFAULT_ERR_MSG);
+      setErrorDisplay(error.message || DEFAULT_ERR_MSG);
     }
   }, [error, sdk.navigator]);
 
-  return <Note body={errorMessage} variant="negative" />;
+  return <Note body={errorDisplay} variant="negative" />;
 };
 
 export default ErrorDisplay;
