@@ -86,12 +86,11 @@ export const fetchProductPreviews = async (skus, config) => {
 
   const requests = [];
   for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
-    requests.push(
-      shopifyClient.product.fetchMultiple(validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1)))
-    );
+    const currentIdPage = validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1));
+    requests.push(shopifyClient.product.fetchMultiple(currentIdPage));
   }
-  const response = (await Promise.all(requests)).flat();
 
+  const response = (await Promise.all(requests)).flat();
   const products = response.map((res) => convertProductToBase64(res));
 
   return validIds.map((validId) => {
@@ -163,12 +162,11 @@ export const fetchProductVariantPreviews = async (skus, config) => {
 
   const requests = [];
   for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
-    requests.push(
-      _fetchProductVariantPreviews(validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1)), config)
-    );
+    const currentIdPage = validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1));
+    requests.push(_fetchProductVariantPreviews(currentIdPage, config));
   }
-  const response = (await Promise.all(requests)).flatMap((res) => res.data.nodes);
 
+  const response = (await Promise.all(requests)).flatMap((res) => res.data.nodes);
   const nodes = response.filter(identity).map((node) => convertProductToBase64(node));
 
   const variantPreviews = nodes.map(previewsToProductVariants(config));
