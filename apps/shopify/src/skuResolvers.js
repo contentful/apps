@@ -168,7 +168,6 @@ export const fetchProductVariantPreviews = async (skus, config) => {
       config
     );
     response.push(...currentPage.data.nodes);
-    console.log(response);
   }
 
   const nodes = response.filter(identity).map((node) => convertProductToBase64(node));
