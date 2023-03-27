@@ -9,12 +9,8 @@ import { convertBase64ToString, convertStringToBase64 } from './utils/base64';
  * e.g. gid://shopify/Product/1234567890 -> 1234567890
  */
 export const decodeId = (sku) => {
-  try {
-    const decodedId = convertBase64ToString(sku);
-    return decodedId && decodeId.slice(decodedId.lastIndexOf('/') + 1);
-  } catch {
-    return null;
-  }
+  const decodedId = convertBase64ToString(sku);
+  return decodedId && decodedId.slice(decodedId.lastIndexOf('/') + 1);
 };
 
 /**
