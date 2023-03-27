@@ -33,7 +33,7 @@ const ApiAccessSection = (props: Props) => {
       <div>
         <Subheading marginBottom="spacingXs">API access</Subheading>
         <Paragraph marginBottom="none">
-          Authorize this application to access Google Analytics Admin & Data APIs
+          Authorize this application to access Google Analytics 4 Admin and Data APIs
         </Paragraph>
       </div>
       {!isInEditMode && isAppInstalled && parameters && parameters.serviceAccountKeyId ? (
