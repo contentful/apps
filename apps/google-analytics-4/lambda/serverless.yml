@@ -44,7 +44,7 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource:
-            - Fn::GetAtt: [service-account-keys, Arn]
+            - Fn::GetAtt: [ServiceAccountKeysTable, Arn]
 
 functions:
   api:
