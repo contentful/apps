@@ -43,6 +43,7 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
+            - dynamodb:DeleteTable
           Resource:
             - Fn::GetAtt: [ServiceAccountKeysTable, Arn]
 
