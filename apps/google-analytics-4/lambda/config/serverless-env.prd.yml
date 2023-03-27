@@ -1,3 +1,4 @@
 signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/prd/signing-secret}
 domainName: google-analytics-4.ctfapps.net
 serviceAccountKeyEncryptionSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/google-analytics-4-action/prd/service-account-key-encryption-secret}
+dynamoDbEndpoint: https://dynamodb.us-east-1.amazonaws.com

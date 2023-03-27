@@ -19,8 +19,8 @@ custom:
     httpPort: 8080
     host: 0.0.0.0
   awsRegion: us-east-1
-  dynamoDbEndpoint: http://dynamodb:8000
   dynamoDbTableName: sls-apps-ga4-backend-${opt:stage, 'dev'}-service-account-keys
+  dynamoDbEndpoint: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):dynamoDbEndpoint}
   serviceAccountKeyEncryptionSecret: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):serviceAccountKeyEncryptionSecret}
 
 provider:
