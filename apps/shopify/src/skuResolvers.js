@@ -90,7 +90,7 @@ export const fetchProductPreviews = async (skus, config) => {
       shopifyClient.product.fetchMultiple(validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1)))
     );
   }
-  const response = (await Promise.all(requests)).reduce((acc, curr) => [...acc, ...curr], []);
+  const response = (await Promise.all(requests)).flat();
 
   const products = response.map((res) => convertProductToBase64(res));
 
@@ -163,14 +163,11 @@ export const fetchProductVariantPreviews = async (skus, config) => {
 
   const requests = [];
   for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
-    response.push(
+    requests.push(
       _fetchProductVariantPreviews(validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1)), config)
     );
   }
-  const response = (await Promise.all(requests)).reduce(
-    (acc, curr) => [...acc, ...curr.data.nodes],
-    []
-  );
+  const response = (await Promise.all(requests)).flatMap((res) => res.data.nodes);
 
   const nodes = response.filter(identity).map((node) => convertProductToBase64(node));
 
