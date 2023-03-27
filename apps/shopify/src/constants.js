@@ -4,7 +4,6 @@
 export const DEFAULT_SHOPIFY_VARIANT_TITLE = 'Default Title';
 export const SHOPIFY_API_VERSION = '2023-01';
 export const SHOPIFY_ENTITY_LIMIT = 250;
-export const SHOPIFY_ENTITY_LIMIT_AS_INDEX = SHOPIFY_ENTITY_LIMIT - 1;
 
 export const SKU_TYPES = [
   {

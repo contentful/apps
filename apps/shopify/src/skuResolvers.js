@@ -12,11 +12,7 @@ import {
 
 import { validateParameters } from '.';
 import { previewsToProductVariants } from './dataTransformer';
-import {
-  SHOPIFY_API_VERSION,
-  SHOPIFY_ENTITY_LIMIT,
-  SHOPIFY_ENTITY_LIMIT_AS_INDEX,
-} from './constants';
+import { SHOPIFY_API_VERSION, SHOPIFY_ENTITY_LIMIT } from './constants';
 import {
   convertStringToBase64,
   convertBase64ToString,
@@ -91,7 +87,7 @@ export const fetchProductPreviews = async (skus, config) => {
   const response = [];
   for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
     const currentPage = await shopifyClient.product.fetchMultiple(
-      validIds.slice(i, i + SHOPIFY_ENTITY_LIMIT_AS_INDEX)
+      validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1))
     );
     response.push(...currentPage);
   }
@@ -168,7 +164,7 @@ export const fetchProductVariantPreviews = async (skus, config) => {
   const response = [];
   for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
     const currentPage = await _fetchProductVariantPreviews(
-      validIds.slice(i, i + SHOPIFY_ENTITY_LIMIT_AS_INDEX),
+      validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1)),
       config
     );
     response.push(...currentPage.data.nodes);
