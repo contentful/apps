@@ -8,4 +8,5 @@ metadata:
     contentful.com/ci-alert-slack: prd-integrations-engineering-bots
 
 spec:
+  type: library
   owner: group:team-integrations
