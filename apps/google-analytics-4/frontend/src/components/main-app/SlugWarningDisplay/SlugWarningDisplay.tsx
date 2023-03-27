@@ -4,7 +4,7 @@ import Note from 'components/common/Note/Note';
 import { ContentTypeValue } from 'types';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
-import { getContentTypeSpecificMsg, DEFAULT_CONTENT_MSG } from '../constants/noteMessages';
+import { getContentTypeSpecificMsg, DEFAULT_ERR_MSG } from '../constants/noteMessages';
 import HyperLink from 'components/common/HyperLink/HyperLink';
 
 interface Props {
@@ -25,7 +25,7 @@ const SlugWarningDisplay = (props: Props) => {
     getContentTypeSpecificMsg(contentTypeName);
 
   const renderContent = () => {
-    const content = { bodyMsg: DEFAULT_CONTENT_MSG, renderHyperLink: true };
+    const content = { bodyMsg: DEFAULT_ERR_MSG, renderHyperLink: true };
     if (!slugFieldIsConfigured) {
       content.bodyMsg = noSlugConfigMsg;
     } else if (!contentTypeHasSlugField) {
