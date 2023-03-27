@@ -1,0 +1,2 @@
+const mockCma = {};
+export { mockCma };
