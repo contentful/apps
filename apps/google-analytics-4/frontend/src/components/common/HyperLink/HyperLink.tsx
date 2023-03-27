@@ -23,7 +23,7 @@ const HyperLink = (props: Props) => {
       }
       return prev.concat(link, current);
     }, []);
-    return bodyWithTextLink;
+    return bodyWithTextLink as JSX.Element;
   };
 
   return formatLink();
