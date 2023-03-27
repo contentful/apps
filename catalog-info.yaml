@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: apps
+  annotations:
+    circleci.com/project-slug: github/contentful/apps
+    github.com/project-slug: contentful/apps
+    contentful.com/ci-alert-slack: prd-integrations-engineering-bots
+
+spec:
+  type: library
+  lifecycle: production
+  owner: group:team-integrations
