@@ -87,6 +87,11 @@ export interface RunReportParamsType {
 }
 
 export type DateRangeType = 'lastWeek' | 'lastDay' | 'lastMonth';
+
+export interface StartEndDates {
+  start: string;
+  end: string;
+}
 export interface AccountSummariesType {
   displayName: string;
   name: string;
