@@ -29,7 +29,7 @@ const AnalyticsMetricDisplay = (props: Props) => {
   } = props;
 
   const propertyIdNumber = propertyId.split('/')[1] || '';
-  const viewUrl = getExternalUrl(propertyIdNumber, reportSlug, startEndDates);
+  const viewUrl = getExternalUrl(propertyIdNumber, { pagePath: reportSlug, startEndDates });
 
   return (
     <>
