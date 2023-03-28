@@ -1,67 +1,52 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { SidebarExtensionSDK } from '@contentful/app-sdk';
+import React, { useState, useEffect } from 'react';
 import Note from 'components/common/Note/Note';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
 import {
-  DEFAULT_ERR_MSG,
   INVALID_ARGUMENT_MSG,
   PERMISSION_DENIED_MSG,
-} from '../constants/noteMessages';
-import HyperLink from 'components/common/HyperLink/HyperLink';
+} from 'components/main-app/constants/noteMessages';
+import { AppConfigPageHyperLink, SupportHyperLink } from './CommonErrorDisplays';
 
 interface Props {
   error: Error;
 }
 
+type HyperLinkErrorDisplays = 'supportHyperLink' | 'appConfigPageHyperLink';
+
 const ErrorDisplay = (props: Props) => {
   const { error } = props;
-  const [errorDisplay, setErrorDisplay] = useState<string | JSX.Element>('');
+  const [errorBody, setErrorBody] = useState<HyperLinkErrorDisplays | string>('');
 
-  const sdk = useSDK<SidebarExtensionSDK>();
-  const appConfigPageHyperLink = useMemo(() => {
-    const openConfigPage = () => sdk.navigator.openAppConfig();
-    return (
-      <HyperLink
-        body={INVALID_ARGUMENT_MSG}
-        substring="app configuration page."
-        onClick={openConfigPage}
-      />
-    );
-  }, [sdk.navigator]);
-
-  const supportHyperLink = useMemo(
-    () => (
-      <HyperLink
-        body={DEFAULT_ERR_MSG}
-        substring="contact support."
-        hyperLinkHref="https://www.contentful.com/support/?utm_source=webapp&utm_medium=help-menu&utm_campaign=in-app-help"
-      />
-    ),
-    []
-  );
+  const hyperLinkErrorDisplays = {
+    supportHyperLink: <SupportHyperLink />,
+    appConfigPageHyperLink: <AppConfigPageHyperLink bodyMsg={INVALID_ARGUMENT_MSG} />,
+  };
 
   useEffect(() => {
     const handleApiError = (e: ApiErrorType) => {
       switch (e.errorType) {
         case ERROR_TYPE_MAP.invalidProperty:
-          setErrorDisplay(appConfigPageHyperLink);
+          setErrorBody('appConfigPageHyperLink');
           break;
         case ERROR_TYPE_MAP.disabledDataApi:
-          setErrorDisplay(PERMISSION_DENIED_MSG);
+          setErrorBody(PERMISSION_DENIED_MSG);
           break;
         default:
-          setErrorDisplay(e.message || supportHyperLink);
+          setErrorBody(e.message || 'supportHyperLink');
       }
     };
-
     if (isApiErrorType(error)) handleApiError(error);
     else {
-      setErrorDisplay(error.message || supportHyperLink);
+      setErrorBody(error.message || 'supportHyperLink');
     }
-  }, [error, sdk.navigator, supportHyperLink, appConfigPageHyperLink]);
+  }, [error]);
 
-  return <Note body={errorDisplay} variant="negative" />;
+  return (
+    <Note
+      body={hyperLinkErrorDisplays[errorBody as HyperLinkErrorDisplays] ?? errorBody}
+      variant="negative"
+    />
+  );
 };
 
 export default ErrorDisplay;

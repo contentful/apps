@@ -4,8 +4,11 @@ import Note from 'components/common/Note/Note';
 import { ContentTypeValue } from 'types';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
-import { getContentTypeSpecificMsg, DEFAULT_ERR_MSG } from '../constants/noteMessages';
-import HyperLink from 'components/common/HyperLink/HyperLink';
+import { getContentTypeSpecificMsg } from 'components/main-app/constants/noteMessages';
+import {
+  SupportHyperLink,
+  AppConfigPageHyperLink,
+} from 'components/main-app/ErrorDisplay/CommonErrorDisplays';
 
 interface Props {
   slugFieldInfo: ContentTypeValue;
@@ -16,19 +19,6 @@ const SlugWarningDisplay = (props: Props) => {
   const sdk = useSDK<SidebarExtensionSDK>();
   const contentTypeName = sdk.contentType.name;
 
-  const openConfigPage = () => sdk.navigator.openAppConfig();
-  const appConfigPageHyperLink = (bodyMsg: string) => (
-    <HyperLink onClick={openConfigPage} body={bodyMsg} substring="app configuration page." />
-  );
-
-  const supportHyperLink = (
-    <HyperLink
-      body={DEFAULT_ERR_MSG}
-      substring="contact support."
-      hyperLinkHref="https://www.contentful.com/support/?utm_source=webapp&utm_medium=help-menu&utm_campaign=in-app-help"
-    />
-  );
-
   const { slugFieldIsConfigured, contentTypeHasSlugField, isPublished } =
     useSidebarSlug(slugFieldInfo);
 
@@ -36,11 +26,11 @@ const SlugWarningDisplay = (props: Props) => {
     getContentTypeSpecificMsg(contentTypeName);
 
   const renderContent = () => {
-    const content: { bodyMsg: string | JSX.Element } = { bodyMsg: supportHyperLink };
+    const content: { bodyMsg: string | JSX.Element } = { bodyMsg: <SupportHyperLink /> };
     if (!slugFieldIsConfigured) {
-      content.bodyMsg = appConfigPageHyperLink(noSlugConfigMsg);
+      content.bodyMsg = <AppConfigPageHyperLink bodyMsg={noSlugConfigMsg} />;
     } else if (!contentTypeHasSlugField) {
-      content.bodyMsg = appConfigPageHyperLink(noSlugContentMsg);
+      content.bodyMsg = <AppConfigPageHyperLink bodyMsg={noSlugContentMsg} />;
     } else if (!isPublished) {
       content.bodyMsg = notPublishedMsg;
     }
