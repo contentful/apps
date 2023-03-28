@@ -29,7 +29,6 @@ import {
 } from './fields';
 
 import { Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
-import ClientOAuth2 from 'client-oauth2';
 
 interface Props {
   sdk: AppExtensionSDK;
@@ -183,27 +182,6 @@ export default class AppConfig extends React.Component<Props, State> {
     this.setState({ selectedFields });
   };
 
-  verifyAuthCredentials = async () => {
-    this.setState((state) => ({
-      ...state,
-      verifying: true,
-    }));
-
-    const commerceAuth = new ClientOAuth2({
-      clientId: this.state.parameters['client_id'],
-      clientSecret: this.state.parameters['client_secret'],
-      accessTokenUri: this.state.parameters['accessTokenApiEndpoint'],
-      scopes: [this.state.parameters['scope']],
-    });
-
-    const token = await commerceAuth.credentials.getToken();
-    this.setState((state) => ({
-      ...state,
-      verifying: false,
-      token,
-    }));
-  };
-
   renderApp() {
     const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
     const { parameterDefinitions, sdk } = this.props;
@@ -239,16 +217,6 @@ export default class AppConfig extends React.Component<Props, State> {
                   />
                 );
               })}
-              <Button
-                buttonType={this.state.token ? 'positive' : 'primary'}
-                onBlur={function noRefCheck() {}}
-                onClick={() => this.verifyAuthCredentials()}
-                size="medium"
-                type="button"
-                loading={this.state.verifying}
-                disabled={this.state.token ? true : false}>
-                {this.state.token ? 'Token Successfully Generated' : 'Check Token Generation'}
-              </Button>
             </Form>
             <hr className={styles.splitter} />
           </Typography>

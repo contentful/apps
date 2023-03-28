@@ -1,4 +1,3 @@
-import React from 'react';
 import { render } from 'react-dom';
 
 import {
@@ -38,43 +37,6 @@ init((sdk) => {
               description: 'The API URL',
               type: 'Symbol',
               required: true,
-            },
-            {
-              id: 'accessTokenApiEndpoint',
-              name: 'Access Token URL',
-              description: 'The access token API URL',
-              type: 'Symbol',
-              required: true,
-            },
-            {
-              id: 'client_id',
-              name: 'Client ID',
-              description: 'OAUTH Client ID',
-              type: 'Symbol',
-              required: true,
-            },
-            {
-              id: 'client_secret',
-              name: 'Client Secret',
-              description: 'OAUTH Client Secret',
-              type: 'Symbol',
-              required: true,
-            },
-            {
-              id: 'grant_type',
-              name: 'Grant Type',
-              description: 'OAUTH Grant type',
-              type: 'Symbol',
-              required: true,
-              default: 'client_credentials',
-            },
-            {
-              id: 'scope',
-              name: 'Scope',
-              description: 'OAUTH Scope',
-              type: 'Symbol',
-              required: true,
-              default: 'extended',
             },
             {
               id: 'baseSites',
