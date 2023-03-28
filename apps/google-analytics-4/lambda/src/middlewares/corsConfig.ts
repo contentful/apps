@@ -3,6 +3,7 @@ export const corsConfig = {
   methods: 'GET,PUT,POST,PATCH,DELETE,OPTIONS',
   allowedHeaders: [
     'Authorization',
+    'Content-Type',
     // Contentful SDK Headers
     'X-Contentful-Timestamp',
     'X-Contentful-Signed-Headers',
