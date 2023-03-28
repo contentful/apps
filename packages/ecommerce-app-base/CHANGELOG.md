@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.48](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.47...@contentful/ecommerce-app-base@3.1.48) (2023-03-28)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.30.3 to 4.31.0 ([#2898](https://github.com/contentful/apps/issues/2898)) ([354b612](https://github.com/contentful/apps/commit/354b6123070755675ff64bcf6126b3d97160e2dc))
+- **deps:** bump @contentful/f36-components from 4.31.0 to 4.32.0 ([#2938](https://github.com/contentful/apps/issues/2938)) ([4eeda28](https://github.com/contentful/apps/commit/4eeda28688a654f4708fe0032ac9815ca2fe0530))
+- **deps:** bump @types/lodash from 4.14.191 to 4.14.192 ([#2961](https://github.com/contentful/apps/issues/2961)) ([ff246a1](https://github.com/contentful/apps/commit/ff246a1bd15c9b5d7dfd57b2917ddf4b84af004a))
+- **deps:** bump contentful-management from 10.30.0 to 10.30.1 ([#2850](https://github.com/contentful/apps/issues/2850)) ([1a914e1](https://github.com/contentful/apps/commit/1a914e14e190e1c6b575c21775fe385a2c2332fc))
+- **deps:** bump contentful-management from 10.30.1 to 10.31.0 ([#2885](https://github.com/contentful/apps/issues/2885)) ([922d92f](https://github.com/contentful/apps/commit/922d92f758cf7f149d35af1959ac94303d910c30))
+- **deps:** bump contentful-management from 10.31.0 to 10.31.1 ([#2899](https://github.com/contentful/apps/issues/2899)) ([4b6e53e](https://github.com/contentful/apps/commit/4b6e53e705e6686da4a5c1b55f2c2f1364eb4cc7))
+- **deps:** bump contentful-management from 10.31.1 to 10.31.3 ([#2935](https://github.com/contentful/apps/issues/2935)) ([ecff321](https://github.com/contentful/apps/commit/ecff3211321f6af3a96dcc1dddbb920aaa437e4c))
+
 ## [3.1.47](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.46...@contentful/ecommerce-app-base@3.1.47) (2023-03-20)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
