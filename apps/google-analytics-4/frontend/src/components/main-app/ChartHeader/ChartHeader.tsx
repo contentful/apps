@@ -37,7 +37,7 @@ const ChartHeader = (props: Props) => {
     <Flex
       justifyContent="space-between"
       alignItems="flex-end"
-      marginBottom="spacingXs"
+      marginBottom="spacingS"
       id="chart-header">
       <Box>
         <DisplayText marginBottom="none" size="large">
