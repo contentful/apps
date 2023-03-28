@@ -45,6 +45,7 @@ const AnalyticsApp = (props: Props) => {
       try {
         const reportData = await api.runReports(reportRequestParams);
         setRunReportResponse(reportData);
+        setError(undefined);
       } catch (e) {
         setError(e as Error);
       }
@@ -97,6 +98,7 @@ const AnalyticsApp = (props: Props) => {
         reportSlug={reportSlug}
         pageViews={pageViews}
         error={error}
+        propertyId={propertyId}
       />
     );
   };

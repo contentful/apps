@@ -1,13 +1,15 @@
 import React from 'react';
 import { useSidebarSlug } from 'hooks/useSidebarSlug/useSidebarSlug';
-import { TextLink } from '@contentful/f36-components';
 import Note from 'components/common/Note/Note';
 import { ContentTypeValue } from 'types';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarExtensionSDK } from '@contentful/app-sdk';
-import { getContentTypeSpecificMsg, DEFAULT_CONTENT_MSG } from '../constants/noteMessages';
+import { getContentTypeSpecificMsg } from 'components/main-app/constants/noteMessages';
+import {
+  SupportHyperLink,
+  AppConfigPageHyperLink,
+} from 'components/main-app/ErrorDisplay/CommonErrorDisplays';
 
-const HYPER_LINK_MSG = 'app configuration page.';
 interface Props {
   slugFieldInfo: ContentTypeValue;
 }
@@ -17,30 +19,18 @@ const SlugWarningDisplay = (props: Props) => {
   const sdk = useSDK<SidebarExtensionSDK>();
   const contentTypeName = sdk.contentType.name;
 
-  const openConfigPage = () => sdk.navigator.openAppConfig();
-  const linkToOpenConfigPage = (
-    <TextLink onClick={openConfigPage} target="_blank" rel="noopener noreferer">
-      {HYPER_LINK_MSG}
-    </TextLink>
-  );
-
   const { slugFieldIsConfigured, contentTypeHasSlugField, isPublished } =
     useSidebarSlug(slugFieldInfo);
 
-  const showHyperlink = !slugFieldIsConfigured || !contentTypeHasSlugField;
-  const { noSlugConfigMsg, noSlugContentMsg, notPublishedMsg } = getContentTypeSpecificMsg(
-    contentTypeName,
-    showHyperlink
-  );
+  const { noSlugConfigMsg, noSlugContentMsg, notPublishedMsg } =
+    getContentTypeSpecificMsg(contentTypeName);
 
   const renderContent = () => {
-    const content = { bodyMsg: DEFAULT_CONTENT_MSG, hyperLink: <></> };
+    const content: { bodyMsg: string | JSX.Element } = { bodyMsg: <SupportHyperLink /> };
     if (!slugFieldIsConfigured) {
-      content.bodyMsg = noSlugConfigMsg;
-      content.hyperLink = linkToOpenConfigPage;
+      content.bodyMsg = <AppConfigPageHyperLink bodyMsg={noSlugConfigMsg} />;
     } else if (!contentTypeHasSlugField) {
-      content.bodyMsg = noSlugContentMsg;
-      content.hyperLink = linkToOpenConfigPage;
+      content.bodyMsg = <AppConfigPageHyperLink bodyMsg={noSlugContentMsg} />;
     } else if (!isPublished) {
       content.bodyMsg = notPublishedMsg;
     }
@@ -48,18 +38,9 @@ const SlugWarningDisplay = (props: Props) => {
     return content;
   };
 
-  const { bodyMsg, hyperLink } = renderContent();
+  const { bodyMsg } = renderContent();
 
-  return (
-    <Note
-      body={
-        <>
-          {bodyMsg} {hyperLink}
-        </>
-      }
-      variant="warning"
-    />
-  );
+  return <Note body={bodyMsg} variant="warning" />;
 };
 
 export default SlugWarningDisplay;

@@ -17,6 +17,7 @@ describe('Analytics metric display components for the analytics app', () => {
         metricName={METRIC_NAME}
         runReportResponse={runReportResponseHasViews}
         reportSlug="/en-US"
+        propertyId=""
       />
     );
 

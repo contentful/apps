@@ -5,13 +5,13 @@ import sinon, { SinonStubbedInstance } from 'sinon';
 import {
   mockAnalyticsAdminServiceClient,
   validServiceAccountKeyFile,
-  validServiceAccountKeyFileBase64,
   validServiceAccountKeyIdBase64,
 } from '../test/mocks/googleApi';
 import app from './app';
 import { GoogleApiService } from './services/googleApiService';
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
+import { DynamoDBService } from './services/dynamoDbService';
 
 chai.use(chaiHttp);
 
@@ -19,7 +19,6 @@ const sandbox = sinon.createSandbox();
 
 const serviceAccountKeyHeaders = {
   'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
-  'X-Contentful-ServiceAccountKey': validServiceAccountKeyFileBase64,
 };
 
 describe('app', () => {
@@ -44,21 +43,41 @@ describe('app', () => {
     });
   });
 
-  describe('GET /api/credentials', () => {
-    it('responds with 200', async () => {
-      const response = await chai
-        .request(app)
-        .get('/api/credentials')
-        .set(serviceAccountKeyHeaders);
-      expect(response).to.have.status(200);
-    });
+  describe('PUT /api/service_account_key_file', () => {
+    describe('when the request body is a valid ServiceAccountKey', () => {
+      describe('given a new ServiceAccountKey', () => {
+        beforeEach(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (DynamoDBService.prototype.getServiceAccountKeyFile as any).resolves(null);
+          sandbox.stub(DynamoDBService.prototype, 'saveServiceAccountKeyFile').resolves();
+        });
 
-    it('returns the expected response body', async () => {
-      const response = await chai
-        .request(app)
-        .get('/api/credentials')
-        .set(serviceAccountKeyHeaders);
-      expect(response.body).to.have.property('status', 'active');
+        it('responds with 200', async () => {
+          const response = await chai
+            .request(app)
+            .put('/api/service_account_key_file')
+            .set(serviceAccountKeyHeaders)
+            .set('X-Contentful-Space-Id', 'spaceId')
+            .send(validServiceAccountKeyFile);
+          expect(response).to.have.status(200);
+        });
+      });
+
+      describe('given an existing ServiceAccountKey', () => {
+        beforeEach(() => {
+          sandbox.stub(DynamoDBService.prototype, 'saveServiceAccountKeyFile').resolves();
+        });
+
+        it('responds with 200', async () => {
+          const response = await chai
+            .request(app)
+            .put('/api/service_account_key_file')
+            .set(serviceAccountKeyHeaders)
+            .set('X-Contentful-Space-Id', 'spaceId')
+            .send(validServiceAccountKeyFile);
+          expect(response).to.have.status(200);
+        });
+      });
     });
   });
 
@@ -76,7 +95,8 @@ describe('app', () => {
       const response = await chai
         .request(app)
         .get('/api/account_summaries')
-        .set(serviceAccountKeyHeaders);
+        .set(serviceAccountKeyHeaders)
+        .set('X-Contentful-Space-Id', 'spaceId');
       expect(response).to.have.status(200);
     });
 
@@ -84,7 +104,8 @@ describe('app', () => {
       const response = await chai
         .request(app)
         .get('/api/account_summaries')
-        .set(serviceAccountKeyHeaders);
+        .set(serviceAccountKeyHeaders)
+        .set('X-Contentful-Space-Id', 'spaceId');
       expect(response.body[0]).to.have.property('propertySummaries');
     });
   });

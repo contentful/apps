@@ -19,9 +19,9 @@ custom:
     httpPort: 8080
     host: 0.0.0.0
   awsRegion: us-east-1
-  dynamoDbEndpoint: http://dynamodb:8000
-  dynamoDbtableName: sls-apps-ga4-backend-${opt:stage, 'dev'}-SharedCredentialsTable
-  dynamoDbSharedCredentialsSecretKey: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):dynamoDbSharedCredentialsSecretKey}
+  dynamoDbTableName: sls-apps-ga4-backend-${opt:stage, 'dev'}-service-account-keys
+  dynamoDbEndpoint: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):dynamoDbEndpoint}
+  serviceAccountKeyEncryptionSecret: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):serviceAccountKeyEncryptionSecret}
 
 provider:
   name: aws
@@ -44,7 +44,7 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource:
-            - Fn::GetAtt: [SharedCredentialsTable, Arn]
+            - Fn::GetAtt: [ServiceAccountKeysTable, Arn]
 
 functions:
   api:
@@ -56,8 +56,8 @@ functions:
       NODE_ENV: ${env:NODE_ENV, 'development'}
       RELEASE_VERSION: ${env:CIRCLE_SHA1, 'undefined'}
       DYNAMODB_ENDPOINT: ${self:custom.dynamoDbEndpoint}
-      DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbtableName}
-      SHARED_CREDENTIALS_SECRET_KEY: ${self:custom.dynamoDbSharedCredentialsSecretKey}
+      DYNAMODB_TABLE_NAME: ${self:custom.dynamoDbTableName}
+      SERVICE_ACCOUNT_KEY_ENCRYPTION_SECRET: ${self:custom.serviceAccountKeyEncryptionSecret}
     handler: build/src/index.handler
     events:
       - http:
@@ -66,14 +66,14 @@ functions:
 
 resources:
   Resources:
-    SharedCredentialsTable:
+    ServiceAccountKeysTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.dynamoDbtableName}
+        TableName: ${self:custom.dynamoDbTableName}
         AttributeDefinitions:
-          - AttributeName: sharedCredentialsId
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          - AttributeName: sharedCredentialsId
+          - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST

@@ -7,6 +7,6 @@ describe('About header for the Analytics Config Page', () => {
       render(<AboutSection />);
     });
 
-    expect(screen.getByText('About Google Analytics for Contentful')).toBeInTheDocument();
+    expect(screen.getByText('About Google Analytics 4 for Contentful')).toBeInTheDocument();
   });
 });

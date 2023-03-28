@@ -8,8 +8,6 @@ import {
   serviceAccountKeyProvider,
 } from './serviceAccountKeyProvider';
 import {
-  validServiceAccountKeyFile,
-  validServiceAccountKeyFileBase64,
   validServiceAccountKeyId,
   validServiceAccountKeyIdBase64,
 } from '../../test/mocks/googleApi';
@@ -22,51 +20,42 @@ describe('serviceAccountKeyProvider', () => {
     testRequest = createRequest({
       headers: {
         'X-Contentful-ServiceAccountKeyId': validServiceAccountKeyIdBase64,
-        'X-Contentful-ServiceAccountKey': validServiceAccountKeyFileBase64,
       },
     });
   });
 
   it('sets the service account properties on the request object', () => {
     serviceAccountKeyProvider(testRequest, {} as Express.Response, next);
-    expect(testRequest.serviceAccountKey).to.have.property(
-      'private_key',
-      validServiceAccountKeyFile.private_key
-    );
     expect(testRequest.serviceAccountKeyId).to.have.property('id', validServiceAccountKeyId.id);
   });
 
-  describe('when bad JSON is provided', () => {
+  describe('when bad [encoded] JSON is provided', () => {
     beforeEach(() => {
       testRequest = createRequest({
         headers: {
-          'X-Contentful-ServiceAccountKeyId': 'Zm9vYmFy',
-          'X-Contentful-ServiceAccountKey': 'Zm9vYmFy',
+          'X-Contentful-ServiceAccountKeyId': 'bm90IGpzb24=', // base64 encoded 'not json'
         },
       });
     });
 
     it('throws InvalidServiceAccountKey', () => {
-      expect(() => {
-        serviceAccountKeyProvider(testRequest, {} as Express.Response, next);
-      }).to.throw(InvalidServiceAccountKey);
+      serviceAccountKeyProvider(testRequest, {} as Express.Response, next);
+      sinon.assert.calledWith(next, sinon.match.instanceOf(InvalidServiceAccountKey));
     });
   });
 
-  describe('when an improperly formed key is provided', () => {
+  describe('when valid JSON, but invalid service key ID is provided', () => {
     beforeEach(() => {
       testRequest = createRequest({
         headers: {
-          'X-Contentful-ServiceAccountKeyId': 'eyJmb28iOiJiYXIifQ==',
-          'X-Contentful-ServiceAccountKey': 'eyJmb28iOiJiYXIifQ==',
+          'X-Contentful-ServiceAccountKeyId': 'eyJmb28iOiJiYXIifQ==', // base64 encoded '{"foo":"bar"}'
         },
       });
     });
 
     it('throws InvalidServiceAccountKey', () => {
-      expect(() => {
-        serviceAccountKeyProvider(testRequest, {} as Express.Response, next);
-      }).to.throw(InvalidServiceAccountKey);
+      serviceAccountKeyProvider(testRequest, {} as Express.Response, next);
+      sinon.assert.calledWith(next, sinon.match.instanceOf(InvalidServiceAccountKey));
     });
   });
 
@@ -77,10 +66,9 @@ describe('serviceAccountKeyProvider', () => {
       });
     });
 
-    it('sets the values top null', () => {
-      expect(() => {
-        serviceAccountKeyProvider(testRequest, {} as Express.Response, next);
-      }).to.throw(MissingServiceAccountKeyHeader);
+    it('throws MissingServiceAccountKeyHeader', () => {
+      serviceAccountKeyProvider(testRequest, {} as Express.Response, next);
+      sinon.assert.calledWith(next, sinon.match.instanceOf(MissingServiceAccountKeyHeader));
     });
   });
 });

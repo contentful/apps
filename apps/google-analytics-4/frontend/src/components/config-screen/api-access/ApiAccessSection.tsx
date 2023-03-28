@@ -9,8 +9,10 @@ interface Props {
   parameters: KeyValueMap;
   mergeSdkParameters: Function;
   isInEditMode: boolean;
+  isSavingPrivateKeyFile: boolean;
   onInEditModeChange: Function;
-  onIsValidServiceAccount: Function;
+  onHasServiceCheckErrorsChange: Function;
+  onKeyFileUpdate: Function;
 }
 
 const ApiAccessSection = (props: Props) => {
@@ -20,8 +22,10 @@ const ApiAccessSection = (props: Props) => {
     parameters,
     mergeSdkParameters,
     isInEditMode,
+    isSavingPrivateKeyFile,
     onInEditModeChange,
-    onIsValidServiceAccount,
+    onHasServiceCheckErrorsChange,
+    onKeyFileUpdate,
   } = props;
 
   return (
@@ -29,20 +33,18 @@ const ApiAccessSection = (props: Props) => {
       <div>
         <Subheading marginBottom="spacingXs">API access</Subheading>
         <Paragraph marginBottom="none">
-          Authorize this application to access Google Analytics Admin & Data APIs
+          Authorize this application to access Google Analytics 4 Admin and Data APIs
         </Paragraph>
       </div>
-      {!isInEditMode &&
-      isAppInstalled &&
-      parameters &&
-      parameters.serviceAccountKeyId &&
-      parameters.serviceAccountKey ? (
+      {!isInEditMode && isAppInstalled && parameters && parameters.serviceAccountKeyId ? (
         <DisplayServiceAccountCard
+          isSavingPrivateKeyFile={isSavingPrivateKeyFile}
           onInEditModeChange={onInEditModeChange}
           serviceAccountKeyId={parameters.serviceAccountKeyId}
-          serviceAccountKey={parameters.serviceAccountKey}
           onAccountSummariesChange={onAccountSummariesChange}
           isAppInstalled={isAppInstalled}
+          parameters={parameters}
+          onHasServiceCheckErrorsChange={onHasServiceCheckErrorsChange}
         />
       ) : (
         <SetupServiceAccountCard
@@ -50,7 +52,7 @@ const ApiAccessSection = (props: Props) => {
           mergeSdkParameters={mergeSdkParameters}
           isInEditMode={isInEditMode}
           onInEditModeChange={onInEditModeChange}
-          onIsValidServiceAccount={onIsValidServiceAccount}
+          onKeyFileUpdate={onKeyFileUpdate}
         />
       )}
     </Stack>

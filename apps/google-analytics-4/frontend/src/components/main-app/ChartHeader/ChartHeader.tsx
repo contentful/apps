@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, DisplayText, Flex, Paragraph, Select } from '@contentful/f36-components';
 import { DateRangeType } from 'types';
+import { styles } from './ChartHeader.styles';
 
 interface Props {
   metricName: string;
@@ -39,7 +40,12 @@ const ChartHeader = (props: Props) => {
         </DisplayText>
         <Paragraph marginBottom="none">{getMetricDisplayString(metricName)}</Paragraph>
       </Box>
-      <Select id="daterange" name="daterange" value={dateSelection} onChange={handleOnChange}>
+      <Select
+        className={styles.root}
+        id="daterange"
+        name="daterange"
+        value={dateSelection}
+        onChange={handleOnChange}>
         <Select.Option value="lastDay">Last 24 hours</Select.Option>
         <Select.Option value="lastWeek">Last 7 days</Select.Option>
         <Select.Option value="lastMonth">Last 28 days</Select.Option>

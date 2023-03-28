@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Stack,
   Card,
@@ -12,20 +12,20 @@ import {
   Box,
 } from '@contentful/f36-components';
 import { CheckCircleIcon, ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
+import { ServiceAccountKeyId } from 'types';
 import {
   AssertionError,
   convertKeyFileToServiceAccountKey,
   convertServiceAccountKeyToServiceAccountKeyId,
 } from 'utils/serviceAccountKey';
-import { debounce } from 'lodash';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 
 interface Props {
   isInEditMode: boolean;
   mergeSdkParameters: Function;
   parameters: KeyValueMap;
-  onIsValidServiceAccount: Function;
   onInEditModeChange: Function;
+  onKeyFileUpdate: Function;
 }
 
 const placeholderText = `{
@@ -34,30 +34,16 @@ const placeholderText = `{
 }`;
 
 export default function SetupServiceAccountCard(props: Props) {
-  const {
-    mergeSdkParameters,
-    parameters,
-    isInEditMode,
-    onInEditModeChange,
-    onIsValidServiceAccount,
-  } = props;
+  const { mergeSdkParameters, isInEditMode, onInEditModeChange, onKeyFileUpdate } = props;
 
-  const [keyFile, setKeyFile] = useState<string>();
+  const [rawServiceAccountKey, setRawServiceAccountKey] = useState<string>();
+  const [serviceAccountKeyId, setServiceAccountKeyId] = useState<ServiceAccountKeyId>();
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  useEffect(() => {
-    !errorMessage && parameters.serviceAccountKey && parameters.serviceAccountKeyId
-      ? onIsValidServiceAccount(true)
-      : onIsValidServiceAccount(false);
-
-    // This is a on page load check, not whenever parameters service accounts change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onIsValidServiceAccount]);
-
-  const handleKeyFileChange = (e: any) => {
-    setKeyFile(e.target.value);
-    const debHandleServiceKey = debounce(() => handleKeyFileToServiceAccount(e.target.value), 150);
-    debHandleServiceKey();
+  const handleRawServiceAccountKeyChange = (e: any) => {
+    const keyfile = e.target.value;
+    setRawServiceAccountKey(keyfile);
+    handleKeyFileToServiceAccount(keyfile);
   };
 
   const handleKeyFileToServiceAccount = (keyfile: string) => {
@@ -65,17 +51,18 @@ export default function SetupServiceAccountCard(props: Props) {
       const _serviceAccountKey = convertKeyFileToServiceAccountKey(keyfile);
       const _serviceAccountKeyId =
         convertServiceAccountKeyToServiceAccountKeyId(_serviceAccountKey);
+
+      onKeyFileUpdate(_serviceAccountKey);
+      setServiceAccountKeyId(_serviceAccountKeyId);
       setErrorMessage('');
 
       const _parameters = {
-        serviceAccountKey: _serviceAccountKey,
         serviceAccountKeyId: _serviceAccountKeyId,
       };
 
       mergeSdkParameters(_parameters);
-      onIsValidServiceAccount(true);
     } catch (e: any) {
-      onIsValidServiceAccount(false);
+      onKeyFileUpdate(undefined);
       // failed assertions about key file contents or could not parse as JSON
       if (e instanceof AssertionError || e instanceof SyntaxError) {
         setErrorMessage(e.message);
@@ -87,15 +74,11 @@ export default function SetupServiceAccountCard(props: Props) {
   };
 
   const handleCancelClick = () => {
-    setKeyFile('');
+    setRawServiceAccountKey('');
+    setServiceAccountKeyId(undefined);
     setErrorMessage('');
     onInEditModeChange(false);
-    onIsValidServiceAccount(true);
   };
-
-  // consider form value invalid if they've provided at least some text but a serviceAccountKey or serivceAccountKeyId has
-  // not been able to be generated successfully
-  const isInvalid = keyFile !== '' && errorMessage !== '';
 
   return (
     <Stack spacing="spacingL" flexDirection="column">
@@ -132,19 +115,19 @@ export default function SetupServiceAccountCard(props: Props) {
         </Box>
         <FormControl
           id="accountCredentialsFile"
-          isInvalid={isInvalid}
+          isInvalid={rawServiceAccountKey !== undefined && !serviceAccountKeyId}
           isRequired={true}
           marginBottom={!isInEditMode ? 'none' : 'spacingM'}>
-          <FormControl.Label>Private Key File</FormControl.Label>
+          <FormControl.Label>Service Account Key</FormControl.Label>
           <Textarea
             spellCheck={false}
             name="accountCredentialsFile"
             placeholder={placeholderText}
             rows={10}
-            value={keyFile}
-            onChange={handleKeyFileChange}
+            value={rawServiceAccountKey}
+            onChange={handleRawServiceAccountKeyChange}
           />
-          {!keyFile ? (
+          {!rawServiceAccountKey ? (
             <FormControl.HelpText>
               Paste the service account key file (JSON) above
             </FormControl.HelpText>
@@ -176,7 +159,7 @@ export default function SetupServiceAccountCard(props: Props) {
       </Paragraph>
       <Paragraph marginBottom="none">
         After configuring the service account, you'll download a set of credentials that Contentful
-        will use to access Google Analytics data on this service account's behalf.
+        will use to access Google Analytics 4 data on this service account's behalf.
       </Paragraph>
     </Stack>
   );

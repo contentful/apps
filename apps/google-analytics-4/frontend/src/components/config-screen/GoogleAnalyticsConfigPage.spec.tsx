@@ -44,19 +44,35 @@ describe('Config Screen component (not installed)', () => {
     await act(async () => {
       render(<GoogleAnalyticsConfigPage />);
     });
-    const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
+    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
     await user.click(keyFileInputBox);
     await user.paste(JSON.stringify(validServiceKeyFile));
 
+    await waitFor(() => {
+      expect(screen.getByText('Service account key file is valid')).toBeInTheDocument();
+    });
+
     let result;
     await act(async () => {
       result = await saveAppInstallation();
     });
 
-    expect(result).toEqual(false);
+    expect(result).toEqual({
+      parameters: {
+        serviceAccountKeyId: {
+          clientEmail: 'example4@PROJECT_ID.iam.gserviceaccount.com',
+          clientId: 'CLIENT_ID',
+          id: 'PRIVATE_KEY_ID',
+          projectId: 'PROJECT_ID',
+        },
+      },
+      targetState: {
+        EditorInterface: {},
+      },
+    });
     expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
   });
 
@@ -66,7 +82,7 @@ describe('Config Screen component (not installed)', () => {
       render(<GoogleAnalyticsConfigPage />);
     });
 
-    const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
+    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
@@ -102,7 +118,6 @@ describe('Config Screen component (not installed)', () => {
 describe('Installed Service Account Key', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
-      serviceAccountKey: validServiceKeyFile,
       serviceAccountKeyId: validServiceKeyId,
       propertyId: 'properties/1234',
       contentTypes: {
@@ -118,10 +133,10 @@ describe('Installed Service Account Key', () => {
       render(<GoogleAnalyticsConfigPage />);
     });
 
-    const editServiceAccountButton = screen.getByTestId('editServiceAccountButton');
+    const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
 
     await user.click(editServiceAccountButton);
-    const keyFileInputBox = screen.getByLabelText(/Private Key File/i);
+    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
     await waitFor(() => user.click(keyFileInputBox));
 
     const newServiceKeyFile: ServiceAccountKey = {
@@ -130,6 +145,10 @@ describe('Installed Service Account Key', () => {
     };
     await user.paste(JSON.stringify(newServiceKeyFile));
 
+    await waitFor(() => {
+      expect(screen.getByText('Service account key file is valid')).toBeInTheDocument();
+    });
+
     let result;
     await act(async () => {
       result = await saveAppInstallation();
@@ -137,9 +156,8 @@ describe('Installed Service Account Key', () => {
 
     expect(result).toEqual({
       parameters: {
-        serviceAccountKey: newServiceKeyFile,
         serviceAccountKeyId: {
-          clientEmail: 'CLIENT_ID',
+          clientEmail: 'example4@PROJECT_ID.iam.gserviceaccount.com',
           clientId: 'CLIENT_ID',
           id: 'PRIVATE_KEY_ID',
           projectId: 'PROJECT_ID',
@@ -159,10 +177,5 @@ describe('Installed Service Account Key', () => {
         },
       },
     });
-
-    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
-    expect(screen.getByText('Service Account')).toBeInTheDocument();
-    expect(screen.getByText('Key ID')).toBeInTheDocument();
-    expect(screen.getByText('Status')).toBeInTheDocument();
   });
 });

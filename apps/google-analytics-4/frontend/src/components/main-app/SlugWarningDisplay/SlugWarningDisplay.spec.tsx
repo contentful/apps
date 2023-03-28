@@ -1,7 +1,7 @@
 import SlugWarningDisplay from './SlugWarningDisplay';
 import { render, screen } from '@testing-library/react';
 import { mockSdk } from '../../../../test/mocks';
-import { getContentTypeSpecificMsg } from '../constants/noteMessages';
+import { getContentTypeSpecificMsg, DEFAULT_ERR_MSG } from '../constants/noteMessages';
 import * as useSidebarSlug from 'hooks/useSidebarSlug/useSidebarSlug';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
@@ -14,14 +14,12 @@ const useSidebarSlugMock = {
   isContentTypeWarning: true,
 };
 
-const HYPER_LINK_MSG = 'app configuration page.';
+const APP_CONFIG_HYPER_LINK_MSG = 'app configuration page.';
 
-const { findByText, getByText, queryByText } = screen;
+const { findByText, queryByText, getByTestId } = screen;
 
-const { noSlugConfigMsg, noSlugContentMsg, notPublishedMsg } = getContentTypeSpecificMsg(
-  'Category',
-  true
-);
+const { noSlugConfigMsg, noSlugContentMsg, notPublishedMsg } =
+  getContentTypeSpecificMsg('Category');
 
 describe('SlugWarningDisplay for the analytics app', () => {
   it('mounts with correct msg and hyperlink when error is missing content type config', async () => {
@@ -34,11 +32,13 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: '', urlPrefix: '' }} />);
 
-    const warningMsg = await findByText(noSlugConfigMsg.trim());
-    const hyperLinkMsg = getByText(HYPER_LINK_MSG);
+    const warningMsg = await findByText(
+      noSlugConfigMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim()
+    );
+    const hyperLink = getByTestId('cf-ui-text-link');
 
     expect(warningMsg).toBeVisible();
-    expect(hyperLinkMsg).toBeVisible();
+    expect(hyperLink).toBeVisible();
   });
 
   it('mounts with correct msg and hyperlink when error is missing slug field', async () => {
@@ -51,11 +51,13 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
-    const warningMsg = await findByText(noSlugContentMsg.trim());
-    const hyperLinkMsg = getByText(HYPER_LINK_MSG);
+    const warningMsg = await findByText(
+      noSlugContentMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim()
+    );
+    const hyperLink = getByTestId('cf-ui-text-link');
 
     expect(warningMsg).toBeVisible();
-    expect(hyperLinkMsg).toBeVisible();
+    expect(hyperLink).toBeVisible();
   });
 
   it('mounts with correct msg and no hyperlink, when error is unpublished content', async () => {
@@ -69,9 +71,27 @@ describe('SlugWarningDisplay for the analytics app', () => {
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
     const warningMsg = await findByText(notPublishedMsg);
-    const hyperLinkMsg = queryByText(HYPER_LINK_MSG);
+    const hyperLinkMsg = queryByText(APP_CONFIG_HYPER_LINK_MSG);
 
     expect(warningMsg).toBeVisible();
     expect(hyperLinkMsg).toBeFalsy();
+  });
+
+  it('mounts with correct msg and hyperlink as default message', async () => {
+    const SUPPORT_LINK_MSG = 'contact support.';
+    jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
+      slugFieldIsConfigured: true,
+      contentTypeHasSlugField: true,
+      isPublished: true,
+      ...useSidebarSlugMock,
+    }));
+
+    render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
+
+    const warningMsg = await findByText(DEFAULT_ERR_MSG.replace(SUPPORT_LINK_MSG, '').trim());
+    const hyperLink = getByTestId('cf-ui-text-link');
+
+    expect(warningMsg).toBeVisible();
+    expect(hyperLink).toBeVisible();
   });
 });

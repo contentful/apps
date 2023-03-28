@@ -12,8 +12,10 @@ export type ApiErrorMap = Record<string, (e: any) => ApiError<Record<string, unk
 export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, next) => {
   if (error) {
     if (isApiError(error)) {
+      console.error(error);
       response.status(error.status).send({ errors: error.toJSON() });
     } else {
+      console.error(error);
       response.status(500).send({
         errors: {
           errorType: 'ServerError',
