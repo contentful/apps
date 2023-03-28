@@ -12,5 +12,5 @@ export const INVALID_SERVICE_ACCOUNT =
 export const getContentTypeSpecificMsg = (contentTypeName: string) => ({
   noSlugConfigMsg: `The Google Analytics 4 sidebar app cannot be displayed on this entry because the ${contentTypeName} content type has not been correctly configured. Please configure this content type on the app configuration page.`,
   noSlugContentMsg: `This ${contentTypeName} entry does not have a valid slug field. Please add a field of type short text to this entry and configure it on the app configuration page.`,
-  notPublishedMsg: `This ${contentTypeName} entry has not yet been published. Please publish the entry and refresh to view this Google Analytics 4 sidebar app.`,
+  notPublishedMsg: `This ${contentTypeName} entry has not yet been published. Please publish the entry to view this Google Analytics 4 sidebar app.`,
 });
