@@ -45,6 +45,7 @@ const AnalyticsApp = (props: Props) => {
       try {
         const reportData = await api.runReports(reportRequestParams);
         setRunReportResponse(reportData);
+        setError(undefined);
       } catch (e) {
         setError(e as Error);
       }
