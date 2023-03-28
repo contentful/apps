@@ -6,6 +6,8 @@ export const INVALID_ARGUMENT_MSG =
   'Invalid arguments provided. Please ensure you have configured your property correctly on the app configuration page.';
 export const PERMISSION_DENIED_MSG =
   'Permission denied. Please either enable your Google Analytics Data API or ensure you have valid permissions.';
+export const INVALID_SERVICE_ACCOUNT =
+  'Invalid service key. Please ensure you have configured your service account correctly on the app configuration page.';
 
 export const getContentTypeSpecificMsg = (contentTypeName: string) => ({
   noSlugConfigMsg: `The Google Analytics 4 sidebar app cannot be displayed on this entry because the ${contentTypeName} content type has not been correctly configured. Please configure this content type on the app configuration page.`,
