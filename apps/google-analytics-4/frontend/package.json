@@ -28,6 +28,7 @@
     "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
     "test": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts test",
     "test:ci": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) CI=true react-scripts test",
+    "lint": "eslint .",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5DlxOS0KvGS1Wk362xgvbN --token ${CONTENTFUL_CMA_TOKEN}",

@@ -158,7 +158,7 @@ export class GoogleApiService {
         ...response,
         ...{ rows: this.supplementDates(response.rows as ReportRowType[], dateArray) },
       };
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (isGoogleError(e)) handleGoogleDataApiError(e);
       else {
         throw e;
@@ -169,7 +169,7 @@ export class GoogleApiService {
   private async fetchAccountSummaries() {
     try {
       return await this.analyticsAdminServiceClient.listAccountSummaries();
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (isGoogleError(e)) handleGoogleAdminApiError(e);
       else throw e;
     }
