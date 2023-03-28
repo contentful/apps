@@ -2,7 +2,8 @@ import { Row, RunReportResponse } from 'types';
 import Note from 'components/common/Note/Note';
 import LineChart from 'components/main-app/LineChart/LineChart';
 import { parseDayAndMonth } from 'helpers/DateHelpers/DateHelpers';
-import { DEFAULT_ERR_MSG, EMPTY_DATA_MSG } from '../constants/noteMessages';
+import ErrorDisplay from 'components/main-app/ErrorDisplay/ErrorDisplay';
+import { EMPTY_DATA_MSG } from '../constants/noteMessages';
 import { styles } from './ChartContent.styles';
 
 interface Props {
@@ -27,7 +28,7 @@ const ChartContent = (props: Props) => {
 
   const renderChartContent = () => {
     if (error) {
-      return <Note body={error?.message || DEFAULT_ERR_MSG} variant="negative" />;
+      return <ErrorDisplay error={error} />;
     }
 
     if (!pageViewData.rowCount) {
