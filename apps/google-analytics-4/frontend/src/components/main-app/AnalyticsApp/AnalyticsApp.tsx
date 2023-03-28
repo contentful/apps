@@ -100,6 +100,7 @@ const AnalyticsApp = (props: Props) => {
         error={error}
         propertyId={propertyId}
         startEndDates={startEndDates}
+        selectedDateRange={dateRange}
       />
     );
   };
