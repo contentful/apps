@@ -136,4 +136,4 @@ export interface EditorInterfaceAssignment {
   [key: string]: { [key: string]: { position: number } };
 }
 
-export type ContentWarningTypes = '' | 'error' | 'warning';
+export type ConfigurationWarningTypes = '' | 'error' | 'warning';

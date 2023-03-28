@@ -32,6 +32,7 @@ describe('Installed Service Account Card', () => {
           onAccountSummariesChange={() => {}}
           isAppInstalled={true}
           onHasServiceCheckErrorsChange={() => {}}
+          onIsApiAccessLoading={() => {}}
         />
       );
     });

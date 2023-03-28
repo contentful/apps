@@ -7,7 +7,7 @@ import {
   REMOVED_FROM_SIDEBAR_WARNING_MSG,
   getContentTypeDeletedMsg,
   getSlugFieldDeletedMsg,
-} from './constants/warningMessages';
+} from 'components/config-screen/WarningDisplay/constants/warningMessages';
 
 describe('Content Type Warning for Config Screen', () => {
   it('renders an empty div if there are no warnings or errors', () => {
