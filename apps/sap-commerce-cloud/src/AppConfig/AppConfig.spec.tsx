@@ -12,7 +12,19 @@ describe('Config Screen component', () => {
         getCurrentState: jest.fn(),
       },
     };
-    const { getByText } = render(<ConfigScreen sdk={mockSdk} />);
+    const { getByText } = render(
+      <ConfigScreen
+        sdk={mockSdk}
+        parameterDefinitions={[] as any}
+        validateParameters={(parameters: Record<string, string>) => {
+          return '';
+        }}
+        logo=""
+        name=""
+        color=""
+        description=""
+      />
+    );
 
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();
