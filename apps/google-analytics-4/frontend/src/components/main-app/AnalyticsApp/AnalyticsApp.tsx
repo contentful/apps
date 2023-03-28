@@ -5,6 +5,7 @@ import getRangeDates from 'helpers/DateRangeHelpers/DateRangeHelpers';
 import { DateRangeType, StartEndDates, ContentTypeValue } from 'types';
 import { styles } from './AnalyticsApp.styles';
 import { Flex } from '@contentful/f36-components';
+import { isEmpty } from 'lodash';
 import { RunReportData } from 'apis/apiTypes';
 import { useSidebarSlug } from 'hooks/useSidebarSlug/useSidebarSlug';
 import SlugWarningDisplay from 'components/main-app/SlugWarningDisplay/SlugWarningDisplay';
@@ -40,6 +41,8 @@ const AnalyticsApp = (props: Props) => {
     [startEndDates.start, startEndDates.end, reportSlug, propertyId]
   );
 
+  const runReportFetchRequirements = reportSlug && propertyId && !isContentTypeWarning;
+
   useEffect(() => {
     async function fetchRunReportData() {
       try {
@@ -53,9 +56,9 @@ const AnalyticsApp = (props: Props) => {
       setLoading(false);
     }
 
-    if (reportSlug && propertyId && !isContentTypeWarning) fetchRunReportData();
+    if (runReportFetchRequirements) fetchRunReportData();
     else setTimeout(() => setLoading(false), 200);
-  }, [api, reportRequestParams, reportSlug, propertyId, isContentTypeWarning]);
+  }, [api, reportRequestParams, runReportFetchRequirements]);
 
   useEffect(() => {
     if (runReportResponse.rowCount) {
@@ -77,8 +80,10 @@ const AnalyticsApp = (props: Props) => {
 
   const metricName = runReportResponse.metricHeaders && runReportResponse.metricHeaders[0].name;
 
+  const pendingData = isEmpty(runReportResponse) && !error && runReportFetchRequirements;
+
   const renderAnalyticContent = () => {
-    if (loading) {
+    if (loading || pendingData) {
       return (
         <Flex justifyContent="center" alignItems="center" className={styles.wrapper}>
           <div className={styles.loader}></div>
