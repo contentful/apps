@@ -1,14 +1,6 @@
 import { render, cleanup } from '@testing-library/react';
 import { Props, SortableList } from './SortableList';
-
-const mockCategoryPreview = {
-  sku: 'abc1234',
-  image: '',
-  id: '123',
-  name: 'Mock Product',
-  slug: '',
-  isMissing: false,
-};
+import { mockCategoryPreview } from '../../__mocks__/mockCategoryPreview';
 
 const defaultProps: Props = {
   disabled: false,

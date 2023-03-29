@@ -1,14 +1,6 @@
 import { configure, render, cleanup } from '@testing-library/react';
 import { Props, SortableListItem } from './SortableListItem';
-
-const mockCategoryPreview = {
-  sku: 'abc1234',
-  image: '',
-  id: '123',
-  name: 'Mock Category',
-  slug: '',
-  isMissing: false,
-};
+import { mockCategoryPreview } from '../../__mocks__/mockCategoryPreview';
 
 configure({
   testIdAttribute: 'data-test-id',
