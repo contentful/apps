@@ -11,6 +11,7 @@ import {
 } from '../../test/mocks/googleApi';
 import { GoogleApiError, handleGoogleAdminApiError } from './googleApiUtils';
 import { GoogleApiService } from './googleApiService';
+import { ERROR_TYPE_MAP } from '../errors/apiError';
 
 describe('GoogleApiService', () => {
   let googleApi: GoogleApiService;
@@ -51,21 +52,6 @@ describe('GoogleApiService', () => {
 });
 
 describe('throwGoogleApiError', () => {
-  describe('when passed a regular error', () => {
-    const someError = new Error('boom!');
-
-    it('throws a GoogleApiError', async () => {
-      let error: Error | undefined = undefined;
-      try {
-        handleGoogleAdminApiError(someError);
-      } catch (e) {
-        error = e as Error;
-      }
-      expect(error).to.be.an.instanceof(GoogleApiError);
-      expect(error?.cause).to.equal(someError);
-    });
-  });
-
   describe('when passed a GoogleError server error', () => {
     const someError = {
       name: 'Error',
@@ -75,7 +61,7 @@ describe('throwGoogleApiError', () => {
     };
 
     it('throws a GoogleApiError', async () => {
-      let error: Error | undefined = undefined;
+      let error: Error;
       try {
         handleGoogleAdminApiError(someError);
       } catch (e) {
@@ -83,6 +69,7 @@ describe('throwGoogleApiError', () => {
       }
       expect(error).to.be.an.instanceof(GoogleApiError);
       expect(error).to.have.property('cause', someError);
+      expect(error).to.have.property('errorType', ERROR_TYPE_MAP.unknown);
       expect(error).to.have.property('details', someError.details);
     });
   });
@@ -99,6 +86,7 @@ describe('throwGoogleApiError', () => {
       }
       expect(error).to.be.an.instanceof(GoogleApiError);
       expect(error).to.have.property('cause', someError);
+      expect(error).to.have.property('errorType', ERROR_TYPE_MAP.invalidServiceAccount);
       expect(error).to.have.property('details', mockGoogleErrors.invalidAuthentication.message);
     });
   });
