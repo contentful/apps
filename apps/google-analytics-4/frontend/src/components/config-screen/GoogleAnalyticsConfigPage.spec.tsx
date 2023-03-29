@@ -17,6 +17,9 @@ jest.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
+const RAW_SERVICE_ACCOUNT_KEY =
+  '{"type":"service_account","project_id":"PROJECT_ID","private_key_id":"PRIVATE_KEY_ID","private_key":"----- PRIVATE_KEY-----","client_email":"example4@PROJECT_ID.iam.gserviceaccount.com","client_id":"CLIENT_ID","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"https://www.googleapis.com/robot/v1/metadata/x509/example4%40PROJECT_ID.iam.gserviceaccount.com"}';
+
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
 const saveAppInstallation = async () => {
   // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
@@ -68,6 +71,7 @@ describe('Config Screen component (not installed)', () => {
           id: 'PRIVATE_KEY_ID',
           projectId: 'PROJECT_ID',
         },
+        rawServiceAccountKey: RAW_SERVICE_ACCOUNT_KEY,
       },
       targetState: {
         EditorInterface: {},
@@ -162,6 +166,7 @@ describe('Installed Service Account Key', () => {
           id: 'PRIVATE_KEY_ID',
           projectId: 'PROJECT_ID',
         },
+        rawServiceAccountKey: RAW_SERVICE_ACCOUNT_KEY,
         propertyId: 'properties/1234',
         contentTypes: {
           course: { slugField: 'shortDescription', urlPrefix: 'about' },
