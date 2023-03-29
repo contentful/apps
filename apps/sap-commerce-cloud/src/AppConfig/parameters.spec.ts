@@ -1,37 +1,39 @@
-import { parameterDefinitions, toInputParameters } from './parameters';
+import { ParameterDefinition } from '../interfaces';
+import { toInputParameters } from './parameters';
+
+const mockParameterDefinition: ParameterDefinition = {
+  id: 'someTestid',
+  name: 'some-name',
+  description: 'some description',
+  default: 'some-default-text',
+  type: 'Symbol',
+  required: true,
+};
 
 describe('parameters', () => {
   describe('toInputParameters', () => {
     it('handles lack of parameters', () => {
+      const parameterDefinitions: ParameterDefinition[] = [mockParameterDefinition];
       const result = toInputParameters(parameterDefinitions, {});
 
       expect(result).toEqual({
-        projectKey: '',
-        clientId: '',
-        clientSecret: '',
-        apiEndpoint: '',
-        authApiEndpoint: '',
-        locale: '',
+        someTestid: 'some-default-text',
       });
     });
 
     it('resolves parameters to string values', () => {
+      const parameterDefinitions: ParameterDefinition[] = [mockParameterDefinition];
       const result = toInputParameters(parameterDefinitions, {
-        projectKey: 'some-key',
-        clientId: 12345,
-        clientSecret: 'some-secret',
-        apiEndpoint: 'some-endpoint',
-        authApiEndpoint: 'some-auth-endpoint',
-        locale: 'en',
+        id: 'some-key',
+        name: 'some-key-name',
+        description: 'some description',
+        default: '',
+        type: 'Symbol',
+        required: true,
       });
 
       expect(result).toEqual({
-        projectKey: 'some-key',
-        clientId: '12345',
-        clientSecret: 'some-secret',
-        apiEndpoint: 'some-endpoint',
-        authApiEndpoint: 'some-auth-endpoint',
-        locale: 'en',
+        someTestid: 'some-default-text',
       });
     });
   });

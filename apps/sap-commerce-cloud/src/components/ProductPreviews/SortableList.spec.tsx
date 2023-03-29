@@ -1,24 +1,16 @@
-import React from 'react';
-import identity from 'lodash/identity';
 import { render, cleanup } from '@testing-library/react';
 import { Props, SortableList } from './SortableList';
-import productPreviews from '../../__mocks__/productPreviews';
+import { mockProductPreview } from '../../__mocks__/mockProductPreview';
 
 const defaultProps: Props = {
   disabled: false,
-  productPreviews,
+  productPreviews: [mockProductPreview],
   deleteFn: jest.fn(),
 };
 
 const renderComponent = (props: Props) => {
   return render(<SortableList {...props} />);
 };
-
-jest.mock('react-sortable-hoc', () => ({
-  SortableContainer: identity,
-  SortableElement: identity,
-  SortableHandle: identity,
-}));
 
 describe('SortableList', () => {
   afterEach(cleanup);
