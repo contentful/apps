@@ -24,10 +24,10 @@
     "zod": "3.21.4"
   },
   "scripts": {
-    "start": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) cross-env BROWSER=none react-scripts start",
+    "start": "cross-env BROWSER=none react-scripts start",
     "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
-    "test": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts test",
-    "test:ci": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) CI=true react-scripts test",
+    "test": "react-scripts test",
+    "test:ci": "CI=true react-scripts test",
     "lint": "eslint --max-warnings=0 .",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",

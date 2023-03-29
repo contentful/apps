@@ -6,6 +6,7 @@ import Express from 'express';
 import { verifySignedRequestMiddleware } from './verifySignedRequests';
 import { InvalidSignature } from '../errors/invalidSignature';
 import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
+import { config } from '../config';
 
 const sandbox = sinon.createSandbox();
 
@@ -42,8 +43,8 @@ describe('verifySignedRequestMiddleware', () => {
   };
 
   beforeEach(() => {
-    sandbox.stub(process.env, 'STAGE').value(stage);
-    sandbox.stub(process.env, 'SIGNING_SECRET').value(signingSecret);
+    sandbox.stub(config, 'stage').value(stage);
+    sandbox.stub(config, 'signingSecret').value(signingSecret);
     const headers = buildSignedHeaders(
       method,
       clientRequestPath,

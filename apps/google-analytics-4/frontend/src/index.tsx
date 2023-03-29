@@ -17,14 +17,14 @@ Sentry.init({
   // of transactions for performance monitoring.
   // We recommend adjusting this value in production
   tracesSampleRate: 1.0,
-  environment: process.env.NODE_ENV,
+  environment: config.environment,
   // TODO: setup Sentry as part of release pipeline (see: https://docs.sentry.io/platforms/javascript/sourcemaps/?_ga=2.56533545.342806665.1676988870-873194326.1675171780#uploading-source-maps-to-sentry)
   release: config.release,
 });
 
 const root = document.getElementById('root');
 
-if (process.env.NODE_ENV === 'development' && window.self === window.top) {
+if (config.environment === 'development' && window.self === window.top) {
   // You can remove this if block before deploying your app
   render(<LocalhostWarning />, root);
 } else {
