@@ -124,7 +124,7 @@ export default function SetupServiceAccountCard(props: Props) {
         <FormControl
           id="accountCredentialsFile"
           isInvalid={
-            !parameters.rawServiceAccountKeyId &&
+            !parameters.rawServiceAccountKey &&
             rawServiceAccountKey !== undefined &&
             !serviceAccountKeyId
           }
