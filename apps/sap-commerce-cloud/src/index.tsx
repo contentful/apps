@@ -16,6 +16,8 @@ import AppConfig from './AppConfig/AppConfig';
 import Field from './components/Field';
 import Dialog from './components/Dialog';
 
+import { config } from './config';
+
 interface AWSFunctionURLResponse {
   status: number;
   sapApplicationId: string;
@@ -32,14 +34,14 @@ const getApplicationInterfaceKey = async (): Promise<boolean | string> => {
       throw response;
     }
   } catch (error) {
-    console.error(error);
     return false;
   }
 };
 
 init(async (sdk) => {
   const root = document.getElementById('root');
-  const sapApplicationInterfaceKey = 'saptest0';
+  const isTestEnv = config.isTestEnv;
+  const sapApplicationInterfaceKey = !isTestEnv ? await getApplicationInterfaceKey() : '';
   const ComponentLocationSettings = [
     {
       location: locations.LOCATION_APP_CONFIG,

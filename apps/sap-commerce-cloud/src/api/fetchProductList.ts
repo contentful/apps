@@ -1,11 +1,12 @@
 import { Response, UpdateTotalPagesFn } from '../interfaces';
 import { productTransformer } from './dataTransformers';
+import { config } from '../config';
 
 export async function fetchProductList(
   baseSite: string,
   searchQuery: string,
   page: number,
-  config: any,
+  parameters: any,
   updateTotalPages: UpdateTotalPagesFn,
   applicationInterfaceKey: string
 ): Promise<Response> {
@@ -15,8 +16,15 @@ export async function fetchProductList(
       errors: [],
     };
   }
+  const headers = config.isTestEnv
+    ? {}
+    : {
+        headers: {
+          'Application-Interface-Key': applicationInterfaceKey,
+        },
+      };
   const response: any = await fetch(
-    config.installation.apiEndpoint +
+    parameters.installation.apiEndpoint +
       '/occ/v2/' +
       baseSite +
       '/products/search' +
@@ -24,15 +32,11 @@ export async function fetchProductList(
       searchQuery +
       '&fields=FULL&currentPage=' +
       page,
-    {
-      headers: {
-        'Application-Interface-Key': applicationInterfaceKey,
-      },
-    }
+    headers
   );
   const responseJson = await response.json();
   if (response.ok) {
-    const products = responseJson['products'].map(productTransformer(config.installation));
+    const products = responseJson['products'].map(productTransformer(parameters.installation));
     updateTotalPages(responseJson['pagination']['totalPages']);
     if (!products.length) {
       return {

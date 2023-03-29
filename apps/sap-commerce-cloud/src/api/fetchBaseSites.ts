@@ -1,16 +1,20 @@
 import { baseSiteTransformer } from './dataTransformers';
+import { config } from '../config';
 
 export async function fetchBaseSites(
-  config: any,
+  parameters: any,
   applicationInterfaceKey: string
 ): Promise<string[]> {
-  const url = `${config.installation.apiEndpoint}/occ/v2/basesites`;
+  const url = `${parameters.installation.apiEndpoint}/occ/v2/basesites`;
+  const headers = config.isTestEnv
+    ? {}
+    : {
+        headers: {
+          'Application-Interface-Key': applicationInterfaceKey,
+        },
+      };
   try {
-    const response = await fetch(url, {
-      headers: {
-        'Application-Interface-Key': applicationInterfaceKey,
-      },
-    });
+    const response = await fetch(url, headers);
     if (response.ok) {
       const responseJson = await response.json();
       const baseSites = responseJson['baseSites'].map(baseSiteTransformer());
