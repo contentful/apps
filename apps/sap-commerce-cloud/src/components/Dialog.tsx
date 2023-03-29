@@ -158,7 +158,8 @@ export default class Dialog extends React.Component<DialogProps, State> {
   };
 
   render() {
-    const isFieldTypeArray = get(this.props.sdk.parameters.invocation, 'fieldType', '') === 'Array';
+    const isFieldTypeArray =
+      (get(this.props.sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
     return (
       <>
         <Grid
