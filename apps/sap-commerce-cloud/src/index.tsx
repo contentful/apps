@@ -34,6 +34,7 @@ const getApplicationInterfaceKey = async (): Promise<boolean | string> => {
       throw response;
     }
   } catch (error) {
+    console.error(error);
     return false;
   }
 };
