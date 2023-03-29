@@ -185,9 +185,8 @@ export default class AppConfig extends React.Component<Props, State> {
   renderApp() {
     const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
     const { parameterDefinitions, sdk } = this.props;
-    const {
-      ids: { space, environment },
-    } = sdk;
+    const { ids } = sdk;
+    const { space, environment } = ids;
     const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
 
     return (

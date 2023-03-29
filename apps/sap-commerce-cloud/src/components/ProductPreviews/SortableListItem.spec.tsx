@@ -2,14 +2,21 @@ import React from 'react';
 import identity from 'lodash/identity';
 import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, SortableListItem } from './SortableListItem';
-import productPreviews from '../../__mocks__/productPreviews';
+
+const mockProductPreview = {
+  sku: 'abc1234',
+  image: '',
+  id: '123',
+  name: 'Mock Category',
+  isMissing: false,
+};
 
 configure({
   testIdAttribute: 'data-test-id',
 });
 
 const defaultProps: Props = {
-  product: productPreviews[0],
+  product: mockProductPreview,
   disabled: false,
   onDelete: jest.fn(),
   isSortable: false,
@@ -19,11 +26,7 @@ const renderComponent = (props: Props) => {
   return render(<SortableListItem index={0} {...props} />);
 };
 
-jest.mock('react-sortable-hoc', () => ({
-  SortableContainer: identity,
-  SortableElement: identity,
-  SortableHandle: identity,
-}));
+jest.mock('react-sortable-hoc');
 
 describe('SortableListItem', () => {
   afterEach(cleanup);
@@ -54,7 +57,7 @@ describe('SortableListItem', () => {
   it('should render successfully the error variation for missing product', () => {
     const component = renderComponent({
       ...defaultProps,
-      product: { ...productPreviews[0], name: '' },
+      product: { ...mockProductPreview, name: '' },
     });
     fireEvent(component.getByTestId('image'), new Event('error'));
     expect(component.container).toMatchSnapshot();
