@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Stack,
   Card,
@@ -34,7 +34,8 @@ const placeholderText = `{
 }`;
 
 export default function SetupServiceAccountCard(props: Props) {
-  const { mergeSdkParameters, isInEditMode, onInEditModeChange, onKeyFileUpdate } = props;
+  const { mergeSdkParameters, isInEditMode, onInEditModeChange, onKeyFileUpdate, parameters } =
+    props;
 
   const [rawServiceAccountKey, setRawServiceAccountKey] = useState<string>();
   const [serviceAccountKeyId, setServiceAccountKeyId] = useState<ServiceAccountKeyId>();
@@ -58,6 +59,7 @@ export default function SetupServiceAccountCard(props: Props) {
 
       const _parameters = {
         serviceAccountKeyId: _serviceAccountKeyId,
+        rawServiceAccountKey: keyfile,
       };
 
       mergeSdkParameters(_parameters);
@@ -79,6 +81,12 @@ export default function SetupServiceAccountCard(props: Props) {
     setErrorMessage('');
     onInEditModeChange(false);
   };
+
+  useEffect(() => {
+    if (parameters.rawServiceAccountKey) {
+      setRawServiceAccountKey(parameters.rawServiceAccountKey);
+    }
+  }, [parameters.rawServiceAccountKey]);
 
   return (
     <Stack spacing="spacingL" flexDirection="column">
@@ -115,7 +123,11 @@ export default function SetupServiceAccountCard(props: Props) {
         </Box>
         <FormControl
           id="accountCredentialsFile"
-          isInvalid={rawServiceAccountKey !== undefined && !serviceAccountKeyId}
+          isInvalid={
+            !parameters.rawServiceAccountKeyId &&
+            rawServiceAccountKey !== undefined &&
+            !serviceAccountKeyId
+          }
           isRequired={true}
           marginBottom={!isInEditMode ? 'none' : 'spacingM'}>
           <FormControl.Label>Service Account Key</FormControl.Label>
