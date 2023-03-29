@@ -12,12 +12,12 @@ export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
   const { slugField, urlPrefix } = slugFieldInfo;
   const slugFieldValue = useGetFieldValue(slugField);
 
-  const checkPublishedStatus = (sys: ContentEntitySys) => {
+  const setPublishedStatus = (sys: ContentEntitySys) => {
     setIsPublished(Boolean(sys.publishedAt));
   };
 
   useEffect(() => {
-    sdk.entry.onSysChanged((sys) => checkPublishedStatus(sys));
+    sdk.entry.onSysChanged((sys) => setPublishedStatus(sys));
   }, [sdk.entry]);
 
   const reportSlug = `/${pathJoin(urlPrefix || '', slugFieldValue || '')}`;

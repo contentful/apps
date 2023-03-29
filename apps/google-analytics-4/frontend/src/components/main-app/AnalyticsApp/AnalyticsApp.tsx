@@ -57,7 +57,7 @@ const AnalyticsApp = (props: Props) => {
     }
 
     if (runReportFetchRequirements) fetchRunReportData();
-    else setTimeout(() => setLoading(false), 200);
+    else setLoading(false);
   }, [api, reportRequestParams, runReportFetchRequirements]);
 
   useEffect(() => {
