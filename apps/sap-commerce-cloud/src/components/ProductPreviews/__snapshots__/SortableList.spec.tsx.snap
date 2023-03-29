@@ -88,7 +88,7 @@ exports[`SortableList should render successfully 1`] = `
         class="css-kx63wx"
       >
         <img
-          alt="Mock Product"
+          alt="Mock Category"
           data-test-id="image"
           src=""
           style="display: none;"
@@ -105,7 +105,7 @@ exports[`SortableList should render successfully 1`] = `
             class="Heading__Heading___83D3K css-1xd3m0r f36-margin-bottom--m"
             data-test-id="cf-ui-heading"
           >
-            Mock Product
+            Mock Category
           </h1>
           <h2
             class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
@@ -118,7 +118,6 @@ exports[`SortableList should render successfully 1`] = `
       <div
         class="css-mfolfb"
       >
-        
         <button
           class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--muted___22_IZ"
           data-test-id="cf-ui-icon-button"

@@ -17,7 +17,7 @@ exports[`SortableListItem should render successfully 1`] = `
           class="Heading__Heading___83D3K css-1xd3m0r f36-margin-bottom--m"
           data-test-id="cf-ui-heading"
         >
-          Mock Category
+          Mock Product
         </h1>
         <h2
           class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
