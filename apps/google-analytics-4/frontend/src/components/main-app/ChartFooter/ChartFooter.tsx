@@ -11,7 +11,7 @@ const ChartFooter = (props: Props) => {
 
   return (
     <Flex flexDirection="column" alignItems="flex-start">
-      <Text fontColor="gray600" fontSize="fontSizeS" marginBottom="spacingM">
+      <Text fontColor="gray600" fontSize="fontSizeS" marginTop="spacingS" marginBottom="spacingS">
         Page path: {slugName}
       </Text>
       {viewUrl ? (

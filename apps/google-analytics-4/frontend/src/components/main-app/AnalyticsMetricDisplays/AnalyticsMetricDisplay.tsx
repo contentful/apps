@@ -1,8 +1,7 @@
-import React from 'react';
 import ChartFooter from 'components/main-app/ChartFooter/ChartFooter';
 import ChartHeader from 'components/main-app/ChartHeader/ChartHeader';
 import ChartContent from '../ChartContent/ChartContent';
-import { RunReportResponse, StartEndDates } from 'types';
+import { RunReportResponse, StartEndDates, DateRangeType } from 'types';
 import { getExternalUrl } from 'helpers/externalUrlHelpers/externalUrlHelpers';
 
 interface Props {
@@ -14,6 +13,7 @@ interface Props {
   error?: Error;
   propertyId: string;
   startEndDates: StartEndDates;
+  selectedDateRange?: DateRangeType;
 }
 
 const AnalyticsMetricDisplay = (props: Props) => {
@@ -26,6 +26,7 @@ const AnalyticsMetricDisplay = (props: Props) => {
     pageViews,
     propertyId,
     startEndDates,
+    selectedDateRange,
   } = props;
 
   const propertyIdNumber = propertyId.split('/')[1] || '';
@@ -37,6 +38,7 @@ const AnalyticsMetricDisplay = (props: Props) => {
         metricName={metricName ? metricName : ''}
         metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
         handleChange={handleDateRangeChange}
+        selectedDateRange={selectedDateRange}
       />
 
       <ChartContent error={error} pageViewData={runReportResponse} />

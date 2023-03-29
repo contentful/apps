@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, DisplayText, Flex, Paragraph, Select } from '@contentful/f36-components';
 import { DateRangeType } from 'types';
 import { styles } from './ChartHeader.styles';
@@ -7,6 +7,7 @@ interface Props {
   metricName: string;
   metricValue: string;
   handleChange: Function;
+  selectedDateRange?: DateRangeType;
 }
 
 const getMetricDisplayString = (_metricName: string) => {
@@ -19,7 +20,7 @@ const getMetricDisplayString = (_metricName: string) => {
 };
 
 const ChartHeader = (props: Props) => {
-  const { metricName, metricValue, handleChange } = props;
+  const { metricName, metricValue, handleChange, selectedDateRange } = props;
 
   const [dateSelection, setDateSelection] = useState<DateRangeType>('lastWeek');
 
@@ -28,11 +29,15 @@ const ChartHeader = (props: Props) => {
     handleChange(event.target.value as DateRangeType);
   };
 
+  useEffect(() => {
+    if (selectedDateRange) setDateSelection(selectedDateRange);
+  }, [selectedDateRange]);
+
   return (
     <Flex
       justifyContent="space-between"
       alignItems="flex-end"
-      marginBottom="spacingXs"
+      marginBottom="spacingS"
       id="chart-header">
       <Box>
         <DisplayText marginBottom="none" size="large">
