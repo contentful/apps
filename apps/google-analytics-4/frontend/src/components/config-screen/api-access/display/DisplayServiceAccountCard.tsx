@@ -12,6 +12,8 @@ import {
   Spinner,
   Button,
   Skeleton,
+  TextInput,
+  CopyButton,
 } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
@@ -270,27 +272,29 @@ const DisplayServiceAccountCard = (props: Props) => {
             </Flex>
           </Flex>
           <FormControl>
-            <FormControl.Label marginBottom="none">Service Account</FormControl.Label>
-            <Paragraph>
-              <Flex alignItems="center">
-                <Box paddingRight="spacingS">
-                  <TextLink
-                    icon={<ExternalLinkTrimmedIcon />}
-                    alignIcon="end"
-                    href={`https://console.cloud.google.com/iam-admin/serviceaccounts/details/${serviceAccountKeyId.clientId}?project=${serviceAccountKeyId.projectId}`}
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    {serviceAccountKeyId.clientEmail}
-                  </TextLink>
-                </Box>
-              </Flex>
-            </Paragraph>
+            <FormControl.Label marginBottom="none">Service Account Email</FormControl.Label>
+            <TextInput.Group>
+              <TextInput isDisabled isReadOnly value={serviceAccountKeyId.clientEmail} />
+              <CopyButton
+                value={serviceAccountKeyId.clientEmail}
+                tooltipProps={{ placement: 'right' }}
+              />
+            </TextInput.Group>
+            <FormControl.HelpText>
+              This is the email address associated with your Google service account. See the{' '}
+              <TextLink
+                href="https://support.google.com/analytics/answer/1009702?hl=en#Add&zippy=%2Cin-this-article"
+                target="_blank"
+                icon={<ExternalLinkTrimmedIcon />}
+                alignIcon="end">
+                "Add users"
+              </TextLink>{' '}
+              section of Google's help article for more information.
+            </FormControl.HelpText>
           </FormControl>
           <FormControl>
             <FormControl.Label marginBottom="none">Key ID</FormControl.Label>
-            <Paragraph>
-              <Box as="code">{serviceAccountKeyId.id}</Box>
-            </Paragraph>
+            <TextInput isDisabled isReadOnly value={serviceAccountKeyId.id} />
           </FormControl>
           <FormControl marginBottom="none">
             <FormControl.Label marginBottom="none">Status</FormControl.Label>
