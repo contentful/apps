@@ -52,12 +52,11 @@ const AnalyticsApp = (props: Props) => {
       } catch (e) {
         setError(e as Error);
       }
-
-      setLoading(false);
     }
 
     if (runReportFetchRequirements) fetchRunReportData();
-    else setLoading(false);
+
+    setLoading(false);
   }, [api, reportRequestParams, runReportFetchRequirements]);
 
   useEffect(() => {
