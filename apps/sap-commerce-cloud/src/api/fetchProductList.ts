@@ -6,7 +6,8 @@ export async function fetchProductList(
   searchQuery: string,
   page: number,
   config: any,
-  updateTotalPages: UpdateTotalPagesFn
+  updateTotalPages: UpdateTotalPagesFn,
+  applicationInterfaceKey: string
 ): Promise<Response> {
   if (!baseSite.length) {
     return {
@@ -22,7 +23,12 @@ export async function fetchProductList(
       '?query=' +
       searchQuery +
       '&fields=FULL&currentPage=' +
-      page
+      page,
+    {
+      headers: {
+        'Application-Interface-Key': applicationInterfaceKey,
+      },
+    }
   );
   const responseJson = await response.json();
   if (response.ok) {

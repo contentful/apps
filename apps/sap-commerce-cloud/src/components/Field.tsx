@@ -12,6 +12,7 @@ import logo from '../logo.png';
 
 interface Props {
   sdk: FieldExtensionSDK;
+  applicationInterfaceKey: string;
 }
 
 interface State {
@@ -141,7 +142,10 @@ export default class Field extends React.Component<Props, State> {
                 disabled={editingDisabled}
                 categories={data}
                 onChange={this.updateStateValue}
-                fetchCategoryPreviews={(categories) => fetchCategoryPreviews(categories, config)}
+                fetchCategoryPreviews={(categories) =>
+                  fetchCategoryPreviews(categories, config, this.props.applicationInterfaceKey)
+                }
+                applicationInterfaceKey={this.props.applicationInterfaceKey}
               />
             ) : (
               <ProductPreviews
@@ -150,8 +154,14 @@ export default class Field extends React.Component<Props, State> {
                 skus={data}
                 onChange={this.updateStateValue}
                 fetchProductPreviews={(skus) =>
-                  fetchProductPreviews(skus, config, this.props.sdk.parameters)
+                  fetchProductPreviews(
+                    skus,
+                    config,
+                    this.props.sdk.parameters,
+                    this.props.applicationInterfaceKey
+                  )
                 }
+                applicationInterfaceKey={this.props.applicationInterfaceKey}
               />
             )}
           </div>

@@ -8,7 +8,8 @@ import { fetchBaseSites } from './fetchBaseSites';
 export async function fetchProductPreviews(
   skus: string[],
   config: any,
-  params: any
+  params: any,
+  applicationInterfaceKey: string
 ): Promise<Product[]> {
   if (!skus.length) {
     return [];
@@ -26,7 +27,12 @@ export async function fetchProductPreviews(
       config.apiEndpoint +
         `/occ/v2/${baseSite}/products/` +
         skuId +
-        '?fields=code,name,summary,price(formattedValue,DEFAULT),images(galleryIndex,FULL),averageRating,stock(DEFAULT),description,availableForPickup,url,numberOfReviews,manufacturer,categories(FULL),priceRange,multidimensional,configuratorType,configurable,tags'
+        '?fields=code,name,summary,price(formattedValue,DEFAULT),images(galleryIndex,FULL),averageRating,stock(DEFAULT),description,availableForPickup,url,numberOfReviews,manufacturer,categories(FULL),priceRange,multidimensional,configuratorType,configurable,tags',
+      {
+        headers: {
+          'Application-Interface-Key': applicationInterfaceKey,
+        },
+      }
     );
     if (response.ok) {
       let responseJson = await response.json();
