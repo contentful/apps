@@ -5,7 +5,6 @@ import { DynamoDBService } from '../services/dynamoDbService';
 import {
   MissingServiceAccountKeyFile,
   assertServiceAccountKey,
-  assertServiceAccountKeyId,
 } from '../middlewares/serviceAccountKeyProvider';
 
 const formatArrays = (param: string | string[]) =>

@@ -1,10 +1,5 @@
 import { act, render, screen } from '@testing-library/react';
-import {
-  mockSdk,
-  mockCma,
-  validServiceKeyFile,
-  validServiceKeyId,
-} from '../../../../../test/mocks';
+import { mockSdk, mockCma, validServiceKeyId } from '../../../../../test/mocks';
 import DisplayServiceAccountCard from 'components/config-screen/api-access/display/DisplayServiceAccountCard';
 import { config } from '../../../../../src/config';
 
