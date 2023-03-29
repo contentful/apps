@@ -22,7 +22,7 @@
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "test-ci": "CI=true react-scripts test",
+    "test:ci": "CI=true react-scripts test",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id GdOFzqcDrEbmn2teDQE2i --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
     "eject": "react-scripts eject"
