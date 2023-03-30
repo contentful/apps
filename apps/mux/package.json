@@ -24,7 +24,7 @@
     "@contentful/f36-components": "4.17.0",
     "@contentful/react-apps-toolkit": "1.2.6",
     "@mux/mux-player-react": "0.1.0-beta.28",
-    "@mux/mux-uploader-react": "0.1.0-beta.8",
+    "@mux/mux-uploader-react": "0.1.0-canary.212-8f6bd4d",
     "jsonwebtoken": "8.5.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
