@@ -76,9 +76,15 @@ export default function MapAccountPropertySection(props: Props) {
     <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
       <div>
         <Subheading marginBottom="spacingXs">Google Analytics 4 property</Subheading>
+        <Paragraph>
+          In the dropdown below, select the Google Analytics 4 property that's connected to the
+          content in this Contentful space environment. If you don't see the property you're looking
+          for, make sure the Google service account installed above has been given "viewer" access
+          to it in Google Analytics.
+        </Paragraph>
         <Paragraph marginBottom="none">
-          Note: Only <em>Google Analytics 4</em> properties are listed.{' '}
-          <em>Google Universal Analytics</em> properties are not supported. See{' '}
+          Note: Only Google Analytics 4 properties are listed; Google "Universal Analytics"
+          properties are not supported. See{' '}
           <TextLink
             href="https://support.google.com/analytics/answer/10759417"
             target="_blank"
