@@ -220,10 +220,10 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
         'The service account must have properties assigned to the account for this check to pass'
       ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Service account failed to access an Analytics property',
+      description: "Service account doesn't have access to any GA4 properties",
       disabled: false,
       checklistUrl: {
-        title: 'Add GA4 properties',
+        title: 'Grant access',
         url: 'https://analytics.google.com/analytics/web/',
       },
     },
@@ -232,10 +232,10 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
         'The service account must have properties assigned to the account for this check to pass'
       ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Service account failed to access an Analytics property',
+      description: "Service account doesn't have access to any GA4 properties",
       disabled: false,
       checklistUrl: {
-        title: 'Add GA4 properties',
+        title: 'Grant access',
         url: 'https://analytics.google.com/analytics/web/',
       },
     },
