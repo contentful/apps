@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Stack, Select, TextLink, Paragraph } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import tokens from '@contentful/f36-tokens';
 import { AccountSummariesType, ConfigurationWarningTypes } from 'types';
+import { styles } from 'components/config-screen/map-account-property/MapAccountPropertyDropdown.styles';
 import {
   NO_PROPERTIES,
   getPropertyDeletedMsg,
@@ -80,7 +80,7 @@ const MapAccountPropertyDropdown = (props: Props) => {
               ))}
             </Select>
           </Stack>
-          <Paragraph marginTop="spacingM" style={{ color: tokens.gray600 }}>
+          <Paragraph marginTop="spacingM" className={styles.helpText}>
             If you don't see a property in the dropdown, make sure the Google service account
             installed above has been given "viewer" access to it in Google Analytics. <em>Note:</em>{' '}
             Only Google Analytics 4 properties are listed; Google "Universal Analytics" properties

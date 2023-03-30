@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Stack, Box, Subheading, Spinner, Paragraph, TextLink } from '@contentful/f36-components';
+import { Stack, Box, Subheading, Spinner, Paragraph } from '@contentful/f36-components';
 import { AccountSummariesType } from 'types';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
 import MapAccountPropertyDropdown from 'components/config-screen/map-account-property/MapAccountPropertyDropdown';
 
 interface Props {
