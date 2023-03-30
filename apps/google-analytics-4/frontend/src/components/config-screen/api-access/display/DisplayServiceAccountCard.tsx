@@ -244,9 +244,11 @@ const DisplayServiceAccountCard = (props: Props) => {
   return (
     <Card>
       {isSavingPrivateKeyFile || isLoadingAdminApi || isLoadingDataApi ? (
-        <Skeleton.Container>
-          <Skeleton.BodyText numberOfLines={8} />
-        </Skeleton.Container>
+        <Flex>
+          <Skeleton.Container>
+            <Skeleton.BodyText numberOfLines={8} />
+          </Skeleton.Container>
+        </Flex>
       ) : (
         <>
           <Flex justifyContent="space-between" marginBottom="none">
