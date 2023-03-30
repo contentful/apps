@@ -102,7 +102,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     },
     invalid: {
       icon: getErrorIcon(
-        `We couldn't connect to Google Analytics APIs using the service account key provided. Try re-installing your previous service account key or create and install a new key`
+        `We couldn't connect to Google Analytics APIs using the service account key provided. Try re-installing your current service account key or create and install a new key`
       ),
       title: CHECKLIST_NAMES.serviceAccount,
       description: 'Service account key is not valid',
