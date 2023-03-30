@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Stack,
   Card,
@@ -63,6 +63,16 @@ export default function SetupServiceAccountCard(props: Props) {
       mergeSdkParameters(_parameters);
     } catch (e: any) {
       onKeyFileUpdate(undefined);
+
+      // if not edit mode, so first install, merge params as undefined when error thrown.
+      // prevents the case when user pastes a valid key (saved in parameters optimistically)
+      // and then erases key but still tries to install
+      if (!isInEditMode) {
+        const _parameters = {
+          serviceAccountKeyId: undefined,
+        };
+        mergeSdkParameters(_parameters);
+      }
       // failed assertions about key file contents or could not parse as JSON
       if (e instanceof AssertionError || e instanceof SyntaxError) {
         setErrorMessage(e.message);
