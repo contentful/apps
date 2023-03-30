@@ -49,13 +49,8 @@ const MapAccountPropertyDropdown = (props: Props) => {
     setTooltipContent(content);
   }, [selectedPropertyId, originalPropertyId, isPropertyIdInOptions]);
 
-  const validateSelection = () => {
-    if (selectedPropertyId === originalPropertyId && !isPropertyIdInOptions) {
-      return '';
-    } else {
-      return selectedPropertyId;
-    }
-  };
+  const selectionValue =
+    selectedPropertyId === originalPropertyId && !isPropertyIdInOptions ? '' : selectedPropertyId;
 
   return (
     <>
@@ -66,7 +61,7 @@ const MapAccountPropertyDropdown = (props: Props) => {
             <FormControl>
               <Select
                 testId="accountPropertyDropdown"
-                value={validateSelection()}
+                value={selectionValue}
                 onChange={onSelectionChange}
                 isInvalid={warningType === WarningTypes.Error}>
                 <Select.Option key="empty option" value="" isDisabled>

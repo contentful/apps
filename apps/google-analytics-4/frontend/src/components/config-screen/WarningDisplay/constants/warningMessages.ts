@@ -18,7 +18,7 @@ export const getSlugFieldDeletedMsg = (contentTypeId: string, slugField: string)
 export const NO_PROPERTIES = `There are no properties to display.`;
 
 export const getPropertyDeletedMsg = (propertyId: string): string => {
-  return `The previously configured property (${propertyId}) is no longer available via the configured Google Service Account. Either ensure that the Service Account has access to this property or select a new property and save the configuration.`;
+  return `The previously configured property (${propertyId}) is no longer available via the installed Google service account. Either ensure that the service account has access to this property or select a new property and save the configuration.`;
 };
 
 export enum WarningTypes {

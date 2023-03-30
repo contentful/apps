@@ -45,17 +45,12 @@ export default function MapAccountPropertySection(props: Props) {
   useEffect(() => {
     if (parameters.propertyId) {
       setSelectedPropertyId(parameters.propertyId);
-      // Prevent saving if selected property id is not in list of available properties
-      if (!isPropertyIdInOptions && parameters.propertyId === originalPropertyId) {
-        onIsValidAccountProperty(false);
-      } else {
-        onIsValidAccountProperty(true);
-      }
+      onIsValidAccountProperty(true);
     } else {
       onIsValidAccountProperty(false);
     }
     setLoadingParameters(false);
-  }, [onIsValidAccountProperty, parameters.propertyId, isPropertyIdInOptions, originalPropertyId]);
+  }, [onIsValidAccountProperty, parameters.propertyId]);
 
   useEffect(() => {
     accountsSummaries.sort((a, b) => {
