@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Stack, Box, Select, FormControl, TextLink } from '@contentful/f36-components';
+import { Stack, Select, TextLink, Paragraph } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
 import { AccountSummariesType, ConfigurationWarningTypes } from 'types';
 import {
   NO_PROPERTIES,
@@ -55,51 +56,47 @@ const MapAccountPropertyDropdown = (props: Props) => {
   return (
     <>
       {sortedAccountSummaries.length ? (
-        <Stack spacing="spacingXs">
-          <WarningDisplay warningType={warningType} tooltipContent={tooltipContent} />
-          <Box>
-            <FormControl>
-              <Select
-                testId="accountPropertyDropdown"
-                value={selectionValue}
-                onChange={onSelectionChange}
-                isInvalid={warningType === WarningTypes.Error}>
-                <Select.Option key="empty option" value="" isDisabled>
-                  Select a property...
-                </Select.Option>
-                {sortedAccountSummaries.map((accountSummary: AccountSummariesType) => (
-                  <optgroup
-                    label={`${accountSummary.displayName} (${getIdOnly(accountSummary.account)})`}
-                    key={accountSummary.account}>
-                    {accountSummary.propertySummaries.map((propertySummary) => (
-                      <Select.Option
-                        key={propertySummary.property}
-                        value={propertySummary.property}>
-                        {`${propertySummary.displayName} (${getIdOnly(propertySummary.property)})`}
-                      </Select.Option>
-                    ))}
-                  </optgroup>
-                ))}
-              </Select>
-              <FormControl.HelpText marginTop="spacingM">
-                If you don't see a property in the dropdown, make sure the Google service account
-                installed above has been given "viewer" access to it in Google Analytics.{' '}
-                <em>Note:</em> Only Google Analytics 4 properties are listed; Google "Universal
-                Analytics" properties are not supported. See{' '}
-                <TextLink
-                  href="https://support.google.com/analytics/answer/10759417"
-                  target="_blank"
-                  icon={<ExternalLinkIcon />}
-                  alignIcon="end">
-                  "Make the switch to Google Analytics 4"
-                </TextLink>{' '}
-                for more information.
-              </FormControl.HelpText>
-            </FormControl>
-          </Box>
+        <Stack spacing="spacingXs" flexDirection="column" alignItems="flex-start">
+          <Stack spacing="spacingXs">
+            <WarningDisplay warningType={warningType} tooltipContent={tooltipContent} />
+            <Select
+              testId="accountPropertyDropdown"
+              value={selectionValue}
+              onChange={onSelectionChange}
+              isInvalid={warningType === WarningTypes.Error}>
+              <Select.Option key="empty option" value="" isDisabled>
+                Select a property...
+              </Select.Option>
+              {sortedAccountSummaries.map((accountSummary: AccountSummariesType) => (
+                <optgroup
+                  label={`${accountSummary.displayName} (${getIdOnly(accountSummary.account)})`}
+                  key={accountSummary.account}>
+                  {accountSummary.propertySummaries.map((propertySummary) => (
+                    <Select.Option key={propertySummary.property} value={propertySummary.property}>
+                      {`${propertySummary.displayName} (${getIdOnly(propertySummary.property)})`}
+                    </Select.Option>
+                  ))}
+                </optgroup>
+              ))}
+            </Select>
+          </Stack>
+          <Paragraph marginTop="spacingM" style={{ color: tokens.gray600 }}>
+            If you don't see a property in the dropdown, make sure the Google service account
+            installed above has been given "viewer" access to it in Google Analytics. <em>Note:</em>{' '}
+            Only Google Analytics 4 properties are listed; Google "Universal Analytics" properties
+            are not supported. See{' '}
+            <TextLink
+              href="https://support.google.com/analytics/answer/10759417"
+              target="_blank"
+              icon={<ExternalLinkIcon />}
+              alignIcon="end">
+              "Make the switch to Google Analytics 4"
+            </TextLink>{' '}
+            for more information.
+          </Paragraph>
         </Stack>
       ) : (
-        <Note body={NO_PROPERTIES} variant="neutral" />
+        <Note body={NO_PROPERTIES} variant="warning" />
       )}
     </>
   );

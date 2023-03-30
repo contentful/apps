@@ -15,7 +15,7 @@ export const getSlugFieldDeletedMsg = (contentTypeId: string, slugField: string)
 };
 
 // Property selection warning and error messages
-export const NO_PROPERTIES = `There are no properties to display.`;
+export const NO_PROPERTIES = `We couldn't find any Google Analytics 4 properties to display. See status checks above for possible errors.`;
 
 export const getPropertyDeletedMsg = (propertyId: string): string => {
   return `The previously configured property (${propertyId}) is no longer available via the installed Google service account. Either ensure that the service account has access to this property or select a new property and save the configuration.`;
