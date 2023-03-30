@@ -11,7 +11,12 @@ import { Flex, Tooltip } from '@contentful/f36-components';
 const getErrorIcon = (msg: string) => (
   <Tooltip placement="top" content={msg}>
     <Flex alignItems="center">
-      <ErrorCircleIcon marginLeft="spacingXs" marginRight="spacingXs" variant="negative" />
+      <ErrorCircleIcon
+        testId="error-icon"
+        marginLeft="spacingXs"
+        marginRight="spacingXs"
+        variant="negative"
+      />
     </Flex>
   </Tooltip>
 );
@@ -34,7 +39,12 @@ const getClockIcon = (msg: string) => (
 const getArrowIcon = (msg: string) => (
   <Tooltip placement="top" content={msg}>
     <Flex alignItems="center">
-      <ArrowForwardIcon marginLeft="spacingXs" marginRight="spacingXs" variant="muted" />
+      <ArrowForwardIcon
+        testId="arrow-icon"
+        marginLeft="spacingXs"
+        marginRight="spacingXs"
+        variant="muted"
+      />
     </Flex>
   </Tooltip>
 );
@@ -84,6 +94,7 @@ export type ChecklistStatus = {
     invalidServiceAccount: ChecklistRow;
     adminApiError: ChecklistRow;
     error: ChecklistRow;
+    noAccountsOrPropertiesFound: ChecklistRow;
   };
   Other: {
     unknown: ChecklistRow;
@@ -216,6 +227,18 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
         url: 'https://analytics.google.com/analytics/web/',
       },
     },
+    noAccountsOrPropertiesFound: {
+      icon: getArrowIcon(
+        'The service account must have properties assigned to the account for this check to pass'
+      ),
+      title: CHECKLIST_NAMES.ga4Properties,
+      description: 'Service account failed to access an Analytics property',
+      disabled: false,
+      checklistUrl: {
+        title: 'Add GA4 properties',
+        url: 'https://analytics.google.com/analytics/web/',
+      },
+    },
   },
   Other: {
     unknown: {
@@ -301,7 +324,10 @@ export const getGa4PropertyErrorChecklistStatus = (
 ): ChecklistRow => {
   if (!invalidServiceAccountError && !adminApiError && !ga4PropertiesError)
     return CHECKLIST_STATUSES.GA4Properties.success;
-  if (isFirstSetup && adminApiError) return CHECKLIST_STATUSES.GA4Properties.firstTimeSetup;
+  if (isFirstSetup) {
+    if (adminApiError) return CHECKLIST_STATUSES.GA4Properties.firstTimeSetup;
+    if (ga4PropertiesError) return CHECKLIST_STATUSES.GA4Properties.noAccountsOrPropertiesFound;
+  }
   if (invalidServiceAccountError) return CHECKLIST_STATUSES.GA4Properties.invalidServiceAccount;
   if (adminApiError) return CHECKLIST_STATUSES.GA4Properties.adminApiError;
   if (ga4PropertiesError) return CHECKLIST_STATUSES.GA4Properties.error;

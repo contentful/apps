@@ -278,7 +278,7 @@ describe('Service Account Checklist', () => {
     await screen.findByText(/Analytics Data API is not yet enabled/);
   });
 
-  it('has no found GA4 Accounts or Properties', async () => {
+  it('has no found GA4 Accounts or Properties on first time install', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
@@ -299,5 +299,30 @@ describe('Service Account Checklist', () => {
     });
 
     await screen.findByText(/Service account failed to access an Analytics property/);
+    expect(screen.getByTestId('arrow-icon')).toBeVisible();
+  });
+
+  it('has no found GA4 Accounts or Properties not on first time install', async () => {
+    await act(async () => {
+      render(
+        <ServiceAccountChecklist
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(parameters, undefined, undefined),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(true, parameters, undefined, undefined),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(true, parameters, undefined, undefined),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(false, undefined, undefined, ga4PropertiesError),
+          }}
+        />
+      );
+    });
+
+    await screen.findByText(/Service account failed to access an Analytics property/);
+    expect(screen.getByTestId('error-icon')).toBeVisible();
   });
 });
