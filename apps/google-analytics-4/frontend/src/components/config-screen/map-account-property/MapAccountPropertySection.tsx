@@ -79,7 +79,7 @@ export default function MapAccountPropertySection(props: Props) {
         <Subheading marginBottom="spacingXs">Google Analytics 4 property</Subheading>
         <Paragraph marginBottom="none">
           In the dropdown below, select the Google Analytics 4 property that's connected to the
-          website where content in this Contentful space (environment) appears.
+          website where your content appears.
         </Paragraph>
       </div>
       <Box marginTop="none">

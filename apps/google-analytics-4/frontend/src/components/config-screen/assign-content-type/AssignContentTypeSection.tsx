@@ -165,6 +165,7 @@ const AssignContentTypeSection = (props: Props) => {
         </Paragraph>
         <Paragraph marginBottom="none">
           <TextLink
+            /* TODO: Correct this wrong link. (WRONG below in copy is intentional to ensure we don't forget) */
             href="https://support.google.com/analytics/answer/10759417"
             target="_blank"
             icon={<ExternalLinkIcon />}
