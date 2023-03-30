@@ -169,7 +169,7 @@ const AssignContentTypeSection = (props: Props) => {
             target="_blank"
             icon={<ExternalLinkIcon />}
             alignIcon="end">
-            See our help documentation for more details
+            WRONG See our help documentation for more details
           </TextLink>
         </Paragraph>
       </Box>
