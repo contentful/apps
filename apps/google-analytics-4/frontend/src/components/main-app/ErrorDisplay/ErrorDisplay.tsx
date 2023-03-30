@@ -39,7 +39,7 @@ const ErrorDisplay = (props: Props) => {
         case ERROR_TYPE_MAP.failedFetch:
           setErrorBody('supportHyperLink');
           break;
-        case ERROR_TYPE_MAP.invalidServiceAccount:
+        case ERROR_TYPE_MAP.invalidServiceAccountKey:
           setErrorBody('invalidServiceAccount');
           break;
         default:

@@ -88,7 +88,7 @@ describe('ErrorDisplay', () => {
             details: '',
             message: '',
             status: 404,
-            errorType: 'InvalidServiceAccount',
+            errorType: 'InvalidServiceAccountKey',
           })
         }
       />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Flex, Text, TextLink } from '@contentful/f36-components';
-import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { ChecklistURL } from 'components/config-screen/api-access/display/ChecklistUtils';
 
 type Props = {
@@ -31,7 +31,7 @@ export default function GenericChecklistRow(props: Props) {
         {checklistUrl && (
           <Flex paddingRight="spacingS">
             <TextLink
-              icon={<ExternalLinkTrimmedIcon />}
+              icon={<ExternalLinkIcon />}
               alignIcon="end"
               href={checklistUrl.url}
               target="_blank"
