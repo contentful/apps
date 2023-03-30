@@ -9,6 +9,7 @@ import { CategoryPreviews } from './CategoryPreviews/CategoryPreviews';
 import { fetchProductPreviews } from '../api/fetchProductPreviews';
 import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
 import logo from '../logo.png';
+import { SAPParameters } from '../interfaces';
 
 interface Props {
   sdk: FieldExtensionSDK;
@@ -129,7 +130,7 @@ export default class Field extends React.Component<Props, State> {
 
     const isPickerTypeSetToCategory = this.getPickerMode() === 'category';
     const hasItems = data.length > 0;
-    const config = this.props.sdk.parameters.installation;
+    const config = this.props.sdk.parameters;
     const fieldType = get(this.props, ['sdk', 'field', 'type'], '');
 
     return (
@@ -143,7 +144,11 @@ export default class Field extends React.Component<Props, State> {
                 categories={data}
                 onChange={this.updateStateValue}
                 fetchCategoryPreviews={(categories) =>
-                  fetchCategoryPreviews(categories, config, this.props.applicationInterfaceKey)
+                  fetchCategoryPreviews(
+                    categories,
+                    config.installation,
+                    this.props.applicationInterfaceKey
+                  )
                 }
                 applicationInterfaceKey={this.props.applicationInterfaceKey}
               />
@@ -156,8 +161,7 @@ export default class Field extends React.Component<Props, State> {
                 fetchProductPreviews={(skus) =>
                   fetchProductPreviews(
                     skus,
-                    config,
-                    this.props.sdk.parameters,
+                    this.props.sdk.parameters as SAPParameters,
                     this.props.applicationInterfaceKey
                   )
                 }

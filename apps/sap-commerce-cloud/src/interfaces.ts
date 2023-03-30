@@ -1,4 +1,4 @@
-import { DialogExtensionSDK, FieldExtensionSDK } from '@contentful/app-sdk';
+import { DialogExtensionSDK, FieldExtensionSDK, ParametersAPI } from '@contentful/app-sdk';
 import { FieldsConfig } from './components/fields';
 
 /**
@@ -42,6 +42,13 @@ export interface ParameterDefinition {
    * Whether it is possible without providing a value.
    */
   required: boolean;
+}
+
+export interface SAPParameters extends ParametersAPI {
+  installation: {
+    apiEndpoint: string;
+    baseSites: string;
+  };
 }
 
 export interface Response {

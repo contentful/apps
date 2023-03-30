@@ -1,14 +1,11 @@
 import difference from 'lodash/difference';
-import { ConfigurationParameters, Product } from '../interfaces';
-//import { createRequestBuilder } from '@commercetools/api-request-builder';
-//import { makeCommerceToolsClient } from './makeCommercetoolsClient';
+import { Product, SAPParameters } from '../interfaces';
 import { productTransformer } from './dataTransformers';
 import { config } from '../config';
 
 export async function fetchProductPreviews(
   skus: string[],
-  parameters: any,
-  params: any,
+  parameters: SAPParameters,
   applicationInterfaceKey: string
 ): Promise<Product[]> {
   if (!skus.length) {
@@ -31,7 +28,7 @@ export async function fetchProductPreviews(
     const skuId = splitSku[1];
     skuIds.push(skuId);
     const response = await fetch(
-      parameters.apiEndpoint +
+      parameters.installation.apiEndpoint +
         `/occ/v2/${baseSite}/products/` +
         skuId +
         '?fields=code,name,summary,price(formattedValue,DEFAULT),images(galleryIndex,FULL),averageRating,stock(DEFAULT),description,availableForPickup,url,numberOfReviews,manufacturer,categories(FULL),priceRange,multidimensional,configuratorType,configurable,tags',
@@ -43,7 +40,7 @@ export async function fetchProductPreviews(
     }
   }
 
-  const products = totalResponse.map(productTransformer(parameters));
+  const products = totalResponse.map(productTransformer(parameters.installation));
   const foundSKUs = products.map((product: { sku: any }) => product.sku);
   const missingProducts = difference(skuIds, foundSKUs).map((sku) => ({
     sku,

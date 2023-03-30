@@ -1,8 +1,9 @@
 import { baseSiteTransformer } from './dataTransformers';
 import { config } from '../config';
+import { SAPParameters } from '../interfaces';
 
 export async function fetchBaseSites(
-  parameters: any,
+  parameters: SAPParameters,
   applicationInterfaceKey: string
 ): Promise<string[]> {
   const url = `${parameters.installation.apiEndpoint}/occ/v2/basesites`;

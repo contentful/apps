@@ -16,7 +16,7 @@ import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { ProductList } from './Dialog/ProductList';
 import { fetchProductList } from '../api/fetchProductList';
 import { fetchBaseSites } from '../api/fetchBaseSites';
-import { Error, Product } from '../interfaces';
+import { Error, Product, SAPParameters } from '../interfaces';
 import get from 'lodash/get';
 
 interface DialogProps {
@@ -58,7 +58,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
       this.state.baseSite,
       this.state.query,
       this.state.page,
-      this.props.sdk.parameters,
+      this.props.sdk.parameters as SAPParameters,
       this.updateTotalPages,
       this.props.applicationInterfaceKey
     );
@@ -74,7 +74,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
 
   loadBaseSites = async () => {
     const baseSites = await fetchBaseSites(
-      this.props.sdk.parameters,
+      this.props.sdk.parameters as SAPParameters,
       this.props.applicationInterfaceKey
     );
     let finalBaseSites: string[] = [];

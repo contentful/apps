@@ -1,4 +1,4 @@
-import { Response, UpdateTotalPagesFn } from '../interfaces';
+import { Response, SAPParameters, UpdateTotalPagesFn } from '../interfaces';
 import { productTransformer } from './dataTransformers';
 import { config } from '../config';
 
@@ -6,7 +6,7 @@ export async function fetchProductList(
   baseSite: string,
   searchQuery: string,
   page: number,
-  parameters: any,
+  parameters: SAPParameters,
   updateTotalPages: UpdateTotalPagesFn,
   applicationInterfaceKey: string
 ): Promise<Response> {
