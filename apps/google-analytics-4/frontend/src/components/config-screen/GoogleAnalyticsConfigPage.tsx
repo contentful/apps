@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AppExtensionSDK, AppState, EditorInterface } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { isEmpty } from 'lodash';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
 import { styles } from 'components/config-screen/GoogleAnalytics.styles';
 import Splitter from 'components/common/Splitter';
@@ -97,9 +98,19 @@ export default function GoogleAnalyticsConfigPage() {
   );
 
   const handleConfigure = useCallback(async () => {
-    // Service Account checks go here
-    if (!validKeyFile) {
+    // we are making assumption that serviceAccountKeyId presence means a valid key exists
+
+    // if no serviceAccountKeyId (most likely when user is saving on first install without providing a key)
+    if (isEmpty(parameters.serviceAccountKeyId)) {
       sdk.notifier.error('A valid service account key file is required');
+      return false;
+    }
+
+    // when a key has already been saved, page is in edit mode, and valid key file is undefined, make it clear to user they are saving an old config if not providing a new valid one
+    if (parameters.serviceAccountKeyId && isInEditMode && isEmpty(validKeyFile)) {
+      sdk.notifier.error(
+        'The original service account key will be saved unless a new valid service account key file is provided.'
+      );
       return false;
     }
 
@@ -164,9 +175,10 @@ export default function GoogleAnalyticsConfigPage() {
   }, [sdk]);
 
   const handleConfigurationCompleted = useCallback(async () => {
+    if (isEmpty(validKeyFile)) return;
     // Save valid google service account key file in backend
     setIsSavingPrivateKeyFile(true);
-    const keyFileSaved = validKeyFile && (await postServiceKeyFileToBackend(validKeyFile));
+    const keyFileSaved = await postServiceKeyFileToBackend(validKeyFile);
     setIsSavingPrivateKeyFile(false);
     if (!keyFileSaved) {
       sdk.notifier.error(
