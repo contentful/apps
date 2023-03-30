@@ -54,7 +54,7 @@ const graphqlRequest = async (config, query) => {
   return await response.json();
 };
 
-const paginatGraphQLRequest = async (config, ids, queryFunction) => {
+const paginateGraphQLRequest = async (config, ids, queryFunction) => {
   const requests = [];
   for (let i = 0; i < ids.length; i += SHOPIFY_ENTITY_LIMIT) {
     const currentIdPage = ids.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1));
@@ -97,7 +97,7 @@ export const fetchCollectionPreviews = async (skus, config) => {
 
   const validIds = filterAndDecodeValidIds(skus, 'Collection');
 
-  const response = await paginatGraphQLRequest(config, validIds, collectionQuery);
+  const response = await paginateGraphQLRequest(config, validIds, collectionQuery);
   const collections = response.map((res) => convertCollectionToBase64(res));
 
   return validIds.map((validId) => {
@@ -185,7 +185,7 @@ export const fetchProductVariantPreviews = async (skus, config) => {
 
   const validIds = filterAndDecodeValidIds(skus, 'ProductVariant');
 
-  const response = await paginatGraphQLRequest(config, validIds, productVariantQuery);
+  const response = await paginateGraphQLRequest(config, validIds, productVariantQuery);
   const nodes = response.filter(identity).map((node) => convertProductToBase64(node));
 
   const variantPreviews = nodes.map(previewsToProductVariants(config));
