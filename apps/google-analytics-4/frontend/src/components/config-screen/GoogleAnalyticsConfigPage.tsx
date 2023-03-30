@@ -98,8 +98,6 @@ export default function GoogleAnalyticsConfigPage() {
   );
 
   const handleConfigure = useCallback(async () => {
-    // we are making assumption that serviceAccountKeyId presence means a valid key exists
-
     // if no serviceAccountKeyId (most likely when user is saving on first install without providing a key)
     if (isEmpty(parameters.serviceAccountKeyId)) {
       sdk.notifier.error('A valid service account key file is required');
