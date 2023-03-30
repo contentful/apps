@@ -298,7 +298,7 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findByText(/Service account failed to access an Analytics property/);
+    await screen.findByText(/Service account doesn't have access to any GA4 properties/);
     expect(screen.getByTestId('arrow-icon')).toBeVisible();
   });
 
@@ -322,7 +322,7 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findByText(/Service account failed to access an Analytics property/);
+    await screen.findByText(/Service account doesn't have access to any GA4 properties/);
     expect(screen.getByTestId('error-icon')).toBeVisible();
   });
 });
