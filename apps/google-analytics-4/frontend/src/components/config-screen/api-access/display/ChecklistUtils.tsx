@@ -97,7 +97,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     success: {
       icon: getSuccessIcon(''),
       title: CHECKLIST_NAMES.serviceAccount,
-      description: 'Service account is correctly provided',
+      description: 'Service account key is valid',
       disabled: false,
     },
     invalid: {
