@@ -127,7 +127,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     },
     firstTimeSetup: {
       icon: getArrowIcon(
-        'The Google Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API inside your Google Cloud project to continue.'
+        'The Google Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API in your Google Cloud project to continue.'
       ),
       title: CHECKLIST_NAMES.adminApi,
       description: 'Google Analytics Admin API is not yet enabled',
@@ -143,7 +143,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     },
     error: {
       icon: getErrorIcon(
-        'The Google Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API inside your Google Cloud project.'
+        'The Google Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API in your Google Cloud project.'
       ),
       title: CHECKLIST_NAMES.adminApi,
       description: 'Google Analytics Admin API is not enabled',
@@ -159,7 +159,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     },
     firstTimeSetup: {
       icon: getArrowIcon(
-        'The Google Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API inside your Google Cloud project to continue.'
+        'The Google Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API in your Google Cloud project to continue.'
       ),
       title: CHECKLIST_NAMES.dataApi,
       description: 'Google Analytics Data API is not yet enabled',
@@ -175,7 +175,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     },
     error: {
       icon: getErrorIcon(
-        'The Google Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API inside your Google Cloud project.'
+        'The Google Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API in your Google Cloud project.'
       ),
       title: CHECKLIST_NAMES.dataApi,
       description: 'Google Analytics Data API is not enabled',
@@ -186,7 +186,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     success: {
       icon: getSuccessIcon(''),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Service account has "viewer" access',
+      description: 'Service account has “viewer” access',
       disabled: false,
       checklistUrl: {
         title: 'Details',
@@ -195,10 +195,10 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     },
     firstTimeSetup: {
       icon: getArrowIcon(
-        `You need to grant viewer access to your service account in a Google Analytics 4 property.`
+        `You need to grant “viewer” access to your service account in a Google Analytics 4 property.`
       ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: "Service account doesn't have access to any GA4 properties",
+      description: "Service account doesn't have access to a Google Analytics 4 property",
       disabled: false,
       checklistUrl: {
         title: 'Grant access',
@@ -207,7 +207,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     },
     firstTimeSetupNotEnabled: {
       icon: getClockIcon(
-        `You'll need to grant viewer access to your service account in a Google Analytics 4 property. This check will run once the ${CHECKLIST_NAMES.adminApi} has been enabled.`
+        `You'll need to grant “viewer” access to your service account in a Google Analytics 4 property. This check will run once the ${CHECKLIST_NAMES.adminApi} has been enabled.`
       ),
       title: CHECKLIST_NAMES.ga4Properties,
       description: `Enable Google Analytics Admin API to run this check`,
@@ -234,7 +234,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
         'The service account must have properties assigned to the account for this check to pass'
       ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: "Service account doesn't have access to any GA4 properties",
+      description: "Service account doesn't have access to a Google Analytics 4 property",
       disabled: false,
       checklistUrl: {
         title: 'Grant access',
@@ -326,10 +326,6 @@ export const getGa4PropertyErrorChecklistStatus = (
   adminApiError: ApiErrorType | undefined,
   ga4PropertiesError: ApiErrorType | undefined
 ): ChecklistRow => {
-  console.log('isFirstSetup', isFirstSetup);
-  console.log('invalidServiceAccountError', invalidServiceAccountError);
-  console.log('adminApiError', adminApiError);
-  console.log('ga4PropertiesError', ga4PropertiesError);
   if (!invalidServiceAccountError && !adminApiError && !ga4PropertiesError)
     return CHECKLIST_STATUSES.GA4Properties.success;
   if (isFirstSetup && adminApiError)

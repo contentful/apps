@@ -225,7 +225,7 @@ const DisplayServiceAccountCard = (props: Props) => {
       return isFirstSetup ? (
         <Badge variant="primary">Finish configuration steps below</Badge>
       ) : (
-        <Badge variant="negative">Problems with your configuration</Badge>
+        <Badge variant="negative">Problems with configuration</Badge>
       );
     } else if (unknownError) {
       return (
@@ -238,7 +238,7 @@ const DisplayServiceAccountCard = (props: Props) => {
       );
     }
 
-    return <Badge variant="positive">Access correctly configured</Badge>;
+    return <Badge variant="positive">Successfully configured</Badge>;
   };
 
   return (

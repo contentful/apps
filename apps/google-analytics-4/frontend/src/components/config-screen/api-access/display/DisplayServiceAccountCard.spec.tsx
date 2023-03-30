@@ -38,6 +38,6 @@ describe('Installed Service Account Card', () => {
     });
 
     await screen.findByText('Google Service Account Details');
-    await screen.findByText('Access correctly configured');
+    await screen.findByText('Successfully configured');
   });
 });

@@ -224,7 +224,7 @@ describe('Service Account Checklist', () => {
     await screen.findAllByText(/Service account key is not valid/);
     await screen.findAllByText(/Analytics Admin API is not yet enabled/);
     await screen.findAllByText(/Analytics Data API is not yet enabled/);
-    await screen.findAllByText(/Enable Analytics Admin API to run this check/);
+    await screen.findAllByText(/Enable Google Analytics Admin API to run this check/);
   });
 
   it('does not have the admin api enabled', async () => {
@@ -298,6 +298,6 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findByText(/Service account doesn't have access to any GA4 properties/);
+    await screen.findByText(/Service account doesn't have access to a Google Analytics 4 property/);
   });
 });
