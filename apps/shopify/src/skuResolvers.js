@@ -35,6 +35,46 @@ export async function makeShopifyClient(config) {
   });
 }
 
+const graphqlRequest = async (config, query) => {
+  const { apiEndpoint, storefrontAccessToken } = config;
+  const url = `https://${removeHttpsAndTrailingSlash(
+    apiEndpoint
+  )}/api/${SHOPIFY_API_VERSION}/graphql`;
+
+  const response = await window.fetch(url, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'x-shopify-storefront-access-token': storefrontAccessToken,
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  return await response.json();
+};
+
+/**
+ * Fetches a maximum of 250 previews per request.
+ */
+const collectionQuery = (validIds) => {
+  const queryIds = validIds.map((sku) => `"${sku}"`).join(',');
+  return `
+  {
+    nodes (ids: [${queryIds}]) {
+      id,
+      ...on Collection {
+        handle,
+        title,
+        image {
+          src
+        }
+      }
+    }
+  }
+  `;
+};
+
 /**
  * Fetches the collection previews for the collections selected by the user.
  */
@@ -44,21 +84,16 @@ export const fetchCollectionPreviews = async (skus, config) => {
   }
 
   const validIds = filterAndDecodeValidIds(skus, 'Collection');
-  const shopifyClient = await makeShopifyClient(config);
 
-  const response = await shopifyClient.collection.fetchAll(SHOPIFY_ENTITY_LIMIT);
-  if (response.length > 0) {
-    let hasNextPage = response.length === SHOPIFY_ENTITY_LIMIT;
-    while (hasNextPage && response[response.length - 1].hasNextPage) {
-      const nextPage = await shopifyClient.collection.fetchAll(
-        response[response.length - 1].nextPage
-      );
-      response.push(...nextPage);
+  const requests = [];
+  for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
+    const currentIdPage = validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1));
+    const query = collectionQuery(currentIdPage);
 
-      hasNextPage = nextPage.length === SHOPIFY_ENTITY_LIMIT;
-    }
+    requests.push(graphqlRequest(config, query));
   }
 
+  const response = (await Promise.all(requests)).flatMap((res) => res.data.nodes);
   const collections = response.map((res) => convertCollectionToBase64(res));
 
   return validIds.map((validId) => {
@@ -114,9 +149,9 @@ export const fetchProductPreviews = async (skus, config) => {
 /**
  * Fetches 250 product variant previews for the product selected by the user.
  */
-const _fetchProductVariantPreviews = async (validIds, config) => {
+const productVariantQuery = (validIds) => {
   const queryIds = validIds.map((sku) => `"${sku}"`).join(',');
-  const query = `
+  return `
   {
     nodes (ids: [${queryIds}]) {
       id,
@@ -134,23 +169,6 @@ const _fetchProductVariantPreviews = async (validIds, config) => {
     }
   }
   `;
-
-  const { apiEndpoint, storefrontAccessToken } = config;
-  const url = `https://${removeHttpsAndTrailingSlash(
-    apiEndpoint
-  )}/api/${SHOPIFY_API_VERSION}/graphql`;
-
-  const response = await window.fetch(url, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'x-shopify-storefront-access-token': storefrontAccessToken,
-    },
-    body: JSON.stringify({ query }),
-  });
-
-  return await response.json();
 };
 
 /**
@@ -166,7 +184,9 @@ export const fetchProductVariantPreviews = async (skus, config) => {
   const requests = [];
   for (let i = 0; i < validIds.length; i += SHOPIFY_ENTITY_LIMIT) {
     const currentIdPage = validIds.slice(i, i + (SHOPIFY_ENTITY_LIMIT - 1));
-    requests.push(_fetchProductVariantPreviews(currentIdPage, config));
+    const query = productVariantQuery(currentIdPage);
+
+    requests.push(graphqlRequest(config, query));
   }
 
   const response = (await Promise.all(requests)).flatMap((res) => res.data.nodes);
