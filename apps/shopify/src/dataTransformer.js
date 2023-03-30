@@ -17,8 +17,12 @@ export const decodeId = (sku) => {
  * Removes the protocol and trailing slash from a URL
  * This is a QOL for users who copy-paste the URL from the browser
  */
-export const removeHttpsAndTrailingSlash = (url) =>
-  url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+export const removeHttpsAndTrailingSlash = (url) => {
+  const protocol = /^https?:\/\/(www\.)?/;
+  const trailingSlash = /\/$/;
+
+  return url.replace(protocol, '').replace(trailingSlash, '');
+};
 
 /**
  * Transforms the API response of Shopify collections into
@@ -34,7 +38,7 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
     collectionId &&
     `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/collections/${collectionId}`;
 
-  return {
+  const result = {
     id: collection.id,
     image,
     name: collection.title,
@@ -42,6 +46,8 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
     sku: collection.id,
     ...(externalLink ? { externalLink } : {}),
   };
+
+  return result;
 };
 
 /**
@@ -58,7 +64,7 @@ export const productDataTransformer = (product, apiEndpoint) => {
     productId &&
     `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/products/${productId}`;
 
-  return {
+  const productData = {
     id: product.id,
     image,
     name: product.title,
@@ -66,6 +72,9 @@ export const productDataTransformer = (product, apiEndpoint) => {
     sku: product.id,
     ...(externalLink ? { externalLink } : {}),
   };
+
+  console.log(productData);
+  return productData;
 };
 
 /**
@@ -123,6 +132,6 @@ export const previewsToProductVariants =
       displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${id}`,
       productId: product.id,
       name: title === DEFAULT_SHOPIFY_VARIANT_TITLE ? product.title : `${product.title} (${title})`,
-      ...(externalLink ? { externalLink } : {}),
+      ...(externalLink && { externalLink }),
     };
   };
