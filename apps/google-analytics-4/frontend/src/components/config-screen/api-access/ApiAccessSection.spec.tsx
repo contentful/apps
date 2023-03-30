@@ -21,6 +21,7 @@ describe('Config Screen component (not installed)', () => {
           onInEditModeChange={() => {}}
           onHasServiceCheckErrorsChange={() => {}}
           onKeyFileUpdate={() => {}}
+          onIsApiAccessLoading={() => {}}
         />
       );
     });

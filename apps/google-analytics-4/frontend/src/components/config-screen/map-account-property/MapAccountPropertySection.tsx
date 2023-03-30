@@ -1,36 +1,45 @@
 import { useState, useEffect } from 'react';
-import {
-  Stack,
-  Box,
-  Subheading,
-  Select,
-  Spinner,
-  Paragraph,
-  TextLink,
-  FormControl,
-} from '@contentful/f36-components';
+import { Stack, Box, Subheading, Spinner, Paragraph } from '@contentful/f36-components';
 import { AccountSummariesType } from 'types';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import MapAccountPropertyDropdown from 'components/config-screen/map-account-property/MapAccountPropertyDropdown';
 
 interface Props {
   accountsSummaries: AccountSummariesType[];
   parameters: KeyValueMap;
   mergeSdkParameters: Function;
   onIsValidAccountProperty: Function;
+  originalPropertyId: string;
+  isApiAccessLoading: boolean;
 }
 
-const getIdOnly = (unformattedId: string) => {
-  return unformattedId.split('/')[1];
-};
-
 export default function MapAccountPropertySection(props: Props) {
-  const { accountsSummaries, parameters, mergeSdkParameters, onIsValidAccountProperty } = props;
+  const {
+    accountsSummaries,
+    parameters,
+    mergeSdkParameters,
+    onIsValidAccountProperty,
+    originalPropertyId,
+    isApiAccessLoading,
+  } = props;
 
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [sortedAccountSummaries, setSortedAccountSummaries] = useState<AccountSummariesType[]>([]);
   const [loadingProperties, setLoadingProperties] = useState<boolean>(true);
   const [loadingParameters, setLoadingParameters] = useState<boolean>(true);
+  const [isPropertyIdInOptions, setIsPropertyIdInOptions] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (parameters.propertyId === originalPropertyId) {
+      const isInOptions = sortedAccountSummaries.some((accountSummary) => {
+        return accountSummary.propertySummaries.some((propertySummary) => {
+          return propertySummary.property === originalPropertyId;
+        });
+      });
+
+      setIsPropertyIdInOptions(isInOptions);
+    }
+  }, [sortedAccountSummaries, originalPropertyId, parameters.propertyId]);
 
   useEffect(() => {
     if (parameters.propertyId) {
@@ -57,20 +66,11 @@ export default function MapAccountPropertySection(props: Props) {
     setLoadingProperties(false);
   }, [accountsSummaries]);
 
-  const handleSelectionChange = (e: any) => {
+  const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const _selectedPropertyId = e.target.value;
     setSelectedPropertyId(_selectedPropertyId);
     mergeSdkParameters({ propertyId: _selectedPropertyId });
     onIsValidAccountProperty(true);
-  };
-
-  const shouldRenderDropdown = () => {
-    return (
-      !loadingProperties &&
-      !loadingParameters &&
-      accountsSummaries.length &&
-      sortedAccountSummaries.length
-    );
   };
 
   return (
@@ -83,42 +83,14 @@ export default function MapAccountPropertySection(props: Props) {
         </Paragraph>
       </div>
       <Box marginTop="none">
-        {shouldRenderDropdown() ? (
-          <FormControl>
-            <Select
-              testId="accountPropertyDropdown"
-              value={selectedPropertyId}
-              onChange={handleSelectionChange}>
-              <Select.Option key="empty option" value="" isDisabled>
-                Select a property...
-              </Select.Option>
-              {sortedAccountSummaries.map((accountSummary: AccountSummariesType) => (
-                <optgroup
-                  label={`${accountSummary.displayName} (${getIdOnly(accountSummary.account)})`}
-                  key={accountSummary.account}>
-                  {accountSummary.propertySummaries.map((propertySummary) => (
-                    <Select.Option key={propertySummary.property} value={propertySummary.property}>
-                      {`${propertySummary.displayName} (${getIdOnly(propertySummary.property)})`}
-                    </Select.Option>
-                  ))}
-                </optgroup>
-              ))}
-            </Select>
-            <FormControl.HelpText marginTop="spacingM">
-              If you don't see a property in the dropdown, make sure the Google service account
-              installed above has been given "viewer" access to it in Google Analytics.{' '}
-              <em>Note:</em> Only Google Analytics 4 properties are listed; Google "Universal
-              Analytics" properties are not supported. See{' '}
-              <TextLink
-                href="https://support.google.com/analytics/answer/10759417"
-                target="_blank"
-                icon={<ExternalLinkIcon />}
-                alignIcon="end">
-                "Make the switch to Google Analytics 4"
-              </TextLink>{' '}
-              for more information.
-            </FormControl.HelpText>
-          </FormControl>
+        {!loadingProperties && !loadingParameters && !isApiAccessLoading ? (
+          <MapAccountPropertyDropdown
+            onSelectionChange={handleSelectionChange}
+            isPropertyIdInOptions={isPropertyIdInOptions}
+            selectedPropertyId={selectedPropertyId}
+            sortedAccountSummaries={sortedAccountSummaries}
+            originalPropertyId={originalPropertyId}
+          />
         ) : (
           <Spinner variant="primary" />
         )}

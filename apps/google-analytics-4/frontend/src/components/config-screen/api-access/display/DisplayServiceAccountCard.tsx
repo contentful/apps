@@ -34,6 +34,7 @@ interface Props {
   parameters: KeyValueMap;
   onHasServiceCheckErrorsChange: Function;
   isSavingPrivateKeyFile: boolean;
+  onIsApiAccessLoading: Function;
 }
 
 const DisplayServiceAccountCard = (props: Props) => {
@@ -45,6 +46,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     parameters,
     onHasServiceCheckErrorsChange,
     isSavingPrivateKeyFile,
+    onIsApiAccessLoading,
   } = props;
 
   const [isLoadingAdminApi, setIsLoadingAdminApi] = useState(true);
@@ -96,6 +98,7 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   const verifyAdminApi = useCallback(async () => {
     try {
+      onIsApiAccessLoading(true);
       setIsLoadingAdminApi(true);
       const fetchedAccountSummaries = await api.listAccountSummaries();
       setAccountsSummaries(fetchedAccountSummaries);
@@ -115,6 +118,7 @@ const DisplayServiceAccountCard = (props: Props) => {
         throw e;
       }
     } finally {
+      onIsApiAccessLoading(false);
       setIsLoadingAdminApi(false);
     }
 

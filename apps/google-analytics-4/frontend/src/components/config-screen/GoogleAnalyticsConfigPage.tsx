@@ -31,6 +31,7 @@ export default function GoogleAnalyticsConfigPage() {
   const [hasServiceCheckErrors, setHasServiceCheckErrors] = useState<boolean>(true);
   const [validKeyFile, setValidKeyFile] = useState<ServiceAccountKey | undefined>();
   const [isSavingPrivateKeyFile, setIsSavingPrivateKeyFile] = useState<boolean>(false);
+  const [isApiAccessLoading, setIsApiAccessLoading] = useState(true);
 
   const sdk = useSDK<AppExtensionSDK>();
   const cma = useCMA();
@@ -112,13 +113,13 @@ export default function GoogleAnalyticsConfigPage() {
       return false;
     }
 
-    // Account to Property checks go here
+    // Property checks go here
     if (!isValidAccountProperty && isAppInstalled && !isInEditMode) {
-      sdk.notifier.error('A valid account and property selection is required');
+      sdk.notifier.error('A valid property selection is required');
       return false;
     }
 
-    // Account to Property checks go here
+    // Content types checks go here
     if (!isValidContentTypeAssignment && isAppInstalled && !isInEditMode) {
       sdk.notifier.error('Invalid content types assignment');
       return false;
@@ -206,6 +207,10 @@ export default function GoogleAnalyticsConfigPage() {
     setAccountsSummaries(_accountSummaries);
   };
 
+  const handleIsApiAccessLoading = (_isLoadingAdminApi: boolean) => {
+    setIsApiAccessLoading(_isLoadingAdminApi);
+  };
+
   const handleInEditModeChange = (_isInEditMode: boolean) => {
     setIsInEditMode(_isInEditMode);
   };
@@ -234,6 +239,7 @@ export default function GoogleAnalyticsConfigPage() {
           onInEditModeChange={handleInEditModeChange}
           onHasServiceCheckErrorsChange={handleHasServiceCheckErrorsChange}
           onKeyFileUpdate={handleKeyFileUpdate}
+          onIsApiAccessLoading={handleIsApiAccessLoading}
         />
         {isAppInstalled && showPropertyDropdownAndContentTypeSection() && (
           <>
@@ -243,6 +249,8 @@ export default function GoogleAnalyticsConfigPage() {
               parameters={parameters}
               onIsValidAccountProperty={handleIsValidAccountProperty}
               mergeSdkParameters={mergeSdkParameters}
+              originalPropertyId={originalParameters.propertyId ?? ''}
+              isApiAccessLoading={isApiAccessLoading}
             />
             <Splitter />
             <AssignContentTypeSection
