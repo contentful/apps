@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@commercetools/platform-sdk": "2.7.0",
-    "@commercetools/sdk-client-v2": "1.4.0",
+    "@commercetools/sdk-client-v2": "1.4.2",
     "@contentful/app-scripts": "1.2.0",
     "@contentful/app-sdk": "4.9.0",
     "@contentful/ecommerce-app-base": "3.1.0",
