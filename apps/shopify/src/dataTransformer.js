@@ -38,16 +38,14 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
     collectionId &&
     `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/collections/${collectionId}`;
 
-  const result = {
+  return {
     id: collection.id,
     image,
     name: collection.title,
     displaySKU: handle ? `Handle: ${handle}` : `Collection ID: ${collection.id}`,
     sku: collection.id,
-    ...(externalLink ? { externalLink } : {}),
+    ...(externalLink && { externalLink }),
   };
-
-  return result;
 };
 
 /**
@@ -64,17 +62,14 @@ export const productDataTransformer = (product, apiEndpoint) => {
     productId &&
     `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/products/${productId}`;
 
-  const productData = {
+  return {
     id: product.id,
     image,
     name: product.title,
     displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${product.id}`,
     sku: product.id,
-    ...(externalLink ? { externalLink } : {}),
+    ...(externalLink && { externalLink }),
   };
-
-  console.log(productData);
-  return productData;
 };
 
 /**
