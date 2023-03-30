@@ -19,8 +19,8 @@ export const convertStringToBase64 = (str) => {
 export const convertProductToBase64 = (res) => {
   return {
     ...res,
-    id: convertStringToBase64(res.id),
-    product: res.product && { ...res.product, id: convertStringToBase64(res.product.id) },
+    id: convertStringToBase64(res?.id),
+    product: res?.product && { ...res?.product, id: convertStringToBase64(res?.product.id) },
   };
 };
 
