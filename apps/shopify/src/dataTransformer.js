@@ -44,7 +44,7 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
     name: collection.title,
     displaySKU: handle ? `Handle: ${handle}` : `Collection ID: ${collection.id}`,
     sku: collection.id,
-    ...(externalLink && { externalLink }),
+    ...{ externalLink },
   };
 };
 
@@ -68,7 +68,7 @@ export const productDataTransformer = (product, apiEndpoint) => {
     name: product.title,
     displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${product.id}`,
     sku: product.id,
-    ...(externalLink && { externalLink }),
+    ...{ externalLink },
   };
 };
 
@@ -127,6 +127,6 @@ export const previewsToProductVariants =
       displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${id}`,
       productId: product.id,
       name: title === DEFAULT_SHOPIFY_VARIANT_TITLE ? product.title : `${product.title} (${title})`,
-      ...(externalLink && { externalLink }),
+      ...{ externalLink },
     };
   };
