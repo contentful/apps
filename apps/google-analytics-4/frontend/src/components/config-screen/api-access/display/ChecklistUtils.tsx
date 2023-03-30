@@ -122,15 +122,15 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     success: {
       icon: getSuccessIcon(''),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Analytics Admin API is enabled',
+      description: 'Google Analytics Admin API is enabled',
       disabled: false,
     },
     firstTimeSetup: {
       icon: getArrowIcon(
-        'The Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API inside your Google Cloud project to continue.'
+        'The Google Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API inside your Google Cloud project to continue.'
       ),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Analytics Admin API is not yet enabled',
+      description: 'Google Analytics Admin API is not yet enabled',
       disabled: false,
     },
     invalidServiceAccount: {
@@ -143,10 +143,10 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     },
     error: {
       icon: getErrorIcon(
-        'The Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API inside your Google Cloud project.'
+        'The Google Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API inside your Google Cloud project.'
       ),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Analytics Admin API is not enabled',
+      description: 'Google Analytics Admin API is not enabled',
       disabled: false,
     },
   },
@@ -154,15 +154,15 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     success: {
       icon: getSuccessIcon(''),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Analytics Data API is enabled',
+      description: 'Google Analytics Data API is enabled',
       disabled: false,
     },
     firstTimeSetup: {
       icon: getArrowIcon(
-        'The Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API inside your Google Cloud project to continue.'
+        'The Google Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API inside your Google Cloud project to continue.'
       ),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Analytics Data API is not yet enabled',
+      description: 'Google Analytics Data API is not yet enabled',
       disabled: false,
     },
     invalidServiceAccount: {
@@ -175,10 +175,10 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
     },
     error: {
       icon: getErrorIcon(
-        'The Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API inside your Google Cloud project.'
+        'The Google Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API inside your Google Cloud project.'
       ),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Analytics Data API is not enabled',
+      description: 'Google Analytics Data API is not enabled',
       disabled: false,
     },
   },
@@ -210,7 +210,7 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
         `You'll need to grant viewer access to your service account in a Google Analytics 4 property. This check will run once the ${CHECKLIST_NAMES.adminApi} has been enabled.`
       ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: `Enable Analytics Admin API to run this check`,
+      description: `Enable Google Analytics Admin API to run this check`,
       disabled: true,
     },
     invalidServiceAccount: {
@@ -222,9 +222,11 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
       disabled: true,
     },
     adminApiError: {
-      icon: getClockIcon('This check will not run until the Analytics Admin API has been enabled'),
+      icon: getClockIcon(
+        'This check will not run until the Google Analytics Admin API has been enabled'
+      ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Enable Analytics Admin API to run this check',
+      description: 'Enable Google Analytics Admin API to run this check',
       disabled: true,
     },
     error: {
