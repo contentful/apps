@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AppExtensionSDK, AppState, EditorInterface } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { isEmpty } from 'lodash';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
 import { styles } from 'components/config-screen/GoogleAnalytics.styles';
 import Splitter from 'components/common/Splitter';
@@ -30,6 +31,7 @@ export default function GoogleAnalyticsConfigPage() {
   const [hasServiceCheckErrors, setHasServiceCheckErrors] = useState<boolean>(true);
   const [validKeyFile, setValidKeyFile] = useState<ServiceAccountKey | undefined>();
   const [isSavingPrivateKeyFile, setIsSavingPrivateKeyFile] = useState<boolean>(false);
+  const [isApiAccessLoading, setIsApiAccessLoading] = useState(true);
 
   const sdk = useSDK<AppExtensionSDK>();
   const cma = useCMA();
@@ -97,19 +99,27 @@ export default function GoogleAnalyticsConfigPage() {
   );
 
   const handleConfigure = useCallback(async () => {
-    // Service Account checks go here
-    if (!validKeyFile) {
+    // if no serviceAccountKeyId (most likely when user is saving on first install without providing a key)
+    if (isEmpty(parameters.serviceAccountKeyId)) {
       sdk.notifier.error('A valid service account key file is required');
       return false;
     }
 
-    // Account to Property checks go here
-    if (!isValidAccountProperty && isAppInstalled && !isInEditMode) {
-      sdk.notifier.error('A valid account and property selection is required');
+    // when a key has already been saved, page is in edit mode, and valid key file is undefined, make it clear to user they are saving an old config if not providing a new valid one
+    if (parameters.serviceAccountKeyId && isInEditMode && isEmpty(validKeyFile)) {
+      sdk.notifier.error(
+        'The original service account key will be saved unless a new valid service account key file is provided.'
+      );
       return false;
     }
 
-    // Account to Property checks go here
+    // Property checks go here
+    if (!isValidAccountProperty && isAppInstalled && !isInEditMode) {
+      sdk.notifier.error('A valid property selection is required');
+      return false;
+    }
+
+    // Content types checks go here
     if (!isValidContentTypeAssignment && isAppInstalled && !isInEditMode) {
       sdk.notifier.error('Invalid content types assignment');
       return false;
@@ -164,9 +174,10 @@ export default function GoogleAnalyticsConfigPage() {
   }, [sdk]);
 
   const handleConfigurationCompleted = useCallback(async () => {
+    if (isEmpty(validKeyFile)) return;
     // Save valid google service account key file in backend
     setIsSavingPrivateKeyFile(true);
-    const keyFileSaved = validKeyFile && (await postServiceKeyFileToBackend(validKeyFile));
+    const keyFileSaved = await postServiceKeyFileToBackend(validKeyFile);
     setIsSavingPrivateKeyFile(false);
     if (!keyFileSaved) {
       sdk.notifier.error(
@@ -194,6 +205,10 @@ export default function GoogleAnalyticsConfigPage() {
   /** Shared state between ApiAccessSection and MapAccountPropertySection **/
   const handleAccountSummariesChange = (_accountSummaries: any[]) => {
     setAccountsSummaries(_accountSummaries);
+  };
+
+  const handleIsApiAccessLoading = (_isLoadingAdminApi: boolean) => {
+    setIsApiAccessLoading(_isLoadingAdminApi);
   };
 
   const handleInEditModeChange = (_isInEditMode: boolean) => {
@@ -224,6 +239,7 @@ export default function GoogleAnalyticsConfigPage() {
           onInEditModeChange={handleInEditModeChange}
           onHasServiceCheckErrorsChange={handleHasServiceCheckErrorsChange}
           onKeyFileUpdate={handleKeyFileUpdate}
+          onIsApiAccessLoading={handleIsApiAccessLoading}
         />
         {isAppInstalled && showPropertyDropdownAndContentTypeSection() && (
           <>
@@ -233,6 +249,8 @@ export default function GoogleAnalyticsConfigPage() {
               parameters={parameters}
               onIsValidAccountProperty={handleIsValidAccountProperty}
               mergeSdkParameters={mergeSdkParameters}
+              originalPropertyId={originalParameters.propertyId ?? ''}
+              isApiAccessLoading={isApiAccessLoading}
             />
             <Splitter />
             <AssignContentTypeSection

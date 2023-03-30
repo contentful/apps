@@ -9,7 +9,12 @@ import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
 
 const sandbox = sinon.createSandbox();
 
-function buildSignedHeaders(method: any, path: string, headers: any, secret: string) {
+function buildSignedHeaders(
+  method: NodeAppsToolkit.CanonicalRequest['method'],
+  path: string,
+  headers: NodeAppsToolkit.CanonicalRequest['headers'],
+  secret: string
+) {
   const timestamp = Date.now();
   const rawRequest = { method, path, headers };
   const signatureHeaders = NodeAppsToolkit.signRequest(secret, rawRequest, timestamp);

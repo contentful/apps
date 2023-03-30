@@ -20,7 +20,7 @@ export class ProductList extends React.Component<Props> {
 
   render() {
     const isFieldTypeSymbol =
-      get(this.props.sdk.parameters.invocation, 'fieldType', '') === 'Symbol';
+      (get(this.props.sdk.parameters.invocation, 'fieldType', '') as string) === 'Symbol';
 
     return (
       <>

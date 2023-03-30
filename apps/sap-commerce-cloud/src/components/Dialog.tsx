@@ -143,7 +143,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
   };
 
   selectMultipleProductsClickEvent = () => {
-    let finalValue = get(this.props.sdk.parameters.invocation, 'fieldValue', []);
+    let finalValue = get(this.props.sdk.parameters.invocation, 'fieldValue', [] as string[]);
     finalValue = finalValue.concat(this.state.selectedProducts);
     this.props.sdk.close(finalValue);
   };
@@ -163,7 +163,8 @@ export default class Dialog extends React.Component<DialogProps, State> {
   };
 
   render() {
-    const isFieldTypeArray = get(this.props.sdk.parameters.invocation, 'fieldType', '') === 'Array';
+    const isFieldTypeArray =
+      (get(this.props.sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
     return (
       <>
         <Grid

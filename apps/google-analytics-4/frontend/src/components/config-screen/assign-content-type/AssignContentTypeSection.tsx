@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Paragraph, Stack, Subheading, Button, Spinner, Box } from '@contentful/f36-components';
+import {
+  Paragraph,
+  Stack,
+  Subheading,
+  Button,
+  Spinner,
+  Box,
+  TextLink,
+} from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { ContentTypeProps, createClient } from 'contentful-management';
 import { AppExtensionSDK, EditorInterface } from '@contentful/app-sdk';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
@@ -148,10 +157,21 @@ const AssignContentTypeSection = (props: Props) => {
     <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
       <Box>
         <Subheading marginBottom="spacingXs">Content type configuration</Subheading>
+        <Paragraph>
+          Configure content types below that are connected to pages on your website where you're
+          tracking Google Analytics data. You'll need to specify the "slug" field used to generate
+          the page path in your website's URL, and optionally a "prefix" if one exists in front of
+          the URL page path.
+        </Paragraph>
         <Paragraph marginBottom="none">
-          Select which content types will show the Google Analytics functionality in the sidebar.
-          Specify the slug field that is used for URL generation in your application. Optionally,
-          specify a prefix for the slug.
+          <TextLink
+            /* TODO: Correct this wrong link. (WRONG below in copy is intentional to ensure we don't forget) */
+            href="https://support.google.com/analytics/answer/10759417"
+            target="_blank"
+            icon={<ExternalLinkIcon />}
+            alignIcon="end">
+            WRONG See our help documentation for more details
+          </TextLink>
         </Paragraph>
       </Box>
       {!loadingContentTypes && !loadingAllContentTypes ? (

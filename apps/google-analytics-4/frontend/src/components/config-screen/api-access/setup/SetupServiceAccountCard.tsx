@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Stack,
   Card,
@@ -63,6 +63,16 @@ export default function SetupServiceAccountCard(props: Props) {
       mergeSdkParameters(_parameters);
     } catch (e: any) {
       onKeyFileUpdate(undefined);
+
+      // if not edit mode, so first install, merge params as undefined when error thrown.
+      // prevents the case when user pastes a valid key (saved in parameters optimistically)
+      // and then erases key but still tries to install
+      if (!isInEditMode) {
+        const _parameters = {
+          serviceAccountKeyId: undefined,
+        };
+        mergeSdkParameters(_parameters);
+      }
       // failed assertions about key file contents or could not parse as JSON
       if (e instanceof AssertionError || e instanceof SyntaxError) {
         setErrorMessage(e.message);
@@ -146,7 +156,7 @@ export default function SetupServiceAccountCard(props: Props) {
         </FormControl>
       </Card>
       <Paragraph marginBottom="none">
-        To use the Google Analytics app, you will need to provision a{' '}
+        The Google Analytics 4 app requires a{' '}
         <TextLink
           icon={<ExternalLinkTrimmedIcon />}
           alignIcon="end"
@@ -155,11 +165,12 @@ export default function SetupServiceAccountCard(props: Props) {
           rel="noopener noreferrer">
           Google Cloud service account
         </TextLink>{' '}
-        for which you enable <i>read access</i> to your organization's Google Analytics data.
+        with "viewer" access to one of your organization's Google Analytics 4 properties.
       </Paragraph>
       <Paragraph marginBottom="none">
-        After configuring the service account, you'll download a set of credentials that Contentful
-        will use to access Google Analytics 4 data on this service account's behalf.
+        After configuring the service account, you will create and download a service account key
+        file (JSON) that connects this Contentful space to the Google Analytics 4 property you
+        specify.
       </Paragraph>
     </Stack>
   );

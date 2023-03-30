@@ -1,4 +1,4 @@
-import { ServiceAccountKey, ServiceAccountKeyId } from '../../src/types';
+import { ServiceAccountKey, ServiceAccountKeyId, AccountSummariesType } from '../../src/types';
 
 export { mockCma } from './mockCma';
 export { mockSdk } from './mockSdk';
@@ -23,3 +23,44 @@ export const validServiceKeyId: ServiceAccountKeyId = {
   clientEmail: validServiceKeyFile.client_id,
   projectId: validServiceKeyFile.project_id,
 };
+
+export const mockAccountSummaries: AccountSummariesType[] = [
+  {
+    propertySummaries: [
+      {
+        property: 'properties/354562715',
+        displayName: 'property1',
+        propertyType: 'PROPERTY_TYPE_ORDINARY',
+        parent: 'accounts/257755730',
+      },
+      {
+        property: 'properties/354612161',
+        displayName: 'property2',
+        propertyType: 'PROPERTY_TYPE_ORDINARY',
+        parent: 'accounts/257755730',
+      },
+      {
+        property: 'properties/355035053',
+        displayName: 'beast',
+        propertyType: 'PROPERTY_TYPE_ORDINARY',
+        parent: 'accounts/257755730',
+      },
+    ],
+    name: 'accountSummaries/257755730',
+    account: 'accounts/257755730',
+    displayName: 'contentful-fake-test',
+  },
+  {
+    propertySummaries: [
+      {
+        property: 'properties/354946822',
+        displayName: 'property-1',
+        propertyType: 'PROPERTY_TYPE_ORDINARY',
+        parent: 'accounts/258082603',
+      },
+    ],
+    name: 'accountSummaries/258082603',
+    account: 'accounts/258082603',
+    displayName: 'contentful-fake-test-2',
+  },
+];

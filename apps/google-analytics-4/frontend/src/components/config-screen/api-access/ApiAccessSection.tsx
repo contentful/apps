@@ -13,6 +13,7 @@ interface Props {
   onInEditModeChange: Function;
   onHasServiceCheckErrorsChange: Function;
   onKeyFileUpdate: Function;
+  onIsApiAccessLoading: Function;
 }
 
 const ApiAccessSection = (props: Props) => {
@@ -26,6 +27,7 @@ const ApiAccessSection = (props: Props) => {
     onInEditModeChange,
     onHasServiceCheckErrorsChange,
     onKeyFileUpdate,
+    onIsApiAccessLoading,
   } = props;
 
   return (
@@ -45,6 +47,7 @@ const ApiAccessSection = (props: Props) => {
           isAppInstalled={isAppInstalled}
           parameters={parameters}
           onHasServiceCheckErrorsChange={onHasServiceCheckErrorsChange}
+          onIsApiAccessLoading={onIsApiAccessLoading}
         />
       ) : (
         <SetupServiceAccountCard
