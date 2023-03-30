@@ -4,14 +4,19 @@ import GoogleAnalyticsConfigPage from 'components/config-screen/GoogleAnalyticsC
 import { config } from 'config';
 import { validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
+import * as useSDK from '@contentful/react-apps-toolkit';
 import { ServiceAccountKey } from 'types';
+import { NotifierAPI } from '@contentful/app-sdk';
 
 const apiRoot = config.backendApiUrl;
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: () => mockSdk,
-  useCMA: () => mockCma,
-}));
+jest.mock('@contentful/react-apps-toolkit', () => ({ useSDK: jest.fn(), useCMA: jest.fn() }));
+
+// jest.mock('@contentful/react-apps-toolkit', () => ({
+//   useSDK: () => mockSdk,
+//   ...jest.requireActual('@contentful/react-apps-toolkit'),
+//   useCMA: () => mockCma,
+// }));
 
 jest.mock('contentful-management', () => ({
   createClient: () => mockCma,
@@ -36,7 +41,84 @@ describe('Google Analytics Page', () => {
   });
 });
 
-xdescribe('Config Screen component (not installed)', () => {
+describe.only('Google Analytics config page with errors', () => {
+  const mockNotifier = jest.fn();
+  beforeEach(() => {
+    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      ...mockSdk,
+      app: {
+        ...mockSdk.app,
+        onConfigure: jest.fn((cb) => cb()),
+        onConfigurationCompleted: jest.fn((cb) => cb()) as unknown,
+      },
+      notifier: {
+        error: mockNotifier,
+      } as unknown as NotifierAPI,
+    }));
+  });
+  it('renders error message if user tries to install app without service key', async () => {
+    const user = userEvent.setup();
+    await act(async () => {
+      render(<GoogleAnalyticsConfigPage />);
+    });
+
+    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+    await user.click(keyFileInputBox);
+
+    await waitFor(() => {
+      expect(mockNotifier).toHaveBeenCalledWith('A valid service account key file is required');
+    });
+  });
+
+  it('renders error message when user interacts with input, does not input key, but tries to install app', async () => {
+    const user = userEvent.setup();
+    await act(async () => {
+      render(<GoogleAnalyticsConfigPage />);
+    });
+    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+
+    await user.click(keyFileInputBox);
+
+    await waitFor(() => {
+      expect(mockNotifier).toHaveBeenCalledWith('A valid service account key file is required');
+    });
+  });
+
+  it.only('renders error message when user interacts with input, does not input key, but tries to install app', async () => {
+    mockSdk.app.getParameters.mockReturnValue({
+      serviceAccountKeyId: validServiceKeyId,
+      propertyId: 'properties/1234',
+      contentTypes: {
+        course: { slugField: 'shortDescription', urlPrefix: 'about' },
+      },
+    });
+    mockSdk.app.isInstalled.mockReturnValue(true);
+    const user = userEvent.setup();
+    await act(async () => {
+      render(<GoogleAnalyticsConfigPage />);
+    });
+
+    await user.click(screen.getByText('Edit'));
+
+    // const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+
+    // await user.click(keyFileInputBox);
+
+    // await waitFor(() => {
+    //   expect(mockNotifier).toHaveBeenCalledWith('The original service account key will be saved unless a new valid service account key file is provided.');
+    // })
+  });
+});
+
+describe('Config Screen component (not installed)', () => {
+  beforeAll(() => {
+    jest.mock('@contentful/react-apps-toolkit', () => ({
+      useSDK: () => mockSdk,
+      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      useCMA: () => mockCma,
+    }));
+  });
   it('allows the app to be installed with a valid service key file', async () => {
     render(<GoogleAnalyticsConfigPage />);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
