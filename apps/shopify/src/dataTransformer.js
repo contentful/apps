@@ -1,8 +1,24 @@
 import get from 'lodash/get';
-import last from 'lodash/last';
 import flatten from 'lodash/flatten';
 import { DEFAULT_SHOPIFY_VARIANT_TITLE } from './constants';
 import { convertBase64ToString, convertStringToBase64 } from './utils/base64';
+
+/**
+ * Decodes the ID of a Shopify resource
+ * The ID is encoded in base64 and the actual ID is the last part of the string
+ * e.g. gid://shopify/Product/1234567890 -> 1234567890
+ */
+export const decodeId = (sku) => {
+  const decodedId = convertBase64ToString(sku);
+  return decodedId && decodedId.slice(decodedId.lastIndexOf('/') + 1);
+};
+
+/**
+ * Removes the protocol and trailing slash from a URL
+ * This is a QOL for users who copy-paste the URL from the browser
+ */
+export const removeHttpsAndTrailingSlash = (url) =>
+  url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 
 /**
  * Transforms the API response of Shopify collections into
@@ -12,21 +28,11 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
   const image = get(collection, ['image', 'src'], '');
   const handle = get(collection, ['handle'], undefined);
 
-  let externalLink;
-
-  if (apiEndpoint) {
-    try {
-      const collectionIdDecoded = convertBase64ToString(collection.id);
-      const collectionId =
-        collectionIdDecoded && collectionIdDecoded.slice(collectionIdDecoded.lastIndexOf('/') + 1);
-
-      if (apiEndpoint && collectionId) {
-        externalLink = `https://${apiEndpoint}${
-          last(apiEndpoint) === '/' ? '' : '/'
-        }admin/collections/${collectionId}`;
-      }
-    } catch {}
-  }
+  const collectionId = decodeId(collection.id);
+  const externalLink =
+    apiEndpoint &&
+    collectionId &&
+    `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/collections/${collectionId}`;
 
   return {
     id: collection.id,
@@ -45,21 +51,12 @@ export const collectionDataTransformer = (collection, apiEndpoint) => {
 export const productDataTransformer = (product, apiEndpoint) => {
   const image = get(product, ['images', 0, 'src'], '');
   const sku = get(product, ['variants', 0, 'sku'], undefined);
-  let externalLink;
 
-  if (apiEndpoint) {
-    try {
-      const productIdDecoded = convertBase64ToString(product.id);
-      const productId =
-        productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
-
-      if (apiEndpoint && productId) {
-        externalLink = `https://${apiEndpoint}${
-          last(apiEndpoint) === '/' ? '' : '/'
-        }admin/products/${productId}`;
-      }
-    } catch {}
-  }
+  const productId = decodeId(product.id);
+  const externalLink =
+    apiEndpoint &&
+    productId &&
+    `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/products/${productId}`;
 
   return {
     id: product.id,
@@ -110,9 +107,12 @@ export const productsToVariantsTransformer = (products) =>
 export const previewsToProductVariants =
   ({ apiEndpoint }) =>
   ({ sku, id, image, product, title }) => {
-    const productIdDecoded = convertBase64ToString(product.id);
-    const productId =
-      productIdDecoded && productIdDecoded.slice(productIdDecoded.lastIndexOf('/') + 1);
+    const productId = decodeId(product.id);
+    const externalLink =
+      apiEndpoint &&
+      productId &&
+      `https://${removeHttpsAndTrailingSlash(apiEndpoint)}/admin/products/${productId}`;
+
     return {
       id,
       image: get(image, ['src'], ''),
@@ -123,11 +123,6 @@ export const previewsToProductVariants =
       displaySKU: sku ? `SKU: ${sku}` : `Product ID: ${id}`,
       productId: product.id,
       name: title === DEFAULT_SHOPIFY_VARIANT_TITLE ? product.title : `${product.title} (${title})`,
-      ...(apiEndpoint &&
-        productId && {
-          externalLink: `https://${apiEndpoint}${
-            last(apiEndpoint) === '/' ? '' : '/'
-          }admin/products/${productId}`,
-        }),
+      ...(externalLink ? { externalLink } : {}),
     };
   };
