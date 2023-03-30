@@ -7,6 +7,7 @@ import {
   Spinner,
   Paragraph,
   TextLink,
+  FormControl,
 } from '@contentful/f36-components';
 import { AccountSummariesType } from 'types';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
@@ -76,46 +77,48 @@ export default function MapAccountPropertySection(props: Props) {
     <Stack spacing="spacingL" flexDirection="column" alignItems="flex-start">
       <div>
         <Subheading marginBottom="spacingXs">Google Analytics 4 property</Subheading>
-        <Paragraph>
-          In the dropdown below, select the Google Analytics 4 property that's connected to the
-          content in this Contentful space environment. If you don't see the property you're looking
-          for, make sure the Google service account installed above has been given "viewer" access
-          to it in Google Analytics.
-        </Paragraph>
         <Paragraph marginBottom="none">
-          Note: Only Google Analytics 4 properties are listed; Google "Universal Analytics"
-          properties are not supported. See{' '}
-          <TextLink
-            href="https://support.google.com/analytics/answer/10759417"
-            target="_blank"
-            icon={<ExternalLinkIcon />}
-            alignIcon="end">
-            "Make the switch to Google Analytics 4"
-          </TextLink>{' '}
-          for more information.
+          In the dropdown below, select the Google Analytics 4 property that's connected to the
+          website where content in this Contentful space (environment) appears.
         </Paragraph>
       </div>
-      <Box>
+      <Box marginTop="none">
         {shouldRenderDropdown() ? (
-          <Select
-            testId="accountPropertyDropdown"
-            value={selectedPropertyId}
-            onChange={handleSelectionChange}>
-            <Select.Option key="empty option" value="" isDisabled>
-              Select a property...
-            </Select.Option>
-            {sortedAccountSummaries.map((accountSummary: AccountSummariesType) => (
-              <optgroup
-                label={`${accountSummary.displayName} (${getIdOnly(accountSummary.account)})`}
-                key={accountSummary.account}>
-                {accountSummary.propertySummaries.map((propertySummary) => (
-                  <Select.Option key={propertySummary.property} value={propertySummary.property}>
-                    {`${propertySummary.displayName} (${getIdOnly(propertySummary.property)})`}
-                  </Select.Option>
-                ))}
-              </optgroup>
-            ))}
-          </Select>
+          <FormControl>
+            <Select
+              testId="accountPropertyDropdown"
+              value={selectedPropertyId}
+              onChange={handleSelectionChange}>
+              <Select.Option key="empty option" value="" isDisabled>
+                Select a property...
+              </Select.Option>
+              {sortedAccountSummaries.map((accountSummary: AccountSummariesType) => (
+                <optgroup
+                  label={`${accountSummary.displayName} (${getIdOnly(accountSummary.account)})`}
+                  key={accountSummary.account}>
+                  {accountSummary.propertySummaries.map((propertySummary) => (
+                    <Select.Option key={propertySummary.property} value={propertySummary.property}>
+                      {`${propertySummary.displayName} (${getIdOnly(propertySummary.property)})`}
+                    </Select.Option>
+                  ))}
+                </optgroup>
+              ))}
+            </Select>
+            <FormControl.HelpText marginTop="spacingM">
+              If you don't see a property in the dropdown, make sure the Google service account
+              installed above has been given "viewer" access to it in Google Analytics.{' '}
+              <em>Note:</em> Only Google Analytics 4 properties are listed; Google "Universal
+              Analytics" properties are not supported. See{' '}
+              <TextLink
+                href="https://support.google.com/analytics/answer/10759417"
+                target="_blank"
+                icon={<ExternalLinkIcon />}
+                alignIcon="end">
+                "Make the switch to Google Analytics 4"
+              </TextLink>{' '}
+              for more information.
+            </FormControl.HelpText>
+          </FormControl>
         ) : (
           <Spinner variant="primary" />
         )}

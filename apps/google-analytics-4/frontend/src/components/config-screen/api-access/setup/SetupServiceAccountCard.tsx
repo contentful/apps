@@ -155,7 +155,8 @@ export default function SetupServiceAccountCard(props: Props) {
           rel="noopener noreferrer">
           Google Cloud service account
         </TextLink>{' '}
-        for which you enable <i>read access</i> to your organization's Google Analytics data.
+        for which you enable "viewer" access to one of your organization's Google Analytics
+        properties.
       </Paragraph>
       <Paragraph marginBottom="none">
         After configuring the service account, you'll download a set of credentials that Contentful
