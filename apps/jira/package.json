@@ -6,7 +6,7 @@
     "concurrently": "5.3.0",
     "js-yaml": "3.14.0",
     "ngrok": "4.3.3",
-    "npm": "8.19.3"
+    "npm": "8.19.4"
   },
   "scripts": {
     "start:lambda": "npm run --prefix functions start",
