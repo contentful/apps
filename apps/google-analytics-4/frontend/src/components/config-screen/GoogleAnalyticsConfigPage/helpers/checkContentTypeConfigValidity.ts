@@ -1,9 +1,8 @@
 import { KeyValueMap } from 'contentful-management';
 import { isEmpty } from 'lodash';
 
-// criteria for overall config validity:
+// criteria for checking that content type config is minimally valid so that the app is in a usable state:
 // at least one content type is selected and configured with a slug field.
-// this means app is in a usable state
 
 export const checkContentTypeConfigValidity = (parameters: KeyValueMap) => {
   if (!parameters.contentTypes || !isEmpty(parameters.contentTypes)) return false;
