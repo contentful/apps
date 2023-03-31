@@ -139,7 +139,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
   };
 
   updateTotalPages = (totalPages: number) => {
-    this.state.totalPages = totalPages;
+    this.setState({ totalPages: this.state.totalPages });
   };
 
   selectMultipleProductsClickEvent = () => {
@@ -153,12 +153,12 @@ export default class Dialog extends React.Component<DialogProps, State> {
   }
 
   nextPageButtonEvent = () => {
-    this.state.page = this.state.page + 1;
+    this.setState({ page: this.state.page - 1 });
     this.load();
   };
 
   prevPageButtonEvent = () => {
-    this.state.page = this.state.page - 1;
+    this.setState({ page: this.state.page - 1 });
     this.load();
   };
 

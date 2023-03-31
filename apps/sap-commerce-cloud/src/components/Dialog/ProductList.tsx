@@ -50,7 +50,7 @@ export class ProductList extends React.Component<Props> {
               <TableCell>{product.sku}</TableCell>
               <TableCell>{product.name}</TableCell>
               <TableCell>
-                <img src={product.image} />
+                <img src={product.image} alt="product" />
               </TableCell>
             </TableRow>
           );
