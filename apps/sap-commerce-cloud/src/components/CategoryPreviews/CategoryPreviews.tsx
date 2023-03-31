@@ -13,6 +13,7 @@ interface Props {
   onChange: (categories: string[]) => void;
   categories: string[];
   fetchCategoryPreviews: PreviewsFn;
+  applicationInterfaceKey: string;
 }
 
 interface State {
@@ -41,7 +42,7 @@ export class CategoryPreviews extends React.Component<Props, State> {
     try {
       const { fetchCategoryPreviews, categories } = this.props;
       const categoryPreviewsUnsorted = shouldRefetch
-        ? await fetchCategoryPreviews(categories)
+        ? await fetchCategoryPreviews(categories, this.props.applicationInterfaceKey)
         : this.state.categoryPreviews;
       const categoryPreviews = mapSort(categoryPreviewsUnsorted, categories, 'id');
       this.setState({ categoryPreviews });

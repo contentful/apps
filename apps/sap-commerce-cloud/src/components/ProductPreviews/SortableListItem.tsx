@@ -170,10 +170,8 @@ export const SortableListItem = SortableElement<Props>(
             <IconButton
               label="Delete"
               iconProps={{ icon: 'Close' }}
-              {...{
-                buttonType: 'muted',
-                onClick: onDelete,
-              }}
+              buttonType="muted"
+              onClick={onDelete}
             />
           </div>
         )}
