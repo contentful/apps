@@ -11,14 +11,16 @@ interface Props {
 }
 
 const HyperLink = (props: Props) => {
-  const { body, substring, onClick = () => {}, hyperLinkHref, icon, alignIcon  } = props;
+  const { body, substring, onClick = () => {}, hyperLinkHref, icon, alignIcon } = props;
   const textLinkComponent = (index: number) => (
     <TextLink
       onClick={onClick}
       href={hyperLinkHref}
       target="_blank"
       rel="noopener noreferer"
-      key={`textLink-${index}`}>
+      key={`textLink-${index}`}
+      icon={icon}
+      alignIcon={alignIcon}>
       {substring}
     </TextLink>
   );
