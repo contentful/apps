@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { styles } from 'components/config-screen/assign-content-type/AssignContentType.styles';
 import {
-  NO_CONTENT_TYPE_ERR_MSG,
   NO_SLUG_WARNING_MSG,
   REMOVED_FROM_SIDEBAR_WARNING_MSG,
   getContentTypeDeletedMsg,
@@ -52,12 +51,7 @@ const ContentTypeWarning = (props: Props) => {
       content += getSlugFieldDeletedMsg(contentTypeId, slugField);
     }
 
-    // Error states
-    if (!contentTypeId) {
-      setWarningType(WarningTypes.Error);
-      content += NO_CONTENT_TYPE_ERR_MSG;
-    }
-
+    // Error state
     if (contentTypeId && !isContentTypeInOptions) {
       setWarningType(WarningTypes.Error);
       content += getContentTypeDeletedMsg(contentTypeId);

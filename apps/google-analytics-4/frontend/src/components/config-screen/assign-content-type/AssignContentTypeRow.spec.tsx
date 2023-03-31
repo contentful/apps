@@ -56,7 +56,7 @@ const props = {
 };
 
 describe('Assign Content Type Card for Config Screen', () => {
-  it('shows invalid and disabled inputs when content type is empty', () => {
+  it('shows disabled inputs when content type is empty', () => {
     render(
       <AssignContentTypeRow
         contentTypeEntry={[
@@ -70,7 +70,6 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    expect(screen.getByTestId('contentTypeSelect')).toBeInvalid();
     expect(screen.getByTestId('slugFieldSelect')).toBeDisabled();
     expect(screen.getByTestId('urlPrefixInput')).toBeDisabled();
   });
