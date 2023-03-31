@@ -10,8 +10,13 @@ interface Props {
 
 const HyperLink = (props: Props) => {
   const { body, substring, onClick = () => {}, hyperLinkHref } = props;
-  const link = (
-    <TextLink onClick={onClick} href={hyperLinkHref} target="_blank" rel="noopener noreferer">
+  const textLinkComponent = (index: number) => (
+    <TextLink
+      onClick={onClick}
+      href={hyperLinkHref}
+      target="_blank"
+      rel="noopener noreferer"
+      key={`textLink-${index}`}>
       {substring}
     </TextLink>
   );
@@ -21,7 +26,7 @@ const HyperLink = (props: Props) => {
       if (!i) {
         return [current];
       }
-      return prev.concat(link, current);
+      return prev.concat(textLinkComponent(i), current);
     }, []);
     return bodyWithTextLink as JSX.Element;
   };
