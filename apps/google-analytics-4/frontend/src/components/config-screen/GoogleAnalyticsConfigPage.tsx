@@ -125,15 +125,15 @@ export default function GoogleAnalyticsConfigPage() {
       return false;
     }
 
-    // Remove empty content type rows
     let parametersToSave = parameters;
 
+    // Filter out empty content types that came from empty rows on the form
     if (parameters.contentTypes) {
-      const filteredContentTypes = Object.fromEntries(
+      const nonEmptyContentTypes = Object.fromEntries(
         Object.entries(parameters.contentTypes).filter(([key]) => key !== '')
       );
 
-      parametersToSave = { ...parameters, contentTypes: filteredContentTypes };
+      parametersToSave = { ...parameters, contentTypes: nonEmptyContentTypes };
       setParameters(parametersToSave);
     }
 

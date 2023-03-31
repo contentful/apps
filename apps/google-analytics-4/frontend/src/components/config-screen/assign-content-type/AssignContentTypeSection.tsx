@@ -93,6 +93,7 @@ const AssignContentTypeSection = (props: Props) => {
     setContentTypes(newContentTypes);
     const _parameters = { contentTypes: newContentTypes };
     mergeSdkParameters(_parameters);
+    // We always want the user to be able to save the configuration, even if there are errors or warnings
     onIsValidContentTypeAssignment(true);
   };
 
