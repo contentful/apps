@@ -4,7 +4,15 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 
 In the project directory, you can run:
 
-#### `npm start`
+### Install packages
+
+`npm i` 
+
+### Set development ENV
+
+Copy the contents of .env.development.sample into a new file called .env.development
+
+#### `npm run start`
 
 Creates or updates your app definition in contentful, and runs the app in development mode.
 Open your app to view it in the browser.
