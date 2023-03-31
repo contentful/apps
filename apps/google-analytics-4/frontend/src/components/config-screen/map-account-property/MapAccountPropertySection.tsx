@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Stack, Box, Subheading, Spinner, Paragraph } from '@contentful/f36-components';
+import { Stack, Box, Subheading, Paragraph, Skeleton, Flex } from '@contentful/f36-components';
 import { AccountSummariesType } from 'types';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 import MapAccountPropertyDropdown from 'components/config-screen/map-account-property/MapAccountPropertyDropdown';
@@ -82,8 +82,8 @@ export default function MapAccountPropertySection(props: Props) {
           website where your content appears.
         </Paragraph>
       </div>
-      <Box marginTop="none">
-        {!loadingProperties && !loadingParameters && !isApiAccessLoading ? (
+      {!loadingProperties && !loadingParameters && !isApiAccessLoading ? (
+        <Box marginTop="none">
           <MapAccountPropertyDropdown
             onSelectionChange={handleSelectionChange}
             isPropertyIdInOptions={isPropertyIdInOptions}
@@ -91,10 +91,14 @@ export default function MapAccountPropertySection(props: Props) {
             sortedAccountSummaries={sortedAccountSummaries}
             originalPropertyId={originalPropertyId}
           />
-        ) : (
-          <Spinner variant="primary" />
-        )}
-      </Box>
+        </Box>
+      ) : (
+        <Flex marginTop="none" fullWidth={true}>
+          <Skeleton.Container svgHeight={139}>
+            <Skeleton.BodyText numberOfLines={6} />
+          </Skeleton.Container>
+        </Flex>
+      )}
     </Stack>
   );
 }
