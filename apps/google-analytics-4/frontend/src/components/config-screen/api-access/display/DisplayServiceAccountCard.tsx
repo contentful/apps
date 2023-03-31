@@ -282,7 +282,7 @@ const DisplayServiceAccountCard = (props: Props) => {
           </Flex>
           <FormControl>
             <FormControl.Label marginBottom="none">Service Account</FormControl.Label>
-            <Paragraph>
+            <Box>
               <Flex alignItems="center">
                 <Box paddingRight="spacingS">
                   <TextLink
@@ -295,17 +295,17 @@ const DisplayServiceAccountCard = (props: Props) => {
                   </TextLink>
                 </Box>
               </Flex>
-            </Paragraph>
+            </Box>
           </FormControl>
           <FormControl>
             <FormControl.Label marginBottom="none">Key ID</FormControl.Label>
-            <Paragraph>
+            <Box>
               <Box as="code">{serviceAccountKeyId.id}</Box>
-            </Paragraph>
+            </Box>
           </FormControl>
           <FormControl marginBottom="none">
             <FormControl.Label marginBottom="none">Status</FormControl.Label>
-            <Paragraph>
+            <Box>
               <Flex>
                 <Box paddingRight="spacingS">
                   <RenderStatusInfo />
@@ -324,7 +324,7 @@ const DisplayServiceAccountCard = (props: Props) => {
                   </Box>
                 )}
               </Flex>
-            </Paragraph>
+            </Box>
           </FormControl>
           {!unknownError && showChecks && (
             <ServiceAccountChecklist
