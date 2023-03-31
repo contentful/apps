@@ -237,14 +237,6 @@ export default function GoogleAnalyticsConfigPage() {
     setValidKeyFile(_validKeyFile);
   };
 
-  // const isContentTypeConfigValid = () => {
-  //   if (!parameters.contentTypes) return false;
-  //   const configuredContentType = Object.keys(parameters.contentTypes).find((key) => key);
-  //   const atLeastOneSlugFieldPresent = configuredContentType && Boolean(parameters.contentTypes[configuredContentType].slugField);
-  //   const contentTypesPresent = parameters.contentTypes && !isEmpty(parameters.contentTypes) && atLeastOneSlugFieldPresent;
-  //   return contentTypesPresent;
-  // }
-
   return (
     <>
       <Box className={styles.background} />
