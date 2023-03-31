@@ -214,15 +214,19 @@ const DisplayServiceAccountCard = (props: Props) => {
     );
   };
 
+  const configError =
+    invalidServiceAccountError ||
+    missingServiceAccountError ||
+    adminApiError ||
+    dataApiError ||
+    ga4PropertiesError;
+
+  useEffect(() => {
+    if (configError) setShowChecks(true);
+  }, [configError]);
+
   const RenderStatusInfo = () => {
-    const configError =
-      invalidServiceAccountError ||
-      missingServiceAccountError ||
-      adminApiError ||
-      dataApiError ||
-      ga4PropertiesError;
     if (configError) {
-      setShowChecks(true);
       return isFirstSetup ? (
         <Badge variant="primary">Finish configuration steps below</Badge>
       ) : (
