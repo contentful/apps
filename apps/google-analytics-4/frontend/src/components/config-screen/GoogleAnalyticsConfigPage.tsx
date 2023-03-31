@@ -125,8 +125,20 @@ export default function GoogleAnalyticsConfigPage() {
       return false;
     }
 
+    // Remove empty content type rows
+    let parametersToSave = parameters;
+
+    if (parameters.contentTypes) {
+      const filteredContentTypes = Object.fromEntries(
+        Object.entries(parameters.contentTypes).filter(([key]) => key !== '')
+      );
+
+      parametersToSave = { ...parameters, contentTypes: filteredContentTypes };
+      setParameters(parametersToSave);
+    }
+
     // Assign the app to the sidebar for saved content types
-    const contentTypeIds = Object.keys(parameters.contentTypes ?? {});
+    const contentTypeIds = Object.keys(parametersToSave.contentTypes ?? {});
     const newEditorInterfaceAssignments = generateEditorInterfaceAssignments(
       currentEditorInterface,
       contentTypeIds,
@@ -135,14 +147,14 @@ export default function GoogleAnalyticsConfigPage() {
     );
 
     setCurrentEditorInterface(newEditorInterfaceAssignments);
-    setOriginalParameters(parameters);
+    setOriginalParameters(parametersToSave);
 
     const newAppState: AppState = {
       EditorInterface: newEditorInterfaceAssignments,
     };
 
     return {
-      parameters: parameters,
+      parameters: parametersToSave,
       targetState: newAppState,
     };
   }, [

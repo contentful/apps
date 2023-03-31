@@ -141,7 +141,7 @@ const AssignContentTypeRow = (props: Props) => {
           id={`contentType-${index}`}
           name={`contentType-${index}`}
           testId="contentTypeSelect"
-          isInvalid={!contentTypeId || !isContentTypeInOptions}
+          isInvalid={!isContentTypeInOptions && contentTypeId !== ''}
           onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
             onContentTypeChange(contentTypeId, event.target.value)
           }

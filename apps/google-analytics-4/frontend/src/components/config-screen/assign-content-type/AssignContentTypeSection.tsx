@@ -93,18 +93,7 @@ const AssignContentTypeSection = (props: Props) => {
     setContentTypes(newContentTypes);
     const _parameters = { contentTypes: newContentTypes };
     mergeSdkParameters(_parameters);
-
-    // Do not allow saving an empty content type or one that was deleted
-    let hasValidContentTypes = true;
-
-    for (const contentType in newContentTypes) {
-      if (!contentType || !allContentTypeEntries.find((entry) => entry[0] === contentType)) {
-        hasValidContentTypes = false;
-        break;
-      }
-    }
-
-    onIsValidContentTypeAssignment(hasValidContentTypes);
+    onIsValidContentTypeAssignment(true);
   };
 
   const handleContentTypeChange = (prevKey: string, newKey: string) => {

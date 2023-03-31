@@ -73,7 +73,6 @@ const DisplayServiceAccountCard = (props: Props) => {
   const api = useApi(serviceAccountKeyId);
 
   const handleApiError = (error: ApiErrorType) => {
-    console.log('errorType', error.errorType);
     switch (error.errorType) {
       case ERROR_TYPE_MAP.invalidServiceAccountKey:
         setInvalidServiceAccountError(error);

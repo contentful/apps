@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
 import {
-  NO_CONTENT_TYPE_ERR_MSG,
   NO_SLUG_WARNING_MSG,
   REMOVED_FROM_SIDEBAR_WARNING_MSG,
   getContentTypeDeletedMsg,
@@ -23,27 +22,6 @@ describe('Content Type Warning for Config Screen', () => {
     );
 
     expect(screen.getByTestId('noStatus')).toBeVisible();
-  });
-
-  it('renders an error icon and correct tooltip content when the content type is empty', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <ContentTypeWarning
-        contentTypeId={''}
-        slugField={''}
-        isSaved={false}
-        isInSidebar={true}
-        isContentTypeInOptions={false}
-        isSlugFieldInOptions={false}
-      />
-    );
-
-    expect(screen.getByTestId('errorIcon')).toBeVisible();
-
-    await user.hover(screen.getByTestId('cf-ui-icon'));
-
-    expect(screen.getByRole('tooltip').textContent).toBe(NO_CONTENT_TYPE_ERR_MSG);
   });
 
   it('renders an error icon and correct tooltip content when content type is deleted', async () => {
