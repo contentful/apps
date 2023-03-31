@@ -3,14 +3,15 @@ import express from 'express';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import { setSentryContext } from './setSentryContext';
+import { config } from '../config';
 
 describe('setSentryContext', () => {
   chai.use(chaiHttp);
   const app = express();
 
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV,
+    dsn: config.sentryDSN,
+    environment: config.environment,
   });
 
   app.use(setSentryContext);
