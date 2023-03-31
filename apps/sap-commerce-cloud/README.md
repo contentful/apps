@@ -10,7 +10,7 @@ In the project directory, you can run:
 
 ### Set development ENV
 
-Copy the contents of .env.development.sample into a new file called .env.development
+Copy the contents of .env.development.sample into a new file called .env.development (calls to SAP will only work from localhost with this added)
 
 #### `npm run start`
 
