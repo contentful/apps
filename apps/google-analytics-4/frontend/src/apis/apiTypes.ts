@@ -76,7 +76,7 @@ export const ERROR_TYPE_MAP = {
   disabledDataApi: 'DisabledDataApi',
   noAccountsOrPropertiesFound: 'NoAccountsOrPropertiesFound',
   invalidProperty: 'InvalidProperty',
-  invalidServiceAccount: 'InvalidServiceAccount',
+  invalidServiceAccountKey: 'InvalidServiceAccountKey',
   missingServiceAccountKeyFile: 'MissingServiceAccountKeyFile',
 };
 

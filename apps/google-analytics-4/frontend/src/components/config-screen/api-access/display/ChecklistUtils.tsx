@@ -40,16 +40,17 @@ const getArrowIcon = (msg: string) => (
 );
 
 const CHECKLIST_NAMES = {
-  serviceAccount: 'Service Account',
+  serviceAccount: 'Service account',
   adminApi: 'Admin API',
   dataApi: 'Data API',
-  ga4Properties: 'GA4 Account Properties',
+  ga4Properties: 'Property access',
   unknown: 'Unknown',
 };
 
 export type ChecklistURL = {
   title: string;
   url: string;
+  external?: boolean;
 };
 
 export type ChecklistRow = {
@@ -80,6 +81,7 @@ export type ChecklistStatus = {
   };
   GA4Properties: {
     success: ChecklistRow;
+    firstTimeSetupNotEnabled: ChecklistRow;
     firstTimeSetup: ChecklistRow;
     invalidServiceAccount: ChecklistRow;
     adminApiError: ChecklistRow;
@@ -93,91 +95,98 @@ export type ChecklistStatus = {
 export const CHECKLIST_STATUSES: ChecklistStatus = {
   ServiceKey: {
     success: {
-      icon: getSuccessIcon('Service account is correctly installed'),
+      icon: getSuccessIcon(''),
       title: CHECKLIST_NAMES.serviceAccount,
-      description: 'Success!',
+      description: 'Service account key is valid',
       disabled: false,
     },
     invalid: {
       icon: getErrorIcon(
-        'Failed to connect to your service account. Re-install your service account key if the problem persists'
+        `We couldn't connect to Google Analytics APIs using the service account key provided. Try re-installing your current service account key or create and install a new key`
       ),
       title: CHECKLIST_NAMES.serviceAccount,
-      description: 'Invalid service account and service account key',
+      description: 'Service account key is not valid',
       disabled: false,
     },
     missing: {
       icon: getErrorIcon(
-        'We were unable to retrieve the private key from your service account key file. Please try reinstalling your service account key file. If the problem persists, contact support.'
+        "For technical reasons we were unable to retrieve the service account key that's stored for this app. If the problem persists, try reinstalling the service account key or contact support."
       ),
       title: CHECKLIST_NAMES.serviceAccount,
-      description: 'Unable to retrieve service account key file.',
+      description:
+        'Unable to retrieve your stored service account key. Re-install it if the problem persists',
       disabled: false,
     },
   },
   AdminApi: {
     success: {
-      icon: getSuccessIcon('Admin API successfully enabled'),
+      icon: getSuccessIcon(''),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Success!',
+      description: 'Google Analytics Admin API is enabled',
       disabled: false,
     },
     firstTimeSetup: {
-      icon: getArrowIcon('Please enable the Admin API to run this check'),
+      icon: getArrowIcon(
+        'The Google Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API in your Google Cloud project to continue.'
+      ),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Analytics Admin API is not yet enabled',
+      description: 'Google Analytics Admin API is not yet enabled',
       disabled: false,
     },
     invalidServiceAccount: {
       icon: getClockIcon(
-        'Service account errors detected, please install a correctly configured service account installation'
+        'This check will not run until a valid service account key has been provided'
       ),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Awaiting a correctly configured service account installation',
+      description: `Provide a valid service account key to run this check`,
       disabled: true,
     },
     error: {
-      icon: getErrorIcon('Failed to connect to the Admin API - did you enable the api?'),
+      icon: getErrorIcon(
+        'The Google Analytics Admin API allows Contentful to fetch the list of properties your service account has access to. Please enable this API in your Google Cloud project.'
+      ),
       title: CHECKLIST_NAMES.adminApi,
-      description: 'Analytics Admin API must be enabled to use this app',
+      description: 'Google Analytics Admin API is not enabled',
       disabled: false,
     },
   },
   DataApi: {
     success: {
-      icon: getSuccessIcon('The Analytics Data API is enabled'),
+      icon: getSuccessIcon(''),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Success!',
+      description: 'Google Analytics Data API is enabled',
       disabled: false,
     },
     firstTimeSetup: {
-      icon: getArrowIcon('Please enable the Data API to run this check'),
+      icon: getArrowIcon(
+        'The Google Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API in your Google Cloud project to continue.'
+      ),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Analytics Data API is not yet enabled',
+      description: 'Google Analytics Data API is not yet enabled',
       disabled: false,
     },
     invalidServiceAccount: {
       icon: getClockIcon(
-        'Service account errors detected, please install a correctly configured service account installation'
+        'This check will not run until a valid service account key has been provided'
       ),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Awaiting a correctly configured service account installation',
+      description: `Provide a valid service account key to run this check`,
       disabled: true,
     },
     error: {
-      icon: getErrorIcon('Failed to connect to the Data API - did you enable the api?'),
+      icon: getErrorIcon(
+        'The Google Analytics Data API allows Contentful to fetch analytics data from the property you specify. Please enable this API in your Google Cloud project.'
+      ),
       title: CHECKLIST_NAMES.dataApi,
-      description: 'Analytics Data API must be enabled to use this app',
+      description: 'Google Analytics Data API is not enabled',
       disabled: false,
     },
   },
   GA4Properties: {
     success: {
-      icon: getSuccessIcon(
-        'Your service account has access to assign a Google Analytics 4 property'
-      ),
+      icon: getSuccessIcon(''),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Success!',
+      description: 'Service account has “viewer” access',
       disabled: false,
       checklistUrl: {
         title: 'Details',
@@ -185,23 +194,39 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
       },
     },
     firstTimeSetup: {
-      icon: getClockIcon(`Check will run once the ${CHECKLIST_NAMES.adminApi} is enabled`),
+      icon: getArrowIcon(
+        `You need to grant “viewer” access to your service account in a Google Analytics 4 property.`
+      ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: `Enable Analytics Admin API to run this check`,
+      description: "Service account doesn't have access to a Google Analytics 4 property",
+      disabled: false,
+      checklistUrl: {
+        title: 'Grant access',
+        url: 'https://analytics.google.com/analytics/web/',
+      },
+    },
+    firstTimeSetupNotEnabled: {
+      icon: getClockIcon(
+        `You'll need to grant “viewer” access to your service account in a Google Analytics 4 property. This check will run once the ${CHECKLIST_NAMES.adminApi} has been enabled.`
+      ),
+      title: CHECKLIST_NAMES.ga4Properties,
+      description: `Enable Google Analytics Admin API to run this check`,
       disabled: true,
     },
     invalidServiceAccount: {
       icon: getClockIcon(
-        'Service account errors detected, please install a correctly configured service account installation'
+        'This check will not run until a valid service account key has been provided'
       ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Awaiting a correctly configured service account installation',
+      description: `Provide a valid service account key to run this check`,
       disabled: true,
     },
     adminApiError: {
-      icon: getClockIcon('This check requires the admin api to be enabled'),
+      icon: getClockIcon(
+        'This check will not run until the Google Analytics Admin API has been enabled'
+      ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Enable Analytics Admin API to run this check',
+      description: 'Enable Google Analytics Admin API to run this check',
       disabled: true,
     },
     error: {
@@ -209,17 +234,19 @@ export const CHECKLIST_STATUSES: ChecklistStatus = {
         'The service account must have properties assigned to the account for this check to pass'
       ),
       title: CHECKLIST_NAMES.ga4Properties,
-      description: 'Service account failed to access an Analytics property',
+      description: "Service account doesn't have access to a Google Analytics 4 property",
       disabled: false,
       checklistUrl: {
-        title: 'Add GA4 properties',
+        title: 'Grant access',
         url: 'https://analytics.google.com/analytics/web/',
       },
     },
   },
   Other: {
     unknown: {
-      icon: getErrorIcon('Please contant support if an unknown error is seen.'),
+      icon: getErrorIcon(
+        'Something went wrong. Please try again, or get in touch with support of the problem persists'
+      ),
       title: CHECKLIST_NAMES.unknown,
       description: 'An unknown error has occurred. Try again or contact support',
       disabled: true,
@@ -247,7 +274,7 @@ export const getServiceKeyChecklistStatus = (
   missingServiceAccountError: ApiErrorType | undefined
 ) => {
   const url = `https://console.cloud.google.com/iam-admin/serviceaccounts/details/${parameters.serviceAccountKeyId.clientId}?project=${parameters.serviceAccountKeyId.projectId}`;
-  const title = invalidServiceAccountError ? 'Edit service account' : 'Details';
+  const title = invalidServiceAccountError ? 'Manage service account' : 'Details';
   const checklistUrl = {
     title: title,
     url: url,
@@ -301,9 +328,11 @@ export const getGa4PropertyErrorChecklistStatus = (
 ): ChecklistRow => {
   if (!invalidServiceAccountError && !adminApiError && !ga4PropertiesError)
     return CHECKLIST_STATUSES.GA4Properties.success;
-  if (isFirstSetup && adminApiError) return CHECKLIST_STATUSES.GA4Properties.firstTimeSetup;
-  if (invalidServiceAccountError) return CHECKLIST_STATUSES.GA4Properties.invalidServiceAccount;
+  if (isFirstSetup && adminApiError)
+    return CHECKLIST_STATUSES.GA4Properties.firstTimeSetupNotEnabled;
+  if (isFirstSetup && ga4PropertiesError) return CHECKLIST_STATUSES.GA4Properties.firstTimeSetup;
   if (adminApiError) return CHECKLIST_STATUSES.GA4Properties.adminApiError;
+  if (invalidServiceAccountError) return CHECKLIST_STATUSES.GA4Properties.invalidServiceAccount;
   if (ga4PropertiesError) return CHECKLIST_STATUSES.GA4Properties.error;
   return CHECKLIST_STATUSES.Other.unknown;
 };

@@ -73,8 +73,9 @@ const DisplayServiceAccountCard = (props: Props) => {
   const api = useApi(serviceAccountKeyId);
 
   const handleApiError = (error: ApiErrorType) => {
+    console.log('errorType', error.errorType);
     switch (error.errorType) {
-      case ERROR_TYPE_MAP.invalidServiceAccount:
+      case ERROR_TYPE_MAP.invalidServiceAccountKey:
         setInvalidServiceAccountError(error);
         break;
       case ERROR_TYPE_MAP.missingServiceAccountKeyFile:
@@ -222,9 +223,9 @@ const DisplayServiceAccountCard = (props: Props) => {
       ga4PropertiesError;
     if (configError) {
       return isFirstSetup ? (
-        <Badge variant="warning">Incomplete</Badge>
+        <Badge variant="primary">Finish configuration steps below</Badge>
       ) : (
-        <Badge variant="negative">"Some checks were unsuccessful"</Badge>
+        <Badge variant="negative">Problems with configuration</Badge>
       );
     } else if (unknownError) {
       return (
@@ -237,15 +238,17 @@ const DisplayServiceAccountCard = (props: Props) => {
       );
     }
 
-    return <Badge variant="positive">Active</Badge>;
+    return <Badge variant="positive">Successfully configured</Badge>;
   };
 
   return (
     <Card>
       {isSavingPrivateKeyFile || isLoadingAdminApi || isLoadingDataApi ? (
-        <Skeleton.Container>
-          <Skeleton.BodyText numberOfLines={8} />
-        </Skeleton.Container>
+        <Flex>
+          <Skeleton.Container>
+            <Skeleton.BodyText numberOfLines={8} />
+          </Skeleton.Container>
+        </Flex>
       ) : (
         <>
           <Flex justifyContent="space-between" marginBottom="none">
