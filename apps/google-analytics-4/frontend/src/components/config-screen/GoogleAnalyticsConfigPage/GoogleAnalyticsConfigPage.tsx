@@ -3,7 +3,7 @@ import { AppExtensionSDK, AppState, EditorInterface } from '@contentful/app-sdk'
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { isEmpty } from 'lodash';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
-import { styles } from 'components/config-screen/GoogleAnalytics.styles';
+import { styles } from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage.styles';
 import Splitter from 'components/common/Splitter';
 import ApiAccessSection from 'components/config-screen/api-access/ApiAccessSection';
 import AboutSection from 'components/config-screen/header/AboutSection';
@@ -13,9 +13,11 @@ import AssignContentTypeSection from 'components/config-screen/assign-content-ty
 import MapAccountPropertySection from 'components/config-screen/map-account-property/MapAccountPropertySection';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 import { generateEditorInterfaceAssignments } from 'helpers/contentTypeHelpers/contentTypeHelpers';
-import fetchWithSignedRequest from '../../helpers/signed-requests';
-import { config } from '../../config';
-import { convertServiceAccountKeyToServiceAccountKeyId } from '../../utils/serviceAccountKey';
+import fetchWithSignedRequest from '../../../helpers/signed-requests';
+import { config } from '../../../config';
+import { convertServiceAccountKeyToServiceAccountKeyId } from '../../../utils/serviceAccountKey';
+import NextStepsSection from '../NextStepsSection/NextStepsSection';
+import { checkContentTypeConfigValidity } from './helpers/checkContentTypeConfigValidity';
 
 export default function GoogleAnalyticsConfigPage() {
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);
@@ -235,6 +237,14 @@ export default function GoogleAnalyticsConfigPage() {
     setValidKeyFile(_validKeyFile);
   };
 
+  // const isContentTypeConfigValid = () => {
+  //   if (!parameters.contentTypes) return false;
+  //   const configuredContentType = Object.keys(parameters.contentTypes).find((key) => key);
+  //   const atLeastOneSlugFieldPresent = configuredContentType && Boolean(parameters.contentTypes[configuredContentType].slugField);
+  //   const contentTypesPresent = parameters.contentTypes && !isEmpty(parameters.contentTypes) && atLeastOneSlugFieldPresent;
+  //   return contentTypesPresent;
+  // }
+
   return (
     <>
       <Box className={styles.background} />
@@ -272,6 +282,13 @@ export default function GoogleAnalyticsConfigPage() {
               currentEditorInterface={currentEditorInterface}
               originalContentTypes={originalParameters.contentTypes ?? {}}
             />
+
+            <Splitter />
+            {parameters.propertyId && (
+              <NextStepsSection
+                isContentTypeConfigured={checkContentTypeConfigValidity(parameters)}
+              />
+            )}
           </>
         )}
       </Box>

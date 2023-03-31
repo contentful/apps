@@ -23,6 +23,9 @@ const mockSdk: any = {
   contentType: {
     name: 'Category',
   },
+  navigator: {
+    openEntriesList: jest.fn(),
+  },
 };
 
 export { mockSdk };

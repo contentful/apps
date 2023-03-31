@@ -1,15 +1,17 @@
 import React, { MouseEventHandler } from 'react';
-import { TextLink } from '@contentful/f36-components';
+import { TextLink, TextLinkProps } from '@contentful/f36-components';
 
 interface Props {
   body: string;
   substring: string;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
   hyperLinkHref?: string;
+  icon?: JSX.Element;
+  alignIcon?: TextLinkProps['alignIcon'];
 }
 
 const HyperLink = (props: Props) => {
-  const { body, substring, onClick = () => {}, hyperLinkHref } = props;
+  const { body, substring, onClick = () => {}, hyperLinkHref, icon, alignIcon  } = props;
   const textLinkComponent = (index: number) => (
     <TextLink
       onClick={onClick}
