@@ -12,7 +12,7 @@
     "@contentful/ecommerce-app-base": "^3.1.41",
     "@types/lodash": "4.14.189",
     "core-js": "3.4.1",
-    "graphql": "15.3.0",
+    "graphql": "15.8.0",
     "graphql-tag": "2.11.0",
     "lodash": "4.17.20",
     "react": "17.0.1",
