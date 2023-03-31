@@ -222,6 +222,7 @@ const DisplayServiceAccountCard = (props: Props) => {
       dataApiError ||
       ga4PropertiesError;
     if (configError) {
+      setShowChecks(true);
       return isFirstSetup ? (
         <Badge variant="primary">Finish configuration steps below</Badge>
       ) : (
