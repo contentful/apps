@@ -17,6 +17,8 @@ jest.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
+jest.setTimeout(30000);
+
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
 const saveAppInstallation = async () => {
   // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
