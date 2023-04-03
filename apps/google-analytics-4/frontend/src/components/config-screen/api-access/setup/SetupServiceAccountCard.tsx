@@ -118,9 +118,9 @@ export default function SetupServiceAccountCard(props: Props) {
               rel="noopener noreferrer">
               these detailed instructions
             </TextLink>{' '}
-            to create a service account in Google and obtain the required service account key file.
-            When you are finished, copy and paste the entire contents of this file into the "Service
-            Account Key File" field above.
+            to create a service account in Google and obtain the required service account key file
+            (JSON). When you are finished, copy and paste the entire contents of this file into the
+            "Service Account Key" field below.
           </Note>
         </Box>
         <FormControl
@@ -148,7 +148,7 @@ export default function SetupServiceAccountCard(props: Props) {
               <Flex isInline={true} alignItems="center">
                 <CheckCircleIcon variant="positive" />
                 <Text as="p" marginLeft="spacing2Xs" fontColor="gray700">
-                  Service account key file is valid
+                  Service account key file is valid JSON
                 </Text>
               </Flex>
             </Flex>
