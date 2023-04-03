@@ -52,7 +52,7 @@ describe('Config Screen component (not installed)', () => {
     await user.paste(JSON.stringify(validServiceKeyFile));
 
     await waitFor(() => {
-      expect(screen.getByText('Service account key file is valid')).toBeInTheDocument();
+      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     });
 
     let result;
@@ -146,7 +146,7 @@ describe('Installed Service Account Key', () => {
     await user.paste(JSON.stringify(newServiceKeyFile));
 
     await waitFor(() => {
-      expect(screen.getByText('Service account key file is valid')).toBeInTheDocument();
+      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     });
 
     let result;

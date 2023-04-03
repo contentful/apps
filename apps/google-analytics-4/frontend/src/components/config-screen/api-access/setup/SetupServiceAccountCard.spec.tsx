@@ -81,7 +81,7 @@ describe('Setup Google Service Account Details page', () => {
 
     await waitFor(() => {
       expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toBeNull();
-      expect(screen.getByText('Service account key file is valid')).toBeInTheDocument();
+      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     });
   });
 });
