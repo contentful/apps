@@ -7,11 +7,6 @@ global.window.close = () => {};
 global.window.encodeURIComponent = (x) => x;
 global.window.addEventListener = jest.fn();
 
-global.window.localStorage = {
-  getItem: () => {},
-  setItem: () => {},
-};
-
 const LOCATION_ENTRY_SIDEBAR = 'entry-sidebar';
 const LOCATION_ENTRY_EDITOR = 'entry-editor';
 
