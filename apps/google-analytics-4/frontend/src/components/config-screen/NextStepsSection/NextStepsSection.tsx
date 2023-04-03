@@ -4,10 +4,10 @@ import { AppExtensionSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 
-export const NO_CONTENT_TYPES_MSG =
-  'Be sure to save this configuration. Once you have configured a content type, head over to the Content tab, open an entry associated with a configured content type, and view the app in the sidebar.';
-export const CONTENT_TYPES_MSG =
-  'Be sure to save this configuration. Head over to the Content tab, open an entry associated with a configured content type, and view the app in the sidebar.';
+export const formatMessage = (isContentTypeConfigured?: boolean) =>
+  `Be sure to save this configuration. ${
+    isContentTypeConfigured ? 'Head' : 'Once you have configured a content type, head'
+  } over to the Content tab, open an entry of a configured content type, and view the app in the sidebar`;
 
 interface Props {
   isContentTypeConfigured?: boolean;
@@ -21,10 +21,10 @@ const NextStepsSection = (props: Props) => {
 
   return (
     <>
-      <Subheading marginBottom="spacingXs">View app</Subheading>
+      <Subheading marginBottom="spacingXs">View app on content entry</Subheading>
       <Paragraph>
         <HyperLink
-          body={isContentTypeConfigured ? CONTENT_TYPES_MSG : NO_CONTENT_TYPES_MSG}
+          body={formatMessage(isContentTypeConfigured)}
           substring="Content tab"
           onClick={openEntriesList}
         />

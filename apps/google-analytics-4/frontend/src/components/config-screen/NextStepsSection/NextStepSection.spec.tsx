@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockSdk } from '../../../../test/mocks';
-import NextStepSection, { CONTENT_TYPES_MSG, NO_CONTENT_TYPES_MSG } from './NextStepsSection';
+import NextStepSection, { formatMessage } from './NextStepsSection';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -9,7 +9,9 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 const { getByText, getAllByTestId } = screen;
 
-const testComponentRender = async (descriptionCopy: string) => {
+const testComponentRender = async (isContentTypeConfigured?: boolean) => {
+  const descriptionCopy = formatMessage(isContentTypeConfigured).replace('Content tab', '').trim();
+
   const title = getByText('View app');
   const description = getByText(descriptionCopy);
   const hyperLinks = getAllByTestId('cf-ui-text-link');
@@ -24,13 +26,13 @@ describe('NextStepSection', () => {
   it('mounts with correct copies when content type is configured', async () => {
     render(<NextStepSection isContentTypeConfigured />);
 
-    await testComponentRender(CONTENT_TYPES_MSG.replace('Content tab', '').trim());
+    await testComponentRender(true);
   });
 
   it('mounts with correct copies when content type is not configured', async () => {
     render(<NextStepSection />);
 
-    await testComponentRender(NO_CONTENT_TYPES_MSG.replace('Content tab', '').trim());
+    await testComponentRender();
   });
 
   it('calls function to open entries list page when link is clicked', async () => {
