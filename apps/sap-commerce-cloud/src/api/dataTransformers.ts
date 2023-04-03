@@ -28,8 +28,8 @@ export const categoryTransformer =
       '';
     return {
       id,
-      name: get(item, ['name', locale == undefined ? '' : locale], ''),
-      slug: get(item, ['slug', locale == undefined ? '' : locale], ''),
+      name: get(item, ['name', locale === undefined ? '' : locale], ''),
+      slug: get(item, ['slug', locale === undefined ? '' : locale], ''),
       isMissing: false,
       sku: '',
       image: '',

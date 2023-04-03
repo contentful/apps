@@ -2,7 +2,7 @@ import difference from 'lodash/difference';
 import { ConfigurationParameters, Category } from '../interfaces';
 //import { createRequestBuilder } from '@commercetools/api-request-builder';
 //import { makeCommerceToolsClient } from './makeCommercetoolsClient';
-import { categoryTransformer } from './dataTransformers';
+// import { categoryTransformer } from './dataTransformers';
 
 export async function fetchCategoryPreviews(
   ids: string[],
@@ -41,10 +41,10 @@ export async function fetchCategoryPreviews(
 
   const response = await client.execute({ uri, method: 'GET' });*/
 
-  const response = await fetch(
-    'https://api.c19a91jwyt-habermaas1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/jakooDE/products/' +
-      '?fields=code,name,summary,price(formattedValue,DEFAULT),images(galleryIndex,FULL),averageRating,stock(DEFAULT),description,availableForPickup,url,numberOfReviews,manufacturer,categories(FULL),priceRange,multidimensional,configuratorType,configurable,tags&lang=de&curr=EUR'
-  );
+  // const response = await fetch(
+  //   'https://api.c19a91jwyt-habermaas1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/jakooDE/products/' +
+  //     '?fields=code,name,summary,price(formattedValue,DEFAULT),images(galleryIndex,FULL),averageRating,stock(DEFAULT),description,availableForPickup,url,numberOfReviews,manufacturer,categories(FULL),priceRange,multidimensional,configuratorType,configurable,tags&lang=de&curr=EUR'
+  // );
 
   /*if (response.statusCode === 200) {
     const foundCategories = response.body.results.map(categoryTransformer(config));

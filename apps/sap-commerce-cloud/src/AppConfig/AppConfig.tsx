@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { AppExtensionSDK, CollectionResponse } from '@contentful/app-sdk';
 import {
-  Button,
   Form,
   Heading,
   Note,
