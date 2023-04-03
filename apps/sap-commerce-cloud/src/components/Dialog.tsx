@@ -18,6 +18,7 @@ import { fetchProductList } from '../api/fetchProductList';
 import { fetchBaseSites } from '../api/fetchBaseSites';
 import { Error, Product, SAPParameters } from '../interfaces';
 import get from 'lodash/get';
+import union from 'lodash/union';
 
 interface DialogProps {
   sdk: DialogExtensionSDK;
@@ -120,9 +121,11 @@ export default class Dialog extends React.Component<DialogProps, State> {
   multiProductsCheckBoxClickEvent = (event: any) => {
     let existingProducts: string[] = this.state.selectedProducts;
     const skuId: string = event.target.id;
+
     if (event.target.checked) {
       if (!existingProducts.includes(skuId)) {
-        existingProducts.push(this.state.baseSite + ':' + skuId);
+        const apiEndpoint = get(this.props.sdk.parameters.invocation, 'apiEndpoint', '');
+        existingProducts.push(`${apiEndpoint}/occ/v2/${this.state.baseSite}/products/${skuId}`);
         this.setState({
           selectedProducts: existingProducts,
         });
@@ -143,9 +146,10 @@ export default class Dialog extends React.Component<DialogProps, State> {
   };
 
   selectMultipleProductsClickEvent = () => {
-    let finalValue = get(this.props.sdk.parameters.invocation, 'fieldValue', [] as string[]);
-    finalValue = finalValue.concat(this.state.selectedProducts);
-    this.props.sdk.close(finalValue);
+    const currentField = get(this.props.sdk.parameters.invocation, 'fieldValue', [] as string[]);
+    const updatedField = union(currentField, this.state.selectedProducts);
+
+    this.props.sdk.close(updatedField);
   };
 
   searchButtonClickEvent() {

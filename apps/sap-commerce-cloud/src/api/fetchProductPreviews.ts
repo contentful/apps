@@ -23,14 +23,9 @@ export async function fetchProductPreviews(
         },
       };
   for (const sku of skus) {
-    const splitSku = sku.split(':');
-    const baseSite = splitSku[0];
-    const skuId = splitSku[1];
-    skuIds.push(skuId);
+    skuIds.push(sku.split('/products/').pop() as string);
     const response = await fetch(
-      parameters.installation.apiEndpoint +
-        `/occ/v2/${baseSite}/products/` +
-        skuId +
+      sku +
         '?fields=code,name,summary,price(formattedValue,DEFAULT),images(galleryIndex,FULL),averageRating,stock(DEFAULT),description,availableForPickup,url,numberOfReviews,manufacturer,categories(FULL),priceRange,multidimensional,configuratorType,configurable,tags',
       headers
     );
@@ -43,7 +38,7 @@ export async function fetchProductPreviews(
   const products = totalResponse.map(productTransformer(parameters.installation));
   const foundSKUs = products.map((product: { sku: any }) => product.sku);
   const missingProducts = difference(skuIds, foundSKUs).map((sku) => ({
-    sku,
+    sku: sku.split('/products/').pop(),
     image: '',
     id: '',
     name: '',
