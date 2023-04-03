@@ -8,7 +8,7 @@
   "dependencies": {
     "@contentful/app-sdk": "4.9.0",
     "@contentful/forma-36-fcss": "0.3.5",
-    "@contentful/forma-36-react-components": "3.93.2",
+    "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.0",
     "@testing-library/react": "8.0.7",
     "@use-it/interval": "0.1.4",
