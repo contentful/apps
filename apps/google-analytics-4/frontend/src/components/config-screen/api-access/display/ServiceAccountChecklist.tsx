@@ -1,6 +1,7 @@
 import GenericChecklistRow from 'components/config-screen/api-access/display/GenericCheckRow';
 import { ChecklistRow } from 'components/config-screen/api-access/display/ChecklistUtils';
 import tokens from '@contentful/f36-tokens';
+import { Box } from '@contentful/f36-components';
 
 interface Props {
   serviceAccountCheck: ChecklistRow;
@@ -24,7 +25,7 @@ export default function ServiceAccountChecklist(props: Props) {
   const { adminApiCheck, dataApiCheck, serviceAccountCheck, ga4PropertiesCheck } = props;
 
   return (
-    <>
+    <Box marginTop="spacingS">
       <GenericChecklistRow
         icon={serviceAccountCheck.icon}
         title={serviceAccountCheck.title}
@@ -57,6 +58,6 @@ export default function ServiceAccountChecklist(props: Props) {
         disabled={ga4PropertiesCheck.disabled}
         style={{ ...styles.defaultRowStyle, ...styles.nonTopRowStyle }}
       />
-    </>
+    </Box>
   );
 }
