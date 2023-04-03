@@ -16,12 +16,12 @@ describe('handle date range helper', () => {
   it('formats dates correctly for week range', () => {
     const { startDay, endDay } = calculateRangeDates('lastWeek');
 
-    expect(Math.abs(endDay - startDay) / DAY_IN_MS).toBe(RANGE_OPTIONS.lastWeek.startDaysAgo);
+    expect((endDay - startDay) / DAY_IN_MS).toBe(RANGE_OPTIONS.lastWeek.startDaysAgo);
   });
 
   it('formats dates correctly for day range', () => {
     const { startDay, endDay } = calculateRangeDates('lastDay');
 
-    expect(Math.abs(endDay - startDay) / DAY_IN_MS).toBe(RANGE_OPTIONS.lastDay.startDaysAgo);
+    expect((endDay - startDay) / DAY_IN_MS).toBe(RANGE_OPTIONS.lastDay.startDaysAgo);
   });
 });
