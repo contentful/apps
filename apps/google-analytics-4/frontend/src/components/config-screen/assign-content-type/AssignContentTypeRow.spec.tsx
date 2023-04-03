@@ -53,6 +53,7 @@ const props = {
   onRemoveContentType: onRemoveContentType,
   currentEditorInterface: {},
   originalContentTypes: {},
+  focus: false,
 };
 
 describe('Assign Content Type Card for Config Screen', () => {

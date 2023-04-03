@@ -16,6 +16,7 @@ interface Props {
   onRemoveContentType: (key: string) => void;
   currentEditorInterface: Partial<EditorInterface>;
   originalContentTypes: ContentTypes;
+  focus: boolean;
 }
 
 const AssignContentTypeRow = (props: Props) => {
@@ -30,6 +31,7 @@ const AssignContentTypeRow = (props: Props) => {
     onRemoveContentType,
     currentEditorInterface,
     originalContentTypes,
+    focus,
   } = props;
 
   const [contentTypeId, { slugField, urlPrefix }] = contentTypeEntry;
@@ -126,6 +128,13 @@ const AssignContentTypeRow = (props: Props) => {
     );
   };
 
+  useEffect(() => {
+    if (focus) {
+      const contentTypeSelect = document.getElementById(`contentType-${index}`);
+      if (contentTypeSelect) contentTypeSelect.focus();
+    }
+  }, [focus, index]);
+
   return (
     <Stack spacing="spacingXs" paddingBottom="spacingS" key={contentTypeId} testId="contentTypeRow">
       <ContentTypeWarning
@@ -175,7 +184,9 @@ const AssignContentTypeRow = (props: Props) => {
         />
       </Box>
       <Box className={styles.removeItem}>
-        <TextLink onClick={() => onRemoveContentType(contentTypeId)}>Remove</TextLink>
+        <TextLink as="button" onClick={() => onRemoveContentType(contentTypeId)}>
+          Remove
+        </TextLink>
       </Box>
     </Stack>
   );
