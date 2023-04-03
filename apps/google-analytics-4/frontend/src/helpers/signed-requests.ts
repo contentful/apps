@@ -1,4 +1,4 @@
-import { ServiceAccountKey } from '@/types';
+import { ServiceAccountKey } from '../types';
 import { CreateAppSignedRequestProps } from 'contentful-management/dist/typings/entities/app-signed-request';
 import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
 

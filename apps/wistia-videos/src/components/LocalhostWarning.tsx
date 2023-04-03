@@ -8,8 +8,7 @@ const LocalhostWarning = () => {
         display: 'flex',
         justifyContent: 'center',
         marginTop: '40px',
-      }}
-    >
+      }}>
       <Note title="App running outside of Contentful" style={{ maxWidth: '800px' }}>
         <Paragraph>
           Contentful Apps need to run inside the Contentful web app to function properly. Install
