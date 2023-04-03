@@ -13,10 +13,10 @@ import AssignContentTypeSection from 'components/config-screen/assign-content-ty
 import MapAccountPropertySection from 'components/config-screen/map-account-property/MapAccountPropertySection';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 import { generateEditorInterfaceAssignments } from 'helpers/contentTypeHelpers/contentTypeHelpers';
-import fetchWithSignedRequest from '../../helpers/signed-requests';
-import { config } from '../../config';
-import { convertServiceAccountKeyToServiceAccountKeyId } from '../../utils/serviceAccountKey';
-import NextStepsSection from './NextStepsSection/NextStepsSection';
+import fetchWithSignedRequest from 'helpers/signed-requests';
+import { config } from 'config';
+import { convertServiceAccountKeyToServiceAccountKeyId } from 'utils/serviceAccountKey';
+import NextStepsSection from '../NextStepsSection/NextStepsSection';
 import { checkContentTypeConfigValidity } from './helpers/checkContentTypeConfigValidity';
 
 export default function GoogleAnalyticsConfigPage() {
