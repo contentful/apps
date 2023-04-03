@@ -3,7 +3,7 @@ import { AppExtensionSDK, AppState, EditorInterface } from '@contentful/app-sdk'
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { isEmpty } from 'lodash';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
-import { styles } from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage.styles';
+import { styles } from './GoogleAnalyticsConfigPage.styles';
 import Splitter from 'components/common/Splitter';
 import ApiAccessSection from 'components/config-screen/api-access/ApiAccessSection';
 import AboutSection from 'components/config-screen/header/AboutSection';
