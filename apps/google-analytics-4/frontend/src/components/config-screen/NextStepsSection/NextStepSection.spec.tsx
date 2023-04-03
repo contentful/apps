@@ -12,7 +12,7 @@ const { getByText, getAllByTestId } = screen;
 const testComponentRender = async (isContentTypeConfigured?: boolean) => {
   const descriptionCopy = formatMessage(isContentTypeConfigured).replace('Content tab', '').trim();
 
-  const title = getByText('View app');
+  const title = getByText('View app on content entry');
   const description = getByText(descriptionCopy);
   const hyperLinks = getAllByTestId('cf-ui-text-link');
 
