@@ -125,9 +125,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
     if (event.target.checked) {
       if (!existingProducts.includes(skuId)) {
         const apiEndpoint = get(this.props.sdk.parameters.invocation, 'apiEndpoint', '');
-        existingProducts.push(
-          apiEndpoint + '/occ/v2/' + this.state.baseSite + '/products/' + skuId
-        );
+        existingProducts.push(`${apiEndpoint}/occ/v2/${this.state.baseSite}/products/${skuId}`);
         this.setState({
           selectedProducts: existingProducts,
         });
