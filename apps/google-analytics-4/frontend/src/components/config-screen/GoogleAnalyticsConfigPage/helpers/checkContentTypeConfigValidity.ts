@@ -8,8 +8,8 @@ export const checkContentTypeConfigValidity = (parameters: KeyValueMap) => {
   if (isEmpty(parameters.contentTypes)) return false;
 
   const aConfiguredContentType = Object.keys(parameters.contentTypes).find((key) => key);
-  const conentTypeAndSlugFieldConfigured =
+  const contentTypeAndSlugFieldConfigured =
     aConfiguredContentType && parameters.contentTypes[aConfiguredContentType].slugField;
 
-  return conentTypeAndSlugFieldConfigured;
+  return contentTypeAndSlugFieldConfigured;
 };

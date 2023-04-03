@@ -10,7 +10,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 const { getByText, getAllByTestId } = screen;
 
 const testComponentRender = async (descriptionCopy: string) => {
-  const title = getByText('View app on Entry page');
+  const title = getByText('View app');
   const description = getByText(descriptionCopy);
   const hyperLinks = getAllByTestId('cf-ui-text-link');
 

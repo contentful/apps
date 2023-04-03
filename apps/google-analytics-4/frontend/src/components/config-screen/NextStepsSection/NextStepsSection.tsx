@@ -21,7 +21,7 @@ const NextStepsSection = (props: Props) => {
 
   return (
     <>
-      <Subheading marginBottom="spacingXs">View app on Entry page</Subheading>
+      <Subheading marginBottom="spacingXs">View app</Subheading>
       <Paragraph>
         <HyperLink
           body={isContentTypeConfigured ? CONTENT_TYPES_MSG : NO_CONTENT_TYPES_MSG}
