@@ -90,6 +90,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
             onRemoveContentType={onRemoveContentType}
             currentEditorInterface={currentEditorInterface}
             originalContentTypes={originalContentTypes}
+            focus={index + 1 === contentTypeEntries.length}
           />
         );
       })}

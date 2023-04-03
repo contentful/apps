@@ -179,9 +179,11 @@ const AssignContentTypeSection = (props: Props) => {
               originalContentTypes={originalContentTypes}
             />
           )}
-          <Button onClick={handleAddContentType} isDisabled={hasIncompleteContentTypes}>
-            {hasContentTypes ? 'Add another content type' : 'Add a content type'}
-          </Button>
+          {Object.keys(contentTypes).length < Object.keys(allContentTypes).length && (
+            <Button onClick={handleAddContentType} isDisabled={hasIncompleteContentTypes}>
+              Add a content type
+            </Button>
+          )}
         </>
       ) : (
         <Spinner variant="primary" />
