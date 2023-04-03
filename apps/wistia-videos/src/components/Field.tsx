@@ -35,10 +35,10 @@ const VIDEOS_PER_PAGE = 500;
 
 const Field = (props: FieldProps) => {
   const { sdk } = props;
-  const [data, updateData] = useState<WistiaVideo[]>([]);
+  const [videos, setVideos] = useState<WistiaVideo[]>([]);
   const [selectedIds, setIds] = useState<number[]>([]);
-  const [dropdownData, filterDropdownData] = useState<WistiaVideo[]>([]);
-  const [loading, updateLoadingStatus] = useState(true);
+  const [dropdownData, setDropdownData] = useState<WistiaVideo[]>([]);
+  const [loading, setLoadingStatus] = useState(true);
   const [end, setEnd] = useState(VIDEOS_PER_PAGE);
   const [error, setError] = useState(null || '');
   sdk.window.startAutoResizer();
@@ -52,19 +52,19 @@ const Field = (props: FieldProps) => {
           parameters.excludedProjects,
           parameters.apiBearerToken
         );
-        let videos = await fetchVideos(projectIds, parameters.apiBearerToken);
-        if (videos.length === 0) {
+        let _videos = await fetchVideos(projectIds, parameters.apiBearerToken);
+        if (_videos.length === 0) {
           setError('There are no videos in your Wistia space');
         } else {
-          updateData(videos);
-          filterDropdownData(videos);
+          setVideos(_videos);
+          setDropdownData(_videos);
         }
       } catch (error) {
         if (error instanceof WistiaError) {
           setError(error.message);
         }
       } finally {
-        updateLoadingStatus(false);
+        setLoadingStatus(false);
       }
     };
 
@@ -108,7 +108,7 @@ const Field = (props: FieldProps) => {
   // set field value with updated state
   const setNewValues = (updatedIds: number[]) => {
     sdk.field.setValue({
-      items: data
+      items: videos
         .filter((item) => updatedIds.findIndex((updatedId) => item.id === updatedId) !== -1)
         .map((item) => {
           const values = {
@@ -123,11 +123,15 @@ const Field = (props: FieldProps) => {
   };
 
   const getDropdownData = (searchTerm: string) => {
-    const newDropdownData = [...data].filter((item: WistiaVideo) =>
+    const newDropdownData = videos.filter((item: WistiaVideo) =>
       item.name.toLowerCase().includes(searchTerm.toLocaleLowerCase())
     );
     return newDropdownData;
   };
+
+  {
+    console.log(dropdownData);
+  }
 
   return (
     <>
@@ -137,11 +141,11 @@ const Field = (props: FieldProps) => {
         </Paragraph>
       ) : (
         <>
-          {data.length && !error ? (
+          {videos.length && !error ? (
             <Flex flexDirection={'column'} fullHeight={true}>
               <Flex marginBottom={'spacingS'}>
                 <TextInput
-                  onChange={(event) => filterDropdownData(getDropdownData(event.target.value))}
+                  onChange={(event) => setDropdownData(getDropdownData(event.target.value))}
                   placeholder="Search for a video"
                 />
               </Flex>
@@ -150,7 +154,7 @@ const Field = (props: FieldProps) => {
                 style={{ width: '100%', height: '380px', overflow: 'scroll' }}>
                 <Flex>
                   <Grid columns={3} columnGap={'spacingS'} rowGap={'spacingS'}>
-                    {[...dropdownData].slice(0, end).map((item) => (
+                    {dropdownData.slice(0, end).map((item) => (
                       <GridItem key={item.id}>
                         <Card
                           onClick={() => updateVideoIds(item.id)}
@@ -182,7 +186,7 @@ const Field = (props: FieldProps) => {
                   <Paragraph style={{ marginBottom: 10 }}>Selected Videos</Paragraph>
                   <Flex flexWrap={'wrap'}>
                     {sdk.field.getValue().items.map((item: WistiaVideo) => {
-                      const fullItem = data.find((i) => item.id === i.id);
+                      const fullItem = videos.find((i) => item.id === i.id);
                       return (
                         <Pill
                           style={{ width: 300, marginRight: 10, marginBottom: 10 }}
