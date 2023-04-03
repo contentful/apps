@@ -7,13 +7,13 @@ import {
   Note,
   Card,
   Stack,
-  Paragraph,
   FormControl,
   Spinner,
   Button,
   Skeleton,
+  Text,
 } from '@contentful/f36-components';
-import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
+import { ExternalLinkTrimmedIcon, CycleIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
@@ -245,123 +245,131 @@ const DisplayServiceAccountCard = (props: Props) => {
     return <Badge variant="positive">Successfully configured</Badge>;
   };
 
+  const isLoading = isSavingPrivateKeyFile || isLoadingAdminApi || isLoadingDataApi;
+
+  const loadingSkeleton = (width = '100%') => {
+    return (
+      <Skeleton.Container svgHeight={21}>
+        <Skeleton.BodyText numberOfLines={1} lineHeight={20} width={width} />
+      </Skeleton.Container>
+    );
+  };
+
   return (
     <Card>
-      {isSavingPrivateKeyFile || isLoadingAdminApi || isLoadingDataApi ? (
-        <Flex>
-          <Skeleton.Container>
-            <Skeleton.BodyText numberOfLines={8} />
-          </Skeleton.Container>
+      <Flex justifyContent="space-between" marginBottom="spacingS">
+        <Box marginBottom="none">
+          <b>Google Service Account Details</b>
+        </Box>
+        <Flex justifyContent="space-between">
+          <Button
+            testId="editServiceAccountButton"
+            onClick={() => onInEditModeChange(true)}
+            variant="secondary"
+            size="small">
+            Replace key
+          </Button>
         </Flex>
-      ) : (
-        <>
-          <Flex justifyContent="space-between" marginBottom="none">
-            <Paragraph marginBottom="none" marginTop="spacingXs">
-              <b>Google Service Account Details</b>
-            </Paragraph>
-            <Flex justifyContent="space-between" marginBottom="spacingL">
-              <Box paddingRight="spacingXs" paddingTop="spacingXs">
+      </Flex>
+      <FormControl>
+        <FormControl.Label marginBottom="none">Service Account</FormControl.Label>
+        <Box>
+          {isLoading ? (
+            loadingSkeleton('65%')
+          ) : (
+            <Flex alignItems="center">
+              <Box paddingRight="spacingS">
                 <TextLink
-                  testId="editServiceAccountButton"
-                  as="button"
-                  variant="primary"
-                  onClick={() => onInEditModeChange(true)}>
-                  Edit
+                  icon={<ExternalLinkTrimmedIcon />}
+                  alignIcon="end"
+                  href={`https://console.cloud.google.com/iam-admin/serviceaccounts/details/${serviceAccountKeyId.clientId}?project=${serviceAccountKeyId.projectId}`}
+                  target="_blank"
+                  rel="noopener noreferrer">
+                  {serviceAccountKeyId.clientEmail}
                 </TextLink>
               </Box>
-              <Box>
-                {isSavingPrivateKeyFile || (isLoadingAdminApi && isLoadingDataApi) ? (
-                  <Spinner variant="primary" />
-                ) : (
-                  <Button variant="primary" size="small" onClick={handleApiTestClick}>
-                    Test
-                  </Button>
-                )}
-              </Box>
             </Flex>
-          </Flex>
-          <FormControl>
-            <FormControl.Label marginBottom="none">Service Account</FormControl.Label>
-            <Box>
-              <Flex alignItems="center">
-                <Box paddingRight="spacingS">
-                  <TextLink
-                    icon={<ExternalLinkTrimmedIcon />}
-                    alignIcon="end"
-                    href={`https://console.cloud.google.com/iam-admin/serviceaccounts/details/${serviceAccountKeyId.clientId}?project=${serviceAccountKeyId.projectId}`}
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    {serviceAccountKeyId.clientEmail}
-                  </TextLink>
-                </Box>
-              </Flex>
-            </Box>
-          </FormControl>
-          <FormControl>
-            <FormControl.Label marginBottom="none">Key ID</FormControl.Label>
-            <Box>
-              <Box as="code">{serviceAccountKeyId.id}</Box>
-            </Box>
-          </FormControl>
-          <FormControl marginBottom="none">
-            <FormControl.Label marginBottom="none">Status</FormControl.Label>
-            <Box>
-              <Flex>
-                <Box paddingRight="spacingS">
-                  <RenderStatusInfo />
-                </Box>
-                {!unknownError && (
-                  <Box>
-                    {showChecks ? (
-                      <TextLink as="button" variant="primary" onClick={() => setShowChecks(false)}>
-                        Hide all checks
-                      </TextLink>
-                    ) : (
-                      <TextLink as="button" variant="primary" onClick={() => setShowChecks(true)}>
-                        Show all checks
-                      </TextLink>
-                    )}
-                  </Box>
-                )}
-              </Flex>
-            </Box>
-          </FormControl>
-          {!unknownError && showChecks && (
-            <ServiceAccountChecklist
-              serviceAccountCheck={{
-                ...getServiceKeyChecklistStatus(
-                  parameters,
-                  invalidServiceAccountError,
-                  missingServiceAccountError
-                ),
-              }}
-              adminApiCheck={{
-                ...getAdminApiErrorChecklistStatus(
-                  isFirstSetup,
-                  parameters,
-                  invalidServiceAccountError,
-                  adminApiError
-                ),
-              }}
-              dataApiCheck={{
-                ...getDataApiErrorChecklistStatus(
-                  isFirstSetup,
-                  parameters,
-                  invalidServiceAccountError,
-                  dataApiError
-                ),
-              }}
-              ga4PropertiesCheck={{
-                ...getGa4PropertyErrorChecklistStatus(
-                  isFirstSetup,
-                  invalidServiceAccountError,
-                  adminApiError,
-                  ga4PropertiesError
-                ),
-              }}
-            />
           )}
-        </>
+        </Box>
+      </FormControl>
+      <FormControl>
+        <FormControl.Label marginBottom="none">Key ID</FormControl.Label>
+        <Box>
+          {isLoading ? loadingSkeleton('50%') : <Box as="code">{serviceAccountKeyId.id}</Box>}
+        </Box>
+      </FormControl>
+      <FormControl marginBottom="none">
+        <FormControl.Label marginBottom="spacing2Xs">
+          <Flex alignItems="center">
+            <Text fontWeight="fontWeightDemiBold" marginRight="spacing2Xs">
+              Status
+            </Text>
+            {isLoading ? (
+              <Spinner size="small" />
+            ) : (
+              <CycleIcon size="small" style={{ cursor: 'pointer' }} onClick={handleApiTestClick} />
+            )}
+          </Flex>
+        </FormControl.Label>
+        <Box>
+          {isLoading ? (
+            loadingSkeleton('45%')
+          ) : (
+            <Flex>
+              <Box paddingRight="spacingS">
+                <RenderStatusInfo />
+              </Box>
+              {!unknownError && (
+                <Box>
+                  {showChecks ? (
+                    <TextLink as="button" variant="primary" onClick={() => setShowChecks(false)}>
+                      Hide status checks
+                    </TextLink>
+                  ) : (
+                    <TextLink as="button" variant="primary" onClick={() => setShowChecks(true)}>
+                      Show status checks
+                    </TextLink>
+                  )}
+                </Box>
+              )}
+            </Flex>
+          )}
+        </Box>
+      </FormControl>
+      {!unknownError && showChecks && !isLoading && (
+        <ServiceAccountChecklist
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(
+              parameters,
+              invalidServiceAccountError,
+              missingServiceAccountError
+            ),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(
+              isFirstSetup,
+              parameters,
+              invalidServiceAccountError,
+              adminApiError
+            ),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(
+              isFirstSetup,
+              parameters,
+              invalidServiceAccountError,
+              dataApiError
+            ),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(
+              isFirstSetup,
+              invalidServiceAccountError,
+              adminApiError,
+              ga4PropertiesError
+            ),
+          }}
+        />
       )}
     </Card>
   );
