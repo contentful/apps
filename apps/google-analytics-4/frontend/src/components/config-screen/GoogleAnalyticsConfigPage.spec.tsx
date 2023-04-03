@@ -1,8 +1,8 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { mockSdk, mockCma } from '../../../../test/mocks';
+import { mockSdk, mockCma } from '../../../test/mocks';
 import GoogleAnalyticsConfigPage from './GoogleAnalyticsConfigPage';
-import { config } from '../../../config';
-import { validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
+import { config } from '../../config';
+import { validServiceKeyFile, validServiceKeyId } from '../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { ServiceAccountKey } from 'types';
 
