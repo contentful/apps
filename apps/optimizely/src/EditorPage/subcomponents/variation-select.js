@@ -39,12 +39,10 @@ export default function VariationSelect(props) {
               icon="Plus"
               onClick={() => {
                 setShowDropdown(true);
-              }}
-            >
+              }}>
               Create entry and link
             </TextLink>
-          }
-        >
+          }>
           <DropdownList maxHeight={300}>
             <DropdownListItem isTitle>Select content type</DropdownListItem>
             {linkContentTypes.map((value, index) => (
@@ -53,8 +51,7 @@ export default function VariationSelect(props) {
                 onClick={() => {
                   props.onCreate(value);
                   setShowDropdown(false);
-                }}
-              >
+                }}>
                 {linkContentTypeNames[index]}
               </DropdownListItem>
             ))}

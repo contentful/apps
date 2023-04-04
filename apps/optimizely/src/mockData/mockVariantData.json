@@ -1,148 +1,148 @@
 {
-    "results": {
-      "confidence_threshold": 0.9,
-      "end_time": "2019-08-05T14:55:00.000000Z",
-      "experiment_id": 15049730511,
+  "results": {
+    "confidence_threshold": 0.9,
+    "end_time": "2019-08-05T14:55:00.000000Z",
+    "experiment_id": 15049730511,
+    "metrics": [
+      {
+        "aggregator": "unique",
+        "event_id": 15053980195,
+        "name": "CTA Click",
+        "results": {
+          "15044200440": {
+            "is_baseline": true,
+            "level": "variation",
+            "name": "variation_1",
+            "rate": 0,
+            "samples": 4,
+            "value": 0,
+            "variance": 0,
+            "variation_id": "15044200440"
+          },
+          "15057850296": {
+            "is_baseline": false,
+            "level": "variation",
+            "lift": {
+              "is_significant": false,
+              "lift_status": "equal",
+              "significance": 0,
+              "value": 0,
+              "visitors_remaining": 9223372036854776000
+            },
+            "name": "variation_2",
+            "rate": 0,
+            "samples": 3,
+            "value": 0,
+            "variance": 0,
+            "variation_id": "15057850296"
+          }
+        },
+        "scope": "visitor",
+        "winning_direction": "increasing"
+      }
+    ],
+    "reach": {
+      "baseline_count": 4,
+      "baseline_reach": 0.5714285714285714,
+      "total_count": 7,
+      "treatment_count": 3,
+      "treatment_reach": 0.42857142857142855,
+      "variations": {
+        "15044200440": {
+          "count": 4,
+          "name": "variation_1",
+          "variation_id": "15044200440",
+          "variation_reach": 0.5714285714285714
+        },
+        "15057850296": {
+          "count": 3,
+          "name": "variation_2",
+          "variation_id": "15057850296",
+          "variation_reach": 0.42857142857142855
+        }
+      }
+    },
+    "start_time": "2019-05-29T20:25:53.000000Z",
+    "stats_config": {
+      "confidence_level": 0.9,
+      "difference_type": "relative",
+      "epoch_enabled": false
+    }
+  },
+  "experiments": [
+    {
+      "allocation_policy": "manual",
+      "audience_conditions": "everyone",
+      "campaign_id": 15039691085,
+      "changes": [],
+      "created": "2019-05-29T20:21:28.804947Z",
+      "description": "",
+      "earliest": "2019-05-29T20:25:53.423147Z",
+      "environments": {
+        "production": {
+          "status": "running",
+          "environment_name": "Production",
+          "environment_id": 15028260215,
+          "percentage_included": null
+        }
+      },
+      "holdback": 0,
+      "id": 15049730511,
+      "is_classic": false,
+      "key": "landing-page-hero",
+      "last_modified": "2019-05-30T03:05:55.452016Z",
       "metrics": [
         {
           "aggregator": "unique",
           "event_id": 15053980195,
-          "name": "CTA Click",
-          "results": {
-            "15044200440": {
-              "is_baseline": true,
-              "level": "variation",
-              "name": "variation_1",
-              "rate": 0,
-              "samples": 4,
-              "value": 0,
-              "variance": 0,
-              "variation_id": "15044200440"
-            },
-            "15057850296": {
-              "is_baseline": false,
-              "level": "variation",
-              "lift": {
-                "is_significant": false,
-                "lift_status": "equal",
-                "significance": 0,
-                "value": 0,
-                "visitors_remaining": 9223372036854776000
-              },
-              "name": "variation_2",
-              "rate": 0,
-              "samples": 3,
-              "value": 0,
-              "variance": 0,
-              "variation_id": "15057850296"
-            }
-          },
           "scope": "visitor",
           "winning_direction": "increasing"
         }
       ],
-      "reach": {
-        "baseline_count": 4,
-        "baseline_reach": 0.5714285714285714,
-        "total_count": 7,
-        "treatment_count": 3,
-        "treatment_reach": 0.42857142857142855,
-        "variations": {
-          "15044200440": {
-            "count": 4,
-            "name": "variation_1",
-            "variation_id": "15044200440",
-            "variation_reach": 0.5714285714285714
-          },
-          "15057850296": {
-            "count": 3,
-            "name": "variation_2",
-            "variation_id": "15057850296",
-            "variation_reach": 0.42857142857142855
-          }
-        }
-      },
-      "start_time": "2019-05-29T20:25:53.000000Z",
-      "stats_config": {
-        "confidence_level": 0.9,
-        "difference_type": "relative",
-        "epoch_enabled": false
-      }
-    },
-    "experiments": [
+      "name": "landing-page-hero",
+      "page_ids": [],
+      "project_id": 15024710079,
+      "status": "running",
+      "type": "a/b",
+      "variations": [
         {
-          "allocation_policy": "manual",
-          "audience_conditions": "everyone",
-          "campaign_id": 15039691085,
-          "changes": [],
-          "created": "2019-05-29T20:21:28.804947Z",
-          "description": "",
-          "earliest": "2019-05-29T20:25:53.423147Z",
-          "environments": {
-            "production": {
-              "status": "running",
-              "environment_name": "Production",
-              "environment_id": 15028260215,
-              "percentage_included": null
-            }
-          },
-          "holdback": 0,
-          "id": 15049730511,
-          "is_classic": false,
-          "key": "landing-page-hero",
-          "last_modified": "2019-05-30T03:05:55.452016Z",
-          "metrics": [
-            {
-              "aggregator": "unique",
-              "event_id": 15053980195,
-              "scope": "visitor",
-              "winning_direction": "increasing"
-            }
-          ],
-          "name": "landing-page-hero",
-          "page_ids": [],
-          "project_id": 15024710079,
-          "status": "running",
-          "type": "a/b",
-          "variations": [
-            {
-              "actions": [],
-              "archived": false,
-              "key": "variation_1",
-              "status": "active",
-              "variation_id": 15044200440,
-              "weight": 5000
-            },
-            {
-              "actions": [],
-              "archived": false,
-              "key": "variation_2",
-              "status": "active",
-              "variation_id": 15057850296,
-              "weight": 5000
-            }
-          ],
-          "whitelist": [
-            {
-              "user_id": "user_1",
-              "variation_id": 15044200440
-            },
-            {
-              "user_id": "user_2",
-              "variation_id": 15057850296
-            }
-          ]
+          "actions": [],
+          "archived": false,
+          "key": "variation_1",
+          "status": "active",
+          "variation_id": 15044200440,
+          "weight": 5000
+        },
+        {
+          "actions": [],
+          "archived": false,
+          "key": "variation_2",
+          "status": "active",
+          "variation_id": 15057850296,
+          "weight": 5000
         }
       ],
-    "entries":{
-        "sys": {
-          "type": "Array"
+      "whitelist": [
+        {
+          "user_id": "user_1",
+          "variation_id": 15044200440
         },
-        "total": 0,
-        "skip": 0,
-        "limit": 1000,
-        "items": []
-      },
+        {
+          "user_id": "user_2",
+          "variation_id": 15057850296
+        }
+      ]
+    }
+  ],
+  "entries": {
+    "sys": {
+      "type": "Array"
+    },
+    "total": 0,
+    "skip": 0,
+    "limit": 1000,
+    "items": []
+  },
   "contentTypes": {
     "sys": {
       "type": "Array"
