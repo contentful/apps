@@ -42,9 +42,7 @@ const getApplicationInterfaceKey = async (): Promise<boolean | string> => {
 init(async (sdk) => {
   const root = document.getElementById('root');
   const isTestEnv = config.isTestEnv;
-  let sapApplicationInterfaceKey = !isTestEnv ? await getApplicationInterfaceKey() : '';
-  // removing until we figure out the issues on the SAP side
-  sapApplicationInterfaceKey = '';
+  const sapApplicationInterfaceKey = !isTestEnv ? await getApplicationInterfaceKey() : '';
   const ComponentLocationSettings = [
     {
       location: locations.LOCATION_APP_CONFIG,
@@ -68,7 +66,8 @@ init(async (sdk) => {
             {
               id: 'baseSites',
               name: 'Base Sites',
-              description: 'Allowed Base Sites',
+              description:
+                'Include all base sites that you want to have available in the app. Separate each base site with a comma.',
               type: 'Symbol',
               required: true,
               default: '',
