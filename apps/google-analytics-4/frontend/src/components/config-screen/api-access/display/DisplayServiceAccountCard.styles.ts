@@ -1,9 +1,9 @@
 import { css } from 'emotion';
-import tokens from '@contentful/f36-tokens';
 
 export const styles = {
   textLink: css({
-    lineHeight: tokens.lineHeightS,
+    // smallest F36 line-height token is 16px and this adjustment required two less pixels
+    lineHeight: '14px',
   }),
   statusWrapper: css({
     alignItems: 'flex-end',
