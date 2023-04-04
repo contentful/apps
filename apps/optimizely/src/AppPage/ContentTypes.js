@@ -145,8 +145,7 @@ export default function ContentTypes({
           buttonType="muted"
           onClick={() => toggleModal(true)}
           disabled={!addableContentTypes.length}
-          testId="add-content"
-        >
+          testId="add-content">
           Add content type
         </Button>
         {addedContentTypes.length > 0 ? (
@@ -184,8 +183,7 @@ export default function ContentTypes({
                   onChange={(e) => onSelectContentType(e.target.value)}
                   value={selectedContentType || ''}
                   testId="content-type-selector"
-                  required
-                >
+                  required>
                   <Option value="" disabled>
                     Select content type
                   </Option>
@@ -220,8 +218,7 @@ export default function ContentTypes({
               <Button
                 disabled={!selectedContentType}
                 onClick={addContentTypeCloseModal}
-                buttonType="positive"
-              >
+                buttonType="positive">
                 Save
               </Button>
               <Button onClick={onClose} buttonType="muted">
@@ -291,8 +288,7 @@ function ContentTypeRow({
           <TextLink
             onClick={() => onClickDelete(contentTypeId)}
             className={styles.link}
-            linkType="negative"
-          >
+            linkType="negative">
             Delete
           </TextLink>
         )}
