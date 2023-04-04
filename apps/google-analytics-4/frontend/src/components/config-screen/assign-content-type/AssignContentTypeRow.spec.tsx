@@ -154,8 +154,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const selectOptions = await screen.findByTestId('slugFieldSelect');
-    await user.selectOptions(selectOptions, ['slug']);
+    await user.selectOptions(screen.getByTestId('slugFieldSelect'), ['slug']);
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();
   });
@@ -176,8 +175,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const input = await screen.findByTestId('urlPrefixInput');
-    await user.type(input, '/en-US');
+    await user.type(screen.getByTestId('urlPrefixInput'), '/en-US');
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();
   });

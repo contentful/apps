@@ -41,9 +41,8 @@ describe('Content Type Warning for Config Screen', () => {
     expect(screen.getByTestId('errorIcon')).toBeVisible();
 
     await user.hover(screen.getByTestId('cf-ui-icon'));
-    const tooltip = await screen.findByRole('tooltip');
 
-    expect(tooltip.textContent).toBe(getContentTypeDeletedMsg('test'));
+    expect(screen.getByRole('tooltip').textContent).toBe(getContentTypeDeletedMsg('test'));
   });
 
   it('renders a warning icon and correct tooltip content when slug field empty', async () => {
@@ -63,9 +62,8 @@ describe('Content Type Warning for Config Screen', () => {
     expect(screen.getByTestId('warningIcon')).toBeVisible();
 
     await user.hover(screen.getByTestId('cf-ui-icon'));
-    const tooltip = await screen.findByRole('tooltip');
 
-    expect(tooltip.textContent).toBe(NO_SLUG_WARNING_MSG);
+    expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
   });
 
   it('renders a warning icon and correct tooltip content when app is removed from content type sidebar', async () => {
@@ -85,9 +83,8 @@ describe('Content Type Warning for Config Screen', () => {
     expect(screen.getByTestId('warningIcon')).toBeVisible();
 
     await user.hover(screen.getByTestId('cf-ui-icon'));
-    const tooltip = await screen.findByRole('tooltip');
 
-    expect(tooltip.textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
+    expect(screen.getByRole('tooltip').textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
   });
 
   it('renders a warning icon and correct tooltip content when slug field is deleted', async () => {
@@ -107,8 +104,7 @@ describe('Content Type Warning for Config Screen', () => {
     expect(screen.getByTestId('warningIcon')).toBeVisible();
 
     await user.hover(screen.getByTestId('cf-ui-icon'));
-    const tooltip = await screen.findByRole('tooltip');
 
-    expect(tooltip.textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));
+    expect(screen.getByRole('tooltip').textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));
   });
 });

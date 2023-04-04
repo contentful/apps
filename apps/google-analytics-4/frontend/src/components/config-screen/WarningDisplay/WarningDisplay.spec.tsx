@@ -11,9 +11,8 @@ describe('WarningDisplay component', () => {
     expect(screen.getByTestId('errorIcon')).toBeVisible();
 
     await user.hover(screen.getByTestId('cf-ui-icon'));
-    const tooltip = await screen.findByRole('tooltip');
 
-    expect(tooltip.textContent).toBe('This is an error');
+    expect(screen.getByRole('tooltip').textContent).toBe('This is an error');
   });
 
   it('renders a warning icon and correct tooltip content', async () => {
@@ -24,9 +23,8 @@ describe('WarningDisplay component', () => {
     expect(screen.getByTestId('warningIcon')).toBeVisible();
 
     await user.hover(screen.getByTestId('cf-ui-icon'));
-    const tooltip = await screen.findByRole('tooltip');
 
-    expect(tooltip.textContent).toBe('This is a warning');
+    expect(screen.getByRole('tooltip').textContent).toBe('This is a warning');
   });
 
   it('renders an empty div if there are no warnings or errors', () => {
