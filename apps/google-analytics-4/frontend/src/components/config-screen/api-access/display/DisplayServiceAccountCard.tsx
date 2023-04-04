@@ -25,6 +25,7 @@ import {
   getServiceKeyChecklistStatus,
 } from 'components/config-screen/api-access/display/ChecklistUtils';
 import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
+import { styles } from './DisplayServiceAccountCard.styles';
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
@@ -315,18 +316,26 @@ const DisplayServiceAccountCard = (props: Props) => {
           {isLoading ? (
             loadingSkeleton('45%')
           ) : (
-            <Flex>
+            <Flex className={styles.statusWrapper}>
               <Box paddingRight="spacingS">
                 <RenderStatusInfo />
               </Box>
               {!unknownError && (
                 <Box>
                   {showChecks ? (
-                    <TextLink as="button" variant="primary" onClick={() => setShowChecks(false)}>
+                    <TextLink
+                      className={styles.textLink}
+                      as="button"
+                      variant="primary"
+                      onClick={() => setShowChecks(false)}>
                       Hide status checks
                     </TextLink>
                   ) : (
-                    <TextLink as="button" variant="primary" onClick={() => setShowChecks(true)}>
+                    <TextLink
+                      className={styles.textLink}
+                      as="button"
+                      variant="primary"
+                      onClick={() => setShowChecks(true)}>
                       Show status checks
                     </TextLink>
                   )}
