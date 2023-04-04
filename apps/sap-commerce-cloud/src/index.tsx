@@ -66,7 +66,8 @@ init(async (sdk) => {
             {
               id: 'baseSites',
               name: 'Base Sites',
-              description: 'Allowed Base Sites',
+              description:
+                'Include all base sites that you want to have available in the app. Separate each base site with a comma.',
               type: 'Symbol',
               required: true,
               default: '',
