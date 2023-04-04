@@ -41,8 +41,8 @@ const getApplicationInterfaceKey = async (): Promise<boolean | string> => {
 
 init(async (sdk) => {
   const root = document.getElementById('root');
-  const isTestEnv = config.isTestEnv;
-  const sapApplicationInterfaceKey = !isTestEnv ? await getApplicationInterfaceKey() : '';
+  //const isTestEnv = config.isTestEnv;
+  const sapApplicationInterfaceKey = '';
   const ComponentLocationSettings = [
     {
       location: locations.LOCATION_APP_CONFIG,
