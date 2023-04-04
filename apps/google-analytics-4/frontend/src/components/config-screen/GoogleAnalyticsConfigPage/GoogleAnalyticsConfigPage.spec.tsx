@@ -35,8 +35,8 @@ describe('Google Analytics Page', () => {
       render(<GoogleAnalyticsConfigPage />);
     });
 
-    await screen.findByText('API access');
-    await screen.findByText('Google Service Account Details');
+    screen.getByText('API access');
+    screen.getByText('Google Service Account Details');
   });
 });
 
