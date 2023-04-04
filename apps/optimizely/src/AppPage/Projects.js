@@ -31,8 +31,7 @@ export default function Projects({ allProjects, selectedProject, onProjectChange
         value={selectedProject ? selectedProject.toString() : ''}
         onChange={onProjectChange}
         selectProps={{ isDisabled: !allProjects }}
-        width="large"
-      >
+        width="large">
         <Option value="">Select Optimizely Project</Option>
         {!!allProjects.length &&
           allProjects.map((p) => (

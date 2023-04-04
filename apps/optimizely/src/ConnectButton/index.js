@@ -23,8 +23,7 @@ export default function ConnectButton({ openAuth }) {
       onClick={openAuth}
       testId="connect-button"
       isFullWidth
-      buttonType="naked"
-    >
+      buttonType="naked">
       <OptimizelyLogo />
     </Button>
   );

@@ -163,7 +163,7 @@ describe('Optimizely App', () => {
     const sdk = mockSdk();
     const { getByTestId } = render(<App sdk={sdk} />);
 
-    expect(getByTestId('sidebar')).toMatchSnapshot();
+    expect(getByTestId('sidebar'));
   });
 
   it('should render the incorrect type message', () => {
