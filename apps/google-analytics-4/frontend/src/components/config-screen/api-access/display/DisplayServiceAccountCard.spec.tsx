@@ -25,7 +25,7 @@ describe('Installed Service Account Card', () => {
     await act(async () => {
       render(
         <DisplayServiceAccountCard
-          isSavingPrivateKeyFile={false}
+          isSavingConfiguration={false}
           serviceAccountKeyId={validServiceKeyId}
           parameters={{}}
           onInEditModeChange={() => {}}
