@@ -75,6 +75,7 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   const handleApiError = (error: ApiErrorType) => {
     switch (error.errorType) {
+      case ERROR_TYPE_MAP.invalidServiceAccount:
       case ERROR_TYPE_MAP.invalidServiceAccountKey:
         setInvalidServiceAccountError(error);
         break;
@@ -358,7 +359,7 @@ const DisplayServiceAccountCard = (props: Props) => {
             ...getAdminApiErrorChecklistStatus(
               isFirstSetup,
               parameters,
-              invalidServiceAccountError,
+              invalidServiceAccountError || missingServiceAccountError,
               adminApiError
             ),
           }}
@@ -366,14 +367,14 @@ const DisplayServiceAccountCard = (props: Props) => {
             ...getDataApiErrorChecklistStatus(
               isFirstSetup,
               parameters,
-              invalidServiceAccountError,
+              invalidServiceAccountError || missingServiceAccountError,
               dataApiError
             ),
           }}
           ga4PropertiesCheck={{
             ...getGa4PropertyErrorChecklistStatus(
               isFirstSetup,
-              invalidServiceAccountError,
+              invalidServiceAccountError || missingServiceAccountError,
               adminApiError,
               ga4PropertiesError
             ),

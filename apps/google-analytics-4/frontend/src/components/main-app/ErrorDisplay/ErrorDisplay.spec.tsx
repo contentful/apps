@@ -88,6 +88,30 @@ describe('ErrorDisplay', () => {
             details: '',
             message: '',
             status: 404,
+            errorType: 'InvalidServiceAccount',
+          })
+        }
+      />
+    );
+
+    const warningMsg = await findByText(
+      INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim()
+    );
+    const hyperLink = getByTestId('cf-ui-text-link');
+
+    expect(warningMsg).toBeVisible();
+    expect(hyperLink).toBeVisible();
+  });
+
+  it('mounts with correct msg when error is of type InvalidServiceAccountKey', async () => {
+    const HYPER_LINK_COPY = 'app configuration page.';
+    render(
+      <ErrorDisplay
+        error={
+          new ApiError({
+            details: '',
+            message: '',
+            status: 404,
             errorType: 'InvalidServiceAccountKey',
           })
         }
