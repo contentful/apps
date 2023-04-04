@@ -12,8 +12,9 @@ import {
   Button,
   Skeleton,
   Text,
+  CopyButton,
 } from '@contentful/f36-components';
-import { ExternalLinkTrimmedIcon, CycleIcon } from '@contentful/f36-icons';
+import { CycleIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
@@ -261,15 +262,13 @@ const DisplayServiceAccountCard = (props: Props) => {
         <Box marginBottom="none">
           <b>Google Service Account Details</b>
         </Box>
-        <Flex justifyContent="space-between">
-          <Button
-            testId="editServiceAccountButton"
-            onClick={() => onInEditModeChange(true)}
-            variant="secondary"
-            size="small">
-            Replace key
-          </Button>
-        </Flex>
+        <Button
+          testId="editServiceAccountButton"
+          onClick={() => onInEditModeChange(true)}
+          variant="secondary"
+          size="small">
+          Replace key
+        </Button>
       </Flex>
       <FormControl>
         <FormControl.Label marginBottom="none">Service Account</FormControl.Label>
@@ -277,26 +276,27 @@ const DisplayServiceAccountCard = (props: Props) => {
           {isLoading ? (
             loadingSkeleton('65%')
           ) : (
-            <Flex alignItems="center">
-              <Box paddingRight="spacingS">
-                <TextLink
-                  icon={<ExternalLinkTrimmedIcon />}
-                  alignIcon="end"
-                  href={`https://console.cloud.google.com/iam-admin/serviceaccounts/details/${serviceAccountKeyId.clientId}?project=${serviceAccountKeyId.projectId}`}
-                  target="_blank"
-                  rel="noopener noreferrer">
-                  {serviceAccountKeyId.clientEmail}
-                </TextLink>
-              </Box>
+            <Flex alignItems="center" gap="spacingXs">
+              <Box>{serviceAccountKeyId.clientEmail}</Box>
+              <CopyButton
+                value={serviceAccountKeyId.clientEmail}
+                size="small"
+                style={{
+                  display: 'block',
+                  border: 'none',
+                  padding: 0,
+                  lineHeight: '1rem',
+                  height: '1rem',
+                  width: 'auto',
+                }}
+              />
             </Flex>
           )}
         </Box>
       </FormControl>
       <FormControl>
         <FormControl.Label marginBottom="none">Key ID</FormControl.Label>
-        <Box>
-          {isLoading ? loadingSkeleton('50%') : <Box as="code">{serviceAccountKeyId.id}</Box>}
-        </Box>
+        {isLoading ? loadingSkeleton('50%') : <Box>{serviceAccountKeyId.id}</Box>}
       </FormControl>
       <FormControl marginBottom="none">
         <FormControl.Label marginBottom="spacing2Xs">
