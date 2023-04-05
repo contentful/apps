@@ -4,7 +4,7 @@ Contentful Marketplace App that displays real-time page-based analytics data fro
 
 ## Requirements
 
-- [Google Analytics 4](https://developers.google.com/analytics/devguides/collection/ga4) (Note: Google's deprecated Universal Analytics is not supported with this version of the Google Analytics App)
+- [Google Analytics 4](https://developers.google.com/analytics/devguides/collection/ga4) (Note: Google's deprecated Universal Analytics is not supported in the Google Analytics 4 app)
 
 ## Installation and Usage
 
@@ -17,7 +17,7 @@ See the [Google Analytics 4 App Marketplace listing](https://contentful.com/mark
 
 ### General
 
-- The Google Analytics App app is built on top of Contentful's [app framework](https://www.contentful.com/developers/docs/extensibility/app-framework/)
+- The Google Analytics 4 App is built on top of Contentful's [app framework](https://www.contentful.com/developers/docs/extensibility/app-framework/)
 - The app itself is a React application that provides a Sidebar widget and App Config widget, used within Contentful's app framework
 
 ### Authorization
@@ -38,7 +38,7 @@ See the [Google Analytics 4 App Marketplace listing](https://contentful.com/mark
 
 To develop this app locally, there are a few prerequisites you will want to have in place:
 
-- A Google Analytics 4 property in an active Google Analytics account. You will also need to have Google Analytics gathering data on a public website somewhere in order to generate metrics you can use to display and test
+- A Google Analytics 4 property in an active Google Analytics 4 account. You will also need to have the Google Analytics 4 property gathering data on a public website somewhere in order to generate metrics you can use to display and test
 - A Contentful organization and space
 - A development definition of the app itself
 
