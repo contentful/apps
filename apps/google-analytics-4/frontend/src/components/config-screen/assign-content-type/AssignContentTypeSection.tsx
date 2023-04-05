@@ -156,12 +156,11 @@ const AssignContentTypeSection = (props: Props) => {
         </Paragraph>
         <Paragraph marginBottom="none">
           <TextLink
-            /* TODO: Correct this wrong link. (WRONG below in copy is intentional to ensure we don't forget) */
-            href="https://support.google.com/analytics/answer/10759417"
+            href="https://www.contentful.com/help/google-analytics-4-app/"
             target="_blank"
             icon={<ExternalLinkIcon />}
             alignIcon="end">
-            WRONG See our help documentation for more details
+            See our help documentation for more details
           </TextLink>
         </Paragraph>
       </Box>
