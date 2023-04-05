@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SidebarExtensionSDK } from '@contentful/app-sdk';
+import { SidebarAppSDK } from '@contentful/app-sdk';
 
 import { List, ListItem, Note } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -8,7 +8,7 @@ const CONTENT_FIELD_ID = 'body';
 const WORDS_PER_MINUTE = 200;
 
 const Sidebar = () => {
-  const sdk = useSDK<SidebarExtensionSDK>();
+  const sdk = useSDK<SidebarAppSDK>();
 
   const contentField = sdk.entry.fields[CONTENT_FIELD_ID];
   const [blogText, setBlogText] = useState(contentField.getValue());

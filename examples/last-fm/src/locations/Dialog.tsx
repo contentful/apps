@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Spinner, Stack, EntityList } from '@contentful/f36-components';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 
 export interface Album {
@@ -18,7 +18,7 @@ export interface Image {
 }
 
 const Dialog = () => {
-  const sdk = useSDK<DialogExtensionSDK>();
+  const sdk = useSDK<DialogAppSDK>();
   useAutoResizer();
 
   const [album, setAlbum] = useState<Album[] | undefined>();

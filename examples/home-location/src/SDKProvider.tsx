@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { init, KnownSDK } from "@contentful/app-sdk";
+import { init, KnownAppSDK } from "@contentful/app-sdk";
 import { SDKContext } from "@contentful/react-apps-toolkit/dist/SDKProvider";
 
 const DELAY_TIMEOUT = 4 * 1000;
@@ -20,7 +20,7 @@ interface SDKProviderProps {
 
 // TODO: can be removed when released
 export const SDKProvider: FC<PropsWithChildren<SDKProviderProps>> = (props) => {
-  const [sdk, setSDK] = useState<KnownSDK | undefined>();
+  const [sdk, setSDK] = useState<KnownAppSDK | undefined>();
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -28,7 +28,7 @@ export const SDKProvider: FC<PropsWithChildren<SDKProviderProps>> = (props) => {
         "Your app is taking longer than expected to initialize. If you think this is an error with Contentful's App SDK, let us know: https://github.com/contentful/ui-extensions-sdk/issues"
       );
     }, DELAY_TIMEOUT);
-    init((sdk: KnownSDK) => {
+    init((sdk: KnownAppSDK) => {
       setSDK(sdk);
       window.clearTimeout(timeout);
     });

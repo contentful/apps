@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Heading, Form, Accordion, Flex, Checkbox } from '@contentful/f36-components';
 import { css } from 'emotion';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
@@ -63,7 +63,7 @@ const ConfigScreen = () => {
   const [selectedSidebarCTs, setSelectedSidebarCTs] = useState<string[]>([]);
   const [supportedFieldCTs, setSupportedFieldCTs] = useState<ContentTypeProps[]>([]);
   const [selectedFieldCTs, setSelectedFieldCTs] = useState<string[]>([]);
-  const sdk = useSDK<AppExtensionSDK>();
+  const sdk = useSDK<ConfigAppSDK>();
   const cma = useCMA();
 
   const onConfigure = useCallback(async () => {

@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import type { SidebarExtensionSDK } from '@contentful/app-sdk';
+import type { SidebarAppSDK } from '@contentful/app-sdk';
 
-defineProps<{ sdk: SidebarExtensionSDK }>();
+defineProps<{ sdk: SidebarAppSDK }>();
 </script>

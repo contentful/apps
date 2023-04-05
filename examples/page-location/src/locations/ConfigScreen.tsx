@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Box, Note } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 export const Config = () => {
-  const sdk = useSDK<AppExtensionSDK>();
+  const sdk = useSDK<ConfigAppSDK>();
   useEffect(() => {
     sdk.app.setReady();
   }, []);

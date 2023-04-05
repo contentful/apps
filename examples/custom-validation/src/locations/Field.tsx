@@ -1,11 +1,11 @@
-import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { FieldAppSDK } from '@contentful/app-sdk';
 import { Note, Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useState } from 'react';
 import { getEntry, onEntryChanged } from '../utils';
 
 export function Field() {
-  const sdk = useSDK<FieldExtensionSDK>();
+  const sdk = useSDK<FieldAppSDK>();
 
   const [errors, setErrors] = useState<string[]>([]);
 

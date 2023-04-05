@@ -1,6 +1,6 @@
 import React from "react";
 import { render } from "react-dom";
-import { init, KnownSDK } from "@contentful/app-sdk";
+import { init, KnownAppSDK } from "@contentful/app-sdk";
 import { GlobalStyles } from "@contentful/f36-components";
 
 import LocalhostWarning from "./components/LocalhostWarning";
@@ -13,7 +13,7 @@ window.addEventListener("message", (e) => {
   console.log(e.data);
 });
 
-init((sdk: KnownSDK) => {
+init((sdk: KnownAppSDK) => {
   if (process.env.NODE_ENV === "development" && window.self === window.top) {
     // You can remove this if block before deploying your app
     render(<LocalhostWarning />, root);

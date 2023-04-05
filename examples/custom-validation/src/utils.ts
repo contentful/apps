@@ -1,7 +1,7 @@
-import { EditorExtensionSDK, FieldExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
+import { EditorAppSDK, FieldAppSDK, SidebarAppSDK } from '@contentful/app-sdk';
 import { EntryProps } from 'contentful-management';
 
-type SDK = FieldExtensionSDK | SidebarExtensionSDK | EditorExtensionSDK;
+type SDK = FieldAppSDK | SidebarAppSDK | EditorAppSDK;
 
 export function getEntry(sdk: SDK): EntryProps {
   return {
