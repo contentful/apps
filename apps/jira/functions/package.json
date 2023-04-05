@@ -14,7 +14,7 @@
     "start": "npm run build && serverless offline --httpPort 3000"
   },
   "dependencies": {
-    "aws-sdk": "^2.1349.0",
+    "aws-sdk": "^2.1350.0",
     "node-fetch": "^2.6.9"
   },
   "devDependencies": {
