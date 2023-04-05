@@ -36,7 +36,7 @@ const TestComponent = (props: Props) => {
   );
 };
 
-const { getByText } = screen;
+const { getByText, findByText } = screen;
 
 describe('useSidebarSlug hook', () => {
   it('returns slug info and status when content types are configured correctly', () => {
@@ -88,5 +88,38 @@ describe('useSidebarSlug hook', () => {
     expect(getByText('reportSlug: /en-US')).toBeVisible();
     expect(getByText('slugFieldValue:')).toBeVisible();
     expect(getByText('isContentTypeWarning: true')).toBeVisible();
+  });
+
+  it('returns slug info and status when field value is updated', async () => {
+    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      entry: {
+        fields: { slugField: {} },
+        onSysChanged: jest.fn((cb) =>
+          cb({
+            publishedAt: '2020202',
+          } as unknown as ContentEntitySys)
+        ),
+      },
+    }));
+    jest
+      .spyOn(getFieldValue, 'default')
+      .mockImplementationOnce(() => '/fieldValue')
+      .mockImplementationOnce(() => '/differentFieldValue');
+    const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
+
+    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
+
+    expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
+    expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
+    expect(getByText('isPublished: true')).toBeVisible();
+    expect(getByText('reportSlug: /en-US/fieldValue')).toBeVisible();
+    expect(getByText('slugFieldValue: /fieldValue')).toBeVisible();
+    expect(getByText('isContentTypeWarning: false')).toBeVisible();
+
+    const newSlugFieldValue = await findByText('slugFieldValue: /differentFieldValue');
+
+    expect(newSlugFieldValue).toBeVisible();
+    expect(getByText('reportSlug: /en-US/differentFieldValue')).toBeVisible();
   });
 });
