@@ -26,7 +26,6 @@ export const apiErrorHandler: ErrorRequestHandler = (error, _request, response, 
       });
     }
   }
-
   next();
 };
 

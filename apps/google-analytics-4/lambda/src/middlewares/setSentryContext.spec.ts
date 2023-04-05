@@ -17,7 +17,7 @@ describe('setSentryContext', () => {
   app.use(setSentryContext);
 
   app.get('/test', (_req, res) => {
-    res.send('ok');
+    res.sendStatus(200);
   });
 
   it('should set the sentry tags', async () => {
