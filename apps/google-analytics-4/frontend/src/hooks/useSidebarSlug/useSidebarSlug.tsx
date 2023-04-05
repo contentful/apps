@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ContentTypeValue } from 'types';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ContentEntitySys, SidebarExtensionSDK } from '@contentful/app-sdk';
@@ -18,17 +18,11 @@ export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
     setIsPublished(Boolean(sys.publishedAt));
   };
 
-  const updateSlugFieldValue = (v: string) => {
-    setDebouncedSlugFieldValue(v);
-  };
-
-  const handleSlugFieldValue = useCallback(updateSlugFieldValue, [updateSlugFieldValue]);
-
   useEffect(() => {
-    const timeout = setTimeout(() => handleSlugFieldValue(slugFieldValue), 500);
+    const timeout = setTimeout(() => setDebouncedSlugFieldValue(slugFieldValue), 500);
 
     return () => clearTimeout(timeout);
-  }, [slugFieldValue, handleSlugFieldValue]);
+  }, [slugFieldValue]);
 
   useEffect(() => {
     // We only want this to update state on component mount.
