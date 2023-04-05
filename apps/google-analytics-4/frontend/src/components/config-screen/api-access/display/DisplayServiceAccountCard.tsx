@@ -326,19 +326,11 @@ const DisplayServiceAccountCard = (props: Props) => {
               {!unknownError && (
                 <Box>
                   {showChecks ? (
-                    <TextLink
-                      className={styles.textLink}
-                      as="button"
-                      variant="primary"
-                      onClick={() => setShowChecks(false)}>
+                    <TextLink as="button" variant="primary" onClick={() => setShowChecks(false)}>
                       Hide status checks
                     </TextLink>
                   ) : (
-                    <TextLink
-                      className={styles.textLink}
-                      as="button"
-                      variant="primary"
-                      onClick={() => setShowChecks(true)}>
+                    <TextLink as="button" variant="primary" onClick={() => setShowChecks(true)}>
                       Show status checks
                     </TextLink>
                   )}
