@@ -11,6 +11,7 @@ import Home from './locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { contentfulContext } from './helpers/contentfulContext';
 import { upperFirst } from 'lodash';
+import { useAnalytics } from './hooks/useAnalytics';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -24,6 +25,8 @@ const ComponentLocationSettings = {
 
 const App = () => {
   const sdk = useSDK();
+  const analytics = useAnalytics();
+  console.log('analytics', analytics);
 
   const Component = useMemo(() => {
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {
