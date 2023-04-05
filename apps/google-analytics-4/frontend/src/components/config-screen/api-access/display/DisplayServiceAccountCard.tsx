@@ -14,7 +14,7 @@ import {
   Text,
   CopyButton,
 } from '@contentful/f36-components';
-import { CycleIcon } from '@contentful/f36-icons';
+import { CycleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
@@ -27,6 +27,7 @@ import {
 } from 'components/config-screen/api-access/display/ChecklistUtils';
 import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
 import { styles } from './DisplayServiceAccountCard.styles';
+import HyperLink from 'components/common/HyperLink/HyperLink';
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
@@ -204,7 +205,7 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   interface BadgeNoteType {
     badgeLabel: string;
-    noteMessage?: string;
+    noteMessage?: string | JSX.Element;
   }
 
   // TODO: Update these Render functions (RenderSimpleBadgeNote, RenderStatusInfo) to have more robust error messages for the user to act upon
@@ -213,7 +214,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     return (
       <Stack spacing="spacingL" marginBottom="none" alignItems="flex-start" flexDirection="column">
         <Badge variant="negative">{badgeLabel}</Badge>
-        {noteMessage && <Note variant="warning">{noteMessage}</Note>}
+        {noteMessage && <Note variant="negative">{noteMessage}</Note>}
       </Stack>
     );
   };
@@ -237,14 +238,16 @@ const DisplayServiceAccountCard = (props: Props) => {
         <Badge variant="negative">Problems with configuration</Badge>
       );
     } else if (unknownError) {
-      return (
-        <RenderSimpleBadgeNote
-          badgeLabel="Unknown Error"
-          noteMessage={
-            'An unknown error occurred. You can try the action again in a few minutes, or contact support if the error persists.'
-          }
+      const noteMessage = (
+        <HyperLink
+          body="An unknown error occurred. You can try the action again in a few minutes, or contact support if the error persists."
+          substring="contact support"
+          hyperLinkHref="https://www.contentful.com/support/?utm_source=webapp&utm_medium=help-menu&utm_campaign=in-app-help"
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
         />
       );
+      return <RenderSimpleBadgeNote badgeLabel="Unknown Error" noteMessage={noteMessage} />;
     }
 
     return <Badge variant="positive">Successfully configured</Badge>;
