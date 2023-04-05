@@ -102,7 +102,10 @@ describe('useSidebarSlug hook', () => {
         ),
       },
     }));
-    jest.spyOn(getFieldValue, 'default').mockImplementationOnce(() => '/fieldValue');
+    jest
+      .spyOn(getFieldValue, 'default')
+      .mockImplementationOnce(() => '/fieldValue')
+      .mockImplementationOnce(() => '/differentFieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
@@ -114,7 +117,6 @@ describe('useSidebarSlug hook', () => {
     expect(getByText('slugFieldValue: /fieldValue')).toBeVisible();
     expect(getByText('isContentTypeWarning: false')).toBeVisible();
 
-    jest.spyOn(getFieldValue, 'default').mockImplementationOnce(() => '/differentFieldValue');
     const newSlugFieldValue = await findByText('slugFieldValue: /differentFieldValue');
 
     expect(newSlugFieldValue).toBeVisible();
