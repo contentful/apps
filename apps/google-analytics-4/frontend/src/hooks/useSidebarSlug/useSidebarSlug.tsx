@@ -19,7 +19,7 @@ export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
   };
 
   useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedSlugFieldValue(slugFieldValue), 500);
+    const timeout = setTimeout(() => setDebouncedSlugFieldValue(slugFieldValue), 700);
 
     return () => clearTimeout(timeout);
   }, [slugFieldValue]);
