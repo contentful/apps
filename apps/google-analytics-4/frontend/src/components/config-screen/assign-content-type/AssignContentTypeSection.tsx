@@ -151,7 +151,8 @@ const AssignContentTypeSection = (props: Props) => {
           Configure content types below that are connected to pages on your website where you're
           tracking Google Analytics data. You'll need to specify the "slug" field used to generate
           the page path in your website's URL, and optionally a "prefix" if one exists in front of
-          the URL page path.
+          the URL page path. The app will be automatically added to the sidebar of associated
+          content types on save of the configuration.
         </Paragraph>
         <Paragraph marginBottom="none">
           <TextLink
