@@ -17,8 +17,6 @@ jest.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
 
-jest.setTimeout(30000);
-
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
 const saveAppInstallation = async () => {
   // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
@@ -53,9 +51,7 @@ describe('Config Screen component (not installed)', () => {
     await user.click(keyFileInputBox);
     await user.paste(JSON.stringify(validServiceKeyFile));
 
-    await waitFor(() => {
-      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
-    });
+    expect(await screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
 
     let result;
     await act(async () => {
@@ -75,7 +71,7 @@ describe('Config Screen component (not installed)', () => {
         EditorInterface: {},
       },
     });
-    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
+    expect(await screen.getByText('Google Service Account Details')).toBeInTheDocument();
   });
 
   it('prevents the app from being installed with invalid service key file', async () => {
@@ -84,7 +80,7 @@ describe('Config Screen component (not installed)', () => {
       render(<GoogleAnalyticsConfigPage />);
     });
 
-    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+    const keyFileInputBox = await screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
@@ -98,7 +94,7 @@ describe('Config Screen component (not installed)', () => {
 
     // false result prevents parameters save
     expect(result).toEqual(false);
-    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
+    expect(await screen.getByText('Google Service Account Details')).toBeInTheDocument();
   });
 
   it('prevents the app from being installed if no service key file is provided', async () => {
@@ -113,7 +109,7 @@ describe('Config Screen component (not installed)', () => {
 
     // false result prevents parameters save
     expect(result).toEqual(false);
-    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
+    expect(await screen.getByText('Google Service Account Details')).toBeInTheDocument();
   });
 });
 
@@ -138,7 +134,7 @@ describe('Installed Service Account Key', () => {
     const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
 
     await user.click(editServiceAccountButton);
-    const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+    const keyFileInputBox = await screen.getByLabelText(/Service Account Key/i);
     await waitFor(() => user.click(keyFileInputBox));
 
     const newServiceKeyFile: ServiceAccountKey = {
@@ -147,9 +143,7 @@ describe('Installed Service Account Key', () => {
     };
     await user.paste(JSON.stringify(newServiceKeyFile));
 
-    await waitFor(() => {
-      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
-    });
+    expect(await screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
 
     let result;
     await act(async () => {
