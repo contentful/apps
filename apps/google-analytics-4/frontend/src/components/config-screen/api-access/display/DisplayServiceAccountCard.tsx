@@ -35,7 +35,7 @@ interface Props {
   isAppInstalled: boolean;
   parameters: KeyValueMap;
   onHasServiceCheckErrorsChange: Function;
-  isSavingPrivateKeyFile: boolean;
+  isSavingConfiguration: boolean;
   onIsApiAccessLoading: Function;
 }
 
@@ -47,7 +47,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     isAppInstalled,
     parameters,
     onHasServiceCheckErrorsChange,
-    isSavingPrivateKeyFile,
+    isSavingConfiguration,
     onIsApiAccessLoading,
   } = props;
 
@@ -185,9 +185,11 @@ const DisplayServiceAccountCard = (props: Props) => {
   }, [adminApiError, dataApiError, ga4PropertiesError, invalidServiceAccountError]);
 
   useEffect(() => {
+    if (isSavingConfiguration) return;
+
     verifyAdminApi();
     verifyDataApi();
-  }, [verifyAdminApi, verifyDataApi]);
+  }, [isSavingConfiguration, verifyAdminApi, verifyDataApi]);
 
   const handleApiTestClick = () => {
     verifyAdminApi();
@@ -248,7 +250,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     return <Badge variant="positive">Successfully configured</Badge>;
   };
 
-  const isLoading = isSavingPrivateKeyFile || isLoadingAdminApi || isLoadingDataApi;
+  const isLoading = isSavingConfiguration || isLoadingAdminApi || isLoadingDataApi;
 
   const loadingSkeleton = (width = '100%') => {
     return (

@@ -9,7 +9,7 @@ interface Props {
   parameters: KeyValueMap;
   mergeSdkParameters: Function;
   isInEditMode: boolean;
-  isSavingPrivateKeyFile: boolean;
+  isSavingConfiguration: boolean;
   onInEditModeChange: Function;
   onHasServiceCheckErrorsChange: Function;
   onKeyFileUpdate: Function;
@@ -23,7 +23,7 @@ const ApiAccessSection = (props: Props) => {
     parameters,
     mergeSdkParameters,
     isInEditMode,
-    isSavingPrivateKeyFile,
+    isSavingConfiguration,
     onInEditModeChange,
     onHasServiceCheckErrorsChange,
     onKeyFileUpdate,
@@ -40,7 +40,7 @@ const ApiAccessSection = (props: Props) => {
       </div>
       {!isInEditMode && isAppInstalled && parameters && parameters.serviceAccountKeyId ? (
         <DisplayServiceAccountCard
-          isSavingPrivateKeyFile={isSavingPrivateKeyFile}
+          isSavingConfiguration={isSavingConfiguration}
           onInEditModeChange={onInEditModeChange}
           serviceAccountKeyId={parameters.serviceAccountKeyId}
           onAccountSummariesChange={onAccountSummariesChange}
