@@ -25,8 +25,6 @@ describe('Content Type Warning for Config Screen', () => {
   });
 
   it('renders an error icon and correct tooltip content when content type is deleted', async () => {
-    const user = userEvent.setup();
-
     render(
       <ContentTypeWarning
         contentTypeId={'test'}
@@ -38,16 +36,14 @@ describe('Content Type Warning for Config Screen', () => {
       />
     );
 
-    expect(screen.getByTestId('errorIcon')).toBeVisible();
-
+    const user = userEvent.setup();
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
+    expect(screen.getByTestId('errorIcon')).toBeVisible();
     expect(screen.getByRole('tooltip').textContent).toBe(getContentTypeDeletedMsg('test'));
   });
 
   it('renders a warning icon and correct tooltip content when slug field empty', async () => {
-    const user = userEvent.setup();
-
     render(
       <ContentTypeWarning
         contentTypeId={'test'}
@@ -59,16 +55,14 @@ describe('Content Type Warning for Config Screen', () => {
       />
     );
 
-    expect(screen.getByTestId('warningIcon')).toBeVisible();
-
+    const user = userEvent.setup();
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
+    expect(screen.getByTestId('warningIcon')).toBeVisible();
     expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
   });
 
   it('renders a warning icon and correct tooltip content when app is removed from content type sidebar', async () => {
-    const user = userEvent.setup();
-
     render(
       <ContentTypeWarning
         contentTypeId={'test'}
@@ -80,16 +74,14 @@ describe('Content Type Warning for Config Screen', () => {
       />
     );
 
-    expect(screen.getByTestId('warningIcon')).toBeVisible();
-
+    const user = userEvent.setup();
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
+    expect(screen.getByTestId('warningIcon')).toBeVisible();
     expect(screen.getByRole('tooltip').textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
   });
 
   it('renders a warning icon and correct tooltip content when slug field is deleted', async () => {
-    const user = userEvent.setup();
-
     render(
       <ContentTypeWarning
         contentTypeId={'test'}
@@ -101,10 +93,10 @@ describe('Content Type Warning for Config Screen', () => {
       />
     );
 
-    expect(screen.getByTestId('warningIcon')).toBeVisible();
-
+    const user = userEvent.setup();
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
+    expect(screen.getByTestId('warningIcon')).toBeVisible();
     expect(screen.getByRole('tooltip').textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));
   });
 });

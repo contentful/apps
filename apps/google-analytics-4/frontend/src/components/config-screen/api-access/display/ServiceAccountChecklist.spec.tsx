@@ -132,39 +132,37 @@ describe('Service Account Checklist', () => {
   });
 
   it('installed with invalid service account key', async () => {
-    await act(async () => {
-      render(
-        <ServiceAccountChecklist
-          serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, {} as ApiErrorType, undefined),
-          }}
-          adminApiCheck={{
-            ...getAdminApiErrorChecklistStatus(
-              false,
-              parameters,
-              invalidServiceAccountKeyError,
-              undefined
-            ),
-          }}
-          dataApiCheck={{
-            ...getDataApiErrorChecklistStatus(
-              false,
-              parameters,
-              invalidServiceAccountKeyError,
-              undefined
-            ),
-          }}
-          ga4PropertiesCheck={{
-            ...getGa4PropertyErrorChecklistStatus(
-              false,
-              invalidServiceAccountKeyError,
-              undefined,
-              undefined
-            ),
-          }}
-        />
-      );
-    });
+    render(
+      <ServiceAccountChecklist
+        serviceAccountCheck={{
+          ...getServiceKeyChecklistStatus(parameters, {} as ApiErrorType, undefined),
+        }}
+        adminApiCheck={{
+          ...getAdminApiErrorChecklistStatus(
+            false,
+            parameters,
+            invalidServiceAccountKeyError,
+            undefined
+          ),
+        }}
+        dataApiCheck={{
+          ...getDataApiErrorChecklistStatus(
+            false,
+            parameters,
+            invalidServiceAccountKeyError,
+            undefined
+          ),
+        }}
+        ga4PropertiesCheck={{
+          ...getGa4PropertyErrorChecklistStatus(
+            false,
+            invalidServiceAccountKeyError,
+            undefined,
+            undefined
+          ),
+        }}
+      />
+    );
 
     // Service account message and action
     await screen.findByText(/Service account key is not valid/);

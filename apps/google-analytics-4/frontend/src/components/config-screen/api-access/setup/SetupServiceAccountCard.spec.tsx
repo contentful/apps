@@ -28,8 +28,6 @@ describe('Setup Google Service Account Details page', () => {
   });
 
   it('renders an error state when invalid input', async () => {
-    const user = userEvent.setup();
-
     await act(async () => {
       render(
         <SetupServiceAccountCard
@@ -46,6 +44,7 @@ describe('Setup Google Service Account Details page', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
+    const user = userEvent.setup();
     await user.click(keyFileInputBox);
     await user.paste(JSON.stringify({ foo: 'bar' }));
 
@@ -58,8 +57,6 @@ describe('Setup Google Service Account Details page', () => {
   });
 
   it('renders a success state when valid input', async () => {
-    const user = userEvent.setup();
-
     await act(async () => {
       render(
         <SetupServiceAccountCard
@@ -76,6 +73,7 @@ describe('Setup Google Service Account Details page', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
+    const user = userEvent.setup();
     await user.click(keyFileInputBox);
     await user.paste(JSON.stringify(validServiceKeyFile));
 

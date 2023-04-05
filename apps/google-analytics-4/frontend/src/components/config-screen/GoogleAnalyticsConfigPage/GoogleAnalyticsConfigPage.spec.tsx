@@ -42,7 +42,6 @@ describe('Google Analytics Page', () => {
 
 describe('Config Screen component (not installed)', () => {
   it('allows the app to be installed with a valid service key file', async () => {
-    const user = userEvent.setup();
     await act(async () => {
       render(<GoogleAnalyticsConfigPage />);
     });
@@ -50,6 +49,7 @@ describe('Config Screen component (not installed)', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
+    const user = userEvent.setup();
     await user.click(keyFileInputBox);
     await user.paste(JSON.stringify(validServiceKeyFile));
 
@@ -79,7 +79,6 @@ describe('Config Screen component (not installed)', () => {
   });
 
   it('prevents the app from being installed with invalid service key file', async () => {
-    const user = userEvent.setup();
     await act(async () => {
       render(<GoogleAnalyticsConfigPage />);
     });
@@ -88,6 +87,7 @@ describe('Config Screen component (not installed)', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
+    const user = userEvent.setup();
     await user.click(keyFileInputBox);
     await user.paste('{ "foo": "bar" }');
 
@@ -130,13 +130,13 @@ describe('Installed Service Account Key', () => {
   });
 
   it('overrides the saved values if a new key file is provided', async () => {
-    const user = userEvent.setup();
     await act(async () => {
       render(<GoogleAnalyticsConfigPage />);
     });
 
     const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
 
+    const user = userEvent.setup();
     await user.click(editServiceAccountButton);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
     await waitFor(() => user.click(keyFileInputBox));
