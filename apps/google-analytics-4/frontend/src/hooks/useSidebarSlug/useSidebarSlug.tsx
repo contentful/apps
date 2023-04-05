@@ -31,7 +31,12 @@ export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
   }, [slugFieldValue, handleSlugFieldValue]);
 
   useEffect(() => {
+    // We only want this to update state on component mount.
+    // Otherwise when slugFieldValue changes it is updated
+    // in the above useEffect
+
     setDebouncedSlugFieldValue(slugFieldValue);
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
