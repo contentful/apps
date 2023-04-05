@@ -3,18 +3,14 @@ import { AnalyticsBrowser } from '@segment/analytics-next';
 import { render } from '@testing-library/react';
 import React, { FunctionComponent } from 'react';
 import { useAnalytics } from './useAnalytics';
+import { mockAnalytics } from '../../test/mocks/mockAnalytics';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
 jest.mock('@segment/analytics-next', () => ({
-  AnalyticsBrowser: {
-    load: function () {
-      return this;
-    },
-    identify: jest.fn(),
-  },
+  AnalyticsBrowser: mockAnalytics,
 }));
 
 const testFn = jest.fn((val) => val);
