@@ -9,10 +9,23 @@ import {
 } from 'components/config-screen/api-access/display/ChecklistUtils';
 
 const invalidServiceAccountError = {
-  errorType: ERROR_TYPE_MAP.invalidServiceAccountKey,
+  errorType: ERROR_TYPE_MAP.invalidServiceAccount,
   message: 'Invalid Service Account Error Message.',
   status: 500,
 };
+
+const invalidServiceAccountKeyError = {
+  errorType: ERROR_TYPE_MAP.invalidServiceAccountKey,
+  message: 'Invalid Service Account Key Error Message.',
+  status: 500,
+};
+
+const missingServiceAccountKeyFileError = {
+  errorType: ERROR_TYPE_MAP.missingServiceAccountKeyFile,
+  message: 'Missing Service Account Key File Error Message.',
+  status: 500,
+};
+
 const adminApiError = {
   errorType: ERROR_TYPE_MAP.disabledAdminApi,
   message: 'Admin API Error Message.',
@@ -69,15 +82,19 @@ describe('Service Account Checklist', () => {
     await screen.findByText('Admin API');
     await screen.findByText('Data API');
     await screen.findByText('Property access');
+    // Service account message
+    await screen.findByText(/Service account key is valid/);
+    // Message and action for other three checks
     await screen.findAllByText(/enabled/);
+    await screen.findAllByText(/Details/);
   });
 
-  it('installed with invalid service account key', async () => {
+  it('installed with invalid service account', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, undefined, undefined),
+            ...getServiceKeyChecklistStatus(parameters, {} as ApiErrorType, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(
@@ -107,6 +124,52 @@ describe('Service Account Checklist', () => {
       );
     });
 
+    // Service account message and action
+    await screen.findByText(/Service account key is not valid/);
+    await screen.findByText(/Manage service account/);
+    // Message for other three checks
+    await screen.findAllByText(/Provide a valid service account key to run this check/);
+  });
+
+  it('installed with invalid service account key', async () => {
+    await act(async () => {
+      render(
+        <ServiceAccountChecklist
+          serviceAccountCheck={{
+            ...getServiceKeyChecklistStatus(parameters, {} as ApiErrorType, undefined),
+          }}
+          adminApiCheck={{
+            ...getAdminApiErrorChecklistStatus(
+              false,
+              parameters,
+              invalidServiceAccountKeyError,
+              undefined
+            ),
+          }}
+          dataApiCheck={{
+            ...getDataApiErrorChecklistStatus(
+              false,
+              parameters,
+              invalidServiceAccountKeyError,
+              undefined
+            ),
+          }}
+          ga4PropertiesCheck={{
+            ...getGa4PropertyErrorChecklistStatus(
+              false,
+              invalidServiceAccountKeyError,
+              undefined,
+              undefined
+            ),
+          }}
+        />
+      );
+    });
+
+    // Service account message and action
+    await screen.findByText(/Service account key is not valid/);
+    await screen.findByText(/Manage service account/);
+    // Message for other three checks
     await screen.findAllByText(/Provide a valid service account key to run this check/);
   });
 
@@ -121,7 +184,7 @@ describe('Service Account Checklist', () => {
             ...getAdminApiErrorChecklistStatus(
               false,
               parameters,
-              invalidServiceAccountError,
+              missingServiceAccountKeyFileError,
               undefined
             ),
           }}
@@ -129,14 +192,14 @@ describe('Service Account Checklist', () => {
             ...getDataApiErrorChecklistStatus(
               false,
               parameters,
-              invalidServiceAccountError,
+              missingServiceAccountKeyFileError,
               undefined
             ),
           }}
           ga4PropertiesCheck={{
             ...getGa4PropertyErrorChecklistStatus(
               false,
-              invalidServiceAccountError,
+              missingServiceAccountKeyFileError,
               undefined,
               undefined
             ),
@@ -145,7 +208,10 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findAllByText(/Unable to retrieve your stored service account key/);
+    // Service account message
+    await screen.findByText(/Unable to retrieve your stored service account key/);
+    // Message for other three checks
+    await screen.findAllByText(/Provide a valid service account key to run this check/);
   });
 
   it('first time install with invalid service account key', async () => {
@@ -153,7 +219,7 @@ describe('Service Account Checklist', () => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
-            ...getServiceKeyChecklistStatus(parameters, undefined, undefined),
+            ...getServiceKeyChecklistStatus(parameters, {} as ApiErrorType, undefined),
           }}
           adminApiCheck={{
             ...getAdminApiErrorChecklistStatus(
@@ -183,10 +249,14 @@ describe('Service Account Checklist', () => {
       );
     });
 
+    // Service account message and action
+    await screen.findByText(/Service account key is not valid/);
+    await screen.findByText(/Manage service account/);
+    // Message for other three checks
     await screen.findAllByText(/Provide a valid service account key to run this check/);
   });
 
-  it('invalid service account key even when apis are enabled', async () => {
+  it('invalid service account when admin and data apis are not enabled', async () => {
     await act(async () => {
       render(
         <ServiceAccountChecklist
@@ -221,10 +291,16 @@ describe('Service Account Checklist', () => {
       );
     });
 
-    await screen.findAllByText(/Service account key is not valid/);
-    await screen.findAllByText(/Analytics Admin API is not yet enabled/);
-    await screen.findAllByText(/Analytics Data API is not yet enabled/);
-    await screen.findAllByText(/Enable Google Analytics Admin API to run this check/);
+    // Service account message and action
+    await screen.findByText(/Service account key is not valid/);
+    await screen.findByText(/Manage service account/);
+    // API messages and actions
+    await screen.findByText(/Analytics Admin API is not yet enabled/);
+    await screen.findByText(/Enable Admin API/);
+    await screen.findByText(/Analytics Data API is not yet enabled/);
+    await screen.findByText(/Enable Data API/);
+    // Property message
+    await screen.findByText(/Enable Google Analytics Admin API to run this check/);
   });
 
   it('does not have the admin api enabled', async () => {
@@ -247,7 +323,9 @@ describe('Service Account Checklist', () => {
       );
     });
 
+    // Admin API message and action
     await screen.findByText(/Analytics Admin API is not yet enabled/);
+    await screen.findByText(/Enable Admin API/);
   });
 
   it('does not have the data api enabled', async () => {
@@ -275,7 +353,9 @@ describe('Service Account Checklist', () => {
       );
     });
 
+    // Data API message and action
     await screen.findByText(/Analytics Data API is not yet enabled/);
+    await screen.findByText(/Enable Data API/);
   });
 
   it('has no found GA4 Accounts or Properties', async () => {
@@ -298,6 +378,8 @@ describe('Service Account Checklist', () => {
       );
     });
 
+    // Properties message and action
     await screen.findByText(/Service account doesn't have access to a Google Analytics 4 property/);
+    await screen.findByText(/Grant access/);
   });
 });

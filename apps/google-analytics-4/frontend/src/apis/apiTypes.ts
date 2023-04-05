@@ -67,6 +67,7 @@ export type RunReportData = z.infer<typeof ZRunReportData>;
 // TODO: more comprehensive recognization of known failures (ie. Stale/bad account data, lambda unavailable, transient, non-transient errors, timeouts)
 // NOTE: This needs to be in sync with the lambda - ie copy and pasted
 export const ERROR_TYPE_MAP = {
+  // Google errors
   unknown: 'Unknown',
   unexpected: 'Unexpected',
   failedFetch: 'FailedFetch',
@@ -76,6 +77,8 @@ export const ERROR_TYPE_MAP = {
   disabledDataApi: 'DisabledDataApi',
   noAccountsOrPropertiesFound: 'NoAccountsOrPropertiesFound',
   invalidProperty: 'InvalidProperty',
+  invalidServiceAccount: 'InvalidServiceAccount',
+  // Lambda errors
   invalidServiceAccountKey: 'InvalidServiceAccountKey',
   missingServiceAccountKeyFile: 'MissingServiceAccountKeyFile',
 };
