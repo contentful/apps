@@ -1,5 +1,5 @@
-import { SkeletonContainer, SkeletonImage } from "@contentful/f36-components";
-import React from "react";
+import { SkeletonContainer, SkeletonImage } from '@contentful/f36-components';
+import React from 'react';
 
 export const LoadingStats = () => (
   <SkeletonContainer>

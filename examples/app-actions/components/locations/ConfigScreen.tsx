@@ -90,8 +90,7 @@ const ConfigScreen = () => {
             id="target-language"
             name="target-language"
             value={parameters?.targetLanguage}
-            onChange={(e) => setParameters({ targetLanguage: e.target.value })}
-          >
+            onChange={(e) => setParameters({ targetLanguage: e.target.value })}>
             <Select.Option value="mandalorian">Mandalorian</Select.Option>
             <Select.Option value="sith">Sith</Select.Option>
             <Select.Option value="yoda">Yoda</Select.Option>
@@ -107,5 +106,4 @@ const ConfigScreen = () => {
     </>
   );
 };
-
 export default ConfigScreen;

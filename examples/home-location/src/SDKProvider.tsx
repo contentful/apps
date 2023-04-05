@@ -1,12 +1,6 @@
-import React, {
-  FC,
-  PropsWithChildren,
-  ReactElement,
-  useEffect,
-  useState,
-} from "react";
-import { init, KnownAppSDK } from "@contentful/app-sdk";
-import { SDKContext } from "@contentful/react-apps-toolkit/dist/SDKProvider";
+import React, { FC, PropsWithChildren, ReactElement, useEffect, useState } from 'react';
+import { init, KnownAppSDK } from '@contentful/app-sdk';
+import { SDKContext } from '@contentful/react-apps-toolkit/dist/SDKProvider';
 
 const DELAY_TIMEOUT = 4 * 1000;
 
@@ -42,7 +36,5 @@ export const SDKProvider: FC<PropsWithChildren<SDKProviderProps>> = (props) => {
     return null;
   }
 
-  return (
-    <SDKContext.Provider value={{ sdk }}>{props.children}</SDKContext.Provider>
-  );
+  return <SDKContext.Provider value={{ sdk }}>{props.children}</SDKContext.Provider>;
 };

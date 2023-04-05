@@ -175,8 +175,7 @@ const ConfigScreen = () => {
                     key={ct.sys.id}
                     className={css({
                       margin: tokens.spacingM,
-                    })}
-                  >
+                    })}>
                     {ct.name}
                   </Checkbox>
                 ))}
@@ -191,8 +190,7 @@ const ConfigScreen = () => {
                     key={ct.sys.id}
                     className={css({
                       margin: tokens.spacingM,
-                    })}
-                  >
+                    })}>
                     {ct.name}
                   </Checkbox>
                 ))}
