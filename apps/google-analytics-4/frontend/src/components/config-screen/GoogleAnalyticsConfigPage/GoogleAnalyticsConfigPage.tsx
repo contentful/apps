@@ -3,7 +3,7 @@ import { AppExtensionSDK, AppState, EditorInterface } from '@contentful/app-sdk'
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { isEmpty } from 'lodash';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
-import { styles } from 'components/config-screen/GoogleAnalytics.styles';
+import { styles } from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage.styles';
 import Splitter from 'components/common/Splitter';
 import ApiAccessSection from 'components/config-screen/api-access/ApiAccessSection';
 import AboutSection from 'components/config-screen/header/AboutSection';
@@ -13,9 +13,11 @@ import AssignContentTypeSection from 'components/config-screen/assign-content-ty
 import MapAccountPropertySection from 'components/config-screen/map-account-property/MapAccountPropertySection';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 import { generateEditorInterfaceAssignments } from 'helpers/contentTypeHelpers/contentTypeHelpers';
-import fetchWithSignedRequest from '../../helpers/signed-requests';
-import { config } from '../../config';
-import { convertServiceAccountKeyToServiceAccountKeyId } from '../../utils/serviceAccountKey';
+import fetchWithSignedRequest from 'helpers/signed-requests';
+import { config } from 'config';
+import { convertServiceAccountKeyToServiceAccountKeyId } from 'utils/serviceAccountKey';
+import HyperLink from 'components/common/HyperLink/HyperLink';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 export default function GoogleAnalyticsConfigPage() {
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);
@@ -286,6 +288,15 @@ export default function GoogleAnalyticsConfigPage() {
             />
           </>
         )}
+
+        <Splitter />
+        <HyperLink
+          body="Questions or concerns? Contact support."
+          substring="Contact support."
+          hyperLinkHref="https://www.contentful.com/support/?utm_source=webapp&utm_medium=help-menu&utm_campaign=in-app-help"
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
+        />
       </Box>
 
       <GoogleAnalyticsIcon />
