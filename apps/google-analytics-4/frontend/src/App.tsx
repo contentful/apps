@@ -26,7 +26,6 @@ const ComponentLocationSettings = {
 const App = () => {
   const sdk = useSDK();
   const analytics = useAnalytics();
-  console.log('analytics', analytics);
 
   const Component = useMemo(() => {
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {
@@ -42,6 +41,9 @@ const App = () => {
             if (value) scope.setTag(`X-Contentful-${upperFirst(key)}`, value);
           }
         });
+
+        // track page view in Segment
+        analytics.page(location);
 
         return component;
       }
