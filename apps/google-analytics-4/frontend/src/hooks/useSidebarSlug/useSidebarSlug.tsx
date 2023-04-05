@@ -25,8 +25,8 @@ export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
   }, [slugFieldValue]);
 
   useEffect(() => {
-    // We only want this to update state on component mount.
-    // Otherwise when slugFieldValue changes it is updated
+    // This only updates state on component mount.
+    // Any other update when slugFieldValue changes occurs
     // in the above useEffect
 
     setDebouncedSlugFieldValue(slugFieldValue);
