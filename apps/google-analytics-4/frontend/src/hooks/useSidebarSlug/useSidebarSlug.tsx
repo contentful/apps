@@ -6,33 +6,37 @@ import { pathJoin } from 'utils/pathJoin';
 import useGetFieldValue from '../useGetFieldValue';
 
 export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
+  const [isPublished, setIsPublished] = useState(false);
+  const [debouncedSlugFieldValue, setDebouncedSlugFieldValue] = useState('');
+
   const sdk = useSDK<SidebarExtensionSDK>();
 
   const { slugField, urlPrefix } = slugFieldInfo;
   const slugFieldValue = useGetFieldValue(slugField);
 
-  const [isPublished, setIsPublished] = useState(false);
-  const [debouncedSlugFieldValue, setDebouncedSlugFieldValue] = useState(slugFieldValue);
-
   const handlePublishedStatus = (sys: ContentEntitySys) => {
     setIsPublished(Boolean(sys.publishedAt));
   };
-
-  useEffect(() => {
-    sdk.entry.onSysChanged((sys) => handlePublishedStatus(sys));
-  }, [sdk.entry]);
 
   const updateSlugFieldValue = (v: string) => {
     setDebouncedSlugFieldValue(v);
   };
 
-  const handleSlugField = useCallback(updateSlugFieldValue, [updateSlugFieldValue]);
+  const handleSlugFieldValue = useCallback(updateSlugFieldValue, [updateSlugFieldValue]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => handleSlugField(slugFieldValue), 500);
+    const timeout = setTimeout(() => handleSlugFieldValue(slugFieldValue), 500);
 
     return () => clearTimeout(timeout);
-  }, [slugFieldValue, handleSlugField]);
+  }, [slugFieldValue, handleSlugFieldValue]);
+
+  useEffect(() => {
+    setDebouncedSlugFieldValue(slugFieldValue);
+  }, []);
+
+  useEffect(() => {
+    sdk.entry.onSysChanged((sys) => handlePublishedStatus(sys));
+  }, [sdk.entry]);
 
   const reportSlug = `/${pathJoin(urlPrefix || '', debouncedSlugFieldValue || '')}`;
   const slugFieldIsConfigured = Boolean(slugField);
