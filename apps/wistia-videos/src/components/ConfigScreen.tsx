@@ -16,7 +16,7 @@ import {
 } from '@contentful/forma-36-react-components';
 import { css } from 'emotion';
 import { fetchProjects } from '../functions/getVideos';
-import { ProjectReduced, WistiaError, WistiaProject } from './helpers/types';
+import { ProjectReduced, WistiaError } from './helpers/types';
 
 export interface AppInstallationParameters {
   apiBearerToken?: string;
@@ -37,6 +37,28 @@ const Config = (props: ConfigProps) => {
   });
   const [loading, setLoadingStatus] = useState(false);
 
+  const getProjects = useCallback(async () => {
+    try {
+      setLoadingStatus(true);
+      const response = await fetchProjects(parameters.apiBearerToken || '');
+      Notification.success('Your connection to the Wistia Data API is working.');
+      // set the projects in the state (don't save all the projects in the config parameters to prevent
+      // the config object to become very large and reach the size limit)
+      setFetchedProjects(response);
+      setShowButton(false);
+      setRequiredMessage('');
+      setLoadingStatus(false);
+    } catch (error) {
+      if (error instanceof WistiaError) {
+        Notification.error(`Connection to Wistia Data API failed: ${error.message}`);
+        setFetchedProjects([]);
+        if (error.code && error.message) {
+          setRequiredMessage(error.message);
+        }
+      }
+    }
+  }, [parameters.apiBearerToken]);
+
   // Updates app configuration by calling this function as a callback in the app.sdk.onConfigure function
   const configureApp = useCallback(async () => {
     const currentState = await props.sdk.app.getCurrentState();
@@ -56,7 +78,7 @@ const Config = (props: ConfigProps) => {
     if (parameters.apiBearerToken) {
       getProjects();
     }
-  }, [parameters.apiBearerToken]);
+  }, [parameters.apiBearerToken, getProjects]);
 
   // Initial load for config page
   useEffect(() => {
@@ -96,28 +118,6 @@ const Config = (props: ConfigProps) => {
           getProjects();
         } else {
           setParameters(newParameters);
-        }
-      }
-    }
-  };
-
-  const getProjects: () => void = async () => {
-    try {
-      setLoadingStatus(true);
-      const response = await fetchProjects(parameters.apiBearerToken || '');
-      Notification.success('Your connection to the Wistia Data API is working.');
-      // set the projects in the state (don't save all the projects in the config parameters to prevent
-      // the config object to become very large and reach the size limit)
-      setFetchedProjects(response);
-      setShowButton(false);
-      setRequiredMessage('');
-      setLoadingStatus(false);
-    } catch (error) {
-      if (error instanceof WistiaError) {
-        Notification.error(`Connection to Wistia Data API failed: ${error.message}`);
-        setFetchedProjects([]);
-        if (error.code && error.message) {
-          setRequiredMessage(error.message);
         }
       }
     }
