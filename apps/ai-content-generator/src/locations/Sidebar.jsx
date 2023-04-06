@@ -510,7 +510,7 @@ const Sidebar = () => {
       </Visible>
       <FormControl.HelpText>
         This feature uses a third party AI tool. Please ensure your use of the tool and any
-        AI-generated content complies with applicable laws and{' '}
+        AI-generated content complies with applicable laws, your company's policies, and all other{' '}
         <TextLink
           icon={<ExternalLinkTrimmedIcon />}
           alignIcon="end"
