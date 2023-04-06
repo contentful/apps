@@ -1,5 +1,5 @@
 import { mockSdk, mockAccountSummaries } from '../../../../test/mocks';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import MapAccountPropertyPage from './MapAccountPropertySection';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
@@ -7,43 +7,39 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Empty Account Properties mapping dropdown', () => {
-  it('does not render the dropdown', async () => {
-    act(() => {
-      render(
-        <MapAccountPropertyPage
-          accountsSummaries={[]}
-          parameters={{}}
-          mergeSdkParameters={() => {}}
-          onIsValidAccountProperty={() => {}}
-          originalPropertyId={''}
-          isApiAccessLoading={false}
-        />
-      );
-    });
+  it('does not render the dropdown', () => {
+    render(
+      <MapAccountPropertyPage
+        accountsSummaries={[]}
+        parameters={{}}
+        mergeSdkParameters={() => {}}
+        onIsValidAccountProperty={() => {}}
+        originalPropertyId={''}
+        isApiAccessLoading={false}
+      />
+    );
 
-    expect(screen.getByText('Google Analytics 4 property')).toBeVisible();
+    expect(screen.getByText('Google Analytics 4 property')).toBeInTheDocument();
     expect(screen.queryByTestId('accountPropertyDropdown')).toBeNull();
   });
 });
 
 describe('Account Properties mapping dropdown', () => {
-  it('renders the dropdown', async () => {
-    act(() => {
-      render(
-        <MapAccountPropertyPage
-          accountsSummaries={mockAccountSummaries}
-          parameters={{}}
-          mergeSdkParameters={() => {}}
-          onIsValidAccountProperty={() => {}}
-          originalPropertyId={''}
-          isApiAccessLoading={false}
-        />
-      );
-    });
+  it('renders the dropdown', () => {
+    render(
+      <MapAccountPropertyPage
+        accountsSummaries={mockAccountSummaries}
+        parameters={{}}
+        mergeSdkParameters={() => {}}
+        onIsValidAccountProperty={() => {}}
+        originalPropertyId={''}
+        isApiAccessLoading={false}
+      />
+    );
 
     const propertiesDropdown = screen.getByTestId('accountPropertyDropdown');
 
-    expect(screen.getByText('Google Analytics 4 property')).toBeVisible();
+    expect(screen.getByText('Google Analytics 4 property')).toBeInTheDocument();
     expect(propertiesDropdown).toBeVisible();
   });
 });

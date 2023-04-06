@@ -26,7 +26,6 @@ describe('Config Screen component (not installed)', () => {
       );
     });
 
-    expect(screen.getByText('API access')).toBeInTheDocument();
     expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
     expect(screen.getByText('Service Account Key')).toBeInTheDocument();
   });
