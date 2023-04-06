@@ -59,7 +59,7 @@ const parameters = {
 
 describe('Service Account Checklist', () => {
   it('is the active happy path', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
@@ -90,7 +90,7 @@ describe('Service Account Checklist', () => {
   });
 
   it('installed with invalid service account', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
@@ -132,7 +132,7 @@ describe('Service Account Checklist', () => {
   });
 
   it('installed with invalid service account key', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
@@ -174,7 +174,7 @@ describe('Service Account Checklist', () => {
   });
 
   it('missing service account key', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
@@ -215,7 +215,7 @@ describe('Service Account Checklist', () => {
   });
 
   it('first time install with invalid service account key', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
@@ -257,7 +257,7 @@ describe('Service Account Checklist', () => {
   });
 
   it('invalid service account when admin and data apis are not enabled', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
@@ -304,7 +304,7 @@ describe('Service Account Checklist', () => {
   });
 
   it('does not have the admin api enabled', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
@@ -329,7 +329,7 @@ describe('Service Account Checklist', () => {
   });
 
   it('does not have the data api enabled', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{
@@ -359,7 +359,7 @@ describe('Service Account Checklist', () => {
   });
 
   it('has no found GA4 Accounts or Properties', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <ServiceAccountChecklist
           serviceAccountCheck={{

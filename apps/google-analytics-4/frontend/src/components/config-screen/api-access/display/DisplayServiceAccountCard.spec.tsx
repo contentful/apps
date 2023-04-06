@@ -21,8 +21,8 @@ describe('Installed Service Account Card', () => {
     });
   });
 
-  it('is the active happy path', async () => {
-    await act(async () => {
+  it('is the active happy path', () => {
+    act(() => {
       render(
         <DisplayServiceAccountCard
           isSavingConfiguration={false}
@@ -37,7 +37,7 @@ describe('Installed Service Account Card', () => {
       );
     });
 
-    await screen.findByText('Google Service Account Details');
-    await screen.findByText('Successfully configured');
+    screen.findByText('Google Service Account Details');
+    screen.findByText('Successfully configured');
   });
 });

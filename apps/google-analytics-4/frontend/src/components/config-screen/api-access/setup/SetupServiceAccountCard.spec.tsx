@@ -10,7 +10,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('Setup Google Service Account Details page', () => {
   it('renders account card with no input', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <SetupServiceAccountCard
           parameters={{}}
@@ -30,7 +30,7 @@ describe('Setup Google Service Account Details page', () => {
   it('renders an error state when invalid input', async () => {
     const user = userEvent.setup();
 
-    await act(async () => {
+    act(() => {
       render(
         <SetupServiceAccountCard
           parameters={{}}
@@ -60,7 +60,7 @@ describe('Setup Google Service Account Details page', () => {
   it('renders a success state when valid input', async () => {
     const user = userEvent.setup();
 
-    await act(async () => {
+    act(() => {
       render(
         <SetupServiceAccountCard
           parameters={{}}
