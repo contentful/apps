@@ -124,7 +124,7 @@ For this command to work, the following environment variables must be set:
 
 To get started, use the following command in the root of the `lambda` directory:
 
-`make start-app`
+`make go`
 
 This will launch a local `DynamoDB` instance, as well as a development instance of the `lambda` with mounted volumes for nodemon changes to be picked up on save.
 
