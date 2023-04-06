@@ -8,7 +8,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('Empty Account Properties mapping dropdown', () => {
   it('does not render the dropdown', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <MapAccountPropertyPage
           accountsSummaries={[]}
@@ -28,7 +28,7 @@ describe('Empty Account Properties mapping dropdown', () => {
 
 describe('Account Properties mapping dropdown', () => {
   it('renders the dropdown', async () => {
-    await act(async () => {
+    act(() => {
       render(
         <MapAccountPropertyPage
           accountsSummaries={mockAccountSummaries}

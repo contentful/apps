@@ -3,7 +3,7 @@ import { act, render, screen } from '@testing-library/react';
 
 describe('About header for the Analytics Config Page', () => {
   it('can render the about section', async () => {
-    await act(async () => {
+    act(() => {
       render(<AboutSection />);
     });
 

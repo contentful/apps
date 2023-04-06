@@ -31,9 +31,7 @@ export const apiPath = (path: string) => {
 
 describe('Google Analytics Page', () => {
   it('renders setup view', async () => {
-    await act(async () => {
-      render(<GoogleAnalyticsConfigPage />);
-    });
+    render(<GoogleAnalyticsConfigPage />);
 
     await screen.findByText('API access');
     await screen.findByText('Google Service Account Details');
@@ -43,9 +41,7 @@ describe('Google Analytics Page', () => {
 describe('Config Screen component (not installed)', () => {
   it('allows the app to be installed with a valid service key file', async () => {
     const user = userEvent.setup();
-    await act(async () => {
-      render(<GoogleAnalyticsConfigPage />);
-    });
+    render(<GoogleAnalyticsConfigPage />);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
@@ -80,9 +76,7 @@ describe('Config Screen component (not installed)', () => {
 
   it('prevents the app from being installed with invalid service key file', async () => {
     const user = userEvent.setup();
-    await act(async () => {
-      render(<GoogleAnalyticsConfigPage />);
-    });
+    render(<GoogleAnalyticsConfigPage />);
 
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
@@ -102,9 +96,7 @@ describe('Config Screen component (not installed)', () => {
   });
 
   it('prevents the app from being installed if no service key file is provided', async () => {
-    await act(async () => {
-      render(<GoogleAnalyticsConfigPage />);
-    });
+    render(<GoogleAnalyticsConfigPage />);
 
     let result;
     await act(async () => {
@@ -131,9 +123,7 @@ describe('Installed Service Account Key', () => {
 
   it('overrides the saved values if a new key file is provided', async () => {
     const user = userEvent.setup();
-    await act(async () => {
-      render(<GoogleAnalyticsConfigPage />);
-    });
+    render(<GoogleAnalyticsConfigPage />);
 
     const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
 

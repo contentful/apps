@@ -8,8 +8,8 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Config Screen component (not installed)', () => {
-  it('can render the about section', async () => {
-    await act(async () => {
+  it('can render the about section', () => {
+    act(() => {
       render(
         <ApiAccessSection
           isAppInstalled={false}
