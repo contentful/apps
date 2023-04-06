@@ -1,4 +1,6 @@
+import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { AnalyticsAdminServiceClient } from '@google-analytics/admin';
+import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import sinon, { SinonStubbedInstance } from 'sinon';
@@ -8,10 +10,8 @@ import {
   validServiceAccountKeyIdBase64,
 } from '../test/mocks/googleApi';
 import app from './app';
-import { GoogleApiService } from './services/googleApiService';
-import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
-import { BetaAnalyticsDataClient } from '@google-analytics/data';
 import { DynamoDBService } from './services/dynamoDbService';
+import { GoogleApiService } from './services/googleApiService';
 
 chai.use(chaiHttp);
 
@@ -47,9 +47,10 @@ describe('app', () => {
     describe('when the request body is a valid ServiceAccountKey', () => {
       describe('given a new ServiceAccountKey', () => {
         beforeEach(() => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (DynamoDBService.prototype.getServiceAccountKeyFile as any).resolves(null);
           sandbox.stub(DynamoDBService.prototype, 'saveServiceAccountKeyFile').resolves();
+          sandbox
+            .stub(DynamoDBService.prototype, 'getServiceAccountKeyFile')
+            .resolves(validServiceAccountKeyFile);
         });
 
         it('responds with 200', async () => {
@@ -66,8 +67,10 @@ describe('app', () => {
       describe('given an existing ServiceAccountKey', () => {
         beforeEach(() => {
           sandbox.stub(DynamoDBService.prototype, 'saveServiceAccountKeyFile').resolves();
+          sandbox
+            .stub(DynamoDBService.prototype, 'getServiceAccountKeyFile')
+            .resolves(validServiceAccountKeyFile);
         });
-
         it('responds with 200', async () => {
           const response = await chai
             .request(app)
@@ -84,11 +87,15 @@ describe('app', () => {
   // TODO: These test need to be updated once we have everything configured
   describe('GET /api/account_summaries', () => {
     let googleApi: GoogleApiService;
-
     beforeEach(() => {
       mockAdminClient = mockAnalyticsAdminServiceClient();
       googleApi = new GoogleApiService(validServiceAccountKeyFile, mockAdminClient, mockDataClient);
+
       sandbox.stub(GoogleApiService, 'fromServiceAccountKeyFile').returns(googleApi);
+      sandbox.stub(DynamoDBService.prototype, 'saveServiceAccountKeyFile').resolves();
+      sandbox
+        .stub(DynamoDBService.prototype, 'getServiceAccountKeyFile')
+        .resolves(validServiceAccountKeyFile);
     });
 
     it('responds with 200', async () => {

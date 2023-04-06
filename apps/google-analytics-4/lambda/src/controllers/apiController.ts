@@ -44,7 +44,7 @@ const ApiController = {
         serviceAccountKeyFile
       );
 
-      return res.send(200);
+      return res.sendStatus(200);
     } catch (err) {
       next(err);
     }
