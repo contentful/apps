@@ -188,7 +188,7 @@ const AssignContentTypeSection = (props: Props) => {
         </>
       ) : (
         <Flex marginTop="none" fullWidth={true}>
-          <Skeleton.Container svgHeight={139}>
+          <Skeleton.Container svgHeight={147}>
             <Skeleton.BodyText numberOfLines={6} />
           </Skeleton.Container>
         </Flex>
