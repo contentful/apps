@@ -84,7 +84,7 @@ const AnalyticsApp = (props: Props) => {
     if (loading || pendingData) {
       return (
         <Skeleton.Container svgHeight={300}>
-          <Skeleton.Image width={325} height={68} offsetTop={10} />
+          <Skeleton.Image height={68} width={325} offsetTop={10} />
           <Skeleton.Image height={160} width={325} offsetTop={93} />
           <Skeleton.Image height={25} width={200} offsetTop={268} />
         </Skeleton.Container>
