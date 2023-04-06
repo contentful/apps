@@ -17,5 +17,6 @@ export const config = {
   version: getEnvironmentVariable('REACT_APP_VERSION', 'no-version-set'),
   release: getEnvironmentVariable('REACT_APP_RELEASE', 'no-release-hash-set'),
   sentryDSN: getEnvironmentVariable('REACT_APP_SENTRY_DSN'),
+  segmentWriteKey: getEnvironmentVariable('REACT_APP_SEGMENT_WRITE_KEY'),
   environment: getEnvironmentVariable('NODE_ENV'),
 };
