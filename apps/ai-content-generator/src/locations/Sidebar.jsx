@@ -1,5 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, FormControl, Select, Textarea, TextLink } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  FormControl,
+  Note,
+  Select,
+  Paragraph,
+  Textarea,
+  TextLink,
+} from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { documentToPlainTextString } from '@contentful/rich-text-plain-text-renderer';
 import { createClient } from 'contentful-management';
@@ -26,6 +35,7 @@ const Sidebar = () => {
     }
   );
 
+  const [error, setError] = useState(null);
   const [prompt, setPrompt] = useState(fields[sdk.contentType.displayField].getValue() || '');
   const [loading, setLoading] = useState(false);
   const [option, setOption] = useState('0');
@@ -63,23 +73,29 @@ const Sidebar = () => {
       },
       method: 'POST',
       body: JSON.stringify(GPTPayload),
-    }).then((res) => {
-      if (res.status !== 200) {
-        let message = res.statusText;
-        if (!message) {
-          switch (res.status) {
-            case 429:
-              message = 'Too many requests. Please try again later.';
-              break;
-            default:
-              message = 'Something went wrong. Please try again later.';
+    })
+      .then((res) => {
+        return Promise.all([res.json(), res]);
+      })
+      .then((args) => {
+        const [json, res] = args;
+        if (res.status !== 200) {
+          let message = json?.error?.message || res.statusText;
+          if (!message) {
+            switch (res.status) {
+              case 429:
+                message = 'Too many requests. Please try again later.';
+                break;
+              default:
+                message = 'Something went wrong. Please try again later.';
+            }
           }
+          setError(message);
+          throw new Error(`Error: ${res.status} ${message}`);
         }
-        throw new Error(`Error: ${res.status} ${message}`);
-      }
 
-      return res.json();
-    });
+        return json;
+      });
 
     return response.choices[0].message.content;
   }
@@ -212,11 +228,32 @@ const Sidebar = () => {
     }
   }
 
+  const handleActionChange = (e) => {
+    // reset
+    setField(null);
+    setPrompt('');
+    setSourceLocale(sdk.locales.default);
+    setTargetLocale(sdk.locales.default);
+
+    // set option
+    setOption(e.target.value);
+  };
+
   return (
-    <>
+    <Box style={{ padding: '0 3px' }}>
+      {error && (
+        <FormControl>
+          <Note variant="negative">
+            <Paragraph marginBottom="spacingXs" fontWeight="fontWeightMedium">
+              OpenAI API Error
+            </Paragraph>
+            {error}
+          </Note>
+        </FormControl>
+      )}
       <FormControl>
         <FormControl.Label>Select an action</FormControl.Label>
-        <Select onChange={(event) => setOption(event.target.value)} value={option}>
+        <Select onChange={handleActionChange} value={option}>
           <Select.Option value="0" isDisabled>
             Select an option...
           </Select.Option>
@@ -334,7 +371,7 @@ const Sidebar = () => {
           onClick={() => Render('body', prompt)}
           isFullWidth
           isLoading={loading}
-          isDisabled={loading}>
+          isDisabled={loading || !prompt}>
           {loading ? 'Generating content...' : 'Generate content'}
         </Button>
       </Visible>
@@ -413,7 +450,9 @@ const Sidebar = () => {
           <Select
             defaultValue=""
             onChange={(event) => {
-              const field = richTextFields.find((field) => field.name === event.target.value);
+              const field = [...richTextFields, ...textFields].find(
+                (field) => field.name === event.target.value
+              );
               const value = field.currentEditor
                 ? sdk.entry.fields[field.name].getValue()
                 : field.data;
@@ -422,7 +461,7 @@ const Sidebar = () => {
             <Select.Option value="" isDisabled>
               Select a field...
             </Select.Option>
-            {richTextFields.map((field, index) => {
+            {[...richTextFields, ...textFields].map((field, index) => {
               return (
                 <Select.Option value={field.name} key={index}>
                   {getFieldName(field.name)}
@@ -466,7 +505,9 @@ const Sidebar = () => {
           <Select
             defaultValue=""
             onChange={(event) => {
-              const field = richTextFields.find((field) => field.name === event.target.value);
+              const field = [...richTextFields, ...textFields].find(
+                (field) => field.name === event.target.value
+              );
               const value = field.currentEditor
                 ? sdk.entry.fields[field.name].getValue()
                 : field.data;
@@ -475,7 +516,7 @@ const Sidebar = () => {
             <Select.Option value="" isDisabled>
               Select a field...
             </Select.Option>
-            {richTextFields.map((field, index) => {
+            {[...richTextFields, ...textFields].map((field, index) => {
               return (
                 <Select.Option value={field.name} key={index}>
                   {getFieldName(field.name)}
@@ -508,20 +549,21 @@ const Sidebar = () => {
           {loading ? 'Generating keywords...' : 'Generate keywords'}
         </Button>
       </Visible>
-      <FormControl.HelpText>
-        This feature uses a third party AI tool. Please ensure your use of the tool and any
-        AI-generated content complies with applicable laws, your company's policies, and all other{' '}
-        <TextLink
-          icon={<ExternalLinkTrimmedIcon />}
-          alignIcon="end"
-          href="https://openai.com/policies"
-          target="_blank"
-          rel="noopener noreferrer">
-          Terms and Policies
-        </TextLink>{' '}
-        .
-      </FormControl.HelpText>
-    </>
+      <FormControl marginTop="spacingL">
+        <FormControl.HelpText>
+          This feature uses a third party AI tool. Please ensure your use of the tool and any
+          AI-generated content complies with applicable laws, your company's policies, and all other{' '}
+          <TextLink
+            icon={<ExternalLinkTrimmedIcon />}
+            alignIcon="end"
+            href="https://openai.com/policies"
+            target="_blank"
+            rel="noopener noreferrer">
+            Terms and Policies
+          </TextLink>{' '}
+        </FormControl.HelpText>
+      </FormControl>
+    </Box>
   );
 };
 
