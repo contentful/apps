@@ -4,9 +4,10 @@ import {
   Stack,
   Subheading,
   Button,
-  Spinner,
+  Skeleton,
   Box,
   TextLink,
+  Flex,
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { ContentTypeProps, createClient } from 'contentful-management';
@@ -186,7 +187,11 @@ const AssignContentTypeSection = (props: Props) => {
           )}
         </>
       ) : (
-        <Spinner variant="primary" />
+        <Flex fullWidth={true}>
+          <Skeleton.Container>
+            <Skeleton.BodyText numberOfLines={6} />
+          </Skeleton.Container>
+        </Flex>
       )}
     </Stack>
   );
