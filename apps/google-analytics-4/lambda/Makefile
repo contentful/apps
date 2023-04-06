@@ -1,8 +1,8 @@
 .PHONY: all
 all: help
 
-## make start-app: Starts a docker image for dynamodb, our serverless lambda, and frontend for local development
-start-app:
+## make go: Starts a docker image for dynamodb, our serverless lambda, and frontend for local development
+go:
 	@docker compose up --build
 
 ## make clean: Remove all service containers, orphans and one off containers.
