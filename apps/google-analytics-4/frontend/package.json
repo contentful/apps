@@ -20,13 +20,13 @@
     "react": "17.0.2",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "17.0.2",
-    "react-scripts": "4.0.3",
+    "react-scripts": "5.0.1",
     "zod": "3.21.4"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
-    "test": "react-scripts test --detectOpenHandles --forceExit",
+    "test": "react-scripts test",
     "test:ci": "CI=true react-scripts test",
     "lint": "eslint --max-warnings=0 .",
     "eject": "react-scripts eject",

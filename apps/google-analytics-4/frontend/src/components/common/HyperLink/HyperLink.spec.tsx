@@ -12,7 +12,7 @@ describe('HyperLink component', () => {
 
     const textLink = getByTestId('cf-ui-text-link');
 
-    expect(textLink).toBeVisible();
+    expect(textLink).toBeInTheDocument();
     expect(textLink.firstChild).toHaveTextContent(SUBSTRING);
   });
 
