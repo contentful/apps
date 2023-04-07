@@ -1,4 +1,3 @@
-import { AnalyticsBrowser } from '@segment/analytics-next';
 import { render } from '@testing-library/react';
 import { SegmentAnalyticsProvider } from 'providers/SegmentAnalyticsProvider';
 import React from 'react';
