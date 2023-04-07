@@ -31,12 +31,12 @@ if (config.environment === 'development' && window.self === window.top) {
 } else {
   render(
     <Sentry.ErrorBoundary>
-      <SegmentAnalyticsProvider>
-        <SDKProvider>
+      <SDKProvider>
+        <SegmentAnalyticsProvider>
           <GlobalStyles />
           <App />
-        </SDKProvider>
-      </SegmentAnalyticsProvider>
+        </SegmentAnalyticsProvider>
+      </SDKProvider>
     </Sentry.ErrorBoundary>,
     root
   );
