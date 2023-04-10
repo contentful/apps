@@ -5,6 +5,7 @@ frameworkVersion: '>=3.0.0 <4.0.0'
 plugins:
   - serverless-domain-manager
   - serverless-offline
+  - serverless-prune-plugin
 
 custom:
   sentryDSN: https://b8f524eae7c446fb8071476431426640@o2239.ingest.sentry.io/4504725335834624
@@ -22,6 +23,9 @@ custom:
   dynamoDbTableName: sls-apps-ga4-backend-${opt:stage, 'dev'}-service-account-keys
   dynamoDbEndpoint: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):dynamoDbEndpoint}
   serviceAccountKeyEncryptionSecret: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):serviceAccountKeyEncryptionSecret}
+  prune:
+    automatic: true
+    number: 3
 
 provider:
   name: aws
