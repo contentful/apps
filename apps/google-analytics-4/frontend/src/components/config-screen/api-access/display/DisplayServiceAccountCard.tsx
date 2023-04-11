@@ -14,7 +14,7 @@ import {
   Text,
   CopyButton,
 } from '@contentful/f36-components';
-import { CycleIcon } from '@contentful/f36-icons';
+import { CycleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { useApi } from 'hooks/useApi';
 import { ServiceAccountKeyId } from 'types';
 import { ApiErrorType, ERROR_TYPE_MAP, isApiErrorType } from 'apis/apiTypes';
@@ -27,6 +27,7 @@ import {
 } from 'components/config-screen/api-access/display/ChecklistUtils';
 import ServiceAccountChecklist from 'components/config-screen/api-access/display/ServiceAccountChecklist';
 import { styles } from './DisplayServiceAccountCard.styles';
+import HyperLink from 'components/common/HyperLink/HyperLink';
 
 interface Props {
   serviceAccountKeyId: ServiceAccountKeyId;
@@ -35,7 +36,7 @@ interface Props {
   isAppInstalled: boolean;
   parameters: KeyValueMap;
   onHasServiceCheckErrorsChange: Function;
-  isSavingPrivateKeyFile: boolean;
+  isSavingConfiguration: boolean;
   onIsApiAccessLoading: Function;
 }
 
@@ -47,7 +48,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     isAppInstalled,
     parameters,
     onHasServiceCheckErrorsChange,
-    isSavingPrivateKeyFile,
+    isSavingConfiguration,
     onIsApiAccessLoading,
   } = props;
 
@@ -76,6 +77,7 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   const handleApiError = (error: ApiErrorType) => {
     switch (error.errorType) {
+      case ERROR_TYPE_MAP.invalidServiceAccount:
       case ERROR_TYPE_MAP.invalidServiceAccountKey:
         setInvalidServiceAccountError(error);
         break;
@@ -184,9 +186,11 @@ const DisplayServiceAccountCard = (props: Props) => {
   }, [adminApiError, dataApiError, ga4PropertiesError, invalidServiceAccountError]);
 
   useEffect(() => {
+    if (isSavingConfiguration) return;
+
     verifyAdminApi();
     verifyDataApi();
-  }, [verifyAdminApi, verifyDataApi]);
+  }, [isSavingConfiguration, verifyAdminApi, verifyDataApi]);
 
   const handleApiTestClick = () => {
     verifyAdminApi();
@@ -201,7 +205,7 @@ const DisplayServiceAccountCard = (props: Props) => {
 
   interface BadgeNoteType {
     badgeLabel: string;
-    noteMessage?: string;
+    noteMessage?: string | JSX.Element;
   }
 
   // TODO: Update these Render functions (RenderSimpleBadgeNote, RenderStatusInfo) to have more robust error messages for the user to act upon
@@ -210,7 +214,7 @@ const DisplayServiceAccountCard = (props: Props) => {
     return (
       <Stack spacing="spacingL" marginBottom="none" alignItems="flex-start" flexDirection="column">
         <Badge variant="negative">{badgeLabel}</Badge>
-        {noteMessage && <Note variant="warning">{noteMessage}</Note>}
+        {noteMessage && <Note variant="negative">{noteMessage}</Note>}
       </Stack>
     );
   };
@@ -234,20 +238,22 @@ const DisplayServiceAccountCard = (props: Props) => {
         <Badge variant="negative">Problems with configuration</Badge>
       );
     } else if (unknownError) {
-      return (
-        <RenderSimpleBadgeNote
-          badgeLabel="Unknown Error"
-          noteMessage={
-            'An unknown error occurred. You can try the action again in a few minutes, or contact support if the error persists.'
-          }
+      const noteMessage = (
+        <HyperLink
+          body="An unknown error occurred. You can try the action again in a few minutes, or contact support if the error persists."
+          substring="contact support"
+          hyperLinkHref="https://www.contentful.com/support/?utm_source=webapp&utm_medium=help-menu&utm_campaign=in-app-help"
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
         />
       );
+      return <RenderSimpleBadgeNote badgeLabel="Unknown Error" noteMessage={noteMessage} />;
     }
 
     return <Badge variant="positive">Successfully configured</Badge>;
   };
 
-  const isLoading = isSavingPrivateKeyFile || isLoadingAdminApi || isLoadingDataApi;
+  const isLoading = isSavingConfiguration || isLoadingAdminApi || isLoadingDataApi;
 
   const loadingSkeleton = (width = '100%') => {
     return (
@@ -323,19 +329,11 @@ const DisplayServiceAccountCard = (props: Props) => {
               {!unknownError && (
                 <Box>
                   {showChecks ? (
-                    <TextLink
-                      className={styles.textLink}
-                      as="button"
-                      variant="primary"
-                      onClick={() => setShowChecks(false)}>
+                    <TextLink as="button" variant="primary" onClick={() => setShowChecks(false)}>
                       Hide status checks
                     </TextLink>
                   ) : (
-                    <TextLink
-                      className={styles.textLink}
-                      as="button"
-                      variant="primary"
-                      onClick={() => setShowChecks(true)}>
+                    <TextLink as="button" variant="primary" onClick={() => setShowChecks(true)}>
                       Show status checks
                     </TextLink>
                   )}
@@ -358,7 +356,7 @@ const DisplayServiceAccountCard = (props: Props) => {
             ...getAdminApiErrorChecklistStatus(
               isFirstSetup,
               parameters,
-              invalidServiceAccountError,
+              invalidServiceAccountError || missingServiceAccountError,
               adminApiError
             ),
           }}
@@ -366,14 +364,14 @@ const DisplayServiceAccountCard = (props: Props) => {
             ...getDataApiErrorChecklistStatus(
               isFirstSetup,
               parameters,
-              invalidServiceAccountError,
+              invalidServiceAccountError || missingServiceAccountError,
               dataApiError
             ),
           }}
           ga4PropertiesCheck={{
             ...getGa4PropertyErrorChecklistStatus(
               isFirstSetup,
-              invalidServiceAccountError,
+              invalidServiceAccountError || missingServiceAccountError,
               adminApiError,
               ga4PropertiesError
             ),

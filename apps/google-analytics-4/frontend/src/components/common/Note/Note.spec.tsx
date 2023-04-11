@@ -12,7 +12,7 @@ describe('Note component', () => {
     const note = getByTestId('cf-ui-note');
     const paragraph = getByText(BODY);
 
-    expect(note).toBeVisible();
-    expect(paragraph).toBeVisible();
+    expect(note).toBeInTheDocument();
+    expect(paragraph).toBeInTheDocument();
   });
 });

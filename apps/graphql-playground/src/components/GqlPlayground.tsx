@@ -1,7 +1,7 @@
-import React from "react";
-import { Provider } from "react-redux";
-import { Playground, store } from "graphql-playground-react";
-import stripIndent from "strip-indent";
+import React from 'react';
+import { Provider } from 'react-redux';
+import { Playground, store } from 'graphql-playground-react';
+import stripIndent from 'strip-indent';
 
 interface Sys {
   id: String;
@@ -26,16 +26,18 @@ interface GqlPlaygroundProps {
 
 function formatQuery(query: string) {
   return stripIndent(query)
-    .split("\n")
+    .split('\n')
     .filter((line) => !!line)
-    .join("\n");
+    .join('\n');
 }
 
 function GqlPlayground(props: GqlPlaygroundProps) {
   const { cpaToken, entry, spaceId, spaceEnvironment, spaceEnvironmentAlias } = props;
 
   const tabConfig = {
-    endpoint: `https://graphql.contentful.com/content/v1/spaces/${spaceId}/environments/${spaceEnvironmentAlias || spaceEnvironment}`,
+    endpoint: `https://graphql.contentful.com/content/v1/spaces/${spaceId}/environments/${
+      spaceEnvironmentAlias || spaceEnvironment
+    }`,
     headers: {
       Authorization: `Bearer ${cpaToken}`,
     },
@@ -83,16 +85,11 @@ function GqlPlayground(props: GqlPlaygroundProps) {
         },
       ];
 
-  const settings = { "editor.theme": "light" };
+  const settings = { 'editor.theme': 'light' };
 
   return (
     <Provider store={store}>
-      <Playground
-        tabs={tabs}
-        settings={settings}
-        fixedEndpoint={true}
-        {...tabConfig}
-      />
+      <Playground tabs={tabs} settings={settings} fixedEndpoint={true} {...tabConfig} />
     </Provider>
   );
 }

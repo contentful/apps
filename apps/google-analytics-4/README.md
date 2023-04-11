@@ -1,27 +1,28 @@
-Contentful Marketplace App that displays page-based analytics from Google Analytics alongside Contentful content entries.
+# Google Analytics 4
+
+Contentful Marketplace App that displays real-time page-based analytics data from your organization’s Google Analytics 4 properties alongside relevant content entries.
 
 ## Requirements
 
-- [Google Analytics 4](https://developers.google.com/analytics/devguides/collection/ga4) (Note: Google's deprecated Universal Analytics is not supported with this verison of the Google Analytics App)
+- [Google Analytics 4](https://developers.google.com/analytics/devguides/collection/ga4) (Note: Google's deprecated Universal Analytics is not supported in the Google Analytics 4 app)
 
 ## Installation and Usage
 
-- Link to Marketplace app listing when ready
-- Link to Help Center documentation when ready
-- Link to any extra documentation or overview
+See the [Google Analytics 4 App Marketplace listing](https://contentful.com/marketplace/app/google-analytics-4) for information about how to install and use the app. Also view the two help center documentation resources below for additional information:
+
+- [Google Analytics 4 App Guide](https://www.contentful.com/help/google-analytics-4-app/)
+- [Installing a service account to use with Google Analytics 4](https://www.contentful.com/help/google-analytics-service-account-setup/)
 
 ## Technical Overview
 
 ### General
 
-- The Google Anlaytics App app is built on top of Contentful's [app framework](https://www.smartling.com/software/integrations/contentful/).
-- The app itself is a React application that provides a Sidebar widget and App Config widget, used within Contentful's app framework.
+- The Google Analytics 4 App is built on top of Contentful's [app framework](https://www.contentful.com/developers/docs/extensibility/app-framework/)
+- The app itself is a React application that provides a Sidebar widget and App Config widget, used within Contentful's app framework
 
 ### Authorization
 
-> **IMPORTANT**: In the current development stage this app implementes insecure plaintext storage of access credentials. Before release credentials will be stored via a secure, encrypted solution. -- Dec 8, 2022
-
-- This app uses [service accounts](https://cloud.google.com/iam/docs/understanding-service-accounts) to provision access to users' analytics data. These credentials are used to fetch data from the organization's analytics account on behalf of all users.
+- This app uses [service accounts](https://cloud.google.com/iam/docs/understanding-service-accounts) to provision access to users' analytics data. These credentials are used to fetch data from the organization's analytics account on behalf of all users
 
 ### Google Analytics Data
 
@@ -30,14 +31,14 @@ Contentful Marketplace App that displays page-based analytics from Google Analyt
 
 ### Lambda
 
-- This app requires a backend to make secure API calls to the Goolge Analytics Data API.
-- The backend runs as an AWS lambda
+- This app requires a backend to make secure API calls to the Google Analytics Data API
+- The backend runs as an AWS Lambda
 
 ## Local Development
 
 To develop this app locally, there are a few prerequisites you will want to have in place:
 
-- An Google Analytics 4 property in an active Google Analytics account. You will also need to have Google Analytics gathering data on a public website somewhere in order to generate metrics you can use to display and test.
+- A Google Analytics 4 property in an active Google Analytics 4 account. You will also need to have the Google Analytics 4 property gathering data on a public website somewhere in order to generate metrics you can use to display and test
 - A Contentful organization and space
 - A development definition of the app itself
 
@@ -123,7 +124,7 @@ For this command to work, the following environment variables must be set:
 
 To get started, use the following command in the root of the `lambda` directory:
 
-`make start-app`
+`make go`
 
 This will launch a local `DynamoDB` instance, as well as a development instance of the `lambda` with mounted volumes for nodemon changes to be picked up on save.
 
@@ -137,4 +138,4 @@ Docker compose can also be used with a familiar command set:
 
 `docker compose down` will stop all running instances of images
 
-`docker system prune -a` will remove all allocated memory for docker resources (should be last option for trouble shooting)
+`docker system prune -a` will remove all allocated memory for docker resources (should be last option for troubleshooting)

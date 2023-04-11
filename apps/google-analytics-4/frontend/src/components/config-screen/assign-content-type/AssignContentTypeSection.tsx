@@ -4,9 +4,10 @@ import {
   Stack,
   Subheading,
   Button,
-  Spinner,
+  Skeleton,
   Box,
   TextLink,
+  Flex,
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { ContentTypeProps, createClient } from 'contentful-management';
@@ -151,16 +152,16 @@ const AssignContentTypeSection = (props: Props) => {
           Configure content types below that are connected to pages on your website where you're
           tracking Google Analytics data. You'll need to specify the "slug" field used to generate
           the page path in your website's URL, and optionally a "prefix" if one exists in front of
-          the URL page path.
+          the URL page path. The app will automatically be added to the sidebar of associated
+          content types on save of the configuration.
         </Paragraph>
         <Paragraph marginBottom="none">
           <TextLink
-            /* TODO: Correct this wrong link. (WRONG below in copy is intentional to ensure we don't forget) */
-            href="https://support.google.com/analytics/answer/10759417"
+            href="https://www.contentful.com/help/google-analytics-4-app/"
             target="_blank"
             icon={<ExternalLinkIcon />}
             alignIcon="end">
-            WRONG See our help documentation for more details
+            See our help documentation for more details
           </TextLink>
         </Paragraph>
       </Box>
@@ -186,7 +187,11 @@ const AssignContentTypeSection = (props: Props) => {
           )}
         </>
       ) : (
-        <Spinner variant="primary" />
+        <Flex fullWidth={true}>
+          <Skeleton.Container>
+            <Skeleton.BodyText numberOfLines={6} />
+          </Skeleton.Container>
+        </Flex>
       )}
     </Stack>
   );

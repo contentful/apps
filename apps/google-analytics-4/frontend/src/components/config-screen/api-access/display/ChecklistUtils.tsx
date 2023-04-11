@@ -291,15 +291,15 @@ export const getServiceKeyChecklistStatus = (
 export const getAdminApiErrorChecklistStatus = (
   isFirstSetup: boolean,
   parameters: KeyValueMap,
-  invalidServiceAccountError: ApiErrorType | undefined,
+  serviceAccountError: ApiErrorType | undefined,
   apiError: ApiErrorType | undefined
 ): ChecklistRow => {
   const checklistUrl = getApiChecklistURLs(parameters, apiError ? true : false).adminApi;
-  if (!invalidServiceAccountError && !apiError)
+  if (!serviceAccountError && !apiError)
     return { ...CHECKLIST_STATUSES.AdminApi.success, checklistUrl: checklistUrl };
-  if (isFirstSetup && (apiError || !invalidServiceAccountError))
+  if (isFirstSetup && (apiError || !serviceAccountError))
     return { ...CHECKLIST_STATUSES.AdminApi.firstTimeSetup, checklistUrl: checklistUrl };
-  if (invalidServiceAccountError) return CHECKLIST_STATUSES.AdminApi.invalidServiceAccount;
+  if (serviceAccountError) return CHECKLIST_STATUSES.AdminApi.invalidServiceAccount;
   if (apiError) return { ...CHECKLIST_STATUSES.AdminApi.error, checklistUrl: checklistUrl };
   return CHECKLIST_STATUSES.Other.unknown;
 };
@@ -307,32 +307,32 @@ export const getAdminApiErrorChecklistStatus = (
 export const getDataApiErrorChecklistStatus = (
   isFirstSetup: boolean,
   parameters: KeyValueMap,
-  invalidServiceAccountError: ApiErrorType | undefined,
+  serviceAccountError: ApiErrorType | undefined,
   apiError: ApiErrorType | undefined
 ): ChecklistRow => {
   const checklistUrl = getApiChecklistURLs(parameters, apiError ? true : false).dataApi;
-  if (!invalidServiceAccountError && !apiError)
+  if (!serviceAccountError && !apiError)
     return { ...CHECKLIST_STATUSES.DataApi.success, checklistUrl: checklistUrl };
-  if (isFirstSetup && (apiError || !invalidServiceAccountError))
+  if (isFirstSetup && (apiError || !serviceAccountError))
     return { ...CHECKLIST_STATUSES.DataApi.firstTimeSetup, checklistUrl: checklistUrl };
-  if (invalidServiceAccountError) return CHECKLIST_STATUSES.DataApi.invalidServiceAccount;
+  if (serviceAccountError) return CHECKLIST_STATUSES.DataApi.invalidServiceAccount;
   if (apiError) return { ...CHECKLIST_STATUSES.DataApi.error, checklistUrl: checklistUrl };
   return CHECKLIST_STATUSES.Other.unknown;
 };
 
 export const getGa4PropertyErrorChecklistStatus = (
   isFirstSetup: boolean,
-  invalidServiceAccountError: ApiErrorType | undefined,
+  serviceAccountError: ApiErrorType | undefined,
   adminApiError: ApiErrorType | undefined,
   ga4PropertiesError: ApiErrorType | undefined
 ): ChecklistRow => {
-  if (!invalidServiceAccountError && !adminApiError && !ga4PropertiesError)
+  if (!serviceAccountError && !adminApiError && !ga4PropertiesError)
     return CHECKLIST_STATUSES.GA4Properties.success;
   if (isFirstSetup && adminApiError)
     return CHECKLIST_STATUSES.GA4Properties.firstTimeSetupNotEnabled;
   if (isFirstSetup && ga4PropertiesError) return CHECKLIST_STATUSES.GA4Properties.firstTimeSetup;
   if (adminApiError) return CHECKLIST_STATUSES.GA4Properties.adminApiError;
-  if (invalidServiceAccountError) return CHECKLIST_STATUSES.GA4Properties.invalidServiceAccount;
+  if (serviceAccountError) return CHECKLIST_STATUSES.GA4Properties.invalidServiceAccount;
   if (ga4PropertiesError) return CHECKLIST_STATUSES.GA4Properties.error;
   return CHECKLIST_STATUSES.Other.unknown;
 };

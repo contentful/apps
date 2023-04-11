@@ -1,24 +1,18 @@
 import React from 'react';
 import ConfigScreen from './ConfigScreen';
-import { render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, render, screen } from '@testing-library/react';
+import { mockSdk } from './test-utils/mocksdk';
 
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
-    const mockSdk: any = {
-      app: {
-        onConfigure: jest.fn(),
-        getParameters: jest.fn().mockReturnValueOnce({}),
-        setReady: jest.fn()
-      }
-    };
-    const { getByText } = render(<ConfigScreen sdk={mockSdk} />);
-
-    // simulate the user clicking the install button
-    const configurationData = await mockSdk.app.onConfigure.mock.calls[0][0]();
+    await act(async () => {
+      render(<ConfigScreen sdk={mockSdk} />);
+    });
 
     expect(
-      getByText('Welcome to your contentful app. This is your config page.')
+      screen.getByText(
+        /The GraphQL Playground app enabled developers and content creators to write GraphQL queries right next to their content./
+      )
     ).toBeInTheDocument();
   });
 });

@@ -14,8 +14,8 @@ interface Props {
 
 export class ProductList extends React.Component<Props> {
   selectButtonClickEvent(sku: string) {
-    const skuId = this.props.baseSite + ':' + sku;
-    this.props.sdk.close([skuId]);
+    const apiEndpoint = get(this.props.sdk.parameters.invocation, 'apiEndpoint', '');
+    this.props.sdk.close([`${apiEndpoint}/occ/v2/${this.props.baseSite}/products/${sku}`]);
   }
 
   render() {
