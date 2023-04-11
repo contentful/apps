@@ -9,6 +9,7 @@ import { SDKProvider } from '@contentful/react-apps-toolkit';
 import LocalhostWarning from './components/LocalhostWarning';
 import App from './App';
 import { config } from './config';
+import { SegmentAnalyticsProvider } from 'providers/SegmentAnalyticsProvider';
 
 Sentry.init({
   dsn: config.sentryDSN,
@@ -31,8 +32,10 @@ if (config.environment === 'development' && window.self === window.top) {
   render(
     <Sentry.ErrorBoundary>
       <SDKProvider>
-        <GlobalStyles />
-        <App />
+        <SegmentAnalyticsProvider>
+          <GlobalStyles />
+          <App />
+        </SegmentAnalyticsProvider>
       </SDKProvider>
     </Sentry.ErrorBoundary>,
     root
