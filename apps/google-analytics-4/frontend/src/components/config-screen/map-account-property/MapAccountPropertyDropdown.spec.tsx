@@ -6,7 +6,7 @@ import { NO_PROPERTIES } from 'components/config-screen/WarningDisplay/constants
 
 const onSelectionChange = jest.fn();
 
-xdescribe('Property selection dropdown', () => {
+describe('Property selection dropdown', () => {
   it('renders a dropdown with options if there are account summaries', () => {
     render(
       <MapAccountPropertyDropdown
@@ -46,7 +46,8 @@ xdescribe('Property selection dropdown', () => {
       />
     );
 
-    const user = userEvent.setup({ delay: null });
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.selectOptions(screen.getByTestId('accountPropertyDropdown'), [
       'properties/354612161',
     ]);

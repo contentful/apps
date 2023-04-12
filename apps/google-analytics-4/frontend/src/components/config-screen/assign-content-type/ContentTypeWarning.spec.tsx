@@ -8,7 +8,7 @@ import {
   getSlugFieldDeletedMsg,
 } from 'components/config-screen/WarningDisplay/constants/warningMessages';
 
-xdescribe('Content Type Warning for Config Screen', () => {
+describe('Content Type Warning for Config Screen', () => {
   it('renders an empty div if there are no warnings or errors', () => {
     render(
       <ContentTypeWarning
@@ -38,7 +38,7 @@ xdescribe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('errorIcon')).toBeInTheDocument();
 
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ delay: 100 });
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(getContentTypeDeletedMsg('test'));
@@ -58,7 +58,7 @@ xdescribe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ delay: 100 });
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
@@ -78,7 +78,7 @@ xdescribe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ delay: 100 });
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
@@ -98,7 +98,7 @@ xdescribe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup({ delay: 100 });
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));

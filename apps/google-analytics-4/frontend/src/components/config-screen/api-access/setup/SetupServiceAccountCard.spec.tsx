@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SetupServiceAccountCard from 'components/config-screen/api-access/setup/SetupServiceAccountCard';
 import { mockSdk, mockCma, validServiceKeyFile } from '../../../../../test/mocks';
@@ -40,7 +40,8 @@ describe('Setup Google Service Account Details page', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup({ delay: null });
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.click(keyFileInputBox);
     await user.paste(JSON.stringify({ foo: 'bar' }));
 
@@ -65,7 +66,8 @@ describe('Setup Google Service Account Details page', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup({ delay: null });
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.click(keyFileInputBox);
     await user.paste(JSON.stringify(validServiceKeyFile));
 
