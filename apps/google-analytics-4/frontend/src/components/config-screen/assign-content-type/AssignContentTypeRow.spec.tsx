@@ -56,7 +56,7 @@ const props = {
   focus: false,
 };
 
-xdescribe('Assign Content Type Card for Config Screen', () => {
+describe('Assign Content Type Card for Config Screen', () => {
   it('shows disabled inputs when content type is empty', () => {
     render(
       <AssignContentTypeRow
