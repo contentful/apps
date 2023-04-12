@@ -106,7 +106,7 @@ export class SidebarExtension extends React.Component<
             We recommend switching to Google Analytics 4 (GA4) as soon as possible and using
             Contentful's{' '}
             <a
-              href="https://app.contentful.com/deeplink?link=apps&id=5DlxOS0KvGS1Wk362xgvbN"
+              href="https://www.contentful.com/marketplace/app/google-analytics-4"
               target="_blank"
               rel="noreferrer"
             >
