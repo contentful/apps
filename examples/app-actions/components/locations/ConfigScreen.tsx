@@ -3,7 +3,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from '@emotion/css';
 import tokens from '@contentful/f36-tokens';
 import { Flex, FormControl, Heading, Paragraph, Select } from '@contentful/f36-components';
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 
 const styles = {
   body: css({
@@ -44,7 +44,7 @@ const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     targetLanguage: 'mandalorian',
   });
-  const sdk = useSDK<AppExtensionSDK>();
+  const sdk = useSDK<ConfigAppSDK>();
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
@@ -90,8 +90,7 @@ const ConfigScreen = () => {
             id="target-language"
             name="target-language"
             value={parameters?.targetLanguage}
-            onChange={(e) => setParameters({ targetLanguage: e.target.value })}
-          >
+            onChange={(e) => setParameters({ targetLanguage: e.target.value })}>
             <Select.Option value="mandalorian">Mandalorian</Select.Option>
             <Select.Option value="sith">Sith</Select.Option>
             <Select.Option value="yoda">Yoda</Select.Option>
@@ -107,5 +106,4 @@ const ConfigScreen = () => {
     </>
   );
 };
-
 export default ConfigScreen;

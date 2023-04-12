@@ -1,5 +1,5 @@
-import { Card, Flex, Text } from "@contentful/f36-components";
-import React from "react";
+import { Card, Flex, Text } from '@contentful/f36-components';
+import React from 'react';
 
 interface StatCardProps {
   count: number;

@@ -1,7 +1,7 @@
-import React from "react";
-import Home from "./locations/Home";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { locations } from "@contentful/app-sdk";
+import React from 'react';
+import Home from './locations/Home';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { locations } from '@contentful/app-sdk';
 
 const App = () => {
   const sdk = useSDK();

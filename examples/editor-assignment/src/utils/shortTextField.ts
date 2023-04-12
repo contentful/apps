@@ -1,5 +1,5 @@
 import { ContentTypeProps, PlainClientAPI } from 'contentful-management';
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 
 // For this case, we only care about short text fields
 const SHORT_TEXT_TYPE = 'Symbol';
@@ -13,7 +13,7 @@ export const filterShortTextFieldCTs = (cts: ContentTypeProps[]) => {
 // Initially, we need to go through all content types
 // and set the ones with the app assigned to its short
 // text fields with checkbox as selected
-export const getInitialFieldContentTypes = async (cma: PlainClientAPI, sdk: AppExtensionSDK) => {
+export const getInitialFieldContentTypes = async (cma: PlainClientAPI, sdk: ConfigAppSDK) => {
   const editorInterfaces = await cma.editorInterface.getMany({
     spaceId: sdk.ids.space,
     environmentId: sdk.ids.environment,

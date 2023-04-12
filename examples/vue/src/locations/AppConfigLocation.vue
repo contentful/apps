@@ -4,12 +4,12 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import type { AppExtensionSDK } from '@contentful/app-sdk';
+import type { ConfigAppSDK } from '@contentful/app-sdk';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppInstallationParameters {}
 
-const props = defineProps<{ sdk: AppExtensionSDK }>();
+const props = defineProps<{ sdk: ConfigAppSDK }>();
 
 let parameters = {};
 

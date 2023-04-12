@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import type { HomeExtensionSDK } from '@contentful/app-sdk';
+import type { HomeAppSDK } from '@contentful/app-sdk';
 
-defineProps<{ sdk: HomeExtensionSDK }>();
+defineProps<{ sdk: HomeAppSDK }>();
 </script>

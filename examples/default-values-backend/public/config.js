@@ -28,8 +28,9 @@ class Config extends Component {
           name="default value"
           labelText="Default value"
           value={this.state.parameters.defaultValue}
-          onChange={(e) => this.setState({ parameters: { defaultValue: e.target.value } })}
-        ></TextInput>
+          onChange={(e) =>
+            this.setState({ parameters: { defaultValue: e.target.value } })
+          }></TextInput>
       </Form>
     );
   }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Route, BrowserRouter, Routes } from 'react-router-dom';
 
 import { Heading, Box } from '@contentful/f36-components';
-import { PageExtensionSDK } from '@contentful/app-sdk';
+import { PageAppSDK } from '@contentful/app-sdk';
 
 import Dashboard from '../components/Dashboard';
 
