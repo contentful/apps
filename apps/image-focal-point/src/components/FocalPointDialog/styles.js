@@ -21,10 +21,9 @@ export const styles = {
       cursor: 'crosshair',
       display: 'block',
       margin: '0 auto',
-      width: '100%',
-      height: '100%',
+      maxWidth: '100%',
+      maxHeight: '100%',
       outline: 0,
-      objectFit: 'contain',
     },
   }),
   focalPointDemo: css({
