@@ -18,9 +18,9 @@ jest.mock('contentful-management', () => ({
 }));
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
-const saveAppInstallation = async () => {
+const saveAppInstallation = () => {
   // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
-  return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
+  return mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 };
 
 export const apiPath = (path: string) => {
@@ -113,7 +113,7 @@ describe('Installed Service Account Key', () => {
   it('overrides the saved values if a new key file is provided', async () => {
     render(<GoogleAnalyticsConfigPage />);
 
-    const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
+    const editServiceAccountButton = screen.getByTestId('editServiceAccountButton');
 
     jest.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
