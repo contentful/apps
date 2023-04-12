@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AllContentTypes, AllContentTypeEntries, ContentTypes } from 'types';
 import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
@@ -56,7 +56,7 @@ const props = {
   focus: false,
 };
 
-xdescribe('Assign Content Type Card for Config Screen', () => {
+describe('Assign Content Type Card for Config Screen', () => {
   it('shows disabled inputs when content type is empty', () => {
     render(
       <AssignContentTypeRow
@@ -89,8 +89,9 @@ xdescribe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup({ delay: null });
-    await user.click(screen.getByText('Remove'));
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() => user.click(screen.getByText('Remove')));
 
     expect(onRemoveContentType).toHaveBeenCalled();
   });
@@ -109,8 +110,9 @@ xdescribe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup({ delay: null });
-    await user.click(screen.getByText('Remove'));
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() => user.click(screen.getByText('Remove')));
 
     expect(onRemoveContentType).toHaveBeenCalled();
   });
@@ -129,7 +131,8 @@ xdescribe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup({ delay: null });
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.selectOptions(screen.getByTestId('contentTypeSelect'), ['course']);
 
     expect(onContentTypeChange).toHaveBeenCalled();
@@ -149,7 +152,8 @@ xdescribe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup({ delay: null });
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.selectOptions(screen.getByTestId('slugFieldSelect'), ['slug']);
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();
@@ -169,7 +173,8 @@ xdescribe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup({ delay: null });
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     await user.type(screen.getByTestId('urlPrefixInput'), '/en-US');
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();

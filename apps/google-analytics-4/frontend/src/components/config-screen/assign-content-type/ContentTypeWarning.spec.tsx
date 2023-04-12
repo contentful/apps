@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
 import {
@@ -8,7 +8,7 @@ import {
   getSlugFieldDeletedMsg,
 } from 'components/config-screen/WarningDisplay/constants/warningMessages';
 
-xdescribe('Content Type Warning for Config Screen', () => {
+describe('Content Type Warning for Config Screen', () => {
   it('renders an empty div if there are no warnings or errors', () => {
     render(
       <ContentTypeWarning
@@ -38,8 +38,9 @@ xdescribe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('errorIcon')).toBeInTheDocument();
 
-    const user = userEvent.setup({ delay: null });
-    await user.hover(screen.getByTestId('cf-ui-icon'));
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
 
     expect(screen.getByRole('tooltip').textContent).toBe(getContentTypeDeletedMsg('test'));
   });
@@ -58,12 +59,36 @@ xdescribe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    const user = userEvent.setup({ delay: null });
-    await user.hover(screen.getByTestId('cf-ui-icon'));
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
 
     expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
   });
 
+  it('renders a warning icon and correct tooltip content when slug field is deleted', async () => {
+    render(
+      <ContentTypeWarning
+        contentTypeId={'test'}
+        slugField={'slug'}
+        isSaved={true}
+        isInSidebar={true}
+        isContentTypeInOptions={true}
+        isSlugFieldInOptions={false}
+      />
+    );
+
+    expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
+
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(async () => await user.hover(screen.getByTestId('cf-ui-icon')));
+
+    expect(screen.getByRole('tooltip').textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));
+  });
+});
+
+xdescribe('Content Type Warning for Config Screen Flakey', () => {
   it('renders a warning icon and correct tooltip content when app is removed from content type sidebar', async () => {
     render(
       <ContentTypeWarning
@@ -77,30 +102,11 @@ xdescribe('Content Type Warning for Config Screen', () => {
     );
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
 
-    const user = userEvent.setup({ delay: null });
-    await user.hover(screen.getByTestId('cf-ui-icon'));
+    jest.useFakeTimers();
 
     expect(screen.getByRole('tooltip').textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
-  });
-
-  it('renders a warning icon and correct tooltip content when slug field is deleted', async () => {
-    await render(
-      <ContentTypeWarning
-        contentTypeId={'test'}
-        slugField={'slug'}
-        isSaved={true}
-        isInSidebar={true}
-        isContentTypeInOptions={true}
-        isSlugFieldInOptions={false}
-      />
-    );
-
-    expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
-
-    const user = userEvent.setup({ delay: null });
-    await user.hover(screen.getByTestId('cf-ui-icon'));
-
-    expect(screen.getByRole('tooltip').textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));
   });
 });

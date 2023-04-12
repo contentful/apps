@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockAccountSummaries } from '../../../../test/mocks';
 import MapAccountPropertyDropdown from 'components/config-screen/map-account-property/MapAccountPropertyDropdown';
@@ -6,7 +6,7 @@ import { NO_PROPERTIES } from 'components/config-screen/WarningDisplay/constants
 
 const onSelectionChange = jest.fn();
 
-xdescribe('Property selection dropdown', () => {
+describe('Property selection dropdown', () => {
   it('renders a dropdown with options if there are account summaries', () => {
     render(
       <MapAccountPropertyDropdown
@@ -46,10 +46,11 @@ xdescribe('Property selection dropdown', () => {
       />
     );
 
-    const user = userEvent.setup({ delay: null });
-    await user.selectOptions(screen.getByTestId('accountPropertyDropdown'), [
-      'properties/354612161',
-    ]);
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() =>
+      user.selectOptions(screen.getByTestId('accountPropertyDropdown'), ['properties/354612161'])
+    );
 
     expect(onSelectionChange).toHaveBeenCalled();
   });

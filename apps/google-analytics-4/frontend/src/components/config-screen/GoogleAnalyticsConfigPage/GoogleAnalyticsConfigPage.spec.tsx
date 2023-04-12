@@ -18,9 +18,9 @@ jest.mock('contentful-management', () => ({
 }));
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
-const saveAppInstallation = async () => {
+const saveAppInstallation = () => {
   // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
-  return await mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
+  return mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 };
 
 export const apiPath = (path: string) => {
@@ -43,13 +43,12 @@ xdescribe('Config Screen component (not installed)', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup({ delay: null });
-    await user.click(keyFileInputBox);
-    await user.paste(JSON.stringify(validServiceKeyFile));
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() => user.click(keyFileInputBox));
+    await waitFor(() => user.paste(JSON.stringify(validServiceKeyFile)));
 
-    await waitFor(() => {
-      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
 
     const result = await saveAppInstallation();
 
@@ -76,9 +75,10 @@ xdescribe('Config Screen component (not installed)', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup({ delay: null });
-    await user.click(keyFileInputBox);
-    await user.paste('{ "foo": "bar" }');
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() => user.click(keyFileInputBox));
+    await waitFor(() => user.paste('{ "foo": "bar" }'));
 
     const result = await saveAppInstallation();
 
@@ -98,7 +98,7 @@ xdescribe('Config Screen component (not installed)', () => {
   });
 });
 
-xdescribe('Installed Service Account Key', () => {
+describe('Installed Service Account Key', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
       serviceAccountKeyId: validServiceKeyId,
@@ -113,10 +113,12 @@ xdescribe('Installed Service Account Key', () => {
   it('overrides the saved values if a new key file is provided', async () => {
     render(<GoogleAnalyticsConfigPage />);
 
-    const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
-
-    const user = userEvent.setup({ delay: null });
-    await user.click(editServiceAccountButton);
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const editServiceAccountButton = await waitFor(() =>
+      screen.findByTestId('editServiceAccountButton')
+    );
+    await waitFor(() => user.click(editServiceAccountButton));
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
     await waitFor(() => user.click(keyFileInputBox));
 
@@ -124,12 +126,9 @@ xdescribe('Installed Service Account Key', () => {
       ...validServiceKeyFile,
       private_key_id: 'PRIVATE_KEY_ID',
     };
-    await user.paste(JSON.stringify(newServiceKeyFile));
+    await waitFor(() => user.paste(JSON.stringify(newServiceKeyFile)));
 
-    await waitFor(() => {
-      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
-    });
-
+    expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     const result = await saveAppInstallation();
 
     expect(result).toEqual({

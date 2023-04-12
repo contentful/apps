@@ -8,7 +8,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
-xdescribe('Setup Google Service Account Details page', () => {
+describe('Setup Google Service Account Details page', () => {
   it('renders account card with no input', () => {
     render(
       <SetupServiceAccountCard
@@ -40,16 +40,15 @@ xdescribe('Setup Google Service Account Details page', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup({ delay: null });
-    await user.click(keyFileInputBox);
-    await user.paste(JSON.stringify({ foo: 'bar' }));
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() => user.click(keyFileInputBox));
+    await waitFor(() => user.paste(JSON.stringify({ foo: 'bar' })));
 
-    await waitFor(() => {
-      expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toEqual(
-        'true'
-      );
-      expect(screen.getByText(/Error:/)).toBeInTheDocument();
-    });
+    expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toEqual(
+      'true'
+    );
+    expect(screen.getByText(/Error:/)).toBeInTheDocument();
   });
 
   it('renders a success state when valid input', async () => {
@@ -67,13 +66,12 @@ xdescribe('Setup Google Service Account Details page', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup({ delay: null });
-    await user.click(keyFileInputBox);
-    await user.paste(JSON.stringify(validServiceKeyFile));
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await waitFor(() => user.click(keyFileInputBox));
+    await waitFor(() => user.paste(JSON.stringify(validServiceKeyFile)));
 
-    await waitFor(() => {
-      expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toBeNull();
-      expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
-    });
+    expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toBeNull();
+    expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
   });
 });

@@ -33,7 +33,7 @@ const renderAnalyticsApp = async () =>
     />
   );
 
-xdescribe('AnalyticsApp with correct content types configured', () => {
+describe('AnalyticsApp with correct content types configured', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
       serviceAccountKeyId: validServiceKeyId,
