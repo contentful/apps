@@ -4,9 +4,7 @@ import GoogleAnalyticsConfigPage from 'components/config-screen/GoogleAnalyticsC
 import { config } from 'config';
 import { validServiceKeyFile, validServiceKeyId } from '../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
-import * as useSDK from '@contentful/react-apps-toolkit';
 import { ServiceAccountKey } from 'types';
-import { NotifierAPI } from '@contentful/app-sdk';
 
 const apiRoot = config.backendApiUrl;
 
