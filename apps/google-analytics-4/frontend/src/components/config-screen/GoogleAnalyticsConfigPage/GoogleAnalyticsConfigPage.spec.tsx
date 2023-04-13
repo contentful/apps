@@ -8,7 +8,11 @@ import { ServiceAccountKey } from 'types';
 
 const apiRoot = config.backendApiUrl;
 
-jest.mock('@contentful/react-apps-toolkit', () => ({ useSDK: () => mockSdk, useCMA: jest.fn() }));
+jest.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+  useCMA: () => mockCma,
+}));
+
 jest.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
@@ -41,7 +45,7 @@ describe('Google Analytics Page', () => {
   });
 });
 
-describe.only('Google Analytics config page with errors', () => {
+describe('Google Analytics config page with errors', () => {
   it('renders error message if user tries to install app without service key', async () => {
     const mockOnConfigure = jest.fn((cb: Function) => cb());
     const mockNotifier = jest.fn();
@@ -62,13 +66,6 @@ describe.only('Google Analytics config page with errors', () => {
 });
 
 describe('Config Screen component (not installed)', () => {
-  beforeAll(() => {
-    jest.mock('@contentful/react-apps-toolkit', () => ({
-      useSDK: () => mockSdk,
-      ...jest.requireActual('@contentful/react-apps-toolkit'),
-      useCMA: () => mockCma,
-    }));
-  });
   it('allows the app to be installed with a valid service key file', async () => {
     render(<GoogleAnalyticsConfigPage />);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
