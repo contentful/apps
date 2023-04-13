@@ -25,6 +25,11 @@ export const styles = {
       maxHeight: '100%',
       outline: 0,
     },
+    '& > img[src$=".svg"]': {
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain',
+    },
   }),
   focalPointDemo: css({
     display: 'flex',
