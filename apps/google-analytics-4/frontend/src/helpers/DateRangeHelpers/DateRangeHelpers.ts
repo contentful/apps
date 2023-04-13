@@ -16,8 +16,12 @@ const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
 // date should be local to user in format of YYYY-MM-DD
 const formatDate = (date: Date) => {
-  const localDate = date.toLocaleDateString().split('/');
-  return `${localDate[2]}-${localDate[0]}-${localDate[1]}`;
+  const year = date.getFullYear();
+  // months start at 0
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  return `${year}-${month}-${day}`;
 };
 
 const getRangeDates = (dateRange: DateRangeType) => {

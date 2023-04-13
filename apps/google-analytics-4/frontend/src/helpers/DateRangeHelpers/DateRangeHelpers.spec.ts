@@ -14,7 +14,7 @@ const getDateRangeTime = (range: DateRangeType) => {
 
 const getParsedDateRangeDate = (range: DateRangeType) => {
   const { start, end } = getRangeDates(range);
-  const getDate = (date: string) => Number(new Date(date).toLocaleDateString().split('/')[1]);
+  const getDate = (date: string) => Number(new Date(date).getDate());
   return {
     startDay: getDate(start),
     endDay: getDate(end),
