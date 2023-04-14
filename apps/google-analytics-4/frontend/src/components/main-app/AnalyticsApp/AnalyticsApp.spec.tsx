@@ -49,18 +49,18 @@ describe('AnalyticsApp with correct content types configured', () => {
     }));
   });
 
-  it('mounts data', () => {
+  it('mounts data', async () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
     renderAnalyticsApp();
 
-    const dropdown = getByTestId(SELECT_TEST_ID);
+    const dropdown = await findByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
 
     expect(dropdown).toBeVisible();
     expect(chart).toBeVisible();
   });
 
-  it('mounts with warning message when no data', () => {
+  it('mounts with warning message when no data', async () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
     renderAnalyticsApp();
 
@@ -73,7 +73,7 @@ describe('AnalyticsApp with correct content types configured', () => {
     expect(noteText).toBeVisible();
   });
 
-  it('mounts with error message when error thrown', () => {
+  it('mounts with error message when error thrown', async () => {
     mockApi.mockRejectedValue(() => new Error('api error'));
     renderAnalyticsApp();
 
@@ -86,7 +86,7 @@ describe('AnalyticsApp with correct content types configured', () => {
     expect(noteText).toBeVisible();
   });
 
-  it('renders nothing when it has no response', () => {
+  it('renders nothing when it has no response', async () => {
     renderAnalyticsApp();
 
     expect(screen.queryByTestId(SELECT_TEST_ID)).toBeNull();
@@ -96,7 +96,7 @@ describe('AnalyticsApp with correct content types configured', () => {
 });
 
 describe('AnalyticsApp when content types are not configured correctly', () => {
-  it('renders SlugWarningDisplay component when slug field is not configured', () => {
+  it('renders SlugWarningDisplay component when slug field is not configured', async () => {
     jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
       slugFieldIsConfigured: true,
       contentTypeHasSlugField: false,
@@ -112,7 +112,7 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
     renderAnalyticsApp();
 
     const dropdown = queryByTestId(SELECT_TEST_ID);
-    const warningNote = getByTestId(NOTE_TEST_ID);
+    const warningNote = await findByTestId(NOTE_TEST_ID);
     const noteText = getByText(warningMessage);
 
     expect(dropdown).toBeFalsy();
