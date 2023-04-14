@@ -30,7 +30,7 @@ exports[`SortableListItem should render successfully 1`] = `
           Mock Category
         </h1>
         <h2
-          class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+          class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
           data-test-id="cf-ui-subheading"
         >
           abc1234
@@ -104,7 +104,7 @@ exports[`SortableListItem should render successfully the error variation for mis
       </span>
     </div>
     <div
-      class="css-14lnkev"
+      class="css-6t06np"
     >
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il"
@@ -141,7 +141,7 @@ exports[`SortableListItem should render successfully the error variation for mis
           Mock Category
         </h1>
         <h2
-          class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+          class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
           data-test-id="cf-ui-subheading"
         >
           abc1234
@@ -190,7 +190,7 @@ exports[`SortableListItem should render successfully the error variation for mis
     data-test-id="cf-ui-card"
   >
     <div
-      class="css-14lnkev"
+      class="css-6t06np"
     >
       <svg
         class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il"
@@ -371,7 +371,7 @@ exports[`SortableListItem should render successfully the loading variation 1`] =
           Mock Category
         </h1>
         <h2
-          class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+          class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
           data-test-id="cf-ui-subheading"
         >
           abc1234
@@ -468,7 +468,7 @@ exports[`SortableListItem should render successfully the sortable variation 1`] 
           Mock Category
         </h1>
         <h2
-          class="Subheading__Subheading___2mA9j css-1b5bj2l f36-margin-bottom--m"
+          class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
           data-test-id="cf-ui-subheading"
         >
           abc1234
