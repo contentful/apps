@@ -19,7 +19,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 const mockApi = jest.fn();
 
-const { getByTestId, getByText, queryByTestId } = screen;
+const { findByTestId, getByTestId, getByText, queryByTestId } = screen;
 
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
@@ -64,7 +64,7 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
     renderAnalyticsApp();
 
-    const dropdown = getByTestId(SELECT_TEST_ID);
+    const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
     const noteText = getByText(EMPTY_DATA_MSG);
 
@@ -77,7 +77,7 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockRejectedValue(() => new Error('api error'));
     renderAnalyticsApp();
 
-    const dropdown = getByTestId(SELECT_TEST_ID);
+    const dropdown = await findByTestId(SELECT_TEST_ID);
     const warningNote = getByTestId(NOTE_TEST_ID);
     const noteText = getByText('api error');
 

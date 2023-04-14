@@ -1,1 +1,0 @@
-export { ActionsController } from './controller';
