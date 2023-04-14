@@ -38,17 +38,12 @@ describe('Google Analytics Page', () => {
 
 describe('Google Analytics config page with errors', () => {
   it('renders error message if user tries to install app without service key', async () => {
-    const mockOnConfigure = jest.fn((cb: Function) => cb());
     const mockNotifier = jest.fn();
     mockSdk.notifier = { error: mockNotifier };
 
     render(<GoogleAnalyticsConfigPage />);
 
-    // saves input
-    mockSdk.app.onConfigure = mockOnConfigure;
-    await waitFor(() => {
-      expect(mockOnConfigure).toHaveBeenCalled();
-    });
+    await saveAppInstallation();
 
     await waitFor(() => {
       expect(mockNotifier).toHaveBeenCalledWith('A valid service account key file is required');
