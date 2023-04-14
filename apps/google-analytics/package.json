@@ -17,7 +17,7 @@
     "@contentful/app-sdk": "4.9.0",
     "@contentful/forma-36-fcss": "0.3.5",
     "@contentful/forma-36-react-components": "3.100.7",
-    "@contentful/forma-36-tokens": "0.11.0",
+    "@contentful/forma-36-tokens": "0.11.2",
     "emotion": "10.0.27",
     "lodash": "4.17.21",
     "prop-types": "15.8.1",
