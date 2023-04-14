@@ -15,7 +15,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 const { findByText, getByTestId } = screen;
 
-xdescribe('ErrorDisplay', () => {
+describe('ErrorDisplay', () => {
   it('mounts with correct msg and hyperlink when error is of type InvalidProperty', async () => {
     const HYPER_LINK_COPY = 'app configuration page.';
     render(
