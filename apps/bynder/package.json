@@ -10,7 +10,7 @@
   "dependencies": {
     "@contentful/dam-app-base": "^2.0.35",
     "react": "16.12.0",
-    "react-dom": "16.12.0"
+    "react-dom": "16.14.0"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",

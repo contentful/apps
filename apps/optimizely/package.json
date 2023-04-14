@@ -17,7 +17,7 @@
     "lodash.intersection": "4.4.0",
     "prop-types": "15.8.1",
     "react": "16.8.6",
-    "react-dom": "16.8.6",
+    "react-dom": "16.14.0",
     "react-scripts": "4.0.3",
     "use-methods": "0.5.1",
     "whatwg-fetch": "3.6.2"

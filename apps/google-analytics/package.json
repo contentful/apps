@@ -22,7 +22,7 @@
     "lodash": "4.17.21",
     "prop-types": "15.8.1",
     "react": "16.8.6",
-    "react-dom": "16.8.6",
+    "react-dom": "16.14.0",
     "react-scripts": "4.0.3"
   },
   "scripts": {

@@ -27,7 +27,7 @@
     "@mux/mux-uploader-react": "0.1.0-canary.223-db4cc9f",
     "jsonwebtoken": "8.5.1",
     "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "react-dom": "16.14.0",
     "react-error-overlay": "6.0.11",
     "react-scripts": "4.0.3"
   },
