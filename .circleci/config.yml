@@ -25,7 +25,7 @@ jobs:
   apps-test:
     docker:
       - image: cimg/base:stable
-    resource_class: medium+
+    resource_class: large
     steps:
       - checkout
       - node/install
@@ -57,7 +57,7 @@ jobs:
   deploy-staging:
     docker:
       - image: cimg/base:stable
-    resource_class: medium+
+    resource_class: large
     steps:
       - checkout
       - vault/get-secrets:
@@ -95,7 +95,7 @@ jobs:
   deploy-prod:
     docker:
       - image: cimg/base:stable
-    resource_class: medium+
+    resource_class: large
     steps:
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
