@@ -18,7 +18,7 @@ jest.mock('contentful-management', () => ({
 }));
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
-const saveAppInstallation = () => {
+const saveAppInstallation = async () => {
   // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
   return mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 };
@@ -37,6 +37,19 @@ describe('Google Analytics Page', () => {
 });
 
 xdescribe('Config Screen component (not installed)', () => {
+  it('renders error message if user tries to install app without service key', async () => {
+    const mockNotifier = jest.fn();
+    mockSdk.notifier = { error: mockNotifier };
+
+    render(<GoogleAnalyticsConfigPage />);
+
+    await saveAppInstallation();
+
+    await waitFor(() => {
+      expect(mockNotifier).toHaveBeenCalledWith('A valid service account key file is required');
+    });
+  });
+
   it('allows the app to be installed with a valid service key file', async () => {
     render(<GoogleAnalyticsConfigPage />);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);

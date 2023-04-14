@@ -85,7 +85,7 @@ describe('Content Type Warning for Config Screen', () => {
   });
 });
 
-xdescribe('Content Type Warning for Config Screen Flakey', () => {
+describe('Content Type Warning for Config Screen Flakey', () => {
   it('renders a warning icon and correct tooltip content when app is removed from content type sidebar', async () => {
     render(
       <ContentTypeWarning
