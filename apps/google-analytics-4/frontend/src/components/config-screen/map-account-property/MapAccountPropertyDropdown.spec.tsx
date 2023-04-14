@@ -46,8 +46,7 @@ describe('Property selection dropdown', () => {
       />
     );
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await waitFor(() =>
       user.selectOptions(screen.getByTestId('accountPropertyDropdown'), ['properties/354612161'])
     );

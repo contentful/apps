@@ -89,8 +89,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await waitFor(() => user.click(screen.getByText('Remove')));
 
     expect(onRemoveContentType).toHaveBeenCalled();
@@ -110,8 +109,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await waitFor(() => user.click(screen.getByText('Remove')));
 
     expect(onRemoveContentType).toHaveBeenCalled();
@@ -131,8 +129,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await user.selectOptions(screen.getByTestId('contentTypeSelect'), ['course']);
 
     expect(onContentTypeChange).toHaveBeenCalled();
@@ -152,8 +149,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await user.selectOptions(screen.getByTestId('slugFieldSelect'), ['slug']);
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();
@@ -173,8 +169,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await user.type(screen.getByTestId('urlPrefixInput'), '/en-US');
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();

@@ -8,8 +8,7 @@ describe('WarningDisplay component', () => {
 
     expect(screen.getByTestId('errorIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
 
     expect(screen.getByRole('tooltip').textContent).toBe('This is an error');
@@ -20,8 +19,7 @@ describe('WarningDisplay component', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
 
     expect(screen.getByRole('tooltip').textContent).toBe('This is a warning');

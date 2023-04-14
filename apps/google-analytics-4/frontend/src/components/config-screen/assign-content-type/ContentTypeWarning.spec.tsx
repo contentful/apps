@@ -38,8 +38,7 @@ describe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('errorIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
 
     expect(screen.getByRole('tooltip').textContent).toBe(getContentTypeDeletedMsg('test'));
@@ -59,8 +58,7 @@ describe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
 
     expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
@@ -80,8 +78,7 @@ describe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await waitFor(async () => await user.hover(screen.getByTestId('cf-ui-icon')));
 
     expect(screen.getByRole('tooltip').textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));
@@ -102,10 +99,8 @@ xdescribe('Content Type Warning for Config Screen Flakey', () => {
     );
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
     await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
-
-    jest.useFakeTimers();
 
     expect(screen.getByRole('tooltip').textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
   });
