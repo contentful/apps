@@ -52,17 +52,24 @@ xdescribe('Config Screen component (not installed)', () => {
 
   it('allows the app to be installed with a valid service key file', async () => {
     render(<GoogleAnalyticsConfigPage />);
+    console.log('RENDERED');
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+    console.log('LABELED');
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
     const user = userEvent.setup();
+    console.log('SETUP');
     await user.click(keyFileInputBox);
+    console.log('CLICK');
     await user.paste(JSON.stringify(validServiceKeyFile));
+    console.log('PASTE');
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
+    console.log('EXPECT');
 
     const result = await saveAppInstallation();
+    console.log('SAVED');
 
     expect(result).toEqual({
       parameters: {
@@ -123,21 +130,30 @@ describe('Installed Service Account Key', () => {
 
   it('overrides the saved values if a new key file is provided', async () => {
     render(<GoogleAnalyticsConfigPage />);
+    console.log('RENDERED');
 
     const user = userEvent.setup();
+    console.log('SETUP');
     const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
+    console.log('FIND');
     await user.click(editServiceAccountButton);
+    console.log('CLICK 1');
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+    console.log('GET LABEL 1');
     await user.click(keyFileInputBox);
+    console.log('CLICK 2');
 
     const newServiceKeyFile: ServiceAccountKey = {
       ...validServiceKeyFile,
       private_key_id: 'PRIVATE_KEY_ID',
     };
     await user.paste(JSON.stringify(newServiceKeyFile));
+    console.log('PASTE');
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
+    console.log('GET LABEL 2');
     const result = await saveAppInstallation();
+    console.log('SAVE');
 
     expect(result).toEqual({
       parameters: {

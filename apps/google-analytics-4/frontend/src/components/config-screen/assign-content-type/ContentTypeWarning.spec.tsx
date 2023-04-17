@@ -35,11 +35,15 @@ describe('Content Type Warning for Config Screen', () => {
         isSlugFieldInOptions={false}
       />
     );
+    console.log('RENDER');
 
     expect(screen.getByTestId('errorIcon')).toBeInTheDocument();
+    console.log('GET');
 
     const user = userEvent.setup();
-    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
+    console.log('SETUP');
+    await user.hover(screen.getByTestId('cf-ui-icon'));
+    console.log('HOVER');
 
     expect(screen.getByRole('tooltip').textContent).toBe(getContentTypeDeletedMsg('test'));
   });

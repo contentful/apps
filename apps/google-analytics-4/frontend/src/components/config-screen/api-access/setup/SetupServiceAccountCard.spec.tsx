@@ -60,14 +60,19 @@ describe('Setup Google Service Account Details page', () => {
         onKeyFileUpdate={() => {}}
       />
     );
+    console.log('RENDER');
 
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
+    console.log('SCREEN');
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
     const user = userEvent.setup();
+    console.log('SETUP');
     await user.click(keyFileInputBox);
+    console.log('CLICKR');
     await user.paste(JSON.stringify(validServiceKeyFile));
+    console.log('PASTE');
 
     expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toBeNull();
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();

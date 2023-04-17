@@ -148,9 +148,12 @@ describe('Assign Content Type Card for Config Screen', () => {
         {...props}
       />
     );
+    console.log('RENDER');
 
     const user = userEvent.setup();
+    console.log('SETUP');
     await user.selectOptions(screen.getByTestId('slugFieldSelect'), ['slug']);
+    console.log('SELECT');
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();
   });
