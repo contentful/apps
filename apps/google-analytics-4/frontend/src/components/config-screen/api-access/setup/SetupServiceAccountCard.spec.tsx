@@ -44,9 +44,11 @@ describe('Setup Google Service Account Details page', () => {
     await userEvent.click(keyFileInputBox);
     await userEvent.paste(JSON.stringify({ foo: 'bar' }));
 
+    await screen.findByLabelText(/Service Account Key/);
     expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toEqual(
       'true'
     );
+    await screen.findByText(/Error:/);
     expect(screen.getByText(/Error:/)).toBeInTheDocument();
   });
 
@@ -61,6 +63,7 @@ describe('Setup Google Service Account Details page', () => {
       />
     );
 
+    await screen.findByLabelText(/Service Account Key/i);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this

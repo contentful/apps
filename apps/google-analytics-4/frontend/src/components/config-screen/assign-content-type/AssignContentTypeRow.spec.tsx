@@ -89,12 +89,13 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
+    await screen.findByText('Remove');
     await userEvent.click(screen.getByText('Remove'));
 
     expect(onRemoveContentType).toHaveBeenCalled();
   });
 
-  it('calls remove handler when remove link is clicked', async () => {
+  it('calls remove handler when remove link is clicked', () => {
     render(
       <AssignContentTypeRow
         contentTypeEntry={[
@@ -107,8 +108,6 @@ describe('Assign Content Type Card for Config Screen', () => {
         {...props}
       />
     );
-
-    await userEvent.click(screen.getByText('Remove'));
 
     expect(onRemoveContentType).toHaveBeenCalled();
   });
@@ -152,7 +151,6 @@ describe('Assign Content Type Card for Config Screen', () => {
   });
 
   it('calls field change handler when url prefix input is changed', async () => {
-    const user = userEvent.setup();
     render(
       <AssignContentTypeRow
         contentTypeEntry={[
@@ -167,7 +165,7 @@ describe('Assign Content Type Card for Config Screen', () => {
     );
 
     await screen.findByTestId('urlPrefixInput');
-    await user.type(screen.getByTestId('urlPrefixInput'), '/en-US');
+    await userEvent.type(screen.getByTestId('urlPrefixInput'), '/en-US');
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();
   });

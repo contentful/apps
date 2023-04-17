@@ -46,6 +46,7 @@ describe('Property selection dropdown', () => {
       />
     );
 
+    await screen.findByTestId('accountPropertyDropdown');
     await userEvent.selectOptions(screen.getByTestId('accountPropertyDropdown'), [
       'properties/354612161',
     ]);

@@ -52,6 +52,8 @@ describe('Config Screen component (not installed)', () => {
 
   it('allows the app to be installed with a valid service key file', async () => {
     render(<GoogleAnalyticsConfigPage />);
+
+    await screen.findByLabelText(/Service Account Key/i);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
