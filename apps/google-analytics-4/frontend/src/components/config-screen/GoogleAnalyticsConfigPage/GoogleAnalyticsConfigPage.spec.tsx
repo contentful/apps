@@ -124,17 +124,16 @@ describe('Installed Service Account Key', () => {
   it('overrides the saved values if a new key file is provided', async () => {
     render(<GoogleAnalyticsConfigPage />);
 
-    const user = userEvent.setup();
     const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
-    await user.click(editServiceAccountButton);
+    await userEvent.click(editServiceAccountButton);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
-    await user.click(keyFileInputBox);
+    await userEvent.click(keyFileInputBox);
 
     const newServiceKeyFile: ServiceAccountKey = {
       ...validServiceKeyFile,
       private_key_id: 'PRIVATE_KEY_ID',
     };
-    await user.paste(JSON.stringify(newServiceKeyFile));
+    await userEvent.paste(JSON.stringify(newServiceKeyFile));
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     const result = await saveAppInstallation();

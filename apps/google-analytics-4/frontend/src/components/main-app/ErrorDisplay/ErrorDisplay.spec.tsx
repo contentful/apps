@@ -30,7 +30,7 @@ describe('ErrorDisplay', () => {
     );
 
     expect(
-      screen.findByText(INVALID_ARGUMENT_MSG.replace(HYPER_LINK_COPY, '').trim())
+      screen.getByText(INVALID_ARGUMENT_MSG.replace(HYPER_LINK_COPY, '').trim())
     ).toBeVisible();
     expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
@@ -49,7 +49,7 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    expect(screen.findByText(PERMISSION_DENIED_MSG)).toBeVisible();
+    expect(screen.getByText(PERMISSION_DENIED_MSG)).toBeVisible();
   });
 
   it('mounts with correct msg when error is of type FailedFetch', async () => {
@@ -67,7 +67,7 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    expect(screen.findByText(DEFAULT_ERR_MSG.replace(HYPER_LINK_COPY, '').trim())).toBeVisible();
+    expect(screen.getByText(DEFAULT_ERR_MSG.replace(HYPER_LINK_COPY, '').trim())).toBeVisible();
     expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
 
@@ -87,7 +87,7 @@ describe('ErrorDisplay', () => {
     );
 
     expect(
-      screen.findByText(INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim())
+      screen.getByText(INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim())
     ).toBeVisible();
     expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
@@ -108,7 +108,7 @@ describe('ErrorDisplay', () => {
     );
 
     expect(
-      screen.findByText(INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim())
+      screen.getByText(INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim())
     ).toBeVisible();
     expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
@@ -128,13 +128,13 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    expect(screen.findByText(INTERNAL_ERR_MSG)).toBeVisible();
+    expect(screen.getByText(INTERNAL_ERR_MSG)).toBeVisible();
   });
 
   it('mounts with correct msg when error is not a specified Api Error Type', async () => {
     const ERR_MSG = 'random error';
     render(<ErrorDisplay error={new Error(ERR_MSG)} />);
 
-    expect(screen.findByText(ERR_MSG)).toBeVisible();
+    expect(screen.getByText(ERR_MSG)).toBeVisible();
   });
 });
