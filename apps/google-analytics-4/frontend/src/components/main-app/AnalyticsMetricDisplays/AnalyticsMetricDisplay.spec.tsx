@@ -6,8 +6,6 @@ const PAGE_VIEWS = 0;
 const METRIC_NAME = 'screenPageViews';
 const SLUG = '/en-US';
 
-const { getByText } = screen;
-
 describe('Analytics metric display components for the analytics app', () => {
   it('can render the basic components', () => {
     render(
@@ -22,14 +20,9 @@ describe('Analytics metric display components for the analytics app', () => {
       />
     );
 
-    const pageViews = getByText(PAGE_VIEWS);
-    const metricName = getByText('Total Views');
-    const slug = getByText(`Page path: ${SLUG}`);
-    const chart = document.querySelector('canvas');
-
-    expect(pageViews).toBeVisible();
-    expect(metricName).toBeVisible();
-    expect(slug).toBeVisible();
-    expect(chart).toBeVisible();
+    expect(screen.getByText(PAGE_VIEWS)).toBeVisible();
+    expect(screen.getByText('Total Views')).toBeVisible();
+    expect(screen.getByText(`Page path: ${SLUG}`)).toBeVisible();
+    expect(document.querySelector('canvas')).toBeVisible();
   });
 });

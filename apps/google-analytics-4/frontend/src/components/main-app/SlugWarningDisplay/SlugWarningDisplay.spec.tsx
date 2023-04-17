@@ -16,8 +16,6 @@ const useSidebarSlugMock = {
 
 const APP_CONFIG_HYPER_LINK_MSG = 'app configuration page.';
 
-const { findByText, queryByText, getByTestId } = screen;
-
 const { noSlugConfigMsg, noSlugContentMsg, notPublishedMsg } =
   getContentTypeSpecificMsg('Category');
 
@@ -32,13 +30,10 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: '', urlPrefix: '' }} />);
 
-    const warningMsg = await findByText(
-      noSlugConfigMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim()
-    );
-    const hyperLink = getByTestId('cf-ui-text-link');
-
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(
+      screen.findByText(noSlugConfigMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim())
+    ).toBeVisible();
+    expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
 
   it('mounts with correct msg and hyperlink when error is missing slug field', async () => {
@@ -51,13 +46,10 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
-    const warningMsg = await findByText(
-      noSlugContentMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim()
-    );
-    const hyperLink = getByTestId('cf-ui-text-link');
-
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(
+      screen.findByText(noSlugContentMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim())
+    ).toBeVisible();
+    expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
 
   it('mounts with correct msg and no hyperlink, when error is unpublished content', async () => {
@@ -70,11 +62,8 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
-    const warningMsg = await findByText(notPublishedMsg);
-    const hyperLinkMsg = queryByText(APP_CONFIG_HYPER_LINK_MSG);
-
-    expect(warningMsg).toBeVisible();
-    expect(hyperLinkMsg).toBeFalsy();
+    expect(screen.findByText(notPublishedMsg)).toBeVisible();
+    expect(screen.queryByText(APP_CONFIG_HYPER_LINK_MSG)).toBeFalsy();
   });
 
   it('mounts with correct msg and hyperlink as default message', async () => {
@@ -88,10 +77,7 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
-    const warningMsg = await findByText(DEFAULT_ERR_MSG.replace(SUPPORT_LINK_MSG, '').trim());
-    const hyperLink = getByTestId('cf-ui-text-link');
-
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(screen.findByText(DEFAULT_ERR_MSG.replace(SUPPORT_LINK_MSG, '').trim())).toBeVisible();
+    expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
 });

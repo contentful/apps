@@ -3,16 +3,11 @@ import Note from './Note';
 
 const BODY = 'This is note content';
 
-const { getByText, getByTestId } = screen;
-
 describe('Note component', () => {
   it('mounts', () => {
     render(<Note body={BODY} variant="warning" />);
 
-    const note = getByTestId('cf-ui-note');
-    const paragraph = getByText(BODY);
-
-    expect(note).toBeInTheDocument();
-    expect(paragraph).toBeInTheDocument();
+    expect(screen.getByTestId('cf-ui-note')).toBeInTheDocument();
+    expect(screen.getByText(BODY)).toBeInTheDocument();
   });
 });

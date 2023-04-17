@@ -36,8 +36,6 @@ const TestComponent = (props: Props) => {
   );
 };
 
-const { getByText, findByText } = screen;
-
 describe('useSidebarSlug hook', () => {
   it('returns slug info and status when content types are configured correctly', () => {
     jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
@@ -56,12 +54,12 @@ describe('useSidebarSlug hook', () => {
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
-    expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
-    expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
-    expect(getByText('isPublished: true')).toBeVisible();
-    expect(getByText('reportSlug: /en-US/fieldValue')).toBeVisible();
-    expect(getByText('slugFieldValue: /fieldValue')).toBeVisible();
-    expect(getByText('isContentTypeWarning: false')).toBeVisible();
+    expect(screen.getByText('slugFieldIsConfigured: true')).toBeVisible();
+    expect(screen.getByText('contentTypeHasSlugField: true')).toBeVisible();
+    expect(screen.getByText('isPublished: true')).toBeVisible();
+    expect(screen.getByText('reportSlug: /en-US/fieldValue')).toBeVisible();
+    expect(screen.getByText('slugFieldValue: /fieldValue')).toBeVisible();
+    expect(screen.getByText('isContentTypeWarning: false')).toBeVisible();
   });
 
   it('returns slug info and status when content types not configured correctly', () => {
@@ -82,12 +80,12 @@ describe('useSidebarSlug hook', () => {
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
-    expect(getByText('slugFieldIsConfigured: false')).toBeVisible();
-    expect(getByText('contentTypeHasSlugField: false')).toBeVisible();
-    expect(getByText('isPublished: false')).toBeVisible();
-    expect(getByText('reportSlug: /en-US')).toBeVisible();
-    expect(getByText('slugFieldValue:')).toBeVisible();
-    expect(getByText('isContentTypeWarning: true')).toBeVisible();
+    expect(screen.getByText('slugFieldIsConfigured: false')).toBeVisible();
+    expect(screen.getByText('contentTypeHasSlugField: false')).toBeVisible();
+    expect(screen.getByText('isPublished: false')).toBeVisible();
+    expect(screen.getByText('reportSlug: /en-US')).toBeVisible();
+    expect(screen.getByText('slugFieldValue:')).toBeVisible();
+    expect(screen.getByText('isContentTypeWarning: true')).toBeVisible();
   });
 
   it('returns slug info and status when field value is updated', async () => {
@@ -110,16 +108,14 @@ describe('useSidebarSlug hook', () => {
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
-    expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
-    expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
-    expect(getByText('isPublished: true')).toBeVisible();
-    expect(getByText('reportSlug: /en-US/fieldValue')).toBeVisible();
-    expect(getByText('slugFieldValue: /fieldValue')).toBeVisible();
-    expect(getByText('isContentTypeWarning: false')).toBeVisible();
+    expect(screen.getByText('slugFieldIsConfigured: true')).toBeVisible();
+    expect(screen.getByText('contentTypeHasSlugField: true')).toBeVisible();
+    expect(screen.getByText('isPublished: true')).toBeVisible();
+    expect(screen.getByText('reportSlug: /en-US/fieldValue')).toBeVisible();
+    expect(screen.getByText('slugFieldValue: /fieldValue')).toBeVisible();
+    expect(screen.getByText('isContentTypeWarning: false')).toBeVisible();
 
-    const newSlugFieldValue = await findByText('slugFieldValue: /differentFieldValue');
-
-    expect(newSlugFieldValue).toBeVisible();
-    expect(getByText('reportSlug: /en-US/differentFieldValue')).toBeVisible();
+    expect(screen.findByText('slugFieldValue: /differentFieldValue')).toBeVisible();
+    expect(screen.getByText('reportSlug: /en-US/differentFieldValue')).toBeVisible();
   });
 });
