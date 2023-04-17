@@ -18,7 +18,7 @@ jest.mock('contentful-management', () => ({
 }));
 
 // Helper to mock users clicking "save" -- return result of the callback passed to onConfigure()
-const saveAppInstallation = () => {
+const saveAppInstallation = async () => {
   // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
   return mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
 };
@@ -36,17 +36,29 @@ describe('Google Analytics Page', () => {
   });
 });
 
-xdescribe('Config Screen component (not installed)', () => {
+describe('Config Screen component (not installed)', () => {
+  it('renders error message if user tries to install app without service key', async () => {
+    const mockNotifier = jest.fn();
+    mockSdk.notifier = { error: mockNotifier };
+
+    render(<GoogleAnalyticsConfigPage />);
+
+    await saveAppInstallation();
+
+    await waitFor(() => {
+      expect(mockNotifier).toHaveBeenCalledWith('A valid service account key file is required');
+    });
+  });
+
   it('allows the app to be installed with a valid service key file', async () => {
     render(<GoogleAnalyticsConfigPage />);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(() => user.click(keyFileInputBox));
-    await waitFor(() => user.paste(JSON.stringify(validServiceKeyFile)));
+    const user = userEvent.setup();
+    await user.click(keyFileInputBox);
+    await user.paste(JSON.stringify(validServiceKeyFile));
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
 
@@ -75,10 +87,9 @@ xdescribe('Config Screen component (not installed)', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(() => user.click(keyFileInputBox));
-    await waitFor(() => user.paste('{ "foo": "bar" }'));
+    const user = userEvent.setup();
+    await user.click(keyFileInputBox);
+    await user.paste('{ "foo": "bar" }');
 
     const result = await saveAppInstallation();
 
@@ -113,20 +124,17 @@ describe('Installed Service Account Key', () => {
   it('overrides the saved values if a new key file is provided', async () => {
     render(<GoogleAnalyticsConfigPage />);
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    const editServiceAccountButton = await waitFor(() =>
-      screen.findByTestId('editServiceAccountButton')
-    );
-    await waitFor(() => user.click(editServiceAccountButton));
+    const user = userEvent.setup();
+    const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
+    await user.click(editServiceAccountButton);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
-    await waitFor(() => user.click(keyFileInputBox));
+    await user.click(keyFileInputBox);
 
     const newServiceKeyFile: ServiceAccountKey = {
       ...validServiceKeyFile,
       private_key_id: 'PRIVATE_KEY_ID',
     };
-    await waitFor(() => user.paste(JSON.stringify(newServiceKeyFile)));
+    await user.paste(JSON.stringify(newServiceKeyFile));
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     const result = await saveAppInstallation();

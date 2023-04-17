@@ -24,7 +24,7 @@ const { findByTestId, getByTestId, getByText, queryByTestId } = screen;
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
 
-const renderAnalyticsApp = async () =>
+const renderAnalyticsApp = () =>
   render(
     <AnalyticsApp
       api={{ runReports: mockApi } as unknown as Api}

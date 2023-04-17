@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
 import {
@@ -38,9 +38,8 @@ describe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('errorIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
+    const user = userEvent.setup();
+    await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(getContentTypeDeletedMsg('test'));
   });
@@ -59,9 +58,8 @@ describe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
+    const user = userEvent.setup();
+    await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
   });
@@ -80,15 +78,14 @@ describe('Content Type Warning for Config Screen', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(async () => await user.hover(screen.getByTestId('cf-ui-icon')));
+    const user = userEvent.setup();
+    await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));
   });
 });
 
-xdescribe('Content Type Warning for Config Screen Flakey', () => {
+describe('Content Type Warning for Config Screen Flakey', () => {
   it('renders a warning icon and correct tooltip content when app is removed from content type sidebar', async () => {
     render(
       <ContentTypeWarning
@@ -102,10 +99,8 @@ xdescribe('Content Type Warning for Config Screen Flakey', () => {
     );
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
-
-    jest.useFakeTimers();
+    const user = userEvent.setup();
+    await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
   });
