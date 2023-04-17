@@ -13,8 +13,6 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-const { findByText, getByTestId } = screen;
-
 describe('ErrorDisplay', () => {
   it('mounts with correct msg and hyperlink when error is of type InvalidProperty', async () => {
     const HYPER_LINK_COPY = 'app configuration page.';
@@ -31,11 +29,10 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    const warningMsg = await findByText(INVALID_ARGUMENT_MSG.replace(HYPER_LINK_COPY, '').trim());
-    const hyperLink = getByTestId('cf-ui-text-link');
-
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(
+      screen.findByText(INVALID_ARGUMENT_MSG.replace(HYPER_LINK_COPY, '').trim())
+    ).toBeVisible();
+    expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
 
   it('mounts with correct msg when error is of type DisabledDataApi', async () => {
@@ -52,9 +49,7 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    const warningMsg = await findByText(PERMISSION_DENIED_MSG);
-
-    expect(warningMsg).toBeVisible();
+    expect(screen.findByText(PERMISSION_DENIED_MSG)).toBeVisible();
   });
 
   it('mounts with correct msg when error is of type FailedFetch', async () => {
@@ -72,11 +67,8 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    const warningMsg = await findByText(DEFAULT_ERR_MSG.replace(HYPER_LINK_COPY, '').trim());
-    const hyperLink = getByTestId('cf-ui-text-link');
-
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(screen.findByText(DEFAULT_ERR_MSG.replace(HYPER_LINK_COPY, '').trim())).toBeVisible();
+    expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
 
   it('mounts with correct msg when error is of type InvalidServiceAccount', async () => {
@@ -94,13 +86,10 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    const warningMsg = await findByText(
-      INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim()
-    );
-    const hyperLink = getByTestId('cf-ui-text-link');
-
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(
+      screen.findByText(INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim())
+    ).toBeVisible();
+    expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
 
   it('mounts with correct msg when error is of type InvalidServiceAccountKey', async () => {
@@ -118,13 +107,10 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    const warningMsg = await findByText(
-      INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim()
-    );
-    const hyperLink = getByTestId('cf-ui-text-link');
-
-    expect(warningMsg).toBeVisible();
-    expect(hyperLink).toBeVisible();
+    expect(
+      screen.findByText(INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim())
+    ).toBeVisible();
+    expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
 
   it('mounts with correct msg when error is of ApiError class but not an Error type explicitely handled', async () => {
@@ -142,17 +128,13 @@ describe('ErrorDisplay', () => {
       />
     );
 
-    const warningMsg = await findByText(INTERNAL_ERR_MSG);
-
-    expect(warningMsg).toBeVisible();
+    expect(screen.findByText(INTERNAL_ERR_MSG)).toBeVisible();
   });
 
-  it('mounts with correct msg when error is not a specified Api Error Type ', async () => {
+  it('mounts with correct msg when error is not a specified Api Error Type', async () => {
     const ERR_MSG = 'random error';
     render(<ErrorDisplay error={new Error(ERR_MSG)} />);
 
-    const warningMsg = await findByText(ERR_MSG);
-
-    expect(warningMsg).toBeVisible();
+    expect(screen.findByText(ERR_MSG)).toBeVisible();
   });
 });

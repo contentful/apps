@@ -9,8 +9,6 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-const { getByText } = screen;
-
 describe('ChartContent component', () => {
   it('mounts', () => {
     render(<ChartContent pageViewData={runReportResponseHasViews} />);
@@ -26,16 +24,12 @@ describe('ChartContent component', () => {
       <ChartContent pageViewData={runReportResponseHasViews} error={new Error('api error')} />
     );
 
-    const noteText = getByText('api error');
-
-    expect(noteText).toBeVisible();
+    expect(screen.getByText('api error')).toBeVisible();
   });
 
   it('mounts with warning message if empty data', () => {
     render(<ChartContent pageViewData={runReportResponseNoView} />);
 
-    const noteText = getByText(EMPTY_DATA_MSG);
-
-    expect(noteText).toBeVisible();
+    expect(screen.getByText(EMPTY_DATA_MSG)).toBeVisible();
   });
 });
