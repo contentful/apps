@@ -30,6 +30,7 @@
     "jest": "^27.5.1",
     "nock": "^13.1.1",
     "serverless-domain-manager": "^3.3.0",
+    "serverless-prune-plugin": "^2.0.2",
     "supertest": "^4.0.2",
     "ts-jest": "^27.1.5",
     "ts-node": "^10.9.1",
