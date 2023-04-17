@@ -31,7 +31,7 @@ describe('SlugWarningDisplay for the analytics app', () => {
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: '', urlPrefix: '' }} />);
 
     expect(
-      screen.findByText(noSlugConfigMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim())
+      screen.getByText(noSlugConfigMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim())
     ).toBeVisible();
     expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
@@ -47,7 +47,7 @@ describe('SlugWarningDisplay for the analytics app', () => {
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
     expect(
-      screen.findByText(noSlugContentMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim())
+      screen.getByText(noSlugContentMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim())
     ).toBeVisible();
     expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
@@ -62,7 +62,7 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
-    expect(screen.findByText(notPublishedMsg)).toBeVisible();
+    expect(screen.getByText(notPublishedMsg)).toBeVisible();
     expect(screen.queryByText(APP_CONFIG_HYPER_LINK_MSG)).toBeFalsy();
   });
 
@@ -77,7 +77,7 @@ describe('SlugWarningDisplay for the analytics app', () => {
 
     render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
 
-    expect(screen.findByText(DEFAULT_ERR_MSG.replace(SUPPORT_LINK_MSG, '').trim())).toBeVisible();
+    expect(screen.getByText(DEFAULT_ERR_MSG.replace(SUPPORT_LINK_MSG, '').trim())).toBeVisible();
     expect(screen.getByTestId('cf-ui-text-link')).toBeVisible();
   });
 });

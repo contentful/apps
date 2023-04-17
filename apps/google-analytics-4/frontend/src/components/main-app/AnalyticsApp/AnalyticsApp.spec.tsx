@@ -51,7 +51,7 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
     renderAnalyticsApp();
 
-    expect(screen.findByTestId(SELECT_TEST_ID)).toBeVisible();
+    expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
 
     const chart = document.querySelector('canvas');
     expect(chart).toBeVisible();
@@ -61,7 +61,7 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
     renderAnalyticsApp();
 
-    expect(screen.findByTestId(SELECT_TEST_ID)).toBeVisible();
+    expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
     expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
     expect(screen.getByText(EMPTY_DATA_MSG)).toBeVisible();
   });
@@ -70,7 +70,7 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockRejectedValue(() => new Error('api error'));
     renderAnalyticsApp();
 
-    expect(screen.findByTestId(SELECT_TEST_ID)).toBeVisible();
+    expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
     expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
     expect(screen.getByText('api error')).toBeVisible();
   });
@@ -101,7 +101,7 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
     renderAnalyticsApp();
 
     expect(screen.queryByTestId(SELECT_TEST_ID)).toBeFalsy();
-    expect(screen.findByTestId(NOTE_TEST_ID)).toBeVisible();
+    expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
     expect(screen.getByText(warningMessage)).toBeVisible();
   });
 });

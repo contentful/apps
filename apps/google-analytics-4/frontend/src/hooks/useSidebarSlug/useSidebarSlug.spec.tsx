@@ -115,7 +115,7 @@ describe('useSidebarSlug hook', () => {
     expect(screen.getByText('slugFieldValue: /fieldValue')).toBeVisible();
     expect(screen.getByText('isContentTypeWarning: false')).toBeVisible();
 
-    expect(screen.findByText('slugFieldValue: /differentFieldValue')).toBeVisible();
+    expect(screen.getByText('slugFieldValue: /differentFieldValue')).toBeVisible();
     expect(screen.getByText('reportSlug: /en-US/differentFieldValue')).toBeVisible();
   });
 });
