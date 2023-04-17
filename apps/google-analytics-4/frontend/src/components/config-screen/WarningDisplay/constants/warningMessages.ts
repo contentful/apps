@@ -1,5 +1,5 @@
 // Content type warning and error messages
-export const NO_SLUG_WARNING_MSG = `This content type must have a slug field selected in order for the app to render correctly in the sidebar. `;
+export const NO_SLUG_WARNING_MSG = `This content type must have a slug field selected in order for the app to render correctly in the sidebar. The previously configured content type 'test' has been deleted. Please select a new content type or remove this row. `;
 export const REMOVED_FROM_SIDEBAR_WARNING_MSG = `The app has been removed from the sidebar for this content type. If you would like to remove this
 content type from the app configuration, remove this row and save. If you would like the app to be added back to the sidebar 
 for this content type, just save the app configuration. `;

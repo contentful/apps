@@ -19,8 +19,19 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 const mockApi = jest.fn();
 
+const { findByTestId, getByTestId, getByText, queryByTestId } = screen;
+
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
+
+const renderAnalyticsApp = async () =>
+  render(
+    <AnalyticsApp
+      api={{ runReports: mockApi } as unknown as Api}
+      propertyId="properties/12345"
+      slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
+    />
+  );
 
 describe('AnalyticsApp with correct content types configured', () => {
   beforeEach(() => {
@@ -40,63 +51,43 @@ describe('AnalyticsApp with correct content types configured', () => {
 
   it('mounts data', async () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
-    render(
-      <AnalyticsApp
-        api={{ runReports: mockApi } as unknown as Api}
-        propertyId="properties/12345"
-        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
-      />
-    );
+    renderAnalyticsApp();
 
-    await screen.findByTestId(SELECT_TEST_ID);
-    expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
-
+    const dropdown = await findByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
+
+    expect(dropdown).toBeVisible();
     expect(chart).toBeVisible();
   });
 
   it('mounts with warning message when no data', async () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
-    render(
-      <AnalyticsApp
-        api={{ runReports: mockApi } as unknown as Api}
-        propertyId="properties/12345"
-        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
-      />
-    );
+    renderAnalyticsApp();
 
-    await screen.findByTestId(SELECT_TEST_ID);
+    const dropdown = await findByTestId(SELECT_TEST_ID);
+    const warningNote = getByTestId(NOTE_TEST_ID);
+    const noteText = getByText(EMPTY_DATA_MSG);
 
-    expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
-    expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
-    expect(screen.getByText(EMPTY_DATA_MSG)).toBeVisible();
+    expect(dropdown).toBeVisible();
+    expect(warningNote).toBeVisible();
+    expect(noteText).toBeVisible();
   });
 
   it('mounts with error message when error thrown', async () => {
     mockApi.mockRejectedValue(() => new Error('api error'));
-    render(
-      <AnalyticsApp
-        api={{ runReports: mockApi } as unknown as Api}
-        propertyId="properties/12345"
-        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
-      />
-    );
+    renderAnalyticsApp();
 
-    await screen.findByTestId(SELECT_TEST_ID);
+    const dropdown = await findByTestId(SELECT_TEST_ID);
+    const warningNote = getByTestId(NOTE_TEST_ID);
+    const noteText = getByText('api error');
 
-    expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
-    expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
-    expect(screen.getByText('api error')).toBeVisible();
+    expect(dropdown).toBeVisible();
+    expect(warningNote).toBeVisible();
+    expect(noteText).toBeVisible();
   });
 
   it('renders nothing when it has no response', async () => {
-    render(
-      <AnalyticsApp
-        api={{ runReports: mockApi } as unknown as Api}
-        propertyId="properties/12345"
-        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
-      />
-    );
+    renderAnalyticsApp();
 
     expect(screen.queryByTestId(SELECT_TEST_ID)).toBeNull();
     expect(screen.queryByTestId(NOTE_TEST_ID)).toBeNull();
@@ -118,18 +109,14 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
     const warningMessage = getContentTypeSpecificMsg('Category')
       .noSlugContentMsg.replace('app configuration page.', '')
       .trim();
-    render(
-      <AnalyticsApp
-        api={{ runReports: mockApi } as unknown as Api}
-        propertyId="properties/12345"
-        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
-      />
-    );
+    renderAnalyticsApp();
 
-    await screen.findByTestId(NOTE_TEST_ID);
+    const warningNote = await findByTestId(NOTE_TEST_ID);
+    const noteText = getByText(warningMessage);
+    const dropdown = queryByTestId(SELECT_TEST_ID);
 
-    expect(screen.queryByTestId(SELECT_TEST_ID)).toBeFalsy();
-    expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
-    expect(screen.getByText(warningMessage)).toBeVisible();
+    expect(dropdown).toBeFalsy();
+    expect(warningNote).toBeVisible();
+    expect(noteText).toBeVisible();
   });
 });
