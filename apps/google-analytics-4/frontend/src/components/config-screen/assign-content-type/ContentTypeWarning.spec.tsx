@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContentTypeWarning from 'components/config-screen/assign-content-type/ContentTypeWarning';
 import {
@@ -63,7 +63,7 @@ describe('Content Type Warning for Config Screen', () => {
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
     const user = userEvent.setup();
-    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
+    await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
   });
@@ -83,7 +83,7 @@ describe('Content Type Warning for Config Screen', () => {
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
     const user = userEvent.setup();
-    await waitFor(async () => await user.hover(screen.getByTestId('cf-ui-icon')));
+    await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));
   });
@@ -104,7 +104,7 @@ describe('Content Type Warning for Config Screen Flakey', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
     const user = userEvent.setup();
-    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
+    await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
   });

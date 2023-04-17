@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AllContentTypes, AllContentTypeEntries, ContentTypes } from 'types';
 import AssignContentTypeRow from 'components/config-screen/assign-content-type/AssignContentTypeRow';
@@ -90,7 +90,7 @@ describe('Assign Content Type Card for Config Screen', () => {
     );
 
     const user = userEvent.setup();
-    await waitFor(() => user.click(screen.getByText('Remove')));
+    await user.click(screen.getByText('Remove'));
 
     expect(onRemoveContentType).toHaveBeenCalled();
   });
@@ -110,7 +110,7 @@ describe('Assign Content Type Card for Config Screen', () => {
     );
 
     const user = userEvent.setup();
-    await waitFor(() => user.click(screen.getByText('Remove')));
+    await user.click(screen.getByText('Remove'));
 
     expect(onRemoveContentType).toHaveBeenCalled();
   });

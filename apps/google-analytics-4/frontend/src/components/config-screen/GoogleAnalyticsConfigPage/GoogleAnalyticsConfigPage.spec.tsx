@@ -36,7 +36,7 @@ describe('Google Analytics Page', () => {
   });
 });
 
-xdescribe('Config Screen component (not installed)', () => {
+describe('Config Screen component (not installed)', () => {
   it('renders error message if user tries to install app without service key', async () => {
     const mockNotifier = jest.fn();
     mockSdk.notifier = { error: mockNotifier };

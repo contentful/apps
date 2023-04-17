@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { mockAccountSummaries } from '../../../../test/mocks';
 import MapAccountPropertyDropdown from 'components/config-screen/map-account-property/MapAccountPropertyDropdown';
@@ -47,9 +47,9 @@ describe('Property selection dropdown', () => {
     );
 
     const user = userEvent.setup();
-    await waitFor(() =>
-      user.selectOptions(screen.getByTestId('accountPropertyDropdown'), ['properties/354612161'])
-    );
+    await user.selectOptions(screen.getByTestId('accountPropertyDropdown'), [
+      'properties/354612161',
+    ]);
 
     expect(onSelectionChange).toHaveBeenCalled();
   });
