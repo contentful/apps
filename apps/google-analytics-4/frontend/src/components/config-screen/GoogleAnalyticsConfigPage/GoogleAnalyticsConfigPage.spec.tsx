@@ -56,10 +56,10 @@ describe('Config Screen component (not installed)', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup();
-    await user.click(keyFileInputBox);
-    await user.paste(JSON.stringify(validServiceKeyFile));
+    await userEvent.click(keyFileInputBox);
+    await userEvent.paste(JSON.stringify(validServiceKeyFile));
 
+    await screen.findByText('Service account key file is valid JSON');
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
 
     const result = await saveAppInstallation();
@@ -87,9 +87,8 @@ describe('Config Screen component (not installed)', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup();
-    await user.click(keyFileInputBox);
-    await user.paste('{ "foo": "bar" }');
+    await userEvent.click(keyFileInputBox);
+    await userEvent.paste('{ "foo": "bar" }');
 
     const result = await saveAppInstallation();
 
@@ -124,26 +123,19 @@ describe('Installed Service Account Key', () => {
   it('overrides the saved values if a new key file is provided', async () => {
     render(<GoogleAnalyticsConfigPage />);
 
-    console.log('RENDER');
     const editServiceAccountButton = await screen.findByTestId('editServiceAccountButton');
-    console.log('FIND');
     await userEvent.click(editServiceAccountButton);
-    console.log('CLICK 1');
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
-    console.log('GET LABEL');
     await userEvent.click(keyFileInputBox);
-    console.log('CLICK 2');
 
     const newServiceKeyFile: ServiceAccountKey = {
       ...validServiceKeyFile,
       private_key_id: 'PRIVATE_KEY_ID',
     };
     await userEvent.paste(JSON.stringify(newServiceKeyFile));
-    console.log('PASTE');
 
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
     const result = await saveAppInstallation();
-    console.log('RESULT');
 
     expect(result).toEqual({
       parameters: {

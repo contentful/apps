@@ -52,7 +52,6 @@ describe('AnalyticsApp with correct content types configured', () => {
     renderAnalyticsApp();
 
     await screen.findByTestId(SELECT_TEST_ID);
-
     expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
 
     const chart = document.querySelector('canvas');
@@ -62,6 +61,7 @@ describe('AnalyticsApp with correct content types configured', () => {
   it('mounts with warning message when no data', async () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
     renderAnalyticsApp();
+    console.log('RENDER');
 
     await screen.findByTestId(SELECT_TEST_ID);
 
@@ -105,6 +105,8 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
       .noSlugContentMsg.replace('app configuration page.', '')
       .trim();
     renderAnalyticsApp();
+
+    await screen.findByTestId(NOTE_TEST_ID);
 
     expect(screen.queryByTestId(SELECT_TEST_ID)).toBeFalsy();
     expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();

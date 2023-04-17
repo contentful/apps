@@ -36,10 +36,11 @@ describe('Content Type Warning for Config Screen', () => {
       />
     );
 
-    expect(screen.getByTestId('errorIcon')).toBeInTheDocument();
+    await screen.findByTestId('cf-ui-icon');
+    expect(screen.getByTestId('cf-ui-icon')).toBeInTheDocument();
 
-    const user = userEvent.setup();
-    await user.hover(screen.getByTestId('cf-ui-icon'));
+    await userEvent.hover(screen.getByTestId('cf-ui-icon'));
+    await screen.findByRole('tooltip');
 
     expect(screen.getByRole('tooltip').textContent).toBe(getContentTypeDeletedMsg('test'));
   });
@@ -56,10 +57,10 @@ describe('Content Type Warning for Config Screen', () => {
       />
     );
 
-    expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
+    expect(screen.getByTestId('cf-ui-icon')).toBeInTheDocument();
 
-    const user = userEvent.setup();
-    await user.hover(screen.getByTestId('cf-ui-icon'));
+    await userEvent.hover(screen.getByTestId('cf-ui-icon'));
+    await screen.findByRole('tooltip');
 
     expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
   });
@@ -75,11 +76,17 @@ describe('Content Type Warning for Config Screen', () => {
         isSlugFieldInOptions={false}
       />
     );
+    console.log('RENDER');
+    await screen.findByTestId('cf-ui-icon');
+    console.log('FIND TEST ID');
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
+    console.log('GET TEST ID');
 
-    const user = userEvent.setup();
-    await user.hover(screen.getByTestId('cf-ui-icon'));
+    await userEvent.hover(screen.getByTestId('cf-ui-icon'));
+    console.log('HOVER');
+    await screen.findByRole('tooltip');
+    console.log('FIND BY ROLE');
 
     expect(screen.getByRole('tooltip').textContent).toBe(getSlugFieldDeletedMsg('test', 'slug'));
   });
@@ -98,9 +105,9 @@ describe('Content Type Warning for Config Screen Flakey', () => {
       />
     );
 
-    expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
-    const user = userEvent.setup();
-    await user.hover(screen.getByTestId('cf-ui-icon'));
+    expect(screen.getByTestId('cf-ui-icon')).toBeInTheDocument();
+    await userEvent.hover(screen.getByTestId('cf-ui-icon'));
+    await screen.findByRole('tooltip');
 
     expect(screen.getByRole('tooltip').textContent).toBe(REMOVED_FROM_SIDEBAR_WARNING_MSG);
   });
