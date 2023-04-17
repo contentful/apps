@@ -51,6 +51,7 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
     renderAnalyticsApp();
 
+    await screen.findByTestId(SELECT_TEST_ID);
     expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
 
     const chart = document.querySelector('canvas');
@@ -61,6 +62,8 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
     renderAnalyticsApp();
 
+    await screen.findByTestId(SELECT_TEST_ID);
+
     expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
     expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
     expect(screen.getByText(EMPTY_DATA_MSG)).toBeVisible();
@@ -69,6 +72,8 @@ describe('AnalyticsApp with correct content types configured', () => {
   it('mounts with error message when error thrown', async () => {
     mockApi.mockRejectedValue(() => new Error('api error'));
     renderAnalyticsApp();
+
+    await screen.findByTestId(SELECT_TEST_ID);
 
     expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
     expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();

@@ -107,11 +107,12 @@ describe('useSidebarSlug hook', () => {
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
     render(<TestComponent slugFieldInfo={slugFieldInfo} />);
+    await screen.findByText('reportSlug: /en-US/fieldValue');
+    await screen.findByText('slugFieldValue: /differentFieldValue');
 
     expect(screen.getByText('slugFieldIsConfigured: true')).toBeVisible();
     expect(screen.getByText('contentTypeHasSlugField: true')).toBeVisible();
     expect(screen.getByText('isPublished: true')).toBeVisible();
-    expect(screen.getByText('reportSlug: /en-US/fieldValue')).toBeVisible();
     expect(screen.getByText('slugFieldValue: /fieldValue')).toBeVisible();
     expect(screen.getByText('isContentTypeWarning: false')).toBeVisible();
 
