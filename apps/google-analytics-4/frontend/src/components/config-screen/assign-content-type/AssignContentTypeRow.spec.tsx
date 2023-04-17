@@ -89,8 +89,8 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup();
-    await user.click(screen.getByText('Remove'));
+    await screen.findByText('Remove');
+    await userEvent.click(screen.getByText('Remove'));
 
     expect(onRemoveContentType).toHaveBeenCalled();
   });
@@ -109,8 +109,8 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup();
-    await user.click(screen.getByText('Remove'));
+    await screen.findByText('Remove');
+    await userEvent.click(screen.getByText('Remove'));
 
     expect(onRemoveContentType).toHaveBeenCalled();
   });
@@ -129,8 +129,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup();
-    await user.selectOptions(screen.getByTestId('contentTypeSelect'), ['course']);
+    await userEvent.selectOptions(screen.getByTestId('contentTypeSelect'), ['course']);
 
     expect(onContentTypeChange).toHaveBeenCalled();
   });
@@ -149,8 +148,7 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup();
-    await user.selectOptions(screen.getByTestId('slugFieldSelect'), ['slug']);
+    await userEvent.selectOptions(screen.getByTestId('slugFieldSelect'), ['slug']);
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();
   });
@@ -169,8 +167,8 @@ describe('Assign Content Type Card for Config Screen', () => {
       />
     );
 
-    const user = userEvent.setup();
-    await user.type(screen.getByTestId('urlPrefixInput'), '/en-US');
+    await screen.findByTestId('urlPrefixInput');
+    await userEvent.type(screen.getByTestId('urlPrefixInput'), '/en-US');
 
     expect(onContentTypeFieldChange).toHaveBeenCalled();
   });

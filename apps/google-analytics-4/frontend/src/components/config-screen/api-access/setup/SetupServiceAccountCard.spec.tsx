@@ -36,13 +36,13 @@ describe('Setup Google Service Account Details page', () => {
       />
     );
 
+    await screen.findByLabelText(/Service Account Key/i);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup();
-    await user.click(keyFileInputBox);
-    await user.paste(JSON.stringify({ foo: 'bar' }));
+    await userEvent.click(keyFileInputBox);
+    await userEvent.paste(JSON.stringify({ foo: 'bar' }));
 
     expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toEqual(
       'true'
@@ -61,13 +61,13 @@ describe('Setup Google Service Account Details page', () => {
       />
     );
 
+    await screen.findByLabelText(/Service Account Key/i);
     const keyFileInputBox = screen.getByLabelText(/Service Account Key/i);
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    const user = userEvent.setup();
-    await user.click(keyFileInputBox);
-    await user.paste(JSON.stringify(validServiceKeyFile));
+    await userEvent.click(keyFileInputBox);
+    await userEvent.paste(JSON.stringify(validServiceKeyFile));
 
     expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toBeNull();
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();

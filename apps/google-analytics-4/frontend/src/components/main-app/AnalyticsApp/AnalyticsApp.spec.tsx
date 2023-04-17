@@ -19,10 +19,12 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 const mockApi = jest.fn();
 
+const { findByTestId, getByTestId, getByText, queryByTestId } = screen;
+
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
 
-const renderAnalyticsApp = () =>
+const renderAnalyticsApp = async () =>
   render(
     <AnalyticsApp
       api={{ runReports: mockApi } as unknown as Api}
@@ -51,10 +53,10 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
     renderAnalyticsApp();
 
-    await screen.findByTestId(SELECT_TEST_ID);
-    expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
-
+    const dropdown = await findByTestId(SELECT_TEST_ID);
     const chart = document.querySelector('canvas');
+
+    expect(dropdown).toBeVisible();
     expect(chart).toBeVisible();
   });
 
@@ -62,22 +64,26 @@ describe('AnalyticsApp with correct content types configured', () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
     renderAnalyticsApp();
 
-    await screen.findByTestId(SELECT_TEST_ID);
+    const dropdown = await findByTestId(SELECT_TEST_ID);
+    const warningNote = getByTestId(NOTE_TEST_ID);
+    const noteText = getByText(EMPTY_DATA_MSG);
 
-    expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
-    expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
-    expect(screen.getByText(EMPTY_DATA_MSG)).toBeVisible();
+    expect(dropdown).toBeVisible();
+    expect(warningNote).toBeVisible();
+    expect(noteText).toBeVisible();
   });
 
   it('mounts with error message when error thrown', async () => {
     mockApi.mockRejectedValue(() => new Error('api error'));
     renderAnalyticsApp();
 
-    await screen.findByTestId(SELECT_TEST_ID);
+    const dropdown = await findByTestId(SELECT_TEST_ID);
+    const warningNote = getByTestId(NOTE_TEST_ID);
+    const noteText = getByText('api error');
 
-    expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
-    expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
-    expect(screen.getByText('api error')).toBeVisible();
+    expect(dropdown).toBeVisible();
+    expect(warningNote).toBeVisible();
+    expect(noteText).toBeVisible();
   });
 
   it('renders nothing when it has no response', async () => {
@@ -105,8 +111,12 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
       .trim();
     renderAnalyticsApp();
 
-    expect(screen.queryByTestId(SELECT_TEST_ID)).toBeFalsy();
-    expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
-    expect(screen.getByText(warningMessage)).toBeVisible();
+    const dropdown = queryByTestId(SELECT_TEST_ID);
+    const warningNote = await findByTestId(NOTE_TEST_ID);
+    const noteText = getByText(warningMessage);
+
+    expect(dropdown).toBeFalsy();
+    expect(warningNote).toBeVisible();
+    expect(noteText).toBeVisible();
   });
 });
