@@ -22,15 +22,6 @@ const mockApi = jest.fn();
 const SELECT_TEST_ID = 'cf-ui-select';
 const NOTE_TEST_ID = 'cf-ui-note';
 
-const renderAnalyticsApp = () =>
-  render(
-    <AnalyticsApp
-      api={{ runReports: mockApi } as unknown as Api}
-      propertyId="properties/12345"
-      slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
-    />
-  );
-
 describe('AnalyticsApp with correct content types configured', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
@@ -47,11 +38,16 @@ describe('AnalyticsApp with correct content types configured', () => {
     }));
   });
 
-  it('mounts data', async () => {
+  it('mounts data', () => {
     mockApi.mockImplementation(() => runReportResponseHasViews);
-    renderAnalyticsApp();
+    render(
+      <AnalyticsApp
+        api={{ runReports: mockApi } as unknown as Api}
+        propertyId="properties/12345"
+        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
+      />
+    );
 
-    await screen.findByTestId(SELECT_TEST_ID);
     expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
 
     const chart = document.querySelector('canvas');
@@ -60,7 +56,13 @@ describe('AnalyticsApp with correct content types configured', () => {
 
   it('mounts with warning message when no data', async () => {
     mockApi.mockImplementation(() => runReportResponseNoView);
-    renderAnalyticsApp();
+    render(
+      <AnalyticsApp
+        api={{ runReports: mockApi } as unknown as Api}
+        propertyId="properties/12345"
+        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
+      />
+    );
 
     await screen.findByTestId(SELECT_TEST_ID);
 
@@ -69,19 +71,29 @@ describe('AnalyticsApp with correct content types configured', () => {
     expect(screen.getByText(EMPTY_DATA_MSG)).toBeVisible();
   });
 
-  it('mounts with error message when error thrown', async () => {
+  it('mounts with error message when error thrown', () => {
     mockApi.mockRejectedValue(() => new Error('api error'));
-    renderAnalyticsApp();
-
-    await screen.findByTestId(SELECT_TEST_ID);
+    render(
+      <AnalyticsApp
+        api={{ runReports: mockApi } as unknown as Api}
+        propertyId="properties/12345"
+        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
+      />
+    );
 
     expect(screen.getByTestId(SELECT_TEST_ID)).toBeVisible();
     expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();
     expect(screen.getByText('api error')).toBeVisible();
   });
 
-  it('renders nothing when it has no response', async () => {
-    renderAnalyticsApp();
+  it('renders nothing when it has no response', () => {
+    render(
+      <AnalyticsApp
+        api={{ runReports: mockApi } as unknown as Api}
+        propertyId="properties/12345"
+        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
+      />
+    );
 
     expect(screen.queryByTestId(SELECT_TEST_ID)).toBeNull();
     expect(screen.queryByTestId(NOTE_TEST_ID)).toBeNull();
@@ -90,7 +102,7 @@ describe('AnalyticsApp with correct content types configured', () => {
 });
 
 describe('AnalyticsApp when content types are not configured correctly', () => {
-  it('renders SlugWarningDisplay component when slug field is not configured', async () => {
+  it('renders SlugWarningDisplay component when slug field is not configured', () => {
     jest.spyOn(useSidebarSlug, 'useSidebarSlug').mockImplementation(() => ({
       slugFieldIsConfigured: true,
       contentTypeHasSlugField: false,
@@ -103,7 +115,13 @@ describe('AnalyticsApp when content types are not configured correctly', () => {
     const warningMessage = getContentTypeSpecificMsg('Category')
       .noSlugContentMsg.replace('app configuration page.', '')
       .trim();
-    renderAnalyticsApp();
+    render(
+      <AnalyticsApp
+        api={{ runReports: mockApi } as unknown as Api}
+        propertyId="properties/12345"
+        slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
+      />
+    );
 
     expect(screen.queryByTestId(SELECT_TEST_ID)).toBeFalsy();
     expect(screen.getByTestId(NOTE_TEST_ID)).toBeVisible();

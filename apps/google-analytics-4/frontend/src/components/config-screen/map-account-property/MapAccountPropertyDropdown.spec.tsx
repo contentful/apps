@@ -46,8 +46,7 @@ describe('Property selection dropdown', () => {
       />
     );
 
-    const user = userEvent.setup();
-    await user.selectOptions(screen.getByTestId('accountPropertyDropdown'), [
+    await userEvent.selectOptions(screen.getByTestId('accountPropertyDropdown'), [
       'properties/354612161',
     ]);
 
