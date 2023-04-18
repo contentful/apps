@@ -36,6 +36,7 @@ describe('Property selection dropdown', () => {
   });
 
   it('calls change handler when property selection is changed', async () => {
+    const user = userEvent.setup();
     render(
       <MapAccountPropertyDropdown
         onSelectionChange={onSelectionChange}
@@ -46,7 +47,6 @@ describe('Property selection dropdown', () => {
       />
     );
 
-    const user = userEvent.setup();
     await user.selectOptions(screen.getByTestId('accountPropertyDropdown'), [
       'properties/354612161',
     ]);
