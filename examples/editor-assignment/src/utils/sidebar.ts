@@ -1,9 +1,9 @@
 import { PlainClientAPI } from 'contentful-management';
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 
 // Find all content types with the app assigned to the sidebar
 // and preselect them in the list of content type on initial load
-export const getInitialSidebarContentTypes = async (cma: PlainClientAPI, sdk: AppExtensionSDK) => {
+export const getInitialSidebarContentTypes = async (cma: PlainClientAPI, sdk: ConfigAppSDK) => {
   const editorInterfaces = await cma.editorInterface.getMany({
     spaceId: sdk.ids.space,
     environmentId: sdk.ids.environment,

@@ -1,11 +1,11 @@
-import { SidebarExtensionSDK } from '@contentful/app-sdk';
+import { SidebarAppSDK } from '@contentful/app-sdk';
 import { Button, Select, Stack } from '@contentful/f36-components';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { EnvironmentProps, SpaceProps } from 'contentful-management';
 import React, { useEffect, useState } from 'react';
 
 const Sidebar = () => {
-  const sdk = useSDK<SidebarExtensionSDK>();
+  const sdk = useSDK<SidebarAppSDK>();
   const cma = useCMA();
 
   const [environments, setEnvironments] = useState<EnvironmentProps[] | undefined>(undefined);
@@ -84,8 +84,7 @@ const Sidebar = () => {
               },
             },
           });
-        }}
-      >
+        }}>
         Compare with environment
       </Button>
     </Stack>

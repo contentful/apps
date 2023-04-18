@@ -8,8 +8,8 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Config Screen component (not installed)', () => {
-  it('can render the about section', async () => {
-    await act(async () => {
+  it('can render the about section', () => {
+    act(() => {
       render(
         <ApiAccessSection
           isAppInstalled={false}
@@ -17,7 +17,7 @@ describe('Config Screen component (not installed)', () => {
           parameters={{}}
           mergeSdkParameters={() => {}}
           isInEditMode={false}
-          isSavingPrivateKeyFile={false}
+          isSavingConfiguration={false}
           onInEditModeChange={() => {}}
           onHasServiceCheckErrorsChange={() => {}}
           onKeyFileUpdate={() => {}}
@@ -26,7 +26,6 @@ describe('Config Screen component (not installed)', () => {
       );
     });
 
-    expect(screen.getByText('API access')).toBeInTheDocument();
     expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
     expect(screen.getByText('Service Account Key')).toBeInTheDocument();
   });

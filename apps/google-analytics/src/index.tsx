@@ -9,7 +9,7 @@ import AppConfig from './AppConfig';
 import Analytics from './Analytics';
 import { SidebarExtensionState, SidebarExtensionProps, Gapi, SavedParams } from './typings';
 import styles from './styles';
-import { Paragraph, TextLink } from '@contentful/forma-36-react-components';
+import { Paragraph, TextLink, Note } from '@contentful/forma-36-react-components';
 import { docsUrl } from './utils';
 
 export class SidebarExtension extends React.Component<
@@ -87,6 +87,36 @@ export class SidebarExtension extends React.Component<
       </Paragraph>
     );
 
+    const deprecationNotice = (
+      <Note title="Deprecation Warning" noteType="negative" className={styles.deprecationText}>
+        <>
+          <Paragraph>
+            Google is{' '}
+            <a
+              href="https://support.google.com/analytics/answer/11583528?hl=en"
+              target="_blank"
+              rel="noreferrer"
+            >
+              deprecating
+            </a>{' '}
+            Google Universal Analytics on July 1st, 2023. After that date, no further events will be
+            processed by Google Universal Analytics.
+          </Paragraph>
+          <Paragraph>
+            We recommend switching to Google Analytics 4 (GA4) as soon as possible and using
+            Contentful's{' '}
+            <a
+              href="https://www.contentful.com/marketplace/app/google-analytics-4"
+              target="_blank"
+              rel="noreferrer"
+            >
+              new GA4 app.
+            </a>
+          </Paragraph>
+        </>
+      </Note>
+    );
+
     if (!isAuthorized) {
       const renderAuthButton = async (authButton: HTMLDivElement) => {
         if (!authButton) {
@@ -124,6 +154,7 @@ export class SidebarExtension extends React.Component<
 
       return (
         <>
+          {deprecationNotice}
           <div
             ref={renderAuthButton}
             className={isAuthorized ? styles.hidden : styles.signInButton}
@@ -140,32 +171,45 @@ export class SidebarExtension extends React.Component<
 
     if (!isContentTypeConfigured) {
       return (
-        <Paragraph className={styles.lightText}>
-          The {contentTypeName} content type hasn&apos;t been configured for use with this app. It
-          must have a field of type short text and must be added to the list of content types in
-          this app&apos;s configuration.
-        </Paragraph>
+        <>
+          {deprecationNotice}
+
+          <Paragraph className={styles.lightText}>
+            The {contentTypeName} content type hasn&apos;t been configured for use with this app. It
+            must have a field of type short text and must be added to the list of content types in
+            this app&apos;s configuration.
+          </Paragraph>
+        </>
       );
     }
 
     if (!hasSlug) {
       return (
-        <Paragraph className={styles.lightText}>
-          This {contentTypeName} entry doesn&apos;t have a valid slug field.
-        </Paragraph>
+        <>
+          {deprecationNotice}
+
+          <Paragraph className={styles.lightText}>
+            This {contentTypeName} entry doesn&apos;t have a valid slug field.
+          </Paragraph>
+        </>
       );
     }
 
     if (!entry.getSys().publishedAt) {
       return (
-        <Paragraph className={styles.lightText}>
-          This {contentTypeName} entry hasn&apos;t been published.
-        </Paragraph>
+        <>
+          {deprecationNotice}
+
+          <Paragraph className={styles.lightText}>
+            This {contentTypeName} entry hasn&apos;t been published.
+          </Paragraph>
+        </>
       );
     }
 
     return (
       <section>
+        {deprecationNotice}
         {helpTextNode}
         <Analytics
           sdk={this.props.sdk}

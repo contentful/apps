@@ -18,12 +18,12 @@
   "dependencies": {
     "@contentful/app-sdk": "4.9.0",
     "@contentful/forma-36-fcss": "0.3.5",
-    "@contentful/forma-36-react-components": "3.93.2",
+    "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.0",
     "emotion": "10.0.27",
-    "hex-rgb": "4.1.0",
+    "hex-rgb": "4.3.0",
     "lodash.camelcase": "4.3.0",
-    "prop-types": "15.7.2",
+    "prop-types": "15.8.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-scripts": "4.0.3"

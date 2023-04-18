@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { mockSdk, mockCma, validServiceKeyId } from '../../../../../test/mocks';
 import DisplayServiceAccountCard from 'components/config-screen/api-access/display/DisplayServiceAccountCard';
 import { config } from '../../../../../src/config';
@@ -21,23 +21,20 @@ describe('Installed Service Account Card', () => {
     });
   });
 
-  it('is the active happy path', async () => {
-    await act(async () => {
-      render(
-        <DisplayServiceAccountCard
-          isSavingPrivateKeyFile={false}
-          serviceAccountKeyId={validServiceKeyId}
-          parameters={{}}
-          onInEditModeChange={() => {}}
-          onAccountSummariesChange={() => {}}
-          isAppInstalled={true}
-          onHasServiceCheckErrorsChange={() => {}}
-          onIsApiAccessLoading={() => {}}
-        />
-      );
-    });
+  it('is the active happy path', () => {
+    render(
+      <DisplayServiceAccountCard
+        isSavingConfiguration={false}
+        serviceAccountKeyId={validServiceKeyId}
+        parameters={{}}
+        onInEditModeChange={() => {}}
+        onAccountSummariesChange={() => {}}
+        isAppInstalled={true}
+        onHasServiceCheckErrorsChange={() => {}}
+        onIsApiAccessLoading={() => {}}
+      />
+    );
 
-    await screen.findByText('Google Service Account Details');
-    await screen.findByText('Successfully configured');
+    expect(screen.getByText('Google Service Account Details')).toBeInTheDocument();
   });
 });

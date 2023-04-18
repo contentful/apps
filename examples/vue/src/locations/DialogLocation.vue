@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DialogExtensionSDK } from '@contentful/app-sdk';
+import type { DialogAppSDK } from '@contentful/app-sdk';
 
-defineProps<{ sdk: DialogExtensionSDK }>();
+defineProps<{ sdk: DialogAppSDK }>();
 </script>

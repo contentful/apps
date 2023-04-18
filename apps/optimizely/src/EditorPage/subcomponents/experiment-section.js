@@ -64,8 +64,7 @@ export default function ExperimentSection(props) {
           isDisabled: props.disabled === true || props.loaded === false,
         }}
         id="experiment"
-        name="experiment"
-      >
+        name="experiment">
         {props.loaded === false && <Option value={NOT_SELECTED}>Fetching experiments...</Option>}
         {props.loaded && (
           <React.Fragment>

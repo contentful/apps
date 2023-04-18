@@ -74,6 +74,7 @@ npm run setup
 ```
 
 This step will
+
 - Install dependencies
 - Create an app definition in your Contentful organization
 - Generate public and private keys for your app
@@ -94,6 +95,7 @@ yarn start
 ## Concepts
 
 The code for the example App is split into two parts.
+
 - The **setup script**, which is provided for convenience.
 - The **server code**, which contains all the application logic for the App.
 

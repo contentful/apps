@@ -3,7 +3,7 @@ import { AppExtensionSDK, AppState, EditorInterface } from '@contentful/app-sdk'
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { isEmpty } from 'lodash';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
-import { styles } from 'components/config-screen/GoogleAnalytics.styles';
+import { styles } from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage.styles';
 import Splitter from 'components/common/Splitter';
 import ApiAccessSection from 'components/config-screen/api-access/ApiAccessSection';
 import AboutSection from 'components/config-screen/header/AboutSection';
@@ -13,9 +13,11 @@ import AssignContentTypeSection from 'components/config-screen/assign-content-ty
 import MapAccountPropertySection from 'components/config-screen/map-account-property/MapAccountPropertySection';
 import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
 import { generateEditorInterfaceAssignments } from 'helpers/contentTypeHelpers/contentTypeHelpers';
-import fetchWithSignedRequest from '../../helpers/signed-requests';
-import { config } from '../../config';
-import { convertServiceAccountKeyToServiceAccountKeyId } from '../../utils/serviceAccountKey';
+import fetchWithSignedRequest from 'helpers/signed-requests';
+import { config } from 'config';
+import { convertServiceAccountKeyToServiceAccountKeyId } from 'utils/serviceAccountKey';
+import HyperLink from 'components/common/HyperLink/HyperLink';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 export default function GoogleAnalyticsConfigPage() {
   const [accountsSummaries, setAccountsSummaries] = useState<AccountSummariesType[]>([]);
@@ -30,7 +32,7 @@ export default function GoogleAnalyticsConfigPage() {
   const [originalParameters, setOriginalParameters] = useState<KeyValueMap>({});
   const [hasServiceCheckErrors, setHasServiceCheckErrors] = useState<boolean>(true);
   const [validKeyFile, setValidKeyFile] = useState<ServiceAccountKey | undefined>();
-  const [isSavingPrivateKeyFile, setIsSavingPrivateKeyFile] = useState<boolean>(false);
+  const [isSavingConfiguration, setIsSavingConfiguration] = useState<boolean>(false);
   const [isApiAccessLoading, setIsApiAccessLoading] = useState(true);
 
   const sdk = useSDK<AppExtensionSDK>();
@@ -99,9 +101,12 @@ export default function GoogleAnalyticsConfigPage() {
   );
 
   const handleConfigure = useCallback(async () => {
+    setIsSavingConfiguration(true);
+
     // if no serviceAccountKeyId (most likely when user is saving on first install without providing a key)
     if (isEmpty(parameters.serviceAccountKeyId)) {
       sdk.notifier.error('A valid service account key file is required');
+      setIsSavingConfiguration(false);
       return false;
     }
 
@@ -110,20 +115,25 @@ export default function GoogleAnalyticsConfigPage() {
       sdk.notifier.error(
         'The original service account key will be saved unless a new valid service account key file is provided.'
       );
+      setIsSavingConfiguration(false);
       return false;
     }
 
     // Property checks go here
     if (!isValidAccountProperty && isAppInstalled && !isInEditMode) {
       sdk.notifier.error('A valid property selection is required');
+      setIsSavingConfiguration(false);
       return false;
     }
 
     // Content types checks go here
     if (!isValidContentTypeAssignment && isAppInstalled && !isInEditMode) {
       sdk.notifier.error('Invalid content types assignment');
+      setIsSavingConfiguration(false);
       return false;
     }
+
+    setIsInEditMode(false);
 
     let parametersToSave = parameters;
 
@@ -168,6 +178,7 @@ export default function GoogleAnalyticsConfigPage() {
     sdk.notifier,
   ]);
 
+  // part 1 of transaction
   useEffect(() => {
     sdk.app.onConfigure(() => handleConfigure());
   }, [sdk, handleConfigure]);
@@ -186,21 +197,24 @@ export default function GoogleAnalyticsConfigPage() {
   }, [sdk]);
 
   const handleConfigurationCompleted = useCallback(async () => {
-    if (isEmpty(validKeyFile)) return;
+    if (isEmpty(validKeyFile)) {
+      setIsSavingConfiguration(false);
+      return;
+    }
+
     // Save valid google service account key file in backend
-    setIsSavingPrivateKeyFile(true);
     const keyFileSaved = await postServiceKeyFileToBackend(validKeyFile);
-    setIsSavingPrivateKeyFile(false);
     if (!keyFileSaved) {
       sdk.notifier.error(
         'Failed to save private key file. Please try again. Contact support if the problem persists.'
       );
     }
 
-    setIsInEditMode(false);
     setIsAppInstalled(true);
+    setIsSavingConfiguration(false);
   }, [postServiceKeyFileToBackend, sdk.notifier, validKeyFile]);
 
+  // part 2 of transaction
   useEffect(() => {
     sdk.app.onConfigurationCompleted(() => handleConfigurationCompleted());
   }, [sdk, handleConfigurationCompleted]);
@@ -247,7 +261,7 @@ export default function GoogleAnalyticsConfigPage() {
           mergeSdkParameters={mergeSdkParameters}
           onAccountSummariesChange={handleAccountSummariesChange}
           isInEditMode={isInEditMode}
-          isSavingPrivateKeyFile={isSavingPrivateKeyFile}
+          isSavingConfiguration={isSavingConfiguration}
           onInEditModeChange={handleInEditModeChange}
           onHasServiceCheckErrorsChange={handleHasServiceCheckErrorsChange}
           onKeyFileUpdate={handleKeyFileUpdate}
@@ -274,6 +288,15 @@ export default function GoogleAnalyticsConfigPage() {
             />
           </>
         )}
+
+        <Splitter />
+        <HyperLink
+          body="Questions or concerns? Contact support."
+          substring="Contact support."
+          hyperLinkHref="https://www.contentful.com/support/?utm_source=webapp&utm_medium=help-menu&utm_campaign=in-app-help"
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
+        />
       </Box>
 
       <GoogleAnalyticsIcon />

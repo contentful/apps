@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { ContentType, PageExtensionSDK } from '@contentful/app-sdk';
+import { ContentType, PageAppSDK } from '@contentful/app-sdk';
 import { Box, Paragraph } from '@contentful/f36-components';
 
 import CollectionList from '../components/CollectionList';

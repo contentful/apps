@@ -9,6 +9,7 @@ const mockSdk: any = {
   },
   ids: {
     app: 'test-app',
+    user: 'user-id',
   },
   notifier: {
     error: jest.fn(),

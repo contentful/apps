@@ -1,4 +1,4 @@
-import { DateRangeType } from '@/types';
+import { DateRangeType } from '../../types';
 import getRangeDates, { RANGE_OPTIONS } from './DateRangeHelpers';
 
 const DAY_IN_MS = 1000 * 3600 * 24;
@@ -14,7 +14,7 @@ const getDateRangeTime = (range: DateRangeType) => {
 
 const getParsedDateRangeDate = (range: DateRangeType) => {
   const { start, end } = getRangeDates(range);
-  const getDate = (date: string) => Number(new Date(date).toLocaleDateString().split('/')[1]);
+  const getDate = (date: string) => Number(new Date(date).getDate());
   return {
     startDay: getDate(start),
     endDay: getDate(end),

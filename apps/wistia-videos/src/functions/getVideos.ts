@@ -1,5 +1,4 @@
 import {
-  Project,
   ProjectReduced,
   WistiaError,
   WistiaVideo,

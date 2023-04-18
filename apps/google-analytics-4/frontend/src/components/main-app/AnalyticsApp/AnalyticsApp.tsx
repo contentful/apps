@@ -3,8 +3,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Api } from 'apis/api';
 import getRangeDates from 'helpers/DateRangeHelpers/DateRangeHelpers';
 import { DateRangeType, StartEndDates, ContentTypeValue } from 'types';
-import { styles } from './AnalyticsApp.styles';
-import { Flex } from '@contentful/f36-components';
+import { Skeleton } from '@contentful/f36-components';
 import { isEmpty } from 'lodash';
 import { RunReportData } from 'apis/apiTypes';
 import { useSidebarSlug } from 'hooks/useSidebarSlug/useSidebarSlug';
@@ -84,9 +83,11 @@ const AnalyticsApp = (props: Props) => {
   const renderAnalyticContent = () => {
     if (loading || pendingData) {
       return (
-        <Flex justifyContent="center" alignItems="center" className={styles.wrapper}>
-          <div className={styles.loader}></div>
-        </Flex>
+        <Skeleton.Container svgHeight={300}>
+          <Skeleton.Image height={68} width={325} offsetTop={10} />
+          <Skeleton.Image height={160} width={325} offsetTop={93} />
+          <Skeleton.Image height={25} width={200} offsetTop={268} />
+        </Skeleton.Container>
       );
     }
 

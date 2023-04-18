@@ -1,10 +1,10 @@
-import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { FieldAppSDK } from '@contentful/app-sdk';
 import { AssetCard, Button, Stack } from '@contentful/f36-components';
 import { useAutoResizer, useCMA, useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { Link } from 'contentful-management';
 
 const Field = () => {
-  const sdk = useSDK<FieldExtensionSDK>();
+  const sdk = useSDK<FieldAppSDK>();
   const cma = useCMA();
   useAutoResizer();
 

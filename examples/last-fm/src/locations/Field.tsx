@@ -7,7 +7,7 @@ import {
   AssetCard,
   MenuItem,
 } from '@contentful/f36-components';
-import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { FieldAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 
 interface Album {
@@ -16,7 +16,7 @@ interface Album {
 }
 
 const Field = () => {
-  const sdk = useSDK<FieldExtensionSDK>();
+  const sdk = useSDK<FieldAppSDK>();
   useAutoResizer();
   const [albumSearch, setAlbumSearch] = useState<string>('');
   const [albumData, setAlbumData] = useFieldValue<Album | undefined>();

@@ -96,5 +96,9 @@ const styles = {
     justifyContent: 'center',
     margin: `${tokens.spacing2Xl} 0 ${tokens.spacing4Xl}`,
   }),
+  deprecationText: css({
+    marginBottom: tokens.spacingXs,
+    fontWeight: tokens.fontWeightMedium,
+  }),
 };
 export default styles;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { ContentType, PageExtensionSDK } from '@contentful/app-sdk';
+import { ContentType, PageAppSDK } from '@contentful/app-sdk';
 import { Heading, Paragraph, Grid, Box } from '@contentful/f36-components';
 
 import Collection from './Collection';
@@ -19,7 +19,7 @@ interface CollectionsState {
 }
 
 export default function Dashboard({ contentTypes }: DashboardProps) {
-  const sdk = useSDK<PageExtensionSDK>();
+  const sdk = useSDK<PageAppSDK>();
   const cma = useCMA();
   const [data, setData] = useState<CollectionsState>({
     total: null,

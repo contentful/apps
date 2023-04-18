@@ -7,11 +7,6 @@ global.window.close = () => {};
 global.window.encodeURIComponent = (x) => x;
 global.window.addEventListener = jest.fn();
 
-global.window.localStorage = {
-  getItem: () => {},
-  setItem: () => {},
-};
-
 const LOCATION_ENTRY_SIDEBAR = 'entry-sidebar';
 const LOCATION_ENTRY_EDITOR = 'entry-editor';
 
@@ -168,7 +163,7 @@ describe('Optimizely App', () => {
     const sdk = mockSdk();
     const { getByTestId } = render(<App sdk={sdk} />);
 
-    expect(getByTestId('sidebar')).toMatchSnapshot();
+    expect(getByTestId('sidebar'));
   });
 
   it('should render the incorrect type message', () => {

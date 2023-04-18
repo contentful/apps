@@ -1,4 +1,4 @@
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { Spinner, Stack } from '@contentful/f36-components';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { EntryProps, GetEntryParams, PlainClientAPI } from 'contentful-management';
@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import DiffViewer from 'react-diff-viewer';
 
 const Dialog = () => {
-  const sdk = useSDK<DialogExtensionSDK>();
+  const sdk = useSDK<DialogAppSDK>();
   const cma = useCMA();
   const [leftEntry, setLeftEntry] = useState<EntryProps | null | undefined>();
   const [rightEntry, setRightEntry] = useState<EntryProps | null | undefined>();

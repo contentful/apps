@@ -23,6 +23,7 @@ In order to start developing on the _Contentful GraphQL Playground App_ you need
 ```sh
 npm start
 ```
+
 #### Configure and install the app
 
 To install and develop this app head over to your organization settings and create a new app.
@@ -71,7 +72,7 @@ Your app is ready to be deployed!
 
 This code was originally sourced from [this repository](https://github.com/contentful/contentful-graphql-playground-app).
 
-While we expect and encourage all the changes to be made [here](https://github.com/contentful/apps), there is a chance 
+While we expect and encourage all the changes to be made [here](https://github.com/contentful/apps), there is a chance
 we might need to sync changes coming from the downstream repo.
 
 At this point the process is manual, and it goes like this

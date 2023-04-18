@@ -11,6 +11,7 @@ import Home from './locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { contentfulContext } from './helpers/contentfulContext';
 import { upperFirst } from 'lodash';
+import { useSegmentAnalytics } from 'hooks/useSegmentAnalytics';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -24,6 +25,7 @@ const ComponentLocationSettings = {
 
 const App = () => {
   const sdk = useSDK();
+  const segmentAnalytics = useSegmentAnalytics();
 
   const Component = useMemo(() => {
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {
@@ -40,10 +42,13 @@ const App = () => {
           }
         });
 
+        // track page view
+        segmentAnalytics.page(location);
+
         return component;
       }
     }
-  }, [sdk]);
+  }, [sdk, segmentAnalytics]);
 
   return Component ? <Component /> : null;
 };

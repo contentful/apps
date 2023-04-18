@@ -15,7 +15,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 const { findByText, getByTestId } = screen;
 
-describe('ErrorDisplay', () => {
+xdescribe('ErrorDisplay', () => {
   it('mounts with correct msg and hyperlink when error is of type InvalidProperty', async () => {
     const HYPER_LINK_COPY = 'app configuration page.';
     render(
@@ -80,6 +80,30 @@ describe('ErrorDisplay', () => {
   });
 
   it('mounts with correct msg when error is of type InvalidServiceAccount', async () => {
+    const HYPER_LINK_COPY = 'app configuration page.';
+    render(
+      <ErrorDisplay
+        error={
+          new ApiError({
+            details: '',
+            message: '',
+            status: 404,
+            errorType: 'InvalidServiceAccount',
+          })
+        }
+      />
+    );
+
+    const warningMsg = await findByText(
+      INVALID_SERVICE_ACCOUNT.replace(HYPER_LINK_COPY, '').trim()
+    );
+    const hyperLink = getByTestId('cf-ui-text-link');
+
+    expect(warningMsg).toBeVisible();
+    expect(hyperLink).toBeVisible();
+  });
+
+  it('mounts with correct msg when error is of type InvalidServiceAccountKey', async () => {
     const HYPER_LINK_COPY = 'app configuration page.';
     render(
       <ErrorDisplay

@@ -832,8 +832,7 @@ export class App extends React.Component<AppProps, AppState> {
                 variant="negative"
                 size="small"
                 onClick={this.resetField}
-                className="reset-field-button"
-              >
+                className="reset-field-button">
                 Reset this field
               </Button>
             ) : null}
@@ -861,8 +860,7 @@ export class App extends React.Component<AppProps, AppState> {
               variant="negative"
               size="small"
               onClick={this.resetField}
-              className="reset-field-button"
-            >
+              className="reset-field-button">
               Reset this field
             </Button>
           </section>
@@ -884,8 +882,7 @@ export class App extends React.Component<AppProps, AppState> {
                   <TextLink
                     href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
                     target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                    rel="noopener noreferrer">
                     signedPlaybackId
                   </TextLink>
                 </Note>
@@ -974,8 +971,7 @@ export class App extends React.Component<AppProps, AppState> {
                       requestDeleteCaption={this.deleteCaption}
                       playbackId={this.state.value.playbackId || this.state.value.signedPlaybackId}
                       domain={this.props.sdk.parameters.installation.muxDomain}
-                      token={this.state.playbackToken}
-                    ></CaptionsList>
+                      token={this.state.playbackToken}></CaptionsList>
                   ) : (
                     <Note variant="neutral">No Captions</Note>
                   )}
@@ -1028,8 +1024,7 @@ export class App extends React.Component<AppProps, AppState> {
                         name="swap_signed_playback_id"
                         id="swap_signed_playback_id"
                         isChecked={this.isUsingSigned()}
-                        onChange={() => this.swapPlaybackIDs()}
-                      >
+                        onChange={() => this.swapPlaybackIDs()}>
                         {this.isUsingSigned() ? 'Signed Playback' : 'Signed Playback (off)'}
                       </Switch>
                     </Flex>
@@ -1067,12 +1062,10 @@ export class App extends React.Component<AppProps, AppState> {
               overlayText="Drop Video"
               style={{
                 '--overlay-background-color': 'rgb(231, 235, 238)',
-              }}
-            >
+              }}>
               <MuxUploader
                 id="muxuploader"
                 type="bar"
-                status
                 onSuccess={this.onUploadSuccess}
                 endpoint={this.getUploadUrl}
                 //onError={this.onUploadError}
@@ -1087,8 +1080,7 @@ export class App extends React.Component<AppProps, AppState> {
                   alignItems: 'center',
                   padding: '1em',
                   minHeight: '250px',
-                }}
-              ></MuxUploader>
+                }}></MuxUploader>
             </MuxUploaderDrop>
           </div>
         </Box>
