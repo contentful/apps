@@ -108,7 +108,7 @@ function GqlPlayground(props: GqlPlaygroundProps) {
             target="_blank"
             rel="noreferrer"
             href="https://www.contentful.com/developers/docs/references/graphql/#/reference/collection-fields/arguments">
-            learn more
+            Learn more
           </a>
         </Note>
       )}
