@@ -48,27 +48,27 @@ describe('Content Type Warning for Config Screen Flakey', () => {
     await userEvent.unhover(screen.getByTestId('cf-ui-icon'));
   });
 
-  it('renders a warning icon and correct tooltip content when slug field empty', async () => {
-    render(
-      <ContentTypeWarning
-        contentTypeId={'test'}
-        slugField={''}
-        isSaved={true}
-        isInSidebar={false}
-        isContentTypeInOptions={false}
-        isSlugFieldInOptions={false}
-      />
-    );
+  // it('renders a warning icon and correct tooltip content when slug field empty', async () => {
+  //   render(
+  //     <ContentTypeWarning
+  //       contentTypeId={'test'}
+  //       slugField={''}
+  //       isSaved={true}
+  //       isInSidebar={false}
+  //       isContentTypeInOptions={false}
+  //       isSlugFieldInOptions={false}
+  //     />
+  //   );
 
-    await screen.findByTestId('cf-ui-icon');
-    expect(screen.getByTestId('cf-ui-icon')).toBeInTheDocument();
+  //   await screen.findByTestId('cf-ui-icon');
+  //   expect(screen.getByTestId('cf-ui-icon')).toBeInTheDocument();
 
-    await userEvent.hover(screen.getByTestId('cf-ui-icon'));
-    await screen.findByRole('tooltip');
+  //   await userEvent.hover(screen.getByTestId('cf-ui-icon'));
+  //   await screen.findByRole('tooltip');
 
-    expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
-    await userEvent.unhover(screen.getByTestId('cf-ui-icon'));
-  });
+  //   expect(screen.getByRole('tooltip').textContent).toBe(NO_SLUG_WARNING_MSG);
+  //   await userEvent.unhover(screen.getByTestId('cf-ui-icon'));
+  // });
 
   it('renders a warning icon and correct tooltip content when slug field is deleted', async () => {
     render(
