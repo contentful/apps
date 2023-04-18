@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WarningDisplay from 'components/config-screen/WarningDisplay/WarningDisplay';
 
@@ -8,9 +8,8 @@ describe('WarningDisplay component', () => {
 
     expect(screen.getByTestId('errorIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
+    const user = userEvent.setup();
+    await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe('This is an error');
   });
@@ -20,9 +19,8 @@ describe('WarningDisplay component', () => {
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(() => user.hover(screen.getByTestId('cf-ui-icon')));
+    const user = userEvent.setup();
+    await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe('This is a warning');
   });
