@@ -25,7 +25,7 @@ jobs:
   apps-test:
     docker:
       - image: cimg/base:stable
-    resource_class: xlarge
+    resource_class: medium
     steps:
       - checkout
       - node/install
