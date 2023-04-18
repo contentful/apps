@@ -5,6 +5,7 @@ frameworkVersion: '>=2.0.0 <3.0.0'
 plugins:
   - serverless-domain-manager
   - serverless-express
+  - serverless-prune-plugin
 
 custom:
   myStage: ${opt:stage, self:provider.stage}
@@ -14,6 +15,9 @@ custom:
     createRoute53Record: true
     endpointType: 'edge'
     securityPolicy: tls_1_2
+  prune:
+    automatic: true
+    number: 3
 
 provider:
   name: aws
