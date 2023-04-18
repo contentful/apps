@@ -25,7 +25,7 @@ describe('Content Type Warning for Config Screen', () => {
   });
 });
 
-xdescribe('Content Type Warning for Config Screen Flakey', () => {
+describe('Content Type Warning for Config Screen Flakey', () => {
   it('renders an error icon and correct tooltip content when content type is deleted', async () => {
     render(
       <ContentTypeWarning

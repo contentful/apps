@@ -111,7 +111,7 @@ describe('Config Screen component (not installed)', () => {
   });
 });
 
-xdescribe('Installed Service Account Key', () => {
+describe('Installed Service Account Key', () => {
   beforeEach(() => {
     mockSdk.app.getParameters.mockReturnValue({
       serviceAccountKeyId: validServiceKeyId,
