@@ -93,27 +93,23 @@ function GqlPlayground(props: GqlPlaygroundProps) {
   useEffect(() => {
     const unsubscribe = store.subscribe(() => {
       const query: string = getQuery(store.getState());
-      const result = query.toLowerCase().includes('collection');
-      if (hasCollection !== result) {
-        setHasCollection(result);
-      }
+      setHasCollection(query.toLowerCase().includes('collection'));
     });
     return unsubscribe;
-  }, [hasCollection]);
+  }, []);
 
   return (
     <>
       {hasCollection && (
         <Note>
           Did you know that the default limit for a collection is <b>100</b>, lowering this would
-          decrease your query complexity! [
+          decrease your query complexity!{' '}
           <a
             target="_blank"
             rel="noreferrer"
-            href="https://www.contentful.com/developers/docs/references/graphql/#/reference/collection-fields/arguments:~:text=default%20is%200-,limit,to%20fetch.%20The%20default%20is%20100%20and%20the%20maximum%20is%201000,-where">
-            source
+            href="https://www.contentful.com/developers/docs/references/graphql/#/reference/collection-fields/arguments">
+            learn more
           </a>
-          ]
         </Note>
       )}
       <Provider store={store}>
