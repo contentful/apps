@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SetupServiceAccountCard from 'components/config-screen/api-access/setup/SetupServiceAccountCard';
 import { mockSdk, mockCma, validServiceKeyFile } from '../../../../../test/mocks';
@@ -40,10 +40,9 @@ describe('Setup Google Service Account Details page', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(() => user.click(keyFileInputBox));
-    await waitFor(() => user.paste(JSON.stringify({ foo: 'bar' })));
+    const user = userEvent.setup();
+    await user.click(keyFileInputBox);
+    await user.paste(JSON.stringify({ foo: 'bar' }));
 
     expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toEqual(
       'true'
@@ -66,10 +65,9 @@ describe('Setup Google Service Account Details page', () => {
 
     // user.type() got confused by the JSON string chars, so we'll just click and paste -- this
     // actually better recreates likely user behavior as a bonus
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    await waitFor(() => user.click(keyFileInputBox));
-    await waitFor(() => user.paste(JSON.stringify(validServiceKeyFile)));
+    const user = userEvent.setup();
+    await user.click(keyFileInputBox);
+    await user.paste(JSON.stringify(validServiceKeyFile));
 
     expect(screen.getByLabelText(/Service Account Key/).getAttribute('aria-invalid')).toBeNull();
     expect(screen.getByText('Service account key file is valid JSON')).toBeInTheDocument();
