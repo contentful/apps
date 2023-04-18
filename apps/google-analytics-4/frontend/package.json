@@ -27,7 +27,7 @@
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "REACT_APP_RELEASE=$(git rev-parse --short HEAD) react-scripts build",
     "test": "react-scripts test",
-    "test:ci": "CI=true react-scripts test --runInBand",
+    "test:ci": "CI=true react-scripts test --maxWorkers=50%",
     "lint": "eslint --max-warnings=0 .",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
