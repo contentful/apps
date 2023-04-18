@@ -35,6 +35,8 @@ const renderAnalyticsApp = async () =>
 
 describe('AnalyticsApp with correct content types configured', () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
+
     mockSdk.app.getParameters.mockReturnValue({
       serviceAccountKeyId: validServiceKeyId,
     });
