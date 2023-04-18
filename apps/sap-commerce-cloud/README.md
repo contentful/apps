@@ -35,6 +35,9 @@ To make your app look and feel like Contentful use the following libraries:
 - [Forma 36](https://f36.contentful.com/) – Contentful's design system
 - [Contentful Fields Editors](https://www.contentful.com/developers/docs/extensibility/field-editors/) – Contentful's field editor React components
 
+## SAP Backoffice CORS Configuration
+This application requires each origin to be specifically allowlisted in order to work. If you are using a different Contentful origin for any reason, this origin will need to be added in Backoffice. To do so, please contact Contentful support.
+
 ## Learn More
 
 [Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.
