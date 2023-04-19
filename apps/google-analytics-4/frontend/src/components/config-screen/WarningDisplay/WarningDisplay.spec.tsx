@@ -4,22 +4,22 @@ import WarningDisplay from 'components/config-screen/WarningDisplay/WarningDispl
 
 describe('WarningDisplay component', () => {
   it('renders an error icon and correct tooltip content', async () => {
+    const user = userEvent.setup();
     render(<WarningDisplay warningType="error" tooltipContent="This is an error" />);
 
     expect(screen.getByTestId('errorIcon')).toBeInTheDocument();
 
-    const user = userEvent.setup();
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe('This is an error');
   });
 
   it('renders a warning icon and correct tooltip content', async () => {
+    const user = userEvent.setup();
     render(<WarningDisplay warningType="warning" tooltipContent="This is a warning" />);
 
     expect(screen.getByTestId('warningIcon')).toBeInTheDocument();
 
-    const user = userEvent.setup();
     await user.hover(screen.getByTestId('cf-ui-icon'));
 
     expect(screen.getByRole('tooltip').textContent).toBe('This is a warning');
