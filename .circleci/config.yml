@@ -48,9 +48,6 @@ jobs:
           name: Verify project configurations
           command: npm run verify-config
       - run:
-          name: Build
-          command: npm run build
-      - run:
           name: Test
           command: npm run test
 
