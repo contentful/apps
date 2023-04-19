@@ -51,6 +51,22 @@ jobs:
           name: Test
           command: npm run test
 
+  build:
+    docker:
+      - image: cimg/base:stable
+    resource_class: medium+
+    steps:
+      - checkout
+      - node/install
+      - run:
+          name: Install dependencies
+          command: |
+            npm ci
+            npm run bootstrap:ci
+      - run:
+          name: Build
+          command: npm run build
+
   deploy-staging:
     docker:
       - image: cimg/base:stable
@@ -170,10 +186,14 @@ workflows:
       - apps-test:
           context:
             - vault
+      - build:
+          context:
+            - vault
       - deploy-staging:
           context:
             - vault
           requires:
+            - build
             - apps-test
           filters:
             branches:
@@ -184,6 +204,7 @@ workflows:
           context:
             - vault
           requires:
+            - build
             - apps-test
           filters:
             branches:
