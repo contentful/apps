@@ -26,7 +26,8 @@ const buildActions = async () => {
 
     console.log('App actions successfully built');
   } catch (e) {
-    console.log(e);
+    console.log('Error building app actions');
+    throw Error(e);
   }
 };
 
