@@ -3,7 +3,7 @@ service: sls-apps-ecommerce
 frameworkVersion: '>=3.0.0 <4.0.0'
 
 plugins:
-  # - serverless-domain-manager
+  - serverless-domain-manager
   - serverless-offline
   - serverless-prune-plugin
 
