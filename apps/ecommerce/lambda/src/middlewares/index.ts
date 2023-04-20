@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { verifySignedRequestMiddleware } from './verifySignedRequests';
 import { setSentryContext } from './setSentryContext';
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 
 const Middleware = {
   setSentryContext: setSentryContext,
