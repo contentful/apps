@@ -1,27 +1,32 @@
-const fs = require('fs');
-const { readdirSync, readFileSync, writeFileSync, mkdirSync } = fs;
+const fs = require('fs/promises');
+const { readdir, readFile, writeFile, mkdir } = fs;
 
-const buildActions = () => {
+const buildActions = async () => {
   try {
     console.log('Building app actions');
-    mkdirSync('build/actions', { recursive: true });
+    await mkdir('build/actions', { recursive: true });
 
-    const actionsFiles = readdirSync('actions', {
+    const actionsFiles = await readdir('actions', {
       encoding: 'utf-8',
     });
 
-    actionsFiles.forEach((fileName) => {
-      const action = readFileSync(`actions/${fileName}`, {
-        encoding: 'utf-8',
-      }).toString();
+    const actions = await Promise.all(
+      actionsFiles.map((fileName) => {
+        return readFile(`actions/${fileName}`, {
+          encoding: 'utf-8',
+        });
+      })
+    );
 
-      writeFileSync(`build/actions/${fileName}`, action);
-      console.log('App actions successfully built');
-    });
+    await Promise.all(
+      actionsFiles.map((fileName, index) => {
+        return writeFile(`build/actions/${fileName}`, actions[index]);
+      })
+    );
+
+    console.log('App actions successfully built');
   } catch (e) {
-    console.log('Failed to build app actions.');
     console.log(e);
-    process.exit(1);
   }
 };
 
