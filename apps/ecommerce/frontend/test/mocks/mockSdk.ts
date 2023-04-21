@@ -8,6 +8,18 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
+  parameters: {
+    installation: {},
+    instance: {},
+  },
+  field: {
+    getValue: jest.fn(),
+    setValue: jest.fn(),
+    type: 'Object',
+    onSchemaErrorsChanged: jest.fn(),
+    onIsDisabledChanged: jest.fn(),
+    onValueChanged: jest.fn(),
+  },
 };
 
 export { mockSdk };

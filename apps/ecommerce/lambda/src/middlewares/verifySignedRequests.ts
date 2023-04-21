@@ -6,17 +6,24 @@ import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
 import { config } from '../config';
 
 export const verifySignedRequestMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-  const signingSecret = config.signingSecret;
+  const signingSecrets = config.signingSecrets; // randomize order to avoid biased iteration?
   const canonicalReq = makeCanonicalReq(req);
   let isValidReq = false;
 
-  try {
-    isValidReq = NodeAppsToolkit.verifyRequest(signingSecret, canonicalReq, 60); // 60 second TTL
-  } catch (e) {
-    console.error(e);
-    throw new UnableToVerifyRequest('Unable to verify request', {
-      cause: e,
-    });
+  const provider = req.header('X-Contentful-Data-Provider');
+  if (provider) {
+    const providerSecret = signingSecrets[provider];
+
+    try {
+      if (NodeAppsToolkit.verifyRequest(providerSecret, canonicalReq, 60)) {
+        isValidReq = true;
+      }
+    } catch (e) {
+      console.error(e);
+      throw new UnableToVerifyRequest('Unable to verify request', {
+        cause: e,
+      });
+    }
   }
 
   if (!isValidReq) {
