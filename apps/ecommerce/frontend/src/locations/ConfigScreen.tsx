@@ -12,6 +12,9 @@ const ConfigScreen = () => {
   const cma = useCMA();
   const [isInstalled, setIsInstalled] = useState<Boolean>(false);
 
+  console.log('instance parameters', sdk.parameters.instance);
+  console.log('installation parameters', sdk.parameters.installation);
+
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
@@ -38,8 +41,11 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   const ping = async () => {
-    const url = new URL('http://localhost:8080/dev/api/ping');
-    fetchWithSignedRequest(url, sdk.ids.app, cma, 'GET')
+    const url = new URL(`http://localhost:8080/dev/api/ping`);
+    fetchWithSignedRequest(url, sdk.ids.app, cma, 'GET', {
+      // TODO: consider how we want to pass the provider – path param? query param? header?
+      'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
+    })
       .then((res) => {
         if (res.status !== 200) {
           const error = `Error: ${res.status} – ${res.statusText}`;
