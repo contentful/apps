@@ -98,11 +98,11 @@ export const fetchCollectionPreviews = async (skus, config) => {
   const validIds = filterAndDecodeValidIds(skus, 'Collection');
 
   const response = await paginateGraphQLRequest(config, validIds, collectionQuery);
-  const collections = response.map((res) => convertCollectionToBase64(res));
+  const collections = response.map((res) => res && convertCollectionToBase64(res));
 
   return validIds.map((validId) => {
     const collection = collections.find(
-      (collection) => collection.id === convertStringToBase64(validId)
+      (collection) => collection?.id === convertStringToBase64(validId)
     );
     return collection
       ? collectionDataTransformer(collection, config.apiEndpoint)
@@ -133,7 +133,7 @@ export const fetchProductPreviews = async (skus, config) => {
   }
 
   const response = (await Promise.all(requests)).flat();
-  const products = response.map((res) => convertProductToBase64(res));
+  const products = response.map((res) => res && convertProductToBase64(res));
 
   return validIds.map((validId) => {
     const product = products.find((product) => product?.id === convertStringToBase64(validId));
