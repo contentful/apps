@@ -1,4 +1,5 @@
 import { IdsAPI } from '@contentful/app-sdk';
+import { EntityStatus } from '@contentful/f36-components';
 
 // TODO: get this exported from the SDK
 declare type EntryScopedIds = 'field' | 'entry' | 'contentType';
@@ -23,4 +24,20 @@ export interface ContentfulContextHeaders {
   'X-Contentful-Organization'?: string;
   'X-Contentful-Space'?: string;
   'X-Contentful-User'?: string;
+}
+
+export interface ResourceLink {
+  type: 'ResourceLink';
+  linkType: 'Ecommerce::Product';
+  urn: string;
+  provider: 'Shopify';
+}
+
+export interface EcommerceProductData {
+  sys?: ResourceLink;
+  name?: string;
+  description?: string;
+  image?: string;
+  status?: EntityStatus;
+  extras?: {};
 }
