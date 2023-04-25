@@ -9,6 +9,7 @@ import { SidebarLocation } from './SidebarLocation/sidebarLocation.component';
 import { DialogLocation } from './DialogLocation/dialogLocation.component';
 import { EntryLocation } from './EntryLocation/entryLocation.component';
 import { PageLocation } from './PageLocation/pageLocation.component';
+import { HomeLocation } from './HomeLocation/homeLocation.component';
 
 @Component({
   selector: 'app-root',
@@ -41,6 +42,7 @@ export class AppComponent {
         [locations.LOCATION_DIALOG]: DialogLocation,
         [locations.LOCATION_ENTRY_EDITOR]: EntryLocation,
         [locations.LOCATION_PAGE]: PageLocation,
+        [locations.LOCATION_HOME]: HomeLocation,
       };
 
       // Select a component depending on a location in which the app is rendered.
