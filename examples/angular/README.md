@@ -12,6 +12,14 @@ If you don't have Angular CLI installed globally, install it with the following:
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
+NOTE: If running into `EACCES` errors with `ng`, run the same command with `sudo`:
+
+`sudo ng serve` 
+
+or 
+
+`sudo !!` after `ng serve`
+
 ## Code scaffolding
 
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
