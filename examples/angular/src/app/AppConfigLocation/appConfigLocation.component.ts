@@ -4,9 +4,9 @@ import { ConfigAppSDK, FieldAppSDK, KnownAppSDK, init, locations } from '@conten
 export interface AppInstallationParameters {}
 
 @Component({
-  templateUrl: './appConfig.component.html',
+  templateUrl: './appConfigLocation.component.html',
 })
-export class ConfigComponent {
+export class AppConfigLocation {
   @Input() sdk!: ConfigAppSDK;
 
   parameters = {};

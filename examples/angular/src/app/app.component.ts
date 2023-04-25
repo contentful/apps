@@ -1,11 +1,11 @@
 import { Component, ViewChild } from '@angular/core';
 import { init, locations } from '@contentful/app-sdk';
-import { ConfigComponent } from './AppConfigComponent/appConfig.component';
 import { DynamicComponentDirective } from './directives/dynamic-component.directive';
 import { DynamicComponent } from './dynamic-component';
+import { AppConfigLocation } from './AppConfigLocation/appConfigLocation.component';
+import { EntryFieldLocation } from './EntryFieldLocation/entryFieldLocation.component';
 import { Type } from '@angular/core';
-
-export interface AppInstallationParameters {}
+import { SidebarLocation } from './SidebarLocation/sidebarLocation.component';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +32,9 @@ export class AppComponent {
     init((sdk) => {
       // define locations here
       const locationsMap = {
-        [locations.LOCATION_APP_CONFIG]: ConfigComponent,
+        [locations.LOCATION_APP_CONFIG]: AppConfigLocation,
+        [locations.LOCATION_ENTRY_FIELD]: EntryFieldLocation,
+        [locations.LOCATION_ENTRY_SIDEBAR]: SidebarLocation,
       };
 
       // Select a component depending on a location in which the app is rendered.
