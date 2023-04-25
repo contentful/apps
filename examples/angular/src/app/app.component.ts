@@ -6,6 +6,7 @@ import { AppConfigLocation } from './AppConfigLocation/appConfigLocation.compone
 import { EntryFieldLocation } from './EntryFieldLocation/entryFieldLocation.component';
 import { Type } from '@angular/core';
 import { SidebarLocation } from './SidebarLocation/sidebarLocation.component';
+import { DialogLocation } from './DialogLocation/dialogLocation.component';
 
 @Component({
   selector: 'app-root',
@@ -35,6 +36,7 @@ export class AppComponent {
         [locations.LOCATION_APP_CONFIG]: AppConfigLocation,
         [locations.LOCATION_ENTRY_FIELD]: EntryFieldLocation,
         [locations.LOCATION_ENTRY_SIDEBAR]: SidebarLocation,
+        [locations.LOCATION_DIALOG]: DialogLocation,
       };
 
       // Select a component depending on a location in which the app is rendered.
