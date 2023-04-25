@@ -1069,18 +1069,20 @@ export class App extends React.Component<AppProps, AppState> {
                 onSuccess={this.onUploadSuccess}
                 endpoint={this.getUploadUrl}
                 //onError={this.onUploadError}
-                style={{
-                  '--uploader-background-color': 'rgb(247, 249, 250)',
-                  '--button-border-radius': '4px',
-                  '--button-border': '1px solid rgb(207, 217, 224)',
-                  '--button-padding': '0.5rem 1rem',
-                  width: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: '1em',
-                  minHeight: '250px',
-                }}></MuxUploader>
+                style={
+                  {
+                    '--uploader-background-color': 'rgb(247, 249, 250)',
+                    '--button-border-radius': '4px',
+                    '--button-border': '1px solid rgb(207, 217, 224)',
+                    '--button-padding': '0.5rem 1rem',
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '1em',
+                    minHeight: '250px',
+                  } as React.CSSProperties
+                }></MuxUploader>
             </MuxUploaderDrop>
           </div>
         </Box>
