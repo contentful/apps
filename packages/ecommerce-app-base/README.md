@@ -19,19 +19,19 @@ setup({
   description: 'My example SKU App',
   parameterDefinitions: [
     {
-      "id": "category",
-      "type": "Symbol",
-      "name": "Catehory",
-      "description": "Product category of our shop",
-      "required": true
-    }
+      id: 'category',
+      type: 'Symbol',
+      name: 'Catehory',
+      description: 'Product category of our shop',
+      required: true,
+    },
   ],
   validateParameters: () => null,
   fetchProductPreviews: async (skus) => {
-      const responess = await Promise.all(
-          skus.map(sku => fetch(`https://example.com/products/${sku}`))
-      );
-      return responses.map(response => response.json());
+    const responess = await Promise.all(
+      skus.map((sku) => fetch(`https://example.com/products/${sku}`))
+    );
+    return responses.map((response) => response.json());
   },
   renderDialog: (sdk) => {
     const config = sdk.parameters.invocation;
@@ -45,7 +45,7 @@ setup({
       parameters: { config, currentValue },
     });
   },
-  isDisabled: () => false
+  isDisabled: () => false,
 });
 ```
 
@@ -57,4 +57,3 @@ These Contentful apps use `@contentful/ecommerce-app-base`. Look at their source
 
 - [Commerce Layer](../../apps/commercelayer)
 - [Saleor](../../apps/saleor)
-- [Shopify](../../apps/shopify)
