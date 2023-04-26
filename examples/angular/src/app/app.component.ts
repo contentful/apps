@@ -10,6 +10,7 @@ import { DialogLocation } from './DialogLocation/dialogLocation.component';
 import { EntryLocation } from './EntryLocation/entryLocation.component';
 import { PageLocation } from './PageLocation/pageLocation.component';
 import { HomeLocation } from './HomeLocation/homeLocation.component';
+import { LocalHostWarning } from './LocalHostWarning/localHostWarning.component';
 
 @Component({
   selector: 'app-root',
@@ -21,10 +22,14 @@ export class AppComponent {
   dynamicComponent!: DynamicComponentDirective;
 
   ngOnInit() {
-    this.getSdk();
+    if (process.env?.['NODE_ENV'] === 'development' && window.self === window.top) {
+      this.loadComponent(LocalHostWarning);
+    } else {
+      this.getSdk();
+    }
   }
 
-  loadComponent(component: Type<any>, sdk: any) {
+  loadComponent(component: Type<any>, sdk?: any) {
     const viewContainerRef = this.dynamicComponent.viewContainerRef;
     viewContainerRef.clear();
 
