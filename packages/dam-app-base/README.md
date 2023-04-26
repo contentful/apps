@@ -19,15 +19,15 @@ setup({
   description: 'My example DAM App',
   parameterDefinitions: [
     {
-      "id": "folder",
-      "type": "Symbol",
-      "name": "Folder",
-      "description": "Preselected folder when selecting assets.",
-      "required": true
-    }
+      id: 'folder',
+      type: 'Symbol',
+      name: 'Folder',
+      description: 'Preselected folder when selecting assets.',
+      required: true,
+    },
   ],
   validateParameters: () => null,
-  makeThumbnail: asset => asset.thumbnailUrl,
+  makeThumbnail: (asset) => asset.thumbnailUrl,
   renderDialog: async (sdk) => {
     const config = sdk.parameters.invocation;
 
@@ -40,7 +40,7 @@ setup({
       parameters: { config, currentValue },
     });
   },
-  isDisabled: () => false
+  isDisabled: () => false,
 });
 ```
 
@@ -51,7 +51,6 @@ setup({
 These Contentful apps use `@contentful/dam-app-base`. Look at their source code to learn how they utilize this library:
 
 - [Brandfolder](../../apps/brandfolder)
-- [Bynder](../../apps/bynder)
 - [Cloudinary](../../apps/cloudinary)
 - [Dropbox](../../apps/dropbox)
 - [Frontify](../../apps/frontify)

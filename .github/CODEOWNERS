@@ -1,7 +1,6 @@
 apps/ai-content-generator @contentful/team-integrations
 apps/ai-image-tagging @contentful/team-extensibility
 apps/brandfolder @contentful/team-integrations
-apps/bynder @contentful/team-integrations
 apps/cloudinary @contentful/team-integrations
 apps/color-picker @contentful/team-extensibility
 apps/commercetools @contentful/team-integrations
