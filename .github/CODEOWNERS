@@ -1,4 +1,3 @@
-apps/ai-content-generator @contentful/team-integrations
 apps/ai-image-tagging @contentful/team-extensibility
 apps/brandfolder @contentful/team-integrations
 apps/bynder @contentful/team-integrations
