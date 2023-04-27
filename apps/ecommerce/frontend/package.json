@@ -43,7 +43,6 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.7.13",
-    "@sentry/cli": "^2.17.4",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "12.1.5",
     "@tsconfig/create-react-app": "1.0.3",
