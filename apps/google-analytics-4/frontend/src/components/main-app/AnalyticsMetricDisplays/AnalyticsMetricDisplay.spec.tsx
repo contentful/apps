@@ -2,7 +2,8 @@ import AnalyticsMetricDisplay from './AnalyticsMetricDisplay';
 import { render, screen } from '@testing-library/react';
 import runReportResponseHasViews from '../../../../../lambda/public/sampleData/runReportResponseHasViews.json';
 
-const PAGE_VIEWS = 0;
+const PAGE_VIEWS = 2200000;
+const PAGE_VIEWS_FORMATTED = '2.2M';
 const METRIC_NAME = 'screenPageViews';
 const SLUG = '/en-US';
 
@@ -22,7 +23,7 @@ describe('Analytics metric display components for the analytics app', () => {
       />
     );
 
-    const pageViews = getByText(PAGE_VIEWS);
+    const pageViews = getByText(PAGE_VIEWS_FORMATTED);
     const metricName = getByText('Total Views');
     const slug = getByText(`Page path: ${SLUG}`);
     const chart = document.querySelector('canvas');
