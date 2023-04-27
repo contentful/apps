@@ -145,12 +145,7 @@ jobs:
           command: npm run post-deploy
       - run:
           name: Sentry Release
-          command: |
-            SENTRY_RELEASE=$(git rev-parse --short HEAD); \
-            sentry-cli releases --log-level=debug new -p marketplace-apps $SENTRY_RELEASE && \
-            sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $SENTRY_RELEASE && \
-            sentry-cli releases --log-level=debug finalize $SENTRY_RELEASE && \
-            sentry-cli releases --log-level=debug deploys $SENTRY_RELEASE new -e production
+          command: npm run sentry-release
       - run:
           name: Invalidate Slack cloudfront distribution
           command: aws cloudfront create-invalidation --distribution-id $SLACK_PRD_CLOUDFRONT_DIST_ID --paths "/*"
