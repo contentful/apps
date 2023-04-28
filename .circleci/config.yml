@@ -144,6 +144,9 @@ jobs:
           name: Post Deploy
           command: npm run post-deploy
       - run:
+          name: Sentry Release
+          command: npm run sentry-release
+      - run:
           name: Invalidate Slack cloudfront distribution
           command: aws cloudfront create-invalidation --distribution-id $SLACK_PRD_CLOUDFRONT_DIST_ID --paths "/*"
 

@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "4.13.0",
-    "@contentful/f36-components": "4.35.0",
+    "@contentful/f36-components": "4.37.1",
     "@contentful/f36-tokens": "4.0.1",
     "@contentful/react-apps-toolkit": "1.2.15",
     "@segment/analytics-next": "^1.51.3",
@@ -33,13 +33,7 @@
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5DlxOS0KvGS1Wk362xgvbN --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
-    "sentry-create-release": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug new -p marketplace-apps $REACT_APP_RELEASE",
-    "sentry-set-commits": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $REACT_APP_RELEASE",
-    "sentry-upload-source-maps": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug files $REACT_APP_RELEASE upload-sourcemaps --ext ts --ext tsx --ext map ./src ./build",
-    "sentry-finalize-release": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug finalize $REACT_APP_RELEASE",
-    "sentry-deploy": "REACT_APP_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug deploys $REACT_APP_RELEASE new -e production",
-    "post-deploy": "npm run -s sentry-create-release && npm run -s sentry-set-commits && npm run -s sentry-upload-source-maps && npm run -s sentry-finalize-release && npm run -s sentry-deploy"
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -58,7 +52,6 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.7.13",
-    "@sentry/cli": "^2.14.4",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "12.1.5",
     "@tsconfig/create-react-app": "1.0.3",

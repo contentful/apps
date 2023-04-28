@@ -36,7 +36,7 @@ const AnalyticsMetricDisplay = (props: Props) => {
     <>
       <ChartHeader
         metricName={metricName ? metricName : ''}
-        metricValue={pageViews || pageViews === 0 ? pageViews.toString() : ''}
+        metricValue={Intl.NumberFormat('en', { notation: 'compact' }).format(pageViews)}
         handleChange={handleDateRangeChange}
         selectedDateRange={selectedDateRange}
       />
