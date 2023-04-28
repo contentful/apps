@@ -1,5 +1,6 @@
 import { IdsAPI } from '@contentful/app-sdk';
 import { EntityStatus } from '@contentful/f36-components';
+import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 
 // TODO: get this exported from the SDK
 declare type EntryScopedIds = 'field' | 'entry' | 'contentType';
@@ -27,17 +28,30 @@ export interface ContentfulContextHeaders {
 }
 
 export interface ResourceLink {
-  type: 'ResourceLink';
-  linkType: 'Ecommerce::Product';
-  urn: string;
-  provider: 'Shopify';
+  sys: {
+    type: 'ResourceLink';
+    linkType: 'Ecommerce::Product';
+    urn: string;
+    provider: 'Shopify';
+  };
 }
 
-export interface EcommerceProductData {
-  sys?: ResourceLink;
+export interface HydratedResourceData {
   name?: string;
   description?: string;
   image?: string;
   status?: EntityStatus;
   extras?: {};
+}
+
+export interface ResourceCardProps {
+  value: ResourceLink;
+  data?: HydratedResourceData;
+  index?: number;
+  total?: number;
+  onRemove: Function;
+  withDragHandle?: boolean;
+  dragHandleRender?: RenderDragFn;
+  onMoveToTop?: Function;
+  onMoveToBottom?: Function;
 }
