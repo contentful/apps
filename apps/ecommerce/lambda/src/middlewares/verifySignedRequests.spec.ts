@@ -26,7 +26,9 @@ describe('verifySignedRequestMiddleware', () => {
   const next = sinon.stub();
   const stage = 'testing';
   let request: Express.Request;
-  const signingSecret = 'x'.repeat(64);
+  const signingSecrets = {
+    ecommerce: 'x'.repeat(64),
+  };
   const method = 'GET' as const;
   const path = '/foo/bar';
 
@@ -44,12 +46,12 @@ describe('verifySignedRequestMiddleware', () => {
 
   beforeEach(() => {
     sandbox.stub(config, 'stage').value(stage);
-    sandbox.stub(config, 'signingSecret').value(signingSecret);
+    sandbox.stub(config, 'signingSecrets').value(signingSecrets);
     const headers = buildSignedHeaders(
       method,
       clientRequestPath,
       clientRequestHeaders,
-      signingSecret
+      signingSecrets['ecommerce']
     );
     request = createRequest({ method, path, headers });
   });
@@ -72,7 +74,7 @@ describe('verifySignedRequestMiddleware', () => {
         method,
         clientRequestPath,
         clientRequestHeaders,
-        signingSecret
+        signingSecrets['ecommerce']
       );
       const headersWithInvalidSignature = {
         ...headers,
@@ -95,7 +97,7 @@ describe('verifySignedRequestMiddleware', () => {
         method,
         clientRequestPath,
         clientRequestHeaders,
-        signingSecret
+        signingSecrets['ecommerce']
       );
       const headersWithBadSignature = { ...headers, 'x-contentful-signature': badSignature };
       request = createRequest({ method, path, headers: headersWithBadSignature });

@@ -7,6 +7,9 @@ import { useEffect } from 'react';
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
 
+  console.log(JSON.stringify(sdk.parameters.instance));
+  console.log(JSON.stringify(sdk.parameters.installation));
+
   useEffect(() => {
     sdk.window.startAutoResizer();
   }, [sdk.window]);

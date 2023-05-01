@@ -12,8 +12,17 @@ function getEnvironmentVariable(
   return environmentVariableValue;
 }
 
+const parseSigningSecrets = () => {
+  console.log('SIGNING_SECRETS', getEnvironmentVariable('SIGNING_SECRETS'));
+  const signingSecrets = JSON.parse(getEnvironmentVariable('SIGNING_SECRETS')) as {
+    [key: string]: string;
+  };
+  console.log('signingSecrets (parsed)', signingSecrets);
+  return signingSecrets;
+};
+
 export const config = {
-  signingSecret: getEnvironmentVariable('SIGNING_SECRET'),
+  signingSecrets: parseSigningSecrets(),
   stage: getEnvironmentVariable('STAGE'),
   awsRegion: getEnvironmentVariable('AWS_REGION'),
   sentryDSN: getEnvironmentVariable('SENTRY_DSN'),
