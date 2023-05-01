@@ -11,7 +11,6 @@ const Dialog = () => {
   */
   // const cma = useCMA();
 
-  console.log(sdk);
   return <Paragraph>Hello Dialog Component (AppId: {sdk.ids.app})</Paragraph>;
 };
 
