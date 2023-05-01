@@ -37,6 +37,11 @@ jobs:
             git fetch origin master # circleci doesn't fetch master by default
             ./.circleci/prettier-check.sh
       - run:
+          name: Setup NPM
+          command: |
+            echo $'@contentful:registry=https://registry.npmjs.org/
+            //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+      - run:
           name: Install dependencies
           command: |
             npm ci
