@@ -5,15 +5,18 @@ orbs:
   vault: contentful/vault@1
 
 commands:
-  publish:
+  npm_auth:
     steps:
       - vault/get-secrets:
-          template-preset: 'semantic-release-ecosystem'
+        template-preset: 'semantic-release-ecosystem'
       - run:
           name: Setup NPM
           command: |
             echo $'@contentful:registry=https://registry.npmjs.org/
             //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+  publish:
+    steps:
+      - npm_auth
       - run: export GH_TOKEN=${GITHUB_TOKEN}
       - run: git config --global user.email "${GIT_AUTHOR_EMAIL}"
       - run: git config --global user.name "${GIT_AUTHOR_NAME}"
@@ -36,11 +39,7 @@ jobs:
           command: |
             git fetch origin master # circleci doesn't fetch master by default
             ./.circleci/prettier-check.sh
-      - run:
-          name: Setup NPM
-          command: |
-            echo $'@contentful:registry=https://registry.npmjs.org/
-            //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+      - npm_auth
       - run:
           name: Install dependencies
           command: |
