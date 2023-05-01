@@ -1,24 +1,24 @@
-import { FieldAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { FieldAppSDK, init } from '@contentful/app-sdk';
+import { /* useCMA, */ useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import MultipleResources from '../components/MultipleResources';
 import SingleResource from '../components/SingleResource';
-import { useEffect } from 'react';
+// import * as DefaultFieldEditors from '@contentful/default-field-editors';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
 
-  console.log(JSON.stringify(sdk.parameters.instance));
-  console.log(JSON.stringify(sdk.parameters.installation));
+  useAutoResizer();
 
-  useEffect(() => {
-    sdk.window.startAutoResizer();
-  }, [sdk.window]);
-
+  // TODO: rescue any failed react render and render default field editor
+  // try {
   return sdk.parameters.instance.fieldType === 'multiple' ? (
     <MultipleResources />
   ) : (
     <SingleResource />
   );
+  // } catch (error) {
+  //   return <DefaultFieldEditors.Field sdk={sdk} />;
+  // }
 };
 
 export default Field;

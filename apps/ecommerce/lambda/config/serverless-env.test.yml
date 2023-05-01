@@ -1,2 +1,2 @@
-signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/ecommerce-action/test/signing-secret}
+signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/ecommerce-action/test/signing-secrets}
 domainName: ecommerce-test.ctfapps.net

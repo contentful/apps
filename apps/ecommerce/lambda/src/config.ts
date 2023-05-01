@@ -13,11 +13,9 @@ function getEnvironmentVariable(
 }
 
 const parseSigningSecrets = () => {
-  console.log('SIGNING_SECRETS', getEnvironmentVariable('SIGNING_SECRETS'));
   const signingSecrets = JSON.parse(getEnvironmentVariable('SIGNING_SECRETS')) as {
     [key: string]: string;
   };
-  console.log('signingSecrets (parsed)', signingSecrets);
   return signingSecrets;
 };
 

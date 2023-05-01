@@ -12,9 +12,6 @@ const ConfigScreen = () => {
   const cma = useCMA();
   const [isInstalled, setIsInstalled] = useState<Boolean>(false);
 
-  console.log('instance parameters', sdk.parameters.instance);
-  console.log('installation parameters', sdk.parameters.installation);
-
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
