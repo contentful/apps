@@ -4,12 +4,19 @@ import React from 'react';
 import { render } from 'react-dom';
 
 import { GlobalStyles } from '@contentful/f36-components';
-import { SDKProvider } from '@contentful/react-apps-toolkit';
+// import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 import LocalhostWarning from './components/LocalhostWarning';
 import App from './App';
 import { config } from './config';
-import { SegmentAnalyticsProvider } from 'providers/SegmentAnalyticsProvider';
+// import { SegmentAnalyticsProvider } from 'providers/SegmentAnalyticsProvider';
+import {
+  AnalyticsChannels,
+  AnalyticsProvider,
+  InternalSDKProvider,
+  createCustomAPI,
+} from '@contentful/internal-app-sdk';
+import { InternalAnalyticsAPI } from '@contentful/internal-app-sdk/dist/analytics/AnalyticsAPI';
 
 Sentry.init({
   dsn: config.sentryDSN,
@@ -31,12 +38,13 @@ if (config.environment === 'development' && window.self === window.top) {
 } else {
   render(
     <Sentry.ErrorBoundary>
-      <SDKProvider>
-        <SegmentAnalyticsProvider>
+      <InternalSDKProvider<AnalyticsChannels, InternalAnalyticsAPI>
+        createCustomAPI={createCustomAPI}>
+        <AnalyticsProvider userSegmentKey={config.segmentWriteKey}>
           <GlobalStyles />
           <App />
-        </SegmentAnalyticsProvider>
-      </SDKProvider>
+        </AnalyticsProvider>
+      </InternalSDKProvider>
     </Sentry.ErrorBoundary>,
     root
   );
