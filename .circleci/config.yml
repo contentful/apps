@@ -39,7 +39,6 @@ jobs:
           command: |
             git fetch origin master # circleci doesn't fetch master by default
             ./.circleci/prettier-check.sh
-      - npm_auth
       - run:
           name: Install dependencies
           command: |
@@ -61,6 +60,7 @@ jobs:
     resource_class: medium+
     steps:
       - checkout
+      - npm_auth
       - node/install
       - run:
           name: Install dependencies
