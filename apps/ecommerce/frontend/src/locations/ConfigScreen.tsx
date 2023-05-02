@@ -38,8 +38,11 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   const ping = async () => {
-    const url = new URL('http://localhost:8080/dev/api/ping');
-    fetchWithSignedRequest(url, sdk.ids.app, cma, 'GET')
+    const url = new URL(`http://localhost:8080/dev/api/ping`);
+    fetchWithSignedRequest(url, sdk.ids.app, cma, 'GET', {
+      // TODO: consider how we want to pass the provider – path param? query param? header?
+      'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
+    })
       .then((res) => {
         if (res.status !== 200) {
           const error = `Error: ${res.status} – ${res.statusText}`;
