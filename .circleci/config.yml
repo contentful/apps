@@ -25,7 +25,9 @@ commands:
     steps:
       - run:
           name: Use NPM Token
-          command: '[[ ! -z "${NPM_TOKEN}" ]] && (echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc) || (echo "Empty NPM_TOKEN" && exit 1)'
+          command: |
+            echo $'@contentful:registry=https://registry.npmjs.org/
+            //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
       - vault/get-secrets:
           template-preset: 'npm-read'
 
