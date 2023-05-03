@@ -4,3 +4,4 @@ signingSecrets: '{
   "app_name_3": "<APP_3_SIGNING_KEY_GOES_HERE>"
   }'
 domainName: ecommerce-test.ctfapps.net
+baseUrl: http://localhost:8080/dev
