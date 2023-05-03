@@ -57,11 +57,8 @@ jobs:
     resource_class: medium+
     steps:
       - checkout
-      - run:
-          name: Setup NPM
-          command: |
-            echo $'@contentful:registry=https://registry.npmjs.org/
-            //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
+      - vault/get-secrets: # Loads vault secrets
+          template-preset: 'npm-read'
       - node/install
       - run:
           name: Install dependencies
