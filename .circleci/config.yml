@@ -21,6 +21,14 @@ commands:
           name: Publish packages
           command: npm run publish-packages
 
+  with_tokens:
+    steps:
+      - run:
+          name: Use NPM Token
+          command: '[[ ! -z "${NPM_TOKEN}" ]] && (echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc) || (echo "Empty NPM_TOKEN" && exit 1)'
+      - vault/get-secrets:
+          template-preset: 'npm-read'
+
 jobs:
   apps-test:
     docker:
@@ -31,13 +39,12 @@ jobs:
       - node/install
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
-      - vault/get-secrets:
-          template-preset: 'npm-read'
       - run:
           name: Check for prettier violations
           command: |
             git fetch origin master # circleci doesn't fetch master by default
             ./.circleci/prettier-check.sh
+      - with_tokens
       - run:
           name: Install dependencies
           command: |
@@ -61,6 +68,7 @@ jobs:
       - checkout
       - vault/get-secrets: # Loads vault secrets
           template-preset: 'npm-read'
+      - with_tokens
       - node/install
       - run:
           name: Install dependencies
@@ -79,8 +87,7 @@ jobs:
       - checkout
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
-      - vault/get-secrets:
-          template-preset: 'npm-read'
+      - with_tokens
       - node/install
       - run:
           name: Install dependencies
@@ -118,9 +125,8 @@ jobs:
     steps:
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
-      - vault/get-secrets:
-          template-preset: 'npm-read'
       - checkout
+      - with_tokens
       - node/install
       - run:
           name: Install dependencies
