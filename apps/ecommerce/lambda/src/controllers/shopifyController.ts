@@ -1,15 +1,8 @@
 import { Request, Response } from 'express';
-import { ResourceLink } from '@/src/types';
 
-const ApiController = {
-  ping: (req: Request, res: Response) => {
-    return res.send({ status: 'ok', message: 'pong' });
-  },
+const ShopifyController = {
   resource: (req: Request, res: Response) => {
-    const body: ResourceLink = req.body;
-  },
-  product: (req: Request, res: Response) => {
-    console.log(req.params);
+    console.log(req.params.name);
     return res.send({
       sys: {
         type: 'ResourceLink',
@@ -27,4 +20,4 @@ const ApiController = {
   },
 };
 
-export default ApiController;
+export default ShopifyController;
