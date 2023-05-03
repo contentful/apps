@@ -68,8 +68,6 @@ jobs:
     resource_class: medium+
     steps:
       - checkout
-      - vault/get-secrets: # Loads vault secrets
-          template-preset: 'npm-read'
       - with_tokens
       - node/install
       - run:
