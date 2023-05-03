@@ -31,6 +31,8 @@ jobs:
       - node/install
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
+      - vault/get-secrets:
+          template-preset: 'npm-read'
       - run:
           name: Check for prettier violations
           command: |
@@ -77,6 +79,8 @@ jobs:
       - checkout
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
+      - vault/get-secrets:
+          template-preset: 'npm-read'
       - node/install
       - run:
           name: Install dependencies
@@ -114,6 +118,8 @@ jobs:
     steps:
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
+      - vault/get-secrets:
+          template-preset: 'npm-read'
       - checkout
       - node/install
       - run:
