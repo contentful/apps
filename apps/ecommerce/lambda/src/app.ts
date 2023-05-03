@@ -5,7 +5,6 @@ import Middleware from './middlewares';
 import { ApiRouter, ShopifyRouter } from './routers';
 import { corsConfig } from './middlewares/corsConfig';
 import { config } from './config';
-import { ShopifyController } from './controllers';
 
 const app = express();
 app.use(express.json());
