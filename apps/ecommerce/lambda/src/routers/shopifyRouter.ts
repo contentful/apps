@@ -2,6 +2,6 @@ import { Router } from 'express';
 import { ShopifyController } from '../controllers';
 const app = Router();
 
-//app.post('/resource/(product|variant|collection)/:id', ShopifyController.resource);
+app.post('/resource/:resourceType/:id', ShopifyController.resource);
 
 export default app;

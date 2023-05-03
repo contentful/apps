@@ -49,6 +49,7 @@
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.0.4",
     "@sentry/node": "^7.38.0",
+    "axios": "^1.4.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "serverless-http": "^3.1.0"
