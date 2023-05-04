@@ -1,6 +1,7 @@
 import { IdsAPI } from '@contentful/app-sdk';
 import { EntityStatus } from '@contentful/f36-components';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
+import { ErrorInfo } from 'react';
 
 // TODO: get this exported from the SDK
 declare type EntryScopedIds = 'field' | 'entry' | 'contentType';
@@ -54,4 +55,10 @@ export interface ResourceCardProps {
   dragHandleRender?: RenderDragFn;
   onMoveToTop?: Function;
   onMoveToBottom?: Function;
+}
+
+export interface ErrorComponentProps {
+  error: Error;
+  errorInfo: ErrorInfo;
+  resetErrorHandler: () => void;
 }
