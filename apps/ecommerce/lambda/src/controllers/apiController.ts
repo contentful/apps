@@ -35,7 +35,6 @@ const ApiController = {
         const response: AxiosResponse<HydratedResourceData> = await axios.post(url, body);
         res.status(response.status).send(response.data);
       } catch (error) {
-        console.log(error);
         res.status(500).send({
           error,
           message: 'Could not get ' + entityType,
