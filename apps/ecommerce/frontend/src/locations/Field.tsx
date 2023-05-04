@@ -9,8 +9,6 @@ const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   useAutoResizer();
 
-  // TODO: rescue any failed react render and render default field editor
-
   const output =
     sdk.parameters.instance.fieldType === 'multiple' ? <MultipleResources /> : <SingleResource />;
 
