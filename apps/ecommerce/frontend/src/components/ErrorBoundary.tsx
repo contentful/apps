@@ -1,14 +1,12 @@
-import { Component, ErrorInfo, FC, ReactNode } from 'react';
-import { ErrorComponentProps } from '../types';
-type ErrorState = { hasError: boolean; error: Error | null; info: ErrorInfo | null };
-type ErrorProps = { children: ReactNode; FallbackComponent: FC<ErrorComponentProps> };
+import { Component, ErrorInfo } from 'react';
+import type { ErrorBoundaryState, ErrorBoundaryProps } from '../types';
 
-class ErrorBoundary extends Component<ErrorProps, ErrorState> {
-  constructor(props: ErrorProps) {
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
   }
 
-  state: ErrorState = {
+  state: ErrorBoundaryState = {
     hasError: false,
     error: null,
     info: null,
@@ -27,8 +25,8 @@ class ErrorBoundary extends Component<ErrorProps, ErrorState> {
       const { FallbackComponent } = this.props;
       return (
         <FallbackComponent
-          error={this.state.error!}
-          errorInfo={this.state.info!}
+          error={this.state.error}
+          errorInfo={this.state.info}
           resetErrorHandler={this.resetErrorHandler}
         />
       );
