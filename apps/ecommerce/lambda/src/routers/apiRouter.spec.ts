@@ -3,7 +3,6 @@ import chaiHttp from 'chai-http';
 import app from '../app';
 import { mockResourceLink } from '../mocks/resourceLink.mock';
 import nock, { RequestBodyMatcher } from 'nock';
-import { mockResourceData } from '../mocks/resourceData.mock';
 import { mockCombinedResource } from '../mocks/combinedResource.mock';
 import { ResourceLink } from '../types';
 
@@ -48,7 +47,7 @@ describe('API Controller', () => {
     });
 
     it('should throw an error when no provider is provided', (done) => {
-      const { provider, ...newResourceLink } = mockResourceLink.sys;
+      const { provider, ...newResourceLink } = mockResourceLink.sys; // eslint-disable-line @typescript-eslint/no-unused-vars
 
       chai
         .request(app)
