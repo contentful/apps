@@ -1,10 +1,13 @@
 import { FC } from 'react';
 import ErrorBoundary from '../components/ErrorBoundary';
-import Fallback from '../components/Fallback';
+import { ErrorComponentProps } from '../types';
 
-function withErrorBoundary<TProps extends JSX.IntrinsicAttributes>(Component: FC) {
+function withErrorBoundary<TProps extends JSX.IntrinsicAttributes>(
+  Component: FC,
+  FallbackComponent: FC<ErrorComponentProps>
+) {
   return (props: TProps) => (
-    <ErrorBoundary FallbackComponent={Fallback}>
+    <ErrorBoundary FallbackComponent={FallbackComponent}>
       <Component {...props} />
     </ErrorBoundary>
   );
