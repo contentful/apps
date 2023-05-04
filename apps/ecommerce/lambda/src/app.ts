@@ -35,8 +35,8 @@ app.use('/api', ApiRouter);
 
 app.use('/shopify', ShopifyRouter);
 
-// for Postman calls in development
-if (config.environment === 'development') {
+// for Postman calls in development. This bypasses request signing if using Postman to call localhost
+if (config.environment === 'development' || config.environment === 'test') {
   app.use('/', ApiRouter);
 }
 
