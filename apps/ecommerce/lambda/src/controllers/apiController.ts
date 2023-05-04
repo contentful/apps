@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { HydratedResourceData, ResourceLink } from '@/src/types';
 import { config } from '../config';
 
@@ -13,20 +13,19 @@ const ApiController = {
   ) => {
     const body: ResourceLink = req.body;
     const BASE_URL = config.baseUrl;
+    const provider = body.sys.provider.toLowerCase();
+    const entityType = body.sys.linkType.toLowerCase();
+
     try {
-      const url = `${BASE_URL}/${body.sys.provider.toLowerCase()}/resource/${body.sys.linkType}/${
-        req.params.id
-      }`;
+      const url = `${BASE_URL}/${provider}/resource/${entityType}/${req.params.id}`;
 
       const response: AxiosResponse<HydratedResourceData> = await axios.post(url, body);
       res.status(response.status).send(response.data);
     } catch (error) {
-      res
-        .status(500)
-        .send({
-          error,
-          message: 'Could not get ' + body.sys.linkType + ' with ID: ' + req.params.id,
-        });
+      res.status(500).send({
+        error,
+        message: 'Could not get ' + entityType + ' with ID: ' + req.params.id,
+      });
     }
   },
 };
