@@ -1,6 +1,7 @@
-import { IdsAPI } from '@contentful/app-sdk';
-import { EntityStatus } from '@contentful/f36-components';
-import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
+import type { IdsAPI } from '@contentful/app-sdk';
+import type { EntityStatus } from '@contentful/f36-components';
+import type { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
+import type { ErrorInfo, FC, ReactNode } from 'react';
 
 // TODO: get this exported from the SDK
 declare type EntryScopedIds = 'field' | 'entry' | 'contentType';
@@ -54,4 +55,19 @@ export interface ResourceCardProps {
   dragHandleRender?: RenderDragFn;
   onMoveToTop?: Function;
   onMoveToBottom?: Function;
+}
+
+type ErrorBoundaryErrored = { hasError: true; error: Error; info: ErrorInfo };
+type ErrorBoundaryStandby = { hasError: false; error: null; info: null };
+export type ErrorBoundaryState = ErrorBoundaryErrored | ErrorBoundaryStandby;
+
+export type ErrorBoundaryProps = {
+  children: ReactNode;
+  FallbackComponent: FC<ErrorComponentProps>;
+};
+
+export interface ErrorComponentProps {
+  error: Error;
+  errorInfo: ErrorInfo;
+  resetErrorHandler: () => void;
 }
