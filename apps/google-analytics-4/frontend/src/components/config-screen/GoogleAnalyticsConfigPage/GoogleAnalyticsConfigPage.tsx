@@ -49,6 +49,7 @@ export default function GoogleAnalyticsConfigPage() {
 
   useEffect(() => {
     const fetchParametersFromSdk = async () => {
+      console.log('TEST');
       const _parameters = await sdk.app.getParameters();
       if (_parameters) {
         setParameters(_parameters);
