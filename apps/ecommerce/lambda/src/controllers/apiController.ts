@@ -41,6 +41,7 @@ const ApiController = {
           message: 'Could not get ' + entityType,
         });
       }
+      console.log('some git');
     } else {
       res.status(500).send({
         message: `Could not find resource for provider: ${provider}`,
