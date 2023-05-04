@@ -2,17 +2,17 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import MultipleResources from '../components/MultipleResources';
 import SingleResource from '../components/SingleResource';
-import ErrorBoundary from '../components/ErrorBoundary';
-import Fallback from '../components/Fallback';
+import withErrorBoundary from '../hooks/withErrorBoundary';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
   useAutoResizer();
 
-  const output =
-    sdk.parameters.instance.fieldType === 'multiple' ? <MultipleResources /> : <SingleResource />;
+  if (sdk.parameters.instance.fieldType === 'multiple') {
+    return <MultipleResources />;
+  }
 
-  return <ErrorBoundary FallbackComponent={Fallback}>{output}</ErrorBoundary>;
+  return <SingleResource />;
 };
 
-export default Field;
+export default withErrorBoundary(Field);
