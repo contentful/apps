@@ -1,13 +1,16 @@
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../app';
+import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { mockResourceLink } from '../mocks/resourceLink.mock';
 import nock, { RequestBodyMatcher } from 'nock';
 import { mockCombinedResource } from '../mocks/combinedResource.mock';
 import { ResourceLink } from '../types';
+import Sinon from 'sinon';
 
 const BASE_URL = process.env.BASE_URL;
 
+const sandbox = Sinon.createSandbox();
 chai.use(chaiHttp);
 chai.should();
 
@@ -18,11 +21,22 @@ function nockLocalRequest(body: nock.RequestBodyMatcher | ResourceLink) {
 }
 
 describe('API Controller', () => {
+  beforeEach(() => {
+    sandbox.stub(NodeAppsToolkit, 'verifyRequest').get(() => {
+      return () => true;
+    });
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   describe('When sending a ping', () => {
     it('should reply with a pong', (done) => {
       chai
         .request(app)
-        .get('/ping')
+        .get('/api/ping')
+        .set('X-Contentful-Data-Provider', 'shopify')
         .end((error, res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.have.property('message');
@@ -37,7 +51,8 @@ describe('API Controller', () => {
 
       chai
         .request(app)
-        .post('/resource/product')
+        .post('/api/resource/product')
+        .set('X-Contentful-Data-Provider', 'shopify')
         .send(mockResourceLink)
         .end((error, res) => {
           expect(res).to.have.status(200);
@@ -51,7 +66,8 @@ describe('API Controller', () => {
 
       chai
         .request(app)
-        .post('/resource/product')
+        .post('/api/resource/product')
+        .set('X-Contentful-Data-Provider', 'shopify')
         .send({ sys: newResourceLink })
         .end((error, res) => {
           expect(res).to.have.status(500);

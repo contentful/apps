@@ -26,7 +26,8 @@ app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 app.use(apiRouteConstraint, cors(corsConfig));
 
 // verify signed requests on /api/* routes
-app.use(apiRouteConstraint, Middleware.verifiySignedRequests);
+// to test endpoints with Postman, comment out below
+// app.use(apiRouteConstraint, Middleware.verifiySignedRequests);
 
 // serve static files for sample data
 app.use(express.static('public'));
@@ -34,11 +35,6 @@ app.use(express.static('public'));
 app.use('/api', ApiRouter);
 
 app.use('/shopify', ShopifyRouter);
-
-// for Postman calls in development. This bypasses request signing if using Postman to call localhost
-if (config.environment === 'development' || config.environment === 'test') {
-  app.use('/', ApiRouter);
-}
 
 // IMPORTANT: The Sentry error handler must be after all controllers but before any other error handling middleware (with exception of our apiErrorMapper)
 app.use(Middleware.sentryErrorHandler);
