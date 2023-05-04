@@ -14,11 +14,11 @@ chai.should();
 
 function nockLocalRequest(body: nock.RequestBodyMatcher | ResourceLink) {
   return nock(`${BASE_URL}`)
-    .post(/shopify\/resource\/Product\/\d*$/, <RequestBodyMatcher>body)
+    .post(/shopify\/resource$/, <RequestBodyMatcher>body)
     .reply(200, mockCombinedResource);
 }
 
-describe.only('API Controller', () => {
+describe('API Controller', () => {
   describe('When sending a ping', () => {
     it('should reply with a pong', (done) => {
       chai
@@ -38,7 +38,7 @@ describe.only('API Controller', () => {
 
       chai
         .request(app)
-        .post('/resource/product/1234')
+        .post('/resource/product')
         .send(mockResourceLink)
         .end((error, res) => {
           expect(res).to.have.status(200);
@@ -52,7 +52,7 @@ describe.only('API Controller', () => {
 
       chai
         .request(app)
-        .post('/resource/product/1234')
+        .post('/resource/product')
         .send({ sys: newResourceLink })
         .end((error, res) => {
           expect(res).to.have.status(500);

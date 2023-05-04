@@ -9,12 +9,10 @@ const ShopifyController = {
     req: Request<ResourceLink>,
     res: Response<CombinedResource>
   ): Response<CombinedResource> => {
-    return res
-      .send({
-        sys: req.body.sys,
-        ...mockResourceData,
-      })
-      .status(200);
+    return res.send({
+      sys: req.body.sys,
+      ...mockResourceData,
+    });
   },
 };
 
