@@ -8,5 +8,6 @@ module.exports = {
   },
   rules: {
     '@typescript-eslint/ban-types': 0,
+    '@typescript-eslint/explicit-module-boundary-types': 0,
   },
 };
