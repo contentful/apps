@@ -27,7 +27,7 @@ app.use(apiRouteConstraint, cors(corsConfig));
 
 // verify signed requests on /api/* routes
 // to test endpoints with Postman, comment out below
-// app.use(apiRouteConstraint, Middleware.verifiySignedRequests);
+app.use(apiRouteConstraint, Middleware.verifiySignedRequests);
 
 // serve static files for sample data
 app.use(express.static('public'));
