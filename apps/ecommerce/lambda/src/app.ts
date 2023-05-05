@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
 import Middleware from './middlewares';
-import { ApiRouter } from './routers';
+import { ApiRouter, ShopifyRouter } from './routers';
 import { corsConfig } from './middlewares/corsConfig';
 import { config } from './config';
 
@@ -26,12 +26,15 @@ app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 app.use(apiRouteConstraint, cors(corsConfig));
 
 // verify signed requests on /api/* routes
+// to test endpoints with Postman, comment out below
 app.use(apiRouteConstraint, Middleware.verifiySignedRequests);
 
 // serve static files for sample data
 app.use(express.static('public'));
 
 app.use('/api', ApiRouter);
+
+app.use('/shopify', ShopifyRouter);
 
 // IMPORTANT: The Sentry error handler must be after all controllers but before any other error handling middleware (with exception of our apiErrorMapper)
 app.use(Middleware.sentryErrorHandler);
