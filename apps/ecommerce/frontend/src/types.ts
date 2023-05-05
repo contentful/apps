@@ -42,7 +42,7 @@ export interface HydratedResourceData {
   description?: string;
   image?: string;
   status?: EntityStatus;
-  extras?: {};
+  extras?: object;
 }
 
 export interface ResourceCardProps {
