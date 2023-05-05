@@ -13,7 +13,7 @@ class ApiClient {
   }
 
   requestHeaders = () => {
-    let headers = new Headers();
+    const headers = new Headers();
     headers.set('Authorization', 'Basic ' + btoa(`${this.tokenId}:${this.tokenSecret}`));
     headers.set('Content-Type', 'application/json');
     return headers;

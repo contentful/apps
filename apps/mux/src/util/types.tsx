@@ -25,6 +25,7 @@ export interface AppState {
   storyboardToken?: string;
   captionname?: string;
   playerPlaybackId?: string;
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   raw?: any;
 }
 
@@ -68,7 +69,7 @@ export interface Captions {
 export interface captionListProps {
   captions: Array<Captions>;
   requestDeleteCaption: (e) => void;
-  playbackId: String | undefined;
+  playbackId: string | undefined;
   domain: string;
   token: string | undefined;
 }
