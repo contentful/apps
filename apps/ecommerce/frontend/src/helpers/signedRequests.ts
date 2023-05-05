@@ -8,7 +8,7 @@ async function fetchWithSignedRequest(
   cma: PlainClientAPI | CMAClient,
   method: CreateAppSignedRequestProps['method'] = 'GET',
   unsignedHeaders: Record<string, string> = {},
-  body?: string
+  body?: string | object
 ): Promise<Response> {
   const req = {
     url: url,
@@ -16,7 +16,7 @@ async function fetchWithSignedRequest(
     headers: {
       'Content-Type': 'application/json',
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
   };
 
   const rootRelativePath = req.url.pathname;
