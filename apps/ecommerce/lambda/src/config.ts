@@ -20,6 +20,7 @@ const parseSigningSecrets = () => {
 };
 
 export const config = {
+  baseUrl: getEnvironmentVariable('BASE_URL'),
   signingSecrets: parseSigningSecrets(),
   stage: getEnvironmentVariable('STAGE'),
   awsRegion: getEnvironmentVariable('AWS_REGION'),

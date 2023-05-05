@@ -1,25 +1,30 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { config } from '../config';
+import axios from 'axios';
 
 const ApiController = {
   ping: (req: Request, res: Response) => {
     return res.send({ status: 'ok', message: 'pong' });
   },
-  product: (req: Request, res: Response) => {
-    console.log(req.params);
-    return res.send({
-      sys: {
-        type: 'ResourceLink',
-        linkType: 'IntegrationResource',
-        urn: 'crn:shopify:::product:products/8191006998814',
-      },
-      name: 'Metallica T Shirt',
-      description: "An awesome men's T-shirt with metallica on it",
-      status: 'Out of stock',
-      image: 'https://cdn.shopify.com/images/foobar.jpg',
-      extras: {
-        sku: 'abc123',
-      },
-    });
+  resource: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const provider = req.body.sys.provider.toLowerCase();
+
+      const url = `${config.baseUrl}${
+        config.stage === 'dev' ? `/${config.stage}` : ''
+      }/providers/${provider}/resource`;
+      console.debug(`Proxying request to "${url}"...`);
+
+      const proxyResponse = await axios
+        .post(url, req.body)
+        .then((response) => response)
+        .catch((error) => error.response);
+
+      return res.status(proxyResponse.status).send(proxyResponse.data);
+    } catch (error) {
+      console.error('error', error);
+      next(error);
+    }
   },
 };
 

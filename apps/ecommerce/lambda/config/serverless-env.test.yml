@@ -1,2 +1,3 @@
 signingSecrets: ${ssm:/aws/reference/secretsmanager/ci/apps/ecommerce-action/test/signing-secret}
 domainName: ecommerce-test.ctfapps.net
+baseUrl: https://ecommerce-test.ctfapps.net

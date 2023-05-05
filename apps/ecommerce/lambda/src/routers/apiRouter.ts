@@ -3,6 +3,6 @@ import { ApiController } from '../controllers';
 const app = Router();
 
 app.get('/ping', ApiController.ping);
-app.get('/product/:id', ApiController.product);
+app.post('/resource', ApiController.resource);
 
 export default app;
