@@ -1,62 +1,87 @@
 import { EntryCard, MenuItem } from '@contentful/f36-components';
 import { HydratedResourceData, ResourceCardProps, ResourceLink } from '../types';
-import { isEmpty } from 'lodash';
-import { MissingEntityCard } from '@contentful/field-editor-reference';
 import { useEffect, useState } from 'react';
-
-const fetchRemoteData = async (
-  resource: ResourceLink,
-  index?: number
-): Promise<HydratedResourceData> => {
-  return new Promise((resolve) => {
-    const randomTimeout = Math.floor(Math.random() * 3000) + 200; // between 200 and 3000 ms
-
-    setTimeout(async () => {
-      if (index && index === 1) {
-        resolve({});
-      } else {
-        resolve({
-          name: `Product ${index ? index + 1 : ''}`,
-          description: 'Lorem ipsum dolar sit amet',
-          image: 'https://placekitten.com/500/500',
-          status: 'new',
-          extras: {
-            sku: 'abc123',
-          },
-        });
-      }
-    }, randomTimeout);
-  });
-};
+import fetchWithSignedRequest from '../helpers/signedRequests';
+import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { FieldAppSDK } from '@contentful/app-sdk';
+import { config } from '../config';
+import MissingResourceCard from './MissingResourceCard';
+import { useDebounce } from 'usehooks-ts';
 
 const ResourceCard = (props: ResourceCardProps) => {
+  const sdk = useSDK<FieldAppSDK>();
+  const cma = useCMA();
+
   const [hydratedResourceData, setHydratedResourceData] = useState<HydratedResourceData>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [errorStatus, setErrorStatus] = useState<number | undefined>(undefined);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+  const debouncedValue = useDebounce(props.value, 300);
+
+  const hydrateExternalResource = async (resource: ResourceLink) => {
+    const url = new URL(`${config.backendApiUrl}/api/resource`);
+    const data = await fetchWithSignedRequest(
+      url,
+      sdk.ids.app!,
+      cma,
+      'POST',
+      {
+        'x-contentful-data-provider': resource.sys?.provider?.toLowerCase(),
+      },
+      resource
+    )
+      .then((res) => {
+        if (res.ok) {
+          setError(undefined);
+          setErrorStatus(undefined);
+          return res.json();
+        }
+
+        setErrorStatus(res.status);
+        throw new Error(res.statusText);
+      })
+      .then((data) => data)
+      .catch((error) => {
+        console.error(errorStatus, error.message);
+        setError(
+          `Error fetching external resource${resource.sys?.urn ? ` "${resource.sys.urn}"` : ''}${
+            resource.sys?.provider ? ` from ${resource.sys.provider}` : ''
+          }.`
+        );
+        setErrorMessage(error.message);
+        return {};
+      });
+
+    return data;
+  };
 
   useEffect(() => {
-    fetchRemoteData(props.value, props.index).then((remoteData) => {
-      setHydratedResourceData(remoteData);
+    hydrateExternalResource(props.value).then((resource) => {
+      setHydratedResourceData(resource);
       setIsLoading(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [debouncedValue]);
 
-  if (!isLoading && isEmpty(hydratedResourceData)) {
+  if (error) {
     return (
-      <MissingEntityCard
-        entityType="Entry"
-        isDisabled={false}
-        onRemove={() => props.onRemove(props.index)}
+      <MissingResourceCard
+        index={props.index}
+        onRemove={props.onRemove}
+        isLoading={isLoading}
+        error={error}
+        errorMessage={errorMessage}
+        errorStatus={errorStatus}
+        dragHandleRender={props.dragHandleRender}
       />
     );
   }
 
-  let resourceType = props.value.sys.linkType.toString();
-  try {
-    resourceType = props.value.sys.linkType.split('::')[1];
-  } catch (e) {
-    console.error(e);
-  }
+  const provider = props.value.sys?.provider || 'External Resource';
+
+  let resourceType = props.value.sys?.linkType?.toString();
+  if (resourceType) resourceType = resourceType?.split('::')[1];
 
   const actions = [
     <MenuItem key="copy" onClick={() => props.onRemove(props.index)}>
@@ -87,7 +112,7 @@ const ResourceCard = (props: ResourceCardProps) => {
       isLoading={isLoading}
       title={hydratedResourceData.name}
       status={hydratedResourceData.status}
-      contentType={`${props.value.sys.provider} ${resourceType}`}
+      contentType={`${provider} ${resourceType}`}
       thumbnailElement={
         hydratedResourceData.image ? (
           <img src={hydratedResourceData.image} alt={hydratedResourceData.name} />
