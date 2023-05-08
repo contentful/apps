@@ -8,5 +8,5 @@ function getEnvironmentVariable(environmentVariableName: string) {
 }
 
 export const config = {
-  isTestEnv: true,
+  isTestEnv: getEnvironmentVariable('REACT_APP_ENV') === 'development',
 };
