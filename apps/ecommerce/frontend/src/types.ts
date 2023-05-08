@@ -28,7 +28,7 @@ export interface ContentfulContextHeaders {
   'X-Contentful-User'?: string;
 }
 
-export interface ResourceLink {
+export interface ExternalResourceLink {
   sys: {
     type: 'ResourceLink';
     linkType: 'Ecommerce::Product';
@@ -46,7 +46,7 @@ export interface HydratedResourceData {
 }
 
 export interface ResourceCardProps {
-  value: ResourceLink;
+  value: ExternalResourceLink;
   data?: HydratedResourceData;
   index?: number;
   total?: number;

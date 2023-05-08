@@ -5,7 +5,7 @@ import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { mockResourceLink } from '../mocks/resourceLink.mock';
 import nock, { RequestBodyMatcher } from 'nock';
 import { mockCombinedResource } from '../mocks/combinedResource.mock';
-import { ResourceLink } from '../types';
+import { ExternalResourceLink } from '../types';
 import Sinon from 'sinon';
 
 const BASE_URL = process.env.BASE_URL;
@@ -14,7 +14,7 @@ const sandbox = Sinon.createSandbox();
 chai.use(chaiHttp);
 chai.should();
 
-function nockLocalRequest(body: nock.RequestBodyMatcher | ResourceLink) {
+function nockLocalRequest(body: nock.RequestBodyMatcher | ExternalResourceLink) {
   return nock(`${BASE_URL}`)
     .post(/shopify\/resource$/, <RequestBodyMatcher>body)
     .reply(200, mockCombinedResource);
@@ -47,7 +47,7 @@ describe('API Controller', () => {
 
   describe('When sending resource link data', () => {
     it('should return hydrated data when calling a resource', (done) => {
-      nockLocalRequest(<ResourceLink>mockResourceLink);
+      nockLocalRequest(<ExternalResourceLink>mockResourceLink);
 
       chai
         .request(app)

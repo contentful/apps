@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { HydratedResourceData, ResourceLink } from '../types';
+import { HydratedResourceData, ExternalResourceLink } from '../types';
 import { mockResourceData } from '../mocks/resourceData.mock';
 
-type CombinedResource = ResourceLink & HydratedResourceData;
+type CombinedResource = ExternalResourceLink & HydratedResourceData;
 
 const ShopifyController = {
   resource: (
-    req: Request<ResourceLink>,
+    req: Request<ExternalResourceLink>,
     res: Response<CombinedResource>
   ): Response<CombinedResource> => {
     return res.send({

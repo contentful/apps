@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { HydratedResourceData, ResourceLink } from '../types';
+import { HydratedResourceData, ExternalResourceLink } from '../types';
 import ResourceCard from './ResourceCard';
 import { Collapse, Grid, TextLink } from '@contentful/f36-components';
 import { Field } from '@contentful/default-field-editors';
@@ -9,7 +9,7 @@ import { AddContentButton } from './AddContentButton';
 
 const SingleResource = () => {
   const sdk = useSDK<FieldAppSDK>();
-  const [value, setValue] = useState<ResourceLink>(sdk.field.getValue());
+  const [value, setValue] = useState<ExternalResourceLink>(sdk.field.getValue());
   const [data, setData] = useState<HydratedResourceData>({});
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
@@ -19,7 +19,7 @@ const SingleResource = () => {
     });
   }, [sdk.field, setValue]);
 
-  const mockValue: ResourceLink = {
+  const mockValue: ExternalResourceLink = {
     sys: {
       urn: 'gid://products/8191006998814',
       type: 'ResourceLink',

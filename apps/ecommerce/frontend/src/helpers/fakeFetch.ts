@@ -1,7 +1,7 @@
-import { HydratedResourceData, ResourceLink } from '../types';
+import { HydratedResourceData, ExternalResourceLink } from '../types';
 
 const fetchRemoteData = async (
-  resource: ResourceLink,
+  resource: ExternalResourceLink,
   index?: number
 ): Promise<HydratedResourceData> => {
   return new Promise((resolve) => {
