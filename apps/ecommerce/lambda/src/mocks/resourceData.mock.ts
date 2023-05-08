@@ -2,7 +2,7 @@ export const mockResourceData = {
   name: 'Metallica T Shirt',
   description: "An awesome men's T-shirt with metallica on it",
   status: 'Out of stock',
-  image: 'https://cdn.shopify.com/images/foobar.jpg',
+  image: 'https://placekitten.com/500/500',
   extras: {
     sku: 'abc123',
   },

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { HydratedResourceData, ExternalResourceLink } from '@/src/types';
 import { config } from '../config';
-const BASE_URL = config.baseUrl;
+const BASE_URL = `${config.baseUrl}${config.stage === 'prod' ? '' : `/${config.stage}`}`;
 
 const PROVIDERS: Record<string, string> = {
   shopify: `${BASE_URL}/shopify/resource`,
@@ -38,7 +38,9 @@ const ApiController = {
         } catch (error) {
           response = (error as AxiosError).response;
         } finally {
-          res.status((response as AxiosResponse).status).send((response as AxiosResponse).data);
+          res
+            .status((response as AxiosResponse).status)
+            .send(JSON.parse(JSON.stringify((response as AxiosResponse).data)));
         }
       } catch (error) {
         console.log('error', error);

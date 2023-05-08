@@ -51,7 +51,7 @@ describe('API Controller', () => {
 
       chai
         .request(app)
-        .post('/api/resource/product')
+        .post('/api/resource')
         .set('X-Contentful-Data-Provider', 'shopify')
         .send(mockResourceLink)
         .end((error, res) => {
@@ -66,7 +66,7 @@ describe('API Controller', () => {
 
       chai
         .request(app)
-        .post('/api/resource/product')
+        .post('/api/resource')
         .set('X-Contentful-Data-Provider', 'shopify')
         .send({ sys: newResourceLink })
         .end((error, res) => {
