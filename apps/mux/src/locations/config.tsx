@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import React from 'react';
 
 import { AppExtensionSDK, AppConfigAPI, SpaceAPI } from '@contentful/app-sdk';
@@ -248,8 +249,7 @@ class Config extends React.Component<ConfigProps, IState> {
               <TextLink
                 href="https://dashboard.mux.com/settings/access-tokens"
                 rel="noopener noreferrer"
-                target="_blank"
-              >
+                target="_blank">
                 settings on your dashboard
               </TextLink>
               . Note that you must be an admin in your Mux account.
@@ -313,8 +313,7 @@ class Config extends React.Component<ConfigProps, IState> {
                                 fieldId,
                                 (e.target as HTMLInputElement).checked
                               )
-                            }
-                          >
+                            }>
                             {fieldName}
                           </Checkbox>
                         );
@@ -332,8 +331,7 @@ class Config extends React.Component<ConfigProps, IState> {
                 <TextLink
                   href="https://docs.mux.com/docs/headless-cms-contentful#advanced-signed-urls"
                   rel="noopener noreferrer"
-                  target="_blank"
-                >
+                  target="_blank">
                   this guide
                 </TextLink>
                 . To use signed URLs in your application you will have to generate valid JSON web
@@ -346,8 +344,7 @@ class Config extends React.Component<ConfigProps, IState> {
               isDisabled={!this.haveApiCredentials()}
               name="mux-enable-signed-urls"
               isChecked={muxEnableSignedUrls}
-              onChange={(e) => this.toggleSignedUrls((e.target as HTMLInputElement).checked)}
-            >
+              onChange={(e) => this.toggleSignedUrls((e.target as HTMLInputElement).checked)}>
               Enable signed URLs
             </Checkbox>
             {this.state.isEnablingSignedUrls && (
@@ -370,8 +367,7 @@ class Config extends React.Component<ConfigProps, IState> {
             helpText="Adjust audio levels on videos after upload to standard audio levels."
             name="mux-enable-audio-normalize"
             isChecked={muxEnableAudioNormalize}
-            onChange={(e) => this.toggleNormalize((e.target as HTMLInputElement).checked)}
-          >
+            onChange={(e) => this.toggleNormalize((e.target as HTMLInputElement).checked)}>
             Enable Audio Normalization
           </Checkbox>
           <hr className="config-splitter" />
