@@ -1,0 +1,152 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SortableList should render successfully 1`] = `
+<div>
+  <div>
+    <div
+      class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
+      data-test-id="cf-ui-card"
+    >
+      <svg
+        aria-label="Loading component..."
+        class="SkeletonContainer__SkeletonContainer___23jiu css-eiov7n"
+        data-test-id="cf-ui-skeleton-form"
+        height="100%"
+        preserveAspectRatio="xMidYMid meet"
+        role="img"
+        width="100%"
+      >
+        <title>
+          Loading component...
+        </title>
+        <rect
+          clip-path="url(#cf-ui-skeleton-clip-0)"
+          height="100%"
+          style="fill: url(#cf-ui-skeleton-clip-gradient-1);"
+          width="100%"
+          x="0"
+          y="0"
+        />
+        <defs>
+          <clippath
+            id="cf-ui-skeleton-clip-0"
+          >
+            <rect
+              data-test-id="cf-ui-skeleton-image"
+              height="48"
+              rx="0"
+              ry="0"
+              width="48"
+            />
+          </clippath>
+          <lineargradient
+            id="cf-ui-skeleton-clip-gradient-1"
+          >
+            <stop
+              offset="0%"
+              stop-color="#e5ebed"
+              stop-opacity="1"
+            >
+              <animate
+                attributeName="stop-color"
+                dur="2s"
+                id="animation-2"
+                repeatCount="indefinite"
+                values="#e5ebed; #f7f9fa; #e5ebed"
+              />
+            </stop>
+            <stop
+              offset="50%"
+              stop-color="#f7f9fa"
+              stop-opacity="1"
+            >
+              <animate
+                attributeName="stop-color"
+                begin="animation-2.begin+0.25s"
+                dur="2s"
+                repeatCount="indefinite"
+                values="#e5ebed; #f7f9fa; #e5ebed"
+              />
+            </stop>
+            <stop
+              offset="100%"
+              stop-color="#e5ebed"
+              stop-opacity="1"
+            >
+              <animate
+                attributeName="stop-color"
+                begin="animation-2.begin+0.5s"
+                dur="2s"
+                repeatCount="indefinite"
+                values="#e5ebed; #f7f9fa; #e5ebed"
+              />
+            </stop>
+          </lineargradient>
+        </defs>
+      </svg>
+      <div
+        class="css-kx63wx"
+      >
+        <img
+          alt="Mock Category"
+          data-test-id="image"
+          src=""
+          style="display: none;"
+        />
+      </div>
+      <section
+        class="css-1phcpb1"
+      >
+        <div
+          class="Typography__Typography___1ZUfE"
+          data-test-id="cf-ui-text-container"
+        >
+          <h1
+            class="Heading__Heading___83D3K css-1xd3m0r f36-margin-bottom--m"
+            data-test-id="cf-ui-heading"
+          >
+            Mock Category
+          </h1>
+          <h2
+            class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
+            data-test-id="cf-ui-subheading"
+          >
+            abc1234
+          </h2>
+        </div>
+      </section>
+      <div
+        class="css-mfolfb"
+      >
+        <button
+          class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--muted___22_IZ"
+          data-test-id="cf-ui-icon-button"
+          type="button"
+        >
+          <span
+            class="TabFocusTrap__TabFocusTrap___39Vty IconButton__IconButton__inner___3fnmT"
+            tabindex="-1"
+          >
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
+              data-test-id="cf-ui-icon"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+            >
+              <path
+                d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
+              />
+            </svg>
+            <span
+              class="IconButton__IconButton__label___1kp5y helpers__sr-only___3Kv3z"
+            >
+              Delete
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
