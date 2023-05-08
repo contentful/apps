@@ -11,9 +11,6 @@
     }
   },
   "ignoreChanges": [
-    "**/*.md",
-    "**/*.spec.*",
-    "**/test/**",
-    "packages/*/package-lock.json"
+    "**/*.md"
   ]
 }
