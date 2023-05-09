@@ -1,5 +1,5 @@
 // lambda types
-export interface ResourceLink {
+export interface ExternalResourceLink {
   sys: {
     type: 'ResourceLink';
     linkType: 'Ecommerce::Product';

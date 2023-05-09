@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { ResourceLink } from '../types';
+import { ExternalResourceLink } from '../types';
 import ResourceCard from './ResourceCard';
 import { Field } from '@contentful/default-field-editors';
 import { Collapse, Grid, TextLink } from '@contentful/f36-components';
@@ -10,7 +10,7 @@ import { SortableLinkList } from '@contentful/field-editor-reference';
 
 const MultipleResources = () => {
   const sdk = useSDK<FieldAppSDK>();
-  const [value, setValue] = useState<ResourceLink[]>(sdk.field.getValue());
+  const [value, setValue] = useState<ExternalResourceLink[]>(sdk.field.getValue());
   const [total, setTotal] = useState<number>(0);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
@@ -38,7 +38,7 @@ const MultipleResources = () => {
     sdk.field.setValue(newValue);
   };
 
-  const mockValue: ResourceLink = {
+  const mockValue: ExternalResourceLink = {
     sys: {
       urn: 'gid://products/8191006998814',
       type: 'ResourceLink',
@@ -49,7 +49,7 @@ const MultipleResources = () => {
 
   return (
     <Grid rowGap="spacingM">
-      <SortableLinkList<ResourceLink>
+      <SortableLinkList<ExternalResourceLink>
         items={value}
         axis="y"
         useDragHandle={true}

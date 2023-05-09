@@ -1,5 +1,5 @@
 import { EntryCard, MenuItem } from '@contentful/f36-components';
-import { HydratedResourceData, ResourceCardProps, ResourceLink } from '../types';
+import { HydratedResourceData, ResourceCardProps, ExternalResourceLink } from '../types';
 import { useEffect, useState } from 'react';
 import fetchWithSignedRequest from '../helpers/signedRequests';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
@@ -19,7 +19,7 @@ const ResourceCard = (props: ResourceCardProps) => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const debouncedValue = useDebounce(props.value, 300);
 
-  const hydrateExternalResource = async (resource: ResourceLink) => {
+  const hydrateExternalResource = async (resource: ExternalResourceLink) => {
     const url = new URL(`${config.backendApiUrl}/api/resource`);
     const data = await fetchWithSignedRequest(
       url,
@@ -71,6 +71,7 @@ const ResourceCard = (props: ResourceCardProps) => {
         onRemove={props.onRemove}
         isLoading={isLoading}
         error={error}
+        value={JSON.stringify(props.value)}
         errorMessage={errorMessage}
         errorStatus={errorStatus}
         dragHandleRender={props.dragHandleRender}

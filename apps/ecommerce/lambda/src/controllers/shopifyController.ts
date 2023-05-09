@@ -1,14 +1,30 @@
 import { Request, Response } from 'express';
-import { HydratedResourceData, ResourceLink } from '../types';
+import { HydratedResourceData, ExternalResourceLink } from '../types';
 import { mockResourceData } from '../mocks/resourceData.mock';
 
-type CombinedResource = ResourceLink & HydratedResourceData;
+type CombinedResource = ExternalResourceLink & HydratedResourceData;
+interface ErrorResponse {
+  status: 'error';
+  message: string;
+}
 
 const ShopifyController = {
   resource: (
-    req: Request<ResourceLink>,
-    res: Response<CombinedResource>
+    req: Request<ExternalResourceLink>,
+    res: Response<CombinedResource | ErrorResponse>
   ): Response<CombinedResource> => {
+    if (req.body.sys.urn.match(/\/not_found$/)) {
+      return res.status(404).send({
+        status: 'error',
+        message: 'Not found',
+      });
+    } else if (req.body.sys.urn.match(/\/bad_request$/)) {
+      return res.status(400).send({
+        status: 'error',
+        message: 'Bad request',
+      });
+    }
+
     return res.send({
       sys: req.body.sys,
       ...mockResourceData,
