@@ -17,7 +17,7 @@ const MultipleResources = () => {
   useEffect(() => {
     sdk.field.onValueChanged((value) => {
       setValue(value);
-      setTotal(value.length);
+      setTotal(value?.length);
     });
   }, [sdk.field, setValue]);
 
@@ -49,33 +49,35 @@ const MultipleResources = () => {
 
   return (
     <Grid rowGap="spacingM">
-      <SortableLinkList<ExternalResourceLink>
-        items={value}
-        axis="y"
-        useDragHandle={true}
-        isInitiallyDisabled={true}
-        isDisabled={false}
-        hasCardEditActions={false}
-        sdk={sdk}
-        viewType={'card'}
-        parameters={{ instance: {} }}>
-        {({ item, isDisabled, DragHandle, index }) => {
-          return (
-            <Grid.Item>
-              <ResourceCard
-                key={index}
-                index={index}
-                total={total}
-                value={item}
-                dragHandleRender={DragHandle}
-                onRemove={onRemove}
-                onMoveToTop={onMoveToTop}
-                onMoveToBottom={onMoveToBottom}
-              />
-            </Grid.Item>
-          );
-        }}
-      </SortableLinkList>
+      {value && (
+        <SortableLinkList<ExternalResourceLink>
+          items={value}
+          axis="y"
+          useDragHandle={true}
+          isInitiallyDisabled={true}
+          isDisabled={false}
+          hasCardEditActions={false}
+          sdk={sdk}
+          viewType={'card'}
+          parameters={{ instance: {} }}>
+          {({ item, isDisabled, DragHandle, index }) => {
+            return (
+              <Grid.Item>
+                <ResourceCard
+                  key={index}
+                  index={index}
+                  total={total}
+                  value={item}
+                  dragHandleRender={DragHandle}
+                  onRemove={onRemove}
+                  onMoveToTop={onMoveToTop}
+                  onMoveToBottom={onMoveToBottom}
+                />
+              </Grid.Item>
+            );
+          }}
+        </SortableLinkList>
+      )}
       <Grid.Item>
         <AddContentButton onClick={() => sdk.field.setValue([...value, mockValue])} />
       </Grid.Item>
