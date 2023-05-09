@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { ExternalResourceLink } from '../types';
+import { ExternalResourceLink, ProviderLabel } from '../types';
 import ResourceCard from './ResourceCard';
 import { Field } from '@contentful/default-field-editors';
 import { Collapse, Grid, TextLink } from '@contentful/f36-components';
 import { AddContentButton } from './AddContentButton';
 import { SortableLinkList } from '@contentful/field-editor-reference';
+import { startCase } from 'lodash';
 
 const MultipleResources = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -40,10 +41,10 @@ const MultipleResources = () => {
 
   const mockValue: ExternalResourceLink = {
     sys: {
-      urn: 'gid://products/8191006998814',
+      urn: crypto.randomUUID(),
       type: 'ResourceLink',
-      linkType: 'Ecommerce::Product',
-      provider: 'Shopify',
+      linkType: sdk.parameters.instance.linkType,
+      provider: startCase(sdk.parameters.instance.provider) as ProviderLabel,
     },
   };
 
