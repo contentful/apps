@@ -80,7 +80,7 @@ jobs:
           name: Install dependencies
           command: |
             npm ci
-            npm run bootstrap:ci
+            npm run bootstrap:ci-deploy
       - run:
           name: Install awscli
           command: |
@@ -92,7 +92,7 @@ jobs:
           command: |
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-            npm run build
+            npm run build:deploy
       - run:
           name: Deploy apps to staging
           command: |
@@ -118,7 +118,7 @@ jobs:
           name: Install dependencies
           command: |
             npm ci
-            npm run bootstrap:ci
+            npm run bootstrap:ci-deploy
       - run:
           name: Install awscli
           command: |
@@ -130,7 +130,7 @@ jobs:
           command: |
             REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
-            npm run build
+            npm run build:deploy
       - publish
       - run:
           name: Deploy apps to prod
