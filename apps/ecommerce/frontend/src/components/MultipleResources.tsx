@@ -80,7 +80,9 @@ const MultipleResources = () => {
         </SortableLinkList>
       )}
       <Grid.Item>
-        <AddContentButton onClick={() => sdk.field.setValue([...value, mockValue])} />
+        <AddContentButton
+          onClick={() => sdk.field.setValue(value ? [...value, mockValue] : [mockValue])}
+        />
       </Grid.Item>
       <Grid.Item>
         <TextLink as="button" onClick={() => setIsExpanded(!isExpanded)}>

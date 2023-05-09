@@ -33,7 +33,7 @@ export type ProviderLabel = 'Shopify' | 'Magento';
 export interface ExternalResourceLink {
   sys: {
     type: 'ResourceLink';
-    linkType: 'Ecommerce::Product';
+    linkType: 'Ecommerce:Product';
     urn: string;
     provider: ProviderLabel;
   };

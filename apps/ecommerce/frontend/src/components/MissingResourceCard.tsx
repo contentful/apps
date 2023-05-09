@@ -31,7 +31,7 @@ const MissingResourceCard = (props: MissingResourceCardProps) => {
   const [showJson, setShowJson] = useState<boolean>(false);
   const resourceLink = JSON.parse(props.value) as ExternalResourceLink;
   const resourceProvider = resourceLink.sys.provider;
-  const resourceType = resourceLink.sys.linkType.split('::')[1];
+  const resourceType = resourceLink.sys.linkType.split(':')[1];
 
   return (
     <Card

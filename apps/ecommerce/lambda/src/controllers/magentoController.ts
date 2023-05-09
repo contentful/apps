@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { CombinedResource, ErrorResponse, ExternalResourceLink } from '../types';
 import { mockResourceData } from '../mocks/resourceData.mock';
 
-const ShopifyController = {
+const MagentoController = {
   resource: (
     req: Request<ExternalResourceLink>,
     res: Response<CombinedResource | ErrorResponse>
@@ -26,4 +26,4 @@ const ShopifyController = {
   },
 };
 
-export default ShopifyController;
+export default MagentoController;
