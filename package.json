@@ -14,10 +14,12 @@
   "scripts": {
     "bootstrap": "lerna bootstrap --no-ci --since master",
     "bootstrap:ci": "lerna bootstrap --ci --concurrency=3 --since master",
+    "bootstrap:ci-deploy": "lerna bootstrap --ci --concurrency=3",
     "clean": "lerna clean",
     "lint": "lerna run lint --concurrency=3 --since master",
     "verify-config": "lerna run verify-config --concurrency=3 --since master",
     "build": "lerna run build --concurrency=1 --stream --since master",
+    "build:deploy": "lerna run build --concurrency=1 --stream",
     "test": "lerna run test:ci --concurrency=1 --stream --since master",
     "deploy": "lerna run deploy --concurrency=3",
     "deploy:test": "lerna run deploy:test --concurrency=3",
