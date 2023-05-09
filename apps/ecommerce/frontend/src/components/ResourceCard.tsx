@@ -82,7 +82,7 @@ const ResourceCard = (props: ResourceCardProps) => {
   const provider = props.value.sys?.provider || 'External Resource';
 
   let resourceType = props.value.sys?.linkType?.toString();
-  if (resourceType) resourceType = resourceType?.split('::')[1];
+  if (resourceType) resourceType = resourceType?.split(':')[1];
 
   const actions = [
     <MenuItem key="copy" onClick={() => props.onRemove(props.index)}>

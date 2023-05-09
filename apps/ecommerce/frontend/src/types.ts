@@ -28,12 +28,14 @@ export interface ContentfulContextHeaders {
   'X-Contentful-User'?: string;
 }
 
+export type ProviderLabel = 'Shopify' | 'Magento';
+
 export interface ExternalResourceLink {
   sys: {
     type: 'ResourceLink';
-    linkType: 'Ecommerce::Product';
+    linkType: 'Ecommerce:Product';
     urn: string;
-    provider: 'Shopify';
+    provider: ProviderLabel;
   };
 }
 

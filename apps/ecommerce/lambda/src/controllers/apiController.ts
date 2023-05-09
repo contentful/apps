@@ -6,6 +6,7 @@ const BASE_URL = `${config.baseUrl}${config.stage === 'prod' ? '' : `/${config.s
 
 const PROVIDERS: Record<string, string> = {
   shopify: `${BASE_URL}/shopify/resource`,
+  magento: `${BASE_URL}/magento/resource`,
 };
 
 const ApiController = {

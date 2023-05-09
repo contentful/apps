@@ -2,7 +2,7 @@
 export interface ExternalResourceLink {
   sys: {
     type: 'ResourceLink';
-    linkType: 'Ecommerce::Product';
+    linkType: 'Ecommerce:Product';
     urn: string;
     provider: 'Shopify';
   };
@@ -14,4 +14,10 @@ export interface HydratedResourceData {
   image?: string;
   status?: string;
   extras?: object;
+}
+
+export type CombinedResource = ExternalResourceLink & HydratedResourceData;
+export interface ErrorResponse {
+  status: 'error';
+  message: string;
 }

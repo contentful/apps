@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
 import Middleware from './middlewares';
-import { ApiRouter, ShopifyRouter } from './routers';
+import { ApiRouter, MagentoRouter, ShopifyRouter } from './routers';
 import { corsConfig } from './middlewares/corsConfig';
 import { config } from './config';
 
@@ -35,6 +35,7 @@ app.use(express.static('public'));
 app.use('/api', ApiRouter);
 
 app.use('/shopify', ShopifyRouter);
+app.use('/magento', MagentoRouter);
 
 // IMPORTANT: The Sentry error handler must be after all controllers but before any other error handling middleware (with exception of our apiErrorMapper)
 app.use(Middleware.sentryErrorHandler);
