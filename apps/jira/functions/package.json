@@ -15,14 +15,14 @@
   },
   "dependencies": {
     "aws-sdk": "^2.1374.0",
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.10"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.115",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^9.1.1",
     "@types/node": "^12.12.14",
-    "@types/node-fetch": "^2.6.2",
+    "@types/node-fetch": "^2.6.3",
     "@types/request": "^2.48.8",
     "@types/sinon-chai": "^3.2.3",
     "mocha": "^10.0.0",
