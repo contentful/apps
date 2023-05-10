@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# run lint on changed files
+if (lerna run lint --concurrency=3 --since $(git merge-base origin/master HEAD)); then
+  echo "Linting passed"
+else
+  echo "Linting failed"
+  exit 1
+fi
+
+exit 0
