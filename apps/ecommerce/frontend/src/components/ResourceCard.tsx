@@ -1,74 +1,18 @@
 import { Badge, Box, Card, Flex, Grid, Text } from '@contentful/f36-components';
-import { ExternalResource, ResourceCardProps, ExternalResourceLink } from '../types';
-import { useEffect, useState } from 'react';
-import fetchWithSignedRequest from '../helpers/signedRequests';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
-import { FieldAppSDK } from '@contentful/app-sdk';
-import { config } from '../config';
-import MissingResourceCard from './MissingResourceCard';
-import { useDebounce } from 'usehooks-ts';
+import { useState } from 'react';
 import ResourceCardRawData from './ResourceCardRawData';
 import tokens from '@contentful/f36-tokens';
 import ResourceCardMenu from './ResourceCardMenu';
+import { ResourceCardProps } from '../types';
+import MissingResourceCard from './MissingResourceCard';
+import { useDebounce } from 'usehooks-ts';
+import useExternalResource from '../hooks/useExternalResource';
 
 const ResourceCard = (props: ResourceCardProps) => {
-  const sdk = useSDK<FieldAppSDK>();
-  const cma = useCMA();
-
-  const [externalResource, setExternalResource] = useState<ExternalResource>({});
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [errorStatus, setErrorStatus] = useState<number | undefined>(undefined);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const debouncedValue = useDebounce(props.value, 300);
+  const { hydratedResourceData, isLoading, error, errorMessage, errorStatus } =
+    useExternalResource(debouncedValue);
   const [showJson, setShowJson] = useState<boolean>(false);
-
-  const fetchExternalResource = async (resource: ExternalResourceLink) => {
-    const url = new URL(`${config.backendApiUrl}/api/resource`);
-    const [resourceProvider, resourceType] = resource.sys?.linkType?.split(':');
-    const data = await fetchWithSignedRequest(
-      url,
-      sdk.ids.app!,
-      cma,
-      'POST',
-      {
-        'x-contentful-data-provider': resourceProvider.toLowerCase(),
-        'X-Contentful-Data-Provider-BaseURL': sdk.parameters.instance.baseUrl,
-      },
-      resource
-    )
-      .then((res) => {
-        if (res.ok) {
-          setError(undefined);
-          setErrorStatus(undefined);
-          return res.json();
-        }
-
-        setErrorStatus(res.status);
-        throw new Error(res.statusText);
-      })
-      .then((data) => data)
-      .catch((error) => {
-        console.error(errorStatus, error.message);
-        setError(
-          `Error fetching ${resourceType ? resourceType : 'external resource'}${
-            resource.sys?.urn ? ` "${resource.sys.urn}"` : ''
-          }${resourceProvider ? ` from ${resourceProvider}` : ''}.`
-        );
-        setErrorMessage(error.message);
-        return {};
-      });
-
-    return data;
-  };
-
-  useEffect(() => {
-    fetchExternalResource(props.value).then((resource) => {
-      setExternalResource(resource);
-      setIsLoading(false);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedValue]);
 
   if (error) {
     return (
@@ -103,7 +47,9 @@ const ResourceCard = (props: ResourceCardProps) => {
             {resourceProvider} {resourceType}
           </Text>
           <Flex alignItems="center" isInline={true}>
-            {externalResource.status && <Badge variant="featured">{externalResource.status}</Badge>}
+            {hydratedResourceData.status && (
+              <Badge variant="featured">{hydratedResourceData.status}</Badge>
+            )}
             <ResourceCardMenu
               onRemove={() => props.onRemove(props.index)}
               isDataVisible={showJson}
@@ -125,15 +71,20 @@ const ResourceCard = (props: ResourceCardProps) => {
                 fontWeight="fontWeightDemiBold"
                 lineHeight="lineHeightL"
                 isWordBreak={true}>
-                {externalResource.name}
+                {hydratedResourceData.name}
               </Text>
             </Grid.Item>
             <Grid.Item>
-              <Text>{externalResource.description}</Text>
+              <Text>{hydratedResourceData.description}</Text>
             </Grid.Item>
           </Grid>
-          {externalResource.image && (
-            <img src={externalResource.image} alt={externalResource.name} width="70" height="70" />
+          {hydratedResourceData.image && (
+            <img
+              src={hydratedResourceData.image}
+              alt={hydratedResourceData.name}
+              width="70"
+              height="70"
+            />
           )}
         </Flex>
         <ResourceCardRawData
