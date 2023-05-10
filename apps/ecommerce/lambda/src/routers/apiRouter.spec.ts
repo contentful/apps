@@ -8,14 +8,12 @@ import { ExternalResourceLink } from '../types';
 import Sinon from 'sinon';
 import { mockExternalResource } from '../mocks/resourceData.mock';
 
-const BASE_URL = process.env.BASE_URL;
-
 const sandbox = Sinon.createSandbox();
 chai.use(chaiHttp);
 chai.should();
 
 function nockLocalRequest(body: nock.RequestBodyMatcher | ExternalResourceLink) {
-  return nock(`${BASE_URL}`)
+  return nock('http://localhost:8080/test')
     .post(/shopify\/resource$/, <RequestBodyMatcher>body)
     .reply(200, mockExternalResource);
 }
@@ -37,6 +35,7 @@ describe('API Controller', () => {
         .request(app)
         .get('/api/ping')
         .set('X-Contentful-Data-Provider', 'shopify')
+        .set('X-Contentful-Data-Provider-BaseURL', 'http://localhost:8080/dev/shopify')
         .end((error, res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.have.property('message');
@@ -53,6 +52,7 @@ describe('API Controller', () => {
         .request(app)
         .post('/api/resource')
         .set('X-Contentful-Data-Provider', 'shopify')
+        .set('X-Contentful-Data-Provider-BaseURL', 'http://localhost:8080/dev/shopify')
         .send(mockResourceLink)
         .end((error, res) => {
           expect(res).to.have.status(200);

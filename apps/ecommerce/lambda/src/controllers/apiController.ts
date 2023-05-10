@@ -1,13 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ExternalResource, ExternalResourceLink } from '@/src/types';
-import { config } from '../config';
-const BASE_URL = `${config.baseUrl}${config.stage === 'prod' ? '' : `/${config.stage}`}`;
-
-const PROVIDERS: Record<string, string> = {
-  shopify: `${BASE_URL}/shopify/resource`,
-  magento: `${BASE_URL}/magento/resource`,
-};
 
 const ApiController = {
   ping: (req: Request, res: Response) => {
@@ -21,20 +14,26 @@ const ApiController = {
   ) => {
     try {
       const resourceLink: ExternalResourceLink = req.body;
-      const resourceProvider = resourceLink.sys.linkType?.split(':')[0];
-      const proxyUrl = PROVIDERS[resourceProvider?.toLowerCase()];
+      const resourceProvider = req.header('x-contentful-data-provider');
+      const proxyBaseUrl = req.header('x-contentful-data-provider-baseurl');
 
-      if (!proxyUrl) {
+      if (!proxyBaseUrl) {
         return res.status(404).send({
           status: 'error',
-          message: `Provider${resourceProvider ? `: ${resourceProvider}` : ''} not found`,
+          message: `Base URL configuration for provider${
+            resourceProvider ? `: "${resourceProvider}"` : ''
+          } not found`,
         });
       }
+
+      // TODO: fetch provider config from `${proxyBaseUrl}/config.json`
+      const proxyResourceUrl = new URL(proxyBaseUrl);
+      proxyResourceUrl.pathname += `/resource`;
 
       try {
         let response;
         try {
-          response = await axios.post(proxyUrl, resourceLink);
+          response = await axios.post(proxyResourceUrl.toString(), resourceLink);
         } catch (error) {
           response = (error as AxiosError).response;
         } finally {

@@ -33,6 +33,7 @@ const ResourceCard = (props: ResourceCardProps) => {
       'POST',
       {
         'x-contentful-data-provider': resourceProvider.toLowerCase(),
+        'X-Contentful-Data-Provider-BaseURL': sdk.parameters.instance.baseUrl,
       },
       resource
     )
