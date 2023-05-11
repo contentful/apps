@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/contentful/apps.svg?style=svg&circle-token=913f0d4852062fbed644fca927d059d5e3e72908)](https://circleci.com/gh/contentful/apps)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/contentful/apps/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/contentful/apps/tree/master)
 
 # Contentful apps repository
 
