@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ExternalResourceLink } from '../types';
 import ResourceCardRawData from './ResourceCardRawData';
 import ResourceCardMenu from './ResourceCardMenu';
+import getResourceProviderAndType from '../helpers/getResourceProviderAndType';
 
 interface MissingResourceCardProps {
   onRemove: Function;
@@ -23,7 +24,7 @@ interface MissingResourceCardProps {
 const MissingResourceCard = (props: MissingResourceCardProps) => {
   const [showJson, setShowJson] = useState<boolean>(false);
   const resourceLink = JSON.parse(props.value) as ExternalResourceLink;
-  const [resourceProvider, resourceType] = resourceLink.sys.linkType?.split(':');
+  const { resourceProvider, resourceType } = getResourceProviderAndType(resourceLink);
 
   return (
     <Card

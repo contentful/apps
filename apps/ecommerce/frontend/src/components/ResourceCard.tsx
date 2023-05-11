@@ -8,6 +8,7 @@ import { useDebounce } from 'usehooks-ts';
 import useExternalResource from '../hooks/useExternalResource';
 import { ExternalResource, ExternalResourceLink } from '../types';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
+import getResourceProviderAndType from '../helpers/getResourceProviderAndType';
 
 interface Props {
   value: ExternalResourceLink;
@@ -46,7 +47,7 @@ const ResourceCard = (props: Props) => {
     );
   }
 
-  const [resourceProvider, resourceType] = value.sys?.linkType?.split(':');
+  const { resourceProvider, resourceType } = getResourceProviderAndType(value);
 
   return (
     <Card

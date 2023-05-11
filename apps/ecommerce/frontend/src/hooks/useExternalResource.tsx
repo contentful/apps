@@ -4,6 +4,7 @@ import type { FieldAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import fetchWithSignedRequest from '../helpers/signedRequests';
 import { config } from '../config';
+import getResourceProviderAndType from '../helpers/getResourceProviderAndType';
 
 const useExternalResource = (resource?: ExternalResourceLink) => {
   const sdk = useSDK<FieldAppSDK>();
@@ -19,7 +20,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
   const hydrateExternalResource = useCallback(
     async (resource: ExternalResourceLink) => {
       const url = new URL(`${config.backendApiUrl}/api/resource`);
-      const [resourceProvider] = resource.sys?.linkType?.split(':');
+      const { resourceProvider } = getResourceProviderAndType(resource);
 
       const data = await fetchWithSignedRequest(
         url,
@@ -62,7 +63,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
       } catch (error: any) {
         console.error(errorStatus, error.message);
 
-        const [resourceProvider, resourceType] = resource.sys?.linkType?.split(':');
+        const { resourceProvider, resourceType } = getResourceProviderAndType(resource);
         setError(
           `Error fetching ${resourceType ? resourceType : 'external resource'}${
             resource.sys?.urn ? ` "${resource.sys.urn}"` : ''
