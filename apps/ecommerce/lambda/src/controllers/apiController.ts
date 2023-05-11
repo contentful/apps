@@ -33,6 +33,9 @@ const ApiController = {
       try {
         let response;
         try {
+          // TODO: refactor this to get the proxy resource url from the app definition configuration parameters
+          // once this is an internal Contentful service
+          // codeql: ignore-next-line
           response = await axios.post(proxyResourceUrl.toString(), resourceLink);
         } catch (error) {
           response = (error as AxiosError).response;
