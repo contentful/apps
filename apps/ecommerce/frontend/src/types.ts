@@ -55,18 +55,6 @@ export interface ExternalResource {
   extras?: JSONObject;
 }
 
-export interface ResourceCardProps {
-  value: ExternalResourceLink;
-  data?: ExternalResource;
-  index?: number;
-  total?: number;
-  onRemove: Function;
-  withDragHandle?: boolean;
-  dragHandleRender?: RenderDragFn;
-  onMoveToTop?: Function;
-  onMoveToBottom?: Function;
-}
-
 type ErrorBoundaryErrored = { hasError: true; error: Error; info: ErrorInfo };
 type ErrorBoundaryStandby = { hasError: false; error: null; info: null };
 export type ErrorBoundaryState = ErrorBoundaryErrored | ErrorBoundaryStandby;

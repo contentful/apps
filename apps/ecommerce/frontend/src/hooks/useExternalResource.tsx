@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ExternalResourceLink, HydratedResourceData } from '../types';
+import type { ExternalResourceLink, ExternalResource } from '../types';
 import type { FieldAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import fetchWithSignedRequest from '../helpers/signedRequests';
@@ -9,7 +9,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
   const sdk = useSDK<FieldAppSDK>();
   const cma = useCMA();
 
-  const [hydratedResourceData, setHydratedResourceData] = useState<HydratedResourceData>({});
+  const [externalResource, setExternalResource] = useState<ExternalResource>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [error, setError] = useState<string>();
@@ -19,13 +19,15 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
   const hydrateExternalResource = useCallback(
     async (resource: ExternalResourceLink) => {
       const url = new URL(`${config.backendApiUrl}/api/resource`);
+      const [resourceProvider] = resource.sys?.linkType?.split(':');
+
       const data = await fetchWithSignedRequest(
         url,
         sdk.ids.app!,
         cma,
         'POST',
         {
-          'x-contentful-data-provider': resource.sys?.provider?.toLowerCase(),
+          'x-contentful-data-provider': resourceProvider.toLowerCase(),
         },
         resource
       );
@@ -56,13 +58,15 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
 
         const data = await res.json();
 
-        setHydratedResourceData(data);
+        setExternalResource(data);
       } catch (error: any) {
         console.error(errorStatus, error.message);
+
+        const [resourceProvider, resourceType] = resource.sys?.linkType?.split(':');
         setError(
-          `Error fetching external resource${resource.sys?.urn ? ` "${resource.sys.urn}"` : ''}${
-            resource.sys?.provider ? ` from ${resource.sys.provider}` : ''
-          }.`
+          `Error fetching ${resourceType ? resourceType : 'external resource'}${
+            resource.sys?.urn ? ` "${resource.sys.urn}"` : ''
+          }${resourceProvider ? ` from ${resourceProvider}` : ''}.`
         );
         setErrorMessage(error.message);
       }
@@ -78,7 +82,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
   }, [resource]);
 
   return {
-    hydratedResourceData,
+    externalResource,
     isLoading,
     error,
     errorStatus,
