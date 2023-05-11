@@ -6,7 +6,7 @@ import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
 import { config } from '../config';
 
 export const verifySignedRequestMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-  const signingSecrets = config.signingSecrets; // randomize order to avoid biased iteration?
+  const signingSecrets = config.signingSecrets;
   const canonicalReq = makeCanonicalReq(req);
   let isValidReq = false;
 
