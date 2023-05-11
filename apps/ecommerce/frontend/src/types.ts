@@ -1,6 +1,5 @@
 import type { IdsAPI } from '@contentful/app-sdk';
 import type { EntityStatus } from '@contentful/f36-components';
-import type { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 import type { ErrorInfo, FC, ReactNode } from 'react';
 
 // TODO: get this exported from the SDK
