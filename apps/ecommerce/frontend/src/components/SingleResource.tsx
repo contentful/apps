@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { HydratedResourceData, ExternalResourceLink, ProviderLabel } from '../types';
+import { ExternalResource, ExternalResourceLink } from '../types';
 import ResourceCard from './ResourceCard';
 import { Collapse, Grid, TextLink } from '@contentful/f36-components';
 import { Field } from '@contentful/default-field-editors';
 import { AddContentButton } from './AddContentButton';
-import { startCase } from 'lodash';
 
 const SingleResource = () => {
   const sdk = useSDK<FieldAppSDK>();
   const [value, setValue] = useState<ExternalResourceLink>(sdk.field.getValue());
-  const [data, setData] = useState<HydratedResourceData>({});
+  const [data, setData] = useState<ExternalResource>({});
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -25,7 +24,9 @@ const SingleResource = () => {
       urn: crypto.randomUUID(),
       type: 'ResourceLink',
       linkType: sdk.parameters.instance.linkType,
-      provider: startCase(sdk.parameters.instance.provider) as ProviderLabel,
+    },
+    metadata: {
+      resourceType: 'Commerce:Product',
     },
   };
 
@@ -43,7 +44,7 @@ const SingleResource = () => {
           sku: 'abc123',
         },
       };
-      setData(Object.assign(mockData, { sys: value }) as HydratedResourceData);
+      setData(Object.assign(mockData, { sys: value }) as ExternalResource);
     } else {
       setData({});
     }

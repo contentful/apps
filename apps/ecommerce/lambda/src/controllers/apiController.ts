@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { HydratedResourceData, ExternalResourceLink } from '@/src/types';
+import { ExternalResource, ExternalResourceLink } from '@/src/types';
 import { config } from '../config';
 const BASE_URL = `${config.baseUrl}${config.stage === 'prod' ? '' : `/${config.stage}`}`;
 
@@ -16,19 +16,18 @@ const ApiController = {
 
   resource: async (
     req: Request,
-    res: Response<HydratedResourceData | { error?: unknown; message: string }>,
+    res: Response<ExternalResource | { error?: unknown; message: string }>,
     next: NextFunction
   ) => {
     try {
       const resourceLink: ExternalResourceLink = req.body;
-      const proxyUrl = PROVIDERS[resourceLink.sys.provider.toLowerCase()];
+      const resourceProvider = resourceLink.sys.linkType?.split(':')[0];
+      const proxyUrl = PROVIDERS[resourceProvider?.toLowerCase()];
 
       if (!proxyUrl) {
         return res.status(404).send({
           status: 'error',
-          message: `Provider${
-            resourceLink.sys.provider ? `: ${resourceLink.sys.provider}` : ''
-          } not found`,
+          message: `Provider${resourceProvider ? `: ${resourceProvider}` : ''} not found`,
         });
       }
 

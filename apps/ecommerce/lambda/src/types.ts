@@ -1,22 +1,32 @@
 // lambda types
+
+export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
+
+export interface JSONObject {
+  [key: string]: JSONValue;
+}
+
+export type ExternalResourceLinkType = `${Capitalize<string>}:${Capitalize<string>}`;
+
 export interface ExternalResourceLink {
   sys: {
     type: 'ResourceLink';
-    linkType: 'Ecommerce:Product';
+    linkType: ExternalResourceLinkType;
     urn: string;
-    provider: 'Shopify';
+  };
+  metadata?: {
+    [key: string]: JSONValue;
   };
 }
 
-export interface HydratedResourceData {
+export interface ExternalResource {
   name?: string;
   description?: string;
   image?: string;
   status?: string;
-  extras?: object;
+  extras?: JSONObject;
 }
 
-export type CombinedResource = ExternalResourceLink & HydratedResourceData;
 export interface ErrorResponse {
   status: 'error';
   message: string;
