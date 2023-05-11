@@ -1,8 +1,10 @@
 export const mockResourceLink = {
   sys: {
     type: 'ResourceLink',
-    linkType: 'Ecommerce:Product',
+    linkType: 'Shopify:Product',
     urn: 'gid://shopify/Product/123456789',
-    provider: 'shopify',
+  },
+  metadata: {
+    resourceType: 'Commerce:Product',
   },
 };
