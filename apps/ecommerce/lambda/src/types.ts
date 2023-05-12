@@ -19,5 +19,5 @@ export interface HydratedResourceData {
 export type CombinedResource = ExternalResourceLink & HydratedResourceData;
 export interface ErrorResponse {
   status: 'error';
-  message: string;
+  message: string | unknown;
 }

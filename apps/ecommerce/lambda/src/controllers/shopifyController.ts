@@ -1,23 +1,43 @@
-import { LATEST_API_VERSION, ConfigParams, ApiVersion } from '@shopify/shopify-api';
 import { Request, Response } from 'express';
 import { CombinedResource, ErrorResponse, ExternalResourceLink } from '../types';
 import Client from 'shopify-buy';
 import { convertResponseToResource } from '../helpers/shopifyAdapter'
 
-// Initializing a client to return content in the store's primary language
-const client = Client.buildClient({
-  domain: 'contentful-test-app.myshopify.com',
-  storefrontAccessToken: '',
-  apiVersion: ApiVersion.April23
-});
+interface ShopifyParams {
+  domain: string,
+  storefrontAccessToken: string,
+}
+
+const makeShopifyClient = (params: ShopifyParams) => {
+  return Client.buildClient({
+    ...params,
+    apiVersion: "2023-04"
+  });
+}
 
 const ShopifyController = {
+  healthcheck: async (req: Request<ShopifyParams>, res: Response): Promise<Response> => {
+    try {
+      const client = makeShopifyClient({
+        domain: req.body.domain, storefrontAccessToken: req.body.storefrontAccessToken,
+      });
+      const response = await client.shop.fetchInfo();
+      return res.send(response);
+    } catch (error) {
+      return res.status(500).send({
+        status: 'error',
+        message: error
+      })
+    }
+  },
   resource: async (
     req: Request<ExternalResourceLink>,
     res: Response<CombinedResource | ErrorResponse>
   ): Promise<Response<CombinedResource>> => {
-    const product = await client.product.fetch('gid://shopify/Product/8191006671134');
-
+    const id = req.body.sys.urn
+    const client = makeShopifyClient({
+      domain: req.body.domain, storefrontAccessToken: req.body.storefrontAccessToken,
+    })
     if (req.body.sys.urn.match(/\/not_found$/)) {
       return res.status(404).send({
         status: 'error',
@@ -30,10 +50,20 @@ const ShopifyController = {
       });
     }
 
-    return res.send({
-      sys: req.body.sys,
-      ...convertResponseToResource(product),
-    });
+    try {
+      const product = await client.product.fetch(id);
+      return res.send({
+        sys: req.body.sys,
+        ...convertResponseToResource(product),
+      });
+    } catch (error) {
+      return res.status(500).send({
+        status: 'error',
+        message: error
+      })
+    }
+
+
   },
 };
 
