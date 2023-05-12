@@ -26,9 +26,8 @@ const ApiController = {
       if (!proxyUrl) {
         return res.status(404).send({
           status: 'error',
-          message: `Provider${
-            resourceLink.sys.provider ? `: ${resourceLink.sys.provider}` : ''
-          } not found`,
+          message: `Provider${resourceLink.sys.provider ? `: ${resourceLink.sys.provider}` : ''
+            } not found`,
         });
       }
 
@@ -44,7 +43,6 @@ const ApiController = {
             .send(JSON.parse(JSON.stringify((response as AxiosResponse).data)));
         }
       } catch (error) {
-        console.log('error', error);
         res.status(500).send({
           status: 'error',
           message: 'Error fetching resource',
