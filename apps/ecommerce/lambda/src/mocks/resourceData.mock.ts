@@ -1,4 +1,4 @@
-export const mockResourceData = {
+export const mockExternalResource = {
   name: 'Metallica T Shirt',
   description: "An awesome men's T-shirt with metallica on it",
   status: 'Out of stock',

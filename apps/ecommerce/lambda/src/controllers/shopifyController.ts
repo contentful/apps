@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CombinedResource, ErrorResponse, ExternalResourceLink } from '../types';
+import { ExternalResourceLink, ErrorResponse } from '../types';
 import Client from 'shopify-buy';
 import { convertResponseToResource } from '../helpers/shopifyAdapter'
 
@@ -32,8 +32,8 @@ const ShopifyController = {
   },
   resource: async (
     req: Request<ExternalResourceLink>,
-    res: Response<CombinedResource | ErrorResponse>
-  ): Promise<Response<CombinedResource>> => {
+    res: Response<ExternalResourceLink | ErrorResponse>
+  ): Promise<Response<ExternalResourceLink>> => {
     const id = req.body.sys.urn
     const client = makeShopifyClient({
       domain: req.body.domain, storefrontAccessToken: req.body.storefrontAccessToken,

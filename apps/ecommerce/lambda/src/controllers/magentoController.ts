@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import { CombinedResource, ErrorResponse, ExternalResourceLink } from '../types';
-import { mockResourceData } from '../mocks/resourceData.mock';
+import { ErrorResponse, ExternalResource, ExternalResourceLink } from '../types';
+import { mockExternalResource } from '../mocks/resourceData.mock';
 
 const MagentoController = {
   resource: (
     req: Request<ExternalResourceLink>,
-    res: Response<CombinedResource | ErrorResponse>
-  ): Response<CombinedResource> => {
+    res: Response<ExternalResource | ErrorResponse>
+  ): Response<ExternalResource> => {
     if (req.body.sys.urn.match(/\/not_found$/)) {
       return res.status(404).send({
         status: 'error',
@@ -19,10 +19,7 @@ const MagentoController = {
       });
     }
 
-    return res.send({
-      sys: req.body.sys,
-      ...mockResourceData,
-    });
+    return res.send(mockExternalResource);
   },
 };
 

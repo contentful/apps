@@ -1,5 +1,5 @@
-import { EntryCard, MenuItem } from '@contentful/f36-components';
-import { HydratedResourceData, ResourceCardProps, ExternalResourceLink } from '../types';
+import { Badge, Box, Card, Flex, Grid, Text } from '@contentful/f36-components';
+import { ExternalResource, ResourceCardProps, ExternalResourceLink } from '../types';
 import { useEffect, useState } from 'react';
 import fetchWithSignedRequest from '../helpers/signedRequests';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
@@ -7,27 +7,33 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 import { config } from '../config';
 import MissingResourceCard from './MissingResourceCard';
 import { useDebounce } from 'usehooks-ts';
+import ResourceCardRawData from './ResourceCardRawData';
+import tokens from '@contentful/f36-tokens';
+import ResourceCardMenu from './ResourceCardMenu';
 
 const ResourceCard = (props: ResourceCardProps) => {
   const sdk = useSDK<FieldAppSDK>();
   const cma = useCMA();
 
-  const [hydratedResourceData, setHydratedResourceData] = useState<HydratedResourceData>({});
+  const [externalResource, setExternalResource] = useState<ExternalResource>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const [errorStatus, setErrorStatus] = useState<number | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const debouncedValue = useDebounce(props.value, 300);
+  const [showJson, setShowJson] = useState<boolean>(false);
 
-  const hydrateExternalResource = async (resource: ExternalResourceLink) => {
+  const fetchExternalResource = async (resource: ExternalResourceLink) => {
     const url = new URL(`${config.backendApiUrl}/api/resource`);
+    const [resourceProvider, resourceType] = resource.sys?.linkType?.split(':');
     const data = await fetchWithSignedRequest(
       url,
       sdk.ids.app!,
       cma,
       'POST',
       {
-        'x-contentful-data-provider': resource.sys?.provider?.toLowerCase(),
+        'x-contentful-data-provider': resourceProvider.toLowerCase(),
+        'X-Contentful-Data-Provider-BaseURL': sdk.parameters.instance.baseUrl,
       },
       resource
     )
@@ -45,9 +51,9 @@ const ResourceCard = (props: ResourceCardProps) => {
       .catch((error) => {
         console.error(errorStatus, error.message);
         setError(
-          `Error fetching external resource${resource.sys?.urn ? ` "${resource.sys.urn}"` : ''}${
-            resource.sys?.provider ? ` from ${resource.sys.provider}` : ''
-          }.`
+          `Error fetching ${resourceType ? resourceType : 'external resource'}${
+            resource.sys?.urn ? ` "${resource.sys.urn}"` : ''
+          }${resourceProvider ? ` from ${resourceProvider}` : ''}.`
         );
         setErrorMessage(error.message);
         return {};
@@ -57,8 +63,8 @@ const ResourceCard = (props: ResourceCardProps) => {
   };
 
   useEffect(() => {
-    hydrateExternalResource(props.value).then((resource) => {
-      setHydratedResourceData(resource);
+    fetchExternalResource(props.value).then((resource) => {
+      setExternalResource(resource);
       setIsLoading(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,7 +74,10 @@ const ResourceCard = (props: ResourceCardProps) => {
     return (
       <MissingResourceCard
         index={props.index}
+        total={props.total}
         onRemove={props.onRemove}
+        onMoveToBottom={props.onMoveToBottom}
+        onMoveToTop={props.onMoveToTop}
         isLoading={isLoading}
         error={error}
         value={JSON.stringify(props.value)}
@@ -79,52 +88,61 @@ const ResourceCard = (props: ResourceCardProps) => {
     );
   }
 
-  const provider = props.value.sys?.provider || 'External Resource';
-
-  let resourceType = props.value.sys?.linkType?.toString();
-  if (resourceType) resourceType = resourceType?.split(':')[1];
-
-  const actions = [
-    <MenuItem key="copy" onClick={() => props.onRemove(props.index)}>
-      Remove
-    </MenuItem>,
-  ];
-
-  if (typeof props.index !== 'undefined' && props.total && props.total > 1) {
-    if (props.index > 0 && props.onMoveToTop) {
-      actions.push(
-        <MenuItem key="moveToTop" onClick={() => props.onMoveToTop}>
-          Move to top
-        </MenuItem>
-      );
-    }
-
-    if (props.total !== props.index + 1 && props.onMoveToBottom) {
-      actions.push(
-        <MenuItem key="moveToBottom" onClick={() => props.onMoveToBottom}>
-          Move to bottom
-        </MenuItem>
-      );
-    }
-  }
+  const [resourceProvider, resourceType] = props.value.sys?.linkType?.split(':');
 
   return (
-    <EntryCard
+    <Card
+      padding="none"
       isLoading={isLoading}
-      title={hydratedResourceData.name}
-      status={hydratedResourceData.status}
-      contentType={`${provider} ${resourceType}`}
-      thumbnailElement={
-        hydratedResourceData.image ? (
-          <img src={hydratedResourceData.image} alt={hydratedResourceData.name} />
-        ) : undefined
-      }
-      actions={actions}
       withDragHandle={!!props.dragHandleRender}
       dragHandleRender={props.dragHandleRender}
       isHovered={false}>
-      {hydratedResourceData.description}
-    </EntryCard>
+      <Box paddingLeft="spacingM" style={{ borderBottom: `1px solid ${tokens.gray200}` }}>
+        <Flex alignItems="center" fullWidth={true} justifyContent="space-between">
+          <Text fontColor="gray600" isWordBreak={true}>
+            {resourceProvider} {resourceType}
+          </Text>
+          <Flex alignItems="center" isInline={true}>
+            {externalResource.status && <Badge variant="featured">{externalResource.status}</Badge>}
+            <ResourceCardMenu
+              onRemove={() => props.onRemove(props.index)}
+              isDataVisible={showJson}
+              onToggleDataVisible={() => setShowJson((previousState) => !previousState)}
+              index={props.index}
+              total={props.total}
+              onMoveToBottom={() => props.onMoveToBottom?.call(null, props.index)}
+              onMoveToTop={() => props.onMoveToTop?.call(null, props.index)}
+            />
+          </Flex>
+        </Flex>
+      </Box>
+      <Box padding="spacingM">
+        <Flex fullWidth={true} justifyContent="space-between">
+          <Grid rowGap="spacingXs">
+            <Grid.Item>
+              <Text
+                fontSize="fontSizeL"
+                fontWeight="fontWeightDemiBold"
+                lineHeight="lineHeightL"
+                isWordBreak={true}>
+                {externalResource.name}
+              </Text>
+            </Grid.Item>
+            <Grid.Item>
+              <Text>{externalResource.description}</Text>
+            </Grid.Item>
+          </Grid>
+          {externalResource.image && (
+            <img src={externalResource.image} alt={externalResource.name} width="70" height="70" />
+          )}
+        </Flex>
+        <ResourceCardRawData
+          value={JSON.stringify(props.value)}
+          isVisible={showJson}
+          onHide={() => setShowJson(false)}
+        />
+      </Box>
+    </Card>
   );
 };
 

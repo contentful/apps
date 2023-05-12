@@ -28,28 +28,36 @@ export interface ContentfulContextHeaders {
   'X-Contentful-User'?: string;
 }
 
-export type ProviderLabel = 'Shopify' | 'Magento';
+export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
+
+export interface JSONObject {
+  [key: string]: JSONValue;
+}
+
+export type ExternalResourceLinkType = `${Capitalize<string>}:${Capitalize<string>}`;
 
 export interface ExternalResourceLink {
   sys: {
     type: 'ResourceLink';
-    linkType: 'Ecommerce:Product';
+    linkType: ExternalResourceLinkType;
     urn: string;
-    provider: ProviderLabel;
+  };
+  metadata?: {
+    [key: string]: JSONValue;
   };
 }
 
-export interface HydratedResourceData {
+export interface ExternalResource {
   name?: string;
   description?: string;
   image?: string;
   status?: EntityStatus;
-  extras?: object;
+  extras?: JSONObject;
 }
 
 export interface ResourceCardProps {
   value: ExternalResourceLink;
-  data?: HydratedResourceData;
+  data?: ExternalResource;
   index?: number;
   total?: number;
   onRemove: Function;

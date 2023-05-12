@@ -1,9 +1,9 @@
-import { HydratedResourceData, ExternalResourceLink } from '../types';
+import { ExternalResource, ExternalResourceLink } from '../types';
 
 const fetchRemoteData = async (
   resource: ExternalResourceLink,
   index?: number
-): Promise<HydratedResourceData> => {
+): Promise<ExternalResource> => {
   return new Promise((resolve) => {
     const randomTimeout = Math.floor(Math.random() * 3000) + 200; // between 200 and 3000 ms
 
