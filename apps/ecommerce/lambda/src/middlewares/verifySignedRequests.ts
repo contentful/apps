@@ -19,7 +19,7 @@ export const verifySignedRequestMiddleware = (req: Request, _res: Response, next
         isValidReq = true;
       }
     } catch (e) {
-      console.error(e)
+      console.error(e);
       throw new UnableToVerifyRequest('Unable to verify request', {
         cause: e,
       });
