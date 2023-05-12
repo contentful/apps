@@ -21,8 +21,9 @@ const ApiController = {
       if (!proxyBaseUrl) {
         return res.status(404).send({
           status: 'error',
-          message: `Base URL configuration for provider${resourceProvider ? `: "${resourceProvider}"` : ''
-            } not found`,
+          message: `Base URL configuration for provider${
+            resourceProvider ? `: "${resourceProvider}"` : ''
+          } not found`,
         });
       }
 
