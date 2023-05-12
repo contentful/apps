@@ -1,5 +1,5 @@
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { ExternalResourceLink } from '../types';
+import { ExternalResourceLink } from 'types';
 
 const mockValue = (sdk: FieldAppSDK) =>
   ({

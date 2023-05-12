@@ -1,4 +1,4 @@
-import { ExternalResource, ExternalResourceLink } from '../types';
+import { ExternalResource, ExternalResourceLink } from 'types';
 
 const fetchRemoteData = async (
   resource: ExternalResourceLink,

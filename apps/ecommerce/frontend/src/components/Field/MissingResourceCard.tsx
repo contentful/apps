@@ -2,10 +2,10 @@ import { Badge, Box, Card, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 import { useState } from 'react';
-import { ExternalResourceLink } from '../types';
+import { ExternalResourceLink } from 'types';
 import ResourceCardRawData from './ResourceCardRawData';
 import ResourceCardMenu from './ResourceCardMenu';
-import { getResourceProviderAndType } from '../helpers/resourceProviderUtils';
+import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
 
 interface MissingResourceCardProps {
   onRemove: Function;

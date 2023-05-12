@@ -5,10 +5,10 @@ import tokens from '@contentful/f36-tokens';
 import ResourceCardMenu from './ResourceCardMenu';
 import MissingResourceCard from './MissingResourceCard';
 import { useDebounce } from 'usehooks-ts';
-import useExternalResource from '../hooks/useExternalResource';
-import { ExternalResource, ExternalResourceLink } from '../types';
+import useExternalResource from 'hooks/useExternalResource';
+import { ExternalResource, ExternalResourceLink } from 'types';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
-import { getResourceProviderAndType } from '../helpers/resourceProviderUtils';
+import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
 
 interface Props {
   value: ExternalResourceLink;

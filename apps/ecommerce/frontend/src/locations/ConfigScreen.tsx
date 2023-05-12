@@ -1,8 +1,8 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Button } from '@contentful/f36-components';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
-import fetchWithSignedRequest from '../helpers/signedRequests';
+import fetchWithSignedRequest from 'helpers/signedRequests';
 
 export interface AppInstallationParameters {}
 

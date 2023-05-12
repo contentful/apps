@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import ErrorBoundary from '../components/ErrorBoundary';
-import { ErrorComponentProps } from '../types';
+import ErrorBoundary from 'components/Field/ErrorBoundary';
+import { ErrorComponentProps } from 'types';
 
 function withErrorBoundary<TProps extends JSX.IntrinsicAttributes>(
   Component: FC,

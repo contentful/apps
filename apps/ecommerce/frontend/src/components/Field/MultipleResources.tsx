@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { ExternalResourceLink } from '../types';
+import { ExternalResourceLink } from 'types';
 import ResourceList from './ResourceList';
-import mockValue from '../helpers/mockValue';
+import mockValue from 'helpers/mockValue';
 
 const MultipleResources = () => {
   const sdk = useSDK<FieldAppSDK>();

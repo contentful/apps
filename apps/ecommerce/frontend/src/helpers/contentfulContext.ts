@@ -1,4 +1,4 @@
-import { ContentfulContext } from '../types';
+import { ContentfulContext } from 'types';
 import { KnownSDK, locations } from '@contentful/app-sdk';
 
 const Locations = [

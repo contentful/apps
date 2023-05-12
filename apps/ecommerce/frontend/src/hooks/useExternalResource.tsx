@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ExternalResourceLink, ExternalResource } from '../types';
+import type { ExternalResourceLink, ExternalResource } from 'types';
 import type { FieldAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
-import fetchWithSignedRequest from '../helpers/signedRequests';
-import { config } from '../config';
-import { getResourceProviderAndType } from '../helpers/resourceProviderUtils';
+import fetchWithSignedRequest from 'helpers/signedRequests';
+import { config } from 'config';
+import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
 
 const useExternalResource = (resource?: ExternalResourceLink) => {
   const sdk = useSDK<FieldAppSDK>();

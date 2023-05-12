@@ -2,7 +2,7 @@ import { Box, Button, Flex, Note } from '@contentful/f36-components';
 import { Field as DefaultField } from '@contentful/default-field-editors';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { ErrorComponentProps } from '../types';
+import { ErrorComponentProps } from 'types';
 import tokens from '@contentful/f36-tokens';
 
 const FieldFallback = ({ error, resetErrorHandler }: ErrorComponentProps) => {
