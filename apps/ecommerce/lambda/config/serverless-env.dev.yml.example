@@ -3,4 +3,4 @@ signingSecrets: '{
   "app_name_2": "<APP_2_SIGNING_KEY_GOES_HERE>",
   "app_name_3": "<APP_3_SIGNING_KEY_GOES_HERE>"
   }'
-domainName: ecommerce-test.ctfapps.net
+domainName: localhost

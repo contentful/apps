@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ExternalResource, ExternalResourceLink } from '@/src/types';
+import { config } from '../config';
 
 const ApiController = {
   ping: (req: Request, res: Response) => {
@@ -30,12 +31,17 @@ const ApiController = {
       const proxyResourceUrl = new URL(proxyBaseUrl);
       proxyResourceUrl.pathname += `/resource`;
 
+      // prevent SSRF exploits
+      // TODO: refactor this to get the proxy resource url from the app definition
+      // configuration parameters once this is an internal Contentful service
+      if (proxyResourceUrl.hostname !== config.domainName) {
+        // temporary: only support data provider proxying on the same domain to avoid SSRF exploits
+        throw new Error(`Invalid data provider base URL. Hostname must be ${config.domainName}`);
+      }
+
       try {
         let response;
         try {
-          // TODO: refactor this to get the proxy resource url from the app definition configuration parameters
-          // once this is an internal Contentful service
-          // codeql: ignore-next-line
           response = await axios.post(proxyResourceUrl.toString(), resourceLink);
         } catch (error) {
           response = (error as AxiosError).response;
