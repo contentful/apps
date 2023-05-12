@@ -9,7 +9,7 @@
     "@contentful/f36-icons": "^4.25.0",
     "@contentful/f36-tokens": "4.0.1",
     "@contentful/field-editor-reference": "^5.9.0",
-    "@contentful/integration-component-library": "^1.1.12",
+    "@contentful/integration-component-library": "^1.1.28",
     "@contentful/react-apps-toolkit": "1.2.15",
     "@sentry/react": "^7.49.0",
     "contentful-management": "10.32.0",
