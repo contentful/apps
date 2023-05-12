@@ -51,7 +51,6 @@ const ApiController = {
             .send(JSON.parse(JSON.stringify((response as AxiosResponse).data)));
         }
       } catch (error) {
-        console.log('error', error);
         res.status(500).send({
           status: 'error',
           message: 'Error fetching resource',

@@ -29,5 +29,5 @@ export interface ExternalResource {
 
 export interface ErrorResponse {
   status: 'error';
-  message: string;
+  message: string | unknown;
 }
