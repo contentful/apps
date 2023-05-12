@@ -26,5 +26,5 @@ export const config = {
   sentryDSN: getEnvironmentVariable('SENTRY_DSN'),
   environment: getEnvironmentVariable('NODE_ENV'),
   release: getEnvironmentVariable('CIRCLE_SHA1', 'no-release-hash-set'),
-  baseUrl: getEnvironmentVariable('BASE_URL'),
+  domainName: getEnvironmentVariable('DOMAIN_NAME'),
 };
