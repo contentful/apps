@@ -38,24 +38,30 @@ const ShopifyController = {
     const client = makeShopifyClient({
       domain: req.body.domain, storefrontAccessToken: req.body.storefrontAccessToken,
     })
-    if (req.body.sys.urn.match(/\/not_found$/)) {
+    if (id.match(/\/not_found$/)) {
       return res.status(404).send({
         status: 'error',
         message: 'Not found',
       });
-    } else if (req.body.sys.urn.match(/\/bad_request$/)) {
+    } else if (id.match(/\/bad_request$/)) {
       return res.status(400).send({
         status: 'error',
         message: 'Bad request',
       });
     }
-
     try {
       const product = await client.product.fetch(id);
-      return res.send({
-        sys: req.body.sys,
-        ...convertResponseToResource(product),
-      });
+      if (product) {
+        return res.send({
+          sys: req.body.sys,
+          ...convertResponseToResource(product),
+        });
+      } else {
+        return res.status(404).send({
+          status: 'error',
+          message: `Product Not Found for id ${id}`
+        })
+      }
     } catch (error) {
       return res.status(500).send({
         status: 'error',

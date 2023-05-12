@@ -19,7 +19,6 @@ export const verifySignedRequestMiddleware = (req: Request, _res: Response, next
         isValidReq = true;
       }
     } catch (e) {
-      console.error(e);
       throw new UnableToVerifyRequest('Unable to verify request', {
         cause: e,
       });
@@ -29,7 +28,7 @@ export const verifySignedRequestMiddleware = (req: Request, _res: Response, next
   if (!isValidReq) {
     throw new InvalidSignature(
       'Request does not have a valid request signature. ' +
-        'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
+      'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
     );
   }
 
