@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { ErrorResponse, ExternalResource, ExternalResourceLink } from '../types';
+import { ErrorResponse, ExternalResource, ExternalResourceLink, ProviderConfig } from '../types';
 import { mockExternalResource } from '../mocks/resourceData.mock';
+import { PROVIDER_CONFIGS } from '../mocks/providerConfigs';
 
 const MagentoController = {
   resource: (
@@ -20,6 +21,9 @@ const MagentoController = {
     }
 
     return res.send(mockExternalResource);
+  },
+  config: (_req: Request, res: Response<ProviderConfig>): Response<ProviderConfig> => {
+    return res.send(PROVIDER_CONFIGS.magento);
   },
 };
 
