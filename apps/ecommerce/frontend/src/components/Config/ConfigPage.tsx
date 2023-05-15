@@ -10,6 +10,7 @@ import {
   Flex,
   TextInput,
   Skeleton,
+  Subheading,
 } from '@contentful/f36-components';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './ConfigPage.styles';
@@ -56,7 +57,7 @@ const ConfigPage = () => {
 
           return res.json();
         })
-        .then((data) => setProviderConfig(data))
+        .then((data) => setProviderConfig({ ...data, logo: `${baseUrl}/${data.logo}` }))
         .catch((error) => sdk.notifier.error(error.message))
         .finally(() => setIsLoading(false));
     },
@@ -111,26 +112,27 @@ const ConfigPage = () => {
     setParameters({ ...parameters, [key]: value });
   };
 
-  const loadingSkeleton = () => {
+  const LoadingSkeleton = () => {
     return (
       <Skeleton.Container>
-        <Skeleton.BodyText numberOfLines={4} />
+        <Skeleton.DisplayText />
+        <Skeleton.BodyText offsetTop={40} numberOfLines={4} />
       </Skeleton.Container>
     );
   };
 
   return (
     <>
-      <Box className={styles.background} testId="configPageContainer" />
+      <Box className={styles.background(providerConfig.color ?? '')} testId="configPageContainer" />
       <Box className={styles.body}>
         {isLoading ? (
-          loadingSkeleton()
+          <LoadingSkeleton />
         ) : (
           <>
-            <Heading>About {providerConfig.name}</Heading>
+            <Heading>Authorize {providerConfig.name}</Heading>
             <Paragraph>{providerConfig.description}</Paragraph>
             <hr className={styles.splitter} />
-            <Heading>Configuration</Heading>
+            <Subheading>Configuration</Subheading>
             <Form>
               {providerConfig.parameterDefinitions &&
                 providerConfig.parameterDefinitions.map((def: ParameterDefinition) => {
@@ -163,6 +165,9 @@ const ConfigPage = () => {
             ) : null}
           </>
         )}
+      </Box>
+      <Box className={styles.icon}>
+        {isLoading ? null : <img src={providerConfig.logo} alt="App logo" />}
       </Box>
     </>
   );

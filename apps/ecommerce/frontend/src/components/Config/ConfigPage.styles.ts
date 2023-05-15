@@ -14,20 +14,30 @@ export const styles = {
     boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
     borderRadius: '2px',
   }),
-  background: css({
-    display: 'block',
-    position: 'absolute',
-    zIndex: -1,
-    top: 0,
-    width: '100%',
-    height: '300px',
-    backgroundColor: '#212F3F',
-  }),
+  background: (color: string) =>
+    css({
+      display: 'block',
+      position: 'absolute',
+      zIndex: -1,
+      top: 0,
+      width: '100%',
+      height: '300px',
+      backgroundColor: color,
+    }),
   splitter: css({
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
     backgroundColor: tokens.gray300,
+  }),
+  icon: css({
+    display: 'flex',
+    justifyContent: 'center',
+    '> img': {
+      display: 'block',
+      width: '70px',
+      margin: `${tokens.spacingXl} 0`,
+    },
   }),
 };

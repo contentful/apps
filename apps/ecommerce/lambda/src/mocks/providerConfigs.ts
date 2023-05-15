@@ -21,6 +21,8 @@ export const PROVIDER_CONFIGS: ProviderConfigs = {
         required: true,
       },
     ],
+    color: '#212F3F',
+    logo: 'shopify.svg',
   },
   magento: {
     name: 'Magento',
@@ -63,5 +65,7 @@ export const PROVIDER_CONFIGS: ProviderConfigs = {
         required: true,
       },
     ],
+    color: '#EC6737',
+    logo: 'magento.svg',
   },
 };
