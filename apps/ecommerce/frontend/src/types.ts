@@ -68,3 +68,19 @@ export interface ErrorComponentProps {
   errorInfo: ErrorInfo;
   resetErrorHandler: () => void;
 }
+
+export interface ProviderConfig {
+  name: string;
+  description: string;
+  parameterDefinitions: ParameterDefinition[];
+  color: string;
+  logo: string;
+}
+
+export interface ParameterDefinition {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  required: boolean;
+}

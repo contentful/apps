@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { ExternalResourceLink } from '../types';
+import { ExternalResourceLink } from 'types';
 import ResourceCard from './ResourceCard';
 import { Field } from '@contentful/default-field-editors';
 import { Collapse, Grid, TextLink } from '@contentful/f36-components';
