@@ -3,7 +3,7 @@ const { resolve } = require('path');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
-const manifest = require('../contentful-app-manifest.json');
+const manifest = require('./contentful-app-manifest.json');
 
 const argv = yargs(hideBin(process.argv)).argv;
 
