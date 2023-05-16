@@ -9,13 +9,13 @@ import {
   FormControl,
   Flex,
   TextInput,
-  Skeleton,
   Subheading,
 } from '@contentful/f36-components';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './ConfigPage.styles';
 import { ParameterDefinition, ProviderConfig } from 'types';
 import fetchWithSignedRequest from 'helpers/signedRequests';
+import LoadingSkeleton from 'components/Config/LoadingSkeleton';
 
 export interface AppInstallationParameters {
   [key: string]: any;
@@ -112,64 +112,54 @@ const ConfigPage = () => {
     setParameters({ ...parameters, [key]: value });
   };
 
-  const LoadingSkeleton = () => {
-    return (
-      <Skeleton.Container>
-        <Skeleton.DisplayText />
-        <Skeleton.BodyText offsetTop={40} numberOfLines={4} />
-      </Skeleton.Container>
-    );
-  };
-
   return (
-    <>
-      <Box className={styles.background(providerConfig.color ?? '')} testId="configPageContainer" />
-      <Box className={styles.body}>
-        {isLoading ? (
-          <LoadingSkeleton />
-        ) : (
-          <>
+    <Box testId="configPageContainer">
+      {isLoading ? (
+        <LoadingSkeleton />
+      ) : (
+        <>
+          <Box className={styles.background(providerConfig.color)} />
+          <Box className={styles.body}>
             <Heading>Authorize {providerConfig.name}</Heading>
             <Paragraph>{providerConfig.description}</Paragraph>
             <hr className={styles.splitter} />
             <Subheading>Configuration</Subheading>
             <Form>
-              {providerConfig.parameterDefinitions &&
-                providerConfig.parameterDefinitions.map((def: ParameterDefinition) => {
-                  const key = `config-input-${def.id}`;
+              {providerConfig.parameterDefinitions.map((def: ParameterDefinition) => {
+                const key = `config-input-${def.id}`;
 
-                  return (
-                    <FormControl key={key} id={key}>
-                      <FormControl.Label>{def.name}</FormControl.Label>
-                      <TextInput
-                        name={key}
-                        width={def.type === 'Symbol' ? 'large' : 'medium'}
-                        type={def.type === 'Symbol' ? 'text' : 'number'}
-                        maxLength={255}
-                        isRequired={def.required}
-                        value={parameters?.[def.id] ?? ''}
-                        onChange={onParameterChange.bind(this, def.id)}
-                      />
-                      <Flex justifyContent="space-between">
-                        <FormControl.HelpText>{def.description}</FormControl.HelpText>
-                        <FormControl.Counter />
-                      </Flex>
-                    </FormControl>
-                  );
-                })}
+                return (
+                  <FormControl key={key} id={key}>
+                    <FormControl.Label>{def.name}</FormControl.Label>
+                    <TextInput
+                      name={key}
+                      width={def.type === 'Symbol' ? 'large' : 'medium'}
+                      type={def.type === 'Symbol' ? 'text' : 'number'}
+                      maxLength={255}
+                      isRequired={def.required}
+                      value={parameters?.[def.id] ?? ''}
+                      onChange={onParameterChange.bind(this, def.id)}
+                    />
+                    <Flex justifyContent="space-between">
+                      <FormControl.HelpText>{def.description}</FormControl.HelpText>
+                      <FormControl.Counter />
+                    </Flex>
+                  </FormControl>
+                );
+              })}
             </Form>
             {Object.keys(parameters).length ? (
               <Button onClick={() => checkCredentials(sdk.parameters.instance.baseUrl)}>
                 Check Credentials
               </Button>
             ) : null}
-          </>
-        )}
-      </Box>
-      <Box className={styles.icon}>
-        {isLoading ? null : <img src={providerConfig.logo} alt="App logo" />}
-      </Box>
-    </>
+          </Box>
+          <Box className={styles.icon}>
+            <img src={providerConfig.logo} alt="App logo" />
+          </Box>
+        </>
+      )}
+    </Box>
   );
 };
 

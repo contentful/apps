@@ -40,4 +40,10 @@ export const styles = {
       margin: `${tokens.spacingXl} 0`,
     },
   }),
+  loadingContainer: css({
+    maxWidth: tokens.contentWidthDefault,
+  }),
+  loadingText: css({
+    marginTop: '-80px',
+  }),
 };
