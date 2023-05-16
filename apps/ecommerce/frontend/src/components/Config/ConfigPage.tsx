@@ -83,16 +83,11 @@ const ConfigPage = () => {
 
   const checkCredentials = async (baseUrl: string) => {
     const url = new URL(`${baseUrl}/healthcheck`);
-    fetchWithSignedRequest(
-      url,
-      sdk.ids.app,
-      cma,
-      'POST',
-      {
-        'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
-      },
-      { domain: parameters.apiEndpoint, storefrontAccessToken: parameters.storefrontAccessToken }
-    )
+    fetchWithSignedRequest(url, sdk.ids.app, cma, 'POST', {
+      'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
+      'x-contentful-shopify-domain': parameters.apiEndpoint,
+      'x-contentful-shopify-token': parameters.storefrontAccessToken,
+    })
       .then((res) => {
         if (res.status !== 200) {
           const error = `Error: ${res.status} – ${res.statusText}`;
