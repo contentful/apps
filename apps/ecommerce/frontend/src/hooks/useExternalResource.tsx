@@ -29,13 +29,14 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
         'POST',
         {
           'x-contentful-data-provider': resourceProvider.toLowerCase(),
+          'X-Contentful-Data-Provider-BaseURL': sdk.parameters.instance.baseUrl,
         },
         resource
       );
 
       return data;
     },
-    [cma, sdk.ids.app]
+    [cma, sdk.ids.app, sdk.parameters.instance.baseUrl]
   );
 
   useEffect(() => {
