@@ -45,7 +45,7 @@ export class ShopifyProvider {
     try {
       return await this.client.product.fetch(id);
     } catch (error: unknown) {
-      if (typeof error === 'object' && error?.hasOwnProperty('cause')) {
+      if (typeof error === 'object' && !!Object.getOwnPropertyDescriptor(error, 'cause')) {
         throw new ShopifyClientError(<ShopifyError>error);
       }
     }
