@@ -28,8 +28,8 @@
     "lint": "eslint --max-warnings=0 .",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 6wFPGvNI463EN5xF7AwIwA --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
+    "deploy": "aws s3 cp ./build/ s3://cf-apps-ecommerce/$(git rev-parse --short HEAD) --recursive",
+    "post-deploy": "./scripts/post-deploy.sh"
   },
   "eslintConfig": {
     "extends": "react-app"
