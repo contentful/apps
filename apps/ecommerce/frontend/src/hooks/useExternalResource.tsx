@@ -9,6 +9,7 @@ import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
 const useExternalResource = (resource?: ExternalResourceLink) => {
   const sdk = useSDK<FieldAppSDK>();
   const cma = useCMA();
+  const { storefrontAccessToken, apiEndpoint } = sdk.parameters.installation;
 
   const [externalResource, setExternalResource] = useState<ExternalResource>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -19,9 +20,9 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
 
   const hydrateExternalResource = useCallback(
     async (resource: ExternalResourceLink) => {
-      const url = new URL(`${config.backendApiUrl}/api/resource`);
+      const url = new URL(`${config.backendApiUrl}/shopify/resource`);
       const { resourceProvider } = getResourceProviderAndType(resource);
-
+      console.log(storefrontAccessToken, sdk.parameters);
       const data = await fetchWithSignedRequest(
         url,
         sdk.ids.app!,
@@ -30,13 +31,15 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
         {
           'x-contentful-data-provider': resourceProvider.toLowerCase(),
           'X-Contentful-Data-Provider-BaseURL': sdk.parameters.instance.baseUrl,
+          'x-contentful-shopify-domain': apiEndpoint,
+          'x-contentful-shopify-token': storefrontAccessToken,
         },
         resource
       );
 
       return data;
     },
-    [cma, sdk.ids.app, sdk.parameters.instance.baseUrl]
+    [cma, sdk.ids.app, sdk.parameters.instance.baseUrl, apiEndpoint, storefrontAccessToken]
   );
 
   useEffect(() => {

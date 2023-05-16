@@ -1,29 +1,20 @@
 import { Request, Response } from 'express';
 import { ExternalResourceLink, ErrorResponse, ProviderConfig } from '../types';
-import Client from 'shopify-buy';
 import { convertResponseToResource } from '../helpers/shopifyAdapter';
 import { PROVIDER_CONFIGS } from '../mocks/providerConfigs';
-
-interface ShopifyParams {
-  domain: string;
-  storefrontAccessToken: string;
-}
-
-const makeShopifyClient = (params: ShopifyParams) => {
-  return Client.buildClient({
-    ...params,
-    apiVersion: '2023-04',
-  });
-};
+import { ShopifyClientError, ShopifyProvider } from '../classes/Shopify';
 
 const ShopifyController = {
-  healthcheck: async (req: Request<ShopifyParams>, res: Response): Promise<Response> => {
+  healthcheck: async (req: Request, res: Response): Promise<Response> => {
     try {
-      const client = makeShopifyClient({
-        domain: req.body.domain,
-        storefrontAccessToken: req.body.storefrontAccessToken,
+      const domain = req.header('x-contentful-shopify-domain') || '';
+      const storefrontAccessToken = req.header('x-contentful-shopify-token') || '';
+
+      const shopifyClient = new ShopifyProvider({
+        domain,
+        storefrontAccessToken,
       });
-      const response = await client.shop.fetchInfo();
+      const response = await shopifyClient.client.shop.fetchInfo();
       return res.send(response);
     } catch (error) {
       return res.status(500).send({
@@ -36,15 +27,15 @@ const ShopifyController = {
     req: Request<ExternalResourceLink>,
     res: Response<ExternalResourceLink | ErrorResponse>
   ): Promise<Response<ExternalResourceLink>> => {
-    const shopifyDomain = req.header('x-contentful-shopify-domain') || '';
+    const domain = req.header('x-contentful-shopify-domain') || '';
     const storefrontAccessToken = req.header('x-contentful-shopify-token') || '';
     const id = req.body.sys.urn;
-    console.log(id)
-    const client = makeShopifyClient({
-      domain: shopifyDomain,
-      storefrontAccessToken: storefrontAccessToken,
+
+    const shopifyClient = new ShopifyProvider({
+      domain,
+      storefrontAccessToken,
     });
-    console.log('client,', client)
+
     if (id.match(/\/not_found$/)) {
       return res.status(404).send({
         status: 'error',
@@ -57,8 +48,8 @@ const ShopifyController = {
       });
     }
     try {
-      const product = await client.product.fetch(id);
-      console.log(product)
+      const product = await shopifyClient.fetchProduct(id);
+
       if (product) {
         return res.send({
           sys: req.body.sys,
@@ -70,7 +61,13 @@ const ShopifyController = {
           message: `Product Not Found for id ${id}`,
         });
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      if (error instanceof ShopifyClientError) {
+        return res.status(500).send({
+          status: 'error',
+          message: 'Shopify provider not configured, credentials missing or incorrect.',
+        });
+      }
       return res.status(500).send({
         status: 'error',
         message: error,
