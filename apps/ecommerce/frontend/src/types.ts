@@ -1,6 +1,5 @@
 import type { IdsAPI } from '@contentful/app-sdk';
 import type { EntityStatus } from '@contentful/f36-components';
-import type { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 import type { ErrorInfo, FC, ReactNode } from 'react';
 
 // TODO: get this exported from the SDK
@@ -55,18 +54,6 @@ export interface ExternalResource {
   extras?: JSONObject;
 }
 
-export interface ResourceCardProps {
-  value: ExternalResourceLink;
-  data?: ExternalResource;
-  index?: number;
-  total?: number;
-  onRemove: Function;
-  withDragHandle?: boolean;
-  dragHandleRender?: RenderDragFn;
-  onMoveToTop?: Function;
-  onMoveToBottom?: Function;
-}
-
 type ErrorBoundaryErrored = { hasError: true; error: Error; info: ErrorInfo };
 type ErrorBoundaryStandby = { hasError: false; error: null; info: null };
 export type ErrorBoundaryState = ErrorBoundaryErrored | ErrorBoundaryStandby;
@@ -80,4 +67,20 @@ export interface ErrorComponentProps {
   error: Error;
   errorInfo: ErrorInfo;
   resetErrorHandler: () => void;
+}
+
+export interface ProviderConfig {
+  name: string;
+  description: string;
+  parameterDefinitions: ParameterDefinition[];
+  color: string;
+  logo: string;
+}
+
+export interface ParameterDefinition {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  required: boolean;
 }

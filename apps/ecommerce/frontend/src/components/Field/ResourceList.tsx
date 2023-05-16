@@ -1,53 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { ExternalResourceLink } from '../types';
+import { ExternalResourceLink } from 'types';
 import ResourceCard from './ResourceCard';
 import { Field } from '@contentful/default-field-editors';
 import { Collapse, Grid, TextLink } from '@contentful/f36-components';
 import { AddContentButton } from './AddContentButton';
 import { SortableLinkList } from '@contentful/field-editor-reference';
 
-const MultipleResources = () => {
+interface Props {
+  value: ExternalResourceLink[];
+  isMultiple: boolean;
+  addContent: () => void;
+  onRemove: (index: number) => void;
+  onMoveToTop?: (index: number) => void;
+  onMoveToBottom?: (index: number) => void;
+  total: number;
+}
+
+const ResourceList = (props: Props) => {
+  const { value, isMultiple, addContent, onRemove, onMoveToTop, onMoveToBottom, total } = props;
+
   const sdk = useSDK<FieldAppSDK>();
-  const [value, setValue] = useState<ExternalResourceLink[]>(sdk.field.getValue());
-  const [total, setTotal] = useState<number>(0);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-
-  useEffect(() => {
-    sdk.field.onValueChanged((value) => {
-      setValue(value);
-      setTotal(value?.length);
-    });
-  }, [sdk.field, setValue]);
-
-  const onRemove = (index: number) => {
-    const newValue = value.filter((obj, i) => i !== index);
-    sdk.field.setValue(newValue);
-  };
-
-  const onMoveToTop = (index: number) => {
-    const newValue = [...value];
-    newValue.unshift(newValue.splice(index, 1)[0]);
-    sdk.field.setValue(newValue);
-  };
-
-  const onMoveToBottom = (index: number) => {
-    const newValue = [...value];
-    newValue.push(newValue.splice(index, 1)[0]);
-    sdk.field.setValue(newValue);
-  };
-
-  const mockValue: ExternalResourceLink = {
-    sys: {
-      urn: crypto.randomUUID(),
-      type: 'ResourceLink',
-      linkType: sdk.parameters.instance.linkType,
-    },
-    metadata: {
-      resourceType: 'Commerce:Product',
-    },
-  };
 
   return (
     <Grid rowGap="spacingM">
@@ -55,14 +30,14 @@ const MultipleResources = () => {
         <SortableLinkList<ExternalResourceLink>
           items={value}
           axis="y"
-          useDragHandle={true}
+          useDragHandle={isMultiple}
           isInitiallyDisabled={true}
           isDisabled={false}
           hasCardEditActions={false}
           sdk={sdk}
           viewType={'card'}
           parameters={{ instance: {} }}>
-          {({ item, isDisabled, DragHandle, index }) => {
+          {({ item, DragHandle, index }) => {
             return (
               <Grid.Item>
                 <ResourceCard
@@ -70,7 +45,7 @@ const MultipleResources = () => {
                   index={index}
                   total={total}
                   value={item}
-                  dragHandleRender={DragHandle}
+                  dragHandleRender={isMultiple ? DragHandle : undefined}
                   onRemove={onRemove}
                   onMoveToTop={onMoveToTop}
                   onMoveToBottom={onMoveToBottom}
@@ -81,9 +56,7 @@ const MultipleResources = () => {
         </SortableLinkList>
       )}
       <Grid.Item>
-        <AddContentButton
-          onClick={() => sdk.field.setValue(value ? [...value, mockValue] : [mockValue])}
-        />
+        {(isMultiple || !value.length) && <AddContentButton onClick={() => addContent()} />}
       </Grid.Item>
       <Grid.Item>
         <TextLink as="button" onClick={() => setIsExpanded(!isExpanded)}>
@@ -97,4 +70,4 @@ const MultipleResources = () => {
   );
 };
 
-export default MultipleResources;
+export default ResourceList;
