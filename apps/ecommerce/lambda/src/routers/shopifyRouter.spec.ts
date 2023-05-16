@@ -86,7 +86,7 @@ describe('Shopify Router', () => {
     });
   });
 
-  describe('When sending requesting a resource', () => {
+  describe('When requesting a resource', () => {
     it('should reply with Shopify resource when id is valid', (done) => {
       sandbox.stub(Client, 'buildClient').returns(shopifyClientStub);
       chai

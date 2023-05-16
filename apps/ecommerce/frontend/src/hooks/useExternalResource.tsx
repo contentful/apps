@@ -22,7 +22,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
     async (resource: ExternalResourceLink) => {
       const url = new URL(`${config.backendApiUrl}/shopify/resource`);
       const { resourceProvider } = getResourceProviderAndType(resource);
-      console.log(storefrontAccessToken, sdk.parameters);
+
       const data = await fetchWithSignedRequest(
         url,
         sdk.ids.app!,
