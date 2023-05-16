@@ -17,9 +17,11 @@ const container = css({
 });
 
 export const AddContentButton = (props: AddContentButtonProps) => {
+  const { onClick } = props;
+
   return (
     <div className={container}>
-      <Button variant="secondary" startIcon={<PlusIcon />} size="small" onClick={props.onClick}>
+      <Button variant="secondary" startIcon={<PlusIcon />} size="small" onClick={onClick}>
         <Text fontWeight="fontWeightDemiBold">Add content</Text>
       </Button>
     </div>
