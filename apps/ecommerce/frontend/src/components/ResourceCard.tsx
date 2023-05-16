@@ -24,8 +24,9 @@ const ResourceCard = (props: ResourceCardProps) => {
   const [showJson, setShowJson] = useState<boolean>(false);
 
   const fetchExternalResource = async (resource: ExternalResourceLink) => {
-    const url = new URL(`${config.backendApiUrl}/api/resource`);
+    const url = new URL(`${config.backendApiUrl}/shopify/resource`);
     const [resourceProvider, resourceType] = resource.sys?.linkType?.split(':');
+    console.log(sdk.parameters.instance.baseUrl);
     const data = await fetchWithSignedRequest(
       url,
       sdk.ids.app!,
@@ -34,6 +35,8 @@ const ResourceCard = (props: ResourceCardProps) => {
       {
         'x-contentful-data-provider': resourceProvider.toLowerCase(),
         'X-Contentful-Data-Provider-BaseURL': sdk.parameters.instance.baseUrl,
+        'x-contentful-shopify-domain': sdk.parameters.installation.apiEndpoint,
+        'x-contentful-shopify-token': sdk.parameters.installation.storefrontAccessToken,
       },
       resource
     )

@@ -21,7 +21,7 @@ const SingleResource = () => {
 
   const mockValue: ExternalResourceLink = {
     sys: {
-      urn: crypto.randomUUID(),
+      urn: 'gid://shopify/Product/8191006671134',
       type: 'ResourceLink',
       linkType: sdk.parameters.instance.linkType,
     },

@@ -35,11 +35,15 @@ const ShopifyController = {
     req: Request<ExternalResourceLink>,
     res: Response<ExternalResourceLink | ErrorResponse>
   ): Promise<Response<ExternalResourceLink>> => {
+    const shopifyDomain = req.header('x-contentful-shopify-domain') || '';
+    const storefrontAccessToken = req.header('x-contentful-shopify-token') || '';
     const id = req.body.sys.urn;
+    console.log(id)
     const client = makeShopifyClient({
-      domain: req.body.domain,
-      storefrontAccessToken: req.body.storefrontAccessToken,
+      domain: shopifyDomain,
+      storefrontAccessToken: storefrontAccessToken,
     });
+    console.log('client,', client)
     if (id.match(/\/not_found$/)) {
       return res.status(404).send({
         status: 'error',
@@ -53,6 +57,7 @@ const ShopifyController = {
     }
     try {
       const product = await client.product.fetch(id);
+      console.log(product)
       if (product) {
         return res.send({
           sys: req.body.sys,
