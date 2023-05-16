@@ -8,7 +8,7 @@ import { useDebounce } from 'usehooks-ts';
 import useExternalResource from '../hooks/useExternalResource';
 import { ExternalResource, ExternalResourceLink } from '../types';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
-import getResourceProviderAndType from '../helpers/getResourceProviderAndType';
+import { getResourceProviderAndType } from '../helpers/resourceProviderUtils';
 
 interface Props {
   value: ExternalResourceLink;
@@ -66,7 +66,8 @@ const ResourceCard = (props: Props) => {
             <ResourceCardMenu
               onRemove={() => onRemove(index)}
               isDataVisible={showJson}
-              onToggleDataVisible={() => setShowJson((previousState) => !previousState)}
+              onShowData={() => setShowJson(true)}
+              onHideData={() => setShowJson(false)}
               index={index}
               total={total}
               onMoveToBottom={() => onMoveToBottom?.call(null, index)}

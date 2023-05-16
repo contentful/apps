@@ -9,4 +9,4 @@ const getResourceProviderAndType = (resource?: ExternalResourceLink) => {
   };
 };
 
-export default getResourceProviderAndType;
+export { getResourceProviderAndType };

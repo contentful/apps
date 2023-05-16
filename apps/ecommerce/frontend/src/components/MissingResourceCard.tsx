@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ExternalResourceLink } from '../types';
 import ResourceCardRawData from './ResourceCardRawData';
 import ResourceCardMenu from './ResourceCardMenu';
-import getResourceProviderAndType from '../helpers/getResourceProviderAndType';
+import { getResourceProviderAndType } from '../helpers/resourceProviderUtils';
 
 interface MissingResourceCardProps {
   onRemove: Function;
@@ -45,7 +45,8 @@ const MissingResourceCard = (props: MissingResourceCardProps) => {
             <ResourceCardMenu
               onRemove={() => props.onRemove(props.index)}
               isDataVisible={showJson}
-              onToggleDataVisible={() => setShowJson((previousState) => !previousState)}
+              onShowData={() => setShowJson(true)}
+              onHideData={() => setShowJson(false)}
               index={props.index}
               total={props.total}
               onMoveToBottom={() => props.onMoveToBottom?.call(null, props.index)}

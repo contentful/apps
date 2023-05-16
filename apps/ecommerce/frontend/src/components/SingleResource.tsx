@@ -16,7 +16,7 @@ const SingleResource = () => {
     });
   }, [sdk.field, setValue]);
 
-  const onRemove = () => {
+  const handleRemove = () => {
     sdk.field.setValue(undefined);
   };
 
@@ -26,7 +26,7 @@ const SingleResource = () => {
     <ResourceList
       addContent={addContent}
       isMultiple={false}
-      onRemove={onRemove}
+      onRemove={handleRemove}
       total={valueArray.length}
       value={valueArray}
     />

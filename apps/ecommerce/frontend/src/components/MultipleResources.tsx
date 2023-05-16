@@ -18,6 +18,7 @@ const MultipleResources = () => {
   }, [sdk.field, setValue]);
 
   const addContent = () => {
+    // TODO: Update this function to add a new resource(s) to the list
     const newValue = mockValue(sdk);
 
     if (value) {
@@ -27,18 +28,18 @@ const MultipleResources = () => {
     }
   };
 
-  const onRemove = (index: number) => {
+  const handleRemove = (index: number) => {
     const newValue = value.filter((obj, i) => i !== index);
     sdk.field.setValue(newValue);
   };
 
-  const onMoveToTop = (index: number) => {
+  const handleMoveToTop = (index: number) => {
     const newValue = [...value];
     newValue.unshift(newValue.splice(index, 1)[0]);
     sdk.field.setValue(newValue);
   };
 
-  const onMoveToBottom = (index: number) => {
+  const handleMoveToBottom = (index: number) => {
     const newValue = [...value];
     newValue.push(newValue.splice(index, 1)[0]);
     sdk.field.setValue(newValue);
@@ -48,9 +49,9 @@ const MultipleResources = () => {
     <ResourceList
       addContent={addContent}
       isMultiple={true}
-      onMoveToBottom={onMoveToBottom}
-      onMoveToTop={onMoveToTop}
-      onRemove={onRemove}
+      onMoveToBottom={handleMoveToBottom}
+      onMoveToTop={handleMoveToTop}
+      onRemove={handleRemove}
       total={total}
       value={value}
     />

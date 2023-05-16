@@ -18,7 +18,7 @@ interface Props {
   total: number;
 }
 
-const Resources = (props: Props) => {
+const ResourceList = (props: Props) => {
   const { value, isMultiple, addContent, onRemove, onMoveToTop, onMoveToBottom, total } = props;
 
   const sdk = useSDK<FieldAppSDK>();
@@ -37,7 +37,7 @@ const Resources = (props: Props) => {
           sdk={sdk}
           viewType={'card'}
           parameters={{ instance: {} }}>
-          {({ item, isDisabled, DragHandle, index }) => {
+          {({ item, DragHandle, index }) => {
             return (
               <Grid.Item>
                 <ResourceCard
@@ -70,4 +70,4 @@ const Resources = (props: Props) => {
   );
 };
 
-export default Resources;
+export default ResourceList;
