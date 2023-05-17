@@ -2,9 +2,10 @@ import { Badge, Box, Card, Flex, Text } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 import { useState } from 'react';
-import { ExternalResourceLink } from '../types';
+import { ExternalResourceLink } from 'types';
 import ResourceCardRawData from './ResourceCardRawData';
 import ResourceCardMenu from './ResourceCardMenu';
+import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
 
 interface MissingResourceCardProps {
   onRemove: Function;
@@ -23,7 +24,7 @@ interface MissingResourceCardProps {
 const MissingResourceCard = (props: MissingResourceCardProps) => {
   const [showJson, setShowJson] = useState<boolean>(false);
   const resourceLink = JSON.parse(props.value) as ExternalResourceLink;
-  const [resourceProvider, resourceType] = resourceLink.sys.linkType?.split(':');
+  const { resourceProvider, resourceType } = getResourceProviderAndType(resourceLink);
 
   return (
     <Card
@@ -44,7 +45,8 @@ const MissingResourceCard = (props: MissingResourceCardProps) => {
             <ResourceCardMenu
               onRemove={() => props.onRemove(props.index)}
               isDataVisible={showJson}
-              onToggleDataVisible={() => setShowJson((previousState) => !previousState)}
+              onShowData={() => setShowJson(true)}
+              onHideData={() => setShowJson(false)}
               index={props.index}
               total={props.total}
               onMoveToBottom={() => props.onMoveToBottom?.call(null, props.index)}

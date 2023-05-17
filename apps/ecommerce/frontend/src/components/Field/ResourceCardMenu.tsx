@@ -5,7 +5,8 @@ import { MoreHorizontalIcon } from '@contentful/f36-icons';
 interface Props {
   onRemove: Function;
   isDataVisible: boolean;
-  onToggleDataVisible: Function;
+  onShowData: Function;
+  onHideData: Function;
   index?: number;
   total?: number;
   onMoveToTop?: Function;
@@ -16,7 +17,8 @@ const ResourceCardMenu = (props: Props) => {
   const {
     onRemove,
     isDataVisible,
-    onToggleDataVisible,
+    onShowData,
+    onHideData,
     index,
     total,
     onMoveToTop,
@@ -50,7 +52,7 @@ const ResourceCardMenu = (props: Props) => {
 
     menuItems.push(<Menu.Divider key="divider" />);
     menuItems.push(
-      <Menu.Item key="toggleData" onClick={() => onToggleDataVisible()}>
+      <Menu.Item key="toggleData" onClick={() => (isDataVisible ? onHideData() : onShowData())}>
         {isDataVisible ? 'Hide' : 'Show'} Data
       </Menu.Item>
     );
