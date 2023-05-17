@@ -23,6 +23,7 @@ const main = async (watch = false) => {
       outdir: 'build/actions',
       logLevel: 'info',
       format: 'esm',
+      target: 'es6',
     };
 
     if (watch) {
