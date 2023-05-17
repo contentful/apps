@@ -3,6 +3,7 @@ import { ExternalResourceLink, ErrorResponse, ProviderConfig } from '../types';
 import { convertResponseToResource } from '../helpers/shopifyAdapter';
 import { PROVIDER_CONFIGS } from '../mocks/providerConfigs';
 import { ShopifyClientError, ShopifyProvider } from '../classes/Shopify';
+import { config } from '../config';
 
 const ShopifyController = {
   healthcheck: async (req: Request, res: Response): Promise<Response> => {
@@ -31,23 +32,31 @@ const ShopifyController = {
     const storefrontAccessToken = req.header('x-contentful-shopify-token') || '';
     const id = req.body.sys.urn;
 
-    const shopifyClient = new ShopifyProvider({
-      domain,
-      storefrontAccessToken,
-    });
-
-    if (id.match(/\/not_found$/)) {
-      return res.status(404).send({
-        status: 'error',
-        message: 'Not found',
-      });
-    } else if (id.match(/\/bad_request$/)) {
-      return res.status(400).send({
-        status: 'error',
-        message: 'Bad request',
-      });
-    }
     try {
+      if (id.match(/\/not_found$/)) {
+        return res.status(404).send({
+          status: 'error',
+          message: 'Not found',
+        });
+      } else if (id.match(/\/bad_request$/)) {
+        return res.status(400).send({
+          status: 'error',
+          message: 'Bad request',
+        });
+      }
+
+      // prevent SSRF exploits
+      // keys off of a .myshopify.com domain
+      // TODO: find a more secure method since production domains for shopify stores will likely not pass the below condition
+      if (!domain.match(/\w+\.myshopify\.com$/)) {
+        throw new Error(`Invalid domain provider. Provider must be a Shopify domain.`);
+      }
+
+      const shopifyClient = new ShopifyProvider({
+        domain,
+        storefrontAccessToken,
+      });
+
       const product = await shopifyClient.fetchProduct(id);
 
       if (product) {
@@ -68,6 +77,7 @@ const ShopifyController = {
           message: 'Shopify provider not configured, credentials missing or incorrect.',
         });
       }
+      console.log(error);
       return res.status(500).send({
         status: 'error',
         message: error,

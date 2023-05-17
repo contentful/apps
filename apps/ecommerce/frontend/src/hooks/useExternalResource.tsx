@@ -3,7 +3,6 @@ import type { ExternalResourceLink, ExternalResource } from 'types';
 import type { FieldAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import fetchWithSignedRequest from 'helpers/signedRequests';
-import { config } from 'config';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
 
 const useExternalResource = (resource?: ExternalResourceLink) => {
@@ -20,7 +19,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
 
   const hydrateExternalResource = useCallback(
     async (resource: ExternalResourceLink) => {
-      const url = new URL(`${config.backendApiUrl}/shopify/resource`);
+      const url = new URL(`${sdk.parameters.instance.baseUrl}/resource`);
       const { resourceProvider } = getResourceProviderAndType(resource);
 
       const data = await fetchWithSignedRequest(
