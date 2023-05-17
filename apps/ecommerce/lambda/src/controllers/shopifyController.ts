@@ -48,7 +48,7 @@ const ShopifyController = {
       // prevent SSRF exploits
       // keys off of a .myshopify.com domain
       // TODO: find a more secure method since production domains for shopify stores will likely not pass the below condition
-      if (!domain.match(/\w+\.myshopify\.com$/)) {
+      if (!domain.match(/[-a-z0-9]{2,256}\b([-a-z0-9]+)\.myshopify\.com$/)) {
         throw new Error(`Invalid domain provider. Provider must be a Shopify domain.`);
       }
 
