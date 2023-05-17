@@ -7,11 +7,17 @@ const manifest = require('./contentful-app-manifest.json');
 
 const argv = yargs(hideBin(process.argv)).argv;
 
-const getEntryPoints = () =>
-  manifest.actions.reduce((result, action) => {
+const getEntryPoints = () => {
+  const ids = new Set();
+  return manifest.actions.reduce((result, action) => {
+    if (ids.has(action.id)) {
+      throw new Error(`Duplicate action id: ${action.id}`);
+    }
+    ids.add(action.id);
     result[action.id] = resolve(__dirname, action.path);
     return result;
   }, {});
+};
 
 const main = async (watch = false) => {
   try {
