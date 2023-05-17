@@ -8,17 +8,24 @@ const manifest = require('./contentful-app-manifest.json');
 const argv = yargs(hideBin(process.argv)).argv;
 
 const validateActions = () => {
+  const requiredProperties = ['id', 'path', 'entryFile'];
   const uniqueValues = new Set();
 
   manifest.actions.forEach((action) => {
+    requiredProperties.forEach((property) => {
+      if (!action.hasOwnProperty(property)) {
+        throw new Error(`Action with name: '${action.name}' is missing the '${property}' property`);
+      }
+    });
+
     if (uniqueValues.has(action.id)) {
-      throw new Error(`Duplicate action id: ${action.id}`);
+      throw new Error(`Duplicate action id: '${action.id}'`);
     }
     if (uniqueValues.has(action.path)) {
-      throw new Error(`Duplicate action path: ${action.path}`);
+      throw new Error(`Duplicate action path: '${action.path}'`);
     }
     if (uniqueValues.has(action.entryFile)) {
-      throw new Error(`Duplicate entryFile path: ${action.entryFile}`);
+      throw new Error(`Duplicate entryFile path: '${action.entryFile}'`);
     }
 
     uniqueValues.add(action.entryFile);
@@ -39,6 +46,7 @@ const getEntryPoints = () => {
 
 const main = async (watch = false) => {
   try {
+    console.log('Building app actions');
     validateActions();
 
     const config = {
