@@ -3,7 +3,6 @@ import { ExternalResourceLink, ErrorResponse, ProviderConfig } from '../types';
 import { convertResponseToResource } from '../helpers/shopifyAdapter';
 import { PROVIDER_CONFIGS } from '../mocks/providerConfigs';
 import { ShopifyClientError, ShopifyProvider } from '../classes/Shopify';
-import { config } from '../config';
 
 const ShopifyController = {
   healthcheck: async (req: Request, res: Response): Promise<Response> => {
