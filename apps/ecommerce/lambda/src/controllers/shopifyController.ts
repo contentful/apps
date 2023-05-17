@@ -14,6 +14,7 @@ const ShopifyController = {
         domain,
         storefrontAccessToken,
       });
+
       // prevent SSRF exploits
       // keys off of a .myshopify.com domain
       // TODO: find a more secure method since production domains for shopify stores will likely not pass the below condition
@@ -25,7 +26,7 @@ const ShopifyController = {
     } catch (error) {
       return res.status(500).send({
         status: 'error',
-        message: error,
+        message: (error as Error).message,
       });
     }
   },
@@ -53,6 +54,7 @@ const ShopifyController = {
           message: 'Bad request',
         });
       }
+
       // prevent SSRF exploits
       // keys off of a .myshopify.com domain
       // TODO: find a more secure method since production domains for shopify stores will likely not pass the below condition
@@ -80,10 +82,9 @@ const ShopifyController = {
           message: 'Shopify provider not configured, credentials missing or incorrect.',
         });
       }
-      console.log(error);
       return res.status(500).send({
         status: 'error',
-        message: error,
+        message: (error as Error).message,
       });
     }
   },

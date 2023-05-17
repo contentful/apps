@@ -52,6 +52,6 @@ export class ShopifyProvider {
   }
 
   public isShopifyDomain(domain: string): boolean {
-    return !domain.match(/[-a-z0-9]{2,256}\b([-a-z0-9]+)\.myshopify\.com$/);
+    return !!domain.match(/[-a-z0-9]{2,256}\b([-a-z0-9]+)\.myshopify\.com$/);
   }
 }
