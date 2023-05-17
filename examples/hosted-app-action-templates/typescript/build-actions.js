@@ -7,26 +7,46 @@ const manifest = require('./contentful-app-manifest.json');
 
 const argv = yargs(hideBin(process.argv)).argv;
 
-const getEntryPoints = () => {
-  const ids = new Set();
-  return manifest.actions.reduce((result, action) => {
-    if (ids.has(action.id)) {
+const validateActions = () => {
+  const uniqueValues = new Set();
+
+  manifest.actions.forEach((action) => {
+    if (uniqueValues.has(action.id)) {
       throw new Error(`Duplicate action id: ${action.id}`);
     }
-    ids.add(action.id);
-    result[action.id] = resolve(__dirname, action.path);
+    if (uniqueValues.has(action.path)) {
+      throw new Error(`Duplicate action path: ${action.path}`);
+    }
+    if (uniqueValues.has(action.entryFile)) {
+      throw new Error(`Duplicate entryFile path: ${action.entryFile}`);
+    }
+
+    uniqueValues.add(action.entryFile);
+    uniqueValues.add(action.path);
+    uniqueValues.add(action.id);
+  });
+};
+
+const getEntryPoints = () => {
+  return manifest.actions.reduce((result, action) => {
+    const fileName = action.path.split('.')[0];
+
+    result[fileName] = resolve(__dirname, action.entryFile);
+
     return result;
   }, {});
 };
 
 const main = async (watch = false) => {
   try {
+    validateActions();
+
     const config = {
       entryPoints: getEntryPoints(),
       minify: true,
       bundle: true,
       platform: 'node',
-      outdir: 'build/actions',
+      outdir: 'build',
       logLevel: 'info',
       format: 'esm',
       target: 'es6',
@@ -38,7 +58,6 @@ const main = async (watch = false) => {
     } else {
       await esbuild.build(config);
     }
-    console.log('App actions successfully built');
   } catch (e) {
     console.log('Error building app actions');
     throw Error(e);
