@@ -1,18 +1,24 @@
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { ExternalResourceLink } from 'types';
 
-const rand = Math.ceil(Math.random() * 3);
+const mockValue = (sdk: FieldAppSDK) => {
+  const rand = Math.ceil(Math.random() * 3);
 
-const mockValue = (sdk: FieldAppSDK) =>
-  ({
+  return {
     sys: {
-      urn: rand > 1 ? 'gid://shopify/Product/8191006671134' : crypto.randomUUID(),
+      urn:
+        rand === 1
+          ? 'gid://shopify/Product/8191006671134'
+          : rand === 2
+          ? 'gid://shopify/Product/8191006736670'
+          : crypto.randomUUID(),
       type: 'ResourceLink',
       linkType: sdk.parameters.instance.linkType,
     },
     metadata: {
       resourceType: 'Commerce:Product',
     },
-  } as ExternalResourceLink);
+  } as ExternalResourceLink;
+};
 
 export default mockValue;
