@@ -31,23 +31,3 @@ export interface ErrorResponse {
   status: 'error';
   message: string | unknown;
 }
-
-export interface ProviderConfigs {
-  [key: string]: ProviderConfig;
-}
-
-export interface ProviderConfig {
-  name: string;
-  description: string;
-  parameterDefinitions: ParameterDefinition[];
-  color: string;
-  logo: string;
-}
-
-export interface ParameterDefinition {
-  id: string;
-  name: string;
-  description: string;
-  type: string;
-  required: boolean;
-}

@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { ExternalResourceLink, ErrorResponse, ProviderConfig } from '../types';
+import { ExternalResourceLink, ErrorResponse } from '../types';
 import { convertResponseToResource } from '../helpers/shopifyAdapter';
-import { PROVIDER_CONFIGS } from '../mocks/providerConfigs';
 import { ShopifyClientError, ShopifyProvider } from '../classes/Shopify';
 
 const ShopifyController = {
@@ -87,9 +86,6 @@ const ShopifyController = {
         message: (error as Error).message,
       });
     }
-  },
-  config: (_req: Request, res: Response<ProviderConfig>): Response<ProviderConfig> => {
-    return res.send(PROVIDER_CONFIGS.shopify);
   },
 };
 

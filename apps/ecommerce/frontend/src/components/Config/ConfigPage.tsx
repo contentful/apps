@@ -44,7 +44,7 @@ const ConfigPage = () => {
 
   const getConfig = useCallback(
     async (baseUrl: string) => {
-      const url = new URL(`${baseUrl}/config`);
+      const url = new URL(`${baseUrl}/config.json`);
       fetchWithSignedRequest(url, sdk.ids.app, cma, 'GET', {
         'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
       })
@@ -57,7 +57,7 @@ const ConfigPage = () => {
 
           return res.json();
         })
-        .then((data) => setProviderConfig({ ...data, logo: `${baseUrl}/${data.logo}` }))
+        .then((data) => setProviderConfig(data))
         .catch((error) => sdk.notifier.error(error.message))
         .finally(() => setIsLoading(false));
     },
@@ -113,7 +113,7 @@ const ConfigPage = () => {
         <LoadingSkeleton />
       ) : (
         <>
-          <Box className={styles.background(providerConfig.color)} />
+          <Box className={styles.background(providerConfig.primaryColor)} />
           <Box className={styles.body}>
             <Heading>Authorize {providerConfig.name}</Heading>
             <Paragraph>{providerConfig.description}</Paragraph>
@@ -150,7 +150,7 @@ const ConfigPage = () => {
             ) : null}
           </Box>
           <Box className={styles.icon}>
-            <img src={providerConfig.logo} alt="App logo" />
+            <img src={providerConfig.logoUrl} alt="App logo" />
           </Box>
         </>
       )}

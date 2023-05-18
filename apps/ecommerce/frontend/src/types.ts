@@ -73,8 +73,8 @@ export interface ProviderConfig {
   name: string;
   description: string;
   parameterDefinitions: ParameterDefinition[];
-  color: string;
-  logo: string;
+  primaryColor: string;
+  logoUrl: string;
 }
 
 export interface ParameterDefinition {
