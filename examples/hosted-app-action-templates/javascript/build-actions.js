@@ -46,7 +46,7 @@ const getEntryPoints = () => {
 
 const main = async (watch = false) => {
   try {
-    console.log('Building app actions');
+    console.log('Building actions');
     validateActions();
 
     const config = {
@@ -67,7 +67,7 @@ const main = async (watch = false) => {
       await esbuild.build(config);
     }
   } catch (e) {
-    console.log('Error building app actions');
+    console.log('Error building actions');
     throw Error(e);
   }
 };
