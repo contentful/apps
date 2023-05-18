@@ -56,6 +56,8 @@ const shopifyClientStub = {
   },
 };
 
+const stubDomain = 'mytest-domain.myshopify.com';
+
 describe('Shopify Router', () => {
   beforeEach((done) => {
     sandbox.stub(NodeAppsToolkit, 'verifyRequest').get(() => {
@@ -76,6 +78,7 @@ describe('Shopify Router', () => {
         .request(app)
         .post('/shopify/healthcheck')
         .set('X-Contentful-Data-Provider', 'shopify')
+        .set('x-contentful-shopify-domain', stubDomain)
         .send({ sys: mockResourceLink.sys })
         .end((error, res) => {
           expect(res).to.have.status(200);
@@ -86,13 +89,14 @@ describe('Shopify Router', () => {
     });
   });
 
-  describe('When sending requesting a resource', () => {
+  describe('When requesting a resource', () => {
     it('should reply with Shopify resource when id is valid', (done) => {
       sandbox.stub(Client, 'buildClient').returns(shopifyClientStub);
       chai
         .request(app)
         .post('/shopify/resource')
         .set('X-Contentful-Data-Provider', 'shopify')
+        .set('x-contentful-shopify-domain', stubDomain)
         .send({ sys: mockResourceLink.sys })
         .end((error, res) => {
           expect(res).to.have.status(200);
@@ -115,6 +119,7 @@ describe('Shopify Router', () => {
         .request(app)
         .post('/shopify/resource')
         .set('X-Contentful-Data-Provider', 'shopify')
+        .set('x-contentful-shopify-domain', stubDomain)
         .send({ sys: mockResourceLink.sys })
         .end((error, res) => {
           expect(res).to.have.status(404);

@@ -5,7 +5,7 @@ export const convertResponseToResource = (product: Product): ExternalResource =>
   return {
     name: product.title,
     description: product.description,
-    image: product.images[0].url,
+    image: product.images[0].src,
     status: product.availableForSale ? 'Available' : 'Not Available',
     extras: {},
   };
