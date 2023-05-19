@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalResourceLink } from 'types';
-import ResourceList from './ResourceList';
+import ResourceField from './ResourceField';
 import mockValue from 'helpers/mockValue';
 
 const SingleResource = () => {
@@ -23,7 +23,7 @@ const SingleResource = () => {
   const addContent = () => sdk.field.setValue(mockValue(sdk));
 
   return (
-    <ResourceList
+    <ResourceField
       addContent={addContent}
       isMultiple={false}
       onRemove={handleRemove}

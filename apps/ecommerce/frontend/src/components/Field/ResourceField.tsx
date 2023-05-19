@@ -18,7 +18,7 @@ interface Props {
   total: number;
 }
 
-const ResourceList = (props: Props) => {
+const ResourceField = (props: Props) => {
   const { value, isMultiple, addContent, onRemove, onMoveToTop, onMoveToBottom, total } = props;
 
   const sdk = useSDK<FieldAppSDK>();
@@ -70,4 +70,4 @@ const ResourceList = (props: Props) => {
   );
 };
 
-export default ResourceList;
+export default ResourceField;

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import ErrorBoundary from 'components/Field/ErrorBoundary';
+import ErrorBoundary from 'components/Common/ErrorBoundary';
 import { ErrorComponentProps } from 'types';
 
 function withErrorBoundary<TProps extends JSX.IntrinsicAttributes>(
