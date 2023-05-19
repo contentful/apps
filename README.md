@@ -4,6 +4,8 @@
 
 This repository contains the source code for most apps on the [marketplace](https://www.contentful.com/marketplace/) and helpful resources to build your own apps for Contentful.
 
+Many partner apps have been moved to [another repo](https://github.com/contentful/marketplace-partner-apps). If you need access to the Bynder, Cloudinary, or Shopify apps, please view the Marketplace Partner Apps repo.
+
 This repository also includes two packages that help you developing your own apps:
 * [dam-app-base](packages/dam-app-base)
 * [ecommerce-app-base](packages/ecommerce-app-base)
