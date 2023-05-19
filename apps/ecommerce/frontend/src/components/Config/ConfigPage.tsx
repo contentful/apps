@@ -1,30 +1,19 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import {
-  Box,
-  Button,
-  Heading,
-  Paragraph,
-  Form,
-  FormControl,
-  Flex,
-  TextInput,
-  Subheading,
-} from '@contentful/f36-components';
+import { Box } from '@contentful/f36-components';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './ConfigPage.styles';
-import { ParameterDefinition, ProviderConfig } from 'types';
+import { KeyValueMap } from '@contentful/app-sdk/dist/types/entities';
+import { ProviderConfig } from 'types';
 import fetchWithSignedRequest from 'helpers/signedRequests';
-import LoadingSkeleton from 'components/Config/LoadingSkeleton';
-
-export interface AppInstallationParameters {
-  [key: string]: any;
-}
+import ConfigBody from './ConfigBody';
+import AppLogo from './AppLogo';
 
 const ConfigPage = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [parameters, setParameters] = useState<KeyValueMap>({});
   const [providerConfig, setProviderConfig] = useState<ProviderConfig>({} as ProviderConfig);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error>();
 
   const sdk = useSDK<ConfigAppSDK>();
   const cma = useCMA();
@@ -50,23 +39,24 @@ const ConfigPage = () => {
       })
         .then((res) => {
           if (res.status !== 200) {
-            const error = `Error: ${res.status} – ${res.statusText}`;
-            sdk.notifier.error(error);
+            const error = `${res.status} - ${res.statusText}`;
             throw new Error(error);
           }
 
           return res.json();
         })
         .then((data) => setProviderConfig(data))
-        .catch((error) => sdk.notifier.error(error.message))
+        .catch((error) => {
+          setError(error);
+        })
         .finally(() => setIsLoading(false));
     },
-    [cma, sdk.ids.app, sdk.notifier, sdk.parameters.instance.provider]
+    [cma, sdk.ids.app, sdk.parameters.instance.provider]
   );
 
   useEffect(() => {
     (async () => {
-      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
+      const currentParameters: KeyValueMap | null = await sdk.app.getParameters();
 
       if (currentParameters) {
         setParameters(currentParameters);
@@ -81,7 +71,7 @@ const ConfigPage = () => {
     })();
   }, [sdk, getConfig]);
 
-  const checkCredentials = async (baseUrl: string) => {
+  const handleCredentialCheck = async (baseUrl: string) => {
     const url = new URL(`${baseUrl}/healthcheck`);
     fetchWithSignedRequest(url, sdk.ids.app, cma, 'POST', {
       'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
@@ -90,8 +80,7 @@ const ConfigPage = () => {
     })
       .then((res) => {
         if (res.status !== 200) {
-          const error = `Error: ${res.status} – ${res.statusText}`;
-          sdk.notifier.error(error);
+          const error = `Error: ${res.status} - ${res.statusText}`;
           throw new Error(error);
         }
 
@@ -101,60 +90,29 @@ const ConfigPage = () => {
       .catch((error) => sdk.notifier.error(error.message));
   };
 
-  const onParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
 
     setParameters({ ...parameters, [key]: value });
   };
 
   return (
-    <Box testId="configPageContainer">
-      {isLoading ? (
-        <LoadingSkeleton />
-      ) : (
-        <>
-          <Box className={styles.background(providerConfig.primaryColor)} />
-          <Box className={styles.body}>
-            <Heading>Authorize {providerConfig.name}</Heading>
-            <Paragraph>{providerConfig.description}</Paragraph>
-            <hr className={styles.splitter} />
-            <Subheading>Configuration</Subheading>
-            <Form>
-              {providerConfig.parameterDefinitions.map((def: ParameterDefinition) => {
-                const key = `config-input-${def.id}`;
-
-                return (
-                  <FormControl key={key} id={key}>
-                    <FormControl.Label>{def.name}</FormControl.Label>
-                    <TextInput
-                      name={key}
-                      width={def.type === 'Symbol' ? 'large' : 'medium'}
-                      type={def.type === 'Symbol' ? 'text' : 'number'}
-                      maxLength={255}
-                      isRequired={def.required}
-                      value={parameters?.[def.id] ?? ''}
-                      onChange={onParameterChange.bind(this, def.id)}
-                    />
-                    <Flex justifyContent="space-between">
-                      <FormControl.HelpText>{def.description}</FormControl.HelpText>
-                      <FormControl.Counter />
-                    </Flex>
-                  </FormControl>
-                );
-              })}
-            </Form>
-            {Object.keys(parameters).length ? (
-              <Button onClick={() => checkCredentials(sdk.parameters.instance.baseUrl)}>
-                Check Credentials
-              </Button>
-            ) : null}
-          </Box>
-          <Box className={styles.icon}>
-            <img src={providerConfig.logoUrl} alt="App logo" />
-          </Box>
-        </>
-      )}
-    </Box>
+    <>
+      <Box
+        className={styles.background(providerConfig.primaryColor ?? '')}
+        testId="configPageBackground"
+      />
+      <ConfigBody
+        baseUrl={sdk.parameters.instance.baseUrl}
+        error={error}
+        isLoading={isLoading}
+        onCredentialCheck={handleCredentialCheck}
+        onParameterChange={handleParameterChange}
+        parameters={parameters}
+        providerConfig={providerConfig}
+      />
+      <AppLogo error={error} isLoading={isLoading} logoUrl={providerConfig.logoUrl} />
+    </>
   );
 };
 

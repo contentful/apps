@@ -39,11 +39,10 @@ export const styles = {
       width: '70px',
       margin: `${tokens.spacingXl} 0`,
     },
-  }),
-  loadingContainer: css({
-    maxWidth: tokens.contentWidthDefault,
-  }),
-  loadingText: css({
-    marginTop: '-80px',
+    '> svg': {
+      display: 'block',
+      width: '70px',
+      margin: `${tokens.spacingXl} 0`,
+    },
   }),
 };

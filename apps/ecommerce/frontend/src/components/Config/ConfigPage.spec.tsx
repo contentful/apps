@@ -11,6 +11,6 @@ describe('Config Page component', () => {
   it('mounts', () => {
     render(<ConfigPage />);
 
-    expect(screen.getByTestId('configPageContainer')).toBeInTheDocument();
+    expect(screen.getByTestId('configPageBackground')).toBeInTheDocument();
   });
 });
