@@ -13,8 +13,8 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --no-ci --since master",
-    "bootstrap:ci": "lerna bootstrap --ci --concurrency=3 --since master",
-    "bootstrap:ci-deploy": "lerna bootstrap --ci --concurrency=3",
+    "bootstrap:ci": "lerna bootstrap --ci --concurrency=1 --since master",
+    "bootstrap:ci-deploy": "lerna bootstrap --ci --concurrency=1",
     "clean": "lerna clean",
     "lint": "lerna run lint --concurrency=3 --since master",
     "verify-config": "lerna run verify-config --concurrency=3 --since master",
