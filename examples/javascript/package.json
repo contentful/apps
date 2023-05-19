@@ -41,7 +41,8 @@
     "@contentful/app-scripts": "1.9.0",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "12.1.5",
-    "cross-env": "7.0.3"
+    "cross-env": "7.0.3",
+    "esbuild": "^0.17.19"
   },
   "homepage": "."
 }
