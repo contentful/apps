@@ -21,7 +21,7 @@ const ResourceCardMenu = (props: ResourceCardMenuProps) => {
       <Menu.Trigger>
         <IconButton icon={<MoreHorizontalIcon />} aria-label="Actions" />
       </Menu.Trigger>
-      <Menu.List>{...menuItems}</Menu.List>
+      <Menu.List>{menuItems}</Menu.List>
     </Menu>
   );
 };
