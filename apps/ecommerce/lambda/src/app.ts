@@ -22,12 +22,10 @@ app.use(Middleware.setSentryContext);
 // IMPORTANT: The Sentry request handler must be the first middleware on the app
 app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
-// enable CORS on /api/* routes
-app.use(apiRouteConstraint, cors(corsConfig));
-
-// verify signed requests on /api/* routes
-// to test endpoints with Postman, comment out below
-app.use(apiRouteConstraint, Middleware.verifiySignedRequests);
+app.use(apiRouteConstraint, cors(corsConfig)); // enable CORS on /api/* routes
+app.use(apiRouteConstraint, Middleware.loadAppConfig); // load app config on /api/* routes
+app.use(apiRouteConstraint, Middleware.verifiySignedRequests); // verify signed requests on /api/* routes
+app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app installation parameters on /api/* routes
 
 // serve static files for sample data
 app.use(express.static('public'));

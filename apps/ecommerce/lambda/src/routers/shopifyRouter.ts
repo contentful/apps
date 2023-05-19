@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { ShopifyController } from '../controllers';
 const app = Router();
 
+app.get('/credentials', ShopifyController.checkCredentials);
 app.post('/resource', ShopifyController.resource);
-app.post('/healthcheck', ShopifyController.healthcheck);
 
 export default app;

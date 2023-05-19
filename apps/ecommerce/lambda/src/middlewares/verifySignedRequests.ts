@@ -1,21 +1,23 @@
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { CanonicalRequest } from '@contentful/node-apps-toolkit/lib/requests/typings';
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { InvalidSignature } from '../errors/invalidSignature';
 import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
 import { config } from '../config';
 
-export const verifySignedRequestMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-  const signingSecrets = config.signingSecrets;
-  const canonicalReq = makeCanonicalReq(req);
-  let isValidReq = false;
+export const verifySignedRequestMiddleware: RequestHandler = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  try {
+    const canonicalReq = makeCanonicalReq(req);
+    let isValidReq = false;
 
-  const provider = req.header('X-Contentful-Data-Provider');
-  if (provider) {
-    const providerSecret = signingSecrets[provider];
+    if (!req.appConfig) throw new Error('App config not found');
 
     try {
-      if (NodeAppsToolkit.verifyRequest(providerSecret, canonicalReq, 60)) {
+      if (NodeAppsToolkit.verifyRequest(req.appConfig.signingSecret, canonicalReq, 60)) {
         isValidReq = true;
       }
     } catch (e) {
@@ -24,13 +26,16 @@ export const verifySignedRequestMiddleware = (req: Request, _res: Response, next
         cause: e,
       });
     }
-  }
 
-  if (!isValidReq) {
-    throw new InvalidSignature(
-      'Request does not have a valid request signature. ' +
-        'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
-    );
+    if (!isValidReq) {
+      throw new InvalidSignature(
+        'Request does not have a valid request signature. ' +
+          'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
+      );
+    }
+  } catch (e) {
+    console.error(e);
+    return next(e);
   }
 
   next();

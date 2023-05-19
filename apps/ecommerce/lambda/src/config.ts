@@ -12,19 +12,12 @@ function getEnvironmentVariable(
   return environmentVariableValue;
 }
 
-const parseSigningSecrets = () => {
-  const signingSecrets = JSON.parse(getEnvironmentVariable('SIGNING_SECRETS')) as {
-    [key: string]: string;
-  };
-  return signingSecrets;
-};
-
 export const config = {
-  signingSecrets: parseSigningSecrets(),
   stage: getEnvironmentVariable('STAGE'),
   awsRegion: getEnvironmentVariable('AWS_REGION'),
   sentryDSN: getEnvironmentVariable('SENTRY_DSN'),
   environment: getEnvironmentVariable('NODE_ENV'),
   release: getEnvironmentVariable('CIRCLE_SHA1', 'no-release-hash-set'),
   domainName: getEnvironmentVariable('DOMAIN_NAME'),
+  appConfigs: JSON.parse(getEnvironmentVariable('APP_CONFIGS')),
 };

@@ -82,3 +82,7 @@ export interface ParameterDefinition {
   required: boolean;
   placeholder?: string;
 }
+
+export interface AppInstallationParameters {
+  [key: string]: any;
+}

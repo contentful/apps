@@ -1,11 +1,15 @@
 import * as Sentry from '@sentry/node';
-import { verifySignedRequestMiddleware } from './verifySignedRequests';
-import { setSentryContext } from './setSentryContext';
 import { NextFunction, Request, Response } from 'express';
+import { setSentryContext } from './setSentryContext';
+import { loadAppConfigMiddleware } from './loadAppConfig';
+import { getAppInstallationParametersMiddleware } from './getAppInstallationParameters';
+import { verifySignedRequestMiddleware } from './verifySignedRequests';
 
 const Middleware = {
   setSentryContext: setSentryContext,
+  loadAppConfig: loadAppConfigMiddleware,
   verifiySignedRequests: verifySignedRequestMiddleware,
+  getAppInstallationParameters: getAppInstallationParametersMiddleware,
   sentryErrorHandler: Sentry.Handlers.errorHandler({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     shouldHandleError(error) {
