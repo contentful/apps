@@ -8,6 +8,7 @@
       "type": "function",
       "path": "actions/example.js",
       "entryFile": "./actions/example.ts",
+      "allowNetworks": [],
       "parameters": []
     }
   ]
