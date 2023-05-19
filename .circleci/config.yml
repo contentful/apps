@@ -112,10 +112,10 @@ jobs:
           template-preset: 'aws-push-artifacts'
       - checkout
       - node/install
+      - node/install-packages
       - run:
-          name: Install dependencies
+          name: Bootstrap
           command: |
-            npm ci
             npm run bootstrap:ci-deploy
       - run:
           name: Install awscli
