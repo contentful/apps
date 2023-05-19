@@ -1,28 +1,27 @@
 import { Badge, Box, Card, Flex, Grid, Text } from '@contentful/f36-components';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import ResourceCardRawData from './ResourceCardRawData';
 import tokens from '@contentful/f36-tokens';
 import ResourceCardMenu from './ResourceCardMenu';
 import MissingResourceCard from './MissingResourceCard';
 import { useDebounce } from 'usehooks-ts';
 import useExternalResource from 'hooks/field/useExternalResource';
-import { ExternalResource, ExternalResourceLink } from 'types';
+import { ExternalResourceLink } from 'types';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
+import ResourceFieldContext from 'context/ResourceFieldContext';
 
-interface Props {
+export interface ResourceCardProps {
   value: ExternalResourceLink;
-  data?: ExternalResource;
-  index?: number;
-  total?: number;
-  onRemove: Function;
+  index: number;
+  total: number;
   dragHandleRender?: RenderDragFn;
-  onMoveToTop?: Function;
-  onMoveToBottom?: Function;
 }
 
-const ResourceCard = (props: Props) => {
-  const { value, index, total, onRemove, dragHandleRender, onMoveToTop, onMoveToBottom } = props;
+const ResourceCard = (props: ResourceCardProps) => {
+  const { value, index, total, dragHandleRender } = props;
+
+  const { onRemove, onMoveToBottom, onMoveToTop } = useContext(ResourceFieldContext);
 
   const debouncedValue = useDebounce(value, 300);
   const { externalResource, isLoading, error, errorMessage, errorStatus } =
@@ -32,17 +31,11 @@ const ResourceCard = (props: Props) => {
   if (error) {
     return (
       <MissingResourceCard
-        index={index}
-        total={total}
-        onRemove={onRemove}
-        onMoveToBottom={onMoveToBottom}
-        onMoveToTop={onMoveToTop}
-        isLoading={isLoading}
+        {...props}
         error={error}
-        value={JSON.stringify(value)}
         errorMessage={errorMessage}
         errorStatus={errorStatus}
-        dragHandleRender={dragHandleRender}
+        isLoading={isLoading}
       />
     );
   }

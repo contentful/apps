@@ -1,6 +1,6 @@
 import { IconButton, Menu } from '@contentful/f36-components';
 import { MoreHorizontalIcon } from '@contentful/f36-icons';
-import useResourceMenu from 'hooks/field/useResourceMenuItems';
+import useResourceMenu from 'components/Field/ResourceCard/useResourceMenuItems';
 
 export interface ResourceCardMenuProps {
   onRemove: Function;

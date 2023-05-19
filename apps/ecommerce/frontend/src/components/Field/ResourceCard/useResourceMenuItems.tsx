@@ -1,34 +1,25 @@
 import { Menu } from '@contentful/f36-components';
-import { ResourceCardMenuProps } from 'components/Field/ResourceCardMenu';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ResourceCardMenuProps } from './ResourceCardMenu';
+import { useEffect, useMemo, useState } from 'react';
 
 type menuItemsOutput = { menuItems: JSX.Element[] };
 
 const useResourceMenuItems = (menuActions: ResourceCardMenuProps): menuItemsOutput => {
-  const {
-    onRemove,
-    isDataVisible,
-    onShowData,
-    onHideData,
-    index,
-    total,
-    onMoveToTop,
-    onMoveToBottom,
-  } = menuActions;
-
   const defaultMenuItems = useMemo(
     () => [
-      <Menu.Item key="delete" onClick={() => onRemove()}>
+      <Menu.Item key="delete" onClick={() => menuActions.onRemove()}>
         Remove
       </Menu.Item>,
     ],
-    [onRemove]
+    [menuActions]
   );
+
   const [menuItems, setMenuItems] = useState([...defaultMenuItems]);
 
-  const addMenuItems = useCallback(() => {
+  const addMenuItems = () => {
     const newMenuItems = [...defaultMenuItems];
 
+    const { index, total, onMoveToTop, onMoveToBottom } = menuActions;
     if (typeof index !== 'undefined' && total && total > 1) {
       if (index > 0 && onMoveToTop) {
         newMenuItems.push(
@@ -47,6 +38,7 @@ const useResourceMenuItems = (menuActions: ResourceCardMenuProps): menuItemsOutp
       }
     }
 
+    const { isDataVisible, onShowData, onHideData } = menuActions;
     newMenuItems.push(<Menu.Divider key="divider" />);
     newMenuItems.push(
       <Menu.Item key="toggleData" onClick={() => (isDataVisible ? onHideData() : onShowData())}>
@@ -55,20 +47,9 @@ const useResourceMenuItems = (menuActions: ResourceCardMenuProps): menuItemsOutp
     );
 
     setMenuItems([...newMenuItems]);
-  }, [
-    defaultMenuItems,
-    index,
-    isDataVisible,
-    onMoveToBottom,
-    onMoveToTop,
-    onHideData,
-    onShowData,
-    total,
-  ]);
+  };
 
-  useEffect(() => {
-    addMenuItems();
-  }, [addMenuItems]);
+  useEffect(addMenuItems, [menuActions, defaultMenuItems]);
 
   return { menuItems };
 };

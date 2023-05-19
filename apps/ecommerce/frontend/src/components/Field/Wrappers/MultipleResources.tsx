@@ -1,60 +1,54 @@
-import { useEffect, useState } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { ExternalResourceLink } from 'types';
-import ResourceField from './ResourceField';
+import { ResourceField } from '../ResourceField';
 import mockValue from 'helpers/mockValue';
+import ResourceFieldProvider from 'providers/ResourceFieldProvider';
+import { useContext } from 'react';
+import ResourceFieldContext from 'context/ResourceFieldContext';
+
+const isMultiple = true;
 
 const MultipleResources = () => {
   const sdk = useSDK<FieldAppSDK>();
-  const [value, setValue] = useState<ExternalResourceLink[]>(sdk.field.getValue());
-  const [total, setTotal] = useState<number>(0);
+  const { resourceArray } = useContext(ResourceFieldContext);
 
-  useEffect(() => {
-    sdk.field.onValueChanged((value) => {
-      setValue(value);
-      setTotal(value?.length);
-    });
-  }, [sdk.field, setValue]);
-
-  const addContent = () => {
+  const handleAddContent = () => {
     // TODO: Update this function to add a new resource(s) to the list
     const newValue = mockValue(sdk);
 
-    if (value) {
-      sdk.field.setValue([...value, newValue]);
+    if (resourceArray) {
+      sdk.field.setValue([...resourceArray, newValue]);
     } else {
       sdk.field.setValue([newValue]);
     }
   };
 
   const handleRemove = (index: number) => {
-    const newValue = value.filter((obj, i) => i !== index);
+    const newValue = resourceArray.filter((obj, i) => i !== index);
     sdk.field.setValue(newValue);
   };
 
   const handleMoveToTop = (index: number) => {
-    const newValue = [...value];
+    const newValue = [...resourceArray];
     newValue.unshift(newValue.splice(index, 1)[0]);
     sdk.field.setValue(newValue);
   };
 
   const handleMoveToBottom = (index: number) => {
-    const newValue = [...value];
+    const newValue = [...resourceArray];
     newValue.push(newValue.splice(index, 1)[0]);
     sdk.field.setValue(newValue);
   };
 
   return (
-    <ResourceField
-      addContent={addContent}
-      isMultiple={true}
-      onMoveToBottom={handleMoveToBottom}
-      onMoveToTop={handleMoveToTop}
+    <ResourceFieldProvider
+      isMultiple={isMultiple}
+      onAddContent={handleAddContent}
       onRemove={handleRemove}
-      total={total}
-      value={value}
-    />
+      onMoveToBottom={handleMoveToBottom}
+      onMoveToTop={handleMoveToTop}>
+      <ResourceField />
+    </ResourceFieldProvider>
   );
 };
 
