@@ -18,19 +18,21 @@ const validateActions = () => {
       }
     });
 
-    if (uniqueValues.has(action.id)) {
-      throw new Error(`Duplicate action id: '${action.id}'`);
+    const { id, path, entryFile } = action;
+
+    if (uniqueValues.has(id)) {
+      throw new Error(`Duplicate action id: '${id}'`);
     }
-    if (uniqueValues.has(action.path)) {
-      throw new Error(`Duplicate action path: '${action.path}'`);
+    if (uniqueValues.has(path)) {
+      throw new Error(`Duplicate action path: '${path}'`);
     }
-    if (uniqueValues.has(action.entryFile)) {
-      throw new Error(`Duplicate entryFile path: '${action.entryFile}'`);
+    if (uniqueValues.has(entryFile)) {
+      throw new Error(`Duplicate entryFile path: '${entryFile}'`);
     }
 
-    uniqueValues.add(action.entryFile);
-    uniqueValues.add(action.path);
-    uniqueValues.add(action.id);
+    uniqueValues.add(entryFile);
+    uniqueValues.add(path);
+    uniqueValues.add(id);
   });
 };
 
