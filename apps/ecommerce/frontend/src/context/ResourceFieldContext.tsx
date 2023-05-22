@@ -1,5 +1,4 @@
 import { createContext } from 'react';
-import type { ExternalResourceLink } from 'types';
 
 export type ResourceFieldContextType = {
   isMultiple: boolean;

@@ -1,5 +1,4 @@
 import ResourceFieldContext from 'context/ResourceFieldContext';
-import useResourceValue from 'hooks/field/useResourceValue';
 import { ReactNode } from 'react';
 
 export type ResourceFieldProviderProps = {
