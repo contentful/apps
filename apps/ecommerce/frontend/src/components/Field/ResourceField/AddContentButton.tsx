@@ -18,7 +18,11 @@ export const AddContentButton = () => {
 
   return (
     <div className={container}>
-      <Button variant="secondary" startIcon={<PlusIcon />} size="small" onClick={handleAddContent}>
+      <Button
+        variant="secondary"
+        startIcon={<PlusIcon />}
+        size="small"
+        onClick={() => handleAddContent()}>
         <Text fontWeight="fontWeightDemiBold">Add content</Text>
       </Button>
     </div>

@@ -1,58 +1,26 @@
-import { FieldAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useFieldValue } from '@contentful/react-apps-toolkit';
 import { useEffect, useState } from 'react';
 import type { ExternalResourceLink } from 'types';
 
 const useResourceValue = (isMultiple: boolean) => {
-  const sdk = useSDK<FieldAppSDK>();
-
+  const [_value] = useFieldValue<ExternalResourceLink | ExternalResourceLink[]>();
   const [value, setValue] = useState<ExternalResourceLink[]>([]);
-  const [unlistenToField, setUnlistenToField] = useState<() => void>();
 
   const setSingleValue = (newValue: ExternalResourceLink) => {
     const valueArray = newValue ? [newValue] : [];
     setValue(valueArray);
   };
 
-  const initializeValue = () => {
-    const initialValue = sdk.field.getValue();
-
+  const handleFieldChange = () => {
     if (!isMultiple) {
-      setSingleValue(initialValue);
+      setSingleValue(_value as ExternalResourceLink);
       return;
     }
 
-    if (initialValue) {
-      setValue(initialValue);
-    }
+    setValue((_value as ExternalResourceLink[]) || []);
   };
 
-  const attachListener = () => {
-    if (!unlistenToField) {
-      setUnlistenToField(
-        sdk.field.onValueChanged((value) => {
-          if (!isMultiple) {
-            setSingleValue(value);
-            return;
-          }
-
-          setValue(value);
-        })
-      );
-    }
-  };
-
-  const init = () => {
-    initializeValue();
-    attachListener();
-
-    return () => {
-      unlistenToField?.call(null);
-    };
-  };
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(init, [isMultiple]);
+  useEffect(handleFieldChange, [_value, isMultiple]);
 
   return {
     value,

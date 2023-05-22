@@ -11,7 +11,10 @@ const SingleResource = () => {
     sdk.field.setValue(undefined);
   };
 
-  const handleAddContent = () => sdk.field.setValue(mockValue(sdk));
+  const handleAddContent = () => {
+    const newValue = mockValue(sdk);
+    sdk.field.setValue(newValue);
+  };
 
   return (
     <ResourceFieldProvider
