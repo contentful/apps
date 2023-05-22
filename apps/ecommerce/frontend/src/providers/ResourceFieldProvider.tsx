@@ -19,12 +19,9 @@ const ResourceFieldProvider = ({
   onMoveToTop,
   onMoveToBottom,
 }: ResourceFieldProviderProps) => {
-  const { value } = useResourceValue(isMultiple);
-
   return (
     <ResourceFieldContext.Provider
       value={{
-        resourceArray: value,
         isMultiple,
         onAddContent,
         onRemove,

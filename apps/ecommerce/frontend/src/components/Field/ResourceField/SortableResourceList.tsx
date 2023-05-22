@@ -7,8 +7,13 @@ import { useContext } from 'react';
 import { ExternalResourceLink } from 'types';
 import ResourceCard from '../ResourceCard';
 
-const SortableResourceList = () => {
-  const { resourceArray, isMultiple } = useContext(ResourceFieldContext);
+interface Props {
+  resourceArray: ExternalResourceLink[];
+}
+
+const SortableResourceList = (props: Props) => {
+  const { resourceArray } = props;
+  const { isMultiple } = useContext(ResourceFieldContext);
 
   const sdk = useSDK<FieldAppSDK>();
   return (
