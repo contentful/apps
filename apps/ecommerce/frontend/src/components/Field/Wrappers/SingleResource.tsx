@@ -4,8 +4,6 @@ import { ResourceField } from 'components/Field/ResourceField';
 import mockValue from 'helpers/mockValue';
 import ResourceFieldProvider from 'providers/ResourceFieldProvider';
 
-const isMultiple = false;
-
 const SingleResource = () => {
   const sdk = useSDK<FieldAppSDK>();
 
@@ -17,7 +15,7 @@ const SingleResource = () => {
 
   return (
     <ResourceFieldProvider
-      isMultiple={isMultiple}
+      isMultiple={false}
       handleAddContent={handleAddContent}
       handleRemove={handleRemove}>
       <ResourceField />

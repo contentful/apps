@@ -5,8 +5,6 @@ import mockValue from 'helpers/mockValue';
 import ResourceFieldProvider from 'providers/ResourceFieldProvider';
 import type { ExternalResourceLink } from 'types';
 
-const isMultiple = true;
-
 const MultipleResources = () => {
   const sdk = useSDK<FieldAppSDK>();
 
@@ -47,7 +45,7 @@ const MultipleResources = () => {
 
   return (
     <ResourceFieldProvider
-      isMultiple={isMultiple}
+      isMultiple={true}
       handleAddContent={handleAddContent}
       handleRemove={handleRemove}
       handleMoveToBottom={handleMoveToBottom}
