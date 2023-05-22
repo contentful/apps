@@ -1,9 +1,9 @@
 import { Button, Text } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { PlusIcon } from '@contentful/f36-icons';
 import { useContext } from 'react';
 import ResourceFieldContext from 'context/ResourceFieldContext';
+import tokens from '@contentful/f36-tokens';
 
 const container = css({
   display: 'flex',
@@ -14,11 +14,11 @@ const container = css({
 });
 
 export const AddContentButton = () => {
-  const { onAddContent } = useContext(ResourceFieldContext);
+  const { handleAddContent } = useContext(ResourceFieldContext);
 
   return (
     <div className={container}>
-      <Button variant="secondary" startIcon={<PlusIcon />} size="small" onClick={onAddContent}>
+      <Button variant="secondary" startIcon={<PlusIcon />} size="small" onClick={handleAddContent}>
         <Text fontWeight="fontWeightDemiBold">Add content</Text>
       </Button>
     </div>

@@ -1,11 +1,11 @@
-import type { FieldAppSDK } from '@contentful/app-sdk';
 import { Grid } from '@contentful/f36-components';
 import { SortableLinkList } from '@contentful/field-editor-reference';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import ResourceFieldContext from 'context/ResourceFieldContext';
 import { useContext } from 'react';
-import { ExternalResourceLink } from 'types';
-import ResourceCard from '../ResourceCard';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import ResourceCard from 'components/Field/ResourceCard';
+import ResourceFieldContext from 'context/ResourceFieldContext';
+import type { ExternalResourceLink } from 'types';
+import type { FieldAppSDK } from '@contentful/app-sdk';
 
 interface Props {
   resourceArray: ExternalResourceLink[];

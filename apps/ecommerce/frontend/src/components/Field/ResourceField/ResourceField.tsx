@@ -1,9 +1,9 @@
-import { useContext } from 'react';
-import { Grid } from '@contentful/f36-components';
 import { AddContentButton } from './AddContentButton';
-import SortableResourceList from './SortableResourceList';
+import { Grid } from '@contentful/f36-components';
+import { useContext } from 'react';
 import FieldJsonEditor from './FieldJsonEditor';
 import ResourceFieldContext from 'context/ResourceFieldContext';
+import SortableResourceList from './SortableResourceList';
 import useResourceValue from 'hooks/field/useResourceValue';
 
 const ResourceField = () => {

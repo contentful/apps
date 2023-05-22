@@ -1,15 +1,15 @@
 import { Badge, Box, Card, Flex, Grid, Text } from '@contentful/f36-components';
-import { useContext, useState } from 'react';
-import ResourceCardRawData from './ResourceCardRawData';
-import tokens from '@contentful/f36-tokens';
-import ResourceCardMenu from './ResourceCardMenu';
-import MissingResourceCard from './MissingResourceCard';
-import { useDebounce } from 'usehooks-ts';
-import useExternalResource from 'hooks/field/useExternalResource';
-import { ExternalResourceLink } from 'types';
-import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
+import { useContext, useState } from 'react';
+import { useDebounce } from 'usehooks-ts';
+import MissingResourceCard from './MissingResourceCard';
+import ResourceCardMenu from './ResourceCardMenu';
+import ResourceCardRawData from './ResourceCardRawData';
 import ResourceFieldContext from 'context/ResourceFieldContext';
+import tokens from '@contentful/f36-tokens';
+import useExternalResource from 'hooks/field/useExternalResource';
+import type { ExternalResourceLink } from 'types';
+import type { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 
 export interface ResourceCardProps {
   value: ExternalResourceLink;

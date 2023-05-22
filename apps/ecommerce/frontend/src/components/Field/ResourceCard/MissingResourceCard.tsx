@@ -1,11 +1,11 @@
 import { Badge, Box, Card, Flex, Text } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
-import { useContext, useState } from 'react';
-import ResourceCardRawData from './ResourceCardRawData';
-import ResourceCardMenu from './ResourceCardMenu';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
-import { ResourceCardProps } from './ResourceCard';
+import { useContext, useState } from 'react';
+import ResourceCardMenu from './ResourceCardMenu';
+import ResourceCardRawData from './ResourceCardRawData';
 import ResourceFieldContext from 'context/ResourceFieldContext';
+import tokens from '@contentful/f36-tokens';
+import type { ResourceCardProps } from './ResourceCard';
 
 interface MissingResourceCardProps extends ResourceCardProps {
   error: string;

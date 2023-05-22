@@ -1,9 +1,9 @@
-import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { ResourceField } from '../ResourceField';
+import { FieldAppSDK } from '@contentful/app-sdk';
+import { ResourceField } from 'components/Field/ResourceField';
 import mockValue from 'helpers/mockValue';
 import ResourceFieldProvider from 'providers/ResourceFieldProvider';
-import { ExternalResourceLink } from 'types';
+import type { ExternalResourceLink } from 'types';
 
 const isMultiple = true;
 
