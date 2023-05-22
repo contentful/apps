@@ -16,7 +16,7 @@ interface MissingResourceCardProps extends ResourceCardProps {
 
 const MissingResourceCard = (props: MissingResourceCardProps) => {
   const { value, isLoading, errorMessage, errorStatus, index, total, dragHandleRender } = props;
-  const { onRemove, onMoveToBottom, onMoveToTop } = useContext(ResourceFieldContext);
+  const { handleRemove, handleMoveToBottom, handleMoveToTop } = useContext(ResourceFieldContext);
 
   const [showJson, setShowJson] = useState<boolean>(false);
   const { resourceProvider, resourceType } = getResourceProviderAndType(value);
@@ -36,14 +36,14 @@ const MissingResourceCard = (props: MissingResourceCardProps) => {
           <Flex alignItems="center" isInline={true}>
             <Badge variant={errorStatus === 404 ? 'warning' : 'negative'}>{errorMessage}</Badge>
             <ResourceCardMenu
-              onRemove={() => onRemove(index)}
+              onRemove={() => handleRemove(index)}
               isDataVisible={showJson}
               onShowData={() => setShowJson(true)}
               onHideData={() => setShowJson(false)}
               index={index}
               total={total}
-              onMoveToBottom={() => onMoveToBottom?.call(null, index)}
-              onMoveToTop={() => onMoveToTop?.call(null, index)}
+              onMoveToBottom={() => handleMoveToBottom?.call(null, index)}
+              onMoveToTop={() => handleMoveToTop?.call(null, index)}
             />
           </Flex>
         </Flex>

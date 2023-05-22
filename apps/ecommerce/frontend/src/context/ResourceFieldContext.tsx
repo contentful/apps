@@ -2,16 +2,16 @@ import { createContext } from 'react';
 
 export type ResourceFieldContextType = {
   isMultiple: boolean;
-  onAddContent: () => void;
-  onRemove: (index: number) => void;
-  onMoveToTop?: (index: number) => void;
-  onMoveToBottom?: (index: number) => void;
+  handleAddContent: () => void;
+  handleRemove: (index: number) => void;
+  handleMoveToTop?: (index: number) => void;
+  handleMoveToBottom?: (index: number) => void;
 };
 
 const ResourceFieldContext = createContext<ResourceFieldContextType>({
   isMultiple: false,
-  onAddContent: () => {},
-  onRemove: () => {},
+  handleAddContent: () => {},
+  handleRemove: () => {},
 });
 
 export default ResourceFieldContext;

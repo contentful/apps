@@ -21,7 +21,7 @@ export interface ResourceCardProps {
 const ResourceCard = (props: ResourceCardProps) => {
   const { value, index, total, dragHandleRender } = props;
 
-  const { onRemove, onMoveToBottom, onMoveToTop } = useContext(ResourceFieldContext);
+  const { handleRemove, handleMoveToBottom, handleMoveToTop } = useContext(ResourceFieldContext);
 
   const debouncedValue = useDebounce(value, 300);
   const { externalResource, isLoading, error, errorMessage, errorStatus } =
@@ -57,14 +57,14 @@ const ResourceCard = (props: ResourceCardProps) => {
           <Flex alignItems="center" isInline={true}>
             {externalResource.status && <Badge variant="featured">{externalResource.status}</Badge>}
             <ResourceCardMenu
-              onRemove={() => onRemove(index)}
+              onRemove={() => handleRemove(index)}
               isDataVisible={showJson}
               onShowData={() => setShowJson(true)}
               onHideData={() => setShowJson(false)}
               index={index}
               total={total}
-              onMoveToBottom={() => onMoveToBottom?.call(null, index)}
-              onMoveToTop={() => onMoveToTop?.call(null, index)}
+              onMoveToBottom={() => handleMoveToBottom?.call(null, index)}
+              onMoveToTop={() => handleMoveToTop?.call(null, index)}
             />
           </Flex>
         </Flex>

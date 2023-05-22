@@ -48,10 +48,10 @@ const MultipleResources = () => {
   return (
     <ResourceFieldProvider
       isMultiple={isMultiple}
-      onAddContent={handleAddContent}
-      onRemove={handleRemove}
-      onMoveToBottom={handleMoveToBottom}
-      onMoveToTop={handleMoveToTop}>
+      handleAddContent={handleAddContent}
+      handleRemove={handleRemove}
+      handleMoveToBottom={handleMoveToBottom}
+      handleMoveToTop={handleMoveToTop}>
       <ResourceField />
     </ResourceFieldProvider>
   );
