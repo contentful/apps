@@ -10,14 +10,16 @@ export type ResourceFieldProviderProps = {
   children: ReactNode;
 };
 
-const ResourceFieldProvider = ({
-  children,
-  isMultiple,
-  handleAddContent,
-  handleRemove,
-  handleMoveToTop,
-  handleMoveToBottom,
-}: ResourceFieldProviderProps) => {
+const ResourceFieldProvider = (props: ResourceFieldProviderProps) => {
+  const {
+    children,
+    isMultiple,
+    handleAddContent,
+    handleRemove,
+    handleMoveToTop,
+    handleMoveToBottom,
+  } = props;
+
   return (
     <ResourceFieldContext.Provider
       value={{
