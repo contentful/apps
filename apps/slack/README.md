@@ -89,7 +89,7 @@ This sections explains how to run the Slack app locally.
 
 ### General
 
-- Start ngrok with `ngrok https 3000 --subdomain slack-backend-dev` (the `--subdomain` flagwill not work without paid ngrok account)
+- Start ngrok with `ngrok http 3000 --subdomain slack-backend-dev` (the `--subdomain` flagwill not work without paid ngrok account)
 - Create a new Slack app [here](https://api.slack.com/apps)
   - Add the ngrok URL as redirect URL (Features -> OAuth & Permissions -> Redirect URLs)
   - Enable token rotation (Features -> OAuth & Permissions)
