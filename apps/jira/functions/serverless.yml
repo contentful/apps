@@ -1,6 +1,6 @@
 service: sls-apps-jira-backend
 
-frameworkVersion: '>=2.0.0 <3.0.0'
+frameworkVersion: '>=3.0.0'
 
 plugins:
   - serverless-domain-manager
@@ -9,14 +9,14 @@ custom:
   myStage: ${opt:stage, self:provider.stage}
   myEnvironment:
     FRONTEND_URL:
-      prd: "https://app.jira.ctfapps.net"
-      test: "http://localhost:1234"
+      prd: 'https://app.jira.ctfapps.net'
+      test: 'http://localhost:1234'
     OAUTH_REDIRECT_URI:
-      prd: "https://api.jira.ctfapps.net/auth"
-      test: "${env:NGROK_URL}/dev/auth"
+      prd: 'https://api.jira.ctfapps.net/auth'
+      test: '${env:NGROK_URL}/dev/auth'
     BASE_URL:
-      prd: "https://api.jira.ctfapps.net"
-      test: "${env:NGROK_URL}/dev"
+      prd: 'https://api.jira.ctfapps.net'
+      test: '${env:NGROK_URL}/dev'
   customDomain:
     domainName: api.jira.ctfapps.net
     stage: prd
@@ -68,4 +68,3 @@ functions:
           method: get
           cors: true
           private: false
-
