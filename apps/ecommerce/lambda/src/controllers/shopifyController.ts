@@ -6,20 +6,21 @@ import { ShopifyClientError, ShopifyProvider } from '../classes/Shopify';
 const ShopifyController = {
   healthcheck: async (req: Request, res: Response): Promise<Response> => {
     try {
-      const domain = req.header('x-contentful-shopify-domain') || '';
+      const shopName = req.header('x-contentful-shopify-shop') || '';
       const storefrontAccessToken = req.header('x-contentful-shopify-token') || '';
+      const domain = `${shopName}.myshopify.com`;
 
       const shopifyClient = new ShopifyProvider({
         domain,
         storefrontAccessToken,
       });
 
-      // prevent SSRF exploits
-      // keys off of a .myshopify.com domain
-      // TODO: find a more secure method since production domains for shopify stores will likely not pass the below condition
       if (!shopifyClient.isShopifyDomain(domain)) {
-        throw new Error(`Invalid domain provider. Provider must be a Shopify domain.`);
+        throw new Error(
+          `Invalid Shopify shop name: ${shopName}. Must match regex /[-a-z0-9]{2,256}\b([-a-z0-9]+)$/`
+        );
       }
+
       const response = await shopifyClient.client.shop.fetchInfo();
       return res.send(response);
     } catch (error) {
@@ -29,17 +30,26 @@ const ShopifyController = {
       });
     }
   },
+
   resource: async (
     req: Request<ExternalResourceLink>,
     res: Response<ExternalResourceLink | ErrorResponse>
   ): Promise<Response<ExternalResourceLink>> => {
-    const domain = req.header('x-contentful-shopify-domain') || '';
+    const shopName = req.header('x-contentful-shopify-shop') || '';
     const storefrontAccessToken = req.header('x-contentful-shopify-token') || '';
+    const domain = `${shopName}.myshopify.com`;
     const id = req.body.sys.urn;
+
     const shopifyClient = new ShopifyProvider({
       domain,
       storefrontAccessToken,
     });
+
+    if (!shopifyClient.isShopifyDomain(domain)) {
+      throw new Error(
+        `Invalid Shopify shop name: ${shopName}. Must match regex /[-a-z0-9]{2,256}\b([-a-z0-9]+)$/`
+      );
+    }
 
     try {
       if (id.match(/\/not_found$/)) {

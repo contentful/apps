@@ -15,9 +15,6 @@ const mockValue = (sdk: FieldAppSDK) => {
       type: 'ResourceLink',
       linkType: sdk.parameters.instance.linkType,
     },
-    metadata: {
-      resourceType: 'Commerce:Product',
-    },
   } as ExternalResourceLink;
 };
 

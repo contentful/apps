@@ -56,7 +56,7 @@ const shopifyClientStub = {
   },
 };
 
-const stubDomain = 'mytest-domain.myshopify.com';
+const shopName = 'mytest-shop';
 
 describe('Shopify Router', () => {
   beforeEach((done) => {
@@ -78,7 +78,7 @@ describe('Shopify Router', () => {
         .request(app)
         .post('/shopify/healthcheck')
         .set('X-Contentful-Data-Provider', 'shopify')
-        .set('x-contentful-shopify-domain', stubDomain)
+        .set('x-contentful-shopify-shop', shopName)
         .send({ sys: mockResourceLink.sys })
         .end((error, res) => {
           expect(res).to.have.status(200);
@@ -96,7 +96,7 @@ describe('Shopify Router', () => {
         .request(app)
         .post('/shopify/resource')
         .set('X-Contentful-Data-Provider', 'shopify')
-        .set('x-contentful-shopify-domain', stubDomain)
+        .set('x-contentful-shopify-shop', shopName)
         .send({ sys: mockResourceLink.sys })
         .end((error, res) => {
           expect(res).to.have.status(200);
@@ -119,7 +119,7 @@ describe('Shopify Router', () => {
         .request(app)
         .post('/shopify/resource')
         .set('X-Contentful-Data-Provider', 'shopify')
-        .set('x-contentful-shopify-domain', stubDomain)
+        .set('x-contentful-shopify-shop', shopName)
         .send({ sys: mockResourceLink.sys })
         .end((error, res) => {
           expect(res).to.have.status(404);

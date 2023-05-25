@@ -14,9 +14,6 @@ export interface ExternalResourceLink {
     linkType: ExternalResourceLinkType;
     urn: string;
   };
-  metadata?: {
-    [key: string]: JSONValue;
-  };
 }
 
 export interface ExternalResource {

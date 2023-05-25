@@ -67,6 +67,7 @@ const ConfigBody = (props: Props) => {
                       type={def.type === 'Symbol' ? 'text' : 'number'}
                       maxLength={255}
                       isRequired={def.required}
+                      placeholder={def.placeholder}
                       value={parameters?.[def.id] ?? ''}
                       onChange={onParameterChange.bind(this, def.id)}
                     />
