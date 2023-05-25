@@ -26,6 +26,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
         url,
         sdk.ids.app!,
         cma,
+        sdk,
         'POST',
         {
           'x-contentful-data-provider': resourceProvider.toLowerCase(),
@@ -38,7 +39,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
 
       return data;
     },
-    [cma, sdk.ids.app, sdk.parameters.instance.baseUrl, shopName, storefrontAccessToken]
+    [cma, sdk, shopName, storefrontAccessToken]
   );
 
   useEffect(() => {
