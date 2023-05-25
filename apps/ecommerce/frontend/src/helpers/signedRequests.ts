@@ -1,11 +1,13 @@
-import { CMAClient } from '@contentful/app-sdk';
+import { CMAClient, KnownAppSDK } from '@contentful/app-sdk';
 import { CreateAppSignedRequestProps } from 'contentful-management/dist/typings/entities/app-signed-request';
 import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
+import { contentfulContextHeaders } from './contentfulContext';
 
 async function fetchWithSignedRequest(
   url: URL,
   appDefinitionId: string,
   cma: PlainClientAPI | CMAClient,
+  sdk: KnownAppSDK,
   method: CreateAppSignedRequestProps['method'] = 'GET',
   unsignedHeaders: Record<string, string> = {},
   body?: string | object
@@ -15,6 +17,7 @@ async function fetchWithSignedRequest(
     method: method,
     headers: {
       'Content-Type': 'application/json',
+      ...contentfulContextHeaders(sdk),
     },
     body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
   };
