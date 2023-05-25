@@ -16,7 +16,7 @@
     "eslint": "6.8.0",
     "jest": "25.1.0",
     "nodemon": "2.0.2",
-    "serverless": "2.53.1",
+    "serverless": "^3.31.0",
     "serverless-domain-manager": "3.3.1"
   },
   "dependencies": {
