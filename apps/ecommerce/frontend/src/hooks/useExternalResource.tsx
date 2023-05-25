@@ -8,7 +8,7 @@ import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
 const useExternalResource = (resource?: ExternalResourceLink) => {
   const sdk = useSDK<FieldAppSDK>();
   const cma = useCMA();
-  const { storefrontAccessToken, apiEndpoint } = sdk.parameters.installation;
+  const { storefrontAccessToken, shopName } = sdk.parameters.installation;
 
   const [externalResource, setExternalResource] = useState<ExternalResource>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -30,7 +30,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
         {
           'x-contentful-data-provider': resourceProvider.toLowerCase(),
           'X-Contentful-Data-Provider-BaseURL': sdk.parameters.instance.baseUrl,
-          'x-contentful-shopify-domain': apiEndpoint,
+          'x-contentful-shopify-shop': shopName,
           'x-contentful-shopify-token': storefrontAccessToken,
         },
         resource
@@ -38,7 +38,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
 
       return data;
     },
-    [cma, sdk.ids.app, sdk.parameters.instance.baseUrl, apiEndpoint, storefrontAccessToken]
+    [cma, sdk.ids.app, sdk.parameters.instance.baseUrl, shopName, storefrontAccessToken]
   );
 
   useEffect(() => {

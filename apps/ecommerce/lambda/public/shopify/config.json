@@ -5,14 +5,16 @@
     {
       "id": "storefrontAccessToken",
       "name": "Storefront Access Token",
+      "placeholder": "a12bc3d45e678f91011ghi121314j15k",
       "description": "The storefront access token to your Shopify store",
       "type": "Symbol",
       "required": true
     },
     {
-      "id": "apiEndpoint",
-      "name": "API Endpoint",
-      "description": "The Shopify API endpoint",
+      "id": "shopName",
+      "name": "Shop Name",
+      "placeholder": "example-shop",
+      "description": "The shop name of your Shopify store",
       "type": "Symbol",
       "required": true
     }

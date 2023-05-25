@@ -75,7 +75,7 @@ const ConfigPage = () => {
     const url = new URL(`${baseUrl}/healthcheck`);
     fetchWithSignedRequest(url, sdk.ids.app, cma, 'POST', {
       'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
-      'x-contentful-shopify-domain': parameters.apiEndpoint,
+      'x-contentful-shopify-shop': parameters.shopName,
       'x-contentful-shopify-token': parameters.storefrontAccessToken,
     })
       .then((res) => {
