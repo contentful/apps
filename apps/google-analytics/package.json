@@ -9,7 +9,7 @@
     "@types/node": "13.7.0",
     "@types/react": "16.8.17",
     "@types/react-dom": "16.8.4",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.1",
     "cross-env": "7.0.3",
     "typescript": "3.5.2"
   },
