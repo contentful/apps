@@ -1,6 +1,6 @@
-import { CreateAppActionCallProps } from 'contentful-management';
+import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 
-exports.handler = async (payload: CreateAppActionCallProps) => {
+export const handler = async (payload: { [key: string]: any }, context: AppActionCallContext) => {
   const { parameters } = payload;
 
   const response = {
