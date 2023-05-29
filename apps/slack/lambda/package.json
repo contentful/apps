@@ -46,7 +46,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@contentful/node-apps-toolkit": "^2.1.0",
+    "@contentful/node-apps-toolkit": "^2.2.0",
     "@slack/events-api": "3.0.1",
     "@slack/web-api": "^6.8.0",
     "@types/cors": "^2.8.13",
