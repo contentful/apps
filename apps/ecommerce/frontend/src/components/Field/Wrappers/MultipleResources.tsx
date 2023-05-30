@@ -3,7 +3,6 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 import { ResourceField } from 'components/Field/ResourceField';
 import mockValue from 'helpers/mockValue';
 import ResourceFieldProvider from 'providers/ResourceFieldProvider';
-import type { ExternalResourceLink } from 'types';
 
 const MultipleResources = () => {
   const sdk = useSDK<FieldAppSDK>();
