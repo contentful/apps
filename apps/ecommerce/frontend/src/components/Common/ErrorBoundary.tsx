@@ -1,6 +1,7 @@
 import { Component, ErrorInfo } from 'react';
 import type { ErrorBoundaryState, ErrorBoundaryProps } from 'types';
 
+// In order for error boundaries to work, they must be a class component.
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   state: ErrorBoundaryState = {
     hasError: false,

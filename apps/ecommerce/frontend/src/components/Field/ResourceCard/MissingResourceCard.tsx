@@ -1,36 +1,31 @@
 import { Badge, Box, Card, Flex, Text } from '@contentful/f36-components';
-import tokens from '@contentful/f36-tokens';
-import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
-import { useState } from 'react';
-import { ExternalResourceLink } from 'types';
-import ResourceCardRawData from './ResourceCardRawData';
-import ResourceCardMenu from './ResourceCardMenu';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
+import { useContext, useState } from 'react';
+import ResourceCardMenu from './ResourceCardMenu';
+import ResourceCardRawData from './ResourceCardRawData';
+import ResourceFieldContext from 'context/ResourceFieldContext';
+import tokens from '@contentful/f36-tokens';
+import type { ResourceCardProps } from './ResourceCard';
 
-interface MissingResourceCardProps {
-  onRemove: Function;
-  dragHandleRender?: RenderDragFn;
+interface MissingResourceCardProps extends ResourceCardProps {
   error: string;
   errorMessage?: string;
   errorStatus?: number;
-  index?: number;
-  total?: number;
-  isLoading?: boolean;
-  value: string;
-  onMoveToBottom?: Function;
-  onMoveToTop?: Function;
+  isLoading: boolean;
 }
 
 const MissingResourceCard = (props: MissingResourceCardProps) => {
+  const { value, isLoading, errorMessage, errorStatus, index, total, dragHandleRender } = props;
+  const { handleRemove, handleMoveToBottom, handleMoveToTop } = useContext(ResourceFieldContext);
+
   const [showJson, setShowJson] = useState<boolean>(false);
-  const resourceLink = JSON.parse(props.value) as ExternalResourceLink;
-  const { resourceProvider, resourceType } = getResourceProviderAndType(resourceLink);
+  const { resourceProvider, resourceType } = getResourceProviderAndType(value);
 
   return (
     <Card
-      isLoading={props.isLoading}
-      withDragHandle={!!props.dragHandleRender}
-      dragHandleRender={props.dragHandleRender}
+      isLoading={isLoading}
+      withDragHandle={!!dragHandleRender}
+      dragHandleRender={dragHandleRender}
       padding="none"
       isHovered={false}>
       <Box paddingLeft="spacingM" style={{ borderBottom: `1px solid ${tokens.gray200}` }}>
@@ -39,18 +34,16 @@ const MissingResourceCard = (props: MissingResourceCardProps) => {
             {resourceProvider} {resourceType}
           </Text>
           <Flex alignItems="center" isInline={true}>
-            <Badge variant={props.errorStatus === 404 ? 'warning' : 'negative'}>
-              {props.errorMessage}
-            </Badge>
+            <Badge variant={errorStatus === 404 ? 'warning' : 'negative'}>{errorMessage}</Badge>
             <ResourceCardMenu
-              onRemove={() => props.onRemove(props.index)}
+              onRemove={() => handleRemove(index)}
               isDataVisible={showJson}
               onShowData={() => setShowJson(true)}
               onHideData={() => setShowJson(false)}
-              index={props.index}
-              total={props.total}
-              onMoveToBottom={() => props.onMoveToBottom?.call(null, props.index)}
-              onMoveToTop={() => props.onMoveToTop?.call(null, props.index)}
+              index={index}
+              total={total}
+              onMoveToBottom={() => handleMoveToBottom?.call(null, index)}
+              onMoveToTop={() => handleMoveToTop?.call(null, index)}
             />
           </Flex>
         </Flex>
@@ -64,7 +57,7 @@ const MissingResourceCard = (props: MissingResourceCardProps) => {
           Resource is missing or inaccessible
         </Text>
         <ResourceCardRawData
-          value={props.value}
+          value={JSON.stringify(value)}
           isVisible={showJson}
           onHide={() => setShowJson(false)}
         />

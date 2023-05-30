@@ -1,6 +1,6 @@
-import tokens from '@contentful/f36-tokens';
 import { Box, Collapse, CopyButton, Flex, IconButton, Tooltip } from '@contentful/f36-components';
 import { ChevronUpTrimmedIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
 
 interface ResourceCardRawDataProps {
   value: string;
