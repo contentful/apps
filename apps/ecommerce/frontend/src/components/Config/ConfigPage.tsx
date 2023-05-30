@@ -34,7 +34,7 @@ const ConfigPage = () => {
   const getConfig = useCallback(
     async (baseUrl: string) => {
       const url = new URL(`${baseUrl}/config.json`);
-      fetchWithSignedRequest(url, sdk.ids.app, cma, 'GET', {
+      fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'GET', {
         'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
       })
         .then((res) => {
@@ -51,7 +51,7 @@ const ConfigPage = () => {
         })
         .finally(() => setIsLoading(false));
     },
-    [cma, sdk.ids.app, sdk.parameters.instance.provider]
+    [cma, sdk]
   );
 
   useEffect(() => {
@@ -73,7 +73,7 @@ const ConfigPage = () => {
 
   const handleCredentialCheck = async (baseUrl: string) => {
     const url = new URL(`${baseUrl}/healthcheck`);
-    fetchWithSignedRequest(url, sdk.ids.app, cma, 'POST', {
+    fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'POST', {
       'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
       'x-contentful-shopify-shop': parameters.shopName,
       'x-contentful-shopify-token': parameters.storefrontAccessToken,

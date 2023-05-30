@@ -1,53 +1,56 @@
 import { Badge, Box, Card, Flex, Grid, Text } from '@contentful/f36-components';
-import { useState } from 'react';
-import ResourceCardRawData from './ResourceCardRawData';
-import tokens from '@contentful/f36-tokens';
-import ResourceCardMenu from './ResourceCardMenu';
-import MissingResourceCard from './MissingResourceCard';
-import { useDebounce } from 'usehooks-ts';
-import useExternalResource from 'hooks/useExternalResource';
-import { ExternalResource, ExternalResourceLink } from 'types';
-import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
+import { useContext, useEffect, useState } from 'react';
+import { useDebounce } from 'usehooks-ts';
+import MissingResourceCard from './MissingResourceCard';
+import ResourceCardMenu from './ResourceCardMenu';
+import ResourceCardRawData from './ResourceCardRawData';
+import ResourceFieldContext from 'context/ResourceFieldContext';
+import tokens from '@contentful/f36-tokens';
+import useExternalResource from 'hooks/field/useExternalResource';
+import type { ExternalResourceLink } from 'types';
+import type { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
 
-interface Props {
+export interface ResourceCardProps {
   value: ExternalResourceLink;
-  data?: ExternalResource;
-  index?: number;
-  total?: number;
-  onRemove: Function;
+  index: number;
+  total: number;
   dragHandleRender?: RenderDragFn;
-  onMoveToTop?: Function;
-  onMoveToBottom?: Function;
 }
 
-const ResourceCard = (props: Props) => {
-  const { value, index, total, onRemove, dragHandleRender, onMoveToTop, onMoveToBottom } = props;
+const ResourceCard = (props: ResourceCardProps) => {
+  const { value, index, total, dragHandleRender } = props;
+  const { handleRemove, handleMoveToBottom, handleMoveToTop } = useContext(ResourceFieldContext);
 
-  const debouncedValue = useDebounce(value, 300);
+  const [showJson, setShowJson] = useState<boolean>(false);
+
+  const [resourceLink, setResourceLink] = useState<ExternalResourceLink>(value);
+  const debouncedValue = useDebounce(resourceLink, 300);
+
+  const { resourceProvider, resourceType } = getResourceProviderAndType(debouncedValue);
   const { externalResource, isLoading, error, errorMessage, errorStatus } =
     useExternalResource(debouncedValue);
-  const [showJson, setShowJson] = useState<boolean>(false);
+
+  useEffect(() => {
+    const oldValue = JSON.stringify(resourceLink);
+    const newValue = JSON.stringify(value);
+
+    if (oldValue !== newValue) {
+      setResourceLink(value);
+    }
+  }, [resourceLink, value]);
 
   if (error) {
     return (
       <MissingResourceCard
-        index={index}
-        total={total}
-        onRemove={onRemove}
-        onMoveToBottom={onMoveToBottom}
-        onMoveToTop={onMoveToTop}
-        isLoading={isLoading}
+        {...props}
         error={error}
-        value={JSON.stringify(value)}
         errorMessage={errorMessage}
         errorStatus={errorStatus}
-        dragHandleRender={dragHandleRender}
+        isLoading={isLoading}
       />
     );
   }
-
-  const { resourceProvider, resourceType } = getResourceProviderAndType(value);
 
   return (
     <Card
@@ -64,14 +67,14 @@ const ResourceCard = (props: Props) => {
           <Flex alignItems="center" isInline={true}>
             {externalResource.status && <Badge variant="featured">{externalResource.status}</Badge>}
             <ResourceCardMenu
-              onRemove={() => onRemove(index)}
+              onRemove={() => handleRemove(index)}
               isDataVisible={showJson}
               onShowData={() => setShowJson(true)}
               onHideData={() => setShowJson(false)}
               index={index}
               total={total}
-              onMoveToBottom={() => onMoveToBottom?.call(null, index)}
-              onMoveToTop={() => onMoveToTop?.call(null, index)}
+              onMoveToBottom={() => handleMoveToBottom?.call(null, index)}
+              onMoveToTop={() => handleMoveToTop?.call(null, index)}
             />
           </Flex>
         </Flex>

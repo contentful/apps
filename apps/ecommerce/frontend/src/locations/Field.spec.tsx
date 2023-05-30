@@ -6,6 +6,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
   useAutoResizer: () => mockAutoResizer,
+  useFieldValue: () => [undefined],
 }));
 Object.defineProperty(globalThis, 'crypto', {
   value: mockCrypto,
