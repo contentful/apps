@@ -32,8 +32,8 @@ const ResourceCard = (props: ResourceCardProps) => {
     useExternalResource(debouncedValue);
 
   useEffect(() => {
-    const oldValue = JSON.stringify(value);
-    const newValue = JSON.stringify(resourceLink);
+    const oldValue = JSON.stringify(resourceLink);
+    const newValue = JSON.stringify(value);
 
     if (oldValue !== newValue) {
       setResourceLink(value);
