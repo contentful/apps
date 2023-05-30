@@ -17,6 +17,7 @@ export interface SlackAppInstallationParameters {
   active?: boolean;
   workspaces?: string[];
   notifications?: SlackNotification[];
+  installationUuid?: string;
 }
 
 export interface ResolvedEntity {

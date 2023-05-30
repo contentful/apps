@@ -99,10 +99,14 @@ describe('AuthTokenRepository', () => {
 
       singleTableClient.queryByWorkspaceId.resolves([]);
 
-      const response = await instance.put('refresh-token', {
-        spaceId: 'spaceId',
-        environmentId: 'environmentId',
-      });
+      const response = await instance.put(
+        'refresh-token',
+        {
+          spaceId: 'spaceId',
+          environmentId: 'environmentId',
+        },
+        '1234'
+      );
 
       const expectedData: AuthToken = {
         token: 'token',
@@ -110,6 +114,7 @@ describe('AuthTokenRepository', () => {
         refreshToken: 'refresh-token',
         spaceId: 'spaceId',
         environmentId: 'environmentId',
+        installationUuid: '1234',
         slackWorkspaceId: 'team',
       };
       assert.calledWith(
@@ -132,12 +137,16 @@ describe('AuthTokenRepository', () => {
       });
 
       try {
-        await instance.put('code', {
-          // @ts-expect-error expected from scenario
-          spaceId: null,
-          // @ts-expect-error expected from scenario
-          environmentId: null,
-        });
+        await instance.put(
+          'code',
+          {
+            // @ts-expect-error expected from scenario
+            spaceId: null,
+            // @ts-expect-error expected from scenario
+            environmentId: null,
+          },
+          '1234'
+        );
         assert.fail('Did not reject');
       } catch (e) {
         assert.instanceOf(e, UnprocessableEntityException);
@@ -151,6 +160,7 @@ describe('AuthTokenRepository', () => {
         refreshToken: 'refresh-token-1',
         spaceId: 'spaceId-1',
         environmentId: 'environmentId-1',
+        installationUuid: '1234',
         slackWorkspaceId: 'team',
       };
 
@@ -160,6 +170,7 @@ describe('AuthTokenRepository', () => {
         refreshToken: 'refresh-token-2',
         spaceId: 'spaceId-2',
         environmentId: 'environmentId-2',
+        installationUuid: '1234',
         slackWorkspaceId: 'team',
       };
 
@@ -173,10 +184,14 @@ describe('AuthTokenRepository', () => {
 
       singleTableClient.queryByWorkspaceId.resolves([existingAuthToken]);
 
-      await instance.put('code', {
-        spaceId: 'spaceId-1',
-        environmentId: 'environmentId-1',
-      });
+      await instance.put(
+        'code',
+        {
+          spaceId: 'spaceId-1',
+          environmentId: 'environmentId-1',
+        },
+        '1234'
+      );
 
       assert.calledWith(
         singleTableClient.put,
@@ -235,6 +250,7 @@ describe('AuthTokenRepository', () => {
         refreshToken: 'refresh-token-old',
         spaceId: 'space',
         environmentId: 'env',
+        installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
       const otherToken: AuthToken = {
@@ -243,6 +259,7 @@ describe('AuthTokenRepository', () => {
         refreshToken: 'refresh-token-old',
         spaceId: 'space-other',
         environmentId: 'env-other',
+        installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
       const newToken: AuthToken = {
@@ -297,6 +314,7 @@ describe('AuthTokenRepository', () => {
         refreshToken: 'refresh-token-old',
         spaceId: 'space',
         environmentId: 'env',
+        installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
       const otherToken: AuthToken = {
@@ -305,6 +323,7 @@ describe('AuthTokenRepository', () => {
         refreshToken: 'refresh-token-old',
         spaceId: 'space-other',
         environmentId: 'env-other',
+        installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
 
@@ -330,6 +349,7 @@ describe('AuthTokenRepository', () => {
         refreshToken: 'refresh-token-old',
         spaceId: 'space',
         environmentId: 'env',
+        installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
       const otherToken: AuthToken = {
@@ -338,6 +358,7 @@ describe('AuthTokenRepository', () => {
         refreshToken: 'refresh-token-old',
         spaceId: 'space-other',
         environmentId: 'env-other',
+        installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
 
@@ -377,6 +398,7 @@ describe('AuthTokenRepository', () => {
           slackWorkspaceId: 'workspace-1',
           spaceId: 'space-1',
           token: 'token-1',
+          installationUuid: '1234',
           refreshToken: 'refresh-token-1',
           expiresAt: Date.now() + DEFAULT_EXPIRES_IN * 1_000,
         },
@@ -385,6 +407,7 @@ describe('AuthTokenRepository', () => {
           slackWorkspaceId: 'workspace-2',
           spaceId: 'space-2',
           token: 'token-2',
+          installationUuid: '1234',
           refreshToken: 'refresh-token-2',
           expiresAt: Date.now() + DEFAULT_EXPIRES_IN * 1_000,
         },

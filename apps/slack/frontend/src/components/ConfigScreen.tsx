@@ -40,8 +40,9 @@ const Config = () => {
     setActive: state.setActive,
   }));
 
-  const { temporaryRefreshToken } = useAuthStore((state) => ({
+  const { temporaryRefreshToken, installationUuid } = useAuthStore((state) => ({
     temporaryRefreshToken: state.temporaryRefreshToken,
+    installationUuid: state.installationUuid,
   }));
 
   useEffect(() => {
@@ -87,10 +88,12 @@ const Config = () => {
     const currentState = await sdk.app.getCurrentState();
 
     return {
-      parameters,
+      parameters: { ...parameters, installationUuid },
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, installationUuid]);
+
+  console.log('PARAMATERS>>>', parameters);
 
   const onConfigurationCompleted = useCallback(
     async (error) => {
@@ -104,9 +107,9 @@ const Config = () => {
         return;
       }
 
-      if (isFirstInstallation && temporaryRefreshToken) {
+      if (isFirstInstallation && temporaryRefreshToken && installationUuid) {
         try {
-          await apiClient.createAuthToken(sdk, cma, temporaryRefreshToken);
+          await apiClient.createAuthToken(sdk, cma, temporaryRefreshToken, installationUuid);
           setIsFirstInstallation(false);
         } catch (e) {
           console.error(e);
@@ -114,7 +117,7 @@ const Config = () => {
         }
       }
     },
-    [isFirstInstallation, cma, sdk, temporaryRefreshToken]
+    [isFirstInstallation, cma, sdk, temporaryRefreshToken, installationUuid]
   );
 
   useEffect(() => {

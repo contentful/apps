@@ -67,13 +67,19 @@ export const apiClient = {
     );
   },
 
-  createAuthToken: async (sdk: AppExtensionSDK, cma: CMAClient, temporaryRefreshToken: string) => {
+  createAuthToken: async (
+    sdk: AppExtensionSDK,
+    cma: CMAClient,
+    temporaryRefreshToken: string,
+    installationUuid: string
+  ) => {
     return makeSignedRequest(
       {
         method: 'POST',
         path: `/tokens`,
         headers: {
           'Content-Type': 'application/json',
+          'X-Contentful-UUID': `${installationUuid}`,
         },
         body: JSON.stringify({
           refreshToken: temporaryRefreshToken,

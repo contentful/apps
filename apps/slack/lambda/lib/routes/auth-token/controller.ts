@@ -121,15 +121,21 @@ export class AuthTokenController {
   post = asyncHandler(async (request, response) => {
     const spaceId = request.header('x-contentful-space-id');
     const environmentId = request.header('x-contentful-environment-id');
+    const installationUuid = request.header('x-contentful-uuid') || '';
+
     if (!spaceId || !environmentId) {
       throw new NotFoundException();
     }
     const { refreshToken } = assertValid<PostAuthTokenBody>(postAuthTokenBodySchema, request.body);
 
-    const { token } = await this.authTokenRepository.put(refreshToken, {
-      spaceId,
-      environmentId,
-    });
+    const { token } = await this.authTokenRepository.put(
+      refreshToken,
+      {
+        spaceId,
+        environmentId,
+      },
+      installationUuid
+    );
 
     response.status(201).send({ token });
   });

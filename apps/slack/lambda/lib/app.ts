@@ -6,6 +6,7 @@ import { makeSlackClient, makeSingleTableClient, makeDynamoDocumentClient } from
 
 import { errorMiddleware } from './errors';
 import { config } from './config';
+import { corsConfig } from './middlewares/corsConfig';
 
 import { AuthTokenController, AuthTokenRepository } from './routes/auth-token';
 import { WorkspacesController, WorkspacesRepository } from './routes/workspaces';
@@ -26,7 +27,7 @@ const allowedUrls = [config.workflowsUrl, frontendUrl.origin, /(http:\/\/localho
 export function bootstrap(): serverless.Application {
   const app = express();
 
-  app.use(cors({ origin: allowedUrls }));
+  app.use(cors(corsConfig));
 
   const slackClient = makeSlackClient(config.slack, config.backendUrl);
   const dynamoDocumentClient = makeDynamoDocumentClient(config.dynamo);

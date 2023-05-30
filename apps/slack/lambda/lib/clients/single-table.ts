@@ -54,12 +54,12 @@ export class SingleTableClient {
 
   public async get<T extends EntityType>(
     typ: T,
-    uuid: string
+    installationUuid: string
   ): Promise<EntityTypeMap[T] | undefined> {
     const { Item } = await this.docClient
       .get({
         TableName: this.tableName,
-        Key: { uuid, typ },
+        Key: { uuid: installationUuid, typ },
         ConsistentRead: true,
       })
       .promise();

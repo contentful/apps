@@ -12,6 +12,7 @@ export interface AuthToken {
 
   spaceId: string;
   environmentId: string;
+  installationUuid: string;
   slackWorkspaceId: string;
 }
 
