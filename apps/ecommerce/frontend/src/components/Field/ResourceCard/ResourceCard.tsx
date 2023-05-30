@@ -1,6 +1,6 @@
 import { Badge, Box, Card, Flex, Grid, Text } from '@contentful/f36-components';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useDebounce } from 'usehooks-ts';
 import MissingResourceCard from './MissingResourceCard';
 import ResourceCardMenu from './ResourceCardMenu';
@@ -20,13 +20,25 @@ export interface ResourceCardProps {
 
 const ResourceCard = (props: ResourceCardProps) => {
   const { value, index, total, dragHandleRender } = props;
-
   const { handleRemove, handleMoveToBottom, handleMoveToTop } = useContext(ResourceFieldContext);
 
-  const debouncedValue = useDebounce(value, 300);
+  const [showJson, setShowJson] = useState<boolean>(false);
+
+  const [resourceLink, setResourceLink] = useState<ExternalResourceLink>(value);
+  const debouncedValue = useDebounce(resourceLink, 300);
+
+  const { resourceProvider, resourceType } = getResourceProviderAndType(debouncedValue);
   const { externalResource, isLoading, error, errorMessage, errorStatus } =
     useExternalResource(debouncedValue);
-  const [showJson, setShowJson] = useState<boolean>(false);
+
+  useEffect(() => {
+    const oldValue = JSON.stringify(value);
+    const newValue = JSON.stringify(resourceLink);
+
+    if (oldValue !== newValue) {
+      setResourceLink(value);
+    }
+  }, [resourceLink, value]);
 
   if (error) {
     return (
@@ -39,8 +51,6 @@ const ResourceCard = (props: ResourceCardProps) => {
       />
     );
   }
-
-  const { resourceProvider, resourceType } = getResourceProviderAndType(value);
 
   return (
     <Card
