@@ -29,7 +29,7 @@ const useResourceMenuItems = (menuActions: ResourceCardMenuProps): menuItemsOutp
         );
       }
 
-      if (index + 1 !== total && onMoveToBottom) {
+      if (index + 1 < total && onMoveToBottom) {
         newMenuItems.push(
           <Menu.Item key="moveToBottom" onClick={() => onMoveToBottom()}>
             Move to bottom
