@@ -21,9 +21,10 @@ const MultipleResources = () => {
   };
 
   const handleRemove = (index: number) => {
-    const resourceArray = sdk.field.getValue();
+    const resourceArray = [...sdk.field.getValue()];
+    resourceArray.splice(index, 1);
 
-    const newValue = resourceArray.filter((obj: ExternalResourceLink, i: number) => i !== index);
+    const newValue = resourceArray.length > 0 ? resourceArray : undefined;
     sdk.field.setValue(newValue);
   };
 
