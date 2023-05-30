@@ -4,7 +4,4 @@ export const mockResourceLink = {
     linkType: 'Shopify:Product',
     urn: 'gid://shopify/Product/123456789',
   },
-  metadata: {
-    resourceType: 'Commerce:Product',
-  },
 };
