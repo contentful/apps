@@ -18,6 +18,7 @@ export interface AppInstallationParameters {
   active?: boolean;
   workspaces?: string[];
   notifications?: SlackNotification[];
+  installationUuid?: string;
 }
 
 const Config = () => {
@@ -62,6 +63,10 @@ const Config = () => {
   }, [active]);
 
   useEffect(() => {
+    setParameters((prevParameters) => ({ ...prevParameters, installationUuid }));
+  }, [installationUuid]);
+
+  useEffect(() => {
     (async () => {
       setWorkspaceState(WorkspaceState.LOADING);
       try {
@@ -86,14 +91,19 @@ const Config = () => {
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+    const currentParameters = (await sdk.app.getParameters()) || {};
+    let persistingParams;
+    const currentInstallationUuid = currentParameters.installationUuid;
+
+    if (currentInstallationUuid) {
+      persistingParams = { ...parameters, installationUuid: currentInstallationUuid };
+    } else persistingParams = parameters;
 
     return {
-      parameters: { ...parameters, installationUuid },
+      parameters: persistingParams,
       targetState: currentState,
     };
-  }, [parameters, sdk, installationUuid]);
-
-  console.log('PARAMATERS>>>', parameters);
+  }, [parameters, sdk]);
 
   const onConfigurationCompleted = useCallback(
     async (error) => {
