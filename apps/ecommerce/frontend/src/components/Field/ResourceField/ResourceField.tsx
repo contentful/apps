@@ -11,9 +11,13 @@ const ResourceField = () => {
   const { value } = useResourceValue(isMultiple);
 
   return (
-    <Grid rowGap="spacingM">
+    <Grid>
       <SortableResourceList resourceArray={value} />
-      <Grid.Item>{(isMultiple || !value.length) && <AddContentButton />}</Grid.Item>
+      {(isMultiple || !value.length) && (
+        <Grid.Item>
+          <AddContentButton />
+        </Grid.Item>
+      )}
       <Grid.Item>
         <FieldJsonEditor />
       </Grid.Item>

@@ -1,12 +1,10 @@
-import { expect } from 'chai';
 import sinon from 'sinon';
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { createRequest } from 'node-mocks-http';
 import Express from 'express';
 import { verifySignedRequestMiddleware } from './verifySignedRequests';
-import { InvalidSignature } from '../errors/invalidSignature';
-import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
 import { config } from '../config';
+import { AppConfiguration } from '../types';
 
 const sandbox = sinon.createSandbox();
 
@@ -26,11 +24,11 @@ describe('verifySignedRequestMiddleware', () => {
   const next = sinon.stub();
   const stage = 'testing';
   let request: Express.Request;
-  const signingSecrets = {
-    ecommerce: 'x'.repeat(64),
-  };
   const method = 'GET' as const;
   const path = '/foo/bar';
+  const appConfig = config.appConfigs.find((config: AppConfiguration) => config.id === 'appId123');
+
+  if (!appConfig) throw new Error('Missing app config');
 
   // when a stage is involved, the "request" path will include that stage in the client but it will be missing
   // on the express request in the backend
@@ -42,19 +40,18 @@ describe('verifySignedRequestMiddleware', () => {
     'x-contentful-space-id': 'space-id',
     'x-contentful-environment-id': 'environment-id',
     'x-contentful-app-id': 'app-id',
-    'x-contentful-data-provider': 'ecommerce',
   };
 
   beforeEach(() => {
     sandbox.stub(config, 'stage').value(stage);
-    sandbox.stub(config, 'signingSecrets').value(signingSecrets);
     const headers = buildSignedHeaders(
       method,
       clientRequestPath,
       clientRequestHeaders,
-      signingSecrets['ecommerce']
+      appConfig.signingSecret
     );
     request = createRequest({ method, path, headers });
+    request.appConfig = appConfig;
   });
 
   afterEach(() => {
@@ -70,44 +67,56 @@ describe('verifySignedRequestMiddleware', () => {
 
   describe('when request has an invalid signature', () => {
     beforeEach(() => {
-      const invalidSignature = 's'.repeat(64);
+      const invalidSignature = 'x'.repeat(64);
       const headers = buildSignedHeaders(
         method,
         clientRequestPath,
         clientRequestHeaders,
-        signingSecrets['ecommerce']
+        appConfig.signingSecret
       );
       const headersWithInvalidSignature = {
         ...headers,
         'x-contentful-signature': invalidSignature,
       };
       request = createRequest({ method, path, headers: headersWithInvalidSignature });
+      request.appConfig = appConfig;
     });
 
     it('throws with invalidSignature', async () => {
-      expect(() => {
-        verifySignedRequestMiddleware(request, {} as Express.Response, next);
-      }).to.throw(InvalidSignature);
+      verifySignedRequestMiddleware(request, {} as Express.Response, next);
+      sinon.assert.calledWith(
+        next,
+        sinon.match({
+          message:
+            'Request does not have a valid request signature. ' +
+            'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/',
+        })
+      );
     });
   });
 
-  describe('when bad data is fed to verifier', () => {
+  describe('when a signature that fails verification is provided', () => {
     beforeEach(() => {
-      const badSignature = 'foobar';
+      const malformedSignature = 'invalid-signature-format';
       const headers = buildSignedHeaders(
         method,
         clientRequestPath,
         clientRequestHeaders,
-        signingSecrets['ecommerce']
+        appConfig.signingSecret
       );
-      const headersWithBadSignature = { ...headers, 'x-contentful-signature': badSignature };
+      const headersWithBadSignature = { ...headers, 'x-contentful-signature': malformedSignature };
       request = createRequest({ method, path, headers: headersWithBadSignature });
+      request.appConfig = appConfig;
     });
 
     it('throws with UnableToVerifyRequest', async () => {
-      expect(() => {
-        verifySignedRequestMiddleware(request, {} as Express.Response, next);
-      }).to.throw(UnableToVerifyRequest);
+      verifySignedRequestMiddleware(request, {} as Express.Response, next);
+      sinon.assert.calledWith(
+        next,
+        sinon.match({
+          message: 'Unable to verify request',
+        })
+      );
     });
   });
 });

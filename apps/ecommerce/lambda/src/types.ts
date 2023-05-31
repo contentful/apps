@@ -28,3 +28,15 @@ export interface ErrorResponse {
   status: 'error';
   message: string | unknown;
 }
+
+export interface AppConfiguration {
+  id: string;
+  name: string;
+  baseUrl: string;
+  privateKey: string;
+  signingSecret: string;
+}
+
+export interface AppInstallationParameters {
+  [key: string]: string;
+}

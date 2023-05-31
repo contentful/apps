@@ -8,6 +8,7 @@ import { ProviderConfig } from 'types';
 import fetchWithSignedRequest from 'helpers/signedRequests';
 import ConfigBody from './ConfigBody';
 import AppLogo from './AppLogo';
+import { config } from 'config';
 
 const ConfigPage = () => {
   const [parameters, setParameters] = useState<KeyValueMap>({});
@@ -34,9 +35,7 @@ const ConfigPage = () => {
   const getConfig = useCallback(
     async (baseUrl: string) => {
       const url = new URL(`${baseUrl}/config.json`);
-      fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'GET', {
-        'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
-      })
+      fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'GET')
         .then((res) => {
           if (res.status !== 200) {
             const error = `${res.status} - ${res.statusText}`;
@@ -71,22 +70,20 @@ const ConfigPage = () => {
     })();
   }, [sdk, getConfig]);
 
-  const handleCredentialCheck = async (baseUrl: string) => {
-    const url = new URL(`${baseUrl}/healthcheck`);
-    fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'POST', {
-      'X-Contentful-Data-Provider': sdk.parameters.instance.provider,
-      'x-contentful-shopify-shop': parameters.shopName,
-      'x-contentful-shopify-token': parameters.storefrontAccessToken,
+  const checkCredentials = async () => {
+    const url = new URL(`${config.backendApiUrl}/api/credentials`);
+    fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'GET', {
+      // we only pass the installation parameters to the backend via headers here because they are not yet persisted
+      'x-data-provider-parameters': JSON.stringify(parameters),
     })
-      .then((res) => {
-        if (res.status !== 200) {
-          const error = `Error: ${res.status} - ${res.statusText}`;
-          throw new Error(error);
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === 'error') {
+          sdk.notifier.error(data.message);
+        } else {
+          sdk.notifier.success('Credentials check successful');
         }
-
-        return res.json();
       })
-      .then((data) => sdk.notifier.success('Credentials connected successfully'))
       .catch((error) => sdk.notifier.error(error.message));
   };
 
@@ -106,7 +103,7 @@ const ConfigPage = () => {
         baseUrl={sdk.parameters.instance.baseUrl}
         error={error}
         isLoading={isLoading}
-        onCredentialCheck={handleCredentialCheck}
+        onCredentialCheck={checkCredentials}
         onParameterChange={handleParameterChange}
         parameters={parameters}
         providerConfig={providerConfig}
