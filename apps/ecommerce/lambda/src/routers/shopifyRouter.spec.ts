@@ -57,6 +57,7 @@ const shopifyClientStub = {
 };
 
 const shopName = 'mytest-shop';
+const storefrontAccessToken = 'some-access-token';
 
 describe('Shopify Router', () => {
   beforeEach((done) => {
@@ -71,15 +72,16 @@ describe('Shopify Router', () => {
     done();
   });
 
-  describe('When sending a healthcheck', () => {
+  describe('When checking credentials', () => {
     it('should reply with store data', (done) => {
       sandbox.stub(Client, 'buildClient').returns(shopifyClientStub);
       chai
         .request(app)
-        .post('/shopify/healthcheck')
-        .set('X-Contentful-Data-Provider', 'shopify')
-        .set('x-contentful-shopify-shop', shopName)
-        .send({ sys: mockResourceLink.sys })
+        .get('/shopify/credentials')
+        .set('x-contentful-app', 'appId123')
+        .set('x-contentful-space-id', 'spaceId123')
+        .set('x-contentful-environment-id', 'environmentId123')
+        .set('x-data-provider-parameters', JSON.stringify({ shopName, storefrontAccessToken }))
         .end((error, res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.have.property('id');
@@ -95,8 +97,10 @@ describe('Shopify Router', () => {
       chai
         .request(app)
         .post('/shopify/resource')
-        .set('X-Contentful-Data-Provider', 'shopify')
-        .set('x-contentful-shopify-shop', shopName)
+        .set('x-contentful-app', 'appId123')
+        .set('x-contentful-space-id', 'spaceId123')
+        .set('x-contentful-environment-id', 'environmentId123')
+        .set('x-data-provider-parameters', JSON.stringify({ shopName, storefrontAccessToken }))
         .send({ sys: mockResourceLink.sys })
         .end((error, res) => {
           expect(res).to.have.status(200);
@@ -118,8 +122,10 @@ describe('Shopify Router', () => {
       chai
         .request(app)
         .post('/shopify/resource')
-        .set('X-Contentful-Data-Provider', 'shopify')
-        .set('x-contentful-shopify-shop', shopName)
+        .set('x-contentful-app', 'appId123')
+        .set('x-contentful-space-id', 'spaceId123')
+        .set('x-contentful-environment-id', 'environmentId123')
+        .set('x-data-provider-parameters', JSON.stringify({ shopName, storefrontAccessToken }))
         .send({ sys: mockResourceLink.sys })
         .end((error, res) => {
           expect(res).to.have.status(404);

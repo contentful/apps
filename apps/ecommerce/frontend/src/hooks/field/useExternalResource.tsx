@@ -4,11 +4,12 @@ import type { FieldAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import fetchWithSignedRequest from 'helpers/signedRequests';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
+import { contentfulContextHeaders } from 'helpers/contentfulContext';
+import { config } from 'config';
 
 const useExternalResource = (resource?: ExternalResourceLink) => {
   const sdk = useSDK<FieldAppSDK>();
   const cma = useCMA();
-  const { storefrontAccessToken, shopName } = sdk.parameters.installation;
 
   const [externalResource, setExternalResource] = useState<ExternalResource>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -19,8 +20,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
 
   const hydrateExternalResource = useCallback(
     async (resource: ExternalResourceLink) => {
-      const url = new URL(`${sdk.parameters.instance.baseUrl}/resource`);
-      const { resourceProvider } = getResourceProviderAndType(resource);
+      const url = new URL(`${config.backendApiUrl}/api/resource`);
 
       const data = await fetchWithSignedRequest(
         url,
@@ -29,17 +29,14 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
         sdk,
         'POST',
         {
-          'x-contentful-data-provider': resourceProvider.toLowerCase(),
-          'X-Contentful-Data-Provider-BaseURL': sdk.parameters.instance.baseUrl,
-          'x-contentful-shopify-shop': shopName,
-          'x-contentful-shopify-token': storefrontAccessToken,
+          ...contentfulContextHeaders(sdk),
         },
         resource
       );
 
       return data;
     },
-    [cma, sdk, shopName, storefrontAccessToken]
+    [sdk, cma]
   );
 
   useEffect(() => {

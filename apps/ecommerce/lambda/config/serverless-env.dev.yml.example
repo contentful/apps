@@ -1,6 +1,17 @@
-signingSecrets: '{
-  "app_name_1": "<APP_1_SIGNING_KEY_GOES_HERE>",
-  "app_name_2": "<APP_2_SIGNING_KEY_GOES_HERE>",
-  "app_name_3": "<APP_3_SIGNING_KEY_GOES_HERE>"
-  }'
 domainName: localhost
+appConfigs: '[
+  {
+    "name": "shopify",
+    "id": "3KLkNhPCtUvrc5u8MuUqzO",
+    "baseUrl": "http://localhost:8080/dev/shopify",
+    "privateKey": "-----BEGIN RSA PRIVATE KEY-----\<APP_PRIVATE_KEY_GOES_HERE>\n-----END RSA PRIVATE KEY-----\n",
+    "signingSecret": "<APP_SIGNING_SECRET_GOES_HERE>"
+  },
+  {
+    "name": "magento",
+    "id": "4KnUs6pawpNLCYNJxtcapl",
+    "baseUrl": "http://localhost:8080/dev/magento",
+    "privateKey": "-----BEGIN RSA PRIVATE KEY-----\<APP_PRIVATE_KEY_GOES_HERE>\n-----END RSA PRIVATE KEY-----\n",
+    "signingSecret": "<APP_SIGNING_SECRET_GOES_HERE>"
+  }
+]'
