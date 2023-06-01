@@ -17,7 +17,7 @@ export class AuthTokenRepository {
     const accessResponse = await this.slackClient.getAuthToken(code, {
       spaceId,
       environmentId,
-    }); // update with uuid stuff for redirect uri
+    });
 
     if (!accessResponse.refresh_token) {
       // This may happen when rotation is not enabled. Not leaking this to the customers though.
@@ -37,15 +37,23 @@ export class AuthTokenRepository {
 
   async put(
     refreshToken: string,
-    { spaceId }: SpaceEnvironmentContext,
-    installationUuid: string
+    { spaceId, environmentId }: SpaceEnvironmentContext,
+    installationUuid?: string
   ): Promise<AuthToken> {
     const accessResponse = await this.slackClient.refreshToken(refreshToken);
+
+    const uuid = AuthTokenRepository.uuid(
+      spaceId,
+      environmentId,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      accessResponse.team!.id!
+    );
 
     const authToken = AuthTokenRepository.toDatabase(
       accessResponse,
       {
         spaceId,
+        environmentId,
       },
       installationUuid
     );
@@ -54,8 +62,8 @@ export class AuthTokenRepository {
 
     await this.singleTableClient.put(
       Entity.AuthToken,
-      installationUuid,
-      [spaceId, installationUuid],
+      installationUuid || uuid,
+      [spaceId, installationUuid || environmentId],
       authToken
     );
 
@@ -65,7 +73,7 @@ export class AuthTokenRepository {
   async get(workspaceId: string, context: SpaceEnvironmentContext): Promise<AuthToken> {
     const parameters = await getInstallationParametersFromCma(
       context.spaceId,
-      context.environmentId || '' //fix  >>>>>>>>>>>>>>
+      context.environmentId
     );
     const installationUuid = parameters.installationUuid;
     const spaceEnvUuid = AuthTokenRepository.uuid(
@@ -73,7 +81,9 @@ export class AuthTokenRepository {
       context.environmentId,
       workspaceId
     );
-    const possibleUuids = installationUuid || spaceEnvUuid; // do we need???? >>>>>>>>
+
+    // installationUuid is preferred, spaceEnvUuid is for backwards compatibility
+    const possibleUuids = installationUuid || spaceEnvUuid;
     let authToken = await this.singleTableClient.get(Entity.AuthToken, possibleUuids);
 
     if (!authToken) {
@@ -108,6 +118,11 @@ export class AuthTokenRepository {
 
     await Promise.all(
       authTokens.map((token) => {
+        const uuid = AuthTokenRepository.uuid(
+          token.spaceId,
+          token.environmentId,
+          token.slackWorkspaceId
+        );
         const data: AuthToken = {
           ...token,
           refreshToken: authToken.refreshToken,
@@ -116,8 +131,8 @@ export class AuthTokenRepository {
         };
         return this.singleTableClient.put(
           Entity.AuthToken,
-          token.installationUuid || AuthTokenRepository.uuid(token.spaceId, token.slackWorkspaceId),
-          [token.spaceId, token.installationUuid],
+          token?.installationUuid || uuid,
+          [token.spaceId, token.installationUuid || token.environmentId],
           data
         );
       })
@@ -135,7 +150,11 @@ export class AuthTokenRepository {
         this.singleTableClient.delete(
           Entity.AuthToken,
           installationUuid ||
-            AuthTokenRepository.uuid(authToken.spaceId, authToken.slackWorkspaceId)
+            AuthTokenRepository.uuid(
+              authToken.spaceId,
+              authToken.environmentId,
+              authToken.slackWorkspaceId
+            )
         )
       )
     );
@@ -159,21 +178,23 @@ export class AuthTokenRepository {
 
   private static toDatabase(
     slackTokenResponse: OauthV2AccessResponse,
-    { spaceId }: SpaceEnvironmentContext,
-    installationUuid: string
+    { spaceId, environmentId }: SpaceEnvironmentContext,
+    installationUuid?: string
   ): AuthToken {
-    return {
+    const defaultAttributes = {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       token: slackTokenResponse.access_token!,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       refreshToken: slackTokenResponse.refresh_token!,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expiresAt: Date.now() + slackTokenResponse.expires_in! * 1_000,
+      environmentId,
       spaceId,
-      installationUuid,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       slackWorkspaceId: slackTokenResponse.team!.id!,
     };
+
+    return installationUuid ? { ...defaultAttributes, installationUuid } : defaultAttributes;
   }
 
   /**

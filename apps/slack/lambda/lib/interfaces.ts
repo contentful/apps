@@ -9,14 +9,13 @@ export interface AuthToken {
    */
   expiresAt: number;
   refreshToken: string;
-
+  environmentId: string;
   spaceId: string;
-  installationUuid: string;
+  installationUuid?: string;
   slackWorkspaceId: string;
 }
 
 export interface SpaceEnvironmentContext {
   spaceId: string;
-  environmentId?: string;
-  installationUuid?: string; // adjust
+  environmentId: string;
 }
