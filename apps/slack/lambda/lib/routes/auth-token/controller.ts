@@ -68,6 +68,7 @@ export class AuthTokenController {
         environmentId,
       }));
       result = OAuthResult.Ok;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       result = OAuthResult.Error;
       errorMessage = e.message;

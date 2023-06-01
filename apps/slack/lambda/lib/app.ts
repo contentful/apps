@@ -22,7 +22,6 @@ import { makeSpaceEnvClient } from './clients/cma';
 import { ActionsController } from './routes/actions';
 
 const frontendUrl = new URL(config.frontendUrl);
-const allowedUrls = [config.workflowsUrl, frontendUrl.origin, /(http:\/\/localhost):(\d{1,4})/];
 
 export function bootstrap(): serverless.Application {
   const app = express();

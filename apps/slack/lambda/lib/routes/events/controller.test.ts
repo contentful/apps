@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createStubInstance, SinonStub, SinonStubbedInstance, stub } from 'sinon';
 import { assert, mockRequest, mockResponse, runHandler } from '../../../test/utils';
 import { EventsController } from './controller';
