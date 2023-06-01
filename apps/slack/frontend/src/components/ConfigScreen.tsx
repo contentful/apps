@@ -98,15 +98,6 @@ const Config = () => {
     };
   }, [parameters, sdk, installationUuid]);
 
-  useEffect(() => {
-    const getAppParams = async () => {
-      const params = await sdk.app.getParameters();
-      console.log('PARAMSSSSS>>>>>>>', params);
-    };
-
-    getAppParams();
-  }, []); // remove
-
   const onConfigurationCompleted = useCallback(
     async (error) => {
       const isInErrorState = error || (isFirstInstallation && !temporaryRefreshToken);
@@ -121,7 +112,6 @@ const Config = () => {
 
       if (isFirstInstallation && temporaryRefreshToken && installationUuid) {
         try {
-          console.log('do we hit this???');
           await apiClient.createAuthToken(sdk, cma, temporaryRefreshToken, installationUuid);
           setIsFirstInstallation(false);
         } catch (e) {
