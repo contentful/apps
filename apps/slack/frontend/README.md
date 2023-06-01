@@ -14,6 +14,11 @@ You will also see any lint errors in the console.
 
 #### `npm run build`
 
+- Set the following variables in `frontend/.env.development` using the `.env.development.example` file:
+  - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (https://api.slack.com/apps/ -> Select the app you plan to integrate -> Basic Information -> App Credentials -> Client ID)
+  - `REACT_APP_BACKEND_BASE_URL`: The ngrok URL
+- Run the frontend with `npm run start`
+
 Builds the app for production to the `build` folder.
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
