@@ -8,7 +8,7 @@
     "@contentful/app-sdk": "^3.32.1",
     "@contentful/ecommerce-app-base": "^1.0.5",
     "@contentful/field-editor-single-line": "^0.16.0",
-    "@contentful/field-editor-test-utils": "^0.9.0",
+    "@contentful/field-editor-test-utils": "^0.17.3",
     "@contentful/forma-36-fcss": "^0.3.1",
     "@contentful/forma-36-react-components": "^3.80.1",
     "@contentful/forma-36-tokens": "^0.11.2",

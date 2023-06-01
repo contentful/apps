@@ -1,4 +1,4 @@
-exports.handler = async (payload) => {
+export const handler = async (payload) => {
   const { parameters } = payload;
 
   const response = {

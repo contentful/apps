@@ -1,8 +1,10 @@
-[![CircleCI](https://circleci.com/gh/contentful/apps.svg?style=svg&circle-token=913f0d4852062fbed644fca927d059d5e3e72908)](https://circleci.com/gh/contentful/apps)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/contentful/apps/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/contentful/apps/tree/master)
 
 # Contentful apps repository
 
 This repository contains the source code for most apps on the [marketplace](https://www.contentful.com/marketplace/) and helpful resources to build your own apps for Contentful.
+
+Many partner apps have been moved to [another repo](https://github.com/contentful/marketplace-partner-apps). If you need access to the Bynder, Cloudinary, or Shopify apps, please view the Marketplace Partner Apps repo.
 
 This repository also includes two packages that help you developing your own apps:
 * [dam-app-base](packages/dam-app-base)

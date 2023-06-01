@@ -1,0 +1,120 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SortableListItem should render successfully 1`] = `
+<div>
+  <div
+    class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
+    data-test-id="cf-ui-card"
+  >
+    <section
+      class="css-ijlwe4"
+    >
+      <div
+        class="Typography__Typography___1ZUfE"
+        data-test-id="cf-ui-text-container"
+      >
+        <h1
+          class="Heading__Heading___83D3K css-1xd3m0r f36-margin-bottom--m"
+          data-test-id="cf-ui-heading"
+        >
+          Mock Product
+        </h1>
+        <h2
+          class="Subheading__Subheading___2mA9j css-ksy8vh f36-margin-bottom--m"
+          data-test-id="cf-ui-subheading"
+        >
+          123
+        </h2>
+      </div>
+    </section>
+    <div
+      class="css-mfolfb"
+    >
+      <button
+        class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--muted___22_IZ"
+        data-test-id="cf-ui-icon-button"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty IconButton__IconButton__inner___3fnmT"
+          tabindex="-1"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
+            />
+          </svg>
+          <span
+            class="IconButton__IconButton__label___1kp5y helpers__sr-only___3Kv3z"
+          >
+            Delete
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SortableListItem should render successfully the error variation for missing slug 1`] = `
+<div>
+  <div
+    class="Card__Card___1_26G css-pivbrd Card__Card--padding-default___xgDF9"
+    data-test-id="cf-ui-card"
+  >
+    <section
+      class="css-ijlwe4"
+    >
+      <div
+        class="Typography__Typography___1ZUfE"
+        data-test-id="cf-ui-text-container"
+      >
+        <h1
+          class="Heading__Heading___83D3K css-k5fxdf f36-margin-bottom--m"
+          data-test-id="cf-ui-heading"
+        >
+          123
+        </h1>
+        
+      </div>
+    </section>
+    <div
+      class="css-mfolfb"
+    >
+      <button
+        class="IconButton__IconButton___1_XeU a11y__focus-outline--default___2hwb1 IconButton__IconButton--muted___22_IZ"
+        data-test-id="cf-ui-icon-button"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty IconButton__IconButton__inner___3fnmT"
+          tabindex="-1"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il IconButton__IconButton__icon___3yZQN"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
+            />
+          </svg>
+          <span
+            class="IconButton__IconButton__label___1kp5y helpers__sr-only___3Kv3z"
+          >
+            Delete
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

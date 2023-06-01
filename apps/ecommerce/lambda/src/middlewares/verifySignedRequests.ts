@@ -1,29 +1,41 @@
 import * as NodeAppsToolkit from '@contentful/node-apps-toolkit';
 import { CanonicalRequest } from '@contentful/node-apps-toolkit/lib/requests/typings';
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { InvalidSignature } from '../errors/invalidSignature';
 import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
 import { config } from '../config';
 
-export const verifySignedRequestMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-  const signingSecret = config.signingSecret;
-  const canonicalReq = makeCanonicalReq(req);
-  let isValidReq = false;
-
+export const verifySignedRequestMiddleware: RequestHandler = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
   try {
-    isValidReq = NodeAppsToolkit.verifyRequest(signingSecret, canonicalReq, 60); // 60 second TTL
+    const canonicalReq = makeCanonicalReq(req);
+    let isValidReq = false;
+
+    if (!req.appConfig) throw new Error('App config not found');
+
+    try {
+      if (NodeAppsToolkit.verifyRequest(req.appConfig.signingSecret, canonicalReq, 60)) {
+        isValidReq = true;
+      }
+    } catch (e) {
+      console.error(e);
+      throw new UnableToVerifyRequest('Unable to verify request', {
+        cause: e,
+      });
+    }
+
+    if (!isValidReq) {
+      throw new InvalidSignature(
+        'Request does not have a valid request signature. ' +
+          'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
+      );
+    }
   } catch (e) {
     console.error(e);
-    throw new UnableToVerifyRequest('Unable to verify request', {
-      cause: e,
-    });
-  }
-
-  if (!isValidReq) {
-    throw new InvalidSignature(
-      'Request does not have a valid request signature. ' +
-        'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
-    );
+    return next(e);
   }
 
   next();

@@ -1,21 +1,48 @@
-This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
+# E-Commerce App
 
-## How to use
+## Local Development
 
-Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+### Frontend
 
-```bash
-# npx
-npx create-contentful-app --typescript
+The frontend lives in the `frontend/` folder.
 
-# npm
-npm init contentful-app -- --typescript
+To install or update the app locally:
 
-# Yarn
-yarn create contentful-app --typescript
+```sh
+npm i
 ```
 
-## Available Scripts
+To run the tests (in watch mode):
+
+```sh
+npm test
+```
+
+To run the test in CI (no watch):
+
+```sh
+npm run test-ci
+```
+
+### Backend (Lambda)
+
+The backend lives in the `lambda/` folder.
+
+#### Secrets
+
+You will need to create a dev secrets file by running:
+
+```
+cp lambda/config/serverless-env.dev.yml{.example,}
+```
+
+Once this git-ignored file is present, get the signing secret key for the relevant e-commerce provider wrapper app out of our Team Integration's 1Password vault and replace `app_name_1` and `<APP_1_SIGNING_KEY_GOES_HERE>` with the secret.
+
+## Create Contentful App
+
+Note: This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
+
+### Available Scripts
 
 In the project directory, you can run:
 
@@ -52,30 +79,3 @@ For this command to work, the following environment variables must be set:
 - `CONTENTFUL_ORG_ID` - The ID of your organization
 - `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
 - `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
-
-## Libraries to use
-
-To make your app look and feel like Contentful use the following libraries:
-
-- [Forma 36](https://f36.contentful.com/) – Contentful's design system
-- [Contentful Field Editors](https://www.contentful.com/developers/docs/extensibility/field-editors/) – Contentful's field editor React components
-
-## Using the `contentful-management` SDK
-
-In the default create contentful app output, a contentful management client is
-passed into each location. This can be used to interact with Contentful's
-management API. For example
-
-```js
-// Use the client
-cma.locale.getMany({}).then((locales) => console.log(locales));
-```
-
-Visit the [`contentful-management` documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#using-the-contentful-management-library)
-to find out more.
-
-## Learn More
-
-[Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.
-
-Create Contentful App uses [Create React App](https://create-react-app.dev/). You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started) and how to further customize your app.

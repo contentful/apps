@@ -3,6 +3,58 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.63](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.62...@contentful/ecommerce-app-base@3.1.63) (2023-05-26)
+
+### Bug Fixes
+
+- **deps:** bump @types/lodash from 4.14.194 to 4.14.195 ([#3594](https://github.com/contentful/apps/issues/3594)) ([4fb8808](https://github.com/contentful/apps/commit/4fb880877cda4d124cbde6486cb6acd857c7674b))
+
+## [3.1.62](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.61...@contentful/ecommerce-app-base@3.1.62) (2023-05-25)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.40.3 to 4.40.6 ([#3581](https://github.com/contentful/apps/issues/3581)) ([c07227b](https://github.com/contentful/apps/commit/c07227b6dead2f3d08551e702ded49d8e7867f77))
+
+## [3.1.61](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.60...@contentful/ecommerce-app-base@3.1.61) (2023-05-24)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.40.2 to 4.40.3 ([#3570](https://github.com/contentful/apps/issues/3570)) ([9937251](https://github.com/contentful/apps/commit/993725150b044a67f1aae4e1f8f197d7ca370d42))
+
+## [3.1.60](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.59...@contentful/ecommerce-app-base@3.1.60) (2023-05-18)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.40.0 to 4.40.2 ([#3527](https://github.com/contentful/apps/issues/3527)) ([b1b445b](https://github.com/contentful/apps/commit/b1b445b1997e06c6a7d585903c09bcded302fdc2))
+
+## [3.1.59](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.58...@contentful/ecommerce-app-base@3.1.59) (2023-05-15)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.39.0 to 4.40.0 ([#3494](https://github.com/contentful/apps/issues/3494)) ([ad0999e](https://github.com/contentful/apps/commit/ad0999e6d0998739135e92e218b56dda8acb4e33))
+
+## [3.1.58](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.57...@contentful/ecommerce-app-base@3.1.58) (2023-05-12)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [3.1.57](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.56...@contentful/ecommerce-app-base@3.1.57) (2023-05-11)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.37.1 to 4.38.0 ([#3462](https://github.com/contentful/apps/issues/3462)) ([be8304a](https://github.com/contentful/apps/commit/be8304afc8cc52b89cfded06af6e405f7f004515))
+- **deps:** bump @contentful/f36-components from 4.38.0 to 4.39.0 ([#3470](https://github.com/contentful/apps/issues/3470)) ([c04e375](https://github.com/contentful/apps/commit/c04e3752aca97ff1a39dedd9727f7363feb30e00))
+
+## [3.1.56](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.55...@contentful/ecommerce-app-base@3.1.56) (2023-05-08)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [3.1.55](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.54...@contentful/ecommerce-app-base@3.1.55) (2023-05-01)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.35.0 to 4.37.0 ([#3308](https://github.com/contentful/apps/issues/3308)) ([4c5ca39](https://github.com/contentful/apps/commit/4c5ca39180c794d6ef4464e3b81194f85c5d6356))
+- **deps:** bump @contentful/f36-components from 4.37.0 to 4.37.1 ([#3326](https://github.com/contentful/apps/issues/3326)) ([e8c39d2](https://github.com/contentful/apps/commit/e8c39d2ac27d5850c5b1c7c15a823ebdd6b1909d))
+
 ## [3.1.54](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.53...@contentful/ecommerce-app-base@3.1.54) (2023-04-24)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base

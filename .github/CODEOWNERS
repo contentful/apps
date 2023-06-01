@@ -6,6 +6,7 @@ apps/cloudinary @contentful/team-integrations
 apps/color-picker @contentful/team-extensibility
 apps/commercetools @contentful/team-integrations
 apps/dropbox @contentful/team-integrations
+apps/ecommerce @contentful/team-integrations
 apps/frontify @contentful/team-integrations
 apps/gatsby @contentful/team-integrations
 apps/google-analytics-4 @contentful/team-integrations
@@ -18,6 +19,7 @@ apps/netlify @contentful/team-integrations
 apps/optimizely @contentful/team-integrations
 apps/saleor @contentful/team-integrations
 apps/sap-commerce-cloud @contentful/team-integrations
+apps/sap-commerce-cloud-with-air @contentful/team-integrations
 apps/shopify @contentful/team-integrations
 apps/slack @contentful/team-integrations
 apps/smartling @contentful/team-integrations

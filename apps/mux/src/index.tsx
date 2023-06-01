@@ -1,3 +1,5 @@
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
+
 import React from 'react';
 import { render } from 'react-dom';
 
@@ -71,6 +73,7 @@ export class App extends React.Component<AppProps, AppState> {
     };
   }
 
+  // eslint-disable-next-line  @typescript-eslint/ban-types
   detachExternalChangeHandler: Function | null = null;
 
   checkForValidAsset = async () => {
@@ -260,7 +263,7 @@ export class App extends React.Component<AppProps, AppState> {
     this.pollForAssetDetails();
   };
 
-  addByURL = async (remoteURL: String): Promise<void> => {
+  addByURL = async (remoteURL: string): Promise<void> => {
     const passthroughId = (this.props.sdk.entry.getSys() as { id: string }).id;
 
     const result = await this.apiClient.post(
@@ -429,13 +432,14 @@ export class App extends React.Component<AppProps, AppState> {
 
   responseCheck = async (res) => {
     switch (true) {
-      case res.status === 401:
+      case res.status === 401: {
         const json = await res.json();
         this.props.sdk.notifier.error(
           'Looks like something is wrong with the Mux Access Token in the config. Are you sure the token ID and secret in the extension settings match the access token you created?'
         );
         this.setAssetError(json.error.messages[0]);
         return false;
+      }
 
       case res.status === 429:
         this.props.sdk.notifier.error(
@@ -452,6 +456,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   resync = async (params?: any) => {
     return await this.pollForAssetDetails().then(() => {
       if (!params || !params.silent)
@@ -698,7 +703,7 @@ export class App extends React.Component<AppProps, AppState> {
   playerParams = () => {
     if (!this.state.value) return;
 
-    let params = [
+    const params = [
       {
         name: 'playback-id',
         value: this.state.value.playbackId || this.state.value.signedPlaybackId,
@@ -759,6 +764,7 @@ export class App extends React.Component<AppProps, AppState> {
       if ('error' in deleteRes) {
         this.props.sdk.notifier.error(deleteResJson.error.messages[0]);
       }
+      // eslint-disable-next-line no-empty
     } catch (e) {}
 
     if (this.isUsingSigned()) {

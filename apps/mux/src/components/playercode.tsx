@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Textarea, CopyButton, TextLink, Box } from '@contentful/f36-components';
 
 interface GetPlayerCodeProps {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   params: any;
 }
 
@@ -46,8 +47,7 @@ class PlayerCode extends React.Component<GetPlayerCodeProps, {}> {
           <TextLink
             href="https://docs.mux.com/guides/video/mux-player"
             target="_blank"
-            rel="noopener noreferrer"
-          >
+            rel="noopener noreferrer">
             Read more about Mux Player
           </TextLink>
         </p>

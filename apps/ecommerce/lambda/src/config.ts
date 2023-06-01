@@ -13,10 +13,11 @@ function getEnvironmentVariable(
 }
 
 export const config = {
-  signingSecret: getEnvironmentVariable('SIGNING_SECRET'),
   stage: getEnvironmentVariable('STAGE'),
   awsRegion: getEnvironmentVariable('AWS_REGION'),
   sentryDSN: getEnvironmentVariable('SENTRY_DSN'),
   environment: getEnvironmentVariable('NODE_ENV'),
   release: getEnvironmentVariable('CIRCLE_SHA1', 'no-release-hash-set'),
+  domainName: getEnvironmentVariable('DOMAIN_NAME'),
+  appConfigs: JSON.parse(getEnvironmentVariable('APP_CONFIGS')),
 };

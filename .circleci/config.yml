@@ -9,14 +9,12 @@ commands:
     steps:
       - vault/get-secrets:
           template-preset: 'semantic-release-ecosystem'
+      - vault/configure-lerna
       - run:
           name: Setup NPM
           command: |
             echo $'@contentful:registry=https://registry.npmjs.org/
             //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
-      - run: export GH_TOKEN=${GITHUB_TOKEN}
-      - run: git config --global user.email "${GIT_AUTHOR_EMAIL}"
-      - run: git config --global user.name "${GIT_AUTHOR_NAME}"
       - run:
           name: Publish packages
           command: npm run publish-packages
@@ -80,7 +78,7 @@ jobs:
           name: Install dependencies
           command: |
             npm ci
-            npm run bootstrap:ci
+            npm run bootstrap:ci-deploy
       - run:
           name: Install awscli
           command: |
@@ -92,7 +90,7 @@ jobs:
           command: |
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
-            npm run build
+            npm run build:deploy
       - run:
           name: Deploy apps to staging
           command: |
@@ -114,11 +112,11 @@ jobs:
           template-preset: 'aws-push-artifacts'
       - checkout
       - node/install
+      - node/install-packages
       - run:
-          name: Install dependencies
+          name: Bootstrap
           command: |
-            npm ci
-            npm run bootstrap:ci
+            npm run bootstrap:ci-deploy
       - run:
           name: Install awscli
           command: |
@@ -130,7 +128,7 @@ jobs:
           command: |
             REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
-            npm run build
+            npm run build:deploy
       - publish
       - run:
           name: Deploy apps to prod

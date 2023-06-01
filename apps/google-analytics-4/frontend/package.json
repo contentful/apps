@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "4.13.0",
-    "@contentful/f36-components": "4.37.1",
+    "@contentful/f36-components": "4.40.6",
     "@contentful/f36-tokens": "4.0.1",
     "@contentful/react-apps-toolkit": "1.2.15",
     "@segment/analytics-next": "^1.51.3",
@@ -12,7 +12,7 @@
     "@sentry/tracing": "^7.44.2",
     "@testing-library/user-event": "14.4.3",
     "@types/chart.js": "^2.9.37",
-    "@types/lodash": "4.14.194",
+    "@types/lodash": "4.14.195",
     "@types/react-chartjs-2": "^2.5.7",
     "chart.js": "^4.2.1",
     "contentful-management": "10.31.4",

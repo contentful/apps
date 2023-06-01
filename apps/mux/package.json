@@ -12,7 +12,7 @@
     "@types/node": "18.7.14",
     "@types/react": "17.0.39",
     "@types/react-dom": "17.0.11",
-    "@types/webpack-env": "1.18.0",
+    "@types/webpack-env": "1.18.1",
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.1",
     "cross-env": "7.0.3",
@@ -21,7 +21,7 @@
   "dependencies": {
     "@contentful/app-sdk": "4.12.0",
     "@contentful/dam-app-base": "^2.0.35",
-    "@contentful/f36-components": "4.37.1",
+    "@contentful/f36-components": "4.40.6",
     "@contentful/react-apps-toolkit": "1.2.15",
     "@mux/mux-player-react": "^1.10.1",
     "@mux/mux-uploader-react": "^1.0.0-beta.7",
@@ -36,12 +36,10 @@
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "lint": "eslint --max-warnings=0 .",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5l4WmuXdhJGcADHfCm1v4k --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   },
   "browserslist": {
     "production": [

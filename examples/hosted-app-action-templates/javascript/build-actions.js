@@ -1,34 +1,77 @@
-const fs = require('fs/promises');
-const { readdir, readFile, writeFile, mkdir } = fs;
+const esbuild = require('esbuild');
+const { resolve } = require('path');
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
 
-const buildActions = async () => {
-  try {
-    console.log('Building app actions');
-    await mkdir('build/actions', { recursive: true });
+const manifest = require('./contentful-app-manifest.json');
 
-    const actionsFiles = await readdir('actions', {
-      encoding: 'utf-8',
+const argv = yargs(hideBin(process.argv)).argv;
+
+const validateActions = () => {
+  const requiredProperties = ['id', 'path', 'entryFile'];
+  const uniqueValues = new Set();
+
+  manifest.actions.forEach((action) => {
+    requiredProperties.forEach((property) => {
+      if (!action.hasOwnProperty(property)) {
+        throw new Error(`Action with name: '${action.name}' is missing the '${property}' property`);
+      }
     });
 
-    const actions = await Promise.all(
-      actionsFiles.map((fileName) => {
-        return readFile(`actions/${fileName}`, {
-          encoding: 'utf-8',
-        });
-      })
-    );
+    const { id, path, entryFile } = action;
 
-    await Promise.all(
-      actionsFiles.map((fileName, index) => {
-        return writeFile(`build/actions/${fileName}`, actions[index]);
-      })
-    );
+    if (uniqueValues.has(id)) {
+      throw new Error(`Duplicate action id: '${id}'`);
+    }
+    if (uniqueValues.has(path)) {
+      throw new Error(`Duplicate action path: '${path}'`);
+    }
+    if (uniqueValues.has(entryFile)) {
+      throw new Error(`Duplicate entryFile path: '${entryFile}'`);
+    }
 
-    console.log('App actions successfully built');
+    uniqueValues.add(entryFile);
+    uniqueValues.add(path);
+    uniqueValues.add(id);
+  });
+};
+
+const getEntryPoints = () => {
+  return manifest.actions.reduce((result, action) => {
+    const fileName = action.path.split('.')[0];
+
+    result[fileName] = resolve(__dirname, action.entryFile);
+
+    return result;
+  }, {});
+};
+
+const main = async (watch = false) => {
+  try {
+    console.log('Building actions');
+    validateActions();
+
+    const config = {
+      entryPoints: getEntryPoints(),
+      minify: true,
+      bundle: true,
+      platform: 'node',
+      outdir: 'build',
+      logLevel: 'info',
+      format: 'esm',
+      target: 'es6',
+    };
+
+    if (watch) {
+      const context = await esbuild.context(config);
+      await context.watch();
+    } else {
+      await esbuild.build(config);
+    }
   } catch (e) {
-    console.log('Error building app actions');
+    console.log('Error building actions');
     throw Error(e);
   }
 };
 
-buildActions();
+main(argv._.includes('watch')).then(() => console.log('actions built successfully'));

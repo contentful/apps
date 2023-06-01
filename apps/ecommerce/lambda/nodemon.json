@@ -1,6 +1,6 @@
 {
-  "watch": ["src"],
-  "ext": ".ts,.js",
-  "ignore": [],
+  "watch": ["src", "config"],
+  "ext": ".ts,.js,.yml",
+  "ignore": ["**/*.spec.ts", "**/*.spec.tsx"],
   "exec": "npm run build && serverless offline"
 }

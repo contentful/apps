@@ -49,8 +49,12 @@
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.0.4",
     "@sentry/node": "^7.38.0",
+    "@types/shopify-buy": "^2.17.1",
+    "axios": "^1.4.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "serverless-http": "^3.1.0"
+    "nock": "^13.3.1",
+    "serverless-http": "^3.1.0",
+    "shopify-buy": "^2.19.0"
   }
 }
