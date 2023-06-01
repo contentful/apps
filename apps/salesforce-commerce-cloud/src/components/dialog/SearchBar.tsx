@@ -1,13 +1,21 @@
-import React, { useState } from 'react'
-import { css } from '@emotion/react'
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
 
-import { Flex, Box, /* Text, */ TextInput, Spinner, Button, Tooltip, Grid} from '@contentful/f36-components'
-import { SearchIcon, CloseIcon, ErrorCircleIcon, AssetIcon, TagsIcon } from '@contentful/f36-icons'
-import tokens from '@contentful/f36-tokens'
-import { useSDK } from '@contentful/react-apps-toolkit'
-import { DialogAppSDK } from '@contentful/app-sdk'
+import {
+  Flex,
+  Box,
+  /* Text, */ TextInput,
+  Spinner,
+  Button,
+  Tooltip,
+  Grid,
+} from '@contentful/f36-components';
+import { SearchIcon, CloseIcon, ErrorCircleIcon, AssetIcon, TagsIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { DialogAppSDK } from '@contentful/app-sdk';
 
-import { DialogInvocationParameters } from '../../locations/Dialog'
+import { DialogInvocationParameters } from '../../locations/Dialog';
 
 interface SearchBarProps {
   query: string;
@@ -16,9 +24,9 @@ interface SearchBarProps {
   saveIsDisabled: boolean;
   selectedItems?: string | string[];
   selectedData: any[];
-  onQueryChange: (event:React.ChangeEvent<HTMLInputElement>) => void;
+  onQueryChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onSave: () => void;
-  removeSelected: (id:string) => void;
+  removeSelected: (id: string) => void;
 }
 
 interface SearchControlProps extends SearchBarProps {
@@ -26,11 +34,11 @@ interface SearchControlProps extends SearchBarProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => {}
+const noop = () => {};
 
-const SearchBar = (props:SearchBarProps) => {
-  const sdk = useSDK<DialogAppSDK>()
-  const { fieldType } = sdk.parameters.invocation as DialogInvocationParameters
+const SearchBar = (props: SearchBarProps) => {
+  const sdk = useSDK<DialogAppSDK>();
+  const { fieldType } = sdk.parameters.invocation as DialogInvocationParameters;
 
   const headerStyles = css`
     border-bottom: 1px solid ${tokens.gray300};
@@ -42,38 +50,34 @@ const SearchBar = (props:SearchBarProps) => {
       z-index: 1;
       width: calc(100% - 2rem);
     }
-  `
+  `;
 
-  const controlProps = {...props, fieldType}
+  const controlProps = { ...props, fieldType };
 
   return (
-    <Flex
-      as="header"
-      justifyContent="space-between"
-      alignItems="flex-start"
-      css={headerStyles}
-    >
+    <Flex as="header" justifyContent="space-between" alignItems="flex-start" css={headerStyles}>
       <LeftSideControls {...controlProps} />
       <RightSideControls {...controlProps} />
     </Flex>
-  )
-}
+  );
+};
 
 const LeftSideControls = (props: SearchControlProps) => {
-
   const wrapperStyles = css`
     position: relative;
     z-index: 0;
-  `
+  `;
 
-  const textInputStyles = css`padding-left: 35px`
+  const textInputStyles = css`
+    padding-left: 35px;
+  `;
 
   const searchIconStyles = css`
-    z-index:1;
+    z-index: 1;
     position: absolute;
     top: 10px;
     left: 10px;
-  `
+  `;
 
   // const countTextStyles = css`
   //   font-size: ${tokens.fontSizeS};
@@ -84,10 +88,7 @@ const LeftSideControls = (props: SearchControlProps) => {
 
   return (
     <Box css={wrapperStyles}>
-      <Flex
-        flexDirection="row"
-        alignItems="center"
-      >
+      <Flex flexDirection="row" alignItems="center">
         <TextInput
           placeholder={`Search for a ${props.fieldType}...`}
           type="search"
@@ -97,10 +98,7 @@ const LeftSideControls = (props: SearchControlProps) => {
           onChange={props.onQueryChange}
           value={props.query}
         />
-        <SearchIcon
-          variant="muted"
-          css={searchIconStyles}
-        />
+        <SearchIcon variant="muted" css={searchIconStyles} />
         {props.isLoading && (
           <Box marginLeft="spacingS">
             <Spinner />
@@ -109,50 +107,45 @@ const LeftSideControls = (props: SearchControlProps) => {
       </Flex>
       {/* <Text css={countTextStyles}>Total results: </Text> */}
     </Box>
-  )
-}
+  );
+};
 
-const RightSideControls = (props:SearchControlProps) => {
+const RightSideControls = (props: SearchControlProps) => {
   return (
-    <Flex
-      justifyContent="flex-end"
-      flexGrow={1}
-    >
+    <Flex justifyContent="flex-end" flexGrow={1}>
       <SelectionList
         items={props.selectedItems}
         itemsInfo={props.selectedData}
         removeSelected={props.removeSelected}
         fieldType={props.fieldType}
       />
-      <Button
-        variant="primary"
-        onClick={props.onSave}
-        isDisabled={props.saveIsDisabled}
-      >
+      <Button variant="primary" onClick={props.onSave} isDisabled={props.saveIsDisabled}>
         Save
       </Button>
     </Flex>
-  )
-}
+  );
+};
 
 interface SelectionListProps {
   items?: string | string[];
   itemsInfo: any[];
-  removeSelected: (item:string) => void;
-  fieldType: 'product' | 'category'
+  removeSelected: (item: string) => void;
+  fieldType: 'product' | 'category';
 }
 
-const SelectionList = (props:SelectionListProps) => {
-  const items:string[] | undefined = typeof props.items === 'string' ? [props.items] : props.items 
-  
+const SelectionList = (props: SelectionListProps) => {
+  const items: string[] | undefined = typeof props.items === 'string' ? [props.items] : props.items;
+
   // console.log(props)
-  const findItemData = (itemId:string, fieldType: 'product' | 'category', itemsInfo?:any[]) => {
+  const findItemData = (itemId: string, fieldType: 'product' | 'category', itemsInfo?: any[]) => {
     if (itemsInfo?.length) {
       return itemsInfo.find((item) => {
-        return fieldType === 'product' ? item.id === itemId : `${item.catalogId}:${item.id}` === itemId;
-      })
+        return fieldType === 'product'
+          ? item.id === itemId
+          : `${item.catalogId}:${item.id}` === itemId;
+      });
     }
-  }
+  };
 
   return (
     <Grid
@@ -160,41 +153,41 @@ const SelectionList = (props:SelectionListProps) => {
       justifyContent="space-between"
       columnGap="spacingXs"
       rowGap="spacingXs"
-      marginRight="spacingXs"
-    >
-      {items && items.map((itemId:string) => (
-        <SelectionListItem
-          key={itemId}
-          itemId={itemId}
-          itemData={findItemData(itemId, props.fieldType, props.itemsInfo)}
-          removeSelected={props.removeSelected}
-          fieldType={props.fieldType}
-        />
-      ))}
+      marginRight="spacingXs">
+      {items &&
+        items.map((itemId: string) => (
+          <SelectionListItem
+            key={itemId}
+            itemId={itemId}
+            itemData={findItemData(itemId, props.fieldType, props.itemsInfo)}
+            removeSelected={props.removeSelected}
+            fieldType={props.fieldType}
+          />
+        ))}
     </Grid>
-  )
-}
+  );
+};
 
 interface SelectionListItemProps {
   itemId: string;
   itemData: any;
-  fieldType: 'product' | 'category'
-  removeSelected: (id:string) => void;
+  fieldType: 'product' | 'category';
+  removeSelected: (id: string) => void;
 }
 
-const SelectionListItem = (props:SelectionListItemProps) => {
-  const { itemId, itemData, fieldType } = props
+const SelectionListItem = (props: SelectionListItemProps) => {
+  const { itemId, itemData, fieldType } = props;
 
-  const [imageHasLoaded, setImageHasLoaded] = useState<boolean>(false)
-  const [imageHasErrored, setImageHasErrored] = useState<boolean>(false)
+  const [imageHasLoaded, setImageHasLoaded] = useState<boolean>(false);
+  const [imageHasErrored, setImageHasErrored] = useState<boolean>(false);
 
-  const ItemIcon = (props:{fieldType:string}) => {
-    return props.fieldType === 'product' ? <AssetIcon /> : <TagsIcon />
-  }
+  const ItemIcon = (props: { fieldType: string }) => {
+    return props.fieldType === 'product' ? <AssetIcon /> : <TagsIcon />;
+  };
 
-  const getProductPreviewImageUrl = (productInfo?:any) => {
-    return productInfo?.image.absUrl ? productInfo.image.absUrl : ''
-  }
+  const getProductPreviewImageUrl = (productInfo?: any) => {
+    return productInfo?.image.absUrl ? productInfo.image.absUrl : '';
+  };
 
   const selectedItemWrapperStyles = css`
     border: 1px solid;
@@ -209,13 +202,13 @@ const SelectionListItem = (props:SelectionListItemProps) => {
       border-color: ${tokens.gray500};
       cursor: pointer;
       & span > div {
-        opacity: 1
+        opacity: 1;
       }
     }
-  `
+  `;
 
   const closeActionStyles = css`
-    background-color: rgba(0,0,0,.65);
+    background-color: rgba(0, 0, 0, 0.65);
     border-radius: 50%;
     color: white;
     opacity: 0;
@@ -232,7 +225,7 @@ const SelectionListItem = (props:SelectionListItemProps) => {
       left: 50%;
       transform: translate(-50%, -50%);
     }
-  `
+  `;
 
   const selectedItemIconStyles = css`
     background-color: ${tokens.gray100};
@@ -249,7 +242,7 @@ const SelectionListItem = (props:SelectionListItemProps) => {
       left: 50%;
       transform: translate(-50%, -50%);
     }
-  `
+  `;
 
   const selectedItemImageStyles = css`
     display: ${imageHasLoaded ? 'block' : 'none'};
@@ -257,7 +250,7 @@ const SelectionListItem = (props:SelectionListItemProps) => {
     min-width: auto;
     height: 40px;
     overflow: hidden;
-  `
+  `;
 
   return (
     <Flex
@@ -266,17 +259,14 @@ const SelectionListItem = (props:SelectionListItemProps) => {
       onKeyUp={noop}
       onClick={() => props.removeSelected(itemId)}
       flexDirection="column"
-      css={selectedItemWrapperStyles}
-    >
+      css={selectedItemWrapperStyles}>
       <Tooltip content={itemId} placement="bottom">
         <Box css={closeActionStyles}>
           <CloseIcon variant="white" />
         </Box>
 
         {fieldType === 'category' && (
-          <Box css={selectedItemIconStyles}>
-            {itemData ? <TagsIcon /> : <ErrorCircleIcon />}
-          </Box>
+          <Box css={selectedItemIconStyles}>{itemData ? <TagsIcon /> : <ErrorCircleIcon />}</Box>
         )}
         {fieldType === 'product' && (
           <>
@@ -296,7 +286,7 @@ const SelectionListItem = (props:SelectionListItemProps) => {
         )}
       </Tooltip>
     </Flex>
-  )
-}
+  );
+};
 
-export default SearchBar
+export default SearchBar;

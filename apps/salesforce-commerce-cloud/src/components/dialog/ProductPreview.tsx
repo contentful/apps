@@ -2,30 +2,31 @@ import React from 'react';
 
 import { Flex, Text } from '@contentful/f36-components';
 
-const ProductPreview = (props:{product: any}) => {
-  const descriptionLength = 178
-  const { product } = props
+const ProductPreview = (props: { product: any }) => {
+  const descriptionLength = 178;
+  const { product } = props;
 
-  let description = "Description"
+  let description = 'Description';
   if (product.shortDescription.default) {
-    description = product.shortDescription.default.markup.length > descriptionLength ? 
-      `${product.shortDescription.default.markup.substring(0, descriptionLength)}...` :
-      product.shortDescription.default.markup
+    description =
+      product.shortDescription.default.markup.length > descriptionLength
+        ? `${product.shortDescription.default.markup.substring(0, descriptionLength)}...`
+        : product.shortDescription.default.markup;
   }
 
   return (
     <>
-      {product.image.absUrl && 
+      {product.image.absUrl && (
         <img src={product.image.absUrl} alt={product.image.alt.default} height="75" width="75" />
-      }
+      )}
       <Flex flexDirection="column" marginLeft="spacingS">
-         <Text as="div" fontWeight="fontWeightDemiBold">{product.name.default} (ID: {product.id})</Text>
-         <Text as="div">
-           {description}
-         </Text>
-       </Flex>
+        <Text as="div" fontWeight="fontWeightDemiBold">
+          {product.name.default} (ID: {product.id})
+        </Text>
+        <Text as="div">{description}</Text>
+      </Flex>
     </>
   );
-}
+};
 
-export default ProductPreview
+export default ProductPreview;

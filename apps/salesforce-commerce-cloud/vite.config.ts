@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react';
-import svgr from 'vite-plugin-svgr'
+import svgr from 'vite-plugin-svgr';
 import { defineConfig } from 'vite';
 
 export default defineConfig(() => ({
@@ -9,12 +9,12 @@ export default defineConfig(() => ({
   },
   plugins: [
     react({
-      jsxImportSource: "@emotion/react"
+      jsxImportSource: '@emotion/react',
     }),
     svgr(),
   ],
   esbuild: {
-    logOverride: {'this-is-undefined-in-esm': 'silent'}
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
   },
   test: {
     environment: 'happy-dom',

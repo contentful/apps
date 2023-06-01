@@ -27,10 +27,8 @@ const App = () => {
   }, [sdk.location]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      { Component && <Component /> }      
-    </QueryClientProvider>
-  )
+    <QueryClientProvider client={queryClient}>{Component && <Component />}</QueryClientProvider>
+  );
 };
 
 export default App;

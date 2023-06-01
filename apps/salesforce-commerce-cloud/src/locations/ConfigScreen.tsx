@@ -27,7 +27,7 @@ const ConfigScreen = () => {
     organizationId: null,
     shortCode: null,
     siteId: null,
-  })
+  });
 
   const sdk = useSDK<ConfigAppSDK>();
   /*
@@ -45,13 +45,12 @@ const ConfigScreen = () => {
     // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
-    let isValid = true
-    const validUpdate:any = {}
+    let isValid = true;
+    const validUpdate: any = {};
     for (const key of Object.keys(valid)) {
       if (parameters[key as keyof AppInstallationParameters].length) {
         validUpdate[key as keyof typeof validUpdate] = true;
-      }
-      else {
+      } else {
         validUpdate[key] = false;
         isValid = false;
       }
@@ -76,12 +75,13 @@ const ConfigScreen = () => {
     {
       id: 'clientId',
       label: 'Client Id',
-      helpText: 'The Client ID of the API Client to use when connecting to your Salesforce Commerce Cloud store.',
+      helpText:
+        'The Client ID of the API Client to use when connecting to your Salesforce Commerce Cloud store.',
     },
     {
       id: 'clientSecret',
       label: 'Client Secret',
-      helpText: 'The Client Secret (or Password) to use when connecting with the above API client.'
+      helpText: 'The Client Secret (or Password) to use when connecting with the above API client.',
     },
     {
       id: 'organizationId',
@@ -97,32 +97,30 @@ const ConfigScreen = () => {
       id: 'siteId',
       label: 'Site ID',
       helpText: 'The Site ID of the specific Commerce Cloud site to retrieve products from.',
-    }
-  ]
+    },
+  ];
 
-  const onInputFocus = (e:React.FocusEvent<HTMLInputElement>) => {
+  const onInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setValid({
       ...valid,
-      [e.currentTarget.id]: true
-    })
-  }
+      [e.currentTarget.id]: true,
+    });
+  };
 
-  const onInputBlur = (e:React.FocusEvent<HTMLInputElement>) => {
+  const onInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     setValid({
       ...valid,
-      [e.currentTarget.id]: e.currentTarget.value.length ? true : false
-    })
-  }
+      [e.currentTarget.id]: e.currentTarget.value.length ? true : false,
+    });
+  };
 
-  const onInputChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // console.log({[e.currentTarget.id]: e.currentTarget.value})
     setParameters({
       ...parameters,
-      [e.currentTarget.id]: e.currentTarget.value
-    })
-  }
-
-
+      [e.currentTarget.id]: e.currentTarget.value,
+    });
+  };
 
   useEffect(() => {
     // `onConfigure` allows to configure a callback to be
@@ -167,7 +165,7 @@ const ConfigScreen = () => {
   );
 };
 
-const FormInput = (props:{
+const FormInput = (props: {
   input: {
     id: string;
     label: string;
@@ -175,16 +173,13 @@ const FormInput = (props:{
   };
   value: string;
   isInvalid: boolean;
-  onInputChange: (e:React.ChangeEvent<HTMLInputElement>) => void;
-  onInputFocus: (e:React.FocusEvent<HTMLInputElement>) => void;
-  onInputBlur: (e:React.FocusEvent<HTMLInputElement>) => void;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onInputBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 }) => {
-  const input = props.input
+  const input = props.input;
   return (
-    <FormControl
-      isRequired
-      isInvalid={props.isInvalid}
-    >
+    <FormControl isRequired isInvalid={props.isInvalid}>
       <FormControl.Label>{input.label}</FormControl.Label>
       <TextInput
         id={input.id}
@@ -195,13 +190,12 @@ const FormInput = (props:{
         onFocus={props.onInputFocus}
         onBlur={props.onInputBlur}
       />
-      {props.isInvalid &&
+      {props.isInvalid && (
         <FormControl.ValidationMessage>{input.label} is required.</FormControl.ValidationMessage>
-      }
+      )}
       <FormControl.HelpText>{input.helpText}</FormControl.HelpText>
     </FormControl>
-  )
-}
-
+  );
+};
 
 export default ConfigScreen;
