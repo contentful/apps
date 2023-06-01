@@ -88,9 +88,10 @@ const Config = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
     const currentParameters = (await sdk.app.getParameters()) || {};
-    const persistingParams = installationUuid
-      ? { ...parameters, installationUuid }
-      : { ...parameters, installationUuid: currentParameters.installationUuid };
+    const persistingParams = {
+      ...parameters,
+      installationUuid: installationUuid || currentParameters.installationUuid,
+    };
 
     return {
       parameters: persistingParams,
