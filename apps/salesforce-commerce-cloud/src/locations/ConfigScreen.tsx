@@ -74,29 +74,32 @@ const ConfigScreen = () => {
   const salesforceInputs = [
     {
       id: 'clientId',
-      label: 'Client Id',
+      label: 'Client ID',
       helpText:
         'The Client ID of the API Client to use when connecting to your Salesforce Commerce Cloud store.',
     },
     {
       id: 'clientSecret',
       label: 'Client Secret',
-      helpText: 'The Client Secret (or Password) to use when connecting with the above API client.',
+      helpText:
+        'The Client Secret (labeled Password) to use when connecting with the above API client.',
     },
     {
       id: 'organizationId',
-      label: 'Organization Id',
-      helpText: 'Your Organization ID for your specific Salesforce Commerce Cloud instance.',
+      label: 'Organization ID',
+      helpText: 'The Organization ID for your specific Salesforce Commerce Cloud instance.',
     },
     {
       id: 'shortCode',
       label: 'Short Code',
-      helpText: 'The Short Code for your organization to route data correctly.',
+      helpText:
+        'The Short Code for your Salesforce Commerce Cloud organization, used to route data correctly.',
     },
     {
       id: 'siteId',
       label: 'Site ID',
-      helpText: 'The Site ID of the specific Commerce Cloud site to retrieve products from.',
+      helpText:
+        'The Site ID of the specific Salesforce Commerce Cloud site that you want to retrieve products from.',
     },
   ];
 
