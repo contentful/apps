@@ -24,9 +24,8 @@
     "start": "vite",
     "build": "tsc && vite build",
     "test": "vitest",
-    "create-app-definition": "contentful-app-scripts create-app-definition",
-    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1O8njPYTGO44VueSJNBrdZ --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.1.11",
