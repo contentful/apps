@@ -10,7 +10,7 @@ variables:
   signingSecret:
     signing_secret: '<your-contentful-app-signing-secret>'
   tableName: sls-apps-slack-backend-dev-TokenTable
-  dynamoEndpoint: http://dynamodb:8001
+  dynamoEndpoint: http://dynamodb:8000
   frontendUrl: 'http://localhost:1234'
   workflowsUrl: 'workflows-url-for-cors'
   serverless:
