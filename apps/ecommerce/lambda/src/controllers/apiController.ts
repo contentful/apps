@@ -3,6 +3,35 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ExternalResource, ExternalResourceLink } from '@/src/types';
 
 const ApiController = {
+  config: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.appConfig) throw new Error('App config not found');
+
+      const proxyConfigUrl = new URL(req.appConfig.baseUrl);
+      proxyConfigUrl.pathname += `/config.json`;
+
+      try {
+        let response;
+        try {
+          response = await axios.get(proxyConfigUrl.toString());
+        } catch (error) {
+          response = (error as AxiosError).response;
+        } finally {
+          res
+            .status((response as AxiosResponse).status)
+            .send(JSON.parse(JSON.stringify((response as AxiosResponse).data)));
+        }
+      } catch (error) {
+        res.status(500).send({
+          status: 'error',
+          message: 'Error fetching config',
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
+  },
+
   checkCredentials: async (
     req: Request,
     res: Response<ShopifyBuy.ShopResource | { status: 'ok' | 'error'; message: string }>,

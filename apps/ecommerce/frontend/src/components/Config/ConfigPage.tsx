@@ -32,26 +32,23 @@ const ConfigPage = () => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
-  const getConfig = useCallback(
-    async (baseUrl: string) => {
-      const url = new URL(`${baseUrl}/config.json`);
-      fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'GET')
-        .then((res) => {
-          if (res.status !== 200) {
-            const error = `${res.status} - ${res.statusText}`;
-            throw new Error(error);
-          }
+  const getConfig = useCallback(async () => {
+    const url = new URL(`${config.backendApiUrl}/api/config.json`);
+    fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'GET')
+      .then((res) => {
+        if (res.status !== 200) {
+          const error = `${res.status} - ${res.statusText}`;
+          throw new Error(error);
+        }
 
-          return res.json();
-        })
-        .then((data) => setProviderConfig(data))
-        .catch((error) => {
-          setError(error);
-        })
-        .finally(() => setIsLoading(false));
-    },
-    [cma, sdk]
-  );
+        return res.json();
+      })
+      .then((data) => setProviderConfig(data))
+      .catch((error) => {
+        setError(error);
+      })
+      .finally(() => setIsLoading(false));
+  }, [cma, sdk]);
 
   useEffect(() => {
     (async () => {
@@ -61,10 +58,7 @@ const ConfigPage = () => {
         setParameters(currentParameters);
       }
 
-      const baseUrl = sdk.parameters.instance.baseUrl;
-      if (baseUrl) {
-        getConfig(baseUrl);
-      }
+      getConfig();
 
       sdk.app.setReady();
     })();
