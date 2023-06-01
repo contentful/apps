@@ -1,7 +1,8 @@
 export interface GetAuthTokenParameters {
   code: string;
   spaceId: string;
-  environmentId: string;
+  environmentId: string; // remove>>>
+  installationUuid: string;
 }
 
 export const getAuthTokenParametersSchema = {
@@ -9,11 +10,12 @@ export const getAuthTokenParametersSchema = {
   properties: {
     code: { type: 'string' },
     spaceId: { type: 'string' },
-    environmentId: { type: 'string' },
+    environmentId: { type: 'string' }, //remove>>>>
+    installationUuid: { type: 'string' },
   },
   required: ['code', 'spaceId', 'environmentId'],
   additionalProperties: true,
-};
+}; //validation???
 
 export interface PostAuthTokenBody {
   refreshToken: string;

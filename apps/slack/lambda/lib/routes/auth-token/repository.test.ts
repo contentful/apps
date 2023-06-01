@@ -41,6 +41,7 @@ describe('AuthTokenRepository', () => {
         await instance.validate('code', {
           spaceId: 'spaceId',
           environmentId: 'environmentId',
+          installationUuid: '1234',
         }),
         {
           token: 'token',
@@ -61,6 +62,7 @@ describe('AuthTokenRepository', () => {
         await instance.validate('code', {
           spaceId: 'spaceId',
           environmentId: 'environmentId',
+          installationUuid: '1234',
         });
         assert.fail('Did not reject');
       } catch (e) {
@@ -79,6 +81,7 @@ describe('AuthTokenRepository', () => {
         await instance.validate('code', {
           spaceId: 'spaceId',
           environmentId: 'environmentId',
+          installationUuid: '1234',
         });
         assert.fail('Did not reject');
       } catch (e) {
@@ -113,7 +116,6 @@ describe('AuthTokenRepository', () => {
         expiresAt: Date.now() + DEFAULT_EXPIRES_IN * 1_000,
         refreshToken: 'refresh-token',
         spaceId: 'spaceId',
-        environmentId: 'environmentId',
         installationUuid: '1234',
         slackWorkspaceId: 'team',
       };
@@ -145,7 +147,7 @@ describe('AuthTokenRepository', () => {
             // @ts-expect-error expected from scenario
             environmentId: null,
           },
-          '1234'
+          '1235'
         );
         assert.fail('Did not reject');
       } catch (e) {
@@ -159,7 +161,6 @@ describe('AuthTokenRepository', () => {
         expiresAt: Date.now() + DEFAULT_EXPIRES_IN * 1_000,
         refreshToken: 'refresh-token-1',
         spaceId: 'spaceId-1',
-        environmentId: 'environmentId-1',
         installationUuid: '1234',
         slackWorkspaceId: 'team',
       };
@@ -169,7 +170,6 @@ describe('AuthTokenRepository', () => {
         expiresAt: Date.now() + DEFAULT_EXPIRES_IN * 100,
         refreshToken: 'refresh-token-2',
         spaceId: 'spaceId-2',
-        environmentId: 'environmentId-2',
         installationUuid: '1234',
         slackWorkspaceId: 'team',
       };
@@ -188,9 +188,9 @@ describe('AuthTokenRepository', () => {
         'code',
         {
           spaceId: 'spaceId-1',
-          environmentId: 'environmentId-1',
+          installationUuid: '1234',
         },
-        '1234'
+        '12345'
       );
 
       assert.calledWith(
@@ -224,6 +224,7 @@ describe('AuthTokenRepository', () => {
       const r = await instance.get('workspaceId', {
         spaceId: 'spaceId',
         environmentId: 'envId',
+        installationUuid: '1234',
       });
 
       assert.deepEqual(r, data);
@@ -236,6 +237,7 @@ describe('AuthTokenRepository', () => {
         await instance.get('workspaceId', {
           spaceId: 'spaceId',
           environmentId: 'envId',
+          installationUuid: '1234',
         });
         assert.fail('Did not reject');
       } catch (e) {
@@ -249,7 +251,6 @@ describe('AuthTokenRepository', () => {
         expiresAt: Date.now() - DEFAULT_EXPIRES_IN * 1_000,
         refreshToken: 'refresh-token-old',
         spaceId: 'space',
-        environmentId: 'env',
         installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
@@ -258,7 +259,6 @@ describe('AuthTokenRepository', () => {
         expiresAt: Date.now() - DEFAULT_EXPIRES_IN * 1_000,
         refreshToken: 'refresh-token-old',
         spaceId: 'space-other',
-        environmentId: 'env-other',
         installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
@@ -288,6 +288,7 @@ describe('AuthTokenRepository', () => {
       const response = await instance.get('workspace', {
         spaceId: 'space',
         environmentId: 'env',
+        installationUuid: '1234',
       });
 
       assert.deepEqual(response, newToken);
@@ -313,7 +314,6 @@ describe('AuthTokenRepository', () => {
         expiresAt: Date.now() - DEFAULT_EXPIRES_IN * 1_000,
         refreshToken: 'refresh-token-old',
         spaceId: 'space',
-        environmentId: 'env',
         installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
@@ -322,7 +322,6 @@ describe('AuthTokenRepository', () => {
         expiresAt: Date.now() - DEFAULT_EXPIRES_IN * 1_000,
         refreshToken: 'refresh-token-old',
         spaceId: 'space-other',
-        environmentId: 'env-other',
         installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
@@ -335,6 +334,7 @@ describe('AuthTokenRepository', () => {
         instance.get('workspace', {
           spaceId: 'space',
           environmentId: 'env',
+          installationUuid: '1234',
         }),
         NotFoundException
       );
@@ -348,7 +348,6 @@ describe('AuthTokenRepository', () => {
         expiresAt: Date.now() - DEFAULT_EXPIRES_IN * 1_000,
         refreshToken: 'refresh-token-old',
         spaceId: 'space',
-        environmentId: 'env',
         installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
@@ -357,7 +356,6 @@ describe('AuthTokenRepository', () => {
         expiresAt: Date.now() - DEFAULT_EXPIRES_IN * 1_000,
         refreshToken: 'refresh-token-old',
         spaceId: 'space-other',
-        environmentId: 'env-other',
         installationUuid: '1234',
         slackWorkspaceId: 'workspace',
       };
@@ -370,6 +368,7 @@ describe('AuthTokenRepository', () => {
         instance.get('workspace', {
           spaceId: 'space',
           environmentId: 'env',
+          installationUuid: '1234',
         }),
         NotFoundException
       );
@@ -393,8 +392,6 @@ describe('AuthTokenRepository', () => {
     it('handles multiple stored AuthTokens', async () => {
       const data: AuthToken[] = [
         {
-          environmentId: 'env-1',
-
           slackWorkspaceId: 'workspace-1',
           spaceId: 'space-1',
           token: 'token-1',
@@ -403,7 +400,6 @@ describe('AuthTokenRepository', () => {
           expiresAt: Date.now() + DEFAULT_EXPIRES_IN * 1_000,
         },
         {
-          environmentId: 'env-2',
           slackWorkspaceId: 'workspace-2',
           spaceId: 'space-2',
           token: 'token-2',

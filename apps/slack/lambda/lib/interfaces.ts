@@ -11,12 +11,12 @@ export interface AuthToken {
   refreshToken: string;
 
   spaceId: string;
-  environmentId: string;
   installationUuid: string;
   slackWorkspaceId: string;
 }
 
 export interface SpaceEnvironmentContext {
   spaceId: string;
-  environmentId: string;
+  environmentId?: string;
+  installationUuid?: string; // adjust
 }

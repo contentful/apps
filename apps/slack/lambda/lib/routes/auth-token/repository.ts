@@ -37,7 +37,7 @@ export class AuthTokenRepository {
 
   async put(
     refreshToken: string,
-    { spaceId, environmentId }: SpaceEnvironmentContext,
+    { spaceId }: SpaceEnvironmentContext,
     installationUuid: string
   ): Promise<AuthToken> {
     const accessResponse = await this.slackClient.refreshToken(refreshToken);
@@ -46,17 +46,16 @@ export class AuthTokenRepository {
       accessResponse,
       {
         spaceId,
-        environmentId,
       },
-      installationUuid || ''
+      installationUuid
     );
 
-    await this.updateByWorkspaceId(authToken.slackWorkspaceId, authToken, installationUuid || '');
+    await this.updateByWorkspaceId(authToken.slackWorkspaceId, authToken);
 
     await this.singleTableClient.put(
       Entity.AuthToken,
-      installationUuid || '',
-      [spaceId, environmentId],
+      installationUuid,
+      [spaceId, installationUuid],
       authToken
     );
 
@@ -66,12 +65,16 @@ export class AuthTokenRepository {
   async get(workspaceId: string, context: SpaceEnvironmentContext): Promise<AuthToken> {
     const parameters = await getInstallationParametersFromCma(
       context.spaceId,
-      context.environmentId
+      context.environmentId || '' //fix  >>>>>>>>>>>>>>
     );
-    let authToken = await this.singleTableClient.get(
-      Entity.AuthToken,
-      parameters.installationUuid || ''
+    const installationUuid = parameters.installationUuid;
+    const spaceEnvUuid = AuthTokenRepository.uuid(
+      context.spaceId,
+      context.environmentId,
+      workspaceId
     );
+    const possibleUuids = installationUuid || spaceEnvUuid; // do we need???? >>>>>>>>
+    let authToken = await this.singleTableClient.get(Entity.AuthToken, possibleUuids);
 
     if (!authToken) {
       throw new NotFoundException('Entity could not be found');
@@ -83,12 +86,12 @@ export class AuthTokenRepository {
         authToken = AuthTokenRepository.applyRefreshResponse(authToken, refreshResponse);
       } catch (e) {
         if (e instanceof SlackError && e.details === 'invalid_refresh_token') {
-          await this.deleteByWorkspaceId(workspaceId);
+          await this.deleteByWorkspaceId(workspaceId, possibleUuids);
         }
         throw new NotFoundException('Entity could not be found');
       }
 
-      await this.updateByWorkspaceId(authToken.slackWorkspaceId, authToken, '1234');
+      await this.updateByWorkspaceId(authToken.slackWorkspaceId, authToken);
     }
 
     return authToken;
@@ -96,8 +99,7 @@ export class AuthTokenRepository {
 
   private async updateByWorkspaceId(
     workspaceId: string,
-    authToken: Pick<AuthToken, 'refreshToken' | 'expiresAt' | 'token'>,
-    installationUuid: string
+    authToken: Pick<AuthToken, 'refreshToken' | 'expiresAt' | 'token'>
   ): Promise<void> {
     const authTokens = await this.singleTableClient.queryByWorkspaceId(
       Entity.AuthToken,
@@ -114,15 +116,15 @@ export class AuthTokenRepository {
         };
         return this.singleTableClient.put(
           Entity.AuthToken,
-          installationUuid,
-          [token.spaceId, token.environmentId],
+          token.installationUuid || AuthTokenRepository.uuid(token.spaceId, token.slackWorkspaceId),
+          [token.spaceId, token.installationUuid],
           data
         );
       })
     );
   }
 
-  async deleteByWorkspaceId(workspaceId: string): Promise<void> {
+  async deleteByWorkspaceId(workspaceId: string, installationUuid?: string): Promise<void> {
     const authTokens = await this.singleTableClient.queryByWorkspaceId(
       Entity.AuthToken,
       workspaceId
@@ -132,11 +134,8 @@ export class AuthTokenRepository {
       authTokens.map((authToken) =>
         this.singleTableClient.delete(
           Entity.AuthToken,
-          AuthTokenRepository.uuid(
-            authToken.spaceId,
-            authToken.environmentId,
-            authToken.slackWorkspaceId
-          )
+          installationUuid ||
+            AuthTokenRepository.uuid(authToken.spaceId, authToken.slackWorkspaceId)
         )
       )
     );
@@ -160,7 +159,7 @@ export class AuthTokenRepository {
 
   private static toDatabase(
     slackTokenResponse: OauthV2AccessResponse,
-    { spaceId, environmentId }: SpaceEnvironmentContext,
+    { spaceId }: SpaceEnvironmentContext,
     installationUuid: string
   ): AuthToken {
     return {
@@ -171,7 +170,6 @@ export class AuthTokenRepository {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expiresAt: Date.now() + slackTokenResponse.expires_in! * 1_000,
       spaceId,
-      environmentId,
       installationUuid,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       slackWorkspaceId: slackTokenResponse.team!.id!,

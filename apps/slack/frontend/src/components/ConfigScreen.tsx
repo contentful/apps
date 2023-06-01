@@ -63,10 +63,6 @@ const Config = () => {
   }, [active]);
 
   useEffect(() => {
-    setParameters((prevParameters) => ({ ...prevParameters, installationUuid }));
-  }, [installationUuid]);
-
-  useEffect(() => {
     (async () => {
       setWorkspaceState(WorkspaceState.LOADING);
       try {
@@ -92,18 +88,24 @@ const Config = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
     const currentParameters = (await sdk.app.getParameters()) || {};
-    let persistingParams;
-    const currentInstallationUuid = currentParameters.installationUuid;
-
-    if (currentInstallationUuid) {
-      persistingParams = { ...parameters, installationUuid: currentInstallationUuid };
-    } else persistingParams = parameters;
+    const persistingParams = installationUuid
+      ? { ...parameters, installationUuid }
+      : { ...parameters, installationUuid: currentParameters.installationUuid };
 
     return {
       parameters: persistingParams,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, installationUuid]);
+
+  useEffect(() => {
+    const getAppParams = async () => {
+      const params = await sdk.app.getParameters();
+      console.log('PARAMSSSSS>>>>>>>', params);
+    };
+
+    getAppParams();
+  }, []); // remove
 
   const onConfigurationCompleted = useCallback(
     async (error) => {
@@ -119,6 +121,7 @@ const Config = () => {
 
       if (isFirstInstallation && temporaryRefreshToken && installationUuid) {
         try {
+          console.log('do we hit this???');
           await apiClient.createAuthToken(sdk, cma, temporaryRefreshToken, installationUuid);
           setIsFirstInstallation(false);
         } catch (e) {
@@ -141,6 +144,7 @@ const Config = () => {
 
       setParameters({
         ...currentParameters,
+        installationUuid,
         workspaces: Object.values(connectedWorkspaces).map((workspace) => workspace.id),
       });
 
@@ -154,7 +158,7 @@ const Config = () => {
 
       await sdk.app.setReady();
     })();
-  }, [sdk, connectedWorkspaces, setNotifications, setActive]);
+  }, [sdk, connectedWorkspaces, setNotifications, setActive, installationUuid]);
 
   return (
     <Workbench className={styles.workbench}>

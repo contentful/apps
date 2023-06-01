@@ -23,12 +23,10 @@ export const useConnect = () => {
 
   const saveWorkspace = useCallback(
     async (workspace, token) => {
-      const isInstalled = await sdk.app.isInstalled();
-
       const genericErrorMessage =
         'Unable to store configuration. Please try connecting Slack again.';
 
-      if (!isInstalled && token) {
+      if (token) {
         try {
           await api.install({ workspaces: [workspace.id] });
           const installationUuid = uuidv4();

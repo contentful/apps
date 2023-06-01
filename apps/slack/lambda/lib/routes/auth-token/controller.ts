@@ -120,10 +120,10 @@ export class AuthTokenController {
    */
   post = asyncHandler(async (request, response) => {
     const spaceId = request.header('x-contentful-space-id');
-    const environmentId = request.header('x-contentful-environment-id');
-    const installationUuid = request.header('x-contentful-uuid') || '';
+    const installationUuid = request.header('x-contentful-uuid');
 
-    if (!spaceId || !environmentId) {
+    if (!spaceId || !installationUuid) {
+      // require installationUuid??
       throw new NotFoundException();
     }
     const { refreshToken } = assertValid<PostAuthTokenBody>(postAuthTokenBodySchema, request.body);
@@ -132,7 +132,6 @@ export class AuthTokenController {
       refreshToken,
       {
         spaceId,
-        environmentId,
       },
       installationUuid
     );
