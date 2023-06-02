@@ -7,11 +7,11 @@ import { DialogAppSDK } from '@contentful/app-sdk';
 
 // Local Imports
 import { SfccClient } from '../../utils/Sfcc';
-import SearchBar from './SearchBar'
-import ProductSearchResults from './ProductSearchResults'
-import CategorySearchResults from './CategorySearchResults'
-import { AppInstallationParameters } from '../../locations/ConfigScreen'
-import { DialogInvocationParameters } from '../../locations/Dialog'
+import SearchBar from './SearchBar';
+import ProductSearchResults from './ProductSearchResults';
+import CategorySearchResults from './CategorySearchResults';
+import { AppInstallationParameters } from '../../locations/ConfigScreen';
+import { DialogInvocationParameters } from '../../locations/Dialog';
 
 export const headerHeight = 114;
 export const stickyHeaderBreakpoint = 900;
@@ -37,29 +37,31 @@ const SearchPicker = () => {
     sdk.close(selected);
   };
 
-  const findSearchResultData = (id:string ) => {
-    return searchResults.find((item) => item.id === id)
-  }
+  const findSearchResultData = (id: string) => {
+    return searchResults.find((item) => item.id === id);
+  };
 
-  const onItemSelect = (id:string) => {
-    if (selectMultiple) { // Multivalue
-      if (!selected?.length) { // Empty array, Initial Value
-        setSelected([id])
-        setSelectedItemsInfo([findSearchResultData(id)])
-      }
-      else { // Array exists, modify it
-        
-        const updateSelected = [...selected]
-        let updateSelectedData = []
-        const includedIndex = updateSelected.findIndex((item) => item === id)
-        if (includedIndex > -1) { // Item exists in array, unset it
-          updateSelected.splice(includedIndex, 1)
-          updateSelectedData = selectedData.filter((item) => item.id === id)
-        }
-        else {
-          console.log('Item not found.')
-          updateSelected.push(id)
-          updateSelectedData = [...selectedData, findSearchResultData(id)]
+  const onItemSelect = (id: string) => {
+    if (selectMultiple) {
+      // Multivalue
+      if (!selected?.length) {
+        // Empty array, Initial Value
+        setSelected([id]);
+        setSelectedItemsInfo([findSearchResultData(id)]);
+      } else {
+        // Array exists, modify it
+
+        const updateSelected = [...selected];
+        let updateSelectedData = [];
+        const includedIndex = updateSelected.findIndex((item) => item === id);
+        if (includedIndex > -1) {
+          // Item exists in array, unset it
+          updateSelected.splice(includedIndex, 1);
+          updateSelectedData = selectedData.filter((item) => item.id === id);
+        } else {
+          console.log('Item not found.');
+          updateSelected.push(id);
+          updateSelectedData = [...selectedData, findSearchResultData(id)];
         }
 
         setSelected(updateSelected);

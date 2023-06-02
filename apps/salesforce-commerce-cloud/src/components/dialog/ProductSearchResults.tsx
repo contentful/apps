@@ -45,25 +45,26 @@ const ProductSearchResults = (props: SearchResultsProps) => {
   );
 };
 
-const ProductSearchResult = (props:SearchResultProps) => {
-  const { result, fieldType, onItemSelect, selected } = props
-  const resultId = fieldType === 'product' ? result.id : `${result.catalogId}:${result.id}`
-  const isSelected = typeof selected === 'string' ? result.id === selected : selected?.includes(resultId)
+const ProductSearchResult = (props: SearchResultProps) => {
+  const { result, fieldType, onItemSelect, selected } = props;
+  const resultId = fieldType === 'product' ? result.id : `${result.catalogId}:${result.id}`;
+  const isSelected =
+    typeof selected === 'string' ? result.id === selected : selected?.includes(resultId);
 
-  const [imageHasLoaded, setImageHasLoaded] = useState<boolean>(false)
-  const [imageHasErrored, setImageHasErrored] = useState<boolean>(false)
+  const [imageHasLoaded, setImageHasLoaded] = useState<boolean>(false);
+  const [imageHasErrored, setImageHasErrored] = useState<boolean>(false);
 
   const productWrapperStyles = css`
     flex: 0 0 calc(50% - ${parseFloat(tokens.spacingS) * 2}rem);
     padding: ${tokens.spacingS};
     position: relative;
     @media screen and (min-width: 767px) {
-      flex: 0 0 calc(33.3% - ${parseFloat(tokens.spacingS) * 2}rem)
+      flex: 0 0 calc(33.3% - ${parseFloat(tokens.spacingS) * 2}rem);
     }
     @media screen and (min-width: 992px) {
-      flex: 0 0 calc(25% - ${parseFloat(tokens.spacingS) * 2}rem)
+      flex: 0 0 calc(25% - ${parseFloat(tokens.spacingS) * 2}rem);
     }
-  `
+  `;
 
   const productStyles = css`
     border: 1px solid ${tokens.gray200};
@@ -81,7 +82,7 @@ const ProductSearchResult = (props:SearchResultProps) => {
       border-color: ${tokens.gray400};
       cursor: pointer;
     }
-  `
+  `;
 
   const selectedProductStyles = css`
     border-color: rgba(48, 114, 190, 1);
@@ -90,18 +91,18 @@ const ProductSearchResult = (props:SearchResultProps) => {
       border-color: rgba(48, 114, 190, 1);
       cursor: pointer;
     }
-  `
+  `;
 
   const skeletonImageStyles = css`
     width: 100%;
     height: 290px;
-  `
+  `;
 
   const resultNameStyles = css`
     flex: 1 0 auto;
     font-weight: ${tokens.fontWeightDemiBold};
     text-transform: capitalize;
-  `
+  `;
 
   const resultIdStyles = css`
     flex: 0 1 auto;
@@ -113,37 +114,38 @@ const ProductSearchResult = (props:SearchResultProps) => {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-  `
+  `;
 
-  const productStylesCss = [productStyles]
+  const productStylesCss = [productStyles];
   if (isSelected) {
-    productStylesCss.push(selectedProductStyles)
+    productStylesCss.push(selectedProductStyles);
   }
 
   return (
-    <Flex css={productWrapperStyles} >
+    <Flex css={productWrapperStyles}>
       <div
         data-test-id={`item-preview-${resultId}`}
         role="switch"
         aria-checked={isSelected}
         tabIndex={-1}
         onClick={() => onItemSelect(resultId)}
-        css={productStylesCss}
-      >
+        css={productStylesCss}>
         {!imageHasLoaded && !imageHasErrored && (
-          <SkeletonContainer css={skeletonImageStyles} >
+          <SkeletonContainer css={skeletonImageStyles}>
             <SkeletonImage width={400} height={290} />
           </SkeletonContainer>
         )}
         {imageHasErrored && (
-          <div><AssetIcon /></div>
+          <div>
+            <AssetIcon />
+          </div>
         )}
         {!imageHasErrored && (
           <div>
             <img
               onLoad={() => setImageHasLoaded(true)}
               onError={() => setImageHasErrored(true)}
-              style={{display: imageHasLoaded ? 'block' : 'none'}}
+              style={{ display: imageHasLoaded ? 'block' : 'none' }}
               src={result.image?.absUrl}
               alt={result.image?.alt.default}
               data-test-id="image"
@@ -152,12 +154,10 @@ const ProductSearchResult = (props:SearchResultProps) => {
         )}
         <p css={resultNameStyles}>{result.name.default}</p>
         <p css={resultIdStyles}>ID: {result.id}</p>
-        {fieldType === 'category' && (
-          <p css={resultIdStyles}>Catalog ID: {result.catalogId}</p>
-        )}
+        {fieldType === 'category' && <p css={resultIdStyles}>Catalog ID: {result.catalogId}</p>}
       </div>
     </Flex>
-  )
-}
-  
-export default ProductSearchResults
+  );
+};
+
+export default ProductSearchResults;

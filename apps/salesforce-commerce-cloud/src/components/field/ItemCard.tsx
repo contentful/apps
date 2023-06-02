@@ -33,11 +33,12 @@ const ItemCard = (props: ItemCardProps) => {
   const client = new SfccClient(installParameters);
 
   // const [itemId, catalogId] = props.id.split(":")
-  const {isLoading, data: itemData } = useQuery({
+  const { isLoading, data: itemData } = useQuery({
     queryKey: ['itemInfo', props.id],
-    queryFn: props.type === 'product' ?
-             () => client.fetchProduct(props.id) : 
-             () => client.fetchCategory(props.id)
+    queryFn:
+      props.type === 'product'
+        ? () => client.fetchProduct(props.id)
+        : () => client.fetchCategory(props.id),
   });
 
   return (

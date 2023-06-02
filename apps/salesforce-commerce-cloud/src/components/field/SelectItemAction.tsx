@@ -9,8 +9,8 @@ import { Flex, Button } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 
-import { AppInstanceParameters } from '../../locations/Field'
-import logo from '../../Salesforce_Corporate_Logo_RGB.png'
+import { AppInstanceParameters } from '../../locations/Field';
+import logo from '../../Salesforce_Corporate_Logo_RGB.png';
 import { SfccClient } from '../../utils/Sfcc';
 import { AppInstallationParameters } from '../../locations/ConfigScreen';
 import { DialogInvocationParameters } from '../../locations/Dialog';
@@ -38,15 +38,14 @@ const SelectItemAction = (props: { fieldValue?: string | string[] }) => {
 
   const client = new SfccClient(installParameters);
   const currentItemQueries = useQueries({
-    queries: queryArray.map((id:string) => {
+    queries: queryArray.map((id: string) => {
       // const [itemId, catalogId] = id.split(":")
       return {
         queryKey: ['itemInfo', id],
-        queryFn: fieldType === 'product' ? 
-                 () => client.fetchProduct(id) :
-                 () => client.fetchCategory(id)
-      }
-    })
+        queryFn:
+          fieldType === 'product' ? () => client.fetchProduct(id) : () => client.fetchCategory(id),
+      };
+    }),
   });
 
   const queriesComplete = currentItemQueries.every((query) => query.isSuccess || query.isError);

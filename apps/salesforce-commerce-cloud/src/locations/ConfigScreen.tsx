@@ -50,17 +50,11 @@ const ConfigScreen = () => {
     // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
-    const paramKeys = [
-      "clientId",
-      "clientSecret",
-      "organizationId",
-      "shortCode",
-      "siteId"
-    ]
+    const paramKeys = ['clientId', 'clientSecret', 'organizationId', 'shortCode', 'siteId'];
     //Ensure we have actual values for each of the parameters.
     const isValid = paramKeys.every(
-      (key:string) => parameters[key as keyof SalesforceConfig]?.length
-    )
+      (key: string) => parameters[key as keyof SalesforceConfig]?.length
+    );
     // let isValid = true
     // const validUpdate:any = {}
     // for (const key of Object.keys(valid)) {
@@ -79,12 +73,12 @@ const ConfigScreen = () => {
       return false;
     }
 
-    const client = new SfccClient(parameters)
-    const storefrontCatalog = await client.fetchStorefrontCatalog()
+    const client = new SfccClient(parameters);
+    const storefrontCatalog = await client.fetchStorefrontCatalog();
 
     return {
       // Parameters to be persisted as the app configuration.
-      parameters: {...parameters, storefrontCatalogId: storefrontCatalog.id},
+      parameters: { ...parameters, storefrontCatalogId: storefrontCatalog.id },
       // In case you don't want to submit any update to app
       // locations, you can just pass the currentState as is
       targetState: currentState,

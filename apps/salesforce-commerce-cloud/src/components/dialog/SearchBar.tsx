@@ -1,15 +1,7 @@
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 
-import {
-  Flex,
-  Box,
-  TextInput,
-  Spinner,
-  Button,
-  Tooltip,
-  Grid,
-} from '@contentful/f36-components';
+import { Flex, Box, TextInput, Spinner, Button, Tooltip, Grid } from '@contentful/f36-components';
 import { SearchIcon, CloseIcon, ErrorCircleIcon, AssetIcon, TagsIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -133,12 +125,12 @@ interface SelectionListProps {
   fieldType: 'product' | 'category';
 }
 
-const SelectionList = (props:SelectionListProps) => {
-  const items:string[] | undefined = typeof props.items === 'string' ? [props.items] : props.items 
-  
-  const findItemData = (itemId:string, fieldType: 'product' | 'category', itemsInfo?:any[]) => {
+const SelectionList = (props: SelectionListProps) => {
+  const items: string[] | undefined = typeof props.items === 'string' ? [props.items] : props.items;
+
+  const findItemData = (itemId: string, fieldType: 'product' | 'category', itemsInfo?: any[]) => {
     if (itemsInfo?.length) {
-      return itemsInfo.find((item) => item.id === itemId )
+      return itemsInfo.find((item) => item.id === itemId);
     }
   };
 
