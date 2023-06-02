@@ -50,4 +50,14 @@ export class ShopifyProvider {
       }
     }
   }
+
+  public async fetchProducts(): Promise<Product[] | void> {
+    try {
+      return await this.client.product.fetchAll();
+    } catch (error: unknown) {
+      if (typeof error === 'object' && !!Object.getOwnPropertyDescriptor(error, 'cause')) {
+        throw new ShopifyClientError(<ShopifyError>error);
+      }
+    }
+  }
 }
