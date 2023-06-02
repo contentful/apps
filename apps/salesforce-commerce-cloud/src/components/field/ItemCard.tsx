@@ -11,7 +11,7 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 
 // Local Imports
 import { AppInstallationParameters } from '../../locations/ConfigScreen';
-import SfccClient from '../../utils/Sfcc';
+import { SfccClient } from '../../utils/Sfcc';
 
 interface ItemProps {
   id: string;
@@ -32,13 +32,12 @@ const ItemCard = (props: ItemCardProps) => {
   const installParameters = sdk.parameters.installation as AppInstallationParameters;
   const client = new SfccClient(installParameters);
 
-  const [itemId, catalogId] = props.id.split(':');
-  const { isLoading, data: itemData } = useQuery({
+  // const [itemId, catalogId] = props.id.split(":")
+  const {isLoading, data: itemData } = useQuery({
     queryKey: ['itemInfo', props.id],
-    queryFn:
-      props.type === 'product'
-        ? () => client.fetchProduct(itemId)
-        : () => client.fetchCategory(itemId, catalogId),
+    queryFn: props.type === 'product' ?
+             () => client.fetchProduct(props.id) : 
+             () => client.fetchCategory(props.id)
   });
 
   return (

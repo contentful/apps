@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 import {
   Flex,
   Box,
-  /* Text, */ TextInput,
+  TextInput,
   Spinner,
   Button,
   Tooltip,
@@ -133,17 +133,12 @@ interface SelectionListProps {
   fieldType: 'product' | 'category';
 }
 
-const SelectionList = (props: SelectionListProps) => {
-  const items: string[] | undefined = typeof props.items === 'string' ? [props.items] : props.items;
-
-  // console.log(props)
-  const findItemData = (itemId: string, fieldType: 'product' | 'category', itemsInfo?: any[]) => {
+const SelectionList = (props:SelectionListProps) => {
+  const items:string[] | undefined = typeof props.items === 'string' ? [props.items] : props.items 
+  
+  const findItemData = (itemId:string, fieldType: 'product' | 'category', itemsInfo?:any[]) => {
     if (itemsInfo?.length) {
-      return itemsInfo.find((item) => {
-        return fieldType === 'product'
-          ? item.id === itemId
-          : `${item.catalogId}:${item.id}` === itemId;
-      });
+      return itemsInfo.find((item) => item.id === itemId )
     }
   };
 

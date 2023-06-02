@@ -3,17 +3,22 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Heading, Form, TextInput, FormControl } from '@contentful/f36-components';
 import { Workbench } from '@contentful/f36-workbench';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { SalesforceConfig, SfccClient } from '../utils/Sfcc';
 
-export interface AppInstallationParameters {
-  clientId: string;
-  clientSecret: string;
-  organizationId: string;
-  shortCode: string;
-  siteId: string;
+// interface SalesforceConfig {
+//   clientId: string;
+//   clientSecret: string;
+//   organizationId: string;
+//   shortCode: string;
+//   siteId: string;
+// }
+
+export interface AppInstallationParameters extends SalesforceConfig {
+  storefrontCatalogId: string;
 }
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({
+  const [parameters, setParameters] = useState<SalesforceConfig>({
     clientId: '',
     clientSecret: '',
     organizationId: '',
@@ -45,26 +50,41 @@ const ConfigScreen = () => {
     // related to this app installation
     const currentState = await sdk.app.getCurrentState();
 
-    let isValid = true;
-    const validUpdate: any = {};
-    for (const key of Object.keys(valid)) {
-      if (parameters[key as keyof AppInstallationParameters].length) {
-        validUpdate[key as keyof typeof validUpdate] = true;
-      } else {
-        validUpdate[key] = false;
-        isValid = false;
-      }
-    }
+    const paramKeys = [
+      "clientId",
+      "clientSecret",
+      "organizationId",
+      "shortCode",
+      "siteId"
+    ]
+    //Ensure we have actual values for each of the parameters.
+    const isValid = paramKeys.every(
+      (key:string) => parameters[key as keyof SalesforceConfig]?.length
+    )
+    // let isValid = true
+    // const validUpdate:any = {}
+    // for (const key of Object.keys(valid)) {
+    //   if (parameters[key as keyof AppInstallationParameters].length) {
+    //     validUpdate[key as keyof typeof validUpdate] = true;
+    //   }
+    //   else {
+    //     validUpdate[key] = false;
+    //     isValid = false;
+    //   }
+    // }
 
-    setValid(validUpdate);
+    // setValid(validUpdate);
 
     if (!isValid) {
       return false;
     }
 
+    const client = new SfccClient(parameters)
+    const storefrontCatalog = await client.fetchStorefrontCatalog()
+
     return {
       // Parameters to be persisted as the app configuration.
-      parameters,
+      parameters: {...parameters, storefrontCatalogId: storefrontCatalog.id},
       // In case you don't want to submit any update to app
       // locations, you can just pass the currentState as is
       targetState: currentState,
@@ -133,6 +153,7 @@ const ConfigScreen = () => {
   }, [sdk, onConfigure]);
 
   useEffect(() => {
+    sdk.app.setReady();
     (async () => {
       // Get current parameters of the app.
       // If the app is not installed yet, `parameters` will be `null`.
@@ -156,7 +177,7 @@ const ConfigScreen = () => {
           <FormInput
             key={input.id}
             input={input}
-            value={parameters[input.id as keyof AppInstallationParameters]}
+            value={parameters[input.id as keyof AppInstallationParameters]!}
             isInvalid={valid[input.id] !== null && !valid[input.id]}
             onInputChange={onInputChange}
             onInputFocus={onInputFocus}

@@ -1,5 +1,14 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import { AppInstallationParameters } from '../locations/ConfigScreen';
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
+// import { AppInstallationParameters } from "../locations/ConfigScreen"
+
+export interface SalesforceConfig {
+  clientId: string;
+  clientSecret: string;
+  organizationId: string;
+  shortCode: string;
+  siteId: string;
+  storefrontCatalogId?: string;
+}
 
 // console.log(import.meta.env.VITE_PROXY_URL)
 const proxyUrl = import.meta.env.VITE_PROXY_URL || 'https://thawing-shore-22303.herokuapp.com/';
@@ -16,14 +25,15 @@ interface TokenProps {
   expiry: Date;
 }
 
-class SfccClient {
-  protected client!: AxiosInstance;
-  protected parameters: AppInstallationParameters;
-  protected accessToken: TokenProps | undefined;
-
-  constructor(parameters: AppInstallationParameters) {
-    this.parameters = parameters;
-
+export class SfccClient {
+  protected client!: AxiosInstance
+  protected parameters: SalesforceConfig
+  protected accessToken: TokenProps | undefined
+  protected storefrontCatalogId: string | undefined
+  
+  constructor (parameters:SalesforceConfig) {
+    this.parameters = parameters
+    
     this.client = axios.create({
       baseURL: proxyUrl,
       headers: {
@@ -101,8 +111,34 @@ class SfccClient {
     return product;
   };
 
-  searchProducts = async (query?: string) => {
-    const { organizationId } = this.parameters;
+  public fetchStorefrontCatalog = async () => {
+    const { organizationId, siteId } = this.parameters
+
+    const postData:any = {
+      query: {
+        termQuery: {
+          fields: ['is_storefront_catalog'],
+          operator: 'is',
+          values: [ true ]
+        }
+      }
+    }
+
+    const {data: catalogSearchResults} = await this.client.post(`/product/catalogs/v1/organizations/${organizationId}/catalog-search`, postData)
+
+    const storefrontCatalogArray = catalogSearchResults.hits.filter((catalog:any) => {
+      return catalog.assignedSites.some((site:any) => site.id === siteId)
+    })
+    
+    return storefrontCatalogArray[0]
+  }
+
+  searchProducts = async (query?:string) => {
+    if (!this.parameters.storefrontCatalogId) {
+      throw new Error('No storefront catalog id set in client.')
+    }
+
+    const { organizationId, storefrontCatalogId } = this.parameters
 
     const data: any = {
       query: {
@@ -110,13 +146,20 @@ class SfccClient {
           must: [
             {
               termQuery: {
-                fields: ['type'],
-                operator: 'is',
-                values: ['master'],
-              },
+                fields: ["type"],
+                operator: "is",
+                values: [ "master" ]
+              }
             },
-          ],
-        },
+            {
+              termQuery: {
+                fields: [ "catalogId"],
+                operator: "is",
+                values: [ storefrontCatalogId ]
+              }
+            }
+          ]
+        }
       },
       sorts: [
         {
@@ -146,8 +189,12 @@ class SfccClient {
     return searchResults.hits?.length ? searchResults.hits : [];
   };
 
-  public searchCategories = async (query?: string) => {
-    const { organizationId } = this.parameters;
+  public searchCategories = async (query?:string) => {
+    if (!this.parameters.storefrontCatalogId) {
+      throw new Error('No storefront catalog id set in client.')
+    }
+
+    const { organizationId, storefrontCatalogId } = this.parameters
 
     const data: any = {
       query: {
@@ -179,22 +226,29 @@ class SfccClient {
         },
       });
     }
-
-    const { data: searchResults } = await this.client.post(
-      `/product/catalogs/v1/organizations/${organizationId}/category-search`,
-      data
-    );
+    
+    const { data: searchResults } = await this.client.post(`/product/catalogs/v1/organizations/${organizationId}/catalogs/${storefrontCatalogId}/category-search`, data)
 
     return searchResults.hits?.length ? searchResults.hits : [];
   };
 
-  public fetchCategory = async (catalogId: string, categoryId: string) => {
-    const { data: category } = await this.client.get(
-      `/product/catalogs/v1/organizations/${this.parameters.organizationId}/catalogs/${catalogId}/categories/${categoryId}`
-    );
+  
 
-    return category;
-  };
+  public fetchCategory = async (categoryId:string) => {
+    if (!this.parameters.storefrontCatalogId) {
+      throw new Error('No storefront catalog id set in client.')
+    }
+
+    const { organizationId, storefrontCatalogId } = this.parameters
+    
+    const {data: category} = await this.client.get(`/product/catalogs/v1/organizations/${organizationId}/catalogs/${storefrontCatalogId}/categories/${categoryId}`)
+    
+    return category
+  }
+
+  private setStorefrontCatalogId = async () => {
+    const storefrontCatalog = await this.fetchStorefrontCatalog()
+    this.storefrontCatalogId = storefrontCatalog.id
+  }
+
 }
-
-export default SfccClient;
