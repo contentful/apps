@@ -1,6 +1,7 @@
 import type { IdsAPI } from '@contentful/app-sdk';
 import type { EntityStatus } from '@contentful/f36-components';
 import type { ErrorInfo, FC, ReactNode } from 'react';
+import { KeyValueMap } from 'contentful-management';
 
 // TODO: get this exported from the SDK
 declare type EntryScopedIds = 'field' | 'entry' | 'contentType';
@@ -85,4 +86,14 @@ export interface ParameterDefinition {
 
 export interface AppInstallationParameters {
   [key: string]: any;
+}
+
+export enum FieldType {
+  Single = 'single',
+  Multiple = 'multiple',
+}
+
+export interface DialogInvocationParameters extends KeyValueMap {
+  linkType: string;
+  fieldType: FieldType;
 }

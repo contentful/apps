@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 export type ResourceFieldProviderProps = {
   isMultiple: boolean;
   handleAddContent: () => void;
+  handleAddResource: () => Promise<any[]>;
   handleRemove: (index: number) => void;
   handleMoveToTop?: (index: number) => void;
   handleMoveToBottom?: (index: number) => void;
@@ -14,6 +15,7 @@ const ResourceFieldProvider = (props: ResourceFieldProviderProps) => {
   const {
     children,
     isMultiple,
+    handleAddResource,
     handleAddContent,
     handleRemove,
     handleMoveToTop,
@@ -24,6 +26,7 @@ const ResourceFieldProvider = (props: ResourceFieldProviderProps) => {
     <ResourceFieldContext.Provider
       value={{
         isMultiple,
+        handleAddResource,
         handleAddContent,
         handleRemove,
         handleMoveToTop,

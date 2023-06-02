@@ -1,16 +1,7 @@
-import { Paragraph } from '@contentful/f36-components';
-import { DialogAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import ResourceSelectionDialog from 'components/Dialog/ResourceSelectionDialog';
 
 const Dialog = () => {
-  const sdk = useSDK<DialogAppSDK>();
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
-
-  return <Paragraph>Hello Dialog Component (AppId: {sdk.ids.app})</Paragraph>;
+  return <ResourceSelectionDialog />;
 };
 
 export default Dialog;
