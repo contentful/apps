@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ExternalResourceLink, ErrorResponse } from '../types';
+import { ExternalResourceLink, ErrorResponse, ExternalResource } from '../types';
 import { convertResponseToResource } from '../helpers/shopifyAdapter';
 import { ShopifyClientError, ShopifyProvider } from '../classes/Shopify';
 
@@ -58,6 +58,60 @@ const ShopifyController = {
         message: (error as Error).message,
       });
     }
+  },
+
+  resources: async (
+    req: Request,
+    res: Response<ExternalResource[] | ErrorResponse>
+  ): Promise<Response<ExternalResource[]>> => {
+    try {
+      const shopifyClient = new ShopifyProvider(
+        createShopifyClientConfig(req.header('x-data-provider-parameters'))
+      );
+
+      const products = await shopifyClient.fetchProducts();
+
+      if (products) {
+        const convertedProducts = products.map((product) => convertResponseToResource(product));
+        return res.send(convertedProducts).status(200);
+      } else {
+        return res.status(404).send({
+          status: 'error',
+          message: `Products Not Found`,
+        });
+      }
+    } catch (error: unknown) {
+      console.error(error);
+      if (error instanceof ShopifyClientError) {
+        return res.status(error.cause.code === 'ENOTFOUND' ? 404 : 500).send({
+          status: 'error',
+          message: 'Shopify not configured, credentials missing or incorrect.',
+        });
+      }
+
+      return res.status(500).send({
+        status: 'error',
+        message: (error as Error).message,
+      });
+    }
+  },
+  getShopifyResourceTypes: () => {
+    return {
+      name: 'Shopify Product',
+      id: 'shopify:product',
+      schema: {},
+      managementDisplay: {
+        type: 'productCard',
+        fieldMapping: {
+          id: '$.id',
+          name: '$.title',
+          description: '$.body_html',
+          image: '$.images[0].src',
+          status: '$.status',
+        },
+      },
+      filterAttributes: [],
+    };
   },
 };
 

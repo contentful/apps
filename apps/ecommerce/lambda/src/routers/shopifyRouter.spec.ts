@@ -28,7 +28,21 @@ const shopifyClientStub = {
           images: [{ url: 'some-product-url' }],
         } as Product);
       }),
-    fetchAll: () => Sinon.promise(Sinon.spy()),
+    fetchAll: () =>
+      Sinon.promise((resolve) => {
+        return resolve([
+          {
+            title: 'Some Product title',
+            description: 'Some product description',
+            images: [{ url: 'some-product-url' }],
+          },
+          {
+            title: 'Some Product title 2',
+            description: 'Some product description 2',
+            images: [{ url: 'some-product-url2' }],
+          },
+        ] as Product[]);
+      }),
     fetchMultiple: () => Sinon.promise(Sinon.spy()),
     fetchByHandle: () => Sinon.promise(Sinon.spy()),
     fetchQuery: () => Sinon.promise(Sinon.spy()),
@@ -91,6 +105,24 @@ describe('Shopify Router', () => {
     });
   });
 
+  describe('When requesting list of resources', () => {
+    it('should reply with Shopify resources', (done) => {
+      sandbox.stub(Client, 'buildClient').returns(shopifyClientStub);
+      chai
+        .request(app)
+        .post('/shopify/resources')
+        .set('x-contentful-app', 'appId123')
+        .set('x-contentful-space-id', 'spaceId123')
+        .set('x-contentful-environment-id', 'environmentId123')
+        .set('x-data-provider-parameters', JSON.stringify({ shopName, storefrontAccessToken }))
+        .end((error, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.length).equals(2);
+          done();
+        });
+    });
+  });
+
   describe('When requesting a resource', () => {
     it('should reply with Shopify resource when id is valid', (done) => {
       sandbox.stub(Client, 'buildClient').returns(shopifyClientStub);
@@ -109,6 +141,7 @@ describe('Shopify Router', () => {
           done();
         });
     });
+
     it('shows an error message when id is invalid', (done) => {
       sandbox.stub(Client, 'buildClient').returns({
         ...shopifyClientStub,

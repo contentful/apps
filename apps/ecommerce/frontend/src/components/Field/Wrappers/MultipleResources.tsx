@@ -7,6 +7,19 @@ import ResourceFieldProvider from 'providers/ResourceFieldProvider';
 const MultipleResources = () => {
   const sdk = useSDK<FieldAppSDK>();
 
+  const handleAddResource = async (): Promise<any[]> => {
+    const resources = await sdk.dialogs.openCurrentApp({
+      allowHeightOverflow: true,
+      position: 'center',
+      shouldCloseOnOverlayClick: true,
+      shouldCloseOnEscapePress: true,
+      parameters: sdk.parameters.instance,
+      width: 1400,
+    });
+
+    return Array.isArray(resources) ? resources : [];
+  };
+
   const handleAddContent = () => {
     // TODO: Update this function to add a new resource(s) to the list
     const newValue = mockValue(sdk);
@@ -46,6 +59,7 @@ const MultipleResources = () => {
   return (
     <ResourceFieldProvider
       isMultiple={true}
+      handleAddResource={handleAddResource}
       handleAddContent={handleAddContent}
       handleRemove={handleRemove}
       handleMoveToBottom={handleMoveToBottom}

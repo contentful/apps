@@ -7,7 +7,7 @@
     "@contentful/f36-components": "4.10.5",
     "@contentful/f36-tokens": "4.0.1",
     "@contentful/f36-workbench": "^4.21.0",
-    "@contentful/react-apps-toolkit": "1.2.2",
+    "@contentful/react-apps-toolkit": "1.2.15",
     "@dnd-kit/core": "^6.0.8",
     "@dnd-kit/sortable": "^7.0.2",
     "@emotion/react": "^11.11.0",
@@ -24,9 +24,8 @@
     "start": "vite",
     "build": "tsc && vite build",
     "test": "vitest",
-    "create-app-definition": "contentful-app-scripts create-app-definition",
-    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1O8njPYTGO44VueSJNBrdZ --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.1.11",
@@ -39,9 +38,9 @@
     "@vitejs/plugin-react": "1.3.2",
     "eslint": "^8.40.0",
     "eslint-plugin-react": "^7.32.2",
-    "happy-dom": "6.0.2",
+    "happy-dom": "6.0.4",
     "typescript": "4.7.4",
-    "vite": "3.0.0",
-    "vitest": "0.18.0"
+    "vite": "3.2.7",
+    "vitest": "0.31.4"
   }
 }

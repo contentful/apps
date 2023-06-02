@@ -11,6 +11,19 @@ const SingleResource = () => {
     sdk.field.setValue(undefined);
   };
 
+  const handleAddResource = async (): Promise<any[]> => {
+    const resources = await sdk.dialogs.openCurrentApp({
+      allowHeightOverflow: true,
+      position: 'center',
+      shouldCloseOnOverlayClick: true,
+      shouldCloseOnEscapePress: true,
+      parameters: sdk.parameters.instance,
+      width: 1400,
+    });
+
+    return Array.isArray(resources) ? resources : [];
+  };
+
   const handleAddContent = () => {
     const newValue = mockValue(sdk);
     sdk.field.setValue(newValue);
@@ -19,6 +32,7 @@ const SingleResource = () => {
   return (
     <ResourceFieldProvider
       isMultiple={false}
+      handleAddResource={handleAddResource}
       handleAddContent={handleAddContent}
       handleRemove={handleRemove}>
       <ResourceField />
