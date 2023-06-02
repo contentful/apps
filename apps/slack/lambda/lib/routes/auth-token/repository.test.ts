@@ -13,7 +13,6 @@ import { AuthToken, Entity } from '../../interfaces';
 import { NotFoundException, SlackError, UnprocessableEntityException } from '../../errors';
 import { ConflictException } from '../../errors/conflict';
 import * as helpers from '../../helpers/getInstallationParameters';
-import { EventsService } from '../events';
 import { SlackAppEventKey, SlackAppInstallationParameters } from '../events/types';
 
 const DEFAULT_EXPIRES_IN = 12 * 60 * 60; // 12 hours
@@ -35,7 +34,6 @@ describe('AuthTokenRepository', () => {
   let singleTableClient: SinonStubbedInstance<SingleTableClient>;
   let slackClient: SinonStubbedInstance<SlackClient>;
   let clock: SinonFakeTimers;
-  let eventsService: EventsService;
 
   beforeEach(() => {
     singleTableClient = createStubInstance(SingleTableClient);
@@ -43,7 +41,6 @@ describe('AuthTokenRepository', () => {
 
     instance = new AuthTokenRepository(singleTableClient, slackClient);
     clock = useFakeTimers();
-    eventsService = createStubInstance(EventsService);
   });
 
   before(() => {
