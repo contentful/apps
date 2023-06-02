@@ -20,7 +20,6 @@ export class SegmentClient {
   }
 
   trackLocation(location: string) {
-    // console.log('trackLocation', location);
     if (getUserCookieConsent(this.sdk, 'ANALYTICS')) {
       this.segmentAnalytics.page(location);
     }
