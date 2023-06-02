@@ -7,12 +7,8 @@ import { config } from 'config';
 import DialogHeader from './DialogHeader';
 import DialogBody from './DialogBody';
 import { ExternalResource } from 'types';
-import { KeyValueMap } from 'contentful-management';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
-
-interface DialogInvocationParameters extends KeyValueMap {
-  linkType: string;
-}
+import { DialogInvocationParameters } from 'types';
 
 const ResourceSelectionDialog = () => {
   const [externalResources, setExternalResources] = useState<ExternalResource[]>([]);
@@ -50,7 +46,6 @@ const ResourceSelectionDialog = () => {
     <>
       <DialogHeader
         fieldType={fieldType}
-        resourceProvider={resourceProvider}
         resourceType={resourceType}
         total={externalResources.length}
       />

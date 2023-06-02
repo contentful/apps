@@ -4,7 +4,6 @@ import { ExternalResource } from 'types';
 
 export interface ResourceCardProps {
   resource: ExternalResource;
-  total: number;
   cardHeader: string;
 }
 

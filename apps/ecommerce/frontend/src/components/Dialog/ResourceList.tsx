@@ -14,11 +14,10 @@ const ResourceList = (props: Props) => {
 
   return (
     <Flex className={styles.productList}>
-      {externalResources?.map((item, index) => {
+      {externalResources.map((item, index) => {
         return (
           <ResourceCard
             key={index}
-            total={externalResources.length}
             resource={item}
             cardHeader={`${resourceProvider} ${resourceType}`}
           />

@@ -6,10 +6,10 @@ import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import fetchWithSignedRequest from 'helpers/signedRequests';
 import { config } from 'config';
+import { FieldType } from 'types';
 
 interface Props {
-  fieldType: string;
-  resourceProvider: string;
+  fieldType: FieldType;
   resourceType: string;
   total: number;
 }
@@ -22,7 +22,7 @@ const DialogHeader = (props: Props) => {
 
   const { fieldType, resourceType, total } = props;
   const headerTitle =
-    fieldType === 'single' ? `Select a ${resourceType}` : `Select ${resourceType}s`;
+    fieldType === FieldType.Single ? `Select a ${resourceType}` : `Select ${resourceType}s`;
   const resourceCountText = `${total} ${resourceType}s`;
 
   useEffect(() => {
