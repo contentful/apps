@@ -7,7 +7,6 @@
   "scripts": {
     "lint": "eslint .",
     "test": "jest",
-    "test:ci": "jest",
     "serve": "node serve.js",
     "deploy": "sls deploy --stage $STAGE",
     "deploy:test": "npm run deploy"
