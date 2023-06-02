@@ -1,0 +1,24 @@
+version: '3.4'
+
+services:
+  base:
+    image: contentful/slack-app-base
+    build:
+      context: .
+      target: base
+    ports:
+      - '3000:3000'
+    volumes:
+      - /app/node_modules
+      - .:/app
+    environment:
+      - 'AWS_REGION=us-east-1'
+      - 'AWS_ACCESS_KEY_ID=test'
+      - 'AWS_SECRET_ACCESS_KEY=test'
+      - 'DYNAMO_TABLE_NAME=sls-apps-slack-backend-dev-TokenTable'
+      - 'DYNAMO_ENDPOINT=http://dynamodb:8000'
+    depends_on:
+      - dynamodb
+
+  dynamodb:
+    image: amazon/dynamodb-local

@@ -12,11 +12,6 @@ Open your app to view it in the browser.
 The page will reload if you make edits.
 You will also see any lint errors in the console.
 
-- Set the following variables in `frontend/.env.development` using the `.env.development.example` file:
-  - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (https://api.slack.com/apps/ -> Select the app you plan to integrate -> Basic Information -> App Credentials -> Client ID)
-  - `REACT_APP_BACKEND_BASE_URL`: The ngrok URL
-- Run the frontend with `npm run start`
-
 #### `npm run build`
 
 - Set the following variables in `frontend/.env.development` using the `.env.development.example` file:

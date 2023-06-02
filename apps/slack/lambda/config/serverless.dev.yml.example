@@ -1,7 +1,7 @@
 variables:
   myStage: 'dev'
   app:
-    id: <your-CONTENTFUL-app-id>
+    id: <your-app-id>
     privateKey: ./private-key.pem
   baseUrl: "https://api.contentful.com"
   oauthCredentials:
@@ -10,13 +10,13 @@ variables:
   signingSecret:
     signing_secret: '<your-contentful-app-signing-secret>'
   tableName: sls-apps-slack-backend-dev-TokenTable
-  dynamoEndpoint: http://dynamodb:8001
+  dynamoEndpoint: http://dynamodb:8000
   frontendUrl: 'http://localhost:1234'
   workflowsUrl: 'workflows-url-for-cors'
   serverless:
     pathPrefix: '/dev'
   customDomain:
-    domainName: slack-backend-dev.ngrok.io/dev
+    domainName: <your-ngrok-domain-without-https>/dev
     stage: dev
     createRoute53Record: true
     endpointType: 'edge'

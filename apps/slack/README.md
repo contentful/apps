@@ -13,7 +13,7 @@ Click [here](https://app.contentful.com/deeplink?link=apps&id=7ir40h24qLGSQWJ6JC
 You can send Slack messages from your own App Framework backend app. For this to work, the Slack app has to be installed to your space environment and setup for the target Slack workspace and channel.
 
 ```javascript
-import { getManagementToken } from '@contentful/node-apps-toolkit';
+import { getManagementToken } from "@contentful/node-apps-toolkit";
 import { readFileSync } from 'fs';
 
 const APP_DEF_ID = 'app-def-id';
@@ -21,18 +21,17 @@ const SPACE_ID = 'space-id';
 const ENV_ID = 'env-id';
 
 // see https://www.contentful.com/developers/docs/extensibility/app-framework/app-keys/
-const privateKey = readFileSync('key.pem', { encoding: 'utf8' });
+const privateKey = readFileSync("key.pem", { encoding: "utf8", });
 const token = await getManagementToken(privateKey, {
   appInstallationId: APP_DEF_ID,
   spaceId: SPACE_ID,
   environmentId: ENV_ID,
 });
 
-const cma = createClient(
-  { accessToken: token },
+const cma = createClient({ accessToken: token, },
   {
-    type: 'plain',
-    defaults: { spaceId: SPACE_ID, environmentId: ENV_ID },
+    type: "plain",
+    defaults: { spaceId: SPACE_ID, environmentId: ENV_ID, },
   }
 );
 await cma.appAction.call({
@@ -40,9 +39,9 @@ await cma.appAction.call({
   body: {
     workspaceId: 'slack-workspace-id',
     channelId: 'channel-id',
-    message: 'This message was sent from my custom Contentful app',
-  },
-});
+    message: 'This message was sent from my custom Contentful app'
+  }
+})
 ```
 
 ## Support and feature requests
@@ -89,7 +88,7 @@ This sections explains how to run the Slack app locally.
 
 ### General
 
-- Start ngrok with `ngrok http 3000 --subdomain slack-backend-dev` (the `--subdomain` flagwill not work without paid ngrok account)
+- Start ngrok with `ngrok https 3000`
 - Create a new Slack app [here](https://api.slack.com/apps)
   - Add the ngrok URL as redirect URL (Features -> OAuth & Permissions -> Redirect URLs)
   - Enable token rotation (Features -> OAuth & Permissions)
@@ -102,16 +101,17 @@ This sections explains how to run the Slack app locally.
   - Enable config location
   - Eneable request verification and store the secret in `lambda/config/serverless.dev.yml` (`signingSecret` -> `signing_secret`)
   - Create a key pair. Save the private key at `lamba/private-key.pem`
-  - Within `serverless.dev.yml`, `app` => `id` should reference the app id of the newly created app (located on the App details page within Contentful)
 - Configure Slack
   - Store Client ID and Client Secret (Basic Information -> App Credentials) in `lambda/config/serverless.dev.yml` (`oauthCredentials` -> `client_id` / `client_secret`)
   - Store Signing Secret (Basic Information -> App Credentials) in `lambda/config/serverless.dev.yml` (`slackSigningSecret` -> `signing_secret`)
 - Add the ngrok URL to in the `lambda/config/serverless.dev.yml` (`customDomain` -> `domainName`). Remove the `https://` from the URL. Add a trailing `/dev` to the URL (e.g.: `domainName: be25-95-91-246-99.ngrok.io/dev`)
-- Start a docker container with a local DynamoDB instance using `make go` from within the lamda directory
+- Start a docker container with a local DynamoDB instance using `make start-backend`
+- If you start the project for the first time, run `yarn create_table` in the container
+- Run `yarn start:lambda` in the container
 
 ### Frontend
 
-- Set the following variables in `frontend/.env.development` using the `.env.development.example` file:
-  - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (https://api.slack.com/apps/ -> Select the app you plan to integrate -> Basic Information -> App Credentials -> Client ID)
+- Set the following variables in `frontend/.env.development`:
+  - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (Basic Information -> App Credentials -> Client ID)
   - `REACT_APP_BACKEND_BASE_URL`: The ngrok URL
-- Run the frontend with `npm run start`
+- Run the frontend with `yarn run start:frontend`

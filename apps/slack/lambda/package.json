@@ -8,7 +8,6 @@
     "test": "TS_NODE_TRANSPILE_ONLY=1 mocha -r ts-node/register ./lib/**/*.test.ts",
     "lint": "eslint --ext .ts,.js ./",
     "format": "prettier --write '**/*.{jsx,js,ts,tsx}'",
-    "start:dev": "NODE_ENV=development nodemon",
     "start": "npm run build && serverless offline",
     "deploy": "sls deploy --stage $STAGE",
     "deploy:test": "sls deploy --stage test",
