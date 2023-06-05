@@ -1,0 +1,53 @@
+{
+  "TableName": "sls-apps-slack-backend-dev-TokenTable",
+  "AttributeDefinitions": [
+      {
+        "AttributeName": "uuid",
+        "AttributeType": "S"
+      },
+      {
+        "AttributeName": "typ",
+        "AttributeType": "S"
+      },
+      {
+        "AttributeName": "slackWorkspaceId",
+        "AttributeType": "S"
+      }
+    ],
+  "KeySchema": [
+      {
+        "AttributeName": "uuid",
+        "KeyType": "HASH"
+      },
+      {
+        "AttributeName": "typ",
+        "KeyType": "RANGE"
+      }
+    ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  },
+  "GlobalSecondaryIndexes": [
+      {
+        "IndexName": "by-slack-workspace-id",
+        "KeySchema": [
+          {
+            "AttributeName": "typ",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "slackWorkspaceId",
+            "KeyType": "RANGE"
+          }
+        ],
+        "Projection": {
+          "ProjectionType": "ALL"
+        },
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        }
+      }
+    ]
+}

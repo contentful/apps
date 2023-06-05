@@ -1,7 +1,7 @@
 variables:
   myStage: 'dev'
   app:
-    id: <your-app-id>
+    id: <your-CONTENTFUL-app-id>
     privateKey: ./private-key.pem
   baseUrl: "https://api.contentful.com"
   oauthCredentials:
@@ -16,7 +16,7 @@ variables:
   serverless:
     pathPrefix: '/dev'
   customDomain:
-    domainName: <your-ngrok-domain-without-https>/dev
+    domainName: slack-backend-dev.ngrok.io/dev
     stage: dev
     createRoute53Record: true
     endpointType: 'edge'
