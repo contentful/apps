@@ -1,0 +1,49 @@
+service: sls-commercetools-provider
+
+frameworkVersion: '>=3.0.0 <4.0.0'
+
+plugins:
+  - serverless-domain-manager
+  - serverless-offline
+  - serverless-prune-plugin
+
+custom:
+  sentryDSN: https://b8f524eae7c446fb8071476431426640@o2239.ingest.sentry.io/4504725335834624
+  customDomain:
+    domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
+    stage: ${opt:stage, 'dev'}
+    createRoute53Record: true
+    endpointType: 'edge'
+    securityPolicy: tls_1_2
+  serverless-offline:
+    httpPort: 8083
+    lambdaPort: 4004
+  awsRegion: us-east-1
+  prune:
+    automatic: true
+    number: 3
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${self:custom.awsRegion}
+  timeout: 30
+  deploymentBucket:
+    name: cf-apps-serverless-deployment
+  deploymentPrefix: sls-apps-ecommerce
+
+functions:
+  api:
+    description: Ecommerce Commercetools Provider
+    environment:
+      SENTRY_DSN: ${self:custom.sentryDSN}
+      STAGE: ${opt:stage, 'dev'}
+      NODE_ENV: ${env:NODE_ENV, 'development'}
+      RELEASE_VERSION: ${env:CIRCLE_SHA1, 'undefined'}
+      DOMAIN_NAME: ${self:custom.customDomain.domainName}
+    handler: build/index.handler
+    events:
+      - http:
+          path: /{any+}
+          method: ANY
