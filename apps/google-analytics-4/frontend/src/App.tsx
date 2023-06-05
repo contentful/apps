@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { locations } from '@contentful/app-sdk';
 import ConfigScreen from './locations/ConfigScreen';
 import Field from './locations/Field';
@@ -11,7 +11,7 @@ import Home from './locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { contentfulContext } from './helpers/contentfulContext';
 import { upperFirst } from 'lodash';
-import { useSegmentAnalytics } from 'hooks/useSegmentAnalytics';
+import SegmentClient from 'clients/segmentClient';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -25,7 +25,6 @@ const ComponentLocationSettings = {
 
 const App = () => {
   const sdk = useSDK();
-  const segmentAnalytics = useSegmentAnalytics();
 
   const Component = useMemo(() => {
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {
@@ -42,13 +41,14 @@ const App = () => {
           }
         });
 
-        // track page view
-        segmentAnalytics.page(location);
+        // Segment tracking events
+        SegmentClient.identify(sdk);
+        SegmentClient.trackLocation(sdk, location);
 
         return component;
       }
     }
-  }, [sdk, segmentAnalytics]);
+  }, [sdk]);
 
   return Component ? <Component /> : null;
 };
