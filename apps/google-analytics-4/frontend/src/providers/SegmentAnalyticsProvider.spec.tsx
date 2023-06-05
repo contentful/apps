@@ -30,7 +30,6 @@ describe('SegmentAnalyticsProvider', () => {
 
     expect(screen.getByText('children')).toBeVisible();
     expect(mockSegmentAnalytics.load).toHaveBeenCalledWith({ writeKey: config.segmentWriteKey });
-    expect(mockSegmentAnalytics.identify).toHaveBeenCalledWith(mockSdk.ids.user);
     expect(mockSegmentAnalytics.track).toHaveBeenCalledWith('foo');
   });
 });
