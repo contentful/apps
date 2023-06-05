@@ -3,25 +3,33 @@ import { AnalyticsBrowser } from '@segment/analytics-next';
 import { KnownSDK } from '@contentful/app-sdk';
 import { getUserCookieConsent } from 'utils/cookieConsent';
 
-export class SegmentClient {
-  readonly sdk: KnownSDK;
+let clientInstance: SegmentClient;
+
+class SegmentClient {
   segmentAnalytics: AnalyticsBrowser;
 
-  constructor(sdk: KnownSDK) {
-    this.sdk = sdk;
+  constructor() {
     const writeKey = config.segmentWriteKey;
     this.segmentAnalytics = AnalyticsBrowser.load({ writeKey });
+
+    if (clientInstance) {
+      throw new Error('You can only create one instance of SegmentClient');
+    }
+    clientInstance = this;
   }
 
-  identify() {
-    if (getUserCookieConsent(this.sdk, 'PERSONALIZATION')) {
+  identify(sdk: KnownSDK) {
+    if (getUserCookieConsent(sdk, 'PERSONALIZATION')) {
       this.segmentAnalytics.identify();
     }
   }
 
-  trackLocation(location: string) {
-    if (getUserCookieConsent(this.sdk, 'ANALYTICS')) {
+  trackLocation(sdk: KnownSDK, location: string) {
+    if (getUserCookieConsent(sdk, 'ANALYTICS')) {
       this.segmentAnalytics.page(location);
     }
   }
 }
+
+const singletonClient = new SegmentClient();
+export default singletonClient;

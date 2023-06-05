@@ -11,7 +11,7 @@ import Home from './locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { contentfulContext } from './helpers/contentfulContext';
 import { upperFirst } from 'lodash';
-import { SegmentClient } from 'clients/segmentClient';
+import SegmentClient from 'clients/segmentClient';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -27,8 +27,6 @@ const App = () => {
   const sdk = useSDK();
 
   const Component = useMemo(() => {
-    const segmentClient = new SegmentClient(sdk);
-
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {
       if (sdk.location.is(location)) {
         // Set user information, as well as tags for contentful context
@@ -44,8 +42,8 @@ const App = () => {
         });
 
         // Segment tracking events
-        segmentClient.identify();
-        segmentClient.trackLocation(location);
+        SegmentClient.identify(sdk);
+        SegmentClient.trackLocation(sdk, location);
 
         return component;
       }
