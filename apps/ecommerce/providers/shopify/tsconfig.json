@@ -1,15 +1,12 @@
 {
+  "extends": "@tsconfig/node18/tsconfig.json",
   "include": ["src", "test"],
   "exclude": ["node_modules"],
   "compilerOptions": {
     /* Specify a set of entries that re-map imports to additional lookup locations. */
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@shared/*": [
-        "../shared/*"
-      ]
+      "@/*": ["./*"],
+      "@shared/*": ["../shared/*"]
     },
     "sourceMap": true, /* Create source map files for emitted JavaScript files. */
     "outDir": "build", /* Specify an output folder for all emitted files. */
