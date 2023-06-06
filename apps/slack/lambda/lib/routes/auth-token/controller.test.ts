@@ -22,6 +22,7 @@ const DEFAULT_MOCKED_POST_REQUEST = mockRequest({
   headers: {
     ['x-contentful-space-id']: 'space-id',
     ['x-contentful-environment-id']: 'main',
+    ['x-contentful-uuid']: '1234',
   },
   body: {
     refreshToken: 'validToken',
@@ -138,6 +139,7 @@ describe('AuthTokenController', () => {
           headers: {
             ['x-contentful-space-id']: 'space-id',
             ['x-contentful-environment-id']: 'main',
+            ['x-contentful-uuid']: '1234',
           },
         });
         await runHandler(instance.post(request, mockResponse(), next));
@@ -185,6 +187,7 @@ describe('AuthTokenController', () => {
       it('returns an access token', async () => {
         const authToken = {
           slackWorkspaceId: 'team-id',
+          installationUuid: '1234',
           token: 'token',
           refreshToken: 'fresh',
         } as AuthToken;

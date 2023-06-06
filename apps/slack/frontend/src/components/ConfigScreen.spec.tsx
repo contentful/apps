@@ -3,7 +3,7 @@ import ConfigScreen from './ConfigScreen';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { authStore } from '../auth.store';
 import { makeMockSdk } from '../../test/mocks/mockSdk';
-import { SDKContext, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 jest.mock('../requests', () => {
   const realRequests = jest.requireActual('../requests');
@@ -85,17 +85,19 @@ describe('Config Screen component', () => {
     expect(getByText('Failed to fetch workspace')).toBeInTheDocument();
   });
   it('Saves the token after first installation', async () => {
+    const UUID = '1234';
     const { sdk, callbacks } = makeMockSdk();
     sdk.app.isInstalled = () => Promise.resolve(false);
     (useSDK as jest.Mock).mockReturnValue(sdk);
 
     const { apiClient } = jest.requireMock('../requests');
     authStore.getState().setTemporaryRefreshToken('not-empty');
+    authStore.getState().setInstallationUuid(UUID);
     render(<ConfigScreen />);
 
     await act(callbacks.onConfigure);
     await waitFor(() => act(callbacks.onConfigurationCompleted));
 
-    expect(apiClient.createAuthToken).toHaveBeenCalled();
+    expect(apiClient.createAuthToken).toHaveBeenCalledWith(sdk, undefined, 'not-empty', UUID);
   });
 });

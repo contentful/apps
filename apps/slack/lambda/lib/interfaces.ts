@@ -9,9 +9,9 @@ export interface AuthToken {
    */
   expiresAt: number;
   refreshToken: string;
-
-  spaceId: string;
   environmentId: string;
+  spaceId: string;
+  installationUuid?: string;
   slackWorkspaceId: string;
 }
 

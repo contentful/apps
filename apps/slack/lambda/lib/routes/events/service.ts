@@ -84,6 +84,7 @@ export class EventsService {
       this.getResolvedEntity(spaceId, environmentId, eventKey, eventBody),
     ]);
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any
     const promises = notifications!.reduce((acc: Promise<any>[], notification) => {
       const { selectedEvent, selectedContentType, selectedChannel } = notification;
 

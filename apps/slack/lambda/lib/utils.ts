@@ -21,6 +21,7 @@ export const asyncHandler =
     return handler(request, response, next).catch(next);
   };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const assertValid = <T>(schema: { [key: string]: any }, data: unknown): T => {
   const valid = ajv.validate(
     {

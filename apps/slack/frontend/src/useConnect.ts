@@ -6,6 +6,7 @@ import { makeOAuthURL } from './constants';
 import { getEnvironmentName } from './utils';
 import { SDKContext, useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { AppExtensionSDK } from '@contentful/app-sdk';
+import { v4 as uuidv4 } from 'uuid';
 import { useAuthStore } from './auth.store';
 
 export const useConnect = () => {
@@ -18,17 +19,20 @@ export const useConnect = () => {
   // @ts-expect-error private api not typed
   const { api } = useContext(SDKContext);
 
+  const [setInstallationUuid] = useAuthStore((state) => [state.setInstallationUuid]);
+
   const saveWorkspace = useCallback(
     async (workspace, token) => {
-      const isInstalled = await sdk.app.isInstalled();
-
       const genericErrorMessage =
         'Unable to store configuration. Please try connecting Slack again.';
 
-      if (!isInstalled && token) {
+      if (token) {
         try {
           await api.install({ workspaces: [workspace.id] });
-          await apiClient.createAuthToken(sdk, cma, token);
+          const installationUuid = uuidv4();
+          setInstallationUuid(installationUuid);
+
+          await apiClient.createAuthToken(sdk, cma, token, installationUuid);
         } catch (e) {
           console.error(e);
           sdk.notifier.error(genericErrorMessage);

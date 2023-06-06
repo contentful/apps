@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EventsService } from './service';
 import { ACCEPTED_EVENTS } from './constants';
 import { assert } from '../../../test/utils';

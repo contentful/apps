@@ -12,6 +12,7 @@
     "emotion": "^10.0.27",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "uuid": "^9.0.0",
     "zustand": "^4.2.0"
   },
   "scripts": {
@@ -45,6 +46,7 @@
     "@types/node": "^14.18.36",
     "@types/react": "^17.0.43",
     "@types/react-dom": "^18.0.3",
+    "@types/uuid": "^9.0.1",
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "cross-env": "^7.0.3",
     "eslint-plugin-jest": "^27.2.0",

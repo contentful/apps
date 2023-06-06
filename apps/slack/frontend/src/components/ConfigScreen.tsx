@@ -18,6 +18,7 @@ export interface AppInstallationParameters {
   active?: boolean;
   workspaces?: string[];
   notifications?: SlackNotification[];
+  installationUuid?: string;
 }
 
 const Config = () => {
@@ -40,8 +41,9 @@ const Config = () => {
     setActive: state.setActive,
   }));
 
-  const { temporaryRefreshToken } = useAuthStore((state) => ({
+  const { temporaryRefreshToken, installationUuid } = useAuthStore((state) => ({
     temporaryRefreshToken: state.temporaryRefreshToken,
+    installationUuid: state.installationUuid,
   }));
 
   useEffect(() => {
@@ -85,12 +87,17 @@ const Config = () => {
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+    const currentParameters = (await sdk.app.getParameters()) || {};
+    const persistingParams = {
+      ...parameters,
+      installationUuid: installationUuid || currentParameters.installationUuid,
+    };
 
     return {
-      parameters,
+      parameters: persistingParams,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, installationUuid]);
 
   const onConfigurationCompleted = useCallback(
     async (error) => {
@@ -104,9 +111,9 @@ const Config = () => {
         return;
       }
 
-      if (isFirstInstallation && temporaryRefreshToken) {
+      if (isFirstInstallation && temporaryRefreshToken && installationUuid) {
         try {
-          await apiClient.createAuthToken(sdk, cma, temporaryRefreshToken);
+          await apiClient.createAuthToken(sdk, cma, temporaryRefreshToken, installationUuid);
           setIsFirstInstallation(false);
         } catch (e) {
           console.error(e);
@@ -114,7 +121,7 @@ const Config = () => {
         }
       }
     },
-    [isFirstInstallation, cma, sdk, temporaryRefreshToken]
+    [isFirstInstallation, cma, sdk, temporaryRefreshToken, installationUuid]
   );
 
   useEffect(() => {
@@ -128,6 +135,7 @@ const Config = () => {
 
       setParameters({
         ...currentParameters,
+        installationUuid,
         workspaces: Object.values(connectedWorkspaces).map((workspace) => workspace.id),
       });
 
@@ -141,7 +149,7 @@ const Config = () => {
 
       await sdk.app.setReady();
     })();
-  }, [sdk, connectedWorkspaces, setNotifications, setActive]);
+  }, [sdk, connectedWorkspaces, setNotifications, setActive, installationUuid]);
 
   return (
     <Workbench className={styles.workbench}>

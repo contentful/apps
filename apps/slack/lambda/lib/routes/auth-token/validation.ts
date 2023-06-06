@@ -2,6 +2,7 @@ export interface GetAuthTokenParameters {
   code: string;
   spaceId: string;
   environmentId: string;
+  installationUuid?: string;
 }
 
 export const getAuthTokenParametersSchema = {
@@ -10,6 +11,7 @@ export const getAuthTokenParametersSchema = {
     code: { type: 'string' },
     spaceId: { type: 'string' },
     environmentId: { type: 'string' },
+    installationUuid: { type: 'string' },
   },
   required: ['code', 'spaceId', 'environmentId'],
   additionalProperties: true,
