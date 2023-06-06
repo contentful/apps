@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# testing
+coverage
+
+# production
+build/
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+config/serverless-env.dev.yml
+
+npm-debug.log*
+
+# dynamodb dev
+shared-local-instance.db
