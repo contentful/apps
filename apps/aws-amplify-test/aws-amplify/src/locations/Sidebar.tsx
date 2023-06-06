@@ -2,6 +2,7 @@ import React from 'react';
 import { Paragraph } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { Button } from '@aws-amplify/ui-react';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -11,7 +12,17 @@ const Sidebar = () => {
   */
   // const cma = useCMA();
 
-  return <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>;
+  const buildAmplifyApp = () => {
+    console.log('built');
+  };
+
+  return (
+    <Paragraph>
+      <Button variation="primary" loadingText="" onClick={buildAmplifyApp} ariaLabel="">
+        Build
+      </Button>
+    </Paragraph>
+  );
 };
 
 export default Sidebar;
