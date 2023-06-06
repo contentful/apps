@@ -1,4 +1,3 @@
-import React from 'react';
 import { render } from 'react-dom';
 
 import { GlobalStyles } from '@contentful/f36-components';

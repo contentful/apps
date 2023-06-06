@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { locations } from '@contentful/app-sdk';
 import ConfigScreen from './locations/ConfigScreen';
 import Sidebar from './locations/Sidebar';

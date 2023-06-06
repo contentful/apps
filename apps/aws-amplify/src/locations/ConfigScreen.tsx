@@ -52,7 +52,7 @@ export const styles = {
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<ConfigAppSDK>();
-  const [webhookUrl, setWebhookUrl] = useState('');
+  const [webhookUrl, setWebhookUrl] = useState<string>('');
   /*
      To use the cma, inject it as follows.
      If it is not needed, you can remove the next line.
@@ -84,7 +84,7 @@ const ConfigScreen = () => {
     })();
   }, [sdk]);
 
-  const handleWebhookChangeUrl = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleWebhookChange = (e: ChangeEvent<HTMLInputElement>) => {
     setWebhookUrl(e.target.value);
   };
 
@@ -123,7 +123,7 @@ const ConfigScreen = () => {
                 name="webhookUrl"
                 placeholder={'https://www.example/webhook'}
                 value={webhookUrl}
-                onChange={handleWebhookChangeUrl}
+                onChange={handleWebhookChange}
               />
             </FormControl>
             <Flex flexDirection="column" alignItems="end">
