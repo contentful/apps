@@ -11,7 +11,7 @@ const getResourceProviderAndType = (resource?: ExternalResourceLink | string) =>
 
   return {
     resourceProvider,
-    resourceType,
+    resourceType: typeof resourceType === 'string' ? resourceType.toLowerCase() : resourceType,
   };
 };
 

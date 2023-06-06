@@ -8,5 +8,6 @@ export const convertResponseToResource = (product: Product): ExternalResource =>
     image: product.images[0].src,
     status: product.availableForSale ? 'Available' : 'Not Available',
     extras: {},
+    id: product.id,
   };
 };

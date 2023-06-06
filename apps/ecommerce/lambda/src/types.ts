@@ -22,6 +22,7 @@ export interface ExternalResource {
   image?: string;
   status?: string;
   extras?: JSONObject;
+  id?: string;
 }
 
 export interface ErrorResponse {

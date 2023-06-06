@@ -3,6 +3,7 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 import { ResourceField } from 'components/Field/ResourceField';
 import mockValue from 'helpers/mockValue';
 import ResourceFieldProvider from 'providers/ResourceFieldProvider';
+import { ExternalResource } from 'types';
 
 const MultipleResources = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -16,6 +17,25 @@ const MultipleResources = () => {
       parameters: sdk.parameters.instance,
       width: 1400,
     });
+
+    if (resources?.length) {
+      const resourceArray = sdk.field.getValue();
+      const newResources = resources.map((resource: ExternalResource) => {
+        return {
+          sys: {
+            urn: resource.id,
+            type: 'ResourceLink',
+            linkType: sdk.parameters.instance.linkType,
+          },
+        };
+      });
+
+      if (resourceArray) {
+        sdk.field.setValue([...resourceArray, ...newResources]);
+      } else {
+        sdk.field.setValue([...newResources]);
+      }
+    }
 
     return Array.isArray(resources) ? resources : [];
   };
