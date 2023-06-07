@@ -62,6 +62,7 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
+    // TODO persist webhook url
     console.log({ webhookUrl });
 
     return {
