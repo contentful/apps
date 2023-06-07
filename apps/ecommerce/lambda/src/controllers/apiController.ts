@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ExternalResource, ExternalResourceLink } from '@/src/types';
+import { convertResponseToResource } from '../helpers/shopifyAdapter';
+import { Product } from 'shopify-buy';
 
 const ApiController = {
   config: async (req: Request, res: Response, next: NextFunction) => {
@@ -8,7 +10,7 @@ const ApiController = {
       if (!req.appConfig) throw new Error('App config not found');
 
       const proxyConfigUrl = new URL(req.appConfig.baseUrl);
-      proxyConfigUrl.pathname += `/config.json`;
+      proxyConfigUrl.pathname += `/metadata`;
 
       try {
         let response;
@@ -80,22 +82,27 @@ const ApiController = {
       if (!req.appConfig) throw new Error('App config not found');
 
       const proxyResourceUrl = new URL(req.appConfig.baseUrl);
-      proxyResourceUrl.pathname += `/resource`;
+      const resourceId = encodeURIComponent(resourceLink.sys.urn);
+      proxyResourceUrl.pathname += `/resourcesTypes/test/resources/${resourceId}`; // TODO: Replace /test path with actual resource type
 
       try {
         let response;
         try {
-          response = await axios.post(proxyResourceUrl.toString(), resourceLink, {
+          const { shopName, storefrontAccessToken } = req.installationParameters;
+          response = await axios.get(proxyResourceUrl.toString(), {
             headers: {
-              'x-data-provider-parameters': JSON.stringify(req.installationParameters),
+              'x-storefront-access-token': storefrontAccessToken,
+              'x-shop-name': shopName,
             },
           });
-        } catch (error) {
-          response = (error as AxiosError).response;
-        } finally {
+
+          const convertedProduct = convertResponseToResource(response.data);
           res
             .status((response as AxiosResponse).status)
-            .send(JSON.parse(JSON.stringify((response as AxiosResponse).data)));
+            .send(JSON.parse(JSON.stringify(convertedProduct)));
+        } catch (error) {
+          response = (error as AxiosError).response;
+          res.status((response as AxiosResponse).status).send(JSON.parse(JSON.stringify(response)));
         }
       } catch (error) {
         res.status(500).send({
@@ -114,27 +121,31 @@ const ApiController = {
     next: NextFunction
   ) => {
     try {
-      const resourceLink: ExternalResourceLink = req.body;
-
       if (!req.appConfig) throw new Error('App config not found');
 
       const proxyResourceUrl = new URL(req.appConfig.baseUrl);
-      proxyResourceUrl.pathname += `/resources`;
+      proxyResourceUrl.pathname += `/resourcesTypes/test/resources`; // TODO: Replace /test path with actual resource type
 
       try {
         let response;
         try {
-          response = await axios.post(proxyResourceUrl.toString(), resourceLink, {
+          const { shopName, storefrontAccessToken } = req.installationParameters;
+          response = await axios.get(proxyResourceUrl.toString(), {
             headers: {
-              'x-data-provider-parameters': JSON.stringify(req.installationParameters),
+              'x-storefront-access-token': storefrontAccessToken,
+              'x-shop-name': shopName,
             },
           });
-        } catch (error) {
-          response = (error as AxiosError).response;
-        } finally {
+
+          const convertedProducts = response.data.map((product: Product) =>
+            convertResponseToResource(product)
+          );
           res
             .status((response as AxiosResponse).status)
-            .send(JSON.parse(JSON.stringify((response as AxiosResponse).data)));
+            .send(JSON.parse(JSON.stringify(convertedProducts)));
+        } catch (error) {
+          response = (error as AxiosError).response;
+          res.status((response as AxiosResponse).status).send(JSON.parse(JSON.stringify(response)));
         }
       } catch (error) {
         res.status(500).send({
@@ -160,7 +171,7 @@ const ApiController = {
       if (!req.appConfig) throw new Error('App config not found');
 
       const proxyResourceUrl = new URL(req.appConfig.baseUrl);
-      proxyResourceUrl.pathname += `/resourcesTypes`;
+      proxyResourceUrl.pathname += `/resourcesTypes/test`; // TODO: Replace /test path with actual resource type
 
       try {
         let response;

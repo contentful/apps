@@ -18,9 +18,10 @@ const createShopifyClientConfig = (params = '{}') => {
   return { domain, storefrontAccessToken };
 };
 
-export const resourceTypeSchema = {
+export const resourceTypeConfig = {
   resourceTypes: [
     {
+      name: 'Shopify:Product',
       'Shopify:Product': {
         managementDisplay: {
           type: 'productCard',
@@ -39,7 +40,7 @@ export const resourceTypeSchema = {
   ],
 };
 
-export const schema = {
+export const shopifySchema = {
   $ref: '#/definitions/Product',
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {

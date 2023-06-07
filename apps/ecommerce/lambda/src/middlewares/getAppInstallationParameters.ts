@@ -25,7 +25,6 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
       const environmentId = req.header('x-contentful-environment-id');
 
       if (!appId || !spaceId || !environmentId) {
-        console.log('headers', req.headers);
         throw new Error('Missing required headers!');
       }
 
