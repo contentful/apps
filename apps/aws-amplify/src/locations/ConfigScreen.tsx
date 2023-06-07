@@ -62,11 +62,13 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
+    console.log({ webhookUrl });
+
     return {
       parameters,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, webhookUrl, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -88,34 +90,19 @@ const ConfigScreen = () => {
     setWebhookUrl(e.target.value);
   };
 
-  const handleWebhookSave = () => {
-    console.log(webhookUrl);
-  };
-
   return (
     <>
       <Box className={styles.background} />
       <Box className={styles.body}>
         <Box>
-          <Heading>About AWS Amplify for Contentful</Heading>
-          <Paragraph>AWS Amplify is the business.</Paragraph>
+          <Heading>Configure AWS Amplify</Heading>
+          <Paragraph>
+            Amplify is a set of purpose-built tools and features that enables frontend web and
+            mobile developers to quickly and easily build full-stack applications on AWS.
+          </Paragraph>
         </Box>
         <Stack spacing="spacingL" flexDirection="column">
           <Card>
-            <Box marginBottom="spacingM">
-              <Note variant="primary">
-                Follow{' '}
-                <TextLink
-                  // icon={<ExternalLinkTrimmedIcon />}
-                  alignIcon="end"
-                  href="https://aws.amazon.com/amplify/"
-                  target="_blank"
-                  rel="noopener noreferrer">
-                  these detailed instructions
-                </TextLink>{' '}
-                to create a webhook in the AWS amplify dashboard.
-              </Note>
-            </Box>
             <FormControl id="webhookUrl" isRequired={true}>
               <FormControl.Label>AWS Amplify Webhook URL</FormControl.Label>
               <TextInput
@@ -126,10 +113,21 @@ const ConfigScreen = () => {
                 onChange={handleWebhookChange}
               />
             </FormControl>
-            <Flex flexDirection="column" alignItems="end">
-              <Button onClick={handleWebhookSave}>Save</Button>
-            </Flex>
           </Card>
+          <Box marginBottom="spacingM">
+            <Note variant="primary">
+              Follow{' '}
+              <TextLink
+                // icon={<ExternalLinkTrimmedIcon />}
+                alignIcon="end"
+                href="https://aws.amazon.com/amplify/"
+                target="_blank"
+                rel="noopener noreferrer">
+                these detailed instructions
+              </TextLink>{' '}
+              to create a webhook in the AWS amplify dashboard.
+            </Note>
+          </Box>
         </Stack>
       </Box>
     </>
