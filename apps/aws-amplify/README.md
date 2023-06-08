@@ -35,6 +35,14 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.
 Your app is ready to be deployed!
 
+## Using webhooks
+
+This app uses a webhook provided by the user to trigger builds in their AWS Amplify app. This server throws a CORS error at the AWS level, and so to get around that we're using `cors-anywhere`
+
+This package sets up a proxy in order to make CORS valid calls to whatever server from `localhost`.
+
+However, for security reasons you'll need to open your browser, navigate to https://cors-anywhere.herokuapp.com/corsdemo and hit the button on this page. This allows the proxy to work locally.
+
 #### `npm run upload`
 
 Uploads the build folder to contentful and creates a bundle that is automatically activated.
