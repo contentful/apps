@@ -2,12 +2,10 @@ import { useCallback, useState, useEffect, ChangeEvent } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
-  Button,
-  Card,
   Flex,
   FormControl,
   Heading,
-  Note,
+  HelpText,
   Paragraph,
   Stack,
   TextInput,
@@ -16,6 +14,7 @@ import {
 import { css } from 'emotion';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 import tokens from '@contentful/f36-tokens';
+import AmplifyIcon from '../components/common/AmplifyIcon';
 
 export interface AppInstallationParameters {}
 
@@ -28,7 +27,7 @@ export const AWSAmplifyBrand = {
 export const styles = {
   body: css({
     height: 'auto',
-    minHeight: '65vh',
+    minHeight: '40vh',
     margin: '0 auto',
     marginTop: tokens.spacingXl,
     padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
@@ -47,6 +46,13 @@ export const styles = {
     height: '300px',
     backgroundColor: AWSAmplifyBrand.primaryColor,
   }),
+  box: {
+    width: '100%',
+    marginTop: '22px',
+  },
+  icon: {
+    marginTop: '41px',
+  },
 };
 
 const ConfigScreen = () => {
@@ -96,14 +102,14 @@ const ConfigScreen = () => {
       <Box className={styles.background} />
       <Box className={styles.body}>
         <Box>
-          <Heading>Configure AWS Amplify</Heading>
+          <Heading>Set up AWS Amplify</Heading>
           <Paragraph>
             Amplify is a set of purpose-built tools and features that enables frontend web and
             mobile developers to quickly and easily build full-stack applications on AWS.
           </Paragraph>
         </Box>
         <Stack spacing="spacingL" flexDirection="column">
-          <Card>
+          <Box style={styles.box}>
             <FormControl id="webhookUrl" isRequired={true}>
               <FormControl.Label>AWS Amplify Webhook URL</FormControl.Label>
               <TextInput
@@ -113,23 +119,26 @@ const ConfigScreen = () => {
                 value={webhookUrl}
                 onChange={handleWebhookChange}
               />
+              <HelpText>
+                Follow{' '}
+                <TextLink
+                  // icon={<ExternalLinkTrimmedIcon />}
+                  alignIcon="end"
+                  href="https://docs.aws.amazon.com/amplify/latest/userguide/webhooks.html"
+                  target="_blank"
+                  rel="noopener noreferrer">
+                  these detailed instructions
+                </TextLink>{' '}
+                to create a webhook in the AWS amplify dashboard.
+              </HelpText>
             </FormControl>
-          </Card>
-          <Box marginBottom="spacingM">
-            <Note variant="primary">
-              Follow{' '}
-              <TextLink
-                // icon={<ExternalLinkTrimmedIcon />}
-                alignIcon="end"
-                href="https://aws.amazon.com/amplify/"
-                target="_blank"
-                rel="noopener noreferrer">
-                these detailed instructions
-              </TextLink>{' '}
-              to create a webhook in the AWS amplify dashboard.
-            </Note>
           </Box>
         </Stack>
+      </Box>
+      <Box style={styles.icon}>
+        <Flex alignItems="center" justifyContent="center">
+          <AmplifyIcon />
+        </Flex>
       </Box>
     </>
   );
