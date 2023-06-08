@@ -1,7 +1,7 @@
 {
   "name": "@contentful/dam-app-base",
   "description": "Library to build an app to integrate your Digital Asset Management (DAM) system of choice with Contentful",
-  "version": "2.0.54",
+  "version": "2.0.55",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
