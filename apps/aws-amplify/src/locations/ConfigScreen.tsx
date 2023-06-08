@@ -19,7 +19,7 @@ import AmplifyIcon from '../components/common/AmplifyIcon';
 export interface AppInstallationParameters {}
 
 export const AWSAmplifyBrand = {
-  primaryColor: '#187CAB',
+  primaryColor: '#232F3E',
   url: 'https://aws.amazon.com/amplify/',
   logoImage: '',
 };
@@ -115,7 +115,7 @@ const ConfigScreen = () => {
               <TextInput
                 spellCheck={false}
                 name="webhookUrl"
-                placeholder={'https://www.example/webhook'}
+                placeholder={'https://webhooks.amplify.us-east-1.amazonaws.com'}
                 value={webhookUrl}
                 onChange={handleWebhookChange}
               />
@@ -129,7 +129,7 @@ const ConfigScreen = () => {
                   rel="noopener noreferrer">
                   these detailed instructions
                 </TextLink>{' '}
-                to create a webhook in the AWS amplify dashboard.
+                to create a webhook in the AWS Amplify dashboard.
               </HelpText>
             </FormControl>
           </Box>
