@@ -10,6 +10,7 @@
     "@contentful/react-apps-toolkit": "1.2.15",
     "aws-amplify": "^5.2.5",
     "contentful-management": "10.35.6",
+    "cors-anywhere": "^0.4.4",
     "emotion": "10.0.27",
     "react": "17.0.2",
     "react-dom": "17.0.2",
