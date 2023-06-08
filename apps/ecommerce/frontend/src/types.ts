@@ -50,6 +50,7 @@ export interface ExternalResource {
   image?: string;
   status?: EntityStatus;
   extras?: JSONObject;
+  id?: string;
 }
 
 type ErrorBoundaryErrored = { hasError: true; error: Error; info: ErrorInfo };

@@ -7,6 +7,8 @@ interface Props {
   externalResources: ExternalResource[];
   resourceProvider: string;
   resourceType: string;
+  onSelect: (resource: ExternalResource) => void;
+  selectedResources: ExternalResource[];
 }
 
 const DialogBody = (props: Props) => {

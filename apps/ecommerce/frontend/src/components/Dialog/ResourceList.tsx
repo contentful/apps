@@ -7,10 +7,12 @@ interface Props {
   externalResources: ExternalResource[];
   resourceProvider: string;
   resourceType: string;
+  onSelect: (resource: ExternalResource) => void;
+  selectedResources: ExternalResource[];
 }
 
 const ResourceList = (props: Props) => {
-  const { externalResources, resourceProvider, resourceType } = props;
+  const { externalResources, resourceProvider, resourceType, onSelect, selectedResources } = props;
 
   return (
     <Flex className={styles.productList}>
@@ -20,6 +22,8 @@ const ResourceList = (props: Props) => {
             key={index}
             resource={item}
             cardHeader={`${resourceProvider} ${resourceType}`}
+            onSelect={onSelect}
+            selectedResources={selectedResources}
           />
         );
       })}

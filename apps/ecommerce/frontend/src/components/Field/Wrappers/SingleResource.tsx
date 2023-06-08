@@ -21,6 +21,16 @@ const SingleResource = () => {
       width: 1400,
     });
 
+    if (resources?.length) {
+      sdk.field.setValue({
+        sys: {
+          urn: resources[0].id,
+          type: 'ResourceLink',
+          linkType: sdk.parameters.instance.linkType,
+        },
+      });
+    }
+
     return Array.isArray(resources) ? resources : [];
   };
 
