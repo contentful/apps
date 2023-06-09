@@ -1,12 +1,37 @@
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useEffect, useState } from 'react';
+import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { ResourceField } from 'components/App/Field/ResourceField';
-import mockValue from 'helpers/mockValue';
 import ResourceFieldProvider from 'providers/ResourceFieldProvider';
 import { ExternalResource } from 'types';
+import { config } from 'config';
+import fetchWithSignedRequest from 'helpers/signedRequests';
 
 const MultipleResources = () => {
+  const [logoUrl, setLogoUrl] = useState<string>('');
+
   const sdk = useSDK<FieldAppSDK>();
+  const cma = useCMA();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const url = new URL(`${config.backendApiUrl}/api/config.json`);
+
+        const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
+
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+
+        const data = await res.json();
+
+        setLogoUrl(data.logoUrl);
+      } catch (error: any) {
+        console.error(error.message);
+      }
+    })();
+  }, [sdk, cma]);
 
   const handleAddResource = async (): Promise<any[]> => {
     const resources = await sdk.dialogs.openCurrentApp({
@@ -40,18 +65,6 @@ const MultipleResources = () => {
     return Array.isArray(resources) ? resources : [];
   };
 
-  const handleAddContent = () => {
-    // TODO: Update this function to add a new resource(s) to the list
-    const newValue = mockValue(sdk);
-    const resourceArray = sdk.field.getValue();
-
-    if (resourceArray) {
-      sdk.field.setValue([...resourceArray, newValue]);
-    } else {
-      sdk.field.setValue([newValue]);
-    }
-  };
-
   const handleRemove = (index: number) => {
     const resourceArray = [...sdk.field.getValue()];
     resourceArray.splice(index, 1);
@@ -80,10 +93,10 @@ const MultipleResources = () => {
     <ResourceFieldProvider
       isMultiple={true}
       handleAddResource={handleAddResource}
-      handleAddContent={handleAddContent}
       handleRemove={handleRemove}
       handleMoveToBottom={handleMoveToBottom}
-      handleMoveToTop={handleMoveToTop}>
+      handleMoveToTop={handleMoveToTop}
+      logoUrl={logoUrl}>
       <ResourceField />
     </ResourceFieldProvider>
   );
