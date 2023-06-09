@@ -36,7 +36,7 @@ describe('ConfigScreen', () => {
       const webhookUrlInput = screen.getByLabelText('webhookUrl');
 
       await user.click(webhookUrlInput);
-      await user.type(webhookUrlInput, 'http//www.cool.com');
+      await user.type(webhookUrlInput, 'http//cool');
 
       await act(async () => {
         const res = await saveAppInstallation();
