@@ -14,6 +14,7 @@ import { useState } from 'react';
     var open = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function () {
       var args: any = slice.call(arguments);
+      // eslint-disable-next-line no-useless-escape
       var targetOrigin = /^https?:\/\/([^\/]+)/i.exec(args[1]);
       if (
         targetOrigin &&
