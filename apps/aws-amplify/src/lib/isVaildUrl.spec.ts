@@ -7,7 +7,7 @@ describe('isValidUrl', () => {
     expect(res).toBe(false);
   });
 
-  it('', () => {
+  it('returns true if a vaild url is provided', () => {
     const res = isValidUrl('https://www.cool.com');
 
     expect(res).toBe(true);
