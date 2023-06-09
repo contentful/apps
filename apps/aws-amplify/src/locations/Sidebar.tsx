@@ -39,8 +39,7 @@ const Sidebar = () => {
 
   const buildAmplifyApp = () => {
     setIsLoading(true);
-    const webhookURL =
-      'https://webhooks.amplify.us-east-1.amazonaws.com/prod/webhooks?id=7a31abcf-724e-4072-9329-8541f4e3bb02&token=Lba6wO2uyDKgDA6BmHcqUqXefzVZa9GG8r23HNQVuc';
+    const webhookURL = sdk.parameters.installation.amplifyWebhookUrl;
     const initBuild = async () => {
       try {
         const response = await Axios({
