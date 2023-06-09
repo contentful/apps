@@ -14,6 +14,8 @@ const saveAppInstallation = () => {
 };
 
 describe('ConfigScreen', () => {
+  const testUrl = 'https://www.cool.com';
+
   beforeEach(() => {
     render(<ConfigScreen />);
   });
@@ -46,7 +48,6 @@ describe('ConfigScreen', () => {
     it('allows the app to be installed with a valid webhook url', async () => {
       const user = userEvent.setup();
       const webhookUrlInput = screen.getByLabelText('webhookUrl');
-      const testUrl = 'https://www.cool.com';
 
       await user.click(webhookUrlInput);
       await user.type(webhookUrlInput, testUrl);
@@ -65,8 +66,6 @@ describe('ConfigScreen', () => {
   });
 
   describe('installed', () => {
-    const testUrl = 'https://www.cool.com';
-
     beforeEach(async () => {
       mockSdk.app.getParameters.mockReturnValue({
         amplifyWebhookUrl: testUrl,
