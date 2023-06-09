@@ -1,4 +1,4 @@
-import ResourceSelectionDialog from 'components/Dialog/ResourceSelectionDialog/ResourceSelectionDialog';
+import ResourceSelectionDialog from 'components/App/Dialog/ResourceSelectionDialog/ResourceSelectionDialog';
 
 const Dialog = () => {
   return <ResourceSelectionDialog />;
