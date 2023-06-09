@@ -5,7 +5,7 @@
   "dependencies": {
     "@contentful/app-sdk": "4.14.1",
     "@contentful/f36-components": "4.40.6",
-    "@contentful/f36-tokens": "4.0.1",
+    "@contentful/f36-tokens": "4.0.2",
     "@contentful/react-apps-toolkit": "1.2.15",
     "@contentful/rich-text-plain-text-renderer": "^16.0.2",
     "contentful-management": "10.28.1",

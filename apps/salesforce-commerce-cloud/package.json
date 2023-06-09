@@ -5,7 +5,7 @@
   "dependencies": {
     "@contentful/app-sdk": "^4.17.1",
     "@contentful/f36-components": "4.10.5",
-    "@contentful/f36-tokens": "4.0.1",
+    "@contentful/f36-tokens": "4.0.2",
     "@contentful/f36-workbench": "^4.21.0",
     "@contentful/react-apps-toolkit": "1.2.15",
     "@dnd-kit/core": "^6.0.8",
@@ -41,6 +41,6 @@
     "happy-dom": "6.0.4",
     "typescript": "4.7.4",
     "vite": "3.2.7",
-    "vitest": "0.31.4"
+    "vitest": "0.32.0"
   }
 }

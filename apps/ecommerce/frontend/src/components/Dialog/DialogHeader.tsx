@@ -6,12 +6,11 @@ import { useSDK, useCMA } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import fetchWithSignedRequest from 'helpers/signedRequests';
 import { config } from 'config';
-import { FieldType } from 'types';
 
 interface Props {
-  fieldType: FieldType;
-  resourceType: string;
-  total: number;
+  onSave: () => void;
+  headerText: string;
+  resourceCountText: string;
 }
 
 const DialogHeader = (props: Props) => {
@@ -20,10 +19,7 @@ const DialogHeader = (props: Props) => {
   const sdk = useSDK<DialogAppSDK>();
   const cma = useCMA();
 
-  const { fieldType, resourceType, total } = props;
-  const headerTitle =
-    fieldType === FieldType.Single ? `Select a ${resourceType}` : `Select ${resourceType}s`;
-  const resourceCountText = `${total} ${resourceType}s`;
+  const { onSave, headerText, resourceCountText } = props;
 
   useEffect(() => {
     (async () => {
@@ -51,12 +47,14 @@ const DialogHeader = (props: Props) => {
         <Box className={styles.icon} paddingRight="spacingS">
           {logoUrl && <img src={logoUrl} alt="App logo" />}
         </Box>
-        <Subheading marginBottom="none">{headerTitle}</Subheading>
+        <Subheading marginBottom="none">{headerText}</Subheading>
       </Flex>
       <Flex alignItems="center">
         <Paragraph marginBottom="none">{resourceCountText}</Paragraph>
         <Box paddingLeft="spacingS">
-          <Button variant="primary">Save</Button>
+          <Button variant="primary" onClick={onSave}>
+            Save
+          </Button>
         </Box>
         <Box>
           <IconButton

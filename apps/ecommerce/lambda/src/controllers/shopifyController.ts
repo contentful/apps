@@ -73,6 +73,7 @@ const ShopifyController = {
 
       if (products) {
         const convertedProducts = products.map((product) => convertResponseToResource(product));
+
         return res.send(convertedProducts).status(200);
       } else {
         return res.status(404).send({

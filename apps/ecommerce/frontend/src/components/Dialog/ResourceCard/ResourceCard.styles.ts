@@ -5,6 +5,10 @@ export const styles = {
   resourceCard: css({
     marginTop: tokens.spacingXs,
     marginBottom: tokens.spacingXs,
+    '&&:hover': {
+      borderColor: tokens.colorPrimary,
+      cursor: 'pointer',
+    },
   }),
   resourceCardHeader: css({
     borderBottom: `1px solid ${tokens.gray200}`,

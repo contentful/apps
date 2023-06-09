@@ -15,11 +15,11 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.108",
-    "aws-sdk": "^2.1388.0",
+    "aws-sdk": "^2.1394.0",
     "node-fetch": "^2.6.11"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.116",
+    "@types/aws-lambda": "^8.10.117",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^9.1.1",
     "@types/node": "^12.12.14",

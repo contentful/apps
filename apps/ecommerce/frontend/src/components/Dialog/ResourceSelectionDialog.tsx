@@ -6,12 +6,12 @@ import { contentfulContextHeaders } from 'helpers/contentfulContext';
 import { config } from 'config';
 import DialogHeader from './DialogHeader';
 import DialogBody from './DialogBody';
-import { ExternalResource } from 'types';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
-import { DialogInvocationParameters } from 'types';
+import { DialogInvocationParameters, ExternalResource, FieldType } from 'types';
 
 const ResourceSelectionDialog = () => {
   const [externalResources, setExternalResources] = useState<ExternalResource[]>([]);
+  const [selectedResources, setSelectedResources] = useState<ExternalResource[]>([]);
 
   const sdk = useSDK<DialogAppSDK>();
   const cma = useCMA();
@@ -19,6 +19,12 @@ const ResourceSelectionDialog = () => {
 
   const { fieldType, linkType } = sdk.parameters.invocation as DialogInvocationParameters;
   const { resourceProvider, resourceType } = getResourceProviderAndType(linkType);
+
+  const headerText =
+    fieldType === FieldType.Single ? `Select a ${resourceType}` : `Select ${resourceType}s`;
+  const resourceCountText = `${externalResources.length} ${resourceType}s${
+    selectedResources.length ? `, ${selectedResources.length} selected` : ''
+  }`;
 
   useEffect(() => {
     (async () => {
@@ -42,17 +48,39 @@ const ResourceSelectionDialog = () => {
     })();
   }, [sdk, cma]);
 
+  const handleSelectProduct = (resource: ExternalResource) => {
+    const foundResource = selectedResources.find((item) => {
+      return item.id === resource.id;
+    });
+
+    if (foundResource) {
+      setSelectedResources(selectedResources.filter((item) => item.id !== foundResource.id));
+    } else {
+      if (fieldType === FieldType.Single) {
+        setSelectedResources([resource]);
+      } else {
+        setSelectedResources([...selectedResources, resource]);
+      }
+    }
+  };
+
+  const handleSave = () => {
+    sdk.close(selectedResources);
+  };
+
   return (
     <>
       <DialogHeader
-        fieldType={fieldType}
-        resourceType={resourceType}
-        total={externalResources.length}
+        onSave={handleSave}
+        headerText={headerText}
+        resourceCountText={resourceCountText}
       />
       <DialogBody
         externalResources={externalResources}
         resourceProvider={resourceProvider}
         resourceType={resourceType}
+        onSelect={handleSelectProduct}
+        selectedResources={selectedResources}
       />
     </>
   );

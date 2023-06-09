@@ -7,7 +7,7 @@
     "@contentful/default-field-editors": "^1.3.1",
     "@contentful/f36-components": "4.40.6",
     "@contentful/f36-icons": "^4.25.0",
-    "@contentful/f36-tokens": "4.0.1",
+    "@contentful/f36-tokens": "4.0.2",
     "@contentful/field-editor-reference": "^5.9.0",
     "@contentful/integration-component-library": "^1.1.30",
     "@contentful/react-apps-toolkit": "1.2.15",

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Badge, Box, Card, Flex, Grid, Text } from '@contentful/f36-components';
 import { styles } from './ResourceCard.styles';
 import { ExternalResource } from 'types';
@@ -5,13 +6,30 @@ import { ExternalResource } from 'types';
 export interface ResourceCardProps {
   resource: ExternalResource;
   cardHeader: string;
+  onSelect: (resource: ExternalResource) => void;
+  selectedResources: ExternalResource[];
 }
 
 const ResourceCard = (props: ResourceCardProps) => {
-  const { resource, cardHeader } = props;
+  const [isSelected, setIsSelected] = useState<boolean>(false);
+  const { resource, cardHeader, onSelect, selectedResources } = props;
+
+  useEffect(() => {
+    const isSelectedResource = selectedResources.find((item) => {
+      return item.id === resource.id;
+    });
+
+    setIsSelected(!!isSelectedResource);
+  }, [selectedResources, resource.id]);
 
   return (
-    <Card padding="none" className={styles.resourceCard}>
+    <Card
+      padding="none"
+      className={styles.resourceCard}
+      isSelected={isSelected}
+      onClick={() => {
+        onSelect(resource);
+      }}>
       <Box paddingLeft="spacingM" className={styles.resourceCardHeader}>
         <Flex alignItems="center" fullWidth={true} justifyContent="space-between">
           <Text fontColor="gray600" isWordBreak={true}>

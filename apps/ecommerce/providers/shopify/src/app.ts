@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import MetadataController from './controller/MetadataController';
+import ResourceTypeController from './controller/ResourceTypeController';
 
 const app = express();
 app.use(express.json());
@@ -10,7 +12,10 @@ app.use(
   })
 );
 
-app.get('/api', async (req, res) => {
+app.use('/metadata', MetadataController);
+app.use('/resourcesTypes', ResourceTypeController);
+
+app.get('/ping', async (req, res) => {
   res.send('Hello World!');
 });
 
