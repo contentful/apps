@@ -12,7 +12,7 @@ app.use(
   })
 );
 
-app.use('/', MetadataController);
+app.use('/metadata', MetadataController);
 app.use('/resourcesTypes', ResourceTypeController);
 
 app.get('/ping', async (req, res) => {
