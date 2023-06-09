@@ -66,6 +66,7 @@ describe('ConfigScreen', () => {
 
   describe('installed', () => {
     const testUrl = 'https://www.cool.com';
+
     beforeEach(async () => {
       mockSdk.app.getParameters.mockReturnValue({
         amplifyWebhookUrl: testUrl,
