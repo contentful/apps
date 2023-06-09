@@ -1,4 +1,4 @@
-import ConfigPage from 'components/Config/ConfigPage';
+import ConfigPage from 'components/Config/ConfigPage/ConfigPage';
 
 const ConfigScreen = () => {
   return <ConfigPage />;
