@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import FieldJsonEditor from '../FieldJsonEditor/FieldJsonEditor';
 import ResourceFieldContext from 'context/ResourceFieldContext';
-import SortableResourceList from '../SortableResourceList';
+import SortableResourceList from '../SortableResourceList/SortableResourceList';
 import useResourceValue from 'hooks/field/useResourceValue';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { getResourceProviderAndType } from 'helpers/resourceProviderUtils';
