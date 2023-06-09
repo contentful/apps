@@ -1,6 +1,6 @@
 import { Menu } from '@contentful/f36-components';
 import { useEffect, useMemo, useState } from 'react';
-import type { ResourceCardMenuProps } from '../../components/App/Field/ResourceCard/ResourceCardMenu/ResourceCardMenu';
+import type { ResourceCardMenuProps } from 'components/App/Field/ResourceCard/ResourceCardMenu/ResourceCardMenu';
 
 type menuItemsOutput = { menuItems: JSX.Element[] };
 
