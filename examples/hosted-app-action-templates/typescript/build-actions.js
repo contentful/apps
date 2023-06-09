@@ -60,6 +60,7 @@ const main = async (watch = false) => {
       logLevel: 'info',
       format: 'esm',
       target: 'es6',
+      external: ['node:*'],
     };
 
     if (watch) {
