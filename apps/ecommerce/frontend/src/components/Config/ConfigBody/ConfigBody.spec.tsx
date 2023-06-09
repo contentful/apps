@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import ConfigBody from './ConfigBody/ConfigBody';
+import ConfigBody from './ConfigBody';
 
 const mockProviderConfig = {
   name: 'Ecom Provider',
