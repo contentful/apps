@@ -12,17 +12,15 @@ import {
   TextLink,
 } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import tokens from '@contentful/f36-tokens';
-import AmplifyIcon from '../components/common/AmplifyIcon';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
+import AmplifyIcon, { AWSAmplifyBrand } from '../components/common/AmplifyIcon';
+import { isValidUrl } from '../lib/isVaildUrl';
 
-export interface AppInstallationParameters {}
-
-export const AWSAmplifyBrand = {
-  primaryColor: '#232F3E',
-  url: 'https://aws.amazon.com/amplify/',
-  logoImage: '',
-};
+export interface AppInstallationParameters {
+  amplifyWebhookUrl?: string;
+}
 
 export const styles = {
   body: css({
@@ -56,26 +54,30 @@ export const styles = {
 };
 
 const ConfigScreen = () => {
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<ConfigAppSDK>();
-  const [webhookUrl, setWebhookUrl] = useState<string>('');
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [amplifyWebhookUrl, setAmplifyWebhookUrl] = useState<string>('');
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    // TODO persist webhook url
-    console.log({ webhookUrl });
+    if (!isValidUrl(amplifyWebhookUrl)) {
+      sdk.notifier.error('Please provide a valid webhook URL.');
+      return false;
+    }
+
+    const parametersToSave = {
+      ...parameters,
+      amplifyWebhookUrl,
+    };
+
+    setParameters(parametersToSave);
 
     return {
-      parameters,
+      parameters: parametersToSave,
       targetState: currentState,
     };
-  }, [parameters, webhookUrl, sdk]);
+  }, [parameters, sdk, amplifyWebhookUrl]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -89,12 +91,16 @@ const ConfigScreen = () => {
         setParameters(currentParameters);
       }
 
+      if (currentParameters?.amplifyWebhookUrl) {
+        setAmplifyWebhookUrl(currentParameters.amplifyWebhookUrl);
+      }
+
       sdk.app.setReady();
     })();
   }, [sdk]);
 
   const handleWebhookChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setWebhookUrl(e.target.value);
+    setAmplifyWebhookUrl(e.target.value);
   };
 
   return (
@@ -102,7 +108,7 @@ const ConfigScreen = () => {
       <Box className={styles.background} />
       <Box className={styles.body}>
         <Box>
-          <Heading>Set up AWS Amplify</Heading>
+          <Heading>Set Up AWS Amplify</Heading>
           <Paragraph>
             Amplify is a set of purpose-built tools and features that enables frontend web and
             mobile developers to quickly and easily build full-stack applications on AWS.
@@ -111,18 +117,21 @@ const ConfigScreen = () => {
         <Stack spacing="spacingL" flexDirection="column">
           <Box style={styles.box}>
             <FormControl id="webhookUrl" isRequired={true}>
-              <FormControl.Label>AWS Amplify Webhook URL</FormControl.Label>
+              <FormControl.Label aria-label="webhookUrl" htmlFor="webhookUrl">
+                AWS Amplify Webhook URL
+              </FormControl.Label>
               <TextInput
+                testId="webhookUrl"
                 spellCheck={false}
                 name="webhookUrl"
-                placeholder={'https://webhooks.amplify.us-east-1.amazonaws.com'}
-                value={webhookUrl}
+                placeholder={'ex. https://webhooks.amplify.us-east-1.amazonaws.com/...'}
+                value={amplifyWebhookUrl}
                 onChange={handleWebhookChange}
               />
               <HelpText>
                 Follow{' '}
                 <TextLink
-                  // icon={<ExternalLinkTrimmedIcon />}
+                  icon={<ExternalLinkIcon />}
                   alignIcon="end"
                   href="https://docs.aws.amazon.com/amplify/latest/userguide/webhooks.html"
                   target="_blank"

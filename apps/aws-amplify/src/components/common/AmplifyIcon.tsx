@@ -1,3 +1,8 @@
+export const AWSAmplifyBrand = {
+  primaryColor: '#232F3E',
+  url: 'https://aws.amazon.com/amplify/',
+};
+
 export default function AmplifyIcon(props: any) {
   return (
     <svg
