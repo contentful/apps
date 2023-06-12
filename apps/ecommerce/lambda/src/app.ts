@@ -5,6 +5,7 @@ import Middleware from './middlewares';
 import { corsConfig } from './middlewares/corsConfig';
 import { config } from './config';
 import ProviderController from './controllers/ProviderController';
+import CredentialsController from './controllers/CredentialsController';
 
 const app = express();
 app.use(express.json());
@@ -31,6 +32,7 @@ app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app
 app.use(express.static('public'));
 
 app.use('/integrations', ProviderController);
+app.use('/credentials', CredentialsController);
 
 // IMPORTANT: The Sentry error handler must be after all controllers but before any other error handling middleware (with exception of our apiErrorMapper)
 app.use(Middleware.sentryErrorHandler);

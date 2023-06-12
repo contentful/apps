@@ -14,31 +14,48 @@ const ping = async (req: Request, res: Response) => {
 };
 
 const getAppInstallationId = async (req: Request, res: Response) => {
-  const proxyUrl = JSON.parse(JSON.stringify(req.header('x-proxy-url')));
-  const providerMetadata = await getProviderConfig(proxyUrl);
+  const providerUrl = JSON.parse(JSON.stringify(req.header('x-provider-url')));
+  const providerMetadata = await getProviderConfig(providerUrl);
   return res.status(200).send(providerMetadata);
 };
 
 const getResourceTypeSchema = async (req: Request, res: Response) => {
-  const proxyUrl = JSON.parse(JSON.stringify(req.header('x-proxy-url')));
+  const providerUrl = JSON.parse(JSON.stringify(req.header('x-provider-url')));
   const resourceType = JSON.parse(JSON.stringify(req.params.resourceType));
-  const providerMetadata = await getProviderSchema(proxyUrl, resourceType);
+  const providerMetadata = await getProviderSchema({ providerUrl, resourceType });
   return res.status(200).send(providerMetadata);
 };
 
 const getResources = async (req: Request, res: Response) => {
-  const proxyUrl = JSON.parse(JSON.stringify(req.header('x-proxy-url')));
+  const providerUrl = JSON.parse(JSON.stringify(req.header('x-provider-url')));
+  const accessToken = JSON.parse(JSON.stringify(req.header('x-storefront-access-token')));
+  const shopName = JSON.parse(JSON.stringify(req.header('x-shop-name')));
+
   const resourceType = JSON.parse(JSON.stringify(req.params.resourceType));
-  const providerResources = await getProviderResources(proxyUrl, resourceType);
+  const providerResources = await getProviderResources({
+    providerUrl,
+    resourceType,
+    accessToken,
+    shopName,
+  });
   return res.status(200).send(providerResources);
 };
 
 const getOneResource = async (req: Request, res: Response) => {
-  const proxyUrl = JSON.parse(JSON.stringify(req.header('x-proxy-url')));
+  const providerUrl = JSON.parse(JSON.stringify(req.header('x-provider-url')));
+  const accessToken = JSON.parse(JSON.stringify(req.header('x-storefront-access-token')));
+  const shopName = JSON.parse(JSON.stringify(req.header('x-shop-name')));
+
   const resourceType = JSON.parse(JSON.stringify(req.params.resourceType));
   const resourceId = decodeURIComponent(JSON.parse(JSON.stringify(req.params.resourceId)));
 
-  const providerResource = await getOneProviderResource(proxyUrl, resourceType, resourceId);
+  const providerResource = await getOneProviderResource({
+    providerUrl,
+    resourceType,
+    accessToken,
+    shopName,
+    resourceId,
+  });
   return res.status(200).send(providerResource);
 };
 

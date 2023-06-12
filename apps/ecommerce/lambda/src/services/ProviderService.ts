@@ -1,40 +1,44 @@
+import { RequiredProviderInputs } from '../types';
 import axios from 'axios';
 
-export const getProviderConfig = async (proxyUrl: string) => {
-  proxyUrl += `/resourcesTypes`;
-  const resourceTypeMetadata = await axios.get(proxyUrl);
+export const getProviderConfig = async (providerUrl: string) => {
+  providerUrl += `/resourcesTypes`;
+  const resourceTypeMetadata = await axios.get(providerUrl);
   return resourceTypeMetadata.data;
 };
 
-export const getProviderSchema = async (proxyUrl: string, resourceType: string) => {
-  proxyUrl += `/resourcesTypes/${resourceType}/schema`;
-  const resourceTypeMetadata = await axios.get(proxyUrl);
+export const getProviderSchema = async (requiredProviderInputs: RequiredProviderInputs) => {
+  const { providerUrl, resourceType } = requiredProviderInputs;
+
+  const providerUrlFullPath = `${providerUrl}/resourcesTypes/${resourceType}/schema`;
+  const resourceTypeMetadata = await axios.get(providerUrlFullPath);
   return resourceTypeMetadata.data;
 };
 
-export const getProviderResources = async (proxyUrl: string, resourceType: string) => {
-  proxyUrl += `/resourcesTypes/${resourceType}/resources`;
+export const getProviderResources = async (requiredProviderInputs: RequiredProviderInputs) => {
+  const { providerUrl, resourceType, shopName, accessToken } = requiredProviderInputs;
+  const providerUrlFullPath = `${providerUrl}/resourcesTypes/${resourceType}/resources`;
 
-  const providerResources = await axios.get(proxyUrl, {
+  const providerResources = await axios.get(providerUrlFullPath, {
     headers: {
-      'x-storefront-access-token': 'b79cc1f17a585a71595beb972771b617',
-      'x-shop-name': 'contentful-test-app',
+      'x-storefront-access-token': accessToken,
+      'x-shop-name': shopName,
     },
   });
   return providerResources.data;
 };
 
-export const getOneProviderResource = async (
-  proxyUrl: string,
-  resourceType: string,
-  resourceId: string
-) => {
+export const getOneProviderResource = async (requiredProviderInputs: RequiredProviderInputs) => {
+  const { providerUrl, resourceType, shopName, accessToken, resourceId } = requiredProviderInputs;
+
+  if (!resourceId) throw new Error('Missing resourceId');
+
   const encodedResourceId = encodeURIComponent(resourceId);
-  proxyUrl += `/resourcesTypes/${resourceType}/resources/${encodedResourceId}`;
-  const providerResources = await axios.get(proxyUrl, {
+  const providerUrlFullPath = `${providerUrl}/resourcesTypes/${resourceType}/resources/${encodedResourceId}`;
+  const providerResources = await axios.get(providerUrlFullPath, {
     headers: {
-      'x-storefront-access-token': 'b79cc1f17a585a71595beb972771b617',
-      'x-shop-name': 'contentful-test-app',
+      'x-storefront-access-token': accessToken,
+      'x-shop-name': shopName,
     },
   });
   return providerResources.data;

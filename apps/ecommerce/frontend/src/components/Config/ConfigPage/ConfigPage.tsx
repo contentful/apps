@@ -33,7 +33,7 @@ const ConfigPage = () => {
   }, [sdk, onConfigure]);
 
   const getConfig = useCallback(async () => {
-    const url = new URL(`${config.backendApiUrl}/api/config.json`);
+    const url = new URL(`${config.proxyUrl}/resourcesTypes`);
     fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'GET')
       .then((res) => {
         if (res.status !== 200) {
@@ -65,7 +65,7 @@ const ConfigPage = () => {
   }, [sdk, getConfig]);
 
   const checkCredentials = async () => {
-    const url = new URL(`${config.backendApiUrl}/api/credentials`);
+    const url = new URL(`${config.proxyUrl}/credentials`);
     fetchWithSignedRequest(url, sdk.ids.app, cma, sdk, 'GET', {
       // we only pass the installation parameters to the backend via headers here because they are not yet persisted
       'x-data-provider-parameters': JSON.stringify(parameters),

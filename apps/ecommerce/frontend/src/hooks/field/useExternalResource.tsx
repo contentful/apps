@@ -20,7 +20,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
 
   const hydrateExternalResource = useCallback(
     async (resource: ExternalResourceLink) => {
-      const url = new URL(`${config.backendApiUrl}/api/resource`);
+      const url = new URL(`${config.proxyUrl}/api/resource`);
 
       const data = await fetchWithSignedRequest(
         url,

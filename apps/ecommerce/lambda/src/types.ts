@@ -41,3 +41,11 @@ export interface AppConfiguration {
 export interface AppInstallationParameters {
   [key: string]: string;
 }
+
+export interface RequiredProviderInputs {
+  providerUrl: string;
+  resourceType: string;
+  accessToken?: string;
+  shopName?: string;
+  resourceId?: string;
+}
