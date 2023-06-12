@@ -1,6 +1,7 @@
+import { AppConfiguration } from '..//types';
 import {
   getOneProviderResource,
-  getProviderConfig,
+  getAppInstallConfig as getProviderAppInstallConfig,
   getProviderResources,
   getProviderSchema,
 } from '../services/ProviderService';
@@ -13,54 +14,55 @@ const ping = async (req: Request, res: Response) => {
   return res.status(200).send('healthy!');
 };
 
-const getAppInstallationId = async (req: Request, res: Response) => {
-  const providerUrl = JSON.parse(JSON.stringify(req.header('x-provider-url')));
-  const providerMetadata = await getProviderConfig(providerUrl);
+const getAppConfig = (req: Request): AppConfiguration => {
+  if (!req.appConfig) throw new Error('App config not found');
+  return req.appConfig;
+};
+
+const getAppInstallationParameters = (req: Request) => {
+  if (!req.installationParameters) throw new Error('Installation parameters not found');
+  return req.installationParameters;
+};
+
+const getProviderAppInstallationConfig = async (req: Request, res: Response) => {
+  const appConfig = getAppConfig(req);
+  const providerMetadata = await getProviderAppInstallConfig(appConfig.baseUrl);
   return res.status(200).send(providerMetadata);
 };
 
 const getResourceTypeSchema = async (req: Request, res: Response) => {
-  const providerUrl = JSON.parse(JSON.stringify(req.header('x-provider-url')));
-  const resourceType = JSON.parse(JSON.stringify(req.params.resourceType));
-  const providerMetadata = await getProviderSchema({ providerUrl, resourceType });
+  const appConfig = getAppConfig(req);
+  const providerMetadata = await getProviderSchema(appConfig.baseUrl);
   return res.status(200).send(providerMetadata);
 };
 
 const getResources = async (req: Request, res: Response) => {
-  const providerUrl = JSON.parse(JSON.stringify(req.header('x-provider-url')));
-  const accessToken = JSON.parse(JSON.stringify(req.header('x-storefront-access-token')));
-  const shopName = JSON.parse(JSON.stringify(req.header('x-shop-name')));
+  const appConfig = getAppConfig(req);
+  const appInstallationParameters = getAppInstallationParameters(req);
+  const { baseUrl } = appConfig;
 
-  const resourceType = JSON.parse(JSON.stringify(req.params.resourceType));
-  const providerResources = await getProviderResources({
-    providerUrl,
-    resourceType,
-    accessToken,
-    shopName,
-  });
+  const providerResources = await getProviderResources(baseUrl, appInstallationParameters);
   return res.status(200).send(providerResources);
 };
 
 const getOneResource = async (req: Request, res: Response) => {
-  const providerUrl = JSON.parse(JSON.stringify(req.header('x-provider-url')));
-  const accessToken = JSON.parse(JSON.stringify(req.header('x-storefront-access-token')));
-  const shopName = JSON.parse(JSON.stringify(req.header('x-shop-name')));
-
-  const resourceType = JSON.parse(JSON.stringify(req.params.resourceType));
+  const appConfig = getAppConfig(req);
+  const appInstallationParameters = getAppInstallationParameters(req);
   const resourceId = decodeURIComponent(JSON.parse(JSON.stringify(req.params.resourceId)));
+  const resourceType = decodeURIComponent(JSON.parse(JSON.stringify(req.params.resourceType)));
+  const { baseUrl } = appConfig;
 
-  const providerResource = await getOneProviderResource({
-    providerUrl,
-    resourceType,
-    accessToken,
-    shopName,
+  const providerResource = await getOneProviderResource(
     resourceId,
-  });
+    resourceType,
+    baseUrl,
+    appInstallationParameters
+  );
   return res.status(200).send(providerResource);
 };
 
 ProviderController.get('/', ping);
-ProviderController.get('/:appInstallationId', getAppInstallationId);
+ProviderController.get('/:appInstallationId', getProviderAppInstallationConfig);
 ProviderController.get('/:appInstallationId/resourcesTypes/:resourceType', getResourceTypeSchema);
 ProviderController.get('/:appInstallationId/resourcesTypes/:resourceType/resources', getResources);
 ProviderController.get(
