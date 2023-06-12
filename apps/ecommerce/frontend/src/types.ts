@@ -64,7 +64,7 @@ export type ErrorBoundaryProps = {
 
 export interface ErrorComponentProps {
   error: Error;
-  errorInfo?: ErrorInfo;
+  errorInfo: ErrorInfo;
   resetErrorHandler: () => void;
 }
 

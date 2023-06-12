@@ -38,21 +38,9 @@ describe('ResourceCard component', () => {
     const productName = externalResource.name!;
     await userEvent.click(getByText(productName));
 
-    expect(mockOnSelect).toHaveBeenCalled();
-  });
-
-  it('enables selection', () => {
-    const mockOnSelect = jest.fn();
-    render(
-      <ResourceCard
-        cardHeader="Kleenex product"
-        onSelect={mockOnSelect}
-        resource={externalResource}
-        selectedResources={[externalResource]}
-      />
-    );
-
     const card = getByTestId('cf-ui-card');
+
+    expect(mockOnSelect).toHaveBeenCalled();
     expect(card).toBeEnabled();
   });
 });

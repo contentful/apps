@@ -5,7 +5,6 @@ import { mockCma, mockSdk, externalResourceLink } from '../../../../../../test/m
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
 }));
 
 jest.mock('components/App/Field/ResourceCard', () => () => <div>Mock resource card</div>);

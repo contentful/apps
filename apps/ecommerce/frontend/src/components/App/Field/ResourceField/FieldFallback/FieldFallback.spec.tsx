@@ -10,7 +10,6 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
       openConfirm: jest.fn(),
     },
   }),
-  useCMA: () => mockCma,
   useAutoResizer: jest.fn(),
 }));
 
@@ -19,7 +18,11 @@ const { getByText } = screen;
 describe('FieldFallback component', () => {
   it('mounts', () => {
     render(
-      <FieldFallback error={{ message: 'Woops', name: 'an error' }} resetErrorHandler={() => {}} />
+      <FieldFallback
+        error={{ message: 'Woops', name: 'an error' }}
+        resetErrorHandler={() => {}}
+        errorInfo={{ componentStack: '' }}
+      />
     );
 
     const retryButton = getByText('Retry');
@@ -35,6 +38,7 @@ describe('FieldFallback component', () => {
       <FieldFallback
         error={{ message: 'Woops', name: 'an error' }}
         resetErrorHandler={mockResetHandler}
+        errorInfo={{ componentStack: '' }}
       />
     );
 
