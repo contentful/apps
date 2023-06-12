@@ -4,11 +4,7 @@ import { Request, Response, NextFunction, Router } from 'express';
 const CredentialsController = Router();
 
 // TODO: Refactor this so that it pulls in the headers values (shopify storefront token, storename, etc...) separately
-const checkCredentials = async (
-  req: Request,
-  res: Response<ShopifyBuy.ShopResource | { status: 'ok' | 'error'; message: string }>,
-  next: NextFunction
-) => {
+const checkCredentials = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.appConfig) throw new Error('App config not found');
 

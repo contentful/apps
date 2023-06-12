@@ -29,7 +29,8 @@ const ResourceSelectionDialog = () => {
   useEffect(() => {
     (async () => {
       try {
-        const url = new URL(`${config.proxyUrl}/integrations/123/resourcesTypes/123/resources`);
+        // TODO: Fix the app id, and the resource type Id
+        const url = new URL(`${config.proxyUrl}/api/integrations/123/resourcesTypes/123/resources`);
 
         const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET', {
           ...contentfulContextHeaders(sdk),

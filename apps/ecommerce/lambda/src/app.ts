@@ -24,6 +24,8 @@ app.use(Middleware.setSentryContext);
 app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
 app.use(apiRouteConstraint, cors(corsConfig)); // enable CORS on /api/* routes
+
+// TODO: mount headers before verify
 app.use(apiRouteConstraint, Middleware.loadAppConfig); // load app config on /api/* routes
 app.use(apiRouteConstraint, Middleware.verifiySignedRequests); // verify signed requests on /api/* routes
 app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app installation parameters on /api/* routes
@@ -31,8 +33,8 @@ app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app
 // serve static files for sample data
 app.use(express.static('public'));
 
-app.use('/integrations', ProviderController);
-app.use('/credentials', CredentialsController);
+app.use('/api/integrations', ProviderController);
+app.use('/api/credentials', CredentialsController);
 
 // IMPORTANT: The Sentry error handler must be after all controllers but before any other error handling middleware (with exception of our apiErrorMapper)
 app.use(Middleware.sentryErrorHandler);
