@@ -44,7 +44,7 @@
     "@testing-library/react": "12.1.5",
     "@tsconfig/create-react-app": "1.0.3",
     "@types/jest": "29.5.2",
-    "@types/node": "18.16.16",
+    "@types/node": "18.16.17",
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.3",
     "cross-env": "7.0.3",
