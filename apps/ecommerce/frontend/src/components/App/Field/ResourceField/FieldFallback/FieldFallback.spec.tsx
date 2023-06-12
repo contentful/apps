@@ -1,7 +1,7 @@
 import FieldFallback from './FieldFallback';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mockCma, mockSdk } from '../../../../../../test/mocks';
+import { mockSdk } from '../../../../../../test/mocks';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => ({

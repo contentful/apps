@@ -1,7 +1,7 @@
 import React from 'react';
 import SortableResourceList from './SortableResourceList';
 import { render, screen } from '@testing-library/react';
-import { mockCma, mockSdk, externalResourceLink } from '../../../../../../test/mocks';
+import { mockSdk, externalResourceLink } from '../../../../../../test/mocks';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
