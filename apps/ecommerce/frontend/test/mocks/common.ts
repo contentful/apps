@@ -27,7 +27,7 @@ const externalResourceLink: ExternalResourceLink = {
   sys: {
     type: 'ResourceLink',
     linkType: 'Shopify:Product',
-    urn: '12335:Hello',
+    urn: 'gid://shopify/Product/8191006998814',
   },
 };
 
