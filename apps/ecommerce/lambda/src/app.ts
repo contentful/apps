@@ -2,7 +2,6 @@ import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
 import Middleware from './middlewares';
-import { ApiRouter } from './routers';
 import { corsConfig } from './middlewares/corsConfig';
 import { config } from './config';
 import ProviderController from './controllers/ProviderController';
@@ -31,7 +30,6 @@ app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app
 // serve static files for sample data
 app.use(express.static('public'));
 
-app.use('/api', ApiRouter);
 app.use('/integrations', ProviderController);
 
 // IMPORTANT: The Sentry error handler must be after all controllers but before any other error handling middleware (with exception of our apiErrorMapper)
