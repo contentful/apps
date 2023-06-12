@@ -1,6 +1,7 @@
 import ResourceCard from './ResourceCard';
 import { externalResource } from '../../../../../test/mocks';
-import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 
 const { getByText, getByTestId } = screen;
 
@@ -22,7 +23,8 @@ describe('ResourceCard component', () => {
     expect(getByText(productDescription)).toBeVisible();
   });
 
-  it('handles onSelect', () => {
+  it('handles onSelect', async () => {
+    userEvent.setup();
     const mockOnSelect = jest.fn();
     render(
       <ResourceCard
@@ -34,7 +36,7 @@ describe('ResourceCard component', () => {
     );
 
     const productName = externalResource.name!;
-    fireEvent.click(getByText(productName));
+    await userEvent.click(getByText(productName));
 
     expect(mockOnSelect).toHaveBeenCalled();
   });

@@ -1,5 +1,6 @@
 import FieldJsonEditor from './FieldJsonEditor';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { mockCma, mockSdk } from '../../../../../../test/mocks';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
@@ -24,7 +25,7 @@ describe('FieldJsonEditor component', () => {
 
     const showButton = getByText('Show JSON');
 
-    fireEvent.click(showButton);
+    await userEvent.click(showButton);
 
     const hideButton = await findByText('Hide JSON');
     expect(hideButton).toBeVisible();

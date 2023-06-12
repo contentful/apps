@@ -1,5 +1,6 @@
 import ResourceCardMenu from './ResourceCardMenu';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 const { getByTestId, findByTestId, queryByTestId } = screen;
 
@@ -26,15 +27,16 @@ describe('ResourceCardMenu component', () => {
   });
 
   it('opens and closes menu on click', async () => {
+    userEvent.setup();
     render(<ResourceCardMenu {...props} />);
 
     const iconButton = getByTestId('cf-ui-icon-button');
-    fireEvent.click(iconButton);
+    await userEvent.click(iconButton);
     const menuList = await findByTestId('cf-ui-menu-list');
 
     expect(menuList).toBeVisible();
 
-    fireEvent.click(iconButton);
+    await userEvent.click(iconButton);
 
     const menu = queryByTestId('cf-ui-menu');
     expect(menu).toBeFalsy();

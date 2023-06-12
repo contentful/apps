@@ -1,5 +1,6 @@
 import FieldFallback from './FieldFallback';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { mockCma, mockSdk } from '../../../../../../test/mocks';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
@@ -28,7 +29,7 @@ describe('FieldFallback component', () => {
     expect(resetButton).toBeVisible();
   });
 
-  it('handles retry', () => {
+  it('handles retry', async () => {
     const mockResetHandler = jest.fn();
     render(
       <FieldFallback
@@ -38,7 +39,7 @@ describe('FieldFallback component', () => {
     );
 
     const retryButton = getByText('Retry');
-    fireEvent.click(retryButton);
+    await userEvent.click(retryButton);
 
     expect(mockResetHandler).toHaveBeenCalled();
   });
