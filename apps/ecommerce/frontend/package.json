@@ -35,6 +35,12 @@
   "eslintConfig": {
     "extends": "react-app"
   },
+  "lint-staged": {
+    "*.{t,j}s?(x)": [
+      "prettier --write",
+      "eslint --max-warnings=0"
+    ]
+  },
   "browserslist": {
     "production": [
       ">0.2%",
