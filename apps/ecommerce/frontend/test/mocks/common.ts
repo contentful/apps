@@ -1,4 +1,4 @@
-import { ExternalResource } from 'types';
+import { ExternalResource, ExternalResourceLink } from 'types';
 
 const externalResource: ExternalResource = {
   name: 'Kleenex',
@@ -23,4 +23,12 @@ const externalResources: ExternalResource[] = [
   externalResource,
 ];
 
-export { externalResource, externalResources };
+const externalResourceLink: ExternalResourceLink = {
+  sys: {
+    type: 'ResourceLink',
+    linkType: 'Shopify:Product',
+    urn: '12335:Hello',
+  },
+};
+
+export { externalResource, externalResources, externalResourceLink };
