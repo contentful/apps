@@ -5,7 +5,7 @@ const { getByTestId, findByTestId, queryByTestId } = screen;
 
 jest.mock('hooks/field/useResourceMenuItems', () => () => ({
   menuItems: [<div key="mock-menu-item">Mock Menu Item</div>],
-})) > jest.mock('hooks/field/useResourceMenuItems');
+}));
 
 const props = {
   onRemove: jest.fn(),
