@@ -1,7 +1,7 @@
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
-import { SingleResource, MultipleResources, FieldFallback } from 'components/Field';
-import withErrorBoundary from 'hooks/common/withErrorBoundary';
+import { SingleResource, MultipleResources, FieldFallback } from 'components/App/Field';
+import withErrorBoundary from 'components/Common/ErrorBoundary/withErrorBoundary';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
