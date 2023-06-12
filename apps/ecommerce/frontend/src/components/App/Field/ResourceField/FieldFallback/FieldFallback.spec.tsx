@@ -13,7 +13,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: jest.fn(),
 }));
 
-const { getByText, findByText } = screen;
+const { getByText } = screen;
 
 describe('FieldFallback component', () => {
   it('mounts', () => {
