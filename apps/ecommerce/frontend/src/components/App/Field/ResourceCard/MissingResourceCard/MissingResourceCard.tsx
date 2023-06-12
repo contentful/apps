@@ -8,7 +8,6 @@ import tokens from '@contentful/f36-tokens';
 import type { ResourceCardProps } from '../ResourceCard/ResourceCard';
 
 interface MissingResourceCardProps extends ResourceCardProps {
-  error: string;
   errorMessage?: string;
   errorStatus?: number;
   isLoading: boolean;

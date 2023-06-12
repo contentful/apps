@@ -44,7 +44,6 @@ const ResourceCard = (props: ResourceCardProps) => {
     return (
       <MissingResourceCard
         {...props}
-        error={error}
         errorMessage={errorMessage}
         errorStatus={errorStatus}
         isLoading={isLoading}
