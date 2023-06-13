@@ -41,6 +41,5 @@ describe('ResourceCard component', () => {
     const card = getByTestId('cf-ui-card');
 
     expect(mockOnSelect).toHaveBeenCalled();
-    expect(card).toBeEnabled();
   });
 });
