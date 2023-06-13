@@ -15,11 +15,11 @@ const ResourceField = () => {
   const sdk = useSDK<FieldAppSDK>();
   const { linkType } = sdk.parameters.instance;
   const { resourceType } = getResourceProviderAndType(linkType);
-  const buttonText = isMultiple
-    ? `Add ${resourceType}s`
-    : value.length
-    ? `Edit ${resourceType}`
-    : `Add ${resourceType}`;
+
+  const getButtonText = () => {
+    if (isMultiple) return `Add ${resourceType}s`;
+    return value.length ? `Edit ${resourceType}` : `Add ${resourceType}`;
+  };
 
   return (
     <Grid>
@@ -28,7 +28,7 @@ const ResourceField = () => {
         <Box marginBottom="spacingM">
           <Button onClick={handleAddResource}>
             {logoUrl && <img src={logoUrl} alt="App logo" className={styles.icon} />}
-            {buttonText}
+            {getButtonText()}
           </Button>
         </Box>
       </Grid.Item>
