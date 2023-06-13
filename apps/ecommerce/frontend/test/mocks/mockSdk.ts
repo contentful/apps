@@ -24,6 +24,9 @@ const mockSdk: any = {
   location: {
     is: jest.fn(),
   },
+  dialogs: {
+    openCurrentApp: jest.fn(),
+  },
 };
 
 export { mockSdk };

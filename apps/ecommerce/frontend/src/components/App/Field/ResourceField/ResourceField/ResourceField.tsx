@@ -22,7 +22,7 @@ const ResourceField = () => {
   };
 
   return (
-    <Grid>
+    <Grid data-test-id="resource-field">
       <SortableResourceList resourceArray={value} />
       <Grid.Item>
         <Box marginBottom="spacingM">
