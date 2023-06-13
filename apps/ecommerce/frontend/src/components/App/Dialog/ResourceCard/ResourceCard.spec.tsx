@@ -3,7 +3,7 @@ import { externalResource } from '../../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 
-const { getByText, getByTestId } = screen;
+const { getByText } = screen;
 
 describe('ResourceCard component', () => {
   it('mounts', () => {
