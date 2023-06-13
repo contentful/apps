@@ -1,11 +1,36 @@
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { useEffect, useState } from 'react';
+import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { ResourceField } from 'components/App/Field/ResourceField';
-import mockValue from 'helpers/mockValue';
 import ResourceFieldProvider from 'providers/ResourceFieldProvider';
+import { config } from 'config';
+import fetchWithSignedRequest from 'helpers/signedRequests';
 
 const SingleResource = () => {
+  const [logoUrl, setLogoUrl] = useState<string>('');
+
   const sdk = useSDK<FieldAppSDK>();
+  const cma = useCMA();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const url = new URL(`${config.backendApiUrl}/api/config.json`);
+
+        const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
+
+        if (!res.ok) {
+          throw new Error(res.statusText);
+        }
+
+        const data = await res.json();
+
+        setLogoUrl(data.logoUrl);
+      } catch (error: any) {
+        console.error(error.message);
+      }
+    })();
+  }, [sdk, cma]);
 
   const handleRemove = () => {
     sdk.field.setValue(undefined);
@@ -34,17 +59,12 @@ const SingleResource = () => {
     return Array.isArray(resources) ? resources : [];
   };
 
-  const handleAddContent = () => {
-    const newValue = mockValue(sdk);
-    sdk.field.setValue(newValue);
-  };
-
   return (
     <ResourceFieldProvider
       isMultiple={false}
       handleAddResource={handleAddResource}
-      handleAddContent={handleAddContent}
-      handleRemove={handleRemove}>
+      handleRemove={handleRemove}
+      logoUrl={logoUrl}>
       <ResourceField />
     </ResourceFieldProvider>
   );
