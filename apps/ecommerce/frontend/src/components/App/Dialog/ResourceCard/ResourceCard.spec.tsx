@@ -38,8 +38,6 @@ describe('ResourceCard component', () => {
     const productName = externalResource.name!;
     await userEvent.click(getByText(productName));
 
-    const card = getByTestId('cf-ui-card');
-
     expect(mockOnSelect).toHaveBeenCalled();
   });
 });
