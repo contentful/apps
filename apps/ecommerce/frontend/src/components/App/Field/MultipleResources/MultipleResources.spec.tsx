@@ -1,4 +1,4 @@
-import SingleResource from './SingleResource';
+import MultipleResources from './MultipleResources';
 import { mockSdk, mockCma } from '../../../../../test/mocks';
 import { render, screen } from '@testing-library/react';
 import fetchWithSignedRequest from 'helpers/signedRequests';
@@ -40,7 +40,7 @@ const mockFetchWithSignedRequest = fetchWithSignedRequest as jest.MockedFunction
 
 const { findByTestId, findByText } = screen;
 
-describe('SingleResource component', () => {
+describe('MultipleResources component', () => {
   beforeEach(() => {
     const mockApiResponse = {
       ok: true,
@@ -51,7 +51,7 @@ describe('SingleResource component', () => {
   });
 
   it('mounts', async () => {
-    render(<SingleResource />);
+    render(<MultipleResources />);
 
     const resourceField = await findByTestId('resource-field');
 
@@ -64,9 +64,9 @@ describe('SingleResource component', () => {
     const mockSetValue = jest.fn();
     mockSdk.dialogs.openCurrentApp = mockOpenCurrentApp;
     mockSdk.field.setValue = mockSetValue;
-    render(<SingleResource />);
+    render(<MultipleResources />);
 
-    const editResourceButton = await findByText('Edit product');
+    const editResourceButton = await findByText('Add products');
     userEvent.click(editResourceButton);
 
     await new Promise((cb) => setTimeout(cb, 50));
