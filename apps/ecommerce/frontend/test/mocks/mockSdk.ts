@@ -21,6 +21,9 @@ const mockSdk: any = {
     onValueChanged: jest.fn(),
     removeValue: jest.fn(),
   },
+  location: {
+    is: jest.fn(),
+  },
 };
 
 export { mockSdk };
