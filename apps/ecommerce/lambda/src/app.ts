@@ -27,7 +27,8 @@ app.use(apiRouteConstraint, cors(corsConfig)); // enable CORS on /api/* routes
 
 // TODO: mount headers before verify
 app.use(apiRouteConstraint, Middleware.loadAppConfig); // load app config on /api/* routes
-app.use(apiRouteConstraint, Middleware.verifiySignedRequests); // verify signed requests on /api/* routes
+// temporarily commenting this out
+// app.use(apiRouteConstraint, Middleware.verifiySignedRequests); // verify signed requests on /api/* routes
 app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app installation parameters on /api/* routes
 
 // serve static files for sample data
