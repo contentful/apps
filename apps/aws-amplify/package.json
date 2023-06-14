@@ -1,5 +1,5 @@
 {
-  "name": "aws-amplify",
+  "name": "@contentful/aws-amplify",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
