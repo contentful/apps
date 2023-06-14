@@ -13,7 +13,7 @@ interface Props {
 
 const DialogBody = (props: Props) => {
   return (
-    <Box className={styles.body}>
+    <Box data-test-id="dialog-body" className={styles.body}>
       <ResourceList {...props} />
     </Box>
   );

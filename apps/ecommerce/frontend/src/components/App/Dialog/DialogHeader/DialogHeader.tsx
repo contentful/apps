@@ -42,7 +42,11 @@ const DialogHeader = (props: Props) => {
   }, [sdk, cma]);
 
   return (
-    <Flex justifyContent="space-between" alignItems="center" className={styles.header}>
+    <Flex
+      data-test-id="dialog-header"
+      justifyContent="space-between"
+      alignItems="center"
+      className={styles.header}>
       <Flex alignItems="center">
         <Box className={styles.icon} paddingRight="spacingS">
           {logoUrl && <img src={logoUrl} alt="App logo" />}

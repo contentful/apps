@@ -21,6 +21,12 @@ const mockSdk: any = {
     onValueChanged: jest.fn(),
     removeValue: jest.fn(),
   },
+  location: {
+    is: jest.fn(),
+  },
+  dialogs: {
+    openCurrentApp: jest.fn(),
+  },
 };
 
 export { mockSdk };
