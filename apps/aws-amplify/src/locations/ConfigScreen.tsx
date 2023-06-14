@@ -57,9 +57,6 @@ const ConfigScreen = () => {
 
       if (currentParameters) {
         setParameters(currentParameters);
-      }
-
-      if (currentParameters?.amplifyWebhookUrl) {
         setAmplifyWebhookUrl(currentParameters.amplifyWebhookUrl);
       }
 
