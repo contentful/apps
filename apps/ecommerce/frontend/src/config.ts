@@ -13,7 +13,8 @@ function getEnvironmentVariable(
 }
 
 export const config = {
-  backendApiUrl: getEnvironmentVariable('REACT_APP_BACKEND_API_URL'),
+  proxyUrl: getEnvironmentVariable('REACT_APP_PROXY_API_URL'),
+  providerUrl: getEnvironmentVariable('REACT_APP_PROVIDER_URL'),
   version: getEnvironmentVariable('REACT_APP_VERSION', 'no-version-set'),
   release: getEnvironmentVariable('REACT_APP_RELEASE', 'no-release-hash-set'),
   sentryDSN: getEnvironmentVariable('REACT_APP_SENTRY_DSN'),

@@ -2,9 +2,10 @@ import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
 import Middleware from './middlewares';
-import { ApiRouter, MagentoRouter, ShopifyRouter } from './routers';
 import { corsConfig } from './middlewares/corsConfig';
 import { config } from './config';
+import ProviderController from './controllers/ProviderController';
+import CredentialsController from './controllers/CredentialsController';
 
 const app = express();
 app.use(express.json());
@@ -23,6 +24,8 @@ app.use(Middleware.setSentryContext);
 app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
 app.use(apiRouteConstraint, cors(corsConfig)); // enable CORS on /api/* routes
+
+// TODO: mount headers before verify
 app.use(apiRouteConstraint, Middleware.loadAppConfig); // load app config on /api/* routes
 app.use(apiRouteConstraint, Middleware.verifiySignedRequests); // verify signed requests on /api/* routes
 app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app installation parameters on /api/* routes
@@ -30,10 +33,8 @@ app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app
 // serve static files for sample data
 app.use(express.static('public'));
 
-app.use('/api', ApiRouter);
-
-app.use('/shopify', ShopifyRouter);
-app.use('/magento', MagentoRouter);
+app.use('/api/integrations', ProviderController);
+app.use('/api/credentials', CredentialsController);
 
 // IMPORTANT: The Sentry error handler must be after all controllers but before any other error handling middleware (with exception of our apiErrorMapper)
 app.use(Middleware.sentryErrorHandler);

@@ -87,15 +87,20 @@ const ResourceCard = (props: ResourceCardProps) => {
                 fontWeight="fontWeightDemiBold"
                 lineHeight="lineHeightL"
                 isWordBreak={true}>
-                {externalResource.name}
+                {externalResource.title}
               </Text>
             </Grid.Item>
             <Grid.Item>
               <Text>{externalResource.description}</Text>
             </Grid.Item>
           </Grid>
-          {externalResource.image && (
-            <img src={externalResource.image} alt={externalResource.name} width="70" height="70" />
+          {externalResource.images && (
+            <img
+              src={externalResource.images[0].src}
+              alt={externalResource.title}
+              width="70"
+              height="70"
+            />
           )}
         </Flex>
         <ResourceCardRawData

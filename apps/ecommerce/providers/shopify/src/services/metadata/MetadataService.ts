@@ -23,4 +23,5 @@ export const metadata = {
   primaryColor: '#212F3F',
   logoUrl:
     'https://images.ctfassets.net/juh8bvgveao4/4eTYD0rlVO5tAucQoStln/952f5ed757229c91a099e61d8463f2f9/shopify.svg',
+  resourceTypeIds: ['shopify:product'],
 };

@@ -3,8 +3,9 @@ import { Badge, Box, Card, Flex, Grid, Text } from '@contentful/f36-components';
 import { styles } from './ResourceCard.styles';
 import { ExternalResource } from 'types';
 
+// TODO: Fix the CardHeader type during the mapping config refactor/ticket
 export interface ResourceCardProps {
-  resource: ExternalResource;
+  resource: any;
   cardHeader: string;
   onSelect: (resource: ExternalResource) => void;
   selectedResources: ExternalResource[];
@@ -55,15 +56,15 @@ const ResourceCard = (props: ResourceCardProps) => {
                 fontWeight="fontWeightDemiBold"
                 lineHeight="lineHeightL"
                 isWordBreak={true}>
-                {resource.name}
+                {resource.title}
               </Text>
             </Grid.Item>
             <Grid.Item>
               <Text>{resource.description}</Text>
             </Grid.Item>
           </Grid>
-          {resource.image && (
-            <img src={resource.image} alt={resource.name} width="70" height="70" />
+          {resource.images && (
+            <img src={resource.images[0].src} alt={resource.title} width="70" height="70" />
           )}
         </Flex>
       </Box>
