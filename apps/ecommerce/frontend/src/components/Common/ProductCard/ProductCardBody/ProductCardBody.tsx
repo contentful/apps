@@ -7,7 +7,7 @@ interface Props {
   id: string;
 }
 
-const ResourceCardBody = (props: Props) => {
+const ProductCardBody = (props: Props) => {
   const {
     name: productName,
     description: productDescription,
@@ -41,4 +41,4 @@ const ResourceCardBody = (props: Props) => {
   );
 };
 
-export default ResourceCardBody;
+export default ProductCardBody;

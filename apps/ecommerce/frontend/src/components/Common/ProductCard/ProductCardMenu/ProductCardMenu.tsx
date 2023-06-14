@@ -1,20 +1,20 @@
 import { IconButton, Menu } from '@contentful/f36-components';
 import { MoreHorizontalIcon } from '@contentful/f36-icons';
-import useResourceMenu from 'hooks/field/useResourceMenuItems';
+import useResourceMenuItems from 'hooks/field/useResourceMenuItems';
 
-export interface ResourceCardMenuProps {
+export interface ProductCardMenuProps {
   onRemove: Function;
   isDataVisible: boolean;
   onShowData: Function;
   onHideData: Function;
-  index?: number;
-  total?: number;
-  onMoveToTop?: Function;
-  onMoveToBottom?: Function;
+  cardIndex?: number;
+  totalCards?: number;
+  onMoveToTop?: (cardIndex?: number) => void;
+  onMoveToBottom?: (cardIndex?: number) => void;
 }
 
-const ResourceCardMenu = (props: ResourceCardMenuProps) => {
-  const { menuItems } = useResourceMenu(props);
+const ProductCardMenu = (props: ProductCardMenuProps) => {
+  const { menuItems } = useResourceMenuItems(props); // this disturbs me
 
   return (
     <Menu offset={[-5, 0]}>
@@ -26,4 +26,4 @@ const ResourceCardMenu = (props: ResourceCardMenuProps) => {
   );
 };
 
-export default ResourceCardMenu;
+export default ProductCardMenu;

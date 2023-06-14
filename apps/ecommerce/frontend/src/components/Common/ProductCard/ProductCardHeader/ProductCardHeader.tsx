@@ -1,39 +1,40 @@
 import { Badge, Box, Flex, Text, IconButton } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import { styles } from './ResourceCard.styles';
-import ResourceCardMenu from './ResourceCardMenu';
+import { styles } from './ProductCardHeader.styles';
+import ProductCardMenu from '../ProductCardMenu/ProductCardMenu';
+import { ExternalResourceLink } from 'types';
 
 interface Props {
   headerTitle: string;
   status: string;
-  handleRemove: (index: number) => void;
+  handleRemove?: (index?: number) => void;
   showJson: boolean;
   handleShowJson: (show: boolean) => void;
-  index: number;
-  total: number;
-  externalResourceLink: string;
-  handleMoveToBottom: Function;
-  handleMoveToTop: Function;
-  showHeaderMenu: boolean;
+  cardIndex?: number;
+  totalCards?: number;
+  showExternalResourceLinkDetails?: boolean;
+  handleMoveToBottom?: (index?: number) => void;
+  handleMoveToTop?: (index?: number) => void;
+  showHeaderMenu?: boolean;
 }
 
-const ResourceCardHeader = (props: Props) => {
+const ProductCardHeader = (props: Props) => {
   const {
-    externalResourceLink,
+    showExternalResourceLinkDetails,
     headerTitle,
     status,
     handleRemove,
     showJson,
     handleShowJson,
-    index,
-    total,
+    cardIndex,
+    totalCards,
     handleMoveToBottom,
     handleMoveToTop,
     showHeaderMenu,
   } = props;
 
   return (
-    <Box paddingLeft="spacingM" className={styles.resourceCardHeader}>
+    <Box paddingLeft="spacingM" className={styles.productCardHeader}>
       <Flex alignItems="center" fullWidth={true} justifyContent="space-between">
         <Text fontColor="gray600" isWordBreak={true}>
           {headerTitle}
@@ -47,7 +48,7 @@ const ResourceCardHeader = (props: Props) => {
                 <Badge variant="featured">{status}</Badge>
               </Box>
             ))}
-          {externalResourceLink && (
+          {showExternalResourceLinkDetails && (
             <IconButton
               variant="transparent"
               aria-label="View external resource details"
@@ -56,15 +57,15 @@ const ResourceCardHeader = (props: Props) => {
             />
           )}
           {showHeaderMenu && (
-            <ResourceCardMenu
-              onRemove={() => handleRemove(index)}
+            <ProductCardMenu
+              onRemove={() => handleRemove?.call(null, cardIndex)}
               isDataVisible={showJson}
               onShowData={() => handleShowJson(true)}
               onHideData={() => handleShowJson(false)}
-              index={index}
-              total={total}
-              onMoveToBottom={() => handleMoveToBottom?.call(null, index)}
-              onMoveToTop={() => handleMoveToTop?.call(null, index)}
+              cardIndex={cardIndex}
+              totalCards={totalCards}
+              onMoveToBottom={() => handleMoveToBottom?.call(null, cardIndex)}
+              onMoveToTop={() => handleMoveToTop?.call(null, cardIndex)}
             />
           )}
         </Flex>
@@ -73,4 +74,4 @@ const ResourceCardHeader = (props: Props) => {
   );
 };
 
-export default ResourceCardHeader;
+export default ProductCardHeader;
