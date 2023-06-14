@@ -16,7 +16,7 @@ describe('ResourceList component', () => {
       />
     );
 
-    const productName = externalResources[0].name!;
+    const productName = externalResources[0].title!;
     const productDescription = externalResources[0].description!;
 
     expect(getByText(productName)).toBeVisible();

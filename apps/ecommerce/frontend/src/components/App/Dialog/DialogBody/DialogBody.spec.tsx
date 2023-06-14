@@ -16,7 +16,7 @@ describe('DialogBody component', () => {
       />
     );
 
-    const productName = externalResource.name!;
+    const productName = externalResource.title!;
     const productDescription = externalResource.description!;
 
     expect(getByText(productName)).toBeVisible();

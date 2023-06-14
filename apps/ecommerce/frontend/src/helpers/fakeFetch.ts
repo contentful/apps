@@ -12,7 +12,7 @@ const fetchRemoteData = async (
         resolve({});
       } else {
         resolve({
-          name: `Product ${index ? index + 1 : ''}`,
+          title: `Product ${index ? index + 1 : ''}`,
           description: 'Lorem ipsum dolar sit amet',
           image: 'https://placekitten.com/500/500',
           status: 'new',

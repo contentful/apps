@@ -53,7 +53,7 @@ describe('ResourceSelectionDialog component', () => {
     expect(dialogHeader).toBeVisible();
     expect(dialogBody).toBeVisible();
 
-    const productName = externalResource.name!;
+    const productName = externalResource.title!;
     const productDescription = externalResource.description!;
 
     expect(getByText(productName)).toBeVisible();
@@ -83,7 +83,7 @@ describe('ResourceSelectionDialog component', () => {
 
     await findByText('Select a product');
 
-    const resourceCard = getByText(externalResource.name!);
+    const resourceCard = getByText(externalResource.title!);
     userEvent.click(resourceCard);
 
     await findByText('3 products, 1 selected');
@@ -100,12 +100,12 @@ describe('ResourceSelectionDialog component', () => {
 
     await findByText('Select products');
 
-    const resourceCard1 = getByText(externalResource.name!);
+    const resourceCard1 = getByText(externalResource.title!);
     userEvent.click(resourceCard1);
 
     await findByText('3 products, 1 selected');
 
-    const resourceCard2 = getByText(externalResources[1].name!);
+    const resourceCard2 = getByText(externalResources[1].title!);
     userEvent.click(resourceCard2);
 
     await findByText('3 products, 2 selected');

@@ -16,7 +16,7 @@ const MultipleResources = () => {
   useEffect(() => {
     (async () => {
       try {
-        const url = new URL(`${config.backendApiUrl}/api/config.json`);
+        const url = new URL(`${config.proxyUrl}/api/config.json`);
 
         const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
 
