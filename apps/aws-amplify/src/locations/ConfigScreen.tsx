@@ -11,47 +11,15 @@ import {
   TextInput,
   TextLink,
 } from '@contentful/f36-components';
-import { css } from 'emotion';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import tokens from '@contentful/f36-tokens';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import AmplifyIcon, { AWSAmplifyBrand } from '../components/common/AmplifyIcon';
 import { isValidUrl } from '../lib/isVaildUrl';
+import { styles } from '../components/config-screen/ConfigScreen.styles';
+import AmplifyIcon from '../components/common/AmplifyIcon';
 
 export interface AppInstallationParameters {
   amplifyWebhookUrl?: string;
 }
-
-export const styles = {
-  body: css({
-    height: 'auto',
-    minHeight: '40vh',
-    margin: '0 auto',
-    marginTop: tokens.spacingXl,
-    padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
-    maxWidth: '900px',
-    backgroundColor: tokens.colorWhite,
-    zIndex: 2,
-    boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
-    borderRadius: '2px',
-  }),
-  background: css({
-    display: 'block',
-    position: 'absolute',
-    zIndex: -1,
-    top: 0,
-    width: '100%',
-    height: '300px',
-    backgroundColor: AWSAmplifyBrand.primaryColor,
-  }),
-  box: {
-    width: '100%',
-    marginTop: '22px',
-  },
-  icon: {
-    marginTop: '41px',
-  },
-};
 
 const ConfigScreen = () => {
   const sdk = useSDK<ConfigAppSDK>();
