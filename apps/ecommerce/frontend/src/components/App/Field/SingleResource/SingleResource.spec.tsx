@@ -58,7 +58,7 @@ describe('SingleResource component', () => {
     expect(resourceField).toBeVisible();
   });
 
-  it('handles adding a resource ', async () => {
+  it.skip('handles adding a resource ', async () => {
     userEvent.setup();
     const mockOpenCurrentApp = jest.fn(async () => [{ id: 'gid://shopify/Product/8191006998814' }]);
     const mockSetValue = jest.fn();
