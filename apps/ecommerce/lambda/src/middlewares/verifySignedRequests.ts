@@ -53,6 +53,7 @@ const makeCanonicalReq = (req: Request) => {
   const pathPrefix = config.stage !== 'prd' ? `/${config.stage}` : '';
   const fullPath = req.originalUrl.split('?')[0];
   const signedPath = `${pathPrefix}${fullPath}`; // note: req.originalUrl starts with a `/` and includes the full path & query string
+  const encodedSignedPath = signedPath.replace(/:/g, encodeURIComponent(':')); // note: expressjs decodes colons in the path so we have to re-encode the params
 
   // express.json() makes body always an object ({}), even if there is no body
   // so we need to check if the body is empty and set it to undefined
@@ -60,7 +61,7 @@ const makeCanonicalReq = (req: Request) => {
 
   return <CanonicalRequest>{
     method: req.method,
-    path: signedPath,
+    path: encodedSignedPath,
     headers: headers,
     body: bodyOrUndefined,
   };
