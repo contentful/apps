@@ -29,10 +29,12 @@ const ResourceSelectionDialog = () => {
   useEffect(() => {
     (async () => {
       try {
-        const url = new URL(`${config.backendApiUrl}/api/resources`);
+        // TODO: Fix the app id, and the resource type Id
+        const url = new URL(`${config.proxyUrl}/api/integrations/123/resourcesTypes/123/resources`);
 
-        const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'POST', {
+        const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET', {
           ...contentfulContextHeaders(sdk),
+          'x-provider-url': config.providerUrl,
         });
 
         if (!res.ok) {

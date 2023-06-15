@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/app-sdk": "^4.17.2",
+    "@contentful/app-sdk": "^4.19.0",
     "@contentful/f36-components": "4.43.0",
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/react-apps-toolkit": "1.2.15",
@@ -44,11 +44,11 @@
     "@testing-library/react": "12.1.5",
     "@tsconfig/create-react-app": "1.0.3",
     "@types/jest": "29.5.2",
-    "@types/node": "18.16.16",
+    "@types/node": "18.16.18",
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.3",
     "cross-env": "7.0.3",
-    "esbuild": "^0.17.19",
+    "esbuild": "^0.18.2",
     "typescript": "4.9.5"
   },
   "homepage": "."

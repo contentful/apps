@@ -19,6 +19,13 @@ const mockSdk: any = {
     onSchemaErrorsChanged: jest.fn(),
     onIsDisabledChanged: jest.fn(),
     onValueChanged: jest.fn(),
+    removeValue: jest.fn(),
+  },
+  location: {
+    is: jest.fn(),
+  },
+  dialogs: {
+    openCurrentApp: jest.fn(),
   },
 };
 

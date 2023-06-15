@@ -18,9 +18,37 @@ const createShopifyClientConfig = (params = '{}') => {
   return { domain, storefrontAccessToken };
 };
 
-export const resourceTypeSchema = {
+export const appInstallConfig = {
+  name: 'Shopify',
+  description:
+    'The Shopify app allows editors to select products from their Shopify account and reference them inside of Contentful entries.',
+  parameterDefinitions: [
+    {
+      id: 'storefrontAccessToken',
+      name: 'Storefront Access Token',
+      placeholder: 'a12bc3d45e678f91011ghi121314j15k',
+      description: 'The storefront access token to your Shopify store',
+      type: 'Symbol',
+      required: true,
+    },
+    {
+      id: 'shopName',
+      name: 'Shop Name',
+      placeholder: 'example-shop',
+      description: 'The shop name of your Shopify store',
+      type: 'Symbol',
+      required: true,
+    },
+  ],
+  primaryColor: '#212F3F',
+  logoUrl:
+    'https://images.ctfassets.net/juh8bvgveao4/4eTYD0rlVO5tAucQoStln/952f5ed757229c91a099e61d8463f2f9/shopify.svg',
+};
+
+export const resourceTypeConfig = {
   resourceTypes: [
     {
+      name: 'Shopify:Product',
       'Shopify:Product': {
         managementDisplay: {
           type: 'productCard',
@@ -39,7 +67,7 @@ export const resourceTypeSchema = {
   ],
 };
 
-export const schema = {
+export const shopifySchema = {
   $ref: '#/definitions/Product',
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {

@@ -24,7 +24,8 @@ const DialogHeader = (props: Props) => {
   useEffect(() => {
     (async () => {
       try {
-        const url = new URL(`${config.backendApiUrl}/api/config.json`);
+        // TODO: Fix this app installation id
+        const url = new URL(`${config.proxyUrl}/api/integrations/123`);
 
         const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
 
@@ -42,7 +43,11 @@ const DialogHeader = (props: Props) => {
   }, [sdk, cma]);
 
   return (
-    <Flex justifyContent="space-between" alignItems="center" className={styles.header}>
+    <Flex
+      data-test-id="dialog-header"
+      justifyContent="space-between"
+      alignItems="center"
+      className={styles.header}>
       <Flex alignItems="center">
         <Box className={styles.icon} paddingRight="spacingS">
           {logoUrl && <img src={logoUrl} alt="App logo" />}
