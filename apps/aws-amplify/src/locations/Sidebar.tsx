@@ -3,6 +3,7 @@ import { SidebarAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 import Axios, { AxiosError } from 'axios';
 import { useState } from 'react';
+import { config } from '../config';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -16,7 +17,7 @@ const Sidebar = () => {
 
   const buildAmplifyApp = () => {
     setIsLoading(true);
-    const webhookURL = 'https://sdlb4gygrnzr252nrx4h3tghym0fameu.lambda-url.us-west-2.on.aws/';
+    const webhookURL = config.lambdaURL;
     const initBuild = async () => {
       try {
         const response = await Axios({
