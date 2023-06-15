@@ -5,7 +5,7 @@ import { styles } from './ProductCardBadge.styles';
 interface ProductCardBadgeProps {
   showHeaderMenu?: boolean;
   externalResourceError?: ExternalResourceError;
-  status?: EntityStatus; // should this be optional>>>>>>>>>>>>>>>>>
+  status?: EntityStatus;
 }
 
 const ProductCardBadge = (props: ProductCardBadgeProps) => {
