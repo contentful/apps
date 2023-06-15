@@ -20,7 +20,7 @@ const ProductCardBadge = (props: ProductCardBadgeProps) => {
   }
 
   return (
-    <Box className={styles.badge}>
+    <Box data-test-id="badge-style-wrapper" className={styles.badge}>
       <Badge variant="featured">{status}</Badge>
     </Box>
   );

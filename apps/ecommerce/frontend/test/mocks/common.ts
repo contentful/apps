@@ -1,10 +1,12 @@
 import { ExternalResource, ExternalResourceLink } from 'types';
 
 const externalResource: ExternalResource = {
-  title: 'Kleenex',
-  description: 'tissue',
+  title: 'Cheetos',
+  description: 'yummy styrofoam snack',
   status: 'published',
   id: '1234',
+  image:
+    'https://images.ctfassets.net/juh8bvgveao4/QoAO8rqn86a4jiH1yudiN/e518fd9263b67705c3ffb041bd217bda/imageService.webp',
 };
 
 const externalResources: ExternalResource[] = [
@@ -31,4 +33,21 @@ const externalResourceLink: ExternalResourceLink = {
   },
 };
 
-export { externalResource, externalResources, externalResourceLink };
+const externalResourceLinks: ExternalResourceLink[] = [
+  {
+    sys: {
+      type: 'ResourceLink',
+      linkType: 'Shopify:Product',
+      urn: 'gid://shopify/Product/8191006998814',
+    },
+  },
+  {
+    sys: {
+      type: 'ResourceLink',
+      linkType: 'Shopify:Product',
+      urn: 'gid://shopify/Product/123498742354',
+    },
+  },
+];
+
+export { externalResource, externalResources, externalResourceLink, externalResourceLinks };

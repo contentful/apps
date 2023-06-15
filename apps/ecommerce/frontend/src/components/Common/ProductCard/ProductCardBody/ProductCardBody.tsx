@@ -1,17 +1,17 @@
 import { Box, Flex, Grid, Text } from '@contentful/f36-components';
 import { ExternalResourceError } from 'types';
 
-interface Props {
-  name?: string;
+interface ProductCardProps {
+  title?: string;
   description?: string;
   image?: string;
   id?: string;
   error?: ExternalResourceError;
 }
 
-const ProductCardBody = (props: Props) => {
+const ProductCardBody = (props: ProductCardProps) => {
   const {
-    name: productName,
+    title: productName,
     description: productDescription,
     image: productImage,
     id: productId,
@@ -29,7 +29,7 @@ const ProductCardBody = (props: Props) => {
   );
 
   const renderMainBody = () => (
-    <Grid rowGap="spacingXs">
+    <Grid data-test-id="main-product-card-body" rowGap="spacingXs">
       <Grid.Item>
         <Text
           fontSize="fontSizeL"

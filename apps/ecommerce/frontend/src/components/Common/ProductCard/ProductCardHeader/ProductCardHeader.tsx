@@ -9,8 +9,8 @@ interface Props {
   headerTitle: string;
   status?: EntityStatus;
   handleRemove?: (index?: number) => void;
-  showJson: boolean;
-  handleShowJson: (show: boolean) => void;
+  showJson?: boolean;
+  handleShowJson?: (show: boolean) => void;
   cardIndex?: number;
   totalCards?: number;
   showExternalResourceLinkDetails?: boolean;
@@ -62,9 +62,9 @@ const ProductCardHeader = (props: Props) => {
           {showHeaderMenu && (
             <ProductCardMenu
               onRemove={() => handleRemove?.call(null, cardIndex)}
-              isDataVisible={showJson}
-              onShowData={() => handleShowJson(true)}
-              onHideData={() => handleShowJson(false)}
+              isDataVisible={Boolean(showJson)}
+              onShowData={() => handleShowJson?.call(null, true)}
+              onHideData={() => handleShowJson?.call(null, false)}
               cardIndex={cardIndex}
               totalCards={totalCards}
               onMoveToBottom={() => handleMoveToBottom?.call(null, cardIndex)}

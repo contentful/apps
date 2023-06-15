@@ -10,9 +10,9 @@ import ProductCard from 'components/Common/ProductCard';
 export interface ProductCardWrapperProps {
   externalResourceLink: ExternalResourceLink;
   cardIndex: number;
-  dragHandleRender?: RenderDragFn;
   resourceArray: ExternalResourceLink[];
   productCardType: ProductCardType;
+  dragHandleRender?: RenderDragFn;
 }
 
 const ProductCardWrapper = (props: ProductCardWrapperProps) => {
