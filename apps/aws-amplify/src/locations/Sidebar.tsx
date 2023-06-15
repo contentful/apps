@@ -16,18 +16,20 @@ const Sidebar = () => {
 
   const buildAmplifyApp = () => {
     setIsLoading(true);
-    const webhookURL = sdk.parameters.installation.amplifyWebhookUrl;
+    const webhookURL = 'https://sdlb4gygrnzr252nrx4h3tghym0fameu.lambda-url.us-west-2.on.aws/';
     const initBuild = async () => {
       try {
         const response = await Axios({
           method: 'post',
           url: webhookURL,
-          data: {},
+          data: {
+            amplifyUrl: sdk.parameters.installation.amplifyWebhookUrl,
+          },
           headers: {
             'Content-Type': 'application/json',
           },
         });
-        if (response.status === 202) sdk.notifier.success('The AWS website build was triggered.');
+        if (response.status === 200) sdk.notifier.success('The AWS website build was triggered.');
         else throw new Error(errorText);
       } catch (error) {
         if (error instanceof AxiosError) {
