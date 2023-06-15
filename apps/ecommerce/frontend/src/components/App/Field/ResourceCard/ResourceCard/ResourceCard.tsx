@@ -64,7 +64,11 @@ const ResourceCard = (props: ResourceCardProps) => {
             {resourceProvider} {resourceType}
           </Text>
           <Flex alignItems="center" isInline={true}>
-            {externalResource.status && <Badge variant="featured">{externalResource.status}</Badge>}
+            {externalResource.availableForSale && (
+              <Badge variant="featured">
+                {externalResource.availableForSale ? 'Available' : 'Not Available'}
+              </Badge>
+            )}
             <ResourceCardMenu
               onRemove={() => handleRemove(index)}
               isDataVisible={showJson}
