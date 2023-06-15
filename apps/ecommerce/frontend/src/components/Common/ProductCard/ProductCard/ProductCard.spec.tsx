@@ -11,7 +11,7 @@ describe('ProductCard component', () => {
       <ProductCard cardHeader="Kleenex product" onSelect={() => {}} resource={externalResource} />
     );
 
-    const productName = externalResource.name!;
+    const productName = externalResource.title!;
     const productDescription = externalResource.description!;
 
     expect(getByText(productName)).toBeVisible();
@@ -29,7 +29,7 @@ describe('ProductCard component', () => {
       />
     );
 
-    const productName = externalResource.name!;
+    const productName = externalResource.title!;
     await userEvent.click(getByText(productName));
 
     expect(mockOnSelect).toHaveBeenCalled();

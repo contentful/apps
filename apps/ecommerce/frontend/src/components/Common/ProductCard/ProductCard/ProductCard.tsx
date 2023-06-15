@@ -80,7 +80,7 @@ const ProductCard = (props: ProductCardProps) => {
       />
 
       <ProductCardBody
-        name={resource.name}
+        name={resource.title}
         description={resource.description}
         image={resource.image}
         id={resource.id}

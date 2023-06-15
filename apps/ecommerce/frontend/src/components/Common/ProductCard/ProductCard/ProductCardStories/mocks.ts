@@ -9,7 +9,7 @@ export const mockExternalResourceLink: ExternalResourceLink = {
 };
 
 export const mockExternalResource: ExternalResource = {
-  name: 'Cheetos',
+  title: 'Cheetos',
   description: 'Tasty and cheesy! These are so delicious and they make your fingers orange.',
   image:
     'https://images.ctfassets.net/juh8bvgveao4/QoAO8rqn86a4jiH1yudiN/e518fd9263b67705c3ffb041bd217bda/imageService.webp',
