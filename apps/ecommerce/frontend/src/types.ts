@@ -45,7 +45,7 @@ export interface ExternalResourceLink {
 }
 
 export interface ExternalResource {
-  name?: string;
+  title?: string;
   description?: string;
   image?: string;
   status?: EntityStatus;

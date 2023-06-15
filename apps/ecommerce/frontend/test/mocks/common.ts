@@ -1,7 +1,7 @@
 import { ExternalResource, ExternalResourceLink } from 'types';
 
 const externalResource: ExternalResource = {
-  name: 'Kleenex',
+  title: 'Kleenex',
   description: 'tissue',
   status: 'published',
   id: '1234',
@@ -9,13 +9,13 @@ const externalResource: ExternalResource = {
 
 const externalResources: ExternalResource[] = [
   {
-    name: 'Charmin',
+    title: 'Charmin',
     description: 'tissue paper',
     status: 'published',
     id: '2345',
   },
   {
-    name: 'Shout',
+    title: 'Shout',
     description: 'cleaner',
     status: 'published',
     id: '3456',

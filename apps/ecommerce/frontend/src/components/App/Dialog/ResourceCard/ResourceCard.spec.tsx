@@ -16,7 +16,7 @@ describe('ResourceCard component', () => {
       />
     );
 
-    const productName = externalResource.name!;
+    const productName = externalResource.title!;
     const productDescription = externalResource.description!;
 
     expect(getByText(productName)).toBeVisible();
@@ -35,7 +35,7 @@ describe('ResourceCard component', () => {
       />
     );
 
-    const productName = externalResource.name!;
+    const productName = externalResource.title!;
     await userEvent.click(getByText(productName));
 
     expect(mockOnSelect).toHaveBeenCalled();
