@@ -9,7 +9,9 @@ import {
 } from '../../../../../test/mocks';
 import { render, screen } from '@testing-library/react';
 
-jest.mock('../ProductCardMenu/ProductCardMenu', () => <div>Product card menuc component</div>);
+jest.mock('../ProductCardMenu/ProductCardMenu', () => () => (
+  <div>Product card menuc component</div>
+));
 
 jest.mock('helpers/resourceProviderUtils', () => ({
   getResourceProviderAndType: () => ({
