@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ProductCard from '../ProductCard';
-import { ExternalResource } from 'types';
 import { DragHandle } from '@contentful/f36-components';
 import { mockExternalResource, mockExternalResourceLink } from './mocks';
 
