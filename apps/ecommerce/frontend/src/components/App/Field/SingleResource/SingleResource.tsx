@@ -15,7 +15,8 @@ const SingleResource = () => {
   useEffect(() => {
     (async () => {
       try {
-        const url = new URL(`${config.proxyUrl}/api/config.json`);
+        // TODO: Get the app id for the url
+        const url = new URL(`${config.proxyUrl}/api/integrations/123`);
 
         const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
 

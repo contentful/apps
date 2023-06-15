@@ -37,10 +37,10 @@ const ResourceCard = (props: ResourceCardProps) => {
             {cardHeader}
           </Text>
           <Flex alignItems="center" isInline={true}>
-            {resource.status && (
+            {resource.availableForSale && (
               <Box className={styles.badge}>
                 <Badge variant="featured" className={styles.badge}>
-                  {resource.status}
+                  {resource.availableForSale ? 'Available' : 'Not Available'}
                 </Badge>
               </Box>
             )}
