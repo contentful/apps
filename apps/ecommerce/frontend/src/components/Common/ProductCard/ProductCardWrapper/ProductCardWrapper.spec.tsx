@@ -28,9 +28,6 @@ jest.mock('helpers/signedRequests');
 let mockExternalResource = externalResource;
 jest.mock('hooks/field/useExternalResource', () => () => ({
   isLoading: false,
-  error: 'Something went wrong',
-  errorMessage: 'Internal server error',
-  errorStatus: 401,
   externalResource: mockExternalResource,
 }));
 
