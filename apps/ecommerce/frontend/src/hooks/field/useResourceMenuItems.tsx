@@ -1,10 +1,10 @@
 import { Menu } from '@contentful/f36-components';
 import { useEffect, useMemo, useState } from 'react';
-import type { ResourceCardMenuProps } from 'components/App/Field/ResourceCard/ResourceCardMenu/ResourceCardMenu';
+import type { ProductCardMenuProps } from 'components/Common/ProductCard/ProductCardMenu/ProductCardMenu'; // adjust?????
 
 type menuItemsOutput = { menuItems: JSX.Element[] };
 
-const useResourceMenuItems = (menuActions: ResourceCardMenuProps): menuItemsOutput => {
+const useResourceMenuItems = (menuActions: ProductCardMenuProps): menuItemsOutput => {
   const defaultMenuItems = useMemo(
     () => [
       <Menu.Item key="delete" onClick={() => menuActions.onRemove()}>
@@ -19,9 +19,9 @@ const useResourceMenuItems = (menuActions: ResourceCardMenuProps): menuItemsOutp
   const addMenuItems = () => {
     const newMenuItems = [...defaultMenuItems];
 
-    const { index, total, onMoveToTop, onMoveToBottom } = menuActions;
-    if (typeof index !== 'undefined' && total && total > 1) {
-      if (index > 0 && onMoveToTop) {
+    const { cardIndex, totalCards, onMoveToTop, onMoveToBottom } = menuActions;
+    if (typeof cardIndex !== 'undefined' && totalCards && totalCards > 1) {
+      if (cardIndex > 0 && onMoveToTop) {
         newMenuItems.push(
           <Menu.Item key="moveToTop" onClick={() => onMoveToTop()}>
             Move to top
@@ -29,7 +29,7 @@ const useResourceMenuItems = (menuActions: ResourceCardMenuProps): menuItemsOutp
         );
       }
 
-      if (index + 1 < total && onMoveToBottom) {
+      if (cardIndex + 1 < totalCards && onMoveToBottom) {
         newMenuItems.push(
           <Menu.Item key="moveToBottom" onClick={() => onMoveToBottom()}>
             Move to bottom

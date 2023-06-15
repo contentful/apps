@@ -1,10 +1,12 @@
 import { Box, Flex, Grid, Text } from '@contentful/f36-components';
+import { ExternalResourceError } from 'types';
 
 interface Props {
-  name: string;
-  description: string;
-  image: string;
-  id: string;
+  name?: string;
+  description?: string;
+  image?: string;
+  id?: string;
+  error?: ExternalResourceError;
 }
 
 const ProductCardBody = (props: Props) => {
@@ -13,28 +15,45 @@ const ProductCardBody = (props: Props) => {
     description: productDescription,
     image: productImage,
     id: productId,
+    error,
   } = props;
 
+  const renderErrorBody = () => (
+    <Text
+      fontSize="fontSizeL"
+      fontWeight="fontWeightDemiBold"
+      lineHeight="lineHeightL"
+      isWordBreak={true}>
+      Resource is missing or inaccessible
+    </Text>
+  );
+
+  const renderMainBody = () => (
+    <Grid rowGap="spacingXs">
+      <Grid.Item>
+        <Text
+          fontSize="fontSizeL"
+          fontWeight="fontWeightDemiBold"
+          lineHeight="lineHeightL"
+          isWordBreak={true}>
+          {productName}
+        </Text>
+      </Grid.Item>
+      <Grid.Item>
+        <Text>{productDescription}</Text>
+      </Grid.Item>
+      <Grid.Item>
+        <Text fontColor="gray600">{productId}</Text>
+      </Grid.Item>
+    </Grid>
+  );
+
+  // TODO: Handle missing image
   return (
     <Box padding="spacingM">
       <Flex fullWidth={true} justifyContent="space-between">
-        <Grid rowGap="spacingXs">
-          <Grid.Item>
-            <Text
-              fontSize="fontSizeL"
-              fontWeight="fontWeightDemiBold"
-              lineHeight="lineHeightL"
-              isWordBreak={true}>
-              {productName}
-            </Text>
-          </Grid.Item>
-          <Grid.Item>
-            <Text>{productDescription}</Text>
-          </Grid.Item>
-          <Grid.Item>
-            <Text fontColor="gray600">{productId}</Text>
-          </Grid.Item>
-        </Grid>
+        {error ? renderErrorBody() : renderMainBody()}
+
         {productImage && <img src={productImage} alt={productName} width="70" height="70" />}
       </Flex>
     </Box>

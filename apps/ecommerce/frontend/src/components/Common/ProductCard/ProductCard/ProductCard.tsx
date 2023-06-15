@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card } from '@contentful/f36-components';
 import { styles } from './ProductCard.styles';
-import { ExternalResource, ExternalResourceLink, ProductCardType } from 'types';
+import { ExternalResource, ExternalResourceError, ProductCardType } from 'types';
 import ProductCardHeader from '../ProductCardHeader/ProductCardHeader';
 import ProductCardBody from '../ProductCardBody/ProductCardBody';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
@@ -25,8 +25,7 @@ export interface ProductCardProps {
   totalCards?: number;
   externalResourceLink?: any;
   cardMovementCallbacks?: CardMovementCallbacks;
-  // TO DO: add error state
-  // error state>>>>>
+  error?: ExternalResourceError;
 }
 
 const ProductCard = (props: ProductCardProps) => {
@@ -45,10 +44,12 @@ const ProductCard = (props: ProductCardProps) => {
     dragHandleRender,
     externalResourceLink,
     cardMovementCallbacks,
+    error,
   } = props;
 
   const { handleMoveToBottom, handleMoveToTop } = cardMovementCallbacks || {};
   const fieldProductCardType = productCardType === 'field';
+  const renderRawData = !error && fieldProductCardType && externalResourceLink && showJson;
 
   return (
     <Card
@@ -60,29 +61,33 @@ const ProductCard = (props: ProductCardProps) => {
       }}
       isLoading={isLoading}
       withDragHandle={!!dragHandleRender}
-      dragHandleRender={dragHandleRender}>
+      dragHandleRender={dragHandleRender}
+      // TODO: Determine hover state prop
+      isHovered={false}>
       <ProductCardHeader
         headerTitle={cardHeader}
-        status={resource.status ?? ''}
+        status={resource.status}
         handleRemove={handleRemove}
         cardIndex={cardIndex}
         totalCards={totalCards}
         showJson={showJson}
         handleShowJson={setShowJson}
-        showExternalResourceLinkDetails={Boolean(externalResourceLink)}
+        showExternalResourceLinkDetails={!error && Boolean(externalResourceLink)}
         handleMoveToBottom={handleMoveToBottom}
         handleMoveToTop={handleMoveToTop}
         showHeaderMenu={Boolean(fieldProductCardType)}
+        error={error}
       />
 
       <ProductCardBody
-        name={resource.name ?? ''}
-        description={resource.description ?? ''}
-        image={resource.image ?? ''}
-        id={resource.id ?? ''}
+        name={resource.name}
+        description={resource.description}
+        image={resource.image}
+        id={resource.id}
+        error={error}
       />
 
-      {fieldProductCardType && externalResourceLink && showJson && (
+      {renderRawData && (
         <ProductCardRawData
           value={JSON.stringify(externalResourceLink)}
           isVisible={showJson}

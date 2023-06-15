@@ -1,12 +1,13 @@
-import { Badge, Box, Flex, Text, IconButton } from '@contentful/f36-components';
+import { Box, Flex, Text, IconButton, EntityStatus } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { styles } from './ProductCardHeader.styles';
 import ProductCardMenu from '../ProductCardMenu/ProductCardMenu';
-import { ExternalResourceLink } from 'types';
+import { ExternalResourceError } from 'types';
+import ProductCardBadge from '../ProductCardBadge/ProductCardBadge';
 
 interface Props {
   headerTitle: string;
-  status: string;
+  status?: EntityStatus;
   handleRemove?: (index?: number) => void;
   showJson: boolean;
   handleShowJson: (show: boolean) => void;
@@ -16,6 +17,7 @@ interface Props {
   handleMoveToBottom?: (index?: number) => void;
   handleMoveToTop?: (index?: number) => void;
   showHeaderMenu?: boolean;
+  error?: ExternalResourceError;
 }
 
 const ProductCardHeader = (props: Props) => {
@@ -31,6 +33,7 @@ const ProductCardHeader = (props: Props) => {
     handleMoveToBottom,
     handleMoveToTop,
     showHeaderMenu,
+    error,
   } = props;
 
   return (
@@ -39,15 +42,14 @@ const ProductCardHeader = (props: Props) => {
         <Text fontColor="gray600" isWordBreak={true}>
           {headerTitle}
         </Text>
+
         <Flex alignItems="center" isInline={true}>
-          {status &&
-            (showHeaderMenu ? (
-              <Badge variant="featured">{status}</Badge>
-            ) : (
-              <Box className={styles.badge}>
-                <Badge variant="featured">{status}</Badge>
-              </Box>
-            ))}
+          <ProductCardBadge
+            showHeaderMenu={showHeaderMenu}
+            externalResourceError={error}
+            status={status}
+          />
+
           {showExternalResourceLinkDetails && (
             <IconButton
               variant="transparent"
@@ -56,6 +58,7 @@ const ProductCardHeader = (props: Props) => {
               icon={<ExternalLinkIcon />}
             />
           )}
+
           {showHeaderMenu && (
             <ProductCardMenu
               onRemove={() => handleRemove?.call(null, cardIndex)}

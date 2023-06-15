@@ -66,7 +66,8 @@ const MultipleResources = () => {
     return Array.isArray(resources) ? resources : [];
   };
 
-  const handleRemove = (index: number) => {
+  const handleRemove = (index?: number) => {
+    if (!index) return;
     const resourceArray = [...sdk.field.getValue()];
     resourceArray.splice(index, 1);
 
@@ -74,7 +75,8 @@ const MultipleResources = () => {
     sdk.field.setValue(newValue);
   };
 
-  const handleMoveToTop = (index: number) => {
+  const handleMoveToTop = (index?: number) => {
+    if (!index) return;
     const resourceArray = sdk.field.getValue();
 
     const newValue = [...resourceArray];
@@ -82,7 +84,8 @@ const MultipleResources = () => {
     sdk.field.setValue(newValue);
   };
 
-  const handleMoveToBottom = (index: number) => {
+  const handleMoveToBottom = (index?: number) => {
+    if (!index) return;
     const resourceArray = sdk.field.getValue();
 
     const newValue = [...resourceArray];
