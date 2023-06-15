@@ -14,7 +14,7 @@ export interface ProductCardMenuProps {
 }
 
 const ProductCardMenu = (props: ProductCardMenuProps) => {
-  const { menuItems } = useResourceMenuItems(props); // this disturbs me
+  const { menuItems } = useResourceMenuItems(props);
 
   return (
     <Menu offset={[-5, 0]}>

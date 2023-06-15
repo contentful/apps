@@ -31,9 +31,6 @@ export const DialogCard: Story = {
   args: {
     resource: mockExternalResource,
     cardHeader: 'Shopify Product',
-    isLoading: false,
-    cardIndex: 0,
-    totalCards: 1,
   },
   parameters: {
     ...designParams,
@@ -44,9 +41,6 @@ export const DialogSelectedCard: Story = {
   args: {
     resource: mockExternalResource,
     cardHeader: 'Shopify Product',
-    isLoading: false,
-    cardIndex: 0,
-    totalCards: 1,
     isSelected: true,
   },
   parameters: {

@@ -31,7 +31,6 @@ export const FieldSingleReference: Story = {
   args: {
     resource: mockExternalResource,
     cardHeader: 'Shopify Product',
-    isLoading: false,
     cardIndex: 0,
     totalCards: 1,
     productCardType: 'field',
@@ -46,7 +45,6 @@ export const FieldMultipleReference: Story = {
   args: {
     resource: mockExternalResource,
     cardHeader: 'Shopify Product',
-    isLoading: false,
     cardIndex: 1,
     totalCards: 4,
     dragHandleRender: () => {
