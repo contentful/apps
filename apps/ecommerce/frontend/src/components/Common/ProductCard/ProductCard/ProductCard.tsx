@@ -26,6 +26,7 @@ export interface ProductCardProps {
   externalResourceLink?: any;
   cardMovementCallbacks?: CardMovementCallbacks;
   error?: ExternalResourceError;
+  isHovered?: boolean;
 }
 
 const ProductCard = (props: ProductCardProps) => {
@@ -45,6 +46,7 @@ const ProductCard = (props: ProductCardProps) => {
     externalResourceLink,
     cardMovementCallbacks,
     error,
+    isHovered,
   } = props;
 
   const { handleMoveToBottom, handleMoveToTop } = cardMovementCallbacks || {};
@@ -63,7 +65,7 @@ const ProductCard = (props: ProductCardProps) => {
       withDragHandle={!!dragHandleRender}
       dragHandleRender={dragHandleRender}
       // TODO: Determine hover state prop
-      isHovered={false}>
+      isHovered={isHovered}>
       <ProductCardHeader
         headerTitle={cardHeader}
         status={resource.status}

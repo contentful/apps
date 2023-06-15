@@ -26,13 +26,16 @@ const designParams = {
   },
 };
 
+const CARD_HEADER = 'Shopify Product';
+const CARD_TYPE = 'field';
+
 export const FieldSingleReference: Story = {
   args: {
     resource: mockExternalResource,
-    cardHeader: 'Shopify Product',
+    cardHeader: CARD_HEADER,
     cardIndex: 0,
     totalCards: 1,
-    productCardType: 'field',
+    productCardType: CARD_TYPE,
     externalResourceLink: mockExternalResourceLink,
   },
   parameters: {
@@ -43,13 +46,13 @@ export const FieldSingleReference: Story = {
 export const FieldMultipleReference: Story = {
   args: {
     resource: mockExternalResource,
-    cardHeader: 'Shopify Product',
+    cardHeader: CARD_HEADER,
     cardIndex: 1,
     totalCards: 4,
     dragHandleRender: () => {
       return <DragHandle label="Reorder Card" />;
     },
-    productCardType: 'field',
+    productCardType: CARD_TYPE,
     externalResourceLink: mockExternalResourceLink,
   },
   parameters: {
@@ -60,11 +63,11 @@ export const FieldMultipleReference: Story = {
 export const FieldSingleSelectedCard: Story = {
   args: {
     resource: mockExternalResource,
-    cardHeader: 'Shopify Product',
+    cardHeader: CARD_HEADER,
     cardIndex: 0,
     totalCards: 1,
     isSelected: true,
-    productCardType: 'field',
+    productCardType: CARD_TYPE,
     externalResourceLink: mockExternalResourceLink,
   },
   parameters: {
@@ -75,10 +78,10 @@ export const FieldSingleSelectedCard: Story = {
 export const FieldSingleMissingCard: Story = {
   args: {
     resource: {},
-    cardHeader: 'Shopify Product',
+    cardHeader: CARD_HEADER,
     cardIndex: 0,
     totalCards: 1,
-    productCardType: 'field',
+    productCardType: CARD_TYPE,
     error: {
       error: 'error fetching external resource',
       errorMessage: 'Internal server error',
@@ -94,11 +97,11 @@ export const FieldSingleMissingCard: Story = {
 export const FieldSingleSelectedCardLoading: Story = {
   args: {
     resource: mockExternalResource,
-    cardHeader: 'Shopify Product',
+    cardHeader: CARD_HEADER,
     cardIndex: 0,
     totalCards: 1,
     isLoading: true,
-    productCardType: 'field',
+    productCardType: CARD_TYPE,
     externalResourceLink: mockExternalResourceLink,
   },
   parameters: {
