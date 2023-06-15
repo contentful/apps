@@ -64,7 +64,7 @@ const ProductCard = (props: ProductCardProps) => {
       dragHandleRender={dragHandleRender}
       // TODO: Determine hover state prop
       isHovered={false}>
-      {/* <ProductCardHeader
+      <ProductCardHeader
         headerTitle={cardHeader}
         status={resource.status}
         handleRemove={handleRemove}
@@ -77,7 +77,7 @@ const ProductCard = (props: ProductCardProps) => {
         handleMoveToTop={handleMoveToTop}
         showHeaderMenu={Boolean(fieldProductCardType)}
         error={error}
-      /> */}
+      />
 
       <ProductCardBody
         title={resource.title}
