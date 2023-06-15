@@ -9,9 +9,7 @@ import {
 } from '../../../../../test/mocks';
 import { render, screen } from '@testing-library/react';
 
-jest.mock('../ProductCardMenu/ProductCardMenu', () => () => (
-  <div>Product card menuc component</div>
-));
+jest.mock('../ProductCardMenu/ProductCardMenu', () => () => <div>Product card menu component</div>);
 
 jest.mock('helpers/resourceProviderUtils', () => ({
   getResourceProviderAndType: () => ({
@@ -24,8 +22,6 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
-
-jest.mock('helpers/signedRequests');
 
 let mockExternalResource = externalResource;
 jest.mock('hooks/field/useExternalResource', () => () => ({

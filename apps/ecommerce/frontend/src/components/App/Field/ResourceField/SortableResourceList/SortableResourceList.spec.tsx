@@ -8,6 +8,17 @@ import {
   externalResource,
 } from '../../../../../../test/mocks';
 
+jest.mock('components/Common/ProductCard/ProductCardMenu/ProductCardMenu', () => () => (
+  <div>Product card menu component</div>
+));
+
+jest.mock('helpers/resourceProviderUtils', () => ({
+  getResourceProviderAndType: () => ({
+    resourceType: 'product',
+    resourceProvider: 'shopify',
+  }),
+}));
+
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
