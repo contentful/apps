@@ -8,22 +8,24 @@ interface ProductCardBadgeProps {
   status?: EntityStatus;
 }
 
+const WithStyleWrapper = (children: JSX.Element) => (
+  <Box data-test-id="badge-style-wrapper" className={styles.badge}>
+    {children}
+  </Box>
+)
+
 const ProductCardBadge = (props: ProductCardBadgeProps) => {
   const { showHeaderMenu, externalResourceError, status } = props;
   const { error, errorMessage, errorStatus } = externalResourceError || {};
 
   if (error) {
-    return <Badge variant={errorStatus === 404 ? 'warning' : 'negative'}>{errorMessage}</Badge>;
+    return WithStyleWrapper(<Badge variant={errorStatus === 404 ? 'warning' : 'negative'}>{errorMessage}</Badge>)
   }
   if (showHeaderMenu) {
     return <Badge variant="featured">{status}</Badge>;
   }
 
-  return (
-    <Box data-test-id="badge-style-wrapper" className={styles.badge}>
-      <Badge variant="featured">{status}</Badge>
-    </Box>
-  );
+  return WithStyleWrapper(<Badge variant="featured">{status}</Badge>);
 };
 
 export default ProductCardBadge;

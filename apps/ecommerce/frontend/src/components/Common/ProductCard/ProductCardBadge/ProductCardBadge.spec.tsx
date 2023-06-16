@@ -29,7 +29,9 @@ describe('ProductCardBadge component', () => {
     render(<ProductCardBadge externalResourceError={externalResourceError} />);
 
     const errorText = getByText(externalResourceError.errorMessage);
+    const productCardBadgeStyleWrapper = getByTestId('badge-style-wrapper');
 
     expect(errorText).toBeVisible();
+    expect(productCardBadgeStyleWrapper).toBeVisible();
   });
 });

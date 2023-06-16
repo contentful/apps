@@ -45,3 +45,29 @@ export const DialogSelectedCard: Story = {
     ...designParams,
   },
 };
+
+export const DialogLoadingCard: Story = {
+  args: {
+    resource: mockExternalResource,
+    cardHeader: 'Shopify Product',
+    isLoading: true
+  },
+  parameters: {
+    ...designParams,
+  },
+};
+
+export const DialogMissingCard: Story = {
+  args: {
+    resource: {},
+    cardHeader: 'Shopify Product',
+    externalResourceError: {
+      error: 'error fetching external resource',
+      errorMessage: 'Internal server error',
+      errorStatus: 500,
+    },
+  },
+  parameters: {
+    ...designParams,
+  },
+};
