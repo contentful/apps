@@ -46,13 +46,14 @@ const ProductCardWrapper = (props: ProductCardWrapperProps) => {
       cardHeader={`${resourceProvider} ${resourceType}`}
       key={cardIndex}
       isLoading={isLoading}
-      error={{ error, errorMessage, errorStatus } as ExternalResourceError}
+      externalResourceError={{ error, errorMessage, errorStatus } as ExternalResourceError}
       cardIndex={cardIndex}
       totalCards={resourceArray.length}
       dragHandleRender={isMultiple ? dragHandleRender : undefined}
       productCardType={productCardType}
       handleRemove={handleRemove}
       cardMovementCallbacks={{ handleMoveToBottom, handleMoveToTop }}
+      externalResourceLink={resourceLink}
     />
   );
 };

@@ -4,9 +4,10 @@ import { ExternalResourceError } from 'types';
 interface ProductCardProps {
   title?: string;
   description?: string;
-  image?: string;
+  // TO DO fix image mapping
+  image?: any;
   id?: string;
-  error?: ExternalResourceError;
+  externalResourceError?: ExternalResourceError;
 }
 
 const ProductCardBody = (props: ProductCardProps) => {
@@ -15,7 +16,7 @@ const ProductCardBody = (props: ProductCardProps) => {
     description: productDescription,
     image: productImage,
     id: productId,
-    error,
+    externalResourceError,
   } = props;
 
   const renderErrorBody = () => (
@@ -52,7 +53,7 @@ const ProductCardBody = (props: ProductCardProps) => {
   return (
     <Box padding="spacingM">
       <Flex fullWidth={true} justifyContent="space-between">
-        {error ? renderErrorBody() : renderMainBody()}
+        {externalResourceError?.error ? renderErrorBody() : renderMainBody()}
 
         {productImage && <img src={productImage} alt={productName} width="70" height="70" />}
       </Flex>

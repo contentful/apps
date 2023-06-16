@@ -28,7 +28,7 @@ describe('ProductCardBody component', () => {
       errorMessage: 'Internal Server Error',
       errorStatus: 401,
     };
-    render(<ProductCardBody error={externalResourceError} />);
+    render(<ProductCardBody externalResourceError={externalResourceError} />);
 
     const mainBody = queryByTestId('main-product-card-body');
     const errorMessage = getByText('Resource is missing or inaccessible');

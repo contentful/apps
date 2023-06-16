@@ -82,7 +82,7 @@ export const FieldSingleMissingCard: Story = {
     cardIndex: 0,
     totalCards: 1,
     productCardType: CARD_TYPE,
-    error: {
+    externalResourceError: {
       error: 'error fetching external resource',
       errorMessage: 'Internal server error',
       errorStatus: 500,

@@ -13,7 +13,8 @@ type CardMovementCallbacks = {
 };
 
 export interface ProductCardProps {
-  resource: ExternalResource;
+  // TODO: Fix the CardHeader type during the mapping config refactor/ticket
+  resource: any;
   cardHeader: string;
   productCardType?: ProductCardType;
   handleRemove?: (index?: number) => void;
@@ -25,8 +26,8 @@ export interface ProductCardProps {
   totalCards?: number;
   externalResourceLink?: any;
   cardMovementCallbacks?: CardMovementCallbacks;
-  error?: ExternalResourceError;
   isHovered?: boolean;
+  externalResourceError?: ExternalResourceError;
 }
 
 const ProductCard = (props: ProductCardProps) => {
@@ -45,13 +46,13 @@ const ProductCard = (props: ProductCardProps) => {
     dragHandleRender,
     externalResourceLink,
     cardMovementCallbacks,
-    error,
     isHovered,
+    externalResourceError,
   } = props;
 
   const { handleMoveToBottom, handleMoveToTop } = cardMovementCallbacks || {};
   const fieldProductCardType = productCardType === 'field';
-  const renderRawData = !error && fieldProductCardType && externalResourceLink && showJson;
+  const renderRawData = !externalResourceError?.error && fieldProductCardType && externalResourceLink && showJson;
 
   return (
     <Card
@@ -74,19 +75,19 @@ const ProductCard = (props: ProductCardProps) => {
         totalCards={totalCards}
         showJson={showJson}
         handleShowJson={setShowJson}
-        showExternalResourceLinkDetails={!error && Boolean(externalResourceLink)}
+        showExternalResourceLinkDetails={!externalResourceError?.error && Boolean(externalResourceLink)} // do we want to show this icon button when there is an error, or the showData option?
         handleMoveToBottom={handleMoveToBottom}
         handleMoveToTop={handleMoveToTop}
         showHeaderMenu={Boolean(fieldProductCardType)}
-        error={error}
+        error={externalResourceError}
       />
 
       <ProductCardBody
         title={resource.title}
         description={resource.description}
-        image={resource.image}
+        image={resource?.image || resource?.images?.[0]?.src || ''}
         id={resource.id}
-        error={error}
+        externalResourceError={externalResourceError}
       />
 
       {renderRawData && (
