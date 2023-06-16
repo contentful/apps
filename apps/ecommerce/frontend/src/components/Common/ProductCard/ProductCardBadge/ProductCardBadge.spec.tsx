@@ -12,12 +12,24 @@ describe('ProductCardBadge component', () => {
     expect(productCardBadgeStyleWrapper).toBeVisible();
   });
 
-  it('mounts showing header menu', () => {
+  it('mounts showing header menu and default availability status', () => {
     render(<ProductCardBadge showHeaderMenu />);
 
     const productCardBadgeStyleWrapper = queryByTestId('badge-style-wrapper');
+    const status = getByText('Not Available')
 
     expect(productCardBadgeStyleWrapper).toBeFalsy();
+    expect(status).toBeVisible()
+  });
+
+  it('mounts showing status if provided', () => {
+    render(<ProductCardBadge showHeaderMenu resource={{ status: 'new' }}/>);
+
+    const productCardBadgeStyleWrapper = queryByTestId('badge-style-wrapper');
+    const status = getByText('new')
+
+    expect(productCardBadgeStyleWrapper).toBeFalsy();
+    expect(status).toBeVisible()
   });
 
   it('mounts showing error state', () => {

@@ -1,11 +1,11 @@
 import { Badge, Box, EntityStatus } from '@contentful/f36-components';
-import { ExternalResourceError } from 'types';
+import { ExternalResource, ExternalResourceError } from 'types';
 import { styles } from './ProductCardBadge.styles';
 
 interface ProductCardBadgeProps {
   showHeaderMenu?: boolean;
   externalResourceError?: ExternalResourceError;
-  status?: EntityStatus;
+  resource?: ExternalResource;
 }
 
 const WithStyleWrapper = (children: JSX.Element) => (
@@ -15,17 +15,23 @@ const WithStyleWrapper = (children: JSX.Element) => (
 )
 
 const ProductCardBadge = (props: ProductCardBadgeProps) => {
-  const { showHeaderMenu, externalResourceError, status } = props;
+  const { showHeaderMenu, externalResourceError, resource = {} } = props;
   const { error, errorMessage, errorStatus } = externalResourceError || {};
+
+  // TO DO: Ensure the status/badge state is consistent based on data provided
+  const getDisplayStatus = () => {
+    if (resource.status) return resource.status;
+    return resource.availableForSale ? 'Available' : 'Not Available'
+  }
 
   if (error) {
     return WithStyleWrapper(<Badge variant={errorStatus === 404 ? 'warning' : 'negative'}>{errorMessage}</Badge>)
   }
   if (showHeaderMenu) {
-    return <Badge variant="featured">{status}</Badge>;
+    return <Badge variant="featured">{getDisplayStatus()}</Badge>;
   }
 
-  return WithStyleWrapper(<Badge variant="featured">{status}</Badge>);
+  return WithStyleWrapper(<Badge variant="featured">{getDisplayStatus()}</Badge>);
 };
 
 export default ProductCardBadge;

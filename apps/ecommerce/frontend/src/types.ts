@@ -51,6 +51,7 @@ export interface ExternalResource {
   status?: EntityStatus;
   extras?: JSONObject;
   id?: string;
+  availableForSale?: boolean
 }
 
 type ErrorBoundaryErrored = { hasError: true; error: Error; info: ErrorInfo };

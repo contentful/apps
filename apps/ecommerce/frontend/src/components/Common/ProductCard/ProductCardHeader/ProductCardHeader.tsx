@@ -1,13 +1,13 @@
-import { Box, Flex, Text, IconButton, EntityStatus } from '@contentful/f36-components';
+import { Box, Flex, Text, IconButton } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { styles } from './ProductCardHeader.styles';
 import ProductCardMenu from '../ProductCardMenu/ProductCardMenu';
-import { ExternalResourceError } from 'types';
+import { ExternalResource, ExternalResourceError } from 'types';
 import ProductCardBadge from '../ProductCardBadge/ProductCardBadge';
 
 interface Props {
   headerTitle: string;
-  status?: EntityStatus;
+  resource?: ExternalResource;
   handleRemove?: (index?: number) => void;
   showJson?: boolean;
   handleShowJson?: (show: boolean) => void;
@@ -24,7 +24,7 @@ const ProductCardHeader = (props: Props) => {
   const {
     showExternalResourceLinkDetails,
     headerTitle,
-    status,
+    resource,
     handleRemove,
     showJson,
     handleShowJson,
@@ -47,7 +47,7 @@ const ProductCardHeader = (props: Props) => {
           <ProductCardBadge
             showHeaderMenu={showHeaderMenu}
             externalResourceError={error}
-            status={status}
+            resource={resource}
           />
 
           {showExternalResourceLinkDetails && (

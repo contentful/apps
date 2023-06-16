@@ -69,7 +69,7 @@ const ProductCard = (props: ProductCardProps) => {
       isHovered={isHovered}>
       <ProductCardHeader
         headerTitle={cardHeader}
-        status={resource.status}
+        resource={resource}
         handleRemove={handleRemove}
         cardIndex={cardIndex}
         totalCards={totalCards}
