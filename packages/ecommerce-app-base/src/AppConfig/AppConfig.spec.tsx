@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, cleanup, fireEvent, waitFor, screen } from '@testing-library/react';
+import { render, cleanup, fireEvent, waitFor } from '@testing-library/react';
 
 import { AppExtensionSDK } from '@contentful/app-sdk';
 
