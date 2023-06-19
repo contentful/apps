@@ -11,6 +11,8 @@ import {
   Flex,
   TextInput,
 } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
+
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 
@@ -76,6 +78,9 @@ const styles = {
     }),
   section: css({
     margin: `${tokens.spacingXl} 0`,
+  }),
+  eapNote: css({
+    marginBottom: tokens.spacingL,
   }),
   splitter: css({
     marginTop: tokens.spacingL,
@@ -198,8 +203,15 @@ export default class AppConfig extends React.Component<Props, State> {
   };
 
   renderApp() {
-    const { contentTypes, compatibleFields, selectedFields, fieldSkuTypes, parameters, appReady } =
-      this.state;
+    const {
+      contentTypes,
+      compatibleFields,
+      selectedFields,
+      fieldSkuTypes,
+      parameters,
+      appReady,
+      show,
+    } = this.state;
     const { parameterDefinitions, sdk, skuTypes } = this.props;
     const {
       ids: { space, environment },
@@ -235,9 +247,28 @@ export default class AppConfig extends React.Component<Props, State> {
                 );
               })}
             </Form>
-            <hr className={styles.splitter} />
           </>
         )}
+        <Note
+          className={styles.eapNote}
+          withCloseButton={true}
+          title="Resolve content with third party orchestration">
+          Deliver {this.props.name} content effortlessly within Contentful using our Third-Party
+          Orchestration feature. Resolve content referenced from {this.props.name} using the
+          Contentful GraphQL API.
+          <br />
+          <br />
+          Learn more and sign up to our{' '}
+          <TextLink
+            variant="primary"
+            target="_blank"
+            icon={<ExternalLinkIcon />}
+            rel="noopener noreferrer"
+            href={`https://www.contentful.com/developers/docs/concepts/third-party-orchestration/`}>
+            Early Access Programme
+          </TextLink>
+        </Note>
+        <hr className={styles.splitter} />
         <Heading>Assign to fields</Heading>
         {contentTypes.length > 0 ? (
           <Paragraph>
@@ -262,8 +293,7 @@ export default class AppConfig extends React.Component<Props, State> {
                   environment === 'master'
                     ? `https://app.contentful.com/spaces/${space}/content_types`
                     : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-                }
-              >
+                }>
                 content model
               </TextLink>{' '}
               and assign it to the app from this screen.
