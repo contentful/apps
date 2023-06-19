@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { render, cleanup, fireEvent, waitFor, screen } from '@testing-library/react';
 
 import { AppExtensionSDK } from '@contentful/app-sdk';
 
@@ -52,7 +52,7 @@ const makeSdkMock = () => ({
 
 const validate = () => null; // Means no error
 
-const renderComponent = (sdk: unknown) => {
+const renderComponent = (sdk: unknown, isInOrchestrationEAP?: boolean) => {
   return render(
     <AppConfig
       name="Some app"
@@ -62,6 +62,7 @@ const renderComponent = (sdk: unknown) => {
       logo="some-logo.svg"
       color="red"
       description="App description"
+      isInOrchestrationEAP={isInOrchestrationEAP ?? true}
     />
   );
 };
@@ -178,5 +179,21 @@ describe('AppConfig', () => {
         },
       },
     });
+  });
+
+  it('does not render EAP orchestration note if it is set to true', async () => {
+    const sdk = makeSdkMock();
+    const { getByText } = renderComponent(sdk, true);
+    const result = await waitFor(() => getByText(/Resolve content with third party orchestration/));
+    expect(result).toHaveTextContent('Resolve content with third party orchestration');
+  });
+
+  it('does not render EAP orchestration note if it is set to false', async () => {
+    const sdk = makeSdkMock();
+    const { queryByText } = renderComponent(sdk, false);
+    const result = await waitFor(() =>
+      queryByText(/Resolve content with third party orchestration/)
+    );
+    expect(result).toBeNull();
   });
 });

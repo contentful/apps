@@ -42,6 +42,7 @@ interface Props {
   color: string;
   description: string;
   skuTypes?: Integration['skuTypes'];
+  isInOrchestrationEAP?: boolean;
 }
 
 interface State {
@@ -51,6 +52,7 @@ interface State {
   fieldSkuTypes: FieldsSkuTypes;
   parameters: Config;
   appReady: boolean;
+  hideOrchestrationEapNote: boolean;
 }
 
 const styles = {
@@ -108,6 +110,7 @@ export default class AppConfig extends React.Component<Props, State> {
     fieldSkuTypes: {},
     parameters: toInputParameters(this.props.parameterDefinitions, null),
     appReady: false,
+    hideOrchestrationEapNote: false,
   };
 
   componentDidMount() {
@@ -142,6 +145,7 @@ export default class AppConfig extends React.Component<Props, State> {
         parameters: toInputParameters(this.props.parameterDefinitions, parameters),
         fieldSkuTypes: (parameters as { skuTypes?: FieldsSkuTypes })?.skuTypes ?? {},
         appReady: true,
+        hideOrchestrationEapNote: false,
       },
       () => app.setReady()
     );
@@ -202,6 +206,10 @@ export default class AppConfig extends React.Component<Props, State> {
     this.setState({ fieldSkuTypes });
   };
 
+  setHideOrchestrationEapNote = (hideOrchestrationEapNote: boolean) => {
+    this.setState({ hideOrchestrationEapNote });
+  };
+
   renderApp() {
     const {
       contentTypes,
@@ -210,9 +218,10 @@ export default class AppConfig extends React.Component<Props, State> {
       fieldSkuTypes,
       parameters,
       appReady,
-      show,
+      hideOrchestrationEapNote,
     } = this.state;
-    const { parameterDefinitions, sdk, skuTypes } = this.props;
+    const { parameterDefinitions, sdk, skuTypes, isInOrchestrationEAP } = this.props;
+
     const {
       ids: { space, environment },
     } = sdk;
@@ -249,25 +258,30 @@ export default class AppConfig extends React.Component<Props, State> {
             </Form>
           </>
         )}
-        <Note
-          className={styles.eapNote}
-          withCloseButton={true}
-          title="Resolve content with third party orchestration">
-          Deliver {this.props.name} content effortlessly within Contentful using our Third-Party
-          Orchestration feature. Resolve content referenced from {this.props.name} using the
-          Contentful GraphQL API.
-          <br />
-          <br />
-          Learn more and sign up to our{' '}
-          <TextLink
-            variant="primary"
-            target="_blank"
-            icon={<ExternalLinkIcon />}
-            rel="noopener noreferrer"
-            href={`https://www.contentful.com/developers/docs/concepts/third-party-orchestration/`}>
-            Early Access Programme
-          </TextLink>
-        </Note>
+        {isInOrchestrationEAP && (
+          <Note
+            style={{ display: hideOrchestrationEapNote ? 'none' : 'grid' }}
+            className={styles.eapNote}
+            withCloseButton={true}
+            onClose={() => this.setHideOrchestrationEapNote(true)}
+            title="Resolve content with third party orchestration">
+            Deliver {this.props.name} content effortlessly within Contentful using our Third-Party
+            Orchestration feature. Resolve content referenced from {this.props.name} using the
+            Contentful GraphQL API.
+            <br />
+            <br />
+            Learn more and sign up to our{' '}
+            <TextLink
+              variant="primary"
+              target="_blank"
+              icon={<ExternalLinkIcon />}
+              alignIcon="end"
+              rel="noopener noreferrer"
+              href={`https://www.contentful.com/developers/docs/concepts/third-party-orchestration/`}>
+              Early Access Programme
+            </TextLink>
+          </Note>
+        )}
         <hr className={styles.splitter} />
         <Heading>Assign to fields</Heading>
         {contentTypes.length > 0 ? (
