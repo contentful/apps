@@ -264,9 +264,9 @@ export default class AppConfig extends React.Component<Props, State> {
             className={styles.eapNote}
             withCloseButton={true}
             onClose={() => this.setHideOrchestrationEapNote(true)}
-            title="Resolve content with third party orchestration">
-            Deliver {this.props.name} content effortlessly within Contentful using our Third-Party
-            Orchestration feature. Resolve content referenced from {this.props.name} using the
+            title="Resolve content with Third party orchestration">
+            Deliver {this.props.name} content effortlessly within Contentful using our Third party
+            orchestration feature. Resolve content referenced from {this.props.name} using the
             Contentful GraphQL API.
             <br />
             <br />
