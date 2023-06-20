@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ProductCard from '../ProductCard';
 import { DragHandle } from '@contentful/f36-components';
-import { mockExternalResource, mockExternalResourceLink } from './mocks';
+import { externalResource, externalResourceLink } from '../../../../../../.storybook/mocks/common';
 
 const meta = {
   title: 'Ecommerce/ProductCard/FieldProductCard',
@@ -31,12 +31,12 @@ const CARD_TYPE = 'field';
 
 export const FieldSingleReference: Story = {
   args: {
-    resource: mockExternalResource,
+    resource: externalResource,
     cardHeader: CARD_HEADER,
     cardIndex: 0,
     totalCards: 1,
     productCardType: CARD_TYPE,
-    externalResourceLink: mockExternalResourceLink,
+    externalResourceLink: externalResourceLink,
   },
   parameters: {
     ...designParams,
@@ -45,7 +45,7 @@ export const FieldSingleReference: Story = {
 
 export const FieldMultipleReference: Story = {
   args: {
-    resource: mockExternalResource,
+    resource: externalResource,
     cardHeader: CARD_HEADER,
     cardIndex: 1,
     totalCards: 4,
@@ -53,7 +53,7 @@ export const FieldMultipleReference: Story = {
       return <DragHandle label="Reorder Card" />;
     },
     productCardType: CARD_TYPE,
-    externalResourceLink: mockExternalResourceLink,
+    externalResourceLink: externalResourceLink,
   },
   parameters: {
     ...designParams,
@@ -62,13 +62,13 @@ export const FieldMultipleReference: Story = {
 
 export const FieldSingleSelectedCard: Story = {
   args: {
-    resource: mockExternalResource,
+    resource: externalResource,
     cardHeader: CARD_HEADER,
     cardIndex: 0,
     totalCards: 1,
     isSelected: true,
     productCardType: CARD_TYPE,
-    externalResourceLink: mockExternalResourceLink,
+    externalResourceLink: externalResourceLink,
   },
   parameters: {
     ...designParams,
@@ -87,7 +87,7 @@ export const FieldSingleMissingCard: Story = {
       errorMessage: 'Internal server error',
       errorStatus: 500,
     },
-    externalResourceLink: mockExternalResourceLink,
+    externalResourceLink: externalResourceLink,
   },
   parameters: {
     ...designParams,
@@ -96,13 +96,13 @@ export const FieldSingleMissingCard: Story = {
 
 export const FieldSingleSelectedCardLoading: Story = {
   args: {
-    resource: mockExternalResource,
+    resource: externalResource,
     cardHeader: CARD_HEADER,
     cardIndex: 0,
     totalCards: 1,
     isLoading: true,
     productCardType: CARD_TYPE,
-    externalResourceLink: mockExternalResourceLink,
+    externalResourceLink: externalResourceLink,
   },
   parameters: {
     ...designParams,

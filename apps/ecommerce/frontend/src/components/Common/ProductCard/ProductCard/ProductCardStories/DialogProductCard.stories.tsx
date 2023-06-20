@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ProductCard from '../ProductCard';
-import { mockExternalResource } from './mocks';
+import { externalResource } from '../../../../../../.storybook/mocks/common';
 
 const meta = {
   title: 'Ecommerce/ProductCard/DialogProductCard',
@@ -27,7 +27,7 @@ const designParams = {
 
 export const DialogCard: Story = {
   args: {
-    resource: mockExternalResource,
+    resource: externalResource,
     cardHeader: 'Shopify Product',
   },
   parameters: {
@@ -37,7 +37,7 @@ export const DialogCard: Story = {
 
 export const DialogSelectedCard: Story = {
   args: {
-    resource: mockExternalResource,
+    resource: externalResource,
     cardHeader: 'Shopify Product',
     isSelected: true,
   },
@@ -48,7 +48,7 @@ export const DialogSelectedCard: Story = {
 
 export const DialogLoadingCard: Story = {
   args: {
-    resource: mockExternalResource,
+    resource: externalResource,
     cardHeader: 'Shopify Product',
     isLoading: true
   },
