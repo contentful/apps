@@ -44,7 +44,7 @@ const ProductCardBody = (props: ProductCardProps) => {
         <Text>{productDescription}</Text>
       </Grid.Item>
       <Grid.Item>
-        <Text fontColor="gray600">{productId}</Text>
+        <Text fontColor="gray600">Product ID: {productId}</Text>
       </Grid.Item>
     </Grid>
   );

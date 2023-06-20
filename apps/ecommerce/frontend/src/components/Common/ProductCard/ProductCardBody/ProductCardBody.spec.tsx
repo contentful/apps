@@ -12,7 +12,7 @@ describe('ProductCardBody component', () => {
     const mainBody = getByTestId('main-product-card-body');
     const titleElement = getByText(title!);
     const descriptionElement = getByText(description!);
-    const idElement = getByText(id!);
+    const idElement = getByText(`Product ID: ${id!}`);
     const imageElement = document.querySelector('img');
 
     expect(mainBody).toBeVisible();

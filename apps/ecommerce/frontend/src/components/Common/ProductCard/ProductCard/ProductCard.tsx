@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card } from '@contentful/f36-components';
 import { styles } from './ProductCard.styles';
-import { ExternalResource, ExternalResourceError, ProductCardType } from 'types';
+import { ExternalResource, ExternalResourceError, ExternalResourceLink, ProductCardType } from 'types';
 import ProductCardHeader from '../ProductCardHeader/ProductCardHeader';
 import ProductCardBody from '../ProductCardBody/ProductCardBody';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
@@ -24,7 +24,7 @@ export interface ProductCardProps {
   isLoading?: boolean;
   cardIndex?: number;
   totalCards?: number;
-  externalResourceLink?: any;
+  externalResourceLink?: ExternalResourceLink;
   cardMovementCallbacks?: CardMovementCallbacks;
   isHovered?: boolean;
   externalResourceError?: ExternalResourceError;

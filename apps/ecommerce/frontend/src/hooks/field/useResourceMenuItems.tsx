@@ -1,6 +1,6 @@
 import { Menu } from '@contentful/f36-components';
 import { useEffect, useMemo, useState } from 'react';
-import type { ProductCardMenuProps } from 'components/Common/ProductCard/ProductCardMenu/ProductCardMenu'; // adjust?????
+import type { ProductCardMenuProps } from 'components/Common/ProductCard/ProductCardMenu/ProductCardMenu';
 
 type menuItemsOutput = { menuItems: JSX.Element[] };
 
