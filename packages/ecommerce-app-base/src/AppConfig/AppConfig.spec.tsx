@@ -184,8 +184,8 @@ describe('AppConfig', () => {
   it('does render EAP orchestration note if it is set to true', async () => {
     const sdk = makeSdkMock();
     const { getByText } = renderComponent(sdk, true);
-    const result = await waitFor(() => getByText(/Resolve content with third party orchestration/));
-    expect(result).toHaveTextContent('Resolve content with third party orchestration');
+    const result = await waitFor(() => getByText(/Resolve content with Third party orchestration/));
+    expect(result).toHaveTextContent('Resolve content with Third party orchestration');
   });
 
   it('does not render EAP orchestration note if it is set to false', async () => {
