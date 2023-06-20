@@ -23,7 +23,7 @@ describe('ProductCardBadge component', () => {
   });
 
   it('mounts showing status if provided', () => {
-    render(<ProductCardBadge showHeaderMenu resource={{ status: 'new' }}/>);
+    render(<ProductCardBadge showHeaderMenu resource={{ title: 'Cheetos', description: 'yummy cheesy sticks', status: 'new' }}/>);
 
     const productCardBadgeStyleWrapper = queryByTestId('badge-style-wrapper');
     const status = getByText('new')

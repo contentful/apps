@@ -13,7 +13,7 @@ interface Props {
   handleShowJson?: (show: boolean) => void;
   cardIndex?: number;
   totalCards?: number;
-  showExternalResourceLinkDetails?: boolean;
+  externalDetailsLink?: string;
   handleMoveToBottom?: (index?: number) => void;
   handleMoveToTop?: (index?: number) => void;
   showHeaderMenu?: boolean;
@@ -22,7 +22,7 @@ interface Props {
 
 const ProductCardHeader = (props: Props) => {
   const {
-    showExternalResourceLinkDetails,
+    externalDetailsLink,
     headerTitle,
     resource,
     handleRemove,
@@ -50,11 +50,12 @@ const ProductCardHeader = (props: Props) => {
             resource={resource}
           />
 
-          {showExternalResourceLinkDetails && (
+          {externalDetailsLink && (
             <IconButton
               variant="transparent"
               aria-label="View external resource details"
               size="small"
+              // TO DO: add externalDetailsLink redirect logic for onClick event
               icon={<ExternalLinkIcon />}
             />
           )}

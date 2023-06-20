@@ -75,7 +75,8 @@ const ProductCard = (props: ProductCardProps) => {
         totalCards={totalCards}
         showJson={showJson}
         handleShowJson={setShowJson}
-        showExternalResourceLinkDetails={!externalResourceError?.error && Boolean(externalResourceLink)} // do we want to show this icon button when there is an error, or the showData option?
+        // TO DO: provide link string when logic is built
+        externalDetailsLink={''}
         handleMoveToBottom={handleMoveToBottom}
         handleMoveToTop={handleMoveToTop}
         showHeaderMenu={Boolean(fieldProductCardType)}
