@@ -192,7 +192,7 @@ describe('AppConfig', () => {
     const sdk = makeSdkMock();
     const { queryByText } = renderComponent(sdk, false);
     const result = await waitFor(() =>
-      queryByText(/Resolve content with third party orchestration/)
+      queryByText(/Resolve content with Third party orchestration/)
     );
     expect(result).toBeNull();
   });
