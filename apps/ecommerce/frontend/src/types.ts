@@ -47,11 +47,11 @@ export interface ExternalResourceLink {
 export interface ExternalResource {
   title: string;
   description: string;
-  image?: string
+  image?: string;
   status?: EntityStatus;
   extras?: JSONObject;
   id?: string;
-  availableForSale?: boolean
+  availableForSale?: boolean;
 }
 
 type ErrorBoundaryErrored = { hasError: true; error: Error; info: ErrorInfo };
