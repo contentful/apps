@@ -45,12 +45,13 @@ export interface ExternalResourceLink {
 }
 
 export interface ExternalResource {
-  title?: string;
-  description?: string;
+  title: string;
+  description: string;
   image?: string;
   status?: EntityStatus;
   extras?: JSONObject;
   id?: string;
+  availableForSale?: boolean;
 }
 
 type ErrorBoundaryErrored = { hasError: true; error: Error; info: ErrorInfo };
@@ -98,3 +99,12 @@ export interface DialogInvocationParameters extends KeyValueMap {
   linkType: string;
   fieldType: FieldType;
 }
+
+// the variant states of ProductCard, for now, labeled by location
+export type ProductCardType = 'field' | 'dialog';
+
+export type ExternalResourceError = {
+  error: string;
+  errorMessage: string;
+  errorStatus: number;
+};

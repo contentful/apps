@@ -2,13 +2,13 @@ import { Box, Collapse, CopyButton, Flex, IconButton, Tooltip } from '@contentfu
 import { ChevronUpTrimmedIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 
-interface ResourceCardRawDataProps {
+interface ProductCardRawDataProps {
   value: string;
   isVisible: boolean;
   onHide: Function;
 }
 
-const ResourceCardRawData = (props: ResourceCardRawDataProps) => {
+const ProductCardRawData = (props: ProductCardRawDataProps) => {
   const { value, isVisible, onHide } = props;
 
   return (
@@ -58,4 +58,4 @@ const ResourceCardRawData = (props: ResourceCardRawDataProps) => {
   );
 };
 
-export default ResourceCardRawData;
+export default ProductCardRawData;

@@ -1,4 +1,4 @@
-import { ExternalResource, ExternalResourceLink } from 'types';
+import { ExternalResource, ExternalResourceLink } from '../../src/types';
 
 const externalResource: ExternalResource = {
   title: 'Cheetos',
