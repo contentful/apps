@@ -1,4 +1,4 @@
-import ResourceCardMenu from './ResourceCardMenu';
+import ProductCardMenu from './ProductCardMenu';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -15,9 +15,9 @@ const props = {
   onHideData: jest.fn(),
 };
 
-describe('ResourceCardMenu component', () => {
+describe('ProductCardMenu component', () => {
   it('mounts', () => {
-    render(<ResourceCardMenu {...props} />);
+    render(<ProductCardMenu {...props} />);
 
     const iconButton = getByTestId('cf-ui-icon-button');
     const icon = getByTestId('cf-ui-icon');
@@ -28,7 +28,7 @@ describe('ResourceCardMenu component', () => {
 
   it('opens and closes menu on click', async () => {
     userEvent.setup();
-    render(<ResourceCardMenu {...props} />);
+    render(<ProductCardMenu {...props} />);
 
     const iconButton = getByTestId('cf-ui-icon-button');
     await userEvent.click(iconButton);

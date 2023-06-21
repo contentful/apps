@@ -1,5 +1,5 @@
 import { Flex } from '@contentful/f36-components';
-import ResourceCard from '../ResourceCard/ResourceCard';
+import ProductCard from 'components/Common/ProductCard';
 import { styles } from './ResourceList.styles';
 import { ExternalResource } from 'types';
 
@@ -13,17 +13,19 @@ interface Props {
 
 const ResourceList = (props: Props) => {
   const { externalResources, resourceProvider, resourceType, onSelect, selectedResources } = props;
+  const selectedResourceIds = new Set(selectedResources.map((item) => item.id));
 
   return (
     <Flex className={styles.productList}>
-      {externalResources.map((item, index) => {
+      {externalResources.map((externalResource, index) => {
+        const isSelectedResource = selectedResourceIds.has(externalResource.id);
         return (
-          <ResourceCard
+          <ProductCard
             key={index}
-            resource={item}
+            resource={externalResource}
             cardHeader={`${resourceProvider} ${resourceType}`}
             onSelect={onSelect}
-            selectedResources={selectedResources}
+            isSelected={Boolean(isSelectedResource)}
           />
         );
       })}

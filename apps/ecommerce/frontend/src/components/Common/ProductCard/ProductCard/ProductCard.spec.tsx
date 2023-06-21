@@ -1,19 +1,14 @@
-import ResourceCard from './ResourceCard';
+import ProductCard from './ProductCard';
 import { externalResource } from '../../../../../test/mocks';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 
 const { getByText } = screen;
 
-describe('ResourceCard component', () => {
+describe('ProductCard component', () => {
   it('mounts', () => {
     render(
-      <ResourceCard
-        cardHeader="Kleenex product"
-        onSelect={() => {}}
-        resource={externalResource}
-        selectedResources={[]}
-      />
+      <ProductCard cardHeader="Kleenex product" onSelect={() => {}} resource={externalResource} />
     );
 
     const productName = externalResource.title!;
@@ -27,11 +22,10 @@ describe('ResourceCard component', () => {
     userEvent.setup();
     const mockOnSelect = jest.fn();
     render(
-      <ResourceCard
+      <ProductCard
         cardHeader="Kleenex product"
         onSelect={mockOnSelect}
         resource={externalResource}
-        selectedResources={[]}
       />
     );
 

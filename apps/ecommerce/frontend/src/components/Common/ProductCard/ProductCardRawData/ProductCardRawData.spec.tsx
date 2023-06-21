@@ -1,12 +1,12 @@
-import ResourceCardRawData from './ResourceCardRawData';
+import ProductCardRawData from './ProductCardRawData';
 import { render, screen } from '@testing-library/react';
 
 const { getAllByTestId, getByTestId } = screen;
 
-describe('ResourceCardRawData component', () => {
+describe('ProductCardRawData component', () => {
   it('mounts', () => {
     render(
-      <ResourceCardRawData
+      <ProductCardRawData
         value={JSON.stringify('random JSON')}
         isVisible={true}
         onHide={() => {}}

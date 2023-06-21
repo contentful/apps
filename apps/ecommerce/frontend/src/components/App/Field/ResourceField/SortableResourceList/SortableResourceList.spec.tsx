@@ -1,15 +1,36 @@
 import React from 'react';
 import SortableResourceList from './SortableResourceList';
 import { render, screen } from '@testing-library/react';
-import { mockSdk, externalResourceLink } from '../../../../../../test/mocks';
+import {
+  mockSdk,
+  externalResourceLink,
+  mockCma,
+  externalResource,
+} from '../../../../../../test/mocks';
+
+jest.mock('components/Common/ProductCard/ProductCardMenu/ProductCardMenu', () => () => (
+  <div>Product card menu component</div>
+));
+
+jest.mock('helpers/resourceProviderUtils', () => ({
+  getResourceProviderAndType: () => ({
+    resourceType: 'product',
+    resourceProvider: 'shopify',
+  }),
+}));
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
+  useCMA: () => mockCma,
 }));
 
-jest.mock('components/App/Field/ResourceCard', () => () => <div>Mock resource card</div>);
+let mockExternalResource = externalResource;
+jest.mock('hooks/field/useExternalResource', () => () => ({
+  isLoading: false,
+  externalResource: mockExternalResource,
+}));
 
-const { getByText } = screen;
+const { getByTestId } = screen;
 
 describe('SortableResourceList component', () => {
   const mockUseContext: jest.SpyInstance = jest.spyOn(React, 'useContext');
@@ -23,8 +44,8 @@ describe('SortableResourceList component', () => {
   it('mounts', () => {
     render(<SortableResourceList resourceArray={[externalResourceLink]} />);
 
-    const showButton = getByText('Mock resource card');
+    const resourceField = getByTestId('cf-ui-card');
 
-    expect(showButton).toBeVisible();
+    expect(resourceField).toBeVisible();
   });
 });

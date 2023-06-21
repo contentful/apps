@@ -2,10 +2,10 @@ import { Grid } from '@contentful/f36-components';
 import { SortableLinkList } from '@contentful/field-editor-reference';
 import { useContext } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import ResourceCard from 'components/App/Field/ResourceCard';
 import ResourceFieldContext from 'context/ResourceFieldContext';
 import type { ExternalResourceLink } from 'types';
 import type { FieldAppSDK } from '@contentful/app-sdk';
+import ProductCardWrapper from 'components/Common/ProductCard/ProductCardWrapper/ProductCardWrapper';
 
 interface Props {
   resourceArray: ExternalResourceLink[];
@@ -30,12 +30,12 @@ const SortableResourceList = (props: Props) => {
       {({ item, DragHandle, index }) => {
         return (
           <Grid.Item>
-            <ResourceCard
-              key={index}
-              index={index}
-              total={resourceArray.length}
-              value={item}
-              dragHandleRender={isMultiple ? DragHandle : undefined}
+            <ProductCardWrapper
+              externalResourceLink={item}
+              dragHandleRender={DragHandle}
+              cardIndex={index}
+              resourceArray={resourceArray}
+              productCardType="field"
             />
           </Grid.Item>
         );

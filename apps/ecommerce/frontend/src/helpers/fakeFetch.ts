@@ -3,7 +3,7 @@ import { ExternalResource, ExternalResourceLink } from 'types';
 const fetchRemoteData = async (
   resource: ExternalResourceLink,
   index?: number
-): Promise<ExternalResource> => {
+): Promise<ExternalResource | {}> => {
   return new Promise((resolve) => {
     const randomTimeout = Math.floor(Math.random() * 3000) + 200; // between 200 and 3000 ms
 

@@ -4,9 +4,9 @@ import { ReactNode } from 'react';
 export type ResourceFieldProviderProps = {
   isMultiple: boolean;
   handleAddResource: () => Promise<any[]>;
-  handleRemove: (index: number) => void;
-  handleMoveToTop?: (index: number) => void;
-  handleMoveToBottom?: (index: number) => void;
+  handleRemove: (index?: number) => void;
+  handleMoveToTop?: (index?: number) => void;
+  handleMoveToBottom?: (index?: number) => void;
   logoUrl: string;
   children: ReactNode;
 };
