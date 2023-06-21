@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { Card } from '@contentful/f36-components';
 import { styles } from './ProductCard.styles';
-import { ExternalResource, ExternalResourceError, ExternalResourceLink, ProductCardType } from 'types';
+import {
+  ExternalResource,
+  ExternalResourceError,
+  ExternalResourceLink,
+  ProductCardType,
+} from 'types';
 import ProductCardHeader from '../ProductCardHeader/ProductCardHeader';
 import ProductCardBody from '../ProductCardBody/ProductCardBody';
 import { RenderDragFn } from '@contentful/field-editor-reference/dist/types';
@@ -52,7 +57,8 @@ const ProductCard = (props: ProductCardProps) => {
 
   const { handleMoveToBottom, handleMoveToTop } = cardMovementCallbacks || {};
   const fieldProductCardType = productCardType === 'field';
-  const renderRawData = !externalResourceError?.error && fieldProductCardType && externalResourceLink && showJson;
+  const renderRawData =
+    !externalResourceError?.error && fieldProductCardType && externalResourceLink && showJson;
 
   return (
     <Card

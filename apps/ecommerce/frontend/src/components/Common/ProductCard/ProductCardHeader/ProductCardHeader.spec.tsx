@@ -15,7 +15,7 @@ describe('ProductCardHeader component', () => {
 
   it('mounts showing external link button', () => {
     const headerTitle = 'Shopify product';
-    render(<ProductCardHeader headerTitle={headerTitle} externalDetailsLink='https://link' />);
+    render(<ProductCardHeader headerTitle={headerTitle} externalDetailsLink="https://link" />);
 
     const titleElement = getByText(headerTitle);
     const externalLinkButton = getByTestId('cf-ui-icon-button');
@@ -28,7 +28,11 @@ describe('ProductCardHeader component', () => {
   it('mounts showing header menu', () => {
     const headerTitle = 'Shopify product';
     render(
-      <ProductCardHeader headerTitle={headerTitle} externalDetailsLink='https://link' showHeaderMenu />
+      <ProductCardHeader
+        headerTitle={headerTitle}
+        externalDetailsLink="https://link"
+        showHeaderMenu
+      />
     );
 
     const titleElement = getByText(headerTitle);

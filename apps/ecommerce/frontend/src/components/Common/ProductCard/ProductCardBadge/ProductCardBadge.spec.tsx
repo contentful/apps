@@ -16,20 +16,25 @@ describe('ProductCardBadge component', () => {
     render(<ProductCardBadge showHeaderMenu />);
 
     const productCardBadgeStyleWrapper = queryByTestId('badge-style-wrapper');
-    const status = getByText('Not Available')
+    const status = getByText('Not Available');
 
     expect(productCardBadgeStyleWrapper).toBeFalsy();
-    expect(status).toBeVisible()
+    expect(status).toBeVisible();
   });
 
   it('mounts showing status if provided', () => {
-    render(<ProductCardBadge showHeaderMenu resource={{ title: 'Cheetos', description: 'yummy cheesy sticks', status: 'new' }}/>);
+    render(
+      <ProductCardBadge
+        showHeaderMenu
+        resource={{ title: 'Cheetos', description: 'yummy cheesy sticks', status: 'new' }}
+      />
+    );
 
     const productCardBadgeStyleWrapper = queryByTestId('badge-style-wrapper');
-    const status = getByText('new')
+    const status = getByText('new');
 
     expect(productCardBadgeStyleWrapper).toBeFalsy();
-    expect(status).toBeVisible()
+    expect(status).toBeVisible();
   });
 
   it('mounts showing error state', () => {

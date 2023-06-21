@@ -13,12 +13,12 @@ interface Props {
 
 const ResourceList = (props: Props) => {
   const { externalResources, resourceProvider, resourceType, onSelect, selectedResources } = props;
-  const selectedResourceIds = new Set(selectedResources.map(item => item.id));
+  const selectedResourceIds = new Set(selectedResources.map((item) => item.id));
 
   return (
     <Flex className={styles.productList}>
       {externalResources.map((externalResource, index) => {
-        const isSelectedResource = selectedResourceIds.has(externalResource.id)
+        const isSelectedResource = selectedResourceIds.has(externalResource.id);
         return (
           <ProductCard
             key={index}

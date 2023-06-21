@@ -50,7 +50,7 @@ export const DialogLoadingCard: Story = {
   args: {
     resource: externalResource,
     cardHeader: 'Shopify Product',
-    isLoading: true
+    isLoading: true,
   },
   parameters: {
     ...designParams,
