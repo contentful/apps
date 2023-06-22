@@ -1,7 +1,6 @@
 # team integrations owns all code in this repository by default
 * @contentful/team-integrations
 
-# team-extensibility still owns a few specific folders
 apps/graphql-playground @contentful/team-developer-experience
 examples @contentful/team-developer-experience
 
