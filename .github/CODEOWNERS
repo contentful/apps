@@ -2,6 +2,6 @@
 * @contentful/team-integrations
 
 # team-extensibility still owns a few specific folders
-apps/graphql-playground @contentful/team-extensibility
-examples @contentful/team-extensibility
+apps/graphql-playground @contentful/team-developer-experience
+examples @contentful/team-developer-experience
 
