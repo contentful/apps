@@ -51,6 +51,7 @@ export function setup(integration: Integration) {
             color={integration.color}
             description={integration.description}
             skuTypes={integration.skuTypes}
+            isInOrchestrationEAP={integration.isInOrchestrationEAP}
           />
         </>,
         root

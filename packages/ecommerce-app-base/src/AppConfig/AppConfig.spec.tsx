@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { render, cleanup, fireEvent, waitFor, screen } from '@testing-library/react';
 
 import { AppExtensionSDK } from '@contentful/app-sdk';
 
@@ -52,7 +52,7 @@ const makeSdkMock = () => ({
 
 const validate = () => null; // Means no error
 
-const renderComponent = (sdk: unknown) => {
+const renderComponent = (sdk: unknown, isInOrchestrationEAP?: boolean) => {
   return render(
     <AppConfig
       name="Some app"
@@ -62,6 +62,7 @@ const renderComponent = (sdk: unknown) => {
       logo="some-logo.svg"
       color="red"
       description="App description"
+      isInOrchestrationEAP={isInOrchestrationEAP ?? true}
     />
   );
 };
@@ -71,8 +72,8 @@ describe('AppConfig', () => {
 
   it('renders app before installation', async () => {
     const sdk = makeSdkMock();
-    const { getByLabelText } = renderComponent(sdk);
-    await waitFor(() => getByLabelText(/Commercetools Project Key/));
+    renderComponent(sdk);
+    await waitFor(() => screen.getByLabelText(/Commercetools Project Key/));
 
     [
       [/Commercetools Project Key/, ''],
@@ -82,12 +83,12 @@ describe('AppConfig', () => {
       [/Auth API Endpoint/, ''],
       [/Commercetools data locale/, ''],
     ].forEach(([labelRe, expected]) => {
-      const configInput = getByLabelText(labelRe) as HTMLInputElement;
+      const configInput = screen.getByLabelText(labelRe) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
     });
 
     [/Product X$/, /Product D$/].forEach((labelRe) => {
-      const fieldCheckbox = getByLabelText(labelRe) as HTMLInputElement;
+      const fieldCheckbox = screen.getByLabelText(labelRe) as HTMLInputElement;
       expect(fieldCheckbox.checked).toBe(false);
     });
   });
@@ -115,8 +116,8 @@ describe('AppConfig', () => {
       ],
     });
 
-    const { getByLabelText } = renderComponent(sdk);
-    await waitFor(() => getByLabelText(/Commercetools Project Key/));
+    renderComponent(sdk);
+    await waitFor(() => screen.getByLabelText(/Commercetools Project Key/));
 
     [
       [/Commercetools Project Key/, 'some-key'],
@@ -126,7 +127,7 @@ describe('AppConfig', () => {
       [/Auth API Endpoint/, 'some-auth-endpoint'],
       [/Commercetools data locale/, 'en'],
     ].forEach(([labelRe, expected]) => {
-      const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
+      const configInput = screen.getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
     });
 
@@ -134,15 +135,15 @@ describe('AppConfig', () => {
       [/Product X$/, false],
       [/Product D$/, true],
     ].forEach(([labelRe, expected]) => {
-      const fieldCheckbox = getByLabelText(labelRe as RegExp) as HTMLInputElement;
+      const fieldCheckbox = screen.getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(fieldCheckbox.checked).toBe(expected);
     });
   });
 
   it('updates configuration', async () => {
     const sdk = makeSdkMock();
-    const { getByLabelText } = renderComponent(sdk);
-    await waitFor(() => getByLabelText(/Commercetools Project Key/));
+    renderComponent(sdk);
+    await waitFor(() => screen.getByLabelText(/Commercetools Project Key/));
     [
       [/Commercetools Project Key/, 'some-key'],
       [/Client ID/, '12345'],
@@ -151,11 +152,11 @@ describe('AppConfig', () => {
       [/Auth API Endpoint/, 'some-auth-endpoint'],
       [/Commercetools data locale/, 'en'],
     ].forEach(([labelRe, value]) => {
-      const configInput = getByLabelText(labelRe as RegExp) as HTMLInputElement;
+      const configInput = screen.getByLabelText(labelRe as RegExp) as HTMLInputElement;
       fireEvent.change(configInput, { target: { value } });
     });
 
-    const fieldCheckbox = getByLabelText(/Product D$/) as HTMLInputElement;
+    const fieldCheckbox = screen.getByLabelText(/Product D$/) as HTMLInputElement;
     fireEvent.click(fieldCheckbox);
 
     const onConfigure = sdk.app.onConfigure.mock.calls[0][0];
@@ -178,5 +179,23 @@ describe('AppConfig', () => {
         },
       },
     });
+  });
+
+  it('does render EAP orchestration note if it is set to true', async () => {
+    const sdk = makeSdkMock();
+    renderComponent(sdk, true);
+    const result = await waitFor(() =>
+      screen.getByText(/Resolve content with Third party orchestration/)
+    );
+    expect(result).toHaveTextContent('Resolve content with Third party orchestration');
+  });
+
+  it('does not render EAP orchestration note if it is set to false', async () => {
+    const sdk = makeSdkMock();
+    renderComponent(sdk, false);
+    const result = await waitFor(() =>
+      screen.queryByText(/Resolve content with Third party orchestration/)
+    );
+    expect(result).toBeNull();
   });
 });
