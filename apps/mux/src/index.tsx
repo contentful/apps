@@ -1074,6 +1074,7 @@ export class App extends React.Component<AppProps, AppState> {
                 type="bar"
                 onSuccess={this.onUploadSuccess}
                 endpoint={this.getUploadUrl}
+                noDrop
                 //onError={this.onUploadError}
                 style={
                   {
