@@ -6,7 +6,7 @@ In the project directory, you can run:
 
 ### Install packages
 
-`npm i` 
+`npm i`
 
 ### Set development ENV
 
