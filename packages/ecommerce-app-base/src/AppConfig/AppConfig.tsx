@@ -11,7 +11,7 @@ import {
   Flex,
   TextInput,
 } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { OrchestrationEapNote } from './OrchestrationEapNote';
 
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
@@ -259,28 +259,10 @@ export default class AppConfig extends React.Component<Props, State> {
           </>
         )}
         {isInOrchestrationEAP && (
-          <Note
-            style={{ display: hideOrchestrationEapNote ? 'none' : 'grid' }}
-            className={styles.eapNote}
-            withCloseButton={true}
-            onClose={() => this.setHideOrchestrationEapNote(true)}
-            title="Resolve content with Third party orchestration">
-            Deliver {this.props.name} content effortlessly within Contentful using our Third party
-            orchestration feature. Resolve content referenced from {this.props.name} using the
-            Contentful GraphQL API.
-            <br />
-            <br />
-            Learn more and sign up to our{' '}
-            <TextLink
-              variant="primary"
-              target="_blank"
-              icon={<ExternalLinkIcon />}
-              alignIcon="end"
-              rel="noopener noreferrer"
-              href={`https://www.contentful.com/developers/docs/concepts/third-party-orchestration/`}>
-              Early Access Programme
-            </TextLink>
-          </Note>
+          <OrchestrationEapNote
+            hideOrchestrationEapNote={hideOrchestrationEapNote}
+            name={this.props.name}
+          />
         )}
         <hr className={styles.splitter} />
         <Heading>Assign to fields</Heading>

@@ -164,7 +164,7 @@ export type OpenDialogFn = (
 export type DisabledPredicateFn = (currentValue: string[], config: Config) => boolean;
 
 export interface Integration {
-  isInOrchestrationEAP: boolean | undefined;
+  isInOrchestrationEAP?: boolean;
   /**
    * Returns the text that is displayed on the button in the field location.
    *
