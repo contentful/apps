@@ -1,30 +1,6 @@
-apps/ai-content-generator @contentful/team-integrations
-apps/ai-image-tagging @contentful/team-extensibility
-apps/brandfolder @contentful/team-integrations
-apps/bynder @contentful/team-integrations
-apps/cloudinary @contentful/team-integrations
-apps/color-picker @contentful/team-extensibility
-apps/commercetools @contentful/team-integrations
-apps/dropbox @contentful/team-integrations
-apps/ecommerce @contentful/team-integrations
-apps/frontify @contentful/team-integrations
-apps/gatsby @contentful/team-integrations
-apps/google-analytics-4 @contentful/team-integrations
-apps/google-analytics @contentful/team-integrations
-apps/graphql-playground @contentful/team-extensibility
-apps/image-focal-point @contentful/team-extensibility
-apps/jira @contentful/team-integrations
-apps/mux @contentful/team-integrations
-apps/netlify @contentful/team-integrations
-apps/optimizely @contentful/team-integrations
-apps/saleor @contentful/team-integrations
-apps/sap-commerce-cloud @contentful/team-integrations
-apps/sap-commerce-cloud-with-air @contentful/team-integrations
-apps/shopify @contentful/team-integrations
-apps/slack @contentful/team-integrations
-apps/smartling @contentful/team-integrations
-apps/typeform @contentful/team-integrations
-apps/wistia-videos @contentful/team-integrations
+# team integrations owns all code in this repository by default
+* @contentful/team-integrations
 
-examples @contentful/team-extensibility
-packages @contentful/team-extensibility
+apps/graphql-playground @contentful/team-developer-experience
+examples @contentful/team-developer-experience
+
