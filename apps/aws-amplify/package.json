@@ -6,7 +6,7 @@
     "@contentful/app-sdk": "^4.17.2",
     "@contentful/f36-components": "4.41.1",
     "@contentful/f36-tokens": "4.0.2",
-    "@contentful/react-apps-toolkit": "1.2.15",
+    "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.35.6",
     "emotion": "10.0.27",
     "lodash": "^4.17.21",

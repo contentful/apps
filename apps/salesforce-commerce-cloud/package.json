@@ -7,7 +7,7 @@
     "@contentful/f36-components": "4.10.5",
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/f36-workbench": "^4.21.0",
-    "@contentful/react-apps-toolkit": "1.2.15",
+    "@contentful/react-apps-toolkit": "1.2.16",
     "@dnd-kit/core": "^6.0.8",
     "@dnd-kit/sortable": "^7.0.2",
     "@emotion/react": "^11.11.0",
