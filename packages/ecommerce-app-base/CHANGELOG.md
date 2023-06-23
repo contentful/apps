@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.67](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.66...@contentful/ecommerce-app-base@3.1.67) (2023-06-23)
+
+### Bug Fixes
+
+- update @contentful/app-sdk to fix type error ([7f86d16](https://github.com/contentful/apps/commit/7f86d16756103872e0ea67237ec44000338d814c))
+
+### Reverts
+
+- Revert "add prop [MONET-1253] (#3855)" ([196ff5d](https://github.com/contentful/apps/commit/196ff5db783c5006d4ea834648b1ab87df3dfebf)), closes [#3855](https://github.com/contentful/apps/issues/3855)
+
 ## [3.1.66](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.65...@contentful/ecommerce-app-base@3.1.66) (2023-06-22)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
