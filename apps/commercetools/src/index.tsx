@@ -59,6 +59,5 @@ init((sdk) => {
     renderDialog,
     isDisabled: () => false,
     openDialog,
-    isInOrchestrationEAP: true,
   });
 });
