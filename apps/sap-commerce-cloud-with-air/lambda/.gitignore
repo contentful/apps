@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 node_modules/
 .pnp
@@ -17,11 +15,9 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
-lambda/config/serverless-env.dev.yml
+config/serverless-env.dev.yml
 
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # dynamodb dev
 shared-local-instance.db
