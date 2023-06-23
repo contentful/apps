@@ -62,7 +62,7 @@ const renderComponent = (sdk: unknown, isInOrchestrationEAP?: boolean) => {
       logo="some-logo.svg"
       color="red"
       description="App description"
-      isInOrchestrationEAP={isInOrchestrationEAP ?? false}
+      isInOrchestrationEAP={isInOrchestrationEAP ?? true}
     />
   );
 };
