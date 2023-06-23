@@ -10,7 +10,7 @@
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/field-editor-reference": "^5.9.0",
     "@contentful/integration-component-library": "^1.1.30",
-    "@contentful/react-apps-toolkit": "1.2.15",
+    "@contentful/react-apps-toolkit": "1.2.16",
     "@sentry/react": "^7.49.0",
     "contentful-management": "10.32.0",
     "emotion": "10.0.27",
