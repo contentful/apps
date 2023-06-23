@@ -1,9 +1,7 @@
-export const handler = async (payload) => {
-  const { parameters } = payload;
-
+export const handler = async (parameters) => {
   const response = {
-    message: `Hello from your hosted app action. I received the following message as a paramater: ${JSON.stringify(
-      parameters.message
+    message: `Hello from your hosted app action. I received the following message as a parameter: ${JSON.stringify(
+      parameters
     )} `,
   };
 
