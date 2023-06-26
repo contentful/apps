@@ -9,6 +9,7 @@ plugins:
 
 custom:
   sentryDSN: https://b8f524eae7c446fb8071476431426640@o2239.ingest.sentry.io/4504725335834624
+  appConfigs: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):appConfigs}
   customDomain:
     domainName: ${file(./config/serverless-env.${opt:stage, 'dev'}.yml):domainName}
     stage: ${opt:stage, 'dev'}
@@ -41,6 +42,7 @@ functions:
       NODE_ENV: ${env:NODE_ENV, 'development'}
       RELEASE_VERSION: ${env:CIRCLE_SHA1, 'undefined'}
       DOMAIN_NAME: ${self:custom.customDomain.domainName}
+      APP_CONFIGS: ${self:custom.appConfigs}
     handler: build/index.handler
     events:
       - http:

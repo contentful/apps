@@ -1,1 +1,2 @@
 domainName: sap-air-test.ctfapps.net
+appConfigs: ${ssm:/aws/reference/secretsmanager/ci/apps/sap-air-action/test/app-configs}
