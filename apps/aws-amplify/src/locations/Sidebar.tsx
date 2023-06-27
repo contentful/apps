@@ -1,46 +1,32 @@
 import { Paragraph, Button } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import Axios, { AxiosError } from 'axios';
+import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { useState } from 'react';
-import { config } from '../config';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  const errorText = 'The AWS website build was not triggered. Try again later.';
-  const [isLoading, setIsLoading] = useState(false);
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  const cma = useCMA();
+  const [isLoading] = useState(false);
 
-  const buildAmplifyApp = () => {
-    setIsLoading(true);
-    const webhookURL = config.lambdaURL;
-    const initBuild = async () => {
-      try {
-        const response = await Axios({
-          method: 'post',
-          url: webhookURL,
-          data: {
-            amplifyUrl: sdk.parameters.installation.amplifyWebhookUrl,
+  const handleBuildAppActionCall = async () => {
+    try {
+      const res = await cma.appActionCall.createWithResponse(
+        {
+          appActionId: 'example',
+          environmentId: sdk.ids.environment,
+          spaceId: sdk.ids.space,
+          appDefinitionId: sdk.ids.app!,
+        },
+        {
+          parameters: {
+            amplifyWebhookUrl: sdk.parameters.installation.amplifyWebhookUrl,
           },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.status === 200) sdk.notifier.success('The AWS website build was triggered.');
-        else throw new Error(errorText);
-      } catch (error) {
-        if (error instanceof AxiosError) {
-          sdk.notifier.error(errorText);
-        } else sdk.notifier.error((error as Error).message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    initBuild();
+        }
+      );
+      console.log({ res });
+    } catch (err) {
+      console.log({ err });
+    }
   };
 
   return (
@@ -50,7 +36,7 @@ const Sidebar = () => {
         isFullWidth={true}
         isLoading={isLoading}
         isDisabled={isLoading}
-        onClick={buildAmplifyApp}>
+        onClick={handleBuildAppActionCall}>
         {isLoading ? 'Building' : 'Build website'}
       </Button>
     </Paragraph>
