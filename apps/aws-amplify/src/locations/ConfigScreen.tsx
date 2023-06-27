@@ -73,7 +73,7 @@ const ConfigScreen = () => {
       <Box className={styles.background} />
       <Box className={styles.body}>
         <Box>
-          <Heading>Set Up AWS Amplify</Heading>
+          <Heading>Set Up AWS Amplify Smooth Criminal</Heading>
           <Paragraph>
             Amplify is a set of purpose-built tools and features that enables frontend web and
             mobile developers to quickly and easily build full-stack applications on AWS.
