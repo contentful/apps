@@ -8,8 +8,14 @@
       "type": "function",
       "path": "actions/example.js",
       "entryFile": "./actions/example.ts",
-      "allowNetworks": [],
-      "parameters": []
+      "allowNetworks": ["webhooks.amplify.us-east-1.amazonaws.com"],
+      "parameters": [
+        {
+          "id": "amplifyWebhookUrl",
+          "name": "Amplify Webhook URL",
+          "type": "Symbol"
+        }
+      ]
     }
   ]
 }

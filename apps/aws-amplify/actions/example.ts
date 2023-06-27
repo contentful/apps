@@ -1,13 +1,23 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 
-export const handler = async (payload: { [key: string]: any }, context: AppActionCallContext) => {
-  const { parameters } = payload;
+interface AppActionCallParameters {
+  amplifyWebhookUrl: string;
+}
 
-  const response = {
-    message: `Hello from your hosted app action. I received the following message as a paramater: ${JSON.stringify(
-      parameters.message
-    )} `,
+export const handler = async (payload: AppActionCallParameters, context: AppActionCallContext) => {
+  const { amplifyWebhookUrl } = payload;
+
+  try {
+    await fetch(amplifyWebhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+  } catch (err) {}
+
+  return {
+    message: 'Build successfully started',
   };
-
-  return response;
 };
