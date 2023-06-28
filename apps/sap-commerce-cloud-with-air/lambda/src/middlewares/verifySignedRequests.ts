@@ -3,6 +3,7 @@ import { CanonicalRequest } from '@contentful/node-apps-toolkit/lib/requests/typ
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { InvalidSignature } from '../errors/invalidSignature';
 import { UnableToVerifyRequest } from '../errors/unableToVerifyRequest';
+import { config } from '../config';
 import { isEmpty } from 'lodash';
 
 export const verifySignedRequestMiddleware: RequestHandler = async (
@@ -12,6 +13,7 @@ export const verifySignedRequestMiddleware: RequestHandler = async (
 ) => {
   try {
     const canonicalReq = makeCanonicalReq(req);
+
     let isValidReq = false;
 
     if (!req.appConfig) throw new Error('App config not found');
@@ -47,6 +49,12 @@ const makeCanonicalReq = (req: Request) => {
     headers[key] = headers[key]?.toString();
   });
 
+  // TODO: make this stage prefixing logic better? (yuck)
+  const pathPrefix = config.stage !== 'prd' ? `/${config.stage}` : '';
+  const fullPath = req.originalUrl.split('?')[0];
+  const signedPath = `${pathPrefix}${fullPath}`; // note: req.originalUrl starts with a `/` and includes the full path & query string
+  const encodedSignedPath = signedPath.replace(/:/g, encodeURIComponent(':')); // note: expressjs decodes colons in the path so we have to re-encode the params
+
   // express.json() makes body always an object ({}), even if there is no body
   // so we need to check if the body is empty and set it to undefined
   const bodyOrUndefined = isEmpty(req.body) ? undefined : JSON.stringify(req.body);
@@ -54,6 +62,7 @@ const makeCanonicalReq = (req: Request) => {
   return <CanonicalRequest>{
     method: req.method,
     headers: headers,
+    path: encodedSignedPath,
     body: bodyOrUndefined,
   };
 };

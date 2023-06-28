@@ -4,21 +4,17 @@
   "compilerOptions": {
     /* Specify a set of entries that re-map imports to additional lookup locations. */
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@shared/*": [
-        "../shared/*"
-      ]
+      "@/*": ["./*"],
+      "@shared/*": ["../shared/*"]
     },
-    "sourceMap": true, /* Create source map files for emitted JavaScript files. */
-    "outDir": "build", /* Specify an output folder for all emitted files. */
-    "sourceRoot": "/src", /* Specify the root path for debuggers to find the reference source code. */
-    "inlineSources": true, /* Include source code in the sourcemaps inside the emitted JavaScript. */
-    "esModuleInterop": true, /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility. */
-    "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
-    "strict": true, /* Enable all strict type-checking options. */
-    "strictPropertyInitialization": false, /* Check for class properties that are declared but not set in the constructor. */
+    "sourceMap": true /* Create source map files for emitted JavaScript files. */,
+    "outDir": "build" /* Specify an output folder for all emitted files. */,
+    "sourceRoot": "/src" /* Specify the root path for debuggers to find the reference source code. */,
+    "inlineSources": true /* Include source code in the sourcemaps inside the emitted JavaScript. */,
+    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility. */,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "strict": true /* Enable all strict type-checking options. */,
+    "strictPropertyInitialization": false /* Check for class properties that are declared but not set in the constructor. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
 
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
