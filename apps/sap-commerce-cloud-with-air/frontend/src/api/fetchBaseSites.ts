@@ -9,15 +9,8 @@ export async function fetchBaseSites(
   sdk: DialogAppSDK,
   cma: any
 ): Promise<string[]> {
-  console.log('sdk.ids.app', sdk);
-
   const url = new URL(`${config.proxyUrl}/sap/base-sites`);
-  console.log('url', url);
-  console.log('sdk', sdk.ids.app);
-  console.log('cma', cma);
-
   const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
-  console.log(res);
   const json = await res.json();
   console.log(json);
   return json;

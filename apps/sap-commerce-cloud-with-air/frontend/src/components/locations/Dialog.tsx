@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Paragraph } from '@contentful/f36-components';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import DialogClass from '../DialogClass';
-import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
 
 interface AWSFunctionURLResponse {
   status: number;
