@@ -19,10 +19,11 @@ import { fetchBaseSites } from '../api/fetchBaseSites';
 import { Error, Product, SAPParameters } from '../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
+import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
 
 interface DialogProps {
   sdk: any;
-  cma: CMAClient;
+  cma: PlainClientAPI;
   applicationInterfaceKey: string;
 }
 

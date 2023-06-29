@@ -6,7 +6,6 @@
   "dependencies": {
     "@contentful/app-scripts": "^1.7.13",
     "@contentful/app-sdk": "^4.17.1",
-    "@contentful/ecommerce-app-base": "^1.0.5",
     "@contentful/field-editor-single-line": "^0.16.0",
     "@contentful/field-editor-test-utils": "^0.9.0",
     "@contentful/forma-36-fcss": "^0.3.1",

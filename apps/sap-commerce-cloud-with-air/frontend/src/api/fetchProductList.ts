@@ -12,13 +12,13 @@ export async function fetchProductList(
   updateTotalPages: UpdateTotalPagesFn,
   applicationInterfaceKey: string,
   sdk: DialogAppSDK,
-  cma: CMAClient
+  cma: any
 ) {
   const url = new URL(`${config.proxyUrl}/dev/sap`);
 
-  const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
-  console.log(res);
-  const json = await res.json();
-  console.log(json);
+  // const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
+  // console.log(res);
+  // const json = await res.json();
+  // console.log(json);
   return { products: [], errors: [] };
 }

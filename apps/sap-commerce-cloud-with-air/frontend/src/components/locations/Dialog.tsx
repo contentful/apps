@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Paragraph } from '@contentful/f36-components';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import DialogClass from '../DialogClass';
+import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
 
 interface AWSFunctionURLResponse {
   status: number;
@@ -12,7 +13,7 @@ interface AWSFunctionURLResponse {
 const Dialog = () => {
   const [applicationInterfaceKey, setApplicationInterfaceKey] = useState<string>('');
 
-  const sdk = useSDK<DialogExtensionSDK>();
+  const sdk = useSDK();
   const cma = useCMA();
 
   const getApplicationInterfaceKey = async (): Promise<string> => {
@@ -40,7 +41,13 @@ const Dialog = () => {
     getKey();
   }, []);
 
-  return <DialogClass cma={cma} sdk={sdk} applicationInterfaceKey={`${applicationInterfaceKey}`} />;
+  return (
+    <DialogClass
+      cma={cma as any}
+      sdk={sdk}
+      applicationInterfaceKey={`${applicationInterfaceKey}`}
+    />
+  );
 };
 
 export default Dialog;

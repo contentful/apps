@@ -1,23 +1,26 @@
-import { baseSiteTransformer } from './dataTransformers';
 import { config } from '../config';
 import { SAPParameters } from '../interfaces';
 import fetchWithSignedRequest from './signed-requests';
-import { DialogAppSDK, CMAClient } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 
 export async function fetchBaseSites(
   parameters: SAPParameters,
   applicationInterfaceKey: string,
   sdk: DialogAppSDK,
-  cma: CMAClient
+  cma: any
 ): Promise<string[]> {
-  const url = new URL(`${config.proxyUrl}/sap`);
-  console.log(url);
+  console.log('sdk.ids.app', sdk);
+
+  const url = new URL(`${config.proxyUrl}/sap/base-sites`);
+  console.log('url', url);
+  console.log('sdk', sdk.ids.app);
+  console.log('cma', cma);
 
   const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
   console.log(res);
   const json = await res.json();
   console.log(json);
-  return [];
+  return json;
 }
 
 // export async function fetchBaseSites(
