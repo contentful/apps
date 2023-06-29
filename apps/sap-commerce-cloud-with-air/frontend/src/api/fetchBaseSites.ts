@@ -10,7 +10,7 @@ export async function fetchBaseSites(
   sdk: DialogAppSDK,
   cma: CMAClient
 ): Promise<string[]> {
-  const url = new URL(`${config.proxyUrl}/dev/sap`);
+  const url = new URL(`${config.proxyUrl}/sap`);
   console.log(url);
 
   const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');

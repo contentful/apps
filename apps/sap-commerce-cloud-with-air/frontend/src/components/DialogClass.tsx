@@ -37,7 +37,7 @@ interface State {
   errors: Error[];
 }
 
-export default class Dialog extends React.Component<DialogProps, State> {
+export default class DialogClass extends React.Component<DialogProps, State> {
   state: State = {
     baseSite: '',
     baseSites: [],

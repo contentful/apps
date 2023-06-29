@@ -56,7 +56,7 @@ function makeCTAText(fieldType: string, pickerMode: 'category' | 'product') {
   return `Select ${beingSelected}`;
 }
 
-export default class Field extends React.Component<Props, State> {
+export default class FieldClass extends React.Component<Props, State> {
   state = {
     value: fieldValueToState(this.props.sdk.field.getValue()),
     editingDisabled: true,

@@ -14,9 +14,8 @@ import '@contentful/forma-36-tokens/dist/css/index.css';
 import './index.css';
 import AppConfig from './AppConfig/AppConfig';
 
-import Field from './components/Field';
+import FieldClass from './components/FieldClass';
 import { config } from './config';
-import DialogFunctionalComponent from './components/DialogFunctionalComponent';
 
 interface AWSFunctionURLResponse {
   status: number;
@@ -80,7 +79,7 @@ init(async (sdk) => {
     {
       location: locations.LOCATION_ENTRY_FIELD,
       component: (
-        <Field
+        <FieldClass
           sdk={sdk as FieldExtensionSDK}
           applicationInterfaceKey={`${sapApplicationInterfaceKey}`}
         />
@@ -88,9 +87,7 @@ init(async (sdk) => {
     },
     {
       location: locations.LOCATION_DIALOG,
-      component: (
-        <DialogFunctionalComponent applicationInterfaceKey={`${sapApplicationInterfaceKey}`} />
-      ),
+      component: <div />,
     },
   ];
 
