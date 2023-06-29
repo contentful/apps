@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { /* useCMA, */ useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import FieldClass from '../FieldClass';
 interface AWSFunctionURLResponse {
   status: number;
@@ -11,6 +11,7 @@ const Field = () => {
   const [applicationInterfaceKey, setApplicationInterfaceKey] = useState<string>('');
 
   const sdk = useSDK<FieldExtensionSDK>();
+  const cma = useCMA();
 
   const getApplicationInterfaceKey = async (): Promise<string> => {
     const url = 'https://dpqac5rkzhh4cahlgb7jby4qk40qsetg.lambda-url.us-west-2.on.aws/';
@@ -45,7 +46,9 @@ const Field = () => {
   // If you only want to extend Contentful's default editing experience
   // reuse Contentful's editor components
   // -> https://www.contentful.com/developers/docs/extensibility/field-editors/
-  return <FieldClass sdk={sdk} applicationInterfaceKey={applicationInterfaceKey} />;
+  return (
+    <FieldClass sdk={sdk} cma={cma as any} applicationInterfaceKey={applicationInterfaceKey} />
+  );
 };
 
 export default Field;

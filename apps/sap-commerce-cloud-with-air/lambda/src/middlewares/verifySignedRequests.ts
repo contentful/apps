@@ -14,7 +14,6 @@ export const verifySignedRequestMiddleware: RequestHandler = async (
   try {
     const canonicalReq = makeCanonicalReq(req);
 
-    console.log('Canonical Request', canonicalReq);
     let isValidReq = false;
 
     if (!req.appConfig) throw new Error('App config not found');

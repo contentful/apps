@@ -10,9 +10,11 @@ import { fetchProductPreviews } from '../api/fetchProductPreviews';
 import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
 import logo from '../logo.png';
 import { SAPParameters } from '../interfaces';
+import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
 
 interface Props {
   sdk: FieldExtensionSDK;
+  cma: PlainClientAPI;
   applicationInterfaceKey: string;
 }
 
@@ -158,11 +160,13 @@ export default class FieldClass extends React.Component<Props, State> {
                 disabled={editingDisabled}
                 skus={data}
                 onChange={this.updateStateValue}
-                fetchProductPreviews={(skus) =>
-                  fetchProductPreviews(
+                fetchProductPreviews={async (skus) =>
+                  await fetchProductPreviews(
                     skus,
                     this.props.sdk.parameters as any,
-                    this.props.applicationInterfaceKey
+                    this.props.applicationInterfaceKey,
+                    this.props.sdk,
+                    this.props.cma
                   )
                 }
                 applicationInterfaceKey={this.props.applicationInterfaceKey}

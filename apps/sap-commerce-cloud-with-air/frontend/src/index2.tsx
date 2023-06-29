@@ -78,12 +78,7 @@ init(async (sdk) => {
     },
     {
       location: locations.LOCATION_ENTRY_FIELD,
-      component: (
-        <FieldClass
-          sdk={sdk as FieldExtensionSDK}
-          applicationInterfaceKey={`${sapApplicationInterfaceKey}`}
-        />
-      ),
+      component: <div />,
     },
     {
       location: locations.LOCATION_DIALOG,

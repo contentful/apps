@@ -1,3 +1,24 @@
+export const baseSitesMock = [
+  'powertools',
+  'powertools-standalone',
+  'powertools-spa',
+  'electronics',
+  'electronics-standalone',
+  'electronics-spa',
+];
+
+export const SKUIdsMock = ['MZ-FG-R300', 'MZ-FG-M520', 'MZ-FG-E102'];
+
+export const productPreviewMock = [
+  {
+    id: '',
+    image:
+      'https://api.cu2qdtboy0-demo2-d5-public.model-t.cc.commerce.ondemand.com//medias/MZ-FG-R300-515Wx515H.png?context=bWFzdGVyfGltYWdlc3wxNzY2NTl8aW1hZ2UvcG5nfGFEUXhMMmd5WWk4NE56azNPVGsxTkRZMk56Z3lMMDFhTFVaSExWSXpNREF0TlRFMVYzZzFNVFZJTG5CdVp3fGNlNTI0ZTM3N2RkYmUyZDdhZGVhMTdhYWJkZjE4OTg3OTIxOGU2N2UyOWU3OTBmY2MyMGIxODJlY2Q0MmJlZmY',
+    name: 'R300 Bike',
+    sku: 'MZ-FG-R300',
+  },
+];
+
 export const productListMockData = {
   type: 'productCategorySearchPageWsDTO',
   currentQuery: {

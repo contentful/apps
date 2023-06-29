@@ -34,10 +34,6 @@ export async function getProductListService(
     },
   };
 
-  console.log('apiEndpoint', apiEndpoint);
-  console.log('baseSite', baseSites);
-  console.log('applicationInterfaceKey', applicationInterfaceKey);
-
   const response = await axios.get(
     `${apiEndpoint}/occ/v2/${baseSites}/products/search`,
     axiosConfig
@@ -62,6 +58,10 @@ export async function getProductPreviewsService(
       'Application-Interface-Key': JSON.stringify(applicationInterfaceKey),
     },
   };
+
+  console.log('skus', skus);
+  console.log('apiEndpoint', apiEndpoint);
+  console.log('applicationInterfaceKey', applicationInterfaceKey);
 
   for (const sku of skus) {
     skuIds.push(sku.split('/products/').pop() as string);

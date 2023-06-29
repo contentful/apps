@@ -15,8 +15,6 @@ export const loadAppConfigMiddleware: RequestHandler = async (
       (config: { [key: string]: string }) => config.id === appId
     );
 
-    console.log('appConfig', appConfig);
-
     const APP_CONFIG_PROPS = ['id', 'privateKey', 'signingSecret'];
 
     if (!appConfig) {
