@@ -161,7 +161,7 @@ export default class Field extends React.Component<Props, State> {
                 fetchProductPreviews={(skus) =>
                   fetchProductPreviews(
                     skus,
-                    this.props.sdk.parameters as SAPParameters,
+                    this.props.sdk.parameters as any,
                     this.props.applicationInterfaceKey
                   )
                 }

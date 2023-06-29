@@ -12,7 +12,7 @@ import {
   TableRow,
   TextInput,
 } from '@contentful/forma-36-react-components';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { CMAClient, DialogAppSDK, DialogExtensionSDK } from '@contentful/app-sdk';
 import { ProductList } from './Dialog/ProductList';
 import { fetchProductList } from '../api/fetchProductList';
 import { fetchBaseSites } from '../api/fetchBaseSites';
@@ -21,7 +21,8 @@ import get from 'lodash/get';
 import union from 'lodash/union';
 
 interface DialogProps {
-  sdk: DialogExtensionSDK;
+  sdk: any;
+  cma: CMAClient;
   applicationInterfaceKey: string;
 }
 
@@ -59,9 +60,11 @@ export default class Dialog extends React.Component<DialogProps, State> {
       this.state.baseSite,
       this.state.query,
       this.state.page,
-      this.props.sdk.parameters as SAPParameters,
+      this.props.sdk.parameters as any,
       this.updateTotalPages,
-      this.props.applicationInterfaceKey
+      this.props.applicationInterfaceKey,
+      this.props.sdk,
+      this.props.cma
     );
     this.setState({
       baseSite: this.state.baseSite,
@@ -75,8 +78,10 @@ export default class Dialog extends React.Component<DialogProps, State> {
 
   loadBaseSites = async () => {
     const baseSites = await fetchBaseSites(
-      this.props.sdk.parameters as SAPParameters,
-      this.props.applicationInterfaceKey
+      this.props.sdk.parameters as any,
+      this.props.applicationInterfaceKey,
+      this.props.sdk,
+      this.props.cma
     );
     let finalBaseSites: string[] = [];
     const installationConfigBaseSites = get(this.props.sdk.parameters.invocation, 'baseSites', '');
