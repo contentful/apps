@@ -13,8 +13,8 @@ const branchName = 'main';
 const client = new AmplifyClient({
   region: 'us-east-1',
   credentials: {
-    accessKeyId: 'AKIA3Q3ACWGDQ2MI46WX',
-    secretAccessKey: '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',
+    accessKeyId: '',
+    secretAccessKey: '',
   },
 });
 
