@@ -17,6 +17,27 @@ export const productPreviewMock = [
     name: 'R300 Bike',
     sku: 'MZ-FG-R300',
   },
+  {
+    id: '',
+    image:
+      'https://api.cu2qdtboy0-demo2-d5-public.model-t.cc.commerce.ondemand.com//medias/MZ-FG-R300-515Wx515H.png?context=bWFzdGVyfGltYWdlc3wxNzY2NTl8aW1hZ2UvcG5nfGFEUXhMMmd5WWk4NE56azNPVGsxTkRZMk56Z3lMMDFhTFVaSExWSXpNREF0TlRFMVYzZzFNVFZJTG5CdVp3fGNlNTI0ZTM3N2RkYmUyZDdhZGVhMTdhYWJkZjE4OTg3OTIxOGU2N2UyOWU3OTBmY2MyMGIxODJlY2Q0MmJlZmY',
+    name: 'S301 Bike',
+    sku: 'MZ-FG-R301',
+  },
+  {
+    id: '',
+    image:
+      'https://api.cu2qdtboy0-demo2-d5-public.model-t.cc.commerce.ondemand.com//medias/MZ-FG-R300-515Wx515H.png?context=bWFzdGVyfGltYWdlc3wxNzY2NTl8aW1hZ2UvcG5nfGFEUXhMMmd5WWk4NE56azNPVGsxTkRZMk56Z3lMMDFhTFVaSExWSXpNREF0TlRFMVYzZzFNVFZJTG5CdVp3fGNlNTI0ZTM3N2RkYmUyZDdhZGVhMTdhYWJkZjE4OTg3OTIxOGU2N2UyOWU3OTBmY2MyMGIxODJlY2Q0MmJlZmY',
+    name: 'T302 Bike',
+    sku: 'MZ-FG-R302',
+  },
+  {
+    id: '',
+    image:
+      'https://api.cu2qdtboy0-demo2-d5-public.model-t.cc.commerce.ondemand.com//medias/MZ-FG-R300-515Wx515H.png?context=bWFzdGVyfGltYWdlc3wxNzY2NTl8aW1hZ2UvcG5nfGFEUXhMMmd5WWk4NE56azNPVGsxTkRZMk56Z3lMMDFhTFVaSExWSXpNREF0TlRFMVYzZzFNVFZJTG5CdVp3fGNlNTI0ZTM3N2RkYmUyZDdhZGVhMTdhYWJkZjE4OTg3OTIxOGU2N2UyOWU3OTBmY2MyMGIxODJlY2Q0MmJlZmY',
+    name: 'U303 Bike',
+    sku: 'MZ-FG-R303',
+  },
 ];
 
 export const productListMockData = {
