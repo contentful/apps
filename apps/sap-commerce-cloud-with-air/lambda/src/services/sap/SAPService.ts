@@ -59,10 +59,6 @@ export async function getProductPreviewsService(
     },
   };
 
-  console.log('skus', skus);
-  console.log('apiEndpoint', apiEndpoint);
-  console.log('applicationInterfaceKey', applicationInterfaceKey);
-
   for (const sku of skus) {
     skuIds.push(sku.split('/products/').pop() as string);
     const url = `${sku}?fields=code,name,summary,price(formattedValue,DEFAULT),images(galleryIndex,FULL),averageRating,stock(DEFAULT),description,availableForPickup,url,numberOfReviews,manufacturer,categories(FULL),priceRange,multidimensional,configuratorType,configurable,tags`;

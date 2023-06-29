@@ -12,11 +12,10 @@ import {
   TableRow,
   TextInput,
 } from '@contentful/forma-36-react-components';
-import { CMAClient, DialogAppSDK, DialogExtensionSDK } from '@contentful/app-sdk';
 import { ProductList } from './Dialog/ProductList';
 import { fetchProductList } from '../api/fetchProductList';
 import { fetchBaseSites } from '../api/fetchBaseSites';
-import { Error, Product, SAPParameters } from '../interfaces';
+import { Error, Product } from '../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
 import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';

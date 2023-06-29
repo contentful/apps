@@ -32,13 +32,10 @@ export const getProductList = async (req: Request, res: Response) => {
 
 export const getProductPreview = async (req: Request, res: Response) => {
   const skus = JSON.parse(JSON.parse(JSON.stringify(req.header('x-skus'))));
-  console.log('skus', skus);
-
   const keyServiceRes = await getApplicationKeyService();
   const { sapApplicationId } = keyServiceRes;
   const { apiEndpoint } = req.installationParameters;
   const products = await getProductPreviewsService(skus, apiEndpoint, sapApplicationId);
-  console.log('products', products);
   return res.status(200).send(products);
 };
 

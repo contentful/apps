@@ -9,7 +9,6 @@ import { CategoryPreviews } from './CategoryPreviews/CategoryPreviews';
 import { fetchProductPreviews } from '../api/fetchProductPreviews';
 import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
 import logo from '../logo.png';
-import { SAPParameters } from '../interfaces';
 import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
 
 interface Props {

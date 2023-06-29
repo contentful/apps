@@ -22,10 +22,7 @@ async function fetchWithSignedRequest(
     body: body ? JSON.stringify(body) : undefined,
   };
 
-  console.log('req', req);
   const rootRelativePath = req.url.pathname;
-
-  console.log('BEFORE CMA REQUEST CREATE', req);
 
   // add request verification signing secret to request headers
   const { additionalHeaders: signedHeaders } = await cma.appSignedRequest.create(
@@ -39,11 +36,8 @@ async function fetchWithSignedRequest(
       body: req.body,
     }
   );
-  console.log('AFTER CMA REQUEST CREATE');
 
   Object.assign(req.headers, unsignedHeaders, signedHeaders);
-
-  console.log('reqURL', req.url);
 
   return fetch(req.url, req);
 }
