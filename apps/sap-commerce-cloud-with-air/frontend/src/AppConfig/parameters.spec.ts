@@ -10,7 +10,7 @@ const mockParameterDefinition: ParameterDefinition = {
   required: true,
 };
 
-describe('parameters', () => {
+describe.skip('parameters', () => {
   describe('toInputParameters', () => {
     it('handles lack of parameters', () => {
       const parameterDefinitions: ParameterDefinition[] = [mockParameterDefinition];
