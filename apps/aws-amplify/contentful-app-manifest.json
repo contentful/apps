@@ -1,13 +1,13 @@
 {
   "actions": [
     {
-      "id": "example",
-      "name": "Example App Action",
+      "id": "amplifyBuildAction",
+      "name": "Applify Build Action",
       "category": "Custom",
-      "description": "This is an example to help you learn how hosted app actions work.",
+      "description": "This action is used to launch hosted app builds in AWS Amplify.",
       "type": "function",
-      "path": "actions/example.js",
-      "entryFile": "./actions/example.ts",
+      "path": "actions/amplify.js",
+      "entryFile": "./actions/amplify.ts",
       "allowNetworks": ["webhooks.amplify.us-east-1.amazonaws.com"],
       "parameters": [
         {
