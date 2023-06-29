@@ -2,7 +2,7 @@ import { SAPParameters, UpdateTotalPagesFn } from '../interfaces';
 import { config } from '../config';
 import fetchWithSignedRequest from './signed-requests';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { productListMockData } from './realMockData';
+// import { productListMockData } from './realMockData';
 import { productTransformer } from './dataTransformers';
 
 export async function fetchProductList(

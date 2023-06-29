@@ -9,7 +9,6 @@ import '@contentful/forma-36-tokens/dist/css/index.css';
 import './index.css';
 import AppConfig from './AppConfig/AppConfig';
 
-import FieldClass from './components/FieldClass';
 import { config } from './config';
 
 interface AWSFunctionURLResponse {
@@ -35,8 +34,8 @@ const getApplicationInterfaceKey = async (): Promise<boolean | string> => {
 
 init(async (sdk) => {
   const root = document.getElementById('root');
-  const isTestEnv = config.isTestEnv;
-  const sapApplicationInterfaceKey = !isTestEnv ? await getApplicationInterfaceKey() : '';
+  // const isTestEnv = config.isTestEnv;
+  // const sapApplicationInterfaceKey = !isTestEnv ? await getApplicationInterfaceKey() : '';
   const ComponentLocationSettings = [
     {
       location: locations.LOCATION_APP_CONFIG,
