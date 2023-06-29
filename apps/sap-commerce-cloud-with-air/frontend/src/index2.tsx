@@ -1,13 +1,8 @@
+// TODO: Delete this file in a cleanup PR
+
 import { render } from 'react-dom';
 
-import {
-  AppExtensionSDK,
-  FieldExtensionSDK,
-  DialogExtensionSDK,
-  init,
-  locations,
-  DialogAppSDK,
-} from '@contentful/app-sdk';
+import { AppExtensionSDK, init, locations } from '@contentful/app-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import '@contentful/forma-36-tokens/dist/css/index.css';
