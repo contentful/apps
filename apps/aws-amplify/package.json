@@ -3,15 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@aws-sdk/client-amplify": "^3.360.0",
     "@contentful/app-sdk": "^4.17.2",
     "@contentful/f36-components": "4.41.1",
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/react-apps-toolkit": "1.2.15",
+    "aws-amplify": "^5.3.2",
     "aws-sdk": "^2.1405.0",
     "contentful-management": "10.35.6",
     "emotion": "10.0.27",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-scripts": "5.0.1"

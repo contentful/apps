@@ -16,6 +16,7 @@ import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { isValidUrl } from '../lib/isVaildUrl';
 import { styles } from '../components/config-screen/ConfigScreen.styles';
 import AmplifyIcon from '../components/common/AmplifyIcon';
+import { Auth } from 'aws-amplify';
 
 export interface AppInstallationParameters {
   amplifyWebhookUrl?: string;
@@ -68,6 +69,15 @@ const ConfigScreen = () => {
     setAmplifyWebhookUrl(e.target.value);
   };
 
+  const handleConnect = async () => {
+    try {
+      // Redirect the user to authenticate with AWS
+      await Auth.federatedSignIn();
+    } catch (error) {
+      console.log('Error occurred during AWS authentication:', error);
+    }
+  };
+
   return (
     <>
       <Box className={styles.background} />
@@ -109,7 +119,7 @@ const ConfigScreen = () => {
           </Box>
         </Stack>
       </Box>
-      <Box style={styles.icon}>
+      <Box style={styles.icon} onClick={handleConnect}>
         <Flex alignItems="center" justifyContent="center">
           <AmplifyIcon />
         </Flex>

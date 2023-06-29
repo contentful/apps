@@ -5,19 +5,21 @@ interface AppActionCallParameters {
 }
 
 export const handler = async (payload: AppActionCallParameters, context: AppActionCallContext) => {
-  const { amplifyWebhookUrl } = payload;
-
   try {
-    await fetch(amplifyWebhookUrl, {
+    await fetch(payload.amplifyWebhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({}),
     });
-  } catch (err) {}
-
-  return {
-    message: 'Build successfully started',
-  };
+    return {
+      status: 'SUCCESS',
+      message: 'Build successfully initialized',
+    };
+  } catch (err) {
+    return {
+      status: 'FAILED',
+      message: err.message,
+    };
+  }
 };
