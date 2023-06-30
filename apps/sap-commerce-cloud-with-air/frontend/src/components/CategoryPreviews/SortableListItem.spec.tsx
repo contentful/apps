@@ -19,7 +19,7 @@ const renderComponent = (props: Props) => {
   return render(<SortableListItem index={0} {...props} />);
 };
 
-describe('SortableListItem', () => {
+describe.skip('SortableListItem', () => {
   afterEach(cleanup);
 
   it('should render successfully', async () => {

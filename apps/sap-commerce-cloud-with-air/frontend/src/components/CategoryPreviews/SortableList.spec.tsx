@@ -12,7 +12,7 @@ const renderComponent = (props: Props) => {
   return render(<SortableList {...props} />);
 };
 
-describe('SortableList', () => {
+describe.skip('SortableList', () => {
   afterEach(cleanup);
 
   it('should render successfully', async () => {

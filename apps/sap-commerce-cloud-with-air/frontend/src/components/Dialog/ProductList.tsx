@@ -1,7 +1,8 @@
 import React from 'react';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { CheckBoxFn, Product } from '../../interfaces';
-import { Button, Checkbox, TableCell, TableRow } from '@contentful/forma-36-react-components';
+import { Button, Checkbox, TableCell, TableRow } from '@contentful/f36-components';
+import { DoneIcon } from '@contentful/f36-icons';
 import get from 'lodash/get';
 
 interface Props {
@@ -33,14 +34,13 @@ export class ProductList extends React.Component<Props> {
               <TableCell>
                 {isFieldTypeSymbol ? (
                   <Button
-                    buttonType="primary"
-                    icon="Done"
+                    variant="primary"
+                    startIcon={<DoneIcon />}
                     onClick={() => this.selectButtonClickEvent(product.sku)}>
                     Select
                   </Button>
                 ) : (
                   <Checkbox
-                    labelText={''}
                     id={product.sku}
                     defaultChecked={checkboxValue}
                     onChange={this.props.checkboxFn}

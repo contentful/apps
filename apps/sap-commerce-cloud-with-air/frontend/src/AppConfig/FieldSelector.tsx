@@ -1,8 +1,7 @@
 import * as React from 'react';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from '@emotion/css';
-import { Form, Subheading, CheckboxField, Typography } from '@contentful/forma-36-react-components';
-
+import { Checkbox, Flex, Form, Subheading } from '@contentful/f36-components';
 import { ContentType, CompatibleFields, SelectedFields } from './fields';
 
 interface Props {
@@ -11,12 +10,6 @@ interface Props {
   selectedFields: SelectedFields;
   onSelectedFieldsChange: Function;
 }
-const styles = {
-  test: css({
-    display: 'flex',
-    marginBottom: tokens.spacingXs,
-  }),
-};
 export default class FieldSelector extends React.Component<Props> {
   onSelectedFieldChange = (
     ctId: string,
@@ -38,7 +31,7 @@ export default class FieldSelector extends React.Component<Props> {
     const { compatibleFields, contentTypes, selectedFields } = this.props;
 
     return (
-      <Typography>
+      <>
         {contentTypes.map((ct) => {
           const fields = compatibleFields[ct.sys.id];
           return (
@@ -46,25 +39,23 @@ export default class FieldSelector extends React.Component<Props> {
               <Subheading style={{ marginBottom: tokens.spacingM }}>{ct.name}</Subheading>
               <Form>
                 {fields.map((field) => (
-                  <div style={{ display: 'flex' }}>
-                    <CheckboxField
-                      className={styles.test}
-                      key={field.id}
+                  <Flex marginTop="spacingM" flexDirection="column" gap="spacingXs" key={field.id}>
+                    <Checkbox
                       id={`field-box-${ct.sys.id}-${field.id}`}
-                      labelText={field.name}
                       helpText={`${
                         field.type === 'Symbol' ? 'Short text' : 'Short text, list'
                       } · Field ID: ${field.id}`}
-                      checked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                      onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
-                    />
-                  </div>
+                      isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
+                      onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}>
+                      {field.name}
+                    </Checkbox>
+                  </Flex>
                 ))}
               </Form>
             </div>
           );
         })}
-      </Typography>
+      </>
     );
   }
 }

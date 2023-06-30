@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
+import { useState, ReactElement } from 'react';
 import { SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { css } from 'emotion';
 import {
+  Badge,
   Card,
-  CardDragHandle as FormaCardDragHandle,
   Heading,
-  Icon,
   IconButton,
   SkeletonContainer,
   SkeletonImage,
   Subheading,
-  Tag,
-  Typography,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
+import { AssetIcon, CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/forma-36-tokens';
 import { Product } from '../../interfaces';
 
@@ -27,12 +25,14 @@ const IMAGE_SIZE = 48;
 
 const styles = {
   card: css({
-    display: 'flex',
     padding: 0,
     position: 'relative',
     ':not(:first-of-type)': css({
       marginTop: tokens.spacingXs,
     }),
+  }),
+  cardInner: css({
+    display: 'flex',
   }),
   imageWrapper: (imageHasLoaded: boolean) =>
     css({
@@ -54,6 +54,9 @@ const styles = {
     }),
   dragHandle: css({
     height: 'auto',
+    borderBottomLeftRadius: tokens.borderRadiusMedium,
+    borderTopLeftRadius: tokens.borderRadiusMedium,
+    cursor: 'grab',
   }),
   actions: css({
     position: 'absolute',
@@ -67,7 +70,7 @@ const styles = {
       }),
       '&:hover': {
         svg: css({
-          fill: tokens.colorContrastDark,
+          fill: tokens.colorBlack,
         }),
       },
     }),
@@ -85,7 +88,7 @@ const styles = {
       ...(product.name && { textTransform: 'capitalize' }),
     }),
   subheading: css({
-    color: tokens.colorElementDarkest,
+    color: tokens.gray500,
     fontSize: tokens.fontSizeS,
     marginBottom: 0,
   }),
@@ -95,14 +98,14 @@ const styles = {
     padding: tokens.spacingM,
   }),
   errorImage: css({
-    backgroundColor: tokens.colorElementLightest,
+    backgroundColor: tokens.gray100,
     borderRadius: '3px',
     margin: tokens.spacingM,
     width: `${IMAGE_SIZE}px`,
     height: `${IMAGE_SIZE}px`,
     position: 'relative',
     svg: css({
-      fill: tokens.colorTextLight,
+      fill: tokens.gray600,
       width: '100%',
       height: '50%',
       position: 'absolute',
@@ -113,9 +116,7 @@ const styles = {
   }),
 };
 
-const CardDragHandle = SortableHandle(() => (
-  <FormaCardDragHandle className={styles.dragHandle}>Reorder product</FormaCardDragHandle>
-));
+const CardDragHandle = SortableHandle(({ drag }: { drag: ReactElement }) => <>{drag}</>);
 
 export const SortableListItem = SortableElement<Props>(
   ({ product, disabled, isSortable, onDelete }: Props) => {
@@ -123,9 +124,11 @@ export const SortableListItem = SortableElement<Props>(
     const [imageHasErrored, setImageHasErrored] = useState(false);
 
     return (
-      <Card className={styles.card}>
-        <>
-          {isSortable && <CardDragHandle />}
+      <Card
+        className={styles.card}
+        withDragHandle
+        dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}>
+        <div className={styles.cardInner}>
           {!imageHasLoaded && !imageHasErrored && (
             <SkeletonContainer className={styles.skeletonImage}>
               <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
@@ -133,7 +136,11 @@ export const SortableListItem = SortableElement<Props>(
           )}
           {imageHasErrored && (
             <div className={styles.errorImage}>
-              <Icon icon={product.isMissing ? 'ErrorCircle' : 'Asset'} />
+              {product.isMissing ? (
+                <ErrorCircleIcon testId="error-circle-icon" />
+              ) : (
+                <AssetIcon testId="asset-icon" />
+              )}
             </div>
           )}
           {!imageHasErrored && (
@@ -149,28 +156,26 @@ export const SortableListItem = SortableElement<Props>(
             </div>
           )}
           <section className={styles.description}>
-            <Typography>
-              <Heading className={styles.heading(product)}>
-                {product.isMissing || !product.name ? product.sku : product.name}
-              </Heading>
-              {product.isMissing && <Tag tagType="negative">Product missing</Tag>}
-              {!product.isMissing && product.name && (
-                <Subheading className={styles.subheading}>{product.sku}</Subheading>
-              )}
-            </Typography>
+            <Heading className={styles.heading(product)}>
+              {product.isMissing || !product.name ? product.sku : product.name}
+            </Heading>
+            {product.isMissing && <Badge variant="negative">Product missing</Badge>}
+            {!product.isMissing && product.name && (
+              <Subheading className={styles.subheading}>{product.sku}</Subheading>
+            )}
           </section>
-        </>
+        </div>
         {!disabled && (
           <div className={styles.actions}>
             {product.externalLink && (
               <a target="_blank" rel="noopener noreferrer" href={product.externalLink}>
-                <Icon icon="ExternalLink" color="muted" />
+                <ExternalLinkIcon color="muted" />
               </a>
             )}
             <IconButton
-              label="Delete"
-              iconProps={{ icon: 'Close' }}
-              buttonType="muted"
+              aria-label="Delete"
+              icon={<CloseIcon />}
+              variant="transparent"
               onClick={onDelete}
             />
           </div>
