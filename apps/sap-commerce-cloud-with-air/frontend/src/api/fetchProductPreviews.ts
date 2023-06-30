@@ -15,6 +15,7 @@ export async function fetchProductPreviews(
   // return productPreviewMock;
 
   const url = new URL(`${config.proxyUrl}/sap/product-preview`);
+  console.log('URL from fetch preview: ' + url);
   const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET', {
     'x-skus': JSON.stringify(skus),
   });
