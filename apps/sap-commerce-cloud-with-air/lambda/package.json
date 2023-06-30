@@ -8,6 +8,8 @@
     "build": "NODE_ENV=production rimraf ./build && tsc",
     "lint": "eslint --max-warnings=0 .",
     "start": "NODE_ENV=development nodemon",
+    "deploy:test": "NODE_ENV=test sls deploy --stage test",
+    "deploy": "NODE_ENV=production CIRCLE_SHA1=$(git rev-parse --short HEAD) sls deploy --stage $STAGE",
     "verify-config": "STAGE=$(test \"$CIRCLE_BRANCH\" = 'master' && echo 'prd' || echo 'test'); sls print --stage $STAGE"
   },
   "keywords": [],
