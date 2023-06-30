@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button } from '@contentful/forma-36-react-components';
+import { Button } from '@contentful/f36-components';
+import { ShoppingCartIcon } from '@contentful/f36-icons';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
@@ -31,7 +32,6 @@ const styles = {
   }),
   logo: css({
     display: 'block',
-    // width: "30px",
     height: '30px',
     marginRight: tokens.spacingM,
   }),
@@ -176,11 +176,11 @@ export default class FieldClass extends React.Component<Props, State> {
         <div className={styles.container}>
           <img src={logo} alt="Logo" className={styles.logo} />
           <Button
-            icon="ShoppingCart"
-            buttonType="muted"
+            startIcon={<ShoppingCartIcon />}
+            variant="secondary"
             size="small"
             onClick={this.onDialogOpen}
-            disabled={editingDisabled}>
+            isDisabled={editingDisabled}>
             {makeCTAText(fieldType, this.getPickerMode())}
           </Button>
         </div>

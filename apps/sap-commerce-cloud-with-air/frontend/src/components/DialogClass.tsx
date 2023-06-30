@@ -9,7 +9,9 @@ import {
   TableHead,
   TableRow,
   TextInput,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
+import { SearchIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/forma-36-tokens';
 import { ProductList } from './Dialog/ProductList';
 import { fetchProductList } from '../api/fetchProductList';
 import { fetchBaseSites } from '../api/fetchBaseSites';
@@ -37,8 +39,25 @@ interface State {
 }
 
 const styles = {
-  dropdown: css({
-    height: '20px',
+  header: css({
+    borderBottom: `1px solid ${tokens.gray300}`,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: tokens.spacingL,
+    leftsideControls: css({
+      position: 'relative',
+      zIndex: 0,
+      svg: css({
+        zIndex: 1,
+        position: 'absolute',
+        top: '10px',
+        left: '10px',
+      }),
+      input: css({
+        paddingLeft: '35px',
+      }),
+    }),
   }),
 };
 export default class DialogClass extends React.Component<DialogProps, State> {
@@ -178,9 +197,10 @@ export default class DialogClass extends React.Component<DialogProps, State> {
   render() {
     const isFieldTypeArray =
       (get(this.props.sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
+
     return (
       <>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <header className={styles.header}>
           <div style={{ display: 'flex' }}>
             <div style={{ marginLeft: '10px', marginTop: '10px' }}>
               <TextInput
@@ -198,7 +218,7 @@ export default class DialogClass extends React.Component<DialogProps, State> {
               />
             </div>
             <div style={{ marginLeft: '10px', marginTop: '10px' }}>
-              <Select className={styles.dropdown} onChange={this.updateBaseSite}>
+              <Select onChange={this.updateBaseSite}>
                 {this.state.baseSites.map((baseSite) => (
                   <Option key={baseSite} value={baseSite}>
                     {baseSite}
@@ -208,8 +228,8 @@ export default class DialogClass extends React.Component<DialogProps, State> {
             </div>
             <div style={{ marginLeft: '10px', marginTop: '10px' }}>
               <Button
-                buttonType="primary"
-                icon="Search"
+                variant="primary"
+                startIcon={<SearchIcon />}
                 onClick={() => this.searchButtonClickEvent()}>
                 Search
               </Button>
@@ -217,17 +237,14 @@ export default class DialogClass extends React.Component<DialogProps, State> {
           </div>
           {isFieldTypeArray ? (
             <div style={{ marginLeft: '10px', marginTop: '10px' }}>
-              <Button
-                buttonType="primary"
-                icon="Done"
-                onClick={this.selectMultipleProductsClickEvent}>
+              <Button variant="primary" onClick={this.selectMultipleProductsClickEvent}>
                 Select Products
               </Button>
             </div>
           ) : (
             <></>
           )}
-        </div>
+        </header>
 
         <Table style={{ padding: '20px' }}>
           {this.state.errors?.length ? (
@@ -270,7 +287,7 @@ export default class DialogClass extends React.Component<DialogProps, State> {
         </Table>
         <div style={{ margin: '20px' }}>
           {this.state.page > 0 ? (
-            <Button buttonType="primary" onClick={this.prevPageButtonEvent}>
+            <Button variant="primary" onClick={this.prevPageButtonEvent}>
               Previous
             </Button>
           ) : (
@@ -278,7 +295,7 @@ export default class DialogClass extends React.Component<DialogProps, State> {
           )}
           {this.state.page + 1 < this.state.totalPages ? (
             <Button
-              buttonType="primary"
+              variant="primary"
               style={{ marginLeft: '20px' }}
               onClick={this.nextPageButtonEvent}>
               Next
@@ -289,13 +306,12 @@ export default class DialogClass extends React.Component<DialogProps, State> {
         </div>
         {isFieldTypeArray ? (
           <div>
-            {/* // <Button
-          //   buttonType="primary"
-          //   icon="Done"
-          //   onClick={this.selectMultipleProductsClickEvent}
-          //   style={{ margin: '20px' }}>
-          //   Select Products
-          // </Button> */}
+            <Button
+              variant="primary"
+              onClick={this.selectMultipleProductsClickEvent}
+              style={{ margin: '20px' }}>
+              Select Products
+            </Button>
           </div>
         ) : (
           <></>

@@ -2,14 +2,15 @@ import * as React from 'react';
 
 import { AppExtensionSDK, CollectionResponse } from '@contentful/app-sdk';
 import {
+  Flex,
   Form,
+  FormControl,
   Heading,
   Note,
   Paragraph,
-  TextField,
+  TextInput,
   TextLink,
-  Typography,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from '@emotion/css';
 
@@ -155,11 +156,11 @@ export default class AppConfig extends React.Component<Props, State> {
       <>
         <div className={styles.background(this.props.color)} />
         <div className={styles.body}>
-          <Typography>
+          <>
             <Heading>About {this.props.name}</Heading>
             <Paragraph style={{ marginTop: '15px' }}>{this.props.description}</Paragraph>
             <hr className={styles.splitter} />
-          </Typography>
+          </>
           {this.renderApp()}
         </div>
         <div className={styles.icon}>
@@ -191,37 +192,36 @@ export default class AppConfig extends React.Component<Props, State> {
     return (
       <>
         {hasConfigurationOptions && (
-          <Typography>
+          <>
             <Heading style={{ marginBottom: '15px' }}>Configuration</Heading>
             <Form>
               {parameterDefinitions.map((def) => {
                 const key = `config-input-${def.id}`;
 
                 return (
-                  <div style={{ marginBottom: '15px' }}>
-                    <TextField
-                      required={def.required}
-                      key={key}
-                      id={key}
+                  <FormControl key={key} id={key}>
+                    <FormControl.Label>{def.name}</FormControl.Label>
+                    <TextInput
                       name={key}
-                      labelText={def.name}
-                      textInputProps={{
-                        width: def.type === 'Symbol' ? 'large' : 'medium',
-                        type: def.type === 'Symbol' ? 'text' : 'number',
-                        maxLength: 255,
-                      }}
-                      helpText={def.description}
-                      value={parameters[def.id]}
+                      width={def.type === 'Symbol' ? 'large' : 'medium'}
+                      type={def.type === 'Symbol' ? 'text' : 'number'}
+                      maxLength={255}
+                      isRequired={def.required}
+                      value={parameters?.[def.id] ?? ''}
                       onChange={this.onParameterChange.bind(this, def.id)}
                     />
-                  </div>
+                    <Flex justifyContent="space-between">
+                      <FormControl.HelpText>{def.description}</FormControl.HelpText>
+                      <FormControl.Counter />
+                    </Flex>
+                  </FormControl>
                 );
               })}
             </Form>
             <hr className={styles.splitter} />
-          </Typography>
+          </>
         )}
-        <Typography>
+        <>
           <Heading style={{ marginBottom: '15px' }}>Assign to fields</Heading>
           {contentTypes.length > 0 ? (
             <Paragraph>
@@ -235,11 +235,10 @@ export default class AppConfig extends React.Component<Props, State> {
                 This app can only be used with <strong>Short text</strong> or{' '}
                 <strong>Short text, list</strong> fields.
               </Paragraph>
-              <Note noteType="warning">
+              <Note variant="warning">
                 There are <strong>no content types with Short text or Short text, list</strong>{' '}
                 fields in this environment. You can add one in your{' '}
                 <TextLink
-                  linkType="primary"
                   target="_blank"
                   rel="noopener noreferrer"
                   href={
@@ -259,7 +258,7 @@ export default class AppConfig extends React.Component<Props, State> {
             selectedFields={selectedFields}
             onSelectedFieldsChange={this.onSelectedFieldsChange}
           />
-        </Typography>
+        </>
       </>
     );
   }

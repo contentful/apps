@@ -1,16 +1,8 @@
-import React from 'react';
+import { ReactElement } from 'react';
 import { SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { css } from 'emotion';
-import {
-  Card,
-  CardDragHandle as FormaCardDragHandle,
-  Heading,
-  Icon,
-  IconButton,
-  Subheading,
-  Tag,
-  Typography,
-} from '@contentful/forma-36-react-components';
+import { Badge, Card, Heading, IconButton, Subheading } from '@contentful/f36-components';
+import { CloseIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/forma-36-tokens';
 import { Category } from '../../interfaces';
 
@@ -30,6 +22,9 @@ const styles = {
       marginTop: tokens.spacingXs,
     }),
   }),
+  cardInner: css({
+    display: 'flex',
+  }),
   dragHandle: css({
     height: 'auto',
   }),
@@ -45,7 +40,7 @@ const styles = {
       }),
       '&:hover': {
         svg: css({
-          fill: tokens.colorContrastDark,
+          fill: tokens.colorBlack,
         }),
       },
     }),
@@ -64,20 +59,18 @@ const styles = {
       ...(category.name && { textTransform: 'capitalize' }),
     }),
   subheading: css({
-    color: tokens.colorElementDarkest,
+    color: tokens.gray500,
     fontSize: tokens.fontSizeS,
     marginBottom: 0,
   }),
   slug: css({
-    color: tokens.colorElementDarkest,
+    color: tokens.colorBlack,
     fontSize: tokens.fontSizeS,
     marginBottom: 0,
   }),
 };
 
-const CardDragHandle = SortableHandle(() => (
-  <FormaCardDragHandle className={styles.dragHandle}>Reorder category</FormaCardDragHandle>
-));
+const CardDragHandle = SortableHandle(({ drag }: { drag: ReactElement }) => <>{drag}</>);
 
 function getCategoryIdentifier(category: Category) {
   return category.slug.length ? category.slug : category.id;
@@ -86,36 +79,38 @@ function getCategoryIdentifier(category: Category) {
 export const SortableListItem = SortableElement<Props>(
   ({ category, disabled, isSortable, onDelete }: Props) => {
     return (
-      <Card className={styles.card}>
-        <>
-          {isSortable && <CardDragHandle />}
+      <Card
+        className={styles.card}
+        withDragHandle
+        dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}>
+        <div className={styles.cardInner}>
           <section className={styles.description}>
-            <Typography>
+            <>
               <Heading className={styles.heading(category)}>
                 {category.isMissing || !category.name
                   ? getCategoryIdentifier(category)
                   : category.name}
               </Heading>
-              {category.isMissing && <Tag tagType="negative">Category missing</Tag>}
+              {category.isMissing && <Badge variant="negative">Category missing</Badge>}
               {!category.isMissing && category.name && (
                 <Subheading className={styles.subheading}>
                   {getCategoryIdentifier(category)}
                 </Subheading>
               )}
-            </Typography>
+            </>
           </section>
-        </>
+        </div>
         {!disabled && (
           <div className={styles.actions}>
             {category.externalLink && (
               <a target="_blank" rel="noopener noreferrer" href={category.externalLink}>
-                <Icon icon="ExternalLink" color="muted" />
+                <ExternalLinkIcon color="muted" />
               </a>
             )}
             <IconButton
-              label="Delete"
-              iconProps={{ icon: 'Close' }}
-              buttonType="muted"
+              aria-label="Delete"
+              icon={<CloseIcon />}
+              variant="transparent"
               onClick={onDelete}
             />
           </div>
