@@ -12,6 +12,6 @@ describe('Sidebar component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Sidebar />);
 
-    expect(getByText('Build website')).toBeInTheDocument();
+    expect(getByText('Build now')).toBeInTheDocument();
   });
 });

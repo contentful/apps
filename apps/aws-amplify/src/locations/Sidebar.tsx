@@ -55,7 +55,7 @@ const Sidebar = () => {
         onClick={handleBuildAppActionCall}>
         {isLoading ? 'Initiating build...' : 'Build now'}
       </Button>
-      <Paragraph marginTop={'spacingM'}>Last build started: {lastBuildInitiated}</Paragraph>
+      <span>Last build started: {lastBuildInitiated}</span>
     </Paragraph>
   );
 };
