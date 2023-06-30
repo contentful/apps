@@ -14,6 +14,7 @@ export async function fetchBaseSites(
   // return baseSitesMock;
 
   const url = new URL(`${config.proxyUrl}/sap/base-sites`);
+  console.log('URL from fetch base sites: ' + url);
   const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
   const json = await res.json();
   return json;
