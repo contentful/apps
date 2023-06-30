@@ -2,22 +2,14 @@ import { useEffect, useState } from 'react';
 import { Button, Paragraph } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { getItemLocalStorage, build_status_key, setInLocalStorage } from '../lib/localStorage';
 
-const build_status_key = '__contentful_build_timestamp__';
-
-function setInLocalStorage(key: string, value: string | object) {
-  if (typeof value === 'object') {
-    localStorage.setItem(key, JSON.stringify(value));
-  } else {
-    localStorage.setItem(key, value);
-  }
-}
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
   const cma = useCMA();
   const [isLoading, setIsLoading] = useState(false);
   const [lastBuildInitiated, setLastBuildInitiated] = useState(
-    localStorage.getItem(build_status_key) || null
+    getItemLocalStorage(build_status_key) || null
   );
 
   useEffect(() => {
@@ -63,7 +55,7 @@ const Sidebar = () => {
         onClick={handleBuildAppActionCall}>
         {isLoading ? 'Initiating build...' : 'Build now'}
       </Button>
-      <Paragraph marginTop={'spacingM'}>Last build: {lastBuildInitiated}</Paragraph>
+      <Paragraph marginTop={'spacingM'}>Last build started: {lastBuildInitiated}</Paragraph>
     </Paragraph>
   );
 };
