@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, Paragraph } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
-import { getItemLocalStorage, build_status_key, setInLocalStorage } from '../lib/localStorage';
+import { getItemLocalStorage, build_status_key, setItemLocalStorage } from '../lib/localStorage';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
@@ -36,7 +36,7 @@ const Sidebar = () => {
         }
       );
       setLastBuildInitiated(buildInitiated);
-      setInLocalStorage(build_status_key, buildInitiated);
+      setItemLocalStorage(build_status_key, buildInitiated);
       setIsLoading(false);
       const { message } = JSON.parse(res.response.body);
       sdk.notifier.success(message);
