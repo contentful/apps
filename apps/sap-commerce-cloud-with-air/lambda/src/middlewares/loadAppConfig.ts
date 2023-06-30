@@ -15,7 +15,7 @@ export const loadAppConfigMiddleware: RequestHandler = async (
       (config: { [key: string]: string }) => config.id === appId
     );
 
-    const APP_CONFIG_PROPS = ['privateKey', 'signingSecret'];
+    const APP_CONFIG_PROPS = ['id', 'privateKey', 'signingSecret'];
 
     if (!appConfig) {
       throw new Error(`App config for app ID: ${appId} not found.`);

@@ -9,10 +9,11 @@ import { CategoryPreviews } from './CategoryPreviews/CategoryPreviews';
 import { fetchProductPreviews } from '../api/fetchProductPreviews';
 import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
 import logo from '../logo.png';
-import { SAPParameters } from '../interfaces';
+import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
 
 interface Props {
   sdk: FieldExtensionSDK;
+  cma: PlainClientAPI;
   applicationInterfaceKey: string;
 }
 
@@ -56,7 +57,7 @@ function makeCTAText(fieldType: string, pickerMode: 'category' | 'product') {
   return `Select ${beingSelected}`;
 }
 
-export default class Field extends React.Component<Props, State> {
+export default class FieldClass extends React.Component<Props, State> {
   state = {
     value: fieldValueToState(this.props.sdk.field.getValue()),
     editingDisabled: true,
@@ -158,11 +159,13 @@ export default class Field extends React.Component<Props, State> {
                 disabled={editingDisabled}
                 skus={data}
                 onChange={this.updateStateValue}
-                fetchProductPreviews={(skus) =>
-                  fetchProductPreviews(
+                fetchProductPreviews={async (skus) =>
+                  await fetchProductPreviews(
                     skus,
-                    this.props.sdk.parameters as SAPParameters,
-                    this.props.applicationInterfaceKey
+                    this.props.sdk.parameters as any,
+                    this.props.applicationInterfaceKey,
+                    this.props.sdk,
+                    this.props.cma
                   )
                 }
                 applicationInterfaceKey={this.props.applicationInterfaceKey}

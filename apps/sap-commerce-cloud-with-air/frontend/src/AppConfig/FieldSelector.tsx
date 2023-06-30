@@ -11,7 +11,12 @@ interface Props {
   selectedFields: SelectedFields;
   onSelectedFieldsChange: Function;
 }
-
+const styles = {
+  test: css({
+    display: 'flex',
+    marginBottom: tokens.spacingXs,
+  }),
+};
 export default class FieldSelector extends React.Component<Props> {
   onSelectedFieldChange = (
     ctId: string,
@@ -38,19 +43,22 @@ export default class FieldSelector extends React.Component<Props> {
           const fields = compatibleFields[ct.sys.id];
           return (
             <div key={ct.sys.id} className={css({ marginTop: tokens.spacingL })}>
-              <Subheading>{ct.name}</Subheading>
+              <Subheading style={{ marginBottom: tokens.spacingM }}>{ct.name}</Subheading>
               <Form>
                 {fields.map((field) => (
-                  <CheckboxField
-                    key={field.id}
-                    id={`field-box-${ct.sys.id}-${field.id}`}
-                    labelText={field.name}
-                    helpText={`${
-                      field.type === 'Symbol' ? 'Short text' : 'Short text, list'
-                    } · Field ID: ${field.id}`}
-                    checked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                    onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
-                  />
+                  <div style={{ display: 'flex' }}>
+                    <CheckboxField
+                      className={styles.test}
+                      key={field.id}
+                      id={`field-box-${ct.sys.id}-${field.id}`}
+                      labelText={field.name}
+                      helpText={`${
+                        field.type === 'Symbol' ? 'Short text' : 'Short text, list'
+                      } · Field ID: ${field.id}`}
+                      checked={(selectedFields[ct.sys.id] || []).includes(field.id)}
+                      onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
+                    />
+                  </div>
                 ))}
               </Form>
             </div>

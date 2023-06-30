@@ -23,10 +23,12 @@ export async function getBaseSitesService(apiEndpoint: string, applicationInterf
 }
 
 export async function getProductListService(
-  baseSite: string,
+  baseSites: string,
   apiEndpoint: string,
-  applicationInterfaceKey: string
+  applicationInterfaceKey: string,
+  urlPathParams: string
 ) {
+  // TODO: Fix for multiple basesites
   const axiosConfig = {
     headers: {
       'Application-Interface-Key': JSON.stringify(applicationInterfaceKey),
@@ -34,7 +36,7 @@ export async function getProductListService(
   };
 
   const response = await axios.get(
-    `${apiEndpoint}/occ/v2/${baseSite}/products/search`,
+    `${apiEndpoint}/occ/v2/${baseSites}/products/search/${urlPathParams}`,
     axiosConfig
   );
   return response.data;

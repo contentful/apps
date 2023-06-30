@@ -23,18 +23,25 @@ export const getBaseSites = async (req: Request, res: Response) => {
 };
 
 export const getProductList = async (req: Request, res: Response) => {
-  const applicationInterfaceKey = await getApplicationKeyService();
-  const { apiEndpoint, baseSite } = req.installationParameters;
-  const products = await getProductListService(baseSite, apiEndpoint, applicationInterfaceKey);
+  const urlPathParams = JSON.parse(JSON.parse(JSON.stringify(req.header('x-path-params'))));
+  const keyServiceRes = await getApplicationKeyService();
+  const { sapApplicationId } = keyServiceRes;
+  const { apiEndpoint, baseSites } = req.installationParameters;
+  const products = await getProductListService(
+    baseSites,
+    apiEndpoint,
+    sapApplicationId,
+    urlPathParams
+  );
   return res.status(200).send(products);
 };
 
 export const getProductPreview = async (req: Request, res: Response) => {
-  const skus = JSON.parse(JSON.stringify(req.headers.skus));
-
-  const applicationInterfaceKey = await getApplicationKeyService();
+  const skus = JSON.parse(JSON.parse(JSON.stringify(req.header('x-skus'))));
+  const keyServiceRes = await getApplicationKeyService();
+  const { sapApplicationId } = keyServiceRes;
   const { apiEndpoint } = req.installationParameters;
-  const products = await getProductPreviewsService(skus, apiEndpoint, applicationInterfaceKey);
+  const products = await getProductPreviewsService(skus, apiEndpoint, sapApplicationId);
   return res.status(200).send(products);
 };
 

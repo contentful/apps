@@ -1,6 +1,9 @@
-import { Response, SAPParameters, UpdateTotalPagesFn } from '../interfaces';
-import { productTransformer } from './dataTransformers';
+import { SAPParameters, UpdateTotalPagesFn } from '../interfaces';
 import { config } from '../config';
+import fetchWithSignedRequest from './signed-requests';
+import { DialogAppSDK } from '@contentful/app-sdk';
+// import { productListMockData } from './realMockData';
+import { productTransformer } from './dataTransformers';
 
 export async function fetchProductList(
   baseSite: string,
@@ -8,48 +11,22 @@ export async function fetchProductList(
   page: number,
   parameters: SAPParameters,
   updateTotalPages: UpdateTotalPagesFn,
-  applicationInterfaceKey: string
-): Promise<Response> {
-  if (!baseSite.length) {
-    return {
-      products: [],
-      errors: [],
-    };
-  }
-  const headers = config.isTestEnv
-    ? {}
-    : {
-        headers: {
-          'Application-Interface-Key': applicationInterfaceKey,
-        },
-      };
-  const response: any = await fetch(
-    parameters.installation.apiEndpoint +
-      '/occ/v2/' +
-      baseSite +
-      '/products/search' +
-      '?query=' +
-      searchQuery +
-      '&fields=FULL&currentPage=' +
-      page,
-    headers
-  );
-  const responseJson = await response.json();
-  if (response.ok) {
-    const products = responseJson['products'].map(productTransformer(parameters.installation));
-    updateTotalPages(responseJson['pagination']['totalPages']);
-    if (!products.length) {
-      return {
-        products: [],
-        errors: [
-          {
-            message: `Products not found for search term ${searchQuery}`,
-            type: 'Not Found',
-          },
-        ],
-      };
-    }
-    return { products, errors: [] };
-  }
-  return { products: [], errors: responseJson['errors'] };
+  applicationInterfaceKey: string,
+  sdk: DialogAppSDK,
+  cma: any
+) {
+  // TODO: Delete in a cleanup PR
+  // const products = productListMockData.products.map(productTransformer(parameters.installation));
+  // updateTotalPages(productListMockData['pagination']['totalPages']);
+  // return { products, errors: [] };
+
+  const url = new URL(`${config.proxyUrl}/sap/product-list`);
+  const urlPathParams = '?query=' + searchQuery + '&fields=FULL&currentPage=' + page;
+  const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET', {
+    'x-path-params': JSON.stringify(urlPathParams),
+  });
+  const json = await res.json();
+  const products = json.products.map(productTransformer(parameters.installation));
+  updateTotalPages(json['pagination']['totalPages']);
+  return { products, errors: [] };
 }
