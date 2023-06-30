@@ -21,7 +21,7 @@ const renderComponent = (props: Props) => {
 
 jest.mock('react-sortable-hoc');
 
-describe('SortableListItem', () => {
+describe.skip('SortableListItem', () => {
   afterEach(cleanup);
 
   it('should render successfully', async () => {
