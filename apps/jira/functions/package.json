@@ -16,14 +16,14 @@
   "dependencies": {
     "@types/lodash": "^4.14.108",
     "aws-sdk": "^2.1407.0",
-    "node-fetch": "^2.6.11"
+    "node-fetch": "^2.6.12"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.119",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^9.1.1",
     "@types/node": "^12.12.14",
-    "@types/node-fetch": "^2.6.3",
+    "@types/node-fetch": "^2.6.4",
     "@types/request": "^2.48.8",
     "@types/sinon-chai": "^3.2.3",
     "mocha": "^10.0.0",
