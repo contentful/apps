@@ -157,7 +157,7 @@ export default class AppConfig extends React.Component<Props, State> {
         <div className={styles.body}>
           <Typography>
             <Heading>About {this.props.name}</Heading>
-            <Paragraph>{this.props.description}</Paragraph>
+            <Paragraph style={{ marginTop: '15px' }}>{this.props.description}</Paragraph>
             <hr className={styles.splitter} />
           </Typography>
           {this.renderApp()}
@@ -192,27 +192,29 @@ export default class AppConfig extends React.Component<Props, State> {
       <>
         {hasConfigurationOptions && (
           <Typography>
-            <Heading>Configuration</Heading>
+            <Heading style={{ marginBottom: '15px' }}>Configuration</Heading>
             <Form>
               {parameterDefinitions.map((def) => {
                 const key = `config-input-${def.id}`;
 
                 return (
-                  <TextField
-                    required={def.required}
-                    key={key}
-                    id={key}
-                    name={key}
-                    labelText={def.name}
-                    textInputProps={{
-                      width: def.type === 'Symbol' ? 'large' : 'medium',
-                      type: def.type === 'Symbol' ? 'text' : 'number',
-                      maxLength: 255,
-                    }}
-                    helpText={def.description}
-                    value={parameters[def.id]}
-                    onChange={this.onParameterChange.bind(this, def.id)}
-                  />
+                  <div style={{ marginBottom: '15px' }}>
+                    <TextField
+                      required={def.required}
+                      key={key}
+                      id={key}
+                      name={key}
+                      labelText={def.name}
+                      textInputProps={{
+                        width: def.type === 'Symbol' ? 'large' : 'medium',
+                        type: def.type === 'Symbol' ? 'text' : 'number',
+                        maxLength: 255,
+                      }}
+                      helpText={def.description}
+                      value={parameters[def.id]}
+                      onChange={this.onParameterChange.bind(this, def.id)}
+                    />
+                  </div>
                 );
               })}
             </Form>
@@ -220,7 +222,7 @@ export default class AppConfig extends React.Component<Props, State> {
           </Typography>
         )}
         <Typography>
-          <Heading>Assign to fields</Heading>
+          <Heading style={{ marginBottom: '15px' }}>Assign to fields</Heading>
           {contentTypes.length > 0 ? (
             <Paragraph>
               This app can only be used with <strong>Short text</strong> or{' '}

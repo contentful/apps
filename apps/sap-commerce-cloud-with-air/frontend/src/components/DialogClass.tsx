@@ -19,6 +19,7 @@ import { Error, Product } from '../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
 import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
+import { css } from '@emotion/css';
 
 interface DialogProps {
   sdk: any;
@@ -37,6 +38,11 @@ interface State {
   errors: Error[];
 }
 
+const styles = {
+  dropdown: css({
+    height: '20px',
+  }),
+};
 export default class DialogClass extends React.Component<DialogProps, State> {
   state: State = {
     baseSite: '',
@@ -176,56 +182,54 @@ export default class DialogClass extends React.Component<DialogProps, State> {
       (get(this.props.sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
     return (
       <>
-        <Grid
-          columns="1fr 1fr 1fr 1fr 1fr"
-          rowGap="spacingM"
-          columnGap="spacingM"
-          style={{ marginTop: '15px', paddingLeft: '20px' }}>
-          <GridItem>
-            <TextInput
-              type="text"
-              placeholder={'Search Term...'}
-              className="f36-margin-bottom--m"
-              style={{ width: '250px' }}
-              value={this.state.query}
-              onChange={this.updateSearchTerm}
-              onKeyPress={(event) => {
-                if (event.key === 'Enter') {
-                  this.load();
-                }
-              }}
-            />
-          </GridItem>
-          <GridItem>
-            <Select onChange={this.updateBaseSite}>
-              {this.state.baseSites.map((baseSite) => (
-                <Option key={baseSite} value={baseSite}>
-                  {baseSite}
-                </Option>
-              ))}
-            </Select>
-          </GridItem>
-          <GridItem>
-            <Button
-              buttonType="primary"
-              icon="Search"
-              onClick={() => this.searchButtonClickEvent()}>
-              Search
-            </Button>
-          </GridItem>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex' }}>
+            <div style={{ marginLeft: '10px', marginTop: '10px' }}>
+              <TextInput
+                type="text"
+                placeholder={'Search Term...'}
+                className="f36-margin-bottom--m"
+                style={{ width: '250px' }}
+                value={this.state.query}
+                onChange={this.updateSearchTerm}
+                onKeyPress={(event) => {
+                  if (event.key === 'Enter') {
+                    this.load();
+                  }
+                }}
+              />
+            </div>
+            <div style={{ marginLeft: '10px', marginTop: '10px' }}>
+              <Select className={styles.dropdown} onChange={this.updateBaseSite}>
+                {this.state.baseSites.map((baseSite) => (
+                  <Option key={baseSite} value={baseSite}>
+                    {baseSite}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+            <div style={{ marginLeft: '10px', marginTop: '10px' }}>
+              <Button
+                buttonType="primary"
+                icon="Search"
+                onClick={() => this.searchButtonClickEvent()}>
+                Search
+              </Button>
+            </div>
+          </div>
           {isFieldTypeArray ? (
-            <GridItem>
+            <div style={{ marginLeft: '10px', marginTop: '10px' }}>
               <Button
                 buttonType="primary"
                 icon="Done"
                 onClick={this.selectMultipleProductsClickEvent}>
                 Select Products
               </Button>
-            </GridItem>
+            </div>
           ) : (
             <></>
           )}
-        </Grid>
+        </div>
 
         <Table style={{ padding: '20px' }}>
           {this.state.errors?.length ? (
@@ -286,13 +290,15 @@ export default class DialogClass extends React.Component<DialogProps, State> {
           )}
         </div>
         {isFieldTypeArray ? (
-          <Button
-            buttonType="primary"
-            icon="Done"
-            onClick={this.selectMultipleProductsClickEvent}
-            style={{ margin: '20px' }}>
-            Select Products
-          </Button>
+          <div>
+            {/* // <Button
+          //   buttonType="primary"
+          //   icon="Done"
+          //   onClick={this.selectMultipleProductsClickEvent}
+          //   style={{ margin: '20px' }}>
+          //   Select Products
+          // </Button> */}
+          </div>
         ) : (
           <></>
         )}
