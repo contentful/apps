@@ -1,6 +1,6 @@
 import { config } from '../config';
 import { SAPParameters } from '../interfaces';
-import { baseSitesMock } from './realMockData';
+// import { baseSitesMock } from './realMockData';
 import fetchWithSignedRequest from './signed-requests';
 import { DialogAppSDK } from '@contentful/app-sdk';
 
@@ -11,10 +11,10 @@ export async function fetchBaseSites(
   cma: any
 ): Promise<string[]> {
   // TODO: Remove in final PR
-  return baseSitesMock;
+  // return baseSitesMock;
 
-  // const url = new URL(`${config.proxyUrl}/sap/base-sites`);
-  // const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
-  // const json = await res.json();
-  // return json;
+  const url = new URL(`${config.proxyUrl}/sap/base-sites`);
+  const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET');
+  const json = await res.json();
+  return json;
 }
