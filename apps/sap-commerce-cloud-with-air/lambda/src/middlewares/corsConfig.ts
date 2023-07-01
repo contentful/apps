@@ -24,5 +24,6 @@ export const corsConfig = {
     'X-Contentful-Organization',
     'X-Contentful-Space',
     'X-Contentful-User',
+    'Application-Interface-Key',
   ],
 };

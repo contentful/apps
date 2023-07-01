@@ -13,7 +13,7 @@ export async function getBaseSitesService(apiEndpoint: string, applicationInterf
   const url = `${apiEndpoint}/occ/v2/basesites`;
   const axiosConfig = {
     headers: {
-      'Application-Interface-Key': JSON.stringify(applicationInterfaceKey),
+      'Application-Interface-Key': applicationInterfaceKey,
     },
   };
 
@@ -31,7 +31,7 @@ export async function getProductListService(
   // TODO: Fix for multiple basesites
   const axiosConfig = {
     headers: {
-      'Application-Interface-Key': JSON.stringify(applicationInterfaceKey),
+      'Application-Interface-Key': applicationInterfaceKey,
     },
   };
 
@@ -39,6 +39,7 @@ export async function getProductListService(
     `${apiEndpoint}/occ/v2/${baseSites}/products/search/${urlPathParams}`,
     axiosConfig
   );
+
   return response.data;
 }
 
@@ -56,7 +57,7 @@ export async function getProductPreviewsService(
 
   const axiosConfig = {
     headers: {
-      'Application-Interface-Key': JSON.stringify(applicationInterfaceKey),
+      'Application-Interface-Key': applicationInterfaceKey,
     },
   };
 

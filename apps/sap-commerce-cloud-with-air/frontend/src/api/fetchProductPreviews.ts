@@ -18,6 +18,7 @@ export async function fetchProductPreviews(
   console.log('URL from fetch preview: ' + url);
   const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET', {
     'x-skus': JSON.stringify(skus),
+    'application-interface-Key': applicationInterfaceKey,
   });
   const json = await res.json();
   return json;
