@@ -13,8 +13,8 @@ async function fetchWithSignedRequest(
   body?: string | object
 ): Promise<Response> {
   const req = {
-    url: url,
-    method: method,
+    url,
+    method,
     headers: {
       'Content-Type': 'application/json',
       ...contentfulContextHeaders(sdk),

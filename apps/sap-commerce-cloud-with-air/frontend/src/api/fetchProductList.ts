@@ -25,6 +25,7 @@ export async function fetchProductList(
   const urlPathParams = '?query=' + searchQuery + '&fields=FULL&currentPage=' + page;
   const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET', {
     'x-path-params': JSON.stringify(urlPathParams),
+    'application-interface-Key': applicationInterfaceKey,
   });
   const json = await res.json();
   const products = json.products.map(productTransformer(parameters.installation));
