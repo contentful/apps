@@ -23,7 +23,6 @@ export async function fetchProductList(
   const url = new URL(`${config.proxyUrl}/sap/product-list`);
   console.log('URL from fetch product list: ' + url);
   const urlPathParams = '?query=' + searchQuery + '&fields=FULL&currentPage=' + page;
-  console.log({ applicationInterfaceKey });
   const res = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET', {
     'x-path-params': JSON.stringify(urlPathParams),
     'application-interface-Key': applicationInterfaceKey,
