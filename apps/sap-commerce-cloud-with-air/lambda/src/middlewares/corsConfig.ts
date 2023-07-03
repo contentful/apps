@@ -1,6 +1,6 @@
 export const corsConfig = {
   origin: '*',
-  methods: 'GET,PUT,POST,PATCH,DELETE,OPTIONS',
+  methods: 'GET,HEAD,PUT,POST,PATCH,DELETE,OPTIONS',
   allowedHeaders: [
     'Authorization',
     'Content-Type',
@@ -24,6 +24,5 @@ export const corsConfig = {
     'X-Contentful-Organization',
     'X-Contentful-Space',
     'X-Contentful-User',
-    'Application-Interface-Key',
   ],
 };

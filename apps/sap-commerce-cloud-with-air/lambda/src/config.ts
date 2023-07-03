@@ -21,3 +21,5 @@ export const config = {
   // domainName: getEnvironmentVariable('DOMAIN_NAME'),
   appConfigs: JSON.parse(getEnvironmentVariable('APP_CONFIGS')),
 };
+
+export const applicationInterfaceKey = 'xj823lbq';

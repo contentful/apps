@@ -4,6 +4,7 @@ import { setSentryContext } from './setSentryContext';
 import { loadAppConfigMiddleware } from './loadAppConfig';
 import { getAppInstallationParametersMiddleware } from './getAppInstallationParameters';
 import { verifySignedRequestMiddleware } from './verifySignedRequests';
+import { corsConfig } from './corsConfig';
 
 const Middleware = {
   setSentryContext: setSentryContext,
@@ -23,6 +24,7 @@ const Middleware = {
 
     next();
   },
+  corsConfig,
 };
 
 export default Middleware;
