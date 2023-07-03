@@ -4,8 +4,8 @@ import * as Sentry from '@sentry/node';
 import Middleware from './middlewares';
 import { corsConfig } from './middlewares/corsConfig';
 import { config } from './config';
-import SAPController from './controller/SAPController';
 import RateLimit from 'express-rate-limit';
+import { sapRouter } from './routers';
 
 const app = express();
 app.use(express.json());
@@ -39,7 +39,7 @@ app.use(apiRouteConstraint, Middleware.loadAppConfig); // load app config on /ap
 app.use(apiRouteConstraint, Middleware.verifiySignedRequests); // verify signed requests on /api/* routes
 app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app installation parameters on /api/* routes
 
-app.use('/sap', SAPController);
+app.use('/sap', sapRouter);
 
 app.use(Middleware.sentryErrorHandler);
 
