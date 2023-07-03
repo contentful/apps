@@ -9,6 +9,8 @@ import RateLimit from 'express-rate-limit';
 
 const app = express();
 app.use(express.json());
+
+app.use(cors(corsConfig)); // enable CORS on /api/* routes
 const apiRouteConstraint = ['/*'];
 
 // Initialize Sentry as early as possible
@@ -30,8 +32,6 @@ app.use(limiter);
 
 // IMPORTANT: The Sentry request handler must be the first middleware on the app
 app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
-
-app.use(apiRouteConstraint, cors(corsConfig)); // enable CORS on /api/* routes
 
 // TODO: mount headers before verify
 app.use(apiRouteConstraint, Middleware.loadAppConfig); // load app config on /api/* routes
