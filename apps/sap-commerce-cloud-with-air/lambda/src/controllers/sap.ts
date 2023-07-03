@@ -4,8 +4,7 @@ import {
   getProductListService,
   getProductPreviewsService,
 } from '../services/sap';
-
-const applicationInterfaceKey = 'xj823lbq';
+import { applicationInterfaceKey } from '../config';
 
 export const getBaseSites = async (req: Request, res: Response, next: NextFunction) => {
   const { apiEndpoint } = req.installationParameters;

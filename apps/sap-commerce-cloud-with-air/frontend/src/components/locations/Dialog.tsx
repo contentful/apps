@@ -1,42 +1,11 @@
-import React, { useEffect, useState } from 'react';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import DialogClass from '../DialogClass';
 
-interface AWSFunctionURLResponse {
-  status: number;
-  sapApplicationId: string;
-}
+export const applicationInterfaceKey = 'xj823lbq';
 
 const Dialog = () => {
-  const [applicationInterfaceKey, setApplicationInterfaceKey] = useState<string>('');
-
   const sdk = useSDK();
   const cma = useCMA();
-
-  const getApplicationInterfaceKey = async (): Promise<string> => {
-    const url = 'https://dpqac5rkzhh4cahlgb7jby4qk40qsetg.lambda-url.us-west-2.on.aws/';
-    try {
-      const response = await fetch(url);
-      if (response.ok) {
-        const responseJson: AWSFunctionURLResponse = await response.json();
-        return responseJson.sapApplicationId;
-      } else {
-        throw response;
-      }
-    } catch (error) {
-      console.error(error);
-      return 'Nothing Found';
-    }
-  };
-
-  useEffect(() => {
-    const getKey = async () => {
-      const key = await getApplicationInterfaceKey();
-      setApplicationInterfaceKey(key);
-    };
-
-    getKey();
-  }, []);
 
   return (
     <DialogClass
