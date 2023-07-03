@@ -1,17 +1,10 @@
-import { baseSiteTransformer, productTransformer } from '../../utils/utils';
+import { baseSiteTransformer, productTransformer } from '../utils/utils';
 import difference from 'lodash/difference';
-import axios from 'axios';
-
-export async function getApplicationKeyService() {
-  // TODO: Get rid of the hardcoded url
-  const url = 'https://dpqac5rkzhh4cahlgb7jby4qk40qsetg.lambda-url.us-west-2.on.aws/';
-  const sapRes = await axios.get(url);
-  return sapRes.data;
-}
+import axios, { AxiosRequestConfig } from 'axios';
 
 export async function getBaseSitesService(apiEndpoint: string, applicationInterfaceKey: string) {
   const url = `${apiEndpoint}/occ/v2/basesites`;
-  const axiosConfig = {
+  const axiosConfig: AxiosRequestConfig = {
     headers: {
       'Application-Interface-Key': applicationInterfaceKey,
     },
@@ -28,17 +21,14 @@ export async function getProductListService(
   applicationInterfaceKey: string,
   urlPathParams: string
 ) {
-  // TODO: Fix for multiple basesites
-  const axiosConfig = {
+  const axiosConfig: AxiosRequestConfig = {
     headers: {
       'Application-Interface-Key': applicationInterfaceKey,
     },
   };
 
-  const response = await axios.get(
-    `${apiEndpoint}/occ/v2/${baseSites}/products/search/${urlPathParams}`,
-    axiosConfig
-  );
+  const url = `${apiEndpoint}/occ/v2/${baseSites}/products/search/${urlPathParams}`;
+  const response = await axios.get(url, axiosConfig);
 
   return response.data;
 }
@@ -48,18 +38,18 @@ export async function getProductPreviewsService(
   apiEndpoint: string,
   applicationInterfaceKey: string
 ) {
-  if (!skus.length) {
+  const axiosConfig: AxiosRequestConfig = {
+    headers: {
+      'Application-Interface-Key': applicationInterfaceKey,
+    },
+  };
+
+  if (skus.length === 0) {
     return [];
   }
 
   const totalResponse = [];
   const skuIds = [];
-
-  const axiosConfig = {
-    headers: {
-      'Application-Interface-Key': applicationInterfaceKey,
-    },
-  };
 
   for (const sku of skus) {
     skuIds.push(sku.split('/products/').pop() as string);
