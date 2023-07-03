@@ -14,7 +14,7 @@ import { SearchIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/forma-36-tokens';
 import { ProductList } from './Dialog/ProductList';
 import { fetchProductList } from '../api/fetchProductList';
-import { fetchBaseSites } from '../api/fetchBaseSites';
+// import { fetchBaseSites } from '../api/fetchBaseSites';
 import { Error, Product } from '../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
@@ -73,14 +73,13 @@ export default class DialogClass extends React.Component<DialogProps, State> {
   };
 
   componentDidMount() {
-    this.loadBaseSites().then(() => {
-      this.load();
-    });
+    this.load();
   }
 
   load = async () => {
+    const { baseSites } = this.props.sdk.parameters.installation;
     const { products, errors } = await fetchProductList(
-      this.state.baseSite,
+      baseSites,
       this.state.query,
       this.state.page,
       this.props.sdk.parameters as any,
@@ -91,39 +90,11 @@ export default class DialogClass extends React.Component<DialogProps, State> {
     );
     this.setState({
       baseSite: this.state.baseSite,
-      baseSites: this.state.baseSites,
+      baseSites: [baseSites],
       query: this.state.query,
       products: products,
       selectedProducts: this.state.selectedProducts,
       errors: errors,
-    });
-  };
-
-  loadBaseSites = async () => {
-    const baseSites = await fetchBaseSites(
-      this.props.sdk.parameters as any,
-      this.props.applicationInterfaceKey,
-      this.props.sdk,
-      this.props.cma
-    );
-    let finalBaseSites: string[] = [];
-    const installationConfigBaseSites = get(this.props.sdk.parameters.invocation, 'baseSites', '');
-    if (installationConfigBaseSites.length > 0) {
-      for (const baseSite of baseSites) {
-        if (installationConfigBaseSites.split(',').includes(baseSite)) {
-          finalBaseSites.push(baseSite);
-        }
-      }
-    } else {
-      finalBaseSites = baseSites;
-    }
-    this.setState({
-      baseSite: finalBaseSites[0],
-      baseSites: finalBaseSites,
-      query: this.state.query,
-      page: this.state.page,
-      products: [],
-      selectedProducts: [],
     });
   };
 
