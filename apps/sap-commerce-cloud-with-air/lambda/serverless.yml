@@ -41,7 +41,6 @@ functions:
       STAGE: ${opt:stage, 'dev'}
       NODE_ENV: ${env:NODE_ENV, 'development'}
       RELEASE_VERSION: ${env:CIRCLE_SHA1, 'undefined'}
-      DOMAIN_NAME: ${self:custom.customDomain.domainName}
       APP_CONFIGS: ${self:custom.appConfigs}
     handler: build/index.handler
     events:
