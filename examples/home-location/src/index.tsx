@@ -7,7 +7,7 @@ import LocalhostWarning from './components/LocalhostWarning';
 import { SDKProvider } from './SDKProvider';
 
 const container = document.getElementById('root')!;
-const root = createRoot(container)
+const root = createRoot(container);
 
 init((sdk: KnownAppSDK) => {
   if (process.env.NODE_ENV === 'development' && window.self === window.top) {

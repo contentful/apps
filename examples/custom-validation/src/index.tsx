@@ -7,7 +7,7 @@ import App from './App';
 import { LocalhostWarning } from './components/LocalhostWarning';
 
 const container = document.getElementById('root')!;
-const root = createRoot(container)
+const root = createRoot(container);
 
 if (import.meta.env.DEV && window.self === window.top) {
   root.render(<LocalhostWarning />);
