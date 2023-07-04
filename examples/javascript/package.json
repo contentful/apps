@@ -9,8 +9,8 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.38.3",
     "emotion": "10.0.27",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-scripts": "5.0.1"
   },
   "scripts": {
@@ -40,9 +40,8 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.10.2",
     "@testing-library/jest-dom": "5.16.5",
-    "@testing-library/react": "12.1.5",
-    "cross-env": "7.0.3",
-    "esbuild": "^0.18.11"
+    "@testing-library/react": "14.0.0",
+    "cross-env": "7.0.3"
   },
   "homepage": "."
 }
