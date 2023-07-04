@@ -1,29 +1,24 @@
-import React from 'react';
-import { render } from 'react-dom';
 import { init, KnownAppSDK } from '@contentful/app-sdk';
 import { GlobalStyles } from '@contentful/f36-components';
+import { createRoot } from 'react-dom/client';
 
-import LocalhostWarning from './components/LocalhostWarning';
 import App from './App';
+import LocalhostWarning from './components/LocalhostWarning';
 import { SDKProvider } from './SDKProvider';
 
-const root = document.getElementById('root');
-
-window.addEventListener('message', (e) => {
-  console.log(e.data);
-});
+const container = document.getElementById('root')!;
+const root = createRoot(container);
 
 init((sdk: KnownAppSDK) => {
   if (process.env.NODE_ENV === 'development' && window.self === window.top) {
     // You can remove this if block before deploying your app
-    render(<LocalhostWarning />, root);
+    root.render(<LocalhostWarning />);
   } else {
-    render(
+    root.render(
       <SDKProvider>
         <GlobalStyles />
         <App />
-      </SDKProvider>,
-      root
+      </SDKProvider>
     );
   }
 });
