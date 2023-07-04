@@ -2,20 +2,20 @@ import 'regenerator-runtime/runtime';
 import { GlobalStyles } from '@contentful/f36-components';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import { LocalhostWarning } from './components/LocalhostWarning';
 
-const root = document.getElementById('root');
+const container = document.getElementById('root')!;
+const root = createRoot(container)
 
 if (import.meta.env.DEV && window.self === window.top) {
-  render(<LocalhostWarning />, root);
+  root.render(<LocalhostWarning />);
 } else {
-  render(
+  root.render(
     <SDKProvider>
       <GlobalStyles />
       <App />
-    </SDKProvider>,
-    root
+    </SDKProvider>
   );
 }
