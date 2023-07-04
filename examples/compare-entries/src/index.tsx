@@ -1,17 +1,16 @@
-import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { GlobalStyles } from '@contentful/f36-components';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 import App from './App';
 
-const root = document.getElementById('root');
+const container = document.getElementById('root')!;
+const root = createRoot(container);
 
-render(
+root.render(
   <SDKProvider>
     <GlobalStyles />
     <App />
-  </SDKProvider>,
-  root
+  </SDKProvider>
 );
