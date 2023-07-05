@@ -35,7 +35,6 @@ const limiter = RateLimit({
 app.use(limiter);
 
 // TODO: mount headers before verify
-app.use(apiRouteConstraint, Middleware.loadAppConfig); // load app config on /api/* routes
 app.use(apiRouteConstraint, Middleware.verifiySignedRequests); // verify signed requests on /api/* routes
 app.use(apiRouteConstraint, Middleware.getAppInstallationParameters); // get app installation parameters on /api/* routes
 
