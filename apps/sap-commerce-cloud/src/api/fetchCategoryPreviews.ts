@@ -6,8 +6,7 @@ import { ConfigurationParameters, Category } from '../interfaces';
 
 export async function fetchCategoryPreviews(
   ids: string[],
-  config: ConfigurationParameters,
-  sapApplicationInterfaceKey: string
+  config: ConfigurationParameters
 ): Promise<Category[]> {
   const validCategoryIDRegex = /^[a-z0-9]+-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+$/;
   const validIds = ids.filter((id) => validCategoryIDRegex.test(id));

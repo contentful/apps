@@ -16,33 +16,9 @@ import AppConfig from './AppConfig/AppConfig';
 import Field from './components/Field';
 import Dialog from './components/Dialog';
 
-import { config } from './config';
-
-interface AWSFunctionURLResponse {
-  status: number;
-  sapApplicationId: string;
-}
-
-const getApplicationInterfaceKey = async (): Promise<boolean | string> => {
-  const url = 'https://dpqac5rkzhh4cahlgb7jby4qk40qsetg.lambda-url.us-west-2.on.aws/';
-  try {
-    const response = await fetch(url);
-    if (response.ok) {
-      const responseJson: AWSFunctionURLResponse = await response.json();
-      return responseJson.sapApplicationId;
-    } else {
-      throw response;
-    }
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
-};
-
 init(async (sdk) => {
   const root = document.getElementById('root');
-  const isTestEnv = config.isTestEnv;
-  const sapApplicationInterfaceKey = !isTestEnv ? await getApplicationInterfaceKey() : '';
+
   const ComponentLocationSettings = [
     {
       location: locations.LOCATION_APP_CONFIG,
@@ -79,21 +55,11 @@ init(async (sdk) => {
     },
     {
       location: locations.LOCATION_ENTRY_FIELD,
-      component: (
-        <Field
-          sdk={sdk as FieldExtensionSDK}
-          applicationInterfaceKey={`${sapApplicationInterfaceKey}`}
-        />
-      ),
+      component: <Field sdk={sdk as FieldExtensionSDK} />,
     },
     {
       location: locations.LOCATION_DIALOG,
-      component: (
-        <Dialog
-          sdk={sdk as DialogExtensionSDK}
-          applicationInterfaceKey={`${sapApplicationInterfaceKey}`}
-        />
-      ),
+      component: <Dialog sdk={sdk as DialogExtensionSDK} />,
     },
   ];
 
