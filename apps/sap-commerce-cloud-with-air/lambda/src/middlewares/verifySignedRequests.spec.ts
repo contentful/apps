@@ -25,7 +25,6 @@ describe('verifySignedRequestMiddleware', () => {
   let request: Express.Request;
   const method = 'GET' as const;
   const path = '/foo/bar';
-  const privateKey = 'appId123';
   const signingSecret = 'super-secret';
 
   // when a stage is involved, the "request" path will include that stage in the client but it will be missing
