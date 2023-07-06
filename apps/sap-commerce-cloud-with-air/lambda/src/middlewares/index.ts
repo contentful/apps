@@ -1,14 +1,12 @@
 import * as Sentry from '@sentry/node';
 import { NextFunction, Request, Response } from 'express';
 import { setSentryContext } from './setSentryContext';
-import { loadAppConfigMiddleware } from './loadAppConfig';
 import { getAppInstallationParametersMiddleware } from './getAppInstallationParameters';
 import { verifySignedRequestMiddleware } from './verifySignedRequests';
 import { corsConfig } from './corsConfig';
 
 const Middleware = {
   setSentryContext: setSentryContext,
-  loadAppConfig: loadAppConfigMiddleware,
   verifiySignedRequests: verifySignedRequestMiddleware,
   getAppInstallationParameters: getAppInstallationParametersMiddleware,
   sentryErrorHandler: Sentry.Handlers.errorHandler({

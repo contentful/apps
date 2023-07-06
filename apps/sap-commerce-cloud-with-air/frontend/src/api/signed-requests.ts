@@ -10,7 +10,7 @@ async function fetchWithSignedRequest(
   sdk: KnownAppSDK,
   method: CreateAppSignedRequestProps['method'] = 'GET',
   unsignedHeaders: Record<string, string> = {},
-  body?: string | object
+  body?: string | object,
 ): Promise<Response> {
   const req = {
     url,
@@ -34,7 +34,7 @@ async function fetchWithSignedRequest(
       headers: req.headers,
       path: rootRelativePath,
       body: req.body,
-    }
+    },
   );
 
   Object.assign(req.headers, unsignedHeaders, signedHeaders);

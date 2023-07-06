@@ -19,7 +19,7 @@ export async function getProductListService(
   baseSites: string,
   apiEndpoint: string,
   applicationInterfaceKey: string,
-  urlPathParams: string
+  urlPathParams: string,
 ) {
   const axiosConfig: AxiosRequestConfig = {
     headers: {
@@ -36,7 +36,7 @@ export async function getProductListService(
 export async function getProductPreviewsService(
   skus: string[],
   apiEndpoint: string,
-  applicationInterfaceKey: string
+  applicationInterfaceKey: string,
 ) {
   const axiosConfig: AxiosRequestConfig = {
     headers: {

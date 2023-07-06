@@ -1,2 +1,3 @@
 domainName: sap-air.ctfapps.net
-appConfigs: ${ssm:/aws/reference/secretsmanager/ci/apps/sap-air-action/prd/app-configs}
+privateKey: ${ssm:/aws/reference/secretsmanager/ci/apps/sap-air-action/prd/private-key}
+signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/sap-air-action/prd/signing-secret}

@@ -4,7 +4,6 @@ import { createRequest } from 'node-mocks-http';
 import Express from 'express';
 import { verifySignedRequestMiddleware } from './verifySignedRequests';
 import { config } from '../config';
-import { AppConfiguration } from '../types/types';
 
 const sandbox = sinon.createSandbox();
 
@@ -12,7 +11,7 @@ function buildSignedHeaders(
   method: NodeAppsToolkit.CanonicalRequest['method'],
   path: string,
   headers: NodeAppsToolkit.CanonicalRequest['headers'],
-  secret: string
+  secret: string,
 ) {
   const timestamp = Date.now();
   const rawRequest = { method, path, headers };
@@ -26,11 +25,7 @@ describe('verifySignedRequestMiddleware', () => {
   let request: Express.Request;
   const method = 'GET' as const;
   const path = '/foo/bar';
-  const appConfig = config.appConfigs.find(
-    (config: AppConfiguration) => config.privateKey === 'appId123'
-  );
-
-  if (!appConfig) throw new Error('Missing app config');
+  const signingSecret = 'super-secret';
 
   // when a stage is involved, the "request" path will include that stage in the client but it will be missing
   // on the express request in the backend
@@ -50,10 +45,9 @@ describe('verifySignedRequestMiddleware', () => {
       method,
       clientRequestPath,
       clientRequestHeaders,
-      appConfig.signingSecret
+      signingSecret,
     );
     request = createRequest({ method, path, headers });
-    request.appConfig = appConfig;
   });
 
   afterEach(() => {
@@ -74,14 +68,13 @@ describe('verifySignedRequestMiddleware', () => {
         method,
         clientRequestPath,
         clientRequestHeaders,
-        appConfig.signingSecret
+        signingSecret,
       );
       const headersWithInvalidSignature = {
         ...headers,
         'x-contentful-signature': invalidSignature,
       };
       request = createRequest({ method, path, headers: headersWithInvalidSignature });
-      request.appConfig = appConfig;
     });
 
     it('throws with invalidSignature', async () => {
@@ -92,7 +85,7 @@ describe('verifySignedRequestMiddleware', () => {
           message:
             'Request does not have a valid request signature. ' +
             'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/',
-        })
+        }),
       );
     });
   });
@@ -104,11 +97,10 @@ describe('verifySignedRequestMiddleware', () => {
         method,
         clientRequestPath,
         clientRequestHeaders,
-        appConfig.signingSecret
+        signingSecret,
       );
       const headersWithBadSignature = { ...headers, 'x-contentful-signature': malformedSignature };
       request = createRequest({ method, path, headers: headersWithBadSignature });
-      request.appConfig = appConfig;
     });
 
     it('throws with UnableToVerifyRequest', async () => {
@@ -117,7 +109,7 @@ describe('verifySignedRequestMiddleware', () => {
         next,
         sinon.match({
           message: 'Unable to verify request',
-        })
+        }),
       );
     });
   });

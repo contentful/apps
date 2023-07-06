@@ -1,1 +1,2 @@
 domainName: localhost
+privateKey: ./private-key.pem

@@ -8,7 +8,7 @@ export async function fetchBaseSites(
   parameters: SAPParameters,
   applicationInterfaceKey: string,
   sdk: DialogAppSDK,
-  cma: any
+  cma: any,
 ): Promise<string[]> {
   // TODO: Remove in final PR
   // return baseSitesMock;

@@ -17,6 +17,7 @@ build/
 .env.test.local
 .env.production.local
 config/serverless-env.dev.yml
+lambda/private-key.pem
 
 npm-debug.log*
 

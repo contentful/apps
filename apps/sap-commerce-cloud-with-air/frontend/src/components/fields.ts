@@ -49,7 +49,7 @@ export function getCompatibleFields(contentTypes: ContentType[]): CompatibleFiel
 export function editorInterfacesToSelectedFields(
   eis: EditorInterface[],
   fieldsConfig: FieldsConfig,
-  appId?: string
+  appId?: string,
 ): FieldsConfig {
   return eis.reduce((acc, ei) => {
     const ctId = get(ei, ['sys', 'contentType', 'sys', 'id']);
@@ -73,7 +73,7 @@ export function editorInterfacesToSelectedFields(
 
 export function selectedFieldsToTargetState(
   contentTypes: ContentType[],
-  selectedFields: FieldsConfig
+  selectedFields: FieldsConfig,
 ) {
   return {
     EditorInterface: contentTypes.reduce((acc, ct) => {
