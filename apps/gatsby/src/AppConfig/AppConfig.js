@@ -351,7 +351,7 @@ export class AppConfig extends React.Component {
                     value={this.state.authToken}
                     onChange={this.updateAuthToken}
                     className={styles.input}
-                    helpText="Optional authentication token for private Gatsby Cloud sites"
+                    helpText="Optional authentication token for private Gatsby Cloud sites (Cannot use with Content Sync)"
                     textInputProps={{
                       type: 'password',
                     }}
