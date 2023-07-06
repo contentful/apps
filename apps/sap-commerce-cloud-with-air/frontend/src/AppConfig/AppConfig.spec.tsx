@@ -64,7 +64,7 @@ describe.skip('Config Screen component', () => {
         description={`
             The SAP Commerce Cloud app allows content creators to select products from their
             SAP Commerce Cloud instance and reference them inside of Contentful entries.`}
-      />
+      />,
     );
 
     // simulate the user clicking the install button
@@ -72,8 +72,8 @@ describe.skip('Config Screen component', () => {
 
     expect(
       getByText(
-        'The SAP Commerce Cloud app allows content creators to select products from their SAP Commerce Cloud instance and reference them inside of Contentful entries.'
-      )
+        'The SAP Commerce Cloud app allows content creators to select products from their SAP Commerce Cloud instance and reference them inside of Contentful entries.',
+      ),
     ).toBeInTheDocument();
   });
 });

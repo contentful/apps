@@ -48,7 +48,7 @@ export class CategoryPreviews extends React.Component<Props, State> {
       this.setState({ categoryPreviews });
     } catch {
       this.props.sdk.notifier.error(
-        'There was an error fetching the data for the selected products.'
+        'There was an error fetching the data for the selected products.',
       );
     }
   };
