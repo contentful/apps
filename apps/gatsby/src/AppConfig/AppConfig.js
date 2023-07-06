@@ -311,8 +311,7 @@ export class AppConfig extends React.Component {
                     <TextLink
                       href="http://gatsby.dev/contentful-preview-docs"
                       target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                      rel="noopener noreferrer">
                       installation instructions
                     </TextLink>
                     .
@@ -351,7 +350,7 @@ export class AppConfig extends React.Component {
                     value={this.state.authToken}
                     onChange={this.updateAuthToken}
                     className={styles.input}
-                    helpText="Optional authentication token for private Gatsby Cloud sites"
+                    helpText="Optional authentication token for private Gatsby Cloud sites. (Note: Authentication Token cannot be used with Gatsby's Content Sync)"
                     textInputProps={{
                       type: 'password',
                     }}
