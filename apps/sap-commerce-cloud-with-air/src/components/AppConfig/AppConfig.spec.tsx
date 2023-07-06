@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ParameterDefinition } from '../interfaces';
+import { ParameterDefinition } from '../../interfaces';
 import AppConfig from './AppConfig';
 
 describe.skip('Config Screen component', () => {

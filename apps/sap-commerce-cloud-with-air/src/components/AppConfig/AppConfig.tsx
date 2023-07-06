@@ -28,7 +28,7 @@ import {
   selectedFieldsToTargetState,
 } from './fields';
 
-import { Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
+import { Config, ParameterDefinition, ValidateParametersFn } from '../../interfaces';
 
 interface Props {
   sdk: AppExtensionSDK;

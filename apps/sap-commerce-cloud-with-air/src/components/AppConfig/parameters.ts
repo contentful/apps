@@ -1,6 +1,6 @@
 import get from 'lodash.get';
 
-import { Config, ParameterDefinition } from '../interfaces';
+import { Config, ParameterDefinition } from '../../interfaces';
 
 export function toInputParameters(
   parameterDefinitions: ParameterDefinition[],

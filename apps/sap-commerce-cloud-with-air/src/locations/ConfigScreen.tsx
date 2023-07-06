@@ -1,13 +1,13 @@
-import { AppExtensionSDK } from '@contentful/app-sdk';
-import AppConfig from '../../AppConfig/AppConfig';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import AppConfig from '../components/AppConfig/AppConfig';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
 const ConfigScreen = () => {
-  const sdk = useSDK<AppExtensionSDK>();
+  const sdk = useSDK<ConfigAppSDK>();
 
   return (
     <AppConfig
-      sdk={sdk as AppExtensionSDK}
+      sdk={sdk as ConfigAppSDK}
       name="SAP Commerce Cloud App"
       description={`
     The SAP Commerce Cloud app allows content creators to select products from their

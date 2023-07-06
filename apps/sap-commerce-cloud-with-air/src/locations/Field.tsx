@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useCMA, useSDK } from '@contentful/react-apps-toolkit';
-import FieldClass from '../FieldClass';
+import FieldClass from '../components/FieldClass';
 interface AWSFunctionURLResponse {
   status: number;
   sapApplicationId: string;

@@ -15,13 +15,10 @@ import {
   TableRow,
   TextInput,
 } from '@contentful/f36-components';
-// import { SearchIcon } from '@contentful/f36-icons';
+import { SearchIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/forma-36-tokens';
-import { ProductList } from './Dialog/ProductList';
-import { Error, Product } from '../interfaces';
-
-import { productTransformer } from '../api/dataTransformers';
-import { apiKey } from '../config';
+import { ProductList } from '../components/Dialog/ProductList';
+import { useGetProductList } from '../hooks/useGetProductList';
 
 const styles = {
   header: css({
@@ -46,17 +43,17 @@ const styles = {
   }),
 };
 
-export default function DialogClass() {
+export default function Dialog() {
   const [baseSite, setBaseSite] = useState<string>('');
   const [baseSites, setBaseSites] = useState<string[]>([]);
   const [query, setQuery] = useState<string>('');
   const [page, setPage] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(0);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [totalPages] = useState<number>(0);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [errors] = useState([]);
   const sdk = useSDK<DialogAppSDK>();
   const { invocation, installation } = sdk.parameters;
+  const { products, loading } = useGetProductList(query, page);
 
   const isFieldTypeArray = (get(invocation, 'fieldType', '') as string) === 'Array';
 
@@ -65,36 +62,6 @@ export default function DialogClass() {
     setBaseSite(baseSites);
     setBaseSites([baseSites]);
   }, [installation]);
-
-  useEffect(() => {
-    const loadProducts = async () => {
-      const { apiEndpoint, baseSites } = installation;
-      const urlPathParams = `?query=${query}&fields=FULL&currentPage=${page}`;
-
-      const req = await sdk.cma.appActionCall.createWithResponse(
-        {
-          appActionId: 'fetchProductList',
-          environmentId: sdk.ids.environment,
-          spaceId: sdk.ids.space,
-          appDefinitionId: sdk.ids.app!,
-        },
-        {
-          parameters: {
-            sapApiEndpoint: `${apiEndpoint}/occ/v2/${baseSites}/products/search/${urlPathParams}`,
-            apiKey,
-          },
-        }
-      );
-
-      const res = JSON.parse(req.response.body);
-      const products = res.body.products.map(productTransformer(installation));
-
-      setTotalPages(res.body['pagination']['totalPages']);
-      setProducts(products);
-    };
-
-    loadProducts();
-  }, [sdk, installation, page, query]);
 
   const selectMultipleProductsClickEvent = () => {
     const currentField = get(sdk.parameters.invocation, 'fieldValue', [] as string[]);
@@ -160,12 +127,10 @@ export default function DialogClass() {
             </Select>
           </div>
           <div style={{ marginLeft: '10px', marginTop: '10px' }}>
-            {/* <Button
-              variant="primary"
-              startIcon={<SearchIcon />}
-              onClick={() => this.searchButtonClickEvent()}>
+            {/* TODO: fix search noop to work with load */}
+            <Button variant="primary" startIcon={<SearchIcon />} onClick={() => {}}>
               Search
-            </Button> */}
+            </Button>
           </div>
         </div>
         {isFieldTypeArray ? (
@@ -194,7 +159,9 @@ export default function DialogClass() {
         ) : (
           <></>
         )}
-        {products?.length ? (
+        {!products?.length || loading ? (
+          <>Loading...</>
+        ) : (
           <>
             <TableHead>
               <TableRow>
@@ -214,8 +181,6 @@ export default function DialogClass() {
               />
             </TableBody>
           </>
-        ) : (
-          <></>
         )}
       </Table>
       <div style={{ margin: '20px' }}>
