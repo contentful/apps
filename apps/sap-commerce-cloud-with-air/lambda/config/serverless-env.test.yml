@@ -1,3 +1,0 @@
-domainName: sap-air-test.ctfapps.net
-privateKey: ${ssm:/aws/reference/secretsmanager/ci/apps/sap-air-action/test/private-key}
-signingSecret: ${ssm:/aws/reference/secretsmanager/ci/apps/sap-air-action/test/signing-secret}

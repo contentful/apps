@@ -1,0 +1,48 @@
+{
+  "actions": [
+    {
+      "id": "fetchBaseSites",
+      "name": "SAP fetch base sites",
+      "category": "Custom",
+      "description": "This action is used to fetch a list of base sites from SAP Commerce Cloud.",
+      "type": "function",
+      "path": "actions/fetchBaseSites.js",
+      "entryFile": "./actions/fetchBaseSites.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "sapApiEndpoint",
+          "name": "SAP API Endpoint",
+          "type": "Symbol"
+        },
+        {
+          "id": "apiKey",
+          "name": "SAP API Key",
+          "type": "Symbol"
+        }
+      ]
+    },
+    {
+      "id": "fetchProductList",
+      "name": "SAP fetch product list",
+      "category": "Custom",
+      "description": "This action is used to fetch a list of products from SAP Commerce Cloud.",
+      "type": "function",
+      "path": "actions/fetchProductList.js",
+      "entryFile": "./actions/fetchProductList.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "sapApiEndpoint",
+          "name": "SAP API Endpoint",
+          "type": "Symbol"
+        },
+        {
+          "id": "apiKey",
+          "name": "SAP API key",
+          "type": "Symbol"
+        }
+      ]
+    }
+  ]
+}
