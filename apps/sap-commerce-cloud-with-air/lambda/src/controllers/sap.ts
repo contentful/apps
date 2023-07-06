@@ -27,7 +27,7 @@ export const getProductList = async (req: Request, res: Response, next: NextFunc
       baseSites,
       apiEndpoint,
       applicationInterfaceKey,
-      urlPathParams
+      urlPathParams,
     );
 
     return res.status(200).send(products);

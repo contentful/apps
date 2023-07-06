@@ -85,7 +85,7 @@ interface ProductsFnResponse {
 
 export type ProductsFn = (
   search: string,
-  pagination?: Partial<Pagination>
+  pagination?: Partial<Pagination>,
 ) => Promise<ProductsFnResponse>;
 
 /**
@@ -155,7 +155,7 @@ export type RenderDialogFn = (sdk: DialogExtensionSDK) => void;
 export type OpenDialogFn = (
   sdk: FieldExtensionSDK,
   currentValue: string[] | string,
-  config: Config
+  config: Config,
 ) => Promise<string[]>;
 
 /**

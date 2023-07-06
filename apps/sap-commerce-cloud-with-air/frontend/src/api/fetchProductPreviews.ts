@@ -9,7 +9,7 @@ export async function fetchProductPreviews(
   parameters: SAPParameters,
   applicationInterfaceKey: string,
   sdk: FieldAppSDK,
-  cma: any
+  cma: any,
 ) {
   // TODO: Remove in final PR
   // return productPreviewMock;

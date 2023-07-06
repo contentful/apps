@@ -13,7 +13,7 @@ export async function fetchProductList(
   updateTotalPages: UpdateTotalPagesFn,
   applicationInterfaceKey: string,
   sdk: DialogAppSDK,
-  cma: any
+  cma: any,
 ) {
   // TODO: Delete in a cleanup PR
   // const products = productListMockData.products.map(productTransformer(parameters.installation));
