@@ -22,7 +22,6 @@ import union from 'lodash/union';
 
 interface DialogProps {
   sdk: DialogExtensionSDK;
-  applicationInterfaceKey: string;
 }
 
 interface State {
@@ -60,8 +59,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
       this.state.query,
       this.state.page,
       this.props.sdk.parameters as SAPParameters,
-      this.updateTotalPages,
-      this.props.applicationInterfaceKey
+      this.updateTotalPages
     );
     this.setState({
       baseSite: this.state.baseSite,
@@ -74,10 +72,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
   };
 
   loadBaseSites = async () => {
-    const baseSites = await fetchBaseSites(
-      this.props.sdk.parameters as SAPParameters,
-      this.props.applicationInterfaceKey
-    );
+    const baseSites = await fetchBaseSites(this.props.sdk.parameters as SAPParameters);
     let finalBaseSites: string[] = [];
     const installationConfigBaseSites = get(this.props.sdk.parameters.invocation, 'baseSites', '');
     if (installationConfigBaseSites.length > 0) {

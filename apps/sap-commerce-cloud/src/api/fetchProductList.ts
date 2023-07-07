@@ -1,14 +1,12 @@
 import { Response, SAPParameters, UpdateTotalPagesFn } from '../interfaces';
 import { productTransformer } from './dataTransformers';
-import { config } from '../config';
 
 export async function fetchProductList(
   baseSite: string,
   searchQuery: string,
   page: number,
   parameters: SAPParameters,
-  updateTotalPages: UpdateTotalPagesFn,
-  applicationInterfaceKey: string
+  updateTotalPages: UpdateTotalPagesFn
 ): Promise<Response> {
   if (!baseSite.length) {
     return {
@@ -16,13 +14,7 @@ export async function fetchProductList(
       errors: [],
     };
   }
-  const headers = config.isTestEnv
-    ? {}
-    : {
-        headers: {
-          'Application-Interface-Key': applicationInterfaceKey,
-        },
-      };
+
   const response: any = await fetch(
     parameters.installation.apiEndpoint +
       '/occ/v2/' +
@@ -31,8 +23,7 @@ export async function fetchProductList(
       '?query=' +
       searchQuery +
       '&fields=FULL&currentPage=' +
-      page,
-    headers
+      page
   );
   const responseJson = await response.json();
   if (response.ok) {

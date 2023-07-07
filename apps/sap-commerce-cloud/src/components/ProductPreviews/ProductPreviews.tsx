@@ -13,7 +13,6 @@ interface Props {
   onChange: (skus: string[]) => void;
   skus: string[];
   fetchProductPreviews: PreviewsFn;
-  applicationInterfaceKey: string;
 }
 
 interface State {
@@ -42,7 +41,7 @@ export class ProductPreviews extends React.Component<Props, State> {
     try {
       const { fetchProductPreviews, skus } = this.props;
       const productPreviewsUnsorted = shouldRefetch
-        ? await fetchProductPreviews(skus, this.props.applicationInterfaceKey)
+        ? await fetchProductPreviews(skus)
         : this.state.productPreviews;
       const productPreviews = mapSort(productPreviewsUnsorted, skus, 'sku');
       this.setState({ productPreviews });
