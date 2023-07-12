@@ -12,7 +12,7 @@ const Profile = (props: Props) => {
   const { profile, dispatch } = props;
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    dispatch({ type: ParameterAction.UPDATE_PROFILE, value: e.target.value });
+    dispatch({ type: ParameterAction.PROFILE, value: e.target.value });
   };
 
   return (
