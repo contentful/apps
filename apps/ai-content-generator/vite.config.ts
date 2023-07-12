@@ -10,10 +10,10 @@ export default defineConfig(() => ({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
       '@components': path.resolve(__dirname, './src/components'),
       '@configs': path.resolve(__dirname, './src/configs'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@locations': path.resolve(__dirname, './src/locations'),
       '@react-query': path.resolve(__dirname, './src/react-query'),
       '@utils': path.resolve(__dirname, './src/utils'),
     },
