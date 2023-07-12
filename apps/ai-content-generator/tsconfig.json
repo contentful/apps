@@ -18,6 +18,7 @@
       "@configs/*": ["./src/configs/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@locations/*": ["./src/locations/*"],
+      "@react-query": ["./src/react-query"],
       "@react-query/*": ["./src/react-query/*"],
       "@utils/*": ["./src/utils/*"],
     },
