@@ -1,13 +1,13 @@
-import React, { useMemo } from 'react';
 import { locations } from '@contentful/app-sdk';
-import ConfigScreen from './locations/ConfigScreen';
-import Field from './locations/Field';
-import EntryEditor from './locations/EntryEditor';
-import Dialog from './locations/Dialog';
-import Sidebar from './locations/Sidebar';
-import Page from './locations/Page';
-import Home from './locations/Home';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { useMemo } from 'react';
+import ConfigScreen from './locations/ConfigScreen';
+import Dialog from './locations/Dialog';
+import EntryEditor from './locations/EntryEditor';
+import Field from './locations/Field';
+import Page from './locations/Page';
+import Sidebar from './locations/Sidebar';
+import Home from './locations/Home';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
