@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import { AIFeature } from './featureConfig';
 
 /**
@@ -7,25 +8,30 @@ import { AIFeature } from './featureConfig';
 export type Prompt = (input: string, targetLocale: string) => string;
 
 export type FeatureComponentProps = {
-  isTranslate?: boolean;
-  isTitle?: boolean;
+  entryId: string;
 };
 
 /**
  * Feature Items
  */
 
-type FeatureItem = {
+type FeatureItemBase = {
   title: string;
-  buttonTitle: string;
   helpText: string;
-  prompt: Prompt;
 };
+
+interface ComponentFeatureItem extends FeatureItemBase {
+  Component: FC<FeatureComponentProps>;
+}
+
+interface PromptFeatureItem extends FeatureItemBase {
+  prompt: Prompt;
+}
 
 /**
  * Feature Config
  */
 
 export type FeatureConfig = {
-  [key in AIFeature]: FeatureItem;
+  [key in AIFeature]: ComponentFeatureItem | PromptFeatureItem;
 };
