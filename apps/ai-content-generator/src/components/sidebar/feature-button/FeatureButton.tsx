@@ -1,5 +1,5 @@
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { OpenCustomWidgetOptions, SidebarAppSDK } from '@contentful/app-sdk';
+import { SidebarAppSDK } from '@contentful/app-sdk';
 import { Button, Tooltip } from '@contentful/f36-components';
 import { AIFeature } from '@configs/features/featureConfig';
 
