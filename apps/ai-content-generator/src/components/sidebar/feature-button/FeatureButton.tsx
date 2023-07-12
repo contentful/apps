@@ -9,12 +9,6 @@ interface Props {
   helpText: string;
 }
 
-const baseDialogConfig: OpenCustomWidgetOptions = {
-  position: 'center',
-  width: 'fullWidth',
-  minHeight: '468px',
-};
-
 const FeatureButton = (props: Props) => {
   const { feature, text, helpText } = props;
   const sdk = useSDK<SidebarAppSDK>();
@@ -22,14 +16,12 @@ const FeatureButton = (props: Props) => {
   const handleOnClick = () => {
     const entryId = sdk.entry.getSys().id;
 
-    const featureData: OpenCustomWidgetOptions = {
+    sdk.dialogs.openCurrentApp({
+      position: 'center',
+      width: 'fullWidth',
+      minHeight: '468px',
       title: text,
       parameters: { feature, entryId },
-    };
-
-    sdk.dialogs.openCurrentApp({
-      ...baseDialogConfig,
-      ...featureData,
     });
   };
 
