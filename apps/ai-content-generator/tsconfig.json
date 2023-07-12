@@ -14,10 +14,10 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "paths": {
-      "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
       "@configs/*": ["./src/configs/*"],
       "@hooks/*": ["./src/hooks/*"],
+      "@locations/*": ["./src/locations/*"],
       "@react-query/*": ["./src/react-query/*"],
       "@utils/*": ["./src/utils/*"],
     },
