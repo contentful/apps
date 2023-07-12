@@ -1,4 +1,4 @@
-import { AppInstallationParameters } from './ConfigForm';
+import { AppInstallationParameters } from '@locations/ConfigScreen';
 
 export enum ParameterAction {
   MODEL = 'model',
@@ -7,20 +7,19 @@ export enum ParameterAction {
   CONTENTFUL_PARAMETERS = 'contentfulParameters',
 }
 
-const { MODEL, APIKEY, PROFILE, CONTENTFUL_PARAMETERS } = ParameterAction;
-
 type ParameterStringActions = {
-  type: typeof MODEL | typeof APIKEY | typeof PROFILE;
+  type: Exclude<ParameterAction, ParameterAction.CONTENTFUL_PARAMETERS>;
   value: string;
 };
 type ParameterObjectActions = {
-  type: typeof CONTENTFUL_PARAMETERS;
+  type: ParameterAction.CONTENTFUL_PARAMETERS;
   value: AppInstallationParameters;
 };
 
-export type ParameterActionType = ParameterStringActions | ParameterObjectActions;
+export type ParameterReducer = ParameterObjectActions | ParameterStringActions;
 
-const parameterReducer = (state: AppInstallationParameters, action: ParameterActionType) => {
+const { MODEL, APIKEY, PROFILE, CONTENTFUL_PARAMETERS } = ParameterAction;
+const parameterReducer = (state: AppInstallationParameters, action: ParameterReducer) => {
   switch (action.type) {
     case MODEL:
       return { ...state, model: action.value };
