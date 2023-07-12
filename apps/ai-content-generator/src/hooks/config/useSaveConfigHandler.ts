@@ -1,11 +1,9 @@
+import { AppInstallationParameters } from '@/components/config/ConfigForm';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { KeyValueMap } from 'contentful-management';
 import { useEffect } from 'react';
 
-const useSaveConfigHandler = <InstallationParameters extends KeyValueMap>(
-  parameters?: InstallationParameters
-) => {
+const useSaveConfigHandler = (parameters: AppInstallationParameters) => {
   const sdk = useSDK<ConfigAppSDK>();
 
   const getCurrentState = async () => {
