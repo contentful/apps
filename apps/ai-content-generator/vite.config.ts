@@ -14,6 +14,7 @@ export default defineConfig(() => ({
       '@components': path.resolve(__dirname, './src/components'),
       '@configs': path.resolve(__dirname, './src/configs'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@react-query': path.resolve(__dirname, './src/react-query'),
       '@utils': path.resolve(__dirname, './src/utils'),
     },
   },

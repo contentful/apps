@@ -16,8 +16,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
-      "@/configs/*": ["./src/configs/*"],
+      "@configs/*": ["./src/configs/*"],
       "@hooks/*": ["./src/hooks/*"],
+      "@react-query/*": ["./src/react-query/*"],
       "@utils/*": ["./src/utils/*"],
     },
     "noEmit": true,
