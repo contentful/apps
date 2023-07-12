@@ -13,14 +13,6 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "paths": {
-      "@components/*": ["./src/components/*"],
-      "@configs/*": ["./src/configs/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@locations/*": ["./src/locations/*"],
-      "@providers/*": ["./src/providers/*"],
-      "@utils/*": ["./src/utils/*"],
-    },
     "noEmit": true,
     "jsx": "react-jsx"
   },

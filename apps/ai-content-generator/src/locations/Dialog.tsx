@@ -1,39 +1,16 @@
-import useDialogParameters from '@hooks/dialog/useDialogParameters';
-import featureConfig, { AIFeature } from '@configs/features/featureConfig';
-import CommonGenerator from '@components/app/dialog/common-generator/CommonGenerator';
-import GeneratorProvider from '@providers/generatorProvider';
-
-type DialogInvocationParameters = {
-  feature: AIFeature;
-  entryId: string;
-};
+import { DialogAppSDK } from '@contentful/app-sdk';
+import { Paragraph } from '@contentful/f36-components';
+import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 
 const Dialog = () => {
-  const { feature, entryId, isLoading } = useDialogParameters();
+  const sdk = useSDK<DialogAppSDK>();
+  /*
+     To use the cma, inject it as follows.
+     If it is not needed, you can remove the next line.
+  */
+  // const cma = useCMA();
 
-  if (isLoading) {
-    return null;
-  }
-
-  const getGenerator = (feature: AIFeature) => {
-    switch (feature) {
-      case AIFeature.TRANSLATE:
-        return <CommonGenerator isTranslate />;
-
-      case AIFeature.TITLE:
-        return <CommonGenerator isTitle />;
-
-      default:
-        return <CommonGenerator />;
-    }
-  };
-
-  return (
-    <GeneratorProvider entryId={entryId} prompt={featureConfig[feature].prompt}>
-      {getGenerator(feature)}
-    </GeneratorProvider>
-  );
+  return <Paragraph>Hello Dialog Component (AppId: {sdk.ids.app})</Paragraph>;
 };
 
 export default Dialog;
-export type { DialogInvocationParameters };
