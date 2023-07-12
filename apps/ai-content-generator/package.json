@@ -10,11 +10,9 @@
     "@contentful/rich-text-plain-text-renderer": "^16.0.2",
     "contentful-management": "10.28.1",
     "emotion": "10.0.27",
-    "openai": "^3.2.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-scripts": "5.0.1",
-    "styled-components": "^5.3.6"
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-query": "^3.39.3"
   },
   "scripts": {
     "start": "cross-env BROWSER=none PORT=3000 react-scripts start"

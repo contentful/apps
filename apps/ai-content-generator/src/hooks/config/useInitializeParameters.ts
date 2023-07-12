@@ -1,35 +1,28 @@
-import { Dispatch, useEffect } from 'react';
+import { Dispatch } from 'react';
+import { useQuery } from 'react-query';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import type { ConfigAppSDK } from '@contentful/app-sdk';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
-import { ParameterAction, ParameterReducer } from '@components/config/parameterReducer';
+import getCurrentParameters from '@react-query/queries/getCurrentParameters';
+import { AppInstallationParameters } from '@/components/config/ConfigForm';
+import { ParameterAction, ParameterActionType } from '@components/config/parameterReducer';
 
-/**
- * This hook is used to initialize the parameters of the app.
- * It will get the parameters from Contentful and dispatch them to the reducer.
- *
- * @param dispatch a dispatch function from useReducer
- * @returns void
- */
-const useInitializeParameters = (dispatch: Dispatch<ParameterReducer>) => {
+const useInitializeParameters = (dispatch: Dispatch<ParameterActionType>) => {
   const sdk = useSDK<ConfigAppSDK>();
 
-  const dispatchParameters = async () => {
-    const parameters = await sdk.app.getParameters<AppInstallationParameters>();
-
+  const dispatchParameters = (parameters: AppInstallationParameters) => {
     if (!parameters) return;
 
     dispatch({
-      type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS,
+      type: ParameterAction.CONTENTFUL_PARAMETERS,
       value: parameters,
     });
 
     sdk.app.setReady();
   };
 
-  useEffect(() => {
-    dispatchParameters();
-  }, [sdk]);
+  useQuery(['appParameters'], getCurrentParameters(sdk), {
+    onSuccess: dispatchParameters,
+  });
 };
 
 export default useInitializeParameters;

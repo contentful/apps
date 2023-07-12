@@ -1,34 +1,34 @@
-import { AppInstallationParameters } from '@locations/ConfigScreen';
+import { AppInstallationParameters } from './ConfigForm';
 
 export enum ParameterAction {
-  UPDATE_MODEL = 'updateModel',
-  UPDATE_APIKEY = 'updateApiKey',
-  UPDATE_PROFILE = 'updateProfile',
-  APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
+  MODEL = 'model',
+  APIKEY = 'apiKey',
+  PROFILE = 'profile',
+  CONTENTFUL_PARAMETERS = 'contentfulParameters',
 }
 
+const { MODEL, APIKEY, PROFILE, CONTENTFUL_PARAMETERS } = ParameterAction;
+
 type ParameterStringActions = {
-  type: Exclude<ParameterAction, ParameterAction.APPLY_CONTENTFUL_PARAMETERS>;
+  type: typeof MODEL | typeof APIKEY | typeof PROFILE;
   value: string;
 };
 type ParameterObjectActions = {
-  type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS;
+  type: typeof CONTENTFUL_PARAMETERS;
   value: AppInstallationParameters;
 };
 
-export type ParameterReducer = ParameterObjectActions | ParameterStringActions;
+export type ParameterActionType = ParameterStringActions | ParameterObjectActions;
 
-const { UPDATE_MODEL, UPDATE_APIKEY, UPDATE_PROFILE, APPLY_CONTENTFUL_PARAMETERS } =
-  ParameterAction;
-const parameterReducer = (state: AppInstallationParameters, action: ParameterReducer) => {
+const parameterReducer = (state: AppInstallationParameters, action: ParameterActionType) => {
   switch (action.type) {
-    case UPDATE_MODEL:
+    case MODEL:
       return { ...state, model: action.value };
-    case UPDATE_APIKEY:
+    case APIKEY:
       return { ...state, apiKey: action.value };
-    case UPDATE_PROFILE:
+    case PROFILE:
       return { ...state, profile: action.value };
-    case APPLY_CONTENTFUL_PARAMETERS:
+    case CONTENTFUL_PARAMETERS:
       return { ...state, ...action.value };
     default:
       return state;
