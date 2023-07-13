@@ -22,6 +22,3 @@ In Contentful, navigate to the content type to which you would like to add JSON 
 The configuration screen allows you to choose different options for how the JSON Viewer displays. These utilize a select number of Props provided by the [react-json-view](https://www.npmjs.com/package/react-json-view) package.
 
 ![Screenshot of Configuration Screen](config-screen.png)
-
-## Disclaimer
-Contentful provides sample code as a means to demonstrate a technical scenario; any and all sample code provided by Contentful is not intended for production use. Contentful is not responsible for maintaining sample code after it has been provided to a customer.
