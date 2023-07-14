@@ -34,7 +34,7 @@ export const useConnect = () => {
 
           await apiClient.createAuthToken(sdk, cma, token, installationUuid);
         } catch (e) {
-          const error = e as any;
+          const error = e as Error;
 
           // this 'AppInstallation does not exist error' is a race condition that occurs when instantiating the eventsService within the lambda.
           // it is not a valid error to show to the user.
