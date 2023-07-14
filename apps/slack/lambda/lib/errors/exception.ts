@@ -1,5 +1,6 @@
 import { ErrorObject } from 'ajv/dist/types';
 
+// eslint-disable-next-line  @typescript-eslint/no-unused-vars
 export class Exception<T> extends Error {
   status: number;
   message: string;
