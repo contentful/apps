@@ -3,7 +3,7 @@ import baseUrl from '@configs/ai/baseUrl';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
-import AI from '@utils/AI';
+import AI from '@utils/ai';
 import { ChatCompletionRequestMessage } from 'openai';
 import { useMemo, useState } from 'react';
 
@@ -32,7 +32,7 @@ const useAI = () => {
       content,
     };
 
-    return [...baseSystemPrompt(profile, sdk.locales.names[targetLocale]), userPrompt];
+    return [...baseSystemPrompt(profile, targetLocale), userPrompt];
   };
 
   const resetOutput = () => {
@@ -40,6 +40,7 @@ const useAI = () => {
   };
 
   const generateMessage = async (prompt: string, targetLocale: string) => {
+    resetOutput();
     let completeMessage = '';
 
     try {

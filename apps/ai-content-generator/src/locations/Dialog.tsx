@@ -1,6 +1,7 @@
 import useDialogParameters from '@hooks/dialog/useDialogParameters';
-import { AIFeature } from '@configs/features/featureConfig';
+import featureConfig, { AIFeature } from '@configs/features/featureConfig';
 import { Spinner } from '@contentful/f36-components';
+import CommonGenerator from '@components/dialog/common-generator/CommonGenerator';
 
 type DialogInvocationParameters = {
   feature: AIFeature;
@@ -16,18 +17,10 @@ const Dialog = () => {
 
   switch (feature) {
     case AIFeature.TRANSLATE:
-      return (
-        <div>
-          {feature} {entryId}
-        </div>
-      );
+      return <CommonGenerator feature={featureConfig[feature]} entryId={entryId} isTranslate />;
 
     default:
-      return (
-        <div>
-          {feature} {entryId}
-        </div>
-      );
+      return <CommonGenerator feature={featureConfig[feature]} entryId={entryId} />;
   }
 };
 
