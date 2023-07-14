@@ -60,9 +60,10 @@ const useAI = () => {
       }
     } catch (error: any) {
       console.error(error);
+    } finally {
+      setStream(null);
     }
 
-    setStream(null);
     return completeMessage;
   };
 
