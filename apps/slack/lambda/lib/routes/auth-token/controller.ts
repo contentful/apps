@@ -11,7 +11,10 @@ import { OAuthResult } from './constants';
 import { NotFoundException } from '../../errors';
 
 export class AuthTokenController {
-  constructor(private authTokenRepository: AuthTokenRepository, private frontendUrl: string) {}
+  constructor(
+    private authTokenRepository: AuthTokenRepository,
+    private frontendUrl: string,
+  ) {}
 
   /**
    * @openapi
@@ -54,7 +57,7 @@ export class AuthTokenController {
 
     const { code, spaceId, environmentId } = assertValid<GetAuthTokenParameters>(
       getAuthTokenParametersSchema,
-      request.query
+      request.query,
     );
 
     let result, slackWorkspaceId, accessToken, refreshToken, errorMessage;
@@ -125,7 +128,11 @@ export class AuthTokenController {
     const installationUuid = request.header('x-contentful-uuid');
 
     if (!spaceId || !environmentId) {
-      throw new NotFoundException();
+      throw new NotFoundException({
+        errMessage: 'EnvironmentId or spaceId not found in headers',
+        environmentId,
+        spaceId,
+      });
     }
     const { refreshToken } = assertValid<PostAuthTokenBody>(postAuthTokenBodySchema, request.body);
 
@@ -135,7 +142,7 @@ export class AuthTokenController {
         spaceId,
         environmentId,
       },
-      installationUuid
+      installationUuid,
     );
 
     response.status(201).send({ token });

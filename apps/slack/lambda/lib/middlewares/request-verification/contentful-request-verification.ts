@@ -10,7 +10,7 @@ const DEFAULT_TTL = 300; // bump TTL to 5mins to avoid any retry issues with req
 
 export function createContentfulRequestVerificationMiddleware(
   signingSecret: string,
-  verifyRequest = defaultVerifyRequest
+  verifyRequest = defaultVerifyRequest,
 ): RequestHandler {
   return (request, _res, next) => {
     const isValid = verifyRequest(
@@ -21,11 +21,11 @@ export function createContentfulRequestVerificationMiddleware(
         headers: dedupeHeaders(request.headers),
         body: (request.body as Buffer).toString('utf-8'),
       },
-      DEFAULT_TTL
+      DEFAULT_TTL,
     );
 
     if (!isValid) {
-      throw new NotFoundException();
+      throw new NotFoundException({ errMessage: 'Request verification is not valid' });
     }
 
     next();

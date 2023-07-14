@@ -11,7 +11,11 @@ const extractFromSignedHeaders = (request: Request) => {
   const environmentId = request.header('x-contentful-environment-id');
 
   if (!spaceId || !environmentId) {
-    throw new ConflictException();
+    throw new ConflictException({
+      errMessage: 'EnvironmentId or spaceId not found in headers',
+      spaceId,
+      environmentId,
+    });
   }
 
   return { environmentId, spaceId };
@@ -20,7 +24,7 @@ const extractFromSignedHeaders = (request: Request) => {
 export class MessagesController {
   constructor(
     private readonly authTokenRepository: AuthTokenRepository,
-    private readonly messagesRepository: MessagesRepository
+    private readonly messagesRepository: MessagesRepository,
   ) {}
 
   post = asyncHandler(async (request, response) => {

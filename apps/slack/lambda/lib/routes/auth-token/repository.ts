@@ -24,11 +24,19 @@ export class AuthTokenRepository {
 
     if (!accessResponse.refresh_token) {
       // This may happen when rotation is not enabled. Not leaking this to the customers though.
-      throw new ConflictException({ errMessage: 'Unable to fetch refresh token.' });
+      throw new ConflictException({
+        errMessage: 'Unable to fetch refresh token.',
+        environmentId,
+        spaceId,
+      });
     }
 
     if (!accessResponse.team?.id || !accessResponse.access_token) {
-      throw new SlackError({ errMessage: 'Missing or invalid Slack Workspace or Access Token ' });
+      throw new SlackError({
+        errMessage: 'Missing or invalid Slack Workspace or Access Token',
+        environmentId,
+        spaceId,
+      });
     }
 
     return {
@@ -74,23 +82,18 @@ export class AuthTokenRepository {
   }
 
   async get(workspaceId: string, context: SpaceEnvironmentContext): Promise<AuthToken> {
-    const parameters = await getInstallationParametersFromCma(
-      context.spaceId,
-      context.environmentId,
-    );
+    const spaceId = context.spaceId;
+    const environmentId = context.environmentId;
+    const parameters = await getInstallationParametersFromCma(spaceId, environmentId);
     const installationUuid = parameters.installationUuid;
-    const spaceEnvUuid = AuthTokenRepository.uuid(
-      context.spaceId,
-      context.environmentId,
-      workspaceId,
-    );
+    const spaceEnvUuid = AuthTokenRepository.uuid(spaceId, environmentId, workspaceId);
 
     // installationUuid is preferred, spaceEnvUuid is for backwards compatibility
     const possibleUuids = installationUuid || spaceEnvUuid;
     let authToken = await this.singleTableClient.get(Entity.AuthToken, possibleUuids);
 
     if (!authToken) {
-      throw new NotFoundException({ errMessage: 'Auth token could not be found' });
+      throw new NotFoundException({ errMessage: 'Auth token not found', environmentId, spaceId });
     }
 
     if (AuthTokenRepository.isExpired(authToken)) {
@@ -101,7 +104,7 @@ export class AuthTokenRepository {
         if (e instanceof SlackError && e.details?.errMessage === 'invalid_refresh_token') {
           await this.deleteByWorkspaceId(workspaceId, possibleUuids);
         }
-        throw new NotFoundException({ errMessage: 'Auth token expired' });
+        throw new NotFoundException({ errMessage: 'Auth token expired', environmentId, spaceId });
       }
 
       await this.updateByWorkspaceId(authToken.slackWorkspaceId, authToken);
