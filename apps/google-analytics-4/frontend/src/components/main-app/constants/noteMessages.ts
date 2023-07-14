@@ -1,3 +1,5 @@
+import { ServiceAccountKeyId } from 'types';
+
 export const DEFAULT_ERR_MSG =
   'An unknown error has occurred. Please try again or contact support.';
 export const EMPTY_DATA_MSG =
@@ -14,3 +16,20 @@ export const getContentTypeSpecificMsg = (contentTypeName: string) => ({
   noSlugContentMsg: `This ${contentTypeName} entry does not have a valid slug field. Please add a field of type short text to this entry and configure it on the app configuration page.`,
   notPublishedMsg: `This ${contentTypeName} entry has not yet been published. Please publish the entry to view this Google Analytics 4 sidebar app.`,
 });
+
+export const getAppInstallationParamsMsg = (
+  serviceAccountKeyId: ServiceAccountKeyId | undefined,
+  propertyId: string | undefined
+) => {
+  const serviceAccountMsg = 'Service Account Key';
+  const propertyMsg = 'Google Analytics 4 property';
+  let missingParams = '';
+
+  if (!serviceAccountKeyId && !propertyId)
+    missingParams = `${serviceAccountMsg} and ${propertyMsg}`;
+  else {
+    !serviceAccountKeyId ? (missingParams = serviceAccountMsg) : (missingParams = propertyMsg);
+  }
+
+  return `No ${missingParams} provided or found in app installation parameters. Please update your app configuration page. `;
+};

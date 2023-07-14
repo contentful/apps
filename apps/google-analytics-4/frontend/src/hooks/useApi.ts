@@ -10,10 +10,6 @@ export function useApi(serviceAccountKeyId?: ServiceAccountKeyId): Api {
 
   const accountKeyId = serviceAccountKeyId || sdk.parameters.installation.serviceAccountKeyId;
 
-  if (!accountKeyId) {
-    throw new Error('No ServiceAccountKeyId provided or found in installation parameters');
-  }
-
   const api = useMemo(() => {
     return new Api(contentfulContext(sdk), cma, accountKeyId);
   }, [cma, accountKeyId, sdk]);
