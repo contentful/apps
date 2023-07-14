@@ -1,7 +1,6 @@
 import useDialogParameters from '@hooks/dialog/useDialogParameters';
 import { AIFeature } from '@configs/features/featureConfig';
 import { Spinner } from '@contentful/f36-components';
-import useAIFeature from '@hooks/dialog/useAIFeature';
 
 type DialogInvocationParameters = {
   feature: AIFeature;
@@ -10,13 +9,26 @@ type DialogInvocationParameters = {
 
 const Dialog = () => {
   const { feature, entryId, isLoading } = useDialogParameters();
-  const FeatureComponent = useAIFeature(feature);
 
-  if (!FeatureComponent || isLoading) {
+  if (isLoading) {
     return <Spinner size="large" />;
   }
 
-  return <FeatureComponent entryId={entryId} />;
+  switch (feature) {
+    case AIFeature.TRANSLATE:
+      return () => (
+        <div>
+          {feature} {entryId}
+        </div>
+      );
+
+    default:
+      return (
+        <div>
+          {feature} {entryId}
+        </div>
+      );
+  }
 };
 
 export default Dialog;

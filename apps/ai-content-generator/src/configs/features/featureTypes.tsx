@@ -1,4 +1,4 @@
-import { AIFeature, AIFeatureType } from './featureConfig';
+import { AIFeature } from './featureConfig';
 
 /**
  * Core Types
@@ -18,7 +18,6 @@ type FeatureItem = {
   title: string;
   helpText: string;
   prompt: Prompt;
-  featureType: AIFeatureType;
 };
 
 /**
