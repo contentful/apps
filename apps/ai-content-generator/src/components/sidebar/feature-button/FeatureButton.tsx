@@ -1,13 +1,16 @@
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { SidebarAppSDK } from '@contentful/app-sdk';
+import { OpenCustomWidgetOptions, SidebarAppSDK } from '@contentful/app-sdk';
 import { Button, Tooltip } from '@contentful/f36-components';
 import { AIFeature } from '@configs/features/featureConfig';
+import { DialogInvocationParameters } from '@locations/Dialog';
 
 interface Props {
   feature: AIFeature;
   text: string;
   helpText: string;
 }
+
+type openDialogOptions = OpenCustomWidgetOptions & { parameters: DialogInvocationParameters };
 
 const FeatureButton = (props: Props) => {
   const { feature, text, helpText } = props;
@@ -16,13 +19,15 @@ const FeatureButton = (props: Props) => {
   const handleOnClick = () => {
     const entryId = sdk.entry.getSys().id;
 
-    sdk.dialogs.openCurrentApp({
+    const dialogConfig: openDialogOptions = {
       position: 'center',
       width: 'fullWidth',
       minHeight: '468px',
       title: text,
       parameters: { feature, entryId },
-    });
+    };
+
+    sdk.dialogs.openCurrentApp(dialogConfig);
   };
 
   return (

@@ -3,6 +3,7 @@ import translatePrompt from '@configs/prompts/translatePrompt';
 import contentPrompt from '@configs/prompts/contentPrompt';
 import seoKeywordsPrompt from '@configs/prompts/seoKeywordsPrompt';
 import seoDescriptionPrompt from '@configs/prompts/seoDescriptionPrompt';
+import titlePrompt from '@configs/prompts/titlePrompt';
 
 enum AIFeature {
   TITLE = 'title',
@@ -16,7 +17,7 @@ const featureConfig: FeatureConfig = {
   [AIFeature.TITLE]: {
     title: 'Title',
     helpText: 'Help text',
-    Component: () => <div>title</div>,
+    prompt: titlePrompt,
   },
   [AIFeature.CONTENT]: {
     title: 'Content',
