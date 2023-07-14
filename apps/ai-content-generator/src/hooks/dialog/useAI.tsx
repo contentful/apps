@@ -40,13 +40,14 @@ const useAI = () => {
   };
 
   const generateMessage = async (prompt: string, targetLocale: string) => {
+    let completeMessage = '';
+
     try {
       const payload = GPTPayload(prompt, sdk.parameters.installation.profile, targetLocale);
 
       const stream = await ai.streamChatCompletion(payload);
       setStream(stream);
 
-      let completeMessage = '';
       while (true) {
         const streamOutput = await ai.parseStream(stream);
 
@@ -57,20 +58,18 @@ const useAI = () => {
         setOutput((prev) => prev + streamOutput);
         completeMessage += streamOutput;
       }
-
-      setStream(null);
-      return completeMessage;
     } catch (error: any) {
       console.error(error);
-
-      setStream(null);
-      return output;
     }
+
+    setStream(null);
+    return completeMessage;
   };
 
   const sendStopSignal = async () => {
     try {
       await ai.sendStopSignal(stream);
+      setStream(null);
     } catch (error: any) {
       console.error(error);
     }
