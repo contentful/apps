@@ -15,6 +15,7 @@ enum AIFeature {
 
 export enum AIFeatureType {
   BASE = 'base',
+  NONE = 'none',
 }
 
 const featureConfig: FeatureConfig = {

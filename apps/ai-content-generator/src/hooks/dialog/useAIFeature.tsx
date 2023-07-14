@@ -3,7 +3,7 @@ import { FeatureComponentProps } from '@configs/features/featureTypes';
 import { FC } from 'react';
 
 const useAIFeature = (aiFeature?: AIFeature): FC<FeatureComponentProps> | null => {
-  const featureType = aiFeature ? featureConfig[aiFeature].featureType : null;
+  const featureType = aiFeature ? featureConfig[aiFeature].featureType : AIFeatureType.NONE;
 
   switch (featureType) {
     case AIFeatureType.BASE:
