@@ -16,7 +16,7 @@ const Dialog = () => {
 
   switch (feature) {
     case AIFeature.TRANSLATE:
-      return () => (
+      return (
         <div>
           {feature} {entryId}
         </div>
