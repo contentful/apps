@@ -22,7 +22,7 @@ const useAI = () => {
   const [output, setOutput] = useState<string>('');
   const [stream, setStream] = useState<ReadableStreamDefaultReader<Uint8Array> | null>(null);
 
-  const GPTPayload = (
+  const createGPTPayload = (
     content: string,
     profile: string,
     targetLocale: string
@@ -43,7 +43,7 @@ const useAI = () => {
     let completeMessage = '';
 
     try {
-      const payload = GPTPayload(prompt, sdk.parameters.installation.profile, targetLocale);
+      const payload = createGPTPayload(prompt, sdk.parameters.installation.profile, targetLocale);
 
       const stream = await ai.streamChatCompletion(payload);
       setStream(stream);
