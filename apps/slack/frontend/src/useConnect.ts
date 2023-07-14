@@ -34,12 +34,18 @@ export const useConnect = () => {
 
           await apiClient.createAuthToken(sdk, cma, token, installationUuid);
         } catch (e) {
-          console.error(e);
-          sdk.notifier.error(genericErrorMessage);
+          const error = e as any;
+
+          // this error is a race condition that occurs when instantiating the eventsService within the lambda.
+          // the error is not valid to show to the user.
+          if (JSON.parse(error?.message)?.details !== 'AppInstallation does not exist.') {
+            console.error(e);
+            sdk.notifier.error(genericErrorMessage);
+          }
         }
       }
     },
-    [cma, sdk, temporaryRefreshToken]
+    [cma, sdk, temporaryRefreshToken],
   );
 
   const { addConnectedWorkspace, setWorkspaceState, setNotificationsLoading, setChannels } =
@@ -74,7 +80,7 @@ export const useConnect = () => {
         sdk.notifier.success('Connected to the Slack workspace successfully.');
       } catch (e) {
         sdk.notifier.error(
-          'Something went wrong while authenticating with Slack. Please try again.'
+          'Something went wrong while authenticating with Slack. Please try again.',
         );
       } finally {
         setNotificationsLoading(false);
