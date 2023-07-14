@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import { AIFeature } from './featureConfig';
 
 /**
@@ -15,23 +14,16 @@ export type FeatureComponentProps = {
  * Feature Items
  */
 
-type FeatureItemBase = {
+type FeatureItem = {
   title: string;
   helpText: string;
-};
-
-interface ComponentFeatureItem extends FeatureItemBase {
-  Component: FC<FeatureComponentProps>;
-}
-
-interface PromptFeatureItem extends FeatureItemBase {
   prompt: Prompt;
-}
+};
 
 /**
  * Feature Config
  */
 
 export type FeatureConfig = {
-  [key in AIFeature]: ComponentFeatureItem | PromptFeatureItem;
+  [key in AIFeature]: FeatureItem;
 };

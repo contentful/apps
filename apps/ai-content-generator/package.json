@@ -3,16 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@contentful/app-sdk": "4.14.1",
-    "@contentful/f36-components": "4.40.6",
+    "@contentful/app-sdk": "4.22.1",
+    "@contentful/f36-components": "4.45.0",
     "@contentful/f36-tokens": "4.0.2",
-    "@contentful/react-apps-toolkit": "1.2.16",
-    "@contentful/rich-text-plain-text-renderer": "^16.0.2",
-    "contentful-management": "10.28.1",
+    "@contentful/react-apps-toolkit": "1.2.2",
+    "@contentful/rich-text-plain-text-renderer": "^16.0.5",
+    "contentful-management": "10.7.0",
     "emotion": "10.0.27",
+    "openai": "^3.3.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-query": "^3.39.3"
+    "react-dom": "18.2.0"
   },
   "scripts": {
     "start": "cross-env BROWSER=none PORT=3000 react-scripts start"
