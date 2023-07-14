@@ -1,5 +1,4 @@
-import { FC } from 'react';
-import { AIFeature } from './featureConfig';
+import { AIFeature, AIFeatureType } from './featureConfig';
 
 /**
  * Core Types
@@ -15,23 +14,17 @@ export type FeatureComponentProps = {
  * Feature Items
  */
 
-type FeatureItemBase = {
+type FeatureItem = {
   title: string;
   helpText: string;
-};
-
-interface ComponentFeatureItem extends FeatureItemBase {
-  Component: FC<FeatureComponentProps>;
-}
-
-interface PromptFeatureItem extends FeatureItemBase {
   prompt: Prompt;
-}
+  featureType: AIFeatureType;
+};
 
 /**
  * Feature Config
  */
 
 export type FeatureConfig = {
-  [key in AIFeature]: ComponentFeatureItem | PromptFeatureItem;
+  [key in AIFeature]: FeatureItem;
 };
