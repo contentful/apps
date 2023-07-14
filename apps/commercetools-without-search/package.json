@@ -1,0 +1,34 @@
+{
+  "name": "@contentful/commercetools-without-search",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "@types/react": "16.8.23",
+    "@types/react-dom": "16.8.5",
+    "cross-env": "7.0.3",
+    "typescript": "4.3.2"
+  },
+  "dependencies": {
+    "@commercetools/platform-sdk": "2.8.0",
+    "@commercetools/sdk-client-v2": "1.4.2",
+    "@contentful/app-scripts": "1.2.0",
+    "@contentful/app-sdk": "4.21.1",
+    "@contentful/ecommerce-app-base": "3.1.67",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-scripts": "4.0.3"
+  },
+  "scripts": {
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    "last 5 Chrome version",
+    "> 1%",
+    "not ie <= 11"
+  ],
+  "homepage": "."
+}
