@@ -30,7 +30,7 @@ export class SlackClient {
    */
   async getAuthToken(
     oauthCode: string,
-    context: SpaceEnvironmentContext
+    context: SpaceEnvironmentContext,
   ): Promise<OauthV2AccessResponse> {
     const response = await this.client.oauth.v2.access({
       code: oauthCode,
@@ -59,27 +59,27 @@ export class SlackClient {
     message: {
       text?: string;
       blocks?: (Block | KnownBlock)[];
-    }
+    },
   ): Promise<ChatPostMessageResponse> {
     return SlackClient.assertSuccessResponse(
       await this.client.chat.postMessage({
         token: token,
         channel: channelId,
         ...message,
-      })
+      }),
     );
   }
 
   async getWorkspaceInformation(token: string, workspaceId: string): Promise<TeamInfoResponse> {
     return SlackClient.assertSuccessResponse(
-      await this.client.team.info({ team: workspaceId, token })
+      await this.client.team.info({ team: workspaceId, token }),
     );
   }
 
   async getChannelsList(
     token: string,
     workspaceId: string,
-    cursor?: string
+    cursor?: string,
   ): Promise<ConversationsListResponse['channels'] | undefined> {
     const { channels, response_metadata } = await this.fetchChannels(token, workspaceId, cursor);
 
@@ -95,7 +95,7 @@ export class SlackClient {
   async fetchChannels(
     token: string,
     workspaceId: string,
-    cursor = ''
+    cursor = '',
   ): Promise<ConversationsListResponse> {
     return SlackClient.assertSuccessResponse(
       await this.client.conversations.list({
@@ -104,13 +104,13 @@ export class SlackClient {
         cursor,
         limit: 1000,
         exclude_archived: true,
-      })
+      }),
     );
   }
 
   private static assertSuccessResponse(response: WebAPICallResult) {
     if (!response.ok) {
-      throw new SlackError(response.error ?? 'Unknown error');
+      throw new SlackError({ errMessage: response.error ?? 'Unknown error' });
     }
 
     return response;

@@ -15,7 +15,7 @@ const ajv = new Ajv({
 // This allows any handler to be async
 export const asyncHandler =
   (
-    handler: (...params: Parameters<RequestHandler>) => Promise<ReturnType<RequestHandler>>
+    handler: (...params: Parameters<RequestHandler>) => Promise<ReturnType<RequestHandler>>,
   ): RequestHandler =>
   (request, response, next) => {
     return handler(request, response, next).catch(next);
@@ -30,11 +30,12 @@ export const assertValid = <T>(schema: { [key: string]: any }, data: unknown): T
       // https://json-schema.org/understanding-json-schema/reference/schema.html
       $schema: 'http://json-schema.org/draft-07/schema#',
     },
-    data
+    data,
   );
 
   if (!valid) {
-    throw new UnprocessableEntityException(ajv.errors ?? `Invalid Entity`);
+    if (ajv.errors) throw new UnprocessableEntityException({ error: ajv.errors });
+    throw new UnprocessableEntityException({ errMessage: 'Invalid entity' });
   }
 
   return data as T;
