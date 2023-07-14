@@ -38,7 +38,8 @@ export const useConnect = () => {
 
           // this error is a race condition that occurs when instantiating the eventsService within the lambda.
           // the error is not valid to show to the user.
-          if (JSON.parse(error?.message)?.details !== 'AppInstallation does not exist.') {
+          const errorMessage = JSON.parse(error?.message);
+          if (errorMessage && errorMessage.details !== 'AppInstallation does not exist.') {
             console.error(e);
             sdk.notifier.error(genericErrorMessage);
           }
