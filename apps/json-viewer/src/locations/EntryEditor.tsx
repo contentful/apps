@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { EditorExtensionSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
-import { Box, FormControl, Select, Stack } from '@contentful/f36-components';
+import { Box, CopyButton, Flex, FormControl, Select, Stack } from '@contentful/f36-components';
 import ReactJson from 'react-json-view';
 
 const Entry = () => {
@@ -34,28 +34,40 @@ const Entry = () => {
 
   return (
     <Stack flexDirection="column" alignItems="left">
-      <FormControl
-        marginLeft="spacingL"
-        marginTop="spacingL"
-        marginBottom="spacingS"
-        style={{
-          display: 'block',
-          width: '200px',
-        }}>
-        <FormControl.Label>References include depth:</FormControl.Label>
-        <Select id="includeDepth" name="includeDepth" value={selectValue} onChange={handleOnChange}>
-          {
-            // Create select options for values 0 through 10 to represent include depths.
-            Array(11)
-              .fill(0)
-              .map((_, i) => (
-                <Select.Option key={i} value={i}>
-                  Include: {i}
-                </Select.Option>
-              ))
-          }
-        </Select>
-      </FormControl>
+      <Flex flexDirection="row" alignItems="space-between">
+        <Box style={{ width: '100%' }}>
+          <FormControl
+            marginLeft="spacingL"
+            marginTop="spacingL"
+            marginBottom="none"
+            style={{
+              display: 'block',
+              width: '300px',
+            }}>
+            <FormControl.Label>References include depth:</FormControl.Label>
+            <Select
+              id="includeDepth"
+              name="includeDepth"
+              value={selectValue}
+              onChange={handleOnChange}>
+              {
+                // Create select options for values 0 through 10 to represent include depths.
+                Array(11)
+                  .fill(0)
+                  .map((_, i) => (
+                    <Select.Option key={i} value={i}>
+                      Include: {i}
+                    </Select.Option>
+                  ))
+              }
+            </Select>
+          </FormControl>
+        </Box>
+        <CopyButton
+          style={{ marginRight: '10px', marginTop: '10px' }}
+          value={JSON.stringify(entry)}
+        />
+      </Flex>
       <Box marginLeft="spacingL">
         <ReactJson
           src={entry}
