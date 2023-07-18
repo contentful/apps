@@ -3,6 +3,7 @@ import { OpenCustomWidgetOptions, SidebarAppSDK } from '@contentful/app-sdk';
 import { Button, Tooltip } from '@contentful/f36-components';
 import { AIFeature } from '@configs/features/featureConfig';
 import { DialogInvocationParameters } from '@locations/Dialog';
+import { styles } from './FeatureButton.styles'
 
 interface Props {
   feature: AIFeature;
@@ -32,7 +33,7 @@ const FeatureButton = (props: Props) => {
 
   return (
     <Tooltip placement="top" id={feature} content={helpText}>
-      <Button title={helpText} onClick={handleOnClick}>
+      <Button className={styles.button} title={helpText} onClick={handleOnClick}>
         {text}
       </Button>
     </Tooltip>
