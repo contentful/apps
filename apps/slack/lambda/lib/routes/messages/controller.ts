@@ -11,7 +11,11 @@ const extractFromSignedHeaders = (request: Request) => {
   const environmentId = request.header('x-contentful-environment-id');
 
   if (!spaceId || !environmentId) {
-    throw new ConflictException();
+    throw new ConflictException({
+      errMessage: 'EnvironmentId or spaceId not found in headers',
+      spaceId,
+      environmentId,
+    });
   }
 
   return { environmentId, spaceId };

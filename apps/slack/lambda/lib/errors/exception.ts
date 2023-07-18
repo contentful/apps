@@ -1,10 +1,13 @@
+import { ErrorObject } from 'ajv/dist/types';
+
+// eslint-disable-next-line  @typescript-eslint/no-unused-vars
 export class Exception<T> extends Error {
   status: number;
   message: string;
-  details?: T;
+  details?: ExceptionDetails;
   isException: boolean;
 
-  constructor(status: number, message: string, details?: T) {
+  constructor(status: number, message: string, details?: ExceptionDetails) {
     super(message);
     this.status = status;
     this.message = message;
@@ -31,3 +34,10 @@ export class Exception<T> extends Error {
 
 export const isException = (e: unknown): e is Exception<unknown> =>
   typeof e == 'object' && !!e && 'isException' in e;
+
+export type ExceptionDetails = {
+  errMessage?: string;
+  environmentId?: string;
+  spaceId?: string;
+  error?: ErrorObject[] | ErrorObject;
+};

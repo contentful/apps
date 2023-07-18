@@ -17,7 +17,7 @@ export async function getWorkspaceId(
   }
 
   if (!workspaceId) {
-    throw new NotFoundException();
+    throw new NotFoundException({ errMessage: 'WorkspaceId not found', environmentId, spaceId });
   }
   return workspaceId;
 }

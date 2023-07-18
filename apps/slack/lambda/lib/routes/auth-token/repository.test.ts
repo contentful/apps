@@ -343,7 +343,7 @@ describe('AuthTokenRepository', () => {
 
       singleTableClient.get.resolves(oldToken);
       singleTableClient.queryByWorkspaceId.resolves([oldToken, otherToken]);
-      slackClient.refreshToken.rejects(new SlackError('unknown'));
+      slackClient.refreshToken.rejects(new SlackError({ errMessage: 'unknown' }));
 
       await assert.rejects(
         instance.get('workspace', {
@@ -378,7 +378,7 @@ describe('AuthTokenRepository', () => {
 
       singleTableClient.get.resolves(oldToken);
       singleTableClient.queryByWorkspaceId.resolves([oldToken, otherToken]);
-      slackClient.refreshToken.rejects(new SlackError('invalid_refresh_token'));
+      slackClient.refreshToken.rejects(new SlackError({ errMessage: 'invalid_refresh_token' }));
 
       await assert.rejects(
         instance.get('workspace', {

@@ -34,7 +34,8 @@ export const assertValid = <T>(schema: { [key: string]: any }, data: unknown): T
   );
 
   if (!valid) {
-    throw new UnprocessableEntityException(ajv.errors ?? `Invalid Entity`);
+    if (ajv.errors) throw new UnprocessableEntityException({ error: ajv.errors });
+    throw new UnprocessableEntityException({ errMessage: 'Invalid entity' });
   }
 
   return data as T;
