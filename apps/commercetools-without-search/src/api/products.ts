@@ -58,7 +58,8 @@ export async function fetchProductPreviews(
 
 export async function fetchProducts(
   config: ConfigurationParameters,
-  search: string
+  search: string,
+  pagination: { offset: number; limit: number }
 ): Promise<{
   pagination: Pagination;
   products: Product[];
@@ -67,9 +68,16 @@ export async function fetchProducts(
     ? {
         queryArgs: {
           where: `name(${config.locale ?? 'en'}="${search}")`,
+          limit: pagination?.limit,
+          offset: pagination?.offset,
         },
       }
-    : {};
+    : {
+        queryArgs: {
+          limit: pagination?.limit,
+          offset: pagination?.offset,
+        },
+      };
 
   const client = createClient(config);
   const response = await client.productProjections().get(searchQuery).execute();
