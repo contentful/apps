@@ -1,6 +1,7 @@
-import { Button, Flex, Tab } from '@contentful/f36-components';
-import { Dispatch, useState } from 'react';
+import { Button, Flex } from '@contentful/f36-components';
+import { Dispatch } from 'react';
 import { GeneratorAction, GeneratorReducer } from '../generatorReducer';
+import { styles } from './NewOrExistingText.styles'
 
 interface Props {
   isNewText: boolean;
@@ -21,14 +22,15 @@ const NewOrExistingText = (props: Props) => {
 
   return (
     <Flex flexGrow={1} flexDirection="column">
-      <Button title="Input custom text" isActive={isNewText} onClick={() => changeTextSource(true)}>
-        New Text
+      <Button className={styles.button} title="Input custom text" isActive={isNewText} onClick={() => changeTextSource(true)}>
+        From prompt
       </Button>
       <Button
         title="Use existing text from entry"
+        className={styles.button}
         isActive={!isNewText}
         onClick={() => changeTextSource(false)}>
-        From Entry
+        From field
       </Button>
     </Flex>
   );

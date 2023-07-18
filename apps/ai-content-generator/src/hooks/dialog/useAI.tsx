@@ -3,7 +3,7 @@ import baseUrl from '@configs/ai/baseUrl';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
-import AI from '@utils/ai';
+import AI from '@utils/aiApi';
 import { ChatCompletionRequestMessage } from 'openai';
 import { useMemo, useState } from 'react';
 
