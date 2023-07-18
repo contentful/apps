@@ -4,7 +4,7 @@ import { NotFoundException } from '../errors';
 export async function getWorkspaceId(
   spaceId: string,
   environmentId: string,
-  workspaceIdFromParameters?: string,
+  workspaceIdFromParameters?: string
 ): Promise<string> {
   if (workspaceIdFromParameters) {
     return workspaceIdFromParameters;

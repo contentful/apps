@@ -13,7 +13,7 @@ export class EventsService {
     private readonly acceptedEvents: SlackAppEventKey[],
     private readonly authTokenRepository: AuthTokenRepository,
     private readonly messagesRepository: MessagesRepository,
-    private makeCmaClient: typeof makeSpaceEnvClient,
+    private makeCmaClient: typeof makeSpaceEnvClient
   ) {
     this.acceptedEvents = acceptedEvents;
   }
@@ -21,7 +21,7 @@ export class EventsService {
   private getEntryName = async (
     cmaClient: PlainClientAPI,
     entry: EntryProps,
-    contentType: ContentTypeProps,
+    contentType: ContentTypeProps
   ): Promise<string | undefined> => {
     try {
       const locales = await cmaClient.locale.getMany({});
@@ -75,7 +75,7 @@ export class EventsService {
     notifications: SlackNotification[],
     eventKey: SlackAppEventKey,
     workspaceId: string,
-    eventBody: EventEntity,
+    eventBody: EventEntity
   ) {
     const spaceId = eventBody.sys.space.sys.id;
     const environmentId = eventBody.sys.environment.sys.id;
@@ -100,7 +100,7 @@ export class EventsService {
         acc.push(
           this.messagesRepository.create(token, selectedChannel, {
             blocks: this.createMessageBlocks(eventKey, eventBody, resolvedEntity),
-          }),
+          })
         );
       }
       return acc;
@@ -113,7 +113,7 @@ export class EventsService {
     spaceId: string,
     environmentId: string,
     event: SlackAppEventKey,
-    eventBody: EventEntity,
+    eventBody: EventEntity
   ): Promise<ResolvedEntity | undefined> {
     let actorId: undefined | string;
     let date: undefined | string;

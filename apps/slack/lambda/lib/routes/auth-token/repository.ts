@@ -15,7 +15,7 @@ export class AuthTokenRepository {
 
   async validate(
     code: string,
-    { spaceId, environmentId }: SpaceEnvironmentContext,
+    { spaceId, environmentId }: SpaceEnvironmentContext
   ): Promise<Pick<AuthToken, 'refreshToken' | 'token' | 'slackWorkspaceId'>> {
     const accessResponse = await this.slackClient.getAuthToken(code, {
       spaceId,
@@ -49,7 +49,7 @@ export class AuthTokenRepository {
   async put(
     refreshToken: string,
     { spaceId, environmentId }: SpaceEnvironmentContext,
-    installationUuid?: string,
+    installationUuid?: string
   ): Promise<AuthToken> {
     const accessResponse = await this.slackClient.refreshToken(refreshToken);
 
@@ -57,7 +57,7 @@ export class AuthTokenRepository {
       spaceId,
       environmentId,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      accessResponse.team!.id!,
+      accessResponse.team!.id!
     );
 
     const authToken = AuthTokenRepository.toDatabase(
@@ -66,7 +66,7 @@ export class AuthTokenRepository {
         spaceId,
         environmentId,
       },
-      installationUuid,
+      installationUuid
     );
 
     await this.updateByWorkspaceId(authToken.slackWorkspaceId, authToken);
@@ -75,7 +75,7 @@ export class AuthTokenRepository {
       Entity.AuthToken,
       installationUuid || uuid,
       [spaceId, installationUuid || environmentId],
-      authToken,
+      authToken
     );
 
     return authToken;
@@ -115,11 +115,11 @@ export class AuthTokenRepository {
 
   private async updateByWorkspaceId(
     workspaceId: string,
-    authToken: Pick<AuthToken, 'refreshToken' | 'expiresAt' | 'token'>,
+    authToken: Pick<AuthToken, 'refreshToken' | 'expiresAt' | 'token'>
   ): Promise<void> {
     const authTokens = await this.singleTableClient.queryByWorkspaceId(
       Entity.AuthToken,
-      workspaceId,
+      workspaceId
     );
 
     await Promise.all(
@@ -127,7 +127,7 @@ export class AuthTokenRepository {
         const uuid = AuthTokenRepository.uuid(
           token.spaceId,
           token.environmentId,
-          token.slackWorkspaceId,
+          token.slackWorkspaceId
         );
         const data: AuthToken = {
           ...token,
@@ -139,16 +139,16 @@ export class AuthTokenRepository {
           Entity.AuthToken,
           token?.installationUuid || uuid,
           [token.spaceId, token.installationUuid || token.environmentId],
-          data,
+          data
         );
-      }),
+      })
     );
   }
 
   async deleteByWorkspaceId(workspaceId: string, installationUuid?: string): Promise<void> {
     const authTokens = await this.singleTableClient.queryByWorkspaceId(
       Entity.AuthToken,
-      workspaceId,
+      workspaceId
     );
 
     await Promise.all(
@@ -159,10 +159,10 @@ export class AuthTokenRepository {
             AuthTokenRepository.uuid(
               authToken.spaceId,
               authToken.environmentId,
-              authToken.slackWorkspaceId,
-            ),
-        ),
-      ),
+              authToken.slackWorkspaceId
+            )
+        )
+      )
     );
   }
 
@@ -171,7 +171,7 @@ export class AuthTokenRepository {
 
     if (values.some((i) => !i)) {
       throw new UnprocessableEntityException({
-        errMessage: `Cannot create UUID for space ${spaceId}, environment ${environmentId}, workspace ${workspaceId}`,
+        errMessage: `Cannot create UUID for space ${spaceId}, environment ${environmentId}, workspace ${workspaceId}`
       });
     }
 
@@ -185,7 +185,7 @@ export class AuthTokenRepository {
   private static toDatabase(
     slackTokenResponse: OauthV2AccessResponse,
     { spaceId, environmentId }: SpaceEnvironmentContext,
-    installationUuid?: string,
+    installationUuid?: string
   ): AuthToken {
     const defaultAttributes = {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -209,7 +209,7 @@ export class AuthTokenRepository {
    */
   private static applyRefreshResponse(
     currentToken: AuthToken,
-    slackRefreshResponse: OauthV2AccessResponse,
+    slackRefreshResponse: OauthV2AccessResponse
   ): AuthToken {
     return {
       ...currentToken,

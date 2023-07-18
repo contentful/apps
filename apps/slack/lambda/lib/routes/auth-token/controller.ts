@@ -57,7 +57,7 @@ export class AuthTokenController {
 
     const { code, spaceId, environmentId } = assertValid<GetAuthTokenParameters>(
       getAuthTokenParametersSchema,
-      request.query,
+      request.query
     );
 
     let result, slackWorkspaceId, accessToken, refreshToken, errorMessage;
@@ -142,7 +142,7 @@ export class AuthTokenController {
         spaceId,
         environmentId,
       },
-      installationUuid,
+      installationUuid
     );
 
     response.status(201).send({ token });

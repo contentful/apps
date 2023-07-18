@@ -70,7 +70,7 @@ describe('AuthTokenRepository', () => {
           token: 'token',
           refreshToken: 'refresh-token',
           slackWorkspaceId: 'team',
-        },
+        }
       );
     });
 
@@ -130,7 +130,7 @@ describe('AuthTokenRepository', () => {
           spaceId: 'spaceId',
           environmentId: 'environmentId',
         },
-        UUID,
+        UUID
       );
 
       const expectedData: AuthToken = {
@@ -147,7 +147,7 @@ describe('AuthTokenRepository', () => {
         Entity.AuthToken,
         UUID,
         ['spaceId', UUID],
-        expectedData,
+        expectedData
       );
       assert.deepEqual(response, expectedData);
     });
@@ -170,7 +170,7 @@ describe('AuthTokenRepository', () => {
             // @ts-expect-error expected from scenario
             environmentId: null,
           },
-          UUID,
+          UUID
         );
         assert.fail('Did not reject');
       } catch (e) {
@@ -216,7 +216,7 @@ describe('AuthTokenRepository', () => {
           spaceId: 'spaceId-1',
           environmentId: 'environmentId-1',
         },
-        UUID,
+        UUID
       );
 
       assert.calledWith(
@@ -224,7 +224,7 @@ describe('AuthTokenRepository', () => {
         Entity.AuthToken,
         UUID,
         ['spaceId-1', UUID],
-        newAuthToken,
+        newAuthToken
       );
 
       assert.calledWith(singleTableClient.put, Entity.AuthToken, UUID, ['spaceId-2', UUID], {
@@ -317,7 +317,7 @@ describe('AuthTokenRepository', () => {
         Entity.AuthToken,
         `${UUID}-other`,
         ['space-other', `${UUID}-other`],
-        newOtherToken,
+        newOtherToken
       );
     });
 
@@ -350,7 +350,7 @@ describe('AuthTokenRepository', () => {
           spaceId: 'space',
           environmentId: 'env',
         }),
-        NotFoundException,
+        NotFoundException
       );
 
       assert.notCalled(singleTableClient.delete);
@@ -385,7 +385,7 @@ describe('AuthTokenRepository', () => {
           spaceId: 'space',
           environmentId: 'env',
         }),
-        NotFoundException,
+        NotFoundException
       );
 
       assert.calledTwice(singleTableClient.delete);

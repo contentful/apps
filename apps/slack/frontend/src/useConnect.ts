@@ -46,7 +46,7 @@ export const useConnect = () => {
         }
       }
     },
-    [cma, sdk, temporaryRefreshToken],
+    [cma, sdk, temporaryRefreshToken]
   );
 
   const { addConnectedWorkspace, setWorkspaceState, setNotificationsLoading, setChannels } =
@@ -81,7 +81,7 @@ export const useConnect = () => {
         sdk.notifier.success('Connected to the Slack workspace successfully.');
       } catch (e) {
         sdk.notifier.error(
-          'Something went wrong while authenticating with Slack. Please try again.',
+          'Something went wrong while authenticating with Slack. Please try again.'
         );
       } finally {
         setNotificationsLoading(false);

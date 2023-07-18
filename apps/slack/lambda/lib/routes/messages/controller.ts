@@ -24,7 +24,7 @@ const extractFromSignedHeaders = (request: Request) => {
 export class MessagesController {
   constructor(
     private readonly authTokenRepository: AuthTokenRepository,
-    private readonly messagesRepository: MessagesRepository,
+    private readonly messagesRepository: MessagesRepository
   ) {}
 
   post = asyncHandler(async (request, response) => {
