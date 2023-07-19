@@ -12,16 +12,14 @@ import SidebarV1 from './locations/SidebarV1';
 import Sidebar from '@locations/Sidebar';
 import Home from '@locations/Home';
 
-const useV2App = () => {
-  return import.meta.env.VITE_SHOW_AI_CONTENT_GENERATOR_V2 === 'true';
-}
+const useV2App = import.meta.env.VITE_SHOW_AI_CONTENT_GENERATOR_V2 === 'true';
 
 const ComponentLocationSettings = {
-  [locations.LOCATION_APP_CONFIG]:  useV2App() ? ConfigScreen : ConfigScreenV1,
+  [locations.LOCATION_APP_CONFIG]:  useV2App ? ConfigScreen : ConfigScreenV1,
   [locations.LOCATION_ENTRY_FIELD]: Field,
   [locations.LOCATION_ENTRY_EDITOR]: EntryEditor,
-  [locations.LOCATION_DIALOG]: useV2App() ? Dialog : DialogV1,
-  [locations.LOCATION_ENTRY_SIDEBAR]:  useV2App() ? Sidebar : SidebarV1,
+  [locations.LOCATION_DIALOG]: useV2App ? Dialog : DialogV1,
+  [locations.LOCATION_ENTRY_SIDEBAR]:  useV2App ? Sidebar : SidebarV1,
   [locations.LOCATION_PAGE]: Page,
   [locations.LOCATION_HOME]: Home,
 };
