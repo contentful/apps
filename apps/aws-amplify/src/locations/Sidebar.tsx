@@ -1,46 +1,48 @@
-import { Paragraph, Button } from '@contentful/f36-components';
+import { useEffect, useState } from 'react';
+import { Button, Paragraph } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import Axios, { AxiosError } from 'axios';
-import { useState } from 'react';
-import { config } from '../config';
+import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { getItemLocalStorage, build_status_key, setItemLocalStorage } from '../lib/localStorage';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarAppSDK>();
-  const errorText = 'The AWS website build was not triggered. Try again later.';
+  const cma = useCMA();
   const [isLoading, setIsLoading] = useState(false);
-  /*
-     To use the cma, inject it as follows.
-     If it is not needed, you can remove the next line.
-  */
-  // const cma = useCMA();
+  const [lastBuildInitiated, setLastBuildInitiated] = useState(
+    getItemLocalStorage(build_status_key) || null
+  );
 
-  const buildAmplifyApp = () => {
+  useEffect(() => {
+    if (lastBuildInitiated) {
+      setLastBuildInitiated(lastBuildInitiated);
+    }
+  }, [lastBuildInitiated]);
+
+  const handleBuildAppActionCall = async () => {
+    const buildInitiated = new Date().toLocaleTimeString();
     setIsLoading(true);
-    const webhookURL = config.lambdaURL;
-    const initBuild = async () => {
-      try {
-        const response = await Axios({
-          method: 'post',
-          url: webhookURL,
-          data: {
-            amplifyUrl: sdk.parameters.installation.amplifyWebhookUrl,
+    try {
+      const res = await cma.appActionCall.createWithResponse(
+        {
+          appActionId: 'amplifyBuildAction',
+          environmentId: sdk.ids.environment,
+          spaceId: sdk.ids.space,
+          appDefinitionId: sdk.ids.app!,
+        },
+        {
+          parameters: {
+            amplifyWebhookUrl: sdk.parameters.installation.amplifyWebhookUrl,
           },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.status === 200) sdk.notifier.success('The AWS website build was triggered.');
-        else throw new Error(errorText);
-      } catch (error) {
-        if (error instanceof AxiosError) {
-          sdk.notifier.error(errorText);
-        } else sdk.notifier.error((error as Error).message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    initBuild();
+        }
+      );
+      setLastBuildInitiated(buildInitiated);
+      setItemLocalStorage(build_status_key, buildInitiated);
+      setIsLoading(false);
+      const { message } = JSON.parse(res.response.body);
+      sdk.notifier.success(message);
+    } catch (err) {
+      console.log({ err });
+    }
   };
 
   return (
@@ -50,9 +52,10 @@ const Sidebar = () => {
         isFullWidth={true}
         isLoading={isLoading}
         isDisabled={isLoading}
-        onClick={buildAmplifyApp}>
-        {isLoading ? 'Building' : 'Build website'}
+        onClick={handleBuildAppActionCall}>
+        {isLoading ? 'Initiating build...' : 'Build now'}
       </Button>
+      <span>Last build started: {lastBuildInitiated}</span>
     </Paragraph>
   );
 };

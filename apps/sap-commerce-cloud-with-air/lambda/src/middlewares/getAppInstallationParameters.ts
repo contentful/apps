@@ -1,6 +1,9 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { getManagementToken } from '@contentful/node-apps-toolkit';
 import axios from 'axios';
+import path from 'path';
+import fs from 'fs';
+import { config } from '../config';
 import { UnableToGetAppInstallationParameters } from '../errors/unableToGetAppInstallationParameters';
 import { AppInstallationParameters } from '../types/types';
 import { UnableToGetAppAccessToken } from '../errors/unableToGetAppAccessToken';
@@ -24,9 +27,14 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
       throw new Error('Missing required headers!');
     }
 
-    if (!req.appConfig) throw new Error('App config not found');
+    let privateKey = config.privateKey;
+    if (privateKey.endsWith('.pem')) {
+      privateKey = fs.readFileSync(path.join(__dirname, '../../', privateKey), {
+        encoding: 'utf8',
+      });
+    }
 
-    const appAccessToken = await getManagementToken(req.appConfig.privateKey, {
+    const appAccessToken = await getManagementToken(privateKey, {
       appInstallationId: appId,
       spaceId,
       environmentId,

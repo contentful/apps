@@ -18,8 +18,8 @@ export const config = {
   sentryDSN: getEnvironmentVariable('SENTRY_DSN'),
   environment: getEnvironmentVariable('NODE_ENV'),
   release: getEnvironmentVariable('CIRCLE_SHA1', 'no-release-hash-set'),
-  // domainName: getEnvironmentVariable('DOMAIN_NAME'),
-  appConfigs: JSON.parse(getEnvironmentVariable('APP_CONFIGS')),
+  privateKey: getEnvironmentVariable('PRIVATE_KEY'),
+  signingSecret: getEnvironmentVariable('SIGNING_SECRET'),
 };
 
 export const applicationInterfaceKey = 'xj823lbq';

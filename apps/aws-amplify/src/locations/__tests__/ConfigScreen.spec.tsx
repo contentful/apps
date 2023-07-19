@@ -1,7 +1,7 @@
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ConfigScreen from './ConfigScreen';
-import { mockSdk } from '../../test/mocks';
+import ConfigScreen from '../ConfigScreen';
+import { mockSdk } from '../../../test/mocks';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,

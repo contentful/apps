@@ -14,12 +14,11 @@ export const verifySignedRequestMiddleware: RequestHandler = async (
   try {
     const canonicalReq = makeCanonicalReq(req);
 
+    const signingSecret = config.signingSecret;
     let isValidReq = false;
 
-    if (!req.appConfig) throw new Error('App config not found');
-
     try {
-      if (NodeAppsToolkit.verifyRequest(req.appConfig.signingSecret, canonicalReq, 60)) {
+      if (NodeAppsToolkit.verifyRequest(signingSecret, canonicalReq, 60)) {
         isValidReq = true;
       }
     } catch (e) {
@@ -53,7 +52,6 @@ const makeCanonicalReq = (req: Request) => {
   const pathPrefix = config.stage !== 'prd' ? `/${config.stage}` : '';
   const fullPath = req.originalUrl.split('?')[0];
   const signedPath = `${pathPrefix}${fullPath}`; // note: req.originalUrl starts with a `/` and includes the full path & query string
-  const encodedSignedPath = signedPath.replace(/:/g, encodeURIComponent(':')); // note: expressjs decodes colons in the path so we have to re-encode the params
 
   // express.json() makes body always an object ({}), even if there is no body
   // so we need to check if the body is empty and set it to undefined
@@ -62,7 +60,7 @@ const makeCanonicalReq = (req: Request) => {
   return <CanonicalRequest>{
     method: req.method,
     headers: headers,
-    path: encodedSignedPath,
+    path: signedPath,
     body: bodyOrUndefined,
   };
 };

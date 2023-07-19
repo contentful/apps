@@ -110,7 +110,7 @@ export class SlackClient {
 
   private static assertSuccessResponse(response: WebAPICallResult) {
     if (!response.ok) {
-      throw new SlackError(response.error ?? 'Unknown error');
+      throw new SlackError({ errMessage: response.error ?? 'Unknown error' });
     }
 
     return response;

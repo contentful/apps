@@ -14,3 +14,19 @@ export const getContentTypeSpecificMsg = (contentTypeName: string) => ({
   noSlugContentMsg: `This ${contentTypeName} entry does not have a valid slug field. Please add a field of type short text to this entry and configure it on the app configuration page.`,
   notPublishedMsg: `This ${contentTypeName} entry has not yet been published. Please publish the entry to view this Google Analytics 4 sidebar app.`,
 });
+
+export const getMissingParamsMsg = (
+  serviceAccountKeyMissing: boolean,
+  propertyIdMissing: boolean
+) => {
+  const serviceAccountMsg = 'Service Account Key';
+  const propertyMsg = 'Google Analytics 4 property';
+  let missingParams = '';
+
+  if (serviceAccountKeyMissing && propertyIdMissing)
+    missingParams = `${serviceAccountMsg} and ${propertyMsg}`;
+  else if (serviceAccountKeyMissing) missingParams = `${serviceAccountMsg}`;
+  else if (propertyIdMissing) missingParams = `${propertyMsg}`;
+
+  return `No ${missingParams} provided or found in app installation parameters. Please update your app configuration page. `;
+};

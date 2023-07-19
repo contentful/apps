@@ -75,8 +75,8 @@ const ConfigScreen = () => {
         <Box>
           <Heading>Set Up AWS Amplify</Heading>
           <Paragraph>
-            Amplify is a set of purpose-built tools and features that enables frontend web and
-            mobile developers to quickly and easily build full-stack applications on AWS.
+            AWS Amplify seamlessly integrates with your application, enabling you to effortlessly
+            build and deploy a hosted web app with powerful features and scalability.
           </Paragraph>
         </Box>
         <Stack spacing="spacingL" flexDirection="column">

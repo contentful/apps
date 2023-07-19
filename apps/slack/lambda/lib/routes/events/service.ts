@@ -41,7 +41,7 @@ export class EventsService {
 
   convertToEventKey(topic?: string): SlackAppEventKey | undefined {
     if (!topic) {
-      throw new NotFoundException();
+      throw new NotFoundException({ errMessage: 'Event topic not found' });
     }
     const eventArr = topic.split('.');
     if (eventArr.length > 0) {
@@ -62,7 +62,11 @@ export class EventsService {
 
     if (!installationParameters.workspaces || installationParameters.workspaces.length < 1) {
       // no workspace connected
-      throw new NotFoundException();
+      throw new NotFoundException({
+        errMessage: 'Workspaces not found in installation parameters',
+        environmentId,
+        spaceId,
+      });
     }
     return installationParameters;
   }

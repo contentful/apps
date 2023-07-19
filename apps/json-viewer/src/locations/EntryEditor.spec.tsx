@@ -1,5 +1,5 @@
 import React from 'react';
-import Sidebar from './Sidebar';
+import EntryEditor from './EntryEditor';
 import { render } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../test/mocks';
 
@@ -8,10 +8,11 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
-describe('Sidebar component', () => {
+// TODO: Add relevant tests for your EntryEditor component.
+describe.skip('Entry component', () => {
   it('Component text exists', () => {
-    const { getByText } = render(<Sidebar />);
+    const { getByText } = render(<EntryEditor />);
 
-    expect(getByText('Hello Sidebar Component (AppId: test-app)')).toBeInTheDocument();
+    expect(getByText('Hello Entry Editor Component (AppId: test-app)')).toBeInTheDocument();
   });
 });

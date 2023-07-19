@@ -1,6 +1,6 @@
 export const corsConfig = {
   origin: '*',
-  methods: 'GET,HEAD,PUT,POST,PATCH,DELETE,OPTIONS',
+  methods: 'GET,PUT,POST,PATCH,DELETE,OPTIONS',
   allowedHeaders: [
     'Authorization',
     'Content-Type',

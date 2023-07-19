@@ -1,7 +1,7 @@
-import { Exception } from './exception';
+import { Exception, ExceptionDetails } from './exception';
 
-export class SlackError extends Exception<string> {
-  constructor(slackError: string) {
-    super(409, 'Conflict', slackError);
+export class SlackError extends Exception<ExceptionDetails> {
+  constructor(details?: ExceptionDetails) {
+    super(409, 'Conflict', details);
   }
 }

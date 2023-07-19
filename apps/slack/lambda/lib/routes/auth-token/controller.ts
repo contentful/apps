@@ -125,7 +125,11 @@ export class AuthTokenController {
     const installationUuid = request.header('x-contentful-uuid');
 
     if (!spaceId || !environmentId) {
-      throw new NotFoundException();
+      throw new NotFoundException({
+        errMessage: 'EnvironmentId or spaceId not found in headers',
+        environmentId,
+        spaceId,
+      });
     }
     const { refreshToken } = assertValid<PostAuthTokenBody>(postAuthTokenBodySchema, request.body);
 

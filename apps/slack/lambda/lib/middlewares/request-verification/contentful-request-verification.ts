@@ -25,7 +25,7 @@ export function createContentfulRequestVerificationMiddleware(
     );
 
     if (!isValid) {
-      throw new NotFoundException();
+      throw new NotFoundException({ errMessage: 'Request verification is not valid' });
     }
 
     next();

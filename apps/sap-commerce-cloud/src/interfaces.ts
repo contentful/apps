@@ -290,7 +290,7 @@ export interface ConfigurationParameters {
   baseSites?: string;
 }
 
-export type PreviewsFn = (skus: string[], sapApplicationInterfaceKey: string) => Promise<Product[]>;
+export type PreviewsFn = (skus: string[]) => Promise<Product[]>;
 
 export type PickerMode = 'product' | 'category';
 

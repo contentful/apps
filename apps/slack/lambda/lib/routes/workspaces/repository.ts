@@ -10,7 +10,7 @@ export class WorkspacesRepository {
     const info = await this.slackClient.getWorkspaceInformation(token, workspaceId);
 
     if (!info?.team) {
-      throw new NotFoundException(notFoundMessage(workspaceId));
+      throw new NotFoundException({ errMessage: notFoundMessage(workspaceId) });
     }
 
     return WorkspacesRepository.toAPI(info.team);

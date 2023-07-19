@@ -13,7 +13,6 @@ import { SAPParameters } from '../interfaces';
 
 interface Props {
   sdk: FieldExtensionSDK;
-  applicationInterfaceKey: string;
 }
 
 interface State {
@@ -144,13 +143,8 @@ export default class Field extends React.Component<Props, State> {
                 categories={data}
                 onChange={this.updateStateValue}
                 fetchCategoryPreviews={(categories) =>
-                  fetchCategoryPreviews(
-                    categories,
-                    config.installation,
-                    this.props.applicationInterfaceKey
-                  )
+                  fetchCategoryPreviews(categories, config.installation)
                 }
-                applicationInterfaceKey={this.props.applicationInterfaceKey}
               />
             ) : (
               <ProductPreviews
@@ -159,13 +153,8 @@ export default class Field extends React.Component<Props, State> {
                 skus={data}
                 onChange={this.updateStateValue}
                 fetchProductPreviews={(skus) =>
-                  fetchProductPreviews(
-                    skus,
-                    this.props.sdk.parameters as SAPParameters,
-                    this.props.applicationInterfaceKey
-                  )
+                  fetchProductPreviews(skus, this.props.sdk.parameters as SAPParameters)
                 }
-                applicationInterfaceKey={this.props.applicationInterfaceKey}
               />
             )}
           </div>
