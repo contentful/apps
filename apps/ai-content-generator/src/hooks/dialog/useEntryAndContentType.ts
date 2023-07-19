@@ -47,7 +47,6 @@ const useEntryAndContentType = (entryId: string) => {
         },
         entry
       );
-      console.log('hit');
 
       return true;
     } catch (error) {

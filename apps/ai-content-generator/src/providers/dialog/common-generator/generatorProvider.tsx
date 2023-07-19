@@ -44,7 +44,6 @@ const GeneratorProvider = (props: GeneratorProviderProps) => {
   });
 
   const updateProviderData = (newProviderData: Partial<GeneratorContextProps>) => {
-    console.log('newProviderData', newProviderData);
     setProviderData({ ...providerData, ...newProviderData });
   };
 
