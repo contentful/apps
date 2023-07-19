@@ -7,19 +7,21 @@ interface AppActionCallParameters {
 
 export const handler = async (payload: AppActionCallParameters, context: AppActionCallContext) => {
   const { sapApiEndpoint, apiKey } = payload;
+  const headers = {
+    'Content-Type': 'application/json',
+    'application-interface-key': apiKey,
+  };
   try {
     const res = await fetch(sapApiEndpoint, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'application-interface-key': apiKey,
-      },
+      headers,
     });
     if (res.ok) {
       const body = await res.json();
 
       return {
         success: true,
+        headers,
         body,
       };
     }

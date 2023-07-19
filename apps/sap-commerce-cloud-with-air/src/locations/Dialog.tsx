@@ -53,6 +53,7 @@ export default function Dialog() {
   const [errors] = useState([]);
   const sdk = useSDK<DialogAppSDK>();
   const { invocation, installation } = sdk.parameters;
+
   const { products, loading } = useGetProductList(query, page);
 
   const isFieldTypeArray = (get(invocation, 'fieldType', '') as string) === 'Array';
@@ -95,7 +96,7 @@ export default function Dialog() {
   };
 
   const nextPageButtonEvent = () => {
-    setPage(page + 1);
+    setPage(page - 1);
   };
 
   return (
