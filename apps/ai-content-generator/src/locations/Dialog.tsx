@@ -1,7 +1,7 @@
 import useDialogParameters from '@hooks/dialog/useDialogParameters';
 import featureConfig, { AIFeature } from '@configs/features/featureConfig';
-import { Spinner } from '@contentful/f36-components';
 import CommonGenerator from '@components/dialog/common-generator/CommonGenerator';
+import GeneratorProvider from '@providers/dialog/common-generator/generatorProvider';
 
 type DialogInvocationParameters = {
   feature: AIFeature;
@@ -12,16 +12,24 @@ const Dialog = () => {
   const { feature, entryId, isLoading } = useDialogParameters();
 
   if (isLoading) {
-    return <Spinner size="large" />;
+    return null;
   }
 
-  switch (feature) {
-    case AIFeature.TRANSLATE:
-      return <CommonGenerator feature={featureConfig[feature]} entryId={entryId} isTranslate />;
+  const getGenerator = (feature: AIFeature) => {
+    switch (feature) {
+      case AIFeature.TRANSLATE:
+        return <CommonGenerator isTranslate />;
 
-    default:
-      return <CommonGenerator feature={featureConfig[feature]} entryId={entryId} />;
-  }
+      default:
+        return <CommonGenerator />;
+    }
+  };
+
+  return (
+    <GeneratorProvider entryId={entryId} prompt={featureConfig[feature].prompt}>
+      {getGenerator(feature)}
+    </GeneratorProvider>
+  );
 };
 
 export default Dialog;

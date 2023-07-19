@@ -1,5 +1,5 @@
 import { FormControl, Select } from '@contentful/f36-components';
-import { Field } from '../../../../../hooks/dialog/useSupportedFields';
+import { Field } from '@hooks/dialog/useSupportedFields';
 import { ChangeEvent } from 'react';
 
 interface Props {
@@ -22,6 +22,9 @@ function EntryFieldList(props: Props) {
     <FormControl>
       <FormControl.Label>{title}</FormControl.Label>
       <Select value={selectedField} onChange={onChange}>
+        <Select.Option value="" isDisabled>
+          Select field...
+        </Select.Option>
         {fieldList}
       </Select>
     </FormControl>

@@ -1,12 +1,13 @@
-import { useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 import { Flex } from '@contentful/f36-components';
+import { GeneratorContext } from '@providers/dialog/common-generator/generatorProvider';
 import FieldSelector from '@components/dialog/common-generator/field-selector/FieldSelector';
 import Output from '@components/dialog/common-generator/output/Output';
 import { TextFields } from '@hooks/dialog/useSupportedFields';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import generatorReducer, { GeneratorParameters } from './generatorReducer';
 import { FeatureComponentProps } from '@configs/features/featureTypes';
+import generatorReducer, { GeneratorParameters } from './generatorReducer';
 import NewOrExistingText from './new-or-existing-text/NewOrExistingText';
 
 const initialParameters: GeneratorParameters = {
@@ -19,7 +20,9 @@ const initialParameters: GeneratorParameters = {
 };
 
 const CommonGenerator = (props: FeatureComponentProps) => {
-  const { entryId, feature, isTranslate } = props;
+  const { isTranslate } = props;
+  const { setProviderData } = useContext(GeneratorContext);
+
   const sdk = useSDK<DialogAppSDK>();
 
   const [parameters, dispatch] = useReducer(generatorReducer, {
@@ -27,22 +30,21 @@ const CommonGenerator = (props: FeatureComponentProps) => {
     locale: sdk.locales.default,
   });
 
+  const updateProviderData = () => {
+    const { targetLocale, locale } = parameters;
+    setProviderData({
+      targetLocale: targetLocale || locale,
+      dispatch,
+    });
+  };
+
+  useEffect(updateProviderData, [parameters.targetLocale, parameters.locale, dispatch]);
+
   return (
     <Flex>
       <NewOrExistingText isNewText={parameters.isNewText} dispatch={dispatch} />
-      <FieldSelector
-        parameters={parameters}
-        entryId={entryId}
-        isTranslate={isTranslate}
-        fieldTypes={TextFields}
-        dispatch={dispatch}
-      />
-      <Output
-        inputText={parameters.originalText}
-        locale={parameters.targetLocale || parameters.locale}
-        prompt={feature.prompt}
-        dispatch={dispatch}
-      />
+      <FieldSelector parameters={parameters} isTranslate={isTranslate} fieldTypes={TextFields} />
+      <Output outputField={parameters.outputField} inputText={parameters.originalText} />
     </Flex>
   );
 };
