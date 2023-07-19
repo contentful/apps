@@ -132,7 +132,7 @@ export default class AppConfig extends React.Component<Props, State> {
         selectedFields: editorInterfacesToSelectedFields(editorInterfaces, ids.app),
         parameters: toInputParameters(this.props.parameterDefinitions, parameters),
       },
-      () => app.setReady(),
+      () => app.setReady()
     );
   };
 

@@ -14,7 +14,7 @@ export default class FieldSelector extends React.Component<Props> {
   onSelectedFieldChange = (
     ctId: string,
     fieldId: string,
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const updated = { ...this.props.selectedFields };
 

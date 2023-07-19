@@ -2,7 +2,7 @@ type EnvironmentVariable = string | null | number | undefined;
 
 function getEnvironmentVariable(
   environmentVariableName: string,
-  fallback?: EnvironmentVariable,
+  fallback?: EnvironmentVariable
 ): string {
   const environmentVariableValue = process.env[environmentVariableName];
   if (!environmentVariableValue) {

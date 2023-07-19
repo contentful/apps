@@ -8,10 +8,7 @@ import { getInstallationParametersFromCma } from '../../helpers/getInstallationP
 const ONE_MINUTE = 60 * 1_000;
 
 export class AuthTokenRepository {
-  constructor(
-    private singleTableClient: SingleTableClient,
-    private slackClient: SlackClient,
-  ) {}
+  constructor(private singleTableClient: SingleTableClient, private slackClient: SlackClient) {}
 
   async validate(
     code: string,
@@ -171,7 +168,7 @@ export class AuthTokenRepository {
 
     if (values.some((i) => !i)) {
       throw new UnprocessableEntityException({
-        errMessage: `Cannot create UUID for space ${spaceId}, environment ${environmentId}, workspace ${workspaceId}`
+        errMessage: `Cannot create UUID for space ${spaceId}, environment ${environmentId}, workspace ${workspaceId}`,
       });
     }
 

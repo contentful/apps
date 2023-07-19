@@ -27,7 +27,7 @@ export class ProductList extends React.Component<Props> {
       <>
         {this.props.products.map((product, index) => {
           const checkboxValue = this.props.selectedProducts.includes(
-            this.props.baseSite + ':' + product.sku,
+            this.props.baseSite + ':' + product.sku
           );
           return (
             <TableRow key={product.sku}>

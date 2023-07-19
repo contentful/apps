@@ -182,5 +182,5 @@ export const SortableListItem = SortableElement<Props>(
         )}
       </Card>
     );
-  },
+  }
 );

@@ -86,7 +86,7 @@ export default class DialogClass extends React.Component<DialogProps, State> {
       this.updateTotalPages,
       this.props.applicationInterfaceKey,
       this.props.sdk,
-      this.props.cma,
+      this.props.cma
     );
     this.setState({
       baseSite: this.state.baseSite,
@@ -113,7 +113,7 @@ export default class DialogClass extends React.Component<DialogProps, State> {
       },
       () => {
         this.load();
-      },
+      }
     );
   };
 

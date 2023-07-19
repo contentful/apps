@@ -16,6 +16,6 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
       <GlobalStyles />
       <App />
     </SDKProvider>,
-    root,
+    root
   );
 }

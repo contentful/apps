@@ -28,5 +28,5 @@ export const SortableList = SortableContainer<Props>(
         })}
       </div>
     );
-  },
+  }
 );

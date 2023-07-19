@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 export const verifySignedRequestMiddleware: RequestHandler = async (
   req: Request,
   _res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const canonicalReq = makeCanonicalReq(req);
@@ -29,7 +29,7 @@ export const verifySignedRequestMiddleware: RequestHandler = async (
     if (!isValidReq) {
       throw new InvalidSignature(
         'Request does not have a valid request signature. ' +
-          'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/',
+          'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/'
       );
     }
   } catch (e) {

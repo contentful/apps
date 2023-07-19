@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { init, locations } from '@contentful/app-sdk';
 import { Heading, Note, Form, TextInput } from '@contentful/f36-components';
@@ -45,9 +45,10 @@ class Config extends Component {
 }
 
 init((sdk) => {
-  const root = document.getElementById('root');
+  const container = document.getElementById('root');
+  const root = createRoot(container);
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-    render(<Config sdk={sdk} />, root);
+    root.render(<Config sdk={sdk} />);
   } else {
     throw new Error('rendered outside of config location');
   }

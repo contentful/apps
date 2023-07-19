@@ -11,7 +11,7 @@ function buildSignedHeaders(
   method: NodeAppsToolkit.CanonicalRequest['method'],
   path: string,
   headers: NodeAppsToolkit.CanonicalRequest['headers'],
-  secret: string,
+  secret: string
 ) {
   const timestamp = Date.now();
   const rawRequest = { method, path, headers };
@@ -45,7 +45,7 @@ describe('verifySignedRequestMiddleware', () => {
       method,
       clientRequestPath,
       clientRequestHeaders,
-      signingSecret,
+      signingSecret
     );
     request = createRequest({ method, path, headers });
   });
@@ -68,7 +68,7 @@ describe('verifySignedRequestMiddleware', () => {
         method,
         clientRequestPath,
         clientRequestHeaders,
-        signingSecret,
+        signingSecret
       );
       const headersWithInvalidSignature = {
         ...headers,
@@ -85,7 +85,7 @@ describe('verifySignedRequestMiddleware', () => {
           message:
             'Request does not have a valid request signature. ' +
             'See: https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/',
-        }),
+        })
       );
     });
   });
@@ -97,7 +97,7 @@ describe('verifySignedRequestMiddleware', () => {
         method,
         clientRequestPath,
         clientRequestHeaders,
-        signingSecret,
+        signingSecret
       );
       const headersWithBadSignature = { ...headers, 'x-contentful-signature': malformedSignature };
       request = createRequest({ method, path, headers: headersWithBadSignature });
@@ -109,7 +109,7 @@ describe('verifySignedRequestMiddleware', () => {
         next,
         sinon.match({
           message: 'Unable to verify request',
-        }),
+        })
       );
     });
   });

@@ -85,7 +85,7 @@ export default class FieldClass extends React.Component<Props, State> {
     return get(
       sdk,
       ['parameters', 'installation', 'fieldsConfig', contentTypeId, fieldId],
-      'product',
+      'product'
     );
   };
 
@@ -148,7 +148,7 @@ export default class FieldClass extends React.Component<Props, State> {
                   fetchCategoryPreviews(
                     categories,
                     config.installation,
-                    this.props.applicationInterfaceKey,
+                    this.props.applicationInterfaceKey
                   )
                 }
                 applicationInterfaceKey={this.props.applicationInterfaceKey}
@@ -165,7 +165,7 @@ export default class FieldClass extends React.Component<Props, State> {
                     this.props.sdk.parameters as any,
                     this.props.applicationInterfaceKey,
                     this.props.sdk,
-                    this.props.cma,
+                    this.props.cma
                   )
                 }
                 applicationInterfaceKey={this.props.applicationInterfaceKey}

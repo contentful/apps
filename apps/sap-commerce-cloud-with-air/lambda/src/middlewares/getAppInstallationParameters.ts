@@ -11,7 +11,7 @@ import { UnableToGetAppAccessToken } from '../errors/unableToGetAppAccessToken';
 export const getAppInstallationParametersMiddleware: RequestHandler = async (
   req: Request,
   _res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const installationParameters: AppInstallationParameters = {};
@@ -54,7 +54,7 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
             Authorization: `Bearer ${appAccessToken}`,
             'Content-Type': 'application/json',
           },
-        },
+        }
       )
       .then((response) => {
         const appInstallation = response.data;
@@ -63,7 +63,7 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
       .catch((e) => {
         console.error(e.message);
         throw new UnableToGetAppInstallationParameters(
-          `Unable to get app installation parameters: cause: ${e}`,
+          `Unable to get app installation parameters: cause: ${e}`
         );
       });
 
