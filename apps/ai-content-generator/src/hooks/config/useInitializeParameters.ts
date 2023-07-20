@@ -20,7 +20,7 @@ const useInitializeParameters = (dispatch: Dispatch<ParameterReducer>) => {
     if (!parameters) return;
 
     dispatch({
-      type: ParameterAction.CONTENTFUL_PARAMETERS,
+      type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS,
       value: parameters,
     });
 

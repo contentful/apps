@@ -7,7 +7,7 @@ import { AIFeature } from './featureConfig';
 export type Prompt = (input: string, targetLocale: string) => string;
 
 export type FeatureComponentProps = {
-  entryId: string;
+  isTranslate?: boolean;
 };
 
 /**
