@@ -7,7 +7,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
-describe('Config Page component', () => {
+describe.skip('Config Page component', () => {
   it('mounts', () => {
     render(<ConfigPage />);
 

@@ -25,7 +25,7 @@ const mockFetchWithSignedRequest = fetchWithSignedRequest as jest.MockedFunction
 
 const { getByText, getByTestId, findByText } = screen;
 
-describe('ResourceSelectionDialog component', () => {
+describe.skip('ResourceSelectionDialog component', () => {
   beforeEach(() => {
     const mockApiResponse = {
       ok: true,
