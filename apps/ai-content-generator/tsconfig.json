@@ -18,6 +18,7 @@
       "@configs/*": ["./src/configs/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@locations/*": ["./src/locations/*"],
+      "@providers/*": ["./src/providers/*"],
       "@utils/*": ["./src/utils/*"],
     },
     "noEmit": true,

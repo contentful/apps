@@ -19,7 +19,7 @@ const Model = (props: Props) => {
   ));
 
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    dispatch({ type: ParameterAction.MODEL, value: e.target.value });
+    dispatch({ type: ParameterAction.UPDATE_MODEL, value: e.target.value });
   };
 
   return (

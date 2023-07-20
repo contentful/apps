@@ -15,7 +15,6 @@ import { ContentFields, EntryProps } from 'contentful-management';
  */
 const formatField = (field: ContentFields, entry: EntryProps, targetLocale: string): Field => {
   const formattedField = {
-    id: field.id,
     name: field.name,
     data: entry.fields[field.id] ? entry.fields[field.id][targetLocale] : '',
   };
@@ -28,8 +27,8 @@ const formatField = (field: ContentFields, entry: EntryProps, targetLocale: stri
 };
 
 /**
- * A reducer function that checks if a field is supported, whether it has content,
- * and assigns the field to the correct column.
+ * A reducer function that checks if a field is supported and assigns the field
+ * to the correct column.
  *
  * TODO: Handle the case where the field is empty
  * TODO: Support storing fields for both Source and Output
@@ -40,18 +39,19 @@ const formatField = (field: ContentFields, entry: EntryProps, targetLocale: stri
  */
 const isSupported = (entry: EntryProps, supportedFields: SupportedFieldTypes[], locale: string) => {
   return (fieldAcc: SupportedFieldsOutput, field: ContentFields) => {
-    const isSupported = supportedFields.includes(field.type as SupportedFieldTypes);
-    const hasContent = entry.fields[field.id]?.[locale];
+    const existsInEntry = entry.fields[field.id];
+    if (!existsInEntry) {
+      return fieldAcc;
+    }
+
     const formattedField = formatField(field, entry, locale);
 
-    if (isSupported && hasContent) {
-      fieldAcc.supportedFieldsWithContent.push(formattedField);
-    }
-
+    const isSupported = supportedFields.includes(field.type as SupportedFieldTypes);
     if (isSupported) {
-      fieldAcc.allSupportedFields.push(formattedField);
+      fieldAcc.supportedFields.push(formattedField);
     }
 
+    fieldAcc.fields.push(formattedField);
     return fieldAcc;
   };
 };

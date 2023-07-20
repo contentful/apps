@@ -16,7 +16,7 @@ const APIKey = (props: Props) => {
   const censorApiKey = (key: string) => key.replace(/.(?=.{4,}$)/g, '*');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: ParameterAction.APIKEY, value: e.target.value });
+    dispatch({ type: ParameterAction.UPDATE_APIKEY, value: e.target.value });
   };
   const handleBlur = () => {
     setEditing(false);

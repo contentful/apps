@@ -11,7 +11,7 @@ const TextFieldWithButtons = (props: Props) => {
   const { inputText, onFieldChange, children } = props;
   return (
     <Flex flexDirection="column" fullWidth>
-      <Textarea resize="none" rows={14} value={inputText} onChange={onFieldChange}></Textarea>
+      <Textarea rows={14} value={inputText} onChange={onFieldChange}></Textarea>
 
       <Flex alignSelf="flex-end" marginTop="spacingS">
         {children}

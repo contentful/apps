@@ -3,7 +3,6 @@ import { isSupported } from '@utils/dialog/supported-fields/supportedFieldsHelpe
 import useEntryAndContentType from './useEntryAndContentType';
 
 interface Field {
-  id: string;
   name: string;
   data: string;
 }
@@ -26,10 +25,7 @@ const TranslatableFields = [
   SupportedFieldTypes.TEXT,
 ];
 
-export type SupportedFieldsOutput = {
-  allSupportedFields: Field[];
-  supportedFieldsWithContent: Field[];
-};
+export type SupportedFieldsOutput = { supportedFields: Field[]; fields: Field[] };
 
 /**
  * This hook is used to get the fields of an entry that are supported by the feature.
@@ -52,15 +48,15 @@ const useSupportedFields = (
       const validatedFields: SupportedFieldsOutput = contentType.fields.reduce(
         isSupported(entry, supportedFields, targetLocale),
         {
-          supportedFieldsWithContent: [],
-          allSupportedFields: [],
+          supportedFields: [],
+          fields: [],
         }
       );
 
       return validatedFields;
     }
 
-    return { supportedFieldsWithContent: [], allSupportedFields: [] };
+    return { supportedFields: [], fields: [] };
   }, [entry, contentType, targetLocale, supportedFields]);
 
   return { ...fields };
