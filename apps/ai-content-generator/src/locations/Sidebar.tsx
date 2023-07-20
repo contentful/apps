@@ -1,4 +1,4 @@
-import SidebarButtons from '@components/sidebar/SidebarButtons';
+import SidebarButtons from '@components/app/sidebar/SidebarButtons';
 
 const Sidebar = () => {
   return <SidebarButtons />;
