@@ -11,6 +11,6 @@ export const styles = {
     paddingLeft: tokens.spacingM,
     paddingRight: tokens.spacingM,
     paddingTop: tokens.spacingXs,
-    paddingBottom: tokens.spacing2Xs
+    paddingBottom: tokens.spacing2Xs,
   }),
 };

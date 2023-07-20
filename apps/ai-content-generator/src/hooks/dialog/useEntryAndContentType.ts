@@ -39,7 +39,12 @@ const useEntryAndContentType = (entryId: string) => {
       const fieldType = contentType?.fields.find((field) => field.id === fieldKey)?.type;
       const isRichText = fieldType === 'RichText';
 
-      entry.fields[fieldKey][fieldLocale] = isRichText ? richTextModel(updatedText) : updatedText;
+      entry.fields[fieldKey][fieldLocale] = isRichText
+        ? richTextModel(updatedText)
+        : updatedText
+            .replace(/^\s+|\s+$/g, '')
+            .replace(/^['"]+|['"]+$/g, '')
+            .trim();
 
       await cma.entry.update(
         {

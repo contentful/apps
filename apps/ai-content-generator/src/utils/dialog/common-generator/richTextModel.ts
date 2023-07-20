@@ -1,4 +1,10 @@
-export default function RichTextModel(text: string) {
+/**
+ * This function is used to generate a rich text model from a string
+ * TODO: We should see if there are pre-existing functions that do this
+ * @param text
+ * @returns
+ */
+const richTextModel = (text: string) => {
   const textLines = text.split('\n');
 
   return {
@@ -17,4 +23,6 @@ export default function RichTextModel(text: string) {
       ],
     })),
   };
-}
+};
+
+export default richTextModel;

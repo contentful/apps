@@ -1,11 +1,11 @@
 export enum GeneratorAction {
-  LOCALE = 'updateLocale',
-  TARGET_LOCALE = 'updateTargetLocale',
+  UPDATE_LOCALE = 'updateLocale',
+  UPDATE_TARGET_LOCALE = 'updateTargetLocale',
   IS_NEW_TEXT = 'isNewText',
   IS_NOT_NEW_TEXT = 'isNotNewText',
-  SOURCE_FIELD = 'sourceField',
-  OUTPUT_FIELD = 'outputField',
-  ORIGINAL_TEXT = 'originalText',
+  UPDATE_SOURCE_FIELD = 'changeSourceField',
+  UPDATE_OUTPUT_FIELD = 'changeOutputField',
+  UPDATE_ORIGINAL_TEXT = 'changeOriginalText',
 }
 
 export type GeneratorParameters = {
@@ -20,12 +20,14 @@ export type GeneratorParameters = {
 type GeneratorStringActions = {
   type: Exclude<
     GeneratorAction,
-    GeneratorAction.SOURCE_FIELD | GeneratorAction.IS_NEW_TEXT | GeneratorAction.IS_NOT_NEW_TEXT
+    | GeneratorAction.UPDATE_SOURCE_FIELD
+    | GeneratorAction.IS_NEW_TEXT
+    | GeneratorAction.IS_NOT_NEW_TEXT
   >;
   value: string;
 };
 type GeneratorSourceTextAction = {
-  type: GeneratorAction.SOURCE_FIELD;
+  type: GeneratorAction.UPDATE_SOURCE_FIELD;
   field: string;
   value: string;
 };
@@ -39,29 +41,29 @@ export type GeneratorReducer =
   | GeneratorImpulseActions;
 
 const {
-  LOCALE,
-  TARGET_LOCALE,
+  UPDATE_LOCALE,
+  UPDATE_TARGET_LOCALE,
   IS_NEW_TEXT,
   IS_NOT_NEW_TEXT,
-  SOURCE_FIELD,
-  OUTPUT_FIELD,
-  ORIGINAL_TEXT,
+  UPDATE_SOURCE_FIELD,
+  UPDATE_OUTPUT_FIELD,
+  UPDATE_ORIGINAL_TEXT,
 } = GeneratorAction;
 const generatorReducer = (state: GeneratorParameters, action: GeneratorReducer) => {
   switch (action.type) {
-    case LOCALE:
+    case UPDATE_LOCALE:
       return { ...state, locale: action.value };
-    case TARGET_LOCALE:
+    case UPDATE_TARGET_LOCALE:
       return { ...state, targetLocale: action.value };
     case IS_NEW_TEXT:
       return { ...state, isNewText: true, originalText: '', generatedText: '' };
     case IS_NOT_NEW_TEXT:
       return { ...state, isNewText: false, originalText: '', generatedText: '' };
-    case SOURCE_FIELD:
+    case UPDATE_SOURCE_FIELD:
       return { ...state, sourceField: action.field, originalText: action.value };
-    case OUTPUT_FIELD:
+    case UPDATE_OUTPUT_FIELD:
       return { ...state, outputField: action.value };
-    case ORIGINAL_TEXT:
+    case UPDATE_ORIGINAL_TEXT:
       return { ...state, originalText: action.value };
     default:
       return state;

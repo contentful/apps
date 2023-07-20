@@ -20,13 +20,11 @@ const GeneratedTextPanel = (props: Props) => {
 
   return (
     <Tabs.Panel id={OutputTab.GENERATED_TEXT}>
-      {isGenerating && (
+      {isGenerating ? (
         <TextFieldWithButtons inputText={output}>
           <Button onClick={sendStopSignal}>Stop Generating</Button>
         </TextFieldWithButtons>
-      )}
-
-      {!isGenerating && (
+      ) : (
         <TextFieldWithButtons inputText={output} onFieldChange={handleGeneratedTextChange}>
           <>
             <CopyButton value={output} />

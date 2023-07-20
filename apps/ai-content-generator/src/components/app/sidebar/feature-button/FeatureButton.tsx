@@ -3,7 +3,7 @@ import { OpenCustomWidgetOptions, SidebarAppSDK } from '@contentful/app-sdk';
 import { Button, Tooltip } from '@contentful/f36-components';
 import { AIFeature } from '@configs/features/featureConfig';
 import { DialogInvocationParameters } from '@locations/Dialog';
-import { styles } from './FeatureButton.styles'
+import { styles } from './FeatureButton.styles';
 
 interface Props {
   feature: AIFeature;

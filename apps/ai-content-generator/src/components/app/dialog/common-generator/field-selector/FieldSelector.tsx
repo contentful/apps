@@ -4,7 +4,7 @@ import { GeneratorAction, GeneratorParameters } from '../generatorReducer';
 import { ChangeEvent, useContext, useEffect } from 'react';
 import AvailableLocales from './available-locales/AvailableLocales';
 import EntryFieldList from './field-list/EntryFieldList';
-import { GeneratorContext } from '@providers/dialog/common-generator/generatorProvider';
+import { GeneratorContext } from '@providers/generatorProvider';
 import {
   getFieldData,
   updateOutputField,
@@ -25,14 +25,14 @@ const FieldSelector = (props: Props) => {
   const { supportedFields, fields } = useSupportedFields(entryId, fieldTypes, parameters.locale);
 
   const handleSelectChange = (action: GeneratorAction) => {
-    if (action === GeneratorAction.SOURCE_FIELD) {
+    if (action === GeneratorAction.UPDATE_SOURCE_FIELD) {
       return (event: ChangeEvent<HTMLSelectElement>) => {
         const sourceFieldData = getFieldData(event.target.value, fields);
         updateSourceField(sourceFieldData, fields[0], dispatch);
       };
     }
 
-    if (action === GeneratorAction.OUTPUT_FIELD) {
+    if (action === GeneratorAction.UPDATE_OUTPUT_FIELD) {
       return (event: ChangeEvent<HTMLSelectElement>) =>
         updateOutputField(event.target.value, supportedFields[0], dispatch);
     }
@@ -60,7 +60,7 @@ const FieldSelector = (props: Props) => {
 
   useEffect(handleBaseDataChange, [isNewText, locale]);
 
-  const { LOCALE, TARGET_LOCALE } = GeneratorAction;
+  const { UPDATE_LOCALE, UPDATE_TARGET_LOCALE } = GeneratorAction;
   return (
     <Flex flexGrow={2} flexDirection="column" margin="spacingL">
       {!isNewText && (
@@ -68,7 +68,7 @@ const FieldSelector = (props: Props) => {
           title="Source Field"
           selectedField={sourceField}
           fields={fields}
-          onChange={handleSelectChange(GeneratorAction.SOURCE_FIELD)}
+          onChange={handleSelectChange(GeneratorAction.UPDATE_SOURCE_FIELD)}
         />
       )}
 
@@ -76,20 +76,20 @@ const FieldSelector = (props: Props) => {
         title="Output Field"
         selectedField={outputField}
         fields={supportedFields}
-        onChange={handleSelectChange(GeneratorAction.OUTPUT_FIELD)}
+        onChange={handleSelectChange(GeneratorAction.UPDATE_OUTPUT_FIELD)}
       />
 
       <AvailableLocales
         title={isTranslate ? 'Source Language' : 'Language'}
         selectedLocale={locale}
-        onChange={handleSelectChange(LOCALE)}
+        onChange={handleSelectChange(UPDATE_LOCALE)}
       />
 
       {isTranslate && (
         <AvailableLocales
           title="Target Language"
           selectedLocale={targetLocale || locale}
-          onChange={handleSelectChange(TARGET_LOCALE)}
+          onChange={handleSelectChange(UPDATE_TARGET_LOCALE)}
         />
       )}
     </Flex>

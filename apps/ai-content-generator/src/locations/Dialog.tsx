@@ -1,7 +1,7 @@
 import useDialogParameters from '@hooks/dialog/useDialogParameters';
 import featureConfig, { AIFeature } from '@configs/features/featureConfig';
-import CommonGenerator from '@components/dialog/common-generator/CommonGenerator';
-import GeneratorProvider from '@providers/dialog/common-generator/generatorProvider';
+import CommonGenerator from '@components/app/dialog/common-generator/CommonGenerator';
+import GeneratorProvider from '@providers/generatorProvider';
 
 type DialogInvocationParameters = {
   feature: AIFeature;

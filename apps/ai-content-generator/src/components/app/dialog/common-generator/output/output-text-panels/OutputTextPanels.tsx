@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { GeneratorContext } from '@providers/dialog/common-generator/generatorProvider';
+import { GeneratorContext } from '@providers/generatorProvider';
 import useEntryAndContentType from '@hooks/dialog/useEntryAndContentType';
 import useAI from '@hooks/dialog/useAI';
 import GeneratedTextPanel from './generated-text-panel/GeneratedTextPanel';

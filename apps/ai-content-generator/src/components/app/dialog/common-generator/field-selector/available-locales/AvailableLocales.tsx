@@ -16,7 +16,7 @@ const AvailableLocale = (props: Props) => {
   const localeList = sdk.locales.available.map((locale) => {
     return (
       <Select.Option key={locale} value={locale}>
-        {locale}
+        {sdk.locales.names[locale]}
       </Select.Option>
     );
   });

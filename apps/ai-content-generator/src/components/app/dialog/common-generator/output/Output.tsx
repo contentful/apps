@@ -4,7 +4,7 @@ import useAI from '@hooks/dialog/useAI';
 import OutputTextPanels from './output-text-panels/OutputTextPanels';
 
 enum OutputTab {
-  ORIGINAL_TEXT = 'original-text',
+  UPDATE_ORIGINAL_TEXT = 'original-text',
   GENERATED_TEXT = 'generated-text',
 }
 
@@ -17,7 +17,7 @@ const Output = (props: Props) => {
   const { inputText, outputField } = props;
   const ai = useAI();
 
-  const [currentTab, setCurrentTab] = useState(OutputTab.ORIGINAL_TEXT);
+  const [currentTab, setCurrentTab] = useState(OutputTab.UPDATE_ORIGINAL_TEXT);
 
   useEffect(() => {
     if (ai.isGenerating) {
@@ -32,7 +32,7 @@ const Output = (props: Props) => {
         onTabChange={(tab) => setCurrentTab(tab as OutputTab)}
         style={{ width: '100%' }}>
         <Tabs.List>
-          <Tabs.Tab panelId={OutputTab.ORIGINAL_TEXT}> Original Text </Tabs.Tab>
+          <Tabs.Tab panelId={OutputTab.UPDATE_ORIGINAL_TEXT}> Original Text </Tabs.Tab>
           <Tabs.Tab
             panelId={OutputTab.GENERATED_TEXT}
             isDisabled={(ai.isGenerating && !ai.output.length) || !ai.output.length}>
