@@ -26,7 +26,7 @@ const Dialog = () => {
   };
 
   return (
-    <GeneratorProvider entryId={entryId} prompt={featureConfig[feature].prompt}>
+    <GeneratorProvider entryId={entryId} feature={feature} prompt={featureConfig[feature].prompt}>
       {getGenerator(feature)}
     </GeneratorProvider>
   );

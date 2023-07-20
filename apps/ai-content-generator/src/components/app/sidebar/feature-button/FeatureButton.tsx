@@ -9,12 +9,13 @@ interface Props {
   feature: AIFeature;
   text: string;
   helpText: string;
+  dialogTitle: string;
 }
 
 type openDialogOptions = OpenCustomWidgetOptions & { parameters: DialogInvocationParameters };
 
 const FeatureButton = (props: Props) => {
-  const { feature, text, helpText } = props;
+  const { feature, text, dialogTitle, helpText } = props;
   const sdk = useSDK<SidebarAppSDK>();
 
   const handleOnClick = () => {
@@ -24,7 +25,7 @@ const FeatureButton = (props: Props) => {
       position: 'center',
       width: 'fullWidth',
       minHeight: '468px',
-      title: text,
+      title: dialogTitle,
       parameters: { feature, entryId },
     };
 

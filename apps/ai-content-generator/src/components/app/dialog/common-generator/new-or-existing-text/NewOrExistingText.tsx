@@ -1,15 +1,17 @@
 import { Button, Flex } from '@contentful/f36-components';
 import { Dispatch } from 'react';
+import { AIFeature } from '../../../../../configs/features/featureConfig';
 import { GeneratorAction, GeneratorReducer } from '../generatorReducer';
 import { styles } from './NewOrExistingText.styles';
 
 interface Props {
   isNewText: boolean;
   dispatch: Dispatch<GeneratorReducer>;
+  feature: AIFeature;
 }
 
 const NewOrExistingText = (props: Props) => {
-  const { isNewText, dispatch } = props;
+  const { isNewText, dispatch, feature } = props;
 
   const changeTextSource = (isNew: boolean) => {
     if (isNew === isNewText) {
@@ -21,13 +23,13 @@ const NewOrExistingText = (props: Props) => {
   };
 
   return (
-    <Flex flexGrow={1} flexDirection="column">
+    <Flex className={styles.root} flexGrow={1} flexDirection="column">
       <Button
         className={styles.button}
         title="Input custom text"
         isActive={isNewText}
         onClick={() => changeTextSource(true)}>
-        From prompt
+        {feature === 'title' ? 'From prompt' : 'From new text'}
       </Button>
       <Button
         title="Use existing text from entry"

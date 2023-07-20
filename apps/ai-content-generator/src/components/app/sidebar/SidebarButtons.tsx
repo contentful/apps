@@ -4,12 +4,13 @@ import FeatureButton from './feature-button/FeatureButton';
 
 const SidebarButtons = () => {
   const featureList = Object.entries(featureConfig).map(([featureId, configItem]) => {
-    const { title, helpText } = configItem;
+    const { helpText, buttonTitle, title } = configItem;
 
     return (
       <FeatureButton
         key={featureId}
-        text={title}
+        text={buttonTitle}
+        dialogTitle={title}
         helpText={helpText}
         feature={featureId as AIFeature}
       />

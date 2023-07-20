@@ -9,6 +9,7 @@ import { DialogAppSDK } from '@contentful/app-sdk';
 import { FeatureComponentProps } from '@configs/features/featureTypes';
 import generatorReducer, { GeneratorParameters } from './generatorReducer';
 import NewOrExistingText from './new-or-existing-text/NewOrExistingText';
+import { styles } from './CommonGenerator.styles';
 
 const initialParameters: GeneratorParameters = {
   isNewText: false,
@@ -21,7 +22,7 @@ const initialParameters: GeneratorParameters = {
 
 const CommonGenerator = (props: FeatureComponentProps) => {
   const { isTranslate } = props;
-  const { setProviderData } = useContext(GeneratorContext);
+  const { setProviderData, feature } = useContext(GeneratorContext);
 
   const sdk = useSDK<DialogAppSDK>();
 
@@ -41,11 +42,13 @@ const CommonGenerator = (props: FeatureComponentProps) => {
   useEffect(updateProviderData, [parameters.targetLocale, parameters.locale, dispatch]);
 
   return (
-    <Flex>
-      <NewOrExistingText isNewText={parameters.isNewText} dispatch={dispatch} />
-      <FieldSelector parameters={parameters} isTranslate={isTranslate} fieldTypes={TextFields} />
+    <div className={styles.root}>
+      <NewOrExistingText feature={feature} isNewText={parameters.isNewText} dispatch={dispatch} />
+      <div className={styles.fieldSelectorRoot}>
+        <FieldSelector parameters={parameters} isTranslate={isTranslate} fieldTypes={TextFields} />
+      </div>
       <Output outputField={parameters.outputField} inputText={parameters.originalText} />
-    </Flex>
+    </div>
   );
 };
 

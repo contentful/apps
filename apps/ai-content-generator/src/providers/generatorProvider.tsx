@@ -2,6 +2,7 @@ import { GeneratorReducer } from '@components/app/dialog/common-generator/genera
 import { Prompt } from '@configs/features/featureTypes';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { Dispatch, createContext, useState } from 'react';
+import { AIFeature } from '../configs/features/featureConfig';
 
 interface GeneratorContextProps {
   entryId: string;
@@ -13,11 +14,13 @@ interface GeneratorContextProps {
   contentType: ContentTypeProps | null;
 
   dispatch: Dispatch<GeneratorReducer>;
+  feature: AIFeature;
 }
 
 interface GeneratorProviderProps {
   entryId: string;
   prompt: Prompt;
+  feature: AIFeature;
 
   children: React.ReactNode;
 }
@@ -37,11 +40,13 @@ const defaultContext = {
 const GeneratorContext = createContext<GeneratorContextProps>(defaultContext);
 
 const GeneratorProvider = (props: GeneratorProviderProps) => {
-  const { entryId, prompt, children } = props;
+  const { entryId, prompt, children, feature } = props;
+  console.log('fature>>>', feature);
   const [providerData, setProviderData] = useState<GeneratorContextProps>({
     ...defaultContext,
     entryId,
     prompt,
+    feature,
   });
 
   const updateProviderData = (newProviderData: Partial<GeneratorContextProps>) => {
