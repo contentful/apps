@@ -3,7 +3,8 @@ import tokens from '@contentful/f36-tokens';
 
 export const styles = {
   fieldSelectorRoot: css({
-    border: `1px solid ${tokens.gray200}`,
+    borderLeft: `1px solid ${tokens.gray200}`,
+    borderRight: `1px solid ${tokens.gray200}`,
     flexGrow: 1,
   }),
   root: css({
