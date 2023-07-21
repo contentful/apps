@@ -23,7 +23,7 @@ const featureConfig: FeatureConfig = {
   [AIFeature.CONTENT]: {
     title: 'Generate content',
     buttonTitle: 'Content',
-    helpText: 'Generate content based off of your data',
+    helpText: '',
     prompt: contentPrompt,
   },
   [AIFeature.TRANSLATE]: {
