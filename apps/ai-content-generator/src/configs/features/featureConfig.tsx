@@ -17,7 +17,7 @@ const featureConfig: FeatureConfig = {
   [AIFeature.TITLE]: {
     title: 'Generate a title',
     buttonTitle: 'Title',
-    helpText: 'Help text',
+    helpText: '',
     prompt: titlePrompt,
   },
   [AIFeature.CONTENT]: {
@@ -29,19 +29,19 @@ const featureConfig: FeatureConfig = {
   [AIFeature.TRANSLATE]: {
     title: 'Language translation',
     buttonTitle: 'Translate',
-    helpText: 'Help text',
+    helpText: '',
     prompt: translatePrompt,
   },
   [AIFeature.SEO_KEYWORDS]: {
     title: 'Generate SEO keywords',
     buttonTitle: 'SEO Keywords',
-    helpText: 'Help text',
+    helpText: '',
     prompt: seoKeywordsPrompt,
   },
   [AIFeature.SEO_DESCRIPTION]: {
     title: 'Generate an SEO description',
     buttonTitle: 'SEO description',
-    helpText: 'Help text',
+    helpText: '',
     prompt: seoDescriptionPrompt,
   },
 };
