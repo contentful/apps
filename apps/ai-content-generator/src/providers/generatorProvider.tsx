@@ -41,7 +41,6 @@ const GeneratorContext = createContext<GeneratorContextProps>(defaultContext);
 
 const GeneratorProvider = (props: GeneratorProviderProps) => {
   const { entryId, prompt, children, feature } = props;
-  console.log('fature>>>', feature);
   const [providerData, setProviderData] = useState<GeneratorContextProps>({
     ...defaultContext,
     entryId,
