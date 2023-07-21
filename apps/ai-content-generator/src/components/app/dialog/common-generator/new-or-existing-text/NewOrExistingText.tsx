@@ -1,6 +1,6 @@
 import { Button, Flex } from '@contentful/f36-components';
 import { Dispatch } from 'react';
-import { AIFeature } from '../../../../../configs/features/featureConfig';
+import { AIFeature } from '@configs/features/featureConfig';
 import { GeneratorAction, GeneratorReducer } from '../generatorReducer';
 import { styles } from './NewOrExistingText.styles';
 
