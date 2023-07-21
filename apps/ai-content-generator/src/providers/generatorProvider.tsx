@@ -2,7 +2,6 @@ import { GeneratorReducer } from '@components/app/dialog/common-generator/genera
 import { Prompt } from '@configs/features/featureTypes';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { Dispatch, createContext, useState } from 'react';
-import { AIFeature } from '@configs/features/featureConfig';
 
 interface GeneratorContextProps {
   entryId: string;
