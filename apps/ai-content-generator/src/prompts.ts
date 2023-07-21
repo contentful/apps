@@ -5,5 +5,6 @@ export default function prompts({ as = 'title' }) {
       seo_description: `Write an optimized SEO description with max 250 characters for the following text: "__prompt__"`,
       seo_keywords: `Suggest a maximum of eight optimized comma-separated keywords for the following text: "__prompt__"`,
     };
+    /* @ts-ignore */
     return bank[as];
-  }
+  }3
