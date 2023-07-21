@@ -14,13 +14,11 @@ interface GeneratorContextProps {
   contentType: ContentTypeProps | null;
 
   dispatch: Dispatch<GeneratorReducer>;
-  feature: AIFeature;
 }
 
 interface GeneratorProviderProps {
   entryId: string;
   prompt: Prompt;
-  feature: AIFeature;
 
   children: React.ReactNode;
 }
@@ -35,18 +33,16 @@ const defaultContext = {
   contentType: null,
 
   dispatch: (() => {}) as Dispatch<GeneratorReducer>,
-  feature: AIFeature.TITLE,
 };
 
 const GeneratorContext = createContext<GeneratorContextProps>(defaultContext);
 
 const GeneratorProvider = (props: GeneratorProviderProps) => {
-  const { entryId, prompt, children, feature } = props;
+  const { entryId, prompt, children } = props;
   const [providerData, setProviderData] = useState<GeneratorContextProps>({
     ...defaultContext,
     entryId,
     prompt,
-    feature,
   });
 
   const updateProviderData = (newProviderData: Partial<GeneratorContextProps>) => {

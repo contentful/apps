@@ -20,13 +20,16 @@ const Dialog = () => {
       case AIFeature.TRANSLATE:
         return <CommonGenerator isTranslate />;
 
+      case AIFeature.TITLE:
+        return <CommonGenerator isTitle />;
+
       default:
         return <CommonGenerator />;
     }
   };
 
   return (
-    <GeneratorProvider entryId={entryId} feature={feature} prompt={featureConfig[feature].prompt}>
+    <GeneratorProvider entryId={entryId} prompt={featureConfig[feature].prompt}>
       {getGenerator(feature)}
     </GeneratorProvider>
   );

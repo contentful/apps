@@ -20,8 +20,8 @@ const initialParameters: GeneratorParameters = {
 };
 
 const CommonGenerator = (props: FeatureComponentProps) => {
-  const { isTranslate } = props;
-  const { setProviderData, feature } = useContext(GeneratorContext);
+  const { isTranslate, isTitle } = props;
+  const { setProviderData } = useContext(GeneratorContext);
 
   const sdk = useSDK<DialogAppSDK>();
 
@@ -42,7 +42,7 @@ const CommonGenerator = (props: FeatureComponentProps) => {
 
   return (
     <div className={styles.root}>
-      <NewOrExistingText feature={feature} isNewText={parameters.isNewText} dispatch={dispatch} />
+      <NewOrExistingText isTitle={isTitle} isNewText={parameters.isNewText} dispatch={dispatch} />
       <div className={styles.fieldSelectorRoot}>
         <FieldSelector parameters={parameters} isTranslate={isTranslate} fieldTypes={TextFields} />
       </div>
