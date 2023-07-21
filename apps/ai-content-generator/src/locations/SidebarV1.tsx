@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -16,12 +16,12 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import RichTextModel from '../richTextModel';
 import prompts from '../prompts';
 
-const Visible = ({ children, when }) => {
+const Visible = ({ children, when }: any) => {
   return when ? children : null;
 };
 
 const Sidebar = () => {
-  const sdk = useSDK();
+  const sdk = useSDK() as any;
   const fields = sdk.entry.fields;
 
   const cma = createClient(
@@ -39,14 +39,14 @@ const Sidebar = () => {
   const [prompt, setPrompt] = useState(fields[sdk.contentType.displayField].getValue() || '');
   const [loading, setLoading] = useState(false);
   const [option, setOption] = useState('0');
-  const [field, setField] = useState(null);
-  const [richTextFields, setRichTextFields] = useState([]);
-  const [textFields, setTextFields] = useState([]);
-  const [translateableTextFields, setTranslateableTextFields] = useState([]);
+  const [field, setField] = useState<any>(null);
+  const [richTextFields, setRichTextFields] = useState<any>([]);
+  const [textFields, setTextFields] = useState<any>([]);
+  const [translateableTextFields, setTranslateableTextFields] = useState<any>([]);
   const [sourceLocale, setSourceLocale] = useState(sdk.locales.default);
   const [targetLocale, setTargetLocale] = useState(sdk.locales.default);
 
-  async function Prompt(content) {
+  async function Prompt(content: any) {
     const { model = 'gpt-3.5-turbo', profile } = sdk.parameters.installation;
     const GPTPayload = {
       model,
@@ -118,7 +118,7 @@ const Sidebar = () => {
           contentTypeId: entry.sys.contentType.sys.id,
         });
         // Merge the content types with the locale info
-        const fields = contentType.fields.map((field) => {
+        const fields = contentType.fields.map((field: any) => {
           field.locales = entry.fields[field.id] ? Object.keys(entry.fields[field.id]) : [];
           return field;
         });
@@ -175,7 +175,7 @@ const Sidebar = () => {
     );
   }, [sdk.entry.fields, targetLocale]);
 
-  function SetValueToField(field, value, locale = targetLocale) {
+  function SetValueToField(field: any, value: any, locale = targetLocale) {
     field.setValue(
       field.type === 'RichText'
         ? RichTextModel(value)
@@ -187,14 +187,14 @@ const Sidebar = () => {
     );
   }
 
-  function getFieldName(id) {
-    return sdk.contentType.fields.find((field) => field.id === id)?.name || id;
+  function getFieldName(id: any) {
+    return sdk.contentType.fields.find((field: any) => field.id === id)?.name || id;
   }
 
   useEffect(() => {
     // if translating, set the target locale to the first available locale that is not the source locale
     if (option === '30') {
-      const targetLocale = sdk.locales.available.find((l) => l !== sourceLocale);
+      const targetLocale = sdk.locales.available.find((l: any) => l !== sourceLocale);
       setTargetLocale(targetLocale);
     }
   }, [option, sdk.locales.available, sourceLocale]);
@@ -219,7 +219,7 @@ const Sidebar = () => {
       // Use the response coming back as an input prompt in the interface by default
       setPrompt(response);
       sdk.notifier.success('Done! Anything else?');
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       sdk.notifier.error(e.message || 'Something went wrong. Please try again later.');
     } finally {
@@ -228,7 +228,7 @@ const Sidebar = () => {
     }
   }
 
-  const handleActionChange = (e) => {
+  const handleActionChange = (e: any) => {
     // reset
     setField(null);
     setPrompt('');
@@ -243,7 +243,8 @@ const Sidebar = () => {
     <Box style={{ padding: '0 3px' }}>
       {error && (
         <FormControl>
-          <Note variant="negative">
+          <Note variant="negative">\
+            {/* @ts-ignore */}
             <Paragraph marginBottom="spacingXs" fontWeight="fontWeightMedium">
               OpenAI API Error
             </Paragraph>
@@ -260,7 +261,7 @@ const Sidebar = () => {
           <Select.Option value="10">Generate a title</Select.Option>
           <Select.Option
             value="20"
-            isDisabled={richTextFields?.filter((field) => field.currentEditor).length < 1}>
+            isDisabled={richTextFields?.filter((field: any) => field.currentEditor).length < 1}>
             Generate content
           </Select.Option>
           <Select.Option value="30" isDisabled={sdk.locales.available?.length < 1}>
@@ -282,8 +283,8 @@ const Sidebar = () => {
               Select a field...
             </Select.Option>
             {textFields
-              .filter((field) => field.currentEditor)
-              .map((field, index) => {
+              .filter((field: any) => field.currentEditor)
+              .map((field: any, index: number) => {
                 return (
                   <Select.Option value={field.name} key={index}>
                     {getFieldName(field.name)}
@@ -298,10 +299,11 @@ const Sidebar = () => {
             <Select
               onChange={(event) => setTargetLocale(event.target.value)}
               defaultValue={sourceLocale}>
+              {/* @ts-ignore */}
               <Select.Option defaultValue="" isDisabled>
                 Select a language...
               </Select.Option>
-              {sdk.locales.available.map((locale) => (
+              {sdk.locales.available.map((locale: any) => (
                 <Select.Option value={locale} key={locale}>
                   {sdk.locales.names[locale]}
                 </Select.Option>
@@ -327,10 +329,11 @@ const Sidebar = () => {
             <Select
               onChange={(event) => setTargetLocale(event.target.value)}
               defaultValue={sourceLocale}>
+              {/* @ts-ignore */}
               <Select.Option defaultValue="" isDisabled>
                 Select a language...
               </Select.Option>
-              {sdk.locales.available.map((locale) => (
+              {sdk.locales.available.map((locale: any) => (
                 <Select.Option value={locale} key={locale}>
                   {sdk.locales.names[locale]}
                 </Select.Option>
@@ -345,7 +348,7 @@ const Sidebar = () => {
             name="prompt"
             placeholder="Example: 'How to make a gourmet sandwich'"
             value={prompt}
-            onInput={(event) => setPrompt(event.target.value)}
+            onInput={(event: any) => setPrompt(event.target.value)}
           />
         </FormControl>
 
@@ -356,8 +359,8 @@ const Sidebar = () => {
               Select a field...
             </Select.Option>
             {richTextFields
-              .filter((field) => field.currentEditor)
-              .map((field, index) => {
+              .filter((field: any) => field.currentEditor)
+              .map((field: any, index: any) => {
                 return (
                   <Select.Option value={field.name} key={index}>
                     {getFieldName(field.name)}
@@ -384,7 +387,7 @@ const Sidebar = () => {
             <Select.Option value="" isDisabled>
               Select a field...
             </Select.Option>
-            {translateableTextFields.map((field, index) => {
+            {translateableTextFields.map((field: any, index: any) => {
               return (
                 <Select.Option value={field.name} key={index}>
                   {getFieldName(field.name)}
@@ -404,7 +407,7 @@ const Sidebar = () => {
             <Select.Option value="" isDisabled>
               Where to translate from?
             </Select.Option>
-            {sdk.locales.available.map((locale, index) => {
+            {sdk.locales.available.map((locale: any, index: any) => {
               return (
                 <Select.Option value={locale} key={index}>
                   {sdk.locales.names[locale]}
@@ -424,7 +427,7 @@ const Sidebar = () => {
             <Select.Option value="" isDisabled>
               Where to translate into?
             </Select.Option>
-            {sdk.locales.available.map((locale, index) => {
+            {sdk.locales.available.map((locale: any, index: any) => {
               return (
                 <Select.Option value={locale} key={index} isDisabled={locale === sourceLocale}>
                   {sdk.locales.names[locale]}
@@ -477,7 +480,7 @@ const Sidebar = () => {
             <Select.Option value="" isDisabled>
               Select a field...
             </Select.Option>
-            {textFields.map((field, index) => {
+            {textFields.map((field: any, index: any) => {
               return (
                 <Select.Option value={field.name} key={index}>
                   {getFieldName(field.name)}
@@ -527,11 +530,11 @@ const Sidebar = () => {
         </FormControl>
         <FormControl>
           <FormControl.Label>Where should the keywords be output?</FormControl.Label>{' '}
-          <Select defaultValue={field} onChange={(event) => setField(event.target.value)}>
+          <Select defaultValue={field as any} onChange={(event) => setField(event.target.value)}>
             <Select.Option value="" isDisabled>
               Select a field...
             </Select.Option>
-            {textFields.map((field, index) => {
+            {textFields.map((field: any, index: number) => {
               return (
                 <Select.Option value={field.name} key={index}>
                   {getFieldName(field.name)}
