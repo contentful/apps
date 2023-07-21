@@ -1,5 +1,4 @@
 import { useContext, useEffect, useReducer } from 'react';
-import { Flex } from '@contentful/f36-components';
 import { GeneratorContext } from '@providers/generatorProvider';
 import FieldSelector from '@components/app/dialog/common-generator/field-selector/FieldSelector';
 import Output from '@components/app/dialog/common-generator/output/Output';
