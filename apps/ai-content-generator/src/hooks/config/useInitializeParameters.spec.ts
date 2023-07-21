@@ -1,15 +1,16 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import useInitializeParameters from './useInitializeParameters';
-import { mockCma, MockSdk, mockSdkParameters } from '../../../test/mocks';
+import { MockSdk, mockInstallationParameters } from '@test/mocks';
 import { ParameterAction } from '@components/config/parameterReducer';
 
-const mockSdk = new MockSdk(mockSdkParameters.happyPath);
+const mockSdk = new MockSdk({ parameters: mockInstallationParameters.happyPath });
 const sdk = mockSdk.sdk;
+const cma = sdk.cma;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
-  useCMA: () => mockCma,
+  useCMA: () => cma,
 }));
 
 describe('useInitializeParameters', () => {
@@ -25,7 +26,7 @@ describe('useInitializeParameters', () => {
 
     expect(dispatchMock).toHaveBeenCalledWith({
       type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS,
-      value: mockSdkParameters.happyPath,
+      value: mockInstallationParameters.happyPath,
     });
 
     expect(sdk.app.setReady).toBeCalled();

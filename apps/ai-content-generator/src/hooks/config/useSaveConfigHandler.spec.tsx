@@ -1,15 +1,20 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { generateRandomParameters, mockCma, MockSdk, mockSdkParameters } from '../../../test/mocks';
+import {
+  generateRandomInstallationParameters,
+  mockInstallationParameters,
+  MockSdk,
+} from '../../../test/mocks';
 import useSaveConfigHandler from './useSaveConfigHandler';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
+const cma = sdk.cma;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
-  useCMA: () => mockCma,
+  useCMA: () => cma,
 }));
 
 describe('useSaveConfigHandler', () => {
@@ -18,7 +23,7 @@ describe('useSaveConfigHandler', () => {
   });
 
   it('adds the on configure callback', async () => {
-    const parameters = generateRandomParameters();
+    const parameters = generateRandomInstallationParameters();
 
     renderHook(() => useSaveConfigHandler(parameters));
     await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledOnce());
@@ -29,9 +34,9 @@ describe('useSaveConfigHandler', () => {
 
   it('updates the on configure callback when parameters change', async () => {
     const testCases = [
-      generateRandomParameters(),
-      generateRandomParameters(),
-      mockSdkParameters.happyPath,
+      generateRandomInstallationParameters(),
+      generateRandomInstallationParameters(),
+      mockInstallationParameters.happyPath,
     ];
 
     const testIfHookUpdates = async (parameterIndex: number) => {
@@ -51,7 +56,7 @@ describe('useSaveConfigHandler', () => {
     const { rerender } = renderHook(
       (props: AppInstallationParameters) => useSaveConfigHandler(props),
       {
-        initialProps: mockSdkParameters.init,
+        initialProps: mockInstallationParameters.init,
       }
     );
 
