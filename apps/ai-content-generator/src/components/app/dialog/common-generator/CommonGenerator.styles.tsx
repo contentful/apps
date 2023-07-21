@@ -1,5 +1,6 @@
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
+import { DIALOG_MIN_HEIGHT } from '@configs/dialog/dialogConfig';
 
 export const styles = {
   fieldSelectorRoot: css({
@@ -9,6 +10,6 @@ export const styles = {
   }),
   root: css({
     display: 'flex',
-    minHeight: '500px',
+    minHeight: DIALOG_MIN_HEIGHT,
   }),
 };
