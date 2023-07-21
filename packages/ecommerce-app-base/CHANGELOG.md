@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.72](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.71...@contentful/ecommerce-app-base@3.1.72) (2023-07-21)
+
+### Bug Fixes
+
+- **deps:** bump @testing-library/jest-dom from 5.16.5 to 5.17.0 ([#4245](https://github.com/contentful/apps/issues/4245)) ([40af4f3](https://github.com/contentful/apps/commit/40af4f36fea440a03558de5f610a48e564fa4003))
+
 ## [3.1.71](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.1.70...@contentful/ecommerce-app-base@3.1.71) (2023-07-19)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
