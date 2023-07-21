@@ -30,6 +30,7 @@ const useDialogParameters = (): DialogParameters => {
     const newParameters = sdk.parameters.invocation;
     if (!newParameters) {
       setIsLoading(true);
+      return;
     }
 
     setParameters(newParameters);
@@ -41,3 +42,4 @@ const useDialogParameters = (): DialogParameters => {
 };
 
 export default useDialogParameters;
+export type { DialogParameters };

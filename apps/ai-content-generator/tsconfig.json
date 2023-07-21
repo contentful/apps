@@ -20,6 +20,7 @@
       "@locations/*": ["./src/locations/*"],
       "@providers/*": ["./src/providers/*"],
       "@utils/*": ["./src/utils/*"],
+      "@test/*": ["./test/*"],
     },
     "noEmit": true,
     "jsx": "react-jsx"

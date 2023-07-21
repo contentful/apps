@@ -5,7 +5,16 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 import AI from '@utils/aiApi';
 import { ChatCompletionRequestMessage } from 'openai';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+
+export type useAIOutput = {
+  generateMessage: (prompt: string, targetLocale: string) => Promise<string>;
+  isGenerating: boolean;
+  output: string;
+  setOutput: React.Dispatch<React.SetStateAction<string>>;
+  resetOutput: () => void;
+  sendStopSignal: () => Promise<void>;
+};
 
 /**
  * This hook is used to generate messages using the OpenAI API
@@ -13,7 +22,7 @@ import { useEffect, useMemo, useState } from 'react';
  *
  * @returns { generateMessage, resetOutput, output, sendStopSignal }
  */
-const useAI = () => {
+const useAI = (): useAIOutput => {
   const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
   const ai = useMemo(
     () => new AI(baseUrl, sdk.parameters.installation.apiKey, sdk.parameters.installation.model),
@@ -50,9 +59,9 @@ const useAI = () => {
       const stream = await ai.streamChatCompletion(payload);
       setStream(stream);
 
+      setIsGenerating(true);
       while (true) {
         const streamOutput = await ai.parseStream(stream);
-
         if (streamOutput === false) {
           break;
         }
@@ -64,6 +73,7 @@ const useAI = () => {
       console.error(error);
     } finally {
       setStream(null);
+      setIsGenerating(false);
     }
 
     return completeMessage;
@@ -72,15 +82,13 @@ const useAI = () => {
   const sendStopSignal = async () => {
     try {
       await ai.sendStopSignal(stream);
-      setStream(null);
     } catch (error: any) {
       console.error(error);
+    } finally {
+      setStream(null);
+      setIsGenerating(false);
     }
   };
-
-  useEffect(() => {
-    setIsGenerating(stream !== null);
-  }, [stream]);
 
   return {
     generateMessage,

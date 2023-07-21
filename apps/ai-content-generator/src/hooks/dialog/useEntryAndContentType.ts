@@ -17,17 +17,28 @@ const useEntryAndContentType = (entryId: string) => {
   const cma = sdk.cma;
 
   const getEntryAndContentType = async () => {
-    if (entryId) {
+    try {
+      if (!entryId) {
+        throw new Error('Entry id is null');
+      }
+
       const entry = await cma.entry.get({ entryId });
       setEntry(entry);
 
       const contentType = await cma.contentType.get({
         contentTypeId: entry.sys.contentType.sys.id,
       });
-      setContentType(contentType);
-    }
 
-    return { entry, contentType };
+      setContentType(contentType);
+
+      return { entry, contentType };
+    } catch (error) {
+      console.error(error);
+
+      setEntry(null);
+      setContentType(null);
+      return { entry: null, contentType: null };
+    }
   };
 
   const updateEntry = async (fieldKey: string, fieldLocale: string, updatedText: string) => {
