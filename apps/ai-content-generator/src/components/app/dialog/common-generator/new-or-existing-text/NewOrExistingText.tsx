@@ -23,7 +23,7 @@ const NewOrExistingText = (props: Props) => {
   };
 
   return (
-    <Flex className={styles.root} flexGrow={1} flexDirection="column">
+    <Flex flexGrow={1} flexDirection="column">
       <Button
         className={styles.button}
         title="Input custom text"

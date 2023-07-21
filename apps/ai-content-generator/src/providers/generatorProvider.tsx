@@ -14,7 +14,7 @@ interface GeneratorContextProps {
   contentType: ContentTypeProps | null;
 
   dispatch: Dispatch<GeneratorReducer>;
-  feature: AIFeature;
+  feature: AIFeature | null;
 }
 
 interface GeneratorProviderProps {
@@ -35,6 +35,7 @@ const defaultContext = {
   contentType: null,
 
   dispatch: (() => {}) as Dispatch<GeneratorReducer>,
+  feature: null,
 };
 
 const GeneratorContext = createContext<GeneratorContextProps>(defaultContext);
