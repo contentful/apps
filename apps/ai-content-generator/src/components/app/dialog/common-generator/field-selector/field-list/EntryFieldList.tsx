@@ -13,7 +13,7 @@ function EntryFieldList(props: Props) {
   const { title, selectedField, fields, onChange } = props;
 
   const fieldList = fields.map((field) => (
-    <Select.Option key={field.name} value={field.name}>
+    <Select.Option key={field.id} value={field.id}>
       {field.name}
     </Select.Option>
   ));
