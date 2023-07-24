@@ -52,6 +52,7 @@ export const NotificationsPanel = (props: Props) => {
         setContentTypes(fetchedContentTypes.items);
       } catch (e) {
         setErrors((prevErrors) => [...prevErrors, 'ContentTypes']);
+        console.error(e);
       }
     };
     const fetchChannels = async () => {
@@ -62,6 +63,7 @@ export const NotificationsPanel = (props: Props) => {
         }
       } catch (e) {
         setErrors((prevErrors) => [...prevErrors, 'Slack Channels']);
+        console.error(e);
       }
     };
     const calls = [fetchContentTypes()];
