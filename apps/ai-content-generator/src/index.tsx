@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { GlobalStyles } from '@contentful/f36-components';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
-import { LocalHostWarning } from '@contentful/integration-component-library';
+import LocalHostWarning from '@components/common/LocalHostWarning';
 
 import App from './App';
 
@@ -16,6 +16,6 @@ if (import.meta.env.DEV && window.self === window.top) {
     <SDKProvider>
       <GlobalStyles />
       <App />
-    </SDKProvider>,
+    </SDKProvider>
   );
 }
