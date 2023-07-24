@@ -22,19 +22,23 @@ const FieldSelector = (props: Props) => {
   const { isNewText, sourceField, outputField, locale, targetLocale } = parameters;
   const { entryId, dispatch } = useContext(GeneratorContext);
 
-  const { supportedFields, fields } = useSupportedFields(entryId, fieldTypes, parameters.locale);
+  const { supportedFieldsWithContent, allSupportedFields } = useSupportedFields(
+    entryId,
+    fieldTypes,
+    locale
+  );
 
   const handleSelectChange = (action: GeneratorAction) => {
     if (action === GeneratorAction.UPDATE_SOURCE_FIELD) {
       return (event: ChangeEvent<HTMLSelectElement>) => {
-        const sourceFieldData = getFieldData(event.target.value, fields);
-        updateSourceField(sourceFieldData, fields[0], dispatch);
+        const sourceFieldData = getFieldData(event.target.value, supportedFieldsWithContent);
+        updateSourceField(sourceFieldData, supportedFieldsWithContent[0], dispatch);
       };
     }
 
     if (action === GeneratorAction.UPDATE_OUTPUT_FIELD) {
       return (event: ChangeEvent<HTMLSelectElement>) =>
-        updateOutputField(event.target.value, supportedFields[0], dispatch);
+        updateOutputField(event.target.value, allSupportedFields[0], dispatch);
     }
 
     return (event: ChangeEvent<HTMLSelectElement>) =>
@@ -45,16 +49,14 @@ const FieldSelector = (props: Props) => {
   };
 
   const handleBaseDataChange = () => {
-    if (fields.length) {
+    if (supportedFieldsWithContent.length) {
       const sourceFieldData = isNewText
-        ? { name: sourceField, data: '' }
-        : getFieldData(sourceField, fields);
-
-      updateSourceField(sourceFieldData, fields[0], dispatch);
+        ? { id: '', name: '', data: '' }
+        : getFieldData(sourceField, supportedFieldsWithContent);
+      updateSourceField(sourceFieldData, supportedFieldsWithContent[0], dispatch);
     }
-
-    if (supportedFields.length) {
-      updateOutputField(outputField, supportedFields[0], dispatch);
+    if (allSupportedFields.length) {
+      updateOutputField(outputField, allSupportedFields[0], dispatch);
     }
   };
 
@@ -67,7 +69,7 @@ const FieldSelector = (props: Props) => {
         <EntryFieldList
           title="Source Field"
           selectedField={sourceField}
-          fields={fields}
+          fields={supportedFieldsWithContent}
           onChange={handleSelectChange(GeneratorAction.UPDATE_SOURCE_FIELD)}
         />
       )}
@@ -75,7 +77,7 @@ const FieldSelector = (props: Props) => {
       <EntryFieldList
         title="Output Field"
         selectedField={outputField}
-        fields={supportedFields}
+        fields={allSupportedFields}
         onChange={handleSelectChange(GeneratorAction.UPDATE_OUTPUT_FIELD)}
       />
 
