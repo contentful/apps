@@ -9,6 +9,7 @@ const sdk = mockSdk.sdk;
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
   useCMA: () => mockCma,
+  useAutoResizer: () => {},
 }));
 
 describe('Sidebar component', () => {
