@@ -20,6 +20,9 @@ const Dialog = () => {
       case AIFeature.TRANSLATE:
         return <CommonGenerator isTranslate />;
 
+      case AIFeature.TITLE:
+        return <CommonGenerator isTitle />;
+
       default:
         return <CommonGenerator />;
     }

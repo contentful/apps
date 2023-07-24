@@ -6,10 +6,11 @@ import { styles } from './NewOrExistingText.styles';
 interface Props {
   isNewText: boolean;
   dispatch: Dispatch<GeneratorReducer>;
+  isTitle?: boolean;
 }
 
 const NewOrExistingText = (props: Props) => {
-  const { isNewText, dispatch } = props;
+  const { isNewText, dispatch, isTitle } = props;
 
   const changeTextSource = (isNew: boolean) => {
     if (isNew === isNewText) {
@@ -27,7 +28,7 @@ const NewOrExistingText = (props: Props) => {
         title="Input custom text"
         isActive={isNewText}
         onClick={() => changeTextSource(true)}>
-        From prompt
+        {isTitle ? 'From prompt' : 'From new text'}
       </Button>
       <Button
         title="Use existing text from entry"

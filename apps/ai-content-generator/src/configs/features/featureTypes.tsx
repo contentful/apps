@@ -8,6 +8,7 @@ export type Prompt = (input: string, targetLocale: string) => string;
 
 export type FeatureComponentProps = {
   isTranslate?: boolean;
+  isTitle?: boolean;
 };
 
 /**
@@ -16,6 +17,7 @@ export type FeatureComponentProps = {
 
 type FeatureItem = {
   title: string;
+  buttonTitle: string;
   helpText: string;
   prompt: Prompt;
 };
