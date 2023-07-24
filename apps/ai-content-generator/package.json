@@ -7,9 +7,9 @@
     "@contentful/f36-components": "4.45.0",
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/integration-component-library": "^1.1.30",
-    "@contentful/react-apps-toolkit": "1.2.2",
+    "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/rich-text-plain-text-renderer": "^16.0.5",
-    "contentful-management": "10.7.0",
+    "contentful-management": "10.28.1",
     "emotion": "10.0.27",
     "openai": "^3.3.0",
     "react": "18.2.0",
@@ -23,8 +23,20 @@
     "upload": "contentful-app-scripts upload --bundle-dir ./dist",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
   },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "devDependencies": {
-    "@contentful/app-scripts": "1.1.11",
+    "@contentful/app-scripts": "1.7.13",
     "@testing-library/react": "14.0.0",
     "@types/jest": "^29.5.3",
     "@types/node": "18.0.3",
