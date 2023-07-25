@@ -66,8 +66,6 @@ const generatorReducer = (state: GeneratorParameters, action: GeneratorReducer) 
       return { ...state, isNewText: true, originalText: '', generatedText: '' };
     case IS_NOT_NEW_TEXT:
       return { ...state, isNewText: false, originalText: '', generatedText: '' };
-    case CAN_GENERATE_TEXT_FROM_FIELD:
-      return { ...state, canGenerateTextFromField: true, originalText: '', generatedText: '' };
     case UPDATE_SOURCE_FIELD:
       return {
         ...state,

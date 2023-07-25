@@ -9,11 +9,10 @@ interface Props {
   feature: AIFeature;
   text: string;
   helpText: string;
-  dialogTitle: string;
 }
 
 const FeatureButton = (props: Props) => {
-  const { feature, text, dialogTitle, helpText } = props;
+  const { feature, text, helpText } = props;
   const sdk = useSDK<SidebarAppSDK>();
 
   const handleOnClick = () => {
