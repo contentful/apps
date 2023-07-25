@@ -25,7 +25,7 @@
     "react-scripts": "4.0.3",
     "setimmediate": "^1.0.5",
     "uuid": "8.3.2",
-    "whatwg-fetch": "3.6.2"
+    "whatwg-fetch": "3.6.17"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
