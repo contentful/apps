@@ -19,7 +19,7 @@ const FeatureButton = (props: Props) => {
   const handleOnClick = () => {
     const entryId = sdk.entry.getSys().id;
 
-    const dialogConfig = makeDialogConfig({ feature, entryId }, dialogTitle);
+    const dialogConfig = makeDialogConfig({ feature, entryId });
 
     sdk.dialogs.openCurrentApp(dialogConfig);
   };

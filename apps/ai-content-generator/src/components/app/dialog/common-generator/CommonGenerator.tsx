@@ -23,7 +23,7 @@ const initialParameters: GeneratorParameters = {
 
 const CommonGenerator = (props: FeatureComponentProps) => {
   const { isTranslate, isTitle } = props;
-  const { setProviderData } = useContext(GeneratorContext);
+  const { setProviderData, feature } = useContext(GeneratorContext);
 
   const sdk = useSDK<DialogAppSDK>();
 
@@ -51,7 +51,7 @@ const CommonGenerator = (props: FeatureComponentProps) => {
       {parameters.canGenerateTextFromField ? (
         <Output outputField={parameters.outputField} inputText={parameters.originalText} />
       ) : (
-        <NoFieldsSelectedMessage />
+        <NoFieldsSelectedMessage feature={feature} />
       )}
     </div>
   );
