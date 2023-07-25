@@ -76,6 +76,7 @@ jobs:
       - node/install
       - run:
           name: Install dependencies
+          no_output_timeout: 20m
           command: |
             npm ci
             npm run bootstrap:ci-deploy
@@ -115,6 +116,7 @@ jobs:
       - node/install-packages
       - run:
           name: Bootstrap
+          no_output_timeout: 20m
           command: |
             npm run bootstrap:ci-deploy
       - run:
