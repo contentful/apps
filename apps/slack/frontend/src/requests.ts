@@ -53,18 +53,18 @@ export const apiClient = {
     workspaceId: string,
     cma: CMAClient
   ): Promise<SlackChannel[] | undefined> => {
-    return makeSignedRequest(
-      {
-        method: 'GET',
-        path: `/spaces/${sdk.ids.space}/environments/${getEnvironmentName(
-          sdk.ids
-        )}/workspaces/${workspaceId}/channels`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    const req = {
+      method: 'GET' as const,
+      path: `/spaces/${sdk.ids.space}/environments/${getEnvironmentName(
+        sdk.ids
+      )}/workspaces/${workspaceId}/channels`,
+      headers: {
+        'Content-Type': 'application/json',
       },
-      { appDefinitionId: sdk.ids.app, cma }
-    );
+    };
+
+    const response = await makeSignedRequest(req, { appDefinitionId: sdk.ids.app, cma });
+    return response;
   },
 
   createAuthToken: async (
