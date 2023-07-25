@@ -7,15 +7,12 @@ interface Props {
 
 const NoFieldsSelectedMessage = (props: Props) => {
   const { feature } = props;
-  const inputCopy = feature === AIFeature.TRANSLATE ? 'translate' : featureConfig[feature].title;
+  const inputCopy = featureConfig[feature].description;
 
   return (
     <Flex margin="spacingL" flexDirection="column" flexGrow={5}>
       <Flex flexDirection="column">
-        <TextInput
-          isDisabled
-          value={`Select source and output fields in order to generate ${inputCopy}`}
-        />
+        <TextInput isDisabled value={`Select source and output fields in order to ${inputCopy}`} />
         <Flex alignSelf="flex-end" marginTop="spacingS">
           <Button isDisabled>Generate</Button>
         </Flex>

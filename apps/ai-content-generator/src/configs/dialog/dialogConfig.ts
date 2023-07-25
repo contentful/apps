@@ -7,9 +7,7 @@ export const DIALOG_MIN_HEIGHT = '468px';
 type openDialogOptions = OpenCustomWidgetOptions & { parameters: DialogInvocationParameters };
 
 export const makeDialogConfig = (parameters: DialogInvocationParameters): openDialogOptions => {
-  const featureTitle = featureConfig[parameters.feature].title;
-  const dialogTitle =
-    parameters.feature === AIFeature.TRANSLATE ? featureTitle : `Generate ${featureTitle}`;
+  const dialogTitle = featureConfig[parameters.feature].dialogTitle;
 
   return {
     position: 'center',
