@@ -12,7 +12,7 @@ const actionHandler = async (req, res) => {
     const [validBuildHookId] = await getBuildHooksFromAppInstallationParams(appContextDetails);
 
     if (!validBuildHookId) {
-      res.status(404);
+      res.status(500);
       res.json({ message: 'Cannot find build hook' });
       return;
     }
@@ -21,8 +21,12 @@ const actionHandler = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error(err);
-    res.status(400);
-    res.json({ message: err.message });
+    res.status(err.status);
+    res.json({
+      message: err.message,
+      status: err.status,
+      info: 'Firing single build hooks failed',
+    });
   }
 };
 
