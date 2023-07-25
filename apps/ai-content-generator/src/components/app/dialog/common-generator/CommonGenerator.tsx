@@ -9,6 +9,7 @@ import { FeatureComponentProps } from '@configs/features/featureTypes';
 import generatorReducer, { GeneratorParameters } from './generatorReducer';
 import NewOrExistingText from './new-or-existing-text/NewOrExistingText';
 import { styles } from './CommonGenerator.styles';
+import NoFieldsSelectedMessage from './output/output-text-panels/no-fields-selected-message/NoFieldsSelectedMessage';
 
 const initialParameters: GeneratorParameters = {
   isNewText: false,
@@ -17,6 +18,7 @@ const initialParameters: GeneratorParameters = {
   sourceField: '',
   outputField: '',
   originalText: '',
+  canGenerateTextFromField: false,
 };
 
 const CommonGenerator = (props: FeatureComponentProps) => {
@@ -46,7 +48,11 @@ const CommonGenerator = (props: FeatureComponentProps) => {
       <div className={styles.fieldSelectorRoot}>
         <FieldSelector parameters={parameters} isTranslate={isTranslate} fieldTypes={TextFields} />
       </div>
-      <Output outputField={parameters.outputField} inputText={parameters.originalText} />
+      {parameters.canGenerateTextFromField ? (
+        <Output outputField={parameters.outputField} inputText={parameters.originalText} />
+      ) : (
+        <NoFieldsSelectedMessage />
+      )}
     </div>
   );
 };
