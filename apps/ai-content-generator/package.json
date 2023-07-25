@@ -20,8 +20,8 @@
     "build": "tsc && vite build",
     "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_ACCESS_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7sjBFUzBxj1fRrI0eUBwLc --token ${TEST_CMA_TOKEN}"
   },
   "browserslist": {
     "production": [
