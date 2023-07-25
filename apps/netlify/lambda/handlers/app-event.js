@@ -13,8 +13,8 @@ const appEventHandler = async (req, res) => {
     const buildHookIds = await getBuildHooksFromAppInstallationParams(appContextDetails);
 
     if (!buildHookIds || buildHookIds.length === 0) {
-      res.status(404);
-      res.json({ message: 'missing build hook' });
+      res.status(500);
+      res.json({ message: 'Missing build hook' });
       return;
     }
 
@@ -23,8 +23,12 @@ const appEventHandler = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error(err);
-    res.status(400);
-    res.json({ message: err.message });
+    res.status(err.status);
+    res.json({
+      message: err.message,
+      status: err.status,
+      info: 'Firing multiple build hooks failed',
+    });
   }
 };
 

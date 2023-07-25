@@ -82,7 +82,11 @@ const getBuildHooksFromAppInstallationParams = async (
     }
   );
   const parsedRes = await rawResult.json();
-  validateParams(parsedRes);
+  try {
+    validateParams(parsedRes);
+  } catch (err) {
+    throw new Error(err.message);
+  }
 
   if (siteName) {
     return getBuildHookIdFromSiteName(siteName, parsedRes.parameters);
