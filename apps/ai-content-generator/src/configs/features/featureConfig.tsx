@@ -15,33 +15,33 @@ enum AIFeature {
 
 const featureConfig: FeatureConfig = {
   [AIFeature.TITLE]: {
-    title: 'Generate a title',
+    dialogTitle: 'Generate a title',
     buttonTitle: 'Title',
-    helpText: '',
+    messageSuffix: 'generate a title',
     prompt: titlePrompt,
   },
   [AIFeature.CONTENT]: {
-    title: 'Generate content',
+    dialogTitle: 'Generate content',
     buttonTitle: 'Content',
-    helpText: '',
+    messageSuffix: 'generate content',
     prompt: contentPrompt,
   },
   [AIFeature.TRANSLATE]: {
-    title: 'Language translation',
+    dialogTitle: 'Language translation',
     buttonTitle: 'Translate',
-    helpText: '',
+    messageSuffix: 'translate',
     prompt: translatePrompt,
   },
   [AIFeature.SEO_KEYWORDS]: {
-    title: 'Generate SEO keywords',
+    dialogTitle: 'Generate SEO keywords',
     buttonTitle: 'SEO Keywords',
-    helpText: '',
+    messageSuffix: 'generate SEO Keywords',
     prompt: seoKeywordsPrompt,
   },
   [AIFeature.SEO_DESCRIPTION]: {
-    title: 'Generate an SEO description',
+    dialogTitle: 'Generate an SEO description',
     buttonTitle: 'SEO description',
-    helpText: '',
+    messageSuffix: 'generate an SEO description',
     prompt: seoDescriptionPrompt,
   },
 };

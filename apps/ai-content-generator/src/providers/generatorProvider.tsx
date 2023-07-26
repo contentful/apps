@@ -1,47 +1,47 @@
 import { GeneratorReducer } from '@components/app/dialog/common-generator/generatorReducer';
-import { Prompt } from '@configs/features/featureTypes';
+import { AIFeature } from '@configs/features/featureConfig';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { Dispatch, createContext, useState } from 'react';
 
 interface GeneratorContextProps {
   entryId: string;
   targetLocale: string;
-  prompt: Prompt;
   setProviderData: (data: Partial<GeneratorContextProps>) => void;
 
   entry: EntryProps | null;
   contentType: ContentTypeProps | null;
 
   dispatch: Dispatch<GeneratorReducer>;
+  feature: AIFeature;
 }
 
 interface GeneratorProviderProps {
   entryId: string;
-  prompt: Prompt;
 
   children: React.ReactNode;
+  feature: AIFeature;
 }
 
 const defaultContext = {
   entryId: '',
   targetLocale: '',
-  prompt: (() => '') as Prompt,
   setProviderData: (data: Partial<GeneratorContextProps>) => {},
 
   entry: null,
   contentType: null,
 
   dispatch: (() => {}) as Dispatch<GeneratorReducer>,
+  feature: AIFeature.TITLE,
 };
 
 const GeneratorContext = createContext<GeneratorContextProps>(defaultContext);
 
 const GeneratorProvider = (props: GeneratorProviderProps) => {
-  const { entryId, prompt, children } = props;
+  const { entryId, children, feature } = props;
   const [providerData, setProviderData] = useState<GeneratorContextProps>({
     ...defaultContext,
     entryId,
-    prompt,
+    feature,
   });
 
   const updateProviderData = (newProviderData: Partial<GeneratorContextProps>) => {

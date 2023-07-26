@@ -16,10 +16,10 @@ export type FeatureComponentProps = {
  */
 
 type FeatureItem = {
-  title: string;
+  dialogTitle: string;
   buttonTitle: string;
-  helpText: string;
   prompt: Prompt;
+  messageSuffix: string;
 };
 
 /**

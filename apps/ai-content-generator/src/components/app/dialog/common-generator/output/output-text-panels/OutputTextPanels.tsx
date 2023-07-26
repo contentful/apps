@@ -6,6 +6,7 @@ import useEntryAndContentType from '@hooks/dialog/useEntryAndContentType';
 import useAI from '@hooks/dialog/useAI';
 import GeneratedTextPanel from './generated-text-panel/GeneratedTextPanel';
 import OriginalTextPanel from './original-text-panel/OriginalTextPanel';
+import featureConfig from '@configs/features/featureConfig';
 
 interface Props {
   ai: ReturnType<typeof useAI>;
@@ -15,7 +16,7 @@ interface Props {
 
 const OutputTextPanels = (props: Props) => {
   const { ai, inputText, outputField } = props;
-  const { targetLocale, prompt, entryId } = useContext(GeneratorContext);
+  const { targetLocale, feature, entryId } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
 
   const sdk = useSDK<DialogAppSDK>();
@@ -34,7 +35,7 @@ const OutputTextPanels = (props: Props) => {
   const generate = async () => {
     try {
       const localeName = sdk.locales.names[targetLocale];
-      const userMessage = prompt(inputText, localeName);
+      const userMessage = featureConfig[feature].prompt(inputText, localeName);
       await ai.generateMessage(userMessage, localeName);
     } catch (error) {
       console.error(error);
