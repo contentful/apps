@@ -16,8 +16,8 @@
   },
   "scripts": {
     "start": "vite",
-    "start:server": "npm run server && http-server dist -p 3000 -c-1",
     "start:dev": "NODE_ENV='development' && npm start",
+    "start:server": "npm run build && http-server dist -p 3000 -c-1",
     "start:staging": "NODE_ENV='staging' && npm run start:server",
     "start:prod": "NODE_ENV='production' && npm run start:server",
     "build": "tsc && vite build --mode ${NODE_ENV}",
