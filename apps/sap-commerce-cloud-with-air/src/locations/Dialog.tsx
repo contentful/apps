@@ -44,6 +44,7 @@ const styles = {
 };
 
 export default function Dialog() {
+  const sdk = useSDK<DialogAppSDK>();
   const [baseSite, setBaseSite] = useState<string>('');
   const [baseSites, setBaseSites] = useState<string[]>([]);
   const [query, setQuery] = useState<string>('');
@@ -51,9 +52,7 @@ export default function Dialog() {
   const [totalPages] = useState<number>(0);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [errors] = useState([]);
-  const sdk = useSDK<DialogAppSDK>();
   const { invocation, installation } = sdk.parameters;
-
   const { products, loading } = useGetProductList(query, page);
 
   const isFieldTypeArray = (get(invocation, 'fieldType', '') as string) === 'Array';

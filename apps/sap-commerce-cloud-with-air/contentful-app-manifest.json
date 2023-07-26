@@ -43,6 +43,33 @@
           "type": "Symbol"
         }
       ]
+    },
+    {
+      "id": "fetchProductPreview",
+      "name": "SAP fetch product preview",
+      "category": "Custom",
+      "description": "This action is used to fetch a list of product previews from SAP Commerce Cloud.",
+      "type": "function",
+      "path": "actions/fetchProductPreview.js",
+      "entryFile": "./actions/fetchProductPreview.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "sapApiEndpoint",
+          "name": "SAP API Endpoint",
+          "type": "Symbol"
+        },
+        {
+          "id": "apiKey",
+          "name": "SAP API key",
+          "type": "Symbol"
+        },
+        {
+          "id": "skus",
+          "name": "SAP Products skus",
+          "type": "Symbol"
+        }
+      ]
     }
   ]
 }
