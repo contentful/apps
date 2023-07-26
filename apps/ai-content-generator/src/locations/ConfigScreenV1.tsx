@@ -11,7 +11,7 @@ import {
   TextInput,
   TextLink,
 } from '@contentful/f36-components';
-import { css } from 'emotion';
+import { css } from '@emotion/react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import tokens from '@contentful/f36-tokens';
 
@@ -54,7 +54,7 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
+    <Flex flexDirection="column" css={css({ margin: '80px', maxWidth: '800px' })}>
       <Form>
         <FormControl isRequired>
           <FormControl.Label>OpenAI API key</FormControl.Label>

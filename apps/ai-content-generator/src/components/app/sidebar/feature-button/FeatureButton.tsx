@@ -24,7 +24,7 @@ const FeatureButton = (props: Props) => {
 
   return (
     <Tooltip placement="top" id={feature}>
-      <Button className={styles.button} onClick={handleOnClick}>
+      <Button css={styles.button} onClick={handleOnClick}>
         {buttonCopy}
       </Button>
     </Tooltip>

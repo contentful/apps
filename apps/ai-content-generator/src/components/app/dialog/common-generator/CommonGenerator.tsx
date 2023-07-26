@@ -43,9 +43,9 @@ const CommonGenerator = (props: FeatureComponentProps) => {
   useEffect(updateProviderData, [parameters.targetLocale, parameters.locale, dispatch]);
 
   return (
-    <div className={styles.root}>
+    <div css={styles.root}>
       <NewOrExistingText isTitle={isTitle} isNewText={parameters.isNewText} dispatch={dispatch} />
-      <div className={styles.fieldSelectorRoot}>
+      <div css={styles.fieldSelectorRoot}>
         <FieldSelector parameters={parameters} isTranslate={isTranslate} fieldTypes={TextFields} />
       </div>
       {parameters.canGenerateTextFromField ? (
