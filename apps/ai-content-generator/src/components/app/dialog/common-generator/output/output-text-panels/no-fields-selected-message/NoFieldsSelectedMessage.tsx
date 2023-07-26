@@ -5,7 +5,7 @@ import { Button, Flex, TextInput } from '@contentful/f36-components';
 
 const NoFieldsSelectedMessage = () => {
   const { feature } = useContext(GeneratorContext);
-  const inputCopy = featureConfig[feature].description;
+  const inputCopy = featureConfig[feature].messageSuffix;
 
   return (
     <Flex margin="spacingL" flexDirection="column" flexGrow={5}>

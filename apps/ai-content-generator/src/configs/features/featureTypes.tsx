@@ -19,7 +19,7 @@ type FeatureItem = {
   dialogTitle: string;
   buttonTitle: string;
   prompt: Prompt;
-  description: string;
+  messageSuffix: string;
 };
 
 /**

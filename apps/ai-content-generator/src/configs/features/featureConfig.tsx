@@ -17,31 +17,31 @@ const featureConfig: FeatureConfig = {
   [AIFeature.TITLE]: {
     dialogTitle: 'Generate a title',
     buttonTitle: 'Title',
-    description: 'generate a title',
+    messageSuffix: 'generate a title',
     prompt: titlePrompt,
   },
   [AIFeature.CONTENT]: {
     dialogTitle: 'Generate content',
     buttonTitle: 'Content',
-    description: 'generate content',
+    messageSuffix: 'generate content',
     prompt: contentPrompt,
   },
   [AIFeature.TRANSLATE]: {
     dialogTitle: 'Language translation',
     buttonTitle: 'Translate',
-    description: 'translate',
+    messageSuffix: 'translate',
     prompt: translatePrompt,
   },
   [AIFeature.SEO_KEYWORDS]: {
     dialogTitle: 'Generate SEO keywords',
     buttonTitle: 'SEO Keywords',
-    description: 'generate SEO Keywords',
+    messageSuffix: 'generate SEO Keywords',
     prompt: seoKeywordsPrompt,
   },
   [AIFeature.SEO_DESCRIPTION]: {
     dialogTitle: 'Generate an SEO description',
     buttonTitle: 'SEO description',
-    description: 'generate an SEO description',
+    messageSuffix: 'generate an SEO description',
     prompt: seoDescriptionPrompt,
   },
 };
