@@ -46,7 +46,7 @@
     "happy-dom": "6.0.2",
     "http-server": "^14.1.1",
     "typescript": "4.7.4",
-    "vite": "3.0.0",
+    "vite": "3.2.7",
     "vitest": "0.18.0"
   }
 }
