@@ -15,16 +15,21 @@ const useInitializeParameters = (dispatch: Dispatch<ParameterReducer>) => {
   const sdk = useSDK<ConfigAppSDK>();
 
   const dispatchParameters = async () => {
-    const parameters = await sdk.app.getParameters<AppInstallationParameters>();
+    try {
+      const parameters = await sdk.app.getParameters<AppInstallationParameters>();
 
-    if (!parameters) return;
+      // TOOD Handle error state here when it's freshly installed in a space
+      if (!parameters) return;
 
-    dispatch({
-      type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS,
-      value: parameters,
-    });
-
-    sdk.app.setReady();
+      dispatch({
+        type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS,
+        value: parameters,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      sdk.app.setReady();
+    }
   };
 
   useEffect(() => {

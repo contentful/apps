@@ -54,7 +54,7 @@ const ConfigScreen = () => {
   }, [sdk]);
 
   return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
+    <Flex flexDirection="column" css={css({ margin: '80px', maxWidth: '800px' })}>
       <Form>
         <FormControl isRequired>
           <FormControl.Label>OpenAI API key</FormControl.Label>
