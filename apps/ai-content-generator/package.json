@@ -20,7 +20,7 @@
     "start:preview": "npm run build && vite preview",
     "start:staging": "NODE_ENV='staging' && npm run start:preview",
     "start:prod": "NODE_ENV='production' && npm run start:preview",
-    "build": "tsc && vite build --mode ${NODE_ENV:='staging'}",
+    "build": "tsc && vite build --mode ${NODE_ENV:='production'}",
     "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "doNotDeployProdYet": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_ACCESS_TOKEN}",
