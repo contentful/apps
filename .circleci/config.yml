@@ -131,7 +131,7 @@ jobs:
           command: |
             REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
-            NODE_ENV='prod' \
+            NODE_ENV='production' \
             npm run build:deploy
       - publish
       - run:
