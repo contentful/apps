@@ -1,12 +1,10 @@
-import featureConfig, { AIFeature } from '@configs/features/featureConfig';
+import { useContext } from 'react';
+import { GeneratorContext } from '@providers/generatorProvider';
+import featureConfig from '@configs/features/featureConfig';
 import { Button, Flex, TextInput } from '@contentful/f36-components';
 
-interface Props {
-  feature: AIFeature;
-}
-
-const NoFieldsSelectedMessage = (props: Props) => {
-  const { feature } = props;
+const NoFieldsSelectedMessage = () => {
+  const { feature } = useContext(GeneratorContext);
   const inputCopy = featureConfig[feature].description;
 
   return (

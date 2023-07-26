@@ -3,8 +3,8 @@ import featureConfig, { AIFeature } from '@configs/features/featureConfig';
 import FeatureButton from './feature-button/FeatureButton';
 
 const SidebarButtons = () => {
-  const featureList = Object.entries(featureConfig).map(([featureId]) => {
-    return <FeatureButton key={featureId} feature={featureId as AIFeature} />;
+  const featureList = Object.keys(featureConfig).map((feature) => {
+    return <FeatureButton key={feature} feature={feature as AIFeature} />;
   });
 
   return <Box>{featureList}</Box>;
