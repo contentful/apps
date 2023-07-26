@@ -64,8 +64,8 @@ jobs:
       - run:
           name: Build
           command: |
-          NODE_ENV='production' \
-          npm run build
+            NODE_ENV='production' \
+            npm run build
 
   deploy-staging:
     docker:
