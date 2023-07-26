@@ -11,7 +11,7 @@ import {
   TextInput,
   TextLink,
 } from '@contentful/f36-components';
-import { css } from 'emotion';
+import { css } from '@emotion/react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import tokens from '@contentful/f36-tokens';
 

@@ -1,6 +1,6 @@
-import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 import { DIALOG_MIN_HEIGHT } from '@configs/dialog/dialogConfig';
+import { css } from '@emotion/react';
 
 export const styles = {
   fieldSelectorRoot: css({

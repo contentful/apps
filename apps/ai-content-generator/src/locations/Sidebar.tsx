@@ -8,7 +8,7 @@ const Sidebar = () => {
   return (
     <>
       <SidebarButtons />
-      <div className={styles.disclaimerMsgWrapper}>
+      <div css={styles.disclaimerMsgWrapper}>
         <DisclaimerMessage />
       </div>
     </>

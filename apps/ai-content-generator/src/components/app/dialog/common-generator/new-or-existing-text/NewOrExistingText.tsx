@@ -24,7 +24,7 @@ const NewOrExistingText = (props: Props) => {
   return (
     <Flex flexGrow={1} flexDirection="column">
       <Button
-        className={styles.button}
+        css={styles.button}
         title="Input custom text"
         isActive={isNewText}
         onClick={() => changeTextSource(true)}>
@@ -32,7 +32,7 @@ const NewOrExistingText = (props: Props) => {
       </Button>
       <Button
         title="Use existing text from entry"
-        className={styles.button}
+        css={styles.button}
         isActive={!isNewText}
         onClick={() => changeTextSource(false)}>
         From field
