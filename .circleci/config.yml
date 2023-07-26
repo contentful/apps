@@ -63,7 +63,9 @@ jobs:
             npm run bootstrap:ci
       - run:
           name: Build
-          command: npm run build
+          command: |
+          NODE_ENV='production' \
+          npm run build
 
   deploy-staging:
     docker:
