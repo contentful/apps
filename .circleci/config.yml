@@ -91,6 +91,7 @@ jobs:
           command: |
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
+            NODE_ENV='staging' \
             npm run build:deploy
       - run:
           name: Deploy apps to staging
@@ -130,6 +131,7 @@ jobs:
           command: |
             REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
+            NODE_ENV='prod' \
             npm run build:deploy
       - publish
       - run:
