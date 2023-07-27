@@ -23,7 +23,7 @@
     "build": "tsc && vite build --mode ${NODE_ENV:='production'}",
     "test": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "doNotDeployProdYet": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_ACCESS_TOKEN}",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_ACCESS_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7sjBFUzBxj1fRrI0eUBwLc --token ${TEST_CMA_TOKEN}"
   },
   "browserslist": {
