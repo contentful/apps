@@ -17,7 +17,7 @@ import {
 } from '@contentful/f36-components';
 import { SearchIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/forma-36-tokens';
-import { ProductList } from '../components/Dialog/ProductList';
+import ProductList from '../components/Dialog/ProductList';
 import { productTransformer } from '../api/dataTransformers';
 import { apiKey } from '../config';
 import { Product } from '../interfaces';
@@ -100,7 +100,6 @@ export default function Dialog() {
   const selectMultipleProductsClickEvent = () => {
     const currentField = get(sdk.parameters.invocation, 'fieldValue', [] as string[]);
     const updatedField = union(currentField, selectedProducts);
-
     sdk.close(updatedField);
   };
 
