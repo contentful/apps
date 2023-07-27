@@ -43,14 +43,14 @@ const isEmptyOrDone = (line: string) => line === '' || line === '[DONE]';
  * @returns
  */
 const streamToParsedText = (acc: string, line: string) => {
-  const dataText = /(\n)?^data:\s*/;
-  const removedDataText = line.replace(dataText, '').trim();
+  const dataPrepend = /(\n)?^data:\s*/;
+  const textWithoutDataPrepend = line.replace(dataPrepend, '').trim();
 
-  if (isEmptyOrDone(removedDataText)) {
+  if (isEmptyOrDone(textWithoutDataPrepend)) {
     return acc;
   }
 
-  const parsedLine = JSON.parse(removedDataText);
+  const parsedLine = JSON.parse(textWithoutDataPrepend);
   const content = getContentFromParsedLine(parsedLine) || '';
 
   return acc + content;
