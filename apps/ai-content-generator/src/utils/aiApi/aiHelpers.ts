@@ -28,4 +28,32 @@ const getContentFromParsedLine = (parsedLine: any): string => {
   return delta.content;
 };
 
-export { findLineWithTextData, getContentFromParsedLine };
+/**
+ * A filter function that checks if a line has text data or
+ * is the end of a conversation.
+ * @param line
+ * @returns
+ */
+const isEmptyOrDone = (line: string) => line === '' || line === '[DONE]';
+
+/**
+ * A reducer function that parses the stream returned from OpenAI's API.
+ * @param acc
+ * @param line
+ * @returns
+ */
+const streamToParsedText = (acc: string, line: string) => {
+  const dataText = /(\n)?^data:\s*/;
+  const removedDataText = line.replace(dataText, '').trim();
+
+  if (isEmptyOrDone(removedDataText)) {
+    return acc;
+  }
+
+  const parsedLine = JSON.parse(removedDataText);
+  const content = getContentFromParsedLine(parsedLine) || '';
+
+  return acc + content;
+};
+
+export { findLineWithTextData, getContentFromParsedLine, streamToParsedText };
