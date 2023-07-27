@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import { FieldAppSDK } from '@contentful/app-sdk';

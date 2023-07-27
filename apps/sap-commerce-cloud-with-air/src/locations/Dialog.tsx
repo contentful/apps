@@ -18,7 +18,9 @@ import {
 import { SearchIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/forma-36-tokens';
 import { ProductList } from '../components/Dialog/ProductList';
-import { useGetProductList } from '../hooks/useGetProductList';
+import { productTransformer } from '../api/dataTransformers';
+import { apiKey } from '../config';
+import { Product } from '../interfaces';
 
 const styles = {
   header: css({
@@ -51,17 +53,49 @@ export default function Dialog() {
   const [page, setPage] = useState<number>(0);
   const [totalPages] = useState<number>(0);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [products, setProducts] = useState<Product[]>([]);
   const [errors] = useState([]);
-  const { invocation, installation } = sdk.parameters;
-  const { products, loading } = useGetProductList(query, page);
 
-  const isFieldTypeArray = (get(invocation, 'fieldType', '') as string) === 'Array';
+  const isFieldTypeArray = (get(sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
 
   useEffect(() => {
-    const { baseSites } = installation;
-    setBaseSite(baseSites);
-    setBaseSites([baseSites]);
-  }, [installation]);
+    async function fetchProductList() {
+      setLoading(true);
+      try {
+        const req = await sdk.cma.appActionCall.createWithResponse(
+          {
+            appActionId: 'fetchProductList',
+            environmentId: sdk.ids.environment,
+            spaceId: sdk.ids.space,
+            appDefinitionId: sdk.ids.app!,
+          },
+          {
+            parameters: {
+              sapApiEndpoint: `${sdk.parameters.installation.apiEndpoint}/occ/v2/${sdk.parameters.installation.baseSites}/products/search?query=${query}&fields=FULL&currentPage=${page}`,
+              apiKey,
+            },
+          }
+        );
+
+        const res = JSON.parse(req.response.body);
+
+        if (res.body) {
+          const transformedProducts = res.body.products.map(
+            productTransformer(sdk.parameters.installation)
+          );
+          setProducts(transformedProducts);
+          setBaseSite(sdk.parameters.installation.baseSites);
+          setBaseSites([sdk.parameters.installation.baseSites]);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching product list:', error);
+      }
+    }
+
+    fetchProductList();
+  }, [sdk, page, query]);
 
   const selectMultipleProductsClickEvent = () => {
     const currentField = get(sdk.parameters.invocation, 'fieldValue', [] as string[]);

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
-import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { FieldAppSDK } from '@contentful/app-sdk';
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
 import get from 'lodash/get';
@@ -10,12 +10,7 @@ import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
 import logo from '../logo.png';
 import { ProductPreviews } from './ProductPreviews/ProductPreviews';
 import { apiKey } from '../config';
-
-interface Props {
-  sdk: FieldExtensionSDK;
-  cma: any;
-  applicationInterfaceKey: string;
-}
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 const styles = {
   sortable: css({
@@ -51,28 +46,28 @@ function makeCTAText(fieldType: string, pickerMode: 'category' | 'product') {
   return `Select ${beingSelected}`;
 }
 
-const FieldComponent: React.FC<Props> = (props) => {
-  const [value, setValue] = useState<string[]>(fieldValueToState(props.sdk.field.getValue()));
+export default async function Field() {
+  const sdk = useSDK<FieldAppSDK>();
+  const [value, setValue] = useState<string[]>(fieldValueToState(sdk.field.getValue()));
   const [editingDisabled, setEditingDisabled] = useState(true);
 
   useEffect(() => {
-    props.sdk.window.startAutoResizer();
+    sdk.window.startAutoResizer();
 
     // Handle external changes (e.g. when multiple authors are working on the same entry).
     const handleValueChange = (value?: string[] | string) => {
       setValue(fieldValueToState(value));
     };
-    props.sdk.field.onValueChanged(handleValueChange);
+    sdk.field.onValueChanged(handleValueChange);
 
     // Disable editing (e.g. when field is not editable due to R&P).
     const handleIsDisabledChange = (editingDisabled: boolean) => {
       setEditingDisabled(editingDisabled);
     };
-    props.sdk.field.onIsDisabledChanged(handleIsDisabledChange);
-  }, [props.sdk.field, props.sdk.window]);
+    sdk.field.onIsDisabledChanged(handleIsDisabledChange);
+  }, [sdk.field, sdk.window]);
 
   const getPickerMode = () => {
-    const { sdk } = props;
     const contentTypeId = sdk.contentType.sys.id;
     const fieldId = sdk.field.id;
 
@@ -87,20 +82,18 @@ const FieldComponent: React.FC<Props> = (props) => {
     setValue(skus);
 
     if (skus.length > 0) {
-      const value = props.sdk.field.type === 'Array' ? skus : skus[0];
-      props.sdk.field.setValue(value);
+      const value = sdk.field.type === 'Array' ? skus : skus[0];
+      sdk.field.setValue(value);
     } else {
-      props.sdk.field.removeValue();
+      sdk.field.removeValue();
     }
   };
 
   const onDialogOpen = async () => {
-    const { sdk } = props;
-
     const skus = await sdk.dialogs.openCurrentApp({
       allowHeightOverflow: true,
       position: 'center',
-      title: makeCTAText(sdk.field.type, getPickerMode()),
+      title: makeCTAText(sdk.field.type, getPickerMode() as 'category' | 'product'),
       shouldCloseOnOverlayClick: true,
       shouldCloseOnEscapePress: true,
       parameters: {
@@ -123,20 +116,20 @@ const FieldComponent: React.FC<Props> = (props) => {
   const data = value;
   const isPickerTypeSetToCategory = getPickerMode() === 'category';
   const hasItems = data.length > 0;
-  const config = props.sdk.parameters;
-  const fieldType = get(props, ['sdk', 'field', 'type'], '');
+  const config = sdk.parameters;
+  const fieldType = get(sdk, ['field', 'type'], '');
 
   const handleFetchProductPreviews = async (skus: string[]) => {
-    const req = await props.sdk.cma.appActionCall.createWithResponse(
+    const req = await sdk.cma.appActionCall.createWithResponse(
       {
         appActionId: 'fetchProductPreview',
-        environmentId: props.sdk.ids.environment,
-        spaceId: props.sdk.ids.space,
-        appDefinitionId: props.sdk.ids.app!,
+        environmentId: sdk.ids.environment,
+        spaceId: sdk.ids.space,
+        appDefinitionId: sdk.ids.app!,
       },
       {
         parameters: {
-          sapApiEndpoint: `${props.sdk.parameters.installation.apiEndpoint}/occ/v2/${props.sdk.parameters.installation.baseSites}`,
+          sapApiEndpoint: `${sdk.parameters.installation.apiEndpoint}/occ/v2/${sdk.parameters.installation.baseSites}`,
           apiKey,
           skus: JSON.stringify(skus),
         },
@@ -152,27 +145,23 @@ const FieldComponent: React.FC<Props> = (props) => {
         <div className={styles.sortable}>
           {isPickerTypeSetToCategory ? (
             <CategoryPreviews
-              sdk={props.sdk}
+              sdk={sdk}
               disabled={editingDisabled}
               categories={data}
               onChange={updateStateValue}
               fetchCategoryPreviews={(categories) =>
-                fetchCategoryPreviews(
-                  categories,
-                  config.installation,
-                  props.applicationInterfaceKey
-                )
+                fetchCategoryPreviews(categories, config.installation, apiKey)
               }
-              applicationInterfaceKey={props.applicationInterfaceKey}
+              applicationInterfaceKey={apiKey}
             />
           ) : (
             <ProductPreviews
-              sdk={props.sdk}
+              sdk={sdk}
               disabled={editingDisabled}
               skus={data}
               onChange={updateStateValue}
               fetchProductPreviews={handleFetchProductPreviews}
-              applicationInterfaceKey={props.applicationInterfaceKey}
+              applicationInterfaceKey={apiKey}
             />
           )}
         </div>
@@ -185,11 +174,9 @@ const FieldComponent: React.FC<Props> = (props) => {
           size="small"
           onClick={onDialogOpen}
           isDisabled={editingDisabled}>
-          {makeCTAText(fieldType, getPickerMode())}
+          {makeCTAText(fieldType, getPickerMode() as 'category' | 'product')}
         </Button>
       </div>
     </>
   );
-};
-
-export default FieldComponent;
+}
