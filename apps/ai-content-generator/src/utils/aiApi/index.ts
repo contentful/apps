@@ -1,5 +1,5 @@
 import { ChatCompletionRequestMessage } from 'openai';
-import { findLineWithTextData, getContentFromParsedLine } from './aiHelpers';
+import { findLineWithTextData, getContentFromParsedLine, streamToParsedText } from './aiHelpers';
 
 /**
  * This class is used to interact with OpenAI's API.
@@ -67,16 +67,13 @@ class AI {
       return false;
     }
 
-    const dataList = this.decoder.decode(value);
-    const lines = dataList.split('data: ');
+    const dataList = this.decoder.decode(value as Buffer);
+    const lines = dataList.split(/\n{2}/);
 
-    const lineWithTextData = lines.find(findLineWithTextData);
+    const textData = lines.reduce(streamToParsedText, '');
 
-    if (lineWithTextData) {
-      const parsedLine = JSON.parse(lineWithTextData);
-      const content = getContentFromParsedLine(parsedLine);
-
-      return content;
+    if (textData) {
+      return textData;
     }
 
     return '';
