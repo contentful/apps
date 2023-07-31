@@ -14,19 +14,19 @@ import Home from '@locations/Home';
 import { useFlags, useLDClient } from 'launchdarkly-react-client-sdk';
 import { ldConfigType } from '@configs/launch-darkly/ldConfig';
 
-const ComponentLocationSettings = (isV1: boolean) => ({
-  [locations.LOCATION_APP_CONFIG]: isV1 ? ConfigScreenV1 : ConfigScreen,
+const ComponentLocationSettings = (isV2: boolean) => ({
+  [locations.LOCATION_APP_CONFIG]: isV2 ? ConfigScreen : ConfigScreenV1,
   [locations.LOCATION_ENTRY_FIELD]: Field,
   [locations.LOCATION_ENTRY_EDITOR]: EntryEditor,
-  [locations.LOCATION_DIALOG]: isV1 ? DialogV1 : Dialog,
-  [locations.LOCATION_ENTRY_SIDEBAR]: isV1 ? SidebarV1 : Sidebar,
+  [locations.LOCATION_DIALOG]: isV2 ? Dialog : DialogV1,
+  [locations.LOCATION_ENTRY_SIDEBAR]: isV2 ? Sidebar : SidebarV1,
   [locations.LOCATION_PAGE]: Page,
   [locations.LOCATION_HOME]: Home,
 });
 
 const App = () => {
   const sdk = useSDK();
-  const { integrationsAiContentGeneratorV1: isV1 } = useFlags<ldConfigType>();
+  const { integrationsAiContentGeneratorV2: isV2 } = useFlags<ldConfigType>();
   const ldClient = useLDClient();
 
   useEffect(() => {
@@ -39,14 +39,14 @@ const App = () => {
   }, [ldClient]);
 
   const Component = useMemo(() => {
-    const locations = ComponentLocationSettings(isV1);
+    const locations = ComponentLocationSettings(isV2);
 
     for (const [location, component] of Object.entries(locations)) {
       if (sdk.location.is(location)) {
         return component;
       }
     }
-  }, [sdk.location, isV1]);
+  }, [sdk.location, isV2]);
 
   return Component ? <Component /> : null;
 };
