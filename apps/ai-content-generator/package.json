@@ -10,7 +10,6 @@
     "@contentful/rich-text-plain-text-renderer": "^16.0.5",
     "@emotion/react": "^11.11.1",
     "contentful-management": "10.28.1",
-    "lodash": "^4.17.21",
     "openai": "^3.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
@@ -44,7 +43,6 @@
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@testing-library/react": "14.0.0",
     "@types/jest": "^29.5.3",
-    "@types/lodash": "^4.14.196",
     "@types/node": "18.0.3",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",

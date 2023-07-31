@@ -7,7 +7,6 @@ import {
 import { ContentFields, EntryProps } from 'contentful-management';
 import { FieldLocales } from '@locations/Dialog';
 import { LocaleNames } from '@providers/generatorProvider';
-import { orderBy } from 'lodash';
 
 /**
  * This formats an entry's field into an easy-to-use object.
@@ -40,6 +39,26 @@ const formatField = (
   }
 
   return formattedField;
+};
+
+/**
+ * This sorts the field options so that the default locale is first,
+ * then alphabetically by language name
+ * @param a
+ * @param b
+ * @returns
+ */
+const sortFieldOptionsByLanguage = (a: Field, b: Field) => {
+  // Default should be listed first
+  if (a.isDefaultLocale) {
+    return -1;
+  }
+
+  if (!a.isDefaultLocale && !b.isDefaultLocale) {
+    return a.language > b.language ? 1 : -1;
+  }
+
+  return 0;
 };
 
 /**
@@ -79,13 +98,8 @@ const isSupported = (
         allFields.push(formattedField);
       });
 
-      // Sort the locales so that default is first, then alphabetically by language name
-      const sortedFieldsWithContent = orderBy(
-        fieldsWithContent,
-        ['isDefaultLocale', 'language'],
-        ['desc', 'asc']
-      );
-      const sortedAllFields = orderBy(allFields, ['isDefaultLocale', 'language'], ['desc', 'asc']);
+      const sortedFieldsWithContent = fieldsWithContent.sort(sortFieldOptionsByLanguage);
+      const sortedAllFields = allFields.sort(sortFieldOptionsByLanguage);
 
       fieldAcc.supportedFieldsWithContent = [
         ...fieldAcc.supportedFieldsWithContent,
