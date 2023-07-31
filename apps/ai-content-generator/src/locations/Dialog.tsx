@@ -27,9 +27,6 @@ const Dialog = () => {
 
   const getGenerator = (feature: AIFeature) => {
     switch (feature) {
-      case AIFeature.TRANSLATE:
-        return <CommonGenerator isTranslate />;
-
       case AIFeature.TITLE:
         return <CommonGenerator isTitle />;
 

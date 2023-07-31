@@ -3,8 +3,6 @@ import { GeneratorContext } from '@providers/generatorProvider';
 import FieldSelector from '@components/app/dialog/common-generator/field-selector/FieldSelector';
 import Output from '@components/app/dialog/common-generator/output/Output';
 import { TextFields } from '@hooks/dialog/useSupportedFields';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { DialogAppSDK } from '@contentful/app-sdk';
 import { FeatureComponentProps } from '@configs/features/featureTypes';
 import generatorReducer, { GeneratorParameters } from './generatorReducer';
 import NewOrExistingText from './new-or-existing-text/NewOrExistingText';
@@ -13,8 +11,6 @@ import NoFieldsSelectedMessage from './output/output-text-panels/no-fields-selec
 
 const initialParameters: GeneratorParameters = {
   isNewText: false,
-  locale: '',
-  targetLocale: '',
   sourceField: '',
   outputField: '',
   outputFieldId: '',
@@ -24,31 +20,24 @@ const initialParameters: GeneratorParameters = {
 };
 
 const CommonGenerator = (props: FeatureComponentProps) => {
-  const { isTranslate, isTitle } = props;
+  const { isTitle } = props;
   const { setProviderData } = useContext(GeneratorContext);
 
-  const sdk = useSDK<DialogAppSDK>();
-
-  const [parameters, dispatch] = useReducer(generatorReducer, {
-    ...initialParameters,
-    locale: sdk.locales.default,
-  });
+  const [parameters, dispatch] = useReducer(generatorReducer, initialParameters);
 
   const updateProviderData = () => {
-    const { targetLocale, locale } = parameters;
     setProviderData({
-      targetLocale: targetLocale || locale,
       dispatch,
     });
   };
 
-  useEffect(updateProviderData, [parameters.targetLocale, parameters.locale, dispatch]);
+  useEffect(updateProviderData, [dispatch]);
 
   return (
     <div css={styles.root}>
       <NewOrExistingText isTitle={isTitle} isNewText={parameters.isNewText} dispatch={dispatch} />
       <div css={styles.fieldSelectorRoot}>
-        <FieldSelector parameters={parameters} isTranslate={isTranslate} fieldTypes={TextFields} />
+        <FieldSelector parameters={parameters} fieldTypes={TextFields} />
       </div>
       {parameters.canGenerateTextFromField ? (
         <Output

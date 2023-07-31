@@ -17,7 +17,7 @@ interface Props {
 
 const OutputTextPanels = (props: Props) => {
   const { ai, inputText, outputFieldId, outputFieldLocale } = props;
-  const { targetLocale, feature, entryId, localeNames } = useContext(GeneratorContext);
+  const { feature, entryId, localeNames } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
 
   const sdk = useSDK<DialogAppSDK>();

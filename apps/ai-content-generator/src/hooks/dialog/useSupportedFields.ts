@@ -42,7 +42,6 @@ export type SupportedFieldsOutput = {
  *
  * @param entryId Contentful entry id
  * @param supportedFields A list of supported fields
- * @param targetLocale The locale to get the fields from
  * @param fieldLocales Fields and their localizations
  * @param localeNames Shorthand locales to readable language names
  * @returns
@@ -50,7 +49,6 @@ export type SupportedFieldsOutput = {
 const useSupportedFields = (
   entryId: string,
   supportedFields: SupportedFieldTypes[],
-  targetLocale: string,
   fieldLocales: FieldLocales,
   localeNames: LocaleNames
 ) => {
@@ -58,7 +56,7 @@ const useSupportedFields = (
   const fields = useMemo(() => {
     if (entry && contentType) {
       const validatedFields: SupportedFieldsOutput = contentType.fields.reduce(
-        isSupported(entry, supportedFields, targetLocale, fieldLocales, localeNames),
+        isSupported(entry, supportedFields, fieldLocales, localeNames),
         {
           supportedFieldsWithContent: [],
           allSupportedFields: [],
@@ -69,7 +67,7 @@ const useSupportedFields = (
     }
 
     return { supportedFieldsWithContent: [], allSupportedFields: [] };
-  }, [entry, contentType, targetLocale, supportedFields, fieldLocales, localeNames]);
+  }, [entry, contentType, supportedFields, fieldLocales, localeNames]);
 
   return { ...fields };
 };

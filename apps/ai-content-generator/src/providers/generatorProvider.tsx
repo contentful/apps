@@ -10,7 +10,6 @@ export interface LocaleNames {
 
 interface GeneratorContextProps {
   entryId: string;
-  targetLocale: string;
   setProviderData: (data: Partial<GeneratorContextProps>) => void;
 
   entry: EntryProps | null;
@@ -34,7 +33,6 @@ interface GeneratorProviderProps {
 
 const defaultContext = {
   entryId: '',
-  targetLocale: '',
   setProviderData: (data: Partial<GeneratorContextProps>) => {},
 
   entry: null,

@@ -1,6 +1,4 @@
 export enum GeneratorAction {
-  UPDATE_LOCALE = 'updateLocale',
-  UPDATE_TARGET_LOCALE = 'updateTargetLocale',
   IS_NEW_TEXT = 'isNewText',
   IS_NOT_NEW_TEXT = 'isNotNewText',
   UPDATE_SOURCE_FIELD = 'changeSourceField',
@@ -10,8 +8,6 @@ export enum GeneratorAction {
 }
 
 export type GeneratorParameters = {
-  locale: string;
-  targetLocale: string;
   isNewText: boolean;
   // can generate text from field when both source and output fields are selected
   canGenerateTextFromField: boolean;
@@ -60,8 +56,6 @@ export type GeneratorReducer =
   | GeneratorImpulseActions;
 
 const {
-  UPDATE_LOCALE,
-  UPDATE_TARGET_LOCALE,
   IS_NEW_TEXT,
   IS_NOT_NEW_TEXT,
   UPDATE_SOURCE_FIELD,
@@ -71,10 +65,6 @@ const {
 } = GeneratorAction;
 const generatorReducer = (state: GeneratorParameters, action: GeneratorReducer) => {
   switch (action.type) {
-    case UPDATE_LOCALE:
-      return { ...state, locale: action.value };
-    case UPDATE_TARGET_LOCALE:
-      return { ...state, targetLocale: action.value };
     case IS_NEW_TEXT:
       return { ...state, isNewText: true, originalText: '', generatedText: '' };
     case IS_NOT_NEW_TEXT:

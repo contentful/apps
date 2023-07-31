@@ -45,7 +45,6 @@ const formatField = (
  * TODO: Support storing fields for both Source and Output
  * @param entry
  * @param supportedFields
- * @param locale
  * @param fieldLocales
  * @param localeNames
  * @returns
@@ -53,7 +52,6 @@ const formatField = (
 const isSupported = (
   entry: EntryProps,
   supportedFields: SupportedFieldTypes[],
-  locale: string,
   fieldLocales: FieldLocales,
   localeNames: LocaleNames
 ) => {
