@@ -61,8 +61,8 @@ const {
   UPDATE_SOURCE_FIELD,
   UPDATE_OUTPUT_FIELD,
   UPDATE_ORIGINAL_TEXT,
-  CAN_GENERATE_TEXT_FROM_FIELD,
 } = GeneratorAction;
+
 const generatorReducer = (state: GeneratorParameters, action: GeneratorReducer) => {
   switch (action.type) {
     case IS_NEW_TEXT:

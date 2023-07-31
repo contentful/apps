@@ -1,6 +1,6 @@
 import { DialogInvocationParameters } from '@locations/Dialog';
 import { OpenCustomWidgetOptions } from '@contentful/app-sdk';
-import featureConfig, { AIFeature } from '@configs/features/featureConfig';
+import featureConfig from '@configs/features/featureConfig';
 
 export const DIALOG_MIN_HEIGHT = '468px';
 

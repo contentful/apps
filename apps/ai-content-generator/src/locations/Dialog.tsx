@@ -1,5 +1,5 @@
 import useDialogParameters from '@hooks/dialog/useDialogParameters';
-import featureConfig, { AIFeature } from '@configs/features/featureConfig';
+import { AIFeature } from '@configs/features/featureConfig';
 import CommonGenerator from '@components/app/dialog/common-generator/CommonGenerator';
 import GeneratorProvider from '@providers/generatorProvider';
 import { useSDK } from '@contentful/react-apps-toolkit';
