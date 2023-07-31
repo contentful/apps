@@ -10,6 +10,7 @@
     "@contentful/rich-text-plain-text-renderer": "^16.0.5",
     "@emotion/react": "^11.11.1",
     "contentful-management": "10.28.1",
+    "launchdarkly-react-client-sdk": "^3.0.8",
     "openai": "^3.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
