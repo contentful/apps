@@ -16,6 +16,7 @@ interface GeneratorContextProps {
   contentType: ContentTypeProps | null;
   fieldLocales: FieldLocales;
   localeNames: LocaleNames;
+  defaultLocale: string;
 
   dispatch: Dispatch<GeneratorReducer>;
   feature: AIFeature;
@@ -26,6 +27,7 @@ interface GeneratorProviderProps {
 
   fieldLocales: FieldLocales;
   localeNames: LocaleNames;
+  defaultLocale: string;
 
   children: React.ReactNode;
   feature: AIFeature;
@@ -39,6 +41,7 @@ const defaultContext = {
   contentType: null,
   fieldLocales: {},
   localeNames: {},
+  defaultLocale: '',
 
   dispatch: (() => {}) as Dispatch<GeneratorReducer>,
   feature: AIFeature.TITLE,
@@ -47,13 +50,14 @@ const defaultContext = {
 const GeneratorContext = createContext<GeneratorContextProps>(defaultContext);
 
 const GeneratorProvider = (props: GeneratorProviderProps) => {
-  const { entryId, children, feature, fieldLocales, localeNames } = props;
+  const { entryId, children, feature, fieldLocales, localeNames, defaultLocale } = props;
   const [providerData, setProviderData] = useState<GeneratorContextProps>({
     ...defaultContext,
     entryId,
     feature,
     fieldLocales,
     localeNames,
+    defaultLocale,
   });
 
   const updateProviderData = (newProviderData: Partial<GeneratorContextProps>) => {

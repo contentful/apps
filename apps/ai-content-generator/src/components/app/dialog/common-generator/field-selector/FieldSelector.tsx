@@ -18,13 +18,15 @@ interface Props {
 const FieldSelector = (props: Props) => {
   const { parameters, fieldTypes } = props;
   const { isNewText, sourceField, outputField } = parameters;
-  const { entryId, dispatch, fieldLocales, localeNames } = useContext(GeneratorContext);
+  const { entryId, dispatch, fieldLocales, localeNames, defaultLocale } =
+    useContext(GeneratorContext);
 
   const { supportedFieldsWithContent, allSupportedFields } = useSupportedFields(
     entryId,
     fieldTypes,
     fieldLocales,
-    localeNames
+    localeNames,
+    defaultLocale
   );
 
   const handleSelectChange = (action: GeneratorAction) => {
@@ -52,7 +54,7 @@ const FieldSelector = (props: Props) => {
   const handleBaseDataChange = () => {
     if (supportedFieldsWithContent.length) {
       const sourceFieldData = isNewText
-        ? { id: '', key: '', name: '', locale: '', data: '' }
+        ? { id: '', key: '', name: '', locale: '', data: '', language: '', isDefaultLocale: false }
         : getFieldData(sourceField, supportedFieldsWithContent);
       updateSourceField(sourceFieldData, supportedFieldsWithContent[0], dispatch);
     }

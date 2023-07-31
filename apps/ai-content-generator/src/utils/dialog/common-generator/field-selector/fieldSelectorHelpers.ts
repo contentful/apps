@@ -13,7 +13,17 @@ import { Dispatch } from 'react';
  */
 const getFieldData = (fieldKey: string, fields: Field[]) => {
   const field = fields.find((field) => field.key === fieldKey);
-  return field ?? { id: '', key: '', name: '', locale: '', data: '' };
+  return (
+    field ?? {
+      id: '',
+      key: '',
+      name: '',
+      locale: '',
+      data: '',
+      language: '',
+      isDefaultLocale: false,
+    }
+  );
 };
 
 /**

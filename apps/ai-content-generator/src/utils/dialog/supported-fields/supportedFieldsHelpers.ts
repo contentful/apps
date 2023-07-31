@@ -7,6 +7,7 @@ import {
 import { ContentFields, EntryProps } from 'contentful-management';
 import { FieldLocales } from '@locations/Dialog';
 import { LocaleNames } from '@providers/generatorProvider';
+import { orderBy } from 'lodash';
 
 /**
  * This formats an entry's field into an easy-to-use object.
@@ -14,13 +15,15 @@ import { LocaleNames } from '@providers/generatorProvider';
  * @param entry
  * @param locale
  * @param localeNames
+ * @param defaultLocale
  * @returns Field
  */
 const formatField = (
   field: ContentFields,
   entry: EntryProps,
   locale: string,
-  localeNames: LocaleNames
+  localeNames: LocaleNames,
+  defaultLocale: string
 ): Field => {
   const formattedField = {
     id: field.id,
@@ -28,6 +31,8 @@ const formatField = (
     name: `${field.name} - ${localeNames[locale]}`,
     data: entry.fields[field.id] ? entry.fields[field.id][locale] : '',
     locale: locale,
+    language: localeNames[locale],
+    isDefaultLocale: defaultLocale === locale,
   };
 
   if (field.type === 'RichText') {
@@ -47,27 +52,46 @@ const formatField = (
  * @param supportedFields
  * @param fieldLocales
  * @param localeNames
+ * @param defaultLocale
  * @returns
  */
 const isSupported = (
   entry: EntryProps,
   supportedFields: SupportedFieldTypes[],
   fieldLocales: FieldLocales,
-  localeNames: LocaleNames
+  localeNames: LocaleNames,
+  defaultLocale: string
 ) => {
   return (fieldAcc: SupportedFieldsOutput, field: ContentFields) => {
     const isSupportedFieldType = supportedFields.includes(field.type as SupportedFieldTypes);
 
     if (isSupportedFieldType) {
+      const fieldsWithContent = [] as Field[];
+      const allFields = [] as Field[];
+
       fieldLocales[field.id].forEach((locale) => {
         const hasContent = entry.fields[field.id]?.[locale];
-        const formattedField = formatField(field, entry, locale, localeNames);
+        const formattedField = formatField(field, entry, locale, localeNames, defaultLocale);
 
         if (hasContent) {
-          fieldAcc.supportedFieldsWithContent.push(formattedField);
+          fieldsWithContent.push(formattedField);
         }
-        fieldAcc.allSupportedFields.push(formattedField);
+        allFields.push(formattedField);
       });
+
+      // Sort the locales so that default is first, then alphabetically by language name
+      const sortedFieldsWithContent = orderBy(
+        fieldsWithContent,
+        ['isDefaultLocale', 'language'],
+        ['desc', 'asc']
+      );
+      const sortedAllFields = orderBy(allFields, ['isDefaultLocale', 'language'], ['desc', 'asc']);
+
+      fieldAcc.supportedFieldsWithContent = [
+        ...fieldAcc.supportedFieldsWithContent,
+        ...sortedFieldsWithContent,
+      ];
+      fieldAcc.allSupportedFields = [...fieldAcc.allSupportedFields, ...sortedAllFields];
     }
 
     return fieldAcc;

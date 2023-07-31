@@ -24,6 +24,7 @@ const Dialog = () => {
   }
 
   const localeNames = sdk.locales.names;
+  const defaultLocale = sdk.locales.default;
 
   const getGenerator = (feature: AIFeature) => {
     switch (feature) {
@@ -40,7 +41,8 @@ const Dialog = () => {
       feature={feature}
       entryId={entryId}
       fieldLocales={fieldLocales}
-      localeNames={localeNames}>
+      localeNames={localeNames}
+      defaultLocale={defaultLocale}>
       {getGenerator(feature)}
     </GeneratorProvider>
   );

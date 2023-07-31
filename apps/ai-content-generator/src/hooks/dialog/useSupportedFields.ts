@@ -10,6 +10,8 @@ interface Field {
   name: string;
   data: string;
   locale: string;
+  language: string;
+  isDefaultLocale: boolean;
 }
 
 enum SupportedFieldTypes {
@@ -44,19 +46,21 @@ export type SupportedFieldsOutput = {
  * @param supportedFields A list of supported fields
  * @param fieldLocales Fields and their localizations
  * @param localeNames Shorthand locales to readable language names
+ * @param defaultLocale Default locale for the entry
  * @returns
  */
 const useSupportedFields = (
   entryId: string,
   supportedFields: SupportedFieldTypes[],
   fieldLocales: FieldLocales,
-  localeNames: LocaleNames
+  localeNames: LocaleNames,
+  defaultLocale: string
 ) => {
   const { entry, contentType } = useEntryAndContentType(entryId);
   const fields = useMemo(() => {
     if (entry && contentType) {
       const validatedFields: SupportedFieldsOutput = contentType.fields.reduce(
-        isSupported(entry, supportedFields, fieldLocales, localeNames),
+        isSupported(entry, supportedFields, fieldLocales, localeNames, defaultLocale),
         {
           supportedFieldsWithContent: [],
           allSupportedFields: [],
@@ -67,7 +71,7 @@ const useSupportedFields = (
     }
 
     return { supportedFieldsWithContent: [], allSupportedFields: [] };
-  }, [entry, contentType, supportedFields, fieldLocales, localeNames]);
+  }, [entry, contentType, supportedFields, fieldLocales, localeNames, defaultLocale]);
 
   return { ...fields };
 };
