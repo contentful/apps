@@ -15,13 +15,14 @@ interface Props {
 
 export default function ProductList({ products, selectedProducts, baseSite, checkboxFn }: Props) {
   const sdk = useSDK<DialogAppSDK>();
-  const isFieldTypeSymbol =
-    (get(sdk.parameters.invocation, 'fieldType', '') as string) === 'Symbol';
 
   const selectButtonClickEvent = (sku: string) => {
     const apiEndpoint = get(sdk.parameters.invocation, 'apiEndpoint', '');
     sdk.close([`${apiEndpoint}/occ/v2/${baseSite}/products/${sku}`]);
   };
+
+  const isFieldTypeSymbol =
+    (get(sdk.parameters.invocation, 'fieldType', '') as string) === 'Symbol';
 
   return (
     <>

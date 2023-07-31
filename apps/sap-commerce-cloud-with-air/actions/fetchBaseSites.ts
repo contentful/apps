@@ -1,4 +1,6 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
+import get from 'lodash.get';
+import { Hash } from '../src/interfaces';
 
 interface AppActionCallParameters {
   apiKey: string;
@@ -29,3 +31,9 @@ export const handler = async (payload: AppActionCallParameters, context: AppActi
     };
   }
 };
+
+export const baseSiteTransformer =
+  () =>
+  (item: Hash): string => {
+    return get(item, ['uid'], '');
+  };

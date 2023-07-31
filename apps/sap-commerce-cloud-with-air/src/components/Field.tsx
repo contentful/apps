@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react';
 import { Button } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import { FieldAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
 import get from 'lodash/get';
 import { CategoryPreviews } from './CategoryPreviews/CategoryPreviews';
-import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
 import logo from '../logo.png';
 import { ProductPreviews } from './ProductPreviews/ProductPreviews';
 import { apiKey } from '../config';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { cmaRequest } from '../utils';
 
 const styles = {
   sortable: css({
@@ -116,27 +116,35 @@ export default async function Field() {
   const data = value;
   const isPickerTypeSetToCategory = getPickerMode() === 'category';
   const hasItems = data.length > 0;
-  const config = sdk.parameters;
+  // const config = sdk.parameters;
   const fieldType = get(sdk, ['field', 'type'], '');
 
   const handleFetchProductPreviews = async (skus: string[]) => {
-    const req = await sdk.cma.appActionCall.createWithResponse(
-      {
-        appActionId: 'fetchProductPreview',
-        environmentId: sdk.ids.environment,
-        spaceId: sdk.ids.space,
-        appDefinitionId: sdk.ids.app!,
+    const req = await cmaRequest({
+      sdk,
+      appActionId: 'fetchProductPreview',
+      parameters: {
+        skus: JSON.stringify(skus),
       },
-      {
-        parameters: {
-          sapApiEndpoint: `${sdk.parameters.installation.apiEndpoint}/occ/v2/${sdk.parameters.installation.baseSites}`,
-          apiKey,
-          skus: JSON.stringify(skus),
-        },
-      }
-    );
+    });
+
     const parsedResponse = JSON.parse(req.response.body);
+
     return parsedResponse.products;
+  };
+
+  const handleFetchCategoryPreviews = async (categories: string[]) => {
+    const req = await cmaRequest({
+      sdk,
+      appActionId: 'fetchCategoryPreview',
+      parameters: {
+        categories: JSON.stringify(categories),
+      },
+    });
+
+    const parsedResponse = JSON.parse(req.response.body);
+
+    return parsedResponse.categories;
   };
 
   return (
@@ -149,9 +157,7 @@ export default async function Field() {
               disabled={editingDisabled}
               categories={data}
               onChange={updateStateValue}
-              fetchCategoryPreviews={(categories) =>
-                fetchCategoryPreviews(categories, config.installation, apiKey)
-              }
+              fetchCategoryPreviews={handleFetchCategoryPreviews}
               applicationInterfaceKey={apiKey}
             />
           ) : (

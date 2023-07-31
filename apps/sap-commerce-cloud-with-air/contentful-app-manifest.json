@@ -70,6 +70,28 @@
           "type": "Symbol"
         }
       ]
+    },
+    {
+      "id": "fetchCategoryPreview",
+      "name": "SAP fetch category preview",
+      "category": "Custom",
+      "description": "This action is used to fetch a list of category previews from SAP Commerce Cloud.",
+      "type": "function",
+      "path": "actions/fetchCategoryPreview.js",
+      "entryFile": "./actions/fetchCategoryPreview.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "sapApiEndpoint",
+          "name": "SAP API Endpoint",
+          "type": "Symbol"
+        },
+        {
+          "id": "apiKey",
+          "name": "SAP API key",
+          "type": "Symbol"
+        }
+      ]
     }
   ]
 }

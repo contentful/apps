@@ -1,4 +1,3 @@
-import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { get, difference } from 'lodash';
 import { Product, Hash, ConfigurationParameters } from '../src/interfaces';
 
@@ -29,32 +28,35 @@ const fields = [
   'tags',
 ];
 
-export const handler = async (payload: AppActionCallParameters, context: AppActionCallContext) => {
+export const handler = async (payload: AppActionCallParameters) => {
   const { sapApiEndpoint, apiKey, skus } = payload;
-
   try {
-    const totalProducts: any[] = [];
-    const skuIds: any[] = [];
-
+    const totalProducts: Product[] = [];
+    const skuIds: string[] = [];
     const parsedSkus = JSON.parse(skus);
 
-    const promises = parsedSkus.map(async (sku: string) => {
-      const id = sku.split('/products/').pop();
-      const req = await fetch(`${sapApiEndpoint}/products/${id}?fields=${fields.join(',')}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'application-interface-key': apiKey,
-        },
-      });
-      const json = await req.json();
-      totalProducts.push(json);
-      skuIds.push(`${json.code}`);
-    });
+    await Promise.all(
+      parsedSkus.map(async (sku: string) => {
+        const id = sku.split('/products/').pop();
+        const req = await fetch(`${sapApiEndpoint}/products/${id}?fields=${fields.join(',')}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'application-interface-key': apiKey,
+          },
+        });
+        const json = await req.json();
+        totalProducts.push(json);
+        skuIds.push(`${json.code}`);
+      })
+    );
 
-    await Promise.all(promises);
+    const products = totalProducts.map(
+      productTransformer({
+        apiEndpoint: sapApiEndpoint,
+      })
+    );
 
-    const products = totalProducts.map(productTransformer({ apiEndpoint: sapApiEndpoint }));
     const foundSKUs = products.map((product) => product.sku);
     const missingProducts = difference(skuIds, foundSKUs).map((sku) => ({
       sku: sku.split('/products/').pop(),
@@ -67,7 +69,6 @@ export const handler = async (payload: AppActionCallParameters, context: AppActi
     return {
       status: 'Success',
       products: [...products, ...missingProducts],
-      skuIds,
     };
   } catch (err) {
     return {
