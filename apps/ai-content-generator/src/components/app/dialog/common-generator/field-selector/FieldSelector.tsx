@@ -20,12 +20,14 @@ interface Props {
 const FieldSelector = (props: Props) => {
   const { parameters, isTranslate, fieldTypes } = props;
   const { isNewText, sourceField, outputField, locale, targetLocale } = parameters;
-  const { entryId, dispatch } = useContext(GeneratorContext);
+  const { entryId, dispatch, fieldLocales, localeNames } = useContext(GeneratorContext);
 
   const { supportedFieldsWithContent, allSupportedFields } = useSupportedFields(
     entryId,
     fieldTypes,
-    locale
+    locale,
+    fieldLocales,
+    localeNames
   );
 
   const handleSelectChange = (action: GeneratorAction) => {
@@ -37,8 +39,10 @@ const FieldSelector = (props: Props) => {
     }
 
     if (action === GeneratorAction.UPDATE_OUTPUT_FIELD) {
-      return (event: ChangeEvent<HTMLSelectElement>) =>
-        updateOutputField(event.target.value, allSupportedFields[0], dispatch);
+      return (event: ChangeEvent<HTMLSelectElement>) => {
+        const outputFieldData = getFieldData(event.target.value, allSupportedFields);
+        updateOutputField(outputFieldData, allSupportedFields[0], dispatch);
+      };
     }
 
     return (event: ChangeEvent<HTMLSelectElement>) =>
@@ -51,12 +55,13 @@ const FieldSelector = (props: Props) => {
   const handleBaseDataChange = () => {
     if (supportedFieldsWithContent.length) {
       const sourceFieldData = isNewText
-        ? { id: '', name: '', data: '' }
+        ? { id: '', key: '', name: '', locale: '', data: '' }
         : getFieldData(sourceField, supportedFieldsWithContent);
       updateSourceField(sourceFieldData, supportedFieldsWithContent[0], dispatch);
     }
     if (allSupportedFields.length) {
-      updateOutputField(outputField, allSupportedFields[0], dispatch);
+      const outputFieldData = getFieldData(outputField, allSupportedFields);
+      updateOutputField(outputFieldData, allSupportedFields[0], dispatch);
     }
   };
 

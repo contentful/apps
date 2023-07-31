@@ -17,6 +17,8 @@ export type GeneratorParameters = {
   canGenerateTextFromField: boolean;
   sourceField: string;
   outputField: string;
+  outputFieldId: string;
+  outputFieldLocale: string;
   originalText: string;
 };
 
@@ -24,16 +26,26 @@ type GeneratorStringActions = {
   type: Exclude<
     GeneratorAction,
     | GeneratorAction.UPDATE_SOURCE_FIELD
+    | GeneratorAction.UPDATE_OUTPUT_FIELD
     | GeneratorAction.IS_NEW_TEXT
     | GeneratorAction.IS_NOT_NEW_TEXT
   >;
   value: string;
 };
+
 type GeneratorSourceTextAction = {
   type: GeneratorAction.UPDATE_SOURCE_FIELD;
   field: string;
   value: string;
 };
+
+type GeneratorOutputTextAction = {
+  type: GeneratorAction.UPDATE_OUTPUT_FIELD;
+  field: string;
+  id: string;
+  locale: string;
+};
+
 type GeneratorImpulseActions = {
   type:
     | GeneratorAction.IS_NEW_TEXT
@@ -44,6 +56,7 @@ type GeneratorImpulseActions = {
 export type GeneratorReducer =
   | GeneratorStringActions
   | GeneratorSourceTextAction
+  | GeneratorOutputTextAction
   | GeneratorImpulseActions;
 
 const {
@@ -76,8 +89,10 @@ const generatorReducer = (state: GeneratorParameters, action: GeneratorReducer) 
     case UPDATE_OUTPUT_FIELD:
       return {
         ...state,
-        outputField: action.value,
-        canGenerateTextFromField: Boolean(action.value && state.sourceField),
+        outputField: action.field,
+        outputFieldId: action.id,
+        outputFieldLocale: action.locale,
+        canGenerateTextFromField: Boolean(action.field && state.sourceField),
       };
     case UPDATE_ORIGINAL_TEXT:
       return { ...state, originalText: action.value };

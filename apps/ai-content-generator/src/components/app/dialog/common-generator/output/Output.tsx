@@ -10,11 +10,12 @@ enum OutputTab {
 
 interface Props {
   inputText: string;
-  outputField: string;
+  outputFieldId: string;
+  outputFieldLocale: string;
 }
 
 const Output = (props: Props) => {
-  const { inputText, outputField } = props;
+  const { inputText, outputFieldId, outputFieldLocale } = props;
   const ai = useAI();
 
   const [currentTab, setCurrentTab] = useState(OutputTab.UPDATE_ORIGINAL_TEXT);
@@ -40,7 +41,12 @@ const Output = (props: Props) => {
           </Tabs.Tab>
         </Tabs.List>
 
-        <OutputTextPanels outputField={outputField} inputText={inputText} ai={ai} />
+        <OutputTextPanels
+          outputFieldId={outputFieldId}
+          outputFieldLocale={outputFieldLocale}
+          inputText={inputText}
+          ai={ai}
+        />
       </Tabs>
     </Flex>
   );

@@ -5,19 +5,29 @@ import {
   SupportedFieldsOutput,
 } from '@hooks/dialog/useSupportedFields';
 import { ContentFields, EntryProps } from 'contentful-management';
+import { FieldLocales } from '@locations/Dialog';
+import { LocaleNames } from '@providers/generatorProvider';
 
 /**
  * This formats an entry's field into an easy-to-use object.
  * @param field
  * @param entry
- * @param targetLocale
+ * @param locale
+ * @param localeNames
  * @returns Field
  */
-const formatField = (field: ContentFields, entry: EntryProps, targetLocale: string): Field => {
+const formatField = (
+  field: ContentFields,
+  entry: EntryProps,
+  locale: string,
+  localeNames: LocaleNames
+): Field => {
   const formattedField = {
     id: field.id,
-    name: field.name,
-    data: entry.fields[field.id] ? entry.fields[field.id][targetLocale] : '',
+    key: `${field.id}:${locale}`,
+    name: `${field.name} - ${localeNames[locale]}`,
+    data: entry.fields[field.id] ? entry.fields[field.id][locale] : '',
+    locale: locale,
   };
 
   if (field.type === 'RichText') {
@@ -28,28 +38,38 @@ const formatField = (field: ContentFields, entry: EntryProps, targetLocale: stri
 };
 
 /**
- * A reducer function that checks if a field is supported, whether it has content,
- * and assigns the field to the correct column.
+ * A reducer function that checks if a field is a supported type, iterates through its supported locales,
+ * determines whether it has content, and assigns the field to the correct column.
  *
  * TODO: Handle the case where the field is empty
  * TODO: Support storing fields for both Source and Output
  * @param entry
  * @param supportedFields
  * @param locale
+ * @param fieldLocales
+ * @param localeNames
  * @returns
  */
-const isSupported = (entry: EntryProps, supportedFields: SupportedFieldTypes[], locale: string) => {
+const isSupported = (
+  entry: EntryProps,
+  supportedFields: SupportedFieldTypes[],
+  locale: string,
+  fieldLocales: FieldLocales,
+  localeNames: LocaleNames
+) => {
   return (fieldAcc: SupportedFieldsOutput, field: ContentFields) => {
-    const isSupported = supportedFields.includes(field.type as SupportedFieldTypes);
-    const hasContent = entry.fields[field.id]?.[locale];
-    const formattedField = formatField(field, entry, locale);
+    const isSupportedFieldType = supportedFields.includes(field.type as SupportedFieldTypes);
 
-    if (isSupported && hasContent) {
-      fieldAcc.supportedFieldsWithContent.push(formattedField);
-    }
+    if (isSupportedFieldType) {
+      fieldLocales[field.id].forEach((locale) => {
+        const hasContent = entry.fields[field.id]?.[locale];
+        const formattedField = formatField(field, entry, locale, localeNames);
 
-    if (isSupported) {
-      fieldAcc.allSupportedFields.push(formattedField);
+        if (hasContent) {
+          fieldAcc.supportedFieldsWithContent.push(formattedField);
+        }
+        fieldAcc.allSupportedFields.push(formattedField);
+      });
     }
 
     return fieldAcc;

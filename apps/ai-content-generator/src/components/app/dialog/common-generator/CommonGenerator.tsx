@@ -17,6 +17,8 @@ const initialParameters: GeneratorParameters = {
   targetLocale: '',
   sourceField: '',
   outputField: '',
+  outputFieldId: '',
+  outputFieldLocale: '',
   originalText: '',
   canGenerateTextFromField: false,
 };
@@ -49,7 +51,11 @@ const CommonGenerator = (props: FeatureComponentProps) => {
         <FieldSelector parameters={parameters} isTranslate={isTranslate} fieldTypes={TextFields} />
       </div>
       {parameters.canGenerateTextFromField ? (
-        <Output outputField={parameters.outputField} inputText={parameters.originalText} />
+        <Output
+          outputFieldId={parameters.outputFieldId}
+          outputFieldLocale={parameters.outputFieldLocale}
+          inputText={parameters.originalText}
+        />
       ) : (
         <NoFieldsSelectedMessage />
       )}
