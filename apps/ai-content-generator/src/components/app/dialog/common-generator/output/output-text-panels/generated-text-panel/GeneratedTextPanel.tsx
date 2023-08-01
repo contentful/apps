@@ -53,8 +53,10 @@ const GeneratedTextPanel = (props: Props) => {
           onFieldChange={handleGeneratedTextChange}>
           <>
             <CopyButton value={output} />
-            <Button onClick={generate}>Regenerate</Button>
-            <Button isDisabled={!canApply} onClick={apply}>
+            <Button css={{ marginLeft: '8px' }} onClick={generate}>
+              Regenerate
+            </Button>
+            <Button css={{ marginLeft: '8px' }} isDisabled={!canApply} onClick={apply}>
               Apply
             </Button>
           </>

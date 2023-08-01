@@ -1,4 +1,5 @@
-import { Flex, Paragraph } from '@contentful/f36-components';
+import { Flex, Icon, Paragraph } from '@contentful/f36-components';
+import { ErrorCircleOutlineIcon } from '@contentful/f36-icons';
 import { styles } from './TextCounter.styles';
 
 interface Props {
@@ -23,16 +24,26 @@ const TextCounter = (props: Props) => {
   const style = isValid ? styles.validCount : styles.invalidCount;
 
   return (
-    <Flex justifyContent="space-between">
-      <Paragraph css={styles.invalidCount}>
-        {!isValid &&
-          (isBelowMinLength
-            ? `The generated text is shorter than the minimum length of ${minLength}`
-            : `The generated text is longer than the maximum length of ${maxLength}`)}
-      </Paragraph>
-      <Paragraph css={style}>
-        {text.length} {maxLength && '/ ' + maxLength}
-      </Paragraph>
+    <Flex flexDirection="column">
+      <Flex justifyContent="space-between">
+        <Paragraph marginTop="spacing2Xs" css={style}>
+          {text.length} characters
+        </Paragraph>
+        {maxLength && (
+          <Paragraph marginTop="spacing2Xs" css={styles.validCount}>
+            Maximum {maxLength} characters
+          </Paragraph>
+        )}
+      </Flex>
+      <Flex
+        css={{ visibility: isValid ? 'hidden' : 'visible' }}
+        alignContent="center"
+        marginTop="spacingXs">
+        <Icon variant="negative" as={ErrorCircleOutlineIcon}></Icon>
+        <Paragraph marginLeft="spacing2Xs" css={styles.invalidCount}>
+          {isBelowMinLength ? `Please lengthen the text` : `Please shorten the text`}
+        </Paragraph>
+      </Flex>
     </Flex>
   );
 };

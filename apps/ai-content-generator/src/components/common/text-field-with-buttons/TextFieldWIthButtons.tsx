@@ -22,7 +22,7 @@ const TextFieldWithButtons = (props: Props) => {
           minLength={sizeValidation?.min}
         />
 
-        <Flex alignSelf="flex-end" marginTop="spacingS">
+        <Flex alignSelf="flex-end" marginTop="spacingXs">
           {children}
         </Flex>
       </Flex>
