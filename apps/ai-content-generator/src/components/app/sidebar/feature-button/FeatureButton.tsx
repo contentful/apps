@@ -9,7 +9,7 @@ import { useState } from 'react';
 interface Props {
   feature: AIFeature;
   isSaving: boolean;
-  setIsSaving: (isSaving: boolean) => void;
+  onSaving: (isSaving: boolean) => void;
 }
 
 interface FieldLocales {
@@ -17,7 +17,7 @@ interface FieldLocales {
 }
 
 const FeatureButton = (props: Props) => {
-  const { feature, isSaving, setIsSaving } = props;
+  const { feature, isSaving, onSaving } = props;
   const buttonCopy = featureConfig[feature].buttonTitle;
   const sdk = useSDK<SidebarAppSDK>();
 
@@ -30,8 +30,8 @@ const FeatureButton = (props: Props) => {
     return acc;
   }, {} as FieldLocales);
 
-  const toggleSaving = (toggleTo: boolean) => {
-    setIsSaving(toggleTo);
+  const updateSaveState = (toggleTo: boolean) => {
+    onSaving(toggleTo);
     setIsOpeningDialog(toggleTo);
   };
 
@@ -41,12 +41,12 @@ const FeatureButton = (props: Props) => {
     }
 
     try {
-      toggleSaving(true);
+      updateSaveState(true);
       await sdk.entry.save();
     } catch (error) {
       console.error(error);
     } finally {
-      toggleSaving(false);
+      updateSaveState(false);
     }
 
     const entryId = sdk.entry.getSys().id;
