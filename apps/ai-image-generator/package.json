@@ -1,0 +1,48 @@
+{
+  "name": "@contentful/ai-image-generator",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "4.22.0",
+    "@contentful/f36-components": "4.45.0",
+    "@contentful/f36-tokens": "4.0.2",
+    "@contentful/react-apps-toolkit": "1.2.16",
+    "contentful-management": "10.38.3",
+    "@emotion/react": "^11.11.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "scripts": {
+    "start": "vite",
+    "start:preview": "npm run build && vite preview",
+    "start:dist": "http-server dist -p 3000 -c-1",
+    "build": "tsc && vite build --mode ${NODE_ENV:='production'}",
+    "test": "vitest",
+    "create-app-definition": "contentful-app-scripts create-app-definition"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "1.10.2",
+    "@testing-library/react": "14.0.0",
+    "@originjs/vite-plugin-commonjs": "^1.0.3",
+    "@types/node": "16.18.38",
+    "@types/react": "18.2.14",
+    "@types/react-dom": "18.2.6",
+    "@vitejs/plugin-react": "4.0.1",
+    "happy-dom": "9.20.3",
+    "typescript": "5.1.6",
+    "vite": "4.3.9",
+    "vitest": "0.32.4"
+  }
+}
