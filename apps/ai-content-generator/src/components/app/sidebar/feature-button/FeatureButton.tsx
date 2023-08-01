@@ -9,15 +9,26 @@ interface Props {
   feature: AIFeature;
 }
 
+interface FieldLocales {
+  [key: string]: string[];
+}
+
 const FeatureButton = (props: Props) => {
   const { feature } = props;
   const buttonCopy = featureConfig[feature].buttonTitle;
   const sdk = useSDK<SidebarAppSDK>();
 
+  const fields = sdk.entry.fields;
+  const fieldLocales = Object.entries(fields).reduce((acc, entryField) => {
+    const [fieldId, field] = entryField;
+    acc[fieldId] = field.locales;
+    return acc;
+  }, {} as FieldLocales);
+
   const handleOnClick = () => {
     const entryId = sdk.entry.getSys().id;
 
-    const dialogConfig = makeDialogConfig({ feature, entryId });
+    const dialogConfig = makeDialogConfig({ feature, entryId, fieldLocales });
 
     sdk.dialogs.openCurrentApp(dialogConfig);
   };

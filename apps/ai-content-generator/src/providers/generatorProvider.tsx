@@ -2,14 +2,21 @@ import { GeneratorReducer } from '@components/app/dialog/common-generator/genera
 import { AIFeature } from '@configs/features/featureConfig';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { Dispatch, createContext, useState } from 'react';
+import { FieldLocales } from '@locations/Dialog';
+
+export interface LocaleNames {
+  [key: string]: string;
+}
 
 interface GeneratorContextProps {
   entryId: string;
-  targetLocale: string;
   setProviderData: (data: Partial<GeneratorContextProps>) => void;
 
   entry: EntryProps | null;
   contentType: ContentTypeProps | null;
+  fieldLocales: FieldLocales;
+  localeNames: LocaleNames;
+  defaultLocale: string;
 
   dispatch: Dispatch<GeneratorReducer>;
   feature: AIFeature;
@@ -18,17 +25,23 @@ interface GeneratorContextProps {
 interface GeneratorProviderProps {
   entryId: string;
 
+  fieldLocales: FieldLocales;
+  localeNames: LocaleNames;
+  defaultLocale: string;
+
   children: React.ReactNode;
   feature: AIFeature;
 }
 
 const defaultContext = {
   entryId: '',
-  targetLocale: '',
   setProviderData: (data: Partial<GeneratorContextProps>) => {},
 
   entry: null,
   contentType: null,
+  fieldLocales: {},
+  localeNames: {},
+  defaultLocale: '',
 
   dispatch: (() => {}) as Dispatch<GeneratorReducer>,
   feature: AIFeature.TITLE,
@@ -37,11 +50,14 @@ const defaultContext = {
 const GeneratorContext = createContext<GeneratorContextProps>(defaultContext);
 
 const GeneratorProvider = (props: GeneratorProviderProps) => {
-  const { entryId, children, feature } = props;
+  const { entryId, children, feature, fieldLocales, localeNames, defaultLocale } = props;
   const [providerData, setProviderData] = useState<GeneratorContextProps>({
     ...defaultContext,
     entryId,
     feature,
+    fieldLocales,
+    localeNames,
+    defaultLocale,
   });
 
   const updateProviderData = (newProviderData: Partial<GeneratorContextProps>) => {

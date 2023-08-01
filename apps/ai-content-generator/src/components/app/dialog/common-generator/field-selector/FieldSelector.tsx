@@ -2,7 +2,6 @@ import useSupportedFields, { SupportedFieldTypes } from '@hooks/dialog/useSuppor
 import { Flex } from '@contentful/f36-components';
 import { GeneratorAction, GeneratorParameters } from '../generatorReducer';
 import { ChangeEvent, useContext, useEffect } from 'react';
-import AvailableLocales from './available-locales/AvailableLocales';
 import EntryFieldList from './field-list/EntryFieldList';
 import { GeneratorContext } from '@providers/generatorProvider';
 import {
@@ -13,19 +12,21 @@ import {
 
 interface Props {
   parameters: GeneratorParameters;
-  isTranslate?: boolean;
   fieldTypes: SupportedFieldTypes[];
 }
 
 const FieldSelector = (props: Props) => {
-  const { parameters, isTranslate, fieldTypes } = props;
-  const { isNewText, sourceField, outputField, locale, targetLocale } = parameters;
-  const { entryId, dispatch } = useContext(GeneratorContext);
+  const { parameters, fieldTypes } = props;
+  const { isNewText, sourceField, outputField } = parameters;
+  const { entryId, dispatch, fieldLocales, localeNames, defaultLocale } =
+    useContext(GeneratorContext);
 
   const { supportedFieldsWithContent, allSupportedFields } = useSupportedFields(
     entryId,
     fieldTypes,
-    locale
+    fieldLocales,
+    localeNames,
+    defaultLocale
   );
 
   const handleSelectChange = (action: GeneratorAction) => {
@@ -37,8 +38,10 @@ const FieldSelector = (props: Props) => {
     }
 
     if (action === GeneratorAction.UPDATE_OUTPUT_FIELD) {
-      return (event: ChangeEvent<HTMLSelectElement>) =>
-        updateOutputField(event.target.value, allSupportedFields[0], dispatch);
+      return (event: ChangeEvent<HTMLSelectElement>) => {
+        const outputFieldData = getFieldData(event.target.value, allSupportedFields);
+        updateOutputField(outputFieldData, allSupportedFields[0], dispatch);
+      };
     }
 
     return (event: ChangeEvent<HTMLSelectElement>) =>
@@ -51,18 +54,18 @@ const FieldSelector = (props: Props) => {
   const handleBaseDataChange = () => {
     if (supportedFieldsWithContent.length) {
       const sourceFieldData = isNewText
-        ? { id: '', name: '', data: '' }
+        ? { id: '', key: '', name: '', locale: '', data: '', language: '', isDefaultLocale: false }
         : getFieldData(sourceField, supportedFieldsWithContent);
       updateSourceField(sourceFieldData, supportedFieldsWithContent[0], dispatch);
     }
     if (allSupportedFields.length) {
-      updateOutputField(outputField, allSupportedFields[0], dispatch);
+      const outputFieldData = getFieldData(outputField, allSupportedFields);
+      updateOutputField(outputFieldData, allSupportedFields[0], dispatch);
     }
   };
 
-  useEffect(handleBaseDataChange, [isNewText, locale]);
+  useEffect(handleBaseDataChange, [isNewText]);
 
-  const { UPDATE_LOCALE, UPDATE_TARGET_LOCALE } = GeneratorAction;
   return (
     <Flex flexGrow={2} flexDirection="column" margin="spacingL">
       {!isNewText && (
@@ -80,20 +83,6 @@ const FieldSelector = (props: Props) => {
         fields={allSupportedFields}
         onChange={handleSelectChange(GeneratorAction.UPDATE_OUTPUT_FIELD)}
       />
-
-      <AvailableLocales
-        title={isTranslate ? 'Source Language' : 'Language'}
-        selectedLocale={locale}
-        onChange={handleSelectChange(UPDATE_LOCALE)}
-      />
-
-      {isTranslate && (
-        <AvailableLocales
-          title="Target Language"
-          selectedLocale={targetLocale || locale}
-          onChange={handleSelectChange(UPDATE_TARGET_LOCALE)}
-        />
-      )}
     </Flex>
   );
 };

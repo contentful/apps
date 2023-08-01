@@ -39,12 +39,20 @@ const useEntryAndContentType = (entryId: string) => {
       const fieldType = contentType?.fields.find((field) => field.id === fieldKey)?.type;
       const isRichText = fieldType === 'RichText';
 
-      entry.fields[fieldKey][fieldLocale] = isRichText
+      const formattedText = isRichText
         ? richTextModel(updatedText)
         : updatedText
             .replace(/^\s+|\s+$/g, '')
             .replace(/^['"]+|['"]+$/g, '')
             .trim();
+
+      if (!entry.fields[fieldKey]) {
+        entry.fields[fieldKey] = {
+          [fieldLocale]: formattedText,
+        };
+      } else {
+        entry.fields[fieldKey][fieldLocale] = formattedText;
+      }
 
       await cma.entry.update(
         {

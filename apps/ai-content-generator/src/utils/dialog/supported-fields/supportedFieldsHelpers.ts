@@ -5,19 +5,33 @@ import {
   SupportedFieldsOutput,
 } from '@hooks/dialog/useSupportedFields';
 import { ContentFields, EntryProps } from 'contentful-management';
+import { FieldLocales } from '@locations/Dialog';
+import { LocaleNames } from '@providers/generatorProvider';
 
 /**
  * This formats an entry's field into an easy-to-use object.
  * @param field
  * @param entry
- * @param targetLocale
+ * @param locale
+ * @param localeNames
+ * @param defaultLocale
  * @returns Field
  */
-const formatField = (field: ContentFields, entry: EntryProps, targetLocale: string): Field => {
+const formatField = (
+  field: ContentFields,
+  entry: EntryProps,
+  locale: string,
+  localeNames: LocaleNames,
+  defaultLocale: string
+): Field => {
   const formattedField = {
     id: field.id,
-    name: field.name,
-    data: entry.fields[field.id] ? entry.fields[field.id][targetLocale] : '',
+    key: `${field.id}:${locale}`,
+    name: `${field.name} - ${localeNames[locale]}`,
+    data: entry.fields[field.id] ? entry.fields[field.id][locale] : '',
+    locale: locale,
+    language: localeNames[locale],
+    isDefaultLocale: defaultLocale === locale,
   };
 
   if (field.type === 'RichText') {
@@ -28,28 +42,70 @@ const formatField = (field: ContentFields, entry: EntryProps, targetLocale: stri
 };
 
 /**
- * A reducer function that checks if a field is supported, whether it has content,
- * and assigns the field to the correct column.
+ * This sorts the field options so that the default locale is first,
+ * then alphabetically by language name
+ * @param a
+ * @param b
+ * @returns
+ */
+const sortFieldOptionsByLanguage = (a: Field, b: Field) => {
+  // Default should be listed first
+  if (a.isDefaultLocale) {
+    return -1;
+  }
+
+  if (b.isDefaultLocale) {
+    return 1;
+  }
+
+  return a.name.localeCompare(b.name);
+};
+
+/**
+ * A reducer function that checks if a field is a supported type, iterates through its supported locales,
+ * determines whether it has content, and assigns the field to the correct column.
  *
  * TODO: Handle the case where the field is empty
  * TODO: Support storing fields for both Source and Output
  * @param entry
  * @param supportedFields
- * @param locale
+ * @param fieldLocales
+ * @param localeNames
+ * @param defaultLocale
  * @returns
  */
-const isSupported = (entry: EntryProps, supportedFields: SupportedFieldTypes[], locale: string) => {
+const isSupported = (
+  entry: EntryProps,
+  supportedFields: SupportedFieldTypes[],
+  fieldLocales: FieldLocales,
+  localeNames: LocaleNames,
+  defaultLocale: string
+) => {
   return (fieldAcc: SupportedFieldsOutput, field: ContentFields) => {
-    const isSupported = supportedFields.includes(field.type as SupportedFieldTypes);
-    const hasContent = entry.fields[field.id]?.[locale];
-    const formattedField = formatField(field, entry, locale);
+    const isSupportedFieldType = supportedFields.includes(field.type as SupportedFieldTypes);
 
-    if (isSupported && hasContent) {
-      fieldAcc.supportedFieldsWithContent.push(formattedField);
-    }
+    if (isSupportedFieldType) {
+      const fieldsWithContent = [] as Field[];
+      const allFields = [] as Field[];
 
-    if (isSupported) {
-      fieldAcc.allSupportedFields.push(formattedField);
+      fieldLocales[field.id].forEach((locale) => {
+        const hasContent = entry.fields[field.id]?.[locale];
+        const formattedField = formatField(field, entry, locale, localeNames, defaultLocale);
+
+        if (hasContent) {
+          fieldsWithContent.push(formattedField);
+        }
+        allFields.push(formattedField);
+      });
+
+      const sortedFieldsWithContent = fieldsWithContent.sort(sortFieldOptionsByLanguage);
+      const sortedAllFields = allFields.sort(sortFieldOptionsByLanguage);
+
+      fieldAcc.supportedFieldsWithContent = [
+        ...fieldAcc.supportedFieldsWithContent,
+        ...sortedFieldsWithContent,
+      ];
+      fieldAcc.allSupportedFields = [...fieldAcc.allSupportedFields, ...sortedAllFields];
     }
 
     return fieldAcc;

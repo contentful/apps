@@ -11,21 +11,19 @@ import featureConfig from '@configs/features/featureConfig';
 interface Props {
   ai: ReturnType<typeof useAI>;
   inputText: string;
-  outputField: string;
+  outputFieldId: string;
+  outputFieldLocale: string;
 }
 
 const OutputTextPanels = (props: Props) => {
-  const { ai, inputText, outputField } = props;
-  const { targetLocale, feature, entryId } = useContext(GeneratorContext);
+  const { ai, inputText, outputFieldId, outputFieldLocale } = props;
+  const { feature, entryId, localeNames } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
 
   const sdk = useSDK<DialogAppSDK>();
 
   const handleEntryApply = async () => {
-    const fieldKey = outputField.toLocaleLowerCase();
-    const fieldLocale = targetLocale;
-
-    const successfullyUpdated = await updateEntry(fieldKey, fieldLocale, ai.output);
+    const successfullyUpdated = await updateEntry(outputFieldId, outputFieldLocale, ai.output);
 
     if (successfullyUpdated) {
       sdk.close();
@@ -34,7 +32,7 @@ const OutputTextPanels = (props: Props) => {
 
   const generate = async () => {
     try {
-      const localeName = sdk.locales.names[targetLocale];
+      const localeName = localeNames[outputFieldLocale];
       const userMessage = featureConfig[feature].prompt(inputText, localeName);
       await ai.generateMessage(userMessage, localeName);
     } catch (error) {
@@ -48,7 +46,7 @@ const OutputTextPanels = (props: Props) => {
       <GeneratedTextPanel
         ai={ai}
         generate={generate}
-        hasOutputField={outputField === ''}
+        hasOutputField={outputFieldId === ''}
         apply={handleEntryApply}
       />
     </>

@@ -1,11 +1,17 @@
 import { useMemo } from 'react';
 import { isSupported } from '@utils/dialog/supported-fields/supportedFieldsHelpers';
 import useEntryAndContentType from './useEntryAndContentType';
+import { FieldLocales } from '@locations/Dialog';
+import { LocaleNames } from '@providers/generatorProvider';
 
 interface Field {
   id: string;
+  key: string;
   name: string;
   data: string;
+  locale: string;
+  language: string;
+  isDefaultLocale: boolean;
 }
 
 enum SupportedFieldTypes {
@@ -38,19 +44,23 @@ export type SupportedFieldsOutput = {
  *
  * @param entryId Contentful entry id
  * @param supportedFields A list of supported fields
- * @param targetLocale The locale to get the fields from
+ * @param fieldLocales Fields and their localizations
+ * @param localeNames Shorthand locales to readable language names
+ * @param defaultLocale Default locale for the entry
  * @returns
  */
 const useSupportedFields = (
   entryId: string,
   supportedFields: SupportedFieldTypes[],
-  targetLocale: string
+  fieldLocales: FieldLocales,
+  localeNames: LocaleNames,
+  defaultLocale: string
 ) => {
   const { entry, contentType } = useEntryAndContentType(entryId);
   const fields = useMemo(() => {
     if (entry && contentType) {
       const validatedFields: SupportedFieldsOutput = contentType.fields.reduce(
-        isSupported(entry, supportedFields, targetLocale),
+        isSupported(entry, supportedFields, fieldLocales, localeNames, defaultLocale),
         {
           supportedFieldsWithContent: [],
           allSupportedFields: [],
@@ -61,7 +71,7 @@ const useSupportedFields = (
     }
 
     return { supportedFieldsWithContent: [], allSupportedFields: [] };
-  }, [entry, contentType, targetLocale, supportedFields]);
+  }, [entry, contentType, supportedFields, fieldLocales, localeNames, defaultLocale]);
 
   return { ...fields };
 };
