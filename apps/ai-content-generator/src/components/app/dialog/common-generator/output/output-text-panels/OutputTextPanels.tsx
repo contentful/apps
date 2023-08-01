@@ -7,16 +7,18 @@ import useAI from '@hooks/dialog/useAI';
 import GeneratedTextPanel from './generated-text-panel/GeneratedTextPanel';
 import OriginalTextPanel from './original-text-panel/OriginalTextPanel';
 import featureConfig from '@configs/features/featureConfig';
+import { ContentTypeFieldValidation } from 'contentful-management';
 
 interface Props {
   ai: ReturnType<typeof useAI>;
   inputText: string;
   outputFieldId: string;
   outputFieldLocale: string;
+  outputFieldValidation: ContentTypeFieldValidation | null;
 }
 
 const OutputTextPanels = (props: Props) => {
-  const { ai, inputText, outputFieldId, outputFieldLocale } = props;
+  const { ai, inputText, outputFieldId, outputFieldLocale, outputFieldValidation } = props;
   const { feature, entryId, localeNames } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
 
@@ -46,7 +48,7 @@ const OutputTextPanels = (props: Props) => {
       <GeneratedTextPanel
         ai={ai}
         generate={generate}
-        hasOutputField={outputFieldId === ''}
+        outputFieldValidation={outputFieldValidation}
         apply={handleEntryApply}
       />
     </>

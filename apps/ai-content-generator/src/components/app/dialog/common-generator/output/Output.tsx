@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Flex, Tabs } from '@contentful/f36-components';
 import useAI from '@hooks/dialog/useAI';
 import OutputTextPanels from './output-text-panels/OutputTextPanels';
+import { ContentTypeFieldValidation } from 'contentful-management';
 
 enum OutputTab {
   UPDATE_ORIGINAL_TEXT = 'original-text',
@@ -12,10 +13,11 @@ interface Props {
   inputText: string;
   outputFieldId: string;
   outputFieldLocale: string;
+  outputFieldValidation: ContentTypeFieldValidation | null;
 }
 
 const Output = (props: Props) => {
-  const { inputText, outputFieldId, outputFieldLocale } = props;
+  const { inputText, outputFieldId, outputFieldLocale, outputFieldValidation } = props;
   const ai = useAI();
 
   const [currentTab, setCurrentTab] = useState(OutputTab.UPDATE_ORIGINAL_TEXT);
@@ -44,6 +46,7 @@ const Output = (props: Props) => {
         <OutputTextPanels
           outputFieldId={outputFieldId}
           outputFieldLocale={outputFieldLocale}
+          outputFieldValidation={outputFieldValidation}
           inputText={inputText}
           ai={ai}
         />
