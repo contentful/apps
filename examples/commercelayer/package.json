@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@commercelayer/js-auth": "2.0.1",
-    "@contentful/app-sdk": "^4.17.1",
+    "@contentful/app-sdk": "^5.0.0",
     "@contentful/ecommerce-app-base": "^3.1.16",
     "core-js": "3.4.1",
     "react": "17.0.1",

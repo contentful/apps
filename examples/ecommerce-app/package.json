@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@contentful/app-scripts": "1.7.2",
-    "@contentful/app-sdk": "^4.17.1",
+    "@contentful/app-sdk": "^5.0.0",
     "@contentful/ecommerce-app-base": "3.0.0",
     "@contentful/f36-components": "4.4.1",
     "cross-env": "7.0.3",

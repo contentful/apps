@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@contentful/app-scripts": "1.10.2",
-    "@contentful/app-sdk": "4.22.0",
+    "@contentful/app-sdk": "^5.0.0",
     "@contentful/f36-components": "4.45.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.38.3",

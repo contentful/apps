@@ -13,11 +13,7 @@ const App = () => {
   const sdk = useSDK();
 
   const Component = useMemo(() => {
-    for (const [location, component] of Object.entries(ComponentLocationSettings)) {
-      if (sdk.location.is(location)) {
-        return component;
-      }
-    }
+    return ComponentLocationSettings[sdk.location.current];
   }, [sdk.location]);
 
   return Component ? <Component /> : null;
