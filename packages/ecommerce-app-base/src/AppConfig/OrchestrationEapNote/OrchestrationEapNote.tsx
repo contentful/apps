@@ -30,15 +30,15 @@ export const OrchestrationEapNote = ({ hideOrchestrationEapNote, name }: Props) 
       feature. Resolve content referenced from {name} using the Contentful GraphQL API.
       <br />
       <br />
-      Learn more and sign up to our{' '}
+      Learn more and get started today with our{' '}
       <TextLink
         variant="primary"
         target="_blank"
         icon={<ExternalLinkIcon />}
         alignIcon="end"
         rel="noopener noreferrer"
-        href={`https://www.contentful.com/developers/docs/concepts/third-party-orchestration/`}>
-        Early Access Programme
+        href={`https://www.contentful.com/help/third-party-orchestration/`}>
+        Introduction to Third party orchestration
       </TextLink>
     </Note>
   );
