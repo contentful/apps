@@ -54,11 +54,11 @@ const sortFieldOptionsByLanguage = (a: Field, b: Field) => {
     return -1;
   }
 
-  if (!a.isDefaultLocale && !b.isDefaultLocale) {
-    return a.language > b.language ? 1 : -1;
+  if (b.isDefaultLocale) {
+    return 1;
   }
 
-  return 0;
+  return a.name.localeCompare(b.name);
 };
 
 /**
