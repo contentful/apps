@@ -14,8 +14,8 @@ const TextFieldWithButtons = (props: Props) => {
   const { inputText, onFieldChange, children, sizeValidation } = props;
   return (
     <FormControl>
-      <Flex flexDirection="column" fullWidth>
-        <Textarea resize="none" rows={14} value={inputText} onChange={onFieldChange}></Textarea>
+      <Flex flexDirection="column" fullWidth paddingLeft="spacing2Xl" paddingRight="spacing2Xl">
+        <Textarea resize="none" rows={26} value={inputText} onChange={onFieldChange}></Textarea>
         <TextCounter
           text={inputText}
           maxLength={sizeValidation?.max}

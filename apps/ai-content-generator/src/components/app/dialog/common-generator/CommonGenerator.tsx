@@ -1,5 +1,7 @@
 import { useContext, useEffect, useReducer } from 'react';
 import { GeneratorContext } from '@providers/generatorProvider';
+import SourceAndFieldSelectors from '@components/app/dialog/common-generator/field-selector/SourceAndFieldSelectors';
+import Header from '@components/app/dialog/common-generator/header/Header';
 import FieldSelector from '@components/app/dialog/common-generator/field-selector/FieldSelector';
 import Output from '@components/app/dialog/common-generator/output/Output';
 import { TextFields } from '@hooks/dialog/useSupportedFields';
@@ -10,7 +12,7 @@ import { styles } from './CommonGenerator.styles';
 import NoFieldsSelectedMessage from './output/output-text-panels/no-fields-selected-message/NoFieldsSelectedMessage';
 
 const initialParameters: GeneratorParameters = {
-  isNewText: false,
+  isNewText: true,
   sourceField: '',
   output: {
     fieldId: '',
@@ -38,7 +40,14 @@ const CommonGenerator = (props: FeatureComponentProps) => {
 
   return (
     <div css={styles.root}>
-      <NewOrExistingText isTitle={isTitle} isNewText={parameters.isNewText} dispatch={dispatch} />
+      <Header />
+      <SourceAndFieldSelectors parameters={parameters} fieldTypes={TextFields} />
+      <Output
+        outputFieldId={parameters.outputFieldId}
+        outputFieldLocale={parameters.outputFieldLocale}
+        inputText={parameters.originalText}
+      />
+      {/* <NewOrExistingText isTitle={isTitle} isNewText={parameters.isNewText} dispatch={dispatch} />
       <div css={styles.fieldSelectorRoot}>
         <FieldSelector parameters={parameters} fieldTypes={TextFields} />
       </div>
@@ -51,7 +60,7 @@ const CommonGenerator = (props: FeatureComponentProps) => {
         />
       ) : (
         <NoFieldsSelectedMessage />
-      )}
+      )} */}
     </div>
   );
 };

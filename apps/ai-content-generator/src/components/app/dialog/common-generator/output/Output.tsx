@@ -3,6 +3,7 @@ import { Flex, Tabs } from '@contentful/f36-components';
 import useAI from '@hooks/dialog/useAI';
 import OutputTextPanels from './output-text-panels/OutputTextPanels';
 import { ContentTypeFieldValidation } from 'contentful-management';
+import { styles } from './Output.styles';
 
 enum OutputTab {
   UPDATE_ORIGINAL_TEXT = 'original-text',
@@ -29,17 +30,20 @@ const Output = (props: Props) => {
   }, [ai.isGenerating]);
 
   return (
-    <Flex margin="spacingL" flexGrow={5}>
+    <Flex css={styles.wrapper}>
       <Tabs
         currentTab={currentTab}
         onTabChange={(tab) => setCurrentTab(tab as OutputTab)}
-        style={{ width: '100%' }}>
-        <Tabs.List>
-          <Tabs.Tab panelId={OutputTab.UPDATE_ORIGINAL_TEXT}> Original Text </Tabs.Tab>
+        css={styles.tabsContainer}>
+        <Tabs.List css={styles.tabsList}>
+          <Tabs.Tab panelId={OutputTab.UPDATE_ORIGINAL_TEXT} css={styles.tab}>
+            Source
+          </Tabs.Tab>
           <Tabs.Tab
             panelId={OutputTab.GENERATED_TEXT}
-            isDisabled={(ai.isGenerating && !ai.output.length) || !ai.output.length}>
-            Generated Text
+            isDisabled={(ai.isGenerating && !ai.output.length) || !ai.output.length}
+            css={styles.tab}>
+            Result
           </Tabs.Tab>
         </Tabs.List>
 

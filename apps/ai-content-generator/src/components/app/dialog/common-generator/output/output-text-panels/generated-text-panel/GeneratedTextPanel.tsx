@@ -4,6 +4,14 @@ import TextFieldWithButtons from '@components/common/text-field-with-buttons/Tex
 import { OutputTab } from '../../Output';
 import { ContentTypeFieldValidation } from 'contentful-management';
 import { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
+import tokens from '@contentful/f36-tokens';
+
+export const styles = {
+  button: css({
+    marginLeft: `${tokens.spacingXs}`,
+  }),
+};
 
 interface Props {
   generate: () => void;
@@ -53,10 +61,10 @@ const GeneratedTextPanel = (props: Props) => {
           onFieldChange={handleGeneratedTextChange}>
           <>
             <CopyButton value={output} />
-            <Button css={{ marginLeft: '8px' }} onClick={generate}>
+            <Button onClick={generate} css={styles.button}>
               Regenerate
             </Button>
-            <Button css={{ marginLeft: '8px' }} isDisabled={!canApply} onClick={apply}>
+            <Button isDisabled={!canApply} onClick={apply} css={styles.button} variant="primary">
               Apply
             </Button>
           </>

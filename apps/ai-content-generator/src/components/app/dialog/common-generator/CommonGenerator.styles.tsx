@@ -1,5 +1,4 @@
 import tokens from '@contentful/f36-tokens';
-import { DIALOG_MIN_HEIGHT } from '@configs/dialog/dialogConfig';
 import { css } from '@emotion/react';
 
 export const styles = {
@@ -10,6 +9,6 @@ export const styles = {
   }),
   root: css({
     display: 'flex',
-    minHeight: DIALOG_MIN_HEIGHT,
+    flexDirection: 'column',
   }),
 };
