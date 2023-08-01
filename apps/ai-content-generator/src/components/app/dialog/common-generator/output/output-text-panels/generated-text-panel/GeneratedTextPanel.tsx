@@ -2,6 +2,14 @@ import { Button, CopyButton, Tabs } from '@contentful/f36-components';
 import useAI from '@hooks/dialog/useAI';
 import TextFieldWithButtons from '@components/common/text-field-with-buttons/TextFieldWIthButtons';
 import { OutputTab } from '../../Output';
+import { css } from '@emotion/react';
+import tokens from '@contentful/f36-tokens';
+
+export const styles = {
+  button: css({
+    marginLeft: `${tokens.spacingXs}`,
+  }),
+};
 
 interface Props {
   generate: () => void;
@@ -28,8 +36,14 @@ const GeneratedTextPanel = (props: Props) => {
         <TextFieldWithButtons inputText={output} onFieldChange={handleGeneratedTextChange}>
           <>
             <CopyButton value={output} />
-            <Button onClick={generate}>Regenerate</Button>
-            <Button isDisabled={hasOutputField} onClick={apply}>
+            <Button onClick={generate} css={styles.button}>
+              Regenerate
+            </Button>
+            <Button
+              isDisabled={hasOutputField}
+              onClick={apply}
+              css={styles.button}
+              variant="primary">
               Apply
             </Button>
           </>
