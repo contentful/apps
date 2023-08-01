@@ -15,8 +15,8 @@ export type GeneratorParameters = {
   sourceField: string;
   originalText: string;
   output: {
-    field: string;
-    id: string;
+    fieldId: string;
+    fieldKey: string;
     locale: string;
     validation: ContentTypeFieldValidation | null;
   };
@@ -35,8 +35,8 @@ type GeneratorSourceTextAction = {
 
 type GeneratorOutputTextAction = {
   type: GeneratorAction.UPDATE_OUTPUT_FIELD;
-  field: string;
   id: string;
+  key: string;
   locale: string;
   validation: ContentTypeFieldValidation | null;
 };
@@ -71,17 +71,17 @@ const generatorReducer = (
     case UPDATE_SOURCE_FIELD:
       return {
         ...state,
-        canGenerateTextFromField: Boolean(action.sourceField && state.output.field),
+        canGenerateTextFromField: Boolean(action.sourceField && state.output.fieldId),
         sourceField: action.sourceField,
         originalText: action.value,
       };
     case UPDATE_OUTPUT_FIELD:
       return {
         ...state,
-        canGenerateTextFromField: Boolean(action.field && state.sourceField),
+        canGenerateTextFromField: Boolean(action.id && state.sourceField),
         output: {
-          field: action.field,
-          id: action.id,
+          fieldId: action.id,
+          fieldKey: action.key,
           locale: action.locale,
           validation: action.validation,
         },

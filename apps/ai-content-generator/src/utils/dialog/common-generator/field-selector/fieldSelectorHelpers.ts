@@ -58,8 +58,8 @@ const updateOutputField = (
 ) => {
   dispatch({
     type: GeneratorAction.UPDATE_OUTPUT_FIELD,
-    field: outputField.key || fallbackField.key,
-    id: outputField.id,
+    id: outputField.id || fallbackField.id,
+    key: outputField.key,
     locale: outputField.locale,
     validation: outputField.sizeValidation,
   });

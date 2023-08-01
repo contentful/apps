@@ -25,7 +25,6 @@ const OutputTextPanels = (props: Props) => {
   const sdk = useSDK<DialogAppSDK>();
 
   const handleEntryApply = async () => {
-    console.log('apply', outputFieldId, outputFieldLocale);
     const successfullyUpdated = await updateEntry(outputFieldId, outputFieldLocale, ai.output);
 
     if (successfullyUpdated) {

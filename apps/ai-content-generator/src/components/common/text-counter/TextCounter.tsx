@@ -22,6 +22,7 @@ const TextCounter = (props: Props) => {
 
   const isValid = !isBelowMinLength && !isAboveMaxLength;
   const style = isValid ? styles.validCount : styles.invalidCount;
+  const errorMessage = isBelowMinLength ? `Please lengthen the text` : `Please shorten the text`;
 
   return (
     <Flex flexDirection="column">
@@ -40,8 +41,8 @@ const TextCounter = (props: Props) => {
         alignContent="center"
         marginTop="spacingXs">
         <Icon variant="negative" as={ErrorCircleOutlineIcon}></Icon>
-        <Paragraph marginLeft="spacing2Xs" css={styles.invalidCount}>
-          {isBelowMinLength ? `Please lengthen the text` : `Please shorten the text`}
+        <Paragraph testId="error-message" marginLeft="spacing2Xs" css={styles.invalidCount}>
+          {errorMessage}
         </Paragraph>
       </Flex>
     </Flex>

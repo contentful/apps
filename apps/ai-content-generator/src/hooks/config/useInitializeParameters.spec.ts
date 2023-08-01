@@ -39,6 +39,6 @@ describe('useInitializeParameters', () => {
     await waitFor(() => expect(dispatchMock).not.toBeCalled());
 
     expect(dispatchMock).not.toBeCalled();
-    expect(sdk.app.setReady).not.toBeCalled();
+    expect(sdk.app.setReady).toBeCalled();
   });
 });

@@ -1,7 +1,7 @@
 import { ChangeEvent, ReactNode } from 'react';
 import { Flex, FormControl, Textarea } from '@contentful/f36-components';
 import { ContentTypeFieldValidation } from 'contentful-management';
-import TextCounter from './TextCounter';
+import TextCounter from '../text-counter/TextCounter';
 
 interface Props {
   inputText: string;

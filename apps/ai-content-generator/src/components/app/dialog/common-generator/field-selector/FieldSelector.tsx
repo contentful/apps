@@ -61,7 +61,7 @@ const FieldSelector = (props: Props) => {
     }
 
     if (allSupportedFields.length) {
-      const outputFieldData = getFieldData(output.field, allSupportedFields);
+      const outputFieldData = getFieldData(output.fieldId, allSupportedFields);
       updateOutputField(outputFieldData, allSupportedFields[0], dispatch);
     }
   };
@@ -81,7 +81,7 @@ const FieldSelector = (props: Props) => {
 
       <EntryFieldList
         title="Output Field"
-        selectedField={output.field}
+        selectedField={output.fieldKey}
         fields={allSupportedFields}
         onChange={handleSelectChange(GeneratorAction.UPDATE_OUTPUT_FIELD)}
       />

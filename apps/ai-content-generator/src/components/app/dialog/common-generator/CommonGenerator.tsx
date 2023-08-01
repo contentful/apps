@@ -13,8 +13,8 @@ const initialParameters: GeneratorParameters = {
   isNewText: false,
   sourceField: '',
   output: {
-    field: '',
-    id: '',
+    fieldId: '',
+    fieldKey: '',
     locale: '',
     validation: null,
   },
@@ -44,7 +44,7 @@ const CommonGenerator = (props: FeatureComponentProps) => {
       </div>
       {parameters.canGenerateTextFromField ? (
         <Output
-          outputFieldId={parameters.output.field}
+          outputFieldId={parameters.output.fieldId}
           outputFieldLocale={parameters.output.locale}
           outputFieldValidation={parameters.output.validation}
           inputText={parameters.originalText}
