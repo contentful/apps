@@ -4,7 +4,7 @@ import DisclaimerMessage, { BODY_MSG } from './DisclaimerMessage';
 
 describe('DisclaimerMessage component', () => {
   it('mounts', async () => {
-    const { getByText, unmount } = render(<DisclaimerMessage />);
+    const { getByText } = render(<DisclaimerMessage />);
     const message = 'Terms and Policies';
 
     expect(getByText(message)).toBeTruthy();
