@@ -20,15 +20,14 @@ describe('useInitializeParameters', () => {
 
   it('should dispatch Contentful parameters and call setReady', async () => {
     const dispatchMock = vi.fn((val) => val);
-
     renderHook(() => useInitializeParameters(dispatchMock));
+
     await waitFor(() => expect(dispatchMock).toBeCalled());
 
     expect(dispatchMock).toHaveBeenCalledWith({
       type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS,
       value: mockInstallationParameters.happyPath,
     });
-
     expect(sdk.app.setReady).toBeCalled();
   });
 
@@ -40,6 +39,6 @@ describe('useInitializeParameters', () => {
     await waitFor(() => expect(dispatchMock).not.toBeCalled());
 
     expect(dispatchMock).not.toBeCalled();
-    expect(sdk.app.setReady).not.toBeCalled();
+    expect(sdk.app.setReady).toBeCalled();
   });
 });

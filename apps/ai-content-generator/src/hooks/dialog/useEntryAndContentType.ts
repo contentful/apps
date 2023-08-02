@@ -33,7 +33,7 @@ const useEntryAndContentType = (entryId: string) => {
 
       return { entry, contentType };
     } catch (error) {
-      console.error(error);
+      // console.error(error);
 
       setEntry(null);
       setContentType(null);

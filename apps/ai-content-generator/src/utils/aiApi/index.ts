@@ -62,7 +62,6 @@ class AI {
    */
   parseStream = async (stream: ReadableStreamDefaultReader<Uint8Array>) => {
     const { done, value } = await stream.read();
-    console.log(value);
 
     if (done) {
       return false;

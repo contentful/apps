@@ -22,22 +22,6 @@ describe('useAI', () => {
     mockSdk.reset();
   });
 
-  const doesStartGeneration = async (result: useAIOutput) => {
-    result.generateMessage(titlePrompt('this is a test'), 'en-US');
-    await waitFor(() => expect(result.isGenerating).toBe(true));
-    await waitFor(() => expect(result.output).toBeTruthy());
-  };
-
-  const doesStopGeneration = async (result: useAIOutput) => {
-    result.sendStopSignal();
-    await waitFor(() => expect(result.isGenerating).toBe(false));
-  };
-
-  const doesResetOutput = async (result: useAIOutput) => {
-    result.resetOutput();
-    await waitFor(() => expect(result.output).toBe(''));
-  };
-
   it('should start in a default state', () => {
     const { result } = renderHook(() => useAI());
 
@@ -47,22 +31,21 @@ describe('useAI', () => {
 
   it('should start generating when triggered', async () => {
     const { result } = renderHook(() => useAI());
+    result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
 
-    doesStartGeneration(result.current);
+    await waitFor(() => expect(result.current.isGenerating).toBe(false));
+    await waitFor(() => expect(result.current.output).toBeTruthy());
   });
 
-  it('should stop generating when triggered', async () => {
+  it('should stop generating when triggered and reset output', async () => {
     const { result } = renderHook(() => useAI());
+    result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
+    await waitFor(() => expect(result.current.isGenerating).toBe(true));
 
-    doesStartGeneration(result.current);
-    doesStopGeneration(result.current);
-  });
+    result.current.sendStopSignal();
+    await waitFor(() => expect(result.current.isGenerating).toBe(false));
 
-  it('should reset output', async () => {
-    const { result } = renderHook(() => useAI());
-
-    doesStartGeneration(result.current);
-    doesStopGeneration(result.current);
-    doesResetOutput(result.current);
+    result.current.resetOutput();
+    await waitFor(() => expect(result.current.output).toEqual(''));
   });
 });

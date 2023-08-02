@@ -24,11 +24,11 @@ describe('useSaveConfigHandler', () => {
 
   it('adds the on configure callback', async () => {
     const parameters = generateRandomInstallationParameters();
-
     renderHook(() => useSaveConfigHandler(parameters));
-    await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledOnce());
 
+    await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledOnce());
     const configureCallback = sdk.app.onConfigure.mock.calls[0][0];
+
     expect(configureCallback).toBeTypeOf('function');
   });
 
@@ -45,6 +45,7 @@ describe('useSaveConfigHandler', () => {
       const onConfigureCallbackIndex = parameterIndex + 1;
 
       rerender(parameters);
+
       await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledTimes(currentTimesCalled));
 
       const configureCallback2 = await sdk.app.onConfigure.mock.calls[
@@ -61,7 +62,6 @@ describe('useSaveConfigHandler', () => {
     );
 
     await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledOnce());
-
     for (let i = 0; i < testCases.length; i++) {
       await testIfHookUpdates(i);
     }

@@ -1,14 +1,15 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { mockCma, MockSdk } from '../../test/mocks';
+import { MockSdk } from '../../test/mocks';
 import Field from './Field';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
+const cma = sdk.cma;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
-  useCMA: () => mockCma,
+  useCMA: () => cma,
 }));
 
 describe('Field component', () => {

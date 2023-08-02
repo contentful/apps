@@ -19,6 +19,9 @@ const createSDK = (data: SdkParameters, cma: MockCma['cma']) => {
       getCurrentState: vi.fn(),
     },
     cma,
+    entry: {
+      fields: {},
+    },
     parameters: {
       invocation: invocation,
       installation: parameters,

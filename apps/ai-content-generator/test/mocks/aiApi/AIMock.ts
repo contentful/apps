@@ -1,24 +1,27 @@
+import { resolve } from 'path';
 import { vi } from 'vitest';
 
 const getStubbedReader = (): ReadableStreamDefaultReader<Uint8Array> & { streamData: string[] } => {
   return {
     streamData: ['This', 'is', 'a', 'test'],
     read() {
-      const returnValue = {
-        done: this.streamData.length === 0,
-        value: this.streamData.length
-          ? new TextEncoder().encode(this.streamData.shift())
-          : new TextEncoder().encode(''),
-      };
+      if (this.streamData.length === 0) {
+        return Promise.resolve({ done: true, value: undefined });
+      }
+
+      const value = new TextEncoder().encode(this.streamData.shift());
 
       return new Promise((resolve) => {
         setTimeout(() => {
-          resolve(returnValue);
-        }, 1);
+          resolve({ done: false, value });
+        }, Math.floor(Math.random() * 1000));
       });
     },
     cancel(reason: any) {
-      return Promise.resolve();
+      return new Promise((resolve) => {
+        this.streamData = [];
+        resolve(undefined);
+      });
     },
     closed: Promise.resolve(undefined),
     releaseLock() {},

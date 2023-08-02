@@ -51,18 +51,18 @@ const useAI = (): useAIOutput => {
 
   const generateMessage = async (prompt: string, targetLocale: string) => {
     resetOutput();
-    let completeMessage = '';
+    setIsGenerating(true);
 
+    let completeMessage = '';
     try {
       const payload = createGPTPayload(prompt, sdk.parameters.installation.profile, targetLocale);
 
       const stream = await ai.streamChatCompletion(payload);
       setStream(stream);
 
-      setIsGenerating(true);
       while (true) {
         const streamOutput = await ai.parseStream(stream);
-        if (streamOutput === false) {
+        if (streamOutput === false || !stream) {
           break;
         }
 
