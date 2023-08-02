@@ -15,10 +15,11 @@ interface Props {
   outputFieldId: string;
   outputFieldLocale: string;
   outputFieldValidation: ContentTypeFieldValidation | null;
+  isNewText: boolean;
 }
 
 const Output = (props: Props) => {
-  const { inputText, outputFieldId, outputFieldLocale, outputFieldValidation } = props;
+  const { inputText, outputFieldId, outputFieldLocale, outputFieldValidation, isNewText } = props;
   const ai = useAI();
 
   const [currentTab, setCurrentTab] = useState(OutputTab.UPDATE_ORIGINAL_TEXT);
@@ -53,6 +54,7 @@ const Output = (props: Props) => {
           outputFieldValidation={outputFieldValidation}
           inputText={inputText}
           ai={ai}
+          isNewText={isNewText}
         />
       </Tabs>
     </Flex>
