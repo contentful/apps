@@ -21,7 +21,7 @@ interface Props {
 
 const SourceAndFieldSelectors = (props: Props) => {
   const { parameters, fieldTypes } = props;
-  const { isNewText, sourceField, outputField } = parameters;
+  const { isNewText, sourceField, output } = parameters;
   const { entryId, dispatch, fieldLocales, localeNames, defaultLocale } =
     useContext(GeneratorContext);
 
@@ -57,13 +57,15 @@ const SourceAndFieldSelectors = (props: Props) => {
 
   const handleBaseDataChange = () => {
     if (supportedFieldsWithContent.length) {
-      const sourceFieldData = isNewText
-        ? { id: '', key: '', name: '', locale: '', data: '', language: '', isDefaultLocale: false }
-        : getFieldData(sourceField, supportedFieldsWithContent);
+      const sourceFieldData = getFieldData(
+        isNewText ? sourceField : '',
+        supportedFieldsWithContent
+      );
       updateSourceField(sourceFieldData, supportedFieldsWithContent[0], dispatch);
     }
+
     if (allSupportedFields.length) {
-      const outputFieldData = getFieldData(outputField, allSupportedFields);
+      const outputFieldData = getFieldData(output.fieldId, allSupportedFields);
       updateOutputField(outputFieldData, allSupportedFields[0], dispatch);
     }
   };
@@ -97,7 +99,7 @@ const SourceAndFieldSelectors = (props: Props) => {
 
         <EntryFieldList
           title="Output Field"
-          selectedField={outputField}
+          selectedField={output.fieldKey}
           fields={allSupportedFields}
           onChange={handleSelectChange(GeneratorAction.UPDATE_OUTPUT_FIELD)}
           selectFieldWidth={SELECT_WIDTH}
