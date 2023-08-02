@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import tokens from '@contentful/f36-tokens';
 
-export const styles = {
+const styles = {
   button: css({
     marginLeft: `${tokens.spacingXs}`,
   }),

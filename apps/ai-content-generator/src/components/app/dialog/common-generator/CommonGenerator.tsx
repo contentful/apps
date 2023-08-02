@@ -1,11 +1,11 @@
 import { useContext, useEffect, useReducer } from 'react';
+import { Flex } from '@contentful/f36-components';
 import { GeneratorContext } from '@providers/generatorProvider';
 import SourceAndFieldSelectors from '@components/app/dialog/common-generator/field-selector/SourceAndFieldSelectors';
 import Header from '@components/app/dialog/common-generator/header/Header';
 import Output from '@components/app/dialog/common-generator/output/Output';
 import { TextFields } from '@hooks/dialog/useSupportedFields';
 import generatorReducer, { GeneratorParameters } from './generatorReducer';
-import { styles } from './CommonGenerator.styles';
 
 const initialParameters: GeneratorParameters = {
   isNewText: false,
@@ -34,7 +34,7 @@ const CommonGenerator = () => {
   useEffect(updateProviderData, [dispatch]);
 
   return (
-    <div css={styles.root}>
+    <Flex flexDirection="column">
       <Header />
       <SourceAndFieldSelectors parameters={parameters} fieldTypes={TextFields} />
       <Output
@@ -44,7 +44,7 @@ const CommonGenerator = () => {
         inputText={parameters.originalText}
         isNewText={parameters.isNewText}
       />
-    </div>
+    </Flex>
   );
 };
 

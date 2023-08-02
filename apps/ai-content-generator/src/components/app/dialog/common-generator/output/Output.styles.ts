@@ -1,6 +1,8 @@
 import { css } from '@emotion/react';
 import tokens from '@contentful/f36-tokens';
 
+const TAB_WIDTH = 145;
+
 export const styles = {
   wrapper: css({
     margin: `0 ${tokens.spacingL}`,
@@ -13,7 +15,7 @@ export const styles = {
     padding: `${tokens.spacingS} ${tokens.spacing2Xl} 0 ${tokens.spacing2Xl}`,
   }),
   tab: css({
-    width: 145,
+    width: TAB_WIDTH,
     justifyContent: 'center',
   }),
 };

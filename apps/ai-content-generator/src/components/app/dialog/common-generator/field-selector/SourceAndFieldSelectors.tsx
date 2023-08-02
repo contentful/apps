@@ -10,9 +10,17 @@ import {
   updateOutputField,
   updateSourceField,
 } from '@utils/dialog/common-generator/field-selector/fieldSelectorHelpers';
-import { styles } from './SourceAndFieldSelectors.styles';
+import { css } from '@emotion/react';
+import tokens from '@contentful/f36-tokens';
 
 const SELECT_WIDTH = 280;
+
+const styles = {
+  wrapper: css({
+    borderBottom: `1px solid ${tokens.gray300}`,
+    padding: `${tokens.spacingS} ${tokens.spacingM}`,
+  }),
+};
 
 interface Props {
   parameters: GeneratorParameters;
