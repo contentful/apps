@@ -12,7 +12,7 @@ import { styles } from './CommonGenerator.styles';
 import NoFieldsSelectedMessage from './output/output-text-panels/no-fields-selected-message/NoFieldsSelectedMessage';
 
 const initialParameters: GeneratorParameters = {
-  isNewText: true,
+  isNewText: false,
   sourceField: '',
   outputField: '',
   outputFieldId: '',
@@ -43,6 +43,7 @@ const CommonGenerator = (props: FeatureComponentProps) => {
         outputFieldId={parameters.outputFieldId}
         outputFieldLocale={parameters.outputFieldLocale}
         inputText={parameters.originalText}
+        isNewText={parameters.isNewText}
       />
       {/* <NewOrExistingText isTitle={isTitle} isNewText={parameters.isNewText} dispatch={dispatch} />
       <div css={styles.fieldSelectorRoot}>

@@ -40,7 +40,7 @@ const GeneratedTextPanel = (props: Props) => {
               Regenerate
             </Button>
             <Button
-              isDisabled={hasOutputField}
+              isDisabled={!hasOutputField}
               onClick={apply}
               css={styles.button}
               variant="primary">

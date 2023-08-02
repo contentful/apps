@@ -13,10 +13,11 @@ interface Props {
   inputText: string;
   outputFieldId: string;
   outputFieldLocale: string;
+  isNewText: boolean;
 }
 
 const OutputTextPanels = (props: Props) => {
-  const { ai, inputText, outputFieldId, outputFieldLocale } = props;
+  const { ai, inputText, outputFieldId, outputFieldLocale, isNewText } = props;
   const { feature, entryId, localeNames } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
 
@@ -42,11 +43,16 @@ const OutputTextPanels = (props: Props) => {
 
   return (
     <>
-      <OriginalTextPanel inputText={inputText} generate={generate} />
+      <OriginalTextPanel
+        inputText={inputText}
+        generate={generate}
+        isNewText={isNewText}
+        hasOutputField={Boolean(outputFieldId)}
+      />
       <GeneratedTextPanel
         ai={ai}
         generate={generate}
-        hasOutputField={outputFieldId === ''}
+        hasOutputField={Boolean(outputFieldId)}
         apply={handleEntryApply}
       />
     </>

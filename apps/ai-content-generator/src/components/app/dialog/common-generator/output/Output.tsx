@@ -13,10 +13,11 @@ interface Props {
   inputText: string;
   outputFieldId: string;
   outputFieldLocale: string;
+  isNewText: boolean;
 }
 
 const Output = (props: Props) => {
-  const { inputText, outputFieldId, outputFieldLocale } = props;
+  const { inputText, outputFieldId, outputFieldLocale, isNewText } = props;
   const ai = useAI();
 
   const [currentTab, setCurrentTab] = useState(OutputTab.UPDATE_ORIGINAL_TEXT);
@@ -50,6 +51,7 @@ const Output = (props: Props) => {
           outputFieldLocale={outputFieldLocale}
           inputText={inputText}
           ai={ai}
+          isNewText={isNewText}
         />
       </Tabs>
     </Flex>
