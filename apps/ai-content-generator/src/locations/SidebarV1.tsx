@@ -22,6 +22,16 @@ const Visible = ({ children, when }: any) => {
 
 const Sidebar = () => {
   const sdk = useSDK() as any;
+  const { key } = sdk.parameters.installation;
+
+  if (!key) {
+    return (
+      <Note variant="warning">
+        <p>A valid OpenAI API key is required</p>
+      </Note>
+    );
+  }
+
   const fields = sdk.entry.fields;
 
   const cma = createClient(
@@ -139,7 +149,7 @@ const Sidebar = () => {
       }
     }
     getTree();
-  }, [cma.contentType, cma.entry, richTextFields, sdk.entry, targetLocale]);
+  }, [cma.contentType, cma.entry, sdk.entry, targetLocale]);
 
   useMemo(() => {
     const fields = sdk.entry.fields;
@@ -243,8 +253,8 @@ const Sidebar = () => {
     <Box style={{ padding: '0 3px' }}>
       {error && (
         <FormControl>
-          <Note variant="negative">\
-            {/* @ts-ignore */}
+          <Note variant="negative">
+            \{/* @ts-ignore */}
             <Paragraph marginBottom="spacingXs" fontWeight="fontWeightMedium">
               OpenAI API Error
             </Paragraph>
