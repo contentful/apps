@@ -25,6 +25,12 @@ const ConfigScreen = () => {
     const currentState = await sdk.app.getCurrentState();
     setApiKey('');
     setEditing(false);
+
+    if (parameters.key === '') {
+      sdk.notifier.error('A valid OpenAI API key is required');
+      return false;
+    }
+
     return {
       parameters,
       targetState: currentState,
@@ -41,6 +47,7 @@ const ConfigScreen = () => {
     (async () => {
       const currentParameters = await sdk.app.getParameters();
       if (!isMounted) return;
+
       if (currentParameters) {
         setParameters(currentParameters);
         setIsBeta(!!currentParameters.model?.match(/gpt-4/));
