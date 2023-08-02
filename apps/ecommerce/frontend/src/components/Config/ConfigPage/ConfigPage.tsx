@@ -88,6 +88,8 @@ const ConfigPage = () => {
     setParameters({ ...parameters, [key]: value });
   };
 
+  const { baseUrl } = sdk.parameters.instance;
+
   return (
     <>
       <Box
@@ -95,7 +97,7 @@ const ConfigPage = () => {
         testId="configPageBackground"
       />
       <ConfigBody
-        baseUrl={sdk.parameters.instance.baseUrl}
+        baseUrl={baseUrl}
         error={error}
         isLoading={isLoading}
         onCredentialCheck={checkCredentials}
