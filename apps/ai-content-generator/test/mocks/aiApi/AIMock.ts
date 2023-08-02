@@ -1,9 +1,11 @@
 import { resolve } from 'path';
 import { vi } from 'vitest';
 
-const getStubbedReader = (): ReadableStreamDefaultReader<Uint8Array> & { streamData: string[] } => {
+const getStubbedReader = (
+  textToStream: string
+): ReadableStreamDefaultReader<Uint8Array> & { streamData: string[] } => {
   return {
-    streamData: ['This', 'is', 'a', 'test'],
+    streamData: textToStream.split(' '),
     read() {
       if (this.streamData.length === 0) {
         return Promise.resolve({ done: true, value: undefined });
@@ -32,7 +34,9 @@ const AIMock = {
   __esModule: true,
   default: vi.fn().mockImplementation(() => {
     return {
-      streamChatCompletion: vi.fn().mockResolvedValue(Promise.resolve(getStubbedReader())),
+      streamChatCompletion: vi
+        .fn()
+        .mockResolvedValue(Promise.resolve(getStubbedReader('This is a test'))),
       parseStream: vi
         .fn()
         .mockImplementation(async (stream: ReadableStreamDefaultReader<Uint8Array>) => {
