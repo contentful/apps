@@ -8,7 +8,7 @@ import { TextFields } from '@hooks/dialog/useSupportedFields';
 import generatorReducer, { GeneratorParameters } from './generatorReducer';
 
 const initialParameters: GeneratorParameters = {
-  isNewText: false,
+  isNewText: true,
   sourceField: '',
   output: {
     fieldId: '',

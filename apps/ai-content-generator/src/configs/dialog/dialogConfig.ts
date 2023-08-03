@@ -1,7 +1,7 @@
 import { DialogInvocationParameters } from '@locations/Dialog';
 import { OpenCustomWidgetOptions } from '@contentful/app-sdk';
 
-const DIALOG_MIN_HEIGHT = 860;
+const DIALOG_MIN_HEIGHT = 880;
 const DIALOG_WIDTH = 820;
 
 type openDialogOptions = OpenCustomWidgetOptions & { parameters: DialogInvocationParameters };

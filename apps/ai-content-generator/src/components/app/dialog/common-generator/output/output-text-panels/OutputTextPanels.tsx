@@ -56,7 +56,6 @@ const OutputTextPanels = (props: Props) => {
         ai={ai}
         generate={generate}
         outputFieldValidation={outputFieldValidation}
-        hasOutputField={Boolean(outputFieldId)}
         apply={handleEntryApply}
       />
     </>
