@@ -2,7 +2,7 @@
   "actions": [
     {
       "id": "amplifyAppAction",
-      "name": "Applify App Action",
+      "name": "Amplify App Action",
       "category": "Custom",
       "description": "This action is used to launch hosted app builds in AWS Amplify.",
       "type": "function",
