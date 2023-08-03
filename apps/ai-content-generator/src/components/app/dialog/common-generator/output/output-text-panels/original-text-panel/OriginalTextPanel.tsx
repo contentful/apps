@@ -8,10 +8,12 @@ import { OutputTab } from '../../Output';
 interface Props {
   inputText: string;
   generate: () => void;
+  isNewText: boolean;
+  hasOutputField: boolean;
 }
 
 const OriginalTextPanel = (props: Props) => {
-  const { inputText, generate } = props;
+  const { inputText, generate, isNewText, hasOutputField } = props;
   const { dispatch } = useContext(GeneratorContext);
 
   const handleOriginalTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,10 +23,20 @@ const OriginalTextPanel = (props: Props) => {
     });
   };
 
+  const isTextAreaDisabled = isNewText ? false : !inputText;
+  const isGenerateButtonDisabled = !inputText || !hasOutputField;
+  const placeholderText = isNewText ? 'Example prompts...' : 'Directions...';
+  const helperText = isGenerateButtonDisabled ? 'Helper text...' : '';
+
   return (
     <Tabs.Panel id={OutputTab.UPDATE_ORIGINAL_TEXT}>
-      <TextFieldWithButtons inputText={inputText} onFieldChange={handleOriginalTextChange}>
-        <Button onClick={generate} isDisabled={!inputText}>
+      <TextFieldWithButtons
+        inputText={inputText}
+        onFieldChange={handleOriginalTextChange}
+        isDisabled={isTextAreaDisabled}
+        placeholder={placeholderText}
+        helperText={helperText}>
+        <Button onClick={generate} isDisabled={isGenerateButtonDisabled}>
           Generate
         </Button>
       </TextFieldWithButtons>

@@ -1,19 +1,17 @@
 import { DialogInvocationParameters } from '@locations/Dialog';
 import { OpenCustomWidgetOptions } from '@contentful/app-sdk';
-import featureConfig from '@configs/features/featureConfig';
 
-export const DIALOG_MIN_HEIGHT = '468px';
+const DIALOG_MIN_HEIGHT = 880;
+const DIALOG_WIDTH = 820;
 
 type openDialogOptions = OpenCustomWidgetOptions & { parameters: DialogInvocationParameters };
 
 export const makeDialogConfig = (parameters: DialogInvocationParameters): openDialogOptions => {
-  const dialogTitle = featureConfig[parameters.feature].dialogTitle;
-
   return {
     position: 'center',
-    width: 'fullWidth',
+    width: DIALOG_WIDTH,
     minHeight: DIALOG_MIN_HEIGHT,
-    title: dialogTitle,
+    allowHeightOverflow: true,
     parameters,
   };
 };
