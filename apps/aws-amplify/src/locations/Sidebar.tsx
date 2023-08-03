@@ -24,7 +24,7 @@ const Sidebar = () => {
     try {
       const res = await cma.appActionCall.createWithResponse(
         {
-          appActionId: 'amplifyAppAction',
+          appActionId: 'amplifyBuildAction',
           environmentId: sdk.ids.environment,
           spaceId: sdk.ids.space,
           appDefinitionId: sdk.ids.app!,
