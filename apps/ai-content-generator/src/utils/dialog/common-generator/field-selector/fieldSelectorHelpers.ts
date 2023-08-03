@@ -21,6 +21,7 @@ const getFieldData = (fieldKey: string, fields: Field[]) => {
       locale: '',
       data: '',
       language: '',
+      sizeValidation: null,
       isDefaultLocale: false,
     }
   );
@@ -39,7 +40,7 @@ const updateSourceField = (
 ) => {
   dispatch({
     type: GeneratorAction.UPDATE_SOURCE_FIELD,
-    field: sourceField.key || fallbackField.key,
+    sourceField: sourceField.key || fallbackField.key,
     value: sourceField.key ? sourceField.data : fallbackField.data,
   });
 };
@@ -57,9 +58,10 @@ const updateOutputField = (
 ) => {
   dispatch({
     type: GeneratorAction.UPDATE_OUTPUT_FIELD,
-    field: outputField.key || fallbackField.key,
-    id: outputField.id,
+    id: outputField.id || fallbackField.id,
+    key: outputField.key,
     locale: outputField.locale,
+    validation: outputField.sizeValidation,
   });
 };
 

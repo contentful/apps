@@ -3,6 +3,7 @@ import { isSupported } from '@utils/dialog/supported-fields/supportedFieldsHelpe
 import useEntryAndContentType from './useEntryAndContentType';
 import { FieldLocales } from '@locations/Dialog';
 import { LocaleNames } from '@providers/generatorProvider';
+import { ContentTypeFieldValidation } from 'contentful-management/types';
 
 interface Field {
   id: string;
@@ -11,6 +12,7 @@ interface Field {
   data: string;
   locale: string;
   language: string;
+  sizeValidation: ContentTypeFieldValidation | null;
   isDefaultLocale: boolean;
 }
 

@@ -1,10 +1,11 @@
+import { ContentTypeFieldValidation } from 'contentful-management/types';
+
 export enum GeneratorAction {
   IS_NEW_TEXT = 'isNewText',
   IS_NOT_NEW_TEXT = 'isNotNewText',
   UPDATE_SOURCE_FIELD = 'changeSourceField',
   UPDATE_OUTPUT_FIELD = 'changeOutputField',
   UPDATE_ORIGINAL_TEXT = 'changeOriginalText',
-  CAN_GENERATE_TEXT_FROM_FIELD = 'canGenerateTextFromField',
 }
 
 export type GeneratorParameters = {
@@ -12,48 +13,43 @@ export type GeneratorParameters = {
   // can generate text from field when both source and output fields are selected
   canGenerateTextFromField: boolean;
   sourceField: string;
-  outputField: string;
-  outputFieldId: string;
-  outputFieldLocale: string;
   originalText: string;
+  output: {
+    fieldId: string;
+    fieldKey: string;
+    locale: string;
+    validation: ContentTypeFieldValidation | null;
+  };
 };
 
-type GeneratorStringActions = {
-  type: Exclude<
-    GeneratorAction,
-    | GeneratorAction.UPDATE_SOURCE_FIELD
-    | GeneratorAction.UPDATE_OUTPUT_FIELD
-    | GeneratorAction.IS_NEW_TEXT
-    | GeneratorAction.IS_NOT_NEW_TEXT
-  >;
+type GeneratorStringAction = {
+  type: GeneratorAction.UPDATE_ORIGINAL_TEXT;
   value: string;
 };
 
 type GeneratorSourceTextAction = {
   type: GeneratorAction.UPDATE_SOURCE_FIELD;
-  field: string;
+  sourceField: string;
   value: string;
 };
 
 type GeneratorOutputTextAction = {
   type: GeneratorAction.UPDATE_OUTPUT_FIELD;
-  field: string;
   id: string;
+  key: string;
   locale: string;
+  validation: ContentTypeFieldValidation | null;
 };
 
-type GeneratorImpulseActions = {
-  type:
-    | GeneratorAction.IS_NEW_TEXT
-    | GeneratorAction.IS_NOT_NEW_TEXT
-    | GeneratorAction.CAN_GENERATE_TEXT_FROM_FIELD;
+type GeneratorImpulseAction = {
+  type: GeneratorAction.IS_NEW_TEXT | GeneratorAction.IS_NOT_NEW_TEXT;
 };
 
 export type GeneratorReducer =
-  | GeneratorStringActions
+  | GeneratorStringAction
   | GeneratorSourceTextAction
   | GeneratorOutputTextAction
-  | GeneratorImpulseActions;
+  | GeneratorImpulseAction;
 
 const {
   IS_NEW_TEXT,
@@ -63,26 +59,32 @@ const {
   UPDATE_ORIGINAL_TEXT,
 } = GeneratorAction;
 
-const generatorReducer = (state: GeneratorParameters, action: GeneratorReducer) => {
+const generatorReducer = (
+  state: GeneratorParameters,
+  action: GeneratorReducer
+): GeneratorParameters => {
   switch (action.type) {
     case IS_NEW_TEXT:
-      return { ...state, isNewText: true, originalText: '', generatedText: '' };
+      return { ...state, isNewText: true, originalText: '' };
     case IS_NOT_NEW_TEXT:
-      return { ...state, isNewText: false, originalText: '', generatedText: '' };
+      return { ...state, isNewText: false, originalText: '' };
     case UPDATE_SOURCE_FIELD:
       return {
         ...state,
-        sourceField: action.field,
-        canGenerateTextFromField: Boolean(action.field && state.outputField),
+        canGenerateTextFromField: Boolean(action.sourceField && state.output.fieldId),
+        sourceField: action.sourceField,
         originalText: action.value,
       };
     case UPDATE_OUTPUT_FIELD:
       return {
         ...state,
-        outputField: action.field,
-        outputFieldId: action.id,
-        outputFieldLocale: action.locale,
-        canGenerateTextFromField: Boolean(action.field && state.sourceField),
+        canGenerateTextFromField: Boolean(action.id && state.sourceField),
+        output: {
+          fieldId: action.id,
+          fieldKey: action.key,
+          locale: action.locale,
+          validation: action.validation,
+        },
       };
     case UPDATE_ORIGINAL_TEXT:
       return { ...state, originalText: action.value };

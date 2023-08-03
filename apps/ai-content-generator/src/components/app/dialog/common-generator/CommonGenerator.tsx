@@ -12,9 +12,12 @@ import NoFieldsSelectedMessage from './output/output-text-panels/no-fields-selec
 const initialParameters: GeneratorParameters = {
   isNewText: false,
   sourceField: '',
-  outputField: '',
-  outputFieldId: '',
-  outputFieldLocale: '',
+  output: {
+    fieldId: '',
+    fieldKey: '',
+    locale: '',
+    validation: null,
+  },
   originalText: '',
   canGenerateTextFromField: false,
 };
@@ -41,8 +44,9 @@ const CommonGenerator = (props: FeatureComponentProps) => {
       </div>
       {parameters.canGenerateTextFromField ? (
         <Output
-          outputFieldId={parameters.outputFieldId}
-          outputFieldLocale={parameters.outputFieldLocale}
+          outputFieldId={parameters.output.fieldId}
+          outputFieldLocale={parameters.output.locale}
+          outputFieldValidation={parameters.output.validation}
           inputText={parameters.originalText}
         />
       ) : (
