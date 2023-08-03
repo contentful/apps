@@ -17,8 +17,11 @@ const OriginalTextPanel = (props: Props) => {
   const { dispatch } = useContext(GeneratorContext);
 
   const handleOriginalTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const type = isNewText
+      ? GeneratorAction.UPDATE_ORIGINAL_TEXT_PROMPT
+      : GeneratorAction.UPDATE_ORIGINAL_TEXT_FIELD;
     dispatch({
-      type: GeneratorAction.UPDATE_ORIGINAL_TEXT,
+      type: type,
       value: event.target.value,
     });
   };

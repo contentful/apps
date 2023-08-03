@@ -5,7 +5,8 @@ export enum GeneratorAction {
   IS_NOT_NEW_TEXT = 'isNotNewText',
   UPDATE_SOURCE_FIELD = 'changeSourceField',
   UPDATE_OUTPUT_FIELD = 'changeOutputField',
-  UPDATE_ORIGINAL_TEXT = 'changeOriginalText',
+  UPDATE_ORIGINAL_TEXT_PROMPT = 'changeOriginalTextPrompt',
+  UPDATE_ORIGINAL_TEXT_FIELD = 'changeOriginalTextField',
 }
 
 export type GeneratorParameters = {
@@ -13,7 +14,10 @@ export type GeneratorParameters = {
   // can generate text from field when both source and output fields are selected
   canGenerateTextFromField: boolean;
   sourceField: string;
-  originalText: string;
+  originalText: {
+    prompt: string;
+    field: string;
+  };
   output: {
     fieldId: string;
     fieldKey: string;
@@ -22,8 +26,13 @@ export type GeneratorParameters = {
   };
 };
 
-type GeneratorStringAction = {
-  type: GeneratorAction.UPDATE_ORIGINAL_TEXT;
+type GeneratorTextPromptAction = {
+  type: GeneratorAction.UPDATE_ORIGINAL_TEXT_PROMPT;
+  value: string;
+};
+
+type GeneratorTextFieldAction = {
+  type: GeneratorAction.UPDATE_ORIGINAL_TEXT_FIELD;
   value: string;
 };
 
@@ -46,7 +55,8 @@ type GeneratorImpulseAction = {
 };
 
 export type GeneratorReducer =
-  | GeneratorStringAction
+  | GeneratorTextPromptAction
+  | GeneratorTextFieldAction
   | GeneratorSourceTextAction
   | GeneratorOutputTextAction
   | GeneratorImpulseAction;
@@ -56,7 +66,8 @@ const {
   IS_NOT_NEW_TEXT,
   UPDATE_SOURCE_FIELD,
   UPDATE_OUTPUT_FIELD,
-  UPDATE_ORIGINAL_TEXT,
+  UPDATE_ORIGINAL_TEXT_PROMPT,
+  UPDATE_ORIGINAL_TEXT_FIELD,
 } = GeneratorAction;
 
 const generatorReducer = (
@@ -65,15 +76,15 @@ const generatorReducer = (
 ): GeneratorParameters => {
   switch (action.type) {
     case IS_NEW_TEXT:
-      return { ...state, isNewText: true, originalText: '' };
+      return { ...state, isNewText: true };
     case IS_NOT_NEW_TEXT:
-      return { ...state, isNewText: false, originalText: '' };
+      return { ...state, isNewText: false };
     case UPDATE_SOURCE_FIELD:
       return {
         ...state,
         canGenerateTextFromField: Boolean(action.sourceField && state.output.fieldId),
         sourceField: action.sourceField,
-        originalText: action.value,
+        originalText: { ...state.originalText, field: action.value },
       };
     case UPDATE_OUTPUT_FIELD:
       return {
@@ -86,8 +97,10 @@ const generatorReducer = (
           validation: action.validation,
         },
       };
-    case UPDATE_ORIGINAL_TEXT:
-      return { ...state, originalText: action.value };
+    case UPDATE_ORIGINAL_TEXT_PROMPT:
+      return { ...state, originalText: { ...state.originalText, prompt: action.value } };
+    case UPDATE_ORIGINAL_TEXT_FIELD:
+      return { ...state, originalText: { ...state.originalText, field: action.value } };
     default:
       return state;
   }

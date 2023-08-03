@@ -1,7 +1,7 @@
 import useSupportedFields, { SupportedFieldTypes } from '@hooks/dialog/useSupportedFields';
 import { Box, Flex } from '@contentful/f36-components';
 import { GeneratorAction, GeneratorParameters } from '../generatorReducer';
-import { ChangeEvent, useContext, useEffect } from 'react';
+import { ChangeEvent, useContext } from 'react';
 import EntryFieldList from './field-list/EntryFieldList';
 import ContentSource from './content-source/ContentSource';
 import { GeneratorContext } from '@providers/generatorProvider';
@@ -62,23 +62,6 @@ const SourceAndFieldSelectors = (props: Props) => {
         value: event.target.value,
       });
   };
-
-  const handleBaseDataChange = () => {
-    if (supportedFieldsWithContent.length) {
-      const sourceFieldData = getFieldData(
-        isNewText ? sourceField : '',
-        supportedFieldsWithContent
-      );
-      updateSourceField(sourceFieldData, supportedFieldsWithContent[0], dispatch);
-    }
-
-    if (allSupportedFields.length) {
-      const outputFieldData = getFieldData(output.fieldId, allSupportedFields);
-      updateOutputField(outputFieldData, allSupportedFields[0], dispatch);
-    }
-  };
-
-  useEffect(handleBaseDataChange, [isNewText]);
 
   const changeTextSource = () => {
     const type = !isNewText ? GeneratorAction.IS_NEW_TEXT : GeneratorAction.IS_NOT_NEW_TEXT;
