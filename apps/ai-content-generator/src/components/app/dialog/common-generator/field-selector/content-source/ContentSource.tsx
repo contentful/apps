@@ -7,7 +7,7 @@ interface Props {
   selectFieldWidth: number;
 }
 
-function EntryFieldList(props: Props) {
+function ContentSource(props: Props) {
   const { title, isNewText, onChange, selectFieldWidth } = props;
 
   return (
@@ -23,4 +23,4 @@ function EntryFieldList(props: Props) {
   );
 }
 
-export default EntryFieldList;
+export default ContentSource;
