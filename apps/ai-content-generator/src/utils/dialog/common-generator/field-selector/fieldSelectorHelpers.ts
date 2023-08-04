@@ -65,4 +65,46 @@ const updateOutputField = (
   });
 };
 
-export { getFieldData, updateSourceField, updateOutputField };
+/**
+ * Dispatches an action to update the Content Source
+ * @param isNewText
+ * @param dispatch
+ */
+const handleContentSourceChange = (isNewText: boolean, dispatch: Dispatch<GeneratorReducer>) => {
+  const type = !isNewText ? GeneratorAction.IS_NEW_TEXT : GeneratorAction.IS_NOT_NEW_TEXT;
+  dispatch({ type });
+};
+
+/**
+ * Gets the data for the newly selected source field and calls a function to
+ * dispatch an action to update the source field
+ * @param newField
+ * @param fields
+ * @param dispatch
+ */
+const handleSourceFieldChange = (
+  newField: string,
+  fields: Field[],
+  dispatch: Dispatch<GeneratorReducer>
+) => {
+  const sourceFieldData = getFieldData(newField, fields);
+  updateSourceField(sourceFieldData, fields[0], dispatch);
+};
+
+/**
+ * Gets the data for the newly selected output field and calls a function to
+ * dispatch an action to update the output field
+ * @param newField
+ * @param fields
+ * @param dispatch
+ */
+const handleOutputFieldChange = (
+  newField: string,
+  fields: Field[],
+  dispatch: Dispatch<GeneratorReducer>
+) => {
+  const outputFieldData = getFieldData(newField, fields);
+  updateOutputField(outputFieldData, fields[0], dispatch);
+};
+
+export { handleContentSourceChange, handleSourceFieldChange, handleOutputFieldChange };

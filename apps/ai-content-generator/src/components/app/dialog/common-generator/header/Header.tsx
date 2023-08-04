@@ -5,7 +5,7 @@ import { CloseIcon } from '@contentful/f36-icons';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import featureConfig from '@configs/features/featureConfig';
-import sparkle from '@components/common/sparkle-icon/sparkle.png';
+import SparkleFill from '@components/common/sparkle-icon/SparkleFill.svg';
 import { css } from '@emotion/react';
 import tokens from '@contentful/f36-tokens';
 
@@ -31,7 +31,7 @@ const Header = () => {
       alignItems="center"
       css={styles.header}>
       <Flex>
-        <img src={sparkle}></img>
+        <img src={SparkleFill}></img>
         <Subheading marginBottom="none" marginLeft="spacingXs">
           {title}
         </Subheading>

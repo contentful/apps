@@ -1,14 +1,14 @@
 import useSupportedFields, { SupportedFieldTypes } from '@hooks/dialog/useSupportedFields';
-import { Box, Flex } from '@contentful/f36-components';
-import { GeneratorAction, GeneratorParameters } from '../generatorReducer';
-import { ChangeEvent, useContext, useEffect } from 'react';
-import EntryFieldList from './field-list/EntryFieldList';
-import ContentSource from './content-source/ContentSource';
+import { Box, Flex, Select } from '@contentful/f36-components';
+import { GeneratorParameters } from '../generatorReducer';
+import { ChangeEvent, useContext } from 'react';
+import Selector from './selector/Selector';
+import { Field } from '@hooks/dialog/useSupportedFields';
 import { GeneratorContext } from '@providers/generatorProvider';
 import {
-  getFieldData,
-  updateOutputField,
-  updateSourceField,
+  handleContentSourceChange,
+  handleSourceFieldChange,
+  handleOutputFieldChange,
 } from '@utils/dialog/common-generator/field-selector/fieldSelectorHelpers';
 import { css } from '@emotion/react';
 import tokens from '@contentful/f36-tokens';
@@ -21,6 +21,11 @@ const styles = {
     padding: `${tokens.spacingS} ${tokens.spacingM}`,
   }),
 };
+
+enum ContentSourceOptions {
+  FIELD = 'field',
+  PROMPT = 'prompt',
+}
 
 interface Props {
   parameters: GeneratorParameters;
@@ -41,75 +46,69 @@ const SourceAndFieldSelectors = (props: Props) => {
     defaultLocale
   );
 
-  const handleSelectChange = (action: GeneratorAction) => {
-    if (action === GeneratorAction.UPDATE_SOURCE_FIELD) {
-      return (event: ChangeEvent<HTMLSelectElement>) => {
-        const sourceFieldData = getFieldData(event.target.value, supportedFieldsWithContent);
-        updateSourceField(sourceFieldData, supportedFieldsWithContent[0], dispatch);
-      };
-    }
+  const getSourceOptions = () => {
+    const sources = [
+      { id: ContentSourceOptions.FIELD, name: 'Field' },
+      { id: ContentSourceOptions.PROMPT, name: 'Prompt' },
+    ];
 
-    if (action === GeneratorAction.UPDATE_OUTPUT_FIELD) {
-      return (event: ChangeEvent<HTMLSelectElement>) => {
-        const outputFieldData = getFieldData(event.target.value, allSupportedFields);
-        updateOutputField(outputFieldData, allSupportedFields[0], dispatch);
-      };
-    }
-
-    return (event: ChangeEvent<HTMLSelectElement>) =>
-      dispatch({
-        type: action,
-        value: event.target.value,
-      });
+    return sources.map((source) => (
+      <Select.Option key={source.id} value={source.id}>
+        {source.name}
+      </Select.Option>
+    ));
   };
 
-  const handleBaseDataChange = () => {
-    if (supportedFieldsWithContent.length) {
-      const sourceFieldData = getFieldData(
-        isNewText ? sourceField : '',
-        supportedFieldsWithContent
-      );
-      updateSourceField(sourceFieldData, supportedFieldsWithContent[0], dispatch);
-    }
+  const getFieldOptions = (fields: Field[]) => {
+    const defaultOption = (
+      <Select.Option value="" isDisabled>
+        Select field...
+      </Select.Option>
+    );
 
-    if (allSupportedFields.length) {
-      const outputFieldData = getFieldData(output.fieldId, allSupportedFields);
-      updateOutputField(outputFieldData, allSupportedFields[0], dispatch);
-    }
+    const fieldOptions = fields.map((field) => (
+      <Select.Option key={field.key} value={field.key}>
+        {field.name}
+      </Select.Option>
+    ));
+
+    return [defaultOption, ...fieldOptions];
   };
 
-  useEffect(handleBaseDataChange, [isNewText]);
+  const onContentSourceChange = () => handleContentSourceChange(isNewText, dispatch);
 
-  const changeTextSource = () => {
-    const type = !isNewText ? GeneratorAction.IS_NEW_TEXT : GeneratorAction.IS_NOT_NEW_TEXT;
-    dispatch({ type });
-  };
+  const onSourceFieldChange = (event: ChangeEvent<HTMLSelectElement>) =>
+    handleSourceFieldChange(event.target.value, supportedFieldsWithContent, dispatch);
+
+  const onOutputFieldChange = (event: ChangeEvent<HTMLSelectElement>) =>
+    handleOutputFieldChange(event.target.value, allSupportedFields, dispatch);
 
   return (
     <Box css={styles.wrapper}>
       <Flex justifyContent="center">
-        <ContentSource
+        <Selector
           title="Content Source"
-          isNewText={isNewText}
-          onChange={changeTextSource}
+          selectedValue={isNewText ? ContentSourceOptions.PROMPT : ContentSourceOptions.FIELD}
+          options={getSourceOptions()}
+          onChange={onContentSourceChange}
           selectFieldWidth={SELECT_WIDTH}
         />
 
         {!isNewText && (
-          <EntryFieldList
+          <Selector
             title="Source Field"
-            selectedField={sourceField}
-            fields={supportedFieldsWithContent}
-            onChange={handleSelectChange(GeneratorAction.UPDATE_SOURCE_FIELD)}
+            selectedValue={sourceField}
+            options={getFieldOptions(supportedFieldsWithContent)}
+            onChange={onSourceFieldChange}
             selectFieldWidth={SELECT_WIDTH}
           />
         )}
 
-        <EntryFieldList
+        <Selector
           title="Output Field"
-          selectedField={output.fieldKey}
-          fields={allSupportedFields}
-          onChange={handleSelectChange(GeneratorAction.UPDATE_OUTPUT_FIELD)}
+          selectedValue={output.fieldKey}
+          options={getFieldOptions(allSupportedFields)}
+          onChange={onOutputFieldChange}
           selectFieldWidth={SELECT_WIDTH}
         />
       </Flex>

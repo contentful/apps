@@ -8,7 +8,7 @@ import { TextFields } from '@hooks/dialog/useSupportedFields';
 import generatorReducer, { GeneratorParameters } from './generatorReducer';
 
 const initialParameters: GeneratorParameters = {
-  isNewText: true,
+  isNewText: false,
   sourceField: '',
   output: {
     fieldId: '',
@@ -16,7 +16,7 @@ const initialParameters: GeneratorParameters = {
     locale: '',
     validation: null,
   },
-  originalText: '',
+  originalText: { prompt: '', field: '' },
   canGenerateTextFromField: false,
 };
 
@@ -33,6 +33,10 @@ const CommonGenerator = () => {
 
   useEffect(updateProviderData, [dispatch]);
 
+  const inputText = parameters.isNewText
+    ? parameters.originalText.prompt
+    : parameters.originalText.field;
+
   return (
     <Flex flexDirection="column">
       <Header />
@@ -41,7 +45,7 @@ const CommonGenerator = () => {
         outputFieldId={parameters.output.fieldId}
         outputFieldLocale={parameters.output.locale}
         outputFieldValidation={parameters.output.validation}
-        inputText={parameters.originalText}
+        inputText={inputText}
         isNewText={parameters.isNewText}
       />
     </Flex>
