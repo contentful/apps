@@ -9,7 +9,6 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "@segment/analytics-next": "^1.51.3",
     "@sentry/react": "^7.44.2",
-    "@sentry/tracing": "^7.44.2",
     "@testing-library/user-event": "14.4.3",
     "@types/chart.js": "^2.9.37",
     "@types/lodash": "4.14.195",
