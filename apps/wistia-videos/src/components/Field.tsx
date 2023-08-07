@@ -160,11 +160,7 @@ const Field = (props: FieldProps) => {
                             <img src={item.thumbnail.url} alt={item.name} />
                           </StyledImageContainer>
                         </Card>
-                        <Paragraph style={{    whiteSpace: 'nowrap',
-    width: '100%',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-}}}>{item.name}</Paragraph>
+                        <Paragraph style={{ whiteSpace: 'nowrap', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis'}}>{item.name}</Paragraph>
                       </GridItem>
                     ))}
                   </Grid>
