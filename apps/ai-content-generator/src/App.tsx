@@ -36,7 +36,7 @@ const App = () => {
         currentSpaceId: sdk.ids.space,
       },
     });
-  }, [ldClient]);
+  }, [ldClient, sdk.ids.space, sdk.user.sys.id]);
 
   const Component = useMemo(() => {
     const locations = ComponentLocationSettings(isV2);

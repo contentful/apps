@@ -31,7 +31,7 @@ const CommonGenerator = () => {
     });
   };
 
-  useEffect(updateProviderData, [dispatch]);
+  useEffect(updateProviderData, [dispatch, setProviderData]);
 
   const inputText = parameters.isNewText
     ? parameters.originalText.prompt

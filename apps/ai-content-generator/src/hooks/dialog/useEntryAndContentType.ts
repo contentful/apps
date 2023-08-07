@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -16,7 +16,7 @@ const useEntryAndContentType = (entryId: string) => {
   const sdk = useSDK<DialogAppSDK>();
   const cma = sdk.cma;
 
-  const getEntryAndContentType = async () => {
+  const getEntryAndContentType = useCallback(async () => {
     if (entryId) {
       const entry = await cma.entry.get({ entryId });
       setEntry(entry);
@@ -25,10 +25,12 @@ const useEntryAndContentType = (entryId: string) => {
         contentTypeId: entry.sys.contentType.sys.id,
       });
       setContentType(contentType);
+
+      return { entry, contentType };
     }
 
-    return { entry, contentType };
-  };
+    return { entry: null, contentType: null };
+  }, [cma.contentType, cma.entry, entryId]);
 
   const updateEntry = async (fieldKey: string, fieldLocale: string, updatedText: string) => {
     try {
@@ -70,7 +72,7 @@ const useEntryAndContentType = (entryId: string) => {
 
   useEffect(() => {
     getEntryAndContentType();
-  }, [entryId]);
+  }, [entryId, getEntryAndContentType]);
 
   return { entry, contentType, updateEntry };
 };
