@@ -9,6 +9,7 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.38.3",
     "@emotion/react": "^11.11.1",
+    "launchdarkly-react-client-sdk": "^3.0.8",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
