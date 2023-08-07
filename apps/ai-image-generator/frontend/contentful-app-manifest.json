@@ -1,0 +1,21 @@
+{
+  "actions": [
+    {
+      "id": "aiigBuildAction",
+      "name": "AI Image Generator Build Action",
+      "category": "Custom",
+      "description": "This action is used to launch hosted app builds for AIIG.",
+      "type": "function",
+      "path": "actions/aiig.js",
+      "entryFile": "./actions/aiig.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "prompt",
+          "name": "prompt",
+          "type": "Symbol"
+        }
+      ]
+    }
+  ]
+}
