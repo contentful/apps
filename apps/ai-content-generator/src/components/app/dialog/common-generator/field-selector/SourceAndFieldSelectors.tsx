@@ -61,7 +61,7 @@ const SourceAndFieldSelectors = (props: Props) => {
 
   const getFieldOptions = (fields: Field[]) => {
     const defaultOption = (
-      <Select.Option value="" isDisabled>
+      <Select.Option key="default-0" value="" isDisabled>
         Select field...
       </Select.Option>
     );

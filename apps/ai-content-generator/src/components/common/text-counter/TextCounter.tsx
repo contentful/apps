@@ -24,17 +24,33 @@ const TextCounter = (props: Props) => {
   const style = isValid ? styles.validCount : styles.invalidCount;
   const errorMessage = isBelowMinLength ? `Please lengthen the text` : `Please shorten the text`;
 
+  const getCharLimitsToDisplay = () => {
+    let displayContent = '';
+
+    if (maxLength && minLength) {
+      displayContent = `Requires between ${minLength} and ${maxLength} characters`;
+    } else if (maxLength) {
+      displayContent = `Maximum ${maxLength} characters`;
+    } else if (minLength) {
+      displayContent = `Requires at least ${minLength} characters`;
+    }
+
+    const displayComponent = (
+      <Paragraph marginTop="spacing2Xs" css={styles.validCount}>
+        {displayContent}
+      </Paragraph>
+    );
+
+    return displayContent ? displayComponent : null;
+  };
+
   return (
     <Flex flexDirection="column">
       <Flex justifyContent="space-between">
         <Paragraph marginTop="spacing2Xs" css={style}>
           {text.length} characters
         </Paragraph>
-        {maxLength && (
-          <Paragraph marginTop="spacing2Xs" css={styles.validCount}>
-            Maximum {maxLength} characters
-          </Paragraph>
-        )}
+        {getCharLimitsToDisplay()}
       </Flex>
       <Flex
         css={{ visibility: isValid ? 'hidden' : 'visible' }}

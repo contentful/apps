@@ -44,14 +44,12 @@ const GeneratedTextPanel = (props: Props) => {
     setCanApply(isLengthValid);
   };
 
-  useEffect(checkIfCanApply, [output]);
+  useEffect(checkIfCanApply, [output, isGenerating]);
 
   return (
     <Tabs.Panel id={OutputTab.GENERATED_TEXT}>
       {isGenerating ? (
-        <TextFieldWithButtons
-          inputText={output}
-          sizeValidation={{ max: outputFieldValidation?.size?.max }}>
+        <TextFieldWithButtons inputText={output} sizeValidation={outputFieldValidation?.size}>
           <Button onClick={sendStopSignal}>Stop Generating</Button>
         </TextFieldWithButtons>
       ) : (
