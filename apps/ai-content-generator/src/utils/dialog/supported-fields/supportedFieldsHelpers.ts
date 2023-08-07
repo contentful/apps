@@ -32,7 +32,9 @@ const formatField = (
     locale: locale,
     language: localeNames[locale],
     sizeValidation:
-      field.validations?.find((validation) => validation.hasOwnProperty('size')) || null,
+      field.validations?.find((validation) =>
+        Object.prototype.hasOwnProperty.call(validation, 'size')
+      ) || null,
     isDefaultLocale: defaultLocale === locale,
   };
 

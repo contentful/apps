@@ -8,7 +8,7 @@ type loadingState = {
   isLoading: true;
   feature: undefined;
   entryId: undefined;
-  fieldLocales: {};
+  fieldLocales: undefined;
 };
 
 type resolvedState = {

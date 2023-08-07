@@ -35,7 +35,7 @@ interface GeneratorProviderProps {
 
 const defaultContext = {
   entryId: '',
-  setProviderData: (data: Partial<GeneratorContextProps>) => {},
+  setProviderData: (() => {}) as (data: Partial<GeneratorContextProps>) => void,
 
   entry: null,
   contentType: null,

@@ -1,11 +1,18 @@
+interface ParsedLine {
+  choices: {
+    delta: {
+      content: string;
+    };
+  }[];
+}
+
 /**
  * A filter function that checks if a line has text data or
  * is the end of a conversation.
  * @param line
- * @param i
  * @returns
  */
-const findLineWithTextData = (line: string, i: number) => {
+const findLineWithTextData = (line: string) => {
   const trimmedLine = line.trim();
 
   if (trimmedLine === '' || trimmedLine === '[DONE]') {
@@ -21,7 +28,7 @@ const findLineWithTextData = (line: string, i: number) => {
  * @param parsedLine
  * @returns
  */
-const getContentFromParsedLine = (parsedLine: any): string => {
+const getContentFromParsedLine = (parsedLine: ParsedLine): string => {
   const { choices } = parsedLine;
   const { delta } = choices[0];
 
