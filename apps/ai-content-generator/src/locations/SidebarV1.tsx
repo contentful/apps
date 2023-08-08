@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -11,7 +11,6 @@ import {
 } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { documentToPlainTextString } from '@contentful/rich-text-plain-text-renderer';
-import { createClient } from 'contentful-management';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import RichTextModel from '../richTextModel';
 import prompts from '../prompts';
