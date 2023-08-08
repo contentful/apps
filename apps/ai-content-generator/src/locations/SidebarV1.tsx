@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -11,7 +11,6 @@ import {
 } from '@contentful/f36-components';
 import { ExternalLinkTrimmedIcon } from '@contentful/f36-icons';
 import { documentToPlainTextString } from '@contentful/rich-text-plain-text-renderer';
-import { createClient } from 'contentful-management';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import RichTextModel from '../richTextModel';
 import prompts from '../prompts';
@@ -33,17 +32,6 @@ const Sidebar = () => {
   }
 
   const fields = sdk.entry.fields;
-
-  const cma = createClient(
-    { apiAdapter: sdk.cmaAdapter },
-    {
-      type: 'plain',
-      defaults: {
-        environmentId: sdk.ids.environmentAlias ?? sdk.ids.environment,
-        spaceId: sdk.ids.space,
-      },
-    }
-  );
 
   const [error, setError] = useState(null);
   const [prompt, setPrompt] = useState(fields[sdk.contentType.displayField].getValue() || '');
@@ -115,43 +103,6 @@ const Sidebar = () => {
   });
 
   useEffect(() => {
-    // Find ALL the fields in document, including the ones that are going up the tree
-    async function getTree() {
-      const entries = await cma.entry.getMany({
-        query: {
-          links_to_entry: sdk.entry.getSys().id,
-        },
-      });
-      if (entries.total > 0) {
-        const entry = entries.items[0];
-        const contentType = await cma.contentType.get({
-          contentTypeId: entry.sys.contentType.sys.id,
-        });
-        // Merge the content types with the locale info
-        const fields = contentType.fields.map((field: any) => {
-          field.locales = entry.fields[field.id] ? Object.keys(entry.fields[field.id]) : [];
-          return field;
-        });
-        const parentRichTextFields = fields
-          .filter((field) => field.type === 'RichText')
-          .filter((field) => field.locales.includes(targetLocale));
-        // Merge the new fields with the existing ones from the parent, but indicate they are not visibile inside the current editor
-        setRichTextFields([
-          ...richTextFields,
-          ...parentRichTextFields.map((field) => {
-            return {
-              name: field.name,
-              data: entry.fields[field.id][targetLocale],
-              currentEditor: false,
-            };
-          }),
-        ]);
-      }
-    }
-    getTree();
-  }, [cma.contentType, cma.entry, sdk.entry, targetLocale]);
-
-  useMemo(() => {
     const fields = sdk.entry.fields;
     const textFields = Object.keys(fields)
       .filter((key) => fields[key].type === 'Symbol' || fields[key].type === 'Text')
