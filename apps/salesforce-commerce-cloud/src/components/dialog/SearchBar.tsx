@@ -186,7 +186,7 @@ const SelectionListItem = (props: SelectionListItemProps) => {
   };
 
   const getProductPreviewImageUrl = (productInfo?: any) => {
-    return productInfo.image?.absUrl || '';
+    return productInfo?.image?.absUrl || '';
   };
 
   const selectedItemWrapperStyles = css`
