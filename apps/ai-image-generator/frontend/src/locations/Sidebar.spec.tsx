@@ -1,9 +1,9 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../../test/mocks';
+import React from 'react';
 import Sidebar from './Sidebar';
+import { render } from '@testing-library/react';
+import { mockCma, mockSdk } from '../../test/mocks';
 
-vi.mock('@contentful/react-apps-toolkit', () => ({
+jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));
@@ -12,6 +12,6 @@ describe('Sidebar component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Sidebar />);
 
-    expect(getByText('Hello Sidebar Component (AppId: test-app)')).toBeTruthy();
+    expect(getByText('Hello Sidebar Component (AppId: test-app)')).toBeInTheDocument();
   });
 });

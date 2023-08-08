@@ -1,20 +1,31 @@
+import React, { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Flex, Form, Heading, Paragraph } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { Heading, Form, Paragraph, Flex } from '@contentful/f36-components';
 import { css } from 'emotion';
-import { useCallback, useEffect, useState } from 'react';
+import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 
 export interface AppInstallationParameters {}
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<ConfigAppSDK>();
-
   /*
      To use the cma, inject it as follows.
      If it is not needed, you can remove the next line.
   */
   // const cma = useCMA();
+
+  useEffect(() => {
+    const getAppActions = async () => {
+      const appActions = await sdk.cma.appAction.getMany({
+        appDefinitionId: sdk.ids.app,
+        limit: 100,
+      });
+      console.log('appActions', appActions);
+    };
+
+    getAppActions();
+  }, [sdk.cma.appAction, sdk.ids.app]);
 
   const onConfigure = useCallback(async () => {
     // This method will be called when a user clicks on "Install"

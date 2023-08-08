@@ -12,18 +12,21 @@
     "@emotion/react": "^11.11.1",
     "launchdarkly-react-client-sdk": "^3.0.8",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-scripts": "5.0.1"
   },
   "scripts": {
-    "start": "vite",
-    "start:preview": "npm run build && vite preview",
-    "start:dist": "http-server dist -p 3000 -c-1",
-    "build": "tsc && vite build --mode ${NODE_ENV:='production'} && npm run build-actions",
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build  && npm run build-actions",
     "build-actions": "node build-actions.js",
-    "test": "vitest",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3RheWQRagirMFgWrhMOBxL --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6H2pUZdiYcmo0WY8dlYZn5 --token ${TEST_CMA_TOKEN}"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3RheWQRagirMFgWrhMOBxL --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6H2pUZdiYcmo0WY8dlYZn5 --token ${TEST_CMA_TOKEN}"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
   },
   "browserslist": {
     "production": [
@@ -39,16 +42,16 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.10.2",
+    "@contentful/node-apps-toolkit": "^2.2.0",
+    "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.0.0",
-    "@originjs/vite-plugin-commonjs": "^1.0.3",
-    "@types/node": "16.18.38",
-    "@types/react": "18.2.14",
-    "@types/react-dom": "18.2.6",
-    "@vitejs/plugin-react": "4.0.1",
-    "esbuild": "^0.19.0",
-    "happy-dom": "9.20.3",
-    "typescript": "5.1.6",
-    "vite": "4.3.9",
-    "vitest": "0.34.1"
-  }
+    "@tsconfig/create-react-app": "2.0.1",
+    "@types/node": "16.18.39",
+    "@types/react": "18.2.18",
+    "@types/react-dom": "18.2.7",
+    "cross-env": "7.0.3",
+    "esbuild": "^0.18.6",
+    "typescript": "4.9.5"
+  },
+  "homepage": "."
 }
