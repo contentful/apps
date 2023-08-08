@@ -2,6 +2,7 @@ import { ChangeEvent, Dispatch, useState } from 'react';
 import { FormControl, TextInput } from '@contentful/f36-components';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 import { APIKeyText } from '../configText';
+import OpenAILink from '../openai-link/OpenAILink';
 
 interface Props {
   apiKey: string;
@@ -11,17 +12,17 @@ interface Props {
 const APIKey = (props: Props) => {
   const { apiKey, dispatch } = props;
   const [editing, setEditing] = useState(false);
-  const [isTouched, setisTouched] = useState(false);
 
   const censorApiKey = (key: string) => key.replace(/.(?=.{4,}$)/g, '*');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: ParameterAction.UPDATE_APIKEY, value: e.target.value });
   };
+
   const handleBlur = () => {
     setEditing(false);
-    setisTouched(true);
   };
+
   const handleClick = () => setEditing(true);
 
   return (
@@ -46,12 +47,9 @@ const APIKey = (props: Props) => {
           onClick={handleClick}
         />
       )}
-      <FormControl.HelpText>{APIKeyText.helpText}</FormControl.HelpText>
-      {!apiKey && isTouched && (
-        <FormControl.ValidationMessage>
-          {APIKeyText.validationMessage}
-        </FormControl.ValidationMessage>
-      )}
+      <FormControl.HelpText>
+        <OpenAILink body={APIKeyText.helpText} substring={APIKeyText.linkSubstring} />
+      </FormControl.HelpText>
     </FormControl>
   );
 };

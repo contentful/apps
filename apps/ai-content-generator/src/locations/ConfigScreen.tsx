@@ -1,13 +1,12 @@
-import ConfigForm from '@components/config/ConfigForm';
+import ConfigPage from '@components/config/ConfigPage';
 
 interface AppInstallationParameters {
   model: string;
   apiKey: string;
   profile: string;
 }
-
 const ConfigScreen = () => {
-  return <ConfigForm />;
+  return <ConfigPage />;
 };
 
 export default ConfigScreen;
