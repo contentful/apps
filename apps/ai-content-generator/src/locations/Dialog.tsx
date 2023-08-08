@@ -4,6 +4,7 @@ import CommonGenerator from '@components/app/dialog/common-generator/CommonGener
 import GeneratorProvider from '@providers/generatorProvider';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
+import { useMemo } from 'react';
 
 export interface FieldLocales {
   [key: string]: string[];
@@ -26,6 +27,15 @@ const Dialog = () => {
   const localeNames = sdk.locales.names;
   const defaultLocale = sdk.locales.default;
 
+  const GeneratorComponent = useMemo(() => {
+    switch (feature) {
+      case AIFeature.REWRITE:
+        return CommonGenerator;
+      default:
+        return CommonGenerator;
+    }
+  }, [feature]);
+
   return (
     <GeneratorProvider
       feature={feature}
@@ -33,7 +43,7 @@ const Dialog = () => {
       fieldLocales={fieldLocales}
       localeNames={localeNames}
       defaultLocale={defaultLocale}>
-      <CommonGenerator />
+      <GeneratorComponent />
     </GeneratorProvider>
   );
 };
