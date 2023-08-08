@@ -14,11 +14,11 @@ const ProductPreview = (props: { product: any }) => {
         : product.shortDescription.default.markup;
   }
 
+  const imageUrl = product.image?.absUrl;
+
   return (
     <>
-      {product.image.absUrl && (
-        <img src={product.image.absUrl} alt={product.image.alt.default} height="75" width="75" />
-      )}
+      {imageUrl && <img src={imageUrl} alt={product.image.alt.default} height="75" width="75" />}
       <Flex flexDirection="column" marginLeft="spacingS">
         <Text as="div" fontWeight="fontWeightDemiBold">
           {product.name.default} (ID: {product.id})
