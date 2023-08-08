@@ -1,4 +1,4 @@
-import { gptModels } from '@configs/gptModels';
+import { gptModels } from '@configs/ai/gptModels';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 
 const generateRandomParameters = (): AppInstallationParameters => {

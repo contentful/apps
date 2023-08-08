@@ -11,6 +11,7 @@ enum AIFeature {
   TRANSLATE = 'translate',
   SEO_DESCRIPTION = 'seoDescription',
   SEO_KEYWORDS = 'seoKeywords',
+  REWRITE = 'rewrite',
 }
 
 const FIELD_HELP_TEXT_BASE = 'Select a source field and output field to';
@@ -75,6 +76,12 @@ const featureConfig: FeatureConfig = {
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter content to generate SEO description`,
       promptPlaceholder: 'Enter content here to generate SEO description...',
     },
+  },
+  [AIFeature.REWRITE]: {
+    dialogTitle: 'Rewrite content',
+    buttonTitle: 'Rewrite',
+    messageSuffix: 'rewrite content',
+    prompt: contentPrompt,
   },
 };
 

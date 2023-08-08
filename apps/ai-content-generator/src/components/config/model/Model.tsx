@@ -1,6 +1,6 @@
 import { ChangeEvent, Dispatch } from 'react';
 import { FormControl, Select } from '@contentful/f36-components';
-import { gptModels, defaultModelId } from '@configs/gptModels';
+import { gptModels, defaultModelId } from '@configs/ai/gptModels';
 import { ModelText } from '../configText';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 
