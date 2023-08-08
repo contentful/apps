@@ -146,8 +146,8 @@ const ProductSearchResult = (props: SearchResultProps) => {
               onLoad={() => setImageHasLoaded(true)}
               onError={() => setImageHasErrored(true)}
               style={{ display: imageHasLoaded ? 'block' : 'none' }}
-              src={result.image.absUrl}
-              alt={result.image.alt.default}
+              src={result.image?.absUrl}
+              alt={result.image?.alt.default}
               data-test-id="image"
             />
           </div>

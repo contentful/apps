@@ -84,10 +84,12 @@ const ItemPreview = (props: ItemPreviewProps) => {
     onRemove: props.onRemove,
   };
 
+  const imageUrl = itemData.image?.absUrl;
+
   return (
     <>
-      {useImage && itemData.image.absUrl && (
-        <img src={itemData.image.absUrl} alt={itemData.image.alt.default} height="75" width="75" />
+      {useImage && imageUrl && (
+        <img src={imageUrl} alt={itemData.image.alt.default} height="75" width="75" />
       )}
       <Flex flexDirection="column" marginLeft="spacingS">
         <Text as="div" fontWeight="fontWeightDemiBold" fontSize="fontSizeM">
