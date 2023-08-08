@@ -1,7 +1,7 @@
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
 /**
  * This hook is used to save the parameters of the app.
@@ -12,23 +12,23 @@ import { useEffect } from 'react';
 const useSaveConfigHandler = (parameters: AppInstallationParameters) => {
   const sdk = useSDK<ConfigAppSDK>();
 
-  const getCurrentState = async () => {
+  const getCurrentState = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
     return {
       parameters,
       targetState: currentState,
     };
-  };
+  }, [parameters, sdk.app]);
 
-  const changeSaveConfigHandler = () => {
+  const changeSaveConfigHandler = useCallback(() => {
     const saveHandler = getCurrentState();
     sdk.app.onConfigure(() => saveHandler);
-  };
+  }, [getCurrentState, sdk.app]);
 
   useEffect(() => {
     changeSaveConfigHandler();
-  }, [parameters]);
+  }, [parameters, changeSaveConfigHandler]);
 };
 
 export default useSaveConfigHandler;

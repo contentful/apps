@@ -1,4 +1,4 @@
-import { Dispatch, useEffect } from 'react';
+import { Dispatch, useEffect, useCallback } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import type { ConfigAppSDK } from '@contentful/app-sdk';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
@@ -14,7 +14,7 @@ import { ParameterAction, ParameterReducer } from '@components/config/parameterR
 const useInitializeParameters = (dispatch: Dispatch<ParameterReducer>) => {
   const sdk = useSDK<ConfigAppSDK>();
 
-  const dispatchParameters = async () => {
+  const dispatchParameters = useCallback(async () => {
     try {
       const parameters = await sdk.app.getParameters<AppInstallationParameters>();
 
@@ -30,11 +30,11 @@ const useInitializeParameters = (dispatch: Dispatch<ParameterReducer>) => {
     } finally {
       sdk.app.setReady();
     }
-  };
+  }, [dispatch, sdk.app]);
 
   useEffect(() => {
     dispatchParameters();
-  }, [sdk]);
+  }, [sdk, dispatchParameters]);
 };
 
 export default useInitializeParameters;

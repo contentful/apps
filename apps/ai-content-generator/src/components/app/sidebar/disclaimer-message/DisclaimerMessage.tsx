@@ -25,11 +25,13 @@ const DisclaimerMessage = () => {
   );
 
   const formatLink = () => {
-    const bodyWithTextLink = body.split(substring).reduce((prev: any, current, i) => {
+    const bodyWithTextLink = body.split(substring).reduce((prev: unknown, current, i) => {
       if (!i) {
         return [current];
       }
-      return prev.concat(textLinkComponent(i), current);
+      if (Array.isArray(prev)) {
+        return prev.concat(textLinkComponent(i), current);
+      }
     }, []);
     return bodyWithTextLink as JSX.Element;
   };

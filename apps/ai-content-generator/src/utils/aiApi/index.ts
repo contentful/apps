@@ -1,5 +1,5 @@
 import { ChatCompletionRequestMessage } from 'openai';
-import { findLineWithTextData, getContentFromParsedLine, streamToParsedText } from './aiHelpers';
+import { streamToParsedText } from './aiHelpers';
 
 /**
  * This class is used to interact with OpenAI's API.

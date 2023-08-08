@@ -50,7 +50,7 @@ const useAI = () => {
       const stream = await ai.streamChatCompletion(payload);
       setStream(stream);
 
-      while (true) {
+      while (stream) {
         const streamOutput = await ai.parseStream(stream);
 
         if (streamOutput === false) {
@@ -60,7 +60,7 @@ const useAI = () => {
         setOutput((prev) => prev + streamOutput);
         completeMessage += streamOutput;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
     } finally {
       setStream(null);
@@ -73,7 +73,7 @@ const useAI = () => {
     try {
       await ai.sendStopSignal(stream);
       setStream(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
     }
   };
