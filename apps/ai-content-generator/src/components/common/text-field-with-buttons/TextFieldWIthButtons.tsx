@@ -8,7 +8,7 @@ import tokens from '@contentful/f36-tokens';
 const TEXTAREA_ROWS = 26;
 
 const styles = {
-  helperText: css({
+  helpText: css({
     display: 'flex',
     alignItems: 'center',
     color: `${tokens.gray500}`,
@@ -23,19 +23,12 @@ interface Props {
   sizeValidation?: ContentTypeFieldValidation['size'] | null;
   isDisabled?: boolean;
   placeholder?: string;
-  helperText?: string;
+  helpText?: string;
 }
 
 const TextFieldWithButtons = (props: Props) => {
-  const {
-    inputText,
-    onFieldChange,
-    children,
-    sizeValidation,
-    isDisabled,
-    placeholder,
-    helperText,
-  } = props;
+  const { inputText, onFieldChange, children, sizeValidation, isDisabled, placeholder, helpText } =
+    props;
   return (
     <FormControl>
       <Flex flexDirection="column" fullWidth paddingLeft="spacing2Xl" paddingRight="spacing2Xl">
@@ -53,7 +46,7 @@ const TextFieldWithButtons = (props: Props) => {
         />
 
         <Flex alignSelf="flex-end">
-          <Paragraph css={styles.helperText}>{helperText}</Paragraph>
+          <Paragraph css={styles.helpText}>{helpText}</Paragraph>
           {children}
         </Flex>
       </Flex>

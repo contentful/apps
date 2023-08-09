@@ -10,11 +10,18 @@ export type Prompt = (input: string, targetLocale: string) => string;
  * Feature Items
  */
 
+export type DialogText = {
+  fieldHelpText: string;
+  fieldPlaceholder: string;
+  promptHelpText: string;
+  promptPlaceholder: string;
+};
+
 type FeatureItem = {
   dialogTitle: string;
   buttonTitle: string;
   prompt: Prompt;
-  messageSuffix: string;
+  dialogText: DialogText;
 };
 
 /**
