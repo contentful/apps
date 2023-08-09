@@ -44,6 +44,8 @@ const OutputTextPanels = (props: Props) => {
     }
   };
 
+  const dialogText = featureConfig[feature].dialogText;
+
   return (
     <>
       <OriginalTextPanel
@@ -51,6 +53,7 @@ const OutputTextPanels = (props: Props) => {
         generate={generate}
         isNewText={isNewText}
         hasOutputField={Boolean(outputFieldId)}
+        dialogText={dialogText}
       />
       <GeneratedTextPanel
         ai={ai}

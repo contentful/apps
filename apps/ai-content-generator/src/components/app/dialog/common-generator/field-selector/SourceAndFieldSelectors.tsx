@@ -87,7 +87,7 @@ const SourceAndFieldSelectors = (props: Props) => {
     <Box css={styles.wrapper}>
       <Flex justifyContent="center">
         <Selector
-          title="Content Source"
+          title="Content source"
           selectedValue={isNewText ? ContentSourceOptions.PROMPT : ContentSourceOptions.FIELD}
           options={getSourceOptions()}
           onChange={onContentSourceChange}
@@ -96,7 +96,7 @@ const SourceAndFieldSelectors = (props: Props) => {
 
         {!isNewText && (
           <Selector
-            title="Source Field"
+            title="Source field"
             selectedValue={sourceField}
             options={getFieldOptions(supportedFieldsWithContent)}
             onChange={onSourceFieldChange}
@@ -105,7 +105,7 @@ const SourceAndFieldSelectors = (props: Props) => {
         )}
 
         <Selector
-          title="Output Field"
+          title="Output field"
           selectedValue={output.fieldKey}
           options={getFieldOptions(allSupportedFields)}
           onChange={onOutputFieldChange}
