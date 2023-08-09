@@ -1,5 +1,5 @@
 const launchDarklyConfig = {
-  clientSideID: `${import.meta.env.VITE_LAUNCHDARKLY_CLIENT_ID}`,
+  clientSideID: `${process.env.REACT_LAUNCHDARKLY_CLIENT_ID}`,
   deferInitialization: false,
   flags: {
     aiigFlagV2: true,

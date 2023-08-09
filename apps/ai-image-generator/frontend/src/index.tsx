@@ -6,7 +6,7 @@ import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk';
 
 import App from './App';
 import LocalhostWarning from './components/LocalhostWarning';
-import launchDarklyConfig from './configs/launch-darkly/launchDarklyConfig';
+import launchDarklyConfig from 'configs/launch-darkly/launchDarklyConfig';
 
 (async () => {
   const LDProvider = await asyncWithLDProvider(launchDarklyConfig);
@@ -14,7 +14,7 @@ import launchDarklyConfig from './configs/launch-darkly/launchDarklyConfig';
   const container = document.getElementById('root')!;
   const root = createRoot(container);
 
-  if (import.meta.env.DEV && window.self === window.top) {
+  if (process.env.NODE_ENV === 'development' && window.self === window.top) {
     // You can remove this if block before deploying your app
     root.render(<LocalhostWarning />);
   } else {
