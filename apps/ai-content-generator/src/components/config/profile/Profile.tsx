@@ -16,7 +16,7 @@ const Profile = (props: Props) => {
   };
 
   return (
-    <FormControl>
+    <FormControl isRequired>
       <FormControl.Label>{ProfileText.title}</FormControl.Label>
       <Textarea
         rows={15}
@@ -25,8 +25,6 @@ const Profile = (props: Props) => {
         placeholder={ProfileText.textAreaPlaceholder}
         onChange={handleChange}
       />
-
-      <FormControl.HelpText>{ProfileText.helpText}</FormControl.HelpText>
     </FormControl>
   );
 };
