@@ -73,6 +73,10 @@ export function bootstrap(): serverless.Application {
     '/api/spaces/:spaceId/environments/:environmentId/workspaces/:workspaceId/channels',
     workspaces.getChannels
   );
+  app.get(
+    '/api/spaces/:spaceId/environments/:environmentId/workspaces/:workspaceId/channel/:channelId',
+    workspaces.getChannel
+  );
   app.get('/api/spaces/:spaceId/environments/:environmentId/channels', workspaces.getChannels);
   app.post('/api/messages', messages.post);
   app.post('/api/events', events.post);

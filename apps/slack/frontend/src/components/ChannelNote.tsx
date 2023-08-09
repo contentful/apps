@@ -25,7 +25,7 @@ export const ChannelNote = () => {
         href="https://slack.com/oauth/v2/authorize?client_id=2307263142.2755108964338&scope=channels:read,chat:write,team:read&user_scope=https://slack.com/oauth/v2/authorize?client_id=2307263142.2755108964338&scope=channels:read,chat:write,team:read&user_scope=">
         @Contentful
       </TextLink>{' '}
-      app to your selected Slack channels. <TextLink onClick={onNoteClose}>Got it!</TextLink>
+      app to the Slack channels that you would like to configure notifications for. <TextLink onClick={onNoteClose}>Got it!</TextLink>
     </Note>
   );
 };

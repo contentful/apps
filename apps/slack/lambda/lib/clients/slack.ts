@@ -7,9 +7,13 @@ import {
   WebAPICallResult,
   WebClient,
   ConversationsListResponse,
+  ConversationsInfoResponse,
+  ErrorCode,
+  CodedError
 } from '@slack/web-api';
 import { SlackConfiguration } from '../config';
 import { SlackError } from '../errors';
+import { RateLimitError } from '../errors/rate-limit-error';
 import { SpaceEnvironmentContext } from '../interfaces';
 
 export class SlackClient {
@@ -92,20 +96,42 @@ export class SlackClient {
     ];
   }
 
+  async getChannel(
+    token: string,
+    channelId: string
+  ): Promise<ConversationsInfoResponse> {
+    const response =  SlackClient.assertSuccessResponse(
+      await this.client.conversations.info({
+        channel: channelId,
+        token,
+      })
+    );
+
+    return response;
+  }
+
   async fetchChannels(
     token: string,
     workspaceId: string,
     cursor = ''
-  ): Promise<ConversationsListResponse> {
-    return SlackClient.assertSuccessResponse(
-      await this.client.conversations.list({
+  ): Promise<ConversationsListResponse | any> {
+      try {
+        const response = await this.client.users.conversations({
         team: workspaceId,
         token,
         cursor,
-        limit: 1000,
+        limit: 100,
         exclude_archived: true,
       })
-    );
+
+      return response;
+    } catch(e) {
+      const err = e as CodedError; 
+      if (err.code === ErrorCode.RateLimitedError) {
+        throw new RateLimitError({ errMessage: 'Slack has rate limited the retrieval of all channels.' })
+      }
+      else throw new SlackError({ errMessage: err.message })
+    }
   }
 
   private static assertSuccessResponse(response: WebAPICallResult) {
