@@ -1,4 +1,4 @@
-import gptModels from '@configs/gptModels';
+import { gptModels } from '@configs/gptModels';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 
 const generateRandomParameters = (): AppInstallationParameters => {
@@ -7,7 +7,7 @@ const generateRandomParameters = (): AppInstallationParameters => {
   const randomProfile = Math.random().toString(36).substring(7);
 
   return {
-    model: gptModels[randomModelIndex],
+    model: gptModels[randomModelIndex].id,
     apiKey: 'sk-' + randomApiKey,
     profile: randomProfile,
   };

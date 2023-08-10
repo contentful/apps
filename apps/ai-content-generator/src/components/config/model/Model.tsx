@@ -1,6 +1,6 @@
 import { ChangeEvent, Dispatch } from 'react';
 import { FormControl, Select } from '@contentful/f36-components';
-import gptModels from '@configs/gptModels';
+import { gptModels, defaultModelId } from '@configs/gptModels';
 import { ModelText } from '../configText';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 
@@ -13,10 +13,13 @@ const Model = (props: Props) => {
   const { model, dispatch } = props;
 
   const modelList = gptModels.map((model) => (
-    <Select.Option key={model} value={model}>
-      {model}
+    <Select.Option key={model.id} value={model.id}>
+      {model.name}
     </Select.Option>
   ));
+
+  const isSelectionInModelList = gptModels.some((modelOption) => modelOption.id === model);
+  const value = isSelectionInModelList ? model : defaultModelId;
 
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     dispatch({ type: ParameterAction.UPDATE_MODEL, value: e.target.value });
@@ -25,7 +28,7 @@ const Model = (props: Props) => {
   return (
     <FormControl>
       <FormControl.Label>{ModelText.title}</FormControl.Label>
-      <Select value={model} onChange={handleChange}>
+      <Select value={value} onChange={handleChange}>
         {modelList}
       </Select>
 

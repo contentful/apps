@@ -1,3 +1,10 @@
-const gptModels = ['gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-4', 'gpt-4-0314'];
+const gptModels = [
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5' },
+  { id: 'gpt-3.5-turbo-16k', name: 'GPT-3.5 16k' },
+  { id: 'gpt-4', name: 'GPT-4' },
+  { id: 'gpt-4-0314', name: 'GPT-4 32k' },
+];
 
-export default gptModels;
+const defaultModelId = gptModels[0].id;
+
+export { gptModels, defaultModelId };
