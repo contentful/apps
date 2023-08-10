@@ -19,13 +19,17 @@ const ButtonTextField = (props: Props) => {
   const handleButtonClick = (label: string) => {
     const lowerCaseLabel = label.toLowerCase();
 
+    const updatedActiveButtons = new Set(activeButtons);
+
     if (activeButtons.has(lowerCaseLabel)) {
-      activeButtons.delete(lowerCaseLabel);
+      updatedActiveButtons.delete(lowerCaseLabel);
       removeButtonFromInput(lowerCaseLabel);
     } else {
-      activeButtons.add(lowerCaseLabel);
+      updatedActiveButtons.add(lowerCaseLabel);
       addButtonToInput(lowerCaseLabel);
     }
+
+    setActiveButtons(updatedActiveButtons);
   };
 
   const removeButtonFromInput = (label: string) => {
