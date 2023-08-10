@@ -11,7 +11,8 @@ export const styles = {
     paddingLeft: tokens.spacingM,
     paddingRight: tokens.spacingM,
     paddingBottom: tokens.spacing2Xs,
-    maxWidth: 'none'
+    maxWidth: 'none',
+    textOverflow: 'ellipsis'
   }),
   selectedButton: css({
     border: 'none',
@@ -23,6 +24,7 @@ export const styles = {
     paddingRight: tokens.spacingM,
     paddingBottom: tokens.spacing2Xs,
     maxWidth: 'none',
+    textOverflow: 'ellipsis',
     backgroundColor: tokens.gray200,
     '&:hover': {
         backgroundColor: tokens.gray200
