@@ -111,9 +111,15 @@ export class WorkspacesController {
       environmentId,
     });
 
-    const channels = await this.workspacesRepository.getChannels(token, workspaceId);
+    try {
+      const channels = await this.workspacesRepository.getChannels(token, workspaceId);
 
-    response.status(200).send(channels);
+      response.status(200).send(channels);
+    } catch(e) {
+      console.error(e)
+      response.status(500).send({ status: 500, message: 'Unable to fetch slack channels' })
+    }
+
   });
 
 /**
@@ -166,8 +172,13 @@ export class WorkspacesController {
       environmentId,
     });
 
-    const channel = await this.workspacesRepository.getChannel(token, channelId);
+    try {
+      const channel = await this.workspacesRepository.getChannel(token, channelId);
 
-    response.status(200).send(channel);
+      response.status(200).send(channel);
+    } catch(e) {
+      console.error(e)
+      response.status(500).send({ status: 500, message: 'Unable to fetch slack channel' })
+    }
   });
 }

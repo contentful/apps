@@ -64,6 +64,9 @@ export const apiClient = {
     };
 
     const response = await makeSignedRequest(req, { appDefinitionId: sdk.ids.app, cma });
+    if (response.status > 200) {
+      throw new Error('Unable to fetch channels');
+    }
     return response;
   },
 
@@ -84,6 +87,9 @@ export const apiClient = {
     };
 
     const response = await makeSignedRequest(req, { appDefinitionId: sdk.ids.app, cma });
+    if (response.status > 200) {
+      throw new Error('Unable to fetch channel');
+    }
     return response;
 
   },
