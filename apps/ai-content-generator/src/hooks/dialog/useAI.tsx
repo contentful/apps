@@ -7,6 +7,8 @@ import AI from '@utils/aiApi';
 import { ChatCompletionRequestMessage } from 'openai';
 import { useEffect, useMemo, useState } from 'react';
 
+export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
+
 /**
  * This hook is used to generate messages using the OpenAI API
  * output will stream messages just like a chatbot

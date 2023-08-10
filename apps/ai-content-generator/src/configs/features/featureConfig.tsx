@@ -4,6 +4,7 @@ import contentPrompt from '@configs/prompts/contentPrompt';
 import seoKeywordsPrompt from '@configs/prompts/seoKeywordsPrompt';
 import seoDescriptionPrompt from '@configs/prompts/seoDescriptionPrompt';
 import titlePrompt from '@configs/prompts/titlePrompt';
+import rewritePrompt from '@configs/prompts/rewritePrompt';
 
 enum AIFeature {
   TITLE = 'title',
@@ -81,7 +82,7 @@ const featureConfig: FeatureConfig = {
     dialogTitle: 'Rewrite content',
     buttonTitle: 'Rewrite',
     messageSuffix: 'rewrite content',
-    prompt: contentPrompt,
+    prompt: rewritePrompt,
   },
 };
 
