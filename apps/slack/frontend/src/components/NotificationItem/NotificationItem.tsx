@@ -132,7 +132,7 @@ export const NotificationItem = ({
     if (error) {
       return (
         <div className={styles.errorMessage}>
-          <WarningIcon />
+          <WarningIcon variant='warning' />
           <Text>Failed to load slack channel</Text>
         </div>
       )
