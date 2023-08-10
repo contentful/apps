@@ -16,13 +16,13 @@ import {
 import { DeleteIcon } from '@contentful/f36-icons';
 import { Select, FormControl } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { ConnectedWorkspace, SlackChannel } from '../../workspace.store';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 import { SlackNotification, useNotificationStore } from '../../notification.store';
 import { apiClient } from '../../requests';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { ConfigAppSDK } from '@contentful/app-sdk';
 import { ChannelListModal } from '../ChannelModal/ChannelListModal';
+import { ConnectedWorkspace, SlackChannel } from '../../workspace.store';
 import { styles } from './NotificationItem.styles'
 
 interface NotificationItemProps {
@@ -116,19 +116,28 @@ export const NotificationItem = ({
       try {
         setChannelLoading(true)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const response: any = await apiClient.getChannel(sdk, workspace.id, cma, notification.selectedChannel!);
-        if (response) setChannel(response?.channel)
-        setChannelLoading(false)
+        const response = await apiClient.getChannel(sdk, workspace.id, cma, notification.selectedChannel!);
+        if (response) setChannel(response)
         setError(false)
       } catch (e) {
         setError(true);
-        setChannelLoading(false)
         console.error(e);
       }
+      setChannelLoading(false)
     };
 
     if (notification.selectedChannel) fetchChannel();
   }, [cma, workspace, sdk, notification.selectedChannel]);
+
+  const renderChannel = () => {
+    if (channelLoading) return <Spinner className={styles.spinner} variant="default" />
+    return (
+      <>
+        {channel && <Tooltip content={channel?.name}><TextInput className={styles.channelInput} isDisabled value={channel?.name} /></Tooltip>}
+        <Button onClick={openChannelListModal} size='small'>{channel ? 'Change channel' : 'Select channel'}</Button>
+      </>
+    )
+  }
 
   if (error) {
     return (
@@ -139,13 +148,6 @@ export const NotificationItem = ({
       </>
     );
   }
-
-  const renderLoading = () => (
-    <SkeletonContainer>
-     {/* <Skeleton.Image height={40} width='100%' /> */}
-     <SkeletonBodyText numberOfLines={1} />
-    </SkeletonContainer>
-  )
 
   return (
     <div className={styles.itemWrapper(!!notification.selectedContentType)}>
@@ -173,14 +175,7 @@ export const NotificationItem = ({
           <FormControl className={styles.select}>
           <FormControl.Label>Selected slack channel</FormControl.Label>
           <Flex alignItems='center' gap={tokens.spacingM} >
-            {channelLoading ? 
-          <Spinner className={styles.spinner} variant="default" />
-          : (
-            <>
-              {channel && <Tooltip content={channel?.name}><TextInput className={styles.channelInput} isDisabled value={channel?.name} /></Tooltip>}
-              <Button onClick={openChannelListModal} size='small'>{channel ? 'Change channel' : 'Select channel'}</Button>
-            </>
-          )}
+            {renderChannel()}
           </Flex>
           </FormControl>
           <IconButton

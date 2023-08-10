@@ -120,7 +120,7 @@ export class SlackClient {
         team: workspaceId,
         token,
         cursor,
-        limit: 100,
+        limit: 1000,
         exclude_archived: true,
       })
 
@@ -130,7 +130,7 @@ export class SlackClient {
       if (err.code === ErrorCode.RateLimitedError) {
         throw new RateLimitError({ errMessage: 'Slack has rate limited the retrieval of all channels.' })
       }
-      else throw new SlackError({ errMessage: err.message })
+      throw new SlackError({ errMessage: err.message })
     }
   }
 

@@ -7,18 +7,18 @@ import {
   Skeleton,
   Note,
 } from '@contentful/f36-components';
+import { CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
+import { useNotificationStore } from '../../notification.store';
+import { ConnectedWorkspace, SlackChannel, SlackChannelSimplified, useWorkspaceStore } from '../../workspace.store';
 import { styles } from './ChannelListModal.styles';
 import { apiClient } from '../../requests';
-import { ConnectedWorkspace, SlackChannel, SlackChannelSimplified, useWorkspaceStore } from '../../workspace.store';
-import { ConfigAppSDK } from '@contentful/app-sdk';
-import { useNotificationStore } from '../../notification.store';
 
 interface Props {
   isShown: boolean;
   onClose: () => void;
   workspace: ConnectedWorkspace;
   sdk: ConfigAppSDK,
-  cma: any,
+  cma: CMAClient,
   index: number;
   selectedChannel?: SlackChannel
 }
@@ -36,10 +36,7 @@ export const ChannelListModal = ({ isShown, onClose, workspace, sdk, cma, index,
 
   const { setSelectedChannel } =
   useNotificationStore((state) => ({
-    setSelectedChannel: state.setSelectedChannel,
-    setSelectedContentType: state.setSelectedContentType,
-    toggleEvent: state.toggleEvent,
-    removeNotificationAtIndex: state.removeNotificationAtIndex,
+    setSelectedChannel: state.setSelectedChannel
   }));
 
   const handleChannelChange = () => {
