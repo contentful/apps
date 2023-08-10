@@ -115,6 +115,7 @@ export const NotificationItem = ({
     const fetchChannel = async () => {
       try {
         setChannelLoading(true)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const response: any = await apiClient.getChannel(sdk, workspace.id, cma, notification.selectedChannel!);
         if (response) setChannel(response?.channel)
         setChannelLoading(false)
