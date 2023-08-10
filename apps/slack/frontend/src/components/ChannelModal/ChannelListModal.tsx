@@ -114,8 +114,8 @@ export const ChannelListModal = ({ isShown, onClose, workspace, sdk, cma, index,
     }
     return (
       <>
-        <Modal.Content className={styles.modal} >
-          <Flex className={styles.channelWrapper} fullWidth flexDirection='column' >
+        <Modal.Content className={styles.modalContent} >
+          <Flex fullWidth flexDirection='column' >
             {renderChannels()}
           </Flex>
         </Modal.Content>

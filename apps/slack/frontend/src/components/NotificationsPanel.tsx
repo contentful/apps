@@ -75,7 +75,7 @@ export const NotificationsPanel = (props: Props) => {
       <>
         <Subheading marginBottom="spacingS">Notifications</Subheading>
         <Note variant="warning" title="Notifications not available">
-          Notifications can&apos;t been shown. Failed to load {errors.join(' and ')}
+          Failed to load {errors.join(' and ')}
         </Note>
       </>
     );

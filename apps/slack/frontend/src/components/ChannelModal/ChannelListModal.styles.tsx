@@ -28,21 +28,18 @@ export const styles = {
         backgroundColor: tokens.gray200
     },
   }),
-  modal: css({
+  modalContent: css({
     paddingTop: tokens.spacingS,
     paddingBottom: tokens.spacingS, 
     paddingRight: 0,
     paddingLeft: 0,
+    maxHeight: '350px'
   }),
   skeleton: css({
     padding: tokens.spacingS
   }),
   skeletonBody: css({
     height: tokens.spacingL
-  }),
-  channelWrapper: css({
-    maxHeight: '400px',
-    overflowY: 'scroll'
   }),
   footer: css({
     border: `1px solid ${tokens.gray300}`
