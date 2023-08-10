@@ -43,7 +43,7 @@ export const ChannelListModal = ({ isShown, onClose, workspace, sdk, cma, index,
   }));
 
   const handleChannelChange = () => {
-    setSelectedChannel(selectedChannelId!, index)
+    if (selectedChannelId) setSelectedChannel(selectedChannelId, index)
     onClose();
   }
 
@@ -74,6 +74,15 @@ export const ChannelListModal = ({ isShown, onClose, workspace, sdk, cma, index,
           </Note>
         </>
       );
+    }
+
+    if (channels && !channels.length) {
+      return (
+        <Note title="No channels available">
+          There are currently no channels within your Slack workspace where the Contentful app has been added. 
+          Make sure to add the Contentful app to the Slack channels that you would like listed here.
+        </Note>
+      )
     }
 
     return (
