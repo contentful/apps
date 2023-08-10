@@ -81,7 +81,12 @@ const featureConfig: FeatureConfig = {
   [AIFeature.REWRITE]: {
     dialogTitle: 'Rewrite content',
     buttonTitle: 'Rewrite',
-    messageSuffix: 'rewrite content',
+    dialogText: {
+      fieldHelpText: `${FIELD_HELP_TEXT_BASE} rewrite content`,
+      fieldPlaceholder: FIELD_PLACEHOLDER,
+      promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter content to rewrite`,
+      promptPlaceholder: 'Enter content here to rewrite it...',
+    },
     prompt: rewritePrompt,
   },
 };

@@ -7,7 +7,7 @@ import Output from '@components/app/dialog/common-generator/output/Output';
 import { TextFields } from '@hooks/dialog/useSupportedFields';
 import generatorReducer, { GeneratorParameters } from './generatorReducer';
 import featureConfig from '@configs/features/featureConfig';
-import { GenerateMessage, useAIOutput } from '@hooks/dialog/useAI';
+import { GenerateMessage } from '@hooks/dialog/useAI';
 
 const initialParameters: GeneratorParameters = {
   isNewText: false,

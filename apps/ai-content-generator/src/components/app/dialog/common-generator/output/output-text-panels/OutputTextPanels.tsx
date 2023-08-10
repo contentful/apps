@@ -29,7 +29,7 @@ const OutputTextPanels = (props: Props) => {
     outputFieldValidation,
     isNewText,
   } = props;
-  const { feature, entryId, localeNames } = useContext(GeneratorContext);
+  const { feature, entryId } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
 
   const sdk = useSDK<DialogAppSDK>();
