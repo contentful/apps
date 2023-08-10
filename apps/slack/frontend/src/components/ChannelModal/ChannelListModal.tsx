@@ -6,6 +6,7 @@ import {
   SkeletonContainer,
   Skeleton,
   Note,
+  TextLink,
 } from '@contentful/f36-components';
 import { CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
 import { useNotificationStore } from '../../notification.store';
@@ -62,12 +63,21 @@ export const ChannelListModal = ({ isShown, onClose, workspace, sdk, cma, index,
     fetchChannels();
   }, [cma, workspace, sdk])
 
+  const renderContentfulAppLink = () => (
+    <TextLink
+      target="_blank"
+      rel="noopener noreferrer"
+      href="https://contentfultea-efl5000.slack.com/apps/A02N736UC9Y-contentful?tab=more_info">
+      @Contentful
+    </TextLink>
+  )
+
   const renderChannels = () => {
     if (error) {
       return (
         <>
           <Note variant="warning" title="Channels not available">
-            Channels can&apos;t be shown. Failed to load the Slack channels
+            Failed to load Slack channels
           </Note>
         </>
       );
@@ -77,7 +87,8 @@ export const ChannelListModal = ({ isShown, onClose, workspace, sdk, cma, index,
       return (
         <Note title="No channels available">
           There are currently no channels within your Slack workspace where the Contentful app has been added. 
-          Make sure to add the Contentful app to the Slack channels that you would like listed here.
+          Make sure to add the
+          {renderContentfulAppLink()} app to the Slack channels that you would like listed here.
         </Note>
       )
     }

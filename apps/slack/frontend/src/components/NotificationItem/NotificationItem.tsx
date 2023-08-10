@@ -6,15 +6,13 @@ import {
   Text,
   ModalLauncher,
   Button,
-  SkeletonBodyText,
-  SkeletonContainer,
-  Note,
   Flex,
   Spinner,
   Tooltip
 } from '@contentful/f36-components';
 import { DeleteIcon } from '@contentful/f36-icons';
 import { Select, FormControl } from '@contentful/f36-components';
+import { WarningIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
@@ -117,7 +115,7 @@ export const NotificationItem = ({
         setChannelLoading(true)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const response = await apiClient.getChannel(sdk, workspace.id, cma, notification.selectedChannel!);
-        if (response) setChannel(response)
+        setChannel(response)
         setError(false)
       } catch (e) {
         setError(true);
@@ -131,22 +129,20 @@ export const NotificationItem = ({
 
   const renderChannel = () => {
     if (channelLoading) return <Spinner className={styles.spinner} variant="default" />
+    if (error) {
+      return (
+        <div className={styles.errorMessage}>
+          <WarningIcon />
+          <Text>Failed to load slack channel</Text>
+        </div>
+      )
+    }
     return (
       <>
         {channel && <Tooltip content={channel?.name}><TextInput className={styles.channelInput} isDisabled value={channel?.name} /></Tooltip>}
         <Button onClick={openChannelListModal} size='small'>{channel ? 'Change channel' : 'Select channel'}</Button>
       </>
     )
-  }
-
-  if (error) {
-    return (
-      <>
-        <Note variant="warning" title="Notification not available">
-          Notification can&apos;t be shown. Failed to load the configured Slack channel
-        </Note>
-      </>
-    );
   }
 
   return (

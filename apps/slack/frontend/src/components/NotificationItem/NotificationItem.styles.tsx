@@ -32,5 +32,11 @@ export const styles = {
     }),
     spinner: css({
         height: '40px'
+    }),
+    errorMessage: css({
+      height: '40px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: tokens.spacingXs
     })
   };
