@@ -89,13 +89,13 @@ const ButtonTextField = (props: Props) => {
     <Box width={100} css={styles.wrapper}>
       <FormLabel>Select tone options</FormLabel>
       <Flex flexWrap="wrap" marginBottom={'spacingL'}>
-        {buttons.map((btnLabel) => (
+        {buttons.map((buttonLabel) => (
           <Button
             css={styles.button}
-            key={btnLabel}
-            onClick={() => handleButtonClick(btnLabel)}
-            isActive={activeButtons.has(btnLabel.toLowerCase())}>
-            {btnLabel}
+            key={buttonLabel}
+            onClick={() => handleButtonClick(buttonLabel)}
+            isActive={activeButtons.has(buttonLabel.toLowerCase())}>
+            {buttonLabel}
           </Button>
         ))}
       </Flex>
