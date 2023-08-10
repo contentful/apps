@@ -52,7 +52,7 @@ const ButtonTextField = (props: Props) => {
       }
 
       const delimiter = trimmedPrev.endsWith(',') ? ' ' : ', ';
-      return trimmedPrev.trim() + delimiter + `${label}, `;
+      return trimmedPrev + delimiter + `${label}, `;
     });
   };
 
