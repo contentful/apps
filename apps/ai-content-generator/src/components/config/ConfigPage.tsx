@@ -4,14 +4,14 @@ import ConfigSection from '@components/config/config-section/ConfigSection';
 import BrandSection from '@components/config/brand-section/BrandSection';
 import { styles } from './ConfigPage.styles';
 import { Sections } from '@components/config/configText';
-import gptModels from '@configs/gptModels';
+import { defaultModelId } from '@configs/gptModels';
 import useInitializeParameters from '@hooks/config/useInitializeParameters';
 import useSaveConfigHandler from '@hooks/config/useSaveConfigHandler';
 import parameterReducer from './parameterReducer';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 
 const initialParameters: AppInstallationParameters = {
-  model: gptModels[0],
+  model: defaultModelId,
   apiKey: '',
   profile: '',
 };
