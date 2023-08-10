@@ -36,9 +36,10 @@ const ButtonTextField = (props: Props) => {
     const labelWithExtraSpacesRegex = new RegExp(`\\s*${label}\\s*,`);
 
     handleInputChange((prevValue) => {
-      const valueWithoutButton = prevValue.replace(labelWithExtraSpacesRegex, '');
-      const trimmedValue = valueWithoutButton.trim();
+      const valueWithoutLabel = prevValue.replace(labelWithExtraSpacesRegex, '');
+      const trimmedValue = valueWithoutLabel.trim();
       const updatedText = trimmedValue.endsWith(',') ? trimmedValue + ' ' : trimmedValue;
+
       return updatedText;
     });
   };
