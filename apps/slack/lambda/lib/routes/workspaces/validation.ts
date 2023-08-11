@@ -7,6 +7,11 @@ export type ChannelsWorkspacesParameters = Omit<WorkspacesParameters, 'workspace
   workspaceId?: string;
 };
 
+export type ChannelWorkspacesParameters = Omit<WorkspacesParameters, 'workspaceId'> & {
+  workspaceId?: string;
+  channelId: string;
+};
+
 export const getWorkspacesParametersSchema = {
   type: 'object',
   properties: {
@@ -25,4 +30,14 @@ export const getChannelsParametersSchema = {
     spaceId: { type: 'string' },
     environmentId: { type: 'string' },
   },
+};
+
+export const getChannelParametersSchema = {
+  type: 'object',
+  properties: {
+    workspaceId: { type: 'string' },
+    spaceId: { type: 'string' },
+    environmentId: { type: 'string' },
+    channelId: { type: 'string' }
+  }, 
 };

@@ -3,7 +3,9 @@ import { AuthTokenRepository } from '../auth-token';
 import { WorkspacesRepository } from './repository';
 import {
   ChannelsWorkspacesParameters,
+  ChannelWorkspacesParameters,
   getChannelsParametersSchema,
+  getChannelParametersSchema,
   getWorkspacesParametersSchema,
   WorkspacesParameters,
 } from './validation';
@@ -109,8 +111,74 @@ export class WorkspacesController {
       environmentId,
     });
 
-    const channels = await this.workspacesRepository.getChannels(token, workspaceId);
+    try {
+      const channels = await this.workspacesRepository.getChannels(token, workspaceId);
 
-    response.status(200).send(channels);
+      response.status(200).send(channels);
+    } catch(e) {
+      console.error(e)
+      response.status(500).send({ status: 500, message: 'Unable to fetch slack channels' })
+    }
+
+  });
+
+/**
+   * @openapi
+   * /api/spaces/{spaceId}/environments/{environmentId}/workspaces/{workspaceId}/channel:
+   *   get:
+   *     description: Fetch a channel's information
+   *     parameters:
+   *        - in: path
+   *          name: spaceId
+   *          description: Contentful space where Slack App is installed
+   *        - in: path
+   *          name: environmentId
+   *          description: Contentful environment where Slack App is installed
+   *        - in: path
+   *          name: workspaceId
+   *          description: Slack Workspace whose information is required
+   *        - in: path
+   *          name: channelId
+   *          descriptions: The channel for which this endpoint is fetching information
+   *     responses:
+   *       422:
+   *         description: Unprocessable Entity. Path parameters are missing or invalid
+   *         content:
+   *           application/json:
+   *             example: { "status": 422, "message": "UnprocessableEntity" }
+   *       404:
+   *         description: Not found. Thrown when the workspace does not exist or the request verification fails.
+   *         content:
+   *           application/json:
+   *             example: { "status": 404, "message": "NotFound" }
+   *       200:
+   *         description: OK
+   *         content:
+   *           application/json:
+   *             example: [{ "id": "CHANNEL_ID", "name": "#my-channel" }]
+   */
+  getChannel = asyncHandler(async (request, response) => {
+    const {
+      workspaceId: workspaceIdFromParameters,
+      channelId,
+      spaceId,
+      environmentId,
+    } = assertValid<ChannelWorkspacesParameters>(getChannelParametersSchema, request.params);
+
+    const workspaceId = await getWorkspaceId(spaceId, environmentId, workspaceIdFromParameters);
+
+    const { token } = await this.authTokenRepository.get(workspaceId, {
+      spaceId,
+      environmentId,
+    });
+
+    try {
+      const channel = await this.workspacesRepository.getChannel(token, channelId);
+
+      response.status(200).send(channel);
+    } catch(e) {
+      console.error(e)
+      response.status(500).send({ status: 500, message: 'Unable to fetch slack channel' })
+    }
   });
 }

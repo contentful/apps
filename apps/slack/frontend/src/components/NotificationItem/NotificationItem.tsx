@@ -1,46 +1,33 @@
-import React, { useMemo } from 'react';
-import { Paragraph, Checkbox, IconButton, Text } from '@contentful/f36-components';
+import { useMemo, useEffect, useState } from 'react';
+import {
+  Checkbox,
+  IconButton,
+  TextInput,
+  Text,
+  ModalLauncher,
+  Button,
+  Flex,
+  Spinner,
+  Tooltip
+} from '@contentful/f36-components';
 import { DeleteIcon } from '@contentful/f36-icons';
 import { Select, FormControl } from '@contentful/f36-components';
-import { css } from 'emotion';
+import { WarningIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
-import { SlackChannelSimplified } from '../workspace.store';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
-import { SlackNotification, useNotificationStore } from '../notification.store';
-
-const styles = {
-  itemWrapper: (withMargin: boolean) =>
-    css({
-      marginBottom: tokens.spacingL,
-      paddingBottom: withMargin ? tokens.spacingL : '0',
-      borderBottom: `1px solid ${tokens.gray300}`,
-    }),
-  item: css({
-    display: 'flex',
-    flexFlow: 'row nowrap',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  }),
-  notifiesIn: css({
-    lineHeight: '18px',
-    margin: `11px ${tokens.spacingL} calc(${tokens.spacingM} + 11px) ${tokens.spacingL}`,
-  }),
-  select: css({
-    flex: 1,
-    marginBottom: tokens.spacingM,
-  }),
-  delete: css({
-    height: tokens.spacingXl,
-    margin: `0 0 ${tokens.spacingM} ${tokens.spacingS}`,
-    padding: `0 ${tokens.spacing2Xs}`,
-  }),
-};
+import { SlackNotification, useNotificationStore } from '../../notification.store';
+import { apiClient } from '../../requests';
+import { ChannelListModal } from '../ChannelModal/ChannelListModal';
+import { ConnectedWorkspace, SlackChannel } from '../../workspace.store';
+import { styles } from './NotificationItem.styles'
 
 interface NotificationItemProps {
   notification: SlackNotification;
-  channels: SlackChannelSimplified[];
   index: number;
   contentTypes: ContentTypeProps[];
+  workspace: ConnectedWorkspace;
 }
 
 enum SlackAppEventKey {
@@ -70,18 +57,23 @@ const SLACK_APP_EVENTS = {
 };
 
 export const NotificationItem = ({
-  channels,
   contentTypes,
   notification,
   index,
+  workspace
 }: NotificationItemProps) => {
-  const { setSelectedChannel, setSelectedContentType, toggleEvent, removeNotificationAtIndex } =
+  const sdk = useSDK<ConfigAppSDK>();
+  const cma = sdk.cma;
+  const { setSelectedContentType, toggleEvent, removeNotificationAtIndex } =
     useNotificationStore((state) => ({
-      setSelectedChannel: state.setSelectedChannel,
       setSelectedContentType: state.setSelectedContentType,
       toggleEvent: state.toggleEvent,
       removeNotificationAtIndex: state.removeNotificationAtIndex,
     }));
+  
+  const [channel, setChannel] = useState<SlackChannel>();
+  const [channelLoading, setChannelLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
 
   const selectedEvents = useMemo(
     () =>
@@ -100,6 +92,58 @@ export const NotificationItem = ({
     if (foundContentType) return foundContentType.name;
     return contentTypeId;
   };
+
+  const openChannelListModal = () => {
+    return ModalLauncher.open(({ isShown, onClose }) => (
+      <ChannelListModal
+        isShown={isShown}
+        onClose={() => {
+          onClose(true);
+        }}
+        workspace={workspace}
+        sdk={sdk}
+        cma={cma}
+        index={index}
+        selectedChannel={channel}
+      />
+    ));
+  };
+
+  useEffect(() => {
+    const fetchChannel = async () => {
+      try {
+        setChannelLoading(true)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const response = await apiClient.getChannel(sdk, workspace.id, cma, notification.selectedChannel!);
+        setChannel(response)
+        setError(false)
+      } catch (e) {
+        setError(true);
+        console.error(e);
+      }
+      setChannelLoading(false)
+    };
+
+    if (notification.selectedChannel) fetchChannel();
+  }, [cma, workspace, sdk, notification.selectedChannel]);
+
+  const renderChannel = () => {
+    if (channelLoading) return <Spinner className={styles.spinner} variant="default" />
+    if (error) {
+      return (
+        <div className={styles.errorMessage}>
+          <WarningIcon variant='warning' />
+          <Text>Failed to load slack channel</Text>
+        </div>
+      )
+    }
+    return (
+      <>
+        {channel && <Tooltip content={channel?.name}><TextInput className={styles.channelInput} isDisabled value={channel?.name} /></Tooltip>}
+        <Button onClick={openChannelListModal} size='small'>{channel ? 'Change channel' : 'Select channel'}</Button>
+      </>
+    )
+  }
 
   return (
     <div className={styles.itemWrapper(!!notification.selectedContentType)}>
@@ -124,32 +168,19 @@ export const NotificationItem = ({
           </Select>
         </FormControl>
         <Text className={styles.notifiesIn}>notifies in</Text>
-        <FormControl className={styles.select}>
-          <FormControl.Label>Slack channel</FormControl.Label>
-          <Select
-            id="channel"
-            name="channel"
-            defaultValue={notification.selectedChannel || ''}
-            onChange={(e) => {
-              setSelectedChannel(e.target.value, index);
-            }}>
-            <Select.Option value="" isDisabled>
-              Select a Slack channel...
-            </Select.Option>
-            {channels.map((channel) => (
-              <Select.Option key={channel.id} value={channel.id}>
-                {channel.name}
-              </Select.Option>
-            ))}
-          </Select>
-        </FormControl>
-        <IconButton
-          icon={<DeleteIcon variant="secondary" />}
-          aria-label="Delete notification"
-          onClick={() => removeNotificationAtIndex(index)}
-          variant="transparent"
-          className={styles.delete}
-        />
+          <FormControl className={styles.select}>
+          <FormControl.Label>Selected Slack channel</FormControl.Label>
+          <Flex alignItems='center' gap={tokens.spacingM} >
+            {renderChannel()}
+          </Flex>
+          </FormControl>
+          <IconButton
+            icon={<DeleteIcon variant="secondary" />}
+            aria-label="Delete notification"
+            onClick={() => removeNotificationAtIndex(index)}
+            variant="transparent"
+            className={styles.delete}
+          />
       </div>
       {notification.selectedContentType && (
         <Checkbox.Group value={selectedEvents}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Text,
   Button,
@@ -15,14 +15,13 @@ import {
 } from '@contentful/f36-components';
 import { PlusIcon } from '@contentful/f36-icons';
 import { styles } from './WorkspacePanel/styles';
-import { NotificationItem } from './NotificationItem';
+import { NotificationItem } from './NotificationItem/NotificationItem';
 import { ConnectedWorkspace, useWorkspaceStore } from '../workspace.store';
 import { ContentTypeProps } from 'contentful-management';
 import { useNotificationStore } from '../notification.store';
-import { apiClient } from '../requests';
 import { ChannelNote } from './ChannelNote';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 
 const NOTIFICATION_LIMIT = 15;
 
@@ -31,18 +30,17 @@ interface Props {
 }
 
 export const NotificationsPanel = (props: Props) => {
+  const { workspace } = props;
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
-  const [channels, setChannels, setNotificationsLoading, notificationsLoading] = useWorkspaceStore(
+  const [setNotificationsLoading, notificationsLoading] = useWorkspaceStore(
     (state) => [
-      state.channels,
-      state.setChannels,
       state.setNotificationsLoading,
       state.notificationsLoading,
     ]
   );
   const [errors, setErrors] = useState<string[]>([]);
-  const cma = useCMA();
-  const sdk = useSDK<AppExtensionSDK>();
+  const sdk = useSDK<ConfigAppSDK>();
+  const cma = sdk.cma
 
   useEffect(() => {
     setErrors([]);
@@ -55,28 +53,13 @@ export const NotificationsPanel = (props: Props) => {
         console.error(e);
       }
     };
-    const fetchChannels = async () => {
-      try {
-        const fetchedChannels = await apiClient.getChannels(sdk, props.workspace.id, cma);
-        if (Array.isArray(fetchedChannels)) {
-          setChannels(fetchedChannels);
-        }
-      } catch (e) {
-        setErrors((prevErrors) => [...prevErrors, 'Slack Channels']);
-        console.error(e);
-      }
-    };
     const calls = [fetchContentTypes()];
 
     setNotificationsLoading(true);
-
-    if (!channels) {
-      calls.push(fetchChannels());
-    }
     Promise.all(calls).finally(() => {
       setNotificationsLoading(false);
     });
-  }, [cma, props.workspace, sdk]);
+  }, [cma, workspace, sdk]);
 
   const { active, notifications, createNotification, setActive } = useNotificationStore(
     (state) => ({
@@ -92,7 +75,7 @@ export const NotificationsPanel = (props: Props) => {
       <>
         <Subheading marginBottom="spacingS">Notifications</Subheading>
         <Note variant="warning" title="Notifications not available">
-          Notifications can&apos;t been shown. Failed to load {errors.join(' and ')}
+          Failed to load {errors.join(' and ')}
         </Note>
       </>
     );
@@ -108,7 +91,7 @@ export const NotificationsPanel = (props: Props) => {
       </div>
     );
   }
-  if (!channels || !contentTypes) {
+  if (!contentTypes) {
     return null;
   }
 
@@ -131,8 +114,8 @@ export const NotificationsPanel = (props: Props) => {
             key={index}
             index={index}
             contentTypes={contentTypes}
-            channels={channels}
             notification={notification}
+            workspace={workspace}
           />
         ))}
         <Stack alignItems="center">

@@ -23,6 +23,11 @@ export class WorkspacesRepository {
     });
   }
 
+  async getChannel(token: string, channelId: string) {
+    const response = await this.slackClient.getChannel(token, channelId);
+    return response?.channel;
+  }
+
   private static toAPI({ id, name, icon }: NonNullable<TeamInfoResponse['team']>) {
     return { id, name, icon };
   }

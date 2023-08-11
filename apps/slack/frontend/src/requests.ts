@@ -1,4 +1,4 @@
-import { AppExtensionSDK, CanonicalRequest, CMAClient } from '@contentful/app-sdk';
+import { CanonicalRequest, CMAClient, ConfigAppSDK } from '@contentful/app-sdk';
 import { BACKEND_BASE_URL } from './constants';
 import { ConnectedWorkspace, SlackChannel, SlackChannelSimplified } from './workspace.store';
 import { getEnvironmentName } from './utils';
@@ -28,7 +28,7 @@ const makeSignedRequest = async (
 
 export const apiClient = {
   getWorkspace: async (
-    sdk: AppExtensionSDK,
+    sdk: ConfigAppSDK,
     workspaceId: string,
     cma: CMAClient
   ): Promise<ConnectedWorkspace> => {
@@ -49,7 +49,7 @@ export const apiClient = {
     return response;
   },
   getChannels: async (
-    sdk: AppExtensionSDK,
+    sdk: ConfigAppSDK,
     workspaceId: string,
     cma: CMAClient
   ): Promise<SlackChannel[] | undefined> => {
@@ -64,11 +64,38 @@ export const apiClient = {
     };
 
     const response = await makeSignedRequest(req, { appDefinitionId: sdk.ids.app, cma });
+    if (response.status > 200) {
+      throw new Error('Unable to fetch channels');
+    }
     return response;
   },
 
+  getChannel: async (
+    sdk: ConfigAppSDK,
+    workspaceId: string,
+    cma: CMAClient,
+    channelId: string
+  ): Promise<SlackChannel | undefined> => {
+    const req = {
+      method: 'GET' as const,
+      path: `/spaces/${sdk.ids.space}/environments/${getEnvironmentName(
+        sdk.ids
+      )}/workspaces/${workspaceId}/channel/${channelId}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await makeSignedRequest(req, { appDefinitionId: sdk.ids.app, cma });
+    if (response.status > 200) {
+      throw new Error('Unable to fetch channel');
+    }
+    return response;
+
+  },
+
   createAuthToken: async (
-    sdk: AppExtensionSDK,
+    sdk: ConfigAppSDK,
     cma: CMAClient,
     temporaryRefreshToken: string,
     installationUuid: string

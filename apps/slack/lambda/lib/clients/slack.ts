@@ -7,6 +7,7 @@ import {
   WebAPICallResult,
   WebClient,
   ConversationsListResponse,
+  ConversationsInfoResponse,
 } from '@slack/web-api';
 import { SlackConfiguration } from '../config';
 import { SlackError } from '../errors';
@@ -92,20 +93,35 @@ export class SlackClient {
     ];
   }
 
+  async getChannel(
+    token: string,
+    channelId: string
+  ): Promise<ConversationsInfoResponse> {
+    const response =  SlackClient.assertSuccessResponse(
+      await this.client.conversations.info({
+        channel: channelId,
+        token,
+      })
+    );
+
+    return response;
+  }
+
   async fetchChannels(
     token: string,
     workspaceId: string,
     cursor = ''
-  ): Promise<ConversationsListResponse> {
-    return SlackClient.assertSuccessResponse(
-      await this.client.conversations.list({
-        team: workspaceId,
-        token,
-        cursor,
-        limit: 1000,
-        exclude_archived: true,
-      })
-    );
+  ): Promise<ConversationsListResponse | any> {
+      const response = SlackClient.assertSuccessResponse(
+        await this.client.users.conversations({
+          team: workspaceId,
+          token,
+          cursor,
+          limit: 1000,
+          exclude_archived: true,
+        }))
+
+      return response;
   }
 
   private static assertSuccessResponse(response: WebAPICallResult) {
