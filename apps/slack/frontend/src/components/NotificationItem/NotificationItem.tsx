@@ -169,7 +169,7 @@ export const NotificationItem = ({
         </FormControl>
         <Text className={styles.notifiesIn}>notifies in</Text>
           <FormControl className={styles.select}>
-          <FormControl.Label>Selected slack channel</FormControl.Label>
+          <FormControl.Label>Selected Slack channel</FormControl.Label>
           <Flex alignItems='center' gap={tokens.spacingM} >
             {renderChannel()}
           </Flex>
