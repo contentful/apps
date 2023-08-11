@@ -1,4 +1,4 @@
-import baseSystemPrompt from '@configs/ai/baseSystemPrompt';
+import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
 import baseUrl from '@configs/ai/baseUrl';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -6,6 +6,8 @@ import { AppInstallationParameters } from '@locations/ConfigScreen';
 import AI from '@utils/aiApi';
 import { ChatCompletionRequestMessage } from 'openai';
 import { useEffect, useMemo, useState } from 'react';
+
+export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
 /**
  * This hook is used to generate messages using the OpenAI API

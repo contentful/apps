@@ -4,6 +4,7 @@ import contentPrompt from '@configs/prompts/contentPrompt';
 import seoKeywordsPrompt from '@configs/prompts/seoKeywordsPrompt';
 import seoDescriptionPrompt from '@configs/prompts/seoDescriptionPrompt';
 import titlePrompt from '@configs/prompts/titlePrompt';
+import rewritePrompt from '@configs/prompts/rewritePrompt';
 
 enum AIFeature {
   TITLE = 'title',
@@ -11,9 +12,10 @@ enum AIFeature {
   TRANSLATE = 'translate',
   SEO_DESCRIPTION = 'seoDescription',
   SEO_KEYWORDS = 'seoKeywords',
+  REWRITE = 'rewrite',
 }
 
-const FIELD_HELP_TEXT_BASE = 'Select a source field and output field to';
+const FIELD_HELP_TEXT_BASE = 'Select a source field and output field';
 const FIELD_PLACEHOLDER = 'Your source and results will appear here...';
 const PROMPT_HELP_TEXT_BASE = 'Select an output field and';
 
@@ -23,7 +25,7 @@ const featureConfig: FeatureConfig = {
     buttonTitle: 'Generate title',
     prompt: titlePrompt,
     dialogText: {
-      fieldHelpText: `${FIELD_HELP_TEXT_BASE} generate a title`,
+      fieldHelpText: `${FIELD_HELP_TEXT_BASE} to generate a title`,
       fieldPlaceholder: FIELD_PLACEHOLDER,
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter a prompt to generate a title`,
       promptPlaceholder:
@@ -35,7 +37,7 @@ const featureConfig: FeatureConfig = {
     buttonTitle: 'Generate content',
     prompt: contentPrompt,
     dialogText: {
-      fieldHelpText: `${FIELD_HELP_TEXT_BASE} generate content`,
+      fieldHelpText: `${FIELD_HELP_TEXT_BASE} to generate content`,
       fieldPlaceholder: FIELD_PLACEHOLDER,
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter a prompt to generate content`,
       promptPlaceholder:
@@ -47,19 +49,30 @@ const featureConfig: FeatureConfig = {
     buttonTitle: 'Language translation',
     prompt: translatePrompt,
     dialogText: {
-      fieldHelpText: `${FIELD_HELP_TEXT_BASE} generate a translation`,
+      fieldHelpText: `${FIELD_HELP_TEXT_BASE} to generate a translation`,
       fieldPlaceholder: FIELD_PLACEHOLDER,
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter content to generate a translation`,
       promptPlaceholder:
         "Enter content here to translate it according to the output field's language...",
     },
   },
+  [AIFeature.REWRITE]: {
+    dialogTitle: 'Rewrite',
+    buttonTitle: 'Rewrite',
+    dialogText: {
+      fieldHelpText: `${FIELD_HELP_TEXT_BASE}, then add tone instructions.`,
+      fieldPlaceholder: FIELD_PLACEHOLDER,
+      promptHelpText: `${PROMPT_HELP_TEXT_BASE} and then add tone instructions.`,
+      promptPlaceholder: 'Enter content here to rewrite it...',
+    },
+    prompt: rewritePrompt,
+  },
   [AIFeature.SEO_KEYWORDS]: {
     dialogTitle: 'Generate SEO keywords',
     buttonTitle: 'SEO Keywords',
     prompt: seoKeywordsPrompt,
     dialogText: {
-      fieldHelpText: `${FIELD_HELP_TEXT_BASE} generate SEO keywords`,
+      fieldHelpText: `${FIELD_HELP_TEXT_BASE} to generate SEO keywords`,
       fieldPlaceholder: FIELD_PLACEHOLDER,
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter content to generate SEO keywords`,
       promptPlaceholder: 'Enter content here to generate SEO keywords...',
@@ -70,7 +83,7 @@ const featureConfig: FeatureConfig = {
     buttonTitle: 'SEO Description',
     prompt: seoDescriptionPrompt,
     dialogText: {
-      fieldHelpText: `${FIELD_HELP_TEXT_BASE} generate SEO description`,
+      fieldHelpText: `${FIELD_HELP_TEXT_BASE} to generate SEO description`,
       fieldPlaceholder: FIELD_PLACEHOLDER,
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter content to generate SEO description`,
       promptPlaceholder: 'Enter content here to generate SEO description...',
