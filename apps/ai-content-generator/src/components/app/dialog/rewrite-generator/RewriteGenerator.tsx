@@ -1,5 +1,5 @@
-import { useContext, useEffect, useReducer, useState } from 'react';
-import { Flex } from '@contentful/f36-components';
+import { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Box, Flex } from '@contentful/f36-components';
 import { GeneratorContext } from '@providers/generatorProvider';
 import SourceAndFieldSelectors from '@components/app/dialog/common-generator/field-selector/SourceAndFieldSelectors';
 import Header from '@components/app/dialog/common-generator/header/Header';
@@ -30,6 +30,8 @@ const RewriteGenerator = () => {
 
   const [parameters, dispatch] = useReducer(generatorReducer, initialParameters);
   const [rewritePromptData, setRewritePromptData] = useState('');
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerRef = useRef<HTMLElement>(null);
 
   const updateProviderData = () => {
     setProviderData({
@@ -37,7 +39,14 @@ const RewriteGenerator = () => {
     });
   };
 
-  useEffect(updateProviderData, [dispatch, setProviderData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(updateProviderData, [dispatch]);
+
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.clientHeight);
+    }
+  }, []);
 
   const inputText = parameters.isNewText
     ? parameters.originalText.prompt
@@ -55,9 +64,11 @@ const RewriteGenerator = () => {
 
   return (
     <Flex flexDirection="column">
-      <Header />
-      <SourceAndFieldSelectors parameters={parameters} fieldTypes={TextFields} />
-      <ButtonTextField inputValue={rewritePromptData} handleInputChange={setRewritePromptData} />
+      <Box ref={headerRef}>
+        <Header />
+        <SourceAndFieldSelectors parameters={parameters} fieldTypes={TextFields} />
+        <ButtonTextField inputValue={rewritePromptData} handleInputChange={setRewritePromptData} />
+      </Box>
       <Output
         onGenerate={handleGenerate}
         outputFieldId={parameters.output.fieldId}
@@ -65,6 +76,7 @@ const RewriteGenerator = () => {
         outputFieldValidation={parameters.output.validation}
         inputText={inputText}
         isNewText={parameters.isNewText}
+        headerHeight={headerHeight}
       />
     </Flex>
   );
