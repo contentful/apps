@@ -58,7 +58,7 @@ const main = async (watch = false) => {
       platform: 'node',
       outdir: 'build',
       logLevel: 'info',
-      format: 'cjs',
+      format: 'esm',
       target: 'es6',
       external: ['node:*'],
     };
