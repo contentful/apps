@@ -20,9 +20,6 @@
     "build-frontend": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ../build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3RheWQRagirMFgWrhMOBxL --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ../build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6H2pUZdiYcmo0WY8dlYZn5 --token ${TEST_CMA_TOKEN}"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -40,7 +37,6 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.10.2",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.0.0",
     "@tsconfig/create-react-app": "2.0.1",
