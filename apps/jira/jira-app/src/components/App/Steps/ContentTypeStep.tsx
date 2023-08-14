@@ -51,8 +51,7 @@ const ContentTypeStep = ({
             environment === 'master'
               ? `https://app.contentful.com/spaces/${space}/content_types`
               : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-          }
-        >
+          }>
           content type
         </TextLink>{' '}
         and assign it to the app from this screen.

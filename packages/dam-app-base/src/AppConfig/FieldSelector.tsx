@@ -43,8 +43,7 @@ export default class FieldSelector extends React.Component<Props> {
                   id={`field-box-${ct.sys.id}-${field.id}`}
                   helpText={`Field ID: ${field.id}`}
                   isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                  onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
-                >
+                  onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}>
                   {field.name}
                 </Checkbox>
               ))}

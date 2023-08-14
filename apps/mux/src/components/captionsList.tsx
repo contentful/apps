@@ -41,8 +41,7 @@ class CaptionsList extends React.Component<captionListProps, {}> {
                     <a
                       href={`https://stream.${this.props.domain}/${this.props.playbackId}/text/${
                         caption.id
-                      }.vtt${this.token()}`}
-                    >
+                      }.vtt${this.token()}`}>
                       Download
                     </a>
                   </Table.Cell>
@@ -51,8 +50,7 @@ class CaptionsList extends React.Component<captionListProps, {}> {
                       variant="negative"
                       size="small"
                       data-track={caption.id}
-                      onClick={this.props.requestDeleteCaption}
-                    >
+                      onClick={this.props.requestDeleteCaption}>
                       Delete
                     </Button>
                   </Table.Cell>

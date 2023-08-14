@@ -129,10 +129,8 @@ export const SortableListItem = SortableElement<Props>(
       <Card
         data-testid="sortable-list-item"
         className={styles.card}
-        // @ts-ignore
         withDragHandle
-        dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}
-      >
+        dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}>
         <div className={styles.cardInner}>
           {!imageHasLoaded && !imageHasErrored && product.image && (
             <SkeletonContainer className={styles.skeletonImage}>

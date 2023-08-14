@@ -76,8 +76,7 @@ export default class InstanceStep extends React.Component<Props, State> {
             onChange={(e) => pickResource(e.target.value)}
             isDisabled={resources.length === 1}
             width="full"
-            value={selectedResource || ''}
-          >
+            value={selectedResource || ''}>
             <Option value="">Select a site</Option>
             {resources.map((r) => (
               <Option key={r.id} value={r.id}>
@@ -109,8 +108,7 @@ export default class InstanceStep extends React.Component<Props, State> {
                   testId="search-result-project"
                   onClick={() => {
                     this.selectProject(project);
-                  }}
-                >
+                  }}>
                   {project.name}
                 </Card>
               ))}

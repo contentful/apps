@@ -74,7 +74,6 @@ describe('AppConfig', () => {
     const sdk = makeSdkMock();
     renderComponent(sdk);
     await waitFor(() => screen.getByLabelText(/Commercetools Project Key/));
-
     [
       [/Commercetools Project Key/, ''],
       [/Client ID/, ''],
@@ -86,7 +85,6 @@ describe('AppConfig', () => {
       const configInput = screen.getByLabelText(labelRe) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
     });
-
     [/Product X$/, /Product D$/].forEach((labelRe) => {
       const fieldCheckbox = screen.getByLabelText(labelRe) as HTMLInputElement;
       expect(fieldCheckbox.checked).toBe(false);
@@ -118,7 +116,6 @@ describe('AppConfig', () => {
 
     renderComponent(sdk);
     await waitFor(() => screen.getByLabelText(/Commercetools Project Key/));
-
     [
       [/Commercetools Project Key/, 'some-key'],
       [/Client ID/, '12345'],
@@ -130,7 +127,6 @@ describe('AppConfig', () => {
       const configInput = screen.getByLabelText(labelRe as RegExp) as HTMLInputElement;
       expect(configInput.value).toEqual(expected);
     });
-
     [
       [/Product X$/, false],
       [/Product D$/, true],

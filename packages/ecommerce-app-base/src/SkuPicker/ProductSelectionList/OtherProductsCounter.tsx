@@ -41,8 +41,7 @@ export const OtherProductsCounter = (props: Props) => (
   <Tooltip
     targetWrapperClassName={styles.tooltip}
     content={`${props.productCount} more`}
-    placement="bottom"
-  >
+    placement="bottom">
     <div className={styles.label}>
       <span>+{props.productCount}</span>
     </div>

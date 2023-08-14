@@ -27,12 +27,11 @@ if (window.location.search.includes('token')) {
     }
 
     if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
-      (sdk as SidebarExtensionSDK).window.startAutoResizer()
+      (sdk as SidebarExtensionSDK).window.startAutoResizer();
       renderAtRoot(
         <Auth
           notifyError={sdk.notifier.error}
-          parameters={sdk.parameters.installation as InstallationParameters}
-        >
+          parameters={sdk.parameters.installation as InstallationParameters}>
           {(token, client: JiraClient, resetClient) => (
             <Jira client={client} sdk={sdk as SidebarExtensionSDK} signOut={resetClient} />
           )}

@@ -190,8 +190,7 @@ export default class AppConfig extends React.Component<Props, State> {
           name={key}
           isRequired={def.required}
           onChange={this.onParameterChange.bind(this, def.id)}
-          value={this.state.parameters[def.id]}
-        >
+          value={this.state.parameters[def.id]}>
           {values.map((currValue: string) => (
             <Option value={currValue} key={currValue}>
               {currValue}
@@ -267,8 +266,7 @@ export default class AppConfig extends React.Component<Props, State> {
                   environment === 'master'
                     ? `https://app.contentful.com/spaces/${space}/content_types`
                     : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-                }
-              >
+                }>
                 content model
               </TextLink>{' '}
               and assign it to the app from this screen.

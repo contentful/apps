@@ -14,7 +14,7 @@ const App = () => {
 
   const Component = useMemo(() => {
     for (const [location, component] of Object.entries(
-      ComponentLocationSettings
+      ComponentLocationSettings,
     )) {
       if (sdk.location.is(location)) {
         return component;

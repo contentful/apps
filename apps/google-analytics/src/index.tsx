@@ -43,7 +43,7 @@ export class SidebarExtension extends React.Component<
     this.props.sdk.entry.onSysChanged(
       debounce(() => {
         this.setState(this.getEntryStateFields());
-      }, 500)
+      }, 500),
     );
   }
 
@@ -95,8 +95,7 @@ export class SidebarExtension extends React.Component<
             <a
               href="https://support.google.com/analytics/answer/11583528?hl=en"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               deprecating
             </a>{' '}
             Google Universal Analytics on July 1st, 2023. After that date, no further events will be
@@ -108,8 +107,7 @@ export class SidebarExtension extends React.Component<
             <a
               href="https://www.contentful.com/marketplace/app/google-analytics-4"
               target="_blank"
-              rel="noreferrer"
-            >
+              rel="noreferrer">
               new GA4 app.
             </a>
           </Paragraph>
@@ -232,7 +230,7 @@ init((sdk) => {
         sdk={sdk as SidebarExtensionSDK}
         gapi={(window as unknown as { gapi: Gapi }).gapi}
       />,
-      document.getElementById('root')
+      document.getElementById('root'),
     );
   }
 });

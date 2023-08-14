@@ -9,7 +9,7 @@ interface Props {
   contentTypes: ContentType[];
   compatibleFields: CompatibleFields;
   selectedFields: SelectedFields;
-  onSelectedFieldsChange: Function;
+  onSelectedFieldsChange: (fields: SelectedFields) => void;
   fieldSkuTypes: FieldsSkuTypes;
   onFieldSkuTypesChange: (fieldSkuTypes: FieldsSkuTypes) => void;
   skuTypes?: Integration['skuTypes'];
@@ -113,8 +113,7 @@ export default class FieldSelector extends React.Component<Props, State> {
                       field.type === 'Symbol' ? 'Short text' : 'Short text, list'
                     } · Field ID: ${field.id}`}
                     isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                    onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
-                  >
+                    onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}>
                     {field.name}
                   </Checkbox>
                   {skuTypes.length > 0 && (selectedFields[ct.sys.id] || []).includes(field.id) ? (
@@ -130,8 +129,7 @@ export default class FieldSelector extends React.Component<Props, State> {
                               (fieldSkuTypes[ct.sys.id]?.[field.id] ?? defaultSkuType) ===
                               skuType.id
                             }
-                            onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}
-                          >
+                            onChange={this.onFieldSkuTypesChange.bind(this, ct.sys.id, field.id)}>
                             {skuType.name}
                           </Radio>
                         ))}

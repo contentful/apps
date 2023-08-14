@@ -1,12 +1,5 @@
-import React from 'react';
-import {
-  fireEvent,
-  configure,
-  render,
-  cleanup,
-  waitFor,
-  getByTestId,
-} from '@testing-library/react';
+import * as React from 'react';
+import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, SortableListItem } from './SortableListItem';
 import productPreviews from '../__mocks__/productPreviews';
 
@@ -26,9 +19,9 @@ const renderComponent = (props: Props) => {
 };
 
 jest.mock('react-sortable-hoc', () => ({
-  SortableContainer: (x: any) => x,
-  SortableElement: (x: any) => x,
-  SortableHandle: (x: any) => x,
+  SortableContainer: (x: unknown) => x,
+  SortableElement: (x: unknown) => x,
+  SortableHandle: (x: unknown) => x,
 }));
 
 describe('SortableListItem', () => {

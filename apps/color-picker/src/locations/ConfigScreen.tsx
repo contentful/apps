@@ -79,7 +79,7 @@ const ConfigScreen = () => {
     const newTheme = {
       ...theme,
       colors: theme.colors.map((color) =>
-        color.id === swatch.id ? swatch : color
+        color.id === swatch.id ? swatch : color,
       ),
     };
 

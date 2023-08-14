@@ -240,8 +240,7 @@ export function TypeFormField({ sdk }: Props) {
             icon="Edit"
             rel="noopener noreferrer"
             className={styles.editButton}
-            disabled={!value}
-          >
+            disabled={!value}>
             Edit
           </TextLink>
           {selectedForm.isPublic ? (
@@ -250,8 +249,7 @@ export function TypeFormField({ sdk }: Props) {
             <Tooltip
               containerElement="span"
               content="You can not preview this typeform because it is private"
-              place="right"
-            >
+              place="right">
               {PreviewButton}
             </Tooltip>
           )}
@@ -260,8 +258,7 @@ export function TypeFormField({ sdk }: Props) {
             target="_blank"
             icon="Entry"
             rel="noopener noreferrer"
-            className={styles.editButton}
-          >
+            className={styles.editButton}>
             Results
           </TextLink>
         </div>

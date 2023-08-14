@@ -36,6 +36,7 @@
     "@types/react-dom": "18.0.3",
     "@types/react-sortable-hoc": "0.7.1",
     "eslint-plugin-storybook": "^0.6.13",
+    "eslint": "7.32.0",
     "jest": "27.5.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
@@ -52,9 +53,14 @@
     "@contentful/f36-icons": "^4.25.0",
     "@contentful/f36-tokens": "^4.0.0",
     "@contentful/react-apps-toolkit": "^1.2.16",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
     "array-move": "^3.0.0",
     "contentful-management": "^10.0.0",
     "emotion": "^10.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.33.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "lodash": "^4.0.0",
     "react-sortable-hoc": "^2.0.0"
   },
@@ -69,6 +75,7 @@
     "test": "jest --watch",
     "test:ci": "jest",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "lint": "eslint src"
   }
 }

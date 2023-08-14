@@ -8,7 +8,7 @@ import {
   Button,
   Flex,
   Spinner,
-  Tooltip
+  Tooltip,
 } from '@contentful/f36-components';
 import { DeleteIcon } from '@contentful/f36-icons';
 import { Select, FormControl } from '@contentful/f36-components';
@@ -21,7 +21,7 @@ import { SlackNotification, useNotificationStore } from '../../notification.stor
 import { apiClient } from '../../requests';
 import { ChannelListModal } from '../ChannelModal/ChannelListModal';
 import { ConnectedWorkspace, SlackChannel } from '../../workspace.store';
-import { styles } from './NotificationItem.styles'
+import { styles } from './NotificationItem.styles';
 
 interface NotificationItemProps {
   notification: SlackNotification;
@@ -60,17 +60,18 @@ export const NotificationItem = ({
   contentTypes,
   notification,
   index,
-  workspace
+  workspace,
 }: NotificationItemProps) => {
   const sdk = useSDK<ConfigAppSDK>();
   const cma = sdk.cma;
-  const { setSelectedContentType, toggleEvent, removeNotificationAtIndex } =
-    useNotificationStore((state) => ({
+  const { setSelectedContentType, toggleEvent, removeNotificationAtIndex } = useNotificationStore(
+    (state) => ({
       setSelectedContentType: state.setSelectedContentType,
       toggleEvent: state.toggleEvent,
       removeNotificationAtIndex: state.removeNotificationAtIndex,
-    }));
-  
+    }),
+  );
+
   const [channel, setChannel] = useState<SlackChannel>();
   const [channelLoading, setChannelLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
@@ -83,7 +84,7 @@ export const NotificationItem = ({
         }
         return [...acc, `event-${event.id}-${index}`];
       }, []),
-    [notification.selectedEvent, index]
+    [notification.selectedEvent, index],
   );
 
   const getContentTypeName = (contentTypeId: string | null) => {
@@ -112,38 +113,49 @@ export const NotificationItem = ({
   useEffect(() => {
     const fetchChannel = async () => {
       try {
-        setChannelLoading(true)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const response = await apiClient.getChannel(sdk, workspace.id, cma, notification.selectedChannel!);
-        setChannel(response)
-        setError(false)
+        setChannelLoading(true);
+        const response = await apiClient.getChannel(
+          sdk,
+          workspace.id,
+          cma,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          notification.selectedChannel!,
+        );
+        setChannel(response);
+        setError(false);
       } catch (e) {
         setError(true);
         console.error(e);
       }
-      setChannelLoading(false)
+      setChannelLoading(false);
     };
 
     if (notification.selectedChannel) fetchChannel();
   }, [cma, workspace, sdk, notification.selectedChannel]);
 
   const renderChannel = () => {
-    if (channelLoading) return <Spinner className={styles.spinner} variant="default" />
+    if (channelLoading) return <Spinner className={styles.spinner} variant="default" />;
     if (error) {
       return (
         <div className={styles.errorMessage}>
-          <WarningIcon variant='warning' />
+          <WarningIcon variant="warning" />
           <Text>Failed to load slack channel</Text>
         </div>
-      )
+      );
     }
     return (
       <>
-        {channel && <Tooltip content={channel?.name}><TextInput className={styles.channelInput} isDisabled value={channel?.name} /></Tooltip>}
-        <Button onClick={openChannelListModal} size='small'>{channel ? 'Change channel' : 'Select channel'}</Button>
+        {channel && (
+          <Tooltip content={channel?.name}>
+            <TextInput className={styles.channelInput} isDisabled value={channel?.name} />
+          </Tooltip>
+        )}
+        <Button onClick={openChannelListModal} size="small">
+          {channel ? 'Change channel' : 'Select channel'}
+        </Button>
       </>
-    )
-  }
+    );
+  };
 
   return (
     <div className={styles.itemWrapper(!!notification.selectedContentType)}>
@@ -168,19 +180,19 @@ export const NotificationItem = ({
           </Select>
         </FormControl>
         <Text className={styles.notifiesIn}>notifies in</Text>
-          <FormControl className={styles.select}>
+        <FormControl className={styles.select}>
           <FormControl.Label>Selected Slack channel</FormControl.Label>
-          <Flex alignItems='center' gap={tokens.spacingM} >
+          <Flex alignItems="center" gap={tokens.spacingM}>
             {renderChannel()}
           </Flex>
-          </FormControl>
-          <IconButton
-            icon={<DeleteIcon variant="secondary" />}
-            aria-label="Delete notification"
-            onClick={() => removeNotificationAtIndex(index)}
-            variant="transparent"
-            className={styles.delete}
-          />
+        </FormControl>
+        <IconButton
+          icon={<DeleteIcon variant="secondary" />}
+          aria-label="Delete notification"
+          onClick={() => removeNotificationAtIndex(index)}
+          variant="transparent"
+          className={styles.delete}
+        />
       </div>
       {notification.selectedContentType && (
         <Checkbox.Group value={selectedEvents}>

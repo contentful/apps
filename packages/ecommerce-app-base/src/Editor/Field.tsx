@@ -48,13 +48,13 @@ const Field: FC = () => {
     sdk.field.onValueChanged((value?: string[] | string) => {
       setValue(fieldValueToState(value));
     });
-  }, [sdk.field.onValueChanged, setValue]);
+  }, [setValue, sdk.field]);
 
   useEffect(() => {
     sdk.field.onIsDisabledChanged((editingDisabled: boolean) => {
       setEditingDisabled(editingDisabled);
     });
-  }, [sdk.field.onIsDisabledChanged]);
+  }, [sdk.field]);
 
   const updateValue = useCallback(
     async (skus: string[]) => {
@@ -65,7 +65,7 @@ const Field: FC = () => {
         await sdk.field.removeValue();
       }
     },
-    [sdk.field.setValue, sdk.field.removeValue]
+    [sdk.field]
   );
 
   // useCallback relevant?
@@ -89,7 +89,7 @@ const Field: FC = () => {
     if (result.length) {
       await updateValue(result);
     }
-  }, [value, sdk.field, sdk.parameters.installation, sdk.contentType]);
+  }, [value, sdk, openDialog, skuTypes, updateValue]);
 
   const hasItems = value.length > 0;
   const config = sdk.parameters.installation;

@@ -45,7 +45,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     padding: tokens.spacingL,
-    leftsideControls: css({
+    leftSideControls: css({
       position: 'relative',
       zIndex: 0,
       svg: css({

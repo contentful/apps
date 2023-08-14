@@ -86,8 +86,7 @@ export default class Search extends React.Component<Props, State> {
               padding="none"
               className="search-card"
               testId="search-result-issue"
-              onClick={() => this.addLink(issue)}
-            >
+              onClick={() => this.addLink(issue)}>
               <div>
                 <Tooltip place="bottom" content={`${issue.issuetype.name}: ${issue.key}`}>
                   <img className="type" src={issue.issuetype.iconUrl} alt={issue.issuetype.name} />

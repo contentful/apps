@@ -108,8 +108,7 @@ export const ProductSelectionListItem = (props: Props) => {
         className={styles.product}
         onKeyUp={noop}
         data-test-id={`selection-preview-${product.sku}`}
-        onClick={() => selectProduct(product.sku)}
-      >
+        onClick={() => selectProduct(product.sku)}>
         <Tooltip content={productIsMissing ? 'Product missing' : product.name} placement="bottom">
           <div className={styles.removeIcon}>
             <CloseIcon variant="white" />

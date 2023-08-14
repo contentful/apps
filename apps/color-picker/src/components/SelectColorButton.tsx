@@ -36,7 +36,7 @@ interface MenuButtonProps {
 
 function _SelectColorButton(
   { showChevron, name, value, onClick, onClearClick }: MenuButtonProps,
-  ref: Ref<HTMLButtonElement>
+  ref: Ref<HTMLButtonElement>,
 ) {
   const sdk = useSDK<FieldExtensionSDK>();
 
