@@ -9,3 +9,4 @@ tags
 **/.coverage/**
 lerna-debug.log
 .eslintcache
+.tool-versions

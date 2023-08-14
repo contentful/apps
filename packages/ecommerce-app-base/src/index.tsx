@@ -1,39 +1,29 @@
-import {
-  AppExtensionSDK,
-  DialogExtensionSDK,
-  FieldExtensionSDK,
-  init,
-  locations,
-} from '@contentful/app-sdk';
+import { ConfigAppSDK, DialogAppSDK, init, locations } from '@contentful/app-sdk';
 import { GlobalStyles } from '@contentful/f36-components';
 import * as React from 'react';
 import { render } from 'react-dom';
 import AppConfig from './AppConfig/AppConfig';
 import Field from './Editor/Field';
 import { Integration } from './interfaces';
+import { SDKProvider } from '@contentful/react-apps-toolkit';
+import { IntegrationProvider } from './Editor/IntegrationContext';
 
 export function setup(integration: Integration) {
   init((sdk) => {
     const root = document.getElementById('root');
 
     if (sdk.location.is(locations.LOCATION_DIALOG)) {
-      integration.renderDialog(sdk as DialogExtensionSDK);
+      integration.renderDialog(sdk as DialogAppSDK);
     }
 
     if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
       render(
-        <>
-          <GlobalStyles />
-          <Field
-            sdk={sdk as FieldExtensionSDK}
-            makeCTA={integration.makeCTA}
-            logo={integration.logo}
-            fetchProductPreviews={integration.fetchProductPreviews}
-            openDialog={integration.openDialog}
-            isDisabled={integration.isDisabled}
-            skuTypes={integration.skuTypes}
-          />
-        </>,
+        <IntegrationProvider integration={integration}>
+          <SDKProvider>
+            <GlobalStyles />
+            <Field />
+          </SDKProvider>
+        </IntegrationProvider>,
         root
       );
     }
@@ -42,17 +32,19 @@ export function setup(integration: Integration) {
       render(
         <>
           <GlobalStyles />
-          <AppConfig
-            name={integration.name}
-            sdk={sdk as AppExtensionSDK}
-            parameterDefinitions={integration.parameterDefinitions}
-            validateParameters={integration.validateParameters}
-            logo={integration.logo}
-            color={integration.color}
-            description={integration.description}
-            skuTypes={integration.skuTypes}
-            isInOrchestrationEAP={integration.isInOrchestrationEAP}
-          />
+          <SDKProvider>
+            <AppConfig
+              name={integration.name}
+              sdk={sdk as ConfigAppSDK}
+              parameterDefinitions={integration.parameterDefinitions}
+              validateParameters={integration.validateParameters}
+              logo={integration.logo}
+              color={integration.color}
+              description={integration.description}
+              skuTypes={integration.skuTypes}
+              isInOrchestrationEAP={integration.isInOrchestrationEAP}
+            />
+          </SDKProvider>
         </>,
         root
       );
