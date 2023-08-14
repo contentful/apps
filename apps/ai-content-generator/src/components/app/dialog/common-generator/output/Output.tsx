@@ -39,7 +39,7 @@ const Output = (props: Props) => {
   }, [ai.isGenerating]);
 
   return (
-    <Flex css={styles.wrapper}>
+    <Flex css={styles.output}>
       <Tabs
         currentTab={currentTab}
         onTabChange={(tab) => setCurrentTab(tab as OutputTab)}
