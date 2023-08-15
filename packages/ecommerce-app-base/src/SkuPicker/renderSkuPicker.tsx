@@ -1,11 +1,11 @@
-import React from 'react';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import * as React from 'react';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { render } from 'react-dom';
 import { SkuPicker } from './SkuPicker';
 import { MakeSaveBtnTextFn, ProductPreviewsFn, ProductsFn } from '../interfaces';
 
 interface Props {
-  sdk: DialogExtensionSDK;
+  sdk: DialogAppSDK;
   fetchProductPreviews: ProductPreviewsFn;
   fetchProducts: ProductsFn;
   searchDelay?: number;

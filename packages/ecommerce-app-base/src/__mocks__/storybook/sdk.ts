@@ -1,5 +1,7 @@
 import productPreviews from '../productPreviews';
+import { FieldAppSDK } from '@contentful/app-sdk';
 
+// @ts-ignore
 export const sdk = {
   close: (...args) => alert(args),
   field: {
@@ -17,4 +19,4 @@ export const sdk = {
   notifier: {
     error: (message: string) => alert(message),
   },
-};
+} as FieldAppSDK;

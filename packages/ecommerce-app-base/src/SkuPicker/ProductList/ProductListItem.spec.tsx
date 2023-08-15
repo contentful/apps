@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, ProductListItem } from './ProductListItem';
 import productPreviews from '../../__mocks__/productPreviews';

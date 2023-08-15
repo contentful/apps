@@ -3,10 +3,9 @@ import { GlobalStyles } from '@contentful/f36-components';
 import * as React from 'react';
 import { render } from 'react-dom';
 import AppConfig from './AppConfig/AppConfig';
-import Field from './Editor/Field';
+import { Field, IntegrationProvider } from './Editor';
 import { Integration } from './interfaces';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
-import { IntegrationProvider } from './Editor/IntegrationContext';
 
 export function setup(integration: Integration) {
   init((sdk) => {

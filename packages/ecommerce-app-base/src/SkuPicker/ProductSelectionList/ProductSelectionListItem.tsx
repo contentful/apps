@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import tokens from '@contentful/f36-tokens';
 import noop from 'lodash/noop';
 import { css } from 'emotion';
@@ -6,7 +7,7 @@ import { Product } from '../../interfaces';
 
 import { Icon, Tooltip } from '@contentful/f36-components';
 
-import { CloseIcon, ErrorCircleIcon, AssetIcon } from '@contentful/f36-icons';
+import { AssetIcon, CloseIcon, ErrorCircleIcon } from '@contentful/f36-icons';
 
 export interface Props {
   product: Product;

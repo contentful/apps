@@ -32,7 +32,7 @@ function fieldValueToState(value?: string | string[]): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-const Field: FC = () => {
+export const Field: FC = () => {
   useAutoResizer();
 
   const sdk = useSDK<FieldAppSDK>();
@@ -130,5 +130,3 @@ const Field: FC = () => {
     </>
   );
 };
-
-export default Field;

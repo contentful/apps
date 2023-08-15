@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 import { configure, render, cleanup } from '@testing-library/react';
-import { getPagesRange, Props, Paginator } from '.';
+import { getPagesRange, Props, Paginator } from './Paginator';
 
 configure({
   testIdAttribute: 'data-test-id',
