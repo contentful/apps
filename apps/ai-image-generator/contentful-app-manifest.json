@@ -6,8 +6,7 @@
       "category": "Custom",
       "description": "This action is used to launch hosted app builds for AIIG.",
       "type": "function",
-      "path": "actions/aiig.js",
-      "entryFile": "./actions/aiig.ts",
+      "path": "backend/actions.js",
       "allowNetworks": [],
       "parameters": [
         {

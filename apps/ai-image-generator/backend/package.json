@@ -1,0 +1,18 @@
+{
+  "name": "ai-image-generator-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "validate-actions": "node scripts/validate-actions.js",
+    "build-actions": "NODE_ENV=production tsc",
+    "build-backend": "npm run validate-actions && npm run build-actions"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "^16.1.0",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@contentful/node-apps-toolkit": "^2.2.0"
+  }
+}
