@@ -19,7 +19,7 @@
     "start": "cross-env BROWSER=none react-scripts start",
     "build-frontend": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": "react-app"
