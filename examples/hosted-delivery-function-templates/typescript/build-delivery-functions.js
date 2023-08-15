@@ -1,5 +1,5 @@
 const esbuild = require('esbuild');
-const { resolve } = require('path');
+const { join, parse, resolve } = require('path');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
@@ -11,14 +11,22 @@ const validateActions = () => {
   const requiredProperties = ['id', 'path', 'entryFile'];
   const uniqueValues = new Set();
 
-  manifest.actions.forEach((action) => {
+  if (manifest.deliveryFunctions.length > 1) {
+    throw new Error(
+      `The maximum amount of delivery functions is 1, found ${manifest.deliveryFunctions.length}`
+    );
+  }
+
+  manifest.deliveryFunctions.forEach((deliveryFunction) => {
     requiredProperties.forEach((property) => {
-      if (!action.hasOwnProperty(property)) {
-        throw new Error(`Action with name: '${action.name}' is missing the '${property}' property`);
+      if (!deliveryFunction.hasOwnProperty(property)) {
+        throw new Error(
+          `Delivery function with name: '${deliveryFunction.name}' is missing the '${property}' property`
+        );
       }
     });
 
-    const { id, path, entryFile } = action;
+    const { id, path, entryFile } = deliveryFunction;
 
     if (uniqueValues.has(id)) {
       throw new Error(`Duplicate action id: '${id}'`);
@@ -37,10 +45,11 @@ const validateActions = () => {
 };
 
 const getEntryPoints = () => {
-  return manifest.actions.reduce((result, action) => {
-    const fileName = action.path.split('.')[0];
+  return manifest.deliveryFunctions.reduce((result, deliveryFunction) => {
+    const fileProperties = parse(deliveryFunction.path);
+    const fileName = join(fileProperties.dir, fileProperties.name);
 
-    result[fileName] = resolve(__dirname, action.entryFile);
+    result[fileName] = resolve(__dirname, deliveryFunction.entryFile);
 
     return result;
   }, {});
@@ -48,7 +57,7 @@ const getEntryPoints = () => {
 
 const main = async (watch = false) => {
   try {
-    console.log('Building app actions');
+    console.log('Building delivery functions');
     validateActions();
 
     const config = {
@@ -70,9 +79,9 @@ const main = async (watch = false) => {
       await esbuild.build(config);
     }
   } catch (e) {
-    console.log('Error building app actions');
+    console.log('Error building delivery functions');
     throw Error(e);
   }
 };
 
-main(argv._.includes('watch')).then(() => console.log('actions built successfully'));
+main(argv._.includes('watch')).then(() => console.log('delivery functions built successfully'));

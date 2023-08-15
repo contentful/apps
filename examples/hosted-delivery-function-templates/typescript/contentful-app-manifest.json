@@ -4,7 +4,8 @@
       "id": "example",
       "name": "Example Delivery Function",
       "description": "This is an example to help you learn how hosted delivery functions work.",
-      "path": "delivery-functions/example.ts",
+      "path": "delivery-functions/example.js",
+      "entryFile": "delivery-functions/example.ts",
       "allowNetworks": []
     }
   ]
