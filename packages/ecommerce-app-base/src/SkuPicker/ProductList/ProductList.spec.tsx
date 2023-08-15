@@ -1,11 +1,7 @@
-import React from 'react';
-import { render, cleanup, configure } from '@testing-library/react';
-import { Props, ProductList } from '.';
+import * as React from 'react';
+import { render, cleanup } from '@testing-library/react';
+import { Props, ProductList } from './ProductList';
 import productPreviews from '../../__mocks__/productPreviews';
-
-configure({
-  testIdAttribute: 'data-test-id',
-});
 
 const defaultProps: Props = {
   products: productPreviews,
