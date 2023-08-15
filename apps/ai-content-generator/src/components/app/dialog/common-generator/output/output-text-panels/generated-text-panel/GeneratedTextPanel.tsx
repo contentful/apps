@@ -8,6 +8,9 @@ import { css } from '@emotion/react';
 import tokens from '@contentful/f36-tokens';
 
 const styles = {
+  panel: css({
+    flexGrow: 1,
+  }),
   button: css({
     marginLeft: `${tokens.spacingXs}`,
   }),
@@ -52,7 +55,7 @@ const GeneratedTextPanel = (props: Props) => {
   ]);
 
   return (
-    <Tabs.Panel id={OutputTab.GENERATED_TEXT}>
+    <Tabs.Panel id={OutputTab.GENERATED_TEXT} css={styles.panel}>
       {isGenerating ? (
         <TextFieldWithButtons inputText={output} sizeValidation={outputFieldValidation?.size}>
           <Button onClick={sendStopSignal}>Stop Generating</Button>

@@ -5,6 +5,13 @@ import TextFieldWithButtons from '@components/common/text-field-with-buttons/Tex
 import { GeneratorAction } from '@components/app/dialog/common-generator/generatorReducer';
 import { OutputTab } from '../../Output';
 import { DialogText } from '@configs/features/featureTypes';
+import { css } from '@emotion/react';
+
+const styles = {
+  panel: css({
+    flexGrow: 1,
+  }),
+};
 
 interface Props {
   inputText: string;
@@ -34,7 +41,7 @@ const OriginalTextPanel = (props: Props) => {
   const helpText = isNewText ? dialogText.promptHelpText : dialogText.fieldHelpText;
 
   return (
-    <Tabs.Panel id={OutputTab.UPDATE_ORIGINAL_TEXT}>
+    <Tabs.Panel id={OutputTab.UPDATE_ORIGINAL_TEXT} css={styles.panel}>
       <TextFieldWithButtons
         inputText={inputText}
         onFieldChange={handleOriginalTextChange}

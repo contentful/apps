@@ -3,7 +3,7 @@ import { Flex, Tabs } from '@contentful/f36-components';
 import useAI, { GenerateMessage } from '@hooks/dialog/useAI';
 import OutputTextPanels from './output-text-panels/OutputTextPanels';
 import { ContentTypeFieldValidation } from 'contentful-management';
-import { styles } from './Output.styles';
+import { styles, makeOutputStyle } from './Output.styles';
 
 enum OutputTab {
   UPDATE_ORIGINAL_TEXT = 'original-text',
@@ -17,6 +17,7 @@ interface Props {
   outputFieldLocale: string;
   outputFieldValidation: ContentTypeFieldValidation | null;
   isNewText: boolean;
+  headerHeight: number;
 }
 
 const Output = (props: Props) => {
@@ -27,6 +28,7 @@ const Output = (props: Props) => {
     outputFieldLocale,
     outputFieldValidation,
     isNewText,
+    headerHeight,
   } = props;
   const ai = useAI();
 
@@ -38,8 +40,10 @@ const Output = (props: Props) => {
     }
   }, [ai.isGenerating]);
 
+  const outputStyle = makeOutputStyle(headerHeight);
+
   return (
-    <Flex css={styles.wrapper}>
+    <Flex css={outputStyle}>
       <Tabs
         currentTab={currentTab}
         onTabChange={(tab) => setCurrentTab(tab as OutputTab)}

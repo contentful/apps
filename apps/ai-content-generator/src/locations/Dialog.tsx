@@ -2,7 +2,7 @@ import useDialogParameters from '@hooks/dialog/useDialogParameters';
 import { AIFeature } from '@configs/features/featureConfig';
 import CommonGenerator from '@components/app/dialog/common-generator/CommonGenerator';
 import GeneratorProvider from '@providers/generatorProvider';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK, useAutoResizer } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import RewriteGenerator from '@components/app/dialog/rewrite-generator/RewriteGenerator';
 
@@ -19,6 +19,7 @@ type DialogInvocationParameters = {
 const Dialog = () => {
   const { feature, entryId, isLoading, fieldLocales } = useDialogParameters();
   const sdk = useSDK<DialogAppSDK>();
+  useAutoResizer();
 
   if (isLoading) {
     return null;
