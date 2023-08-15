@@ -5,6 +5,7 @@ import { GlobalStyles } from '@contentful/f36-components';
 
 const meta: Meta<typeof SortableList> = {
   component: SortableList,
+  tags: ['autodocs'],
 };
 
 export default meta;

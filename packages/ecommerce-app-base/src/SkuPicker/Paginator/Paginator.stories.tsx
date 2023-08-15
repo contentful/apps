@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 const meta: Meta<typeof Paginator> = {
   component: Paginator,
+  tags: ['autodocs'],
 };
 
 export default meta;

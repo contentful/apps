@@ -62,7 +62,8 @@
     "eslint-plugin-react": "^7.33.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "lodash": "^4.0.0",
-    "react-sortable-hoc": "^2.0.0"
+    "react-sortable-hoc": "^2.0.0",
+    "usehooks-ts": "^2.9.1"
   },
   "peerDependencies": {
     "react": "^16.3.0 || ^17.0.0",

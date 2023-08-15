@@ -17,7 +17,13 @@
     "resolveJsonModule": true,
     "declaration": true
   },
-  "files": ["./src/index.tsx"],
-  "exclude": ["node_modules", "build", "**/*.stories.tsx"]
-
+  "files": [
+    "./src/index.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "lib",
+    "**/*.stories.tsx",
+    "src/__mocks__"
+  ]
 }

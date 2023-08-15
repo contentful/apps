@@ -9,6 +9,7 @@ import { GlobalStyles } from '@contentful/f36-components';
 
 const meta: Meta<typeof Field> = {
   component: Field,
+  tags: ['autodocs'],
 };
 
 export default meta;
