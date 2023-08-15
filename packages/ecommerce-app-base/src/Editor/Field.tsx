@@ -1,33 +1,14 @@
-import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { Button } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import * as React from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { FieldsSkuTypes } from '../AppConfig/fields';
-import {
-  DisabledPredicateFn,
-  Integration,
-  MakeCTAFn,
-  OpenDialogFn,
-  ProductPreviewsFn,
-} from '../interfaces';
 import { SortableComponent } from './SortableComponent';
-
-interface Props {
-  sdk: FieldExtensionSDK;
-  makeCTA: MakeCTAFn;
-  logo: string;
-  fetchProductPreviews: ProductPreviewsFn;
-  openDialog: OpenDialogFn;
-  isDisabled: DisabledPredicateFn;
-  skuTypes?: Integration['skuTypes'];
-}
-
-interface State {
-  value: string[];
-  editingDisabled: boolean;
-}
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
+import { FieldAppSDK } from '@contentful/app-sdk';
+import { useIntegration } from './IntegrationContext';
 
 const styles = {
   sortable: css({
@@ -51,40 +32,45 @@ function fieldValueToState(value?: string | string[]): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-export default class Field extends React.Component<Props, State> {
-  state = {
-    value: fieldValueToState(this.props.sdk.field.getValue()),
-    editingDisabled: true,
-  };
+const Field: FC = () => {
+  useAutoResizer();
 
-  componentDidMount() {
-    this.props.sdk.window.startAutoResizer();
+  const sdk = useSDK<FieldAppSDK>();
 
-    // Handle external changes (e.g. when multiple authors are working on the same entry).
-    this.props.sdk.field.onValueChanged((value?: string[] | string) => {
-      this.setState({ value: fieldValueToState(value) });
+  const { skuTypes, fetchProductPreviews, logo, isDisabled, makeCTA, openDialog } =
+    useIntegration();
+
+  // Do we need a local representation of the remote state?
+  const [value, setValue] = useState(() => fieldValueToState(sdk.field.getValue()));
+  const [editingDisabled, setEditingDisabled] = useState(() => false);
+
+  useEffect(() => {
+    sdk.field.onValueChanged((value?: string[] | string) => {
+      setValue(fieldValueToState(value));
     });
+  }, [sdk.field.onValueChanged, setValue]);
 
-    // Disable editing (e.g. when field is not editable due to R&P).
-    this.props.sdk.field.onIsDisabledChanged((editingDisabled: boolean) => {
-      this.setState({ editingDisabled });
+  useEffect(() => {
+    sdk.field.onIsDisabledChanged((editingDisabled: boolean) => {
+      setEditingDisabled(editingDisabled);
     });
-  }
+  }, [sdk.field.onIsDisabledChanged]);
 
-  updateStateValue = (skus: string[]) => {
-    this.setState({ value: skus });
+  const updateValue = useCallback(
+    async (skus: string[]) => {
+      if (skus.length > 0) {
+        const value = sdk.field.type === 'Array' ? skus : skus[0];
+        await sdk.field.setValue(value);
+      } else {
+        await sdk.field.removeValue();
+      }
+    },
+    [sdk.field.setValue, sdk.field.removeValue]
+  );
 
-    if (skus.length > 0) {
-      const value = this.props.sdk.field.type === 'Array' ? skus : skus[0];
-      this.props.sdk.field.setValue(value);
-    } else {
-      this.props.sdk.field.removeValue();
-    }
-  };
-
-  onDialogOpen = async () => {
-    const currentValue = this.state.value;
-    const { skuTypes, sdk } = this.props;
+  // useCallback relevant?
+  const onDialogOpen = useCallback(async () => {
+    const currentValue = value;
     const config = sdk.parameters.installation;
 
     const defaultSkuType = skuTypes?.find((skuType) => skuType.default === true)?.id;
@@ -93,59 +79,55 @@ export default class Field extends React.Component<Props, State> {
         sdk.field.id
       ] ?? defaultSkuType;
 
-    const result = await this.props.openDialog(sdk, currentValue, {
+    const result = await openDialog(sdk, currentValue, {
       ...config,
       fieldValue: fieldValueToState(sdk.field.getValue()),
       fieldType: sdk.field.type,
       skuType,
     });
+
     if (result.length) {
-      this.updateStateValue(result);
+      await updateValue(result);
     }
-  };
+  }, [value, sdk.field, sdk.parameters.installation, sdk.contentType]);
 
-  render = () => {
-    const { value: selectedSKUs, editingDisabled } = this.state;
-    const { skuTypes, sdk } = this.props;
+  const hasItems = value.length > 0;
+  const config = sdk.parameters.installation;
+  const isDisabledLocal = editingDisabled || isDisabled(value, config);
 
-    const hasItems = selectedSKUs.length > 0;
-    const config = sdk.parameters.installation;
-    const isDisabled = editingDisabled || this.props.isDisabled(selectedSKUs, config);
+  const defaultSkuType = skuTypes?.find((skuType) => skuType.default === true)?.id;
+  const skuType =
+    (config as { skuTypes?: FieldsSkuTypes }).skuTypes?.[sdk.contentType.sys.id]?.[sdk.field.id] ??
+    defaultSkuType;
 
-    const defaultSkuType = skuTypes?.find((skuType) => skuType.default === true)?.id;
-    const skuType =
-      (config as { skuTypes?: FieldsSkuTypes }).skuTypes?.[sdk.contentType.sys.id]?.[
-        sdk.field.id
-      ] ?? defaultSkuType;
-
-    return (
-      <>
-        {hasItems && (
-          <div className={styles.sortable}>
-            <SortableComponent
-              sdk={sdk}
-              disabled={editingDisabled}
-              skus={selectedSKUs}
-              onChange={this.updateStateValue}
-              config={config}
-              fetchProductPreviews={this.props.fetchProductPreviews}
-              skuType={skuType}
-            />
-          </div>
-        )}
-        <div className={styles.container}>
-          <img src={this.props.logo} alt="Logo" className={styles.logo} />
-          <Button
-            startIcon={<ShoppingCartIcon />}
-            variant="secondary"
-            size="small"
-            onClick={this.onDialogOpen}
-            isDisabled={isDisabled}
-          >
-            {this.props.makeCTA(sdk.field.type, skuType)}
-          </Button>
+  return (
+    <>
+      {hasItems && (
+        <div className={styles.sortable}>
+          <SortableComponent
+            sdk={sdk}
+            disabled={editingDisabled}
+            skus={value}
+            onChange={updateValue}
+            config={config}
+            fetchProductPreviews={fetchProductPreviews}
+            skuType={skuType}
+          />
         </div>
-      </>
-    );
-  };
-}
+      )}
+      <div className={styles.container}>
+        <img src={logo} alt="Logo" className={styles.logo} />
+        <Button
+          startIcon={<ShoppingCartIcon />}
+          variant="secondary"
+          size="small"
+          onClick={onDialogOpen}
+          isDisabled={isDisabledLocal}>
+          {makeCTA(sdk.field.type, skuType)}
+        </Button>
+      </div>
+    </>
+  );
+};
+
+export default Field;
