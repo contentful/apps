@@ -8,21 +8,31 @@
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/node-apps-toolkit": "^2.2.0",
     "@contentful/react-apps-toolkit": "1.2.16",
-    "contentful-management": "10.38.3",
     "@emotion/react": "^11.11.1",
+    "@storybook/addon-a11y": "^7.3.0",
+    "contentful-management": "10.38.3",
     "launchdarkly-react-client-sdk": "^3.0.8",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "storybook-addon-designs": "^6.3.1"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build-frontend": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3RheWQRagirMFgWrhMOBxL --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6H2pUZdiYcmo0WY8dlYZn5 --token ${TEST_CMA_TOKEN}",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "react-app",
+      "plugin:storybook/recommended"
+    ]
   },
   "browserslist": {
     "production": [
@@ -37,14 +47,32 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@contentful/app-scripts": "1.10.2",
+    "@contentful/node-apps-toolkit": "^2.2.0",
+    "@storybook/addon-essentials": "^7.3.0",
+    "@storybook/addon-interactions": "^7.3.0",
+    "@storybook/addon-links": "^7.3.0",
+    "@storybook/addon-onboarding": "^1.0.8",
+    "@storybook/blocks": "^7.3.0",
+    "@storybook/preset-create-react-app": "^7.3.0",
+    "@storybook/react": "^7.3.0",
+    "@storybook/react-webpack5": "^7.3.0",
+    "@storybook/testing-library": "^0.2.0",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.0.0",
     "@tsconfig/create-react-app": "2.0.1",
     "@types/node": "16.18.39",
     "@types/react": "18.2.18",
     "@types/react-dom": "18.2.7",
+    "babel-plugin-named-exports-order": "^0.0.2",
     "cross-env": "7.0.3",
-    "typescript": "4.9.5"
+    "esbuild": "^0.19.2",
+    "eslint-plugin-storybook": "^0.6.13",
+    "prop-types": "^15.8.1",
+    "storybook": "^7.3.0",
+    "typescript": "4.9.5",
+    "webpack": "^5.88.2"
   },
   "homepage": "."
 }

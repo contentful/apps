@@ -5,8 +5,8 @@ import { SDKProvider } from '@contentful/react-apps-toolkit';
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk';
 
 import App from './App';
-import LocalhostWarning from './components/LocalhostWarning';
-import launchDarklyConfig from 'configs/launch-darkly/launchDarklyConfig';
+import LocalhostWarning from './components/common/LocalhostWarning';
+import launchDarklyConfig from './configs/launch-darkly/launchDarklyConfig';
 
 (async () => {
   const LDProvider = await asyncWithLDProvider(launchDarklyConfig);
