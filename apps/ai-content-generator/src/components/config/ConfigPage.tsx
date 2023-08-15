@@ -13,7 +13,7 @@ import { AppInstallationParameters } from '@locations/ConfigScreen';
 const initialParameters: AppInstallationParameters = {
   model: defaultModelId,
   apiKey: '',
-  profile: '',
+  profile: {},
 };
 
 const ConfigPage = () => {

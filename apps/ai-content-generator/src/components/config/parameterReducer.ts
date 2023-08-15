@@ -8,18 +8,32 @@ export enum ParameterAction {
 }
 
 type ParameterStringActions = {
-  type: Exclude<ParameterAction, ParameterAction.APPLY_CONTENTFUL_PARAMETERS>;
+  type: Exclude<
+    ParameterAction,
+    ParameterAction.APPLY_CONTENTFUL_PARAMETERS | ParameterAction.UPDATE_PROFILE
+  >;
   value: string;
 };
+
 type ParameterObjectActions = {
   type: ParameterAction.APPLY_CONTENTFUL_PARAMETERS;
   value: AppInstallationParameters;
 };
 
-export type ParameterReducer = ParameterObjectActions | ParameterStringActions;
+type ParameterProfileActions = {
+  type: ParameterAction.UPDATE_PROFILE;
+  field: string;
+  value: string;
+};
+
+export type ParameterReducer =
+  | ParameterObjectActions
+  | ParameterStringActions
+  | ParameterProfileActions;
 
 const { UPDATE_MODEL, UPDATE_APIKEY, UPDATE_PROFILE, APPLY_CONTENTFUL_PARAMETERS } =
   ParameterAction;
+
 const parameterReducer = (state: AppInstallationParameters, action: ParameterReducer) => {
   switch (action.type) {
     case UPDATE_MODEL:
@@ -27,7 +41,13 @@ const parameterReducer = (state: AppInstallationParameters, action: ParameterRed
     case UPDATE_APIKEY:
       return { ...state, apiKey: action.value };
     case UPDATE_PROFILE:
-      return { ...state, profile: action.value };
+      return {
+        ...state,
+        profile: {
+          ...state.profile,
+          [action.field]: action.value,
+        },
+      };
     case APPLY_CONTENTFUL_PARAMETERS:
       return { ...state, ...action.value };
     default:

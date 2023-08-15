@@ -9,7 +9,9 @@ const generateRandomParameters = (): AppInstallationParameters => {
   return {
     model: gptModels[randomModelIndex].id,
     apiKey: 'sk-' + randomApiKey,
-    profile: randomProfile,
+    profile: {
+      profile: randomProfile,
+    },
   };
 };
 

@@ -1,31 +1,48 @@
 import { ChangeEvent, Dispatch } from 'react';
-import { FormControl, Textarea } from '@contentful/f36-components';
+import { FormControl, TextInput, Textarea } from '@contentful/f36-components';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
-import { ProfileText } from '../configText';
+import { BrandProfileFields } from '../configText';
 
 interface Props {
-  profile: string;
+  profile: { [key: string]: string };
   dispatch: Dispatch<ParameterReducer>;
 }
+
+const TEXTAREA_ROWS = 5;
 
 const Profile = (props: Props) => {
   const { profile, dispatch } = props;
 
-  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    dispatch({ type: ParameterAction.UPDATE_PROFILE, value: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>, field: string) => {
+    dispatch({ type: ParameterAction.UPDATE_PROFILE, value: e.target.value, field: field });
   };
 
   return (
-    <FormControl isRequired>
-      <FormControl.Label>{ProfileText.title}</FormControl.Label>
-      <Textarea
-        rows={15}
-        value={profile}
-        name="profile"
-        placeholder={ProfileText.textAreaPlaceholder}
-        onChange={handleChange}
-      />
-    </FormControl>
+    <>
+      {BrandProfileFields.map((field) => {
+        const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+          handleChange(e, field.id);
+        };
+
+        const fieldProps = {
+          value: profile[field.id] ?? '',
+          name: field.title,
+          placeholder: field.textAreaPlaceholder,
+          onChange: onChange,
+        };
+
+        return (
+          <FormControl isRequired={field.isRequired} key={field.id}>
+            <FormControl.Label>{field.title}</FormControl.Label>
+            {field.type === 'textarea' ? (
+              <Textarea rows={TEXTAREA_ROWS} resize="none" {...fieldProps} />
+            ) : (
+              <TextInput type="text" {...fieldProps} />
+            )}
+          </FormControl>
+        );
+      })}
+    </>
   );
 };
 
