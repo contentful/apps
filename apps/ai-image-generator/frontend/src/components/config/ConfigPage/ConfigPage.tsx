@@ -7,12 +7,12 @@ export const PAGE_TITLE = 'Set up AI Images powered by DALL-E'
 
 
 interface ParameterObject {
-    [key: string]: string
+  [key: string]: string
 }
 
 interface Props {
-    handleConfig: (value: ParameterObject) => void
-    parameters: AppInstallationParameters
+  handleConfig: (value: ParameterObject) => void
+  parameters: AppInstallationParameters
 }
 
 

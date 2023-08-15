@@ -7,13 +7,16 @@ export interface AppInstallationParameters {
   apiKey?: string
 }
 
-interface ParameterError {
-  isApiKeyValid: boolean
+const errorMessages = {
+  apiKeyEmpty: 'API key is required.',
+  apiKeyInvalid: 'API key is not valid'
 }
+
+type InstallErrors = 'apiKeyEmpty' | 'apiKeyInvalid'
+
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
-  const [error, setError] = useState<ParameterError>({ isApiKeyValid: false })
   const sdk = useSDK<ConfigAppSDK>();
 
   useEffect(() => {
@@ -28,10 +31,17 @@ const ConfigScreen = () => {
     getAppActions();
   }, [sdk.cma.appAction, sdk.ids.app]);
 
-  const onConfigure = useCallback(async () => {
+  const handleError = (errorType: InstallErrors) => {
+    sdk.notifier.error(errorMessages[errorType])
+  }
+
+  const handleInstall = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    if (Object.keys(error)) sdk.notifier.error('Invalid Api Key') // map the message
+    if (!parameters.apiKey) {
+      handleError('apiKeyEmpty')
+      return false;
+    }
 
     return {
       parameters,
@@ -40,8 +50,8 @@ const ConfigScreen = () => {
   }, [parameters, sdk]);
 
   useEffect(() => {
-    sdk.app.onConfigure(() => onConfigure());
-  }, [sdk, onConfigure]);
+    sdk.app.onConfigure(() => handleInstall());
+  }, [sdk, handleInstall]);
 
   useEffect(() => {
     (async () => {
@@ -51,18 +61,11 @@ const ConfigScreen = () => {
         setParameters(currentParameters);
       }
 
-      // Once preparation has finished, call `setReady` to hide
-      // the loading screen and present the app to a user.
       sdk.app.setReady();
     })();
   }, [sdk]);
 
   const handleConfig = (updatedParams: AppInstallationParameters) => {
-    if (!updatedParams.apiKey) {
-      setError({ isApiKeyValid: false })
-      return;
-    };
-
     setParameters((prevParameters) => ({
       ...prevParameters,
       ...updatedParams
