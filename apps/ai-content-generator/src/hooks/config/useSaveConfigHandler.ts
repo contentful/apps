@@ -22,8 +22,7 @@ const useSaveConfigHandler = (parameters: AppInstallationParameters) => {
   }, [parameters, sdk.app]);
 
   const changeSaveConfigHandler = useCallback(() => {
-    const saveHandler = getCurrentState();
-    sdk.app.onConfigure(() => saveHandler);
+    sdk.app.onConfigure(() => getCurrentState());
   }, [getCurrentState, sdk.app]);
 
   useEffect(() => {
