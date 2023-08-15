@@ -22,12 +22,13 @@ const ConfigScreen = () => {
     getAppActions();
   }, [sdk.cma.appAction, sdk.ids.app]);
 
-  const handleError = (errorType: InstallErrors) => {
-    sdk.notifier.error(configPageErrorMessages[errorType])
-  }
 
   const handleInstall = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+
+    const handleError = (errorType: InstallErrors) => {
+      sdk.notifier.error(configPageErrorMessages[errorType])
+    }  
 
     if (!parameters.apiKey) {
       handleError('apiKeyEmpty')

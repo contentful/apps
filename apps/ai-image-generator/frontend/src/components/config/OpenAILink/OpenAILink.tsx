@@ -23,6 +23,7 @@ const OpenAILink = (props: Props) => {
   );
 
   const formatLink = () => {
+    // eslint-disable-next-line array-callback-return
     const bodyWithTextLink = body.split(substring).reduce((prev: unknown, current, i) => {
       if (!i) {
         return [current];
