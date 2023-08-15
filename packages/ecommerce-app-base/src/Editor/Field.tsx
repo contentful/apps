@@ -96,6 +96,7 @@ const Field: FC = () => {
   const isDisabledLocal = editingDisabled || isDisabled(value, config);
 
   const defaultSkuType = skuTypes?.find((skuType) => skuType.default === true)?.id;
+
   const skuType =
     (config as { skuTypes?: FieldsSkuTypes }).skuTypes?.[sdk.contentType.sys.id]?.[sdk.field.id] ??
     defaultSkuType;

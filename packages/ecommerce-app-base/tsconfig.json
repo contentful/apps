@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "skipLibCheck": true,
     "outDir": "./lib",
     "target": "es5",
     "module": "commonjs",
@@ -16,5 +17,7 @@
     "resolveJsonModule": true,
     "declaration": true
   },
-  "files": ["./src/index.tsx"]
+  "files": ["./src/index.tsx"],
+  "exclude": ["node_modules", "build", "**/*.stories.tsx"]
+
 }
