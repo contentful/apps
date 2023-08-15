@@ -14,16 +14,13 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "paths": {
-      "@components/*": ["./src/components/*"],
-      "@configs/*": ["./src/configs/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@locations/*": ["./src/locations/*"],
-      "@providers/*": ["./src/providers/*"],
-      "@utils/*": ["./src/utils/*"],
-    },
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": "src",
+    "sourceMap": true,
+    "inlineSources": true,
+    "sourceRoot": "/src"
   },
-  "include": ["src"],
+  "include": ["src", "test"],
+  "exclude": ["node_modules"]
 }

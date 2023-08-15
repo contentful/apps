@@ -1,18 +1,9 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import ConfigPage from '../components/config/ConfigPage/ConfigPage';
-
-export interface AppInstallationParameters {
-  apiKey?: string
-}
-
-const errorMessages = {
-  apiKeyEmpty: 'API key is required.',
-  apiKeyInvalid: 'API key is not valid'
-}
-
-type InstallErrors = 'apiKeyEmpty' | 'apiKeyInvalid'
+import ConfigPage from 'components/config/ConfigPage/ConfigPage';
+import { configPageErrorMessages } from 'constants/errorMessages';
+import { AppInstallationParameters, InstallErrors } from 'types/configPage';
 
 
 const ConfigScreen = () => {
@@ -32,7 +23,7 @@ const ConfigScreen = () => {
   }, [sdk.cma.appAction, sdk.ids.app]);
 
   const handleError = (errorType: InstallErrors) => {
-    sdk.notifier.error(errorMessages[errorType])
+    sdk.notifier.error(configPageErrorMessages[errorType])
   }
 
   const handleInstall = useCallback(async () => {

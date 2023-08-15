@@ -1,7 +1,7 @@
 import { Box, Heading } from '@contentful/f36-components';
 import { styles } from './ConfigPage.styles';
-import APIKey from '../ApiKey/APIKey';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
+import APIKey from 'components/config/ApiKey/APIKey';
+import { AppInstallationParameters } from 'types/configPage';
 
 export const PAGE_TITLE = 'Set up AI Images powered by DALL-E'
 

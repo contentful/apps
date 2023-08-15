@@ -1,4 +1,7 @@
 import type { StorybookConfig } from '@storybook/react-webpack5';
+
+const path = require('path');
+
 const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
   addons: [
@@ -9,6 +12,16 @@ const config: StorybookConfig = {
     '@storybook/addon-a11y',
     'storybook-addon-designs',
   ],
+  typescript: {
+    check: false,
+    checkOptions: {},
+    reactDocgen: "react-docgen-typescript",
+    reactDocgenTypescriptOptions: {
+      shouldExtractLiteralValuesFromEnum: true,
+      propFilter: (prop) =>
+        prop.parent ? !/node_modules/.test(prop.parent.fileName) : true,
+    },
+  },
   framework: {
     name: '@storybook/react-webpack5',
     options: {},

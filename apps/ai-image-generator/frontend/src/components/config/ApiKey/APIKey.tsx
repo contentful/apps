@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from 'react';
 import { FormControl, TextInput } from '@contentful/f36-components';
-import OpenAILink from '../OpenAILink/OpenAILink';
+import OpenAILink from 'components/config/OpenAILink/OpenAILink';
 
 interface Props {
   apiKey?: string;
