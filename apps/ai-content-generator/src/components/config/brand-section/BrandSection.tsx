@@ -10,7 +10,7 @@ export const styles = css({
 });
 
 interface Props {
-  profile: string;
+  profile: { [key: string]: string };
   dispatch: Dispatch<ParameterReducer>;
 }
 

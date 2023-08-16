@@ -7,13 +7,13 @@ import { Sections } from '@components/config/configText';
 import { defaultModelId } from '@configs/ai/gptModels';
 import useInitializeParameters from '@hooks/config/useInitializeParameters';
 import useSaveConfigHandler from '@hooks/config/useSaveConfigHandler';
-import parameterReducer from './parameterReducer';
+import parameterReducer from '@components/config/parameterReducer';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 
 const initialParameters: AppInstallationParameters = {
   model: defaultModelId,
   apiKey: '',
-  profile: '',
+  profile: {},
 };
 
 const ConfigPage = () => {

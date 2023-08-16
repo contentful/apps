@@ -1,9 +1,9 @@
-import ConfigPage from '@components/config/ConfigPage';
+import ConfigPage from '@components/config/config-page/ConfigPage';
 
 interface AppInstallationParameters {
   model: string;
   apiKey: string;
-  profile: string;
+  profile: { [key: string]: string };
 }
 const ConfigScreen = () => {
   return <ConfigPage />;
