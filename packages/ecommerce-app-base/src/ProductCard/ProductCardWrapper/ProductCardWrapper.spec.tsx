@@ -1,7 +1,6 @@
 import ProductCardWrapper from './ProductCardWrapper';
 import {
   mockSdk,
-  mockCma,
   externalResource,
   externalResourceLink,
   externalResourceLinks,
@@ -10,7 +9,13 @@ import { render, screen } from '@testing-library/react';
 import * as React from 'react';
 import { ResourceFieldProvider } from '../context';
 
-jest.mock('../ProductCardMenu/ProductCardMenu', () => () => <div>Product card menu component</div>);
+jest.mock(
+  '../ProductCardMenu/ProductCardMenu',
+  () =>
+    function ProductCardMenuMock() {
+      return <div>Product card menu component</div>;
+    }
+);
 
 jest.mock('../helpers/resourceProviderUtils', () => ({
   getResourceProviderAndType: () => ({
@@ -21,10 +26,10 @@ jest.mock('../helpers/resourceProviderUtils', () => ({
 
 jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useCMA: () => mockCma,
+  useCMA: () => {},
 }));
 
-let mockExternalResource = externalResource;
+const mockExternalResource = externalResource;
 jest.mock('../hooks/field/useExternalResource', () => () => ({
   isLoading: false,
   externalResource: mockExternalResource,

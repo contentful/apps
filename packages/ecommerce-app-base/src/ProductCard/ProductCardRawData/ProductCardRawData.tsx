@@ -6,7 +6,7 @@ import tokens from '@contentful/f36-tokens';
 interface ProductCardRawDataProps {
   value: string;
   isVisible: boolean;
-  onHide: Function;
+  onHide: () => void;
 }
 
 const ProductCardRawData = (props: ProductCardRawDataProps) => {

@@ -20,7 +20,7 @@ type CardMovementCallbacks = {
 
 export interface ProductCardProps {
   // TODO: Fix the CardHeader type during the mapping config refactor/ticket
-  resource: any;
+  resource: ExternalResource;
   cardHeader: string;
   productCardType?: ProductCardType;
   handleRemove?: (index?: number) => void;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ExternalResourceLink } from '../../types';
+import type { ExternalResource, ExternalResourceLink } from '../../types';
 import type { FieldAppSDK } from '@contentful/app-sdk';
 import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import fetchWithSignedRequest from './../../helpers/signedRequests';
@@ -11,7 +11,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
   const cma = useCMA();
 
   // TODO: Fix this externalResource type in the config mapping refactor
-  const [externalResource, setExternalResource] = useState<any>({});
+  const [externalResource, setExternalResource] = useState<ExternalResource>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [error, setError] = useState<string>();
@@ -24,8 +24,7 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
       const encodedUrn = encodeURIComponent(resource.sys.urn);
       // TODO: Fix the app id in the url
       const url = new URL(
-        'some url to be configured'
-        //`${config.proxyUrl}/api/integrations/123/resourcesTypes/${encodedLinkType}/resources/${encodedUrn}`
+        `${'proxy-url'}/api/integrations/123/resourcesTypes/${encodedLinkType}/resources/${encodedUrn}`
       );
 
       const data = await fetchWithSignedRequest(url, sdk.ids.app!, cma, sdk, 'GET', {
@@ -59,16 +58,21 @@ const useExternalResource = (resource?: ExternalResourceLink) => {
         const data = await res.json();
 
         setExternalResource(data);
-      } catch (error: any) {
-        console.error(errorStatus, error.message);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(errorStatus, error.message);
 
-        const { resourceProvider, resourceType } = getResourceProviderAndType(resource);
-        setError(
-          `Error fetching ${resourceType ? resourceType : 'external resource'}${
-            resource.sys?.urn ? ` "${resource.sys.urn}"` : ''
-          }${resourceProvider ? ` from ${resourceProvider}` : ''}.`
-        );
-        setErrorMessage(error.message);
+          const { resourceProvider, resourceType } = getResourceProviderAndType(resource);
+          setError(
+            `Error fetching ${resourceType ? resourceType : 'external resource'}${
+              resource.sys?.urn ? ` "${resource.sys.urn}"` : ''
+            }${resourceProvider ? ` from ${resourceProvider}` : ''}.`
+          );
+          setErrorMessage(error.message);
+        } else {
+          setError('unknown error');
+          setErrorMessage('unknown error');
+        }
       }
 
       setIsLoading(false);

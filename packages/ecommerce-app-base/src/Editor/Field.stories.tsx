@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import productPreviews from '../__mocks__/productPreviews';
 import { Field } from './Field';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import logo from '../__mocks__/logo.svg';
 import { SDKContext } from '@contentful/react-apps-toolkit';

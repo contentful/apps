@@ -1,5 +1,5 @@
 import type { IdsAPI } from '@contentful/app-sdk';
-import type { EntityStatus } from '@contentful/f36-components';
+import type { AssetProps, EntityStatus } from '@contentful/f36-components';
 import type { ErrorInfo, FC, ReactElement, ReactNode } from 'react';
 import { KeyValueMap } from 'contentful-management';
 
@@ -48,6 +48,7 @@ export interface ExternalResource {
   title: string;
   description: string;
   image?: string;
+  images?: AssetProps[];
   status?: EntityStatus;
   extras?: JSONObject;
   id?: string;
@@ -87,7 +88,7 @@ export interface ParameterDefinition {
 }
 
 export interface AppInstallationParameters {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export enum FieldType {

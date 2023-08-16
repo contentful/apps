@@ -4,12 +4,12 @@ import { MoreHorizontalIcon } from '@contentful/f36-icons';
 import useResourceMenuItems from '../hooks/field/useResourceMenuItems';
 
 export interface ProductCardMenuProps {
-  onRemove: Function;
   isDataVisible: boolean;
-  onShowData: Function;
-  onHideData: Function;
   cardIndex?: number;
   totalCards?: number;
+  onRemove: () => void;
+  onShowData: () => void;
+  onHideData: () => void;
   onMoveToTop?: (cardIndex?: number) => void;
   onMoveToBottom?: (cardIndex?: number) => void;
 }

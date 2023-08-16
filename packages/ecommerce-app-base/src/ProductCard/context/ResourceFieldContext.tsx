@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
+import { ExternalResource } from '../types';
 
 export type ResourceFieldContextType = {
   isMultiple: boolean;
-  handleAddResource: () => Promise<any[]>;
+  handleAddResource: () => Promise<ExternalResource[]>;
   handleRemove: (index?: number) => void;
   handleMoveToTop?: (index?: number) => void;
   handleMoveToBottom?: (index?: number) => void;
@@ -20,7 +21,7 @@ export const ResourceFieldContext = createContext<ResourceFieldContextType>({
 
 export type ResourceFieldProviderProps = {
   isMultiple: boolean;
-  handleAddResource: () => Promise<any[]>;
+  handleAddResource: () => Promise<ExternalResource[]>;
   handleRemove: (index?: number) => void;
   handleMoveToTop?: (index?: number) => void;
   handleMoveToBottom?: (index?: number) => void;

@@ -129,6 +129,7 @@ export const ListItem: FC<Props> = ({ product, isSortable, disabled, onDelete, s
     <Card
       data-test-id="sortable-list-item"
       className={styles.card}
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       withDragHandle
       dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}>

@@ -6,7 +6,7 @@ interface ProductCardProps {
   title?: string;
   description?: string;
   // TO DO fix image mapping
-  image?: any;
+  image?: string;
   id?: string;
   externalResourceError?: ExternalResourceError;
 }
@@ -55,7 +55,6 @@ const ProductCardBody = (props: ProductCardProps) => {
     <Box padding="spacingM">
       <Flex fullWidth={true} justifyContent="space-between">
         {externalResourceError?.error ? renderErrorBody() : renderMainBody()}
-
         {productImage && <img src={productImage} alt={productName} width="70" height="70" />}
       </Flex>
     </Box>

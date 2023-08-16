@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import ProductCard from './ProductCard';
 import { DragHandle } from '@contentful/f36-components';
 import { externalResource, externalResourceLink } from '../../__mocks__/storybook/common';
@@ -9,7 +9,7 @@ const meta = {
   component: ProductCard,
   tags: ['autodocs'],
   ...parameters,
-} satisfies Meta<typeof ProductCard>;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

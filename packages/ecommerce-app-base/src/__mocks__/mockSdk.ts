@@ -1,4 +1,7 @@
-const mockSdk: any = {
+import { DeepPartial } from './DeepPartial';
+import { KnownAppSDK } from '@contentful/app-sdk';
+
+const mockSdk: DeepPartial<KnownAppSDK> = {
   app: {
     onConfigure: jest.fn(),
     getParameters: jest.fn().mockReturnValueOnce({}),
