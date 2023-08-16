@@ -2,6 +2,7 @@ import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockCma, MockSdk } from '../../test/mocks';
 import ConfigScreen from './ConfigScreen';
+import { Sections } from '@components/config/configText';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
@@ -12,9 +13,8 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('Config Screen component', () => {
-  it('Component text exists', async () => {
+  it('Config header exists', async () => {
     const { getByText } = render(<ConfigScreen />);
-    // simulate the user clicking the install button
-    expect(getByText('OpenAI API key')).toBeTruthy();
+    expect(getByText(Sections.pageHeading)).toBeTruthy();
   });
 });
