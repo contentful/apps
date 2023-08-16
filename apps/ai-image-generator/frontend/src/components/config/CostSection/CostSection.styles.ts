@@ -1,7 +1,13 @@
+import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 
 export const styles = {
   link: css({
-    marginTop: 0
+    color: tokens.gray900
   }),
+  wrapper: css({
+    'p:last-child': {
+        marginTop: 0
+    }
+  })
 };
