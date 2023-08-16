@@ -79,7 +79,7 @@ const main = async (watch = false) => {
       await esbuild.build(config);
     }
   } catch (e) {
-    console.log('Error building delivery functions');
+    console.error('Error building delivery functions');
     throw Error(e);
   }
 };
