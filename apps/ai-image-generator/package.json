@@ -1,0 +1,16 @@
+{
+  "name": "@contentful/ai-image-generator",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "create-app-definition": "contentful-app-scripts create-app-definition",
+    "build": "rimraf ./build && npm run build-frontend && npm run build-backend",
+    "build-backend": "cd backend && npm ci --include=dev && npm run build",
+    "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3RheWQRagirMFgWrhMOBxL --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6H2pUZdiYcmo0WY8dlYZn5 --token ${TEST_CMA_TOKEN}"
+  },
+  "dependencies": {
+    "@contentful/app-scripts": "1.10.2"
+  }
+}
