@@ -1,6 +1,6 @@
 const launchDarklyConfig = {
-  // TO DO: Add as env variable
-  clientSideID: '588a047044b03e0b3211298e',
+  // TO DO: Add as env variable.
+  clientSideID: '',
   deferInitialization: false,
   flags: {
     aiigFlagV2: true,
