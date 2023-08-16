@@ -1,5 +1,6 @@
 const launchDarklyConfig = {
-  clientSideID: `${process.env.REACT_LAUNCHDARKLY_CLIENT_ID}`,
+  // TO DO: Add as env variable.
+  clientSideID: '',
   deferInitialization: false,
   flags: {
     aiigFlagV2: true,
