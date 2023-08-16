@@ -1,10 +1,10 @@
 import { Box, Heading } from '@contentful/f36-components';
-import { styles } from './ConfigPage.styles';
 import APIKey from 'components/config/ApiKeySection/APIKeySection';
 import { AppInstallationParameters } from 'types/configPage';
 import configPageCopies from 'constants/configPageCopies';
-import CostSection from '../CostSection/CostSection';
-import DisclaimerSection from '../DisclaimerSection/DisclaimerSection';
+import CostSection from 'components/config/CostSection/CostSection';
+import DisclaimerSection from 'components/config/DisclaimerSection/DisclaimerSection';
+import { styles } from './ConfigPage.styles';
 
 interface ParameterObject {
   [key: string]: string;
