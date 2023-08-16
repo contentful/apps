@@ -2,10 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import productPreviews from '../__mocks__/productPreviews';
 import { SortableList } from './SortableList';
 import { GlobalStyles } from '@contentful/f36-components';
+import { parameters } from '../../.storybook/parameters';
 
 const meta: Meta<typeof SortableList> = {
   component: SortableList,
   tags: ['autodocs'],
+  ...parameters,
 };
 
 export default meta;

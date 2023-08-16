@@ -1,18 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ProductCard from './ProductCard';
 import { externalResource } from '../../__mocks__/storybook/common';
+import { parameters } from '../../../.storybook/parameters';
 
 const meta = {
-  title: 'Ecommerce/ProductCard/DialogProductCard',
+  title: 'ProductCard/DialogProductCard',
   component: ProductCard,
   tags: ['autodocs'],
-  decorators: [
-    (Story) => (
-      <div style={{ width: '700px' }}>
-        <Story />
-      </div>
-    ),
-  ],
+  ...parameters,
 } satisfies Meta<typeof ProductCard>;
 
 export default meta;
@@ -25,7 +20,7 @@ const designParams = {
   },
 };
 
-export const DialogCard: Story = {
+export const Default: Story = {
   args: {
     resource: externalResource,
     cardHeader: 'Shopify Product',
@@ -35,7 +30,7 @@ export const DialogCard: Story = {
   },
 };
 
-export const DialogSelectedCard: Story = {
+export const Selected: Story = {
   args: {
     resource: externalResource,
     cardHeader: 'Shopify Product',
@@ -46,7 +41,7 @@ export const DialogSelectedCard: Story = {
   },
 };
 
-export const DialogLoadingCard: Story = {
+export const Loading: Story = {
   args: {
     resource: externalResource,
     cardHeader: 'Shopify Product',
@@ -57,7 +52,7 @@ export const DialogLoadingCard: Story = {
   },
 };
 
-export const DialogMissingCard: Story = {
+export const Missing: Story = {
   args: {
     resource: {},
     cardHeader: 'Shopify Product',

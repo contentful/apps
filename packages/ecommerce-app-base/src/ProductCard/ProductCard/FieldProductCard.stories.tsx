@@ -2,18 +2,13 @@ import type { Meta, StoryObj } from '@storybook/react';
 import ProductCard from './ProductCard';
 import { DragHandle } from '@contentful/f36-components';
 import { externalResource, externalResourceLink } from '../../__mocks__/storybook/common';
+import { parameters } from '../../../.storybook/parameters';
 
 const meta = {
-  title: 'Ecommerce/ProductCard/FieldProductCard',
+  title: 'ProductCard/FieldProductCard',
   component: ProductCard,
   tags: ['autodocs'],
-  decorators: [
-    (Story) => (
-      <div style={{ width: '700px' }}>
-        <Story />
-      </div>
-    ),
-  ],
+  ...parameters,
 } satisfies Meta<typeof ProductCard>;
 
 export default meta;
@@ -29,7 +24,7 @@ const designParams = {
 const CARD_HEADER = 'Shopify Product';
 const CARD_TYPE = 'field';
 
-export const FieldSingleReference: Story = {
+export const SingleReference: Story = {
   args: {
     resource: externalResource,
     cardHeader: CARD_HEADER,
@@ -43,7 +38,7 @@ export const FieldSingleReference: Story = {
   },
 };
 
-export const FieldMultipleReference: Story = {
+export const MultipleReference: Story = {
   args: {
     resource: externalResource,
     cardHeader: CARD_HEADER,
@@ -60,7 +55,7 @@ export const FieldMultipleReference: Story = {
   },
 };
 
-export const FieldSingleSelectedCard: Story = {
+export const Selected: Story = {
   args: {
     resource: externalResource,
     cardHeader: CARD_HEADER,
@@ -75,7 +70,7 @@ export const FieldSingleSelectedCard: Story = {
   },
 };
 
-export const FieldSingleMissingCard: Story = {
+export const Missing: Story = {
   args: {
     resource: {},
     cardHeader: CARD_HEADER,
@@ -94,7 +89,7 @@ export const FieldSingleMissingCard: Story = {
   },
 };
 
-export const FieldSingleSelectedCardLoading: Story = {
+export const Loading: Story = {
   args: {
     resource: externalResource,
     cardHeader: CARD_HEADER,

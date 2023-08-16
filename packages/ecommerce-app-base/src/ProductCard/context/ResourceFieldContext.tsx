@@ -1,4 +1,6 @@
-import { createContext } from 'react';
+import * as React from 'react';
+import { createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
 
 export type ResourceFieldContextType = {
   isMultiple: boolean;
@@ -9,11 +11,47 @@ export type ResourceFieldContextType = {
   logoUrl: string;
 };
 
-const ResourceFieldContext = createContext<ResourceFieldContextType>({
+export const ResourceFieldContext = createContext<ResourceFieldContextType>({
   isMultiple: false,
   handleAddResource: async () => [],
   handleRemove: () => {},
   logoUrl: '',
 });
 
-export default ResourceFieldContext;
+export type ResourceFieldProviderProps = {
+  isMultiple: boolean;
+  handleAddResource: () => Promise<any[]>;
+  handleRemove: (index?: number) => void;
+  handleMoveToTop?: (index?: number) => void;
+  handleMoveToBottom?: (index?: number) => void;
+  logoUrl: string;
+  children: ReactNode;
+};
+
+export const ResourceFieldProvider = (props: ResourceFieldProviderProps) => {
+  const {
+    children,
+    isMultiple,
+    handleAddResource,
+    handleRemove,
+    handleMoveToTop,
+    handleMoveToBottom,
+    logoUrl,
+  } = props;
+
+  return (
+    <ResourceFieldContext.Provider
+      value={{
+        isMultiple,
+        handleAddResource,
+        handleRemove,
+        handleMoveToTop,
+        handleMoveToBottom,
+        logoUrl,
+      }}>
+      {children}
+    </ResourceFieldContext.Provider>
+  );
+};
+
+export const useResourceField = () => useContext(ResourceFieldContext);

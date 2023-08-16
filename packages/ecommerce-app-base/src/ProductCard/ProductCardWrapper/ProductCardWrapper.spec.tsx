@@ -8,6 +8,7 @@ import {
 } from '../../__mocks__';
 import { render, screen } from '@testing-library/react';
 import * as React from 'react';
+import { ResourceFieldProvider } from '../context';
 
 jest.mock('../ProductCardMenu/ProductCardMenu', () => () => <div>Product card menu component</div>);
 
@@ -32,23 +33,22 @@ jest.mock('../hooks/field/useExternalResource', () => () => ({
 const { findByTestId } = screen;
 
 describe('ProductCardWrapper component', () => {
-  const mockUseContext: jest.SpyInstance = jest.spyOn(React, 'useContext');
-  beforeEach(() => {
-    mockUseContext.mockReturnValue({
-      handleRemove: jest.fn(),
-      handleMoveToBottom: jest.fn(),
-      handleMoveToTop: jest.fn(),
-      isMultiple: false,
-    });
-  });
   it('mounts', async () => {
     render(
-      <ProductCardWrapper
-        externalResourceLink={externalResourceLink}
-        cardIndex={1}
-        resourceArray={externalResourceLinks}
-        productCardType="field"
-      />
+      <ResourceFieldProvider
+        logoUrl={''}
+        isMultiple={false}
+        handleMoveToBottom={jest.fn()}
+        handleMoveToTop={jest.fn()}
+        handleAddResource={jest.fn()}
+        handleRemove={jest.fn()}>
+        <ProductCardWrapper
+          externalResourceLink={externalResourceLink}
+          cardIndex={1}
+          resourceArray={externalResourceLinks}
+          productCardType="field"
+        />
+      </ResourceFieldProvider>
     );
 
     const resourceField = await findByTestId('cf-ui-card');

@@ -11,6 +11,17 @@ import {GlobalStyles} from '@contentful/f36-components';
 const meta: Meta<typeof SkuPicker> = {
     component: SkuPicker,
     tags: ['autodocs'],
+    parameters: {
+        layout: 'left',
+    },
+    decorators: [
+        (Story) => (
+            <>
+                <GlobalStyles/>
+                <Story/>
+            </>
+        ),
+    ],
 };
 
 export default meta;
@@ -31,14 +42,6 @@ export const Default: Story = {
         searchDelay: 500,
         hideSearch: false,
         skuType: 'product',
-        fetchProductPreviews: () => Promise.resolve(productPreviews),
+        fetchProductPreviews: (skus) => Promise.resolve(productPreviews),
     },
-    decorators: [
-        (Story) => (
-            <>
-                <GlobalStyles/>
-                <Story/>
-            </>
-        ),
-    ],
 };

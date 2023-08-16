@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { getResourceProviderAndType } from '../helpers/resourceProviderUtils';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDebounce } from 'usehooks-ts';
 import useExternalResource from '../hooks/field/useExternalResource';
 import type {
@@ -10,7 +10,7 @@ import type {
   RenderDragFn,
 } from '../types';
 import ProductCard from '../ProductCard/ProductCard';
-import ResourceFieldContext from '../context/ResourceFieldContext';
+import { useResourceField } from '../context';
 
 export interface ProductCardWrapperProps {
   externalResourceLink: ExternalResourceLink;
@@ -23,8 +23,7 @@ export interface ProductCardWrapperProps {
 const ProductCardWrapper = (props: ProductCardWrapperProps) => {
   const { externalResourceLink, cardIndex, dragHandleRender, resourceArray, productCardType } =
     props;
-  const { isMultiple, handleMoveToBottom, handleMoveToTop, handleRemove } =
-    useContext(ResourceFieldContext);
+  const { isMultiple, handleMoveToBottom, handleMoveToTop, handleRemove } = useResourceField();
 
   const [resourceLink, setResourceLink] = useState<ExternalResourceLink>(externalResourceLink);
   const debouncedExternalResourceLinkValue = useDebounce(resourceLink, 300);
