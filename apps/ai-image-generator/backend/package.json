@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "validate-actions": "node scripts/validate-actions.js",
