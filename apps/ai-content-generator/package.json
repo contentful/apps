@@ -1,5 +1,5 @@
 {
-  "name": "@contentful/ai-content-generator",
+  "name": "ai-content-generator",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
