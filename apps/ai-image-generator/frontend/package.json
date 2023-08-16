@@ -19,16 +19,11 @@
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
-    "build-frontend": "BUILD_PATH=../build react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ../build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3RheWQRagirMFgWrhMOBxL --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ../build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6H2pUZdiYcmo0WY8dlYZn5 --token ${TEST_CMA_TOKEN}",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
-    "build-backend": "cd ../backend && npm ci && npm run build-backend",
-    "build": "rimraf ../build && npm run build-frontend && npm run build-backend"
+    "build-storybook": "storybook build"
   },
   "eslintConfig": {
     "extends": [
@@ -50,8 +45,6 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@contentful/app-scripts": "1.10.2",
-    "@contentful/node-apps-toolkit": "^2.2.0",
     "@storybook/addon-essentials": "^7.3.0",
     "@storybook/addon-interactions": "^7.3.0",
     "@storybook/addon-links": "^7.3.0",
