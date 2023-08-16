@@ -4,7 +4,7 @@ import productPreviews from '../__mocks__/productPreviews';
 // @ts-ignore
 import logo from '../__mocks__/logo.svg';
 import { SkuPicker } from './SkuPicker';
-import { ProductsFn } from '../interfaces';
+import { ProductsFn } from '../types';
 import { sdk } from '../__mocks__/storybook/sdk';
 import { GlobalStyles } from '@contentful/f36-components';
 

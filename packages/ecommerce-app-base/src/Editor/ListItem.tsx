@@ -12,7 +12,7 @@ import {
 import { AssetIcon, CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
-import { Product } from '../interfaces';
+import type { Product } from '../types';
 import { SortableHandle } from 'react-sortable-hoc';
 
 const IMAGE_SIZE = 48;

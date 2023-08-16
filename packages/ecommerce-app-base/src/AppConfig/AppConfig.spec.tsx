@@ -1,7 +1,7 @@
-import React from 'react';
+import * as React from 'react';
 import { render, cleanup, fireEvent, waitFor, screen } from '@testing-library/react';
 
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 
 import AppConfig from './AppConfig';
 import { definitions } from './parameters.spec';
@@ -56,7 +56,7 @@ const renderComponent = (sdk: unknown, isInOrchestrationEAP?: boolean) => {
   return render(
     <AppConfig
       name="Some app"
-      sdk={sdk as AppExtensionSDK}
+      sdk={sdk as ConfigAppSDK}
       parameterDefinitions={definitions}
       validateParameters={validate}
       logo="some-logo.svg"

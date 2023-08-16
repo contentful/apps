@@ -3,7 +3,7 @@ import { useState } from 'react';
 import tokens from '@contentful/f36-tokens';
 import noop from 'lodash/noop';
 import { css } from 'emotion';
-import { Product } from '../../interfaces';
+import { Product } from '../../types';
 
 import { Icon, Tooltip } from '@contentful/f36-components';
 

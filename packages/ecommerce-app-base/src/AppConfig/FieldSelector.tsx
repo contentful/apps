@@ -2,7 +2,7 @@ import { Checkbox, Flex, Form, Paragraph, Radio, Subheading } from '@contentful/
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import * as React from 'react';
-import { Integration } from '../interfaces';
+import { Integration } from '../types';
 import { CompatibleFields, ContentType, FieldsSkuTypes, SelectedFields } from './fields';
 
 interface Props {

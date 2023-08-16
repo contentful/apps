@@ -8,7 +8,7 @@ import { SDKContext } from '@contentful/react-apps-toolkit';
 import { IntegrationProvider } from './IntegrationContext';
 import { sdk } from '../__mocks__/storybook/sdk';
 import { GlobalStyles } from '@contentful/f36-components';
-import { Integration } from '../interfaces';
+import { Integration } from '../types';
 import { parameters } from '../../.storybook/parameters';
 
 const meta: Meta<typeof Field> = {

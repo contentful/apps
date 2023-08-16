@@ -1,6 +1,6 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
-import { Integration } from '../interfaces';
+import type { Integration } from '../types';
 
 // eslint-disable-next-line
 export const IntegrationContext = createContext<Integration>({} as Integration);

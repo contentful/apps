@@ -1,4 +1,4 @@
-import { ParameterDefinition } from '../interfaces';
+import { ParameterDefinition } from '../types';
 import { toInputParameters, toAppParameters } from './parameters';
 
 export const definitions: ParameterDefinition[] = [

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { AppExtensionSDK, CollectionResponse } from '@contentful/app-sdk';
+import { ConfigAppSDK, CollectionResponse } from '@contentful/app-sdk';
 import {
   Heading,
   Paragraph,
@@ -31,10 +31,10 @@ import {
   FieldsSkuTypes,
 } from './fields';
 
-import { Config, Integration, ParameterDefinition, ValidateParametersFn } from '../interfaces';
+import { Config, Integration, ParameterDefinition, ValidateParametersFn } from '../types';
 
 interface Props {
-  sdk: AppExtensionSDK;
+  sdk: ConfigAppSDK;
   parameterDefinitions: ParameterDefinition[];
   validateParameters: ValidateParametersFn;
   logo: string;

@@ -4,7 +4,7 @@ import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, SkuPicker } from './SkuPicker';
 import productPreviews from '../__mocks__/productPreviews';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { Integration, ProductsFn } from '../interfaces';
+import { Integration, ProductsFn } from '../types';
 
 configure({
   testIdAttribute: 'data-test-id',

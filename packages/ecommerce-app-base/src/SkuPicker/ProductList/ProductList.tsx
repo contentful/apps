@@ -1,7 +1,7 @@
 import React from 'react';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import { Product } from '../../interfaces';
+import { Product } from '../../types';
 import { ProductListItem } from './ProductListItem';
 
 export interface Props {

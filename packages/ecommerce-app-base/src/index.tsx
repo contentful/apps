@@ -4,7 +4,7 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import AppConfig from './AppConfig/AppConfig';
 import { Field, IntegrationProvider } from './Editor';
-import { Integration } from './interfaces';
+import { Integration } from './types';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 export function setup(integration: Integration) {
@@ -51,5 +51,6 @@ export function setup(integration: Integration) {
   });
 }
 
-export * from './interfaces';
+// we should not export everything here
+export * from './types';
 export { renderSkuPicker } from './SkuPicker/renderSkuPicker';

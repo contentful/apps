@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { render } from 'react-dom';
 import { SkuPicker } from './SkuPicker';
-import { MakeSaveBtnTextFn, ProductPreviewsFn, ProductsFn } from '../interfaces';
+import { MakeSaveBtnTextFn, ProductPreviewsFn, ProductsFn } from '../types';
 
 interface Props {
   sdk: DialogAppSDK;

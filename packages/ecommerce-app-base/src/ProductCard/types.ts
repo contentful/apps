@@ -1,7 +1,6 @@
 import type { IdsAPI } from '@contentful/app-sdk';
 import type { AssetProps, EntityStatus } from '@contentful/f36-components';
-import type { ErrorInfo, FC, ReactElement, ReactNode } from 'react';
-import { KeyValueMap } from 'contentful-management';
+import type { ReactElement } from 'react';
 
 // TODO: get this exported from the SDK
 declare type EntryScopedIds = 'field' | 'entry' | 'contentType';
@@ -53,52 +52,6 @@ export interface ExternalResource {
   extras?: JSONObject;
   id?: string;
   availableForSale?: boolean;
-}
-
-type ErrorBoundaryErrored = { hasError: true; error: Error; info: ErrorInfo };
-type ErrorBoundaryStandby = { hasError: false; error: null; info: null };
-export type ErrorBoundaryState = ErrorBoundaryErrored | ErrorBoundaryStandby;
-
-export type ErrorBoundaryProps = {
-  children: ReactNode;
-  FallbackComponent: FC<ErrorComponentProps>;
-};
-
-export interface ErrorComponentProps {
-  error: Error;
-  errorInfo: ErrorInfo;
-  resetErrorHandler: () => void;
-}
-
-export interface ProviderConfig {
-  name: string;
-  description: string;
-  parameterDefinitions: ParameterDefinition[];
-  primaryColor: string;
-  logoUrl: string;
-}
-
-export interface ParameterDefinition {
-  id: string;
-  name: string;
-  description: string;
-  type: string;
-  required: boolean;
-  placeholder?: string;
-}
-
-export interface AppInstallationParameters {
-  [key: string]: unknown;
-}
-
-export enum FieldType {
-  Single = 'single',
-  Multiple = 'multiple',
-}
-
-export interface DialogInvocationParameters extends KeyValueMap {
-  linkType: string;
-  fieldType: FieldType;
 }
 
 // the variant states of ProductCard, for now, labeled by location

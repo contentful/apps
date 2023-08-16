@@ -9,6 +9,7 @@ import { SortableComponent } from './SortableComponent';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useIntegration } from './IntegrationContext';
+import { SKUType } from '../types';
 
 const styles = {
   sortable: css({
@@ -73,7 +74,7 @@ export const Field: FC = () => {
     const currentValue = value;
     const config = sdk.parameters.installation;
 
-    const defaultSkuType = skuTypes?.find((skuType) => skuType.default === true)?.id;
+    const defaultSkuType = skuTypes?.find((skuType: SKUType) => skuType.default === true)?.id;
     const skuType =
       (config as { skuTypes?: FieldsSkuTypes }).skuTypes?.[sdk.contentType.sys.id]?.[
         sdk.field.id
@@ -95,7 +96,7 @@ export const Field: FC = () => {
   const config = sdk.parameters.installation;
   const isDisabledLocal = editingDisabled || isDisabled(value, config);
 
-  const defaultSkuType = skuTypes?.find((skuType) => skuType.default === true)?.id;
+  const defaultSkuType = skuTypes?.find((skuType: SKUType) => skuType.default === true)?.id;
 
   const skuType =
     (config as { skuTypes?: FieldsSkuTypes }).skuTypes?.[sdk.contentType.sys.id]?.[sdk.field.id] ??

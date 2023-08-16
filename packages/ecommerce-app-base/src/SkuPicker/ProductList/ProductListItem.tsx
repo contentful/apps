@@ -3,7 +3,7 @@ import tokens from '@contentful/f36-tokens';
 import noop from 'lodash/noop';
 import { css } from 'emotion';
 import { activeProductCheck } from '../iconsInBase64';
-import { Product } from '../../interfaces';
+import { Product } from '../../types';
 
 import { SkeletonContainer, SkeletonImage } from '@contentful/f36-components';
 
