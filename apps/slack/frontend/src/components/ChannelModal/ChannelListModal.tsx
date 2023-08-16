@@ -70,7 +70,7 @@ export const ChannelListModal = ({
       setLoading(false);
     };
     fetchChannels();
-    // added during migration of to new linting rules, ideally we can remove it
+    // added during migration to new linting rules, ideally we can remove it
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cma, workspace, sdk]);
 
