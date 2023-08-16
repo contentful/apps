@@ -2,9 +2,6 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "outDir": "../build/backend",
-    "paths": {
-      "@/*": ["./*"],
-    },
     "sourceMap": true,
     "inlineSources": true,
     "sourceRoot": "/src"

@@ -4,12 +4,17 @@ interface AppActionCallParameters {
   prompt: string;
 }
 
-export const handler = async (payload: AppActionCallParameters, context: AppActionCallContext) => {
-  const { prompt } = payload;
-  try {
-    console.log(prompt);
-  } catch (err) {}
+interface AppActionResponse {
+  status: number;
+  prompt: string;
+  images: string[];
+}
 
+export const handler = async (
+  payload: AppActionCallParameters,
+  _context: AppActionCallContext
+): Promise<AppActionResponse> => {
+  const { prompt } = payload;
   return {
     status: 201,
     prompt,
