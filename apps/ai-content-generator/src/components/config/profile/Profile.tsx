@@ -1,7 +1,7 @@
 import { ChangeEvent, Dispatch } from 'react';
 import { FormControl, TextInput, Textarea } from '@contentful/f36-components';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
-import { BrandProfileFields } from '../configText';
+import { BrandProfileFields, FieldTypes } from '../configText';
 
 interface Props {
   profile: { [key: string]: string };
@@ -34,7 +34,7 @@ const Profile = (props: Props) => {
         return (
           <FormControl isRequired={field.isRequired} key={field.id}>
             <FormControl.Label>{field.title}</FormControl.Label>
-            {field.type === 'textarea' ? (
+            {field.fieldType === FieldTypes.TEXTAREA ? (
               <Textarea rows={TEXTAREA_ROWS} resize="none" {...fieldProps} />
             ) : (
               <TextInput type="text" {...fieldProps} />
