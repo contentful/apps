@@ -11,12 +11,6 @@ const validateActions = () => {
   const requiredProperties = ['id', 'path', 'entryFile'];
   const uniqueValues = new Set();
 
-  if (manifest.deliveryFunctions.length > 1) {
-    throw new Error(
-      `The maximum amount of delivery functions is 1, found ${manifest.deliveryFunctions.length}`
-    );
-  }
-
   manifest.deliveryFunctions.forEach((deliveryFunction) => {
     requiredProperties.forEach((property) => {
       if (!deliveryFunction.hasOwnProperty(property)) {
