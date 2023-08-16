@@ -46,7 +46,9 @@ export const useConnect = () => {
         }
       }
     },
-    [cma, sdk, temporaryRefreshToken]
+    // added during migration to new linting rules, ideally we can remove it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cma, sdk, temporaryRefreshToken],
   );
 
   const { addConnectedWorkspace, setWorkspaceState, setNotificationsLoading, setChannels } =
@@ -81,7 +83,7 @@ export const useConnect = () => {
         sdk.notifier.success('Connected to the Slack workspace successfully.');
       } catch (e) {
         sdk.notifier.error(
-          'Something went wrong while authenticating with Slack. Please try again.'
+          'Something went wrong while authenticating with Slack. Please try again.',
         );
       } finally {
         setNotificationsLoading(false);
@@ -96,6 +98,8 @@ export const useConnect = () => {
 
   useEffect(() => {
     return () => window.removeEventListener('message', onMessage);
+    // added during migration to new linting rules, ideally we can remove it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startOAuth = () => {
