@@ -38,8 +38,7 @@ jobs:
           name: Install dependencies
           command: |
             npm ci
-            npm run bootstrap:ci-deploy
-          no_output_timeout: 20m
+            npm run bootstrap:ci
       - run:
           name: Lint
           command: npm run lint
