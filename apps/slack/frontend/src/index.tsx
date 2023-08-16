@@ -25,6 +25,6 @@ if (params.has('result')) {
       <GlobalStyles />
       <Config />
     </CustomSDKProvider>,
-    root,
+    root
   );
 }

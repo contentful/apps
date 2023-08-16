@@ -20,7 +20,7 @@ export const CustomSDKProvider: FC<PropsWithChildren<SDKProviderProps>> = (props
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       console.warn(
-        "Your app is taking longer than expected to initialize. If you think this is an error with Contentful's App SDK, let us know: https://github.com/contentful/ui-extensions-sdk/issues",
+        "Your app is taking longer than expected to initialize. If you think this is an error with Contentful's App SDK, let us know: https://github.com/contentful/ui-extensions-sdk/issues"
       );
     }, DELAY_TIMEOUT);
     init(
@@ -30,7 +30,7 @@ export const CustomSDKProvider: FC<PropsWithChildren<SDKProviderProps>> = (props
         setApi(api);
         window.clearTimeout(timeout);
       },
-      { makeCustomApi: CustomAPIClient.create },
+      { makeCustomApi: CustomAPIClient.create }
     );
     return () => window.clearTimeout(timeout);
   }, []);

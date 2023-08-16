@@ -69,7 +69,7 @@ export const NotificationItem = ({
       setSelectedContentType: state.setSelectedContentType,
       toggleEvent: state.toggleEvent,
       removeNotificationAtIndex: state.removeNotificationAtIndex,
-    }),
+    })
   );
 
   const [channel, setChannel] = useState<SlackChannel>();
@@ -84,7 +84,7 @@ export const NotificationItem = ({
         }
         return [...acc, `event-${event.id}-${index}`];
       }, []),
-    [notification.selectedEvent, index],
+    [notification.selectedEvent, index]
   );
 
   const getContentTypeName = (contentTypeId: string | null) => {
@@ -119,7 +119,7 @@ export const NotificationItem = ({
           workspace.id,
           cma,
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          notification.selectedChannel!,
+          notification.selectedChannel!
         );
         setChannel(response);
         setError(false);

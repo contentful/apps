@@ -40,7 +40,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
           // use only short text fields of content type
           contentType.fields.filter((f) => f.type === 'Symbol'),
           // sort by field name
-          'name',
+          'name'
         );
 
         if (fields.length) {
@@ -52,7 +52,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
 
         return acc;
       },
-      {},
+      {}
     );
     const { contentTypes } = savedParams;
 
@@ -81,7 +81,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         clientId: savedParams.clientId || '',
         viewId: savedParams.viewId || '',
       },
-      () => sdk.app.setReady(),
+      () => sdk.app.setReady()
     );
 
     sdk.app.onConfigure(() => this.configureApp());
@@ -120,7 +120,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         acc[id] = sidebarPosition;
         return acc;
       },
-      {},
+      {}
     );
 
     return {
