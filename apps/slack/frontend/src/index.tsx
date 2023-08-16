@@ -5,7 +5,6 @@ import './index.css';
 
 import Config from './components/ConfigScreen';
 import { CustomSDKProvider } from './CustomSDKProvider';
-import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 const params = new URLSearchParams(window.location.search);
 

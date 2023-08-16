@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card, Paragraph, Flex, Text } from '@contentful/f36-components';
+import { Button, Card, Flex, Text } from '@contentful/f36-components';
 
 import { styles } from './styles';
 import { ConnectedWorkspace, useWorkspaceStore } from '../../workspace.store';

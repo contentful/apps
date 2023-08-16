@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export interface Channel<T> {
   send(event: string, ...args: Array<any>): Promise<any>;
   call(channelName: T, methodName: string, args?: Array<any>): Promise<any>;

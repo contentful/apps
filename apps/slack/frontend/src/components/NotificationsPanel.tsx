@@ -57,6 +57,8 @@ export const NotificationsPanel = (props: Props) => {
     Promise.all(calls).finally(() => {
       setNotificationsLoading(false);
     });
+    // added during migration of to new linting rules, ideally we can remove it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cma, workspace, sdk]);
 
   const { active, notifications, createNotification, setActive } = useNotificationStore(

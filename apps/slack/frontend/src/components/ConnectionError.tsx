@@ -11,7 +11,7 @@ const ConnectionError = () => {
 
   return (
     <Note title="Failed to fetch workspace" variant="warning">
-      <div>Couldn't connect to Slack. Reconnect to configure notifications</div>
+      <div>{"Couldn't connect to Slack. Reconnect to configure notifications"}</div>
       <TextLink onClick={reconnect}>Reconnect to Slack</TextLink>
     </Note>
   );
