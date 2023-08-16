@@ -85,8 +85,7 @@ export default class Analytics extends React.Component<AnalyticsProps, Analytics
           <Select
             name="range"
             value={`${rangeOptionIndex}`}
-            onChange={(event) => this.handleRangeChange((event.target as HTMLSelectElement).value)}
-          >
+            onChange={(event) => this.handleRangeChange((event.target as HTMLSelectElement).value)}>
             {RANGE_OPTIONS.map((r, index) => (
               <option key={index} value={`${index}`}>
                 {r.label}

@@ -244,8 +244,7 @@ export default class Sidebar extends React.Component<Props, State> {
         buttonType="muted"
         isFullWidth
         className="request-translation"
-        onClick={() => window.open(smartlingLink)}
-      >
+        onClick={() => window.open(smartlingLink)}>
         <Icon icon="ExternalLink" color="secondary" /> Request Translation
       </Button>
     );
@@ -258,8 +257,7 @@ export default class Sidebar extends React.Component<Props, State> {
             buttonType="primary"
             isFullWidth
             className="signin"
-            onClick={() => this.runAuthFlow()}
-          >
+            onClick={() => this.runAuthFlow()}>
             Sign in with Smartling
           </Button>
           <br />
@@ -295,8 +293,7 @@ export default class Sidebar extends React.Component<Props, State> {
           <Tooltip
             place="top"
             targetWrapperClassName="tooltip"
-            content={submissionStatusLongText(smartlingEntry.assetStatus)}
-          >
+            content={submissionStatusLongText(smartlingEntry.assetStatus)}>
             <Icon icon="InfoCircle" />
           </Tooltip>
         </Flex>
@@ -311,8 +308,7 @@ export default class Sidebar extends React.Component<Props, State> {
                 <Card
                   key={sub.submissionId}
                   className="submission"
-                  onClick={() => this.linkToFile(sub)}
-                >
+                  onClick={() => this.linkToFile(sub)}>
                   <div className="info">
                     <div className="locale">{this.getLocaleByName(sub.targetLocaleExternalId)}</div>
                     {sub.status.toLowerCase() === 'in_progress' && (
@@ -360,8 +356,7 @@ export default class Sidebar extends React.Component<Props, State> {
           <TextLink
             href="https://contentful.com/developers/docs/extensibility/apps/smartling/"
             target="_blank"
-            rel="noopener noreferrer"
-          >
+            rel="noopener noreferrer">
             View documentation
           </TextLink>
         </Note>
@@ -382,8 +377,7 @@ export default class Sidebar extends React.Component<Props, State> {
           <TextLink
             href="https://help.smartling.com/hc/en-us/articles/360000546974-Contentful-Connector-Overview"
             target="_blank"
-            rel="noopener"
-          >
+            rel="noopener">
             Learn how Smartling works with Contentful&nbsp;
             <Icon size="tiny" icon="ExternalLink" color="secondary" />
           </TextLink>

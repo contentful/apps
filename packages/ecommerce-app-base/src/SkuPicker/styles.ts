@@ -52,7 +52,7 @@ export const styles = {
     margin: `${tokens.spacingM} auto ${tokens.spacingL} auto`,
     textAlign: 'center',
   }),
-  leftsideControls: css({
+  leftSideControls: css({
     position: 'relative',
     zIndex: 0,
     svg: css({
@@ -65,7 +65,7 @@ export const styles = {
       paddingLeft: '35px',
     }),
   }),
-  rightsideControls: css({
+  rightSideControls: css({
     justifyContent: 'flex-end',
     flexGrow: 1,
     display: 'flex',

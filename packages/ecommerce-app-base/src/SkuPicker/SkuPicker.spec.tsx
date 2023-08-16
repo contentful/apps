@@ -1,9 +1,10 @@
-import React from 'react';
-import merge from 'lodash/merge';
+import * as React from 'react';
+import { merge } from 'lodash';
 import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, SkuPicker } from './SkuPicker';
 import productPreviews from '../__mocks__/productPreviews';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
+import { Integration, ProductsFn } from '../interfaces';
 
 configure({
   testIdAttribute: 'data-test-id',
@@ -18,9 +19,9 @@ const renderComponent = async (props: Props) => {
 };
 
 jest.mock('react-sortable-hoc', () => ({
-  SortableContainer: (x: any) => x,
-  SortableElement: (x: any) => x,
-  SortableHandle: (x: any) => x,
+  SortableContainer: (x: unknown) => x,
+  SortableElement: (x: unknown) => x,
+  SortableHandle: (x: unknown) => x,
 }));
 
 describe('SkuPicker', () => {
@@ -40,10 +41,10 @@ describe('SkuPicker', () => {
           success: jest.fn(),
           error: jest.fn(),
         },
-      } as unknown as DialogExtensionSDK,
+      } as unknown as DialogAppSDK,
       fetchProductPreviews: jest.fn((skus) =>
         productPreviews.filter((preview) => skus.includes(preview.sku))
-      ) as any,
+      ) as unknown as Integration['fetchProductPreviews'],
       fetchProducts: jest.fn(() => ({
         pagination: {
           count: 3,
@@ -52,7 +53,7 @@ describe('SkuPicker', () => {
           total: 3,
         },
         products: productPreviews,
-      })) as any,
+      })) as unknown as ProductsFn,
     };
   });
   afterEach(cleanup);
@@ -71,7 +72,7 @@ describe('SkuPicker', () => {
             hasNextPage: true,
           },
           products: productPreviews.slice(0, 2),
-        })) as any,
+        })) as unknown as ProductsFn,
       });
       expect(await findByTestId('infinite-scrolling-pagination')).toBeTruthy();
     });
@@ -84,7 +85,7 @@ describe('SkuPicker', () => {
             hasNextPage: false,
           },
           products: productPreviews.slice(0, 2),
-        })) as any,
+        })) as unknown as ProductsFn,
       });
       expect(queryByTestId('infinite-scrolling-pagination')).toBeNull();
     });

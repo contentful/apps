@@ -28,8 +28,7 @@ class Menu extends React.Component<MenuProps, {}> {
               <Button
                 variant="negative"
                 onClick={this.props.requestDeleteAsset}
-                data-testid="deletebutton"
-              >
+                data-testid="deletebutton">
                 Delete
               </Button>
             </Flex>

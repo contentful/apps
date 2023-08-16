@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import productPreviews from '../__mocks__/productPreviews';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import logo from '../__mocks__/logo.svg';
 import { SkuPicker } from './SkuPicker';
 import { ProductsFn } from '../interfaces';
@@ -26,7 +28,7 @@ export const Default: Story = {
     searchDelay: 500,
     hideSearch: false,
     skuType: 'product',
-    fetchProductPreviews: (skus) => Promise.resolve(productPreviews),
+    fetchProductPreviews: () => Promise.resolve(productPreviews),
   },
   decorators: [
     (Story) => (

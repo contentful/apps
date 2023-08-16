@@ -188,8 +188,7 @@ export class AppConfig extends React.Component<Props, State> {
                   <TextLink
                     href="https://www.typeform.com/"
                     target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                    rel="noopener noreferrer">
                     Typeform
                   </TextLink>{' '}
                   app allows you to reference your forms from Typeform without leaving Contentful.
@@ -209,8 +208,7 @@ export class AppConfig extends React.Component<Props, State> {
                   onChange={(event: any) => this.setWorkSpaceId(event.currentTarget.value)}
                   hasError={workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
                   value={selectedWorkspaceId}
-                  data-test-id="typeform-select"
-                >
+                  data-test-id="typeform-select">
                   <Option key="" value="">
                     {workspaces.length === 0 ? 'No workspaces available' : 'Choose workspace'}
                   </Option>
@@ -249,8 +247,7 @@ export class AppConfig extends React.Component<Props, State> {
                         environment === 'master'
                           ? `https://app.contentful.com/spaces/${space}/content_types`
                           : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-                      }
-                    >
+                      }>
                       content model
                     </TextLink>{' '}
                     and assign it to the app from this screen.

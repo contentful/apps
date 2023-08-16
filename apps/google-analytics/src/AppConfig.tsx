@@ -40,7 +40,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
           // use only short text fields of content type
           contentType.fields.filter((f) => f.type === 'Symbol'),
           // sort by field name
-          'name'
+          'name',
         );
 
         if (fields.length) {
@@ -52,7 +52,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
 
         return acc;
       },
-      {}
+      {},
     );
     const { contentTypes } = savedParams;
 
@@ -81,7 +81,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         clientId: savedParams.clientId || '',
         viewId: savedParams.viewId || '',
       },
-      () => sdk.app.setReady()
+      () => sdk.app.setReady(),
     );
 
     sdk.app.onConfigure(() => this.configureApp());
@@ -120,7 +120,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
         acc[id] = sidebarPosition;
         return acc;
       },
-      {}
+      {},
     );
 
     return {
@@ -231,8 +231,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   <TextLink
                     href="https://developers.googleblog.com/2021/08/gsi-jsweb-deprecation.html"
                     target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                    rel="noopener noreferrer">
                     deprecated the library
                   </TextLink>{' '}
                   Contentful uses to link your Contentful space to a Google Analytics dashboard and
@@ -252,8 +251,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   <TextLink
                     href="https://www.contentful.com/help/deprecation-notice-google-analytics-app/"
                     target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                    rel="noopener noreferrer">
                     Read more details here.
                   </TextLink>
                 </Paragraph>
@@ -265,8 +263,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                 <TextLink
                   href="https://www.contentful.com/developers/docs/extensibility/apps/google-analytics/"
                   target="_blank"
-                  rel="noopener noreferrer"
-                >
+                  rel="noopener noreferrer">
                   documentation
                 </TextLink>
                 .
@@ -335,16 +332,14 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
             {contentTypeEntries.map(([key, { slugField, urlPrefix }], index) => (
               <div
                 key={key}
-                className={[styles.contentTypeGrid, styles.contentTypeGridInputs].join(' ')}
-              >
+                className={[styles.contentTypeGrid, styles.contentTypeGridInputs].join(' ')}>
                 <Select
                   name={'contentType-' + index}
                   id={'contentType-' + index}
                   value={key}
                   onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
                     this.handleContentTypeChange(key, event.target.value)
-                  }
-                >
+                  }>
                   {key ? null : (
                     <option disabled value="">
                       Select a Content Type
@@ -370,8 +365,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   value={slugField}
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                     this.handleContentTypeFieldChange(key, 'slugField', event.target.value)
-                  }
-                >
+                  }>
                   <option disabled value="">
                     Select slug field
                   </option>
@@ -401,8 +395,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
               type="button"
               buttonType="muted"
               disabled={Object.values(contentTypes).some((ct) => !ct.slugField)}
-              onClick={() => this.addContentType()}
-            >
+              onClick={() => this.addContentType()}>
               {hasSelectedContentTypes ? 'Add another content type' : 'Add a content type'}
             </Button>
           </Typography>

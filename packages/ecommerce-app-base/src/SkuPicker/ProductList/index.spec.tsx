@@ -23,7 +23,7 @@ describe('ProductList', () => {
   it('should render successfully with no items selected', async () => {
     const { getAllByTestId, getByTestId } = renderComponent(defaultProps);
     expect(getAllByTestId('ProductListItem')).toHaveLength(productPreviews.length);
-    for (let product of productPreviews) {
+    for (const product of productPreviews) {
       expect(getByTestId(`product-preview-${product.sku}`)).toHaveAttribute(
         'aria-checked',
         'false'
@@ -38,7 +38,7 @@ describe('ProductList', () => {
       selectedSKUs: [selectedSKU],
     });
     expect(getAllByTestId('ProductListItem')).toHaveLength(productPreviews.length);
-    for (let product of productPreviews) {
+    for (const product of productPreviews) {
       expect(getByTestId(`product-preview-${product.sku}`)).toHaveAttribute(
         'aria-checked',
         selectedSKU === product.sku ? 'true' : 'false'

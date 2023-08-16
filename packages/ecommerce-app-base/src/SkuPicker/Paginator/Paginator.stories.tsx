@@ -16,7 +16,8 @@ export const Default: Story = {
     activePage: 0,
     pageCount: 10,
   },
-  render: (args, context) => {
+  render: (args) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [activePage, setActivePage] = useState(() => args.activePage);
     return (
       <Paginator activePage={activePage} setActivePage={setActivePage} pageCount={args.pageCount} />

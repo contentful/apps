@@ -32,15 +32,13 @@ interface Props {
 export const NotificationsPanel = (props: Props) => {
   const { workspace } = props;
   const [contentTypes, setContentTypes] = useState<ContentTypeProps[]>([]);
-  const [setNotificationsLoading, notificationsLoading] = useWorkspaceStore(
-    (state) => [
-      state.setNotificationsLoading,
-      state.notificationsLoading,
-    ]
-  );
+  const [setNotificationsLoading, notificationsLoading] = useWorkspaceStore((state) => [
+    state.setNotificationsLoading,
+    state.notificationsLoading,
+  ]);
   const [errors, setErrors] = useState<string[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
-  const cma = sdk.cma
+  const cma = sdk.cma;
 
   useEffect(() => {
     setErrors([]);
@@ -67,7 +65,7 @@ export const NotificationsPanel = (props: Props) => {
       notifications: state.notifications,
       createNotification: state.createNotification,
       setActive: state.setActive,
-    })
+    }),
   );
 
   if (errors.length > 0) {

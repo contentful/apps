@@ -47,8 +47,7 @@ export function Paginator(props: Props) {
         className={styles.button}
         variant="secondary"
         isDisabled={hasOnlyOnePage || activePageIsAtPaginatorStart}
-        onClick={() => setActivePage(1)}
-      >
+        onClick={() => setActivePage(1)}>
         <img className={styles.chevronLeft} src={doubleChevron} alt="right" />
       </Button>
       <Button
@@ -66,8 +65,7 @@ export function Paginator(props: Props) {
             className={styles.button}
             variant={page === activePage ? 'primary' : 'secondary'}
             testId={page === activePage ? 'active' : `inactive-${page}`}
-            key={pageIndex}
-          >
+            key={pageIndex}>
             {page}
           </Button>
         );
@@ -83,8 +81,7 @@ export function Paginator(props: Props) {
         variant="secondary"
         className={styles.button}
         isDisabled={hasOnlyOnePage || activePageIsAtPaginatorEnd}
-        onClick={() => setActivePage(pageCount)}
-      >
+        onClick={() => setActivePage(pageCount)}>
         <img className={styles.chevronRight} src={doubleChevron} alt="right" />
       </Button>
     </div>

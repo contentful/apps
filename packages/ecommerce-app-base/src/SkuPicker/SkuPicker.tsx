@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import get from 'lodash/get';
 import clamp from 'lodash/clamp';
 import debounce from 'lodash/debounce';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { Paginator } from './Paginator';
 import {
@@ -16,12 +16,12 @@ import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
 import { mapSort } from '../utils';
 
-import { Button, Icon, TextInput } from '@contentful/f36-components';
+import { Button, TextInput } from '@contentful/f36-components';
 
 import { SearchIcon } from '@contentful/f36-icons';
 
 export interface Props {
-  sdk: DialogExtensionSDK;
+  sdk: DialogAppSDK;
   fetchProductPreviews: ProductPreviewsFn;
   fetchProducts: ProductsFn;
   searchDelay?: number;
@@ -133,7 +133,7 @@ export class SkuPicker extends Component<Props, State> {
   };
 
   selectProduct = (sku: string) => {
-    const { fieldType } = this.props.sdk.parameters.invocation as Record<string, any>;
+    const { fieldType } = this.props.sdk.parameters.invocation as Record<string, unknown>;
     const onlyOneProductCanBeSelected = fieldType === 'Symbol';
 
     if (this.state.selectedSKUs.includes(sku)) {
@@ -162,7 +162,7 @@ export class SkuPicker extends Component<Props, State> {
     return (
       <>
         <header className={styles.header}>
-          <div className={styles.leftsideControls}>
+          <div className={styles.leftSideControls}>
             {!hideSearch && (
               <>
                 <TextInput
@@ -183,14 +183,13 @@ export class SkuPicker extends Component<Props, State> {
               </span>
             )}
           </div>
-          <div className={styles.rightsideControls}>
+          <div className={styles.rightSideControls}>
             <ProductSelectionList products={selectedProducts} selectProduct={this.selectProduct} />
             <Button
               className={styles.saveBtn}
               variant="primary"
               onClick={() => this.props.sdk.close(selectedSKUs)}
-              isDisabled={selectedSKUs.length === 0}
-            >
+              isDisabled={selectedSKUs.length === 0}>
               {makeSaveBtnText(selectedSKUs, skuType)}
             </Button>
           </div>
@@ -215,8 +214,7 @@ export class SkuPicker extends Component<Props, State> {
               variant="transparent"
               testId="infinite-scrolling-pagination"
               onClick={this.loadMoreProducts}
-              isFullWidth
-            >
+              isFullWidth>
               Load more
             </Button>
           )}

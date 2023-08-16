@@ -124,8 +124,7 @@ export default class AppConfig extends React.Component<Props, State> {
                   <TextLink
                     href="https://dashboard.smartling.com"
                     target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                    rel="noopener noreferrer">
                     Smartling
                   </TextLink>{' '}
                   app allows you to view the status of your translation without leaving Contentful.
@@ -164,8 +163,7 @@ export default class AppConfig extends React.Component<Props, State> {
                       environment === 'master'
                         ? `https://app.contentful.com/spaces/${space}/content_types`
                         : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-                    }
-                  >
+                    }>
                     content type
                   </TextLink>{' '}
                   and assign it to the app from this screen.

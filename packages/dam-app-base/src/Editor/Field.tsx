@@ -134,8 +134,7 @@ export default class Field extends React.Component<Props, State> {
             variant="secondary"
             size="small"
             onClick={this.onDialogOpen}
-            isDisabled={isDisabled}
-          >
+            isDisabled={isDisabled}>
             {this.props.cta}
           </Button>
         </div>
