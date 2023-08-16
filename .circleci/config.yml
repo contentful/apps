@@ -38,7 +38,7 @@ jobs:
           name: Install dependencies
           command: |
             npm ci
-            npm run bootstrap:ci
+            npm run bootstrap:ci-deploy
       - run:
           name: Lint
           command: npm run lint
