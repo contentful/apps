@@ -7,6 +7,24 @@
       "description": "This action is used to launch hosted app builds for AIIG.",
       "type": "function",
       "path": "actions/aiig-build-action.js",
+      "entryFile": "./backend/src/actions/aiig-build-action.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "prompt",
+          "name": "prompt",
+          "type": "Symbol"
+        }
+      ]
+    },
+    {
+      "id": "aiigGenerateImage",
+      "name": "Generate AI Image",
+      "category": "Custom",
+      "description": "This action is used to launch hosted app builds for AIIG.",
+      "type": "function",
+      "path": "actions/aiig-generate-image.js",
+      "entryFile": "./backend/src/actions/aiig-generate-image.ts",
       "allowNetworks": [],
       "parameters": [
         {
