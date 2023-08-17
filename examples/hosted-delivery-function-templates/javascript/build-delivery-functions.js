@@ -7,7 +7,7 @@ const manifest = require('./contentful-app-manifest.json');
 
 const argv = yargs(hideBin(process.argv)).argv;
 
-const validateActions = () => {
+const validateDeliveryFunctions = () => {
   const requiredProperties = ['id', 'path', 'entryFile'];
   const uniqueValues = new Set();
 
@@ -23,10 +23,10 @@ const validateActions = () => {
     const { id, path, entryFile } = deliveryFunction;
 
     if (uniqueValues.has(id)) {
-      throw new Error(`Duplicate action id: '${id}'`);
+      throw new Error(`Duplicate deliveryFunction id: '${id}'`);
     }
     if (uniqueValues.has(path)) {
-      throw new Error(`Duplicate action path: '${path}'`);
+      throw new Error(`Duplicate deliveryFunction path: '${path}'`);
     }
     if (uniqueValues.has(entryFile)) {
       throw new Error(`Duplicate entryFile path: '${entryFile}'`);
@@ -52,7 +52,7 @@ const getEntryPoints = () => {
 const main = async (watch = false) => {
   try {
     console.log('Building delivery functions');
-    validateActions();
+    validateDeliveryFunctions();
 
     const config = {
       entryPoints: getEntryPoints(),
