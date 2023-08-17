@@ -3,18 +3,29 @@
   "version": "0.1.0",
   "private": true,
   "description": "",
-  "type": "module",
   "main": "index.js",
   "scripts": {
     "validate-actions": "node scripts/validate-actions.js",
-    "build-actions": "NODE_ENV=production tsc",
-    "build": "npm run validate-actions && npm run build-actions"
+    "build-actions": "NODE_ENV=production tsc --module esnext",
+    "build": "npm run validate-actions && npm run build-actions",
+    "test": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --exit",
+    "test:ci": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 CI=true mocha --exit",
+    "test:debug": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
+    "test:watch": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test"
   },
   "dependencies": {
-    "@contentful/node-apps-toolkit": "^2.2.0"
+    "@contentful/node-apps-toolkit": "^2.2.0",
+    "contentful-management": "^10.39.2"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.0",
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "@types/sinon": "^10.0.16",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "sinon": "^15.2.0",
+    "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
   }
 }

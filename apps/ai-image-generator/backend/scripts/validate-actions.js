@@ -1,6 +1,3 @@
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-
 const manifest = require('../../contentful-app-manifest.json');
 
 const validateActions = () => {
