@@ -4,15 +4,16 @@ import { TextLink } from '@contentful/f36-components';
 interface Props {
   body: string;
   substring: string;
+  href: string
 }
 
 // TODO: We should use the HyperLink component from the integration-component-library
-const OpenAILink = (props: Props) => {
-  const { body, substring } = props;
+const Hyperlink = (props: Props) => {
+  const { body, substring, href } = props;
 
   const textLinkComponent = (index: number) => (
     <TextLink
-      href={'https://openai.com'}
+      href={href}
       target="_blank"
       rel="noopener noreferer"
       key={`textLink-${index}`}
@@ -38,4 +39,4 @@ const OpenAILink = (props: Props) => {
   return formatLink();
 };
 
-export default OpenAILink;
+export default Hyperlink;

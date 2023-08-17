@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import ApiKeySection from './APIKey';
+import ApiKeySection from './APIKeySection';
 
 const meta = {
   title: 'config/APIKey',
@@ -13,4 +13,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {};
+export const Default: Story = {};
+
+export const WithApiKey: Story = {
+  args: { apiKey: 'pretend-api-key'}
+}

@@ -1,15 +1,17 @@
-import APIKey, { SUBSTRING, TITLE } from './APIKey';
+import APIKey from './APIKeySection';
 import { render, screen } from '@testing-library/react';
+import configPageCopies from 'constants/configPageCopies';
 
 const { getByText, getByTestId } = screen;
+const { sectionTitle, linkSubstring } = configPageCopies.apiKeySection;
 
-describe('APIKey component', () => {
+describe('APIKeySection component', () => {
   it('Component mounts without apiKey provided', async () => {
     render(<APIKey handleApiKey={() => null} />);
 
-    const title = getByText(TITLE);
+    const title = getByText(sectionTitle);
     const input = getByTestId('cf-ui-text-input');
-    const hyperLink = getByText(SUBSTRING);
+    const hyperLink = getByText(linkSubstring);
 
     expect(title).toBeVisible();
     expect(input).toBeVisible();
@@ -17,8 +19,7 @@ describe('APIKey component', () => {
   });
 
   it('Component mounts with apiKey provided', async () => {
-    const API_KEY = 'ksdfusdfkjh';
-    render(<APIKey handleApiKey={() => null} apiKey="ksdfusdfkjh" />);
+    render(<APIKey handleApiKey={() => null} apiKey='ksdfusdfkjh' />);
 
     const input = getByTestId('cf-ui-text-input');
 

@@ -1,19 +1,18 @@
 import { ChangeEvent, useState } from 'react';
 import { FormControl, TextInput } from '@contentful/f36-components';
-import OpenAILink from 'components/config/OpenAILink/OpenAILink';
+import OpenAILink from 'components/config/Hyperlink/Hyperlink';
+import configPageCopies from 'constants/configPageCopies';
 
 interface Props {
   apiKey?: string;
   handleApiKey: (value: { apiKey: string }) => void;
 }
 
-export const TITLE = 'Open AI Key';
-export const BODY = 'Provide your Open AI API key. If you need to generate a key, visit openai.com';
-export const SUBSTRING = 'visit openai.com';
-
-const APIKey = (props: Props) => {
+const APIKeySection = (props: Props) => {
   const { apiKey, handleApiKey } = props;
   const [editing, setEditing] = useState(false);
+
+  const { sectionTitle, linkBody, linkSubstring, linkHref } = configPageCopies.apiKeySection
 
   const censorApiKey = (key: string) => key.replace(/.(?=.{4,}$)/g, '*');
 
@@ -28,8 +27,8 @@ const APIKey = (props: Props) => {
   const handleClick = () => setEditing(true);
 
   return (
-    <FormControl testId="api-key-section" isRequired>
-      <FormControl.Label>{TITLE}</FormControl.Label>
+    <FormControl testId='api-key-section' isRequired>
+      <FormControl.Label>{sectionTitle}</FormControl.Label>
       {editing ? (
         <TextInput
           value={apiKey}
@@ -50,10 +49,10 @@ const APIKey = (props: Props) => {
         />
       )}
       <FormControl.HelpText>
-        <OpenAILink body={BODY} substring={SUBSTRING} />
+        <OpenAILink body={linkBody} substring={linkSubstring} href={linkHref} />
       </FormControl.HelpText>
     </FormControl>
   );
 };
 
-export default APIKey;
+export default APIKeySection;
