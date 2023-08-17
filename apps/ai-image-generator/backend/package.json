@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "validate-actions": "node scripts/validate-actions.mjs",
+    "validate-actions": "node scripts/validate-actions.js",
     "build-actions": "NODE_ENV=production tsc --module esnext",
     "build": "npm run validate-actions && npm run build-actions",
     "test": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --exit",
