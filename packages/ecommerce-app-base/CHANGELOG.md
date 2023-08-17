@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.2](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.2.1...@contentful/ecommerce-app-base@3.2.2) (2023-08-17)
+
+### Bug Fixes
+
+- **deps:** bump eslint-plugin-react from 7.33.1 to 7.33.2 ([#4518](https://github.com/contentful/apps/issues/4518)) ([56caf7b](https://github.com/contentful/apps/commit/56caf7b24bf244738e4c76f6c56d58c0936a1347))
+
 ## [3.2.1](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.2.0...@contentful/ecommerce-app-base@3.2.1) (2023-08-16)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
