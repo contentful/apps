@@ -1,5 +1,5 @@
 const esbuild = require('esbuild');
-const { resolve } = require('path');
+const { join, parse, resolve } = require('path');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
@@ -7,24 +7,26 @@ const manifest = require('./contentful-app-manifest.json');
 
 const argv = yargs(hideBin(process.argv)).argv;
 
-const validateActions = () => {
+const validateDeliveryFunctions = () => {
   const requiredProperties = ['id', 'path', 'entryFile'];
   const uniqueValues = new Set();
 
-  manifest.actions.forEach((action) => {
+  manifest.deliveryFunctions.forEach((deliveryFunction) => {
     requiredProperties.forEach((property) => {
-      if (!action.hasOwnProperty(property)) {
-        throw new Error(`Action with name: '${action.name}' is missing the '${property}' property`);
+      if (!deliveryFunction.hasOwnProperty(property)) {
+        throw new Error(
+          `Delivery function with name: '${deliveryFunction.name}' is missing the '${property}' property`
+        );
       }
     });
 
-    const { id, path, entryFile } = action;
+    const { id, path, entryFile } = deliveryFunction;
 
     if (uniqueValues.has(id)) {
-      throw new Error(`Duplicate action id: '${id}'`);
+      throw new Error(`Duplicate deliveryFunction id: '${id}'`);
     }
     if (uniqueValues.has(path)) {
-      throw new Error(`Duplicate action path: '${path}'`);
+      throw new Error(`Duplicate deliveryFunction path: '${path}'`);
     }
     if (uniqueValues.has(entryFile)) {
       throw new Error(`Duplicate entryFile path: '${entryFile}'`);
@@ -37,10 +39,11 @@ const validateActions = () => {
 };
 
 const getEntryPoints = () => {
-  return manifest.actions.reduce((result, action) => {
-    const fileName = action.path.split('.')[0];
+  return manifest.deliveryFunctions.reduce((result, deliveryFunction) => {
+    const fileProperties = parse(deliveryFunction.path);
+    const fileName = join(fileProperties.dir, fileProperties.name);
 
-    result[fileName] = resolve(__dirname, action.entryFile);
+    result[fileName] = resolve(__dirname, deliveryFunction.entryFile);
 
     return result;
   }, {});
@@ -48,8 +51,8 @@ const getEntryPoints = () => {
 
 const main = async (watch = false) => {
   try {
-    console.log('Building app actions');
-    validateActions();
+    console.log('Building delivery functions');
+    validateDeliveryFunctions();
 
     const config = {
       entryPoints: getEntryPoints(),
@@ -70,9 +73,9 @@ const main = async (watch = false) => {
       await esbuild.build(config);
     }
   } catch (e) {
-    console.log('Error building app actions');
+    console.error('Error building delivery functions');
     throw Error(e);
   }
 };
 
-main(argv._.includes('watch')).then(() => console.log('actions built successfully'));
+main(argv._.includes('watch')).then(() => console.log('delivery functions built successfully'));
