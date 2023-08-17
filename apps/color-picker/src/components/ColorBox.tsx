@@ -21,7 +21,7 @@ export function ColorBox({ color }: Props) {
   return (
     <span
       className={styles.colorBox(
-        (typeof color === 'string' ? color : color?.value) ?? '#ffffff',
+        (typeof color === 'string' ? color : color?.value) ?? '#ffffff'
       )}
     />
   );

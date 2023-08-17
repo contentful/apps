@@ -67,7 +67,7 @@ export const NotificationsPanel = (props: Props) => {
       notifications: state.notifications,
       createNotification: state.createNotification,
       setActive: state.setActive,
-    }),
+    })
   );
 
   if (errors.length > 0) {

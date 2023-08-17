@@ -14,5 +14,5 @@ render(
     <GlobalStyles />
     <App />
   </SDKProvider>,
-  root,
+  root
 );

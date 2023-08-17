@@ -4,7 +4,7 @@ import { Note, TextLink } from '@contentful/f36-components';
 
 export const ChannelNote = () => {
   const [noteClosed, setNoteClosed] = React.useState(
-    window.localStorage.getItem('channelsNote') === 'seen',
+    window.localStorage.getItem('channelsNote') === 'seen'
   );
 
   const onNoteClose = () => {

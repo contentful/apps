@@ -18,7 +18,7 @@ describe('APIKey component', () => {
 
   it('Component mounts with apiKey provided', async () => {
     const API_KEY = 'ksdfusdfkjh';
-    render(<APIKey handleApiKey={() => null} apiKey='ksdfusdfkjh' />);
+    render(<APIKey handleApiKey={() => null} apiKey="ksdfusdfkjh" />);
 
     const input = getByTestId('cf-ui-text-input');
 

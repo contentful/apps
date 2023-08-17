@@ -5,7 +5,6 @@ import ConfigPage from 'components/config/ConfigPage/ConfigPage';
 import { configPageErrorMessages } from 'constants/errorMessages';
 import { AppInstallationParameters, InstallErrors } from 'types/configPage';
 
-
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
   const sdk = useSDK<ConfigAppSDK>();
@@ -22,16 +21,15 @@ const ConfigScreen = () => {
     getAppActions();
   }, [sdk.cma.appAction, sdk.ids.app]);
 
-
   const handleInstall = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
     const handleError = (errorType: InstallErrors) => {
-      sdk.notifier.error(configPageErrorMessages[errorType])
-    }  
+      sdk.notifier.error(configPageErrorMessages[errorType]);
+    };
 
     if (!parameters.apiKey) {
-      handleError('apiKeyEmpty')
+      handleError('apiKeyEmpty');
       return false;
     }
 
@@ -60,13 +58,11 @@ const ConfigScreen = () => {
   const handleConfig = (updatedParams: AppInstallationParameters) => {
     setParameters((prevParameters) => ({
       ...prevParameters,
-      ...updatedParams
-    }))
-  }
+      ...updatedParams,
+    }));
+  };
 
-  return (
-    <ConfigPage parameters={parameters} handleConfig={handleConfig} />
-  );
+  return <ConfigPage parameters={parameters} handleConfig={handleConfig} />;
 };
 
 export default ConfigScreen;

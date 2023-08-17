@@ -72,14 +72,14 @@ const Config = () => {
             currentParameters.workspaces.map(async (workspaceId: string) => {
               const workspace = await apiClient.getWorkspace(sdk, workspaceId, cma);
               addConnectedWorkspace({ ...workspace });
-            }),
+            })
           );
         }
         setWorkspaceState(WorkspaceState.SUCCESS);
       } catch (e) {
         setWorkspaceState(WorkspaceState.ERROR);
         sdk.notifier.error(
-          'Something went wrong fetching the connected workspace. Please try again.',
+          'Something went wrong fetching the connected workspace. Please try again.'
         );
       }
     })();
@@ -121,7 +121,7 @@ const Config = () => {
         }
       }
     },
-    [isFirstInstallation, cma, sdk, temporaryRefreshToken, installationUuid],
+    [isFirstInstallation, cma, sdk, temporaryRefreshToken, installationUuid]
   );
 
   useEffect(() => {

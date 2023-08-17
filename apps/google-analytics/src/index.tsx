@@ -43,7 +43,7 @@ export class SidebarExtension extends React.Component<
     this.props.sdk.entry.onSysChanged(
       debounce(() => {
         this.setState(this.getEntryStateFields());
-      }, 500),
+      }, 500)
     );
   }
 
@@ -230,7 +230,7 @@ init((sdk) => {
         sdk={sdk as SidebarExtensionSDK}
         gapi={(window as unknown as { gapi: Gapi }).gapi}
       />,
-      document.getElementById('root'),
+      document.getElementById('root')
     );
   }
 });

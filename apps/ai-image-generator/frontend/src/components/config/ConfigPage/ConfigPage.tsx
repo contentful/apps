@@ -3,18 +3,16 @@ import { styles } from './ConfigPage.styles';
 import APIKey from 'components/config/ApiKey/APIKey';
 import { AppInstallationParameters } from 'types/configPage';
 
-export const PAGE_TITLE = 'Set up AI Images powered by DALL-E'
-
+export const PAGE_TITLE = 'Set up AI Images powered by DALL-E';
 
 interface ParameterObject {
-  [key: string]: string
+  [key: string]: string;
 }
 
 interface Props {
-  handleConfig: (value: ParameterObject) => void
-  parameters: AppInstallationParameters
+  handleConfig: (value: ParameterObject) => void;
+  parameters: AppInstallationParameters;
 }
-
 
 const ConfigPage = (props: Props) => {
   const { handleConfig, parameters } = props;

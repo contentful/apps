@@ -18,7 +18,7 @@ const APIKey = (props: Props) => {
   const censorApiKey = (key: string) => key.replace(/.(?=.{4,}$)/g, '*');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    handleApiKey({ apiKey: e.target.value })
+    handleApiKey({ apiKey: e.target.value });
   };
 
   const handleBlur = () => {
@@ -28,7 +28,7 @@ const APIKey = (props: Props) => {
   const handleClick = () => setEditing(true);
 
   return (
-    <FormControl testId='api-key-section' isRequired>
+    <FormControl testId="api-key-section" isRequired>
       <FormControl.Label>{TITLE}</FormControl.Label>
       {editing ? (
         <TextInput
