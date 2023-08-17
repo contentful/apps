@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { SortableListItem } from './SortableListItem';
-import productPreviews from '../__mocks__/productPreviews';
-import { Props } from './ListItem';
+import { productsList } from '../__mocks__';
+import { Props } from '../ProductCard/LegacyProductCard/LegacyProductCard';
 
 const defaultProps: Props = {
-  product: productPreviews[0],
+  product: productsList[0],
   disabled: false,
   onDelete: jest.fn(),
   isSortable: false,
@@ -55,7 +55,7 @@ describe('SortableListItem', () => {
   it('should render successfully the error variation for missing product', async () => {
     const { getByTestId } = renderComponent({
       ...defaultProps,
-      product: { ...productPreviews[0], name: '' },
+      product: { ...productsList[0], name: '' },
     });
     const image = getByTestId('image');
     fireEvent(image, new Event('error'));

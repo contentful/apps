@@ -1,15 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import productPreviews from '../__mocks__/productPreviews';
 import { Field } from './Field';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import logo from '../__mocks__/logo.svg';
 import { SDKContext } from '@contentful/react-apps-toolkit';
 import { IntegrationProvider } from './IntegrationContext';
 import { sdk } from '../__mocks__/storybook/sdk';
 import { GlobalStyles } from '@contentful/f36-components';
-import { Integration } from '../types';
 import { parameters } from '../../.storybook/parameters';
+import { KnownAppSDK } from '@contentful/app-sdk';
+import { integration } from '../__mocks__/storybook/integration';
+import { productsList } from '../__mocks__';
 
 const meta: Meta<typeof Field> = {
   component: Field,
@@ -21,31 +19,64 @@ export default meta;
 
 type Story = StoryObj<typeof Field>;
 
-const integration: Integration = {
-  logo,
-  color: '##ffff',
-  description: 'some description',
-  name: 'ecommerce integration',
-  isInOrchestrationEAP: false,
-  parameterDefinitions: [],
-  skuTypes: [{ id: 'product', name: 'Product' }],
-  makeCTA: () => 'Select SKU',
-  isDisabled: () => false,
-  renderDialog: () => {},
-  openDialog: (_, currentValue: string) => {
-    alert(currentValue);
-    return Promise.resolve([] as string[]);
-  },
-  validateParameters: () => '',
-  fetchProductPreviews: () => Promise.resolve(productPreviews),
-};
-
-export const Default: Story = {
+export const Version1SingleProduct: Story = {
   decorators: [
     (Story) => (
-      <IntegrationProvider integration={integration}>
+      <IntegrationProvider integration={integration('v1', [productsList[0]])}>
         <GlobalStyles />
-        <SDKContext.Provider value={{ sdk }}>
+        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
+          <Story />
+        </SDKContext.Provider>
+      </IntegrationProvider>
+    ),
+  ],
+};
+
+export const Version1MultipleProducts: Story = {
+  decorators: [
+    (Story) => (
+      <IntegrationProvider integration={integration('v1')}>
+        <GlobalStyles />
+        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
+          <Story />
+        </SDKContext.Provider>
+      </IntegrationProvider>
+    ),
+  ],
+};
+
+export const Version1AdditionalDataRendererDefined: Story = {
+  decorators: [
+    (Story) => (
+      <IntegrationProvider integration={{ ...integration('v1'), renderAdditionalData: () => null }}>
+        <GlobalStyles />
+        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
+          <Story />
+        </SDKContext.Provider>
+      </IntegrationProvider>
+    ),
+  ],
+};
+
+export const Version2SingleProduct: Story = {
+  decorators: [
+    (Story) => (
+      <IntegrationProvider integration={integration('v2', [productsList[0]])}>
+        <GlobalStyles />
+        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
+          <Story />
+        </SDKContext.Provider>
+      </IntegrationProvider>
+    ),
+  ],
+};
+
+export const Version2MultipleProducts: Story = {
+  decorators: [
+    (Story) => (
+      <IntegrationProvider integration={integration('v2')}>
+        <GlobalStyles />
+        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
           <Story />
         </SDKContext.Provider>
       </IntegrationProvider>

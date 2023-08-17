@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, ProductListItem } from './ProductListItem';
-import productPreviews from '../../__mocks__/productPreviews';
+import { productsList } from '../../__mocks__';
 
 configure({
   testIdAttribute: 'data-test-id',
 });
 
 const defaultProps: Props = {
-  product: productPreviews[0],
+  product: productsList[0],
   selectProduct: jest.fn(),
   isSelected: false,
 };

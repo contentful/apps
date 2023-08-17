@@ -7,10 +7,14 @@ import {
   ValidateParametersFn,
 } from './ui';
 import { ParameterDefinition } from './config';
+import { ReactNode } from 'react';
+import { Product } from './product';
 
 export type SKUType = { id: string; name: string; default?: boolean };
 
-export type Integration = {
+export type ProductCardVersion = 'v1' | 'v2';
+
+export type Integration<AdditionalData = undefined> = {
   isInOrchestrationEAP?: boolean;
   /**
    * Returns the text that is displayed on the button in the field location.
@@ -60,7 +64,7 @@ export type Integration = {
    * @param config App configuration
    * @returns List of Products which is used to render a preview.
    */
-  fetchProductPreviews: ProductPreviewsFn;
+  fetchProductPreviews: ProductPreviewsFn<AdditionalData>;
 
   /**
    * Function that gets called within the Iframe when the app is rendered in a dialog location.
@@ -115,4 +119,20 @@ export type Integration = {
    * This configuration will be stored under the skuTypes key in your installation parameters.
    */
   skuTypes?: SKUType[];
+
+  /**
+   * Opt-in to the new Product Card component
+   */
+  productCardVersion?: ProductCardVersion;
+
+  /**
+   * render additional data with for Product Card version "v2"
+   */
+  renderAdditionalData?: AdditionalDataRenderer<AdditionalData>;
 };
+
+export type AdditionalDataRendererProps<AdditionalData> = { product: Product<AdditionalData> };
+
+export type AdditionalDataRenderer<AdditionalData = undefined> = (
+  props: AdditionalDataRendererProps<AdditionalData>
+) => ReactNode;

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { merge } from 'lodash';
 import { fireEvent, configure, render, cleanup } from '@testing-library/react';
 import { Props, SkuPicker } from './SkuPicker';
-import productPreviews from '../__mocks__/productPreviews';
+import { productsList } from '../__mocks__';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { Integration, ProductsFn } from '../types';
 
@@ -43,7 +43,7 @@ describe('SkuPicker', () => {
         },
       } as unknown as DialogAppSDK,
       fetchProductPreviews: jest.fn((skus) =>
-        productPreviews.filter((preview) => skus.includes(preview.sku))
+        productsList.filter((preview) => skus.includes(preview.sku))
       ) as unknown as Integration['fetchProductPreviews'],
       fetchProducts: jest.fn(() => ({
         pagination: {
@@ -52,7 +52,7 @@ describe('SkuPicker', () => {
           offset: 0,
           total: 3,
         },
-        products: productPreviews,
+        products: productsList,
       })) as unknown as ProductsFn,
     };
   });
@@ -71,7 +71,7 @@ describe('SkuPicker', () => {
           pagination: {
             hasNextPage: true,
           },
-          products: productPreviews.slice(0, 2),
+          products: productsList.slice(0, 2),
         })) as unknown as ProductsFn,
       });
       expect(await findByTestId('infinite-scrolling-pagination')).toBeTruthy();
@@ -84,7 +84,7 @@ describe('SkuPicker', () => {
           pagination: {
             hasNextPage: false,
           },
-          products: productPreviews.slice(0, 2),
+          products: productsList.slice(0, 2),
         })) as unknown as ProductsFn,
       });
       expect(queryByTestId('infinite-scrolling-pagination')).toBeNull();
@@ -94,12 +94,12 @@ describe('SkuPicker', () => {
   describe('when it is operating on a field of type Symbol', () => {
     it('should allow the user to select only one product', async () => {
       const { queryByTestId, findByTestId } = await renderComponent(defaultProps);
-      const productA = await findByTestId(`product-preview-${productPreviews[1].sku}`);
-      const productB = await findByTestId(`product-preview-${productPreviews[2].sku}`);
+      const productA = await findByTestId(`product-preview-${productsList[1].sku}`);
+      const productB = await findByTestId(`product-preview-${productsList[2].sku}`);
       productA.click();
       productB.click();
-      expect(queryByTestId(`selection-preview-${productPreviews[1].sku}`)).toBeNull();
-      expect(await findByTestId(`selection-preview-${productPreviews[2].sku}`)).toBeTruthy();
+      expect(queryByTestId(`selection-preview-${productsList[1].sku}`)).toBeNull();
+      expect(await findByTestId(`selection-preview-${productsList[2].sku}`)).toBeTruthy();
     });
   });
 
@@ -111,12 +111,12 @@ describe('SkuPicker', () => {
           parameters: { invocation: { fieldType: 'Array' } },
         }),
       });
-      const productA = await findByTestId(`product-preview-${productPreviews[1].sku}`);
-      const productB = await findByTestId(`product-preview-${productPreviews[2].sku}`);
+      const productA = await findByTestId(`product-preview-${productsList[1].sku}`);
+      const productB = await findByTestId(`product-preview-${productsList[2].sku}`);
       productA.click();
       productB.click();
-      expect(await findByTestId(`selection-preview-${productPreviews[1].sku}`)).toBeTruthy();
-      expect(await findByTestId(`selection-preview-${productPreviews[2].sku}`)).toBeTruthy();
+      expect(await findByTestId(`selection-preview-${productsList[1].sku}`)).toBeTruthy();
+      expect(await findByTestId(`selection-preview-${productsList[2].sku}`)).toBeTruthy();
     });
   });
 });

@@ -12,7 +12,7 @@ import {
 import { AssetIcon, CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
-import type { Product } from '../types';
+import type { Product } from '../../types';
 import { SortableHandle } from 'react-sortable-hoc';
 
 const IMAGE_SIZE = 48;
@@ -120,7 +120,13 @@ export interface Props {
 
 const CardDragHandle = SortableHandle(({ drag }: { drag: ReactElement }) => <>{drag}</>);
 
-export const ListItem: FC<Props> = ({ product, isSortable, disabled, onDelete, skuType }) => {
+export const LegacyProductCard: FC<Props> = ({
+  product,
+  isSortable,
+  disabled,
+  onDelete,
+  skuType,
+}) => {
   const [imageHasLoaded, setImageLoaded] = useState(false);
   const [imageHasErrored, setImageHasErrored] = useState(false);
   const productIsMissing = !product.name;

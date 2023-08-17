@@ -1,4 +1,4 @@
-import productPreviews from '../productPreviews';
+import { productsList } from '../products';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { DeepPartial } from '../DeepPartial';
 
@@ -10,7 +10,10 @@ export const sdk: DeepPartial<FieldAppSDK> = {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     onValueChanged: () => {},
-    getValue: () => productPreviews,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    setValue: (value) => Promise.resolve(value),
+    getValue: () => productsList,
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     onIsDisabledChanged: () => {},

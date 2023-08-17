@@ -1,5 +1,5 @@
-// Internal, provider agnostic shape
-export type Product = {
+// Internal - provider agnostic shape
+export type Product<AdditionalData = undefined> = {
   sku: string;
   displaySKU?: string;
   image: string;
@@ -8,6 +8,7 @@ export type Product = {
   externalLink?: string;
   description?: string;
   category?: string;
+  additionalData?: AdditionalData;
 };
 
 export type Pagination = {

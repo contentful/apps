@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ProductSelectionList } from './index';
-import productPreviews from '../../__mocks__/productPreviews';
+import { productsList } from '../../__mocks__';
 import { GlobalStyles } from '@contentful/f36-components';
 
 const meta: Meta<typeof ProductSelectionList> = {
@@ -12,14 +12,14 @@ export default meta;
 
 type Story = StoryObj<typeof ProductSelectionList>;
 
-const productPreviewNoImages = productPreviews.map((value) => {
+const productPreviewNoImages = productsList.map((value) => {
   const product = { ...value, image: '' };
   return product;
 });
 
 export const Default: Story = {
   args: {
-    products: productPreviews,
+    products: productsList,
     selectProduct: (...args) => alert(args),
   },
   decorators: [

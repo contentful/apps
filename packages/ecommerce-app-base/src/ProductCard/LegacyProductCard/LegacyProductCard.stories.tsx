@@ -1,15 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import productPreviews from '../__mocks__/productPreviews';
-import { parameters } from '../../.storybook/parameters';
-import { ListItem } from './ListItem';
+import { products, productsList } from '../../__mocks__';
+import { parameters } from '../../../.storybook/parameters';
+import { LegacyProductCard } from './LegacyProductCard';
 
-const meta: Meta<typeof ListItem> = {
-  component: ListItem,
+const meta: Meta<typeof LegacyProductCard> = {
+  component: LegacyProductCard,
   tags: ['autodocs'],
   ...parameters,
+  argTypes: {
+    product: {
+      options: products,
+    },
+  },
   args: {
     skuType: 'product',
-    product: productPreviews[0],
+    product: productsList[0],
     disabled: false,
     isSortable: false,
     onDelete: () => {},
@@ -18,7 +23,7 @@ const meta: Meta<typeof ListItem> = {
 
 export default meta;
 
-type Story = StoryObj<typeof ListItem>;
+type Story = StoryObj<typeof LegacyProductCard>;
 
 export const Default: Story = {};
 
@@ -36,6 +41,6 @@ export const Sortable: Story = {
 
 export const NoImage: Story = {
   args: {
-    product: { ...productPreviews[0], image: '' },
+    product: { ...productsList[0], image: '' },
   },
 };

@@ -35,11 +35,11 @@ export type ValidateParametersFn = (parameters: Record<string, string>) => strin
  * @param skuType SKU type of the current field. Undefined if only a single SKU type is supported by the app.
  * @returns List of Products which is used to render a preview.
  */
-export type ProductPreviewsFn = (
+export type ProductPreviewsFn<AdditionalData = undefined> = (
   skus: string[],
   config: Config,
   skuType?: string
-) => Promise<Product[]>;
+) => Promise<Product<AdditionalData>[]>;
 export type DeleteFn = (index: number) => void;
 
 /**

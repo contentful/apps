@@ -1,0 +1,1 @@
+export { ProductCardAdditionalData } from './ProductCardAdditionalData';

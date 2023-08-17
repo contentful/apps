@@ -1,4 +1,4 @@
-import { Button } from '@contentful/f36-components';
+import { Box, Button, Note, TextLink } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
@@ -38,8 +38,16 @@ export const Field: FC = () => {
 
   const sdk = useSDK<FieldAppSDK>();
 
-  const { skuTypes, fetchProductPreviews, logo, isDisabled, makeCTA, openDialog } =
-    useIntegration();
+  const {
+    skuTypes,
+    fetchProductPreviews,
+    logo,
+    isDisabled,
+    makeCTA,
+    openDialog,
+    productCardVersion,
+    renderAdditionalData,
+  } = useIntegration();
 
   // Do we need a local representation of the remote state?
   const [value, setValue] = useState(() => fieldValueToState(sdk.field.getValue()));
@@ -117,6 +125,7 @@ export const Field: FC = () => {
           />
         </div>
       )}
+
       <div className={styles.container}>
         <img src={logo} alt="Logo" className={styles.logo} />
         <Button
@@ -128,6 +137,28 @@ export const Field: FC = () => {
           {makeCTA(sdk.field.type, skuType)}
         </Button>
       </div>
+
+      {productCardVersion === 'v1' && renderAdditionalData && (
+        <Box marginTop={'spacingM'} marginBottom={'spacingM'}>
+          <AdditionalDataRendererWarning />
+        </Box>
+      )}
     </>
+  );
+};
+
+const AdditionalDataRendererWarning = () => {
+  return (
+    <Note variant={'warning'}>
+      It looks like an <code>additionalDataRenderer</code> is defined, this only works in
+      conjunction with <code>productCardVersion@v2</code>
+      {' - '}
+      <TextLink
+        as={'button'}
+        onClick={() => alert('This should point to the not yet created docs')}>
+        read more
+      </TextLink>
+      .
+    </Note>
   );
 };

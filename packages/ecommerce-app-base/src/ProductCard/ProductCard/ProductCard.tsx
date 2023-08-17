@@ -1,27 +1,15 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Card } from '@contentful/f36-components';
+import { Box, Card, TextLink } from '@contentful/f36-components';
 import { styles } from './ProductCard.styles';
-import {
-  ExternalResource,
-  ExternalResourceError,
-  ExternalResourceLink,
-  ProductCardType,
-  RenderDragFn,
-} from '../types';
+import { ExternalResource, ExternalResourceError, ProductCardType, RenderDragFn } from '../types';
 import ProductCardHeader from '../ProductCardHeader/ProductCardHeader';
 import ProductCardBody from '../ProductCardBody/ProductCardBody';
-import ProductCardRawData from '../ProductCardRawData/ProductCardRawData';
-
-type CardMovementCallbacks = {
-  handleMoveToTop?: (index?: number) => void;
-  handleMoveToBottom?: (index?: number) => void;
-};
+import { ProductCardAdditionalData } from '../ProductCardAdditionalData';
 
 export interface ProductCardProps {
-  // TODO: Fix the CardHeader type during the mapping config refactor/ticket
   resource: ExternalResource;
-  cardHeader: string;
+  title: string;
   productCardType?: ProductCardType;
   handleRemove?: (index?: number) => void;
   onSelect?: (resource: ExternalResource) => void;
@@ -29,37 +17,31 @@ export interface ProductCardProps {
   dragHandleRender?: RenderDragFn;
   isLoading?: boolean;
   cardIndex?: number;
-  totalCards?: number;
-  externalResourceLink?: ExternalResourceLink;
-  cardMovementCallbacks?: CardMovementCallbacks;
-  isHovered?: boolean;
   externalResourceError?: ExternalResourceError;
 }
 
 const ProductCard = (props: ProductCardProps) => {
-  const [showJson, setShowJson] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const {
-    cardIndex,
-    totalCards,
+    cardIndex = 0,
     productCardType = 'dialog',
     isLoading,
     resource,
-    cardHeader,
+    title,
     handleRemove,
     onSelect,
     isSelected,
     dragHandleRender,
-    externalResourceLink,
-    cardMovementCallbacks,
-    isHovered,
     externalResourceError,
   } = props;
 
-  const { handleMoveToBottom, handleMoveToTop } = cardMovementCallbacks || {};
   const fieldProductCardType = productCardType === 'field';
-  const renderRawData =
-    !externalResourceError?.error && fieldProductCardType && externalResourceLink && showJson;
+  const hasError = externalResourceError?.error;
+  const displaySKU =
+    resource.displaySKU ?? resource.sku
+      ? `Product SKU: ${resource.sku}`
+      : `Product ID: ${resource.id}`;
 
   return (
     <Card
@@ -67,43 +49,38 @@ const ProductCard = (props: ProductCardProps) => {
       className={styles.productCard}
       isSelected={isSelected}
       onClick={() => {
-        onSelect && onSelect(resource);
+        !!onSelect && onSelect(resource);
       }}
       isLoading={isLoading}
       withDragHandle={!!dragHandleRender}
-      dragHandleRender={dragHandleRender}
-      // TODO: Determine hover state prop
-      isHovered={isHovered}>
+      dragHandleRender={dragHandleRender}>
       <ProductCardHeader
-        headerTitle={cardHeader}
+        headerTitle={title}
         resource={resource}
         handleRemove={handleRemove}
         cardIndex={cardIndex}
-        totalCards={totalCards}
-        showJson={showJson}
-        handleShowJson={setShowJson}
-        // TO DO: provide link string when logic is built
-        externalDetailsLink={''}
-        handleMoveToBottom={handleMoveToBottom}
-        handleMoveToTop={handleMoveToTop}
+        isExpanded={isExpanded}
         showHeaderMenu={Boolean(fieldProductCardType)}
-        error={externalResourceError}
       />
 
       <ProductCardBody
-        title={resource.title}
-        description={resource.description}
-        image={resource?.image || resource?.images?.[0]?.src || ''}
-        id={resource.id}
+        title={resource.name}
+        description={resource.description ?? '{no description provided}'}
+        image={resource?.image ?? ''}
+        id={displaySKU}
+        isExpanded={isExpanded}
         externalResourceError={externalResourceError}
       />
 
-      {renderRawData && (
-        <ProductCardRawData
-          value={JSON.stringify(externalResourceLink)}
-          isVisible={showJson}
-          onHide={() => setShowJson(false)}
-        />
+      {!hasError && (
+        <Box marginBottom="spacingM" marginLeft="spacingM">
+          <ProductCardAdditionalData isExpanded={isExpanded}>
+            {resource.description}
+          </ProductCardAdditionalData>
+          <TextLink as="button" onClick={() => setIsExpanded(!isExpanded)}>
+            {isExpanded ? 'hide details' : 'more details'}
+          </TextLink>
+        </Box>
       )}
     </Card>
   );

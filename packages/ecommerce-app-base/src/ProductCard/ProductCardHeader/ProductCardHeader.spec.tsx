@@ -2,43 +2,23 @@ import ProductCardHeader from './ProductCardHeader';
 import { render, screen } from '@testing-library/react';
 import * as React from 'react';
 
-const { getByText, getByTestId, getAllByTestId } = screen;
+const { getByText, getAllByTestId } = screen;
 
 describe('ProductCardHeader component', () => {
   it('mounts', () => {
     const headerTitle = 'Shopify product';
     render(<ProductCardHeader headerTitle={headerTitle} />);
-
     const titleElement = getByText(headerTitle);
-
     expect(titleElement).toBeVisible();
-  });
-
-  it('mounts showing external link button', () => {
-    const headerTitle = 'Shopify product';
-    render(<ProductCardHeader headerTitle={headerTitle} externalDetailsLink="https://link" />);
-
-    const titleElement = getByText(headerTitle);
-    const externalLinkButton = getByTestId('cf-ui-icon-button');
-
-    expect(titleElement).toBeVisible();
-    expect(externalLinkButton).toBeVisible();
-    expect(externalLinkButton).toHaveAttribute('aria-label', 'View external resource details');
   });
 
   it('mounts showing header menu', () => {
     const headerTitle = 'Shopify product';
-    render(
-      <ProductCardHeader
-        headerTitle={headerTitle}
-        externalDetailsLink="https://link"
-        showHeaderMenu
-      />
-    );
+    render(<ProductCardHeader headerTitle={headerTitle} showHeaderMenu />);
 
     const titleElement = getByText(headerTitle);
     const buttons = getAllByTestId('cf-ui-icon-button');
-    const menuButton = buttons[1];
+    const menuButton = buttons[0];
 
     expect(titleElement).toBeVisible();
     expect(menuButton).toBeVisible();

@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import productPreviews from '../__mocks__/productPreviews';
+import { productsList } from '../__mocks__';
 import { SortableList } from './SortableList';
 import { GlobalStyles } from '@contentful/f36-components';
 import { parameters } from '../../.storybook/parameters';
+import { integration } from '../__mocks__/storybook/integration';
+import { IntegrationProvider } from './IntegrationContext';
 
 const meta: Meta<typeof SortableList> = {
   component: SortableList,
@@ -16,17 +18,17 @@ type Story = StoryObj<typeof SortableList>;
 
 export const Default: Story = {
   args: {
-    skuType: 'SKU Type',
-    productPreviews,
+    skuType: 'Product',
+    productPreviews: productsList,
     disabled: false,
     deleteFn: () => {},
   },
-  decorators: [
-    (Story) => (
-      <>
+  render: (args) => {
+    return (
+      <IntegrationProvider integration={integration('v2')}>
         <GlobalStyles />
-        <Story />
-      </>
-    ),
-  ],
+        <SortableList {...args} />
+      </IntegrationProvider>
+    );
+  },
 };

@@ -1,19 +1,21 @@
+import * as React from 'react';
 import ProductCardBody from './ProductCardBody';
 import { render, screen } from '@testing-library/react';
-import { externalResource } from '../../__mocks__';
-import * as React from 'react';
+import { productsList } from '../../__mocks__';
 
 const { getByText, getByTestId, queryByTestId } = screen;
 
 describe('ProductCardBody component', () => {
   it('mounts', () => {
-    const { title, description, id, image } = externalResource;
-    render(<ProductCardBody title={title} description={description} id={id} image={image} />);
+    const { name, description, id, image } = productsList[0];
+    render(<ProductCardBody title={name} description={description} id={id} image={image} />);
 
     const mainBody = getByTestId('main-product-card-body');
-    const titleElement = getByText(title!);
-    const descriptionElement = getByText(description!);
-    const idElement = getByText(`Product ID: ${id!}`);
+    const titleElement = getByText(name!);
+    const descriptionElement = getByText(
+      'Open your door to the world of grilling with the sleek Spirit II E-210...'
+    );
+    const idElement = getByText(id);
     const imageElement = document.querySelector('img');
 
     expect(mainBody).toBeVisible();

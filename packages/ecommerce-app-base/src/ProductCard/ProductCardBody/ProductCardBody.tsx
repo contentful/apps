@@ -1,14 +1,16 @@
 import * as React from 'react';
-import { Box, Flex, Grid, Text } from '@contentful/f36-components';
+import { Box, Caption, Flex, Grid, Text } from '@contentful/f36-components';
 import { ExternalResourceError } from '../types';
+import { truncate } from 'lodash';
+import { ProductImage } from '../ProductImage';
 
 interface ProductCardProps {
   title?: string;
   description?: string;
-  // TO DO fix image mapping
   image?: string;
   id?: string;
   externalResourceError?: ExternalResourceError;
+  isExpanded?: boolean;
 }
 
 const ProductCardBody = (props: ProductCardProps) => {
@@ -19,6 +21,8 @@ const ProductCardBody = (props: ProductCardProps) => {
     id: productId,
     externalResourceError,
   } = props;
+
+  const hasError = !!externalResourceError?.error;
 
   const renderErrorBody = () => (
     <Text
@@ -33,29 +37,33 @@ const ProductCardBody = (props: ProductCardProps) => {
   const renderMainBody = () => (
     <Grid data-test-id="main-product-card-body" rowGap="spacingXs">
       <Grid.Item>
-        <Text
-          fontSize="fontSizeL"
-          fontWeight="fontWeightDemiBold"
-          lineHeight="lineHeightL"
-          isWordBreak={true}>
+        <Text fontWeight="fontWeightDemiBold" isWordBreak={true}>
           {productName}
         </Text>
       </Grid.Item>
       <Grid.Item>
-        <Text>{productDescription}</Text>
+        {/* Caption does not allow a fontColor prop */}
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+        {/* @ts-ignore */}
+        <Caption fontColor="gray600" fontWeight={'fontWeightMedium'}>
+          {productId}
+        </Caption>
       </Grid.Item>
       <Grid.Item>
-        <Text fontColor="gray600">Product ID: {productId}</Text>
+        <Text isWordBreak={true}>
+          {truncate(productDescription, { length: props.isExpanded ? 220 : 75, separator: ' ' })}
+        </Text>
       </Grid.Item>
     </Grid>
   );
 
-  // TODO: Handle missing image
   return (
-    <Box padding="spacingM">
+    <Box padding="spacingM" paddingBottom="spacing2Xs">
       <Flex fullWidth={true} justifyContent="space-between">
-        {externalResourceError?.error ? renderErrorBody() : renderMainBody()}
-        {productImage && <img src={productImage} alt={productName} width="70" height="70" />}
+        {hasError ? renderErrorBody() : renderMainBody()}
+        {!hasError && (
+          <ProductImage src={productImage} alt={productName} width="70px" height="70px" />
+        )}
       </Flex>
     </Box>
   );

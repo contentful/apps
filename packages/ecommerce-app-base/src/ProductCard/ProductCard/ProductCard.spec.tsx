@@ -1,19 +1,21 @@
 import ProductCard from './ProductCard';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
-import { externalResource } from '../../__mocks__';
 import * as React from 'react';
+import { productsList } from '../../__mocks__';
 
 const { getByText } = screen;
 
+const product = productsList[0];
+
 describe('ProductCard component', () => {
   it('mounts', () => {
-    render(
-      <ProductCard cardHeader="Kleenex product" onSelect={() => {}} resource={externalResource} />
-    );
+    const mockOnSelect = jest.fn();
+    render(<ProductCard title="Kleenex product" onSelect={mockOnSelect} resource={product} />);
 
-    const productName = externalResource.title!;
-    const productDescription = externalResource.description!;
+    const productName = product.name!;
+    const productDescription =
+      'Open your door to the world of grilling with the sleek Spirit II E-210...';
 
     expect(getByText(productName)).toBeVisible();
     expect(getByText(productDescription)).toBeVisible();
@@ -22,15 +24,9 @@ describe('ProductCard component', () => {
   it('handles onSelect', async () => {
     userEvent.setup();
     const mockOnSelect = jest.fn();
-    render(
-      <ProductCard
-        cardHeader="Kleenex product"
-        onSelect={mockOnSelect}
-        resource={externalResource}
-      />
-    );
+    render(<ProductCard title="Kleenex product" onSelect={mockOnSelect} resource={product} />);
 
-    const productName = externalResource.title!;
+    const productName = product.name!;
     await userEvent.click(getByText(productName));
 
     expect(mockOnSelect).toHaveBeenCalled();
