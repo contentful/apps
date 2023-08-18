@@ -55,7 +55,7 @@ const RewriteGenerator = () => {
   const handleGenerate = async (generateMessage: GenerateMessage) => {
     try {
       const localeName = localeNames[parameters.output.locale];
-      const userMessage = featureConfig[feature].prompt(inputText, localeName, rewritePromptData);
+      const userMessage = featureConfig[feature].prompt(inputText, rewritePromptData);
       await generateMessage(userMessage, localeName);
     } catch (error) {
       console.error(error);

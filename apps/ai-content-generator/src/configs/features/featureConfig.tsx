@@ -59,13 +59,13 @@ const featureConfig: FeatureConfig = {
   [AIFeature.REWRITE]: {
     dialogTitle: 'Rewrite',
     buttonTitle: 'Rewrite',
+    prompt: rewritePrompt,
     dialogText: {
       fieldHelpText: `${FIELD_HELP_TEXT_BASE}, then add tone instructions.`,
       fieldPlaceholder: FIELD_PLACEHOLDER,
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} and then add tone instructions.`,
       promptPlaceholder: 'Enter content here to rewrite it...',
     },
-    prompt: rewritePrompt,
   },
   [AIFeature.SEO_KEYWORDS]: {
     dialogTitle: 'Generate SEO keywords',
