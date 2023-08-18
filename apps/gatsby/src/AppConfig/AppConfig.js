@@ -309,7 +309,7 @@ export class AppConfig extends React.Component {
                   <span>
                     To set up Content Sync, see the{' '}
                     <TextLink
-                      href="http://gatsby.dev/contentful-preview-docs"
+                      href="https://support.gatsbyjs.com/hc/en-us/articles/17278047641876-Add-the-Gatsby-Cloud-App-to-Contentful"
                       target="_blank"
                       rel="noopener noreferrer">
                       installation instructions
