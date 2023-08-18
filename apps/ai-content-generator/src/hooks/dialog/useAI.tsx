@@ -2,7 +2,7 @@ import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
 import baseUrl from '@configs/ai/baseUrl';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
+import { AppInstallationParameters, ProfileType } from '@locations/ConfigScreen';
 import AI from '@utils/aiApi';
 import { ChatCompletionRequestMessage } from 'openai';
 import { useEffect, useMemo, useState } from 'react';
@@ -27,7 +27,7 @@ const useAI = () => {
 
   const createGPTPayload = (
     content: string,
-    profile: string,
+    profile: ProfileType,
     targetLocale: string
   ): ChatCompletionRequestMessage[] => {
     const userPrompt: ChatCompletionRequestMessage = {
@@ -47,11 +47,7 @@ const useAI = () => {
     let completeMessage = '';
 
     try {
-      const payload = createGPTPayload(
-        prompt,
-        sdk.parameters.installation.profile.profile,
-        targetLocale
-      );
+      const payload = createGPTPayload(prompt, sdk.parameters.installation.profile, targetLocale);
 
       const stream = await ai.streamChatCompletion(payload);
       setStream(stream);

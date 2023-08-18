@@ -2,9 +2,10 @@ import { ChangeEvent, Dispatch } from 'react';
 import { FormControl, TextInput, Textarea } from '@contentful/f36-components';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 import { BrandProfileFields, FieldTypes } from '../configText';
+import { ProfileType } from '@locations/ConfigScreen';
 
 interface Props {
-  profile: { [key: string]: string };
+  profile: ProfileType;
   dispatch: Dispatch<ParameterReducer>;
 }
 
