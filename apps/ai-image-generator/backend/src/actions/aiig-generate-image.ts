@@ -12,6 +12,7 @@ interface AppActionResponse {
   images: string[];
 }
 
+// TODO: Implement real api key fetching
 async function fetchOpenAiApiKey(_cma: PlainClientAPI) {
   return 'openai-api-key';
 }
