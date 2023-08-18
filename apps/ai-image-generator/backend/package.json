@@ -5,9 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "validate-actions": "node scripts/validate-actions.js",
-    "build-actions": "NODE_ENV=production tsc --module esnext",
-    "build": "npm run validate-actions && npm run build-actions",
+    "build": "NODE_ENV=production tsc --module es6",
     "test": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --exit",
     "test:ci": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 CI=true mocha --exit",
     "test:debug": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
@@ -15,7 +13,8 @@
   },
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.2.0",
-    "contentful-management": "^10.39.2"
+    "contentful-management": "^10.39.2",
+    "openai": "^4.0.0"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.0",
