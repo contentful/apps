@@ -3,46 +3,48 @@ import { ProfileFields } from '@components/config/configText';
 import { ProfileType } from '@locations/ConfigScreen';
 
 const generateBrandProfile = (profile: ProfileType) => {
-  let profilePrompt = '';
+  const { PROFILE, ADDITIONAL, VALUES, TONE, AUDIENCE, EXCLUDE, INCLUDE } = ProfileFields;
 
-  if (profile[ProfileFields.PROFILE]) {
-    profilePrompt += `You are working for a company with the following profile: ${
-      profile[ProfileFields.PROFILE]
-    }. `;
+  const profilePromptParts = [];
+
+  if (profile[PROFILE]) {
+    profilePromptParts.push(
+      `You are working for a company with the following profile: ${profile[PROFILE]}. `
+    );
   }
 
-  if (profile[ProfileFields.ADDITIONAL]) {
-    profilePrompt += `It is important that you also know the following details about the company: ${
-      profile[ProfileFields.ADDITIONAL]
-    }. `;
+  if (profile[ADDITIONAL]) {
+    profilePromptParts.push(
+      `It is important that you also know the following details about the company: ${profile[ADDITIONAL]}. `
+    );
   }
 
-  if (profile[ProfileFields.VALUES]) {
-    profilePrompt += `Your company's brand has the following values and attributes: ${
-      profile[ProfileFields.VALUES]
-    }. `;
+  if (profile[VALUES]) {
+    profilePromptParts.push(
+      `Your company's brand has the following values and attributes: ${profile[VALUES]}. `
+    );
   }
 
-  if (profile[ProfileFields.TONE]) {
-    profilePrompt += `Your company's voice can be described as ${profile[ProfileFields.TONE]}. `;
+  if (profile[TONE]) {
+    profilePromptParts.push(`Your company's voice can be described as ${profile[TONE]}. `);
   }
 
-  if (profile[ProfileFields.AUDIENCE]) {
-    profilePrompt += `Your company's target audience is: ${profile[ProfileFields.AUDIENCE]}. `;
+  if (profile[AUDIENCE]) {
+    profilePromptParts.push(`Your company's target audience is: ${profile[AUDIENCE]}. `);
   }
 
-  if (profile[ProfileFields.EXCLUDE]) {
-    profilePrompt += `Your company's brand states that you should never use the following words: ${
-      profile[ProfileFields.EXCLUDE]
-    } . `;
+  if (profile[EXCLUDE]) {
+    profilePromptParts.push(
+      `Your company's brand states that you should never use the following words: ${profile[EXCLUDE]} . `
+    );
   }
 
-  if (profile[ProfileFields.INCLUDE]) {
-    profilePrompt += `Your company's brand commonly uses these words: ${
-      profile[ProfileFields.INCLUDE]
-    } . `;
+  if (profile[INCLUDE]) {
+    profilePromptParts.push(
+      `Your company's brand commonly uses these words: ${profile[INCLUDE]} . `
+    );
   }
-  console.log(profilePrompt);
+  const profilePrompt = profilePromptParts.join(' ');
 
   return profilePrompt;
 };
