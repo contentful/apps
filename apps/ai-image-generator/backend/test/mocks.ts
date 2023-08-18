@@ -3,18 +3,21 @@ import { Adapter, PlainClientAPI, createClient } from 'contentful-management';
 import OpenAI from 'openai';
 import sinon from 'sinon';
 
-export const makeMockPlainClient = (stub: sinon.SinonStub): PlainClientAPI => {
+export const makeMockPlainClient = <T>(response: T, stub: sinon.SinonStub): PlainClientAPI => {
   const apiAdapter: Adapter = {
-    makeRequest: (args) => {
-      return stub.returns(Promise.resolve())(args);
+    makeRequest: async <T>(args: T) => {
+      return stub.returns(response)(args);
     },
   };
   return createClient({ apiAdapter }, { type: 'plain' });
 };
 
-export const makeMockAppActionCallContext = (cmaStub = sinon.stub()): AppActionCallContext => {
+export const makeMockAppActionCallContext = <T>(
+  response: T,
+  cmaStub = sinon.stub()
+): AppActionCallContext => {
   return {
-    cma: makeMockPlainClient(cmaStub),
+    cma: makeMockPlainClient(response, cmaStub),
     appActionCallContext: {
       spaceId: 'space-id',
       environmentId: 'environment-id',

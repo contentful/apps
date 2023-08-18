@@ -12,22 +12,27 @@ interface AppActionResponse {
   images: string[];
 }
 
-// TODO: Implement real api key fetching
-async function fetchOpenAiApiKey(_cma: PlainClientAPI) {
-  return 'openai-api-key';
-}
-
-async function makeOpenAiApiService(cma: PlainClientAPI): Promise<OpenAiApiService> {
-  const openAiApiKey = await fetchOpenAiApiKey(cma);
-  return OpenAiApiService.fromOpenAiApiKey(openAiApiKey);
+async function fetchOpenAiApiKey(cma: PlainClientAPI, appInstallationId: string): Promise<string> {
+  const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
+  const appInstallationParams = appInstallation.parameters;
+  if (typeof appInstallationParams === 'object' && 'apiKey' in appInstallationParams) {
+    return appInstallationParams['apiKey'];
+  } else {
+    throw new Error('No OpenAI API Key was found in the installation parameters');
+  }
 }
 
 export const handler = async (
   payload: AppActionCallParameters,
-  context: AppActionCallContext,
-  openAiApiService?: OpenAiApiService
+  context: AppActionCallContext
 ): Promise<AppActionResponse> => {
-  openAiApiService ??= await makeOpenAiApiService(context.cma);
+  const {
+    cma,
+    appActionCallContext: { appInstallationId },
+  } = context;
+  const openAiApiKey = await fetchOpenAiApiKey(cma, appInstallationId);
+  const openAiApiService = OpenAiApiService.fromOpenAiApiKey(openAiApiKey);
+
   const { prompt } = payload;
   const images = await openAiApiService.createImage({
     prompt,
