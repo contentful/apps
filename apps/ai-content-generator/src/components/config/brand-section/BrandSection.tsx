@@ -4,13 +4,14 @@ import Profile from '../profile/Profile';
 import { Sections } from '../configText';
 import { ParameterReducer } from '../parameterReducer';
 import { css } from '@emotion/react';
+import { ProfileType } from '@locations/ConfigScreen';
 
 export const styles = css({
   width: '100%',
 });
 
 interface Props {
-  profile: { [key: string]: string };
+  profile: ProfileType;
   dispatch: Dispatch<ParameterReducer>;
 }
 

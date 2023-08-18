@@ -6,6 +6,16 @@ const ModelText = {
     'capable than any previous models.',
 };
 
+export enum ProfileFields {
+  PROFILE = 'profile',
+  VALUES = 'values',
+  TONE = 'tone',
+  EXCLUDE = 'exclude',
+  INCLUDE = 'include',
+  AUDIENCE = 'audience',
+  ADDITIONAL = 'additional',
+}
+
 export enum FieldTypes {
   TEXTAREA = 'textarea',
   TEXTINPUT = 'textinput',
@@ -13,57 +23,49 @@ export enum FieldTypes {
 
 const BrandProfileFields = [
   {
-    id: 'profile',
+    id: ProfileFields.PROFILE,
     title: 'Describe your brand or product.',
     textAreaPlaceholder: 'Example: Contentful is a headless content management system.',
     isRequired: true,
     fieldType: FieldTypes.TEXTAREA,
   },
   {
-    id: 'link',
-    title:
-      'Does your brand have a published brand guide or copy guidelines? If so, provide a link.',
-    textAreaPlaceholder: 'Example: http://mybrand/voiceandtone.com',
-    isRequired: false,
-    fieldType: FieldTypes.TEXTINPUT,
-  },
-  {
-    id: 'values',
+    id: ProfileFields.VALUES,
     title: "What are your brand's values and attributes?",
     textAreaPlaceholder: 'Example: Bold, unique, young',
     isRequired: false,
     fieldType: FieldTypes.TEXTINPUT,
   },
   {
-    id: 'tone',
+    id: ProfileFields.TONE,
     title: "Describe your brand's voice and tone.",
     textAreaPlaceholder: 'Example: Humorous, absurd, kind',
     isRequired: false,
     fieldType: FieldTypes.TEXTINPUT,
   },
   {
-    id: 'exclude',
+    id: ProfileFields.EXCLUDE,
     title: 'Are there any words your brand should never use?',
     textAreaPlaceholder: 'Example: Humorous, absurd, kind',
     isRequired: false,
     fieldType: FieldTypes.TEXTINPUT,
   },
   {
-    id: 'include',
+    id: ProfileFields.INCLUDE,
     title: 'Are there any words your brand should commonly use?',
     textAreaPlaceholder: 'Example: Humorous, absurd, kind',
     isRequired: false,
     fieldType: FieldTypes.TEXTINPUT,
   },
   {
-    id: 'audience',
+    id: ProfileFields.AUDIENCE,
     title: "Describe your brand's target audience.",
     textAreaPlaceholder: 'Example: Men and women ages 18-24 who love fashion.',
     isRequired: false,
     fieldType: FieldTypes.TEXTINPUT,
   },
   {
-    id: 'additional',
+    id: ProfileFields.ADDITIONAL,
     title: 'Is there anything else that AI should know about your brand or product?',
     textAreaPlaceholder:
       'Example: Contentful is a leading composable content platform. It was a headless CMS category maker that now has company in the marketplace, but remains to be the preferred choice for medium, large and enterprise companies.',
