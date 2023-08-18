@@ -6,7 +6,7 @@ import {
   mockImagesGenerateResponse,
 } from '../../test/mocks';
 import sinon from 'sinon';
-import { OpenAiApiService } from '../services/openAIApiService';
+import { OpenAiApiService } from '../services/openaiApiService';
 import OpenAI from 'openai';
 
 describe('aiigGenerateImage.handler', () => {
