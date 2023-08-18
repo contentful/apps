@@ -1,7 +1,7 @@
 import { makeMockOpenAiApi, mockImagesGenerateResponse } from '../../test/mocks';
 import { expect } from 'chai';
 import { SinonStubbedInstance } from 'sinon';
-import { OpenAiApiService } from './openAIApiService';
+import { OpenAiApiService } from './openaiApiService';
 import OpenAI from 'openai';
 
 const validCreateImageEditParams = async () => ({
