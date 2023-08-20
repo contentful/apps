@@ -7,10 +7,9 @@ import type { FC, PropsWithChildren } from 'react';
 export const styles = {
   box: css({
     backgroundColor: tokens.gray100,
-    padding: tokens.spacingM,
+    //padding: tokens.spacingM,
     marginTop: tokens.spacingS,
     marginBottom: tokens.spacingS,
-    width: `calc(100% -100px)`,
   }),
 };
 

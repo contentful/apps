@@ -1,8 +1,7 @@
 import React, { ReactElement } from 'react';
 import { SortableElement, SortableHandle } from 'react-sortable-hoc';
-import { LegacyProductCard } from '../ProductCard';
+import { LegacyProductCard, ProductCard } from '../ProductCard';
 import { useIntegration } from './IntegrationContext';
-import ProductCard from '../ProductCard';
 import { Product } from '../types';
 import { RenderDragFn } from '../ProductCard/types';
 
@@ -26,11 +25,11 @@ export const SortableListItem = SortableElement<Props>((props: Props) => {
   if (productCardVersion === 'v2') {
     return (
       <ProductCard
+        handleRemove={props.onDelete}
         dragHandleRender={dragHandleRender}
         productCardType={'field'}
         resource={props.product}
         title={props.skuType!}
-        cardIndex={props.index}
       />
     );
   }

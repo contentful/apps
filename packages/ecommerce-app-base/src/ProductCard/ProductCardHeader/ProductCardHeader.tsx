@@ -7,14 +7,13 @@ import { ExternalResource } from '../types';
 type Props = {
   headerTitle: string;
   resource?: ExternalResource;
-  handleRemove?: (index?: number) => void;
+  handleRemove?: () => void;
   isExpanded?: boolean;
-  cardIndex?: number;
   showHeaderMenu?: boolean;
 };
 
 const ProductCardHeader = (props: Props) => {
-  const { headerTitle, handleRemove, cardIndex, showHeaderMenu } = props;
+  const { headerTitle, handleRemove, showHeaderMenu } = props;
 
   return (
     <Box paddingLeft="spacingM" className={styles.productCardHeader}>
@@ -23,9 +22,7 @@ const ProductCardHeader = (props: Props) => {
           {headerTitle}
         </Text>
         <Flex alignItems="center" isInline={true}>
-          {showHeaderMenu && (
-            <ProductCardMenu onRemove={() => handleRemove?.call(null, cardIndex)} />
-          )}
+          {showHeaderMenu && <ProductCardMenu onRemove={() => !!handleRemove && handleRemove()} />}
         </Flex>
       </Flex>
     </Box>

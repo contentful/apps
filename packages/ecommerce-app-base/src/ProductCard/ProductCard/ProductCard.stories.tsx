@@ -1,5 +1,5 @@
 import type { StoryObj } from '@storybook/react';
-import ProductCard from './ProductCard';
+import { ProductCard } from './ProductCard';
 import { DragHandle } from '@contentful/f36-components';
 import { parameters } from '../../../.storybook/parameters';
 import { products, productsList } from '../../__mocks__';
@@ -17,11 +17,10 @@ const meta = {
     },
   },
   args: {
-    handleRemove: (cardIndex: number) => alert(JSON.stringify({ cardIndex })),
+    handleRemove: () => alert('remove item'),
     resource: productsList[0],
     title: CARD_HEADER,
     productCardType: CARD_TYPE,
-    cardIndex: 0,
   },
 };
 
@@ -90,6 +89,16 @@ export const MissingImage: Story = {
 };
 
 export const Loading: Story = {
+  args: {
+    isLoading: true,
+  },
+  parameters: {
+    ...designParams,
+  },
+};
+
+// ToDo
+export const CustomRenderer: Story = {
   args: {
     isLoading: true,
   },

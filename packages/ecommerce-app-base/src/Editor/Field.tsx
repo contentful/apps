@@ -46,7 +46,7 @@ export const Field: FC = () => {
     makeCTA,
     openDialog,
     productCardVersion,
-    renderAdditionalData,
+    additionalDataRenderer,
   } = useIntegration();
 
   // Do we need a local representation of the remote state?
@@ -138,7 +138,7 @@ export const Field: FC = () => {
         </Button>
       </div>
 
-      {productCardVersion === 'v1' && renderAdditionalData && (
+      {productCardVersion === 'v1' && additionalDataRenderer && (
         <Box marginTop={'spacingM'} marginBottom={'spacingM'}>
           <AdditionalDataRendererWarning />
         </Box>

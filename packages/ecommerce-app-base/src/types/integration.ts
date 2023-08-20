@@ -128,7 +128,7 @@ export type Integration<AdditionalData = undefined> = {
   /**
    * render additional data with for Product Card version "v2"
    */
-  renderAdditionalData?: AdditionalDataRenderer<AdditionalData>;
+  additionalDataRenderer?: AdditionalDataRenderer<AdditionalData>;
 };
 
 export type AdditionalDataRendererProps<AdditionalData> = { product: Product<AdditionalData> };

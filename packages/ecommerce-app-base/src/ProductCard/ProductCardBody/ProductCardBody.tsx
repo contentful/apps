@@ -3,15 +3,16 @@ import { Box, Caption, Flex, Grid, Text } from '@contentful/f36-components';
 import { ExternalResourceError } from '../types';
 import { truncate } from 'lodash';
 import { ProductImage } from '../ProductImage';
+import { PropsWithChildren } from 'react';
 
-interface ProductCardProps {
+type ProductCardProps = PropsWithChildren<{
   title?: string;
   description?: string;
   image?: string;
   id?: string;
   externalResourceError?: ExternalResourceError;
   isExpanded?: boolean;
-}
+}>;
 
 const ProductCardBody = (props: ProductCardProps) => {
   const {
@@ -20,6 +21,7 @@ const ProductCardBody = (props: ProductCardProps) => {
     image: productImage,
     id: productId,
     externalResourceError,
+    children,
   } = props;
 
   const hasError = !!externalResourceError?.error;
@@ -38,7 +40,7 @@ const ProductCardBody = (props: ProductCardProps) => {
     <Grid data-test-id="main-product-card-body" rowGap="spacingXs">
       <Grid.Item>
         <Text fontWeight="fontWeightDemiBold" isWordBreak={true}>
-          {productName}
+          {truncate(productName, { length: 75 })}
         </Text>
       </Grid.Item>
       <Grid.Item>
@@ -65,6 +67,7 @@ const ProductCardBody = (props: ProductCardProps) => {
           <ProductImage src={productImage} alt={productName} width="70px" height="70px" />
         )}
       </Flex>
+      {children}
     </Box>
   );
 };

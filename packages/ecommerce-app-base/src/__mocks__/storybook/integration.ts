@@ -14,7 +14,7 @@ export const integration = (
   name: 'ecommerce integration',
   isInOrchestrationEAP: false,
   parameterDefinitions: [],
-  skuTypes: [{ id: 'product', name: 'Product' }],
+  skuTypes: [{ id: 'product', name: 'Product', default: true }],
   makeCTA: () => 'Select SKU',
   isDisabled: () => false,
   renderDialog: () => {},

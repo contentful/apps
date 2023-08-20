@@ -5,11 +5,23 @@ import { GlobalStyles } from '@contentful/f36-components';
 import { parameters } from '../../.storybook/parameters';
 import { integration } from '../__mocks__/storybook/integration';
 import { IntegrationProvider } from './IntegrationContext';
+import { Integration } from '../types';
 
-const meta: Meta<typeof SortableList> = {
+type Args = typeof SortableList & Pick<Integration, 'productCardVersion'>;
+
+const meta: Meta<Args> = {
   component: SortableList,
   tags: ['autodocs'],
   ...parameters,
+  argTypes: {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    productCardVersion: {
+      options: ['v1', 'v2'],
+      control: { type: 'radio' },
+      defaultValue: 'v1',
+    },
+  },
 };
 
 export default meta;
@@ -23,9 +35,12 @@ export const Default: Story = {
     disabled: false,
     deleteFn: () => {},
   },
-  render: (args) => {
+  render: (args, context) => {
+    console.log({ args, context });
     return (
-      <IntegrationProvider integration={integration('v2')}>
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      <IntegrationProvider integration={integration(args.productCardVersion)}>
         <GlobalStyles />
         <SortableList {...args} />
       </IntegrationProvider>

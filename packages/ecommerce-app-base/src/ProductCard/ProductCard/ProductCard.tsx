@@ -6,6 +6,8 @@ import { ExternalResource, ExternalResourceError, ProductCardType, RenderDragFn 
 import ProductCardHeader from '../ProductCardHeader/ProductCardHeader';
 import ProductCardBody from '../ProductCardBody/ProductCardBody';
 import { ProductCardAdditionalData } from '../ProductCardAdditionalData';
+import { useIntegration } from '../../Editor';
+import { RawData } from '../AdditionalData/RawData';
 
 export interface ProductCardProps {
   resource: ExternalResource;
@@ -16,15 +18,13 @@ export interface ProductCardProps {
   isSelected?: boolean;
   dragHandleRender?: RenderDragFn;
   isLoading?: boolean;
-  cardIndex?: number;
   externalResourceError?: ExternalResourceError;
 }
 
-const ProductCard = (props: ProductCardProps) => {
+export const ProductCard = (props: ProductCardProps) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const {
-    cardIndex = 0,
     productCardType = 'dialog',
     isLoading,
     resource,
@@ -36,12 +36,32 @@ const ProductCard = (props: ProductCardProps) => {
     externalResourceError,
   } = props;
 
+  const { additionalDataRenderer } = useIntegration();
+
   const fieldProductCardType = productCardType === 'field';
   const hasError = externalResourceError?.error;
   const displaySKU =
-    resource.displaySKU ?? resource.sku
-      ? `Product SKU: ${resource.sku}`
-      : `Product ID: ${resource.id}`;
+    resource.displaySKU ??
+    (!!resource.sku ? `Product SKU: ${resource.sku}` : `Product ID: ${resource.id}`);
+
+  const renderAdditionalData = () => {
+    return (
+      <Box marginBottom="spacingS">
+        <ProductCardAdditionalData isExpanded={isExpanded}>
+          {!!additionalDataRenderer && typeof additionalDataRenderer === 'function' ? (
+            additionalDataRenderer({ product: resource })
+          ) : (
+            <RawData value={resource} />
+          )}
+        </ProductCardAdditionalData>
+        <TextLink
+          as="button"
+          onClick={() => setIsExpanded((currentIsExpanded) => !currentIsExpanded)}>
+          {isExpanded ? 'hide details' : 'more details'}
+        </TextLink>
+      </Box>
+    );
+  };
 
   return (
     <Card
@@ -58,7 +78,6 @@ const ProductCard = (props: ProductCardProps) => {
         headerTitle={title}
         resource={resource}
         handleRemove={handleRemove}
-        cardIndex={cardIndex}
         isExpanded={isExpanded}
         showHeaderMenu={Boolean(fieldProductCardType)}
       />
@@ -69,21 +88,9 @@ const ProductCard = (props: ProductCardProps) => {
         image={resource?.image ?? ''}
         id={displaySKU}
         isExpanded={isExpanded}
-        externalResourceError={externalResourceError}
-      />
-
-      {!hasError && (
-        <Box marginBottom="spacingM" marginLeft="spacingM">
-          <ProductCardAdditionalData isExpanded={isExpanded}>
-            {resource.description}
-          </ProductCardAdditionalData>
-          <TextLink as="button" onClick={() => setIsExpanded(!isExpanded)}>
-            {isExpanded ? 'hide details' : 'more details'}
-          </TextLink>
-        </Box>
-      )}
+        externalResourceError={externalResourceError}>
+        {!hasError && renderAdditionalData()}
+      </ProductCardBody>
     </Card>
   );
 };
-
-export default ProductCard;

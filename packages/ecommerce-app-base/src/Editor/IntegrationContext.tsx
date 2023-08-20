@@ -15,7 +15,7 @@ export const useIntegration = (): Integration => {
   return useContext(IntegrationContext);
 };
 
-/* let"s see if we need it ...
+/* let's see if we need it ...
 export function withIntegrationContext<T extends Partial<Integration> = {}>(
   WrappedComponent: ComponentType<T>
 ) {
