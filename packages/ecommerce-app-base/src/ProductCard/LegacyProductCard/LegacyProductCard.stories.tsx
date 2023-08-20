@@ -39,8 +39,14 @@ export const Sortable: Story = {
   },
 };
 
-export const NoImage: Story = {
+export const MissingImage: Story = {
   args: {
     product: { ...productsList[0], image: '' },
+  },
+};
+
+export const MissingProduct: Story = {
+  args: {
+    product: { ...productsList[0], name: undefined },
   },
 };

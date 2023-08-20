@@ -1,19 +1,12 @@
 import * as React from 'react';
-import { FC, ReactElement, useState } from 'react';
-import {
-  Badge,
-  Card,
-  Heading,
-  IconButton,
-  SkeletonContainer,
-  SkeletonImage,
-  Subheading,
-} from '@contentful/f36-components';
-import { AssetIcon, CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
+import { FC, ReactElement } from 'react';
+import { Badge, Card, Heading, IconButton, Subheading } from '@contentful/f36-components';
+import { CloseIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 import type { Product } from '../../types';
 import { SortableHandle } from 'react-sortable-hoc';
+import { ProductImage } from '../ProductImage';
 
 const IMAGE_SIZE = 48;
 
@@ -28,24 +21,9 @@ const styles = {
   cardInner: css({
     display: 'flex',
   }),
-  imageWrapper: (imageHasLoaded: boolean) =>
-    css({
-      width: imageHasLoaded ? `${IMAGE_SIZE}px` : 0,
-      height: imageHasLoaded ? `${IMAGE_SIZE}px` : 0,
-      overflow: 'hidden',
-      margin: imageHasLoaded ? tokens.spacingM : 0,
-      position: 'relative',
-      '> img': css({
-        display: 'block',
-        height: `${IMAGE_SIZE}px`,
-        minWidth: 'auto',
-        userSelect: 'none',
-        position: 'absolute',
-        left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
-      }),
-    }),
+  imgWrapper: css({
+    margin: tokens.spacingM,
+  }),
   dragHandle: css({
     height: 'auto',
     borderBottomLeftRadius: tokens.borderRadiusMedium,
@@ -127,8 +105,6 @@ export const LegacyProductCard: FC<Props> = ({
   onDelete,
   skuType,
 }) => {
-  const [imageHasLoaded, setImageLoaded] = useState(false);
-  const [imageHasErrored, setImageHasErrored] = useState(false);
   const productIsMissing = !product.name;
 
   return (
@@ -140,31 +116,14 @@ export const LegacyProductCard: FC<Props> = ({
       withDragHandle
       dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}>
       <div className={styles.cardInner}>
-        {!imageHasLoaded && !imageHasErrored && product.image && (
-          <SkeletonContainer className={styles.skeletonImage}>
-            <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
-          </SkeletonContainer>
-        )}
-        {!product.image || imageHasErrored ? (
-          <div className={styles.errorImage}>
-            {productIsMissing ? (
-              <ErrorCircleIcon testId="error-circle-icon" />
-            ) : (
-              <AssetIcon testId="asset-icon" />
-            )}
-          </div>
-        ) : (
-          <div className={styles.imageWrapper(imageHasLoaded)}>
-            <img
-              style={{ display: imageHasLoaded ? 'block' : 'none' }}
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageHasErrored(true)}
-              src={product.image}
-              alt={product.name}
-              data-test-id="image"
-            />
-          </div>
-        )}
+        <ProductImage
+          className={styles.imgWrapper}
+          src={product.image}
+          alt={product.name}
+          width={`${IMAGE_SIZE}px`}
+          height={`${IMAGE_SIZE}px`}
+        />
+
         <section className={styles.description}>
           <Heading className={styles.name(product.name)}>
             {productIsMissing ? product.sku : product.name}

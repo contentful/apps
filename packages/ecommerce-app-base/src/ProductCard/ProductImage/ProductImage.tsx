@@ -14,6 +14,7 @@ type ImageSize = {
 type Props = {
   alt?: string;
   src?: string;
+  className?: string;
 } & ImageSize;
 
 const styles = {
@@ -53,12 +54,12 @@ const styles = {
   }),
 };
 
-export const ProductImage: FC<Props> = ({ src, alt, width, height }) => {
+export const ProductImage: FC<Props> = ({ src, alt, width, height, className }) => {
   const [loaded, setLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   return (
-    <div style={{ width, height }}>
+    <div style={{ width, height }} className={className}>
       {!loaded && !hasError && (
         <SkeletonContainer className={styles.skeletonImage}>
           <SkeletonImage width={width} height={height} />
