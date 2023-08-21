@@ -9,6 +9,7 @@ import useInitializeParameters from '@hooks/config/useInitializeParameters';
 import useSaveConfigHandler from '@hooks/config/useSaveConfigHandler';
 import parameterReducer from '@components/config/parameterReducer';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
+import { ConfigErrors } from '@components/config/configText';
 
 const initialParameters: AppInstallationParameters = {
   model: defaultModelId,
@@ -19,7 +20,25 @@ const initialParameters: AppInstallationParameters = {
 const ConfigPage = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
 
-  useSaveConfigHandler(parameters);
+  const validateParams = (params: AppInstallationParameters): string[] => {
+    const notifierErrors = [];
+
+    if (!params.apiKey) {
+      notifierErrors.push(ConfigErrors.missingApiKey);
+    }
+
+    if (!params.model) {
+      notifierErrors.push(ConfigErrors.missingModel);
+    }
+
+    if (!params.profile.profile) {
+      notifierErrors.push(ConfigErrors.missingProfile);
+    }
+
+    return notifierErrors;
+  };
+
+  useSaveConfigHandler(parameters, validateParams);
   useInitializeParameters(dispatchParameters);
 
   return (
