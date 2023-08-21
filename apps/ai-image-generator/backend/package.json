@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "NODE_ENV=production tsc --module es6",
+    "build": "NODE_ENV=production tsc",
     "test": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --exit",
     "test:ci": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 CI=true mocha --exit",
     "test:debug": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
@@ -17,7 +17,7 @@
     "openai": "^4.0.0"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^16.1.0",
+    "@tsconfig/node18": "^18.2.0",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^10.0.16",
