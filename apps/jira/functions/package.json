@@ -16,7 +16,7 @@
   "dependencies": {
     "@types/lodash": "^4.14.108",
     "aws-sdk": "^2.1440.0",
-    "node-fetch": "^2.6.12"
+    "node-fetch": "^2.6.13"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.119",
