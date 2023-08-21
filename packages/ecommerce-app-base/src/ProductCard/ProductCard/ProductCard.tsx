@@ -7,7 +7,7 @@ import ProductCardHeader from '../ProductCardHeader/ProductCardHeader';
 import ProductCardBody from '../ProductCardBody/ProductCardBody';
 import { ProductCardAdditionalData } from '../ProductCardAdditionalData';
 import { useIntegration } from '../../Editor';
-import { RawData } from '../AdditionalData/RawData';
+import { RawData } from '../../AdditionalData';
 
 export interface ProductCardProps {
   resource: ExternalResource;

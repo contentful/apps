@@ -53,4 +53,5 @@ export function setup(integration: Integration) {
 
 // we should not export everything here
 export * from './types';
+export * from './AdditionalData';
 export { renderSkuPicker } from './SkuPicker/renderSkuPicker';

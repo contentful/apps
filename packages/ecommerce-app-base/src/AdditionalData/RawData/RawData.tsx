@@ -16,6 +16,7 @@ export const RawData: FC<Props> = ({ value }) => {
           width: '100%',
           margin: 0,
           border: `1px dashed ${tokens.gray300}`,
+          borderRadius: 'inherit',
           backgroundColor: tokens.gray100,
           padding: `${tokens.spacingS}`,
         }}>

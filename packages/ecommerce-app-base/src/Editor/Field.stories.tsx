@@ -48,7 +48,8 @@ export const Version1MultipleProducts: Story = {
 export const Version1AdditionalDataRendererDefined: Story = {
   decorators: [
     (Story) => (
-      <IntegrationProvider integration={{ ...integration('v1'), renderAdditionalData: () => null }}>
+      <IntegrationProvider
+        integration={{ ...integration('v1'), additionalDataRenderer: () => null }}>
         <GlobalStyles />
         <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
           <Story />
