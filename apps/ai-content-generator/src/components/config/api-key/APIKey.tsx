@@ -2,7 +2,8 @@ import { ChangeEvent, Dispatch, useState } from 'react';
 import { FormControl, TextInput } from '@contentful/f36-components';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 import { APIKeyText } from '../configText';
-import OpenAILink from '../openai-link/OpenAILink';
+import HyperLink from '@components/common/HyperLink/HyperLink';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 interface Props {
   apiKey: string;
@@ -48,7 +49,13 @@ const APIKey = (props: Props) => {
         />
       )}
       <FormControl.HelpText>
-        <OpenAILink body={APIKeyText.helpText} substring={APIKeyText.linkSubstring} />
+        <HyperLink
+          body={APIKeyText.helpText}
+          substring={APIKeyText.linkSubstring}
+          hyperLinkHref={APIKeyText.link}
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
+        />
       </FormControl.HelpText>
     </FormControl>
   );

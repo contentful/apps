@@ -78,6 +78,7 @@ const APIKeyText = {
   title: 'OpenAI API Key',
   helpText: 'Enter your OpenAI API key. If you need to generate a key, visit openai.com',
   linkSubstring: 'openai.com',
+  link: 'https://openai.com',
 };
 
 const Sections = {

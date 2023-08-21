@@ -5,9 +5,10 @@ import { Box } from '@contentful/f36-components';
 import SidebarButtons from '@components/app/sidebar/SidebarButtons';
 import ParametersMissingWarning from '@components/app/sidebar/ParametersMissingWarning';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
-import DisclaimerMessage from '@components/app/sidebar/disclaimer-message/DisclaimerMessage';
 import { styles } from './Sidebar.styles';
-import { warningMessages } from '@components/app/sidebar/warningMessages';
+import { warningMessages, disclaimerMessage } from '@components/app/sidebar/sidebarText';
+import HyperLink from '@components/common/HyperLink/HyperLink';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 const Sidebar = () => {
   useAutoResizer();
@@ -36,7 +37,13 @@ const Sidebar = () => {
         </Box>
       ) : null}
       <Box css={styles.msgWrapper}>
-        <DisclaimerMessage />
+        <HyperLink
+          body={disclaimerMessage.body}
+          substring={disclaimerMessage.substring}
+          hyperLinkHref={disclaimerMessage.link}
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
+        />
       </Box>
     </>
   );
