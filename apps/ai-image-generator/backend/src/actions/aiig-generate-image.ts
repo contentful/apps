@@ -6,11 +6,29 @@ interface AppActionCallParameters {
   prompt: string;
 }
 
-interface AppActionResponse {
-  status: number;
-  prompt: string;
-  images: string[];
+interface Image {
+  url: string;
 }
+
+// TODO: Create generic versions of success and error
+export interface AppActionCallResponseSuccess {
+  ok: true;
+  data: {
+    type: 'ImageCreationResult';
+    images: Image[];
+  };
+}
+
+export interface AppActionCallResponseError {
+  ok: false;
+  error: {
+    type: string;
+    message: string;
+    details: Record<string, any>;
+  };
+}
+
+type AppActionCallResponse = AppActionCallResponseSuccess | AppActionCallResponseError;
 
 async function fetchOpenAiApiKey(cma: PlainClientAPI, appInstallationId: string): Promise<string> {
   const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
@@ -25,7 +43,7 @@ async function fetchOpenAiApiKey(cma: PlainClientAPI, appInstallationId: string)
 export const handler = async (
   payload: AppActionCallParameters,
   context: AppActionCallContext
-): Promise<AppActionResponse> => {
+): Promise<AppActionCallResponse> => {
   const {
     cma,
     appActionCallContext: { appInstallationId },
@@ -34,14 +52,17 @@ export const handler = async (
   const openAiApiService = OpenAiApiService.fromOpenAiApiKey(openAiApiKey);
 
   const { prompt } = payload;
-  const images = await openAiApiService.createImage({
+  const openAiImages = await openAiApiService.createImage({
     prompt,
-    numImages: 1,
+    numImages: 4,
     size: '1024x1024',
   });
+  const images = openAiImages.filter((image): image is Image => !!image.url);
   return {
-    status: 201,
-    prompt,
-    images: images.map((image) => (image.url !== undefined ? image.url : '')),
+    ok: true,
+    data: {
+      type: 'ImageCreationResult',
+      images,
+    },
   };
 };
