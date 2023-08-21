@@ -1,8 +1,10 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
+  "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
     "outDir": "./build",
-    "sourceMap": false
+    "sourceMap": false,
+    "target": "es2022"
+
   },
   "include": ["src"],
   "exclude": ["node_modules", "**/*.spec.ts"]
