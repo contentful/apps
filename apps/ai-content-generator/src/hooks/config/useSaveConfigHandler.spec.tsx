@@ -19,8 +19,9 @@ describe('useSaveConfigHandler', () => {
 
   it('adds the on configure callback', async () => {
     const parameters = generateRandomParameters();
+    const mockValidateParams = vi.fn(() => []);
 
-    renderHook(() => useSaveConfigHandler(parameters));
+    renderHook(() => useSaveConfigHandler(parameters, mockValidateParams));
     await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledOnce());
 
     const configureCallback = sdk.app.onConfigure.mock.calls[0][0];
@@ -33,6 +34,7 @@ describe('useSaveConfigHandler', () => {
       generateRandomParameters(),
       mockSdkParameters.happyPath,
     ];
+    const mockValidateParams = vi.fn(() => []);
 
     const testIfHookUpdates = async (parameterIndex: number) => {
       const parameters = testCases[parameterIndex];
@@ -49,7 +51,7 @@ describe('useSaveConfigHandler', () => {
     };
 
     const { rerender } = renderHook(
-      (props: AppInstallationParameters) => useSaveConfigHandler(props),
+      (props: AppInstallationParameters) => useSaveConfigHandler(props, mockValidateParams),
       {
         initialProps: mockSdkParameters.init,
       }
@@ -60,5 +62,17 @@ describe('useSaveConfigHandler', () => {
     for (let i = 0; i < testCases.length; i++) {
       await testIfHookUpdates(i);
     }
+  });
+
+  it('does not save the configuration when there are invalid parameters', async () => {
+    const parameters = generateRandomParameters();
+    const mockValidateParams = vi.fn(() => ['invalid']);
+
+    renderHook(() => useSaveConfigHandler(parameters, mockValidateParams));
+
+    await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledOnce());
+
+    const configureCallback = sdk.app.onConfigure.mock.calls[0][0]();
+    expect(configureCallback.parameters).toEqual(undefined);
   });
 });

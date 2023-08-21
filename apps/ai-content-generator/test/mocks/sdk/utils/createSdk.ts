@@ -12,6 +12,9 @@ const createSDK = (parameters: AppInstallationParameters) => {
     ids: {
       app: 'test-app',
     },
+    notifier: {
+      error: vi.fn(),
+    },
   };
 };
 
