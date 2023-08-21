@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Paginator } from './index';
-import { GlobalStyles } from '@contentful/f36-components';
 import { useState } from 'react';
 
 const meta: Meta<typeof Paginator> = {
@@ -24,12 +23,4 @@ export const Default: Story = {
       <Paginator activePage={activePage} setActivePage={setActivePage} pageCount={args.pageCount} />
     );
   },
-  decorators: [
-    (Story) => (
-      <>
-        <GlobalStyles />
-        <Story />
-      </>
-    ),
-  ],
 };

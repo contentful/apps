@@ -15,14 +15,6 @@ const meta: Meta<typeof SkuPicker> = {
   parameters: {
     layout: 'left',
   },
-  decorators: [
-    (Story) => (
-      <>
-        <GlobalStyles />
-        <Story />
-      </>
-    ),
-  ],
 };
 
 export default meta;

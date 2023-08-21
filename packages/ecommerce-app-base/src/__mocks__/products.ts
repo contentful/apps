@@ -33,10 +33,52 @@ export const productsList: Product[] = [
   },
 ];
 
-export const products = productsList.reduce(
-  (previousValue, currentValue: Product) => {
-    previousValue[currentValue.name] = currentValue;
-    return previousValue;
+export const products = productsList.reduce((previousValue, currentValue: Product) => {
+  previousValue[currentValue.name] = currentValue;
+  return previousValue;
+}, {} as Record<string, Product>);
+
+export const columns = [
+  {
+    title: 'Shopify activity',
+    rows: [
+      {
+        name: 'Status',
+        value: 'active',
+      },
+      {
+        name: 'Inventory',
+        value: '35 out of 40',
+      },
+      {
+        name: 'Created',
+        value: 'tbd',
+      },
+      {
+        name: 'Updated',
+        value: 'tbd',
+      },
+    ],
   },
-  {} as Record<string, Product>
-);
+  {
+    title: 'Product information',
+    rows: [
+      {
+        name: 'Price',
+        value: '$20.00',
+      },
+      {
+        name: 'Sizes',
+        value: 'XL',
+      },
+      {
+        name: 'Colors',
+        value: 'Maroon and gold',
+      },
+      {
+        name: 'Vendor',
+        value: 'Surley',
+      },
+    ],
+  },
+];

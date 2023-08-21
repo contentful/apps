@@ -1,1 +1,0 @@
-export { ProductCardAdditionalData } from './ProductCardAdditionalData';

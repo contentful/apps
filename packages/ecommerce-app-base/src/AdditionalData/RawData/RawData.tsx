@@ -1,5 +1,5 @@
-import * as React from 'react';
 import type { FC } from 'react';
+import * as React from 'react';
 import { CopyButton, Flex } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { JSONObject } from '../../types';
@@ -15,9 +15,9 @@ export const RawData: FC<Props> = ({ value }) => {
           position: 'relative',
           width: '100%',
           margin: 0,
-          border: `1px dashed ${tokens.gray300}`,
-          borderRadius: 'inherit',
           backgroundColor: tokens.gray100,
+          border: `1px dashed ${tokens.gray300}`,
+          borderRadius: tokens.borderRadiusMedium,
           padding: `${tokens.spacingS}`,
         }}>
         <div

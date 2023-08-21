@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ProductSelectionList } from './index';
 import { productsList } from '../../__mocks__';
-import { GlobalStyles } from '@contentful/f36-components';
 
 const meta: Meta<typeof ProductSelectionList> = {
   component: ProductSelectionList,
@@ -22,14 +21,6 @@ export const Default: Story = {
     products: productsList,
     selectProduct: (...args) => alert(args),
   },
-  decorators: [
-    (Story) => (
-      <>
-        <GlobalStyles />
-        <Story />
-      </>
-    ),
-  ],
 };
 
 export const NoImages: Story = {
@@ -37,12 +28,4 @@ export const NoImages: Story = {
     products: productPreviewNoImages,
     selectProduct: (...args) => alert(args),
   },
-  decorators: [
-    (Story) => (
-      <>
-        <GlobalStyles />
-        <Story />
-      </>
-    ),
-  ],
 };

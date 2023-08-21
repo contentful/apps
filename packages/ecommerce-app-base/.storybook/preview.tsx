@@ -1,4 +1,6 @@
 import type { Preview } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
+import { GlobalStyles } from '@contentful/f36-components';
 
 const preview: Preview = {
   parameters: {
@@ -11,6 +13,14 @@ const preview: Preview = {
       },
     },
   },
+  decorators: [
+    (Story: StoryFn) => (
+      <>
+        <GlobalStyles />
+        <Story />
+      </>
+    ),
+  ],
 };
 
 export default preview;

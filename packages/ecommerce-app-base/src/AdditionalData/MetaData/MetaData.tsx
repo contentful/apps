@@ -1,25 +1,26 @@
 import * as React from 'react';
-import { FC, ReactNode } from 'react';
-import { Box, Caption, Text } from '@contentful/f36-components';
+import { FC } from 'react';
+import { Box, Caption } from '@contentful/f36-components';
 import { Row } from './Row';
 import { Column } from './Column';
+import { Container } from '../Container';
 
 type RowData = {
   name: string;
-  value: ReactNode;
+  value: string;
 };
 
-type ColumnData = {
+export type ColumnData = {
   title: string;
   rows: Array<RowData>;
 };
 
-type MetaData = {
+export type MetaDataProps = {
   columns: Array<ColumnData>;
 };
 
-export const MetaData: FC<MetaData> = ({ columns }) => {
-  const renderRow = (row: RowData) => {
+export const MetaData: FC<MetaDataProps> = ({ columns }) => {
+  const renderMetaRow = (row: RowData) => {
     return (
       <Box key={row.name}>
         <Caption as={'span'} marginRight={'spacingM'} color={'gray700'}>
@@ -38,10 +39,14 @@ export const MetaData: FC<MetaData> = ({ columns }) => {
         <Caption as={'h3'} fontWeight={'fontWeightMedium'} marginBottom={'spacingM'}>
           {column.title}
         </Caption>
-        {column.rows.map((row) => renderRow(row))}
+        {column.rows.map((row) => renderMetaRow(row))}
       </Column>
     );
   };
 
-  return <Row>{columns.map((column) => renderColumn(column))}</Row>;
+  return (
+    <Container>
+      <Row>{columns.map((column) => renderColumn(column))}</Row>
+    </Container>
+  );
 };

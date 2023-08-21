@@ -68,7 +68,7 @@ export const ProductImage: FC<Props> = ({ src, alt, width, height, className }) 
 
       {hasError && (
         <div className={styles.errorImage} style={{ width, height }}>
-          <AssetIcon />
+          <AssetIcon data-test-id={'asset-icon'} />
         </div>
       )}
 

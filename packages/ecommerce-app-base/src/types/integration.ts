@@ -8,13 +8,13 @@ import {
 } from './ui';
 import { ParameterDefinition } from './config';
 import { ReactNode } from 'react';
-import { Product } from './product';
+import { AdditionalDataDefaultType, Product } from './product';
 
 export type SKUType = { id: string; name: string; default?: boolean };
 
 export type ProductCardVersion = 'v1' | 'v2';
 
-export type Integration<AdditionalData = undefined> = {
+export type Integration<AdditionalData = AdditionalDataDefaultType> = {
   isInOrchestrationEAP?: boolean;
   /**
    * Returns the text that is displayed on the button in the field location.
@@ -133,6 +133,6 @@ export type Integration<AdditionalData = undefined> = {
 
 export type AdditionalDataRendererProps<AdditionalData> = { product: Product<AdditionalData> };
 
-export type AdditionalDataRenderer<AdditionalData = undefined> = (
+export type AdditionalDataRenderer<AdditionalData = AdditionalDataDefaultType> = (
   props: AdditionalDataRendererProps<AdditionalData>
 ) => ReactNode;

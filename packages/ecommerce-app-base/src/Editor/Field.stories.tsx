@@ -1,18 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Field } from './Field';
-import { SDKContext } from '@contentful/react-apps-toolkit';
-import { IntegrationProvider } from './IntegrationContext';
-import { sdk } from '../__mocks__/storybook/sdk';
-import { GlobalStyles } from '@contentful/f36-components';
-import { parameters } from '../../.storybook/parameters';
-import { KnownAppSDK } from '@contentful/app-sdk';
 import { integration } from '../__mocks__/storybook/integration';
 import { productsList } from '../__mocks__';
+import { decorators } from '../__mocks__/storybook/decorators';
 
 const meta: Meta<typeof Field> = {
   component: Field,
   tags: ['autodocs'],
-  ...parameters,
+  decorators: [decorators.WithSDKProvider(), decorators.WithFixedWidth()],
 };
 
 export default meta;
@@ -21,66 +16,57 @@ type Story = StoryObj<typeof Field>;
 
 export const Version1SingleProduct: Story = {
   decorators: [
-    (Story) => (
-      <IntegrationProvider integration={integration('v1', [productsList[0]])}>
-        <GlobalStyles />
-        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
-          <Story />
-        </SDKContext.Provider>
-      </IntegrationProvider>
+    decorators.WithIntegrationProvider(
+      integration(
+        {
+          productCardVersion: 'v1',
+        },
+        [productsList[0]]
+      )
     ),
   ],
 };
 
 export const Version1MultipleProducts: Story = {
   decorators: [
-    (Story) => (
-      <IntegrationProvider integration={integration('v1')}>
-        <GlobalStyles />
-        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
-          <Story />
-        </SDKContext.Provider>
-      </IntegrationProvider>
+    decorators.WithIntegrationProvider(
+      integration({
+        productCardVersion: 'v1',
+      })
     ),
   ],
 };
 
 export const Version1AdditionalDataRendererDefined: Story = {
   decorators: [
-    (Story) => (
-      <IntegrationProvider
-        integration={{ ...integration('v1'), additionalDataRenderer: () => null }}>
-        <GlobalStyles />
-        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
-          <Story />
-        </SDKContext.Provider>
-      </IntegrationProvider>
+    decorators.WithIntegrationProvider(
+      integration({
+        productCardVersion: 'v1',
+        additionalDataRenderer: () => null,
+      })
     ),
   ],
 };
 
 export const Version2SingleProduct: Story = {
   decorators: [
-    (Story) => (
-      <IntegrationProvider integration={integration('v2', [productsList[0]])}>
-        <GlobalStyles />
-        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
-          <Story />
-        </SDKContext.Provider>
-      </IntegrationProvider>
+    decorators.WithIntegrationProvider(
+      integration(
+        {
+          productCardVersion: 'v2',
+        },
+        [productsList[0]]
+      )
     ),
   ],
 };
 
 export const Version2MultipleProducts: Story = {
   decorators: [
-    (Story) => (
-      <IntegrationProvider integration={integration('v2')}>
-        <GlobalStyles />
-        <SDKContext.Provider value={{ sdk: sdk as KnownAppSDK }}>
-          <Story />
-        </SDKContext.Provider>
-      </IntegrationProvider>
+    decorators.WithIntegrationProvider(
+      integration({
+        productCardVersion: 'v2',
+      })
     ),
   ],
 };

@@ -1,13 +1,29 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Box, Card, TextLink } from '@contentful/f36-components';
-import { styles } from './ProductCard.styles';
+import { Box, Card, Collapse, TextLink } from '@contentful/f36-components';
 import { ExternalResource, ExternalResourceError, ProductCardType, RenderDragFn } from '../types';
 import ProductCardHeader from '../ProductCardHeader/ProductCardHeader';
 import ProductCardBody from '../ProductCardBody/ProductCardBody';
-import { ProductCardAdditionalData } from '../ProductCardAdditionalData';
 import { useIntegration } from '../../Editor';
 import { RawData } from '../../AdditionalData';
+
+import { css } from 'emotion';
+import tokens from '@contentful/f36-tokens';
+
+export const styles = {
+  productCard: css({
+    marginTop: tokens.spacingXs,
+    marginBottom: tokens.spacingXs,
+    '&&:hover': {
+      borderColor: tokens.colorPrimary,
+      cursor: 'pointer',
+    },
+  }),
+  additionalDataWrapper: css({
+    marginTop: tokens.spacingS,
+    marginBottom: tokens.spacingS,
+  }),
+};
 
 export interface ProductCardProps {
   resource: ExternalResource;
@@ -47,13 +63,13 @@ export const ProductCard = (props: ProductCardProps) => {
   const renderAdditionalData = () => {
     return (
       <Box marginBottom="spacingS">
-        <ProductCardAdditionalData isExpanded={isExpanded}>
-          {!!additionalDataRenderer && typeof additionalDataRenderer === 'function' ? (
-            additionalDataRenderer({ product: resource })
-          ) : (
-            <RawData value={resource} />
-          )}
-        </ProductCardAdditionalData>
+        <Collapse isExpanded={isExpanded}>
+          <Box className={styles.additionalDataWrapper}>
+            {!!additionalDataRenderer &&
+              typeof additionalDataRenderer === 'function' &&
+              additionalDataRenderer({ product: resource })}
+          </Box>
+        </Collapse>
         <TextLink
           as="button"
           onClick={() => setIsExpanded((currentIsExpanded) => !currentIsExpanded)}>

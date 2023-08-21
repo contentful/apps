@@ -2,17 +2,16 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { productsList } from '../__mocks__';
 import { SortableList } from './SortableList';
 import { GlobalStyles } from '@contentful/f36-components';
-import { parameters } from '../../.storybook/parameters';
 import { integration } from '../__mocks__/storybook/integration';
 import { IntegrationProvider } from './IntegrationContext';
 import { Integration } from '../types';
+import { decorators } from '../__mocks__/storybook/decorators';
 
 type Args = typeof SortableList & Pick<Integration, 'productCardVersion'>;
 
 const meta: Meta<Args> = {
   component: SortableList,
   tags: ['autodocs'],
-  ...parameters,
   argTypes: {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -22,6 +21,7 @@ const meta: Meta<Args> = {
       defaultValue: 'v1',
     },
   },
+  decorators: [decorators.WithFixedWidth()],
 };
 
 export default meta;
@@ -35,13 +35,12 @@ export const Default: Story = {
     disabled: false,
     deleteFn: () => {},
   },
-  render: (args, context) => {
-    console.log({ args, context });
+  render: (args) => {
     return (
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      <IntegrationProvider integration={integration(args.productCardVersion)}>
-        <GlobalStyles />
+      <IntegrationProvider
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        integration={integration({ productCardVersion: args.productCardVersion })}>
         <SortableList {...args} />
       </IntegrationProvider>
     );

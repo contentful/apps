@@ -1,8 +1,12 @@
 import type { StoryObj } from '@storybook/react';
 import { ProductCard } from './ProductCard';
 import { DragHandle } from '@contentful/f36-components';
-import { parameters } from '../../../.storybook/parameters';
 import { products, productsList } from '../../__mocks__';
+import { decorators } from '../../__mocks__/storybook/decorators';
+import { columns } from '../../__mocks__/products';
+import { MetaData, RawData } from '../../AdditionalData';
+import { Product } from '../../types';
+import { ComponentProps } from 'react';
 
 const CARD_HEADER = 'Shopify Product';
 const CARD_TYPE = 'field';
@@ -10,7 +14,6 @@ const CARD_TYPE = 'field';
 const meta = {
   component: ProductCard,
   tags: ['autodocs'],
-  ...parameters,
   argTypes: {
     resource: {
       options: products,
@@ -22,6 +25,7 @@ const meta = {
     title: CARD_HEADER,
     productCardType: CARD_TYPE,
   },
+  decorators: [decorators.WithFixedWidth()],
 };
 
 export default meta;
@@ -97,12 +101,54 @@ export const Loading: Story = {
   },
 };
 
-// ToDo
-export const CustomRenderer: Story = {
-  args: {
-    isLoading: true,
-  },
+type AdditionalDataType = ComponentProps<typeof MetaData>['columns'];
+
+export const RawDataRenderer: Story = {
+  args: {},
   parameters: {
     ...designParams,
+  },
+  decorators: [
+    decorators.WithIntegrationProvider<AdditionalDataType>({
+      additionalDataRenderer: ({ product }: { product: Product<AdditionalDataType> }) => {
+        return <RawData value={{ columns: product.additionalData }} />;
+      },
+    }),
+  ],
+  render: (args) => {
+    return (
+      <ProductCard
+        resource={{
+          ...args.resource,
+          additionalData: columns,
+        }}
+        title={'product'}
+      />
+    );
+  },
+};
+
+export const MetaDataRenderer: Story = {
+  args: {},
+  parameters: {
+    ...designParams,
+  },
+  decorators: [
+    decorators.WithIntegrationProvider<AdditionalDataType>({
+      additionalDataRenderer: ({ product }: { product: Product<AdditionalDataType> }) => {
+        return <MetaData columns={product.additionalData} />;
+      },
+    }),
+  ],
+  render: (args) => {
+    return (
+      <ProductCard
+        resource={{
+          ...args.resource,
+          additionalData: columns,
+        }}
+        title={'product'}
+      />
+    );
   },
 };

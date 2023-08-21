@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { parameters } from '../../../.storybook/parameters';
 import { ProductImage } from './ProductImage';
 
 const meta: Meta<typeof ProductImage> = {
   component: ProductImage,
   tags: ['autodocs'],
-  ...parameters,
   args: {
     alt: 'Product Image',
   },

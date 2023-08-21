@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { products, productsList } from '../../__mocks__';
-import { parameters } from '../../../.storybook/parameters';
 import { LegacyProductCard } from './LegacyProductCard';
+import { decorators } from '../../__mocks__/storybook/decorators';
 
 const meta: Meta<typeof LegacyProductCard> = {
   component: LegacyProductCard,
   tags: ['autodocs'],
-  ...parameters,
   argTypes: {
     product: {
       options: products,
@@ -19,6 +18,7 @@ const meta: Meta<typeof LegacyProductCard> = {
     isSortable: false,
     onDelete: () => {},
   },
+  decorators: [decorators.WithFixedWidth()],
 };
 
 export default meta;

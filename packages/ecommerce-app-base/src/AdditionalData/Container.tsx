@@ -7,15 +7,12 @@ import tokens from '@contentful/f36-tokens';
 const styles = {
   container: css({
     width: tokens.contentWidthFull,
+    padding: tokens.spacingM,
     backgroundColor: tokens.gray100,
     borderRadius: tokens.borderRadiusMedium,
   }),
 };
 
-export const Container: FC<PropsWithChildren<NonNullable<unknown>>> = ({ children }) => {
-  return (
-    <Box className={styles.container} padding={'spacingM'}>
-      {children}
-    </Box>
-  );
+export const Container: FC<PropsWithChildren<object>> = ({ children }) => {
+  return <Box className={styles.container}>{children}</Box>;
 };
