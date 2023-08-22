@@ -34,9 +34,9 @@ export const RawDataRenderer: FC<Props> = ({ value }) => {
             right: tokens.spacingXs,
             bottom: tokens.spacingXs,
           }}>
-          <CopyButton value={stringValue} />
+          <CopyButton data-test-id={'copy-raw-data-button'} value={stringValue} />
         </div>
-        <code>{stringValue}</code>
+        <code role={'document'}>{stringValue}</code>
       </pre>
     </Flex>
   );

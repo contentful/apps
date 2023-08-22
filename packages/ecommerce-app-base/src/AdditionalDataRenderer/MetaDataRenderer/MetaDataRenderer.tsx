@@ -22,8 +22,8 @@ export type MetaDataProps = {
 export const MetaDataRenderer: FC<MetaDataProps> = ({ columns }) => {
   const renderMetaRow = (row: RowData) => {
     return (
-      <Box key={row.name}>
-        <Caption as={'span'} marginRight={'spacingM'} color={'gray700'}>
+      <Box key={row.name} role={'listItem'}>
+        <Caption as={'span'} marginRight={'spacingM'} color={'gray700'} role={'heading'}>
           {row.name}:
         </Caption>
         <Caption as={'span'} color={'gray900'}>
