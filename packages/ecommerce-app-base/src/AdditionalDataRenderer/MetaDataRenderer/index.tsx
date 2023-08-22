@@ -1,3 +1,3 @@
-export { MetaData } from './MetaData';
+export { MetaDataRenderer } from './MetaDataRenderer';
 export { Column } from './Column';
 export { Row } from './Row';

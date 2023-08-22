@@ -24,7 +24,7 @@ export const styles = {
     height: '300px',
     backgroundColor: AWSAmplifyBrand.primaryColor,
   }),
-  additionalDataWrapper: {
+  box: {
     width: '100%',
     marginTop: '22px',
   },

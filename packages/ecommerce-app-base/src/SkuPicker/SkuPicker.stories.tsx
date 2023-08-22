@@ -5,7 +5,6 @@ import logo from '../__mocks__/logo.svg';
 import { SkuPicker } from './SkuPicker';
 import { ProductsFn } from '../types';
 import { sdk } from '../__mocks__/storybook/sdk';
-import { GlobalStyles } from '@contentful/f36-components';
 import { productsList } from '../__mocks__';
 
 const meta: Meta<typeof SkuPicker> = {

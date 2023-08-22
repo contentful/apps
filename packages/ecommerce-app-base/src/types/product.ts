@@ -1,6 +1,6 @@
 // Internal - provider agnostic shape
 
-export type AdditionalDataDefaultType = any;
+export type AdditionalDataDefaultType = unknown;
 
 export type Product<AdditionalData = AdditionalDataDefaultType> = {
   sku: string;

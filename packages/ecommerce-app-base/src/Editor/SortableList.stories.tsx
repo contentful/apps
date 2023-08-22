@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { productsList } from '../__mocks__';
 import { SortableList } from './SortableList';
-import { GlobalStyles } from '@contentful/f36-components';
 import { integration } from '../__mocks__/storybook/integration';
 import { IntegrationProvider } from './IntegrationContext';
 import { Integration } from '../types';

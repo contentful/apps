@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { Box, Caption } from '@contentful/f36-components';
 import { Row } from './Row';
 import { Column } from './Column';
@@ -7,7 +7,7 @@ import { Container } from '../Container';
 
 type RowData = {
   name: string;
-  value: string;
+  value: string | ReactNode;
 };
 
 export type ColumnData = {
@@ -19,7 +19,7 @@ export type MetaDataProps = {
   columns: Array<ColumnData>;
 };
 
-export const MetaData: FC<MetaDataProps> = ({ columns }) => {
+export const MetaDataRenderer: FC<MetaDataProps> = ({ columns }) => {
   const renderMetaRow = (row: RowData) => {
     return (
       <Box key={row.name}>

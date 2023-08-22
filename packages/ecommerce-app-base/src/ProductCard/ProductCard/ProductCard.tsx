@@ -5,7 +5,6 @@ import { ExternalResource, ExternalResourceError, ProductCardType, RenderDragFn 
 import ProductCardHeader from '../ProductCardHeader/ProductCardHeader';
 import ProductCardBody from '../ProductCardBody/ProductCardBody';
 import { useIntegration } from '../../Editor';
-import { RawData } from '../../AdditionalData';
 
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';

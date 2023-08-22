@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { RawData } from './index';
+import { RawDataRenderer } from './index';
 import { decorators } from '../../__mocks__/storybook/decorators';
 
-const meta: Meta<typeof RawData> = {
-  title: 'AdditionalData/RawData',
-  component: RawData,
+const meta: Meta<typeof RawDataRenderer> = {
+  title: 'AdditionalData/RawDataRenderer',
+  component: RawDataRenderer,
   tags: ['autodocs'],
   decorators: [decorators.WithFixedWidth()],
 };
 
 export default meta;
 
-type Story = StoryObj<typeof RawData>;
+type Story = StoryObj<typeof RawDataRenderer>;
 
 export const Default: Story = {
   args: {

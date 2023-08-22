@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { columns } from '../../__mocks__/products';
-import { MetaData } from './MetaData';
+import { MetaDataRenderer } from './MetaDataRenderer';
 
-const meta: Meta<typeof MetaData> = {
-  title: 'AdditionalData/MetaData',
-  component: MetaData,
+const meta: Meta<typeof MetaDataRenderer> = {
+  title: 'AdditionalData/MetaDataRenderer',
+  component: MetaDataRenderer,
   tags: ['autodocs'],
   parameters: {
     layout: 'left',
@@ -13,7 +13,7 @@ const meta: Meta<typeof MetaData> = {
 
 export default meta;
 
-type Story = StoryObj<typeof MetaData>;
+type Story = StoryObj<typeof MetaDataRenderer>;
 
 export const Default: Story = {
   args: {

@@ -6,7 +6,7 @@ import { JSONObject } from '../../types';
 
 type Props = { value: JSONObject };
 
-export const RawData: FC<Props> = ({ value }) => {
+export const RawDataRenderer: FC<Props> = ({ value }) => {
   return (
     <Flex alignItems="flex-start" fullWidth={true} justifyContent="space-between">
       <pre

@@ -4,8 +4,9 @@ import { DragHandle } from '@contentful/f36-components';
 import { products, productsList } from '../../__mocks__';
 import { decorators } from '../../__mocks__/storybook/decorators';
 import { columns } from '../../__mocks__/products';
-import { MetaData, RawData } from '../../AdditionalData';
+import { MetaDataRenderer, RawDataRenderer } from '../../AdditionalDataRenderer';
 import { Product } from '../../types';
+import * as React from 'react';
 import { ComponentProps } from 'react';
 
 const CARD_HEADER = 'Shopify Product';
@@ -101,9 +102,9 @@ export const Loading: Story = {
   },
 };
 
-type AdditionalDataType = ComponentProps<typeof MetaData>['columns'];
+type AdditionalDataType = ComponentProps<typeof MetaDataRenderer>['columns'];
 
-export const RawDataRenderer: Story = {
+export const RawData_Renderer: Story = {
   args: {},
   parameters: {
     ...designParams,
@@ -111,7 +112,7 @@ export const RawDataRenderer: Story = {
   decorators: [
     decorators.WithIntegrationProvider<AdditionalDataType>({
       additionalDataRenderer: ({ product }: { product: Product<AdditionalDataType> }) => {
-        return <RawData value={{ columns: product.additionalData }} />;
+        return <RawDataRenderer value={{ columns: product.additionalData }} />;
       },
     }),
   ],
@@ -128,7 +129,7 @@ export const RawDataRenderer: Story = {
   },
 };
 
-export const MetaDataRenderer: Story = {
+export const MetaData_Renderer: Story = {
   args: {},
   parameters: {
     ...designParams,
@@ -136,7 +137,7 @@ export const MetaDataRenderer: Story = {
   decorators: [
     decorators.WithIntegrationProvider<AdditionalDataType>({
       additionalDataRenderer: ({ product }: { product: Product<AdditionalDataType> }) => {
-        return <MetaData columns={product.additionalData} />;
+        return <MetaDataRenderer columns={product.additionalData} />;
       },
     }),
   ],
