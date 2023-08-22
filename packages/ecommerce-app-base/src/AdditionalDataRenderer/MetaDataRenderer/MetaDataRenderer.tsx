@@ -31,7 +31,7 @@ const styles = {
 export const MetaDataRenderer: FC<MetaDataProps> = ({ columns }) => {
   const renderMetaRow = (row: RowData) => {
     return (
-      <Box key={row.name} role={'listItem'} marginBottom={'spacingXs'}>
+      <Box key={row.name} role={'listItem'} marginBottom={'spacing2Xs'}>
         <Caption>
           <span className={styles.name}>{row.name}:</span> {row.value}
         </Caption>

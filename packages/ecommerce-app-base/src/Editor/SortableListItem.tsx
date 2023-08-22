@@ -17,7 +17,7 @@ export interface Props {
 const CardDragHandle = SortableHandle(({ drag }: { drag: ReactElement }) => <>{drag}</>);
 
 export const SortableListItem = SortableElement<Props>((props: Props) => {
-  const { productCardVersion } = useIntegration();
+  const { productCardVersion, name } = useIntegration();
   const dragHandleRender: RenderDragFn | undefined = props.isSortable
     ? ({ drag }) => <CardDragHandle drag={drag} />
     : undefined;
@@ -29,7 +29,7 @@ export const SortableListItem = SortableElement<Props>((props: Props) => {
         dragHandleRender={dragHandleRender}
         productCardType={'field'}
         resource={props.product}
-        title={props.skuType!}
+        title={`${name} - ${props.skuType!}`}
       />
     );
   }

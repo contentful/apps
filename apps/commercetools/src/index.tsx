@@ -1,4 +1,4 @@
-import { FieldExtensionSDK, init } from '@contentful/app-sdk';
+import { FieldAppSDK, init } from '@contentful/app-sdk';
 import { setup } from '@contentful/ecommerce-app-base';
 import { fetchPreviews } from './api';
 import { PARAMETER_DEFINITIONS, validateParameters } from './config';
@@ -17,7 +17,7 @@ function makeCTA(fieldType: string, skuType?: string) {
 }
 
 async function openDialog(
-  sdk: FieldExtensionSDK,
+  sdk: FieldAppSDK,
   _currentValue: string | string[],
   config: ConfigurationParameters & {
     fieldValue?: string | string[];

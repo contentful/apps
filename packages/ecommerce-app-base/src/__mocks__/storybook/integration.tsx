@@ -12,7 +12,7 @@ export function integration<AdditionalDataType = AdditionalDataDefaultType>(
     logo,
     color: '##ffff',
     description: 'some description',
-    name: 'ecommerce integration',
+    name: 'Ecommerce',
     isInOrchestrationEAP: false,
     parameterDefinitions: [],
     skuTypes: [{ id: 'product', name: 'Product', default: true }],
