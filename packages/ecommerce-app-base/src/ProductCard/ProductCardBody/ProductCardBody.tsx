@@ -5,6 +5,9 @@ import { truncate } from 'lodash';
 import { ProductImage } from '../ProductImage';
 import { PropsWithChildren } from 'react';
 
+const EXCERPT_LENGTH = 75;
+const DESCRIPTION_LENGTH = 220;
+
 type ProductCardProps = PropsWithChildren<{
   title?: string;
   description?: string;
@@ -40,7 +43,7 @@ const ProductCardBody = (props: ProductCardProps) => {
     <Grid data-test-id="main-product-card-body" rowGap="spacingXs">
       <Grid.Item>
         <Text fontWeight="fontWeightDemiBold" isWordBreak={true}>
-          {truncate(productName, { length: 75 })}
+          {truncate(productName, { length: EXCERPT_LENGTH })}
         </Text>
       </Grid.Item>
       <Grid.Item>
@@ -53,7 +56,10 @@ const ProductCardBody = (props: ProductCardProps) => {
       </Grid.Item>
       <Grid.Item>
         <Text isWordBreak={true}>
-          {truncate(productDescription, { length: props.isExpanded ? 220 : 75, separator: ' ' })}
+          {truncate(productDescription, {
+            length: props.isExpanded ? DESCRIPTION_LENGTH : EXCERPT_LENGTH,
+            separator: ' ',
+          })}
         </Text>
       </Grid.Item>
     </Grid>
