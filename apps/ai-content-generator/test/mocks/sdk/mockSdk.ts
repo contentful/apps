@@ -2,6 +2,7 @@ import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { mockSdkParameters } from '..';
 import { createSDK } from './utils/createSdk';
 import { vi } from 'vitest';
+import { mockGetManyContentType } from './contentTypes/mockContentType';
 
 interface MockSdk {
   sdk: ReturnType<typeof createSDK>;
@@ -26,6 +27,7 @@ class MockSdk {
     this.sdk.app.setReady = vi.fn();
     this.sdk.app.getCurrentState = vi.fn();
     this.sdk.notifier.error = vi.fn();
+    this.sdk.cma.contentType.getMany = vi.fn().mockReturnValue(mockGetManyContentType);
   }
 }
 

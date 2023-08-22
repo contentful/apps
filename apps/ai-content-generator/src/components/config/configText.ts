@@ -87,12 +87,22 @@ const Sections = {
   brandHeading: 'Brand profile',
   brandDescription:
     'Add details about your brand to power accurate and on-brand content for all of your prompts.',
+  addToSidebarHeading: 'Add to sidebar views',
+  addToSidebarDescription: 'Assign AI Content Generator to content types.',
 };
 
 const ConfigErrors = {
   missingApiKey: 'A valid API key is required',
   missingModel: 'A valid model must be selected',
   missingProfile: 'Please enter a brand profile',
+  noContentTypes:
+    'There are no content types available in this environment. You can add a content type and then assign it to the app from this screen.',
+  noContentTypesSubstring: 'add a content type',
 };
 
-export { ModelText, BrandProfileFields, APIKeyText, Sections, ConfigErrors };
+const ContentTypeText = {
+  allText: 'Select all Content Types',
+  specificText: 'Select specific content types',
+};
+
+export { ModelText, BrandProfileFields, APIKeyText, Sections, ConfigErrors, ContentTypeText };
