@@ -37,6 +37,7 @@
     "@types/react": "17.0.43",
     "@types/react-dom": "18.0.3",
     "@types/react-sortable-hoc": "0.7.1",
+
     "@typescript-eslint/parser": "^6.4.0",
     "eslint": "7.32.0",
     "eslint-config-prettier": "^9.0.0",
@@ -48,6 +49,7 @@
     "react-dom": "17.0.2",
     "rimraf": "3.0.2",
     "storybook": "^7.2.3",
+    "ts-jest": "27.1.5",
     "typedoc": "0.24.8",
     "typedoc-plugin-markdown": "3.15.4",
     "typescript": "4.7.4"
