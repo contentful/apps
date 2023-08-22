@@ -4,6 +4,8 @@ import { Box, Caption } from '@contentful/f36-components';
 import { Row } from './Row';
 import { Column } from './Column';
 import { Container } from '../Container';
+import { css } from 'emotion';
+import tokens from '@contentful/f36-tokens';
 
 type RowData = {
   name: string;
@@ -19,15 +21,19 @@ export type MetaDataProps = {
   columns: Array<ColumnData>;
 };
 
+const styles = {
+  name: css({
+    marginRight: tokens.spacingXs,
+    color: tokens.gray700,
+  }),
+};
+
 export const MetaDataRenderer: FC<MetaDataProps> = ({ columns }) => {
   const renderMetaRow = (row: RowData) => {
     return (
-      <Box key={row.name} role={'listItem'}>
-        <Caption as={'span'} marginRight={'spacingM'} color={'gray700'} role={'heading'}>
-          {row.name}:
-        </Caption>
-        <Caption as={'span'} color={'gray900'}>
-          {row.value}
+      <Box key={row.name} role={'listItem'} marginBottom={'spacingXs'}>
+        <Caption>
+          <span className={styles.name}>{row.name}:</span> {row.value}
         </Caption>
       </Box>
     );
