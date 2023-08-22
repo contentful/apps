@@ -2,11 +2,13 @@ import type { FC } from 'react';
 import * as React from 'react';
 import { CopyButton, Flex } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { JSONObject } from '../../types';
 
-type Props = { value: JSONObject };
+type Props = {
+  value: Parameters<typeof JSON.stringify>[0];
+};
 
 export const RawDataRenderer: FC<Props> = ({ value }) => {
+  const stringValue = JSON.stringify(value, null, 2);
   return (
     <Flex alignItems="flex-start" fullWidth={true} justifyContent="space-between">
       <pre
@@ -32,9 +34,9 @@ export const RawDataRenderer: FC<Props> = ({ value }) => {
             right: tokens.spacingXs,
             bottom: tokens.spacingXs,
           }}>
-          <CopyButton value={JSON.stringify(value, null, 2)} />
+          <CopyButton value={stringValue} />
         </div>
-        <code>{JSON.stringify(value, null, 2)}</code>
+        <code>{stringValue}</code>
       </pre>
     </Flex>
   );
