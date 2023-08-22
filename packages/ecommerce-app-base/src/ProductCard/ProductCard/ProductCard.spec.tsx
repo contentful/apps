@@ -1,6 +1,6 @@
 import { ProductCard } from './ProductCard';
 import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import * as React from 'react';
 import { productsList } from '../../__mocks__';
 
@@ -9,6 +9,8 @@ const { getByText } = screen;
 const product = productsList[0];
 
 describe('ProductCard component', () => {
+  afterEach(cleanup);
+
   it('mounts', () => {
     const mockOnSelect = jest.fn();
     render(<ProductCard title="Kleenex product" onSelect={mockOnSelect} resource={product} />);

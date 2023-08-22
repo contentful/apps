@@ -1,11 +1,13 @@
 import * as React from 'react';
 import ProductCardBody from './ProductCardBody';
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { productsList } from '../../__mocks__';
 
 const { getByText, getByTestId, queryByTestId } = screen;
 
 describe('ProductCardBody component', () => {
+  afterEach(cleanup);
+
   it('mounts', () => {
     const { name, description, id, image } = productsList[0];
     render(<ProductCardBody title={name} description={description} id={id} image={image} />);
