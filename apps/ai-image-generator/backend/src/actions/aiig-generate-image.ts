@@ -1,6 +1,7 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { PlainClientAPI } from 'contentful-management';
 import { OpenAiApiService } from '../services/openaiApiService';
+import OpenAI from 'openai';
 
 interface AppActionCallParameters {
   prompt: string;
@@ -8,6 +9,7 @@ interface AppActionCallParameters {
 
 interface Image {
   url: string;
+  imageType: string;
 }
 
 // TODO: Create generic versions of success and error
@@ -57,7 +59,9 @@ export const handler = async (
     numImages: 4,
     size: '1024x1024',
   });
-  const images = openAiImages.filter((image): image is Image => !!image.url);
+  const images = openAiImages
+    .map((image) => ({ url: image.url, imageType: 'png' }))
+    .filter((image): image is Image => !!image.url);
   return {
     ok: true,
     data: {
