@@ -1,7 +1,6 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { PlainClientAPI } from 'contentful-management';
 import { OpenAiApiService } from '../services/openaiApiService';
-import OpenAI from 'openai';
 
 interface AppActionCallParameters {
   prompt: string;
