@@ -12,10 +12,11 @@ type ItemData = {
   value: string | ReactNode;
 };
 
+type ItemRendererData = () => ReactNode;
+
 export type ColumnData = {
   title: string;
-  items: Array<ItemData>;
-  footer?: () => ReactNode;
+  items: Array<ItemData | ItemRendererData>;
 };
 
 export type MetaDataProps = {
@@ -30,30 +31,32 @@ const styles = {
   }),
 };
 
+const isItemRendererData = (item: ItemData | ItemRendererData): item is ItemRendererData => {
+  return typeof item === 'function';
+};
+
 export const MetaDataRenderer: FC<MetaDataProps> = ({ columns, footer }) => {
-  const renderMetaRow = (row: ItemData) => {
+  const renderMetaRow = (item: ItemData | ItemRendererData) => {
     return (
-      <Box key={row.name} role={'listItem'} marginBottom={'spacing2Xs'}>
-        <Caption>
-          <span className={styles.name}>{row.name}:</span> {row.value}
-        </Caption>
+      <Box key={item.name} role={'listItem'} marginBottom={'spacing2Xs'}>
+        {isItemRendererData(item) ? (
+          item()
+        ) : (
+          <Caption>
+            <span className={styles.name}>{item.name}:</span> {item.value}
+          </Caption>
+        )}
       </Box>
     );
   };
 
-  const renderColumn = ({ items, footer, title }: ColumnData) => {
+  const renderColumn = ({ items, title }: ColumnData) => {
     return (
       <Column key={title}>
         <Caption as={'h3'} fontWeight={'fontWeightMedium'} marginBottom={'spacingM'}>
           {title}
         </Caption>
         {items.map((row) => renderMetaRow(row))}
-
-        {!!footer && (
-          <Box key={'footer'} role={'listItem'} marginBottom={'spacing2Xs'}>
-            {footer()}
-          </Box>
-        )}
       </Column>
     );
   };

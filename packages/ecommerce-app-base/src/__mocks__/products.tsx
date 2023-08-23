@@ -1,7 +1,5 @@
 import { Product } from '../types';
-import { Caption, TextLink } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
-import tokens from '@contentful/f36-tokens';
+import { LinkDataItemRenderer } from '../AdditionalDataRenderer/MetaDataRenderer';
 
 export const productsList: Product[] = [
   {
@@ -78,18 +76,7 @@ export const columns = [
         name: 'Vendor',
         value: 'Surley',
       },
+      () => <LinkDataItemRenderer href={'#'} text={'More information'} />,
     ],
-    footer: () => {
-      return (
-        <Caption>
-          <TextLink
-            style={{ fontSize: tokens.fontSizeS }}
-            icon={<ExternalLinkIcon size={'tiny'} />}
-            alignIcon="end">
-            More information{' '}
-          </TextLink>
-        </Caption>
-      );
-    },
   },
 ];
