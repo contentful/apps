@@ -1,4 +1,7 @@
 import { Product } from '../types';
+import { Caption, TextLink } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
 
 export const productsList: Product[] = [
   {
@@ -41,7 +44,7 @@ export const products = productsList.reduce((previousValue, currentValue: Produc
 export const columns = [
   {
     title: 'Shopify activity',
-    rows: [
+    items: [
       {
         name: 'Status',
         value: 'active',
@@ -62,7 +65,7 @@ export const columns = [
   },
   {
     title: 'Product information',
-    rows: [
+    items: [
       {
         name: 'Price',
         value: '$20.00',
@@ -72,13 +75,21 @@ export const columns = [
         value: 'XL',
       },
       {
-        name: 'Colors',
-        value: 'Maroon and gold',
-      },
-      {
         name: 'Vendor',
         value: 'Surley',
       },
     ],
+    footer: () => {
+      return (
+        <Caption>
+          <TextLink
+            style={{ fontSize: tokens.fontSizeS }}
+            icon={<ExternalLinkIcon size={'tiny'} />}
+            alignIcon="end">
+            More information{' '}
+          </TextLink>
+        </Caption>
+      );
+    },
   },
 ];

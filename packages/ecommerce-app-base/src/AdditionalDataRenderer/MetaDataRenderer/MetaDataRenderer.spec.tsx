@@ -5,7 +5,7 @@ import { MetaDataRenderer } from './MetaDataRenderer';
 describe('A MetaDataRenderer', () => {
   it('can render columns with titles', () => {
     const { getByRole } = render(
-      <MetaDataRenderer columns={[{ title: 'hello world', rows: [] }]} />
+      <MetaDataRenderer columns={[{ title: 'hello world', items: [] }]} />
     );
     const title = getByRole('heading');
     expect(title).toBeInTheDocument();
@@ -18,7 +18,7 @@ describe('A MetaDataRenderer', () => {
         columns={[
           {
             title: 'hello world',
-            rows: [
+            items: [
               { name: 'first-name', value: 'first-value' },
               { name: 'second-name', value: 'second-value' },
             ],

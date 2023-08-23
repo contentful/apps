@@ -7,18 +7,20 @@ import { Container } from '../Container';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 
-type RowData = {
+type ItemData = {
   name: string;
   value: string | ReactNode;
 };
 
 export type ColumnData = {
   title: string;
-  rows: Array<RowData>;
+  items: Array<ItemData>;
+  footer?: () => ReactNode;
 };
 
 export type MetaDataProps = {
   columns: Array<ColumnData>;
+  footer?: () => ReactNode;
 };
 
 const styles = {
@@ -28,8 +30,8 @@ const styles = {
   }),
 };
 
-export const MetaDataRenderer: FC<MetaDataProps> = ({ columns }) => {
-  const renderMetaRow = (row: RowData) => {
+export const MetaDataRenderer: FC<MetaDataProps> = ({ columns, footer }) => {
+  const renderMetaRow = (row: ItemData) => {
     return (
       <Box key={row.name} role={'listItem'} marginBottom={'spacing2Xs'}>
         <Caption>
@@ -39,13 +41,19 @@ export const MetaDataRenderer: FC<MetaDataProps> = ({ columns }) => {
     );
   };
 
-  const renderColumn = (column: ColumnData) => {
+  const renderColumn = ({ items, footer, title }: ColumnData) => {
     return (
-      <Column key={column.title}>
+      <Column key={title}>
         <Caption as={'h3'} fontWeight={'fontWeightMedium'} marginBottom={'spacingM'}>
-          {column.title}
+          {title}
         </Caption>
-        {column.rows.map((row) => renderMetaRow(row))}
+        {items.map((row) => renderMetaRow(row))}
+
+        {!!footer && (
+          <Box key={'footer'} role={'listItem'} marginBottom={'spacing2Xs'}>
+            {footer()}
+          </Box>
+        )}
       </Column>
     );
   };
@@ -53,6 +61,7 @@ export const MetaDataRenderer: FC<MetaDataProps> = ({ columns }) => {
   return (
     <Container>
       <Row>{columns.map((column) => renderColumn(column))}</Row>
+      {!!footer && footer()}
     </Container>
   );
 };
