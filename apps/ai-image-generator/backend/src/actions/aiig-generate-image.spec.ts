@@ -47,7 +47,10 @@ describe('aiigGenerateImage.handler', () => {
     const result = (await handler(parameters, context)) as AppActionCallResponseSuccess;
     expect(result).to.have.property('ok', true);
     expect(result.data).to.have.property('type', 'ImageCreationResult');
-    expect(result.data.images).to.deep.include(mockImagesGenerateResponse.data[0]);
+    expect(result.data.images).to.deep.include({
+      url: mockImagesGenerateResponse.data[0].url,
+      imageType: 'png',
+    });
   });
 
   it('calls the cma to get the api key from app installation params', async () => {
