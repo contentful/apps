@@ -1,24 +1,38 @@
 import { DeliveryFunctionRequestEventType } from '@contentful/node-apps-toolkit';
+import { fetch } from 'undici';
 
-export const handlers = {
-  [DeliveryFunctionRequestEventType.GRAPHQL_FIELD_MAPPING]: async (event, context) => {
-    const result = []
-    const fields = event.fields;
-    fields.forEach(({ contentTypeId, field }) => {
-      result.push({
-        contentTypeId,
-        fieldId: field.id,
-        graphQLOutputType: 'Product',
-        graphQLQueryField: 'product',
-        graphQLQueryArgument: 'id'
-      })
-    })
-    return result;
-  },
-  [DeliveryFunctionRequestEventType.GRAPHQL_QUERY]: async (event, context) => {
+const fieldMappingHandler = (event, context) => {
+  const result = event.fields.map(({ contentTypeId, field }) => {
     return {
-      data: {},
-      errors: []
-    }
+      contentTypeId,
+      fieldId: field.id,
+      graphQLOutputType: 'Starship',
+      graphQLQueryField: 'starship',
+      graphQLQueryArgument: 'id',
+    };
+  });
+
+  return result;
+};
+
+const queryHandler = (event, context) => {
+  return fetch('https://swapi-graphql.netlify.app/.netlify/functions/index', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: event.query,
+      operationName: event.operationName,
+      variables: event.variables,
+    }),
+  }).then((response) => response.json());
+};
+
+export const handler = (event, context) => {
+  if (event.type === DeliveryFunctionRequestEventType.GRAPHQL_FIELD_MAPPING) {
+    return fieldMappingHandler(event, context);
   }
-}
+  if (event.type === DeliveryFunctionRequestEventType.GRAPHQL_QUERY) {
+    return queryHandler(event, context);
+  }
+  throw new Error('Unknown Event');
+};
