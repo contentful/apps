@@ -11,6 +11,12 @@ interface Image {
   imageType: string;
 }
 
+interface ActionError {
+  type: string;
+  message: string;
+  details?: Record<string, any>;
+}
+
 // TODO: Create generic versions of success and error
 export interface AppActionCallResponseSuccess {
   ok: true;
@@ -22,11 +28,7 @@ export interface AppActionCallResponseSuccess {
 
 export interface AppActionCallResponseError {
   ok: false;
-  error: {
-    type: string;
-    message: string;
-    details: Record<string, any>;
-  };
+  errors: ActionError[];
 }
 
 type AppActionCallResponse = AppActionCallResponseSuccess | AppActionCallResponseError;
@@ -49,18 +51,44 @@ export const handler = async (
     cma,
     appActionCallContext: { appInstallationId },
   } = context;
-  const openAiApiKey = await fetchOpenAiApiKey(cma, appInstallationId);
-  const openAiApiService = OpenAiApiService.fromOpenAiApiKey(openAiApiKey);
 
-  const { prompt } = payload;
-  const openAiImages = await openAiApiService.createImage({
-    prompt,
-    numImages: 4,
-    size: '1024x1024',
-  });
-  const images = openAiImages
-    .map((image) => ({ url: image.url, imageType: 'png' }))
-    .filter((image): image is Image => !!image.url);
+  let images: Image[];
+
+  try {
+    const openAiApiKey = await fetchOpenAiApiKey(cma, appInstallationId);
+    const openAiApiService = OpenAiApiService.fromOpenAiApiKey(openAiApiKey);
+
+    const { prompt } = payload;
+    const openAiImages = await openAiApiService.createImage({
+      prompt,
+      numImages: 4,
+      size: '1024x1024',
+    });
+    images = openAiImages
+      .map((image) => ({ url: image.url, imageType: 'png' }))
+      .filter((image): image is Image => !!image.url);
+  } catch (e) {
+    if (!(e instanceof Error)) {
+      return {
+        ok: false,
+        errors: [
+          {
+            message: 'Unknown error occurred',
+            type: 'UnknownError',
+          },
+        ],
+      };
+    }
+    return {
+      ok: false,
+      errors: [
+        {
+          message: e.message,
+          type: e.constructor.name,
+        },
+      ],
+    };
+  }
   return {
     ok: true,
     data: {

@@ -8,8 +8,13 @@ import sinon from 'sinon';
 import { OpenAiApiService } from '../services/openaiApiService';
 import OpenAI from 'openai';
 import sinonChai from 'sinon-chai';
-import { AppActionCallResponseSuccess, handler } from './aiig-generate-image';
+import {
+  AppActionCallResponseError,
+  AppActionCallResponseSuccess,
+  handler,
+} from './aiig-generate-image';
 import { AppInstallationProps, SysLink } from 'contentful-management';
+import { APIError } from 'openai/error';
 
 chai.use(sinonChai);
 
@@ -58,6 +63,22 @@ describe('aiigGenerateImage.handler', () => {
     expect(cmaRequestStub).to.have.been.calledWithMatch({
       entityType: 'AppInstallation',
       action: 'get',
+    });
+  });
+
+  describe('when an error is thrown', async () => {
+    beforeEach(() => {
+      const generateImageStub = mockOpenAiApi.images.generate as sinon.SinonStub;
+      generateImageStub.throws(new APIError(403, undefined, 'Boom!', undefined));
+    });
+
+    it('returns the images result', async () => {
+      const result = (await handler(parameters, context)) as AppActionCallResponseError;
+      expect(result).to.have.property('ok', false);
+      expect(result.errors).to.deep.include({
+        message: 'Boom!',
+        type: 'APIError',
+      });
     });
   });
 });
