@@ -1,3 +1,5 @@
+import { Product } from '@contentful/ecommerce-app-base';
+
 export interface ConfigurationParameters {
   projectKey?: string;
   clientId?: string;
@@ -10,3 +12,10 @@ export interface ConfigurationParameters {
 }
 
 export type SkuType = 'product' | 'category';
+
+export type CommerceToolsProduct = Product & {
+  additionalData?: {
+    createdAt: string;
+    updatedAt: string;
+  };
+};

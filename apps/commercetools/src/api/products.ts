@@ -1,12 +1,12 @@
 import { ProductProjection } from '@commercetools/platform-sdk';
-import { Product, Pagination } from '@contentful/ecommerce-app-base';
-import { ConfigurationParameters } from '../types';
+import { Pagination } from '@contentful/ecommerce-app-base';
+import { CommerceToolsProduct, ConfigurationParameters } from '../types';
 import { createClient } from './client';
 
 const MAX_LIMIT = 500;
 
 function productTransformer({ projectKey, locale, mcUrl }: ConfigurationParameters) {
-  return (item: ProductProjection): Product => {
+  return (item: ProductProjection): CommerceToolsProduct => {
     const merchantCenterBaseUrl =
       mcUrl && mcUrl.length > 0 ? mcUrl : 'https://mc.europe-west1.gcp.commercetools.com';
     const id = item.id ?? '';
@@ -18,6 +18,11 @@ function productTransformer({ projectKey, locale, mcUrl }: ConfigurationParamete
       name: item.name?.[locale ?? 'en'] ?? '',
       sku: item.masterVariant?.sku ?? '',
       externalLink,
+      description: item.description?.[locale ?? 'en'] ?? undefined,
+      additionalData: {
+        createdAt: item.createdAt,
+        updatedAt: item.lastModifiedAt,
+      },
     };
   };
 }
@@ -25,7 +30,7 @@ function productTransformer({ projectKey, locale, mcUrl }: ConfigurationParamete
 export async function fetchProductPreviews(
   skus: string[],
   config: ConfigurationParameters
-): Promise<Product[]> {
+): Promise<CommerceToolsProduct[]> {
   if (skus.length === 0) {
     return [];
   }
@@ -36,6 +41,7 @@ export async function fetchProductPreviews(
     .search()
     .get({
       queryArgs: {
+        expand: ['description'],
         'filter.query': [`variants.sku:${skus.map((sku) => `"${sku}"`).join(',')}`],
         limit: MAX_LIMIT,
       },
@@ -44,7 +50,7 @@ export async function fetchProductPreviews(
 
   if (response.statusCode === 200) {
     const products = response.body.results.map(productTransformer(config));
-    const foundSKUs = products.map((product: Product) => product.sku);
+    const foundSKUs = products.map((product: CommerceToolsProduct) => product.sku);
     const missingProducts = skus
       .filter((sku) => !foundSKUs.includes(sku))
       .map((sku) => ({
@@ -65,7 +71,7 @@ export async function fetchProducts(
   pagination: { offset: number; limit: number }
 ): Promise<{
   pagination: Pagination;
-  products: Product[];
+  products: CommerceToolsProduct[];
 }> {
   const client = createClient(config);
   const response = await client
