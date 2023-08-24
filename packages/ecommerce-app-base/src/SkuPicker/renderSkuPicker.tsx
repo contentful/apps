@@ -4,7 +4,7 @@ import { render } from 'react-dom';
 import { SkuPicker } from './SkuPicker';
 import { MakeSaveBtnTextFn, ProductPreviewsFn, ProductsFn } from '../types';
 
-interface Props {
+interface Props<> {
   sdk: DialogAppSDK;
   fetchProductPreviews: ProductPreviewsFn;
   fetchProducts: ProductsFn;

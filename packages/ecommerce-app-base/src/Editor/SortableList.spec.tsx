@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { render, cleanup } from '@testing-library/react';
 import { Props, SortableList } from './SortableList';
 import { productsList } from '../__mocks__';

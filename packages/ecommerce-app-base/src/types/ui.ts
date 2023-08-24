@@ -1,6 +1,6 @@
 import { DialogAppSDK, FieldAppSDK } from '@contentful/app-sdk';
 import { Config } from './config';
-import { AdditionalDataDefaultType, Product } from './product';
+import { Product } from './product';
 
 /**
  * Returns the text that is displayed on the button in the field location.
@@ -35,11 +35,11 @@ export type ValidateParametersFn = (parameters: Record<string, string>) => strin
  * @param skuType SKU type of the current field. Undefined if only a single SKU type is supported by the app.
  * @returns List of Products which is used to render a preview.
  */
-export type ProductPreviewsFn<AdditionalData = AdditionalDataDefaultType> = (
+export type ProductPreviewsFn<P extends Product = Product> = (
   skus: string[],
   config: Config,
   skuType?: string
-) => Promise<Product<AdditionalData>[]>;
+) => Promise<P[]>;
 export type DeleteFn = (index: number) => void;
 
 /**

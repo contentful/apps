@@ -1,5 +1,4 @@
-import * as React from 'react';
-import ProductCardMenu from './ProductCardMenu';
+import { ProductCardMenu } from './ProductCardMenu';
 import { render, screen } from '@testing-library/react';
 
 const { getByTestId } = screen;

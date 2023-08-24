@@ -8,13 +8,13 @@ import {
 } from './ui';
 import { ParameterDefinition } from './config';
 import { ReactNode } from 'react';
-import { AdditionalDataDefaultType, Product } from './product';
+import { Product } from './product';
 
 export type SKUType = { id: string; name: string; default?: boolean };
 
 export type ProductCardVersion = 'v1' | 'v2';
 
-export type Integration<AdditionalData = AdditionalDataDefaultType> = {
+export type Integration<P extends Product = Product> = {
   isInOrchestrationEAP?: boolean;
   /**
    * Returns the text that is displayed on the button in the field location.
@@ -64,7 +64,7 @@ export type Integration<AdditionalData = AdditionalDataDefaultType> = {
    * @param config App configuration
    * @returns List of Products which is used to render a preview.
    */
-  fetchProductPreviews: ProductPreviewsFn<AdditionalData>;
+  fetchProductPreviews: ProductPreviewsFn<P>;
 
   /**
    * Function that gets called within the Iframe when the app is rendered in a dialog location.
@@ -128,11 +128,11 @@ export type Integration<AdditionalData = AdditionalDataDefaultType> = {
   /**
    * render additional data with for Product Card version "v2"
    */
-  additionalDataRenderer?: AdditionalDataRenderer<AdditionalData>;
+  additionalDataRenderer?: AdditionalDataRenderer<P>;
 };
 
-export type AdditionalDataRendererProps<AdditionalData> = { product: Product<AdditionalData> };
+export type AdditionalDataRendererProps<P extends Product = Product> = { product: P };
 
-export type AdditionalDataRenderer<AdditionalData = AdditionalDataDefaultType> = (
-  props: AdditionalDataRendererProps<AdditionalData>
+export type AdditionalDataRenderer<P extends Product = Product> = (
+  props: AdditionalDataRendererProps<P>
 ) => ReactNode;

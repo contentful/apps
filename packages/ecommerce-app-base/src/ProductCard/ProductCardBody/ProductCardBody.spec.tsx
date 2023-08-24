@@ -1,5 +1,4 @@
-import * as React from 'react';
-import ProductCardBody from './ProductCardBody';
+import { ProductCardBody } from './ProductCardBody';
 import { cleanup, render, screen } from '@testing-library/react';
 import { productsList } from '../../__mocks__';
 

@@ -1,7 +1,6 @@
 import { ProductCard } from './ProductCard';
 import userEvent from '@testing-library/user-event';
 import { cleanup, render, screen } from '@testing-library/react';
-import * as React from 'react';
 import { productsList } from '../../__mocks__';
 
 const { getByText } = screen;

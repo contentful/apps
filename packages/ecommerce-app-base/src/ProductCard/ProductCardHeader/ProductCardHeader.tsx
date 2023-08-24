@@ -1,7 +1,6 @@
-import * as React from 'react';
 import { Box, Flex, Text } from '@contentful/f36-components';
 import { styles } from './ProductCardHeader.styles';
-import ProductCardMenu from '../ProductCardMenu/ProductCardMenu';
+import { ProductCardMenu } from '../ProductCardMenu/ProductCardMenu';
 import { ExternalResource } from '../types';
 
 type Props = {
@@ -12,7 +11,7 @@ type Props = {
   showHeaderMenu?: boolean;
 };
 
-const ProductCardHeader = (props: Props) => {
+export const ProductCardHeader = (props: Props) => {
   const { headerTitle, handleRemove, showHeaderMenu } = props;
 
   return (
@@ -28,5 +27,3 @@ const ProductCardHeader = (props: Props) => {
     </Box>
   );
 };
-
-export default ProductCardHeader;

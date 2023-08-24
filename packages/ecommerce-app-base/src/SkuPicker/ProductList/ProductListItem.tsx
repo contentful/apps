@@ -9,8 +9,8 @@ import { SkeletonContainer, SkeletonImage } from '@contentful/f36-components';
 
 import { AssetIcon } from '@contentful/f36-icons';
 
-export interface Props {
-  product: Product;
+export interface Props<P extends Product = Product> {
+  product: P;
   selectProduct: (sku: string) => void;
   isSelected: boolean;
 }
@@ -115,7 +115,7 @@ const styles = {
     }),
 };
 
-export const ProductListItem = (props: Props) => {
+export function ProductListItem<P extends Product = Product>(props: Props<P>) {
   const { product, isSelected, selectProduct } = props;
   const [imageHasLoaded, setImageHasLoaded] = useState(false);
   const [imageHasErrored, setImageHasErrored] = useState(false);
@@ -159,4 +159,4 @@ export const ProductListItem = (props: Props) => {
       </div>
     </div>
   );
-};
+}

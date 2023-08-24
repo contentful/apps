@@ -4,10 +4,10 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import AppConfig from './AppConfig/AppConfig';
 import { Field, IntegrationProvider } from './Editor';
-import { Integration } from './types';
+import { Integration, Product } from './types';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
 
-export function setup(integration: Integration) {
+export function setup<P extends Product = Product>(integration: Integration<P>) {
   init((sdk) => {
     const root = document.getElementById('root');
 

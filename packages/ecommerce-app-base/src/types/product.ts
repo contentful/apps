@@ -1,8 +1,6 @@
 // Internal - provider agnostic shape
 
-export type AdditionalDataDefaultType = unknown;
-
-export type Product<AdditionalData = AdditionalDataDefaultType> = {
+export type Product = {
   sku: string;
   displaySKU?: string;
   image: string;
@@ -11,7 +9,6 @@ export type Product<AdditionalData = AdditionalDataDefaultType> = {
   externalLink?: string;
   description?: string;
   category?: string;
-  additionalData?: AdditionalData;
 };
 
 export type Pagination = {
@@ -22,12 +19,12 @@ export type Pagination = {
   hasNextPage?: boolean;
 };
 
-type ProductsFnResponse = {
+type ProductsFnResponse<P extends Product = Product> = {
   pagination: Pagination;
-  products: Product[];
+  products: P[];
 };
 
-export type ProductsFn = (
+export type ProductsFn<P extends Product = Product> = (
   search: string,
   pagination?: Partial<Pagination>
-) => Promise<ProductsFnResponse>;
+) => Promise<ProductsFnResponse<P>>;

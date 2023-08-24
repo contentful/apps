@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { css } from 'emotion';
-import { Product } from '../../types';
 import { ProductSelectionListItem } from './ProductSelectionListItem';
 import { OtherProductsCounter } from './OtherProductsCounter';
+import { Product } from '../../types';
 
 export interface Props {
   products: Product[];

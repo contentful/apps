@@ -9,7 +9,7 @@ export const mapSort = <T extends Product, K extends keyof T>(
   array: T[],
   order: (T[K] | string)[],
   key: K
-) => {
+): T[] => {
   return array.slice().sort((a, b) => {
     const A = a[key];
     const B = b[key];

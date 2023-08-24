@@ -1,9 +1,8 @@
-import * as React from 'react';
 import { useState } from 'react';
 import { Box, Card, Collapse, TextLink } from '@contentful/f36-components';
 import { ExternalResource, ExternalResourceError, ProductCardType, RenderDragFn } from '../types';
-import ProductCardHeader from '../ProductCardHeader/ProductCardHeader';
-import ProductCardBody from '../ProductCardBody/ProductCardBody';
+import { ProductCardHeader } from '../ProductCardHeader/ProductCardHeader';
+import { ProductCardBody } from '../ProductCardBody/ProductCardBody';
 import { useIntegration } from '../../Editor';
 
 import { css } from 'emotion';

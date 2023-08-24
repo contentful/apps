@@ -1,4 +1,4 @@
-import ProductCardHeader from './ProductCardHeader';
+import { ProductCardHeader } from './ProductCardHeader';
 import { render, screen } from '@testing-library/react';
 import * as React from 'react';
 

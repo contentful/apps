@@ -2,7 +2,7 @@ import { Box, Button, Note, TextLink } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import * as React from 'react';
+
 import { FC, useCallback, useEffect, useState } from 'react';
 import { FieldsSkuTypes } from '../AppConfig/fields';
 import { SortableComponent } from './SortableComponent';

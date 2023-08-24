@@ -17,7 +17,7 @@ type ProductCardProps = PropsWithChildren<{
   isExpanded?: boolean;
 }>;
 
-const ProductCardBody = (props: ProductCardProps) => {
+export const ProductCardBody = (props: ProductCardProps) => {
   const {
     title: productName,
     description: productDescription,
@@ -77,5 +77,3 @@ const ProductCardBody = (props: ProductCardProps) => {
     </Box>
   );
 };
-
-export default ProductCardBody;

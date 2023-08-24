@@ -6,7 +6,7 @@ export interface ProductCardMenuProps {
   onRemove: () => void;
 }
 
-const ProductCardMenu = (props: ProductCardMenuProps) => {
+export const ProductCardMenu = (props: ProductCardMenuProps) => {
   return (
     <Menu offset={[-5, 0]}>
       <Menu.Trigger>
@@ -20,5 +20,3 @@ const ProductCardMenu = (props: ProductCardMenuProps) => {
     </Menu>
   );
 };
-
-export default ProductCardMenu;

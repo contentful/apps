@@ -19,15 +19,17 @@ const styles = {
   }),
 };
 
-export const ProductList = ({ selectProduct, selectedSKUs, products }: Props) => (
-  <div className={styles.productList}>
-    {products.map((product) => (
-      <ProductListItem
-        key={product.id}
-        product={product}
-        isSelected={selectedSKUs.includes(product.sku)}
-        selectProduct={selectProduct}
-      />
-    ))}
-  </div>
-);
+export function ProductList({ selectProduct, selectedSKUs, products }: Props) {
+  return (
+    <div className={styles.productList}>
+      {products.map((product) => (
+        <ProductListItem
+          key={product.id}
+          product={product}
+          isSelected={selectedSKUs.includes(product.sku)}
+          selectProduct={selectProduct}
+        />
+      ))}
+    </div>
+  );
+}

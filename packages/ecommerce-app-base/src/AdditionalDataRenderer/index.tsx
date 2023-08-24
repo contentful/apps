@@ -1,2 +1,2 @@
 export { RawDataRenderer } from './RawDataRenderer';
-export { MetaDataRenderer } from './MetaDataRenderer';
+export { MetaDataRenderer, LinkDataItemRenderer } from './MetaDataRenderer';
