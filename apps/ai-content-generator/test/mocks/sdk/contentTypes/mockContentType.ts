@@ -93,4 +93,17 @@ const mockGetManyContentType = {
   total: 1,
 };
 
-export { mockContentType, mockGetManyContentType };
+const mockSelectedContentTypes = {
+  page: true,
+  article: true,
+};
+
+const mockEditorInterface = {
+  page: {
+    sidebar: {
+      position: 1,
+    },
+  },
+};
+
+export { mockContentType, mockGetManyContentType, mockSelectedContentTypes, mockEditorInterface };

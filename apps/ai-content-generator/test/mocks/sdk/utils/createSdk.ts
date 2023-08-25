@@ -1,6 +1,6 @@
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { vi } from 'vitest';
-import { mockGetManyContentType } from '../contentTypes/mockContentType';
+import { mockGetManyContentType, mockEditorInterface } from '../contentTypes/mockContentType';
 
 const createSDK = (parameters: AppInstallationParameters) => {
   return {
@@ -8,7 +8,7 @@ const createSDK = (parameters: AppInstallationParameters) => {
       onConfigure: vi.fn(),
       getParameters: vi.fn().mockReturnValueOnce(parameters),
       setReady: vi.fn(),
-      getCurrentState: vi.fn(),
+      getCurrentState: vi.fn().mockReturnValue({ EditorInterface: mockEditorInterface }),
     },
     ids: {
       app: 'test-app',
