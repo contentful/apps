@@ -66,11 +66,9 @@ const sortFieldOptionsByLanguage = (a: Field, b: Field) => {
 };
 
 /**
- * A reducer function that checks if a field is a supported type, iterates through its supported locales,
+ * A reducer function that checks if a field is a supported type and is visible, iterates through its supported locales,
  * determines whether it has content, and assigns the field to the correct column.
  *
- * TODO: Handle the case where the field is empty
- * TODO: Support storing fields for both Source and Output
  * @param entry
  * @param supportedFields
  * @param fieldLocales
@@ -87,8 +85,9 @@ const isSupported = (
 ) => {
   return (fieldAcc: SupportedFieldsOutput, field: ContentFields) => {
     const isSupportedFieldType = supportedFields.includes(field.type as SupportedFieldTypes);
+    const isFieldVisible = !field.disabled;
 
-    if (isSupportedFieldType) {
+    if (isSupportedFieldType && isFieldVisible) {
       const fieldsWithContent = [] as Field[];
       const allFields = [] as Field[];
 
