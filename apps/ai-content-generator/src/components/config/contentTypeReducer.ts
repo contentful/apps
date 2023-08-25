@@ -1,5 +1,3 @@
-import { ContentTypeProps } from 'contentful-management';
-
 export enum ContentTypeAction {
   ADD = 'add',
   REMOVE = 'remove',
@@ -9,12 +7,12 @@ export enum ContentTypeAction {
 
 type ContentTypeActions = {
   type: Exclude<ContentTypeAction, ContentTypeAction.REMOVE_ALL | ContentTypeAction.ADD_ALL>;
-  value: ContentTypeProps;
+  value: string;
 };
 
 type ContentTypeAddAllAction = {
   type: ContentTypeAction.ADD_ALL;
-  value: { [key: string]: ContentTypeProps };
+  value: { [key: string]: boolean };
 };
 
 type ContentTypeRemoveAllAction = {
@@ -28,21 +26,18 @@ export type ContentTypeReducer =
 
 const { ADD, REMOVE, ADD_ALL, REMOVE_ALL } = ContentTypeAction;
 
-const contentTypeReducer = (
-  state: { [key: string]: ContentTypeProps },
-  action: ContentTypeReducer
-) => {
+const contentTypeReducer = (state: { [key: string]: boolean }, action: ContentTypeReducer) => {
   switch (action.type) {
     case ADD:
-      if (state[action.value.sys.id]) {
+      if (state[action.value]) {
         return state;
       } else {
-        return { ...state, [action.value.sys.id]: action.value };
+        return { ...state, [action.value]: true };
       }
     case REMOVE:
-      if (state[action.value.sys.id]) {
+      if (state[action.value]) {
         const newState = { ...state };
-        delete newState[action.value.sys.id];
+        delete newState[action.value];
         return { ...newState };
       } else {
         return state;

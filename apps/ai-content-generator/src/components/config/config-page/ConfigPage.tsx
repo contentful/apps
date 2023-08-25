@@ -42,9 +42,9 @@ const ConfigPage = () => {
     return notifierErrors;
   };
 
-  useSaveConfigHandler(parameters, validateParams);
+  useSaveConfigHandler(parameters, validateParams, contentTypes);
   useInitializeParameters(dispatchParameters);
-  const allContentTypes = useGetContentTypes();
+  const { allContentTypes } = useGetContentTypes(dispatchContentTypes);
 
   return (
     <Box css={styles.body}>

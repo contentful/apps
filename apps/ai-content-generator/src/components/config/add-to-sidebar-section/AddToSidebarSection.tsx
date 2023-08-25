@@ -13,7 +13,7 @@ const styles = css({
 
 interface Props {
   allContentTypes: ContentTypeProps[];
-  selectedContentTypes: { [key: string]: ContentTypeProps };
+  selectedContentTypes: { [key: string]: boolean };
   dispatch: Dispatch<ContentTypeReducer>;
 }
 

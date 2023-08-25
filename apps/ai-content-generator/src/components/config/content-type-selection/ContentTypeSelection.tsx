@@ -7,7 +7,7 @@ import { styles } from './ContentTypeSelection.styles';
 
 interface Props {
   allContentTypes: ContentTypeProps[];
-  selectedContentTypes: { [key: string]: ContentTypeProps };
+  selectedContentTypes: { [key: string]: boolean };
   dispatch: Dispatch<ContentTypeReducer>;
 }
 
@@ -16,9 +16,9 @@ const ContentTypeSelection = (props: Props) => {
   const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
 
   const formattedAllContentTypes = useMemo(() => {
-    const newState: { [key: string]: ContentTypeProps } = {};
+    const newState: { [key: string]: boolean } = {};
     allContentTypes.forEach((contentType) => {
-      newState[contentType.sys.id] = contentType;
+      newState[contentType.sys.id] = true;
     });
     return newState;
   }, [allContentTypes]);
@@ -35,7 +35,7 @@ const ContentTypeSelection = (props: Props) => {
 
   const handleCheckboxChange = (contentType: ContentTypeProps, isChecked: boolean) => {
     const action = isChecked ? ContentTypeAction.REMOVE : ContentTypeAction.ADD;
-    dispatch({ type: action, value: contentType });
+    dispatch({ type: action, value: contentType.sys.id });
   };
 
   return (
