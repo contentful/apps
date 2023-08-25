@@ -18,19 +18,3 @@ export function IntegrationProvider<P extends Product = Product>({
 export const useIntegration = <P extends Product = Product>(): Integration<P> => {
   return useContext(IntegrationContext) as unknown as Integration<P>;
 };
-
-/* let's see if we need it ...
-export function withIntegrationContext<T extends Partial<Integration> = {}>(
-  WrappedComponent: ComponentType<T>
-) {
-  const displayName = WrappedComponent.displayName || WrappedComponent.name || 'Component';
-
-  const ComponentWithContext = (props: Omit<T, keyof Integration>) => {
-    const context = useIntegration();
-    return <WrappedComponent {...context} {...(props as T)} />;
-  };
-
-  ComponentWithContext.displayName = `withIntegrationContext(${displayName})`;
-  return ComponentWithContext;
-}
- */

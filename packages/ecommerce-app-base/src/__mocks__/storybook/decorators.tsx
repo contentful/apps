@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import { IntegrationProvider } from '../../Editor';
 import { integration } from './integration';
-import { AdditionalDataDefaultType, Integration } from '../../types';
+import { Integration } from '../../types';
 import { productsList } from '../products';
 import { sdk } from './sdk';
 import { KnownAppSDK } from '@contentful/app-sdk';
@@ -9,13 +9,9 @@ import { SDKContext } from '@contentful/react-apps-toolkit';
 import { StoryFn } from '@storybook/react';
 
 export const decorators = {
-  WithIntegrationProvider: <AdditionalDataType = AdditionalDataDefaultType,>(
-    integrationOverride: Partial<Integration>,
-    products = productsList
-  ) => {
+  WithIntegrationProvider: (integrationOverride: Partial<Integration>, products = productsList) => {
     return (Story: StoryFn) => (
-      <IntegrationProvider
-        integration={integration<AdditionalDataType>(integrationOverride, products)}>
+      <IntegrationProvider integration={integration(integrationOverride, products)}>
         <Story />
       </IntegrationProvider>
     );

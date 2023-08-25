@@ -7,10 +7,12 @@ import { columns } from '../../__mocks__/products';
 import { MetaDataRenderer, RawDataRenderer } from '../../AdditionalDataRenderer';
 import { Product } from '../../types';
 import * as React from 'react';
-import { ComponentProps } from 'react';
+import { ColumnData } from '../../AdditionalDataRenderer/MetaDataRenderer/MetaDataRenderer';
 
 const CARD_HEADER = 'Shopify Product';
 const CARD_TYPE = 'field';
+
+type ProductWithAdditionalData = Product & { additionalData: Array<ColumnData> };
 
 const meta = {
   component: ProductCard,
@@ -102,16 +104,14 @@ export const Loading: Story = {
   },
 };
 
-type AdditionalDataType = ComponentProps<typeof MetaDataRenderer>['columns'];
-
 export const RawData_Renderer: Story = {
   args: {},
   parameters: {
     ...designParams,
   },
   decorators: [
-    decorators.WithIntegrationProvider<AdditionalDataType>({
-      additionalDataRenderer: ({ product }: { product: Product<AdditionalDataType> }) => {
+    decorators.WithIntegrationProvider({
+      additionalDataRenderer: ({ product }: { product: ProductWithAdditionalData }) => {
         return <RawDataRenderer value={{ columns: product.additionalData }} />;
       },
     }),
@@ -119,10 +119,12 @@ export const RawData_Renderer: Story = {
   render: (args) => {
     return (
       <ProductCard
-        resource={{
-          ...args.resource,
-          additionalData: columns,
-        }}
+        resource={
+          {
+            ...args.resource,
+            additionalData: columns,
+          } as unknown as ProductWithAdditionalData
+        }
         title={'product'}
       />
     );
@@ -135,8 +137,8 @@ export const MetaData_Renderer: Story = {
     ...designParams,
   },
   decorators: [
-    decorators.WithIntegrationProvider<AdditionalDataType>({
-      additionalDataRenderer: ({ product }: { product: Product<AdditionalDataType> }) => {
+    decorators.WithIntegrationProvider({
+      additionalDataRenderer: ({ product }: { product: ProductWithAdditionalData }) => {
         return <MetaDataRenderer columns={product.additionalData} />;
       },
     }),
@@ -144,10 +146,12 @@ export const MetaData_Renderer: Story = {
   render: (args) => {
     return (
       <ProductCard
-        resource={{
-          ...args.resource,
-          additionalData: columns,
-        }}
+        resource={
+          {
+            ...args.resource,
+            additionalData: columns,
+          } as unknown as ProductWithAdditionalData
+        }
         title={'product'}
       />
     );
