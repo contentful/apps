@@ -1,9 +1,9 @@
 import React from 'react';
 import { Note } from '@contentful/forma-36-react-components';
-import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { FieldAppSDK } from '@contentful/app-sdk';
 
 interface FieldProps {
-  sdk: FieldExtensionSDK;
+  sdk: FieldAppSDK;
 }
 
 const Field = (prop: FieldProps) => {

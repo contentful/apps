@@ -1,5 +1,5 @@
 import React, { Component, ChangeEvent } from 'react';
-import { AppExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Card,
   TextField,
@@ -20,7 +20,7 @@ export interface AppInstallationParameters {
 type ParameterKeys = keyof AppInstallationParameters;
 
 interface ConfigProps {
-  sdk: AppExtensionSDK;
+  sdk: ConfigAppSDK;
 }
 
 interface ConfigState {
@@ -37,7 +37,7 @@ const TABS = [
       state,
       onInputChange,
     }: {
-      sdk: AppExtensionSDK;
+      sdk: ConfigAppSDK;
       state: ConfigState;
       onInputChange: (event: ChangeEvent) => void;
     }) => (
@@ -117,7 +117,7 @@ const TABS = [
 ];
 
 export default class Config extends Component<ConfigProps, ConfigState> {
-  sdk: AppExtensionSDK;
+  sdk: ConfigAppSDK;
 
   constructor(props: ConfigProps) {
     super(props);
