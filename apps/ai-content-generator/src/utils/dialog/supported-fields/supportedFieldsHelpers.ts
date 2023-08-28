@@ -33,9 +33,8 @@ const createSizeValidation = (
     size: { max: defaultMax },
   };
 
-  if (customSizeValidation.size) {
-    const newMax = customSizeValidation.size?.max ? customSizeValidation.size.max : defaultMax;
-    customSizeValidation.size.max = newMax;
+  if (customSizeValidation.size && !customSizeValidation.size?.max) {
+    customSizeValidation.size.max = defaultMax;
   }
 
   return customSizeValidation;
