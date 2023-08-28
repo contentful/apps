@@ -1,30 +1,36 @@
 import {
-  DeliveryFunctionEventHandler,
-  DeliveryFunctionRequestEventType,
+  DeliveryFunctionEventContext,
+  DeliveryFunctionEventHandler as EventHandler,
+  DeliveryFunctionEventType as EventType,
   GraphQLQueryResponse,
 } from '@contentful/node-apps-toolkit';
 import { fetch } from 'undici';
 
-const fieldMappingHandler: DeliveryFunctionEventHandler<
-  DeliveryFunctionRequestEventType.GRAPHQL_FIELD_MAPPING
-> = (event, context) => {
-  const result = event.fields.map(({ contentTypeId, field }) => {
+type AppInstallationParameters = {
+  namespaceOverride?: string;
+};
+
+const fieldMappingHandler: EventHandler<EventType.GRAPHQL_FIELD_MAPPING> = (
+  event,
+  context: DeliveryFunctionEventContext<AppInstallationParameters>
+) => {
+  const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
       contentTypeId,
       fieldId: field.id,
       graphQLOutputType: 'Starship',
       graphQLQueryField: 'starship',
-      graphQLQueryArgument: 'id',
+      graphQLQueryArguments: { id: '' },
     };
   });
 
-  return result;
+  return {
+    namespace: context.appInstallationParameters.namespaceOverride || 'StarWars',
+    fields,
+  };
 };
 
-const queryHandler: DeliveryFunctionEventHandler<DeliveryFunctionRequestEventType.GRAPHQL_QUERY> = (
-  event,
-  context
-) => {
+const queryHandler: EventHandler<EventType.GRAPHQL_QUERY> = (event, context) => {
   return fetch('https://swapi-graphql.netlify.app/.netlify/functions/index', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -36,11 +42,11 @@ const queryHandler: DeliveryFunctionEventHandler<DeliveryFunctionRequestEventTyp
   }).then((response) => response.json() as GraphQLQueryResponse);
 };
 
-export const handler: DeliveryFunctionEventHandler = (event, context) => {
-  if (event.type === DeliveryFunctionRequestEventType.GRAPHQL_FIELD_MAPPING) {
+export const handler: EventHandler = (event, context) => {
+  if (event.type === EventType.GRAPHQL_FIELD_MAPPING) {
     return fieldMappingHandler(event, context);
   }
-  if (event.type === DeliveryFunctionRequestEventType.GRAPHQL_QUERY) {
+  if (event.type === EventType.GRAPHQL_QUERY) {
     return queryHandler(event, context);
   }
   throw new Error('Unknown Event');

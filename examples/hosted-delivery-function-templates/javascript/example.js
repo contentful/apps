@@ -1,18 +1,21 @@
-import { DeliveryFunctionRequestEventType } from '@contentful/node-apps-toolkit';
+import { DeliveryFunctionEventType as EventType } from '@contentful/node-apps-toolkit';
 import { fetch } from 'undici';
 
 const fieldMappingHandler = (event, context) => {
-  const result = event.fields.map(({ contentTypeId, field }) => {
+  const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
       contentTypeId,
       fieldId: field.id,
       graphQLOutputType: 'Starship',
       graphQLQueryField: 'starship',
-      graphQLQueryArgument: 'id',
+      graphQLQueryArguments: { id: '' },
     };
   });
 
-  return result;
+  return {
+    namespace: context.appInstallationParameters.namespaceOverride || 'StarWars',
+    fields,
+  };
 };
 
 const queryHandler = (event, context) => {
@@ -28,10 +31,10 @@ const queryHandler = (event, context) => {
 };
 
 export const handler = (event, context) => {
-  if (event.type === DeliveryFunctionRequestEventType.GRAPHQL_FIELD_MAPPING) {
+  if (event.type === EventType.GRAPHQL_FIELD_MAPPING) {
     return fieldMappingHandler(event, context);
   }
-  if (event.type === DeliveryFunctionRequestEventType.GRAPHQL_QUERY) {
+  if (event.type === EventType.GRAPHQL_QUERY) {
     return queryHandler(event, context);
   }
   throw new Error('Unknown Event');
