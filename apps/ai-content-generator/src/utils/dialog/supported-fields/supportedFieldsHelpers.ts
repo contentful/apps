@@ -7,6 +7,39 @@ import {
 import { ContentFields, EntryProps } from 'contentful-management';
 import { FieldLocales } from '@locations/Dialog';
 import { LocaleNames } from '@providers/generatorProvider';
+import { ContentTypeFieldValidation } from 'contentful-management/types';
+
+/**
+ * This creates the size validation for the field
+ * If no custom size validation exists, use the default character length for the field type
+ * as listed in our technical limits: https://www.contentful.com/developers/docs/technical-limits/.
+ * If a custom max length exists, use that instead of the default.
+ * @param fieldValidations
+ * @param fieldType
+ * @returns ContentTypeFieldValidation
+ */
+const createSizeValidation = (
+  fieldValidations: ContentTypeFieldValidation[] | undefined,
+  fieldType: string
+): ContentTypeFieldValidation => {
+  const DEFAULT_CHAR_LENGTH = {
+    [SupportedFieldTypes.RICH_TEXT]: 200000,
+    [SupportedFieldTypes.SYMBOL]: 256,
+    [SupportedFieldTypes.TEXT]: 50000,
+  };
+  const defaultMax = DEFAULT_CHAR_LENGTH[fieldType as SupportedFieldTypes];
+
+  const customSizeValidation = fieldValidations?.find((validation) => validation?.size) || {
+    size: { max: defaultMax },
+  };
+
+  if (customSizeValidation.size) {
+    const newMax = customSizeValidation.size?.max ? customSizeValidation.size.max : defaultMax;
+    customSizeValidation.size.max = newMax;
+  }
+
+  return customSizeValidation;
+};
 
 /**
  * This formats an entry's field into an easy-to-use object.
@@ -31,10 +64,7 @@ const formatField = (
     data: entry.fields[field.id] ? entry.fields[field.id][locale] : '',
     locale: locale,
     language: localeNames[locale],
-    sizeValidation:
-      field.validations?.find((validation) =>
-        Object.prototype.hasOwnProperty.call(validation, 'size')
-      ) || null,
+    sizeValidation: createSizeValidation(field.validations, field.type),
     isDefaultLocale: defaultLocale === locale,
   };
 
