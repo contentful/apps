@@ -1,6 +1,12 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { generateRandomParameters, mockCma, MockSdk, mockSdkParameters } from '../../../test/mocks';
+import {
+  generateRandomParameters,
+  mockCma,
+  MockSdk,
+  mockSdkParameters,
+  mockContentTypes,
+} from '../../../test/mocks';
 import useSaveConfigHandler from './useSaveConfigHandler';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 
@@ -21,7 +27,13 @@ describe('useSaveConfigHandler', () => {
     const parameters = generateRandomParameters();
     const mockValidateParams = vi.fn(() => []);
 
-    renderHook(() => useSaveConfigHandler(parameters, mockValidateParams));
+    renderHook(() =>
+      useSaveConfigHandler(
+        parameters,
+        mockValidateParams,
+        mockContentTypes.mockSelectedContentTypes
+      )
+    );
     await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledOnce());
 
     const configureCallback = sdk.app.onConfigure.mock.calls[0][0];
@@ -51,7 +63,8 @@ describe('useSaveConfigHandler', () => {
     };
 
     const { rerender } = renderHook(
-      (props: AppInstallationParameters) => useSaveConfigHandler(props, mockValidateParams),
+      (props: AppInstallationParameters) =>
+        useSaveConfigHandler(props, mockValidateParams, mockContentTypes.mockSelectedContentTypes),
       {
         initialProps: mockSdkParameters.init,
       }
@@ -68,7 +81,13 @@ describe('useSaveConfigHandler', () => {
     const parameters = generateRandomParameters();
     const mockValidateParams = vi.fn(() => ['invalid']);
 
-    renderHook(() => useSaveConfigHandler(parameters, mockValidateParams));
+    renderHook(() =>
+      useSaveConfigHandler(
+        parameters,
+        mockValidateParams,
+        mockContentTypes.mockSelectedContentTypes
+      )
+    );
 
     await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledOnce());
 
