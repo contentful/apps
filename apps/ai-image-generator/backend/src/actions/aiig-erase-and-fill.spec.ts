@@ -1,5 +1,9 @@
+import * as nodeFetch from 'node-fetch';
+
 import chai, { expect } from 'chai';
 import {
+  absolutePathToFile,
+  arrayBufferFromFile,
   makeMockAppActionCallContext,
   makeMockOpenAiApi,
   mockImagesResponse,
@@ -12,16 +16,18 @@ import {
   AppActionCallResponseError,
   AppActionCallResponseSuccess,
   handler,
-} from './aiig-generate-image';
+} from './aiig-erase-and-fill';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { APIError } from 'openai/error';
 
 chai.use(sinonChai);
 
-describe('aiigGenerateImage.handler', () => {
+describe('aiigEraseAndFill.handler', () => {
   const cmaRequestStub = sinon.stub();
   const parameters = {
     prompt: 'My image text',
+    image: absolutePathToFile('./test/mocks/images/hyundai-new.png'),
+    mask: absolutePathToFile('./test/mocks/images/mask.png'),
   };
   const mockAppInstallation: AppInstallationProps = {
     sys: {
@@ -41,17 +47,30 @@ describe('aiigGenerateImage.handler', () => {
 
   let mockOpenAiApi: sinon.SinonStubbedInstance<OpenAI>;
   let openAiApiService: OpenAiApiService;
+  let fetchStub: sinon.SinonStub;
 
   beforeEach(() => {
-    mockOpenAiApi = makeMockOpenAiApi();
+    mockOpenAiApi = makeMockOpenAiApi('edit');
     openAiApiService = new OpenAiApiService(mockOpenAiApi);
     sinon.stub(OpenAiApiService, 'fromOpenAiApiKey').returns(openAiApiService);
+
+    fetchStub = sinon.stub(nodeFetch, 'default');
+    fetchStub.callsFake(async (url: string): Promise<nodeFetch.Response> => {
+      const fileContents = await arrayBufferFromFile(url);
+      return new Promise((resolve) =>
+        resolve(new nodeFetch.Response(fileContents, { status: 200 }))
+      );
+    });
+  });
+
+  afterEach(() => {
+    fetchStub.restore();
   });
 
   it('returns the images result', async () => {
     const result = (await handler(parameters, context)) as AppActionCallResponseSuccess;
     expect(result).to.have.property('ok', true);
-    expect(result.data).to.have.property('type', 'ImageCreationResult');
+    expect(result.data).to.have.property('type', 'ImageEditResult');
     expect(result.data.images).to.deep.include({
       url: mockImagesResponse.data[0].url,
       imageType: 'png',
@@ -68,8 +87,8 @@ describe('aiigGenerateImage.handler', () => {
 
   describe('when an error is thrown', async () => {
     beforeEach(() => {
-      const generateImageStub = mockOpenAiApi.images.generate as sinon.SinonStub;
-      generateImageStub.throws(new APIError(403, undefined, 'Boom!', undefined));
+      const imagesStub = mockOpenAiApi.images.edit as sinon.SinonStub;
+      imagesStub.throws(new APIError(403, undefined, 'Boom!', undefined));
     });
 
     it('returns the images result', async () => {

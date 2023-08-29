@@ -33,6 +33,23 @@
           "type": "Symbol"
         }
       ]
+    },
+    {
+      "id": "aiigEditAndFill",
+      "name": "Edit and fill with AI Image",
+      "category": "Custom",
+      "description": "This action will edit an image using OpenAI DALL-E 2 given a prompt, source image, and mask",
+      "type": "function",
+      "path": "actions/aiig-edit-and-fill.js",
+      "entryFile": "./backend/src/actions/aiig-edit-and-fill.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "prompt",
+          "name": "prompt",
+          "type": "Symbol"
+        }
+      ]
     }
   ]
 }
