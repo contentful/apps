@@ -1,33 +1,27 @@
 import { DeliveryFunctionEventType as EventType } from '@contentful/node-apps-toolkit';
-import { fetch } from 'undici';
 
 const fieldMappingHandler = (event, context) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
       contentTypeId,
       fieldId: field.id,
-      graphQLOutputType: 'Starship',
-      graphQLQueryField: 'starship',
+      graphQLOutputType: 'Foo',
+      graphQLQueryField: 'bar',
       graphQLQueryArguments: { id: '' },
     };
   });
 
   return {
-    namespace: context.appInstallationParameters.namespaceOverride || 'StarWars',
+    namespace: 'MyApp',
     fields,
   };
 };
 
 const queryHandler = (event, context) => {
-  return fetch('https://swapi-graphql.netlify.app/.netlify/functions/index', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: event.query,
-      operationName: event.operationName,
-      variables: event.variables,
-    }),
-  }).then((response) => response.json());
+  return {
+    data: {},
+    errors: [],
+  };
 };
 
 export const handler = (event, context) => {
