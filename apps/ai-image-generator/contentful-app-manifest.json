@@ -40,8 +40,8 @@
       "category": "Custom",
       "description": "This action will edit an image using OpenAI DALL-E 2 given a prompt, source image, and mask",
       "type": "function",
-      "path": "actions/aiig-edit-and-fill.js",
-      "entryFile": "./backend/src/actions/aiig-edit-and-fill.ts",
+      "path": "actions/aiig-erase-and-fill.js",
+      "entryFile": "./backend/src/actions/aiig-erase-and-fill.ts",
       "allowNetworks": [],
       "parameters": [
         {
