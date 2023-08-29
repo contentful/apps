@@ -48,6 +48,16 @@
           "id": "prompt",
           "name": "prompt",
           "type": "Symbol"
+        },
+        {
+          "id": "image",
+          "name": "image",
+          "type": "Symbol"
+        },
+        {
+          "id": "mask",
+          "name": "mask",
+          "type": "Symbol"
         }
       ]
     }
