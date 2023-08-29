@@ -93,7 +93,7 @@ const mockGetManyContentType = {
   total: 1,
 };
 
-const mockSelectedContentTypes = ['page', 'article'];
+const mockSelectedContentTypes = new Set(['page', 'article']);
 
 const mockEditorInterface = {
   page: {
