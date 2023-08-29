@@ -17,16 +17,8 @@ const ContentTypeSelection = (props: Props) => {
 
   useEffect(() => {
     const areAllItemsChecked = allContentTypes.length === selectedContentTypes.size;
-    const areAllButOneItemsChecked = allContentTypes.length - selectedContentTypes.size === 1;
-
-    if (!isSelectAllChecked && areAllItemsChecked) {
-      setIsSelectAllChecked(true);
-    }
-
-    if (isSelectAllChecked && areAllButOneItemsChecked) {
-      setIsSelectAllChecked(false);
-    }
-  }, [allContentTypes.length, isSelectAllChecked, selectedContentTypes.size]);
+    setIsSelectAllChecked(areAllItemsChecked);
+  }, [allContentTypes.length, selectedContentTypes.size]);
 
   const handleSelectAll = () => {
     if (isSelectAllChecked) {
@@ -35,8 +27,6 @@ const ContentTypeSelection = (props: Props) => {
       const allContentTypeIds = allContentTypes.map((ct) => ct.sys.id);
       dispatch({ type: ContentTypeAction.ADD_ALL, value: allContentTypeIds });
     }
-
-    setIsSelectAllChecked(!isSelectAllChecked);
   };
 
   const handleCheckboxChange = (contentType: ContentTypeProps, isChecked: boolean) => {
