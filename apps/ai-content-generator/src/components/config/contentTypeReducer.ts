@@ -35,8 +35,7 @@ const contentTypeReducer = (state: Set<string>, action: ContentTypeReducer) => {
       state.delete(action.value);
       return new Set(state);
     case ADD_ALL:
-      action.value.forEach((item) => state.add(item));
-      return new Set(state);
+      return new Set(action.value);
     case REMOVE_ALL:
       state.clear();
       return new Set(state);
