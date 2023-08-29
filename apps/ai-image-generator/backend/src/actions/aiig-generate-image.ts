@@ -1,37 +1,16 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { PlainClientAPI } from 'contentful-management';
 import { OpenAiApiService } from '../services/openaiApiService';
+import { AppActionCallResponse, Image } from '../types';
 
 interface AppActionCallParameters {
   prompt: string;
 }
 
-interface Image {
-  url: string;
-  imageType: string;
+export interface ImageCreationResult {
+  type: 'ImageCreationResult';
+  images: Image[];
 }
-
-interface ActionError {
-  type: string;
-  message: string;
-  details?: Record<string, any>;
-}
-
-// TODO: Create generic versions of success and error
-export interface AppActionCallResponseSuccess {
-  ok: true;
-  data: {
-    type: 'ImageCreationResult';
-    images: Image[];
-  };
-}
-
-export interface AppActionCallResponseError {
-  ok: false;
-  errors: ActionError[];
-}
-
-type AppActionCallResponse = AppActionCallResponseSuccess | AppActionCallResponseError;
 
 async function fetchOpenAiApiKey(cma: PlainClientAPI, appInstallationId: string): Promise<string> {
   const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
@@ -46,7 +25,7 @@ async function fetchOpenAiApiKey(cma: PlainClientAPI, appInstallationId: string)
 export const handler = async (
   payload: AppActionCallParameters,
   context: AppActionCallContext
-): Promise<AppActionCallResponse> => {
+): Promise<AppActionCallResponse<ImageCreationResult>> => {
   const {
     cma,
     appActionCallContext: { appInstallationId },

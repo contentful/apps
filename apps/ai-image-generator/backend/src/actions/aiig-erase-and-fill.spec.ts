@@ -12,13 +12,10 @@ import sinon from 'sinon';
 import { OpenAiApiService } from '../services/openaiApiService';
 import OpenAI from 'openai';
 import sinonChai from 'sinon-chai';
-import {
-  AppActionCallResponseError,
-  AppActionCallResponseSuccess,
-  handler,
-} from './aiig-erase-and-fill';
+import { ImageEditResult, handler } from './aiig-erase-and-fill';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { APIError } from 'openai/error';
+import { AppActionCallResponseError, AppActionCallResponseSuccess } from '../types';
 
 chai.use(sinonChai);
 
@@ -68,7 +65,10 @@ describe('aiigEraseAndFill.handler', () => {
   });
 
   it('returns the images result', async () => {
-    const result = (await handler(parameters, context)) as AppActionCallResponseSuccess;
+    const result = (await handler(
+      parameters,
+      context
+    )) as AppActionCallResponseSuccess<ImageEditResult>;
     expect(result).to.have.property('ok', true);
     expect(result.data).to.have.property('type', 'ImageEditResult');
     expect(result.data.images).to.deep.include({
