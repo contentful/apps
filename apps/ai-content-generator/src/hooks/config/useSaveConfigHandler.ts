@@ -14,7 +14,7 @@ import { generateEditorInterfaceAssignments } from '@utils/config/contentTypeHel
 const useSaveConfigHandler = (
   parameters: AppInstallationParameters,
   validateParams: (params: AppInstallationParameters) => string[],
-  contentTypes: string[]
+  contentTypes: Set<string>
 ) => {
   const sdk = useSDK<ConfigAppSDK>();
 
@@ -28,17 +28,12 @@ const useSaveConfigHandler = (
 
     const currentState = await sdk.app.getCurrentState();
 
-    let currentEditorInterface = {};
-
-    if (currentState !== null) {
-      const { EditorInterface } = currentState;
-      currentEditorInterface = EditorInterface;
-    }
+    const currentEditorInterface = currentState?.EditorInterface || {};
 
     // Assign the app to the sidebar for saved content types
     const newEditorInterfaceAssignments = generateEditorInterfaceAssignments(
       currentEditorInterface,
-      contentTypes,
+      Array.from(contentTypes),
       'sidebar',
       1
     );

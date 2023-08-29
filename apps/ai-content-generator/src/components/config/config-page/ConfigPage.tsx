@@ -20,9 +20,11 @@ const initialParameters: AppInstallationParameters = {
   profile: {},
 };
 
+const initialContentTypes: Set<string> = new Set();
+
 const ConfigPage = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
-  const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, []);
+  const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, initialContentTypes);
 
   const validateParams = (params: AppInstallationParameters): string[] => {
     const notifierErrors = [];

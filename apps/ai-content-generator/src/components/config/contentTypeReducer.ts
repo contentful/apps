@@ -26,16 +26,20 @@ export type ContentTypeReducer =
 
 const { ADD, REMOVE, ADD_ALL, REMOVE_ALL } = ContentTypeAction;
 
-const contentTypeReducer = (state: string[], action: ContentTypeReducer) => {
+const contentTypeReducer = (state: Set<string>, action: ContentTypeReducer) => {
   switch (action.type) {
     case ADD:
-      return [...state, action.value];
+      state.add(action.value);
+      return new Set(state);
     case REMOVE:
-      return state.filter((ct) => ct !== action.value);
+      state.delete(action.value);
+      return new Set(state);
     case ADD_ALL:
-      return action.value;
+      action.value.forEach((item) => state.add(item));
+      return new Set(state);
     case REMOVE_ALL:
-      return [];
+      state.clear();
+      return new Set(state);
     default:
       return state;
   }

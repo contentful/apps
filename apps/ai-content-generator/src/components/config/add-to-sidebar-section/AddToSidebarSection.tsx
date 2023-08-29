@@ -13,7 +13,7 @@ const styles = css({
 
 interface Props {
   allContentTypes: ContentTypeProps[];
-  selectedContentTypes: string[];
+  selectedContentTypes: Set<string>;
   dispatch: Dispatch<ContentTypeReducer>;
 }
 

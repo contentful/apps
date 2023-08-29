@@ -1,4 +1,4 @@
-import { Dispatch, useState } from 'react';
+import { Dispatch, useState, useEffect } from 'react';
 import { Checkbox, FormControl, Table } from '@contentful/f36-components';
 import { ContentTypeProps } from 'contentful-management';
 import { ContentTypeText } from '@components/config/configText';
@@ -7,7 +7,7 @@ import { styles } from './ContentTypeSelection.styles';
 
 interface Props {
   allContentTypes: ContentTypeProps[];
-  selectedContentTypes: string[];
+  selectedContentTypes: Set<string>;
   dispatch: Dispatch<ContentTypeReducer>;
 }
 
@@ -15,12 +15,24 @@ const ContentTypeSelection = (props: Props) => {
   const { allContentTypes, selectedContentTypes, dispatch } = props;
   const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
 
-  const allContentTypeIds = allContentTypes.map((ct) => ct.sys.id);
+  useEffect(() => {
+    const areAllItemsChecked = allContentTypes.length === selectedContentTypes.size;
+    const areAllButOneItemsChecked = allContentTypes.length - selectedContentTypes.size === 1;
+
+    if (!isSelectAllChecked && areAllItemsChecked) {
+      setIsSelectAllChecked(true);
+    }
+
+    if (isSelectAllChecked && areAllButOneItemsChecked) {
+      setIsSelectAllChecked(false);
+    }
+  }, [allContentTypes.length, isSelectAllChecked, selectedContentTypes.size]);
 
   const handleSelectAll = () => {
     if (isSelectAllChecked) {
       dispatch({ type: ContentTypeAction.REMOVE_ALL });
     } else {
+      const allContentTypeIds = allContentTypes.map((ct) => ct.sys.id);
       dispatch({ type: ContentTypeAction.ADD_ALL, value: allContentTypeIds });
     }
 
@@ -33,7 +45,7 @@ const ContentTypeSelection = (props: Props) => {
   };
 
   const isChecked = (contentTypeId: string) => {
-    return selectedContentTypes.includes(contentTypeId);
+    return selectedContentTypes.has(contentTypeId);
   };
 
   return (
