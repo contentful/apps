@@ -1,7 +1,8 @@
 import { AppInstallationParameters } from '@locations/ConfigScreen';
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import { AppState, ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useCallback } from 'react';
+import { generateEditorInterfaceAssignments } from '@utils/config/contentTypeHelpers';
 
 /**
  * This hook is used to save the parameters of the app.
@@ -12,7 +13,8 @@ import { useEffect, useCallback } from 'react';
  */
 const useSaveConfigHandler = (
   parameters: AppInstallationParameters,
-  validateParams: (params: AppInstallationParameters) => string[]
+  validateParams: (params: AppInstallationParameters) => string[],
+  contentTypes: Set<string>
 ) => {
   const sdk = useSDK<ConfigAppSDK>();
 
@@ -26,11 +28,25 @@ const useSaveConfigHandler = (
 
     const currentState = await sdk.app.getCurrentState();
 
+    const currentEditorInterface = currentState?.EditorInterface || {};
+
+    // Assign the app to the sidebar for saved content types
+    const newEditorInterfaceAssignments = generateEditorInterfaceAssignments(
+      currentEditorInterface,
+      Array.from(contentTypes),
+      'sidebar',
+      1
+    );
+
+    const newAppState: AppState = {
+      EditorInterface: newEditorInterfaceAssignments,
+    };
+
     return {
       parameters,
-      targetState: currentState,
+      targetState: newAppState,
     };
-  }, [parameters, sdk.app, sdk.notifier, validateParams]);
+  }, [contentTypes, parameters, sdk.app, sdk.notifier, validateParams]);
 
   const changeSaveConfigHandler = useCallback(() => {
     sdk.app.onConfigure(() => getCurrentState());

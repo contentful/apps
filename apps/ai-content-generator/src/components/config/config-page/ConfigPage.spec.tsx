@@ -18,8 +18,10 @@ describe('ConfigPage component', () => {
 
     const configTitle = screen.getByText(Sections.configHeading);
     const brandTitle = screen.getByText(Sections.brandHeading);
+    const sidebarTitle = screen.getByText(Sections.addToSidebarHeading);
 
     expect(configTitle).toBeTruthy();
     expect(brandTitle).toBeTruthy();
+    expect(sidebarTitle).toBeTruthy();
   });
 });
