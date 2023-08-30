@@ -12,7 +12,7 @@ import sinon from 'sinon';
 import { OpenAiApiService } from '../services/openaiApiService';
 import OpenAI from 'openai';
 import sinonChai from 'sinon-chai';
-import { ImageEditResult, handler } from './aiig-select-and-fill';
+import { ImageEditResult, handler } from './aiig-select-fill';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { APIError } from 'openai/error';
 import { AppActionCallResponseError, AppActionCallResponseSuccess } from '../types';
