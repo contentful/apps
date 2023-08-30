@@ -1,22 +1,24 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { PlainClientAPI } from 'contentful-management';
 import { OpenAiApiService } from '../services/openaiApiService';
+import * as nodeFetch from 'node-fetch';
 import { AppActionCallResponse, Image } from '../types';
 import { fetchOpenAiApiKey } from '../utils';
 
 interface AppActionCallParameters {
   prompt: string;
+  image: string;
+  mask: string;
 }
 
-export interface ImageCreationResult {
-  type: 'ImageCreationResult';
+export interface ImageEditResult {
+  type: 'ImageEditResult';
   images: Image[];
 }
 
 export const handler = async (
   payload: AppActionCallParameters,
   context: AppActionCallContext
-): Promise<AppActionCallResponse<ImageCreationResult>> => {
+): Promise<AppActionCallResponse<ImageEditResult>> => {
   const {
     cma,
     appActionCallContext: { appInstallationId },
@@ -27,10 +29,23 @@ export const handler = async (
   try {
     const openAiApiKey = await fetchOpenAiApiKey(cma, appInstallationId);
     const openAiApiService = OpenAiApiService.fromOpenAiApiKey(openAiApiKey);
+    const { prompt, image: imageUrl, mask: maskUrl } = payload;
+    const fetch = nodeFetch.default;
 
-    const { prompt } = payload;
-    const openAiImages = await openAiApiService.createImage({
+    const image = await fetch(imageUrl);
+    if (!image) {
+      throw new Error(`Unable to fetch imageUrl: ${imageUrl}`);
+    }
+
+    const mask = await fetch(maskUrl);
+    if (!mask) {
+      throw new Error(`Unable to fetch maskUrl: ${maskUrl}`);
+    }
+
+    const openAiImages = await openAiApiService.editImage({
       prompt,
+      image,
+      mask,
       numImages: 4,
       size: '1024x1024',
     });
@@ -62,7 +77,7 @@ export const handler = async (
   return {
     ok: true,
     data: {
-      type: 'ImageCreationResult',
+      type: 'ImageEditResult',
       images,
     },
   };
