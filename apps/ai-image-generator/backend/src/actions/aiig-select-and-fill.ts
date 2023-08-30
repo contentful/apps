@@ -1,6 +1,4 @@
-console.log('prod');
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { PlainClientAPI } from 'contentful-management';
 import { OpenAiApiService } from '../services/openaiApiService';
 import * as nodeFetch from 'node-fetch';
 import { AppActionCallResponse, Image } from '../types';
@@ -36,12 +34,12 @@ export const handler = async (
 
     const image = await fetch(imageUrl);
     if (!image) {
-      throw new Error(`'imageUrl' ${imageUrl} didn't work`);
+      throw new Error(`Unable to fetch imageUrl: ${imageUrl}`);
     }
 
     const mask = await fetch(maskUrl);
     if (!mask) {
-      throw new Error(`'maskUrl' ${maskUrl} didn't work`);
+      throw new Error(`Unable to fetch maskUrl: ${maskUrl}`);
     }
 
     const openAiImages = await openAiApiService.editImage({
