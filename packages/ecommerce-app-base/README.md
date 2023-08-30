@@ -45,11 +45,16 @@ setup({
       parameters: { config, currentValue },
     });
   },
-  isDisabled: () => false
+  isDisabled: () => false,
+  productCardVersion: 'v2'  
 });
 ```
 
 [Type Documentation](docs/README.md)
+
+## Components
+- [Storybook Components](https://ecommerce-app-base-components.netlify.app/) 
+
 
 ## Apps
 

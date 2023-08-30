@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.108",
-    "aws-sdk": "^2.1441.0",
-    "node-fetch": "^2.6.13"
+    "aws-sdk": "^2.1447.0",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.119",

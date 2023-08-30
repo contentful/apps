@@ -15,15 +15,15 @@
   },
   "devDependencies": {
     "eslint": "6.8.0",
-    "jest": "^29.6.3",
+    "jest": "^29.6.4",
     "serverless": "^3.31.0",
     "serverless-domain-manager": "3.3.2"
   },
   "dependencies": {
-    "@contentful/node-apps-toolkit": "^2.3.0",
+    "@contentful/node-apps-toolkit": "^2.4.0",
     "aws-serverless-express": "3.4.0",
     "express": "4.18.2",
     "lodash.get": "^4.4.2",
-    "node-fetch": "2.6.13"
+    "node-fetch": "2.7.0"
   }
 }

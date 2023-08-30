@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.3.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.2.6...@contentful/ecommerce-app-base@3.3.0) (2023-08-30)
+
+### Features
+
+- add product card [MONET-1338] ([#4534](https://github.com/contentful/apps/issues/4534)) ([5e9fcf4](https://github.com/contentful/apps/commit/5e9fcf409a896a4eb043c3ee9de5d368fec3e660))
+
+## [3.2.6](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.2.5...@contentful/ecommerce-app-base@3.2.6) (2023-08-30)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [3.2.5](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.2.4...@contentful/ecommerce-app-base@3.2.5) (2023-08-28)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
 ## [3.2.4](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.2.3...@contentful/ecommerce-app-base@3.2.4) (2023-08-22)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
