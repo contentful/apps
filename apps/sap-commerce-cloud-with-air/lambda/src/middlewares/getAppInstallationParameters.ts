@@ -61,15 +61,12 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
 
     // get installation parameters from via CMA
     await axios
-      .get(
-        `https://api.contentful.com/spaces/${spaceId}/environments/${environmentId}/app_installations/${appId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${appAccessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      )
+      .get(`${host}/spaces/${spaceId}/environments/${environmentId}/app_installations/${appId}`, {
+        headers: {
+          Authorization: `Bearer ${appAccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      })
       .then((response) => {
         const appInstallation = response.data;
         Object.assign(installationParameters, appInstallation.parameters);
