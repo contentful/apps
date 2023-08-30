@@ -6,7 +6,6 @@
     "@types/react": "17.0.65",
     "@types/react-dom": "17.0.20",
     "cross-env": "7.0.3",
-    "relative-deps": "^1.0.7",
     "typescript": "4.3.2"
   },
   "dependencies": {
@@ -14,20 +13,16 @@
     "@commercetools/sdk-client-v2": "1.4.2",
     "@contentful/app-scripts": "1.2.0",
     "@contentful/app-sdk": "4.21.1",
-    "@contentful/ecommerce-app-base": "3.1.67",
+    "@contentful/ecommerce-app-base": "3.3.0",
     "@contentful/f36-components": "^4.48.1",
     "@contentful/react-apps-toolkit": "^1.2.16",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-scripts": "^5.0.1"
   },
-  "relativeDependencies": {
-    "@contentful/ecommerce-app-base": "../../packages/ecommerce-app-base"
-  },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
-    "prepare": "relative-deps",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 7yUlnpgAofvRDee0n6Ocv2 --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 4sN817kAlqYtBZFTJA4ISX --token ${TEST_CMA_TOKEN}"
   },
