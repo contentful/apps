@@ -1,14 +1,10 @@
-import React from 'react';
-import { render, cleanup, configure } from '@testing-library/react';
-import { Props, ProductList } from '.';
-import productPreviews from '../../__mocks__/productPreviews';
-
-configure({
-  testIdAttribute: 'data-test-id',
-});
+import * as React from 'react';
+import { render, cleanup } from '@testing-library/react';
+import { Props, ProductList } from './ProductList';
+import { productsList } from '../../__mocks__';
 
 const defaultProps: Props = {
-  products: productPreviews,
+  products: productsList,
   selectProduct: jest.fn(),
   selectedSKUs: [],
 };
@@ -22,8 +18,8 @@ describe('ProductList', () => {
 
   it('should render successfully with no items selected', async () => {
     const { getAllByTestId, getByTestId } = renderComponent(defaultProps);
-    expect(getAllByTestId('ProductListItem')).toHaveLength(productPreviews.length);
-    for (const product of productPreviews) {
+    expect(getAllByTestId('ProductListItem')).toHaveLength(productsList.length);
+    for (const product of productsList) {
       expect(getByTestId(`product-preview-${product.sku}`)).toHaveAttribute(
         'aria-checked',
         'false'
@@ -32,13 +28,13 @@ describe('ProductList', () => {
   });
 
   it('should render successfully with selected items', () => {
-    const selectedSKU = productPreviews[1].sku;
+    const selectedSKU = productsList[1].sku;
     const { getAllByTestId, getByTestId } = renderComponent({
       ...defaultProps,
       selectedSKUs: [selectedSKU],
     });
-    expect(getAllByTestId('ProductListItem')).toHaveLength(productPreviews.length);
-    for (const product of productPreviews) {
+    expect(getAllByTestId('ProductListItem')).toHaveLength(productsList.length);
+    for (const product of productsList) {
       expect(getByTestId(`product-preview-${product.sku}`)).toHaveAttribute(
         'aria-checked',
         selectedSKU === product.sku ? 'true' : 'false'

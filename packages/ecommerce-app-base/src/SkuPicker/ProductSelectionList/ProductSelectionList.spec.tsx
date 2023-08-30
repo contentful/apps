@@ -1,10 +1,10 @@
-import React from 'react';
+import * as React from 'react';
 import { render, cleanup } from '@testing-library/react';
-import { Props, ProductSelectionList } from '.';
-import productPreviews from '../../__mocks__/productPreviews';
+import { Props, ProductSelectionList } from './ProductSelectionList';
+import { productsList } from '../../__mocks__';
 
 const defaultProps: Props = {
-  products: productPreviews,
+  products: productsList,
   selectProduct: jest.fn(),
 };
 
@@ -17,6 +17,6 @@ describe('ProductSelectionList', () => {
 
   it('should render successfully', async () => {
     const { getAllByTestId } = renderComponent(defaultProps);
-    expect(getAllByTestId('product-selection-list-item')).toHaveLength(productPreviews.length);
+    expect(getAllByTestId('product-selection-list-item')).toHaveLength(productsList.length);
   });
 });

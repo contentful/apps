@@ -80,9 +80,9 @@ const getInitialValue = (sdk) => ({
 
 /**
  * Get entries linked to a list of entries
- * 
+ *
  * @description Due to Contentful auto-saving after the entry has been created but not before the getEntries might return incorrect response and require a retry until the linked has been created by Contentful
- * 
+ *
  */
 const getEntriesLinkedByIds = async (space, entryIds) => {
   const DELAY_IN_MILLISECONDS = 5000;
@@ -101,13 +101,12 @@ const getEntriesLinkedByIds = async (space, entryIds) => {
       return entriesRes;
     } else {
       retries++;
-      await new Promise(resolve => setTimeout(resolve, DELAY_IN_MILLISECONDS));
+      await new Promise((resolve) => setTimeout(resolve, DELAY_IN_MILLISECONDS));
     }
   }
 
   throw new Error('Failed to retrieve entries after retries');
 };
-
 
 const fetchInitialData = async (sdk, client) => {
   const { space, ids, locales } = sdk;

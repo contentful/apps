@@ -1,7 +1,10 @@
 import type { Preview } from '@storybook/react';
+import { StoryFn } from '@storybook/react';
+import { GlobalStyles } from '@contentful/f36-components';
 
 const preview: Preview = {
   parameters: {
+    layout: 'centered',
     actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {
       matchers: {
@@ -10,6 +13,14 @@ const preview: Preview = {
       },
     },
   },
+  decorators: [
+    (Story: StoryFn) => (
+      <>
+        <GlobalStyles />
+        <Story />
+      </>
+    ),
+  ],
 };
 
 export default preview;

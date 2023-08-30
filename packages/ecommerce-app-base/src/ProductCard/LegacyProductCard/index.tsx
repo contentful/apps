@@ -1,0 +1,1 @@
+export { LegacyProductCard } from './LegacyProductCard';

@@ -1,11 +1,11 @@
-import * as React from 'react';
 import arrayMove from 'array-move';
 import isEqual from 'lodash/isEqual';
 import difference from 'lodash/difference';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { mapSort } from '../utils';
 import { SortableList } from './SortableList';
-import { Config, Product, ProductPreviewsFn } from '../interfaces';
+import { Config, Product, ProductPreviewsFn } from '../types';
+import { Component } from 'react';
 
 interface Props {
   sdk: FieldAppSDK;
@@ -21,7 +21,7 @@ interface State {
   productPreviews: Product[];
 }
 
-export class SortableComponent extends React.Component<Props, State> {
+export class SortableComponent extends Component<Props, State> {
   state = {
     productPreviews: [],
   };

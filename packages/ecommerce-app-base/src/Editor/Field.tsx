@@ -1,14 +1,15 @@
-import { Button } from '@contentful/f36-components';
+import { Box, Button, Note } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import * as React from 'react';
+
 import { FC, useCallback, useEffect, useState } from 'react';
 import { FieldsSkuTypes } from '../AppConfig/fields';
 import { SortableComponent } from './SortableComponent';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useIntegration } from './IntegrationContext';
+import { SKUType } from '../types';
 
 const styles = {
   sortable: css({
@@ -32,13 +33,21 @@ function fieldValueToState(value?: string | string[]): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-const Field: FC = () => {
+export const Field: FC = () => {
   useAutoResizer();
 
   const sdk = useSDK<FieldAppSDK>();
 
-  const { skuTypes, fetchProductPreviews, logo, isDisabled, makeCTA, openDialog } =
-    useIntegration();
+  const {
+    skuTypes,
+    fetchProductPreviews,
+    logo,
+    isDisabled,
+    makeCTA,
+    openDialog,
+    productCardVersion,
+    additionalDataRenderer,
+  } = useIntegration();
 
   // Do we need a local representation of the remote state?
   const [value, setValue] = useState(() => fieldValueToState(sdk.field.getValue()));
@@ -73,7 +82,7 @@ const Field: FC = () => {
     const currentValue = value;
     const config = sdk.parameters.installation;
 
-    const defaultSkuType = skuTypes?.find((skuType) => skuType.default === true)?.id;
+    const defaultSkuType = skuTypes?.find((skuType: SKUType) => skuType.default === true)?.id;
     const skuType =
       (config as { skuTypes?: FieldsSkuTypes }).skuTypes?.[sdk.contentType.sys.id]?.[
         sdk.field.id
@@ -95,7 +104,7 @@ const Field: FC = () => {
   const config = sdk.parameters.installation;
   const isDisabledLocal = editingDisabled || isDisabled(value, config);
 
-  const defaultSkuType = skuTypes?.find((skuType) => skuType.default === true)?.id;
+  const defaultSkuType = skuTypes?.find((skuType: SKUType) => skuType.default === true)?.id;
 
   const skuType =
     (config as { skuTypes?: FieldsSkuTypes }).skuTypes?.[sdk.contentType.sys.id]?.[sdk.field.id] ??
@@ -116,6 +125,7 @@ const Field: FC = () => {
           />
         </div>
       )}
+
       <div className={styles.container}>
         <img src={logo} alt="Logo" className={styles.logo} />
         <Button
@@ -127,8 +137,21 @@ const Field: FC = () => {
           {makeCTA(sdk.field.type, skuType)}
         </Button>
       </div>
+
+      {productCardVersion === 'v1' && additionalDataRenderer && (
+        <Box marginTop={'spacingM'} marginBottom={'spacingM'}>
+          <AdditionalDataRendererWarning />
+        </Box>
+      )}
     </>
   );
 };
 
-export default Field;
+const AdditionalDataRendererWarning = () => {
+  return (
+    <Note variant={'warning'}>
+      It looks like an <code>additionalDataRenderer</code> is defined, this only works in
+      conjunction with <code>productCardVersion@v2</code>.
+    </Note>
+  );
+};

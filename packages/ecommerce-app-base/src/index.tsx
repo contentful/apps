@@ -3,12 +3,11 @@ import { GlobalStyles } from '@contentful/f36-components';
 import * as React from 'react';
 import { render } from 'react-dom';
 import AppConfig from './AppConfig/AppConfig';
-import Field from './Editor/Field';
-import { Integration } from './interfaces';
+import { Field, IntegrationProvider } from './Editor';
+import { Integration, Product } from './types';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
-import { IntegrationProvider } from './Editor/IntegrationContext';
 
-export function setup(integration: Integration) {
+export function setup<P extends Product = Product>(integration: Integration<P>) {
   init((sdk) => {
     const root = document.getElementById('root');
 
@@ -52,5 +51,7 @@ export function setup(integration: Integration) {
   });
 }
 
-export * from './interfaces';
+// we should not export everything here
+export * from './types';
+export * from './AdditionalDataRenderer';
 export { renderSkuPicker } from './SkuPicker/renderSkuPicker';

@@ -1,6 +1,5 @@
-import * as React from 'react';
 import { SortableContainer } from 'react-sortable-hoc';
-import { DeleteFn, Product } from '../interfaces';
+import { DeleteFn, Product } from '../types';
 import { SortableListItem } from './SortableListItem';
 
 export interface Props {

@@ -1,39 +1,72 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import productPreviews from '../__mocks__/productPreviews';
-import Field from './Field';
-import logo from '../__mocks__/logo.svg';
-import { SDKContext } from '@contentful/react-apps-toolkit';
-import { IntegrationProvider } from './IntegrationContext';
-import { sdk } from '../__mocks__/storybook/sdk';
-import { GlobalStyles } from '@contentful/f36-components';
+import { Field } from './Field';
+import { integration } from '../__mocks__/storybook/integration';
+import { productsList } from '../__mocks__';
+import { decorators } from '../__mocks__/storybook/decorators';
 
 const meta: Meta<typeof Field> = {
   component: Field,
+  tags: ['autodocs'],
+  decorators: [decorators.WithSDKProvider(), decorators.WithFixedWidth()],
 };
 
 export default meta;
 
 type Story = StoryObj<typeof Field>;
 
-const integration = {
-  sdk,
-  logo,
-  makeCTA: () => 'Select SKU',
-  fetchProductPreviews: () => Promise.resolve(productPreviews),
-  skuTypes: [{ id: 'product', name: 'Product' }],
-  isDisabled: () => false,
-  openDialog: (_, currentValue: string) => alert(currentValue),
+export const Version1SingleProduct: Story = {
+  decorators: [
+    decorators.WithIntegrationProvider(
+      integration(
+        {
+          productCardVersion: 'v1',
+        },
+        [productsList[0]]
+      )
+    ),
+  ],
 };
 
-export const Default: Story = {
+export const Version1MultipleProducts: Story = {
   decorators: [
-    (Story) => (
-      <IntegrationProvider integration={integration}>
-        <GlobalStyles />
-        <SDKContext.Provider value={{ sdk }}>
-          <Story />
-        </SDKContext.Provider>
-      </IntegrationProvider>
+    decorators.WithIntegrationProvider(
+      integration({
+        productCardVersion: 'v1',
+      })
+    ),
+  ],
+};
+
+export const Version1AdditionalDataRendererDefined: Story = {
+  decorators: [
+    decorators.WithIntegrationProvider(
+      integration({
+        productCardVersion: 'v1',
+        additionalDataRenderer: () => null,
+      })
+    ),
+  ],
+};
+
+export const Version2SingleProduct: Story = {
+  decorators: [
+    decorators.WithIntegrationProvider(
+      integration(
+        {
+          productCardVersion: 'v2',
+        },
+        [productsList[0]]
+      )
+    ),
+  ],
+};
+
+export const Version2MultipleProducts: Story = {
+  decorators: [
+    decorators.WithIntegrationProvider(
+      integration({
+        productCardVersion: 'v2',
+      })
     ),
   ],
 };

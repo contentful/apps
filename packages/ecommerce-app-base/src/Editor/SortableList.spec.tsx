@@ -1,11 +1,10 @@
-import * as React from 'react';
 import { render, cleanup } from '@testing-library/react';
 import { Props, SortableList } from './SortableList';
-import productPreviews from '../__mocks__/productPreviews';
+import { productsList } from '../__mocks__';
 
 const defaultProps: Props = {
   disabled: false,
-  productPreviews,
+  productPreviews: productsList,
   deleteFn: jest.fn(),
 };
 
@@ -25,6 +24,6 @@ describe('SortableList', () => {
   it('should render successfully', async () => {
     const { queryAllByTestId } = renderComponent(defaultProps);
 
-    expect(queryAllByTestId('sortable-list-item')).toHaveLength(productPreviews.length);
+    expect(queryAllByTestId('sortable-list-item')).toHaveLength(productsList.length);
   });
 });

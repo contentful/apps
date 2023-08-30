@@ -5,7 +5,7 @@
     "target": "es5",
     "module": "commonjs",
     "strict": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "rootDir": "./src",
     "experimentalDecorators": true,
     "esModuleInterop": true,
@@ -15,9 +15,15 @@
       "es2017"
     ],
     "resolveJsonModule": true,
-    "declaration": true
+    "declaration": true,
   },
-  "files": ["./src/index.tsx"],
-  "exclude": ["node_modules", "build", "**/*.stories.tsx"]
-
+  "files": [
+    "./src/index.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "lib",
+    "**/*.stories.tsx",
+    "src/__mocks__"
+  ]
 }

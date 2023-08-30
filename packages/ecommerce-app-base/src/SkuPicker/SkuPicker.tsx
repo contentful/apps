@@ -5,13 +5,7 @@ import debounce from 'lodash/debounce';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { Paginator } from './Paginator';
-import {
-  MakeSaveBtnTextFn,
-  Pagination,
-  Product,
-  ProductPreviewsFn,
-  ProductsFn,
-} from '../interfaces';
+import { MakeSaveBtnTextFn, Pagination, Product, ProductPreviewsFn, ProductsFn } from '../types';
 import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
 import { mapSort } from '../utils';
