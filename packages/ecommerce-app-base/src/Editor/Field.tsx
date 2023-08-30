@@ -1,4 +1,4 @@
-import { Box, Button, Note, TextLink } from '@contentful/f36-components';
+import { Box, Button, Note } from '@contentful/f36-components';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
@@ -151,14 +151,7 @@ const AdditionalDataRendererWarning = () => {
   return (
     <Note variant={'warning'}>
       It looks like an <code>additionalDataRenderer</code> is defined, this only works in
-      conjunction with <code>productCardVersion@v2</code>
-      {' - '}
-      <TextLink
-        as={'button'}
-        onClick={() => alert('This should point to the not yet created docs')}>
-        read more
-      </TextLink>
-      .
+      conjunction with <code>productCardVersion@v2</code>.
     </Note>
   );
 };
