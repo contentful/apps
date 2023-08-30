@@ -24,6 +24,19 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
       const spaceId = req.header('x-contentful-space-id');
       const environmentId = req.header('x-contentful-environment-id');
 
+      const crn = req.header('x-contentful-crn') || 'default:contentful'; // Bandaid to default to US region
+      const partition = crn.split(':')[1];
+
+      let host;
+      switch (partition) {
+        case 'contentful':
+          host = 'api.contentful.com';
+          break;
+        case 'contentful-eu':
+          host = 'api.eu.contentful.com';
+          break;
+      }
+
       if (!appId || !spaceId || !environmentId) {
         throw new Error('Missing required headers!');
       }
@@ -34,6 +47,7 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
         appInstallationId: appId,
         spaceId,
         environmentId,
+        host,
       })
         .then((token) => token)
         .catch((e) => {
