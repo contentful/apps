@@ -78,12 +78,42 @@ const getInitialValue = (sdk) => ({
   experimentsResults: {},
 });
 
+/**
+ * Get entries linked to a list of entries
+ *
+ * @description Due to Contentful auto-saving after the entry has been created but not before the getEntries might return incorrect response and require a retry until the linked has been created by Contentful
+ *
+ */
+const getEntriesLinkedByIds = async (space, entryIds) => {
+  const DELAY_IN_MILLISECONDS = 5000;
+  const RETRY_LIMIT = 5;
+
+  let retries = 0;
+
+  while (retries < RETRY_LIMIT) {
+    const entriesRes = await space.getEntries({
+      links_to_entry: entryIds,
+      skip: 0,
+      limit: 1000,
+    });
+
+    if (entriesRes.items.length) {
+      return entriesRes;
+    } else {
+      retries++;
+      await new Promise((resolve) => setTimeout(resolve, DELAY_IN_MILLISECONDS));
+    }
+  }
+
+  throw new Error('Failed to retrieve entries after retries');
+};
+
 const fetchInitialData = async (sdk, client) => {
   const { space, ids, locales } = sdk;
 
   const [contentTypesRes, entriesRes, experiments] = await Promise.all([
     space.getContentTypes({ order: 'name', limit: 1000 }),
-    space.getEntries({ links_to_entry: ids.entry, skip: 0, limit: 1000 }),
+    getEntriesLinkedByIds(space, ids.entry),
     client.getExperiments(),
   ]);
 

@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@contentful/node-apps-toolkit": "2.2.0",
+    "esbuild": "0.19.2"
+  }
+}

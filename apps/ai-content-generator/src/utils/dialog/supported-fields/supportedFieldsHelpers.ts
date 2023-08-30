@@ -7,6 +7,38 @@ import {
 import { ContentFields, EntryProps } from 'contentful-management';
 import { FieldLocales } from '@locations/Dialog';
 import { LocaleNames } from '@providers/generatorProvider';
+import { ContentTypeFieldValidation } from 'contentful-management/types';
+
+/**
+ * This creates the size validation for the field
+ * If no custom size validation exists, use the default character length for the field type
+ * as listed in our technical limits: https://www.contentful.com/developers/docs/technical-limits/.
+ * If a custom max length exists, use that instead of the default.
+ * @param fieldValidations
+ * @param fieldType
+ * @returns ContentTypeFieldValidation
+ */
+const createSizeValidation = (
+  fieldValidations: ContentTypeFieldValidation[] | undefined,
+  fieldType: string
+): ContentTypeFieldValidation => {
+  const DEFAULT_CHAR_LENGTH = {
+    [SupportedFieldTypes.RICH_TEXT]: 200000,
+    [SupportedFieldTypes.SYMBOL]: 256,
+    [SupportedFieldTypes.TEXT]: 50000,
+  };
+  const defaultMax = DEFAULT_CHAR_LENGTH[fieldType as SupportedFieldTypes];
+
+  const customSizeValidation = fieldValidations?.find((validation) => validation?.size) || {
+    size: { max: defaultMax },
+  };
+
+  if (customSizeValidation.size && !customSizeValidation.size?.max) {
+    customSizeValidation.size.max = defaultMax;
+  }
+
+  return customSizeValidation;
+};
 
 /**
  * This formats an entry's field into an easy-to-use object.
@@ -31,10 +63,7 @@ const formatField = (
     data: entry.fields[field.id] ? entry.fields[field.id][locale] : '',
     locale: locale,
     language: localeNames[locale],
-    sizeValidation:
-      field.validations?.find((validation) =>
-        Object.prototype.hasOwnProperty.call(validation, 'size')
-      ) || null,
+    sizeValidation: createSizeValidation(field.validations, field.type),
     isDefaultLocale: defaultLocale === locale,
   };
 
@@ -66,11 +95,9 @@ const sortFieldOptionsByLanguage = (a: Field, b: Field) => {
 };
 
 /**
- * A reducer function that checks if a field is a supported type, iterates through its supported locales,
+ * A reducer function that checks if a field is a supported type and is visible, iterates through its supported locales,
  * determines whether it has content, and assigns the field to the correct column.
  *
- * TODO: Handle the case where the field is empty
- * TODO: Support storing fields for both Source and Output
  * @param entry
  * @param supportedFields
  * @param fieldLocales
@@ -87,8 +114,9 @@ const isSupported = (
 ) => {
   return (fieldAcc: SupportedFieldsOutput, field: ContentFields) => {
     const isSupportedFieldType = supportedFields.includes(field.type as SupportedFieldTypes);
+    const isFieldVisible = !field.disabled;
 
-    if (isSupportedFieldType) {
+    if (isSupportedFieldType && isFieldVisible) {
       const fieldsWithContent = [] as Field[];
       const allFields = [] as Field[];
 

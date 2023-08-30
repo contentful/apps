@@ -1,24 +1,35 @@
-import { DeliveryFunctionRequestEventType } from '@contentful/node-apps-toolkit';
+import { DeliveryFunctionEventType as EventType } from '@contentful/node-apps-toolkit';
 
-export const handlers = {
-  [DeliveryFunctionRequestEventType.GRAPHQL_FIELD_MAPPING]: async (event, context) => {
-    const result = []
-    const fields = event.fields;
-    fields.forEach(({ contentTypeId, field }) => {
-      result.push({
-        contentTypeId,
-        fieldId: field.id,
-        graphQLOutputType: 'Product',
-        graphQLQueryField: 'product',
-        graphQLQueryArgument: 'id'
-      })
-    })
-    return result;
-  },
-  [DeliveryFunctionRequestEventType.GRAPHQL_QUERY]: async (event, context) => {
+const fieldMappingHandler = (event, context) => {
+  const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
-      data: {},
-      errors: []
-    }
+      contentTypeId,
+      fieldId: field.id,
+      graphQLOutputType: 'Foo',
+      graphQLQueryField: 'bar',
+      graphQLQueryArguments: { id: '' },
+    };
+  });
+
+  return {
+    namespace: 'MyApp',
+    fields,
+  };
+};
+
+const queryHandler = (event, context) => {
+  return {
+    data: {},
+    errors: [],
+  };
+};
+
+export const handler = (event, context) => {
+  if (event.type === EventType.GRAPHQL_FIELD_MAPPING) {
+    return fieldMappingHandler(event, context);
   }
-}
+  if (event.type === EventType.GRAPHQL_QUERY) {
+    return queryHandler(event, context);
+  }
+  throw new Error('Unknown Event');
+};
