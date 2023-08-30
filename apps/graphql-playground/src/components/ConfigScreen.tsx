@@ -49,7 +49,7 @@ const TABS = [
         <Form>
           <Paragraph style={{ marginTop: '1em' }}>
             <TextLink
-              href={`https://app.contentful.com/spaces/${sdk.ids.space}/api/keys`}
+              href={`${sdk.hostnames.webapp}spaces/${sdk.ids.space}/api/keys`}
               target="_blank"
               rel="noopener">
               Create a new pair of API keys
