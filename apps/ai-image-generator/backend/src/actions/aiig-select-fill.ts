@@ -3,6 +3,8 @@ import { OpenAiApiService } from '../services/openaiApiService';
 import * as nodeFetch from 'node-fetch';
 import { AppActionCallResponse, Image } from '../types';
 import { fetchOpenAiApiKey } from '../utils';
+import { toFile } from 'openai';
+import { transformImages } from '../transform-images';
 
 interface AppActionCallParameters {
   prompt: string;
@@ -32,20 +34,25 @@ export const handler = async (
     const { prompt, image: imageUrl, mask: maskUrl } = payload;
     const fetch = nodeFetch.default;
 
-    const image = await fetch(imageUrl);
-    if (!image) {
+    const sourceImageResponse = await fetch(imageUrl);
+    if (!sourceImageResponse) {
       throw new Error(`Unable to fetch imageUrl: ${imageUrl}`);
     }
 
-    const mask = await fetch(maskUrl);
-    if (!mask) {
+    const maskImageResponse = await fetch(maskUrl);
+    if (!maskImageResponse) {
       throw new Error(`Unable to fetch maskUrl: ${maskUrl}`);
     }
 
+    const { mask: maskBuffer, image: imageBuffer } = await transformImages({
+      sourceImageResponse,
+      maskImageResponse,
+    });
+
     const openAiImages = await openAiApiService.editImage({
       prompt,
-      image,
-      mask,
+      image: await toFile(imageBuffer),
+      mask: await toFile(maskBuffer),
       numImages: 4,
       size: '1024x1024',
     });
