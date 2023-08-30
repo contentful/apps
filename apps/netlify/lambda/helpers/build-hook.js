@@ -51,6 +51,7 @@ const getBuildHookIdFromSiteName = (siteName, params) => {
 const getBuildHooksFromAppInstallationParams = async (
   appContextDetails = {
     environmentId: '',
+    host: '',
     spaceId: '',
     siteName: '',
     contentTypeId: '',
@@ -60,7 +61,7 @@ const getBuildHooksFromAppInstallationParams = async (
   getToken = getManagementToken,
   fetch = nodeFetch
 ) => {
-  const { spaceId, environmentId, siteName, contentTypeId, isAsset } = appContextDetails;
+  const { spaceId, host, environmentId, siteName, contentTypeId, isAsset } = appContextDetails;
 
   if (!siteName && !contentTypeId && !isAsset) {
     throw new Error('Invalid request, requires action call or publish/unpublish event');
@@ -70,6 +71,7 @@ const getBuildHooksFromAppInstallationParams = async (
     spaceId,
     environmentId,
     appInstallationId,
+    host,
   });
 
   const rawResult = await fetch(
@@ -111,12 +113,26 @@ const extractAppContextDetails = (req) => {
     assetTypes.includes(get(req.body, 'sys.type')),
   ];
 
+  const crn = req.header('x-contentful-crn') || 'default:contentful'; // Bandaid to default to US region
+  const partition = crn.split(':')[1];
+
+  let host;
+  switch (partition) {
+    case 'contentful':
+      host = 'api.contentful.com';
+      break;
+    case 'contentful-eu':
+      host = 'api.eu.contentful.com';
+      break;
+  }
+
   return {
     spaceId,
     environmentId,
     contentTypeId,
     siteName,
     isAsset,
+    host,
   };
 };
 
