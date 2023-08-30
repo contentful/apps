@@ -35,13 +35,13 @@
       ]
     },
     {
-      "id": "aiigEditAndFill",
+      "id": "aiigSelectFill",
       "name": "Edit and fill with AI Image",
       "category": "Custom",
       "description": "This action will edit an image using OpenAI DALL-E 2 given a prompt, source image, and mask",
       "type": "function",
-      "path": "actions/aiig-select-and-fill.js",
-      "entryFile": "./backend/src/actions/aiig-select-and-fill.ts",
+      "path": "actions/aiig-select-fill.js",
+      "entryFile": "./backend/src/actions/aiig-select-fill.ts",
       "allowNetworks": [],
       "parameters": [
         {
