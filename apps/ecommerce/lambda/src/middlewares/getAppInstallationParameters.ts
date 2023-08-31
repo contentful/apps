@@ -65,8 +65,6 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
           appDefinitionId: appId,
         });
         Object.assign(installationParameters, appInstallation.parameters);
-
-        req.installationParameters = installationParameters;
       } catch (e: unknown) {
         console.error((e as { message: string }).message);
         throw new UnableToGetAppInstallationParameters(
@@ -74,6 +72,7 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
         );
       }
     }
+    req.installationParameters = installationParameters;
   } catch (e) {
     console.error(e);
     return next(e);
