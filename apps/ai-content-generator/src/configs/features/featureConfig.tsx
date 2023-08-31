@@ -18,6 +18,15 @@ enum AIFeature {
 const FIELD_HELP_TEXT_BASE = 'Select a source field and output field';
 const FIELD_PLACEHOLDER = 'Your source and results will appear here...';
 const PROMPT_HELP_TEXT_BASE = 'Select an output field and';
+const TOKEN_WARNING = 'Generating content uses Chat GPT tokens.';
+const TOKEN_SUBSTRING = 'Chat GPT tokens.';
+const TOKEN_LINK = 'https://openai.com/pricing';
+
+const tokenWarning = {
+  warningText: TOKEN_WARNING,
+  substring: TOKEN_SUBSTRING,
+  link: TOKEN_LINK,
+};
 
 const featureConfig: FeatureConfig = {
   [AIFeature.TITLE]: {
@@ -30,6 +39,7 @@ const featureConfig: FeatureConfig = {
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter a prompt to generate a title`,
       promptPlaceholder:
         "Write a prompt, for example...\nAn article about quantum computing in simple terms\nA blog post about creative ideas for a 10 year old's birthday\nA tutorial about making an HTTP request in JavaScript",
+      tokenWarning,
     },
   },
   [AIFeature.CONTENT]: {
@@ -42,6 +52,7 @@ const featureConfig: FeatureConfig = {
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter a prompt to generate content`,
       promptPlaceholder:
         "Write a prompt, for example...\nExplain quantum computing in simple terms\nGot any creative ideas for a 10 year old's birthday?\nHow do I make an HTTP request in JavaScript?",
+      tokenWarning,
     },
   },
   [AIFeature.TRANSLATE]: {
@@ -54,6 +65,7 @@ const featureConfig: FeatureConfig = {
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter content to generate a translation`,
       promptPlaceholder:
         "Enter content here to translate it according to the output field's language...",
+      tokenWarning,
     },
   },
   [AIFeature.REWRITE]: {
@@ -65,6 +77,7 @@ const featureConfig: FeatureConfig = {
       fieldPlaceholder: FIELD_PLACEHOLDER,
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} and then add tone instructions.`,
       promptPlaceholder: 'Enter content here to rewrite it...',
+      tokenWarning,
     },
   },
   [AIFeature.SEO_KEYWORDS]: {
@@ -76,6 +89,7 @@ const featureConfig: FeatureConfig = {
       fieldPlaceholder: FIELD_PLACEHOLDER,
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter content to generate SEO keywords`,
       promptPlaceholder: 'Enter content here to generate SEO keywords...',
+      tokenWarning,
     },
   },
   [AIFeature.SEO_DESCRIPTION]: {
@@ -87,6 +101,7 @@ const featureConfig: FeatureConfig = {
       fieldPlaceholder: FIELD_PLACEHOLDER,
       promptHelpText: `${PROMPT_HELP_TEXT_BASE} enter content to generate SEO description`,
       promptPlaceholder: 'Enter content here to generate SEO description...',
+      tokenWarning: tokenWarning,
     },
   },
 };

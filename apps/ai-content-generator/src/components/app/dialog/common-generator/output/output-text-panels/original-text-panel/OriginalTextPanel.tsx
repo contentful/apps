@@ -23,6 +23,7 @@ interface Props {
 
 const OriginalTextPanel = (props: Props) => {
   const { inputText, generate, isNewText, hasOutputField, dialogText } = props;
+  const { tokenWarning } = dialogText;
   const { dispatch } = useContext(GeneratorContext);
 
   const handleOriginalTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,6 +40,7 @@ const OriginalTextPanel = (props: Props) => {
   const isGenerateButtonDisabled = !inputText || !hasOutputField;
   const placeholderText = isNewText ? dialogText.promptPlaceholder : dialogText.fieldPlaceholder;
   const helpText = isNewText ? dialogText.promptHelpText : dialogText.fieldHelpText;
+  const helpTextProps = isGenerateButtonDisabled ? { helpText } : { warningMessage: tokenWarning };
 
   return (
     <Tabs.Panel id={OutputTab.UPDATE_ORIGINAL_TEXT} css={styles.panel}>
@@ -47,7 +49,7 @@ const OriginalTextPanel = (props: Props) => {
         onFieldChange={handleOriginalTextChange}
         isDisabled={isTextAreaDisabled}
         placeholder={placeholderText}
-        helpText={isGenerateButtonDisabled ? helpText : ''}>
+        {...helpTextProps}>
         <Button onClick={generate} isDisabled={isGenerateButtonDisabled}>
           Generate
         </Button>

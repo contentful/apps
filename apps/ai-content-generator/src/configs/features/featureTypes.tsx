@@ -10,11 +10,18 @@ export type Prompt = (input: string, targetLocale: string, ...args: string[]) =>
  * Feature Items
  */
 
+export type TokenWarning = {
+  warningText: string;
+  substring: string;
+  link: string;
+};
+
 export type DialogText = {
   fieldHelpText: string;
   fieldPlaceholder: string;
   promptHelpText: string;
   promptPlaceholder: string;
+  tokenWarning: TokenWarning;
 };
 
 type FeatureItem = {
