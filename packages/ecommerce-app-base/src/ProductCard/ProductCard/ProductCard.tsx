@@ -98,7 +98,7 @@ export const ProductCard = (props: ProductCardProps) => {
 
       <ProductCardBody
         title={resource.name}
-        description={resource.description ?? '{no description provided}'}
+        description={resource.description ?? 'no description provided'}
         image={resource?.image ?? ''}
         id={displaySKU}
         isExpanded={isExpanded}
