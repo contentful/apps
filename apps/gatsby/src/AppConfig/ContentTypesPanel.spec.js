@@ -5,7 +5,7 @@ import { cleanup, render } from '@testing-library/react';
 function mockSdk() {
   return {
     hostnames: {
-      webapp: 'https://app.contentful.com',
+      webapp: 'app.contentful.com',
     },
   };
 }
