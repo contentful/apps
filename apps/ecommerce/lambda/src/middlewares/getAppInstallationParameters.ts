@@ -1,6 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { getManagementToken } from '@contentful/node-apps-toolkit';
-import axios from 'axios';
 import { UnableToGetAppInstallationParameters } from '../errors/unableToGetAppInstallationParameters';
 import { AppInstallationParameters } from '../types';
 import { UnableToGetAppAccessToken } from '../errors/unableToGetAppAccessToken';
