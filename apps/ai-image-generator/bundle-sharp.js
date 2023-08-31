@@ -1,5 +1,7 @@
 const fs = require('fs/promises');
 
+console.log('Copying sharp files from node_modules to build/node_modules');
+
 const copySharp = async () => {
   await fs.cp('./node_modules/sharp', './build/node_modules/sharp', {
     recursive: true,
