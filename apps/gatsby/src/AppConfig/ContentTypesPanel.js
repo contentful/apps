@@ -17,7 +17,6 @@ import {
   FormLabel,
 } from '@contentful/forma-36-react-components';
 import React, { useState } from 'react';
-import { useSDK } from '@contentful/react-apps-toolkit';
 
 const sortContentTypesAlphabetically = (contentTypes) => {
   const sorted = contentTypes.sort((type1, type2) => {
@@ -38,8 +37,7 @@ const ContentTypesSkeleton = () => (
   </SkeletonContainer>
 );
 
-const NoContentTypes = ({ space, environment }) => {
-  const sdk = useSDK();
+const NoContentTypes = ({ hostnames, space, environment }) => {
   return (
     <Note noteType="warning">
       There are no content types available in this environment. You can add one
@@ -47,8 +45,8 @@ const NoContentTypes = ({ space, environment }) => {
         target="_blank"
         href={
           environment === 'master'
-            ? `https://${sdk.hostnames.webapp}/spaces/${space}/content_types`
-            : `https://${sdk.hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
+            ? `https://${hostnames.webapp}/spaces/${space}/content_types`
+            : `https://${hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
         }
         rel="noopener noreferrer">
         content type
@@ -86,6 +84,7 @@ export const ContentTypesSelection = ({
   selectorType,
   space,
   environment,
+  hostnames,
 }) => {
   //Focus value to compare with selection value to determine whether an update in state is necessary
   const [focusValue, changeFocus] = useState('');
@@ -100,7 +99,7 @@ export const ContentTypesSelection = ({
   }
 
   if (0 === contentTypes.length) {
-    return <NoContentTypes space={space} environment={environment} />;
+    return <NoContentTypes hostnames={hostnames} space={space} environment={environment} />;
   }
 
   const fullEnabledTypes = enabledContentTypes.map((enabledType) => {
@@ -251,6 +250,7 @@ const ContentTypesPanel = ({
   selectorType,
   space,
   environment,
+  hostnames,
 }) => (
   <Typography>
     <FormLabel>Slug Configuration</FormLabel>
@@ -289,6 +289,7 @@ const ContentTypesPanel = ({
       <ContentTypesSelection
         space={space}
         environment={environment}
+        hostnames={hostnames}
         contentTypes={contentTypes}
         enabledContentTypes={enabledContentTypes}
         urlConstructors={urlConstructors}

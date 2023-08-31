@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@contentful/app-sdk": "4.23.0",
-    "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/forma-36-fcss": "0.3.5",
     "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.2",

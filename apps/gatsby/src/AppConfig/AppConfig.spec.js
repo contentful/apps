@@ -6,18 +6,6 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function mockUseSDK() {
-  return {
-    hostnames: {
-      webapp: 'app.contentful.com',
-    },
-  };
-}
-
-jest.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: () => mockUseSDK(),
-}));
-
 function makeMockSdk({
   onConfigure = () => {},
   previewUrl = 'https://preview.de',

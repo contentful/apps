@@ -9,18 +9,6 @@ function loadEntryPoint() {
   });
 }
 
-function mockUseSDK() {
-  return {
-    hostnames: {
-      webapp: 'app.contentful.com',
-    },
-  };
-}
-
-jest.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: () => mockUseSDK(),
-}));
-
 jest.mock('react-dom');
 
 const mockSdk = {

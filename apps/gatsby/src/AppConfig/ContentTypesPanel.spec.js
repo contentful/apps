@@ -2,22 +2,13 @@ import React from 'react';
 import { ContentTypesSelection } from './ContentTypesPanel';
 import { cleanup, render } from '@testing-library/react';
 
-function mockSdk() {
-  return {
-    hostnames: {
-      webapp: 'app.contentful.com',
-    },
-  };
-}
-
-jest.mock('@contentful/react-apps-toolkit', () => ({
-  useSDK: () => mockSdk(),
-}));
-
 describe('ContentTypesList', function () {
   let contentTypeId = 1;
   const environment = 'master';
   const space = '12512asfasf';
+  const hostnames = {
+    webapp: 'app.contentful.com',
+  };
 
   const contentType = (name) => ({
     sys: { id: String(++contentTypeId) },
@@ -27,14 +18,21 @@ describe('ContentTypesList', function () {
   afterEach(cleanup);
 
   it('should show Skeleton on nil values', () => {
-    const { container } = render(<ContentTypesSelection contentTypes={null} />);
+    const { container } = render(
+      <ContentTypesSelection contentTypes={null} hostnames={hostnames} />
+    );
 
     expect(container).toMatchSnapshot();
   });
 
   it('should show a Note if there are no content types', () => {
     const { container } = render(
-      <ContentTypesSelection contentTypes={[]} space={space} environment={environment} />
+      <ContentTypesSelection
+        contentTypes={[]}
+        space={space}
+        environment={environment}
+        hostnames={hostnames}
+      />
     );
 
     expect(container).toMatchSnapshot();
@@ -48,6 +46,7 @@ describe('ContentTypesList', function () {
         enabledContentTypes={[]}
         space={space}
         environment={environment}
+        hostnames={hostnames}
       />
     );
 
@@ -66,6 +65,7 @@ describe('ContentTypesList', function () {
         enabledContentTypes={enabledTypes}
         environment={environment}
         space={space}
+        hostnames={hostnames}
       />
     );
 
