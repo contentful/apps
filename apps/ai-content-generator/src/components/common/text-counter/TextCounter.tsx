@@ -1,4 +1,4 @@
-import { Flex, Icon, Paragraph } from '@contentful/f36-components';
+import { Flex, Paragraph } from '@contentful/f36-components';
 import { ErrorCircleOutlineIcon } from '@contentful/f36-icons';
 import { styles } from './TextCounter.styles';
 
@@ -22,7 +22,6 @@ const TextCounter = (props: Props) => {
 
   const isValid = !isBelowMinLength && !isAboveMaxLength;
   const style = isValid ? styles.validCount : styles.invalidCount;
-  const errorMessage = isBelowMinLength ? `Please lengthen the text` : `Please shorten the text`;
 
   const getCharLimitsToDisplay = () => {
     let displayContent = '';
@@ -36,7 +35,7 @@ const TextCounter = (props: Props) => {
     }
 
     const displayComponent = (
-      <Paragraph marginTop="spacing2Xs" css={styles.validCount}>
+      <Paragraph marginTop="spacing2Xs" css={style}>
         {displayContent}
       </Paragraph>
     );
@@ -45,21 +44,19 @@ const TextCounter = (props: Props) => {
   };
 
   return (
-    <Flex flexDirection="column">
+    <Flex flexDirection="column" marginBottom="spacingM" data-testid="text-counter">
       <Flex justifyContent="space-between">
-        <Paragraph marginTop="spacing2Xs" css={style}>
-          {text.length} characters
-        </Paragraph>
+        <Flex alignContent="center" marginTop="spacing2Xs">
+          {!isValid ? (
+            <ErrorCircleOutlineIcon
+              variant="negative"
+              marginRight="spacing2Xs"
+              data-testid="error-icon"
+            />
+          ) : null}
+          <Paragraph css={style}>{text.length} characters</Paragraph>
+        </Flex>
         {getCharLimitsToDisplay()}
-      </Flex>
-      <Flex
-        css={{ visibility: isValid ? 'hidden' : 'visible' }}
-        alignContent="center"
-        marginTop="spacingXs">
-        <Icon variant="negative" as={ErrorCircleOutlineIcon}></Icon>
-        <Paragraph testId="error-message" marginLeft="spacing2Xs" css={styles.invalidCount}>
-          {errorMessage}
-        </Paragraph>
       </Flex>
     </Flex>
   );
