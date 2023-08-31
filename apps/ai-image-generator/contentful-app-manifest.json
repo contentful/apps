@@ -7,7 +7,7 @@
       "description": "This action returns a static result for testing purposes",
       "type": "function",
       "path": "actions/aiig-static.js",
-      "entryFile": "./backend/src/actions/aiig-statid.ts",
+      "entryFile": "./backend/src/actions/aiig-static.ts",
       "allowNetworks": [],
       "parameters": [
         {
