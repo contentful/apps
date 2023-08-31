@@ -2,17 +2,22 @@ import * as nodeFetch from 'node-fetch';
 import { default as sharp } from 'sharp';
 import { areEqualColors, toRGBA, toSharp } from './utils';
 
+export const ERASE_COLOR: sharp.RGBA = { r: 174, g: 193, b: 204 };
+export const MAX_SIDE = 1024;
+
 interface TransformedImages {
   image: Buffer;
   mask: Buffer;
 }
 
-export const ERASE_COLOR: sharp.RGBA = { r: 174, g: 193, b: 204 };
-export const MAX_SIDE = 1024;
-
 interface Dimensions {
   width: number;
   height: number;
+}
+
+interface ConstrainedDimensions {
+  side: number;
+  changed: boolean;
 }
 
 export class ImageTransformer {
@@ -40,13 +45,15 @@ export class ImageTransformer {
     dimensions: Dimensions;
   }> {
     const sharpImage = toSharp(this.sourceImageResponse.body);
-    const initialMetadata = await sharpImage.metadata();
 
-    const { format: initialFormat } = initialMetadata;
+    const { format: initialFormat } = await sharpImage.metadata();
     if (initialFormat !== 'png') {
       sharpImage.toFormat('png');
     }
 
+    // we get the width and height separately, after the initial format,
+    // because certain file types don't have width and height. doing this check
+    // after we enforce PNG ensures we have values for width and height
     const { width, height } = await sharpImage.metadata();
     if (!width || !height)
       throw new TypeError('width or height dimensions missing from image metadata!');
@@ -67,23 +74,10 @@ export class ImageTransformer {
     };
   }
 
-  private constrainDimensions(dimensions: Dimensions): {
-    side: number;
-    changed: boolean;
-  } {
+  private constrainDimensions(dimensions: Dimensions): ConstrainedDimensions {
     const { width, height } = dimensions;
 
-    let side: number;
-    if (width !== height) {
-      side = Math.min(width, height);
-    } else {
-      side = width;
-    }
-
-    if (side > MAX_SIDE) {
-      side = MAX_SIDE;
-    }
-
+    const side = Math.min(width, height, MAX_SIDE);
     return {
       side,
       changed: side !== width || side !== height,
@@ -97,9 +91,8 @@ export class ImageTransformer {
   }): Promise<Buffer> {
     const { width, height, eraseColor } = maskParams;
     const sharpImage = toSharp(this.maskImageResponse.body);
-    const initialMetadata = await sharpImage.metadata();
-    const { width: initialWidth, height: initialHeight } = initialMetadata;
 
+    const { width: initialWidth, height: initialHeight } = await sharpImage.metadata();
     if (width !== initialWidth || height !== initialHeight) {
       sharpImage.resize({
         width,
