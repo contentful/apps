@@ -5,6 +5,7 @@ import { UnableToGetAppInstallationParameters } from '../errors/unableToGetAppIn
 import { AppInstallationParameters } from '../types';
 import { UnableToGetAppAccessToken } from '../errors/unableToGetAppAccessToken';
 import { getHost } from '../helpers/getHost';
+import { createClient } from 'contentful-management';
 
 export const getAppInstallationParametersMiddleware: RequestHandler = async (
   req: Request,
@@ -46,30 +47,33 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
           });
         });
 
-      // get installation parameters from via CMA
-      await axios
-        .get(
-          `https://api.contentful.com/spaces/${spaceId}/environments/${environmentId}/app_installations/${appId}`,
+      try {
+        const cmaClient = createClient(
           {
-            headers: {
-              Authorization: `Bearer ${appAccessToken}`,
-              'Content-Type': 'application/json',
+            accessToken: appAccessToken,
+            host,
+          },
+          {
+            type: 'plain',
+            defaults: {
+              spaceId,
+              environmentId,
             },
           }
-        )
-        .then((response) => {
-          const appInstallation = response.data;
-          Object.assign(installationParameters, appInstallation.parameters);
-        })
-        .catch((e) => {
-          console.error(e.message);
-          throw new UnableToGetAppInstallationParameters(
-            'Unable to get app installation parameters',
-            {
-              cause: e,
-            }
-          );
+        );
+
+        const appInstallation = await cmaClient.appInstallation.get({
+          appDefinitionId: appId,
         });
+        Object.assign(installationParameters, appInstallation.parameters);
+
+        req.installationParameters = installationParameters;
+      } catch (e: any) {
+        console.error(e.message);
+        throw new UnableToGetAppInstallationParameters(
+          `Unable to get app installation parameters: cause: ${e}`
+        );
+      }
     }
 
     req.installationParameters = installationParameters;
