@@ -9,6 +9,18 @@ function loadEntryPoint() {
   });
 }
 
+function mockUseSDK() {
+  return {
+    hostnames: {
+      webapp: 'app.contentful.com',
+    },
+  };
+}
+
+jest.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockUseSDK(),
+}));
+
 jest.mock('react-dom');
 
 const mockSdk = {
@@ -21,6 +33,9 @@ const mockSdk = {
       webhookUrl: 'https://webhook.com',
       authToken: 'test-token',
     },
+  },
+  hostnames: {
+    webapp: 'app.contentful.com',
   },
   entry: {
     onSysChanged: jest.fn(() => ({
