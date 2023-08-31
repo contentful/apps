@@ -4,7 +4,7 @@ import { ContentTypeFieldValidation } from 'contentful-management';
 import TextCounter from '../text-counter/TextCounter';
 import HyperLink from '../HyperLink/HyperLink';
 import { styles } from './TextFieldWithButtons.styles';
-import { TokenWarning } from '@configs/features/featureTypes';
+import { TokenWarning } from '@configs/token-warning/tokenWarning';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 interface Props {

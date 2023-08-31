@@ -6,6 +6,7 @@ import { GeneratorAction } from '@components/app/dialog/common-generator/generat
 import { OutputTab } from '../../Output';
 import { DialogText } from '@configs/features/featureTypes';
 import { css } from '@emotion/react';
+import { tokenWarning } from '@configs/token-warning/tokenWarning';
 
 const styles = {
   panel: css({
@@ -23,7 +24,6 @@ interface Props {
 
 const OriginalTextPanel = (props: Props) => {
   const { inputText, generate, isNewText, hasOutputField, dialogText } = props;
-  const { tokenWarning } = dialogText;
   const { dispatch } = useContext(GeneratorContext);
 
   const handleOriginalTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
