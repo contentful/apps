@@ -17,7 +17,6 @@ import {
   FormLabel,
 } from '@contentful/forma-36-react-components';
 import React, { useState } from 'react';
-import { useSDK } from '@contentful/app-sdk';
 
 const sortContentTypesAlphabetically = (contentTypes) => {
   const sorted = contentTypes.sort((type1, type2) => {
@@ -38,26 +37,23 @@ const ContentTypesSkeleton = () => (
   </SkeletonContainer>
 );
 
-const NoContentTypes = ({ space, environment }) => {
-  const sdk = useSDK();
-
-  return (
-    <Note noteType="warning">
-      There are no content types available in this environment. You can add one
-      <TextLink
-        target="_blank"
-        href={
-          environment === 'master'
-            ? `${sdk.hostnames.webapp}/spaces/${space}/content_types`
-            : `${sdk.hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
-        }
-        rel="noopener noreferrer">
-        content type
-      </TextLink>
-      and assign it to the app from this screen.
-    </Note>
-  );
-};
+const NoContentTypes = ({ space, environment }) => (
+  <Note noteType="warning">
+    There are no content types available in this environment. You can add one
+    <TextLink
+      target="_blank"
+      href={
+        environment === 'master'
+          ? `https://app.contentful.com/spaces/${space}/content_types`
+          : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+      }
+      rel="noopener noreferrer"
+    >
+      content type
+    </TextLink>
+    and assign it to the app from this screen.
+  </Note>
+);
 
 const UrlInput = ({ urlConstructors, id, onSlugInput, placeholder, disabled }) => {
   const valueIndex = urlConstructors
@@ -134,7 +130,8 @@ export const ContentTypesSelection = ({
                   onContentTypeToggle(event.target.value, focusValue);
                   event.target.blur(); //Have to blur target for correct focus value in the case dropdown is changed multiple times
                 }}
-                width={'medium'}>
+                width={'medium'}
+              >
                 {sortedContentTypes.map(({ name, sys }) => (
                   <Option key={`option - ${sys.id}`} value={sys.id} label={name}>
                     {name}
@@ -153,7 +150,8 @@ export const ContentTypesSelection = ({
             <Flex>
               <TextLink
                 linkType="negative"
-                onClick={() => updateModalState({ open: true, id: sys.id })}>
+                onClick={() => updateModalState({ open: true, id: sys.id })}
+              >
                 Remove
               </TextLink>
             </Flex>
@@ -172,7 +170,8 @@ export const ContentTypesSelection = ({
               }}
               defaultValue
               width={'medium'}
-              key={'placeholder'}>
+              key={'placeholder'}
+            >
               <Option disabled value>
                 {'Select a content type'}
               </Option>
@@ -184,7 +183,8 @@ export const ContentTypesSelection = ({
                     disabled={selected}
                     key={sys.id}
                     value={sys.id}
-                    label={`${name}${selected ? ' – already selected' : ''}`}>
+                    label={`${name}${selected ? ' – already selected' : ''}`}
+                  >
                     {name}
                   </Option>
                 );
@@ -226,7 +226,8 @@ export const ContentTypesSelection = ({
                   onClick={() => {
                     disableContentType(modalState.id);
                     modalReset();
-                  }}>
+                  }}
+                >
                   Remove
                 </Button>
                 <Button buttonType="muted" onClick={() => modalReset()}>
