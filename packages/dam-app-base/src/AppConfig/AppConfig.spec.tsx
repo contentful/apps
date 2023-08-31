@@ -37,6 +37,9 @@ const makeSdkMock = () => ({
     getParameters: jest.fn().mockResolvedValue(null),
     onConfigure: jest.fn().mockReturnValue(undefined),
   },
+  hostnames: {
+    webapp: 'app.contentful.com',
+  },
   ids: {
     app: 'some-app',
   },
