@@ -8,7 +8,8 @@ const { APP_ID, PRIVATE_APP_KEY } = process.env;
 
 export const makeSpaceEnvClient = async (
   spaceId: string,
-  environmentId: string
+  environmentId: string,
+  host: string
 ): Promise<PlainClientAPI> => {
   let privateKey = PRIVATE_APP_KEY as string;
   if (privateKey.endsWith('.pem')) {
@@ -21,12 +22,13 @@ export const makeSpaceEnvClient = async (
     appInstallationId: APP_ID as string,
     spaceId,
     environmentId,
+    host,
   });
 
   return contentful.createClient(
     {
       accessToken: appAccessToken,
-      host: process.env.BASE_URL ? process.env.BASE_URL.split('https://')[1] : 'api.contentful.com',
+      host,
     },
     {
       type: 'plain',

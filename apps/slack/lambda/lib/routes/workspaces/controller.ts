@@ -10,6 +10,7 @@ import {
   WorkspacesParameters,
 } from './validation';
 import { getWorkspaceId } from '../../helpers/getWorkspaceId';
+import { getHost } from '../../helpers/getHost';
 
 export class WorkspacesController {
   constructor(
@@ -55,10 +56,15 @@ export class WorkspacesController {
       request.params
     );
 
-    const { token } = await this.authTokenRepository.get(workspaceId, {
-      spaceId,
-      environmentId,
-    });
+    const host = getHost(request);
+    const { token } = await this.authTokenRepository.get(
+      workspaceId,
+      {
+        spaceId,
+        environmentId,
+      },
+      host
+    );
 
     const info = await this.workspacesRepository.get(token, workspaceId);
 
@@ -103,26 +109,34 @@ export class WorkspacesController {
       spaceId,
       environmentId,
     } = assertValid<ChannelsWorkspacesParameters>(getChannelsParametersSchema, request.params);
-
-    const workspaceId = await getWorkspaceId(spaceId, environmentId, workspaceIdFromParameters);
-
-    const { token } = await this.authTokenRepository.get(workspaceId, {
+    const host = getHost(request);
+    const workspaceId = await getWorkspaceId(
       spaceId,
       environmentId,
-    });
+      host,
+      workspaceIdFromParameters
+    );
+
+    const { token } = await this.authTokenRepository.get(
+      workspaceId,
+      {
+        spaceId,
+        environmentId,
+      },
+      host
+    );
 
     try {
       const channels = await this.workspacesRepository.getChannels(token, workspaceId);
 
       response.status(200).send(channels);
-    } catch(e) {
-      console.error(e)
-      response.status(500).send({ status: 500, message: 'Unable to fetch slack channels' })
+    } catch (e) {
+      console.error(e);
+      response.status(500).send({ status: 500, message: 'Unable to fetch slack channels' });
     }
-
   });
 
-/**
+  /**
    * @openapi
    * /api/spaces/{spaceId}/environments/{environmentId}/workspaces/{workspaceId}/channel:
    *   get:
@@ -165,20 +179,30 @@ export class WorkspacesController {
       environmentId,
     } = assertValid<ChannelWorkspacesParameters>(getChannelParametersSchema, request.params);
 
-    const workspaceId = await getWorkspaceId(spaceId, environmentId, workspaceIdFromParameters);
-
-    const { token } = await this.authTokenRepository.get(workspaceId, {
+    const host = getHost(request);
+    const workspaceId = await getWorkspaceId(
       spaceId,
       environmentId,
-    });
+      host,
+      workspaceIdFromParameters
+    );
+
+    const { token } = await this.authTokenRepository.get(
+      workspaceId,
+      {
+        spaceId,
+        environmentId,
+      },
+      host
+    );
 
     try {
       const channel = await this.workspacesRepository.getChannel(token, channelId);
 
       response.status(200).send(channel);
-    } catch(e) {
-      console.error(e)
-      response.status(500).send({ status: 500, message: 'Unable to fetch slack channel' })
+    } catch (e) {
+      console.error(e);
+      response.status(500).send({ status: 500, message: 'Unable to fetch slack channel' });
     }
   });
 }

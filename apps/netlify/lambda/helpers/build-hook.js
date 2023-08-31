@@ -1,6 +1,7 @@
 const { getManagementToken } = require('@contentful/node-apps-toolkit');
 const nodeFetch = require('node-fetch');
 const get = require('lodash.get');
+const getHost = require('./getHost');
 
 const privateKey = process.env['APP_IDENTITY_PRIVATE_KEY'] || '';
 const appInstallationId = (process.env['APP_DEFINITION_ID'] || '').trim();
@@ -113,18 +114,7 @@ const extractAppContextDetails = (req) => {
     assetTypes.includes(get(req.body, 'sys.type')),
   ];
 
-  const crn = req.header('x-contentful-crn') || 'default:contentful'; // Bandaid to default to US region
-  const partition = crn.split(':')[1];
-
-  let host;
-  switch (partition) {
-    case 'contentful':
-      host = 'api.contentful.com';
-      break;
-    case 'contentful-eu':
-      host = 'api.eu.contentful.com';
-      break;
-  }
+  const host = getHost(req);
 
   return {
     spaceId,

@@ -78,10 +78,14 @@ export class AuthTokenRepository {
     return authToken;
   }
 
-  async get(workspaceId: string, context: SpaceEnvironmentContext): Promise<AuthToken> {
+  async get(
+    workspaceId: string,
+    context: SpaceEnvironmentContext,
+    host: string
+  ): Promise<AuthToken> {
     const spaceId = context.spaceId;
     const environmentId = context.environmentId;
-    const parameters = await getInstallationParametersFromCma(spaceId, environmentId);
+    const parameters = await getInstallationParametersFromCma(spaceId, environmentId, host);
     const installationUuid = parameters.installationUuid;
     const spaceEnvUuid = AuthTokenRepository.uuid(spaceId, environmentId, workspaceId);
 

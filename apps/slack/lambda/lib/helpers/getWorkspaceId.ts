@@ -4,13 +4,18 @@ import { NotFoundException } from '../errors';
 export async function getWorkspaceId(
   spaceId: string,
   environmentId: string,
+  host: string,
   workspaceIdFromParameters?: string
 ): Promise<string> {
   if (workspaceIdFromParameters) {
     return workspaceIdFromParameters;
   }
   let workspaceId;
-  const installationParameters = await getInstallationParametersFromCma(spaceId, environmentId);
+  const installationParameters = await getInstallationParametersFromCma(
+    spaceId,
+    environmentId,
+    host
+  );
   const workspaces = installationParameters?.workspaces;
   if (workspaces && workspaces.length > 0) {
     workspaceId = workspaces[0];
