@@ -2,6 +2,18 @@ import React from 'react';
 import { ContentTypesSelection } from './ContentTypesPanel';
 import { cleanup, render } from '@testing-library/react';
 
+function mockSdk() {
+  return {
+    hostnames: {
+      webapp: 'https://app.contentful.com',
+    },
+  };
+}
+
+jest.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk(),
+}));
+
 describe('ContentTypesList', function () {
   let contentTypeId = 1;
   const environment = 'master';
