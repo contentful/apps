@@ -38,7 +38,7 @@ function GqlPlayground(props: GqlPlaygroundProps) {
   const [hasCollection, setHasCollection] = useState<boolean>();
 
   const tabConfig = {
-    endpoint: `https://graphql.contentful.com/content/v1/spaces/${spaceId}/environments/${
+    endpoint: `https://${sdk.hostnames.graphql}/content/v1/spaces/${spaceId}/environments/${
       spaceEnvironmentAlias || spaceEnvironment
     }`,
     headers: {
