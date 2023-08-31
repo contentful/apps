@@ -17,7 +17,7 @@ const Page = (props: PageProps) => {
   const spaceEnvironmentAlias = sdk.ids.environmentAlias;
 
   return cpaToken ? (
-    <GqlPlayground {...{ cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }} />
+    <GqlPlayground {...{ sdk, cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }} />
   ) : (
     <Card style={{ margin: '1em' }}>
       <Note noteType="warning">
