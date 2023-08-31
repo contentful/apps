@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 
 import { init, locations } from '@contentful/app-sdk';
+import { SDKProvider } from '@contentful/app-sdk';
 
 import Sidebar from './Sidebar';
 import { AppConfig } from './AppConfig';
@@ -14,8 +15,18 @@ init((sdk) => {
   const root = document.getElementById('root');
 
   if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
-    render(<Sidebar sdk={sdk} />, root);
+    render(
+      <SDKProvider>
+        <Sidebar sdk={sdk} />
+      </SDKProvider>,
+      root
+    );
   } else if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-    render(<AppConfig sdk={sdk} />, root);
+    render(
+      <SDKProvider>
+        <AppConfig sdk={sdk} />{' '}
+      </SDKProvider>,
+      root
+    );
   }
 });
