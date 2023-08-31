@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.3.2](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.1...@contentful/ecommerce-app-base@3.3.2) (2023-08-31)
+
+### Bug Fixes
+
+- remove curly braces on description fallback ([962a73c](https://github.com/contentful/apps/commit/962a73c587e75d5a7f7d3c570b3b31a703bf3637))
+
 ## [3.3.1](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.0...@contentful/ecommerce-app-base@3.3.1) (2023-08-31)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
