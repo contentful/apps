@@ -1,7 +1,7 @@
 import * as React from 'react';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { FieldAppSDK } from '@contentful/app-sdk';
 import { SortableComponent } from './SortableComponent';
 import { ThumbnailFn, OpenDialogFn, DisabledPredicateFn, Asset } from '../interfaces';
 
@@ -10,7 +10,7 @@ import { Button, Note, TextLink } from '@contentful/f36-components';
 import { AssetIcon } from '@contentful/f36-icons';
 
 interface Props {
-  sdk: FieldExtensionSDK;
+  sdk: FieldAppSDK;
   cta: string;
   logo: string;
   makeThumbnail: ThumbnailFn;
