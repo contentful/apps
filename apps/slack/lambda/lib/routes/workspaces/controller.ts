@@ -180,12 +180,12 @@ export class WorkspacesController {
     } = assertValid<ChannelWorkspacesParameters>(getChannelParametersSchema, request.params);
 
     const host = getHost(request);
-    const workspaceId = await getWorkspaceId(
+    const workspaceId = await getWorkspaceId({
       spaceId,
       environmentId,
       host,
-      workspaceIdFromParameters
-    );
+      workspaceIdFromParameters,
+    });
 
     const { token } = await this.authTokenRepository.get(
       workspaceId,
