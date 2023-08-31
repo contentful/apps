@@ -241,10 +241,14 @@ describe('AuthTokenRepository', () => {
       const data = { token: 'lol' } as AuthToken;
       singleTableClient.get.resolves(data);
 
-      const r = await instance.get('workspaceId', {
-        spaceId: 'spaceId',
-        environmentId: 'envId',
-      });
+      const r = await instance.get(
+        'workspaceId',
+        {
+          spaceId: 'spaceId',
+          environmentId: 'envId',
+        },
+        ''
+      );
 
       assert.deepEqual(r, data);
     });
@@ -253,10 +257,14 @@ describe('AuthTokenRepository', () => {
       singleTableClient.get.resolves(undefined);
 
       try {
-        await instance.get('workspaceId', {
-          spaceId: 'spaceId',
-          environmentId: 'envId',
-        });
+        await instance.get(
+          'workspaceId',
+          {
+            spaceId: 'spaceId',
+            environmentId: 'envId',
+          },
+          ''
+        );
         assert.fail('Did not reject');
       } catch (e) {
         assert.instanceOf(e, NotFoundException);
@@ -305,10 +313,14 @@ describe('AuthTokenRepository', () => {
         expires_in: DEFAULT_EXPIRES_IN,
       });
 
-      const response = await instance.get('workspace', {
-        spaceId: 'space',
-        environmentId: 'env',
-      });
+      const response = await instance.get(
+        'workspace',
+        {
+          spaceId: 'space',
+          environmentId: 'env',
+        },
+        ''
+      );
 
       assert.deepEqual(response, newToken);
       assert.calledWith(singleTableClient.put, Entity.AuthToken, UUID, ['space', UUID], newToken);
@@ -346,10 +358,14 @@ describe('AuthTokenRepository', () => {
       slackClient.refreshToken.rejects(new SlackError({ errMessage: 'unknown' }));
 
       await assert.rejects(
-        instance.get('workspace', {
-          spaceId: 'space',
-          environmentId: 'env',
-        }),
+        instance.get(
+          'workspace',
+          {
+            spaceId: 'space',
+            environmentId: 'env',
+          },
+          ''
+        ),
         NotFoundException
       );
 
@@ -381,10 +397,14 @@ describe('AuthTokenRepository', () => {
       slackClient.refreshToken.rejects(new SlackError({ errMessage: 'invalid_refresh_token' }));
 
       await assert.rejects(
-        instance.get('workspace', {
-          spaceId: 'space',
-          environmentId: 'env',
-        }),
+        instance.get(
+          'workspace',
+          {
+            spaceId: 'space',
+            environmentId: 'env',
+          },
+          ''
+        ),
         NotFoundException
       );
 
