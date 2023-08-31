@@ -1,12 +1,16 @@
 import { getInstallationParametersFromCma } from './getInstallationParameters';
 import { NotFoundException } from '../errors';
 
-export async function getWorkspaceId(
-  spaceId: string,
-  environmentId: string,
-  host: string,
-  workspaceIdFromParameters?: string
-): Promise<string> {
+type GetWorkspaceIdParams = {
+  spaceId: string;
+  environmentId: string;
+  host: string;
+  workspaceIdFromParameters?: string;
+};
+
+export async function getWorkspaceId(params: GetWorkspaceIdParams): Promise<string> {
+  const { spaceId, environmentId, host, workspaceIdFromParameters } = params;
+
   if (workspaceIdFromParameters) {
     return workspaceIdFromParameters;
   }

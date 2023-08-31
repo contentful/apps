@@ -38,12 +38,12 @@ export class MessagesController {
     const { spaceId, environmentId } = extractFromSignedHeaders(request);
 
     const host = getHost(request);
-    const workspaceId = await getWorkspaceId(
+    const workspaceId = await getWorkspaceId({
       spaceId,
       environmentId,
       host,
-      workspaceIdFromParameters
-    );
+      workspaceIdFromParameters,
+    });
 
     const { token } = await this.authTokenRepository.get(
       workspaceId,
