@@ -6,7 +6,8 @@
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "build": "rimraf ./build && npm run build-frontend && npm run build-backend",
     "build-actions": "node build-actions.js",
-    "build-backend": "cd backend && npm ci && cd .. && npm run build-actions",
+    "bundle-sharp": "node bundle-sharp.js",
+    "build-backend": "cd backend && npm ci && cd .. && npm run build-actions && npm run bundle-sharp",
     "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3RheWQRagirMFgWrhMOBxL --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6H2pUZdiYcmo0WY8dlYZn5 --token ${TEST_CMA_TOKEN}",
@@ -14,6 +15,7 @@
   },
   "dependencies": {
     "@contentful/app-scripts": "1.10.2",
-    "esbuild": "^0.19.2"
+    "esbuild": "^0.19.2",
+    "sharp": "^0.32.5"
   }
 }

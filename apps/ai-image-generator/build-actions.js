@@ -60,7 +60,7 @@ const main = async (watch = false) => {
       logLevel: 'info',
       format: 'cjs',
       target: 'es2022',
-      external: ['node:*'],
+      external: ['node:*', 'sharp'],
     };
 
     if (watch) {
