@@ -72,7 +72,7 @@ const getBuildHooksFromAppInstallationParams = async (
     spaceId,
     environmentId,
     appInstallationId,
-    host,
+    host: `https://${host}`,
   });
 
   const rawResult = await fetch(

@@ -36,7 +36,7 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
         appInstallationId: appId,
         spaceId,
         environmentId,
-        host,
+        host: `https://${host}`,
       })
         .then((token) => token)
         .catch((e) => {

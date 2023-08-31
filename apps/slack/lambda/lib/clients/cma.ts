@@ -22,7 +22,7 @@ export const makeSpaceEnvClient = async (
     appInstallationId: APP_ID as string,
     spaceId,
     environmentId,
-    host,
+    host: `https://${host}`,
   });
 
   return contentful.createClient(
