@@ -74,8 +74,6 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
         );
       }
     }
-
-    req.installationParameters = installationParameters;
   } catch (e) {
     console.error(e);
     return next(e);
