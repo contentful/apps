@@ -1,16 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  Note,
-  Text,
-  TextLink,
-  Heading,
-  Paragraph,
-  Checkbox,
-} from '@contentful/f36-components';
+import { Note, Text, TextLink, Heading, Paragraph, Checkbox } from '@contentful/f36-components';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 const styles = {
   selectAllCheckbox: css({
@@ -31,6 +25,7 @@ const NetlifyContentTypes = ({
   space,
   environment,
 }) => {
+  const sdk = useSDK();
   const allSelected = contentTypes.length === enabledContentTypes.length;
 
   const onChange = (e) => {
@@ -41,7 +36,9 @@ const NetlifyContentTypes = ({
     if (id === SELECT_ALL_CHECKBOX) {
       changed = allSelected ? [] : contentTypes.map(([id]) => id);
     } else {
-      changed = isChecked ? enabledContentTypes.concat([id]) : enabledContentTypes.filter((cur) => cur !== id);
+      changed = isChecked
+        ? enabledContentTypes.concat([id])
+        : enabledContentTypes.filter((cur) => cur !== id);
     }
 
     onEnabledContentTypesChange(changed);
@@ -62,31 +59,26 @@ const NetlifyContentTypes = ({
             rel="noopener noreferrer"
             href={
               environment === 'master'
-                ? `https://app.contentful.com/spaces/${space}/content_types`
-                : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
-            }
-          >
+                ? `https://${sdk.hostnames.webapp}/spaces/${space}/content_types`
+                : `https://${sdk.hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
+            }>
             content type
           </TextLink>{' '}
           and assign it to the app from this screen.
         </Note>
       ) : (
-        <Checkbox.Group onChange={onChange} value={allSelected ? [SELECT_ALL_CHECKBOX, ...enabledContentTypes] : enabledContentTypes}>
+        <Checkbox.Group
+          onChange={onChange}
+          value={allSelected ? [SELECT_ALL_CHECKBOX, ...enabledContentTypes] : enabledContentTypes}>
           <Checkbox
             id={SELECT_ALL_CHECKBOX}
             value={SELECT_ALL_CHECKBOX}
             isDisabled={disabled}
-            className={styles.selectAllCheckbox}
-          >
+            className={styles.selectAllCheckbox}>
             Select all
           </Checkbox>
           {contentTypes.map(([id, name]) => (
-            <Checkbox
-              key={id}
-              id={`ct-box-${id}`}
-              value={id}
-              isDisabled={disabled}
-            >
+            <Checkbox key={id} id={`ct-box-${id}`} value={id} isDisabled={disabled}>
               <Text className={styles.checkboxLabel}>{name}</Text>
             </Checkbox>
           ))}

@@ -5,7 +5,7 @@
   "homepage": "./",
   "dependencies": {
     "@contentful/app-scripts": "^1.7.13",
-    "@contentful/app-sdk": "^3.32.1",
+    "@contentful/app-sdk": "^4.23.0",
     "@contentful/ecommerce-app-base": "^1.0.5",
     "@contentful/field-editor-single-line": "^0.16.0",
     "@contentful/field-editor-test-utils": "^0.17.3",

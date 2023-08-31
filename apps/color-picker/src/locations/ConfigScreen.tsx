@@ -188,7 +188,7 @@ const ConfigScreen = () => {
                   target="_blank"
                   icon={<ExternalLinkIcon />}
                   alignIcon="end"
-                  href={`https://app.contentful.com/spaces/${
+                  href={`https://${sdk.hostnames.webapp}/spaces/${
                     sdk.ids.space
                   }/environments/${
                     sdk.ids.environmentAlias || sdk.ids.environment

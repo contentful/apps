@@ -44,7 +44,12 @@ export interface ParameterDefinition {
   required: boolean;
 }
 
-export interface SAPParameters extends ParametersAPI {
+export type AppParameters = {
+  apiEndpoint: string;
+  baseSites: string;
+};
+
+export interface SAPParameters extends ParametersAPI<AppParameters, {}, {}> {
   installation: {
     apiEndpoint: string;
     baseSites: string;

@@ -8,6 +8,7 @@ import {
   Note,
   TextLink,
 } from '@contentful/forma-36-react-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface Props {
   space: string;
@@ -24,6 +25,7 @@ const ContentTypeStep = ({
   space,
   environment,
 }: Props) => {
+  const sdk = useSDK();
   const ctMap: { [key: string]: string } = contentTypes.reduce((acc, ct) => {
     return {
       ...acc,
@@ -49,8 +51,8 @@ const ContentTypeStep = ({
           rel="noopener noreferrer"
           href={
             environment === 'master'
-              ? `https://app.contentful.com/spaces/${space}/content_types`
-              : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+              ? `https://${sdk.hostnames.webapp}/spaces/${space}/content_types`
+              : `https://${sdk.hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
           }>
           content type
         </TextLink>{' '}
