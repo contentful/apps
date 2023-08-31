@@ -67,8 +67,8 @@ export const getAppInstallationParametersMiddleware: RequestHandler = async (
         Object.assign(installationParameters, appInstallation.parameters);
 
         req.installationParameters = installationParameters;
-      } catch (e: any) {
-        console.error(e.message);
+      } catch (e: unknown) {
+        console.error((e as { message: string }).message);
         throw new UnableToGetAppInstallationParameters(
           `Unable to get app installation parameters: cause: ${e}`
         );
