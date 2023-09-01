@@ -1,4 +1,4 @@
-import { CollectionResponse, ConfigAppSDK } from '@contentful/app-sdk';
+import { AppExtensionSDK, CollectionResponse } from '@contentful/app-sdk';
 import {
   Flex,
   Form,
@@ -28,7 +28,7 @@ import FieldSelector from './FieldSelector';
 import { toExtensionParameters, toInputParameters } from './parameters';
 
 interface Props {
-  sdk: ConfigAppSDK;
+  sdk: AppExtensionSDK;
   parameterDefinitions: ParameterDefinition[];
   validateParameters: ValidateParametersFn;
   logo: string;
@@ -205,7 +205,7 @@ export default class AppConfig extends React.Component<Props, State> {
   renderApp() {
     const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
     const { parameterDefinitions, sdk } = this.props;
-    const { ids, hostnames } = sdk;
+    const { ids } = sdk;
     const { space, environment } = ids;
 
     const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
@@ -264,8 +264,8 @@ export default class AppConfig extends React.Component<Props, State> {
                 rel="noopener noreferrer"
                 href={
                   environment === 'master'
-                    ? `https://${hostnames.webapp}/spaces/${space}/content_types`
-                    : `https://${hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
+                    ? `https://app.contentful.com/spaces/${space}/content_types`
+                    : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
                 }>
                 content model
               </TextLink>{' '}

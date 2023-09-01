@@ -39,9 +39,6 @@ const makeSdkMock = () => ({
   ids: {
     app: 'some-app',
   },
-  hostnames: {
-    webapp: 'app.contentful.com',
-  },
   space: {
     getContentTypes: jest.fn().mockResolvedValue({ items: contentTypes }),
     getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] }),
