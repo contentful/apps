@@ -27,15 +27,20 @@ export const productTransformer =
   };
 
 export const getHost = (req: Request): string => {
-  const crn = req.header('x-contentful-crn');
-  const partition = crn?.split(':')[1];
+  try {
+    const crn = req.header('x-contentful-crn');
+    const partition = crn?.split(':')[1];
 
-  switch (partition) {
-    case 'contentful':
-      return 'api.contentful.com';
-    case 'contentful-eu':
-      return 'api.eu.contentful.com';
-    default:
-      return 'api.contentful.com';
+    switch (partition) {
+      case 'contentful':
+        return 'api.contentful.com';
+      case 'contentful-eu':
+        return 'api.eu.contentful.com';
+      default:
+        return 'api.contentful.com';
+    }
+  } catch (error) {
+    console.error(error);
+    return 'api.contentful.com';
   }
 };
