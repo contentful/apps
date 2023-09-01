@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import * as useSDK from '@contentful/react-apps-toolkit';
 import { ContentTypeValue } from 'types';
 import * as getFieldValue from '../useGetFieldValue';
-import { ContentEntitySys, EntrySys } from '@contentful/app-sdk';
+import { EntrySys } from '@contentful/app-sdk';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({ useSDK: jest.fn() }));
 
