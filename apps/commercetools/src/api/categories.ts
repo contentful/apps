@@ -2,6 +2,7 @@ import { Category } from '@commercetools/platform-sdk';
 import { Pagination } from '@contentful/ecommerce-app-base';
 import { CommerceToolsProduct, ConfigurationParameters } from '../types';
 import { createClient } from './client';
+import { getLocalizedValue } from './localisation-helpers';
 
 function categoryTransformer({ projectKey, locale, mcUrl }: ConfigurationParameters) {
   return (item: Category): CommerceToolsProduct => {
@@ -10,17 +11,19 @@ function categoryTransformer({ projectKey, locale, mcUrl }: ConfigurationParamet
     const id = item.id ?? '';
     const externalLink =
       (projectKey && id && `${merchantCenterBaseUrl}/${projectKey}/categories/${id}/general`) || '';
+
     return {
       id,
       sku: id,
-      displaySKU: item.slug[locale ?? 'en'] ?? id,
-      name: item.name?.[locale ?? 'en'] ?? '',
+      displaySKU: getLocalizedValue(item.slug),
+      name: getLocalizedValue(item.name) ?? '',
       image: item.assets?.[0]?.sources?.[0]?.uri ?? '',
       externalLink,
-      description: item.description?.[locale ?? 'en'] ?? undefined,
+      description: getLocalizedValue(item.description),
       additionalData: {
         createdAt: item.createdAt,
         updatedAt: item.lastModifiedAt,
+        attributes: [],
       },
     };
   };

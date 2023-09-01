@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { CommerceToolsProduct } from './types';
 import { LinkDataItemRenderer, MetaDataRenderer } from '@contentful/ecommerce-app-base';
 import * as React from 'react';
-import { Box, Caption, DateTime, TextLink } from '@contentful/f36-components';
+import { Box, Caption, DateTime, Text, TextLink } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 
 type Props = {
@@ -10,6 +10,7 @@ type Props = {
 };
 
 const NOT_AVAILABLE = 'Not available';
+const MAX_NUM_ATTRIBUTES = 3;
 
 const createCreatedDate = (data?: string) => ({
   name: 'Created',
@@ -23,6 +24,25 @@ const createUpdatedDate = (data?: string) => ({
 
 const createExternalLink = (href?: string) => {
   return () => (!!href ? <LinkDataItemRenderer text={'More information'} href={href} /> : null);
+};
+
+const createAttributes = (
+  attributes: NonNullable<CommerceToolsProduct['additionalData']>['attributes']
+) => {
+  const hasTooManyAttributes = attributes.length > MAX_NUM_ATTRIBUTES;
+
+  if (!hasTooManyAttributes) {
+    return attributes;
+  }
+
+  return [
+    ...attributes.slice(0, MAX_NUM_ATTRIBUTES),
+    () => (
+      <Text fontSize="fontSizeS" fontColor="gray700">
+        <i>+{attributes.length - MAX_NUM_ATTRIBUTES} more attributes in commercetools</i>
+      </Text>
+    ),
+  ];
 };
 
 const footer = () => {
@@ -57,8 +77,11 @@ export const AdditionalDataRenderer: FC<Props> = ({ product }) => {
       ],
     },
     {
-      title: 'Product information',
-      items: [createExternalLink(externalLink)],
+      title: 'Attributes',
+      items: [
+        ...createAttributes(additionalData?.attributes ?? []),
+        createExternalLink(externalLink),
+      ],
     },
   ];
 

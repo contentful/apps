@@ -17,5 +17,6 @@ export type CommerceToolsProduct = Product & {
   additionalData?: {
     createdAt: string;
     updatedAt: string;
+    attributes: { name: string; value: string }[];
   };
 };
