@@ -2,7 +2,12 @@ import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { mockSdkParameters } from '..';
 import { createSDK } from './utils/createSdk';
 import { vi } from 'vitest';
-import { mockGetManyContentType, mockEditorInterface } from './contentTypes/mockContentType';
+import {
+  mockGetManyContentType,
+  mockEditorInterface,
+  mockContentType,
+} from './contentTypes/mockContentType';
+import { mockEntry } from './entry/mockEntry';
 
 interface MockSdk {
   sdk: ReturnType<typeof createSDK>;
@@ -30,6 +35,8 @@ class MockSdk {
       .mockReturnValue({ EditorInterface: mockEditorInterface });
     this.sdk.notifier.error = vi.fn();
     this.sdk.cma.contentType.getMany = vi.fn().mockReturnValue(mockGetManyContentType);
+    this.sdk.cma.contentType.get = vi.fn().mockReturnValue(mockContentType);
+    this.sdk.cma.entry.get = vi.fn().mockReturnValue(mockEntry);
   }
 }
 
