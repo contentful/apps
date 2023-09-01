@@ -14,4 +14,16 @@ export const styles = {
     color: `${tokens.gray500}`,
     margin: `0 ${tokens.spacingS}`,
   }),
+  warningContainer: css({
+    display: 'flex',
+    alignItems: 'center',
+    margin: `0 ${tokens.spacingS}`,
+  }),
+  warningMessage: css({
+    color: `${tokens.gray500}`,
+  }),
+  warningLink: css({
+    color: `${tokens.gray500} !important`,
+    fontWeight: `${tokens.fontWeightNormal} !important`,
+  }),
 };

@@ -2,7 +2,10 @@ import { ChangeEvent, ReactNode } from 'react';
 import { Flex, Textarea, Paragraph } from '@contentful/f36-components';
 import { ContentTypeFieldValidation } from 'contentful-management';
 import TextCounter from '../text-counter/TextCounter';
+import HyperLink from '../HyperLink/HyperLink';
 import { styles } from './TextFieldWithButtons.styles';
+import { TokenWarning } from '@configs/token-warning/tokenWarning';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 interface Props {
   inputText: string;
@@ -12,11 +15,21 @@ interface Props {
   isDisabled?: boolean;
   placeholder?: string;
   helpText?: string;
+  warningMessage?: TokenWarning;
 }
 
 const TextFieldWithButtons = (props: Props) => {
-  const { inputText, onFieldChange, children, sizeValidation, isDisabled, placeholder, helpText } =
-    props;
+  const {
+    inputText,
+    onFieldChange,
+    children,
+    sizeValidation,
+    isDisabled,
+    placeholder,
+    helpText,
+    warningMessage,
+  } = props;
+
   return (
     <Flex
       flexDirection="column"
@@ -38,7 +51,21 @@ const TextFieldWithButtons = (props: Props) => {
       />
 
       <Flex alignSelf="flex-end">
-        <Paragraph css={styles.helpText}>{helpText}</Paragraph>
+        {helpText && <Paragraph css={styles.helpText}>{helpText}</Paragraph>}
+        {warningMessage && (
+          <Flex css={styles.warningContainer}>
+            <Paragraph css={styles.warningMessage} marginBottom="none">
+              <HyperLink
+                body={warningMessage.warningText}
+                substring={warningMessage.substring}
+                hyperLinkHref={warningMessage.link}
+                icon={<ExternalLinkIcon />}
+                alignIcon="end"
+                textLinkStyle={styles.warningLink}
+              />
+            </Paragraph>
+          </Flex>
+        )}
         {children}
       </Flex>
     </Flex>

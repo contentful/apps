@@ -89,6 +89,16 @@ const Sections = {
     'Add details about your brand to power accurate and on-brand content for all of your prompts.',
   addToSidebarHeading: 'Add to sidebar views',
   addToSidebarDescription: 'Assign AI Content Generator to content types.',
+  costHeading: 'Cost',
+  costSubheading: 'Generating content uses your Open AI tokens.',
+  costDescription: 'View the current pricing model at openai.com/pricing',
+  costLinkSubstring: 'openai.com/pricing',
+  costLink: 'https://openai.com/pricing',
+  disclaimerHeading: 'Disclaimer',
+  disclaimerDescription:
+    "This feature uses a third party AI tool. Please ensure your use of the tool and any AI-generated content complies with applicable laws, your company's policies, and all other Terms and Policies",
+  disclaimerLinkSubstring: 'Terms and Policies',
+  disclaimerLink: 'https://openai.com/policies',
 };
 
 const ConfigErrors = {

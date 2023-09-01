@@ -1,5 +1,6 @@
 import { MouseEventHandler } from 'react';
 import { TextLink, TextLinkProps } from '@contentful/f36-components';
+import { SerializedStyles } from '@emotion/react';
 
 interface Props {
   body: string;
@@ -8,10 +9,19 @@ interface Props {
   hyperLinkHref?: string;
   icon?: JSX.Element;
   alignIcon?: TextLinkProps['alignIcon'];
+  textLinkStyle?: SerializedStyles;
 }
 
 const HyperLink = (props: Props) => {
-  const { body, substring, onClick = () => {}, hyperLinkHref, icon, alignIcon } = props;
+  const {
+    body,
+    substring,
+    onClick = () => {},
+    hyperLinkHref,
+    icon,
+    alignIcon,
+    textLinkStyle,
+  } = props;
   const textLinkComponent = (index: number) => (
     <TextLink
       onClick={onClick}
@@ -20,7 +30,8 @@ const HyperLink = (props: Props) => {
       rel="noopener noreferer"
       key={`textLink-${index}`}
       icon={icon}
-      alignIcon={alignIcon}>
+      alignIcon={alignIcon}
+      css={textLinkStyle}>
       {substring}
     </TextLink>
   );
