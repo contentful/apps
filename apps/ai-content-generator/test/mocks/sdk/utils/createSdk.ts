@@ -1,6 +1,11 @@
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { vi } from 'vitest';
-import { mockGetManyContentType, mockEditorInterface } from '../contentTypes/mockContentType';
+import {
+  mockGetManyContentType,
+  mockEditorInterface,
+  mockContentType,
+} from '../contentTypes/mockContentType';
+import { mockEntry } from '../entry/mockEntry';
 
 const createSDK = (parameters: AppInstallationParameters) => {
   return {
@@ -19,6 +24,10 @@ const createSDK = (parameters: AppInstallationParameters) => {
     cma: {
       contentType: {
         getMany: vi.fn().mockReturnValueOnce(mockGetManyContentType),
+        get: vi.fn().mockReturnValueOnce(mockContentType),
+      },
+      entry: {
+        get: vi.fn().mockReturnValueOnce(mockEntry),
       },
     },
   };
