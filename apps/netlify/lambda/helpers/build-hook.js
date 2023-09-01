@@ -1,6 +1,7 @@
 const { getManagementToken } = require('@contentful/node-apps-toolkit');
 const nodeFetch = require('node-fetch');
 const get = require('lodash.get');
+const getHost = require('./getHost');
 
 const privateKey = process.env['APP_IDENTITY_PRIVATE_KEY'] || '';
 const appInstallationId = (process.env['APP_DEFINITION_ID'] || '').trim();
@@ -51,6 +52,7 @@ const getBuildHookIdFromSiteName = (siteName, params) => {
 const getBuildHooksFromAppInstallationParams = async (
   appContextDetails = {
     environmentId: '',
+    host: '',
     spaceId: '',
     siteName: '',
     contentTypeId: '',
@@ -60,7 +62,7 @@ const getBuildHooksFromAppInstallationParams = async (
   getToken = getManagementToken,
   fetch = nodeFetch
 ) => {
-  const { spaceId, environmentId, siteName, contentTypeId, isAsset } = appContextDetails;
+  const { spaceId, host, environmentId, siteName, contentTypeId, isAsset } = appContextDetails;
 
   if (!siteName && !contentTypeId && !isAsset) {
     throw new Error('Invalid request, requires action call or publish/unpublish event');
@@ -70,6 +72,7 @@ const getBuildHooksFromAppInstallationParams = async (
     spaceId,
     environmentId,
     appInstallationId,
+    host: `https://${host}`,
   });
 
   const rawResult = await fetch(
@@ -111,12 +114,15 @@ const extractAppContextDetails = (req) => {
     assetTypes.includes(get(req.body, 'sys.type')),
   ];
 
+  const host = getHost(req);
+
   return {
     spaceId,
     environmentId,
     contentTypeId,
     siteName,
     isAsset,
+    host,
   };
 };
 

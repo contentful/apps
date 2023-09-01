@@ -3,6 +3,7 @@ import { assertValid, asyncHandler } from '../../utils';
 import { EventsService } from './service';
 import { EventEntity } from './types';
 import { eventMessageWorkspacesBodySchema } from './validation';
+import { getHost } from '../../helpers/getHost';
 
 export class EventsController {
   private readonly verifyRequest: typeof verifyRequest;
@@ -16,10 +17,12 @@ export class EventsController {
 
     const spaceId = validEventBody.sys.space.sys.id;
     const environmentId = validEventBody.sys.environment.sys.id;
+    const host = getHost(request);
 
     const installationParameters = await this.eventsService.getInstallationParameters(
       spaceId,
-      environmentId
+      environmentId,
+      host
     );
 
     const topic = request.header('x-contentful-topic');
@@ -46,7 +49,8 @@ export class EventsController {
       installationParameters.notifications,
       eventKey,
       workspaceId,
-      validEventBody
+      validEventBody,
+      host
     );
 
     response.sendStatus(204);

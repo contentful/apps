@@ -54,8 +54,12 @@ export class EventsService {
     }
   }
 
-  async getInstallationParameters(spaceId: string, environmentId: string) {
-    const installationParameters = await getInstallationParametersFromCma(spaceId, environmentId);
+  async getInstallationParameters(spaceId: string, environmentId: string, host: string) {
+    const installationParameters = await getInstallationParametersFromCma(
+      spaceId,
+      environmentId,
+      host
+    );
     if (!installationParameters?.notifications || installationParameters.notifications.length < 1) {
       return null;
     }
@@ -75,17 +79,22 @@ export class EventsService {
     notifications: SlackNotification[],
     eventKey: SlackAppEventKey,
     workspaceId: string,
-    eventBody: EventEntity
+    eventBody: EventEntity,
+    host: string
   ) {
     const spaceId = eventBody.sys.space.sys.id;
     const environmentId = eventBody.sys.environment.sys.id;
 
     const [{ token }, resolvedEntity] = await Promise.all([
-      this.authTokenRepository.get(workspaceId, {
-        spaceId,
-        environmentId,
-      }),
-      this.getResolvedEntity(spaceId, environmentId, eventKey, eventBody),
+      this.authTokenRepository.get(
+        workspaceId,
+        {
+          spaceId,
+          environmentId,
+        },
+        host
+      ),
+      this.getResolvedEntity(spaceId, environmentId, host, eventKey, eventBody),
     ]);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any
@@ -112,6 +121,7 @@ export class EventsService {
   async getResolvedEntity(
     spaceId: string,
     environmentId: string,
+    host: string,
     event: SlackAppEventKey,
     eventBody: EventEntity
   ): Promise<ResolvedEntity | undefined> {
@@ -120,7 +130,7 @@ export class EventsService {
     let entryName: undefined | string;
     let entry: undefined | EntryProps;
 
-    const cmaClient = await this.makeCmaClient(spaceId, environmentId);
+    const cmaClient = await this.makeCmaClient(spaceId, environmentId, host);
 
     const contentType = await cmaClient.contentType.get({
       contentTypeId: eventBody.sys.contentType.sys.id,
