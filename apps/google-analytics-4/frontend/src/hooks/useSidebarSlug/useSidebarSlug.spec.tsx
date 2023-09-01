@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import * as useSDK from '@contentful/react-apps-toolkit';
 import { ContentTypeValue } from 'types';
 import * as getFieldValue from '../useGetFieldValue';
-import { ContentEntitySys } from '@contentful/app-sdk';
+import { ContentEntitySys, EntrySys } from '@contentful/app-sdk';
 
 jest.mock('@contentful/react-apps-toolkit', () => ({ useSDK: jest.fn() }));
 
@@ -43,11 +43,12 @@ describe('useSidebarSlug hook', () => {
     jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...jest.requireActual('@contentful/react-apps-toolkit'),
       entry: {
+        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
         fields: { slugField: {} },
         onSysChanged: jest.fn((cb) =>
           cb({
             publishedAt: '2020202',
-          } as unknown as ContentEntitySys)
+          } as unknown as EntrySys)
         ),
       },
     }));
@@ -68,11 +69,12 @@ describe('useSidebarSlug hook', () => {
     jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...jest.requireActual('@contentful/react-apps-toolkit'),
       entry: {
+        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
         fields: {},
         onSysChanged: jest.fn((cb) =>
           cb({
             publishedAt: '',
-          } as unknown as ContentEntitySys)
+          } as unknown as EntrySys)
         ),
       },
     }));
@@ -94,11 +96,12 @@ describe('useSidebarSlug hook', () => {
     jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
       ...jest.requireActual('@contentful/react-apps-toolkit'),
       entry: {
+        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
         fields: { slugField: {} },
         onSysChanged: jest.fn((cb) =>
           cb({
             publishedAt: '2020202',
-          } as unknown as ContentEntitySys)
+          } as unknown as EntrySys)
         ),
       },
     }));
