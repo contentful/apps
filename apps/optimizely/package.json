@@ -10,7 +10,7 @@
     "@contentful/forma-36-fcss": "0.3.5",
     "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.2",
-    "@testing-library/react": "8.0.7",
+    "@testing-library/react": "8.0.9",
     "@use-it/interval": "0.1.4",
     "emotion": "10.0.27",
     "lodash.get": "4.4.2",

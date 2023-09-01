@@ -3,7 +3,7 @@
   "version": "1.5.14",
   "private": true,
   "devDependencies": {
-    "@testing-library/react": "8.0.4",
+    "@testing-library/react": "8.0.9",
     "@types/jest": "24.0.15",
     "@types/lodash": "4.14.195",
     "@types/node": "13.7.0",

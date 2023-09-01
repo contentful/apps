@@ -55,7 +55,7 @@
     "@storybook/react-webpack5": "^7.3.0",
     "@storybook/testing-library": "^0.2.0",
     "@testing-library/jest-dom": "5.17.0",
-    "@testing-library/react": "14.0.0",
+    "@testing-library/react": "8.0.9",
     "@tsconfig/create-react-app": "2.0.1",
     "@types/node": "16.18.39",
     "@types/react": "18.2.18",

@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.1.11",
-    "@testing-library/react": "12.1.5",
+    "@testing-library/react": "8.0.9",
     "@types/node": "18.0.3",
     "@types/react": "17.0.47",
     "@types/react-dom": "17.0.17",

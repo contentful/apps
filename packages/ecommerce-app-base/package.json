@@ -29,7 +29,7 @@
     "@storybook/react-webpack5": "^7.2.3",
     "@storybook/testing-library": "^0.2.0",
     "@testing-library/jest-dom": "5.17.0",
-    "@testing-library/react": "12.1.5",
+    "@testing-library/react": "8.0.9",
     "@types/array-move": "2.0.0",
     "@types/jest": "27.5.0",
     "@types/lodash": "4.14.195",

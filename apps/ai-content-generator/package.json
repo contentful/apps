@@ -45,7 +45,7 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.7.13",
     "@originjs/vite-plugin-commonjs": "^1.0.3",
-    "@testing-library/react": "14.0.0",
+    "@testing-library/react": "8.0.9",
     "@types/jest": "^29.5.3",
     "@types/node": "18.0.3",
     "@types/react": "18.2.14",

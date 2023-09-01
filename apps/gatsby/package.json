@@ -5,7 +5,7 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.2.0",
     "@testing-library/jest-dom": "5.17.0",
-    "@testing-library/react": "8.0.7",
+    "@testing-library/react": "8.0.9",
     "cross-env": "7.0.3"
   },
   "dependencies": {
