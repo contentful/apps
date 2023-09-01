@@ -10,8 +10,8 @@ const NoContentTypesWarning = () => {
 
   const link =
     environment === 'master'
-      ? `https://app.contentful.com/spaces/${space}/content_types`
-      : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`;
+      ? `https://${sdk.hostnames.webapp}/spaces/${space}/content_types`
+      : `https://${sdk.hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`;
 
   return (
     <Note

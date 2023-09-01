@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@contentful/forma-36-react-components';
-import { FieldExtensionSDK } from '@contentful/app-sdk';
+import { FieldAppSDK } from '@contentful/app-sdk';
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
 import get from 'lodash/get';
@@ -9,10 +9,10 @@ import { CategoryPreviews } from './CategoryPreviews/CategoryPreviews';
 import { fetchProductPreviews } from '../api/fetchProductPreviews';
 import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
 import logo from '../logo.png';
-import { SAPParameters } from '../interfaces';
+import { AppParameters, SAPParameters } from '../interfaces';
 
 interface Props {
-  sdk: FieldExtensionSDK;
+  sdk: FieldAppSDK<AppParameters>;
 }
 
 interface State {

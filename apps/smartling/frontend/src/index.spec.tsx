@@ -54,6 +54,9 @@ describe('App', () => {
         },
         async onConfigurationCompleted() {},
       },
+      hostnames: {
+        webapp: 'app.contentful.com',
+      },
       space: {
         async getEditorInterfaces() {
           return {

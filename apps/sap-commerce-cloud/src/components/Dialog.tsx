@@ -12,16 +12,16 @@ import {
   TableRow,
   TextInput,
 } from '@contentful/forma-36-react-components';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './Dialog/ProductList';
 import { fetchProductList } from '../api/fetchProductList';
 import { fetchBaseSites } from '../api/fetchBaseSites';
-import { Error, Product, SAPParameters } from '../interfaces';
+import { AppParameters, Error, Product, SAPParameters } from '../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
 
 interface DialogProps {
-  sdk: DialogExtensionSDK;
+  sdk: DialogAppSDK<AppParameters>;
 }
 
 interface State {

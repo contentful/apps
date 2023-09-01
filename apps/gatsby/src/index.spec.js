@@ -22,6 +22,9 @@ const mockSdk = {
       authToken: 'test-token',
     },
   },
+  hostnames: {
+    webapp: 'app.contentful.com',
+  },
   entry: {
     onSysChanged: jest.fn(() => ({
       id: '123',
