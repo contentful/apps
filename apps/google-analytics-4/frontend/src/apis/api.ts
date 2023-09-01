@@ -1,5 +1,4 @@
 import { config } from '../config';
-import { PlainClientAPI } from 'contentful-management';
 import {
   ServiceAccountKeyId,
   ServiceAccountKey,
@@ -19,6 +18,7 @@ import {
   RunReportData,
 } from 'apis/apiTypes';
 import { upperFirst } from 'lodash';
+import { CMAClient } from '@contentful/app-sdk';
 
 export class ApiError extends Error {
   details: string;
@@ -37,11 +37,11 @@ export class Api {
   readonly baseUrl: string;
   readonly contentfulContext: ContentfulContext;
   readonly serviceAccountKeyId: ServiceAccountKeyId;
-  readonly cma: PlainClientAPI;
+  readonly cma: CMAClient;
 
   constructor(
     contentfulContext: ContentfulContext,
-    cma: PlainClientAPI,
+    cma: CMAClient,
     serviceAccountKeyId: ServiceAccountKeyId
   ) {
     this.baseUrl = config.backendApiUrl;

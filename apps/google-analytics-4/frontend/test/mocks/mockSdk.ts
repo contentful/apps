@@ -7,6 +7,34 @@ const mockSdk: any = {
     isInstalled: jest.fn(),
     onConfigurationCompleted: jest.fn(),
   },
+  cma: {
+    appSignedRequest: {
+      create: () => ({}),
+    },
+    getSpace: () => ({
+      getEnvironment: () => ({
+        getContentTypes: () => ({
+          description:
+            'A series of lessons designed to teach sets of concepts that enable students to master Contentful.',
+          displayField: 'title',
+          name: 'Course',
+          fields: [
+            {
+              course: {
+                disabled: false,
+                id: 'title',
+                localized: true,
+                name: 'Title',
+                omitted: false,
+                required: true,
+                type: 'Symbol',
+              },
+            },
+          ],
+        }),
+      }),
+    }),
+  },
   ids: {
     app: 'test-app',
     user: 'user-id',

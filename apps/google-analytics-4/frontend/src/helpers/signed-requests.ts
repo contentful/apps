@@ -1,11 +1,11 @@
+import { CMAClient } from '@contentful/app-sdk';
 import { ServiceAccountKey } from '../types';
 import { CreateAppSignedRequestProps } from 'contentful-management/dist/typings/entities/app-signed-request';
-import { PlainClientAPI } from 'contentful-management/dist/typings/plain/common-types';
 
 async function fetchWithSignedRequest(
   url: URL,
   appDefinitionId: string,
-  cma: PlainClientAPI,
+  cma: CMAClient,
   method: CreateAppSignedRequestProps['method'] = 'GET',
   unsignedHeaders: Record<string, string> = {},
   body?: ServiceAccountKey

@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import fetchWithSignedRequest from '../helpers/signed-requests';
-import { PlainClientAPI } from 'contentful-management';
 import { ApiError } from 'apis/api';
 import { Headers, ApiErrorType, ERROR_TYPE_MAP, ZApiErrorResponse } from 'apis/apiTypes';
+import { CMAClient } from '@contentful/app-sdk';
 
 export async function fetchFromApi<T>(
   apiUrl: URL,
   schema: z.ZodTypeAny,
   appDefinitionId: string,
-  cma: PlainClientAPI,
+  cma: CMAClient,
   headers: Headers = {}
 ): Promise<T> {
   const response = await fetchResponse(apiUrl, appDefinitionId, cma, headers);
@@ -21,7 +21,7 @@ export async function fetchFromApi<T>(
 async function fetchResponse(
   url: URL,
   appDefinitionId: string,
-  cma: PlainClientAPI,
+  cma: CMAClient,
   headers: Headers
 ): Promise<Response> {
   try {
