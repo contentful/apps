@@ -90,11 +90,11 @@ export class ImageTransformer {
     eraseColor: sharp.RGBA;
   }): Promise<Buffer> {
     const { width, height, eraseColor } = maskParams;
-    const sharpImage = toSharp(this.maskImageResponse.body);
+    let sharpImage = toSharp(this.maskImageResponse.body);
 
     const { width: initialWidth, height: initialHeight } = await sharpImage.metadata();
     if (width !== initialWidth || height !== initialHeight) {
-      sharpImage.resize({
+      sharpImage = sharpImage.resize({
         width,
         height,
         fit: 'fill', // stretches to fit
