@@ -6,6 +6,7 @@ import { GeneratorAction } from '@components/app/dialog/common-generator/generat
 import { OutputTab } from '../../Output';
 import { DialogText } from '@configs/features/featureTypes';
 import { css } from '@emotion/react';
+import { tokenWarning } from '@configs/token-warning/tokenWarning';
 
 const styles = {
   panel: css({
@@ -39,6 +40,7 @@ const OriginalTextPanel = (props: Props) => {
   const isGenerateButtonDisabled = !inputText || !hasOutputField;
   const placeholderText = isNewText ? dialogText.promptPlaceholder : dialogText.fieldPlaceholder;
   const helpText = isNewText ? dialogText.promptHelpText : dialogText.fieldHelpText;
+  const helpTextProps = isGenerateButtonDisabled ? { helpText } : { warningMessage: tokenWarning };
 
   return (
     <Tabs.Panel id={OutputTab.UPDATE_ORIGINAL_TEXT} css={styles.panel}>
@@ -47,7 +49,7 @@ const OriginalTextPanel = (props: Props) => {
         onFieldChange={handleOriginalTextChange}
         isDisabled={isTextAreaDisabled}
         placeholder={placeholderText}
-        helpText={isGenerateButtonDisabled ? helpText : ''}>
+        {...helpTextProps}>
         <Button onClick={generate} isDisabled={isGenerateButtonDisabled}>
           Generate
         </Button>

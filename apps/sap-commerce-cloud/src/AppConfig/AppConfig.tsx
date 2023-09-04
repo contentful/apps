@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { AppExtensionSDK, CollectionResponse } from '@contentful/app-sdk';
+import { CollectionResponse, ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Form,
   Heading,
@@ -27,10 +27,10 @@ import {
   selectedFieldsToTargetState,
 } from './fields';
 
-import { Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
+import { AppParameters, Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
 
 interface Props {
-  sdk: AppExtensionSDK;
+  sdk: ConfigAppSDK<AppParameters>;
   parameterDefinitions: ParameterDefinition[];
   validateParameters: ValidateParametersFn;
   logo: string;
@@ -184,7 +184,7 @@ export default class AppConfig extends React.Component<Props, State> {
   renderApp() {
     const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
     const { parameterDefinitions, sdk } = this.props;
-    const { ids } = sdk;
+    const { ids, hostnames } = sdk;
     const { space, environment } = ids;
     const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
 
@@ -242,8 +242,8 @@ export default class AppConfig extends React.Component<Props, State> {
                   rel="noopener noreferrer"
                   href={
                     environment === 'master'
-                      ? `https://app.contentful.com/spaces/${space}/content_types`
-                      : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+                      ? `https://${hostnames.webapp}/spaces/${space}/content_types`
+                      : `https://${hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
                   }>
                   content model
                 </TextLink>{' '}

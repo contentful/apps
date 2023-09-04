@@ -39,7 +39,7 @@ const ContentTypeSelection = (props: Props) => {
   };
 
   return (
-    <FormControl as="fieldset">
+    <FormControl as="fieldset" marginBottom="none">
       <Table css={styles.table}>
         <Table.Head>
           <Table.Row>

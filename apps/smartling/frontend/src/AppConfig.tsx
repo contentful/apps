@@ -161,8 +161,8 @@ export default class AppConfig extends React.Component<Props, State> {
                     rel="noopener noreferrer"
                     href={
                       environment === 'master'
-                        ? `https://app.contentful.com/spaces/${space}/content_types`
-                        : `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types`
+                        ? `https://${sdk.hostnames.webapp}/spaces/${space}/content_types`
+                        : `https://${sdk.hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
                     }>
                     content type
                   </TextLink>{' '}

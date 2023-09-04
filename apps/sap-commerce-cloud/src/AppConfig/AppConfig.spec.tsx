@@ -12,6 +12,9 @@ describe('Config Screen component', () => {
         setReady: jest.fn(),
         getCurrentState: jest.fn(),
       },
+      hostnames: {
+        webapp: 'app.contentful.com',
+      },
       ids: {
         space: '123214',
         environment: 'master',

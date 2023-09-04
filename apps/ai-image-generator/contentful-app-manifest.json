@@ -1,18 +1,28 @@
 {
   "actions": [
     {
-      "id": "aiigBuildAction",
-      "name": "AI Image Generator Test Action",
+      "id": "aiigSelectFillStatic",
+      "name": "AI Image Generator Test Select Fill",
       "category": "Custom",
       "description": "This action returns a static result for testing purposes",
       "type": "function",
-      "path": "actions/aiig-build-action.js",
-      "entryFile": "./backend/src/actions/aiig-build-action.ts",
+      "path": "actions/aiig-static.js",
+      "entryFile": "./backend/src/actions/aiig-static.ts",
       "allowNetworks": [],
       "parameters": [
         {
           "id": "prompt",
           "name": "prompt",
+          "type": "Symbol"
+        },
+        {
+          "id": "image",
+          "name": "image",
+          "type": "Symbol"
+        },
+        {
+          "id": "mask",
+          "name": "mask",
           "type": "Symbol"
         }
       ]
@@ -30,6 +40,33 @@
         {
           "id": "prompt",
           "name": "prompt",
+          "type": "Symbol"
+        }
+      ]
+    },
+    {
+      "id": "aiigSelectFill",
+      "name": "Edit and fill with AI Image",
+      "category": "Custom",
+      "description": "This action will edit an image using OpenAI DALL-E 2 given a prompt, source image, and mask",
+      "type": "function",
+      "path": "actions/aiig-select-fill.js",
+      "entryFile": "./backend/src/actions/aiig-select-fill.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "prompt",
+          "name": "prompt",
+          "type": "Symbol"
+        },
+        {
+          "id": "image",
+          "name": "image",
+          "type": "Symbol"
+        },
+        {
+          "id": "mask",
+          "name": "mask",
           "type": "Symbol"
         }
       ]

@@ -1,52 +1,22 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { PlainClientAPI } from 'contentful-management';
 import { OpenAiApiService } from '../services/openaiApiService';
+import { AppActionCallResponse, Image } from '../types';
+import { fetchOpenAiApiKey } from '../utils';
 
 interface AppActionCallParameters {
   prompt: string;
 }
 
-interface Image {
-  url: string;
-  imageType: string;
-}
-
-interface ActionError {
-  type: string;
-  message: string;
-  details?: Record<string, any>;
-}
-
-// TODO: Create generic versions of success and error
-export interface AppActionCallResponseSuccess {
-  ok: true;
-  data: {
-    type: 'ImageCreationResult';
-    images: Image[];
-  };
-}
-
-export interface AppActionCallResponseError {
-  ok: false;
-  errors: ActionError[];
-}
-
-type AppActionCallResponse = AppActionCallResponseSuccess | AppActionCallResponseError;
-
-async function fetchOpenAiApiKey(cma: PlainClientAPI, appInstallationId: string): Promise<string> {
-  const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
-  const appInstallationParams = appInstallation.parameters;
-  if (typeof appInstallationParams === 'object' && 'apiKey' in appInstallationParams) {
-    return appInstallationParams['apiKey'];
-  } else {
-    throw new Error('No OpenAI API Key was found in the installation parameters');
-  }
+export interface ImageCreationResult {
+  type: 'ImageCreationResult';
+  images: Image[];
 }
 
 export const handler = async (
   payload: AppActionCallParameters,
   context: AppActionCallContext
-): Promise<AppActionCallResponse> => {
+): Promise<AppActionCallResponse<ImageCreationResult>> => {
   const {
     cma,
     appActionCallContext: { appInstallationId },

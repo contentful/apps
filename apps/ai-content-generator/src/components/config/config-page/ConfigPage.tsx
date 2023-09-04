@@ -1,6 +1,8 @@
 import { useReducer } from 'react';
 import { Box, Heading } from '@contentful/f36-components';
 import ConfigSection from '@components/config/config-section/ConfigSection';
+import CostSection from '@components/config/cost-section/CostSection';
+import DisclaimerSection from '@components/config/disclaimer-section/DisclaimerSection';
 import BrandSection from '@components/config/brand-section/BrandSection';
 import AddToSidebarSection from '@components/config/add-to-sidebar-section/AddToSidebarSection';
 import { styles } from './ConfigPage.styles';
@@ -57,6 +59,10 @@ const ConfigPage = () => {
         model={parameters.model}
         dispatch={dispatchParameters}
       />
+      <hr css={styles.splitter} />
+      <CostSection />
+      <hr css={styles.splitter} />
+      <DisclaimerSection />
       <hr css={styles.splitter} />
       <BrandSection profile={parameters.profile} dispatch={dispatchParameters} />
       <hr css={styles.splitter} />

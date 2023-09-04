@@ -360,6 +360,7 @@ export class AppConfig extends React.Component {
                   <ContentTypesPanel
                     space={space}
                     environment={environment}
+                    hostnames={sdk.hostnames}
                     contentTypes={contentTypes}
                     enabledContentTypes={enabledContentTypes}
                     urlConstructors={urlConstructors}

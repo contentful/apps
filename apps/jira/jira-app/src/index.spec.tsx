@@ -13,6 +13,18 @@ configure({
   testIdAttribute: 'data-test-id',
 });
 
+function mockUseSDK() {
+  return {
+    hostnames: {
+      webapp: 'app.contentful.com',
+    },
+  };
+}
+
+jest.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockUseSDK(),
+}));
+
 const originalStorage = window.localStorage;
 
 describe('The Jira App Components', () => {
@@ -54,6 +66,9 @@ describe('The Jira App Components', () => {
       user: {
         firstName: 'David',
         lastName: 'Fateh',
+      },
+      hostnames: {
+        webapp: 'app.contentful.com',
       },
     };
   });

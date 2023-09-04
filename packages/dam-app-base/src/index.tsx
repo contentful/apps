@@ -1,10 +1,4 @@
-import {
-  AppExtensionSDK,
-  DialogExtensionSDK,
-  FieldExtensionSDK,
-  init,
-  locations,
-} from '@contentful/app-sdk';
+import { ConfigAppSDK, DialogAppSDK, FieldAppSDK, init, locations } from '@contentful/app-sdk';
 import { GlobalStyles } from '@contentful/f36-components';
 import * as React from 'react';
 import { render } from 'react-dom';
@@ -17,7 +11,7 @@ export function setup(integration: Integration) {
     const root = document.getElementById('root');
 
     if (sdk.location.is(locations.LOCATION_DIALOG)) {
-      integration.renderDialog(sdk as DialogExtensionSDK);
+      integration.renderDialog(sdk as DialogAppSDK);
     }
 
     if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
@@ -25,7 +19,7 @@ export function setup(integration: Integration) {
         <>
           <GlobalStyles />
           <Field
-            sdk={sdk as FieldExtensionSDK}
+            sdk={sdk as FieldAppSDK}
             cta={integration.cta}
             logo={integration.logo}
             makeThumbnail={integration.makeThumbnail}
@@ -43,7 +37,7 @@ export function setup(integration: Integration) {
           <GlobalStyles />
           <AppConfig
             name={integration.name}
-            sdk={sdk as AppExtensionSDK}
+            sdk={sdk as ConfigAppSDK}
             parameterDefinitions={integration.parameterDefinitions}
             validateParameters={integration.validateParameters}
             logo={integration.logo}

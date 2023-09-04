@@ -28,6 +28,9 @@ const getMockSdk = () => ({
       authToken: 'test-token',
     },
   },
+  hostnames: {
+    webapp: 'app.contentful.com',
+  },
   entry: {
     onSysChanged: jest.fn((cb) => {
       cb(getMockContent());
@@ -83,7 +86,7 @@ describe('Gatsby App Sidebar', () => {
     );
 
     await new Promise((res) => setTimeout(res, 2000));
-    expect(mockSdk.entry.save).not.toBeCalled()
+    expect(mockSdk.entry.save).not.toBeCalled();
     expect(mockFetch).toBeCalledWith(WEBHOOK_URL, expect.anything());
     expect(mockWindowOpen).toBeCalledWith(PREVIEW_URL);
   });
@@ -108,7 +111,7 @@ describe('Gatsby App Sidebar', () => {
     );
 
     await new Promise((res) => setTimeout(res, 1));
-    expect(mockSdk.entry.save).toBeCalled()
+    expect(mockSdk.entry.save).toBeCalled();
     expect(mockFetch).toBeCalledWith(WEBHOOK_URL, expect.anything());
     /**
      * The expected url should be in the form of:

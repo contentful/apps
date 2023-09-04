@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AppExtensionSDK, AppState, EditorInterface } from '@contentful/app-sdk';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { isEmpty } from 'lodash';
 import GoogleAnalyticsIcon from 'components/common/GoogleAnalyticsIcon';
 import { styles } from 'components/config-screen/GoogleAnalyticsConfigPage/GoogleAnalyticsConfigPage.styles';
@@ -36,7 +36,7 @@ export default function GoogleAnalyticsConfigPage() {
   const [isApiAccessLoading, setIsApiAccessLoading] = useState(true);
 
   const sdk = useSDK<AppExtensionSDK>();
-  const cma = useCMA();
+  const cma = sdk.cma;
 
   const handleHasServiceCheckErrorsChange = (hasErrors: boolean) => {
     setHasServiceCheckErrors(hasErrors);

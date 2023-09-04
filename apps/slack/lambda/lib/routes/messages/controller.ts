@@ -5,6 +5,7 @@ import { AuthTokenRepository } from '../auth-token';
 import { MessagesRepository } from './repository';
 import { PostMessageBody, postMessageWorkspacesBodySchema } from './validation';
 import { getWorkspaceId } from '../../helpers/getWorkspaceId';
+import { getHost } from '../../helpers/getHost';
 
 const extractFromSignedHeaders = (request: Request) => {
   const spaceId = request.header('x-contentful-space-id');
@@ -36,12 +37,22 @@ export class MessagesController {
 
     const { spaceId, environmentId } = extractFromSignedHeaders(request);
 
-    const workspaceId = await getWorkspaceId(spaceId, environmentId, workspaceIdFromParameters);
-
-    const { token } = await this.authTokenRepository.get(workspaceId, {
+    const host = getHost(request);
+    const workspaceId = await getWorkspaceId({
       spaceId,
       environmentId,
+      host,
+      workspaceIdFromParameters,
     });
+
+    const { token } = await this.authTokenRepository.get(
+      workspaceId,
+      {
+        spaceId,
+        environmentId,
+      },
+      host
+    );
 
     await this.messagesRepository.create(token, channelId, { text: message });
 

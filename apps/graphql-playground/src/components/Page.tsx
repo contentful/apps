@@ -1,10 +1,10 @@
 import React from 'react';
-import { PageExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { PageAppSDK } from '@contentful/app-sdk';
 import { Card, Note } from '@contentful/forma-36-react-components';
 import GqlPlayground from './GqlPlayground';
 
 interface PageProps {
-  sdk: PageExtensionSDK;
+  sdk: PageAppSDK;
 }
 
 const Page = (props: PageProps) => {
@@ -17,7 +17,7 @@ const Page = (props: PageProps) => {
   const spaceEnvironmentAlias = sdk.ids.environmentAlias;
 
   return cpaToken ? (
-    <GqlPlayground {...{ cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }} />
+    <GqlPlayground {...{ sdk, cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }} />
   ) : (
     <Card style={{ margin: '1em' }}>
       <Note noteType="warning">

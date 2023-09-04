@@ -1,10 +1,10 @@
 import React from 'react';
-import { DialogExtensionSDK } from 'contentful-ui-extensions-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import GqlPlayground from './GqlPlayground';
 import { Button } from '@contentful/forma-36-react-components';
 
 interface DialogProps {
-  sdk: DialogExtensionSDK;
+  sdk: DialogAppSDK;
 }
 
 const Dialog = (props: DialogProps) => {
@@ -38,7 +38,7 @@ const Dialog = (props: DialogProps) => {
         style={{ position: 'absolute', top: '1em', right: '4em', zIndex: 1 }}>
         Close{' '}
       </Button>
-      <GqlPlayground {...{ entry, cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }} />;
+      <GqlPlayground {...{ sdk, entry, cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }} />;
     </>
   );
 };

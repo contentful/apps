@@ -1,7 +1,7 @@
 import { ChangeEvent, Dispatch } from 'react';
 import { FormControl, TextInput, Textarea } from '@contentful/f36-components';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
-import { BrandProfileFields, FieldTypes } from '../configText';
+import { BrandProfileFields, FieldTypes, ProfileFields } from '../configText';
 import { ProfileType } from '@locations/ConfigScreen';
 
 interface Props {
@@ -32,8 +32,13 @@ const Profile = (props: Props) => {
           onChange: onChange,
         };
 
+        const marginBottomStyle = field.id === ProfileFields.ADDITIONAL ? 'none' : 'spacingL';
+
         return (
-          <FormControl isRequired={field.isRequired} key={field.id}>
+          <FormControl
+            isRequired={field.isRequired}
+            key={field.id}
+            marginBottom={marginBottomStyle}>
             <FormControl.Label>{field.title}</FormControl.Label>
             {field.fieldType === FieldTypes.TEXTAREA ? (
               <Textarea rows={TEXTAREA_ROWS} resize="none" {...fieldProps} />

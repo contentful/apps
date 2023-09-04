@@ -26,7 +26,7 @@ const Model = (props: Props) => {
   };
 
   return (
-    <FormControl isRequired>
+    <FormControl isRequired marginBottom="none">
       <FormControl.Label>{ModelText.title}</FormControl.Label>
       <Select value={value} onChange={handleChange}>
         {modelList}

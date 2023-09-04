@@ -21,6 +21,9 @@ function makeMockSdk({
         items: [],
       }),
     },
+    hostnames: {
+      webapp: 'app.contentful.com',
+    },
     app: {
       onConfigure,
       getParameters: () => ({
@@ -39,7 +42,7 @@ function makeMockSdk({
     notifier: {
       error: () => {},
     },
-  }
+  };
 }
 
 function makeContentTypes() {
@@ -58,12 +61,12 @@ function makeContentTypes() {
 }
 
 describe('<AppConfig />', () => {
-  /** 
+  /**
    * Because the Contentful SDK takes care of calling configure, we need to follow an atypical
    * pattern for the following tests. This includes adding a delay to ensure that the component is fully
    * mounted before manually calling the configure method and then asserting that its return value
    * is correct
-   */ 
+   */
   describe('configure callback validation', () => {
     it('validates url fields and returns correct values if valid', async () => {
       let configure;
@@ -135,7 +138,7 @@ describe('<AppConfig />', () => {
 
       expect(configureResult).toEqual(false);
     });
-  })
+  });
 });
 
 describe('enabledContentTypesToTargetState', () => {

@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.3.5](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.4...@contentful/ecommerce-app-base@3.3.5) (2023-09-04)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [3.3.4](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.3...@contentful/ecommerce-app-base@3.3.4) (2023-09-01)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [3.3.3](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.2...@contentful/ecommerce-app-base@3.3.3) (2023-09-01)
+
+### Bug Fixes
+
+- **deps:** bump @storybook/addon-a11y from 7.3.2 to 7.4.0 ([#4689](https://github.com/contentful/apps/issues/4689)) ([b81384b](https://github.com/contentful/apps/commit/b81384b4023aeee731cc2cb7664d004836de910a))
+
+## [3.3.2](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.1...@contentful/ecommerce-app-base@3.3.2) (2023-08-31)
+
+### Bug Fixes
+
+- remove curly braces on description fallback ([962a73c](https://github.com/contentful/apps/commit/962a73c587e75d5a7f7d3c570b3b31a703bf3637))
+
+## [3.3.1](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.0...@contentful/ecommerce-app-base@3.3.1) (2023-08-31)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
 # [3.3.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.2.6...@contentful/ecommerce-app-base@3.3.0) (2023-08-30)
 
 ### Features

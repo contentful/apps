@@ -105,19 +105,31 @@ describe('EventsService', () => {
   });
   describe('#getInstallationParameters', () => {
     it('returns the installation parameters if requests are set', async () => {
-      const installationParams = await instance.getInstallationParameters('space-id', 'env-id');
+      const installationParams = await instance.getInstallationParameters(
+        'space-id',
+        'env-id',
+        'host:contentful'
+      );
 
       assert.equal(installationParams, expectedParams);
     });
     it('returns null if notifications are not defined', async () => {
       expectedParams.notifications = undefined;
-      const installationParams = await instance.getInstallationParameters('space-id', 'env-id');
+      const installationParams = await instance.getInstallationParameters(
+        'space-id',
+        'env-id',
+        'host:contentful'
+      );
 
       assert.equal(installationParams, null);
     });
     it('returns null if there are no notifications', async () => {
       expectedParams.notifications = [];
-      const installationParams = await instance.getInstallationParameters('space-id', 'env-id');
+      const installationParams = await instance.getInstallationParameters(
+        'space-id',
+        'env-id',
+        'host:contentful'
+      );
 
       assert.equal(installationParams, null);
     });
@@ -134,7 +146,7 @@ describe('EventsService', () => {
       let error: any;
 
       try {
-        await instance.getInstallationParameters('space-id', 'env-id');
+        await instance.getInstallationParameters('space-id', 'env-id', 'host:contentful');
       } catch (e) {
         error = e;
       }
@@ -152,7 +164,7 @@ describe('EventsService', () => {
       let error: any;
 
       try {
-        await instance.getInstallationParameters('space-id', 'env-id');
+        await instance.getInstallationParameters('space-id', 'env-id', 'host:contentful');
       } catch (e) {
         error = e;
       }
@@ -186,6 +198,7 @@ describe('EventsService', () => {
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
         'env-id',
+        'contentful',
         SlackAppEventKey.PUBLISH,
         eventBody
       );
@@ -201,6 +214,7 @@ describe('EventsService', () => {
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
         'env-id',
+        'contentful',
         SlackAppEventKey.UNPUBLISHED,
         eventBody
       );
@@ -216,6 +230,7 @@ describe('EventsService', () => {
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
         'env-id',
+        'contentful',
         SlackAppEventKey.CREATED,
         eventBody
       );
@@ -231,6 +246,7 @@ describe('EventsService', () => {
       const resolvedEntity = await instance.getResolvedEntity(
         'space-id',
         'env-id',
+        'contentful',
         SlackAppEventKey.DELETED,
         eventBody
       );
@@ -273,7 +289,8 @@ describe('EventsService', () => {
           notifications,
           eventKey,
           workspaceId,
-          entryBody
+          entryBody,
+          'contentful'
         );
         assert.callCount(messagesRepository.create, 2);
       });
@@ -284,7 +301,8 @@ describe('EventsService', () => {
           notifications,
           eventKey,
           workspaceId,
-          entryBody
+          entryBody,
+          'contentful'
         );
         assert.callCount(messagesRepository.create, 1);
       });

@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { Playground, store, getQuery } from 'graphql-playground-react';
 import stripIndent from 'strip-indent';
 import { Note } from '@contentful/forma-36-react-components';
+import { DialogAppSDK, PageAppSDK } from '@contentful/app-sdk';
 
 interface Sys {
   id: String;
@@ -18,6 +19,7 @@ interface Entry {
 }
 
 interface GqlPlaygroundProps {
+  sdk: PageAppSDK | DialogAppSDK;
   cpaToken: string;
   spaceId: string;
   spaceEnvironment: string;
@@ -33,12 +35,12 @@ function formatQuery(query: string) {
 }
 
 function GqlPlayground(props: GqlPlaygroundProps) {
-  const { cpaToken, entry, spaceId, spaceEnvironment, spaceEnvironmentAlias } = props;
+  const { sdk, cpaToken, entry, spaceId, spaceEnvironment, spaceEnvironmentAlias } = props;
 
   const [hasCollection, setHasCollection] = useState<boolean>();
 
   const tabConfig = {
-    endpoint: `https://graphql.contentful.com/content/v1/spaces/${spaceId}/environments/${
+    endpoint: `https://${sdk.hostnames.graphql}/content/v1/spaces/${spaceId}/environments/${
       spaceEnvironmentAlias || spaceEnvironment
     }`,
     headers: {

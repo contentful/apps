@@ -1,12 +1,6 @@
 import { render } from 'react-dom';
 
-import {
-  AppExtensionSDK,
-  FieldExtensionSDK,
-  DialogExtensionSDK,
-  init,
-  locations,
-} from '@contentful/app-sdk';
+import { init, locations, FieldAppSDK, DialogAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import '@contentful/forma-36-tokens/dist/css/index.css';
@@ -15,6 +9,7 @@ import AppConfig from './AppConfig/AppConfig';
 
 import Field from './components/Field';
 import Dialog from './components/Dialog';
+import { AppParameters } from './interfaces';
 
 init(async (sdk) => {
   const root = document.getElementById('root');
@@ -24,7 +19,7 @@ init(async (sdk) => {
       location: locations.LOCATION_APP_CONFIG,
       component: (
         <AppConfig
-          sdk={sdk as AppExtensionSDK}
+          sdk={sdk as ConfigAppSDK<AppParameters>}
           name="SAP Commerce Cloud App"
           description={`
             The SAP Commerce Cloud app allows content creators to select products from their
@@ -55,11 +50,11 @@ init(async (sdk) => {
     },
     {
       location: locations.LOCATION_ENTRY_FIELD,
-      component: <Field sdk={sdk as FieldExtensionSDK} />,
+      component: <Field sdk={sdk as FieldAppSDK<AppParameters>} />,
     },
     {
       location: locations.LOCATION_DIALOG,
-      component: <Dialog sdk={sdk as DialogExtensionSDK} />,
+      component: <Dialog sdk={sdk as DialogAppSDK<AppParameters>} />,
     },
   ];
 
