@@ -90,11 +90,11 @@ export class ImageTransformer {
     eraseColor: sharp.RGBA;
   }): Promise<Buffer> {
     const { width, height, eraseColor } = maskParams;
-    let sharpImage = toSharp(this.maskImageResponse.body);
+    const sharpImage = toSharp(this.maskImageResponse.body);
 
     const { width: initialWidth, height: initialHeight } = await sharpImage.metadata();
     if (width !== initialWidth || height !== initialHeight) {
-      sharpImage = sharpImage.resize({
+      sharpImage.resize({
         width,
         height,
         fit: 'fill', // stretches to fit
@@ -115,7 +115,6 @@ export class ImageTransformer {
 
     for (let i = 0; i < imagePixels.length; i += 4) {
       const imagePixel = toRGBA(imagePixels.subarray(i, i + 4));
-      console.log(imagePixel);
 
       if (!areEqualColors(colorToReplace, imagePixel)) continue;
 
@@ -123,7 +122,6 @@ export class ImageTransformer {
       imagePixels[i + 3] = 0;
     }
 
-    // return a new sharp image built off the transformed raw buffer
     return sharp(imagePixels, {
       raw: {
         width: info.width,
