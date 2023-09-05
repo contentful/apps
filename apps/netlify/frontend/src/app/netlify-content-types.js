@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { Note, Text, TextLink, Heading, Paragraph, Checkbox } from '@contentful/f36-components';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
-import { useSDK } from '@contentful/react-apps-toolkit';
 
 const styles = {
   selectAllCheckbox: css({
@@ -24,8 +23,8 @@ const NetlifyContentTypes = ({
   disabled,
   space,
   environment,
+  hostnames,
 }) => {
-  const sdk = useSDK();
   const allSelected = contentTypes.length === enabledContentTypes.length;
 
   const onChange = (e) => {
@@ -59,8 +58,8 @@ const NetlifyContentTypes = ({
             rel="noopener noreferrer"
             href={
               environment === 'master'
-                ? `https://${sdk.hostnames.webapp}/spaces/${space}/content_types`
-                : `https://${sdk.hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
+                ? `https://${hostnames.webapp}/spaces/${space}/content_types`
+                : `https://${hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
             }>
             content type
           </TextLink>{' '}
@@ -95,6 +94,7 @@ NetlifyContentTypes.propTypes = {
   contentTypes: PropTypes.array.isRequired,
   enabledContentTypes: PropTypes.array.isRequired,
   onEnabledContentTypesChange: PropTypes.func.isRequired,
+  hostnames: PropTypes.object.isRequired,
 };
 
 export default NetlifyContentTypes;
