@@ -1,9 +1,11 @@
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { fetchOpenAiApiKey } from './utils';
 import sinon from 'sinon';
-import { makeMockPlainClient } from '../test/mocks';
+import { absolutePathToFile, makeMockPlainClient, readableStreamFromFile } from '../test/mocks';
 import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
+import { Response } from 'node-fetch';
+import sharp from 'sharp';
 
 chai.use(sinonChai);
 
@@ -17,8 +19,8 @@ describe('fetchOpenApiKey', () => {
       appDefinition: {} as SysLink,
       environment: {} as SysLink,
       space: {} as SysLink,
-      version: 1,
       createdAt: 'createdAt',
+      version: 1,
       updatedAt: 'updatedAt',
     },
     parameters: {
