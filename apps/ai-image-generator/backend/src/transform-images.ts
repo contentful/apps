@@ -2,7 +2,7 @@ import * as nodeFetch from 'node-fetch';
 import { default as sharp } from 'sharp';
 import { areEqualColors, toRGBA, toSharp } from './utils';
 
-export const ERASE_COLOR: sharp.RGBA = { r: 174, g: 193, b: 204 };
+export const ERASE_COLOR: sharp.RGBA = { r: 231, g: 235, b: 238 };
 export const MAX_SIDE = 1024;
 
 interface TransformedImages {
