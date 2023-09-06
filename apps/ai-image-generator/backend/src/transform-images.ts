@@ -90,11 +90,11 @@ export class ImageTransformer {
     eraseColor: sharp.RGBA;
   }): Promise<Buffer> {
     const { width, height, eraseColor } = maskParams;
-    let sharpImage = toSharp(this.maskImageResponse.body);
+    const sharpImage = toSharp(this.maskImageResponse.body);
 
     const { width: initialWidth, height: initialHeight } = await sharpImage.metadata();
     if (width !== initialWidth || height !== initialHeight) {
-      sharpImage = sharpImage.resize({
+      sharpImage.resize({
         width,
         height,
         fit: 'fill', // stretches to fit
@@ -109,28 +109,19 @@ export class ImageTransformer {
     colorToReplace: sharp.RGBA,
     sharpImage: sharp.Sharp
   ): Promise<sharp.Sharp> {
-    const metadata = await sharpImage.metadata();
-    const { hasAlpha } = metadata;
-
-    if (!hasAlpha) return sharpImage;
-
     const { data: imagePixels, info } = await sharpImage
       .raw()
       .toBuffer({ resolveWithObject: true });
 
-    // image "pixels" are sets of four integers in a row, ie [red, blue, green, alpha]. so we
-    // iterate over the image pixels in batches of 4
     for (let i = 0; i < imagePixels.length; i += 4) {
-      // just take the current "batch" of four pixels and convert to RGBA
-      const imagePixel = toRGBA(imagePixels.subarray(i, i + 3));
+      const imagePixel = toRGBA(imagePixels.subarray(i, i + 4));
 
-      if (areEqualColors(colorToReplace, imagePixel)) continue;
+      if (!areEqualColors(colorToReplace, imagePixel)) continue;
 
       // set the alpha pixel bit to 0, i.e. make the current pixel transparent
       imagePixels[i + 3] = 0;
     }
 
-    // return a new sharp image built off the transformed raw buffer
     return sharp(imagePixels, {
       raw: {
         width: info.width,

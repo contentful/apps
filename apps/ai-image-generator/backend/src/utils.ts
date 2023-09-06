@@ -21,9 +21,15 @@ export const toSharp = (imageStream: NodeJS.ReadableStream): sharp.Sharp => {
 
 // note: we don't care about alpha channel here, only the RGB color
 export const areEqualColors = (colorA: sharp.RGBA, colorB: sharp.RGBA): boolean => {
-  if (colorA.r != colorB.r) return false;
-  if (colorA.g != colorB.g) return false;
-  if (colorA.b != colorB.b) return false;
+  if (colorA.r !== colorB.r) {
+    return false;
+  }
+  if (colorA.g !== colorB.g) {
+    return false;
+  }
+  if (colorA.b !== colorB.b) {
+    return false;
+  }
   return true;
 };
 
