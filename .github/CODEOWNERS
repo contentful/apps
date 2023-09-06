@@ -3,4 +3,5 @@
 
 apps/graphql-playground @contentful/team-developer-experience
 examples @contentful/team-developer-experience
+packages @contentful/team-developer-experience
 
