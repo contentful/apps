@@ -57,13 +57,11 @@ const main = async (watch = false) => {
     const config = {
       entryPoints: getEntryPoints(),
       minify: true,
-      bundle: true,
       platform: 'node',
       outdir: 'build',
       logLevel: 'info',
       format: 'esm',
       target: 'es6',
-      external: ['node:*'],
     };
 
     if (watch) {
