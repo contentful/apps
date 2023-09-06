@@ -45,6 +45,7 @@ class AppActionRunner {
         environmentId: this.environmentId,
         spaceId: this.spaceId,
         appDefinitionId: appAction.sys.appDefinition.sys.id,
+        retries: 15,
       },
       {
         parameters: this.params,
