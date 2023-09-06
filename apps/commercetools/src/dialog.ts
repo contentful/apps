@@ -1,5 +1,5 @@
-import { DialogExtensionSDK } from '@contentful/app-sdk';
-import { renderSkuPicker } from '@contentful/ecommerce-app-base';
+import { DialogAppSDK } from '@contentful/app-sdk';
+import { ProductPreviewsFn, renderSkuPicker } from '@contentful/ecommerce-app-base';
 import { createResolver, fetchPreviews } from './api';
 import { SkuType } from './types';
 
@@ -31,7 +31,7 @@ function makeSaveBtnText(skuType: SkuType) {
   }
 }
 
-export async function renderDialog(sdk: DialogExtensionSDK) {
+export async function renderDialog(sdk: DialogAppSDK) {
   const DIALOG_ID = 'dialog-root';
 
   const container = document.createElement('div');
@@ -45,7 +45,7 @@ export async function renderDialog(sdk: DialogExtensionSDK) {
 
   renderSkuPicker(DIALOG_ID, {
     sdk,
-    fetchProductPreviews: fetchPreviews,
+    fetchProductPreviews: fetchPreviews as ProductPreviewsFn,
     fetchProducts: createResolver(sdk, skuType),
     searchDelay: 750,
     skuType,
