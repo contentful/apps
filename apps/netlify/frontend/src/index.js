@@ -4,7 +4,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { init, locations } from '@contentful/app-sdk';
-import { SDKProvider } from '@contentful/app-sdk';
 
 import '@contentful/forma-36-fcss/dist/styles.css';
 
@@ -15,18 +14,8 @@ init((sdk) => {
   const root = document.getElementById('root');
 
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-    ReactDOM.render(
-      <SDKProvider>
-        <NetlifyAppConfig sdk={sdk} />
-      </SDKProvider>,
-      root
-    );
+    ReactDOM.render(<NetlifyAppConfig sdk={sdk} />, root);
   } else if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
-    ReactDOM.render(
-      <SDKProvider>
-        <NeflifySidebar sdk={sdk} />
-      </SDKProvider>,
-      root
-    );
+    ReactDOM.render(<NeflifySidebar sdk={sdk} />, root);
   }
 });

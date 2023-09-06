@@ -208,6 +208,7 @@ export default class NetlifyAppConfig extends React.Component {
               space={space}
               environment={environment}
               disabled={disabled}
+              hostnames={sdk.hostnames}
               contentTypes={this.state.contentTypes}
               enabledContentTypes={this.state.enabledContentTypes}
               onEnabledContentTypesChange={this.onEnabledContentTypesChange}

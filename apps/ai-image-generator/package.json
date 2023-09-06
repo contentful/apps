@@ -6,14 +6,19 @@
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "build": "rimraf ./build && npm run build-frontend && npm run build-backend",
     "build-actions": "node build-actions.js",
-    "build-backend": "cd backend && npm ci && cd .. && npm run build-actions",
+    "build-sharp": "rimraf ./build/backend/node-modules && npm run replace-installed-sharp && npm run bundle-sharp",
+    "bundle-sharp": "node bundle-sharp.js",
+    "build-backend": "cd backend && npm ci && cd .. && npm run build-actions && npm run build-sharp",
     "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3RheWQRagirMFgWrhMOBxL --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6H2pUZdiYcmo0WY8dlYZn5 --token ${TEST_CMA_TOKEN}",
-    "deploy:sandbox": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 3vLfusuPgGHcydK5ET8IcG --token ${TEST_CMA_TOKEN}"
+    "deploy:sandbox": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 3vLfusuPgGHcydK5ET8IcG --token ${TEST_CMA_TOKEN}",
+    "replace-installed-sharp": "rimraf ./node_modules/sharp && npm run install-linux-sharp",
+    "install-linux-sharp": "SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install --arch=x64 --platform=linux --libc=glibc sharp"
   },
   "dependencies": {
     "@contentful/app-scripts": "1.10.2",
-    "esbuild": "^0.19.2"
+    "esbuild": "^0.19.2",
+    "sharp": "^0.32.5"
   }
 }

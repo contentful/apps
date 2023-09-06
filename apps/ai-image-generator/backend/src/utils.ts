@@ -1,4 +1,5 @@
 import { PlainClientAPI } from 'contentful-management';
+import { default as sharp } from 'sharp';
 
 export async function fetchOpenAiApiKey(
   cma: PlainClientAPI,
@@ -12,3 +13,25 @@ export async function fetchOpenAiApiKey(
     throw new Error('No OpenAI API Key was found in the installation parameters');
   }
 }
+
+export const toSharp = (imageStream: NodeJS.ReadableStream): sharp.Sharp => {
+  const sharpStream = sharp({ failOn: 'none' });
+  return imageStream.pipe(sharpStream);
+};
+
+// note: we don't care about alpha channel here, only the RGB color
+export const areEqualColors = (colorA: sharp.RGBA, colorB: sharp.RGBA): boolean => {
+  if (colorA.r != colorB.r) return false;
+  if (colorA.g != colorB.g) return false;
+  if (colorA.b != colorB.b) return false;
+  return true;
+};
+
+export const toRGBA = (rawPixels: Buffer): sharp.RGBA => {
+  return {
+    r: rawPixels[0],
+    g: rawPixels[1],
+    b: rawPixels[2],
+    alpha: rawPixels[3],
+  };
+};

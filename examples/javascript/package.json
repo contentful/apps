@@ -7,7 +7,7 @@
     "@contentful/f36-components": "4.50.0",
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/react-apps-toolkit": "1.2.16",
-    "contentful-management": "10.42.0",
+    "contentful-management": "10.44.0",
     "emotion": "10.0.27",
     "react": "18.2.0",
     "react-dom": "18.2.0",

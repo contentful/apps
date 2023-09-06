@@ -3,7 +3,7 @@ import * as nodeFetch from 'node-fetch';
 import chai, { expect } from 'chai';
 import {
   absolutePathToFile,
-  arrayBufferFromFile,
+  readableStreamFromFile,
   makeMockAppActionCallContext,
   makeMockOpenAiApi,
   mockImagesResponse,
@@ -19,7 +19,7 @@ import { AppActionCallResponseError, AppActionCallResponseSuccess } from '../typ
 
 chai.use(sinonChai);
 
-describe('aiigEraseAndFill.handler', () => {
+describe('aiigSelectFill.handler', () => {
   const cmaRequestStub = sinon.stub();
   const parameters = {
     prompt: 'My image text',
@@ -53,7 +53,7 @@ describe('aiigEraseAndFill.handler', () => {
 
     fetchStub = sinon.stub(nodeFetch, 'default');
     fetchStub.callsFake(async (url: string): Promise<nodeFetch.Response> => {
-      const fileContents = await arrayBufferFromFile(url);
+      const fileContents = await readableStreamFromFile(url);
       return new Promise((resolve) =>
         resolve(new nodeFetch.Response(fileContents, { status: 200 }))
       );
