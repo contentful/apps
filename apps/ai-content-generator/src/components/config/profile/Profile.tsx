@@ -3,6 +3,7 @@ import { FormControl, TextInput, Textarea } from '@contentful/f36-components';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 import { BrandProfileFields, FieldTypes, ProfileFields } from '../configText';
 import { ProfileType } from '@locations/ConfigScreen';
+import { ConfigErrors } from '../configText';
 
 interface Props {
   profile: ProfileType;
@@ -25,11 +26,14 @@ const Profile = (props: Props) => {
           handleChange(e, field.id);
         };
 
+        const displayInvalidMessage = field.id === ProfileFields.PROFILE && !profile.profile;
+
         const fieldProps = {
           value: profile[field.id] ?? '',
           name: field.title,
           placeholder: field.textAreaPlaceholder,
           onChange: onChange,
+          isInvalid: displayInvalidMessage,
         };
 
         const marginBottomStyle = field.id === ProfileFields.ADDITIONAL ? 'none' : 'spacingL';
@@ -44,6 +48,11 @@ const Profile = (props: Props) => {
               <Textarea rows={TEXTAREA_ROWS} resize="none" {...fieldProps} />
             ) : (
               <TextInput type="text" {...fieldProps} />
+            )}
+            {displayInvalidMessage && (
+              <FormControl.ValidationMessage>
+                {ConfigErrors.missingProfile}
+              </FormControl.ValidationMessage>
             )}
           </FormControl>
         );

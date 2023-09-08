@@ -103,12 +103,13 @@ const Sections = {
 };
 
 const ConfigErrors = {
-  missingApiKey: 'A valid API key is required',
+  missingApiKey: 'Invalid or missing API Key',
   missingModel: 'A valid model must be selected',
   missingProfile: 'Please enter a brand profile',
   noContentTypes:
     'There are no content types available in this environment. You can add a content type and then assign it to the app from this screen.',
   noContentTypesSubstring: 'add a content type',
+  failedToSave: 'Failed to save:',
 };
 
 const ContentTypeText = {

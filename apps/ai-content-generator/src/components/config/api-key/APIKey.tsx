@@ -1,42 +1,50 @@
-import { ChangeEvent, Dispatch, useState } from 'react';
-import { FormControl, TextInput } from '@contentful/f36-components';
-import { ParameterAction, ParameterReducer } from '../parameterReducer';
+import { ChangeEvent, useState } from 'react';
+import { Flex, FormControl, Spinner, Text, TextInput } from '@contentful/f36-components';
 import { APIKeyText } from '../configText';
 import HyperLink from '@components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { ConfigErrors } from '@components/config/configText';
 
 interface Props {
   apiKey: string;
-  dispatch: Dispatch<ParameterReducer>;
+  isInvalid: boolean;
+  localApiKey: string;
+  onApiKeyChange: (key: string) => void;
+  validateApiKey: (key: string) => Promise<boolean>;
 }
 
 const APIKey = (props: Props) => {
-  const { apiKey, dispatch } = props;
-  const [editing, setEditing] = useState(false);
+  const { apiKey, isInvalid, localApiKey, onApiKeyChange, validateApiKey } = props;
+  const [isEditing, setIsEditing] = useState(false);
+  const [isValidating, setIsValidating] = useState<boolean>(false);
+
+  const displayInvalidMessage = !apiKey || isInvalid;
 
   const censorApiKey = (key: string) => key.replace(/.(?=.{4,}$)/g, '*');
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: ParameterAction.UPDATE_APIKEY, value: e.target.value });
+  const handleBlur = async () => {
+    setIsEditing(false);
+    setIsValidating(true);
+
+    await validateApiKey(localApiKey || apiKey);
+
+    setIsValidating(false);
   };
 
-  const handleBlur = () => {
-    setEditing(false);
-  };
-
-  const handleClick = () => setEditing(true);
+  const handleClick = () => setIsEditing(true);
 
   return (
     <FormControl isRequired>
       <FormControl.Label>{APIKeyText.title}</FormControl.Label>
-      {editing ? (
+      {isEditing ? (
         <TextInput
-          value={apiKey}
+          value={localApiKey}
           type="text"
           name="apikey"
           placeholder="sk-...4svb"
-          onChange={handleChange}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => onApiKeyChange(e.target.value)}
           onBlur={handleBlur}
+          isInvalid={displayInvalidMessage}
         />
       ) : (
         <TextInput
@@ -46,6 +54,7 @@ const APIKey = (props: Props) => {
           name="apikey"
           placeholder="sk-...4svb"
           onClick={handleClick}
+          isInvalid={displayInvalidMessage}
         />
       )}
       <FormControl.HelpText>
@@ -57,6 +66,15 @@ const APIKey = (props: Props) => {
           alignIcon="end"
         />
       </FormControl.HelpText>
+      {isValidating && (
+        <Flex marginTop="spacingXs">
+          <Text marginRight="spacingXs">Validating API Key</Text>
+          <Spinner />
+        </Flex>
+      )}
+      {displayInvalidMessage && (
+        <FormControl.ValidationMessage>{ConfigErrors.missingApiKey}</FormControl.ValidationMessage>
+      )}
     </FormControl>
   );
 };

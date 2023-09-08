@@ -13,13 +13,13 @@ import { generateEditorInterfaceAssignments } from '@utils/config/contentTypeHel
  */
 const useSaveConfigHandler = (
   parameters: AppInstallationParameters,
-  validateParams: (params: AppInstallationParameters) => string[],
+  validateParams: (params: AppInstallationParameters) => Promise<string[]>,
   contentTypes: Set<string>
 ) => {
   const sdk = useSDK<ConfigAppSDK>();
 
   const getCurrentState = useCallback(async () => {
-    const notifierErrors = validateParams(parameters);
+    const notifierErrors = await validateParams(parameters);
 
     if (notifierErrors.length) {
       notifierErrors.forEach((error) => sdk.notifier.error(error));
