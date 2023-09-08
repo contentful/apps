@@ -1,42 +1,31 @@
-import { ChangeEvent, Dispatch } from 'react';
-import { FormControl, TextInput, Textarea } from '@contentful/f36-components';
-import { ParameterAction, ParameterReducer } from '../parameterReducer';
+import { Dispatch } from 'react';
+import { FormControl } from '@contentful/f36-components';
+import { ParameterReducer } from '../parameterReducer';
 import { BrandProfileFields, FieldTypes, ProfileFields } from '../configText';
 import { ProfileType } from '@locations/ConfigScreen';
-import { ConfigErrors } from '../configText';
+import ProfileTextArea from './ProfileTextArea';
+import ProfileTextInput from './ProfileTextInput';
 
 interface Props {
   profile: ProfileType;
   dispatch: Dispatch<ParameterReducer>;
 }
 
-const TEXTAREA_ROWS = 5;
-
 const Profile = (props: Props) => {
   const { profile, dispatch } = props;
-
-  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>, field: string) => {
-    dispatch({ type: ParameterAction.UPDATE_PROFILE, value: e.target.value, field: field });
-  };
 
   return (
     <>
       {BrandProfileFields.map((field) => {
-        const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-          handleChange(e, field.id);
-        };
-
-        const displayInvalidMessage = field.id === ProfileFields.PROFILE && !profile.profile;
+        const marginBottomStyle = field.id === ProfileFields.ADDITIONAL ? 'none' : 'spacingL';
 
         const fieldProps = {
           value: profile[field.id] ?? '',
           name: field.title,
+          id: field.id,
           placeholder: field.textAreaPlaceholder,
-          onChange: onChange,
-          isInvalid: displayInvalidMessage,
+          dispatch: dispatch,
         };
-
-        const marginBottomStyle = field.id === ProfileFields.ADDITIONAL ? 'none' : 'spacingL';
 
         return (
           <FormControl
@@ -45,14 +34,9 @@ const Profile = (props: Props) => {
             marginBottom={marginBottomStyle}>
             <FormControl.Label>{field.title}</FormControl.Label>
             {field.fieldType === FieldTypes.TEXTAREA ? (
-              <Textarea rows={TEXTAREA_ROWS} resize="none" {...fieldProps} />
+              <ProfileTextArea {...fieldProps} />
             ) : (
-              <TextInput type="text" {...fieldProps} />
-            )}
-            {displayInvalidMessage && (
-              <FormControl.ValidationMessage>
-                {ConfigErrors.missingProfile}
-              </FormControl.ValidationMessage>
+              <ProfileTextInput {...fieldProps} />
             )}
           </FormControl>
         );
