@@ -86,12 +86,13 @@ const getInitialValue = (sdk) => ({
  */
 const getEntriesLinkedByIds = async (space, entryIds) => {
   const DELAY_IN_MILLISECONDS = 5000;
-  const RETRY_LIMIT = 5;
+  const RETRY_LIMIT = 2;
 
   let retries = 0;
+  let entriesRes = null;
 
   while (retries < RETRY_LIMIT) {
-    const entriesRes = await space.getEntries({
+    entriesRes = await space.getEntries({
       links_to_entry: entryIds,
       skip: 0,
       limit: 1000,
@@ -101,11 +102,15 @@ const getEntriesLinkedByIds = async (space, entryIds) => {
       return entriesRes;
     } else {
       retries++;
-      await new Promise((resolve) => setTimeout(resolve, DELAY_IN_MILLISECONDS));
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          resolve();
+        }, DELAY_IN_MILLISECONDS)
+      );
     }
   }
 
-  throw new Error('Failed to retrieve entries after retries');
+  return entriesRes;
 };
 
 const fetchInitialData = async (sdk, client) => {
