@@ -4,8 +4,8 @@ export type TokenWarning = {
   link: string;
 };
 
-const TOKEN_WARNING = 'Generating content uses Chat GPT tokens.';
-const TOKEN_SUBSTRING = 'Chat GPT tokens.';
+const TOKEN_WARNING = 'Generating content uses OpenAI tokens.';
+const TOKEN_SUBSTRING = 'OpenAI tokens.';
 const TOKEN_LINK = 'https://openai.com/pricing';
 
 export const tokenWarning: TokenWarning = {
