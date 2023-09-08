@@ -6,6 +6,7 @@ const init: AppInstallationParameters = {
   profile: {
     profile: '',
   },
+  version: 2,
 };
 
 export { init };

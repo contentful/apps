@@ -9,12 +9,23 @@ import { styles } from './Sidebar.styles';
 import { warningMessages, disclaimerMessage } from '@components/app/sidebar/sidebarText';
 import HyperLink from '@components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { mapV1ParamsToV2 } from '@utils/config/parameterHelpers';
 
 const Sidebar = () => {
   useAutoResizer();
 
   const sdk = useSDK<SidebarAppSDK>();
-  const { apiKey, model, profile } = sdk.parameters.installation as AppInstallationParameters;
+  const parameters = sdk.parameters.installation;
+
+  let newParameters = {};
+
+  if (parameters.version !== 2) {
+    newParameters = { ...mapV1ParamsToV2(parameters) };
+  } else {
+    newParameters = { ...parameters };
+  }
+
+  const { apiKey, model, profile } = newParameters as AppInstallationParameters;
 
   if (!apiKey || !model) {
     return (

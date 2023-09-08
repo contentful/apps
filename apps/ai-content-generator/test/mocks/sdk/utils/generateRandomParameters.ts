@@ -12,6 +12,7 @@ const generateRandomParameters = (): AppInstallationParameters => {
     profile: {
       profile: randomProfile,
     },
+    version: 2,
   };
 };
 

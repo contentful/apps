@@ -8,6 +8,7 @@ interface AppInstallationParameters {
   model: string;
   apiKey: string;
   profile: ProfileType;
+  version: number;
 }
 
 const ConfigScreen = () => {

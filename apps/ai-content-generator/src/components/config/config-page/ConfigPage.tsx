@@ -20,6 +20,7 @@ const initialParameters: AppInstallationParameters = {
   model: defaultModelId,
   apiKey: '',
   profile: {},
+  version: 1,
 };
 
 const initialContentTypes: Set<string> = new Set();

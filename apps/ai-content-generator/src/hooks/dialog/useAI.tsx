@@ -6,6 +6,7 @@ import { AppInstallationParameters, ProfileType } from '@locations/ConfigScreen'
 import AI from '@utils/aiApi';
 import { ChatCompletionRequestMessage } from 'openai';
 import { useEffect, useMemo, useState } from 'react';
+import { mapV1ParamsToV2 } from '@utils/config/parameterHelpers';
 
 export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
@@ -16,11 +17,19 @@ export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<
  * @returns { generateMessage, resetOutput, output, sendStopSignal }
  */
 const useAI = () => {
-  const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
-  const ai = useMemo(
-    () => new AI(baseUrl, sdk.parameters.installation.apiKey, sdk.parameters.installation.model),
-    [sdk.parameters.installation]
-  );
+  const sdk = useSDK<DialogAppSDK>();
+  const parameters = sdk.parameters.installation;
+  let newParameters = {};
+
+  if (parameters.version !== 2) {
+    newParameters = { ...mapV1ParamsToV2(parameters) };
+  } else {
+    newParameters = { ...parameters };
+  }
+
+  const { apiKey, model } = newParameters as AppInstallationParameters;
+
+  const ai = useMemo(() => new AI(baseUrl, apiKey, model), [apiKey, model]);
   const [output, setOutput] = useState<string>('');
   const [stream, setStream] = useState<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);

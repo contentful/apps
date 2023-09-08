@@ -6,6 +6,7 @@ const happyPath: AppInstallationParameters = {
   profile: {
     profile: 'test-profile',
   },
+  version: 2,
 };
 
 export { happyPath };
