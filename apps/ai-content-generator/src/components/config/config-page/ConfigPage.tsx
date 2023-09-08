@@ -54,10 +54,6 @@ const ConfigPage = () => {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
     }
 
-    if (!params.profile.profile) {
-      notifierErrors.push(ConfigErrors.missingProfile);
-    }
-
     return notifierErrors;
   };
 

@@ -28,10 +28,7 @@ const Profile = (props: Props) => {
         };
 
         return (
-          <FormControl
-            isRequired={field.isRequired}
-            key={field.id}
-            marginBottom={marginBottomStyle}>
+          <FormControl key={field.id} marginBottom={marginBottomStyle}>
             <FormControl.Label>{field.title}</FormControl.Label>
             {field.fieldType === FieldTypes.TEXTAREA ? (
               <ProfileTextArea {...fieldProps} />
