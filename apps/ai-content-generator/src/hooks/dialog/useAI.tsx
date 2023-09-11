@@ -1,5 +1,5 @@
 import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
-import baseUrl from '@configs/ai/baseUrl';
+import { chatCompletionsBaseUrl } from '@configs/ai/baseUrl';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppInstallationParameters, ProfileType } from '@locations/ConfigScreen';
@@ -29,7 +29,7 @@ const useAI = () => {
 
   const { apiKey, model } = newParameters as AppInstallationParameters;
 
-  const ai = useMemo(() => new AI(baseUrl, apiKey, model), [apiKey, model]);
+  const ai = useMemo(() => new AI(chatCompletionsBaseUrl, apiKey, model), [apiKey, model]);
   const [output, setOutput] = useState<string>('');
   const [stream, setStream] = useState<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);

@@ -25,7 +25,7 @@ describe('useSaveConfigHandler', () => {
 
   it('adds the on configure callback', async () => {
     const parameters = generateRandomParameters();
-    const mockValidateParams = vi.fn(() => []);
+    const mockValidateParams = vi.fn().mockReturnValue([]);
 
     renderHook(() =>
       useSaveConfigHandler(
@@ -46,7 +46,7 @@ describe('useSaveConfigHandler', () => {
       generateRandomParameters(),
       mockSdkParameters.happyPath,
     ];
-    const mockValidateParams = vi.fn(() => []);
+    const mockValidateParams = vi.fn().mockReturnValue([]);
 
     const testIfHookUpdates = async (parameterIndex: number) => {
       const parameters = testCases[parameterIndex];
@@ -79,7 +79,7 @@ describe('useSaveConfigHandler', () => {
 
   it('does not save the configuration when there are invalid parameters', async () => {
     const parameters = generateRandomParameters();
-    const mockValidateParams = vi.fn(() => ['invalid']);
+    const mockValidateParams = vi.fn().mockReturnValue(['invalid']);
 
     renderHook(() =>
       useSaveConfigHandler(
