@@ -3,6 +3,7 @@ import { FormControl, Select } from '@contentful/f36-components';
 import { gptModels, defaultModelId } from '@configs/ai/gptModels';
 import { ModelText } from '../configText';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
+import { ConfigErrors } from '../configText';
 
 interface Props {
   model: string;
@@ -18,6 +19,7 @@ const Model = (props: Props) => {
     </Select.Option>
   ));
 
+  const isInvalid = !model;
   const isSelectionInModelList = gptModels.some((modelOption) => modelOption.id === model);
   const value = isSelectionInModelList ? model : defaultModelId;
 
@@ -26,13 +28,16 @@ const Model = (props: Props) => {
   };
 
   return (
-    <FormControl isRequired marginBottom="none">
+    <FormControl isRequired marginBottom="none" isInvalid={isInvalid}>
       <FormControl.Label>{ModelText.title}</FormControl.Label>
       <Select value={value} onChange={handleChange}>
         {modelList}
       </Select>
 
       <FormControl.HelpText>{ModelText.helpText}</FormControl.HelpText>
+      {isInvalid && (
+        <FormControl.ValidationMessage>{ConfigErrors.missingModel}</FormControl.ValidationMessage>
+      )}
     </FormControl>
   );
 };

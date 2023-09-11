@@ -89,6 +89,29 @@ class AI {
       stream.cancel();
     }
   };
+
+  /**
+   * This function calls OpenAI's models endpoint in order to test whether the API Key is valid.
+   * @returns Promise<boolean>
+   */
+  isApiKeyValid = async (): Promise<boolean> => {
+    const headers = {
+      Authorization: `Bearer ${this.apiKey}`,
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      const res = await fetch(this.baseUrl, {
+        method: 'GET',
+        headers,
+      });
+
+      return res.status === 200;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  };
 }
 
 export default AI;
