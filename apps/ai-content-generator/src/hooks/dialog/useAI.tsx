@@ -1,5 +1,5 @@
 import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
-import baseUrl from '@configs/ai/baseUrl';
+import { chatCompletionsBaseUrl } from '@configs/ai/baseUrl';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { AppInstallationParameters, ProfileType } from '@locations/ConfigScreen';
@@ -18,7 +18,12 @@ export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<
 const useAI = () => {
   const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
   const ai = useMemo(
-    () => new AI(baseUrl, sdk.parameters.installation.apiKey, sdk.parameters.installation.model),
+    () =>
+      new AI(
+        chatCompletionsBaseUrl,
+        sdk.parameters.installation.apiKey,
+        sdk.parameters.installation.model
+      ),
     [sdk.parameters.installation]
   );
   const [output, setOutput] = useState<string>('');
