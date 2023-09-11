@@ -20,8 +20,9 @@ import { modelsBaseUrl } from '@configs/ai/baseUrl';
 
 const initialParameters: AppInstallationParameters = {
   model: defaultModelId,
-  apiKey: '',
-  profile: {},
+  key: '',
+  profile: '',
+  brandProfile: {},
 };
 
 const initialContentTypes: Set<string> = new Set();
@@ -71,7 +72,7 @@ const ConfigPage = () => {
       <Heading>{Sections.pageHeading}</Heading>
       <hr css={styles.splitter} />
       <ConfigSection
-        apiKey={parameters.apiKey}
+        apiKey={parameters.key}
         model={parameters.model}
         dispatch={dispatchParameters}
         isApiKeyValid={isApiKeyValid}
@@ -84,7 +85,10 @@ const ConfigPage = () => {
       <hr css={styles.splitter} />
       <DisclaimerSection />
       <hr css={styles.splitter} />
-      <BrandSection profile={parameters.profile} dispatch={dispatchParameters} />
+      <BrandSection
+        profile={{ ...parameters.brandProfile, profile: parameters.profile }}
+        dispatch={dispatchParameters}
+      />
       <hr css={styles.splitter} />
       <AddToSidebarSection
         allContentTypes={allContentTypes}

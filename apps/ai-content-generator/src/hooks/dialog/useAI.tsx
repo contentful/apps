@@ -21,7 +21,7 @@ const useAI = () => {
     () =>
       new AI(
         chatCompletionsBaseUrl,
-        sdk.parameters.installation.apiKey,
+        sdk.parameters.installation.key,
         sdk.parameters.installation.model
       ),
     [sdk.parameters.installation]
@@ -52,7 +52,14 @@ const useAI = () => {
     let completeMessage = '';
 
     try {
-      const payload = createGPTPayload(prompt, sdk.parameters.installation.profile, targetLocale);
+      const payload = createGPTPayload(
+        prompt,
+        {
+          ...sdk.parameters.installation.brandProfile,
+          profile: sdk.parameters.installation.profile,
+        },
+        targetLocale
+      );
 
       const stream = await ai.streamChatCompletion(payload);
       setStream(stream);
