@@ -3,44 +3,6 @@ import { Adapter, PlainClientAPI, createClient } from 'contentful-management';
 import OpenAI from 'openai';
 import { Images } from 'openai/resources';
 import sinon from 'sinon';
-import fs from 'fs';
-import path from 'path';
-import { Readable } from 'stream';
-import { Response } from 'node-fetch';
-
-/* `path` path to file, relative to project root */
-export const readStreamForFile = (filePath: string): fs.ReadStream => {
-  const absolutePath = absolutePathToFile(filePath);
-  return fs.createReadStream(absolutePath);
-};
-
-export const absolutePathToFile = (filePath: string): string => {
-  return path.resolve(process.cwd(), filePath);
-};
-
-export const arrayBufferFromFile = async (filepath: string): Promise<ArrayBuffer> => {
-  const readStream = readStreamForFile(filepath);
-
-  const buffers: any[] = [];
-  for await (const data of readStream) {
-    buffers.push(data);
-  }
-  return Buffer.concat(buffers);
-};
-
-export const readableStreamFromFile = async (filepath: string): Promise<NodeJS.ReadableStream> => {
-  const buffer = await arrayBufferFromFile(filepath);
-  const readable = new Readable();
-  readable._read = () => {};
-  readable.push(buffer);
-  readable.push(null);
-  return readable;
-};
-
-export const responseFromFile = async (filepath: string): Promise<Response> => {
-  const readableStream = await readableStreamFromFile(filepath);
-  return new Response(readableStream);
-};
 
 export const makeMockPlainClient = <T>(response: T, stub: sinon.SinonStub): PlainClientAPI => {
   const apiAdapter: Adapter = {

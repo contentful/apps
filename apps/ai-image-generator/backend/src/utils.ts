@@ -1,6 +1,11 @@
 import { PlainClientAPI } from 'contentful-management';
 import { default as sharp } from 'sharp';
 
+export interface AreEqualColorOpts {
+  tolerance?: number;
+  compareAlpha?: boolean;
+}
+
 export async function fetchOpenAiApiKey(
   cma: PlainClientAPI,
   appInstallationId: string
@@ -19,16 +24,30 @@ export const toSharp = (imageStream: NodeJS.ReadableStream): sharp.Sharp => {
   return imageStream.pipe(sharpStream);
 };
 
+const difference = (a: number, b: number): number => {
+  return Math.abs(a - b);
+};
+
 // note: we don't care about alpha channel here, only the RGB color
-export const areEqualColors = (colorA: sharp.RGBA, colorB: sharp.RGBA): boolean => {
-  if (colorA.r !== colorB.r) {
+export const areEqualColors = (
+  colorA: sharp.RGBA,
+  colorB: sharp.RGBA,
+  opts: AreEqualColorOpts = {}
+): boolean => {
+  const { tolerance, compareAlpha } = { tolerance: 0, compareAlpha: false, ...opts };
+  if (difference(colorA.r!, colorB.r!) > tolerance) {
     return false;
   }
-  if (colorA.g !== colorB.g) {
+  if (difference(colorA.b!, colorB.b!) > tolerance) {
     return false;
   }
-  if (colorA.b !== colorB.b) {
+  if (difference(colorA.g!, colorB.g!) > tolerance) {
     return false;
+  }
+  if (compareAlpha) {
+    if (difference(colorA.alpha!, colorB.alpha!) > tolerance) {
+      return false;
+    }
   }
   return true;
 };
