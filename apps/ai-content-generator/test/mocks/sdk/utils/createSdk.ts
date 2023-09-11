@@ -30,6 +30,9 @@ const createSDK = (parameters: AppInstallationParameters) => {
         get: vi.fn().mockReturnValueOnce(mockEntry),
       },
     },
+    hostnames: {
+      webapp: '',
+    },
   };
 };
 

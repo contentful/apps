@@ -18,7 +18,7 @@ export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<
 const useAI = () => {
   const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
   const ai = useMemo(
-    () => new AI(baseUrl, sdk.parameters.installation.apiKey, sdk.parameters.installation.model),
+    () => new AI(baseUrl, sdk.parameters.installation.key, sdk.parameters.installation.model),
     [sdk.parameters.installation]
   );
   const [output, setOutput] = useState<string>('');
@@ -47,7 +47,14 @@ const useAI = () => {
     let completeMessage = '';
 
     try {
-      const payload = createGPTPayload(prompt, sdk.parameters.installation.profile, targetLocale);
+      const payload = createGPTPayload(
+        prompt,
+        {
+          ...sdk.parameters.installation.brandProfile,
+          profile: sdk.parameters.installation.profile,
+        },
+        targetLocale
+      );
 
       const stream = await ai.streamChatCompletion(payload);
       setStream(stream);

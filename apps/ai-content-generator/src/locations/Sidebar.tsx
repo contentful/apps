@@ -14,9 +14,9 @@ const Sidebar = () => {
   useAutoResizer();
 
   const sdk = useSDK<SidebarAppSDK>();
-  const { apiKey, model, profile } = sdk.parameters.installation as AppInstallationParameters;
+  const { key, model, profile } = sdk.parameters.installation as AppInstallationParameters;
 
-  if (!apiKey || !model) {
+  if (!key || !model) {
     return (
       <ParametersMissingWarning
         message={warningMessages.paramsMissing}
@@ -28,7 +28,7 @@ const Sidebar = () => {
   return (
     <>
       <SidebarButtons />
-      {!profile?.profile ? (
+      {!profile ? (
         <Box css={styles.msgWrapper}>
           <ParametersMissingWarning
             message={warningMessages.profileMissing}

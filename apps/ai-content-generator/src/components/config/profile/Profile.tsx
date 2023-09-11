@@ -15,7 +15,11 @@ const Profile = (props: Props) => {
   const { profile, dispatch } = props;
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>, field: string) => {
-    dispatch({ type: ParameterAction.UPDATE_PROFILE, value: e.target.value, field: field });
+    if (field === ProfileFields.PROFILE) {
+      dispatch({ type: ParameterAction.UPDATE_PROFILE, value: e.target.value });
+    } else {
+      dispatch({ type: ParameterAction.UPDATE_BRAND_PROFILE, value: e.target.value, field: field });
+    }
   };
 
   return (
