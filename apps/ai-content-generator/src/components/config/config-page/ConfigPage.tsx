@@ -43,7 +43,7 @@ const ConfigPage = () => {
 
   const validateParams = async (params: AppInstallationParameters): Promise<string[]> => {
     const notifierErrors = [];
-    const isApiKeyValid = await validateApiKey(params.apiKey);
+    const isApiKeyValid = await validateApiKey(params.key);
 
     if (!isApiKeyValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingApiKey}`);

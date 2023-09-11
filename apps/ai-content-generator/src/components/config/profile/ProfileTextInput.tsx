@@ -2,6 +2,7 @@ import { ChangeEvent, Dispatch, useEffect, useState } from 'react';
 import { TextInput } from '@contentful/f36-components';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 import { useDebounce } from 'usehooks-ts';
+import { ProfileFields } from '../configText';
 
 interface Props {
   value: string;
@@ -21,7 +22,11 @@ const ProfileTextInput = (props: Props) => {
   }, [value]);
 
   useEffect(() => {
-    dispatch({ type: ParameterAction.UPDATE_PROFILE, value: debouncedValue, field: id });
+    if (id === ProfileFields.PROFILE) {
+      dispatch({ type: ParameterAction.UPDATE_PROFILE, value: debouncedValue });
+    } else {
+      dispatch({ type: ParameterAction.UPDATE_BRAND_PROFILE, value: debouncedValue, field: id });
+    }
   }, [debouncedValue, dispatch, id]);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
