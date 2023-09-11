@@ -41,6 +41,6 @@
     "happy-dom": "6.0.4",
     "typescript": "4.7.4",
     "vite": "3.2.7",
-    "vitest": "0.34.3"
+    "vitest": "0.34.4"
   }
 }
