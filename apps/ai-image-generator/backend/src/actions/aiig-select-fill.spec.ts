@@ -2,12 +2,11 @@ import * as nodeFetch from 'node-fetch';
 
 import chai, { expect } from 'chai';
 import {
-  absolutePathToFile,
-  readableStreamFromFile,
   makeMockAppActionCallContext,
   makeMockOpenAiApi,
   mockImagesResponse,
 } from '../../test/mocks';
+import { absolutePathToFile, readableStreamFromFile } from '../../test/utils';
 import sinon from 'sinon';
 import { OpenAiApiService } from '../services/openaiApiService';
 import OpenAI from 'openai';

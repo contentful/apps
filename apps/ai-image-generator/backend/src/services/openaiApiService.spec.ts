@@ -1,4 +1,5 @@
-import { makeMockOpenAiApi, mockImagesResponse, readStreamForFile } from '../../test/mocks';
+import { makeMockOpenAiApi, mockImagesResponse } from '../../test/mocks';
+import { readStreamForFile } from '../../test/utils';
 import { expect } from 'chai';
 import { SinonStubbedInstance } from 'sinon';
 import { OpenAiApiService } from './openaiApiService';

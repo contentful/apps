@@ -48,6 +48,8 @@ jobs:
       - run:
           name: Test
           command: npm run test
+      - store_artifacts:
+          path: /tmp/artifacts
 
   build:
     docker:
