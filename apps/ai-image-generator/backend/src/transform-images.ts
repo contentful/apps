@@ -1,6 +1,7 @@
 import * as nodeFetch from 'node-fetch';
 import { default as sharp } from 'sharp';
-import { areEqualColors, toRGBA, toSharp } from './utils';
+import { areEqualColors, constrainDimensions, toDimensions, toRGBA, toSharp } from './utils';
+import { Dimensions } from './types';
 
 export const ERASE_COLOR: sharp.RGBA = { r: 231, g: 235, b: 238 };
 export const BAR_COLOR: sharp.RGBA = { r: 0, g: 0, b: 0, alpha: 1 };
@@ -9,13 +10,7 @@ export const MAX_SIDE = 1024;
 interface TransformedImages {
   image: Buffer;
   mask: Buffer;
-}
-
-interface Dimensions {
-  width: number;
-  height: number;
-  ratio: number;
-  layout: 'portrait' | 'landscape' | 'square';
+  sourceStartingDimensions: Dimensions;
 }
 
 export class ImageTransformer {
@@ -38,6 +33,7 @@ export class ImageTransformer {
     return {
       image,
       mask,
+      sourceStartingDimensions: this.sourceStartingDimensions!,
     };
   }
 
@@ -52,9 +48,9 @@ export class ImageTransformer {
       throw new TypeError('width or height dimensions missing from image metadata!');
 
     // preserve starting dimensions so we can restore to correct size at the end
-    this.sourceStartingDimensions = this.toDimensions(startingWidth, startingHeight);
+    this.sourceStartingDimensions = toDimensions(startingWidth, startingHeight);
 
-    const constrainedDimensions = this.constrainDimensions(this.sourceStartingDimensions);
+    const constrainedDimensions = constrainDimensions(this.sourceStartingDimensions, MAX_SIDE);
 
     this.squarifyImage(sharpImage, constrainedDimensions);
 
@@ -73,7 +69,7 @@ export class ImageTransformer {
   }): Promise<Buffer> {
     const { width, height, eraseColor } = maskParams;
     const sharpImage = toSharp(this.maskImageResponse.body);
-    const desiredMaskDimensions = { ...this.toDimensions(width, height) };
+    const desiredMaskDimensions = { ...toDimensions(width, height) };
 
     // width and height are computed during the squarify step
     sharpImage.resize({
@@ -88,71 +84,23 @@ export class ImageTransformer {
 
   // take an image and make it square by adding bars to the left/right or top/bottom as needed
   private squarifyImage(sharpImage: sharp.Sharp, newDimensions: Dimensions) {
-    const { width, height, layout } = newDimensions;
+    const { layout } = newDimensions;
+    let { width, height } = newDimensions;
+
+    if (layout === 'portrait') {
+      // extend the width to match the height
+      width = height;
+    } else if (layout === 'landscape') {
+      // extend the height to match the width
+      height = width;
+    }
 
     sharpImage.resize({
       width,
       height,
+      fit: 'contain', // preserving aspect ratio, contain within both provided dimensions using "letterboxing" where necessary
+      background: BAR_COLOR,
     });
-
-    // we only need to pad the image for portraits and landscapes -- squares are fine as is
-    if (layout === 'portrait') {
-      // figure out how many "extra" width pixels we need to make this a square
-      const extraWidth = height - width;
-
-      // put half of those extra pixels on the left
-      const left = Math.floor(extraWidth / 2);
-
-      // put the rest on the right (in case the number is odd, right will get an extra pixel)
-      const right = extraWidth - left;
-
-      sharpImage.extend({
-        left,
-        right,
-        background: BAR_COLOR,
-      });
-    } else if (layout === 'landscape') {
-      // figure out how many "extra" height pixels we need to make this a square
-      const extraHeight = width - height;
-
-      // put half of those extra pixels on the top
-      const top = Math.floor(extraHeight / 2);
-
-      // put the rest on the bottom (in case the number is odd, bottom will get an extra pixel)
-      const bottom = extraHeight - top;
-      sharpImage.extend({
-        top,
-        bottom,
-        background: BAR_COLOR,
-      });
-    }
-  }
-
-  // force the provided dimensions within the maximum side constraints
-  private constrainDimensions(dimensions: Dimensions): Dimensions {
-    const { width: startingWidth, height: startingHeight, layout, ratio } = dimensions;
-
-    let width: number;
-    let height: number;
-
-    switch (layout) {
-      case 'portrait':
-        height = Math.min(startingHeight, MAX_SIDE);
-        const computedWidth = Math.round(height * ratio);
-        width = Math.min(computedWidth, MAX_SIDE);
-        break;
-      case 'landscape':
-        width = Math.min(startingWidth, MAX_SIDE);
-        const computedHeight = Math.round(width / ratio);
-        height = Math.min(computedHeight, MAX_SIDE);
-        break;
-      case 'square':
-        width = Math.min(startingWidth, MAX_SIDE);
-        height = Math.min(startingHeight, MAX_SIDE);
-        break;
-    }
-
-    return this.toDimensions(width, height);
   }
 
   private async replaceColorWithTransparent(
@@ -181,31 +129,6 @@ export class ImageTransformer {
         channels: 4,
       },
     });
-  }
-
-  private toDimensions(width: number | undefined, height: number | undefined): Dimensions {
-    if (typeof width === 'undefined' || typeof height === 'undefined') {
-      throw new Error('no width or height');
-    }
-    const ratio = width / height;
-    let layout: Dimensions['layout'];
-
-    if (ratio > 1) {
-      layout = 'landscape';
-    } else if (ratio > 0 && ratio < 1) {
-      layout = 'portrait';
-    } else if (ratio === 1) {
-      layout = 'square';
-    } else {
-      throw new Error('invalid ratio provided');
-    }
-
-    return {
-      width,
-      height,
-      ratio,
-      layout,
-    };
   }
 }
 

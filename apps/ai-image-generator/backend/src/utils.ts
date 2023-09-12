@@ -1,5 +1,6 @@
 import { PlainClientAPI } from 'contentful-management';
 import { default as sharp } from 'sharp';
+import { Dimensions } from './types';
 
 export interface AreEqualColorOpts {
   tolerance?: number;
@@ -59,4 +60,56 @@ export const toRGBA = (rawPixels: Buffer): sharp.RGBA => {
     b: rawPixels[2],
     alpha: rawPixels[3],
   };
+};
+
+export const toDimensions = (width: number | undefined, height: number | undefined): Dimensions => {
+  if (typeof width === 'undefined' || typeof height === 'undefined') {
+    throw new Error('no width or height');
+  }
+  const ratio = width / height;
+  let layout: Dimensions['layout'];
+
+  if (ratio > 1) {
+    layout = 'landscape';
+  } else if (ratio > 0 && ratio < 1) {
+    layout = 'portrait';
+  } else if (ratio === 1) {
+    layout = 'square';
+  } else {
+    throw new Error('invalid ratio provided');
+  }
+
+  return {
+    width,
+    height,
+    ratio,
+    layout,
+  };
+};
+
+// force the provided dimensions within the maximum side constraints
+export const constrainDimensions = (dimensions: Dimensions, maxSide: number): Dimensions => {
+  const { width: startingWidth, height: startingHeight, layout, ratio } = dimensions;
+
+  let width: number;
+  let height: number;
+
+  switch (layout) {
+    case 'portrait':
+      height = Math.min(startingHeight, maxSide);
+      const computedWidth = Math.round(height * ratio);
+      width = Math.min(computedWidth, maxSide);
+      break;
+    case 'landscape':
+      width = Math.min(startingWidth, maxSide);
+      const computedHeight = Math.round(width / ratio);
+      height = Math.min(computedHeight, maxSide);
+      break;
+    case 'square':
+      width = Math.min(startingWidth, maxSide);
+      height = Math.min(startingHeight, maxSide);
+      break;
+  }
+
+  return toDimensions(width, height);
 };

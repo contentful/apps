@@ -1,3 +1,10 @@
+export interface Dimensions {
+  width: number;
+  height: number;
+  ratio: number;
+  layout: 'portrait' | 'landscape' | 'square';
+}
+
 export interface Image {
   url: string;
   imageType: string;

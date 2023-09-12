@@ -12,29 +12,33 @@ import { ImageCreationResult, handler } from './aiig-generate-image';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { APIError } from 'openai/error';
 import { AppActionCallResponseError, AppActionCallResponseSuccess } from '../types';
+import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 
 chai.use(sinonChai);
 
 describe('aiigGenerateImage.handler', () => {
-  const cmaRequestStub = sinon.stub();
+  let context: AppActionCallContext;
+  let cmaRequestStub: sinon.SinonStub;
+
   const parameters = {
     prompt: 'My image text',
   };
-  const mockAppInstallation: AppInstallationProps = {
-    sys: {
-      type: 'AppInstallation',
-      appDefinition: {} as SysLink,
-      environment: {} as SysLink,
-      space: {} as SysLink,
-      version: 1,
-      createdAt: 'createdAt',
-      updatedAt: 'updatedAt',
+  const cmaClientMockResponses: [AppInstallationProps] = [
+    {
+      sys: {
+        type: 'AppInstallation',
+        appDefinition: {} as SysLink,
+        environment: {} as SysLink,
+        space: {} as SysLink,
+        version: 1,
+        createdAt: 'createdAt',
+        updatedAt: 'updatedAt',
+      },
+      parameters: {
+        apiKey: 'openai-api-key',
+      },
     },
-    parameters: {
-      apiKey: 'openai-api-key',
-    },
-  };
-  const context = makeMockAppActionCallContext(mockAppInstallation, cmaRequestStub);
+  ];
 
   let mockOpenAiApi: sinon.SinonStubbedInstance<OpenAI>;
   let openAiApiService: OpenAiApiService;
@@ -43,6 +47,8 @@ describe('aiigGenerateImage.handler', () => {
     mockOpenAiApi = makeMockOpenAiApi();
     openAiApiService = new OpenAiApiService(mockOpenAiApi);
     sinon.stub(OpenAiApiService, 'fromOpenAiApiKey').returns(openAiApiService);
+    cmaRequestStub = sinon.stub();
+    context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
   });
 
   it('returns the images result', async () => {
