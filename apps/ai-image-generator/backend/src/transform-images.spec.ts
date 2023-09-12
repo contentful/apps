@@ -8,7 +8,7 @@ import {
 import { BAR_COLOR, ERASE_COLOR, ImageTransformer } from './transform-images';
 import { expect } from 'chai';
 
-describe.only('ImageTransformer', () => {
+describe('ImageTransformer', () => {
   describe('#execute', () => {
     let transformImages: ImageTransformer;
 
