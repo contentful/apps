@@ -20,7 +20,7 @@
     "react-dom": "16.8.6",
     "react-scripts": "4.0.3",
     "use-methods": "0.5.1",
-    "whatwg-fetch": "3.6.18"
+    "whatwg-fetch": "3.6.19"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
