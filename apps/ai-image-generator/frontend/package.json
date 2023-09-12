@@ -9,6 +9,7 @@
     "@contentful/node-apps-toolkit": "^2.2.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@emotion/react": "^11.11.1",
+    "@segment/analytics-next": "^1.51.3",
     "@storybook/addon-a11y": "^7.3.0",
     "contentful-management": "10.38.3",
     "launchdarkly-react-client-sdk": "^3.0.8",

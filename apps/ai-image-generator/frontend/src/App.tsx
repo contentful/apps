@@ -10,6 +10,7 @@ import Sidebar from './locations/Sidebar';
 import Home from './locations/Home';
 import { useFlags, useLDClient } from 'launchdarkly-react-client-sdk';
 import { launchDarklyConfigType } from './configs/launch-darkly/launchDarklyConfig';
+import SegmentClient from 'clients/segmentClient';
 
 const ComponentLocationSettings = (isV2: boolean) => ({
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -40,10 +41,14 @@ const App = () => {
 
     for (const [location, component] of Object.entries(locations)) {
       if (sdk.location.is(location)) {
+        // Segment tracking events
+        SegmentClient.identify(sdk);
+        SegmentClient.trackLocation(sdk, location);
+
         return component;
       }
     }
-  }, [sdk.location, aiigFlagV2]);
+  }, [sdk, aiigFlagV2]);
 
   return Component ? <Component /> : null;
 };
