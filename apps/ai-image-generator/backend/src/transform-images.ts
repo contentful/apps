@@ -192,12 +192,12 @@ export class ImageTransformer {
 
     if (ratio > 1) {
       layout = 'landscape';
-    } else if (ratio < 1) {
+    } else if (ratio > 0 && ratio < 1) {
       layout = 'portrait';
     } else if (ratio === 1) {
       layout = 'square';
     } else {
-      throw new Error('Math itself is broken');
+      throw new Error('invalid ratio provided');
     }
 
     return {
