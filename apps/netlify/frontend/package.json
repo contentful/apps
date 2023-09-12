@@ -19,7 +19,7 @@
     "lodash.get": "4.4.2",
     "lodash.uniqby": "4.7.0",
     "prop-types": "15.8.1",
-    "pubnub": "7.3.2",
+    "pubnub": "7.3.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-scripts": "4.0.3",
