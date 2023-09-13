@@ -1,12 +1,10 @@
 import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
 import { chatCompletionsBaseUrl } from '@configs/ai/baseUrl';
-import { DialogAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppInstallationParameters, ProfileType } from '@locations/ConfigScreen';
+import { ProfileType } from '@locations/ConfigScreen';
 import AI from '@utils/aiApi';
 import { ChatCompletionRequestMessage } from 'openai';
 import { useEffect, useMemo, useState } from 'react';
-import { mapV1ParamsToV2 } from '@utils/config/parameterHelpers';
+import useInstallationParameters from '@hooks/common/useInstallationParameters';
 
 export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
@@ -17,17 +15,7 @@ export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<
  * @returns { generateMessage, resetOutput, output, sendStopSignal }
  */
 const useAI = () => {
-  const sdk = useSDK<DialogAppSDK>();
-  const parameters = sdk.parameters.installation;
-  let newParameters = {};
-
-  if (parameters.version !== 2) {
-    newParameters = { ...mapV1ParamsToV2(parameters) };
-  } else {
-    newParameters = { ...parameters };
-  }
-
-  const { apiKey, model } = newParameters as AppInstallationParameters;
+  const { apiKey, model, profile } = useInstallationParameters();
 
   const ai = useMemo(() => new AI(chatCompletionsBaseUrl, apiKey, model), [apiKey, model]);
   const [output, setOutput] = useState<string>('');
@@ -56,7 +44,7 @@ const useAI = () => {
     let completeMessage = '';
 
     try {
-      const payload = createGPTPayload(prompt, sdk.parameters.installation.profile, targetLocale);
+      const payload = createGPTPayload(prompt, profile, targetLocale);
 
       const stream = await ai.streamChatCompletion(payload);
       setStream(stream);

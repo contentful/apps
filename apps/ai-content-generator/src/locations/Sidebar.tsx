@@ -1,31 +1,16 @@
 import { useAutoResizer } from '@contentful/react-apps-toolkit';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { SidebarAppSDK } from '@contentful/app-sdk';
 import { Box } from '@contentful/f36-components';
 import SidebarButtons from '@components/app/sidebar/SidebarButtons';
 import ParametersMissingWarning from '@components/app/sidebar/ParametersMissingWarning';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { styles } from './Sidebar.styles';
 import { warningMessages, disclaimerMessage } from '@components/app/sidebar/sidebarText';
 import HyperLink from '@components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import { mapV1ParamsToV2 } from '@utils/config/parameterHelpers';
+import useInstallationParameters from '@hooks/common/useInstallationParameters';
 
 const Sidebar = () => {
   useAutoResizer();
-
-  const sdk = useSDK<SidebarAppSDK>();
-  const parameters = sdk.parameters.installation;
-
-  let newParameters = {};
-
-  if (parameters.version !== 2) {
-    newParameters = { ...mapV1ParamsToV2(parameters) };
-  } else {
-    newParameters = { ...parameters };
-  }
-
-  const { apiKey, model, profile } = newParameters as AppInstallationParameters;
+  const { apiKey, model, profile } = useInstallationParameters();
 
   if (!apiKey || !model) {
     return (
@@ -39,7 +24,7 @@ const Sidebar = () => {
   return (
     <>
       <SidebarButtons />
-      {!profile?.profile ? (
+      {!profile.profile ? (
         <Box css={styles.msgWrapper}>
           <ParametersMissingWarning
             message={warningMessages.profileMissing}
