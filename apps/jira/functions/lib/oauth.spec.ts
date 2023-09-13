@@ -116,7 +116,11 @@ describe('OAuth resource', () => {
       await handler(makeProxyEvent({ code: '1234' }))
       expect(true, 'Did not throw as expected').to.eql(false)
     } catch (err) {
-      expect(err.message).to.eql('OAUTH_TOKEN_EXCHANGE_ENDPOINT environment variable must be set')
+      if (err instanceof Error) {
+        expect(err.message).to.eql(
+          'OAUTH_TOKEN_EXCHANGE_ENDPOINT environment variable must be set'
+        );
+      }
     }
   })
 })
