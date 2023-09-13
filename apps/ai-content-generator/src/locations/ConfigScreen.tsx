@@ -6,8 +6,9 @@ export type ProfileType = {
 };
 interface AppInstallationParameters {
   model: string;
-  apiKey: string;
-  profile: ProfileType;
+  key: string;
+  profile: string;
+  brandProfile: ProfileType;
 }
 
 const ConfigScreen = () => {
