@@ -13,8 +13,8 @@ import { ExternalLinkIcon } from '@contentful/f36-icons';
 const Sidebar = () => {
   useAutoResizer();
 
-  const sdk = useSDK<SidebarAppSDK>();
-  const { key, model, profile } = sdk.parameters.installation as AppInstallationParameters;
+  const sdk = useSDK<SidebarAppSDK<AppInstallationParameters>>();
+  const { key, model, profile } = sdk.parameters.installation;
 
   if (!key || !model) {
     return (
