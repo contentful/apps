@@ -25,7 +25,6 @@
     "@types/sinon": "^10.0.16",
     "@types/sinon-chai": "^3.2.9",
     "chai": "^4.3.7",
-    "chai-http": "^4.4.0",
     "mocha": "^10.2.0",
     "sinon": "^15.2.0",
     "sinon-chai": "^3.7.0",
