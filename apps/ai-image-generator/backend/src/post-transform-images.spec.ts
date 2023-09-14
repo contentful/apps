@@ -37,7 +37,7 @@ describe('PostTransformImages', () => {
 
       it('returns transformed streams', async () => {
         const result = await postTransformImages.execute();
-        const imageSharp = sharp(await result[0].toBuffer());
+        const imageSharp = sharp(await result[0].stream.toBuffer());
 
         await writeFiles({ imageSharp }, 'result-landscape');
 
@@ -58,7 +58,7 @@ describe('PostTransformImages', () => {
 
       it('returns transformed streams', async () => {
         const result = await postTransformImages.execute();
-        const imageSharp = sharp(await result[0].toBuffer());
+        const imageSharp = sharp(await result[0].stream.toBuffer());
 
         await writeFiles({ imageSharp }, 'result-landscape-small');
 
@@ -79,7 +79,7 @@ describe('PostTransformImages', () => {
 
       it('returns transformed streams', async () => {
         const result = await postTransformImages.execute();
-        const imageSharp = sharp(await result[0].toBuffer());
+        const imageSharp = sharp(await result[0].stream.toBuffer());
 
         await writeFiles({ imageSharp }, 'result-portrait');
 

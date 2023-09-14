@@ -1,7 +1,7 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { OpenAiApiService } from '../services/openaiApiService';
 import * as nodeFetch from 'node-fetch';
-import { AppActionCallResponse, Image } from '../types';
+import { AppActionCallResponse, Image, ImageWithUpload } from '../types';
 import { fetchOpenAiApiKey } from '../utils';
 import { toFile } from 'openai';
 import { transformImages } from '../transform-images';
@@ -16,7 +16,7 @@ interface AppActionCallParameters {
 
 export interface ImageEditResult {
   type: 'ImageEditResult';
-  images: Image[];
+  images: ImageWithUpload[];
 }
 
 export const handler = async (
@@ -28,7 +28,7 @@ export const handler = async (
     appActionCallContext: { appInstallationId, spaceId },
   } = context;
 
-  let images: Image[];
+  let images: ImageWithUpload[];
 
   try {
     const openAiApiKey = await fetchOpenAiApiKey(cma, appInstallationId);
@@ -72,7 +72,11 @@ export const handler = async (
       sourceStartingDimensions,
     });
 
-    images = await sharpStreamsToUrl({ imageStreams: processedImages, cmaClient: cma, spaceId });
+    images = await sharpStreamsToUrl({
+      imagesWithStreams: processedImages,
+      cmaClient: cma,
+      spaceId,
+    });
   } catch (e) {
     if (!(e instanceof Error)) {
       return {

@@ -1,3 +1,6 @@
+import { UploadProps } from 'contentful-management';
+import sharp from 'sharp';
+
 export interface Dimensions {
   width: number;
   height: number;
@@ -8,6 +11,18 @@ export interface Dimensions {
 export interface Image {
   url: string;
   imageType: string;
+}
+
+export interface ImageWithStream extends Image {
+  stream: sharp.Sharp;
+}
+
+export interface ImageWithUpload extends Image {
+  upload: Upload;
+}
+
+export interface Upload extends UploadProps {
+  url: string;
 }
 
 export interface ActionError {

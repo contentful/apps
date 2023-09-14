@@ -1,16 +1,15 @@
-import sharp from 'sharp';
 import * as nodeFetch from 'node-fetch';
-import { Dimensions, Image } from './types';
+import { Dimensions, Image, ImageWithStream } from './types';
 import { constrainDimensions, toSharp } from './utils';
 
 export class PostTransformImages {
   constructor(readonly images: Image[], readonly sourceStartingDimensions: Dimensions) {}
 
-  async execute(): Promise<sharp.Sharp[]> {
+  async execute(): Promise<ImageWithStream[]> {
     return await Promise.all(this.images.map((image) => this.postTransformImage(image)));
   }
 
-  async postTransformImage(image: Image): Promise<sharp.Sharp> {
+  async postTransformImage(image: Image): Promise<ImageWithStream> {
     const fetch = nodeFetch.default;
     const imageResponse = await fetch(image.url);
     const sharpImage = toSharp(imageResponse.body);
@@ -25,11 +24,13 @@ export class PostTransformImages {
 
     const constrainedDimensions = constrainDimensions(this.sourceStartingDimensions, width);
 
-    return sharpImage.resize({
+    const stream = sharpImage.resize({
       width: constrainedDimensions.width,
       height: constrainedDimensions.height,
       fit: 'cover',
     });
+
+    return { ...image, stream };
   }
 }
 

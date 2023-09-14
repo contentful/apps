@@ -1,11 +1,7 @@
 import * as nodeFetch from 'node-fetch';
 
 import chai, { expect } from 'chai';
-import {
-  makeMockAppActionCallContext,
-  makeMockOpenAiApi,
-  mockImagesResponse,
-} from '../../test/mocks';
+import { makeMockAppActionCallContext, makeMockOpenAiApi } from '../../test/mocks';
 import { absolutePathToFile, readableStreamFromFile } from '../../test/utils';
 import sinon from 'sinon';
 import { OpenAiApiService } from '../services/openaiApiService';
@@ -71,9 +67,9 @@ describe('aiigSelectFill.handler', () => {
         apiKey: 'openai-api-key',
       },
     },
+    makeUploadResponse('uploadId-0'),
     makeUploadResponse('uploadId-1'),
     makeUploadResponse('uploadId-2'),
-    makeUploadResponse('uploadId-3'),
   ];
 
   let mockOpenAiApi: sinon.SinonStubbedInstance<OpenAI>;
@@ -107,10 +103,18 @@ describe('aiigSelectFill.handler', () => {
     )) as AppActionCallResponseSuccess<ImageEditResult>;
     expect(result).to.have.property('ok', true);
     expect(result.data).to.have.property('type', 'ImageEditResult');
-    expect(result.data.images).to.deep.include({
-      url: 'https://s3.us-east-1.amazonaws.com/upload-api.contentful.com/space-id!upload!uploadId-2',
-      imageType: 'png',
-    });
+
+    // note: this URL for now points to the "generated" URL from DALL E. we will deprecate and remove
+    // this eventually (when frontend is updated)
+    expect(result.data.images[0]).to.have.property(
+      'url',
+      './test/mocks/images/landscape-result-1.png'
+    );
+    expect(result.data.images[0].upload).to.have.property(
+      'url',
+      'https://s3.us-east-1.amazonaws.com/upload-api.contentful.com/space-id!upload!uploadId-0'
+    );
+    expect(result.data.images[0].upload.sys).to.have.property('id', 'uploadId-0');
   });
 
   it('calls the cma to get the key and create uploads', async () => {

@@ -1,7 +1,5 @@
 import { PlainClientAPI, UploadProps } from 'contentful-management';
-import sharp from 'sharp';
-import path from 'path';
-import { Image } from './types';
+import { ImageWithStream, ImageWithUpload } from './types';
 
 const UPLOAD_DOMAIN: Record<string, URL> = {
   us: new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
@@ -10,29 +8,31 @@ const UPLOAD_DOMAIN: Record<string, URL> = {
 
 export class SharpStreamsToUrl {
   constructor(
-    readonly imageStreams: sharp.Sharp[],
+    readonly imagesWithStreams: ImageWithStream[],
     readonly cmaClient: PlainClientAPI,
     readonly spaceId: string
   ) {}
 
-  async execute(): Promise<Image[]> {
-    return Promise.all(this.imageStreams.map((imageStream) => this.streamToImage(imageStream)));
+  async execute(): Promise<ImageWithUpload[]> {
+    return Promise.all(
+      this.imagesWithStreams.map((imageWithStream) => this.streamToImage(imageWithStream))
+    );
   }
 
-  private async streamToImage(imageStream: sharp.Sharp): Promise<Image> {
-    const upload = await this.createUpload(imageStream);
-    const url = this.urlFromUpload(upload);
+  private async streamToImage(imageWithStream: ImageWithStream): Promise<ImageWithUpload> {
+    const uploadProps = await this.createUpload(imageWithStream);
+    const url = this.urlFromUpload(uploadProps);
+    const upload = { ...uploadProps, url };
     return {
-      url,
-      imageType: 'png',
+      url: imageWithStream.url,
+      imageType: imageWithStream.imageType,
+      upload,
     };
   }
 
-  private async createUpload(imageStream: sharp.Sharp): Promise<UploadProps> {
-    return await this.cmaClient.upload.create(
-      { spaceId: this.spaceId },
-      { file: imageStream.toFormat('png') }
-    );
+  private async createUpload(imageWithStream: ImageWithStream): Promise<UploadProps> {
+    const file = imageWithStream.stream.toFormat('png'); // TODO: change to whatever is specified in imagewithstream
+    return await this.cmaClient.upload.create({ spaceId: this.spaceId }, { file });
   }
 
   // TODO Handle eu!
@@ -44,11 +44,11 @@ export class SharpStreamsToUrl {
 }
 
 export const sharpStreamsToUrl = async (params: {
-  imageStreams: sharp.Sharp[];
+  imagesWithStreams: ImageWithStream[];
   cmaClient: PlainClientAPI;
   spaceId: string;
 }) => {
-  const { imageStreams, cmaClient, spaceId } = params;
-  const sharpStreamsToUrlConverter = new SharpStreamsToUrl(imageStreams, cmaClient, spaceId);
+  const { imagesWithStreams, cmaClient, spaceId } = params;
+  const sharpStreamsToUrlConverter = new SharpStreamsToUrl(imagesWithStreams, cmaClient, spaceId);
   return sharpStreamsToUrlConverter.execute();
 };
