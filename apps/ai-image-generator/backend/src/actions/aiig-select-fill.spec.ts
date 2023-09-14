@@ -1,45 +1,76 @@
 import * as nodeFetch from 'node-fetch';
 
 import chai, { expect } from 'chai';
-import {
-  makeMockAppActionCallContext,
-  makeMockOpenAiApi,
-  mockImagesResponse,
-} from '../../test/mocks';
+import { makeMockAppActionCallContext, makeMockOpenAiApi } from '../../test/mocks';
 import { absolutePathToFile, readableStreamFromFile } from '../../test/utils';
 import sinon from 'sinon';
 import { OpenAiApiService } from '../services/openaiApiService';
 import OpenAI from 'openai';
 import sinonChai from 'sinon-chai';
 import { ImageEditResult, handler } from './aiig-select-fill';
-import { AppInstallationProps, SysLink } from 'contentful-management';
+import { SysLink } from 'contentful-management';
 import { APIError } from 'openai/error';
 import { AppActionCallResponseError, AppActionCallResponseSuccess } from '../types';
+import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 
 chai.use(sinonChai);
 
 describe('aiigSelectFill.handler', () => {
-  const cmaRequestStub = sinon.stub();
+  let cmaRequestStub: sinon.SinonStub;
+  let context: AppActionCallContext;
+
+  beforeEach(() => {
+    cmaRequestStub = sinon.stub();
+  });
+
   const parameters = {
     prompt: 'My image text',
     image: absolutePathToFile('./test/mocks/images/hyundai-new.png'),
     mask: absolutePathToFile('./test/mocks/images/mask.png'),
   };
-  const mockAppInstallation: AppInstallationProps = {
+
+  const makeUploadResponse = (uploadId: string) => ({
     sys: {
-      type: 'AppInstallation',
-      appDefinition: {} as SysLink,
-      environment: {} as SysLink,
-      space: {} as SysLink,
-      version: 1,
-      createdAt: 'createdAt',
-      updatedAt: 'updatedAt',
+      type: 'Upload',
+      id: uploadId,
+      space: {
+        sys: {
+          type: 'Link',
+          linkType: 'Space',
+          id: 'spaceId',
+        },
+      },
+      expiresAt: '2015-05-18T11:29:46.809Z',
+      createdAt: '2015-05-18T11:29:46.809Z',
+      createdBy: {
+        sys: {
+          type: 'Link',
+          linkType: 'User',
+          id: '4FLrUHftHW3v2BLi9fzfjU',
+        },
+      },
     },
-    parameters: {
-      apiKey: 'openai-api-key',
+  });
+
+  const cmaClientMockResponses = [
+    {
+      sys: {
+        type: 'AppInstallation',
+        appDefinition: {} as SysLink,
+        environment: {} as SysLink,
+        space: {} as SysLink,
+        version: 1,
+        createdAt: 'createdAt',
+        updatedAt: 'updatedAt',
+      },
+      parameters: {
+        apiKey: 'openai-api-key',
+      },
     },
-  };
-  const context = makeMockAppActionCallContext(mockAppInstallation, cmaRequestStub);
+    makeUploadResponse('uploadId-0'),
+    makeUploadResponse('uploadId-1'),
+    makeUploadResponse('uploadId-2'),
+  ];
 
   let mockOpenAiApi: sinon.SinonStubbedInstance<OpenAI>;
   let openAiApiService: OpenAiApiService;
@@ -57,6 +88,8 @@ describe('aiigSelectFill.handler', () => {
         resolve(new nodeFetch.Response(fileContents, { status: 200 }))
       );
     });
+
+    context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
   });
 
   afterEach(() => {
@@ -70,17 +103,33 @@ describe('aiigSelectFill.handler', () => {
     )) as AppActionCallResponseSuccess<ImageEditResult>;
     expect(result).to.have.property('ok', true);
     expect(result.data).to.have.property('type', 'ImageEditResult');
-    expect(result.data.images).to.deep.include({
-      url: mockImagesResponse.data[0].url,
-      imageType: 'png',
-    });
+
+    // note: this URL for now points to the "generated" URL from DALL E. we will deprecate and remove
+    // this eventually (when frontend is updated)
+    expect(result.data.images[0]).to.have.property(
+      'url',
+      './test/mocks/images/landscape-result-1.png'
+    );
+    expect(result.data.images[0].upload).to.have.property(
+      'url',
+      'https://s3.us-east-1.amazonaws.com/upload-api.contentful.com/space-id!upload!uploadId-0'
+    );
+    expect(result.data.images[0].upload.sys).to.have.property('id', 'uploadId-0');
   });
 
-  it('calls the cma to get the api key from app installation params', async () => {
+  it('calls the cma to get the key and create uploads', async () => {
     await handler(parameters, context);
-    expect(cmaRequestStub).to.have.been.calledWithMatch({
+    expect(cmaRequestStub.firstCall).to.have.been.calledWithMatch({
       entityType: 'AppInstallation',
       action: 'get',
+    });
+    expect(cmaRequestStub.secondCall).to.have.been.calledWithMatch({
+      entityType: 'Upload',
+      action: 'create',
+    });
+    expect(cmaRequestStub.secondCall).to.have.been.calledWithMatch({
+      entityType: 'Upload',
+      action: 'create',
     });
   });
 

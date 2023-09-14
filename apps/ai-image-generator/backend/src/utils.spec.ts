@@ -25,7 +25,7 @@ describe('fetchOpenApiKey', () => {
       apiKey: openAiApiKey,
     },
   };
-  const cma = makeMockPlainClient(mockAppInstallation, cmaStub);
+  const cma = makeMockPlainClient([mockAppInstallation], cmaStub);
   const appInstallationId = 'appInstallationId';
 
   it('returns the apiKey', async () => {

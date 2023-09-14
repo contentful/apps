@@ -1,10 +1,12 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { OpenAiApiService } from '../services/openaiApiService';
 import * as nodeFetch from 'node-fetch';
-import { AppActionCallResponse, Image } from '../types';
+import { AppActionCallResponse, Image, ImageWithUpload } from '../types';
 import { fetchOpenAiApiKey } from '../utils';
 import { toFile } from 'openai';
 import { transformImages } from '../transform-images';
+import { postTransformImages } from '../post-transform-images';
+import { sharpStreamsToUrl } from '../upload-images';
 
 interface AppActionCallParameters {
   prompt: string;
@@ -14,7 +16,7 @@ interface AppActionCallParameters {
 
 export interface ImageEditResult {
   type: 'ImageEditResult';
-  images: Image[];
+  images: ImageWithUpload[];
 }
 
 export const handler = async (
@@ -23,10 +25,10 @@ export const handler = async (
 ): Promise<AppActionCallResponse<ImageEditResult>> => {
   const {
     cma,
-    appActionCallContext: { appInstallationId },
+    appActionCallContext: { appInstallationId, spaceId },
   } = context;
 
-  let images: Image[];
+  let images: ImageWithUpload[];
 
   try {
     const openAiApiKey = await fetchOpenAiApiKey(cma, appInstallationId);
@@ -44,7 +46,11 @@ export const handler = async (
       throw new Error(`Unable to fetch maskUrl: ${maskUrl}`);
     }
 
-    const { mask: maskBuffer, image: imageBuffer } = await transformImages({
+    const {
+      mask: maskBuffer,
+      image: imageBuffer,
+      sourceStartingDimensions,
+    } = await transformImages({
       sourceImageResponse,
       maskImageResponse,
     });
@@ -56,9 +62,21 @@ export const handler = async (
       numImages: 4,
       size: '1024x1024',
     });
-    images = openAiImages
+
+    const rawImages = openAiImages
       .map((image) => ({ url: image.url, imageType: 'png' }))
       .filter((image): image is Image => !!image.url);
+
+    const processedImages = await postTransformImages({
+      images: rawImages,
+      sourceStartingDimensions,
+    });
+
+    images = await sharpStreamsToUrl({
+      imagesWithStreams: processedImages,
+      cmaClient: cma,
+      spaceId,
+    });
   } catch (e) {
     if (!(e instanceof Error)) {
       return {

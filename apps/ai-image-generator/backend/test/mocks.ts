@@ -3,22 +3,26 @@ import { Adapter, PlainClientAPI, createClient } from 'contentful-management';
 import OpenAI from 'openai';
 import { Images } from 'openai/resources';
 import sinon from 'sinon';
+import { Image } from '../src/types';
 
-export const makeMockPlainClient = <T>(response: T, stub: sinon.SinonStub): PlainClientAPI => {
+export const makeMockPlainClient = (responses: any[], stub: sinon.SinonStub): PlainClientAPI => {
+  for (const [callNumber, response] of responses.entries()) {
+    stub.onCall(callNumber).returns(response);
+  }
   const apiAdapter: Adapter = {
     makeRequest: async <T>(args: T) => {
-      return stub.returns(response)(args);
+      return stub(args);
     },
   };
   return createClient({ apiAdapter }, { type: 'plain' });
 };
 
-export const makeMockAppActionCallContext = <T>(
-  response: T,
+export const makeMockAppActionCallContext = (
+  responses: any[],
   cmaStub = sinon.stub()
 ): AppActionCallContext => {
   return {
-    cma: makeMockPlainClient(response, cmaStub),
+    cma: makeMockPlainClient(responses, cmaStub),
     appActionCallContext: {
       spaceId: 'space-id',
       environmentId: 'environment-id',
@@ -32,16 +36,35 @@ export const mockImagesResponse: OpenAI.ImagesResponse = {
   created: 1589478378,
   data: [
     {
-      url: 'https://placekitten.com/g/1024/1024',
+      url: './test/mocks/images/landscape-result-1.png',
     },
     {
-      url: 'https://placekitten.com/g/1024/1024',
-    },
-    {
-      url: 'https://placekitten.com/g/1024/1024',
+      url: './test/mocks/images/landscape-result-2.png',
     },
   ],
 };
+
+export const mockPortraitAiImages: Image[] = [
+  {
+    url: './test/mocks/images/portrait-result-1.png',
+    imageType: 'png',
+  },
+  {
+    url: './test/mocks/images/portrait-result-2.png',
+    imageType: 'png',
+  },
+];
+
+export const mockLandscapeAiImages: Image[] = [
+  {
+    url: './test/mocks/images/landscape-result-1.png',
+    imageType: 'png',
+  },
+  {
+    url: './test/mocks/images/landscape-result-2.png',
+    imageType: 'png',
+  },
+];
 
 export const makeMockOpenAiApi = (
   imagesFunction: keyof Images = 'generate',
