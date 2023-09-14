@@ -22,7 +22,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     trackEvent(SegmentAction.SIDEBAR_RENDERED);
-  });
+  }, [trackEvent]);
 
   if (!key || !model) {
     return (
