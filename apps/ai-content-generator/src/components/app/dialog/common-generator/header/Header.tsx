@@ -8,6 +8,8 @@ import featureConfig from '@configs/features/featureConfig';
 import SparkleFill from '@components/common/sparkle-icon/SparkleFill.svg';
 import { css } from '@emotion/react';
 import tokens from '@contentful/f36-tokens';
+import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
+import { SegmentAction } from '@configs/segment/segmentEvent';
 
 const styles = {
   header: css({
@@ -21,6 +23,7 @@ const styles = {
 
 const Header = () => {
   const sdk = useSDK<DialogAppSDK>();
+  const { trackEvent } = useContext(SegmentAnalyticsContext);
   const { feature } = useContext(GeneratorContext);
   const title = featureConfig[feature].dialogTitle;
 
@@ -42,7 +45,10 @@ const Header = () => {
           aria-label="Close dialog"
           icon={<CloseIcon />}
           size="large"
-          onClick={() => sdk.close()}
+          onClick={() => {
+            trackEvent(SegmentAction.DIALOG_CLOSED_BY_USER);
+            sdk.close();
+          }}
           css={styles.closeButton}
         />
       </Box>

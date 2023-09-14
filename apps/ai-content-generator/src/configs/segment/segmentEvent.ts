@@ -18,7 +18,6 @@ export enum SegmentAction {
 }
 
 export interface SegmentEventData {
-  action_performed_at_ms?: string;
   feature_id?: string;
   from_prompt?: boolean;
   sourceLocale?: string;
@@ -26,6 +25,9 @@ export interface SegmentEventData {
 }
 
 export interface SegmentAppData {
+  gptModel: string;
+
+  // Brand Profile
   profile: boolean;
   values: boolean;
   tone: boolean;
@@ -37,7 +39,6 @@ export interface SegmentAppData {
 
 export interface SegmentEvent extends SegmentEventData {
   action: SegmentAction;
-  gptModel: string;
   configOptions?: SegmentAppData;
 }
 

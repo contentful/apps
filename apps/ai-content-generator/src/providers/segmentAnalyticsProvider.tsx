@@ -1,4 +1,4 @@
-import { BaseAppSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK, DialogAppSDK, SidebarAppSDK } from '@contentful/app-sdk';
 import { AnalyticsBrowser } from '@segment/analytics-next';
 import { createContext, ReactNode } from 'react';
 import { getUserCookieConsent } from '@utils/segment/cookieConsent';
@@ -9,11 +9,19 @@ import {
   SegmentEventData,
   SegmentIdentify,
 } from '@configs/segment/segmentEvent';
+import getTrackedAppData from '@utils/segment/getTrackedAppData';
+import { AppInstallationParameters } from '@locations/ConfigScreen';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface SegmentAnalyticsContextProps {
-  identify: (sdk: BaseAppSDK) => void;
-  trackEvent: (sdk: BaseAppSDK, action: SegmentAction, trackingData: Partial<SegmentEvent>) => void;
+  identify: () => void;
+  trackEvent: (action: SegmentAction, trackingData?: SegmentEventData) => void;
 }
+
+type PossibleSDK =
+  | SidebarAppSDK<AppInstallationParameters>
+  | DialogAppSDK<AppInstallationParameters>
+  | ConfigAppSDK<AppInstallationParameters>;
 
 const noop = () => {};
 
@@ -24,15 +32,19 @@ export const SegmentAnalyticsContext = createContext<SegmentAnalyticsContextProp
 
 export const SegmentAnalyticsProvider = (props: { children: ReactNode }) => {
   const writeKey = (import.meta.env.VITE_SEGMENT_WRITE_KEY as string) || '';
-  const segmentAnalytics = AnalyticsBrowser.load({ writeKey });
+  const sdk = useSDK<PossibleSDK>();
 
-  const identify = (sdk: BaseAppSDK) => {
-    if (!getUserCookieConsent(sdk, 'PERSONALIZATION')) {
+  const segmentAnalytics = getUserCookieConsent(sdk, 'ANALYTICS')
+    ? AnalyticsBrowser.load({ writeKey })
+    : null;
+
+  const identify = () => {
+    if (!segmentAnalytics || !getUserCookieConsent(sdk, 'PERSONALIZATION')) {
       return;
     }
 
     const payload: SegmentIdentify = {
-      environment_key: sdk.ids.environment,
+      environment_key: sdk.ids.environmentAlias || sdk.ids.environment,
       organization_key: sdk.ids.organization,
       space_key: sdk.ids.space,
     };
@@ -40,15 +52,15 @@ export const SegmentAnalyticsProvider = (props: { children: ReactNode }) => {
     segmentAnalytics.identify(sdk.ids.user, payload);
   };
 
-  const trackEvent = (sdk: BaseAppSDK, action: SegmentAction, trackingData: SegmentEventData) => {
-    if (!getUserCookieConsent(sdk, 'ANALYTICS')) {
+  const trackEvent = (action: SegmentAction, eventData: SegmentEventData = {}) => {
+    if (!segmentAnalytics) {
       return;
     }
 
     const payload: SegmentEvent = {
-      gptModel: sdk.parameters.installation.model,
       action: action,
-      ...trackingData,
+      ...getTrackedAppData(sdk),
+      ...eventData,
     };
 
     segmentAnalytics.track(segmentEventName, payload);

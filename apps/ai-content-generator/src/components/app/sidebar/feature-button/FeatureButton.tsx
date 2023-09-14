@@ -4,7 +4,9 @@ import { Button, Spinner, Tooltip } from '@contentful/f36-components';
 import featureConfig, { AIFeature } from '@configs/features/featureConfig';
 import { styles } from './FeatureButton.styles';
 import { makeDialogConfig } from '@configs/dialog/dialogConfig';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
+import { SegmentAction } from '@configs/segment/segmentEvent';
 
 interface Props {
   feature: AIFeature;
@@ -18,6 +20,7 @@ interface FieldLocales {
 
 const FeatureButton = (props: Props) => {
   const { feature, isSaving, onSaving } = props;
+  const { trackEvent } = useContext(SegmentAnalyticsContext);
   const buttonCopy = featureConfig[feature].buttonTitle;
   const sdk = useSDK<SidebarAppSDK>();
 
@@ -50,9 +53,11 @@ const FeatureButton = (props: Props) => {
     }
 
     const entryId = sdk.entry.getSys().id;
-
     const dialogConfig = makeDialogConfig({ feature, entryId, fieldLocales });
 
+    trackEvent(SegmentAction.DIALOG_OPENED, {
+      feature_id: feature,
+    });
     sdk.dialogs.openCurrentApp(dialogConfig);
   };
 
