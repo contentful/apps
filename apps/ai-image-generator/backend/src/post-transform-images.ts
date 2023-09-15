@@ -23,7 +23,7 @@ export class PostTransformImages {
       throw new Error('invalid image, not a square');
     }
 
-    const originalConstrainedDimensions = constrainDimensions(this.sourceStartingDimensions, width);
+    const originalConstrainedDimensions = constrainDimensions(this.sourceStartingDimensions, 1024);
     const extractRegion = this.computeExtractRegion(width, height, originalConstrainedDimensions);
 
     const stream = sharpImage.extract(extractRegion).resize({
@@ -35,26 +35,28 @@ export class PostTransformImages {
     return { ...image, stream };
   }
 
+  // given the image width and height and a set of "target dimensions", compute the extract
+  // region needed to get rid of the black bars before the resize operation
   private computeExtractRegion(
     imageWidth: number,
     imageHeight: number,
-    originalDimensions: Dimensions
+    targetDimensions: Dimensions
   ): Region {
     let top = 0,
       left = 0,
       width = imageWidth,
       height = imageHeight;
-    const { layout, width: originalWidth, height: originalHeight } = originalDimensions;
+    const { layout, width: targetWidth, height: targetHeight } = targetDimensions;
 
     if (layout === 'landscape') {
-      const ratio = originalWidth / width;
-      const innerImageHeight = Math.floor(originalHeight / ratio);
+      const ratio = targetWidth / width;
+      const innerImageHeight = Math.floor(targetHeight / ratio);
       const totalBarHeight = difference(height, innerImageHeight);
       top = Math.floor(totalBarHeight / 2);
       height = innerImageHeight;
     } else if (layout === 'portrait') {
-      const ratio = originalHeight / height;
-      const innerImageWidth = Math.floor(originalWidth / ratio);
+      const ratio = targetHeight / height;
+      const innerImageWidth = Math.floor(targetWidth / ratio);
       const totalBarWidth = difference(width, innerImageWidth);
       left = Math.floor(totalBarWidth / 2);
       width = innerImageWidth;

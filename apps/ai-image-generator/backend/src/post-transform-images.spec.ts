@@ -103,6 +103,41 @@ describe('PostTransformImages', () => {
       });
     });
 
+    describe('when generated image is smaller than desired dimensions (increase)', () => {
+      beforeEach(async () => {
+        const images = [
+          {
+            url: './test/mocks/images/landscape-extra-pixel-dalle-result-512.png',
+            imageType: 'png',
+          },
+        ];
+        const dimensions = toDimensions(700, 467);
+        postTransformImages = new PostTransformImages(images, dimensions);
+      });
+
+      it('returns transformed streams', async () => {
+        const result = await postTransformImages.execute();
+        const imageSharp = sharp(await result[0].stream.toBuffer());
+        const bottomEdge = imageSharp.clone().extract({ left: 0, top: 466, width: 700, height: 1 });
+
+        await writeFiles(
+          { imageSharp, bottomEdge },
+          'result-landscape-generated-small-extra-pixel'
+        );
+
+        const imageMetadata = await imageSharp.metadata();
+
+        expect(imageMetadata).to.have.property('width', 700);
+        expect(imageMetadata).to.have.property('height', 467);
+        expect(imageMetadata).to.have.property('format', 'png');
+
+        const bottomEdgeBarColorProportion = await findColorProportion(bottomEdge, BAR_COLOR, {
+          tolerance: 30,
+        });
+        expect(bottomEdgeBarColorProportion).to.lessThan(1);
+      });
+    });
+
     describe('when image result is portrait', () => {
       beforeEach(async () => {
         const images = mockPortraitAiImages;
