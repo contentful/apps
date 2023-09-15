@@ -30,6 +30,7 @@ const renderAnalyticsApp = async () =>
       api={{ runReports: mockApi } as unknown as Api}
       propertyId="properties/12345"
       slugFieldInfo={{ slugField: 'title', urlPrefix: '' }}
+      useTrailingSlash={false}
     />
   );
 

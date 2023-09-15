@@ -8,6 +8,7 @@ import {
   Box,
   TextLink,
   Flex,
+  Checkbox,
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { ContentTypeProps, createClient } from 'contentful-management';
@@ -40,6 +41,8 @@ const AssignContentTypeSection = (props: Props) => {
     originalContentTypes,
   } = props;
 
+  const [useTrailingSlash, setUseTrailingSlash] = useState<boolean>(false);
+
   // Content type state
   const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
   const [loadingContentTypes, setLoadingContentTypes] = useState<boolean>(true);
@@ -59,9 +62,10 @@ const AssignContentTypeSection = (props: Props) => {
   const sdk = useSDK<AppExtensionSDK>();
 
   useEffect(() => {
+    if (parameters.useTrailingSlash) setUseTrailingSlash(parameters.useTrailingSlash);
     if (parameters.contentTypes) setContentTypes(parameters.contentTypes);
     setLoadingContentTypes(false);
-  }, [parameters.contentTypes]);
+  }, [parameters.contentTypes, parameters.useTrailingSlash]);
 
   useEffect(() => {
     setHasContentTypes(Object.keys(contentTypes).length ? true : false);
@@ -89,6 +93,12 @@ const AssignContentTypeSection = (props: Props) => {
 
     getAllContentTypes();
   }, [sdk]);
+
+  const trailingSlashHandler = () => {
+    setUseTrailingSlash(!useTrailingSlash);
+    mergeSdkParameters({ useTrailingSlash: !useTrailingSlash });
+    onIsValidContentTypeAssignment(true);
+  };
 
   const contentTypeHandler = (newContentTypes: ContentTypes) => {
     setContentTypes(newContentTypes);
@@ -152,10 +162,11 @@ const AssignContentTypeSection = (props: Props) => {
           Configure content types below that are connected to pages on your website where you're
           tracking Google Analytics data. You'll need to specify the "slug" field used to generate
           the page path in your website's URL, and optionally a "prefix" if one exists in front of
-          the URL page path. The app will automatically be added to the sidebar of associated
+          the URL page path. Additionally, you can check the box below to append a trailing slash to
+          all URLs if needed. The app will automatically be added to the sidebar of associated
           content types on save of the configuration.
         </Paragraph>
-        <Paragraph marginBottom="none">
+        <Paragraph>
           <TextLink
             href="https://www.contentful.com/help/google-analytics-4-app/"
             target="_blank"
@@ -164,6 +175,13 @@ const AssignContentTypeSection = (props: Props) => {
             See our help documentation for more details
           </TextLink>
         </Paragraph>
+        <Checkbox
+          name="use-trailing-slash"
+          id="use-trailing-slash"
+          isChecked={useTrailingSlash}
+          onChange={trailingSlashHandler}>
+          Use trailing slash for all page paths
+        </Checkbox>
       </Box>
       {!loadingContentTypes && !loadingAllContentTypes ? (
         <>

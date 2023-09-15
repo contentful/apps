@@ -7,7 +7,7 @@ import useGetFieldValue from '../useGetFieldValue';
 
 const SLUG_FIELD_INPUT_DELAY = 500;
 
-export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
+export const useSidebarSlug = (slugFieldInfo: ContentTypeValue, useTrailingSlash: boolean) => {
   const sdk = useSDK<SidebarExtensionSDK>();
 
   const { slugField, urlPrefix } = slugFieldInfo;
@@ -33,7 +33,9 @@ export const useSidebarSlug = (slugFieldInfo: ContentTypeValue) => {
     sdk.entry.onSysChanged((sys) => handlePublishedStatus(sys));
   }, [sdk.entry]);
 
-  const reportSlug = `/${pathJoin(urlPrefix || '', debouncedSlugFieldValue || '')}`;
+  const reportSlug = `/${pathJoin(urlPrefix || '', debouncedSlugFieldValue || '')}${
+    useTrailingSlash ? '/' : ''
+  }`;
   const slugFieldIsConfigured = Boolean(slugField);
   const contentTypeHasSlugField = slugField in sdk.entry.fields;
 

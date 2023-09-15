@@ -12,6 +12,7 @@ jest.mock('../useGetFieldValue', () => jest.fn());
 
 interface Props {
   slugFieldInfo: ContentTypeValue;
+  useTrailingSlash: boolean;
 }
 
 const TestComponent = (props: Props) => {
@@ -22,7 +23,7 @@ const TestComponent = (props: Props) => {
     reportSlug,
     slugFieldValue,
     isContentTypeWarning,
-  } = useSidebarSlug(props.slugFieldInfo);
+  } = useSidebarSlug(props.slugFieldInfo, props.useTrailingSlash);
 
   return (
     <>
@@ -55,7 +56,7 @@ describe('useSidebarSlug hook', () => {
     jest.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
-    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
+    render(<TestComponent slugFieldInfo={slugFieldInfo} useTrailingSlash={false} />);
 
     expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
     expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
@@ -82,7 +83,7 @@ describe('useSidebarSlug hook', () => {
 
     const slugFieldInfo = { slugField: '', urlPrefix: '/en-US' };
 
-    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
+    render(<TestComponent slugFieldInfo={slugFieldInfo} useTrailingSlash={false} />);
 
     expect(getByText('slugFieldIsConfigured: false')).toBeVisible();
     expect(getByText('contentTypeHasSlugField: false')).toBeVisible();
@@ -111,7 +112,7 @@ describe('useSidebarSlug hook', () => {
       .mockImplementationOnce(() => '/differentFieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
-    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
+    render(<TestComponent slugFieldInfo={slugFieldInfo} useTrailingSlash={false} />);
 
     expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
     expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
@@ -124,5 +125,31 @@ describe('useSidebarSlug hook', () => {
 
     expect(newSlugFieldValue).toBeVisible();
     expect(getByText('reportSlug: /en-US/differentFieldValue')).toBeVisible();
+  });
+
+  it('returns slug info and status with trailing slash', async () => {
+    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      entry: {
+        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        fields: { slugField: {} },
+        onSysChanged: jest.fn((cb) =>
+          cb({
+            publishedAt: '2020202',
+          } as unknown as EntrySys)
+        ),
+      },
+    }));
+    jest.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
+    const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
+
+    render(<TestComponent slugFieldInfo={slugFieldInfo} useTrailingSlash={true} />);
+
+    expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
+    expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
+    expect(getByText('isPublished: true')).toBeVisible();
+    expect(getByText('reportSlug: /en-US/fieldValue/')).toBeVisible();
+    expect(getByText('slugFieldValue: /fieldValue')).toBeVisible();
+    expect(getByText('isContentTypeWarning: false')).toBeVisible();
   });
 });

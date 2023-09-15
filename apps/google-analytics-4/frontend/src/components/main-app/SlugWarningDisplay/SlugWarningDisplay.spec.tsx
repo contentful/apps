@@ -30,7 +30,12 @@ describe('SlugWarningDisplay for the analytics app', () => {
       ...useSidebarSlugMock,
     }));
 
-    render(<SlugWarningDisplay slugFieldInfo={{ slugField: '', urlPrefix: '' }} />);
+    render(
+      <SlugWarningDisplay
+        slugFieldInfo={{ slugField: '', urlPrefix: '' }}
+        useTrailingSlash={false}
+      />
+    );
 
     const warningMsg = await findByText(
       noSlugConfigMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim()
@@ -49,7 +54,12 @@ describe('SlugWarningDisplay for the analytics app', () => {
       ...useSidebarSlugMock,
     }));
 
-    render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
+    render(
+      <SlugWarningDisplay
+        slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }}
+        useTrailingSlash={false}
+      />
+    );
 
     const warningMsg = await findByText(
       noSlugContentMsg.replace(APP_CONFIG_HYPER_LINK_MSG, '').trim()
@@ -68,7 +78,12 @@ describe('SlugWarningDisplay for the analytics app', () => {
       ...useSidebarSlugMock,
     }));
 
-    render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
+    render(
+      <SlugWarningDisplay
+        slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }}
+        useTrailingSlash={false}
+      />
+    );
 
     const warningMsg = await findByText(notPublishedMsg);
     const hyperLinkMsg = queryByText(APP_CONFIG_HYPER_LINK_MSG);
@@ -86,7 +101,12 @@ describe('SlugWarningDisplay for the analytics app', () => {
       ...useSidebarSlugMock,
     }));
 
-    render(<SlugWarningDisplay slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }} />);
+    render(
+      <SlugWarningDisplay
+        slugFieldInfo={{ slugField: 'slug', urlPrefix: '' }}
+        useTrailingSlash={false}
+      />
+    );
 
     const warningMsg = await findByText(DEFAULT_ERR_MSG.replace(SUPPORT_LINK_MSG, '').trim());
     const hyperLink = getByTestId('cf-ui-text-link');
