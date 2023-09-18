@@ -59,7 +59,7 @@ export const handler = async (
       prompt,
       image: await toFile(imageBuffer),
       mask: await toFile(maskBuffer),
-      numImages: 4,
+      numImages: 3,
       size: '1024x1024',
     });
 
