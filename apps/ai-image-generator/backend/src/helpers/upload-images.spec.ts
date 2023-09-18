@@ -1,13 +1,12 @@
-import sharp from 'sharp';
-import { makeMockPlainClient } from '../test/mocks';
-import { absolutePathToFile, responseFromFile } from '../test/utils';
-import { SharpStreamsToUrl } from './upload-images';
-import { toSharp } from './utils';
+import { makeMockPlainClient } from '../../test/mocks';
+import { absolutePathToFile, responseFromFile } from '../../test/utils';
+import { UploadImages } from './upload-images';
+import { toSharp } from '../utils';
 import sinon from 'sinon';
 import { expect } from 'chai';
 
-describe('SharpStreamsToUrl', () => {
-  let sharpStreamsToUrl: SharpStreamsToUrl;
+describe('UploadImages', () => {
+  let uploadImages: UploadImages;
   const spaceId = 'spaceId';
   const uploadId = 'uploadId';
   const sourceUrl = 'http://www.example.com';
@@ -44,11 +43,11 @@ describe('SharpStreamsToUrl', () => {
       };
 
       const cmaClient = makeMockPlainClient([mockUploadApiResponse], cmaClientStub);
-      sharpStreamsToUrl = new SharpStreamsToUrl(imagesWithStreams, cmaClient, spaceId);
+      uploadImages = new UploadImages(imagesWithStreams, cmaClient, spaceId);
     });
 
     it('returns images with correct urls', async () => {
-      const result = await sharpStreamsToUrl.execute();
+      const result = await uploadImages.execute();
       const image = result[0];
       expect(image).to.have.property('url', sourceUrl);
       expect(image.upload).to.have.property(

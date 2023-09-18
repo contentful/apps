@@ -1,12 +1,12 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { OpenAiApiService } from '../services/openaiApiService';
 import * as nodeFetch from 'node-fetch';
-import { AppActionCallResponse, Image, ImageWithUpload } from '../types';
+import { AppActionCallResponse, ImageWithUpload } from '../types';
 import { fetchOpenAiApiKey } from '../utils';
 import { toFile } from 'openai';
-import { transformImages } from '../transform-images';
-import { postTransformImages } from '../post-transform-images';
-import { sharpStreamsToUrl } from '../upload-images';
+import { processImagesAfterEdit } from '../helpers/process-images-after-edit';
+import { uploadImages } from '../helpers/upload-images';
+import { prepareImageForEdit } from '../helpers/prepare-image-for-edit';
 
 interface AppActionCallParameters {
   prompt: string;
@@ -49,8 +49,8 @@ export const handler = async (
     const {
       mask: maskBuffer,
       image: imageBuffer,
-      sourceStartingDimensions,
-    } = await transformImages({
+      constrainedDimensions: initialSourceDimensions,
+    } = await prepareImageForEdit({
       sourceImageResponse,
       maskImageResponse,
     });
@@ -63,16 +63,12 @@ export const handler = async (
       size: '1024x1024',
     });
 
-    const rawImages = openAiImages
-      .map((image) => ({ url: image.url, imageType: 'png' }))
-      .filter((image): image is Image => !!image.url);
-
-    const processedImages = await postTransformImages({
-      images: rawImages,
-      sourceStartingDimensions,
+    const processedImages = await processImagesAfterEdit({
+      images: openAiImages,
+      initialSourceDimensions,
     });
 
-    images = await sharpStreamsToUrl({
+    images = await uploadImages({
       imagesWithStreams: processedImages,
       cmaClient: cma,
       spaceId,

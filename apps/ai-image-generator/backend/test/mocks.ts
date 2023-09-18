@@ -3,7 +3,6 @@ import { Adapter, PlainClientAPI, createClient } from 'contentful-management';
 import OpenAI from 'openai';
 import { Images } from 'openai/resources';
 import sinon from 'sinon';
-import { Image } from '../src/types';
 
 export const makeMockPlainClient = (responses: any[], stub: sinon.SinonStub): PlainClientAPI => {
   for (const [callNumber, response] of responses.entries()) {
@@ -44,25 +43,21 @@ export const mockImagesResponse: OpenAI.ImagesResponse = {
   ],
 };
 
-export const mockPortraitAiImages: Image[] = [
+export const mockPortraitAiImages: OpenAI.Images.Image[] = [
   {
     url: './test/mocks/images/portrait-result-1.png',
-    imageType: 'png',
   },
   {
     url: './test/mocks/images/portrait-result-2.png',
-    imageType: 'png',
   },
 ];
 
-export const mockLandscapeAiImages: Image[] = [
+export const mockLandscapeAiImages: OpenAI.Images.Image[] = [
   {
     url: './test/mocks/images/landscape-result-1.png',
-    imageType: 'png',
   },
   {
     url: './test/mocks/images/landscape-result-2.png',
-    imageType: 'png',
   },
 ];
 

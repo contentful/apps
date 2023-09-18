@@ -1,12 +1,12 @@
 import { PlainClientAPI, UploadProps } from 'contentful-management';
-import { ImageWithStream, ImageWithUpload } from './types';
+import { ImageWithStream, ImageWithUpload } from '../types';
 
 const UPLOAD_DOMAIN: Record<string, URL> = {
   us: new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
   eu: new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
 };
 
-export class SharpStreamsToUrl {
+export class UploadImages {
   constructor(
     readonly imagesWithStreams: ImageWithStream[],
     readonly cmaClient: PlainClientAPI,
@@ -43,12 +43,12 @@ export class SharpStreamsToUrl {
   }
 }
 
-export const sharpStreamsToUrl = async (params: {
+export const uploadImages = async (params: {
   imagesWithStreams: ImageWithStream[];
   cmaClient: PlainClientAPI;
   spaceId: string;
 }) => {
   const { imagesWithStreams, cmaClient, spaceId } = params;
-  const sharpStreamsToUrlConverter = new SharpStreamsToUrl(imagesWithStreams, cmaClient, spaceId);
-  return sharpStreamsToUrlConverter.execute();
+  const imageUploader = new UploadImages(imagesWithStreams, cmaClient, spaceId);
+  return imageUploader.execute();
 };
