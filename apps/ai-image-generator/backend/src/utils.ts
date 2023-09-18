@@ -25,7 +25,7 @@ export const toSharp = (imageStream: NodeJS.ReadableStream): sharp.Sharp => {
   return imageStream.pipe(sharpStream);
 };
 
-const difference = (a: number, b: number): number => {
+export const difference = (a: number, b: number): number => {
   return Math.abs(a - b);
 };
 
