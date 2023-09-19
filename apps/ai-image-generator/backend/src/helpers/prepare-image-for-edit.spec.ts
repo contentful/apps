@@ -4,13 +4,13 @@ import {
   findColorProportion,
   responseFromFile,
   writeFiles,
-} from '../test/utils';
-import { BAR_COLOR, ERASE_COLOR, ImageTransformer } from './transform-images';
+} from '../../test/utils';
+import { BAR_COLOR, ERASE_COLOR, PrepareImageForEdit } from './prepare-image-for-edit';
 import { expect } from 'chai';
 
-describe('ImageTransformer', () => {
+describe('PrepareImageForEdit', () => {
   describe('#execute', () => {
-    let transformImages: ImageTransformer;
+    let prepareImageForEdit: PrepareImageForEdit;
 
     describe('when image is square', () => {
       beforeEach(async () => {
@@ -18,11 +18,14 @@ describe('ImageTransformer', () => {
         const sourceImagePath = absolutePathToFile('./test/mocks/images/peaceful-cat.jpg');
         const maskImageResponse = await responseFromFile(maskPath);
         const sourceImageResponse = await responseFromFile(sourceImagePath);
-        transformImages = new ImageTransformer(sourceImageResponse, maskImageResponse);
+        prepareImageForEdit = await PrepareImageForEdit.build(
+          sourceImageResponse,
+          maskImageResponse
+        );
       });
 
       it('returns images that have been transformed to the correct format', async () => {
-        const result = await transformImages.execute();
+        const result = await prepareImageForEdit.execute();
         const { image, mask } = result;
         const imageSharp = sharp(image, { failOn: 'none' });
         const maskSharp = sharp(mask, { failOn: 'none' });
@@ -61,11 +64,14 @@ describe('ImageTransformer', () => {
           './test/mocks/images/peaceful-cat-landscape.png'
         );
         const sourceImageResponse = await responseFromFile(sourceImagePath);
-        transformImages = new ImageTransformer(sourceImageResponse, maskImageResponse);
+        prepareImageForEdit = await PrepareImageForEdit.build(
+          sourceImageResponse,
+          maskImageResponse
+        );
       });
 
       it('returns images that have been transformed to the correct format', async () => {
-        const result = await transformImages.execute();
+        const result = await prepareImageForEdit.execute();
         const { image, mask } = result;
         const imageSharp = sharp(image, { failOn: 'none' });
         const maskSharp = sharp(mask, { failOn: 'none' });
@@ -108,11 +114,14 @@ describe('ImageTransformer', () => {
         const maskImageResponse = await responseFromFile(maskPath);
         const sourceImagePath = absolutePathToFile('./test/mocks/images/landscape-extra-pixel.jpg');
         const sourceImageResponse = await responseFromFile(sourceImagePath);
-        transformImages = new ImageTransformer(sourceImageResponse, maskImageResponse);
+        prepareImageForEdit = await PrepareImageForEdit.build(
+          sourceImageResponse,
+          maskImageResponse
+        );
       });
 
       it('returns images that have been transformed to the correct format', async () => {
-        const result = await transformImages.execute();
+        const result = await prepareImageForEdit.execute();
         const { image, mask } = result;
         const imageSharp = sharp(image, { failOn: 'none' });
         const maskSharp = sharp(mask, { failOn: 'none' });
@@ -172,11 +181,14 @@ describe('ImageTransformer', () => {
         const maskImageResponse = await responseFromFile(maskPath);
         const sourceImagePath = absolutePathToFile('./test/mocks/images/peaceful-cat-portrait.jpg');
         const sourceImageResponse = await responseFromFile(sourceImagePath);
-        transformImages = new ImageTransformer(sourceImageResponse, maskImageResponse);
+        prepareImageForEdit = await PrepareImageForEdit.build(
+          sourceImageResponse,
+          maskImageResponse
+        );
       });
 
       it('returns images that have been transformed to the correct format', async () => {
-        const result = await transformImages.execute();
+        const result = await prepareImageForEdit.execute();
         const { image, mask } = result;
         const imageSharp = sharp(image, { failOn: 'none' });
         const maskSharp = sharp(mask, { failOn: 'none' });

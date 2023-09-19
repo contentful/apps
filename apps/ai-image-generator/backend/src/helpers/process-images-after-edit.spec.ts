@@ -1,15 +1,15 @@
 import * as nodeFetch from 'node-fetch';
 
 import { expect } from 'chai';
-import { mockLandscapeAiImages, mockPortraitAiImages } from '../test/mocks';
-import { findColorProportion, readableStreamFromFile, writeFiles } from '../test/utils';
-import { PostTransformImages } from './post-transform-images';
-import { toDimensions } from './utils';
+import { mockLandscapeAiImages, mockPortraitAiImages } from '../../test/mocks';
+import { findColorProportion, readableStreamFromFile, writeFiles } from '../../test/utils';
+import { ProcessImagesAfterEdit } from './process-images-after-edit';
+import { toDimensions } from '../utils';
 import sharp from 'sharp';
 import sinon from 'sinon';
-import { BAR_COLOR } from './transform-images';
+import { BAR_COLOR } from './prepare-image-for-edit';
 
-describe('PostTransformImages', () => {
+describe('ProcessImagesAfterEdit', () => {
   let fetchStub: sinon.SinonStub;
 
   beforeEach(async () => {
@@ -27,17 +27,17 @@ describe('PostTransformImages', () => {
   });
 
   describe('#execute', () => {
-    let postTransformImages: PostTransformImages;
+    let processImagesAfterEdit: ProcessImagesAfterEdit;
 
     describe('when image result is landscape', () => {
       beforeEach(async () => {
         const images = mockLandscapeAiImages;
-        const dimensions = toDimensions(1487, 1066);
-        postTransformImages = new PostTransformImages(images, dimensions);
+        const dimensions = toDimensions(1024, 734);
+        processImagesAfterEdit = new ProcessImagesAfterEdit(images, dimensions);
       });
 
       it('returns transformed streams', async () => {
-        const result = await postTransformImages.execute();
+        const result = await processImagesAfterEdit.execute();
         const imageSharp = sharp(await result[0].stream.toBuffer());
 
         await writeFiles({ imageSharp }, 'result-landscape');
@@ -54,11 +54,11 @@ describe('PostTransformImages', () => {
       beforeEach(async () => {
         const images = mockLandscapeAiImages;
         const dimensions = toDimensions(900, 645);
-        postTransformImages = new PostTransformImages(images, dimensions);
+        processImagesAfterEdit = new ProcessImagesAfterEdit(images, dimensions);
       });
 
       it('returns transformed streams', async () => {
-        const result = await postTransformImages.execute();
+        const result = await processImagesAfterEdit.execute();
         const imageSharp = sharp(await result[0].stream.toBuffer());
 
         await writeFiles({ imageSharp }, 'result-landscape-small');
@@ -76,15 +76,14 @@ describe('PostTransformImages', () => {
         const images = [
           {
             url: './test/mocks/images/landscape-extra-pixel-dalle-result.png',
-            imageType: 'png',
           },
         ];
         const dimensions = toDimensions(700, 467);
-        postTransformImages = new PostTransformImages(images, dimensions);
+        processImagesAfterEdit = new ProcessImagesAfterEdit(images, dimensions);
       });
 
       it('returns transformed streams', async () => {
-        const result = await postTransformImages.execute();
+        const result = await processImagesAfterEdit.execute();
         const imageSharp = sharp(await result[0].stream.toBuffer());
         const bottomEdge = imageSharp.clone().extract({ left: 0, top: 466, width: 700, height: 1 });
 
@@ -112,11 +111,11 @@ describe('PostTransformImages', () => {
           },
         ];
         const dimensions = toDimensions(700, 467);
-        postTransformImages = new PostTransformImages(images, dimensions);
+        processImagesAfterEdit = new ProcessImagesAfterEdit(images, dimensions);
       });
 
       it('returns transformed streams', async () => {
-        const result = await postTransformImages.execute();
+        const result = await processImagesAfterEdit.execute();
         const imageSharp = sharp(await result[0].stream.toBuffer());
         const bottomEdge = imageSharp.clone().extract({ left: 0, top: 466, width: 700, height: 1 });
 
@@ -141,12 +140,12 @@ describe('PostTransformImages', () => {
     describe('when image result is portrait', () => {
       beforeEach(async () => {
         const images = mockPortraitAiImages;
-        const dimensions = toDimensions(1500, 2000);
-        postTransformImages = new PostTransformImages(images, dimensions);
+        const dimensions = toDimensions(768, 1024);
+        processImagesAfterEdit = new ProcessImagesAfterEdit(images, dimensions);
       });
 
       it('returns transformed streams', async () => {
-        const result = await postTransformImages.execute();
+        const result = await processImagesAfterEdit.execute();
         const imageSharp = sharp(await result[0].stream.toBuffer());
 
         await writeFiles({ imageSharp }, 'result-portrait');
