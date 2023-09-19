@@ -10,7 +10,7 @@ import { AppConfigPageHyperLink } from 'components/main-app/ErrorDisplay/CommonE
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
 
-  const { serviceAccountKeyId, propertyId, contentTypes, useTrailingSlash } = sdk.parameters
+  const { serviceAccountKeyId, propertyId, contentTypes } = sdk.parameters
     .installation as AppInstallationParameters;
 
   const currentContentType = sdk.contentType.sys.id;
@@ -30,12 +30,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <AnalyticsApp
-        api={api}
-        propertyId={propertyId}
-        slugFieldInfo={slugFieldInfo}
-        useTrailingSlash={useTrailingSlash}
-      />
+      <AnalyticsApp api={api} propertyId={propertyId} slugFieldInfo={slugFieldInfo} />
     </>
   );
 };

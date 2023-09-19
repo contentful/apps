@@ -4,7 +4,7 @@ export interface AppInstallationParameters {
   serviceAccountKeyId: ServiceAccountKeyId;
   contentTypes: ContentTypes;
   propertyId: string;
-  useTrailingSlash: boolean;
+  forceTrailingSlash: boolean;
 }
 
 // TODO: get this exported from the SDK

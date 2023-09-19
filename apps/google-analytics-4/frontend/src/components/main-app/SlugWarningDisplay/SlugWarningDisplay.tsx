@@ -12,18 +12,15 @@ import {
 
 interface Props {
   slugFieldInfo: ContentTypeValue;
-  useTrailingSlash: boolean;
 }
 
 const SlugWarningDisplay = (props: Props) => {
-  const { slugFieldInfo, useTrailingSlash } = props;
+  const { slugFieldInfo } = props;
   const sdk = useSDK<SidebarExtensionSDK>();
   const contentTypeName = sdk.contentType.name;
 
-  const { slugFieldIsConfigured, contentTypeHasSlugField, isPublished } = useSidebarSlug(
-    slugFieldInfo,
-    useTrailingSlash
-  );
+  const { slugFieldIsConfigured, contentTypeHasSlugField, isPublished } =
+    useSidebarSlug(slugFieldInfo);
 
   const { noSlugConfigMsg, noSlugContentMsg, notPublishedMsg } =
     getContentTypeSpecificMsg(contentTypeName);

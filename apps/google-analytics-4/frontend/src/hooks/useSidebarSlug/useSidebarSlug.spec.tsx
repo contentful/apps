@@ -12,7 +12,6 @@ jest.mock('../useGetFieldValue', () => jest.fn());
 
 interface Props {
   slugFieldInfo: ContentTypeValue;
-  useTrailingSlash: boolean;
 }
 
 const TestComponent = (props: Props) => {
@@ -23,7 +22,7 @@ const TestComponent = (props: Props) => {
     reportSlug,
     slugFieldValue,
     isContentTypeWarning,
-  } = useSidebarSlug(props.slugFieldInfo, props.useTrailingSlash);
+  } = useSidebarSlug(props.slugFieldInfo);
 
   return (
     <>
@@ -39,9 +38,18 @@ const TestComponent = (props: Props) => {
 
 const { getByText, findByText } = screen;
 
+const mockInstallationParams = {
+  parameters: {
+    installation: {
+      forceTrailingSlash: false,
+    },
+  },
+};
+
 describe('useSidebarSlug hook', () => {
   it('returns slug info and status when content types are configured correctly', () => {
     jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+      ...mockInstallationParams,
       ...jest.requireActual('@contentful/react-apps-toolkit'),
       entry: {
         ...jest.requireActual('@contentful/react-apps-toolkit').entry,
@@ -56,7 +64,7 @@ describe('useSidebarSlug hook', () => {
     jest.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
-    render(<TestComponent slugFieldInfo={slugFieldInfo} useTrailingSlash={false} />);
+    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
     expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
     expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
@@ -68,6 +76,7 @@ describe('useSidebarSlug hook', () => {
 
   it('returns slug info and status when content types not configured correctly', () => {
     jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+      ...mockInstallationParams,
       ...jest.requireActual('@contentful/react-apps-toolkit'),
       entry: {
         ...jest.requireActual('@contentful/react-apps-toolkit').entry,
@@ -83,7 +92,7 @@ describe('useSidebarSlug hook', () => {
 
     const slugFieldInfo = { slugField: '', urlPrefix: '/en-US' };
 
-    render(<TestComponent slugFieldInfo={slugFieldInfo} useTrailingSlash={false} />);
+    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
     expect(getByText('slugFieldIsConfigured: false')).toBeVisible();
     expect(getByText('contentTypeHasSlugField: false')).toBeVisible();
@@ -95,6 +104,7 @@ describe('useSidebarSlug hook', () => {
 
   it('returns slug info and status when field value is updated', async () => {
     jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+      ...mockInstallationParams,
       ...jest.requireActual('@contentful/react-apps-toolkit'),
       entry: {
         ...jest.requireActual('@contentful/react-apps-toolkit').entry,
@@ -112,7 +122,7 @@ describe('useSidebarSlug hook', () => {
       .mockImplementationOnce(() => '/differentFieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
-    render(<TestComponent slugFieldInfo={slugFieldInfo} useTrailingSlash={false} />);
+    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
     expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
     expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
@@ -128,7 +138,10 @@ describe('useSidebarSlug hook', () => {
   });
 
   it('returns slug info and status with trailing slash', async () => {
+    mockInstallationParams.parameters.installation.forceTrailingSlash = true;
+
     jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+      ...mockInstallationParams,
       ...jest.requireActual('@contentful/react-apps-toolkit'),
       entry: {
         ...jest.requireActual('@contentful/react-apps-toolkit').entry,
@@ -143,7 +156,7 @@ describe('useSidebarSlug hook', () => {
     jest.spyOn(getFieldValue, 'default').mockImplementation(() => '/fieldValue');
     const slugFieldInfo = { slugField: 'slugField', urlPrefix: '/en-US' };
 
-    render(<TestComponent slugFieldInfo={slugFieldInfo} useTrailingSlash={true} />);
+    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
 
     expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
     expect(getByText('contentTypeHasSlugField: true')).toBeVisible();

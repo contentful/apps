@@ -14,10 +14,9 @@ interface Props {
   api: Api;
   propertyId: string;
   slugFieldInfo: ContentTypeValue;
-  useTrailingSlash: boolean;
 }
 const AnalyticsApp = (props: Props) => {
-  const { api, propertyId, slugFieldInfo, useTrailingSlash } = props;
+  const { api, propertyId, slugFieldInfo } = props;
 
   const [runReportResponse, setRunReportResponse] = useState<RunReportData>({} as RunReportData);
   const [dateRange, setDateRange] = useState<DateRangeType>('lastWeek');
@@ -25,7 +24,7 @@ const AnalyticsApp = (props: Props) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
 
-  const { reportSlug, isContentTypeWarning } = useSidebarSlug(slugFieldInfo, useTrailingSlash);
+  const { reportSlug, isContentTypeWarning } = useSidebarSlug(slugFieldInfo);
 
   useAutoResizer();
 
@@ -93,9 +92,7 @@ const AnalyticsApp = (props: Props) => {
     }
 
     if (isContentTypeWarning) {
-      return (
-        <SlugWarningDisplay slugFieldInfo={slugFieldInfo} useTrailingSlash={useTrailingSlash} />
-      );
+      return <SlugWarningDisplay slugFieldInfo={slugFieldInfo} />;
     }
 
     return (

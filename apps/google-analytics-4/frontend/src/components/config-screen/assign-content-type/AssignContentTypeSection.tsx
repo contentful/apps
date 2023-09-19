@@ -41,7 +41,7 @@ const AssignContentTypeSection = (props: Props) => {
     originalContentTypes,
   } = props;
 
-  const [useTrailingSlash, setUseTrailingSlash] = useState<boolean>(false);
+  const [forceTrailingSlash, setForceTrailingSlash] = useState<boolean>(false);
 
   // Content type state
   const [contentTypes, setContentTypes] = useState<ContentTypes>({} as ContentTypes);
@@ -62,10 +62,11 @@ const AssignContentTypeSection = (props: Props) => {
   const sdk = useSDK<AppExtensionSDK>();
 
   useEffect(() => {
-    if (parameters.useTrailingSlash) setUseTrailingSlash(parameters.useTrailingSlash);
+    setLoadingContentTypes(true);
+    if (parameters.forceTrailingSlash) setForceTrailingSlash(parameters.forceTrailingSlash);
     if (parameters.contentTypes) setContentTypes(parameters.contentTypes);
     setLoadingContentTypes(false);
-  }, [parameters.contentTypes, parameters.useTrailingSlash]);
+  }, [parameters.contentTypes, parameters.forceTrailingSlash]);
 
   useEffect(() => {
     setHasContentTypes(Object.keys(contentTypes).length ? true : false);
@@ -95,8 +96,8 @@ const AssignContentTypeSection = (props: Props) => {
   }, [sdk]);
 
   const trailingSlashHandler = () => {
-    setUseTrailingSlash(!useTrailingSlash);
-    mergeSdkParameters({ useTrailingSlash: !useTrailingSlash });
+    setForceTrailingSlash(!forceTrailingSlash);
+    mergeSdkParameters({ forceTrailingSlash: !forceTrailingSlash });
     onIsValidContentTypeAssignment(true);
   };
 
@@ -178,7 +179,7 @@ const AssignContentTypeSection = (props: Props) => {
         <Checkbox
           name="use-trailing-slash"
           id="use-trailing-slash"
-          isChecked={useTrailingSlash}
+          isChecked={forceTrailingSlash}
           onChange={trailingSlashHandler}>
           Use trailing slash for all page paths
         </Checkbox>
