@@ -1,8 +1,8 @@
 {
   "actions": [
     {
-      "id": "aiigSelectFillStatic",
-      "name": "AI Image Generator Test Select Fill",
+      "id": "aiigSelectEditStatic",
+      "name": "AI Image Generator Test Select and Edit",
       "category": "Custom",
       "description": "This action returns a static result for testing purposes",
       "type": "function",
@@ -45,13 +45,13 @@
       ]
     },
     {
-      "id": "aiigSelectFill",
-      "name": "Edit and fill with AI Image",
+      "id": "aiigSelectEdit",
+      "name": "Select and edit with AI Image",
       "category": "Custom",
       "description": "This action will edit an image using OpenAI DALL-E 2 given a prompt, source image, and mask",
       "type": "function",
-      "path": "actions/aiig-select-fill.js",
-      "entryFile": "./backend/src/actions/aiig-select-fill.ts",
+      "path": "actions/aiig-select-edit.js",
+      "entryFile": "./backend/src/actions/aiig-select-edit.ts",
       "allowNetworks": [],
       "parameters": [
         {

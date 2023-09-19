@@ -1,6 +1,6 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { AppActionCallResponse, Upload } from '../types';
-import { ImageEditResult } from './aiig-select-fill';
+import { ImageEditResult } from './aiig-select-edit';
 
 interface AppActionCallParameters {
   prompt: string;
