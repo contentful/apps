@@ -7,7 +7,7 @@ export const styles = {
     },
   }),
   button: css({
-    marginTop: 20,
+    marginRight: 10,
   }),
   box: css({
     display: 'inline-block',
