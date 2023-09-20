@@ -21,7 +21,6 @@ const GettingStartedSection = () => {
   useEffect(() => {
     async function checkAppIsInstalled() {
       const installed = await sdk.app.isInstalled();
-
       if (installed) {
         setAppIsInstalled(true);
       }
