@@ -7,7 +7,7 @@ import sinon from 'sinon';
 import { OpenAiApiService } from '../services/openaiApiService';
 import OpenAI from 'openai';
 import sinonChai from 'sinon-chai';
-import { ImageEditResult, handler } from './aiig-select-fill';
+import { ImageEditResult, handler } from './aiig-select-edit';
 import { SysLink } from 'contentful-management';
 import { APIError } from 'openai/error';
 import { AppActionCallResponseError, AppActionCallResponseSuccess } from '../types';
@@ -15,7 +15,7 @@ import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 
 chai.use(sinonChai);
 
-describe('aiigSelectFill.handler', () => {
+describe('aiigSelectEdit.handler', () => {
   let cmaRequestStub: sinon.SinonStub;
   let context: AppActionCallContext;
 
