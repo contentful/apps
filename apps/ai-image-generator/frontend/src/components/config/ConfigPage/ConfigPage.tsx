@@ -5,6 +5,7 @@ import configPageCopies from 'constants/configPageCopies';
 import CostSection from 'components/config/CostSection/CostSection';
 import DisclaimerSection from 'components/config/DisclaimerSection/DisclaimerSection';
 import { styles } from './ConfigPage.styles';
+import GettingStartedSection from '../GettingStartedSection/GettingStartedSection';
 
 interface ParameterObject {
   [key: string]: string;
@@ -17,7 +18,7 @@ interface Props {
 
 const ConfigPage = (props: Props) => {
   const { handleConfig, parameters } = props;
-  const { pageTitle } = configPageCopies.configPage
+  const { pageTitle } = configPageCopies.configPage;
 
   return (
     <Box className={styles.body}>
@@ -28,6 +29,8 @@ const ConfigPage = (props: Props) => {
       <CostSection />
       <hr className={styles.splitter} />
       <DisclaimerSection />
+      <hr className={styles.splitter} />
+      <GettingStartedSection />
     </Box>
   );
 };
