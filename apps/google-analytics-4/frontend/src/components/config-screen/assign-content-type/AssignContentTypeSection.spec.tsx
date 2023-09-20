@@ -11,7 +11,7 @@ jest.mock('contentful-management', () => ({
 }));
 
 describe('Assign Content Type Section for Config Screen', () => {
-  it('can render the section heading', () => {
+  it('can render the section heading and trailing slash checkbox', () => {
     render(
       <AssignContentTypeSection
         mergeSdkParameters={() => {}}
@@ -23,5 +23,6 @@ describe('Assign Content Type Section for Config Screen', () => {
     );
 
     expect(screen.getByText('Content type configuration')).toBeVisible();
+    expect(screen.getByText('Use trailing slash for all page paths')).toBeVisible();
   });
 });
