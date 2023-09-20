@@ -1,18 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import GettingStartedSection from './GettingStartedSection';
 import configPageCopies from 'constants/configPageCopies';
-import { SDKProvider } from '@contentful/react-apps-toolkit';
+import { mockSdk } from '../../../../test/mocks';
 
 const { getByText } = screen;
 const { sectionTitle } = configPageCopies.gettingStartedSection;
 
+jest.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
+
 describe('GettingStartedSection component', () => {
   it('Component mounts without correct content', async () => {
-    render(
-      <SDKProvider>
-        <GettingStartedSection />
-      </SDKProvider>
-    );
+    render(<GettingStartedSection sdk={mockSdk} />);
 
     const title = getByText(sectionTitle);
 

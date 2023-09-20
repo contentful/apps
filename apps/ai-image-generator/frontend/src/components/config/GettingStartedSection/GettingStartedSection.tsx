@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, Flex, Subheading, Text } from '@contentful/f36-components';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import { styles } from './GettingStartedSection.styles';
 
 import configPageCopies from 'constants/configPageCopies';
@@ -9,12 +10,9 @@ import gettingstarted2 from '../../../assets/gettingstarted-2.png';
 import gettingstarted3 from '../../../assets/gettingstarted-3.png';
 import gettingstarted4 from '../../../assets/gettingstarted-4.png';
 import NewAssetButton from './NewAssetButton';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { ConfigAppSDK } from '@contentful/app-sdk';
 
-const GettingStartedSection = () => {
+const GettingStartedSection = ({ sdk }: { sdk: ConfigAppSDK }) => {
   const [appIsInstalled, setAppIsInstalled] = useState<boolean>(false);
-  const sdk = useSDK<ConfigAppSDK>();
   const { sectionTitle, sectionSubheading1, sectionSubheading2 } =
     configPageCopies.gettingStartedSection;
 
@@ -61,7 +59,11 @@ const GettingStartedSection = () => {
           <img src={gettingstarted4} alt="AI genertaed pug edit mask" />
         </Card>
       </Flex>
-      {appIsInstalled && <NewAssetButton />}
+      {appIsInstalled && (
+        <Flex marginTop="spacingL">
+          <NewAssetButton />
+        </Flex>
+      )}
     </Flex>
   );
 };

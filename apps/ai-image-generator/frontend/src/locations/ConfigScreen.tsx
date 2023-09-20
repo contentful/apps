@@ -62,7 +62,7 @@ const ConfigScreen = () => {
     }));
   };
 
-  return <ConfigPage parameters={parameters} handleConfig={handleConfig} />;
+  return <ConfigPage parameters={parameters} handleConfig={handleConfig} sdk={sdk} />;
 };
 
 export default ConfigScreen;
