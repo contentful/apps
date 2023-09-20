@@ -143,7 +143,7 @@ describe('aiigSelectEdit.handler', () => {
       const result = (await handler(parameters, context)) as AppActionCallResponseError;
       expect(result).to.have.property('ok', false);
       expect(result.errors).to.deep.include({
-        message: 'Boom!',
+        message: '403 Boom!',
         type: 'APIError',
       });
     });
