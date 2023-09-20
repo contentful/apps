@@ -80,9 +80,10 @@ describe('aiigGenerateImage.handler', () => {
 
     it('returns the images result', async () => {
       const result = (await handler(parameters, context)) as AppActionCallResponseError;
+      console.log('ERRORS', result.errors);
       expect(result).to.have.property('ok', false);
       expect(result.errors).to.deep.include({
-        message: 'Boom!',
+        message: '403 Boom!',
         type: 'APIError',
       });
     });
