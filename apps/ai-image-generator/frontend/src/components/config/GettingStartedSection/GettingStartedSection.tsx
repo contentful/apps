@@ -37,7 +37,7 @@ const GettingStartedSection = ({ sdk }: { sdk: ConfigAppSDK }) => {
     <Flex flexDirection="column">
       <Flex flexDirection="column">
         <Subheading>{sectionTitle}</Subheading>
-        <Text fontWeight="fontWeightMedium" fontColor="gray900">
+        <Text fontSize="fontSizeM" fontWeight="fontWeightNormal" fontColor="gray900">
           {sectionSubheading1}
         </Text>
       </Flex>
