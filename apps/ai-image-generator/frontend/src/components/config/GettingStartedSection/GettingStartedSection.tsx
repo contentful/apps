@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Card, Flex, Subheading, Text } from '@contentful/f36-components';
 import { styles } from './GettingStartedSection.styles';
 
@@ -8,10 +9,25 @@ import gettingstarted2 from '../../../assets/gettingstarted-2.png';
 import gettingstarted3 from '../../../assets/gettingstarted-3.png';
 import gettingstarted4 from '../../../assets/gettingstarted-4.png';
 import NewAssetButton from './NewAssetButton';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 
 const GettingStartedSection = () => {
+  const [appIsInstalled, setAppIsInstalled] = useState<boolean>(false);
+  const sdk = useSDK<ConfigAppSDK>();
   const { sectionTitle, sectionSubheading1, sectionSubheading2 } =
     configPageCopies.gettingStartedSection;
+
+  useEffect(() => {
+    async function checkAppIsInstalled() {
+      const installed = await sdk.app.isInstalled();
+
+      if (installed) {
+        setAppIsInstalled(true);
+      }
+    }
+    checkAppIsInstalled();
+  }, [sdk]);
 
   return (
     <Flex flexDirection="column">
@@ -46,7 +62,7 @@ const GettingStartedSection = () => {
           <img src={gettingstarted4} alt="AI genertaed pug edit mask" />
         </Card>
       </Flex>
-      <NewAssetButton />
+      {appIsInstalled && <NewAssetButton />}
     </Flex>
   );
 };
