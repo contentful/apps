@@ -69,7 +69,7 @@ const featureConfig: FeatureConfig = {
   },
   [AIFeature.SEO_KEYWORDS]: {
     dialogTitle: 'Generate SEO keywords',
-    buttonTitle: 'SEO Keywords',
+    buttonTitle: 'SEO keywords',
     prompt: seoKeywordsPrompt,
     dialogText: {
       fieldHelpText: `${FIELD_HELP_TEXT_BASE} to generate SEO keywords`,
@@ -80,7 +80,7 @@ const featureConfig: FeatureConfig = {
   },
   [AIFeature.SEO_DESCRIPTION]: {
     dialogTitle: 'Generate SEO description',
-    buttonTitle: 'SEO Description',
+    buttonTitle: 'SEO description',
     prompt: seoDescriptionPrompt,
     dialogText: {
       fieldHelpText: `${FIELD_HELP_TEXT_BASE} to generate SEO description`,
