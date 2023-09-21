@@ -24,10 +24,11 @@ const configPageCopies = {
   },
   gettingStartedSection: {
     sectionTitle: 'Getting Started',
+    sectionTitle2: 'Generate an image',
+    sectionTitle3: 'Select and edit',
     sectionSubheading1:
       'To generate a new image using AI, create a new media asset from the media library or from any content entry page with a media field. Then, a dialog will open inviting you to write a prompt.',
-    sectionSubheading2:
-      'To edit an asset using AI, select the AI edit tool icon button to view the edit options. Selecting an edit action will open a dialog and from there you can edit with AI.',
+    sectionSubheading2: 'To edit a portion of an asset using AI, select the AI icon button.',
     linkBody: 'Read the docs',
     linkSubstring: 'Read the docs',
     linkHref: 'https://www.contentful.com/help/ai-image-generator',
