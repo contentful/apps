@@ -8,7 +8,7 @@ import getStartedSelectAndEdit from '../../../assets/getStartedSelectAndEdit.jpg
 
 import TryContentGeneratorButton from './TryContentGeneratorButton';
 
-const GettingStartedSection = ({ appIsInstalled }: { appIsInstalled: boolean }) => {
+const GettingStartedSection = ({ appIsInstalled }: { appIsInstalled?: boolean }) => {
   const {
     sectionTitle,
     sectionSubTitle1,
@@ -25,7 +25,7 @@ const GettingStartedSection = ({ appIsInstalled }: { appIsInstalled: boolean }) 
         </Text>
       </Flex>
       <Flex flexDirection="column">
-        <Text marginTop="spacingM" fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
+        <Text marginTop="spacingM" fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
           {sectionSubTitle1}
         </Text>
         <Text
@@ -47,7 +47,7 @@ const GettingStartedSection = ({ appIsInstalled }: { appIsInstalled: boolean }) 
         </Card>
       </Flex>
       <Flex marginTop="spacingL" flexDirection="column">
-        <Text marginTop="spacingM" fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
+        <Text marginTop="spacingM" fontSize="fontSizeL" fontWeight="fontWeightDemiBold">
           {sectionSubTitle2}
         </Text>
         <Text

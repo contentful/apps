@@ -14,7 +14,7 @@ interface ParameterObject {
 interface Props {
   handleConfig: (value: ParameterObject) => void;
   parameters: AppInstallationParameters;
-  appIsInstalled: boolean;
+  appIsInstalled?: boolean;
 }
 
 const ConfigPage = (props: Props) => {
