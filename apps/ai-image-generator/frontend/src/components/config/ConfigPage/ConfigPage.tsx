@@ -4,6 +4,7 @@ import { AppInstallationParameters } from 'types/configPage';
 import configPageCopies from 'constants/configPageCopies';
 import CostSection from 'components/config/CostSection/CostSection';
 import DisclaimerSection from 'components/config/DisclaimerSection/DisclaimerSection';
+import GettingStartedSection from '../GettingStartedSection/GettingStartedSection';
 import { styles } from './ConfigPage.styles';
 
 interface ParameterObject {
@@ -13,11 +14,12 @@ interface ParameterObject {
 interface Props {
   handleConfig: (value: ParameterObject) => void;
   parameters: AppInstallationParameters;
+  appIsInstalled?: boolean;
 }
 
 const ConfigPage = (props: Props) => {
   const { handleConfig, parameters } = props;
-  const { pageTitle } = configPageCopies.configPage
+  const { pageTitle } = configPageCopies.configPage;
 
   return (
     <Box className={styles.body}>
@@ -28,6 +30,8 @@ const ConfigPage = (props: Props) => {
       <CostSection />
       <hr className={styles.splitter} />
       <DisclaimerSection />
+      <hr className={styles.splitter} />
+      <GettingStartedSection appIsInstalled={props.appIsInstalled} />
     </Box>
   );
 };

@@ -4,6 +4,7 @@ const mockSdk: any = {
     getParameters: jest.fn().mockReturnValueOnce({}),
     setReady: jest.fn(),
     getCurrentState: jest.fn(),
+    isInstalled: jest.fn(),
   },
   ids: {
     app: 'test-app',

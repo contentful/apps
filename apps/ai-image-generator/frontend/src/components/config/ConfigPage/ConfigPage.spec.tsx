@@ -10,7 +10,7 @@ describe('ConfigPage component', () => {
     render(<ConfigPage handleConfig={() => null} parameters={{}} />);
 
     const title = getByText(pageTitle);
-    const apiKeySection = getByTestId('api-key-section')
+    const apiKeySection = getByTestId('api-key-section');
 
     expect(title).toBeVisible();
     expect(apiKeySection).toBeVisible();

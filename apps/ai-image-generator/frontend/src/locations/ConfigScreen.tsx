@@ -7,6 +7,7 @@ import { AppInstallationParameters, InstallErrors } from 'types/configPage';
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});
+  const [appIsInstalled, setAppIsInstalled] = useState<boolean>(false);
   const sdk = useSDK<ConfigAppSDK>();
 
   useEffect(() => {
@@ -33,6 +34,8 @@ const ConfigScreen = () => {
       return false;
     }
 
+    setAppIsInstalled(true);
+
     return {
       parameters,
       targetState: currentState,
@@ -55,6 +58,16 @@ const ConfigScreen = () => {
     })();
   }, [sdk]);
 
+  useEffect(() => {
+    async function checkAppIsInstalled() {
+      const installed = await sdk.app.isInstalled();
+      if (installed) {
+        setAppIsInstalled(true);
+      }
+    }
+    checkAppIsInstalled();
+  }, [sdk]);
+
   const handleConfig = (updatedParams: AppInstallationParameters) => {
     setParameters((prevParameters) => ({
       ...prevParameters,
@@ -62,7 +75,13 @@ const ConfigScreen = () => {
     }));
   };
 
-  return <ConfigPage parameters={parameters} handleConfig={handleConfig} />;
+  return (
+    <ConfigPage
+      parameters={parameters}
+      handleConfig={handleConfig}
+      appIsInstalled={appIsInstalled}
+    />
+  );
 };
 
 export default ConfigScreen;
