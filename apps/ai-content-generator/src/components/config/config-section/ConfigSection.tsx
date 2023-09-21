@@ -12,7 +12,7 @@ interface Props {
   isApiKeyValid: boolean;
   localApiKey: string;
   onApiKeyChange: (key: string) => void;
-  validateApiKey: (key: string) => Promise<boolean>;
+  validateApiKey: (key: string) => Promise<void>;
 }
 
 const ConfigSection = (props: Props) => {

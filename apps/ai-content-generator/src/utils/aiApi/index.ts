@@ -1,5 +1,7 @@
 import { ChatCompletionRequestMessage } from 'openai';
 import { streamToParsedText } from './aiHelpers';
+import { validateResponseStatus } from './handleAiApiErrors';
+import { defaultModelId } from '@configs/ai/gptModels';
 
 /**
  * This class is used to interact with OpenAI's API.
@@ -9,10 +11,10 @@ import { streamToParsedText } from './aiHelpers';
  * @param model string
  */
 class AI {
-  constructor(baseUrl: string, apiKey: string, model: string) {
+  constructor(baseUrl: string, apiKey: string, model?: string) {
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
-    this.model = model;
+    this.model = model ?? defaultModelId;
     this.decoder = new TextDecoder('utf-8');
   }
 
@@ -92,25 +94,22 @@ class AI {
 
   /**
    * This function calls OpenAI's models endpoint in order to test whether the API Key is valid.
-   * @returns Promise<boolean>
+   * @returns Promise<Response>
    */
-  isApiKeyValid = async (): Promise<boolean> => {
+  getModels = async (): Promise<Response> => {
     const headers = {
       Authorization: `Bearer ${this.apiKey}`,
       'Content-Type': 'application/json',
     };
 
-    try {
-      const res = await fetch(this.baseUrl, {
-        method: 'GET',
-        headers,
-      });
+    const res = await fetch(this.baseUrl, {
+      method: 'GET',
+      headers,
+    });
 
-      return res.status === 200;
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
+    const responseJson = await res.json();
+    validateResponseStatus(res, responseJson);
+    return responseJson;
   };
 }
 

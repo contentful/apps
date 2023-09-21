@@ -10,6 +10,7 @@ interface Props {
   feature: AIFeature;
   isSaving: boolean;
   onSaving: (isSaving: boolean) => void;
+  shouldDisableButtons: boolean;
 }
 
 interface FieldLocales {
@@ -17,7 +18,7 @@ interface FieldLocales {
 }
 
 const FeatureButton = (props: Props) => {
-  const { feature, isSaving, onSaving } = props;
+  const { feature, isSaving, onSaving, shouldDisableButtons } = props;
   const buttonCopy = featureConfig[feature].buttonTitle;
   const sdk = useSDK<SidebarAppSDK>();
 
@@ -57,7 +58,7 @@ const FeatureButton = (props: Props) => {
 
   return (
     <Tooltip placement="top" id={feature}>
-      <Button css={styles.button} onClick={handleOnClick}>
+      <Button css={styles.button} onClick={handleOnClick} isDisabled={shouldDisableButtons}>
         {buttonCopy} {isOpeningDialog && <Spinner size="small" />}
       </Button>
     </Tooltip>

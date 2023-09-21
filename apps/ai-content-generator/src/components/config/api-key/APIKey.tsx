@@ -10,7 +10,7 @@ interface Props {
   isInvalid: boolean;
   localApiKey: string;
   onApiKeyChange: (key: string) => void;
-  validateApiKey: (key: string) => Promise<boolean>;
+  validateApiKey: (key: string) => Promise<void>;
 }
 
 const APIKey = (props: Props) => {

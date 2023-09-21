@@ -3,7 +3,12 @@ import featureConfig, { AIFeature } from '@configs/features/featureConfig';
 import FeatureButton from './feature-button/FeatureButton';
 import { useState } from 'react';
 
-const SidebarButtons = () => {
+interface Props {
+  shouldDisableButtons: boolean;
+}
+
+const SidebarButtons = (props: Props) => {
+  const { shouldDisableButtons } = props;
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSaving = (toggleTo: boolean) => {
@@ -17,6 +22,7 @@ const SidebarButtons = () => {
         feature={feature as AIFeature}
         isSaving={isSaving}
         onSaving={handleSaving}
+        shouldDisableButtons={shouldDisableButtons}
       />
     );
   });
