@@ -49,7 +49,7 @@ const GettingStartedSection = ({ sdk }: { sdk: ConfigAppSDK }) => {
         </Flex>
       )}
       <Flex flexDirection="column">
-        <Text marginTop="spacingM" fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
+        <Text marginTop="spacingXl" fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
           {sectionTitle2}
         </Text>
         <Text
