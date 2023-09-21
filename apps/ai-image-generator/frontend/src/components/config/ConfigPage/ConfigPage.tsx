@@ -4,9 +4,8 @@ import { AppInstallationParameters } from 'types/configPage';
 import configPageCopies from 'constants/configPageCopies';
 import CostSection from 'components/config/CostSection/CostSection';
 import DisclaimerSection from 'components/config/DisclaimerSection/DisclaimerSection';
-import { styles } from './ConfigPage.styles';
 import GettingStartedSection from '../GettingStartedSection/GettingStartedSection';
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import { styles } from './ConfigPage.styles';
 
 interface ParameterObject {
   [key: string]: string;
@@ -15,7 +14,7 @@ interface ParameterObject {
 interface Props {
   handleConfig: (value: ParameterObject) => void;
   parameters: AppInstallationParameters;
-  sdk: ConfigAppSDK;
+  appIsInstalled: boolean;
 }
 
 const ConfigPage = (props: Props) => {
@@ -32,7 +31,7 @@ const ConfigPage = (props: Props) => {
       <hr className={styles.splitter} />
       <DisclaimerSection />
       <hr className={styles.splitter} />
-      <GettingStartedSection sdk={props.sdk} />
+      <GettingStartedSection appIsInstalled={props.appIsInstalled} />
     </Box>
   );
 };

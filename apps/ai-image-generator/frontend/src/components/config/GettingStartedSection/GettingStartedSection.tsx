@@ -1,37 +1,21 @@
-import { useEffect, useState } from 'react';
-import { Card, Flex, HelpText, Text } from '@contentful/f36-components';
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import { Card, Flex, Text } from '@contentful/f36-components';
 import { styles } from './GettingStartedSection.styles';
 
 import configPageCopies from 'constants/configPageCopies';
 
-import getstarted1 from '../../../assets/get-started-1.jpg';
-import getstarted2 from '../../../assets/get-started-2.jpg';
-import Hyperlink from '../Hyperlink/Hyperlink';
+import getStartedImageGeneration from '../../../assets/getStartedImageGeneration.jpg';
+import getStartedSelectAndEdit from '../../../assets/getStartedSelectAndEdit.jpg';
+
 import TryContentGeneratorButton from './TryContentGeneratorButton';
 
-const GettingStartedSection = ({ sdk }: { sdk: ConfigAppSDK }) => {
-  const [appIsInstalled, setAppIsInstalled] = useState<boolean>(false);
+const GettingStartedSection = ({ appIsInstalled }: { appIsInstalled: boolean }) => {
   const {
     sectionTitle,
-    sectionTitle2,
-    sectionTitle3,
-    sectionSubheading1,
-    sectionSubheading2,
-    linkBody,
-    linkHref,
-    linkSubstring,
+    sectionSubTitle1,
+    sectionSubTitle2,
+    sectionSubHeading1,
+    sectionSubHeading2,
   } = configPageCopies.gettingStartedSection;
-
-  useEffect(() => {
-    async function checkAppIsInstalled() {
-      const installed = await sdk.app.isInstalled();
-      if (installed) {
-        setAppIsInstalled(true);
-      }
-    }
-    checkAppIsInstalled();
-  }, [sdk]);
 
   return (
     <Flex flexDirection="column">
@@ -40,46 +24,43 @@ const GettingStartedSection = ({ sdk }: { sdk: ConfigAppSDK }) => {
           {sectionTitle}
         </Text>
       </Flex>
-      {appIsInstalled && (
-        <Flex marginTop="spacingL">
-          <TryContentGeneratorButton />
-          <HelpText>
-            <Hyperlink body={linkBody} substring={linkSubstring} href={linkHref} />
-          </HelpText>
-        </Flex>
-      )}
       <Flex flexDirection="column">
-        <Text marginTop="spacingXl" fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
-          {sectionTitle2}
+        <Text marginTop="spacingM" fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
+          {sectionSubTitle1}
         </Text>
         <Text
-          marginTop="spacingM"
+          marginTop="spacingS"
           fontSize="fontSizeM"
           fontWeight="fontWeightNormal"
           fontColor="gray900">
-          {sectionSubheading1}
+          {sectionSubHeading1}
         </Text>
+        {appIsInstalled && (
+          <Flex marginTop="spacingL" alignItems="center">
+            <TryContentGeneratorButton />
+          </Flex>
+        )}
       </Flex>
       <Flex marginTop="spacingL">
         <Card className={styles.box}>
-          <img src={getstarted1} alt="AI generator dialog" />
+          <img src={getStartedImageGeneration} alt="AI generator dialog" />
         </Card>
       </Flex>
-      <Flex marginTop="spacingXl" flexDirection="column">
+      <Flex marginTop="spacingL" flexDirection="column">
         <Text marginTop="spacingM" fontSize="fontSizeM" fontWeight="fontWeightDemiBold">
-          {sectionTitle3}
+          {sectionSubTitle2}
         </Text>
         <Text
-          marginTop="spacingM"
+          marginTop="spacingS"
           fontSize="fontSizeM"
           fontWeight="fontWeightNormal"
           fontColor="gray900">
-          {sectionSubheading2}
+          {sectionSubHeading2}
         </Text>
       </Flex>
       <Flex marginTop="spacingL">
         <Card className={styles.box}>
-          <img src={getstarted2} alt="AI generator modal prompt" />
+          <img src={getStartedSelectAndEdit} alt="AI generator modal prompt" />
         </Card>
       </Flex>
     </Flex>
