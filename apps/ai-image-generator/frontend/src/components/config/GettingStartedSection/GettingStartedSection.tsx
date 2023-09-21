@@ -6,7 +6,7 @@ import configPageCopies from 'constants/configPageCopies';
 import getStartedImageGeneration from '../../../assets/getStartedImageGeneration.jpg';
 import getStartedSelectAndEdit from '../../../assets/getStartedSelectAndEdit.jpg';
 
-import TryContentGeneratorButton from './TryContentGeneratorButton';
+import TryImageGeneratorButton from './TryImageGeneratorButton';
 
 const GettingStartedSection = ({ appIsInstalled }: { appIsInstalled?: boolean }) => {
   const {
@@ -37,7 +37,7 @@ const GettingStartedSection = ({ appIsInstalled }: { appIsInstalled?: boolean })
         </Text>
         {appIsInstalled && (
           <Flex marginTop="spacingL" alignItems="center">
-            <TryContentGeneratorButton />
+            <TryImageGeneratorButton />
           </Flex>
         )}
       </Flex>

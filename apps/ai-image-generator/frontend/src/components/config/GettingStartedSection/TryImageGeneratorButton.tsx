@@ -4,7 +4,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './GettingStartedSection.styles';
 import { SyntheticEvent } from 'react';
 
-const TryContentGeneratorButton = () => {
+const TryImageGeneratorButton = () => {
   const sdk = useSDK<KnownAppSDK>();
 
   const handleTryAiig = async (e: SyntheticEvent) => {
@@ -28,4 +28,4 @@ const TryContentGeneratorButton = () => {
   );
 };
 
-export default TryContentGeneratorButton;
+export default TryImageGeneratorButton;

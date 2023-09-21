@@ -12,7 +12,7 @@ jest.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('GettingStartedSection component', () => {
   it('Component mounts without correct content', async () => {
-    render(<GettingStartedSection sdk={mockSdk} />);
+    render(<GettingStartedSection />);
 
     const title = getByText(sectionTitle);
 
