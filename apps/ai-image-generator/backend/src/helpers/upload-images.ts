@@ -43,7 +43,7 @@ export class UploadImages {
     const uploadPath = `${this.spaceId}!upload!${uploadId}`;
     const uploadDomain = UPLOAD_DOMAIN[this.uploadHost];
     if (!uploadDomain)
-      throw new Error(`Invalid cmaHost '${this.uploadHost}' -- could not find upload bucket`);
+      throw new Error(`Invalid uploadHost '${this.uploadHost}' -- could not find upload bucket`);
     return [uploadDomain, uploadPath].join('/');
   }
 }
