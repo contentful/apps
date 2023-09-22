@@ -7,14 +7,17 @@ import getStartedImageGeneration from '../../../assets/getStartedImageGeneration
 import getStartedSelectAndEdit from '../../../assets/getStartedSelectAndEdit.jpg';
 
 import TryImageGeneratorButton from './TryImageGeneratorButton';
+import { TextLink } from '@contentful/f36-components';
 
 const GettingStartedSection = ({ appIsInstalled }: { appIsInstalled?: boolean }) => {
   const {
     sectionTitle,
-    sectionSubTitle1,
-    sectionSubTitle2,
+    generateImageSubtitle: sectionSubTitle1,
+    selectAndEditSubtitle: sectionSubTitle2,
     sectionSubHeading1,
     sectionSubHeading2,
+    linkBody,
+    linkHref,
   } = configPageCopies.gettingStartedSection;
 
   return (
@@ -38,6 +41,7 @@ const GettingStartedSection = ({ appIsInstalled }: { appIsInstalled?: boolean })
         {appIsInstalled && (
           <Flex marginTop="spacingL" alignItems="center">
             <TryImageGeneratorButton />
+            <TextLink href={linkHref}>{linkBody}</TextLink>
           </Flex>
         )}
       </Flex>

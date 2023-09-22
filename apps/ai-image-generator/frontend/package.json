@@ -11,7 +11,6 @@
     "@emotion/react": "^11.11.1",
     "@storybook/addon-a11y": "^7.3.0",
     "contentful-management": "10.38.3",
-    "launchdarkly-react-client-sdk": "^3.0.8",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-scripts": "5.0.1",

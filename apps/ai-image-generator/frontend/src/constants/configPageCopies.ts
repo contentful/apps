@@ -24,8 +24,8 @@ const configPageCopies = {
   },
   gettingStartedSection: {
     sectionTitle: 'Getting Started',
-    sectionSubTitle1: 'Generate an image',
-    sectionSubTitle2: 'Select and edit',
+    generateImageSubtitle: 'Generate an image',
+    selectAndEditSubtitle: 'Select and edit',
     sectionSubHeading1:
       'To generate a new image using AI, create a new media asset from the media library or from any content entry page with a media field. Then, a dialog will open inviting you to write a prompt.',
     sectionSubHeading2: 'To edit a portion of an asset using AI, select the AI icon button.',
