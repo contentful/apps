@@ -1,0 +1,12 @@
+{
+  "deliveryFunctions": [
+    {
+      "id": "PotterDB",
+      "name": "Example Delivery Function querying Potter-DB GraphQL API",
+      "description": "This is an example including hosted delivery functions.",
+      "path": "delivery-functions/index.js",
+      "entryFile": "delivery-functions/index.ts",
+      "allowNetworks": ["api.potterdb.com"]
+    }
+  ]
+}
