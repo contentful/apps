@@ -18,6 +18,12 @@ const fieldMappingHandler: EventHandler<EventType.GRAPHQL_FIELD_MAPPING> = (even
 }
 
 const queryHandler: EventHandler<EventType.GRAPHQL_QUERY> = async (event, context) => {
+  /*
+   * Forwards the GraphQL query to the PotterDB GraphQL API as is.
+   * The `event` contains a boolean `isIntrospectionQuery` that can be used to
+   * determine if the query is an introspection query. This is useful when
+   * the introspection requires different handling that the actual query.
+   */
   const response = await fetch('https://api.potterdb.com/graphql', {
     body: JSON.stringify({
       query: event.query,
