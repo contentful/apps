@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.3.14](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.13...@contentful/ecommerce-app-base@3.3.14) (2023-09-22)
+
+### Bug Fixes
+
+- **deps:** bump @storybook/addon-a11y from 7.4.3 to 7.4.4 ([#4928](https://github.com/contentful/apps/issues/4928)) ([821a775](https://github.com/contentful/apps/commit/821a775bd803e1e607b50c4411ea76aeaa577947))
+
 ## [3.3.13](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.12...@contentful/ecommerce-app-base@3.3.13) (2023-09-22)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
