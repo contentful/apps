@@ -1,20 +1,22 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, Dispatch, useState } from 'react';
 import { Flex, FormControl, Spinner, Text, TextInput } from '@contentful/f36-components';
 import { APIKeyText } from '../configText';
 import HyperLink from '@components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { ConfigErrors } from '@components/config/configText';
+import AI from '@utils/aiApi';
+import { modelsBaseUrl } from '@configs/ai/baseUrl';
+import { ParameterAction, ParameterReducer } from '../parameterReducer';
 
 interface Props {
   apiKey: string;
   isInvalid: boolean;
-  localApiKey: string;
-  onApiKeyChange: (key: string) => void;
-  validateApiKey: (key: string) => Promise<void>;
+  dispatch: Dispatch<ParameterReducer>;
 }
 
 const APIKey = (props: Props) => {
-  const { apiKey, isInvalid, localApiKey, onApiKeyChange, validateApiKey } = props;
+  const { apiKey, isInvalid, dispatch } = props;
+  const [localApiKey, setLocalApiKey] = useState<string>(apiKey);
   const [isEditing, setIsEditing] = useState(false);
   const [isValidating, setIsValidating] = useState<boolean>(false);
 
@@ -22,11 +24,27 @@ const APIKey = (props: Props) => {
 
   const censorApiKey = (key: string) => key.replace(/.(?=.{4,}$)/g, '*');
 
+  const validateApiKey = async (key: string): Promise<boolean> => {
+    const ai = new AI(modelsBaseUrl, key, '');
+
+    try {
+      await ai.getModels();
+      return true;
+    } catch (e: unknown) {
+      console.error(e);
+      return false;
+    }
+  };
+
   const handleBlur = async () => {
     setIsEditing(false);
+
+    if (localApiKey === apiKey) return;
+
     setIsValidating(true);
 
-    await validateApiKey(localApiKey || apiKey);
+    const isValid = await validateApiKey(localApiKey || apiKey);
+    dispatch({ type: ParameterAction.UPDATE_APIKEY, value: localApiKey || apiKey, isValid });
 
     setIsValidating(false);
   };
@@ -42,7 +60,7 @@ const APIKey = (props: Props) => {
           type="text"
           name="apikey"
           placeholder="sk-...4svb"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => onApiKeyChange(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setLocalApiKey(e.target.value)}
           onBlur={handleBlur}
           isInvalid={displayInvalidMessage}
         />

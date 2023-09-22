@@ -8,6 +8,10 @@ import { DialogText } from '@configs/features/featureTypes';
 import { css } from '@emotion/react';
 import { tokenWarning } from '@configs/token-warning/tokenWarning';
 import { SegmentEvents } from '@configs/segment/segmentEvent';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { DialogAppSDK } from '@contentful/app-sdk';
+import { gptModels } from '@configs/ai/gptModels';
 
 const styles = {
   panel: css({
@@ -38,6 +42,10 @@ const OriginalTextPanel = (props: Props) => {
     generate();
   };
 
+  const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
+  const model = gptModels.find((model) => model.id === sdk.parameters.installation.model);
+  const textLimit = model?.textLimit;
+
   const handleOriginalTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const type = isNewText
       ? GeneratorAction.UPDATE_ORIGINAL_TEXT_PROMPT
@@ -49,8 +57,11 @@ const OriginalTextPanel = (props: Props) => {
   };
 
   const isTextAreaDisabled = isNewText ? false : !inputText;
+  const textaboveLimit = inputText.length >= (textLimit || Infinity);
+
   const isGenerateButtonDisabled = !inputText || !hasOutputField;
   const placeholderText = isNewText ? dialogText.promptPlaceholder : dialogText.fieldPlaceholder;
+
   const helpText = isNewText ? dialogText.promptHelpText : dialogText.fieldHelpText;
   const helpTextProps = isGenerateButtonDisabled ? { helpText } : { warningMessage: tokenWarning };
 
@@ -63,8 +74,9 @@ const OriginalTextPanel = (props: Props) => {
         placeholder={placeholderText}
         hasError={hasError}
         errorMessage={errorMessage}
+        sizeValidation={{ max: textLimit }}
         {...helpTextProps}>
-        <Button onClick={handleGenerate} isDisabled={isGenerateButtonDisabled || isGenerating}>
+        <Button onClick={handleGenerate} isDisabled={isGenerateButtonDisabled || textaboveLimit}>
           Generate
         </Button>
       </TextFieldWithButtons>

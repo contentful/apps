@@ -1,6 +1,5 @@
+import { ProfileFields, ProfileType } from '@components/config/appInstallationParameters';
 import { ChatCompletionRequestMessage } from 'openai';
-import { ProfileFields } from '@components/config/configText';
-import { ProfileType } from '@locations/ConfigScreen';
 
 const generateBrandProfile = (profile: ProfileType) => {
   const { PROFILE, ADDITIONAL, VALUES, TONE, AUDIENCE, EXCLUDE, INCLUDE } = ProfileFields;

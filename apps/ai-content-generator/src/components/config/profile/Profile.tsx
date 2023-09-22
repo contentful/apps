@@ -1,13 +1,13 @@
 import { Dispatch } from 'react';
 import { FormControl } from '@contentful/f36-components';
-import { ParameterReducer } from '../parameterReducer';
-import { BrandProfileFields, FieldTypes, ProfileFields } from '../configText';
-import { ProfileType } from '@locations/ConfigScreen';
+import { ParameterReducer, Validator } from '../parameterReducer';
+import { BrandProfileFields, FieldTypes } from '../configText';
 import ProfileTextArea from './ProfileTextArea';
 import ProfileTextInput from './ProfileTextInput';
+import { ProfileType, ProfileFields } from '../appInstallationParameters';
 
 interface Props {
-  profile: ProfileType;
+  profile: Validator<ProfileType>;
   dispatch: Dispatch<ParameterReducer>;
 }
 
@@ -20,9 +20,10 @@ const Profile = (props: Props) => {
         const marginBottomStyle = field.id === ProfileFields.ADDITIONAL ? 'none' : 'spacingL';
 
         const fieldProps = {
-          value: profile[field.id] ?? '',
+          value: profile[field.id]?.value ?? '',
           name: field.title,
           id: field.id,
+          textLimit: field.textLimit,
           placeholder: field.textAreaPlaceholder,
           dispatch: dispatch,
         };

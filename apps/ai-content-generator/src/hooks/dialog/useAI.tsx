@@ -2,11 +2,13 @@ import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
 import { chatCompletionsBaseUrl } from '@configs/ai/baseUrl';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppInstallationParameters, ProfileType } from '@locations/ConfigScreen';
 import AI from '@utils/aiApi';
 import { ChatCompletionRequestMessage } from 'openai';
 import { useEffect, useMemo, useState } from 'react';
 import { defaultModelId } from '@configs/ai/gptModels';
+import AppInstallationParameters, {
+  ProfileType,
+} from '@components/config/appInstallationParameters';
 
 export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
