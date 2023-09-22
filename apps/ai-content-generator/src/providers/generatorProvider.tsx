@@ -21,7 +21,7 @@ interface GeneratorContextProps {
   defaultLocale: string;
 
   dispatch: Dispatch<GeneratorReducer>;
-  trackGeneratorEvent: (event: SegmentEvents) => void;
+  trackGeneratorEvent: (event: SegmentEvents, action?: SegmentAction) => void;
   segmentEventData?: SegmentEventData;
   feature: AIFeature;
 }
@@ -46,7 +46,7 @@ const defaultContext = {
   fieldLocales: {},
   localeNames: {},
   defaultLocale: '',
-  trackGeneratorEvent: (() => {}) as (event: SegmentEvents) => void,
+  trackGeneratorEvent: (() => {}) as (event: SegmentEvents, action?: SegmentAction) => void,
 
   dispatch: (() => {}) as Dispatch<GeneratorReducer>,
   feature: AIFeature.TITLE,
