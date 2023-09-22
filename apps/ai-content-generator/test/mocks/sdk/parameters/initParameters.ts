@@ -1,4 +1,4 @@
-import { AppInstallationParameters } from '@locations/ConfigScreen';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 
 const init: AppInstallationParameters = {
   model: '',

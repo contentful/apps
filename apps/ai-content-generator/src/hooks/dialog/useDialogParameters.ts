@@ -1,6 +1,6 @@
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { DialogInvocationParameters } from '@locations/Dialog';
 import { useEffect, useState } from 'react';
 

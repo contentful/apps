@@ -1,4 +1,4 @@
-import { AppInstallationParameters } from '@locations/ConfigScreen';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 
 const happyPath: AppInstallationParameters = {
   model: 'gpt-3.5-turbo',

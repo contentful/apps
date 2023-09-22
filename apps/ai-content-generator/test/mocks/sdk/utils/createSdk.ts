@@ -1,4 +1,3 @@
-import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { vi } from 'vitest';
 import {
   mockGetManyContentType,
@@ -6,6 +5,7 @@ import {
   mockContentType,
 } from '../contentTypes/mockContentType';
 import { mockEntry } from '../entry/mockEntry';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 
 const createSDK = (parameters: AppInstallationParameters) => {
   return {

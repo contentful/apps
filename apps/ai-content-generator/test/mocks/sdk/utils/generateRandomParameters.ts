@@ -1,5 +1,5 @@
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 import { gptModels } from '@configs/ai/gptModels';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
 
 const generateRandomParameters = (): AppInstallationParameters => {
   const randomModelIndex = Math.floor(Math.random() * gptModels.length);
