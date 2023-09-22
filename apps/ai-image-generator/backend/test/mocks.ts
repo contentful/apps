@@ -27,6 +27,8 @@ export const makeMockAppActionCallContext = (
       environmentId: 'environment-id',
       appInstallationId: 'app-installation-id',
       userId: 'user-id',
+      cmaHost: 'api.contentful.com',
+      uploadHost: 'upload.contentful.com',
     },
   };
 };

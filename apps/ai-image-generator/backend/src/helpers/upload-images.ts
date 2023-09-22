@@ -2,15 +2,18 @@ import { PlainClientAPI, UploadProps } from 'contentful-management';
 import { ImageWithStream, ImageWithUpload } from '../types';
 
 const UPLOAD_DOMAIN: Record<string, URL> = {
-  us: new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
-  eu: new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
+  'upload.contentful.com': new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
+  'upload.eu.contentful.com': new URL(
+    'https://s3.eu-west-1.amazonaws.com/upload-api.eu.contentful.com'
+  ),
 };
 
 export class UploadImages {
   constructor(
     readonly imagesWithStreams: ImageWithStream[],
     readonly cmaClient: PlainClientAPI,
-    readonly spaceId: string
+    readonly spaceId: string,
+    readonly uploadHost: string
   ) {}
 
   async execute(): Promise<ImageWithUpload[]> {
@@ -35,11 +38,13 @@ export class UploadImages {
     return await this.cmaClient.upload.create({ spaceId: this.spaceId }, { file });
   }
 
-  // TODO Handle eu!
   private urlFromUpload(upload: UploadProps): string {
     const uploadId = upload.sys.id;
     const uploadPath = `${this.spaceId}!upload!${uploadId}`;
-    return [UPLOAD_DOMAIN.us.toString(), uploadPath].join('/');
+    const uploadDomain = UPLOAD_DOMAIN[this.uploadHost];
+    if (!uploadDomain)
+      throw new Error(`Invalid uploadHost '${this.uploadHost}' -- could not find upload bucket`);
+    return [uploadDomain, uploadPath].join('/');
   }
 }
 
@@ -47,8 +52,9 @@ export const uploadImages = async (params: {
   imagesWithStreams: ImageWithStream[];
   cmaClient: PlainClientAPI;
   spaceId: string;
+  uploadHost: string;
 }) => {
-  const { imagesWithStreams, cmaClient, spaceId } = params;
-  const imageUploader = new UploadImages(imagesWithStreams, cmaClient, spaceId);
+  const { imagesWithStreams, cmaClient, spaceId, uploadHost } = params;
+  const imageUploader = new UploadImages(imagesWithStreams, cmaClient, spaceId, uploadHost);
   return imageUploader.execute();
 };
