@@ -25,7 +25,7 @@ export const handler = async (
 ): Promise<AppActionCallResponse<ImageEditResult>> => {
   const {
     cma,
-    appActionCallContext: { appInstallationId, spaceId, cmaHost },
+    appActionCallContext: { appInstallationId, spaceId, uploadHost },
   } = context;
 
   let images: ImageWithUpload[];
@@ -72,7 +72,7 @@ export const handler = async (
       imagesWithStreams: processedImages,
       cmaClient: cma,
       spaceId,
-      cmaHost,
+      uploadHost,
     });
   } catch (e) {
     if (!(e instanceof Error)) {

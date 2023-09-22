@@ -10,7 +10,7 @@ describe('UploadImages', () => {
   const spaceId = 'spaceId';
   const uploadId = 'uploadId';
   const sourceUrl = 'http://www.example.com';
-  const cmaHost = 'api.contentful.com';
+  const uploadHost = 'upload.contentful.com';
   const cmaClientStub = sinon.stub();
 
   describe('execute', () => {
@@ -44,7 +44,7 @@ describe('UploadImages', () => {
       };
 
       const cmaClient = makeMockPlainClient([mockUploadApiResponse], cmaClientStub);
-      uploadImages = new UploadImages(imagesWithStreams, cmaClient, spaceId, cmaHost);
+      uploadImages = new UploadImages(imagesWithStreams, cmaClient, spaceId, uploadHost);
     });
 
     it('returns images with correct urls', async () => {

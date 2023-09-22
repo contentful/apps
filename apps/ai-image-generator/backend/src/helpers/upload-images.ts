@@ -2,8 +2,8 @@ import { PlainClientAPI, UploadProps } from 'contentful-management';
 import { ImageWithStream, ImageWithUpload } from '../types';
 
 const UPLOAD_DOMAIN: Record<string, URL> = {
-  'api.contentful.com': new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
-  'api.eu.contentful.com': new URL(
+  'upload.contentful.com': new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
+  'upload.eu.contentful.com': new URL(
     'https://s3.eu-central-1.amazonaws.com/upload-api.eu.contentful.com'
   ),
 };
@@ -13,7 +13,7 @@ export class UploadImages {
     readonly imagesWithStreams: ImageWithStream[],
     readonly cmaClient: PlainClientAPI,
     readonly spaceId: string,
-    readonly cmaHost: string
+    readonly uploadHost: string
   ) {}
 
   async execute(): Promise<ImageWithUpload[]> {
@@ -41,9 +41,9 @@ export class UploadImages {
   private urlFromUpload(upload: UploadProps): string {
     const uploadId = upload.sys.id;
     const uploadPath = `${this.spaceId}!upload!${uploadId}`;
-    const uploadDomain = UPLOAD_DOMAIN[this.cmaHost];
+    const uploadDomain = UPLOAD_DOMAIN[this.uploadHost];
     if (!uploadDomain)
-      throw new Error(`Invalid cmaHost '${this.cmaHost}' -- could not find upload bucket`);
+      throw new Error(`Invalid cmaHost '${this.uploadHost}' -- could not find upload bucket`);
     return [uploadDomain, uploadPath].join('/');
   }
 }
@@ -52,9 +52,9 @@ export const uploadImages = async (params: {
   imagesWithStreams: ImageWithStream[];
   cmaClient: PlainClientAPI;
   spaceId: string;
-  cmaHost: string;
+  uploadHost: string;
 }) => {
-  const { imagesWithStreams, cmaClient, spaceId, cmaHost } = params;
-  const imageUploader = new UploadImages(imagesWithStreams, cmaClient, spaceId, cmaHost);
+  const { imagesWithStreams, cmaClient, spaceId, uploadHost } = params;
+  const imageUploader = new UploadImages(imagesWithStreams, cmaClient, spaceId, uploadHost);
   return imageUploader.execute();
 };

@@ -16,6 +16,7 @@ class AppActionRunner {
     this.client = createClient(
       {
         accessToken: this.accessToken,
+        host: 'api.eu.contentful.com',
       },
       { type: 'plain' }
     );
