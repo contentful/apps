@@ -4,7 +4,7 @@ import { ImageWithStream, ImageWithUpload } from '../types';
 const UPLOAD_DOMAIN: Record<string, URL> = {
   'upload.contentful.com': new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
   'upload.eu.contentful.com': new URL(
-    'https://s3.eu-central-1.amazonaws.com/upload-api.eu.contentful.com'
+    'https://s3.eu-west-1.amazonaws.com/upload-api.eu.contentful.com'
   ),
 };
 
