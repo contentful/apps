@@ -68,7 +68,7 @@ const AssignContentTypeCard = (props: AssignContentTypeCardProps) => {
         />
         <HeaderLabel
           label="Slug field"
-          helpText='The field on your content type where the page path is stored. Example: This field would typically have short slug text like "a-blog-post-i-wrote" that appears in the URL for the page.'
+          helpText='The field on your content type where the page path is stored. If you select a short text list field, the elements in the array will be joined by a forward slash. Example: This field would typically have short slug text like "a-blog-post-i-wrote" that appears in the URL for the page.'
         />
         <HeaderLabel
           label="URL prefix"

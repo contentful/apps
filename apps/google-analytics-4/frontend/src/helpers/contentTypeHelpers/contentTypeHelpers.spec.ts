@@ -52,6 +52,14 @@ const mockContentTypeItems: ContentTypeProps[] = [
         localized: false,
         required: false,
       },
+      {
+        id: 'tags',
+        name: 'Tags',
+        type: 'Array',
+        localized: false,
+        required: false,
+        items: { type: 'Symbol' },
+      },
     ],
   },
 ];
@@ -68,8 +76,8 @@ describe('contentTypeHelpers', () => {
     const fields = result['layout'].fields;
 
     expect(Object.keys(result).length).toEqual(1);
-    // Fields that are not short text should be removed
-    expect(fields.length).toEqual(2);
+    // Fields that are not short text or short text list should be removed
+    expect(fields.length).toEqual(3);
     // Fields should be sorted alphabetically
     expect(fields[0].id).toEqual('slug');
   });

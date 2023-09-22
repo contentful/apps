@@ -1,7 +1,11 @@
-import { EditorInterface } from '@contentful/app-sdk';
+import { ContentTypeField, EditorInterface } from '@contentful/app-sdk';
 import { ContentTypeProps } from 'contentful-management';
 import { AllContentTypes, EditorInterfaceAssignment } from '../../types';
 import sortBy from 'lodash/sortBy';
+
+interface FieldItem {
+  type: string;
+}
 
 export const generateEditorInterfaceAssignments = (
   currentEditorInterface: Partial<EditorInterface>,
@@ -37,17 +41,19 @@ export const generateEditorInterfaceAssignments = (
   return { ...newAssignments, ...assignmentsToAdd };
 };
 
+// only include short text and short text list fields in the slug field dropdown
+const isCompatibleFieldType = (field: ContentTypeField): boolean => {
+  const isArray = field.type === 'Array';
+  return field.type === 'Symbol' || (isArray && (field.items as FieldItem).type === 'Symbol');
+};
+
 export const sortAndFormatAllContentTypes = (
   contentTypeItems: ContentTypeProps[]
 ): AllContentTypes => {
   const sortedContentTypes = sortBy(contentTypeItems, ['name']);
 
   const formattedContentTypes = sortedContentTypes.reduce((acc: AllContentTypes, contentType) => {
-    // only include short text fields in the slug field dropdown
-    const fields = sortBy(
-      contentType.fields.filter((field) => field.type === 'Symbol'),
-      ['name']
-    );
+    const fields = sortBy(contentType.fields.filter(isCompatibleFieldType), ['name']);
 
     if (fields.length) {
       acc[contentType.sys.id] = {

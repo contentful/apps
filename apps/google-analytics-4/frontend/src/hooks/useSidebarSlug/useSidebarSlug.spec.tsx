@@ -30,7 +30,7 @@ const TestComponent = (props: Props) => {
       <div>contentTypeHasSlugField: {contentTypeHasSlugField.toString()}</div>
       <div>isPublished: {isPublished.toString()}</div>
       <div>reportSlug: {reportSlug}</div>
-      <div>slugFieldValue: {slugFieldValue}</div>
+      <div>slugFieldValue: {slugFieldValue.toString()}</div>
       <div>isContentTypeWarning: {isContentTypeWarning.toString()}</div>
     </>
   );
@@ -135,6 +135,33 @@ describe('useSidebarSlug hook', () => {
 
     expect(newSlugFieldValue).toBeVisible();
     expect(getByText('reportSlug: /en-US/differentFieldValue')).toBeVisible();
+  });
+
+  it('returns slug info and status when a short text list field is selected and no URL prefix', async () => {
+    jest.spyOn(useSDK, 'useSDK').mockImplementation(() => ({
+      ...mockInstallationParams,
+      ...jest.requireActual('@contentful/react-apps-toolkit'),
+      entry: {
+        ...jest.requireActual('@contentful/react-apps-toolkit').entry,
+        fields: { slugField: {} },
+        onSysChanged: jest.fn((cb) =>
+          cb({
+            publishedAt: '2020202',
+          } as unknown as EntrySys)
+        ),
+      },
+    }));
+    jest.spyOn(getFieldValue, 'default').mockImplementation(() => ['category', 'pants', 'jeans']);
+    const slugFieldInfo = { slugField: 'slugField', urlPrefix: '' };
+
+    render(<TestComponent slugFieldInfo={slugFieldInfo} />);
+
+    expect(getByText('slugFieldIsConfigured: true')).toBeVisible();
+    expect(getByText('contentTypeHasSlugField: true')).toBeVisible();
+    expect(getByText('isPublished: true')).toBeVisible();
+    expect(getByText('reportSlug: /category/pants/jeans')).toBeVisible();
+    expect(getByText('slugFieldValue: category,pants,jeans')).toBeVisible();
+    expect(getByText('isContentTypeWarning: false')).toBeVisible();
   });
 
   it('returns slug info and status with trailing slash', async () => {
