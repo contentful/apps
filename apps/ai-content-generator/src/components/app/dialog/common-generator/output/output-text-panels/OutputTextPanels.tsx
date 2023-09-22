@@ -8,6 +8,7 @@ import GeneratedTextPanel from './generated-text-panel/GeneratedTextPanel';
 import OriginalTextPanel from './original-text-panel/OriginalTextPanel';
 import featureConfig from '@configs/features/featureConfig';
 import { ContentTypeFieldValidation } from 'contentful-management';
+import { SegmentAction, SegmentEvents } from '@configs/segment/segmentEvent';
 
 interface Props {
   onGenerate: (generateMessage: GenerateMessage) => void;
@@ -29,13 +30,14 @@ const OutputTextPanels = (props: Props) => {
     outputFieldValidation,
     isNewText,
   } = props;
-  const { feature, entryId } = useContext(GeneratorContext);
+  const { feature, entryId, trackGeneratorEvent } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
 
   const sdk = useSDK<DialogAppSDK>();
 
   const handleEntryApply = async () => {
     const successfullyUpdated = await updateEntry(outputFieldId, outputFieldLocale, ai.output);
+    trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
 
     if (successfullyUpdated) {
       sdk.close();
@@ -53,13 +55,14 @@ const OutputTextPanels = (props: Props) => {
       <OriginalTextPanel
         inputText={inputText}
         generate={generate}
+        outputFieldLocale={outputFieldLocale}
         isNewText={isNewText}
         hasOutputField={Boolean(outputFieldId)}
         dialogText={dialogText}
       />
       <GeneratedTextPanel
         ai={ai}
-        generate={generate}
+        generate={() => generate}
         outputFieldValidation={outputFieldValidation}
         apply={handleEntryApply}
       />

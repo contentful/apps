@@ -5,6 +5,9 @@ import GeneratorProvider from '@providers/generatorProvider';
 import { useSDK, useAutoResizer } from '@contentful/react-apps-toolkit';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import RewriteGenerator from '@components/app/dialog/rewrite-generator/RewriteGenerator';
+import { useContext } from 'react';
+import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
+import { SegmentEvents } from '@configs/segment/segmentEvent';
 
 export interface FieldLocales {
   [key: string]: string[];
@@ -18,12 +21,19 @@ type DialogInvocationParameters = {
 
 const Dialog = () => {
   const { feature, entryId, isLoading, fieldLocales } = useDialogParameters();
+  const { trackEvent } = useContext(SegmentAnalyticsContext);
+
   const sdk = useSDK<DialogAppSDK>();
+
   useAutoResizer();
 
   if (isLoading) {
     return null;
   }
+
+  trackEvent(SegmentEvents.FLOW_START, {
+    feature_id: feature,
+  });
 
   const localeNames = sdk.locales.names;
   const defaultLocale = sdk.locales.default;

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Box, Flex } from '@contentful/f36-components';
 import { GeneratorContext } from '@providers/generatorProvider';
 import SourceAndFieldSelectors from '@components/app/dialog/common-generator/field-selector/SourceAndFieldSelectors';
@@ -8,6 +8,8 @@ import { TextFields } from '@hooks/dialog/useSupportedFields';
 import generatorReducer, { GeneratorParameters } from './generatorReducer';
 import featureConfig from '@configs/features/featureConfig';
 import { GenerateMessage } from '@hooks/dialog/useAI';
+import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
+import { SegmentEventData } from '@configs/segment/segmentEvent';
 
 const initialParameters: GeneratorParameters = {
   isNewText: false,
@@ -24,19 +26,37 @@ const initialParameters: GeneratorParameters = {
 
 const CommonGenerator = () => {
   const { setProviderData, feature, localeNames } = useContext(GeneratorContext);
+  const { trackEvent } = useContext(SegmentAnalyticsContext);
 
   const [parameters, dispatch] = useReducer(generatorReducer, initialParameters);
   const [headerHeight, setHeaderHeight] = useState(0);
   const headerRef = useRef<HTMLElement>(null);
 
+  const segmentEventData: SegmentEventData = useMemo(
+    () => ({
+      feature_id: feature,
+      from_prompt: parameters.isNewText,
+      source_field: parameters.isNewText ? '' : parameters.sourceField.split(':')[1],
+      content_generation_prompt: parameters.originalText.prompt || undefined,
+      target_locale: parameters.output.locale,
+    }),
+    [
+      feature,
+      parameters.isNewText,
+      parameters.originalText.prompt,
+      parameters.output.locale,
+      parameters.sourceField,
+    ]
+  );
+
   const updateProviderData = () => {
     setProviderData({
       dispatch,
+      segmentEventData,
     });
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(updateProviderData, [dispatch]);
+  useEffect(updateProviderData, [dispatch, segmentEventData, setProviderData, trackEvent]);
 
   useEffect(() => {
     if (headerRef.current) {

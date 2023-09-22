@@ -6,16 +6,17 @@ const getTrackedAppData = (sdk: BaseAppSDK<AppInstallationParameters>): SegmentA
   const { installation } = sdk.parameters;
 
   return {
-    gptModel: installation?.model,
+    gpt_model: installation?.model,
 
-    // Brand Profile
-    profile: !!installation?.profile,
-    values: !!installation?.brandProfile?.values,
-    tone: !!installation?.brandProfile?.tone,
-    exclude: !!installation?.brandProfile?.exclude,
-    include: !!installation?.brandProfile?.include,
-    audience: !!installation?.brandProfile?.audience,
-    additional: !!installation?.brandProfile?.additional,
+    config_options: {
+      has_profile: !!installation?.profile,
+      has_values: !!installation?.brandProfile?.values,
+      has_tone: !!installation?.brandProfile?.tone,
+      has_exclude: !!installation?.brandProfile?.exclude,
+      has_include: !!installation?.brandProfile?.include,
+      has_audience: !!installation?.brandProfile?.audience,
+      has_additional: !!installation?.brandProfile?.additional,
+    },
   };
 };
 

@@ -4,7 +4,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useCallback, useContext } from 'react';
 import { generateEditorInterfaceAssignments } from '@utils/config/contentTypeHelpers';
 import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
-import { SegmentAction } from '@configs/segment/segmentEvent';
+import { SegmentEvents } from '@configs/segment/segmentEvent';
 
 /**
  * This hook is used to save the parameters of the app.
@@ -41,7 +41,7 @@ const useSaveConfigHandler = (
       1
     );
 
-    trackEvent(SegmentAction.CONFIG_SAVED);
+    trackEvent(SegmentEvents.CONFIG_SAVED);
     const newAppState: AppState = {
       EditorInterface: newEditorInterfaceAssignments,
     };

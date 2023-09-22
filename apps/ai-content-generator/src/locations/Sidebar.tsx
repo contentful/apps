@@ -11,7 +11,7 @@ import HyperLink from '@components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { useContext, useEffect } from 'react';
 import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
-import { SegmentAction } from '@configs/segment/segmentEvent';
+import { SegmentEvents } from '@configs/segment/segmentEvent';
 
 const Sidebar = () => {
   useAutoResizer();
@@ -21,7 +21,7 @@ const Sidebar = () => {
   const { key, model, profile } = sdk.parameters.installation;
 
   useEffect(() => {
-    trackEvent(SegmentAction.SIDEBAR_RENDERED);
+    trackEvent(SegmentEvents.SIDEBAR_RENDERED);
   }, [trackEvent]);
 
   if (!key || !model) {

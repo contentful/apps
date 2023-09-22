@@ -2,20 +2,15 @@ import { ConfigAppSDK, DialogAppSDK, SidebarAppSDK } from '@contentful/app-sdk';
 import { AnalyticsBrowser } from '@segment/analytics-next';
 import { createContext, ReactNode } from 'react';
 import { getUserCookieConsent } from '@utils/segment/cookieConsent';
-import segmentEventName from '@configs/segment/segmentEventName';
-import {
-  SegmentAction,
-  SegmentEvent,
-  SegmentEventData,
-  SegmentIdentify,
-} from '@configs/segment/segmentEvent';
+import { SegmentEvent, SegmentEventData, SegmentIdentify } from '@configs/segment/segmentEvent';
 import getTrackedAppData from '@utils/segment/getTrackedAppData';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { SegmentEvents } from '@configs/segment/segmentEvent';
 
 interface SegmentAnalyticsContextProps {
   identify: () => void;
-  trackEvent: (action: SegmentAction, trackingData?: SegmentEventData) => void;
+  trackEvent: (action: SegmentEvents, trackingData?: SegmentEventData) => void;
 }
 
 type PossibleSDK =
@@ -31,7 +26,7 @@ export const SegmentAnalyticsContext = createContext<SegmentAnalyticsContextProp
 });
 
 export const SegmentAnalyticsProvider = (props: { children: ReactNode }) => {
-  const writeKey = (import.meta.env.VITE_SEGMENT_WRITE_KEY as string) || '';
+  const writeKey = (import.meta.env.VITE_AICG_SEGMENT_WRITE_KEY as string) || '';
   const sdk = useSDK<PossibleSDK>();
 
   const segmentAnalytics = getUserCookieConsent(sdk, 'ANALYTICS')
@@ -52,18 +47,17 @@ export const SegmentAnalyticsProvider = (props: { children: ReactNode }) => {
     segmentAnalytics.identify(sdk.ids.user, payload);
   };
 
-  const trackEvent = (action: SegmentAction, eventData: SegmentEventData = {}) => {
+  const trackEvent = (segmentEvent: SegmentEvents, eventData: SegmentEventData = {}) => {
     if (!segmentAnalytics) {
       return;
     }
 
     const payload: SegmentEvent = {
-      action: action,
       ...getTrackedAppData(sdk),
       ...eventData,
     };
 
-    segmentAnalytics.track(segmentEventName, payload);
+    segmentAnalytics.track(segmentEvent, payload);
   };
 
   return (
