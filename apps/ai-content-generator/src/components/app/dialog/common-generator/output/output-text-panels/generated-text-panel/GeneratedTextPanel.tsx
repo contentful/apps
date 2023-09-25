@@ -25,9 +25,11 @@ interface Props {
   apply: () => void;
 }
 
+const errorMessage = 'The stream was interrupted. Please try again.';
+
 const GeneratedTextPanel = (props: Props) => {
   const { generate, ai, outputFieldValidation, apply } = props;
-  const { sendStopSignal, output, setOutput, isGenerating } = ai;
+  const { sendStopSignal, output, setOutput, isGenerating, hasError } = ai;
   const { trackGeneratorEvent } = useContext(GeneratorContext);
 
   const [canApply, setCanApply] = useState(false);
@@ -82,7 +84,9 @@ const GeneratedTextPanel = (props: Props) => {
         <TextFieldWithButtons
           inputText={output}
           sizeValidation={outputFieldValidation?.size}
-          onFieldChange={handleGeneratedTextChange}>
+          onFieldChange={handleGeneratedTextChange}
+          hasError={hasError}
+          errorMessage={errorMessage}>
           <>
             <CopyButton value={output} onClickCapture={trackCopy} />
             <Button onClick={handleRegenerate} css={styles.button}>

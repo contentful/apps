@@ -40,7 +40,10 @@ const OutputTextPanels = (props: Props) => {
     trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
 
     if (successfullyUpdated) {
+      sdk.notifier.success('Content applied successfully.');
       sdk.close();
+    } else {
+      sdk.notifier.error('Content did not apply successfully. Please try again.');
     }
   };
 
@@ -58,6 +61,7 @@ const OutputTextPanels = (props: Props) => {
         outputFieldLocale={outputFieldLocale}
         isNewText={isNewText}
         hasOutputField={Boolean(outputFieldId)}
+        hasError={ai.hasError && !ai.output.length}
         dialogText={dialogText}
       />
       <GeneratedTextPanel

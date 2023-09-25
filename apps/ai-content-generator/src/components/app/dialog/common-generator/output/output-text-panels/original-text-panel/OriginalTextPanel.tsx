@@ -21,11 +21,14 @@ interface Props {
   isNewText: boolean;
   outputFieldLocale: string;
   hasOutputField: boolean;
+  hasError: boolean;
   dialogText: DialogText;
 }
 
+const errorMessage = 'No results were returned. Please try again.';
+
 const OriginalTextPanel = (props: Props) => {
-  const { inputText, generate, isNewText, hasOutputField, dialogText } = props;
+  const { inputText, generate, isNewText, hasOutputField, dialogText, hasError } = props;
   const { dispatch, trackGeneratorEvent } = useContext(GeneratorContext);
 
   const handleGenerate = () => {
@@ -56,6 +59,8 @@ const OriginalTextPanel = (props: Props) => {
         onFieldChange={handleOriginalTextChange}
         isDisabled={isTextAreaDisabled}
         placeholder={placeholderText}
+        hasError={hasError}
+        errorMessage={errorMessage}
         {...helpTextProps}>
         <Button onClick={handleGenerate} isDisabled={isGenerateButtonDisabled}>
           Generate
