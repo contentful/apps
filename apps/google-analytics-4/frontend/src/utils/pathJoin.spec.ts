@@ -20,4 +20,14 @@ describe('pathJoin', () => {
     const result = pathJoin('/a/', '//b/', '', '/', undefined, 'c/');
     expect(result).toEqual('a/b/c');
   });
+
+  it('handles arrays as inputs', () => {
+    const result = pathJoin(['a', 'b'], ['c', 'd']);
+    expect(result).toEqual('a/b/c/d');
+  });
+
+  it('handles mix of stings and arrays', () => {
+    const result = pathJoin('/a/', ['/b/', '/c/']);
+    expect(result).toEqual('a/b/c');
+  });
 });

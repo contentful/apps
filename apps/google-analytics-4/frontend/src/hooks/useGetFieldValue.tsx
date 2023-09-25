@@ -1,6 +1,6 @@
 import { useFieldValue } from '@contentful/react-apps-toolkit';
 
-const useGetFieldValue = (fieldId: string) => {
+const useGetFieldValue = (fieldId: string): string | object => {
   let fieldValue = '';
 
   try {
