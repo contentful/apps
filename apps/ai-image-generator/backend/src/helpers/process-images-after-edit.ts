@@ -7,7 +7,7 @@ import OpenAI from 'openai';
 export class ProcessImagesAfterEdit {
   constructor(
     readonly openAiImages: OpenAI.Images.Image[],
-    readonly initialSourceDimensions: Dimensions
+    readonly targetSourceDimensions: Dimensions
   ) {}
 
   async execute(): Promise<ImageWithStream[]> {
@@ -41,8 +41,8 @@ export class ProcessImagesAfterEdit {
     // important that we _extract first_ (to clip the black bars off) and then _resize
     // second_ (to restore the original image dimensions proportionally)
     const stream = sharpImage.extract(extractRegion).resize({
-      width: this.initialSourceDimensions.width,
-      height: this.initialSourceDimensions.height,
+      width: this.targetSourceDimensions.width,
+      height: this.targetSourceDimensions.height,
       fit: 'cover',
     });
 
@@ -62,7 +62,7 @@ export class ProcessImagesAfterEdit {
       left = 0,
       width = imageWidth,
       height = imageHeight;
-    const { layout, width: targetWidth, height: targetHeight } = this.initialSourceDimensions;
+    const { layout, width: targetWidth, height: targetHeight } = this.targetSourceDimensions;
 
     // note: logic below is "intentionally" duplicated because abstracting it made it
     // much harder to reason about than it already is!

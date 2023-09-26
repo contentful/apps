@@ -1,11 +1,13 @@
 import { UploadProps } from 'contentful-management';
 import sharp from 'sharp';
 
+export type Layouts = 'portrait' | 'landscape' | 'square';
+
 export interface Dimensions {
   width: number;
   height: number;
   ratio: number;
-  layout: 'portrait' | 'landscape' | 'square';
+  layout: Layouts;
 }
 
 export interface Image {
@@ -19,6 +21,8 @@ export interface ImageWithStream extends Image {
 
 export interface ImageWithUpload extends Image {
   upload: Upload;
+  size: number;
+  dimensions: Dimensions;
 }
 
 export interface Upload extends UploadProps {

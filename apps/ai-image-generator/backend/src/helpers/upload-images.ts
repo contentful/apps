@@ -1,5 +1,7 @@
 import { PlainClientAPI, UploadProps } from 'contentful-management';
 import { ImageWithStream, ImageWithUpload } from '../types';
+import sharp from 'sharp';
+import { toDimensions } from '../utils';
 
 const UPLOAD_DOMAIN: Record<string, URL> = {
   'upload.contentful.com': new URL('https://s3.us-east-1.amazonaws.com/upload-api.contentful.com'),
@@ -23,18 +25,34 @@ export class UploadImages {
   }
 
   private async streamToImage(imageWithStream: ImageWithStream): Promise<ImageWithUpload> {
-    const uploadProps = await this.createUpload(imageWithStream);
+    const file = imageWithStream.stream.toFormat('png'); // TODO: change to whatever is specified in imagewithstream
+    const metadata = await this.calculateImageUploadMetadata(file);
+    const { size, dimensions } = metadata;
+    const uploadProps = await this.createUpload(file);
     const url = this.urlFromUpload(uploadProps);
     const upload = { ...uploadProps, url };
     return {
       url: imageWithStream.url,
       imageType: imageWithStream.imageType,
+      dimensions,
+      size,
       upload,
     };
   }
 
-  private async createUpload(imageWithStream: ImageWithStream): Promise<UploadProps> {
-    const file = imageWithStream.stream.toFormat('png'); // TODO: change to whatever is specified in imagewithstream
+  private async calculateImageUploadMetadata(file: sharp.Sharp) {
+    const fileCloneBuffer = await file.clone().toBuffer();
+    const metadata = await sharp(fileCloneBuffer).metadata();
+    const dimensions = toDimensions(metadata.width, metadata.height);
+    const size = metadata.size;
+    if (!size) {
+      throw new Error('Missing size from provided upload image');
+    }
+
+    return { dimensions, size };
+  }
+
+  private async createUpload(file: sharp.Sharp): Promise<UploadProps> {
     return await this.cmaClient.upload.create({ spaceId: this.spaceId }, { file });
   }
 
