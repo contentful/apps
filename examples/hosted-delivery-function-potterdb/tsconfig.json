@@ -5,5 +5,6 @@
     "moduleResolution": "node",
     "lib": ["dom", "dom.iterable", "esnext"]
   },
-  "include": ["src", "delivery-functions"]
+  "include": ["src"],
+  "exclude": ["delivery-functions"]
 }
