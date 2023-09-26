@@ -21,7 +21,6 @@ const fetchWorkspaces = async (method, _path, token, { fetch }) => {
       body: { message: 'Method not allowed.' },
     };
   }
-  console.log({ BASE_URL });
   const response = await fetch(`${BASE_URL}/workspaces`, {
     headers: {
       Authorization: 'Bearer ' + token,
