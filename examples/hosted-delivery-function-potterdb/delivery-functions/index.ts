@@ -1,8 +1,5 @@
 import { DeliveryFunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit'
 
-const GRAPHQL_FIELD_MAPPING_EVENT = 'graphql.field.mapping'
-const GRAPHQL_QUERY_EVENT = 'graphql.query'
-
 const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, context) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
@@ -41,10 +38,10 @@ const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
 }
 
 export const handler: EventHandler = (event, context) => {
-  if (event.type === GRAPHQL_FIELD_MAPPING_EVENT) {
+  if (event.type === 'graphql.field.mapping') {
     return fieldMappingHandler(event, context)
   }
-  if (event.type === GRAPHQL_QUERY_EVENT) {
+  if (event.type === 'graphql.query') {
     return queryHandler(event, context)
   }
   throw new Error('Unknown Event')
