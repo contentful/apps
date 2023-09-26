@@ -62,7 +62,7 @@ const OutputTextPanels = (props: Props) => {
       />
       <GeneratedTextPanel
         ai={ai}
-        generate={() => generate}
+        generate={generate}
         outputFieldValidation={outputFieldValidation}
         apply={handleEntryApply}
       />
