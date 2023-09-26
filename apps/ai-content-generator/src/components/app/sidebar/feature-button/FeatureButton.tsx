@@ -50,7 +50,6 @@ const FeatureButton = (props: Props) => {
     }
 
     const entryId = sdk.entry.getSys().id;
-
     const dialogConfig = makeDialogConfig({ feature, entryId, fieldLocales });
 
     sdk.dialogs.openCurrentApp(dialogConfig);

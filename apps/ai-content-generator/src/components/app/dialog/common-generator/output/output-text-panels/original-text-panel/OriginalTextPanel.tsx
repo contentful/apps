@@ -7,6 +7,7 @@ import { OutputTab } from '../../Output';
 import { DialogText } from '@configs/features/featureTypes';
 import { css } from '@emotion/react';
 import { tokenWarning } from '@configs/token-warning/tokenWarning';
+import { SegmentEvents } from '@configs/segment/segmentEvent';
 
 const styles = {
   panel: css({
@@ -18,13 +19,19 @@ interface Props {
   inputText: string;
   generate: () => void;
   isNewText: boolean;
+  outputFieldLocale: string;
   hasOutputField: boolean;
   dialogText: DialogText;
 }
 
 const OriginalTextPanel = (props: Props) => {
   const { inputText, generate, isNewText, hasOutputField, dialogText } = props;
-  const { dispatch } = useContext(GeneratorContext);
+  const { dispatch, trackGeneratorEvent } = useContext(GeneratorContext);
+
+  const handleGenerate = () => {
+    trackGeneratorEvent(SegmentEvents.GENERATE_CLICKED);
+    generate();
+  };
 
   const handleOriginalTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const type = isNewText
@@ -50,7 +57,7 @@ const OriginalTextPanel = (props: Props) => {
         isDisabled={isTextAreaDisabled}
         placeholder={placeholderText}
         {...helpTextProps}>
-        <Button onClick={generate} isDisabled={isGenerateButtonDisabled}>
+        <Button onClick={handleGenerate} isDisabled={isGenerateButtonDisabled}>
           Generate
         </Button>
       </TextFieldWithButtons>

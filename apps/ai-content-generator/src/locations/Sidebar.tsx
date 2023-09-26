@@ -9,12 +9,20 @@ import { styles } from './Sidebar.styles';
 import { warningMessages, disclaimerMessage } from '@components/app/sidebar/sidebarText';
 import HyperLink from '@components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { useContext, useEffect } from 'react';
+import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
+import { SegmentEvents } from '@configs/segment/segmentEvent';
 
 const Sidebar = () => {
   useAutoResizer();
 
   const sdk = useSDK<SidebarAppSDK<AppInstallationParameters>>();
+  const { trackEvent } = useContext(SegmentAnalyticsContext);
   const { key, model, profile } = sdk.parameters.installation;
+
+  useEffect(() => {
+    trackEvent(SegmentEvents.SIDEBAR_RENDERED);
+  }, [trackEvent]);
 
   if (!key || !model) {
     return (

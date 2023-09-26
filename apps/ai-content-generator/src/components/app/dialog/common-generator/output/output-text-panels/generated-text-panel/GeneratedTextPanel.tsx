@@ -3,9 +3,11 @@ import useAI from '@hooks/dialog/useAI';
 import TextFieldWithButtons from '@components/common/text-field-with-buttons/TextFieldWIthButtons';
 import { OutputTab } from '../../Output';
 import { ContentTypeFieldValidation } from 'contentful-management';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import tokens from '@contentful/f36-tokens';
+import { SegmentAction, SegmentEvents } from '@configs/segment/segmentEvent';
+import { GeneratorContext } from '@providers/generatorProvider';
 
 const styles = {
   panel: css({
@@ -26,11 +28,27 @@ interface Props {
 const GeneratedTextPanel = (props: Props) => {
   const { generate, ai, outputFieldValidation, apply } = props;
   const { sendStopSignal, output, setOutput, isGenerating } = ai;
+  const { trackGeneratorEvent } = useContext(GeneratorContext);
 
   const [canApply, setCanApply] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const handleGeneratedTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isDirty) {
+      setIsDirty(true);
+      trackGeneratorEvent(SegmentEvents.GENERATED_CONTENT_EDITED);
+    }
+
     setOutput(event.target.value);
+  };
+
+  const handleRegenerate = () => {
+    trackGeneratorEvent(SegmentEvents.REGENERATION_CLICKED);
+    generate();
+  };
+
+  const trackCopy = () => {
+    trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.COPIED);
   };
 
   const checkIfCanApply = () => {
@@ -66,8 +84,8 @@ const GeneratedTextPanel = (props: Props) => {
           sizeValidation={outputFieldValidation?.size}
           onFieldChange={handleGeneratedTextChange}>
           <>
-            <CopyButton value={output} />
-            <Button onClick={generate} css={styles.button}>
+            <CopyButton value={output} onClickCapture={trackCopy} />
+            <Button onClick={handleRegenerate} css={styles.button}>
               Regenerate
             </Button>
             <Button isDisabled={!canApply} onClick={apply} css={styles.button} variant="primary">

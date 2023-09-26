@@ -10,6 +10,7 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "@contentful/rich-text-plain-text-renderer": "^16.0.5",
     "@emotion/react": "^11.11.1",
+    "@segment/analytics-next": "^1.55.0",
     "contentful-management": "10.28.1",
     "launchdarkly-react-client-sdk": "^3.0.8",
     "openai": "^3.3.0",
@@ -52,15 +53,15 @@
     "@types/react-dom": "18.2.6",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",
+    "@vitejs/plugin-react": "4.0.4",
     "eslint": "^8.46.0",
     "eslint-plugin-react": "^7.33.1",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "@vitejs/plugin-react": "4.0.4",
-    "vite-plugin-eslint": "^1.8.1",
     "happy-dom": "6.0.4",
     "http-server": "^14.1.1",
     "typescript": "4.7.4",
     "vite": "4.4.9",
+    "vite-plugin-eslint": "^1.8.1",
     "vitest": "0.34.5"
   }
 }

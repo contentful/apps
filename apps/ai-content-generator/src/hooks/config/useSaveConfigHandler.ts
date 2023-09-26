@@ -1,8 +1,10 @@
 import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { AppState, ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useContext } from 'react';
 import { generateEditorInterfaceAssignments } from '@utils/config/contentTypeHelpers';
+import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
+import { SegmentEvents } from '@configs/segment/segmentEvent';
 
 /**
  * This hook is used to save the parameters of the app.
@@ -17,6 +19,7 @@ const useSaveConfigHandler = (
   contentTypes: Set<string>
 ) => {
   const sdk = useSDK<ConfigAppSDK>();
+  const { trackEvent } = useContext(SegmentAnalyticsContext);
 
   const getCurrentState = useCallback(async () => {
     const notifierErrors = await validateParams(parameters);
@@ -38,6 +41,7 @@ const useSaveConfigHandler = (
       1
     );
 
+    trackEvent(SegmentEvents.CONFIG_SAVED);
     const newAppState: AppState = {
       EditorInterface: newEditorInterfaceAssignments,
     };
@@ -46,7 +50,7 @@ const useSaveConfigHandler = (
       parameters,
       targetState: newAppState,
     };
-  }, [contentTypes, parameters, sdk.app, sdk.notifier, validateParams]);
+  }, [trackEvent, contentTypes, parameters, sdk.app, sdk.notifier, validateParams]);
 
   const changeSaveConfigHandler = useCallback(() => {
     sdk.app.onConfigure(() => getCurrentState());
