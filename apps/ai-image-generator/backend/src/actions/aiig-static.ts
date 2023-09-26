@@ -1,5 +1,5 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { AppActionCallResponse, Upload } from '../types';
+import { AppActionCallResponse, Layouts, Upload } from '../types';
 import { ImageEditResult } from './aiig-select-edit';
 
 interface AppActionCallParameters {
@@ -41,23 +41,52 @@ export const handler = async (
       url: 'https://www.americanhumane.org/app/uploads/2021/12/Cat-8-1024x1024.png',
       imageType: 'png',
       upload,
+      size: 1386522,
+      dimensions: {
+        width: 1024,
+        height: 1024,
+        ratio: 1,
+        layout: 'square' as Layouts,
+      },
     },
     {
       url: 'https://4kwallpapers.com/images/wallpapers/cat-kitten-pet-domestic-animals-cute-cat-portrait-fur-baby-1024x1024-3528.jpg',
       imageType: 'png',
       upload,
+      size: 212992,
+      dimensions: {
+        width: 1024,
+        height: 1024,
+        ratio: 1,
+        layout: 'square' as Layouts,
+      },
     },
     {
       url: 'https://wallpaperaccess.com/full/2448381.jpg',
       imageType: 'png',
       upload,
+      size: 2448381,
+      dimensions: {
+        width: 1024,
+        height: 1024,
+        ratio: 1,
+        layout: 'square' as Layouts,
+      },
     },
     {
       url: 'https://images.infoseemedia.com/wp-content/uploads/2022/02/Black-White-Cat-Image-1024x1024.jpg',
       imageType: 'png',
       upload,
+      size: 189858,
+      dimensions: {
+        width: 1024,
+        height: 1024,
+        ratio: 1,
+        layout: 'square' as Layouts,
+      },
     },
   ];
+
   return {
     ok: true,
     data: {
