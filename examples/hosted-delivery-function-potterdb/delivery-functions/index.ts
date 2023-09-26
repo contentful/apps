@@ -6,7 +6,7 @@ import {
 const GRAPHQL_FIELD_MAPPING_EVENT = 'graphql.field.mapping'
 const GRAPHQL_QUERY_EVENT = 'graphql.query'
 
-const fieldMappingHandler: EventHandler<typeof GRAPHQL_FIELD_MAPPING_EVENT> = (event, context) => {
+const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, context) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
       contentTypeId,
@@ -23,7 +23,7 @@ const fieldMappingHandler: EventHandler<typeof GRAPHQL_FIELD_MAPPING_EVENT> = (e
   }
 }
 
-const queryHandler: EventHandler<typeof GRAPHQL_QUERY_EVENT> = async (event, context) => {
+const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
   /*
    * Forwards the GraphQL query to the PotterDB GraphQL API as is.
    * The `event` contains a boolean `isIntrospectionQuery` that can be used to
