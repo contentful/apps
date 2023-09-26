@@ -33,17 +33,21 @@ const ConfigPage = () => {
   const [isApiKeyValid, setIsApiKeyValid] = useState(true);
   const [localApiKey, setLocalApiKey] = useState('');
 
-  const validateApiKey = async (key: string): Promise<boolean> => {
+  const validateApiKey = async (key: string): Promise<void> => {
     const ai = new AI(modelsBaseUrl, key, '');
-    const isApiKeyValid = await ai.isApiKeyValid();
-    setIsApiKeyValid(isApiKeyValid);
 
-    return isApiKeyValid;
+    try {
+      await ai.getModels();
+      setIsApiKeyValid(true);
+    } catch (e: unknown) {
+      console.error(e);
+      setIsApiKeyValid(false);
+    }
   };
 
   const validateParams = async (params: AppInstallationParameters): Promise<string[]> => {
     const notifierErrors = [];
-    const isApiKeyValid = await validateApiKey(params.key);
+    validateApiKey(params.key);
 
     if (!isApiKeyValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingApiKey}`);
@@ -73,7 +77,7 @@ const ConfigPage = () => {
       <hr css={styles.splitter} />
       <ConfigSection
         apiKey={parameters.key}
-        model={parameters.model}
+        model={parameters.model ?? ''}
         dispatch={dispatchParameters}
         isApiKeyValid={isApiKeyValid}
         localApiKey={localApiKey}

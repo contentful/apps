@@ -33,6 +33,9 @@ const createSDK = (parameters: AppInstallationParameters) => {
     hostnames: {
       webapp: '',
     },
+    parameters: {
+      installation: { ...parameters },
+    },
   };
 };
 

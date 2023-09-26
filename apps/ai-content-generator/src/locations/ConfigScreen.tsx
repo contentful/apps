@@ -5,10 +5,12 @@ export type ProfileType = {
   [K in ProfileFields]?: string;
 };
 interface AppInstallationParameters {
-  model: string;
+  // Model is optional since V1 of the config page didn't save model as a param if you had the default selected.
+  model?: string;
   key: string;
   profile: string;
-  brandProfile: ProfileType;
+  // Optional since we are accessing properties on this object
+  brandProfile?: ProfileType;
 }
 
 const ConfigScreen = () => {

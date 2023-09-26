@@ -29,6 +29,7 @@ class MockSdk {
   reset() {
     this.sdk.app.onConfigure = vi.fn();
     this.sdk.app.getParameters = vi.fn().mockReturnValueOnce(this.originalData.parameters);
+    this.sdk.parameters.installation = this.originalData.parameters;
     this.sdk.app.setReady = vi.fn();
     this.sdk.app.getCurrentState = vi
       .fn()

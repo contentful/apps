@@ -6,6 +6,7 @@ import { AppInstallationParameters, ProfileType } from '@locations/ConfigScreen'
 import AI from '@utils/aiApi';
 import { ChatCompletionRequestMessage } from 'openai';
 import { useEffect, useMemo, useState } from 'react';
+import { defaultModelId } from '@configs/ai/gptModels';
 
 export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
@@ -22,7 +23,7 @@ const useAI = () => {
       new AI(
         chatCompletionsBaseUrl,
         sdk.parameters.installation.key,
-        sdk.parameters.installation.model
+        sdk.parameters.installation.model ?? defaultModelId
       ),
     [sdk.parameters.installation]
   );
