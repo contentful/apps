@@ -30,7 +30,7 @@ const queryHandler: EventHandler<'graphql.query'> = (event, context) => {
   };
 };
 
-export const handler: EventHandler<EventType> = (event, context) => {
+export const handler: EventHandler = (event, context) => {
   if (event.type === GRAPHQL_FIELD_MAPPING_EVENT) {
     return fieldMappingHandler(event, context);
   }
