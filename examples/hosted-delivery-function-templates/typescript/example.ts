@@ -23,7 +23,7 @@ const fieldMappingHandler: EventHandler<typeof GRAPHQL_FIELD_MAPPING_EVENT> = (e
   };
 };
 
-const queryHandler: EventHandler<typeof GRAPHQL_QUERY_EVENT> = (event, context) => {
+const queryHandler: EventHandler<'graphql.query'> = (event, context) => {
   return {
     data: {},
     errors: [],
