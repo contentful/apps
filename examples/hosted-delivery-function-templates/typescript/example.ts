@@ -6,7 +6,7 @@ import {
 const GRAPHQL_FIELD_MAPPING_EVENT = 'graphql.field.mapping';
 const GRAPHQL_QUERY_EVENT = 'graphql.query';
 
-const fieldMappingHandler: EventHandler<typeof GRAPHQL_FIELD_MAPPING_EVENT> = (event, context) => {
+const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, context) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
       contentTypeId,
