@@ -1,6 +1,12 @@
-import { type EventHandler, EventType } from './types'
+import {
+  DeliveryFunctionEventHandler as EventHandler,
+  DeliveryFunctionEventType as EventType,
+} from '@contentful/node-apps-toolkit'
 
-const fieldMappingHandler: EventHandler<EventType.GRAPHQL_FIELD_MAPPING> = (event, context) => {
+const GRAPHQL_FIELD_MAPPING_EVENT = 'graphql.field.mapping'
+const GRAPHQL_QUERY_EVENT = 'graphql.query'
+
+const fieldMappingHandler: EventHandler<typeof GRAPHQL_FIELD_MAPPING_EVENT> = (event, context) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
     return {
       contentTypeId,
@@ -17,7 +23,7 @@ const fieldMappingHandler: EventHandler<EventType.GRAPHQL_FIELD_MAPPING> = (even
   }
 }
 
-const queryHandler: EventHandler<EventType.GRAPHQL_QUERY> = async (event, context) => {
+const queryHandler: EventHandler<typeof GRAPHQL_QUERY_EVENT> = async (event, context) => {
   /*
    * Forwards the GraphQL query to the PotterDB GraphQL API as is.
    * The `event` contains a boolean `isIntrospectionQuery` that can be used to
@@ -37,11 +43,11 @@ const queryHandler: EventHandler<EventType.GRAPHQL_QUERY> = async (event, contex
   return response.json()
 }
 
-export const handler: EventHandler = (event, context) => {
-  if (event.type === EventType.GRAPHQL_FIELD_MAPPING) {
+export const handler: EventHandler<EventType> = (event, context) => {
+  if (event.type === GRAPHQL_FIELD_MAPPING_EVENT) {
     return fieldMappingHandler(event, context)
   }
-  if (event.type === EventType.GRAPHQL_QUERY) {
+  if (event.type === GRAPHQL_QUERY_EVENT) {
     return queryHandler(event, context)
   }
   throw new Error('Unknown Event')
