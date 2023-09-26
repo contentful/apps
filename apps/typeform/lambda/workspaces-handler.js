@@ -16,10 +16,10 @@ module.exports = async (method, path, token, { fetch }) => {
       body: { workspaces: await fetchWorkspaces(method, path, token, { fetch }) },
     };
   } catch (err) {
-    const { message, code } = err;
+    const { message, code, details } = err;
     return {
       status: code,
-      body: { message },
+      body: { message, details },
     };
   }
 };
