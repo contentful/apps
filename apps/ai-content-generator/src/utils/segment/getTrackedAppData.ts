@@ -6,7 +6,7 @@ const getTrackedAppData = (sdk: BaseAppSDK<AppInstallationParameters>): SegmentA
   const { installation } = sdk.parameters;
 
   return {
-    gpt_model: installation?.model,
+    gpt_model: installation?.model || '',
 
     config_options: {
       has_profile: !!installation?.profile,
