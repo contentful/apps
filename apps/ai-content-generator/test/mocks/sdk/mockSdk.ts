@@ -1,4 +1,3 @@
-import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { mockSdkParameters } from '..';
 import { createSDK } from './utils/createSdk';
 import { vi } from 'vitest';
@@ -8,6 +7,7 @@ import {
   mockContentType,
 } from './contentTypes/mockContentType';
 import { mockEntry } from './entry/mockEntry';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 
 interface MockSdk {
   sdk: ReturnType<typeof createSDK>;

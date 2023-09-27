@@ -10,27 +10,17 @@ interface Props {
   model: string;
   dispatch: Dispatch<ParameterReducer>;
   isApiKeyValid: boolean;
-  localApiKey: string;
-  onApiKeyChange: (key: string) => void;
-  validateApiKey: (key: string) => Promise<void>;
 }
 
 const ConfigSection = (props: Props) => {
-  const { apiKey, model, dispatch, isApiKeyValid, localApiKey, onApiKeyChange, validateApiKey } =
-    props;
+  const { apiKey, model, dispatch, isApiKeyValid } = props;
 
   return (
     <Flex flexDirection="column" alignItems="flex-start" fullWidth={true}>
       <Subheading>{Sections.configHeading}</Subheading>
       <Box>
         <Form>
-          <APIKey
-            apiKey={apiKey}
-            isInvalid={!isApiKeyValid}
-            localApiKey={localApiKey}
-            onApiKeyChange={onApiKeyChange}
-            validateApiKey={validateApiKey}
-          />
+          <APIKey apiKey={apiKey} isInvalid={!isApiKeyValid} dispatch={dispatch} />
           <Model model={model} dispatch={dispatch} />
         </Form>
       </Box>

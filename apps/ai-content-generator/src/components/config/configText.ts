@@ -1,3 +1,5 @@
+import { ProfileFields } from './appInstallationParameters';
+
 const ModelText = {
   title: 'Machine Learning Model',
   helpText:
@@ -5,16 +7,6 @@ const ModelText = {
     'models is not significant. However, in more complex reasoning situations, GPT-4 is much more ' +
     'capable than any previous models.',
 };
-
-export enum ProfileFields {
-  PROFILE = 'profile',
-  VALUES = 'values',
-  TONE = 'tone',
-  EXCLUDE = 'exclude',
-  INCLUDE = 'include',
-  AUDIENCE = 'audience',
-  ADDITIONAL = 'additional',
-}
 
 export enum FieldTypes {
   TEXTAREA = 'textarea',
@@ -27,36 +19,42 @@ const BrandProfileFields = [
     title: 'Describe your brand or product.',
     textAreaPlaceholder: 'Example: Contentful is a headless content management system.',
     fieldType: FieldTypes.TEXTAREA,
+    textLimit: 1000,
   },
   {
     id: ProfileFields.VALUES,
     title: "What are your brand's values and attributes?",
     textAreaPlaceholder: 'Example: Bold, unique, young',
     fieldType: FieldTypes.TEXTINPUT,
+    textLimit: 200,
   },
   {
     id: ProfileFields.TONE,
     title: "Describe your brand's voice and tone.",
     textAreaPlaceholder: 'Example: Humorous, absurd, kind',
     fieldType: FieldTypes.TEXTINPUT,
+    textLimit: 200,
   },
   {
     id: ProfileFields.EXCLUDE,
     title: 'Are there any words your brand should never use?',
     textAreaPlaceholder: 'Example: Humorous, absurd, kind',
     fieldType: FieldTypes.TEXTINPUT,
+    textLimit: 200,
   },
   {
     id: ProfileFields.INCLUDE,
     title: 'Are there any words your brand should commonly use?',
     textAreaPlaceholder: 'Example: Humorous, absurd, kind',
     fieldType: FieldTypes.TEXTINPUT,
+    textLimit: 200,
   },
   {
     id: ProfileFields.AUDIENCE,
     title: "Describe your brand's target audience.",
     textAreaPlaceholder: 'Example: Men and women ages 18-24 who love fashion.',
     fieldType: FieldTypes.TEXTINPUT,
+    textLimit: 200,
   },
   {
     id: ProfileFields.ADDITIONAL,
@@ -64,6 +62,7 @@ const BrandProfileFields = [
     textAreaPlaceholder:
       'Example: Contentful is a leading composable content platform. It was a headless CMS category maker that now has company in the marketplace, but remains to be the preferred choice for medium, large and enterprise companies.',
     fieldType: FieldTypes.TEXTAREA,
+    textLimit: 1000,
   },
 ];
 
@@ -98,7 +97,7 @@ const Sections = {
 const ConfigErrors = {
   missingApiKey: 'Invalid or missing API Key',
   missingModel: 'A valid model must be selected',
-  missingProfile: 'Please enter a brand profile',
+  exceededCharacterLimit: 'One or more profile fields exceeds the character limit',
   noContentTypes:
     'There are no content types available in this environment. You can add a content type and then assign it to the app from this screen.',
   noContentTypesSubstring: 'add a content type',

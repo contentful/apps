@@ -1,4 +1,4 @@
-import { AppInstallationParameters } from '@locations/ConfigScreen';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 import { AppState, ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useCallback, useContext } from 'react';
@@ -15,14 +15,14 @@ import { SegmentEvents } from '@configs/segment/segmentEvent';
  */
 const useSaveConfigHandler = (
   parameters: AppInstallationParameters,
-  validateParams: (params: AppInstallationParameters) => Promise<string[]>,
+  validateParams: (params: AppInstallationParameters) => string[],
   contentTypes: Set<string>
 ) => {
   const sdk = useSDK<ConfigAppSDK>();
   const { trackEvent } = useContext(SegmentAnalyticsContext);
 
   const getCurrentState = useCallback(async () => {
-    const notifierErrors = await validateParams(parameters);
+    const notifierErrors = validateParams(parameters);
 
     if (notifierErrors.length) {
       notifierErrors.forEach((error) => sdk.notifier.error(error));

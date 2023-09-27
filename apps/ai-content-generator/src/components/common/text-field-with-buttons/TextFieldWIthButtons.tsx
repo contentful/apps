@@ -6,6 +6,7 @@ import HyperLink from '../HyperLink/HyperLink';
 import { styles } from './TextFieldWithButtons.styles';
 import { TokenWarning } from '@configs/token-warning/tokenWarning';
 import { ErrorCircleOutlineIcon, ExternalLinkIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
 
 interface Props {
   inputText: string;
@@ -53,14 +54,14 @@ const TextFieldWithButtons = (props: Props) => {
         maxLength={sizeValidation?.max}
         minLength={sizeValidation?.min}
       />
-      <Paragraph>
-        {!hasError ? (
+      <Paragraph css={{ color: tokens.red500 }}>
+        {hasError ? (
           <>
             <ErrorCircleOutlineIcon
               variant="negative"
               marginRight="spacing2Xs"
               data-testid="error-icon"
-            />{' '}
+            />
             {errorMessage}
           </>
         ) : null}

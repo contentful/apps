@@ -76,7 +76,10 @@ const generatorReducer = (
 ): GeneratorParameters => {
   switch (action.type) {
     case IS_NEW_TEXT:
-      return { ...state, isNewText: true };
+      return {
+        ...state,
+        isNewText: true,
+      };
     case IS_NOT_NEW_TEXT:
       return { ...state, isNewText: false };
     case UPDATE_SOURCE_FIELD:

@@ -8,7 +8,7 @@ import {
   mockContentTypes,
 } from '../../../test/mocks';
 import useSaveConfigHandler from './useSaveConfigHandler';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;

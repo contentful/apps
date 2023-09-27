@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import { useMemo, useReducer } from 'react';
 import { Box, Heading } from '@contentful/f36-components';
 import ConfigSection from '@components/config/config-section/ConfigSection';
 import CostSection from '@components/config/cost-section/CostSection';
@@ -11,17 +11,24 @@ import { defaultModelId } from '@configs/ai/gptModels';
 import useInitializeParameters from '@hooks/config/useInitializeParameters';
 import useSaveConfigHandler from '@hooks/config/useSaveConfigHandler';
 import useGetContentTypes from '@hooks/config/useGetContentTypes';
-import parameterReducer, { ParameterAction } from '@components/config/parameterReducer';
+import parameterReducer, { Validator } from '@components/config/parameterReducer';
 import contentTypeReducer from '@components/config/contentTypeReducer';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { ConfigErrors } from '@components/config/configText';
-import AI from '@utils/aiApi';
-import { modelsBaseUrl } from '@configs/ai/baseUrl';
+import AppInstallationParameters from '../appInstallationParameters';
 
-const initialParameters: AppInstallationParameters = {
-  model: defaultModelId,
-  key: '',
-  profile: '',
+const initialParameters: Validator<AppInstallationParameters> = {
+  model: {
+    value: defaultModelId,
+    isValid: true,
+  },
+  key: {
+    value: '',
+    isValid: true,
+  },
+  profile: {
+    value: '',
+    isValid: true,
+  },
   brandProfile: {},
 };
 
@@ -30,44 +37,49 @@ const initialContentTypes: Set<string> = new Set();
 const ConfigPage = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, initialContentTypes);
-  const [isApiKeyValid, setIsApiKeyValid] = useState(true);
-  const [localApiKey, setLocalApiKey] = useState('');
 
-  const validateApiKey = async (key: string): Promise<void> => {
-    const ai = new AI(modelsBaseUrl, key, '');
+  const parametersToSave: AppInstallationParameters = useMemo(() => {
+    return {
+      model: parameters.model.value,
+      key: parameters.key.value,
+      profile: parameters.profile.value,
+      brandProfile: {
+        additional: parameters.brandProfile.additional?.value,
+        audience: parameters.brandProfile.audience?.value,
+        exclude: parameters.brandProfile.exclude?.value,
+        include: parameters.brandProfile.include?.value,
+        profile: parameters.brandProfile.profile?.value,
+        tone: parameters.brandProfile.tone?.value,
+        values: parameters.brandProfile.values?.value,
+      },
+    };
+  }, [
+    parameters.brandProfile,
+    parameters.key.value,
+    parameters.model.value,
+    parameters.profile.value,
+  ]);
 
-    try {
-      await ai.getModels();
-      setIsApiKeyValid(true);
-    } catch (e: unknown) {
-      console.error(e);
-      setIsApiKeyValid(false);
-    }
-  };
-
-  const validateParams = async (params: AppInstallationParameters): Promise<string[]> => {
+  const validateParams = (): string[] => {
     const notifierErrors = [];
-    validateApiKey(params.key);
 
-    if (!isApiKeyValid) {
+    if (!parameters.key.isValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingApiKey}`);
-    } else {
-      setLocalApiKey('');
     }
 
-    if (!params.model) {
+    if (!parameters.model.isValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
+    }
+
+    const invalidBrandProfile = Object.values(parameters.brandProfile).findIndex((p) => !p.isValid);
+    if (!parameters.profile.isValid || invalidBrandProfile !== -1) {
+      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.exceededCharacterLimit}`);
     }
 
     return notifierErrors;
   };
 
-  const handleApiKeyChange = (key: string) => {
-    setLocalApiKey(key);
-    dispatchParameters({ type: ParameterAction.UPDATE_APIKEY, value: key });
-  };
-
-  useSaveConfigHandler(parameters, validateParams, contentTypes);
+  useSaveConfigHandler(parametersToSave, validateParams, contentTypes);
   useInitializeParameters(dispatchParameters);
   const allContentTypes = useGetContentTypes(dispatchContentTypes);
 
@@ -76,13 +88,10 @@ const ConfigPage = () => {
       <Heading>{Sections.pageHeading}</Heading>
       <hr css={styles.splitter} />
       <ConfigSection
-        apiKey={parameters.key}
-        model={parameters.model ?? ''}
+        apiKey={parameters.key.value}
+        isApiKeyValid={parameters.key.isValid}
+        model={parameters.model.value}
         dispatch={dispatchParameters}
-        isApiKeyValid={isApiKeyValid}
-        localApiKey={localApiKey}
-        onApiKeyChange={handleApiKeyChange}
-        validateApiKey={validateApiKey}
       />
       <hr css={styles.splitter} />
       <CostSection />
