@@ -7,6 +7,7 @@ import OriginalTextPanel from './original-text-panel/OriginalTextPanel';
 import featureConfig from '@configs/features/featureConfig';
 import { ContentTypeFieldValidation } from 'contentful-management';
 import { SegmentAction, SegmentEvents } from '@configs/segment/segmentEvent';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface Props {
   onGenerate: (generateMessage: GenerateMessage) => void;
@@ -30,10 +31,16 @@ const OutputTextPanels = (props: Props) => {
   } = props;
   const { feature, entryId, trackGeneratorEvent } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
+  const sdk = useSDK();
 
   const handleEntryApply = async () => {
-    await updateEntry(outputFieldId, outputFieldLocale, ai.output);
-    trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
+    const success = await updateEntry(outputFieldId, outputFieldLocale, ai.output);
+    if (success) {
+      trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
+      sdk.notifier.success('Content applied successfully.');
+    } else {
+      sdk.notifier.error('Content did not apply successfully. Please try again.');
+    }
   };
 
   const generate = () => {
@@ -47,6 +54,7 @@ const OutputTextPanels = (props: Props) => {
       <OriginalTextPanel
         inputText={inputText}
         generate={generate}
+        isGenerating={ai.isGenerating}
         outputFieldLocale={outputFieldLocale}
         isNewText={isNewText}
         hasOutputField={Boolean(outputFieldId)}
