@@ -76,7 +76,9 @@ const OriginalTextPanel = (props: Props) => {
         errorMessage={errorMessage}
         sizeValidation={{ max: textLimit }}
         {...helpTextProps}>
-        <Button onClick={handleGenerate} isDisabled={isGenerateButtonDisabled || textaboveLimit}>
+        <Button
+          onClick={handleGenerate}
+          isDisabled={isGenerateButtonDisabled || textaboveLimit || isGenerating}>
           Generate
         </Button>
       </TextFieldWithButtons>

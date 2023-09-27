@@ -51,12 +51,18 @@ const useAI = () => {
   const resetOutput = () => {
     setOutput('');
     setError('');
+    if (stream) {
+      stream.cancel();
+    }
+    setStream(null);
+
     setHasError(false);
   };
 
   const generateMessage = async (prompt: string, targetLocale: string) => {
     resetOutput();
     let completeMessage = '';
+    setIsGenerating(true);
 
     try {
       const payload = createGPTPayload(
@@ -84,6 +90,7 @@ const useAI = () => {
     } catch (error: unknown) {
       console.error(error);
       setError(error as string);
+      console.log('error launched');
       setHasError(true);
     } finally {
       setStream(null);
