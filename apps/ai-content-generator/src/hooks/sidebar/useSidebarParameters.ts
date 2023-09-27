@@ -3,8 +3,8 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { SidebarAppSDK } from '@contentful/app-sdk';
 import AI from '@utils/aiApi';
 import { modelsBaseUrl } from '@configs/ai/baseUrl';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { AiApiError, AiApiErrorType } from '@utils/aiApi/handleAiApiErrors';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 
 /**
  * This hook is used to get the installation parameters from the sidebar location,

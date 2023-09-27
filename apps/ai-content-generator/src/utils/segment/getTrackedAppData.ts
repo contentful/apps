@@ -1,6 +1,6 @@
 import { SegmentAppData } from '@configs/segment/segmentEvent';
 import { BaseAppSDK } from '@contentful/app-sdk';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 
 const getTrackedAppData = (sdk: BaseAppSDK<AppInstallationParameters>): SegmentAppData => {
   const { installation } = sdk.parameters;

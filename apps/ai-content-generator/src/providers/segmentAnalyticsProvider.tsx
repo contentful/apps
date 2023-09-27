@@ -4,9 +4,9 @@ import { createContext, ReactNode } from 'react';
 import { getUserCookieConsent } from '@utils/segment/cookieConsent';
 import { SegmentEvent, SegmentEventData, SegmentIdentify } from '@configs/segment/segmentEvent';
 import getTrackedAppData from '@utils/segment/getTrackedAppData';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { SegmentEvents } from '@configs/segment/segmentEvent';
+import AppInstallationParameters from '@components/config/appInstallationParameters';
 
 interface SegmentAnalyticsContextProps {
   identify: () => void;
