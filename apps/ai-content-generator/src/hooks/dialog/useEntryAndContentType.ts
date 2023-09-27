@@ -63,10 +63,8 @@ const useEntryAndContentType = (entryId: string) => {
         entry
       );
 
-      sdk.notifier.success('Content applied successfully.');
       return true;
     } catch (error) {
-      sdk.notifier.error('Content did not apply successfully. Please try again.');
       console.error(error);
       return false;
     }

@@ -5,7 +5,7 @@ import TextCounter from '../text-counter/TextCounter';
 import HyperLink from '../HyperLink/HyperLink';
 import { styles } from './TextFieldWithButtons.styles';
 import { TokenWarning } from '@configs/token-warning/tokenWarning';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { ErrorCircleOutlineIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 
 interface Props {
   inputText: string;
@@ -16,6 +16,8 @@ interface Props {
   placeholder?: string;
   helpText?: string;
   warningMessage?: TokenWarning;
+  hasError?: boolean;
+  errorMessage?: string;
 }
 
 const TextFieldWithButtons = (props: Props) => {
@@ -28,6 +30,8 @@ const TextFieldWithButtons = (props: Props) => {
     placeholder,
     helpText,
     warningMessage,
+    hasError,
+    errorMessage,
   } = props;
 
   return (
@@ -49,6 +53,18 @@ const TextFieldWithButtons = (props: Props) => {
         maxLength={sizeValidation?.max}
         minLength={sizeValidation?.min}
       />
+      <Paragraph>
+        {!hasError ? (
+          <>
+            <ErrorCircleOutlineIcon
+              variant="negative"
+              marginRight="spacing2Xs"
+              data-testid="error-icon"
+            />{' '}
+            {errorMessage}
+          </>
+        ) : null}
+      </Paragraph>
 
       <Flex alignSelf="flex-end">
         {helpText && <Paragraph css={styles.helpText}>{helpText}</Paragraph>}

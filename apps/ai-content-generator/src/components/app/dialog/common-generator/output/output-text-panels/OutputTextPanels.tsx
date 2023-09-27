@@ -1,6 +1,4 @@
 import { useContext } from 'react';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { DialogAppSDK } from '@contentful/app-sdk';
 import { GeneratorContext } from '@providers/generatorProvider';
 import useEntryAndContentType from '@hooks/dialog/useEntryAndContentType';
 import useAI, { GenerateMessage } from '@hooks/dialog/useAI';
@@ -9,6 +7,7 @@ import OriginalTextPanel from './original-text-panel/OriginalTextPanel';
 import featureConfig from '@configs/features/featureConfig';
 import { ContentTypeFieldValidation } from 'contentful-management';
 import { SegmentAction, SegmentEvents } from '@configs/segment/segmentEvent';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface Props {
   onGenerate: (generateMessage: GenerateMessage) => void;
@@ -32,15 +31,15 @@ const OutputTextPanels = (props: Props) => {
   } = props;
   const { feature, entryId, trackGeneratorEvent } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
-
-  const sdk = useSDK<DialogAppSDK>();
+  const sdk = useSDK();
 
   const handleEntryApply = async () => {
-    const successfullyUpdated = await updateEntry(outputFieldId, outputFieldLocale, ai.output);
-    trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
-
-    if (successfullyUpdated) {
-      sdk.close();
+    const success = await updateEntry(outputFieldId, outputFieldLocale, ai.output);
+    if (success) {
+      trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
+      sdk.notifier.success('Content applied successfully.');
+    } else {
+      sdk.notifier.error('Content did not apply successfully. Please try again.');
     }
   };
 
@@ -55,9 +54,11 @@ const OutputTextPanels = (props: Props) => {
       <OriginalTextPanel
         inputText={inputText}
         generate={generate}
+        isGenerating={ai.isGenerating}
         outputFieldLocale={outputFieldLocale}
         isNewText={isNewText}
         hasOutputField={Boolean(outputFieldId)}
+        hasError={ai.hasError && !ai.output.length}
         dialogText={dialogText}
       />
       <GeneratedTextPanel

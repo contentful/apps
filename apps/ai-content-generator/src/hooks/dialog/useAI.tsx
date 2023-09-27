@@ -30,6 +30,8 @@ const useAI = () => {
   const [output, setOutput] = useState<string>('');
   const [stream, setStream] = useState<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [hasError, setHasError] = useState<boolean>(false);
 
   const createGPTPayload = (
     content: string,
@@ -46,6 +48,8 @@ const useAI = () => {
 
   const resetOutput = () => {
     setOutput('');
+    setError('');
+    setHasError(false);
   };
 
   const generateMessage = async (prompt: string, targetLocale: string) => {
@@ -77,6 +81,8 @@ const useAI = () => {
       }
     } catch (error: unknown) {
       console.error(error);
+      setError(error as string);
+      setHasError(true);
     } finally {
       setStream(null);
     }
@@ -104,6 +110,8 @@ const useAI = () => {
     setOutput,
     resetOutput,
     sendStopSignal,
+    error,
+    hasError,
   };
 };
 
