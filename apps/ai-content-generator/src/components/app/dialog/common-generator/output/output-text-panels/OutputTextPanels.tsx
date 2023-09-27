@@ -1,6 +1,4 @@
 import { useContext } from 'react';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { DialogAppSDK } from '@contentful/app-sdk';
 import { GeneratorContext } from '@providers/generatorProvider';
 import useEntryAndContentType from '@hooks/dialog/useEntryAndContentType';
 import useAI, { GenerateMessage } from '@hooks/dialog/useAI';
@@ -33,18 +31,9 @@ const OutputTextPanels = (props: Props) => {
   const { feature, entryId, trackGeneratorEvent } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
 
-  const sdk = useSDK<DialogAppSDK>();
-
   const handleEntryApply = async () => {
-    const successfullyUpdated = await updateEntry(outputFieldId, outputFieldLocale, ai.output);
+    await updateEntry(outputFieldId, outputFieldLocale, ai.output);
     trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
-
-    if (successfullyUpdated) {
-      sdk.notifier.success('Content applied successfully.');
-      sdk.close();
-    } else {
-      sdk.notifier.error('Content did not apply successfully. Please try again.');
-    }
   };
 
   const generate = () => {
