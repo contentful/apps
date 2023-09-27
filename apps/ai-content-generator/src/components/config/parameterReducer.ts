@@ -119,7 +119,7 @@ const parameterReducer = (
         ...state,
         model: {
           value: parameter.model,
-          isValid: parameter.model.length > 0,
+          isValid: parameter.model?.length > 0,
         },
         key: {
           value: parameter.key,
