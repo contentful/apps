@@ -38,11 +38,13 @@ export function TypeformOAuth({
         return;
       }
 
-      const { token, error } = data;
+      const { token, expireTime, error } = data;
 
       if (error) {
         console.error('There was an error authenticating. Please try again.');
       } else if (token) {
+        window.localStorage.setItem('token', token);
+        window.localStorage.setItem('expireTime', expireTime.toString());
         setToken(token);
         if (oauthWindow) {
           oauthWindow.close();
