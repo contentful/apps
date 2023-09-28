@@ -33,6 +33,7 @@ functions:
     environment:
       CLIENT_ID: ${env:TYPEFORM_CLIENT_ID}
       CLIENT_SECRET: ${env:TYPEFORM_CLIENT_SECRET}
+      DEPLOY_TIME: ${env:DEPLOY_TIME}
     handler: index.handler
     events:
       - http:

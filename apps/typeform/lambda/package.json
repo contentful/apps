@@ -8,8 +8,8 @@
     "lint": "eslint .",
     "test": "jest",
     "test:ci": "jest",
-    "serve:local": "LOCAL_DEV=true nodemon serve.js",
-    "deploy": "sls deploy --stage $STAGE",
+    "serve:local": "DEPLOY_TIME_UNIX=$(date \"+%s\") LOCAL_DEV=true nodemon serve.js",
+    "deploy": "DEPLOY_TIME_UNIX=$(date \"+%s\") sls deploy --stage $STAGE",
     "deploy:test": "npm run deploy"
   },
   "devDependencies": {
