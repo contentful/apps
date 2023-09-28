@@ -11,10 +11,6 @@ const makeError = (response) => {
     error.details = 'Details could not be parsed';
   }
   error.code = response.status;
-  console.log('error', error);
-  console.log('error.details', error.details);
-  console.log('response.headers', response.headers);
-  console.log('response.body', response.text());
   return error;
 };
 
