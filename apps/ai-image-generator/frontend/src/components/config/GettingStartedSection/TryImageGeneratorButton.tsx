@@ -22,7 +22,7 @@ const TryImageGeneratorButton = () => {
   };
 
   return (
-    <Button variant="secondary" className={styles.button} onClick={handleTryAiig}>
+    <Button variant="primary" className={styles.button} onClick={handleTryAiig}>
       Try out AI image generator
     </Button>
   );
