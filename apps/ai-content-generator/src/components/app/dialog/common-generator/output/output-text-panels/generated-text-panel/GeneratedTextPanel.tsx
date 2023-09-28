@@ -1,22 +1,15 @@
-import { Button, CopyButton, Tabs } from '@contentful/f36-components';
+import { Button, CopyButton, Tabs, Paragraph } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
+import Hyperlink from '@components/common/HyperLink/HyperLink';
 import useAI from '@hooks/dialog/useAI';
 import TextFieldWithButtons from '@components/common/text-field-with-buttons/TextFieldWIthButtons';
 import { OutputTab } from '../../Output';
 import { ContentTypeFieldValidation } from 'contentful-management';
 import { useContext, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
-import tokens from '@contentful/f36-tokens';
 import { SegmentAction, SegmentEvents } from '@configs/segment/segmentEvent';
 import { GeneratorContext } from '@providers/generatorProvider';
-
-const styles = {
-  panel: css({
-    flexGrow: 1,
-  }),
-  button: css({
-    marginLeft: `${tokens.spacingXs}`,
-  }),
-};
+import { errorMessages } from '@components/app/dialog/common-generator/errorMessages';
+import { styles } from './GeneratedTextPanel.styles';
 
 interface Props {
   generate: () => void;
@@ -25,11 +18,9 @@ interface Props {
   apply: () => void;
 }
 
-const errorMessage = 'The stream was interrupted. Please try again.';
-
 const GeneratedTextPanel = (props: Props) => {
   const { generate, ai, outputFieldValidation, apply } = props;
-  const { sendStopSignal, output, setOutput, isGenerating, hasError } = ai;
+  const { sendStopSignal, output, setOutput, isGenerating, hasError, error } = ai;
   const { trackGeneratorEvent } = useContext(GeneratorContext);
 
   const [canApply, setCanApply] = useState(false);
@@ -74,6 +65,27 @@ const GeneratedTextPanel = (props: Props) => {
     outputFieldValidation?.size?.min,
   ]);
 
+  const getModalErrorMessage = () => {
+    if (error?.status === 429) {
+      return (
+        <>
+          <Paragraph css={styles.errorMessage}>
+            <Hyperlink
+              body={errorMessages.rateLimitMessage}
+              substring={errorMessages.rateLimitSubstring}
+              hyperLinkHref={errorMessages.rateLimitLink}
+              icon={<ExternalLinkIcon />}
+              alignIcon="end"
+              textLinkStyle={styles.errorLink}
+            />
+          </Paragraph>
+        </>
+      );
+    } else {
+      return <Paragraph css={styles.errorMessage}>{errorMessages.defaultGenerateError}</Paragraph>;
+    }
+  };
+
   return (
     <Tabs.Panel id={OutputTab.GENERATED_TEXT} css={styles.panel}>
       {isGenerating ? (
@@ -86,7 +98,7 @@ const GeneratedTextPanel = (props: Props) => {
           sizeValidation={outputFieldValidation?.size}
           onFieldChange={handleGeneratedTextChange}
           hasError={hasError}
-          errorMessage={errorMessage}>
+          errorMessage={hasError && getModalErrorMessage()}>
           <>
             <CopyButton value={output} onClickCapture={trackCopy} />
             <Button onClick={handleRegenerate} css={styles.button}>

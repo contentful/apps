@@ -12,6 +12,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import AppInstallationParameters from '@components/config/appInstallationParameters';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { gptModels } from '@configs/ai/gptModels';
+import { errorMessages } from '@components/app/dialog/common-generator/errorMessages';
 
 const styles = {
   panel: css({
@@ -29,8 +30,6 @@ interface Props {
   hasError: boolean;
   dialogText: DialogText;
 }
-
-const errorMessage = 'No results were returned. Please try again.';
 
 const OriginalTextPanel = (props: Props) => {
   const { inputText, generate, isGenerating, isNewText, hasOutputField, dialogText, hasError } =
@@ -73,7 +72,7 @@ const OriginalTextPanel = (props: Props) => {
         isDisabled={isTextAreaDisabled}
         placeholder={placeholderText}
         hasError={hasError}
-        errorMessage={errorMessage}
+        errorMessage={errorMessages.defaultOriginalError}
         sizeValidation={{ max: textLimit }}
         {...helpTextProps}>
         <Button

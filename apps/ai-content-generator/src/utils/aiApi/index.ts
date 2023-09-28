@@ -41,19 +41,19 @@ class AI {
       stream: true,
     });
 
-    const stream = (
-      await fetch(this.baseUrl, {
-        method: 'POST',
-        headers,
-        body,
-      })
-    ).body?.getReader();
+    const streamResponse = await fetch(this.baseUrl, {
+      method: 'POST',
+      headers,
+      body,
+    });
 
-    if (!stream) {
-      throw new Error('Unable to create stream');
+    if (streamResponse.status === 200) {
+      const stream = streamResponse.body?.getReader();
+      return stream;
+    } else {
+      const streamJson = await streamResponse.json();
+      validateResponseStatus(streamResponse, streamJson);
     }
-
-    return stream;
   };
 
   /**
@@ -86,7 +86,7 @@ class AI {
    * @param stream ReadableStreamDefaultReader<Uint8Array> | null
    * @returns void
    */
-  sendStopSignal = (stream: ReadableStreamDefaultReader<Uint8Array> | null) => {
+  sendStopSignal = (stream: ReadableStreamDefaultReader<Uint8Array> | null | undefined) => {
     if (stream) {
       stream.cancel();
     }
