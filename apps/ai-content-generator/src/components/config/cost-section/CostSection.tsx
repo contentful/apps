@@ -4,7 +4,17 @@ import Hyperlink from '@components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 const CostSection = () => {
-  const { costHeading, costSubheading, costDescription, costLink, costLinkSubstring } = Sections;
+  const {
+    costHeading,
+    costSubheading,
+    costDescription,
+    costLink,
+    costLinkSubstring,
+    rateLimitDescription,
+    rateLimitLink,
+    rateLimitLinkSubstring,
+  } = Sections;
+
   return (
     <Flex flexDirection="column">
       <Subheading>{costHeading}</Subheading>
@@ -16,6 +26,15 @@ const CostSection = () => {
           body={costDescription}
           substring={costLinkSubstring}
           hyperLinkHref={costLink}
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
+        />
+      </Paragraph>
+      <Paragraph marginBottom="none" marginTop="spacingXs">
+        <Hyperlink
+          body={rateLimitDescription}
+          substring={rateLimitLinkSubstring}
+          hyperLinkHref={rateLimitLink}
           icon={<ExternalLinkIcon />}
           alignIcon="end"
         />
