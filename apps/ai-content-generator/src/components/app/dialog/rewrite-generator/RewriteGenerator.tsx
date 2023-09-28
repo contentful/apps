@@ -28,7 +28,7 @@ const initialParameters: GeneratorParameters = {
 };
 
 const RewriteGenerator = () => {
-  const { setProviderData, localeNames, feature } = useContext(GeneratorContext);
+  const { setProviderData, localeNames, feature, segmentEventData } = useContext(GeneratorContext);
   const { trackEvent } = useContext(SegmentAnalyticsContext);
 
   const [parameters, dispatch] = useReducer(generatorReducer, initialParameters);
@@ -36,7 +36,7 @@ const RewriteGenerator = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
   const headerRef = useRef<HTMLElement>(null);
 
-  const segmentEventData: SegmentEventData = useMemo(
+  const newSegmentEventData: SegmentEventData = useMemo(
     () => ({
       feature_id: feature,
       from_prompt: parameters.isNewText,
@@ -54,13 +54,21 @@ const RewriteGenerator = () => {
   );
 
   const updateProviderData = () => {
-    setProviderData({
-      dispatch,
-      segmentEventData,
-    });
+    if (newSegmentEventData !== segmentEventData) {
+      setProviderData({
+        dispatch,
+        segmentEventData: newSegmentEventData,
+      });
+    }
   };
 
-  useEffect(updateProviderData, [dispatch, segmentEventData, setProviderData, trackEvent]);
+  useEffect(updateProviderData, [
+    dispatch,
+    newSegmentEventData,
+    setProviderData,
+    trackEvent,
+    segmentEventData,
+  ]);
 
   useEffect(() => {
     if (headerRef.current) {
