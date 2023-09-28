@@ -15,6 +15,18 @@ const app = express();
 
 const FRONTEND = path.dirname(require.resolve('@contentful/typeform-frontend'));
 
+const computeLastModifiedTime = () => {
+  const deployTime = process.env.DEPLOY_TIME_UNIX;
+  if (typeof deployTime === 'undefined') {
+    throw new Error('Missing DEPLOY_TIME_UNIX env var');
+  }
+
+  // JS uses number of _milliseconds_ since epoch, whereas unix generates number in
+  // _seconds_ since epoch. So we have to convert
+  const epochTime = Number(deployTime) * 1000;
+  return new Date(epochTime).toGMTString();
+};
+
 app.use('/forms', async (req, res) => {
   const { authorization } = req.headers;
   if (!authorization) {
@@ -51,7 +63,8 @@ app.use('/callback', async (req, res) => {
   res.redirect(`${origin}/frontend/?token=${access_token}&expiresIn=${expires_in}`);
 });
 
-app.use('/frontend', express.static(FRONTEND));
+const lastModified = computeLastModifiedTime();
+app.use('/frontend', express.static(FRONTEND, { lastModified }));
 
 app.use((_req, res) => res.status(404).send('Not found'));
 
