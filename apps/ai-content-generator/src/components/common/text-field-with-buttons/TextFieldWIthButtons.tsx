@@ -6,7 +6,6 @@ import HyperLink from '../HyperLink/HyperLink';
 import { styles } from './TextFieldWithButtons.styles';
 import { TokenWarning } from '@configs/token-warning/tokenWarning';
 import { ErrorCircleOutlineIcon, ExternalLinkIcon } from '@contentful/f36-icons';
-import tokens from '@contentful/f36-tokens';
 
 interface Props {
   inputText: string;
@@ -18,7 +17,7 @@ interface Props {
   helpText?: string;
   warningMessage?: TokenWarning;
   hasError?: boolean;
-  errorMessage?: string;
+  errorMessage?: string | ReactNode;
 }
 
 const TextFieldWithButtons = (props: Props) => {
@@ -54,18 +53,16 @@ const TextFieldWithButtons = (props: Props) => {
         maxLength={sizeValidation?.max}
         minLength={sizeValidation?.min}
       />
-      <Paragraph css={{ color: tokens.red500 }}>
-        {hasError ? (
-          <>
-            <ErrorCircleOutlineIcon
-              variant="negative"
-              marginRight="spacing2Xs"
-              data-testid="error-icon"
-            />
-            {errorMessage}
-          </>
-        ) : null}
-      </Paragraph>
+      {hasError ? (
+        <Flex marginBottom="spacingM">
+          <ErrorCircleOutlineIcon
+            variant="negative"
+            marginRight="spacing2Xs"
+            data-testid="error-icon"
+          />
+          {errorMessage}
+        </Flex>
+      ) : null}
 
       <Flex alignSelf="flex-end">
         {helpText && <Paragraph css={styles.helpText}>{helpText}</Paragraph>}

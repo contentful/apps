@@ -87,6 +87,9 @@ const Sections = {
   costDescription: 'View the current pricing model at openai.com/pricing',
   costLinkSubstring: 'openai.com/pricing',
   costLink: 'https://openai.com/pricing',
+  rateLimitDescription: "Chat GPT enforces usage quotas. Learn about Chat GPT's rate limits",
+  rateLimitLinkSubstring: "Chat GPT's rate limits",
+  rateLimitLink: 'https://platform.openai.com/docs/guides/rate-limits/overview',
   disclaimerHeading: 'Disclaimer',
   disclaimerDescription:
     "This feature uses a third party AI tool. Please ensure your use of the tool and any AI-generated content complies with applicable laws, your company's policies, and all other Terms and Policies",

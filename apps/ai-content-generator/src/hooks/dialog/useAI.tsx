@@ -9,6 +9,7 @@ import { defaultModelId } from '@configs/ai/gptModels';
 import AppInstallationParameters, {
   ProfileType,
 } from '@components/config/appInstallationParameters';
+import { AiApiError, AiApiErrorType } from '@utils/aiApi/handleAiApiErrors';
 
 export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
@@ -30,9 +31,11 @@ const useAI = () => {
     [sdk.parameters.installation]
   );
   const [output, setOutput] = useState<string>('');
-  const [stream, setStream] = useState<ReadableStreamDefaultReader<Uint8Array> | null>(null);
+  const [stream, setStream] = useState<ReadableStreamDefaultReader<Uint8Array> | null | undefined>(
+    null
+  );
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<AiApiErrorType | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
 
   const createGPTPayload = (
@@ -50,7 +53,7 @@ const useAI = () => {
 
   const resetOutput = () => {
     setOutput('');
-    setError('');
+    setError(null);
     if (stream) {
       stream.cancel();
     }
@@ -89,9 +92,13 @@ const useAI = () => {
       }
     } catch (error: unknown) {
       console.error(error);
-      setError(error as string);
-      console.log('error launched');
+      if (error instanceof AiApiError) {
+        setError(error);
+      } else {
+        setError(new AiApiError({}));
+      }
       setHasError(true);
+      setIsGenerating(false);
     } finally {
       setStream(null);
     }

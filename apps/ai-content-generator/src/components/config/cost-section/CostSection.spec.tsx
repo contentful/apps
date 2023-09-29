@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { Sections } from '../configText';
 
 const { getByText } = screen;
-const { costHeading, costLinkSubstring } = Sections;
+const { costHeading, costLinkSubstring, rateLimitLinkSubstring } = Sections;
 
 describe('CostSection component', () => {
   it('Component mounts without correct content', async () => {
@@ -12,8 +12,10 @@ describe('CostSection component', () => {
 
     const title = getByText(costHeading);
     const pricingHyperlink = getByText(costLinkSubstring);
+    const rateLimitHyperlink = getByText(rateLimitLinkSubstring);
 
     expect(title).toBeTruthy();
     expect(pricingHyperlink).toBeTruthy();
+    expect(rateLimitHyperlink).toBeTruthy();
   });
 });
