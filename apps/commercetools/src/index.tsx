@@ -6,7 +6,7 @@ import { SKU_TYPES } from './constants';
 import { renderDialog } from './dialog';
 import logo from './logo.svg';
 import { CommerceToolsProduct, ConfigurationParameters } from './types';
-// import { AdditionalDataRenderer } from './additionalDataRenderer';
+import { AdditionalDataRenderer } from './additionalDataRenderer';
 
 function makeCTA(fieldType: string, skuType?: string) {
   const isArray = fieldType === 'Array';
@@ -54,8 +54,8 @@ const integration: Integration<CommerceToolsProduct> = {
   isDisabled: () => false,
   openDialog,
   isInOrchestrationEAP: true,
-  // productCardVersion: 'v2',
-  // additionalDataRenderer: AdditionalDataRenderer,
+  productCardVersion: 'v2',
+  additionalDataRenderer: AdditionalDataRenderer,
 };
 
 init((sdk) => {
