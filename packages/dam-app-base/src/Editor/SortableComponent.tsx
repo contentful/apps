@@ -1,10 +1,12 @@
 import { Card, IconButton } from '@contentful/f36-components';
 import { CloseIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import arrayMove from 'array-move';
 import * as React from 'react';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { Asset, Config, DeleteFn, ThumbnailFn } from '../interfaces';
+import FileIcon from '../Icons/FileIcon';
 
 interface Props {
   disabled: boolean;
@@ -32,10 +34,6 @@ interface SortableElementProps extends DragHandleProps {
   onDelete: () => void;
 }
 
-const DragHandle = SortableHandle<DragHandleProps>(({ url, alt }: DragHandleProps) =>
-  url ? <img src={url} alt={alt} /> : <div>Asset not available</div>
-);
-
 const styles = {
   container: css({
     maxWidth: '600px',
@@ -47,10 +45,14 @@ const styles = {
   }),
   card: (disabled: boolean) =>
     css({
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
       margin: '10px',
       position: 'relative',
+      cursor: disabled ? 'move' : 'pointer',
+      color: tokens.gray500,
       img: {
-        cursor: disabled ? 'move' : 'pointer',
         display: 'block',
         maxWidth: '150px',
         maxHeight: '100px',
@@ -66,7 +68,43 @@ const styles = {
     padding: 0,
     minHeight: 'initial',
   }),
+  altTextContainer: css({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    maxWidth: '150px',
+    maxHeight: '100px',
+  }),
+  altTextDisplay: css({
+    wordBreak: 'break-word',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
+  }),
 };
+
+const DragHandle = SortableHandle<DragHandleProps>(({ url, alt }: DragHandleProps) => {
+  if (!url && !alt) {
+    return (
+      <div className={styles.altTextContainer}>
+        <p className={styles.altTextDisplay}>Asset not available</p>
+      </div>
+    );
+  } else if (!url) {
+    return (
+      <div className={styles.altTextContainer}>
+        <FileIcon />
+        <p className={styles.altTextDisplay} title={alt}>
+          {alt}
+        </p>
+      </div>
+    );
+  } else {
+    return <img src={url} alt={alt} title={alt} />;
+  }
+});
 
 const SortableItem = SortableElement<SortableElementProps>((props: SortableElementProps) => {
   return (
