@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.62...@contentful/dam-app-base@2.1.0) (2023-10-03)
+
+### Features
+
+- update handling for non-image assets ([#5020](https://github.com/contentful/apps/issues/5020)) ([6d835b5](https://github.com/contentful/apps/commit/6d835b5dd635060e3ca49017762bc665824c3c7f))
+
 ## [2.0.62](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.0.61...@contentful/dam-app-base@2.0.62) (2023-09-07)
 
 **Note:** Version bump only for package @contentful/dam-app-base
