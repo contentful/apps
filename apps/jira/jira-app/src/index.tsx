@@ -9,6 +9,7 @@ import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.scss';
 import JiraClient from './jiraClient';
 import { InstallationParameters } from './interfaces';
+import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 function renderAtRoot(component: JSX.Element) {
   render(component, document.getElementById('root'));
@@ -23,19 +24,25 @@ if (window.location.search.includes('token')) {
 } else {
   init((sdk) => {
     if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-      renderAtRoot(<App sdk={sdk as AppExtensionSDK} />);
+      renderAtRoot(
+        <SDKProvider>
+          <App sdk={sdk as AppExtensionSDK} />
+        </SDKProvider>
+      );
     }
 
     if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {
       (sdk as SidebarExtensionSDK).window.startAutoResizer();
       renderAtRoot(
-        <Auth
-          notifyError={sdk.notifier.error}
-          parameters={sdk.parameters.installation as InstallationParameters}>
-          {(token, client: JiraClient, resetClient) => (
-            <Jira client={client} sdk={sdk as SidebarExtensionSDK} signOut={resetClient} />
-          )}
-        </Auth>
+        <SDKProvider>
+          <Auth
+            notifyError={sdk.notifier.error}
+            parameters={sdk.parameters.installation as InstallationParameters}>
+            {(token, client: JiraClient, resetClient) => (
+              <Jira client={client} sdk={sdk as SidebarExtensionSDK} signOut={resetClient} />
+            )}
+          </Auth>
+        </SDKProvider>
       );
     }
   });
