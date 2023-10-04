@@ -32,11 +32,13 @@ export default class OAuth extends React.Component<Props> {
         return;
       }
 
-      const { token, error } = e.data;
+      const { token, expireTime, error } = e.data;
 
       if (error) {
         this.props.notifyError('There was an error authenticating. Please refresh and try again.');
       } else if (token) {
+        window.localStorage.setItem('token', token);
+        window.localStorage.setItem('expireTime', expireTime.toString());
         this.props.setToken(token);
       }
 

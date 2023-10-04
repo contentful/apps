@@ -374,10 +374,10 @@ describe('The Jira App Components', () => {
       };
 
       standalone(mockWindow as any);
-
-      expect(mockWindow.localStorage.setItem).toHaveBeenCalledWith('token', '123');
-      expect(mockWindow.localStorage.setItem).toHaveBeenCalledWith('expireTime', '10100');
-      expect(mockWindow.opener.postMessage).toHaveBeenCalledWith({ token: '123' }, '*');
+      expect(mockWindow.opener.postMessage).toHaveBeenCalledWith(
+        { token: '123', expireTime: 10100 },
+        '*'
+      );
       expect(mockWindow.history.replaceState).toHaveBeenCalledWith({}, 'oauth', '/');
     });
 
