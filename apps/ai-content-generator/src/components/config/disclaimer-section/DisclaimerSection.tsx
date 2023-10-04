@@ -1,5 +1,5 @@
 import { Flex, Subheading, Text } from '@contentful/f36-components';
-import Hyperlink from '@components/common/HyperLink/HyperLink';
+import { HyperLink } from '@contentful/integration-component-library';
 import { Sections } from '../configText';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 
@@ -10,7 +10,7 @@ const DisclaimerSection = () => {
     <Flex flexDirection="column">
       <Subheading>{disclaimerHeading}</Subheading>
       <Text fontSize="fontSizeM" fontWeight="fontWeightMedium" fontColor="gray900">
-        <Hyperlink
+        <HyperLink
           body={disclaimerDescription}
           substring={disclaimerLinkSubstring}
           hyperLinkHref={disclaimerLink}

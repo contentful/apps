@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from 'react';
 import { FormControl, TextInput } from '@contentful/f36-components';
-import OpenAILink from 'components/config/Hyperlink/Hyperlink';
+import { HyperLink } from '@contentful/integration-component-library';
 import configPageCopies from 'constants/configPageCopies';
 
 interface Props {
@@ -12,7 +12,7 @@ const APIKeySection = (props: Props) => {
   const { apiKey, handleApiKey } = props;
   const [editing, setEditing] = useState(false);
 
-  const { sectionTitle, linkBody, linkSubstring, linkHref } = configPageCopies.apiKeySection
+  const { sectionTitle, linkBody, linkSubstring, linkHref } = configPageCopies.apiKeySection;
 
   const censorApiKey = (key: string) => key.replace(/.(?=.{4,}$)/g, '*');
 
@@ -27,7 +27,7 @@ const APIKeySection = (props: Props) => {
   const handleClick = () => setEditing(true);
 
   return (
-    <FormControl testId='api-key-section' isRequired>
+    <FormControl testId="api-key-section" isRequired>
       <FormControl.Label>{sectionTitle}</FormControl.Label>
       {editing ? (
         <TextInput
@@ -49,7 +49,7 @@ const APIKeySection = (props: Props) => {
         />
       )}
       <FormControl.HelpText>
-        <OpenAILink body={linkBody} substring={linkSubstring} href={linkHref} />
+        <HyperLink body={linkBody} substring={linkSubstring} hyperLinkHref={linkHref} />
       </FormControl.HelpText>
     </FormControl>
   );

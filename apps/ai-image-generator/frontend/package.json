@@ -6,6 +6,7 @@
     "@contentful/app-sdk": "4.22.0",
     "@contentful/f36-components": "4.45.0",
     "@contentful/f36-tokens": "4.0.2",
+    "@contentful/integration-component-library": "^1.1.36",
     "@contentful/node-apps-toolkit": "^2.2.0",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@emotion/react": "^11.11.1",
@@ -64,10 +65,10 @@
     "esbuild": "^0.19.2",
     "eslint-plugin-storybook": "^0.6.13",
     "prop-types": "^15.8.1",
+    "rimraf": "^5.0.1",
     "storybook": "^7.3.0",
     "typescript": "4.9.5",
-    "webpack": "^5.88.2",
-    "rimraf": "^5.0.1"
+    "webpack": "^5.88.2"
   },
   "homepage": "."
 }
