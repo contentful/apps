@@ -88,12 +88,13 @@ describe('The Jira App Components', () => {
 
       const oauthButton = wrapper.getByTestId('oauth-button');
       const token = '123';
+      const expireTime = Date.now() + 600000;
 
       const source: MessageEventSource = { close: jest.fn() } as any;
       (window.open as jest.Mock).mockReturnValue(source);
 
       fireEvent.click(oauthButton);
-      fireEvent(window, new MessageEvent('message', { data: { token }, source }));
+      fireEvent(window, new MessageEvent('message', { data: { token, expireTime }, source }));
 
       expect(window.open).toHaveBeenCalledWith(
         'https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=XD9k9QU9VT4Rt26u6lbO3NM0fOqvvXan&scope=read%3Ajira-user%20read%3Ajira-work%20write%3Ajira-work&redirect_uri=https%3A%2F%2Fapi.jira.ctfapps.net%2Fauth&response_type=code&state=http%3A%2F%2Flocalhost%2F&prompt=consent',
@@ -374,10 +375,10 @@ describe('The Jira App Components', () => {
       };
 
       standalone(mockWindow as any);
-
-      expect(mockWindow.localStorage.setItem).toHaveBeenCalledWith('token', '123');
-      expect(mockWindow.localStorage.setItem).toHaveBeenCalledWith('expireTime', '10100');
-      expect(mockWindow.opener.postMessage).toHaveBeenCalledWith({ token: '123' }, '*');
+      expect(mockWindow.opener.postMessage).toHaveBeenCalledWith(
+        { token: '123', expireTime: 10100 },
+        '*'
+      );
       expect(mockWindow.history.replaceState).toHaveBeenCalledWith({}, 'oauth', '/');
     });
 

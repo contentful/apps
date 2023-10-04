@@ -14,13 +14,11 @@ const standalone = (window: Window) => {
 
     const expireTime = Date.now() + expiresIn * 1000;
 
-    window.localStorage.setItem('token', token);
-    window.localStorage.setItem('expireTime', expireTime.toString());
-    window.opener.postMessage({ token }, '*');
+    window.opener.postMessage({ token, expireTime }, '*');
 
     window.history.replaceState({}, 'oauth', '/');
   } else {
     window.opener.postMessage({ error: 'No query string provided!' }, '*');
   }
 };
-export default standalone
+export default standalone;
