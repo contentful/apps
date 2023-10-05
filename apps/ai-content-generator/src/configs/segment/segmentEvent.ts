@@ -21,6 +21,7 @@ export interface SegmentEventData {
   content_generation_prompt?: string;
   source_field?: string;
   target_locale?: string;
+  rewrite_prompt?: string;
 }
 
 export interface SegmentAppData {
