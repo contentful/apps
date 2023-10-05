@@ -49,7 +49,7 @@ const APIKeySection = (props: Props) => {
         />
       )}
       <FormControl.HelpText>
-        <HyperLink body={linkBody} substring={linkSubstring} hyperLinkHref={linkHref} />
+        <HyperLink body={linkBody} substring={linkSubstring} href={linkHref} />
       </FormControl.HelpText>
     </FormControl>
   );

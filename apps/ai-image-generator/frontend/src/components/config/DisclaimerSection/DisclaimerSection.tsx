@@ -8,7 +8,7 @@ const DisclaimerSection = () => {
     <Flex flexDirection="column">
       <Subheading>{sectionTitle}</Subheading>
       <Text fontSize="fontSizeM" fontWeight="fontWeightNormal" fontColor="gray900">
-        <HyperLink body={linkBody} substring={linkSubstring} hyperLinkHref={linkHref} />
+        <HyperLink body={linkBody} substring={linkSubstring} href={linkHref} />
       </Text>
     </Flex>
   );

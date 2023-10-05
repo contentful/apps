@@ -24,14 +24,14 @@ const CostSection = () => {
         <HyperLink
           body={pricingLinkBody}
           substring={pricingLinkSubstring}
-          hyperLinkHref={pricingLinkHref}
+          href={pricingLinkHref}
         />
       </HelpText>
       <HelpText className={styles.link}>
         <HyperLink
           body={creditLinkBody}
           substring={creditLinkSubstring}
-          hyperLinkHref={creditLinkHref}
+          href={creditLinkHref}
         />
       </HelpText>
     </Flex>

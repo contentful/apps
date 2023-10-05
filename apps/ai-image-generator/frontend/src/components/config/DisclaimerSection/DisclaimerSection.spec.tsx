@@ -2,7 +2,7 @@ import DisclaimerSection from './DisclaimerSection';
 import { render, screen } from '@testing-library/react';
 import configPageCopies from 'constants/configPageCopies';
 
-const { getByText, getByTestId } = screen;
+const { getByText } = screen;
 const { sectionTitle, linkSubstring } = configPageCopies.disclaimerSection;
 
 describe('DisclaimerSection component', () => {
