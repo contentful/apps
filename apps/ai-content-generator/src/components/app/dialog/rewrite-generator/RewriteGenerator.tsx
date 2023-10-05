@@ -43,6 +43,7 @@ const RewriteGenerator = () => {
       source_field: parameters.isNewText ? '' : parameters.sourceField.split(':')[1],
       content_generation_prompt: parameters.originalText.prompt || undefined,
       target_locale: parameters.output.locale,
+      rewrite_prompt: rewritePromptData,
     }),
     [
       feature,
@@ -50,6 +51,7 @@ const RewriteGenerator = () => {
       parameters.originalText.prompt,
       parameters.output.locale,
       parameters.sourceField,
+      rewritePromptData,
     ]
   );
 
