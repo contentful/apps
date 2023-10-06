@@ -166,7 +166,7 @@ async function createContentType() {
       );
       return contentTypeProps.sys.id;
     } catch (err) {
-      throw new Error('Publish content type failed: ' + err);
+      throw new Error(`Publish content type failed: ${err instanceof Error ? err.message : err}`);
     }
   } catch (err) {
     throw new Error(`Content type setup failed: ${err instanceof Error ? err.message : err}`);
