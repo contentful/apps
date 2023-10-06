@@ -54,7 +54,7 @@ HOSTED_APP_URL= # The ngrok URL from step 1 - this must a https URL
 
 The Content Management API (CMA) token can be obtained through the Contentful web app.
 To do this, open the web app in your browser and navigate to the desired space,
-then navigate to **Settings -> API Keys -> Content management tokens -> Generate personal token**.
+then navigate to **Settings -> CMA tokens -> Create personal access token**.
 This token has all the access rights as the account you create it for, but it is only used to set up the example App in your space. The actual backend code will not use it.
 
 ### Warning!

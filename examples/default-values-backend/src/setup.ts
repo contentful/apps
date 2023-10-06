@@ -8,12 +8,26 @@
  * + Set up a webhook that reacts to new Entries
  */
 
-import nodeFetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
+import contentful from 'contentful-management';
 require('dotenv').config();
 const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, HOSTED_APP_URL, BASE_URL, CMA_TOKEN, PRIVATE_APP_KEY } =
   process.env;
+
+const client = contentful.createClient(
+  {
+    // This is the access token for this space. Normally you get the token in the Contentful web app
+    accessToken: CMA_TOKEN as string,
+  },
+  {
+    type: 'plain',
+    defaults: {
+      spaceId: SPACE_ID,
+      environmentId: ENVIRONMENT_ID,
+    },
+  }
+);
 
 // ---------------------------------------
 // Main setup flow
@@ -74,83 +88,55 @@ const isOk = (status: number) => {
 };
 
 async function createAppDefinition() {
-  const body = {
-    name: 'Default field values',
-    src: `${HOSTED_APP_URL}/frontend`,
-    locations: [
+  try {
+    const appDefinitionProps = await client.appDefinition.create(
       {
-        location: 'app-config',
+        organizationId: ORG_ID,
       },
-    ],
-  };
-
-  const response = await nodeFetch(`${BASE_URL}/organizations/${ORG_ID}/app_definitions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/vnd.contentful.management.v1+json',
-      Authorization: `Bearer ${CMA_TOKEN}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (isOk(response.status)) {
-    const j = await response.json();
-    console.log(`Created app definition. APP_ID is ${j.sys.id}`);
-    return j.sys.id;
-  } else {
-    throw new Error('App definition creation failed: ' + (await response.text()));
+      {
+        name: 'Default field values',
+        src: `${HOSTED_APP_URL}/frontend`,
+        locations: [{ location: 'app-config' }],
+      }
+    );
+    console.log(`Created app definition. APP_ID is ${appDefinitionProps.sys.id}`);
+    return appDefinitionProps.sys.id;
+  } catch (err) {
+    throw new Error('App definition creation failed: ' + err);
   }
 }
 
-async function installApp(APP_ID: string, parameters: any) {
-  const response = await nodeFetch(
-    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/app_installations/${APP_ID}`,
-    {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/vnd.contentful.management.v1+json',
-        Authorization: `Bearer ${CMA_TOKEN}`,
+async function installApp(APP_ID: string, parameters: contentful.FreeFormParameters) {
+  try {
+    await client.appInstallation.upsert(
+      {
+        spaceId: SPACE_ID,
+        environmentId: ENVIRONMENT_ID,
+        appDefinitionId: APP_ID,
       },
-      body: JSON.stringify({
+      {
         parameters,
-      }),
-    }
-  );
-
-  if (isOk(response.status)) {
+      }
+    );
     console.log(`Installed app!`);
-  } else {
-    throw new Error('App installation failed: ' + (await response.text()));
+  } catch (err) {
+    throw new Error('App installation failed: ' + err);
   }
 }
 
 async function createAppKey(APP_ID: string) {
-  const body = {
-    generate: true,
-  };
-
-  const response = await nodeFetch(
-    `${BASE_URL}/organizations/${ORG_ID}/app_definitions/${APP_ID}/keys`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${CMA_TOKEN}`,
-      },
-      body: JSON.stringify(body),
-    }
-  );
-
-  if (!isOk(response.status)) {
-    throw new Error('Key creation failed: ' + (await response.text()));
+  try {
+    const { generated, jwk } = await client.appKey.create(
+      { appDefinitionId: APP_ID },
+      { generate: true }
+    );
+    const { privateKey } = generated;
+    fs.writeFileSync(path.join(__dirname, '..', PRIVATE_APP_KEY as string), privateKey);
+    console.log(`New key pair created for app ${APP_ID} and stored under "./keys"`);
+    return { jwk, privateKey };
+  } catch (err) {
+    throw new Error('Key creation failed: ' + err);
   }
-
-  const { generated, jwk } = await response.json();
-  const { privateKey } = generated;
-
-  fs.writeFileSync(path.join(__dirname, '..', PRIVATE_APP_KEY as string), privateKey);
-  console.log(`New key pair created for app ${APP_ID} and stored under "./keys"`);
-  return { jwk, privateKey };
 }
 
 async function createContentType() {
@@ -168,68 +154,36 @@ async function createContentType() {
     ],
   };
 
-  const response = await nodeFetch(
-    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types/${body.name}`,
-    {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/vnd.contentful.management.v1+json',
-        Authorization: `Bearer ${CMA_TOKEN}`,
-      },
-      body: JSON.stringify(body),
-    }
-  );
-
-  if (isOk(response.status)) {
+  try {
+    const contentTypeProps = await client.contentType.create({}, body);
     console.log('Set up example content type!');
-  } else {
-    throw new Error('Content type setup failed: ' + (await response.text()));
-  }
-
-  const responseBody = await response.json();
-
-  const publishResponse = await nodeFetch(
-    `${BASE_URL}/spaces/${SPACE_ID}/environments/${ENVIRONMENT_ID}/content_types/${responseBody.sys.id}/published`,
-    {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/vnd.contentful.management.v1+json',
-        Authorization: `Bearer ${CMA_TOKEN}`,
-        'X-Contentful-Version': responseBody.sys.version,
-      },
-      body: '{}',
+    try {
+      await client.contentType.publish(
+        {
+          contentTypeId: contentTypeProps.sys.id,
+        },
+        contentTypeProps
+      );
+      return contentTypeProps.sys.id;
+    } catch (err) {
+      throw new Error('Publish content type failed: ' + err);
     }
-  );
-
-  if (isOk(publishResponse.status)) {
-    console.log('Published example content type!');
-    return responseBody.sys.id;
-  } else {
-    throw new Error('Publish content type failed: ' + responseBody);
+  } catch (err) {
+    throw new Error('Content type setup failed: ' + err);
   }
 }
 
 async function createAppEvent(APP_ID: string) {
-  const body = {
-    targetUrl: `${HOSTED_APP_URL}/event-handler`,
-    topics: ['Entry.create'],
-  };
-
-  const response = await nodeFetch(
-    `${BASE_URL}/organizations/${ORG_ID}/app_definitions/${APP_ID}/event_subscription`,
-    {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/vnd.contentful.management.v1+json',
-        Authorization: `Bearer ${CMA_TOKEN}`,
-      },
-      body: JSON.stringify(body),
-    }
-  );
-
-  if (isOk(response.status)) {
+  try {
+    await client.appEventSubscription.upsert(
+      { appDefinitionId: APP_ID },
+      {
+        targetUrl: `${HOSTED_APP_URL}/event-handler`,
+        topics: ['Entry.create'],
+      }
+    );
     console.log('Set up App Event!');
-  } else {
-    throw new Error('App event setup failed: ' + (await response.text()));
+  } catch (err) {
+    throw new Error('App event setup failed: ' + err);
   }
 }
