@@ -1,6 +1,6 @@
 import { Flex, HelpText, Subheading, Text } from '@contentful/f36-components';
 import configPageCopies from 'constants/configPageCopies';
-import Hyperlink from '../Hyperlink/Hyperlink';
+import { HyperLink } from '@contentful/integration-component-library';
 import { styles } from './CostSection.styles';
 
 const CostSection = () => {
@@ -21,10 +21,18 @@ const CostSection = () => {
         {sectionSubheading}
       </Text>
       <HelpText className={styles.link}>
-        <Hyperlink body={pricingLinkBody} substring={pricingLinkSubstring} href={pricingLinkHref} />
+        <HyperLink
+          body={pricingLinkBody}
+          substring={pricingLinkSubstring}
+          href={pricingLinkHref}
+        />
       </HelpText>
       <HelpText className={styles.link}>
-        <Hyperlink body={creditLinkBody} substring={creditLinkSubstring} href={creditLinkHref} />
+        <HyperLink
+          body={creditLinkBody}
+          substring={creditLinkSubstring}
+          href={creditLinkHref}
+        />
       </HelpText>
     </Flex>
   );
