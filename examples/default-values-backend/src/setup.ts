@@ -12,7 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import contentful from 'contentful-management';
 require('dotenv').config();
-const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, HOSTED_APP_URL, BASE_URL, CMA_TOKEN, PRIVATE_APP_KEY } =
+const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, HOSTED_APP_URL, CMA_TOKEN, PRIVATE_APP_KEY } =
   process.env;
 
 const client = contentful.createClient(
@@ -102,7 +102,7 @@ async function createAppDefinition() {
     console.log(`Created app definition. APP_ID is ${appDefinitionProps.sys.id}`);
     return appDefinitionProps.sys.id;
   } catch (err) {
-    throw new Error('App definition creation failed: ' + err);
+    throw new Error(`App definition creation failed: ${err instanceof Error ? err.message : err}`);
   }
 }
 
@@ -120,7 +120,7 @@ async function installApp(APP_ID: string, parameters: contentful.FreeFormParamet
     );
     console.log(`Installed app!`);
   } catch (err) {
-    throw new Error('App installation failed: ' + err);
+    throw new Error(`App installation failed: ${err instanceof Error ? err.message : err}`);
   }
 }
 
@@ -135,7 +135,7 @@ async function createAppKey(APP_ID: string) {
     console.log(`New key pair created for app ${APP_ID} and stored under "./keys"`);
     return { jwk, privateKey };
   } catch (err) {
-    throw new Error('Key creation failed: ' + err);
+    throw new Error(`Key creation failed: ${err instanceof Error ? err.message : err}`);
   }
 }
 
@@ -169,7 +169,7 @@ async function createContentType() {
       throw new Error('Publish content type failed: ' + err);
     }
   } catch (err) {
-    throw new Error('Content type setup failed: ' + err);
+    throw new Error(`Content type setup failed: ${err instanceof Error ? err.message : err}`);
   }
 }
 
@@ -184,6 +184,6 @@ async function createAppEvent(APP_ID: string) {
     );
     console.log('Set up App Event!');
   } catch (err) {
-    throw new Error('App event setup failed: ' + err);
+    throw new Error(`App event setup failed: ${err instanceof Error ? err.message : err}`);
   }
 }
