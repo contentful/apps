@@ -77,7 +77,7 @@ export function isDuplicate(msg, previousMessages) {
 function createFormattedTimeString(date) {
   const d = new Date(date);
 
-  return `${formatDistanceToNow(d)} ago at ${format(d, 'h:mm:ss a..aa')}`;
+  return `${formatDistanceToNow(d)} ago at ${format(d, 'h:mm:ss a')}`;
 }
 
 export function messageToState(msg) {
