@@ -10,7 +10,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import contentful from 'contentful-management';
+import * as contentful from 'contentful-management';
 require('dotenv').config();
 const { ORG_ID, SPACE_ID, ENVIRONMENT_ID, HOSTED_APP_URL, CMA_TOKEN, PRIVATE_APP_KEY } =
   process.env;
@@ -83,10 +83,6 @@ main().catch((e) => {
 // Helper functions
 // ---------------------------------------
 
-const isOk = (status: number) => {
-  return status < 400 && status > 99;
-};
-
 async function createAppDefinition() {
   try {
     const appDefinitionProps = await client.appDefinition.create(
@@ -125,11 +121,16 @@ async function installApp(APP_ID: string, parameters: contentful.FreeFormParamet
 async function createAppKey(APP_ID: string) {
   try {
     const { generated, jwk } = await client.appKey.create(
-      { appDefinitionId: APP_ID },
+      {
+        organizationId: ORG_ID,
+        appDefinitionId: APP_ID,
+      },
       { generate: true }
     );
     if (generated) {
-      fs.writeFileSync(path.join(__dirname, '..', PRIVATE_APP_KEY as string), generated.privateKey);
+      const filename = path.join(__dirname, '..', PRIVATE_APP_KEY as string);
+      fs.mkdirSync(path.dirname(filename), { recursive: true });
+      fs.writeFileSync(filename, generated.privateKey);
       console.log(`New key pair created for app ${APP_ID} and stored under "./keys"`);
     }
     return { jwk };
@@ -175,7 +176,10 @@ async function createContentType() {
 async function createAppEvent(APP_ID: string) {
   try {
     await client.appEventSubscription.upsert(
-      { appDefinitionId: APP_ID },
+      {
+        organizationId: ORG_ID,
+        appDefinitionId: APP_ID,
+      },
       {
         targetUrl: `${HOSTED_APP_URL}/event-handler`,
         topics: ['Entry.create'],
