@@ -21,7 +21,7 @@
   "dependencies": {
     "@contentful/app-sdk": "4.12.0",
     "@contentful/dam-app-base": "^2.0.35",
-    "@contentful/f36-components": "4.40.6",
+    "@contentful/f36-components": "4.52.1",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@mux/mux-player-react": "^1.10.1",
     "@mux/mux-uploader-react": "^1.0.0-beta.7",

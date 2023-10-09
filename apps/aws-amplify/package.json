@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.17.2",
-    "@contentful/f36-components": "4.41.1",
+    "@contentful/f36-components": "4.52.1",
     "@contentful/f36-tokens": "4.0.2",
     "@contentful/integration-component-library": "^1.1.41",
     "@contentful/react-apps-toolkit": "1.2.16",
