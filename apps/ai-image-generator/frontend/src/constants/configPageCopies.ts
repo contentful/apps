@@ -14,6 +14,9 @@ const configPageCopies = {
     creditLinkBody: 'View your current credits at labs.openai.com/account',
     creditLinkSubstring: 'labs.openai.com/account',
     creditLinkHref: 'https://labs.openai.com/account',
+    learnMoreBody: 'Learn more about how DALL-E credits work at help.openai.com/en/articles',
+    learnMoreSubstring: 'help.openai.com/en/articles',
+    learnBodyHref: 'https://help.openai.com/en/articles/6399305-how-dall-e-credits-work',
   },
   disclaimerSection: {
     sectionTitle: 'Disclaimer',
