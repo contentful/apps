@@ -16,6 +16,7 @@
     "@hapi/hapi": "21.3.2",
     "@hapi/inert": "7.1.0",
     "@types/node-fetch": "2.6.4",
+    "contentful-management": "^11.1.1",
     "dotenv": "16.3.1",
     "node-fetch": "2.6.12",
     "react": "18.2.0",

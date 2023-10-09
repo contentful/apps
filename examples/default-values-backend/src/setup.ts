@@ -110,8 +110,6 @@ async function installApp(APP_ID: string, parameters: contentful.FreeFormParamet
   try {
     await client.appInstallation.upsert(
       {
-        spaceId: SPACE_ID,
-        environmentId: ENVIRONMENT_ID,
         appDefinitionId: APP_ID,
       },
       {
@@ -130,10 +128,11 @@ async function createAppKey(APP_ID: string) {
       { appDefinitionId: APP_ID },
       { generate: true }
     );
-    const { privateKey } = generated;
-    fs.writeFileSync(path.join(__dirname, '..', PRIVATE_APP_KEY as string), privateKey);
-    console.log(`New key pair created for app ${APP_ID} and stored under "./keys"`);
-    return { jwk, privateKey };
+    if (generated) {
+      fs.writeFileSync(path.join(__dirname, '..', PRIVATE_APP_KEY as string), generated.privateKey);
+      console.log(`New key pair created for app ${APP_ID} and stored under "./keys"`);
+    }
+    return { jwk };
   } catch (err) {
     throw new Error(`Key creation failed: ${err instanceof Error ? err.message : err}`);
   }
