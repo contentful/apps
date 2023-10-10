@@ -2,7 +2,7 @@
   "name": "@contentful/backend_app_demo",
   "version": "1.0.0",
   "scripts": {
-    "start": "yarn buildFrontend && tsc && node --insecure-http-parser built/src/index.js",
+    "start": "$npm_execpath run buildFrontend && tsc && node --insecure-http-parser built/src/index.js",
     "buildFrontend": "parcel build public/index.html",
     "setup": "NODE_OPTIONS=--insecure-http-parser ts-node src/setup.ts"
   },
@@ -16,6 +16,7 @@
     "@hapi/hapi": "21.3.2",
     "@hapi/inert": "7.1.0",
     "@types/node-fetch": "2.6.4",
+    "contentful-management": "^11.1.1",
     "dotenv": "16.3.1",
     "node-fetch": "2.6.12",
     "react": "18.2.0",
@@ -31,6 +32,6 @@
     "last 1 Chrome versions"
   ],
   "engines": {
-    "node": "^16"
+    "node": "^18"
   }
 }
