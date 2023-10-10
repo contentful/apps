@@ -4,7 +4,7 @@ const warningMessages = {
   linkSubstring: `Visit the app configuration page.`,
   unavailable: `Chat GPT is currently unavailable.`,
   defaultError: 'An unknown error occurred. Please try again.',
-  openAiErrorMessage: 'OpenAI API Error: ',
+  openAiErrorMessage: 'OpenAI API Error:',
 };
 
 const disclaimerMessage = {

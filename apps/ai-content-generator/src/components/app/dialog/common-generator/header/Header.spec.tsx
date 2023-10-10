@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { mockCma, MockSdk } from '../../test/mocks';
-import Dialog from './Dialog';
+import { mockCma, MockSdk } from '@test/mocks';
+import Header from './Header';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
@@ -12,9 +12,10 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => {},
 }));
 
-describe('Dialog component', () => {
+describe('Header component', () => {
   it('renders', () => {
-    const { getByText } = render(<Dialog />);
-    expect(getByText('Select a source field and output field to generate a title')).toBeTruthy();
+    const { getByAltText, unmount } = render(<Header />);
+    expect(getByAltText('Sparkle Icon')).toBeTruthy();
+    unmount();
   });
 });

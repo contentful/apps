@@ -51,6 +51,7 @@ const DisplaySidebarWarning = (props: Props) => {
     }
   }
 
+  console.log(hasBrandProfile);
   if (!hasBrandProfile) {
     return (
       <Box css={styles.msgWrapper}>

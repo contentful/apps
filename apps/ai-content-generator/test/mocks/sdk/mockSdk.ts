@@ -8,28 +8,40 @@ import {
 } from './contentTypes/mockContentType';
 import { mockEntry } from './entry/mockEntry';
 import AppInstallationParameters from '@components/config/appInstallationParameters';
-
-interface MockSdk {
-  sdk: ReturnType<typeof createSDK>;
-  originalData: {
-    parameters: AppInstallationParameters;
-  };
-}
+import { DialogInvocationParameters } from '@locations/Dialog';
 
 class MockSdk {
-  constructor(parameters?: AppInstallationParameters) {
-    const newParameters = parameters || mockSdkParameters.init;
+  sdk: ReturnType<typeof createSDK>;
+  originalData: {
+    installation: AppInstallationParameters;
+    invocation: DialogInvocationParameters | undefined;
+  };
 
-    this.sdk = createSDK(newParameters);
+  constructor(parameters?: {
+    installation?: AppInstallationParameters;
+    invocation?: DialogInvocationParameters;
+  }) {
+    const mockParameters = mockSdkParameters.init;
+    const newInstallationParameters = parameters?.installation || mockParameters.installation;
+    const newInvocationParameters = parameters?.invocation || mockParameters.invocation;
+
+    this.sdk = createSDK({
+      installation: newInstallationParameters,
+      invocation: newInvocationParameters,
+    });
     this.originalData = {
-      parameters: newParameters,
+      installation: newInstallationParameters,
+      invocation: newInvocationParameters,
     };
   }
 
   reset() {
     this.sdk.app.onConfigure = vi.fn();
-    this.sdk.app.getParameters = vi.fn().mockReturnValueOnce(this.originalData.parameters);
-    this.sdk.parameters.installation = this.originalData.parameters;
+    this.sdk.app.getParameters = vi.fn().mockReturnValueOnce(this.originalData.installation);
+    this.sdk.parameters.installation = this.originalData.installation;
+    if (this.originalData.invocation) {
+      this.sdk.parameters.invocation = this.originalData.invocation;
+    }
     this.sdk.app.setReady = vi.fn();
     this.sdk.app.getCurrentState = vi
       .fn()

@@ -4,7 +4,7 @@ import useInitializeParameters from './useInitializeParameters';
 import { mockCma, MockSdk, mockSdkParameters } from '../../../test/mocks';
 import { ParameterAction } from '@components/config/parameterReducer';
 
-const mockSdk = new MockSdk(mockSdkParameters.happyPath);
+const mockSdk = new MockSdk({ installation: mockSdkParameters.happyPath });
 const sdk = mockSdk.sdk;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({

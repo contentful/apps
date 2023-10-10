@@ -4,7 +4,7 @@ import useGetContentTypes from './useGetContentTypes';
 import { mockCma, MockSdk, mockSdkParameters, mockContentTypes } from '../../../test/mocks';
 import { ContentTypeAction } from '@components/config/contentTypeReducer';
 
-const mockSdk = new MockSdk(mockSdkParameters.happyPath);
+const mockSdk = new MockSdk({ installation: mockSdkParameters.happyPath });
 const sdk = mockSdk.sdk;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({

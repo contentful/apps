@@ -13,7 +13,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('ConfigPage component', () => {
-  it('Component renders the correct sections', async () => {
+  it('renders the correct sections', async () => {
     render(<ConfigPage />);
 
     const configTitle = screen.getByText(Sections.configHeading);
