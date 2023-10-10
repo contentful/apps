@@ -1,6 +1,7 @@
 # Hosted Delivery Function - PotterDB
-This is an example of a hosted delivery function that uses the PotterDB API to enrich
-entries with data from the Harry Potter universe.
+This is an example of a hosted delivery function that uses the PotterDB REST API to enrich
+entries with data from the Harry Potter universe. Even though PotterDB has a GraphQL API
+itself, we use the REST API to showcase how to potentially wrap any API.
 
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
