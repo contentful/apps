@@ -15,7 +15,7 @@ type resolvedState = {
   isLoading: false;
 } & DialogInvocationParameters;
 
-type DialogParameters = loadingState | resolvedState;
+export type DialogParameters = loadingState | resolvedState;
 
 /**
  * This hook is used to get the parameters that are passed to the dialog.
@@ -29,8 +29,10 @@ const useDialogParameters = (): DialogParameters => {
 
   const handleDialogParameters = () => {
     const newParameters = sdk.parameters.invocation;
+
     if (!newParameters) {
       setIsLoading(true);
+      return;
     }
 
     setParameters(newParameters);

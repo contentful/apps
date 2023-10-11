@@ -22,7 +22,7 @@ const APIKey = (props: Props) => {
 
   const displayInvalidMessage = !apiKey || isInvalid;
 
-  const censorApiKey = (key: string) => key.replace(/.(?=.{4,}$)/g, '*');
+  const censorApiKey = (key: string) => key?.replace(/.(?=.{4,}$)/g, '*');
 
   const validateApiKey = async (key: string): Promise<boolean> => {
     const ai = new AI(modelsBaseUrl, key, '');

@@ -32,7 +32,7 @@ const Header = () => {
       alignItems="center"
       css={styles.header}>
       <Flex>
-        <img src={SparkleFill}></img>
+        <img src={SparkleFill} alt="Sparkle Icon"></img>
         <Subheading marginBottom="none" marginLeft="spacingXs">
           {title}
         </Subheading>

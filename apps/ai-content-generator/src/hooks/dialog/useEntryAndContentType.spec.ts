@@ -9,7 +9,7 @@ import {
   mockEntry,
 } from '../../../test/mocks';
 
-const mockSdk = new MockSdk(mockSdkParameters.happyPath);
+const mockSdk = new MockSdk({ installation: mockSdkParameters.happyPath });
 const sdk = mockSdk.sdk;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({

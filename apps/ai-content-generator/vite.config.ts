@@ -31,6 +31,7 @@ export default defineConfig(() => ({
       '@locations': path.resolve(__dirname, './src/locations'),
       '@providers': path.resolve(__dirname, './src/providers'),
       '@utils': path.resolve(__dirname, './src/utils'),
+      '@test': path.resolve(__dirname, './test'),
     },
   },
   test: {

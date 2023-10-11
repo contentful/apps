@@ -6,14 +6,23 @@ import {
 } from '../contentTypes/mockContentType';
 import { mockEntry } from '../entry/mockEntry';
 import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { DialogInvocationParameters } from '@locations/Dialog';
 
-const createSDK = (parameters: AppInstallationParameters) => {
+interface SdkParameters {
+  installation: AppInstallationParameters;
+  invocation?: DialogInvocationParameters;
+}
+
+const createSDK = (parameters: SdkParameters) => {
   return {
     app: {
       onConfigure: vi.fn(),
       getParameters: vi.fn().mockReturnValueOnce(parameters),
       setReady: vi.fn(),
       getCurrentState: vi.fn().mockReturnValue({ EditorInterface: mockEditorInterface }),
+    },
+    entry: {
+      fields: {},
     },
     ids: {
       app: 'test-app',
@@ -30,12 +39,11 @@ const createSDK = (parameters: AppInstallationParameters) => {
         get: vi.fn().mockReturnValueOnce(mockEntry),
       },
     },
+    locales: {},
     hostnames: {
       webapp: '',
     },
-    parameters: {
-      installation: { ...parameters },
-    },
+    parameters: { ...parameters },
   };
 };
 

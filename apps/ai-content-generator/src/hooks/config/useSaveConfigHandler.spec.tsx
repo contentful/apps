@@ -66,7 +66,7 @@ describe('useSaveConfigHandler', () => {
       (props: AppInstallationParameters) =>
         useSaveConfigHandler(props, mockValidateParams, mockContentTypes.mockSelectedContentTypes),
       {
-        initialProps: mockSdkParameters.init,
+        initialProps: mockSdkParameters.init.installation,
       }
     );
 

@@ -1,4 +1,4 @@
-import { fireEvent, getByPlaceholderText, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockCma, MockSdk } from '../../../../../../test/mocks';
 import ButtonTextField, { buttons } from './ButtonTextField';
