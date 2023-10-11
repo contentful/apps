@@ -27,6 +27,7 @@
     "post-deploy": "lerna run post-deploy",
     "publish-packages": "lerna version --conventional-commits --no-private --force-git-tag --create-release github --yes && lerna publish from-git --yes",
     "prettier": "prettier --no-editorconfig --no-error-on-unmatched-pattern --write {apps,packages,examples}/**/*.{js,jsx,ts,tsx}",
+    "prettier:check": "prettier --no-error-on-unmatched-pattern --check '**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky install",
     "sentry-release": "SENTRY_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug new -p marketplace-apps $SENTRY_RELEASE && sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $SENTRY_RELEASE && sentry-cli releases --log-level=debug finalize $SENTRY_RELEASE && sentry-cli releases --log-level=debug deploys $SENTRY_RELEASE new -e production"
   },
