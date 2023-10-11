@@ -48,7 +48,7 @@ describe('Display Sidebar Warning', () => {
   });
 
   it('Renders catch all error', () => {
-    const { getByText, rerender, unmount } = render(
+    const { getByText, unmount } = render(
       <DisplaySidebarWarning hasBrandProfile={false} apiError={{ status: 999, message: 'Dog' }} />
     );
 

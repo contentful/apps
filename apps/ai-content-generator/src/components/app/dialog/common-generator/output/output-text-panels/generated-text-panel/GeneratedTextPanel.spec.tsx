@@ -49,7 +49,7 @@ describe('GeneratedTextPanel', () => {
 
   it("Renders length error when output field doesn't meet length requirements", () => {
     const hook = renderHook(() => useAI());
-    const { getByText, unmount, rerender } = render(
+    const { getByText, unmount } = render(
       <Tabs currentTab={OutputTab.GENERATED_TEXT}>
         <GeneratedTextPanel
           generate={() => {}}

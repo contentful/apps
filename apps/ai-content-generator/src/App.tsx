@@ -12,12 +12,8 @@ import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
 
 const ComponentLocationSettings = (isV2: boolean) => ({
   [locations.LOCATION_APP_CONFIG]: isV2 ? ConfigScreen : ConfigScreenV1,
-  // [locations.LOCATION_ENTRY_FIELD]: Field,
-  // [locations.LOCATION_ENTRY_EDITOR]: EntryEditor,
   [locations.LOCATION_DIALOG]: Dialog,
   [locations.LOCATION_ENTRY_SIDEBAR]: isV2 ? Sidebar : SidebarV1,
-  // [locations.LOCATION_PAGE]: Page,
-  // [locations.LOCATION_HOME]: Home,
 });
 
 const App = () => {

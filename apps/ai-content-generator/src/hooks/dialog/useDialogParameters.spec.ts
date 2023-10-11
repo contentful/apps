@@ -26,7 +26,7 @@ describe('useDialogParameters', () => {
     expect(result.entryId).toBe(expected?.entryId);
   };
 
-  it('should load immediatly when parameters are present', () => {
+  it('should load immediately when parameters are present', () => {
     const { result } = renderHook(() => useDialogParameters());
     expectStateToBe(result.current, invocationParameters);
   });
