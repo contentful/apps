@@ -1,6 +1,10 @@
 node_modules/
 build/
+built/
 vendor/
 __snapshots__/
+coverage/
 .coverage/
 .cache/
+dist/
+**/packages/**/lib/
