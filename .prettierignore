@@ -4,3 +4,6 @@ vendor/
 __snapshots__/
 .coverage/
 .cache/
+coverage/
+dist/
+lib/
