@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Paragraph } from '@contentful/f36-components';
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { useCMA, useSDK } from '@contentful/react-apps-toolkit';
+import { useAutoResizer, useCMA, useSDK } from '@contentful/react-apps-toolkit';
 import { getItemLocalStorage, build_status_key, setItemLocalStorage } from '../lib/localStorage';
 
 const Sidebar = () => {
@@ -11,6 +11,8 @@ const Sidebar = () => {
   const [lastBuildInitiated, setLastBuildInitiated] = useState(
     getItemLocalStorage(build_status_key) || null
   );
+
+  useAutoResizer();
 
   useEffect(() => {
     if (lastBuildInitiated) {
