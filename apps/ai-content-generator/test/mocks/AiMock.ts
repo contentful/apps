@@ -11,16 +11,14 @@ const getStubbedReader = (
       }
 
       //test adding comment
+      // another comment 
 
       const value = new TextEncoder().encode(this.streamData.shift());
 
       return new Promise((resolve) => {
-        setTimeout(
-          () => {
-            resolve({ done: false, value });
-          },
-          Math.floor(Math.random() * 1000)
-        );
+        setTimeout(() => {
+          resolve({ done: false, value });
+        }, Math.floor(Math.random() * 1000));
       });
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
