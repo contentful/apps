@@ -31,8 +31,8 @@ jobs:
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
       - nx/set-shas:
-        error-on-no-successful-workflow: true
-        main-branch-name: master
+          error-on-no-successful-workflow: true
+          main-branch-name: master
       - run:
           name: Check for prettier violations
           command: npx nx affected --target=prettier:check --base=$NX_BASE --head=$NX_HEAD
