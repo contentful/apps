@@ -30,17 +30,17 @@ jobs:
       - node/install
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
+      - run:
+          name: Install dependencies
+          command: |
+            npm ci
+            npm run bootstrap:ci
       - nx/set-shas:
           error-on-no-successful-workflow: true
           main-branch-name: master
       - run:
           name: Check for prettier violations
           command: npx nx affected --target=prettier:check --base=$NX_BASE --head=$NX_HEAD
-      - run:
-          name: Install dependencies
-          command: |
-            npm ci
-            npm run bootstrap:ci
       - run:
           name: Lint
           command: npm run lint
