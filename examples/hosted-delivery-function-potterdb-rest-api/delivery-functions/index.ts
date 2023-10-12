@@ -1,8 +1,25 @@
 import type { DeliveryFunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit'
 import { createSchema, createYoga } from 'graphql-yoga'
-import { typeDefs } from './schema'
-import { NodeRequest } from '@whatwg-node/server/typings/utils'
 import { GraphQLError } from 'graphql'
+
+/*
+ * We re-create a basic subset of the actual payloads in order to showcase how to wrap a REST API.
+ */
+const typeDefs = `
+type Character {
+  slug: String!
+  name: String
+  aliasNames: [String!]
+  familyMembers: [String!]
+  house: String
+  image: String
+  titles: [String!]
+  wiki: String
+}
+
+type Query {
+  character(slug: String!): Character
+}`
 
 const schema = createSchema({
   typeDefs,
@@ -14,6 +31,7 @@ const schema = createSchema({
         if (!response.ok) {
           throw new GraphQLError(`PotterDB returned a non-200 status code: ${response.status}`)
         }
+
         const character = await response.json()
         const {
           name,
@@ -66,7 +84,7 @@ const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
     variables,
   })
 
-  const request: NodeRequest = {
+  const request = {
     body,
     method: 'post',
     headers: {
