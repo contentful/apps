@@ -11,15 +11,15 @@ export const defaultPagination: Pagination = {
   total: 0,
   count: 0,
   limit: 0,
-  hasNextPage: false
+  hasNextPage: false,
 };
 
 export const strings = {
   selectProducts: 'Select products',
   selectProduct: 'Select a product',
   errors: {
-    missingApiEndpoint: 'Missing Api Edpoint URL'
-  }
+    missingApiEndpoint: 'Missing Api Edpoint URL',
+  },
 };
 
 export const SKUPickerConfig = {
@@ -32,10 +32,10 @@ export const SKUPickerConfig = {
       name: 'Store API URL',
       description: 'The url to your store API',
       type: 'Symbol',
-      required: true
-    }
+      required: true,
+    },
   ],
-  color: ''
+  color: '',
 };
 
 export const dialogConfig: Omit<OpenCustomWidgetOptions, 'id'> = {
@@ -43,5 +43,5 @@ export const dialogConfig: Omit<OpenCustomWidgetOptions, 'id'> = {
   position: 'center',
   shouldCloseOnOverlayClick: true,
   shouldCloseOnEscapePress: true,
-  width: 1400
+  width: 1400,
 };

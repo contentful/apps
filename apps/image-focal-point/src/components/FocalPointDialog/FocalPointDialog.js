@@ -106,8 +106,7 @@ export class FocalPointDialog extends Component {
                   role="button"
                   tabIndex={-1}
                   onClick={this.onImageClick}
-                  onKeyDown={() => {}}
-                >
+                  onKeyDown={() => {}}>
                   <img
                     ref={this.imgRef}
                     src={file.url}

@@ -9,6 +9,6 @@ if (process.env.NODE_ENV === 'development') {
 const constants = {
   OAUTH_REDIRECT_URI: `${LAMBDA_URI}/auth`,
   CONNECT_URL: `${LAMBDA_URI}/connect.json`,
-  CLIENT_ID
+  CLIENT_ID,
 };
-export default constants
+export default constants;

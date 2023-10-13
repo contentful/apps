@@ -11,4 +11,4 @@ const standalone = (window: Window) => {
     window.opener.postMessage({ token, refreshToken }, '*');
   }
 };
-export default standalone
+export default standalone;

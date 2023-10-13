@@ -42,11 +42,8 @@ const Field = () => {
     }
 
     // @ts-ignore
-    const customItemHeight = sdk.parameters.instance.withCustomValue
-      ? HEIGHT_ITEM
-      : 0;
-    const calculatedHeight =
-      HEIGHT_BASE + customItemHeight + theme.colors.length * HEIGHT_ITEM;
+    const customItemHeight = sdk.parameters.instance.withCustomValue ? HEIGHT_ITEM : 0;
+    const calculatedHeight = HEIGHT_BASE + customItemHeight + theme.colors.length * HEIGHT_ITEM;
 
     sdk.window.updateHeight(calculatedHeight <= 400 ? calculatedHeight : 400);
   }, [isOpen, sdk, theme]);
@@ -90,11 +87,7 @@ const Field = () => {
           onClearClick={() => setValue(undefined)}
         />
       ) : (
-        <Menu
-          isOpen={isOpen}
-          onOpen={() => setIsOpen(true)}
-          onClose={() => setIsOpen(false)}
-        >
+        <Menu isOpen={isOpen} onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
           <Menu.Trigger>
             <SelectColorButton
               showChevron
@@ -107,8 +100,7 @@ const Field = () => {
             {theme.colors.map((color: Color) => (
               <Menu.Item
                 key={color.id}
-                onClick={() => setValue(storeHexValue ? color.value : color)}
-              >
+                onClick={() => setValue(storeHexValue ? color.value : color)}>
                 <Flex alignItems="center" gap="spacingXs">
                   <ColorBox color={color} />
                   {color.name}
@@ -116,9 +108,7 @@ const Field = () => {
               </Menu.Item>
             ))}
             {allowCustomValue && (
-              <Menu.Item onClick={() => customColorPicker?.current?.click()}>
-                Custom...
-              </Menu.Item>
+              <Menu.Item onClick={() => customColorPicker?.current?.click()}>Custom...</Menu.Item>
             )}
           </Menu.List>
         </Menu>

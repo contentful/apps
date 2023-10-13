@@ -1,9 +1,4 @@
-import {
-  Flex,
-  FormControl,
-  IconButton,
-  TextInput,
-} from '@contentful/f36-components';
+import { Flex, FormControl, IconButton, TextInput } from '@contentful/f36-components';
 import { DeleteIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
@@ -24,19 +19,12 @@ interface SwatchEditorProps {
   onRemove: (swatch: Color) => void;
 }
 
-export default function SwatchEditor({
-  swatch,
-  onChange,
-  onRemove,
-}: SwatchEditorProps) {
+export default function SwatchEditor({ swatch, onChange, onRemove }: SwatchEditorProps) {
   return (
     <div>
       <FormControl marginBottom="spacingM">
         <Flex gap={tokens.spacingXs} alignItems="center">
-          <FormControl.Label
-            htmlFor="SwatchEditor"
-            className={styles.displayNone}
-          >
+          <FormControl.Label htmlFor="SwatchEditor" className={styles.displayNone}>
             Color
           </FormControl.Label>
           <input

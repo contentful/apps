@@ -11,7 +11,10 @@ import { OAuthResult } from './constants';
 import { NotFoundException } from '../../errors';
 
 export class AuthTokenController {
-  constructor(private authTokenRepository: AuthTokenRepository, private frontendUrl: string) {}
+  constructor(
+    private authTokenRepository: AuthTokenRepository,
+    private frontendUrl: string
+  ) {}
 
   /**
    * @openapi

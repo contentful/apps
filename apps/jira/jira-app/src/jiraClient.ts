@@ -163,7 +163,7 @@ export default class JiraClient {
    * @param records Array of URNS
    */
   private removeRecord(entryUrn: string, records: string[]): string[] {
-    return records.filter(record => record !== entryUrn);
+    return records.filter((record) => record !== entryUrn);
   }
 
   /**Internal method for adding and removing ContentfulLink entity properties.
@@ -290,7 +290,7 @@ export default class JiraClient {
       );
 
       if (!result.ok) {
-        throw new Error()
+        throw new Error();
       }
 
       const res: CloudProject = await result.json();

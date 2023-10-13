@@ -1,5 +1,5 @@
 export interface AppInstallationParameters {
-    apiKey?: string
+  apiKey?: string;
 }
 
-export type InstallErrors = 'apiKeyEmpty' | 'apiKeyInvalid'
+export type InstallErrors = 'apiKeyEmpty' | 'apiKeyInvalid';

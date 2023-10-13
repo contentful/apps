@@ -34,10 +34,13 @@ export const productsList: Product[] = [
   },
 ];
 
-export const products = productsList.reduce((previousValue, currentValue: Product) => {
-  previousValue[currentValue.name] = currentValue;
-  return previousValue;
-}, {} as Record<string, Product>);
+export const products = productsList.reduce(
+  (previousValue, currentValue: Product) => {
+    previousValue[currentValue.name] = currentValue;
+    return previousValue;
+  },
+  {} as Record<string, Product>
+);
 
 export const columns = [
   {

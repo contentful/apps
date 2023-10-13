@@ -38,7 +38,7 @@ export interface SidebarExtensionProps {
 }
 
 export interface SidebarExtensionState {
-  isContentTypeConfigured: boolean
+  isContentTypeConfigured: boolean;
   isAuthorized: boolean;
   hasSlug: boolean;
   pagePath: string;
@@ -51,7 +51,7 @@ export interface AnalyticsProps {
   viewId: string;
   sdk: SidebarExtensionSDK;
   gapi: Gapi;
-  setHelpText: (helpText: string) => void
+  setHelpText: (helpText: string) => void;
 }
 
 export interface AnalyticsState {
@@ -112,7 +112,9 @@ export interface Gapi {
     auth: {
       isAuthorized: () => boolean;
       signOut: () => void;
-      authorize: (options: { container: HTMLElement | string; clientid: string }) => { rm: () => void };
+      authorize: (options: { container: HTMLElement | string; clientid: string }) => {
+        rm: () => void;
+      };
       on(type: string, listener: () => void): void;
     };
   };
@@ -120,11 +122,11 @@ export interface Gapi {
     analytics: {
       management: {
         accountSummaries: {
-          list: () => Promise<AccountsSummary>
-        }
-      }
-    }
-  }
+          list: () => Promise<AccountsSummary>;
+        };
+      };
+    };
+  };
 }
 
 export interface AccountsSummary {
@@ -146,8 +148,8 @@ export type GapiError = {
     message: string;
     domain: string;
     reason: string;
-  }[]
+  }[];
   status: string;
   message: string;
   code: number;
-}
+};

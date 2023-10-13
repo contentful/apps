@@ -71,7 +71,7 @@ export type ProductsFnResponse = {
 
 export enum DisplayLabelPrefix {
   variantSKU = 'Variant SKU',
-  productID = 'Product ID'
+  productID = 'Product ID',
 }
 
 export type Identifiers = string[];

@@ -15,5 +15,4 @@ describe('DisclaimerSection component', () => {
     expect(title).toBeVisible();
     expect(hyperLink).toBeVisible();
   });
-
 });

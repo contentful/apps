@@ -174,8 +174,7 @@ export class AITagView extends React.Component {
           type="button"
           disabled={this.state.isMissingImage || hasImageError}
           loading={this.state.isFetchingTags}
-          onClick={this.fetchTags}
-        >
+          onClick={this.fetchTags}>
           Auto-tag from AI
         </Button>
         <CheckboxField

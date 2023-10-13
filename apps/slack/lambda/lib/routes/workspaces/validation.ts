@@ -38,6 +38,6 @@ export const getChannelParametersSchema = {
     workspaceId: { type: 'string' },
     spaceId: { type: 'string' },
     environmentId: { type: 'string' },
-    channelId: { type: 'string' }
-  }, 
+    channelId: { type: 'string' },
+  },
 };

@@ -78,9 +78,7 @@ const ConfigScreen = () => {
     const theme = parameters.themes[0];
     const newTheme = {
       ...theme,
-      colors: theme.colors.map((color) =>
-        color.id === swatch.id ? swatch : color
-      ),
+      colors: theme.colors.map((color) => (color.id === swatch.id ? swatch : color)),
     };
 
     setParameters({
@@ -113,8 +111,7 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters =
-        await sdk.app.getParameters<AppInstallationParameters>();
+      const currentParameters = await sdk.app.getParameters<AppInstallationParameters>();
 
       if (currentParameters) {
         setParameters(currentParameters);
@@ -139,20 +136,17 @@ const ConfigScreen = () => {
       flexDirection="column"
       paddingTop="spacing2Xl"
       paddingBottom="spacing2Xl"
-      className={styles.body}
-    >
+      className={styles.body}>
       <Flex
         flexDirection="column"
         gap="spacingM"
         paddingBottom="spacingL"
-        className={styles.cardColumn}
-      >
+        className={styles.cardColumn}>
         <Card>
           <div>
             <Subheading marginBottom="spacingXs">Theme</Subheading>
             <Paragraph>
-              Optionally, specify a set of predefined colors that editors can
-              choose from.
+              Optionally, specify a set of predefined colors that editors can choose from.
             </Paragraph>
 
             {parameters.themes[0].colors.map((swatch) => (
@@ -172,28 +166,19 @@ const ConfigScreen = () => {
         {isInstalled ? (
           <Card className={styles.overflowHidden}>
             <Flex flexDirection="row" alignItems="center">
-              <Flex
-                gap="spacingXs"
-                flexDirection="column"
-                alignItems="flex-start"
-              >
-                <Subheading marginBottom="none">
-                  Up next: Assign the app to your fields
-                </Subheading>
+              <Flex gap="spacingXs" flexDirection="column" alignItems="flex-start">
+                <Subheading marginBottom="none">Up next: Assign the app to your fields</Subheading>
                 <Paragraph marginBottom="none">
-                  Set the Color Picker app as the appearance of JSON fields that
-                  you want to use as a color picker.
+                  Set the Color Picker app as the appearance of JSON fields that you want to use as
+                  a color picker.
                 </Paragraph>
                 <TextLink
                   target="_blank"
                   icon={<ExternalLinkIcon />}
                   alignIcon="end"
-                  href={`https://${sdk.hostnames.webapp}/spaces/${
-                    sdk.ids.space
-                  }/environments/${
+                  href={`https://${sdk.hostnames.webapp}/spaces/${sdk.ids.space}/environments/${
                     sdk.ids.environmentAlias || sdk.ids.environment
-                  }/content_types`}
-                >
+                  }/content_types`}>
                   Edit content model
                 </TextLink>
               </Flex>
@@ -207,8 +192,7 @@ const ConfigScreen = () => {
           </Card>
         ) : (
           <Note variant="neutral">
-            If you don't need a custom theme, go ahead and hit install in the
-            top right!
+            If you don't need a custom theme, go ahead and hit install in the top right!
           </Note>
         )}
       </Flex>

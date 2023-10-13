@@ -91,7 +91,6 @@ export const apiClient = {
       throw new Error('Unable to fetch channel');
     }
     return response;
-
   },
 
   createAuthToken: async (

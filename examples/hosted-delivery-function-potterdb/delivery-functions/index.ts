@@ -1,4 +1,4 @@
-import { DeliveryFunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit'
+import { DeliveryFunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
 
 const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, context) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
@@ -8,14 +8,14 @@ const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, conte
       graphQLOutputType: 'Character',
       graphQLQueryField: 'character',
       graphQLQueryArguments: { slug: '' },
-    }
-  })
+    };
+  });
 
   return {
     namespace: 'PotterDB',
     fields,
-  }
-}
+  };
+};
 
 const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
   /*
@@ -32,17 +32,17 @@ const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
     }),
     method: 'POST',
     headers: { Accept: 'application/json', 'content-type': 'application/json' },
-  })
+  });
 
-  return response.json()
-}
+  return response.json();
+};
 
 export const handler: EventHandler = (event, context) => {
   if (event.type === 'graphql.field.mapping') {
-    return fieldMappingHandler(event, context)
+    return fieldMappingHandler(event, context);
   }
   if (event.type === 'graphql.query') {
-    return queryHandler(event, context)
+    return queryHandler(event, context);
   }
-  throw new Error('Unknown Event')
-}
+  throw new Error('Unknown Event');
+};

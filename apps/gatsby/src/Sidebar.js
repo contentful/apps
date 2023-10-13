@@ -222,7 +222,7 @@ export default class Sidebar extends React.Component {
 
     this.setState({ buttonDisabled: true });
 
-    await this.sdk.entry.save()
+    await this.sdk.entry.save();
     this.refreshPreview();
 
     let previewUrl = this.getPreviewUrl();

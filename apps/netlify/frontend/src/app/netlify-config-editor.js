@@ -81,8 +81,7 @@ const NetlifyConfigEditor = ({
           const updated = siteConfigs.filter((_, i) => i !== configIndex);
           onSiteConfigsChange(updated);
           onClose();
-        }}
-      >
+        }}>
         <Text>
           Do you really want to remove <b>{siteName}</b>?
         </Text>
@@ -126,15 +125,13 @@ const NetlifyConfigEditor = ({
                 className={styles.editBtn}
                 variant="primary"
                 isDisabled={disabled}
-                onClick={() => onEdit(configIndex)}
-              >
+                onClick={() => onEdit(configIndex)}>
                 Edit
               </TextLink>
               <TextLink
                 variant="negative"
                 isDisabled={disabled}
-                onClick={() => onRemove(configIndex)}
-              >
+                onClick={() => onRemove(configIndex)}>
                 Remove
               </TextLink>
             </div>
@@ -146,8 +143,7 @@ const NetlifyConfigEditor = ({
             variant={siteConfigs.length > 0 ? 'secondary' : 'primary'}
             startIcon={<PlusIcon />}
             size="small"
-            onClick={onAdd}
-          >
+            onClick={onAdd}>
             Add {siteConfigs.length > 0 ? 'another ' : ''}site
           </Button>
           {isAllSitesConfigured && (

@@ -69,7 +69,9 @@ const ProductSearchResult = (props: SearchResultProps) => {
   const productStyles = css`
     border: 1px solid ${tokens.gray200};
     border-radius: 3px;
-    box-shadow: 0px 0px 0px 1px inset rgba(48, 114, 190, 0), 0 1px 3px rgba(0, 0, 0, 0);
+    box-shadow:
+      0px 0px 0px 1px inset rgba(48, 114, 190, 0),
+      0 1px 3px rgba(0, 0, 0, 0);
     display: flex;
     flex-direction: column;
     padding: ${tokens.spacingS};
@@ -86,7 +88,9 @@ const ProductSearchResult = (props: SearchResultProps) => {
 
   const selectedProductStyles = css`
     border-color: rgba(48, 114, 190, 1);
-    box-shadow: 0px 0px 0px 1px inset rgba(48, 114, 190, 1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    box-shadow:
+      0px 0px 0px 1px inset rgba(48, 114, 190, 1),
+      0 1px 3px rgba(0, 0, 0, 0.08);
     &:hover {
       border-color: rgba(48, 114, 190, 1);
       cursor: pointer;

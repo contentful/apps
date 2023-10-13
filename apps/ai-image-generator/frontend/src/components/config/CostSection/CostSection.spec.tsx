@@ -17,5 +17,4 @@ describe('CostSection component', () => {
     expect(pricingHyperlink).toBeVisible();
     expect(creditHyperlink).toBeVisible();
   });
-
 });
