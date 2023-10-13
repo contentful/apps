@@ -26,8 +26,8 @@ export const fetchProductVariantsQuery = (
 ) => gql`
   {
     productVariants(first: ${ITEMS_OFFSET}, after: "${lastCursor}", filter: { search: "${search}", sku: ${getFormattedIdentifiers(
-  skus
-)} } ) {
+      skus
+    )} } ) {
       totalCount
       pageInfo {
         hasNextPage

@@ -5,46 +5,46 @@ export const styles = {
   field: css({
     display: 'flex',
     '> img': {
-      marginRight: `${tokens.spacingXs}`
+      marginRight: `${tokens.spacingXs}`,
     },
-    marginBottom: `${tokens.spacingS}`
+    marginBottom: `${tokens.spacingS}`,
   }),
   logo: css({
     width: '40px',
-    height: '40px'
+    height: '40px',
   }),
   actionButtons: css({
     display: 'flex',
     alignItems: 'center',
     marginLeft: `${tokens.spacing2Xl}`,
     '> button': css({
-      marginRight: `${tokens.spacingXl}`
+      marginRight: `${tokens.spacingXl}`,
     }),
-    marginBottom: tokens.spacingXs
+    marginBottom: tokens.spacingXs,
   }),
   editButton: css({
     marginRight: tokens.spacingL,
     svg: {
       width: '16px',
-      height: '16px'
-    }
+      height: '16px',
+    },
   }),
   previewButton: (disabled: boolean) =>
     css({
       marginRight: tokens.spacingL,
       button: {
-        display: 'flex'
+        display: 'flex',
       },
       svg: {
         fill: tokens.colorPrimary,
         transition: `fill ${tokens.transitionDurationDefault} ${tokens.transitionEasingDefault}`,
         overflow: 'visible',
-        marginRight: tokens.spacing2Xs
+        marginRight: tokens.spacing2Xs,
       },
       '&:hover': {
         svg: {
-          fill: disabled ? tokens.colorPrimary : tokens.gray900
-        }
-      }
-    })
+          fill: disabled ? tokens.colorPrimary : tokens.gray900,
+        },
+      },
+    }),
 };

@@ -87,8 +87,7 @@ export default class NetlifyConnection extends React.Component {
         <div className={styles.auth}>
           <Button
             className={`${styles.button} ${styles.buttonHover}`}
-            onClick={this.props.onConnectClick}
-          >
+            onClick={this.props.onConnectClick}>
             Connect account
           </Button>
         </div>

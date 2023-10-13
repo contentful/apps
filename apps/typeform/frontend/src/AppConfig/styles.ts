@@ -12,7 +12,7 @@ export const styles = {
     backgroundColor: tokens.colorWhite,
     zIndex: 2,
     boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
-    borderRadius: '2px'
+    borderRadius: '2px',
   }),
   background: (color: string) =>
     css({
@@ -22,20 +22,20 @@ export const styles = {
       top: 0,
       width: '100%',
       height: '300px',
-      backgroundColor: color
+      backgroundColor: color,
     }),
   section: css({
-    margin: `${tokens.spacingXl} 0`
+    margin: `${tokens.spacingXl} 0`,
   }),
   splitter: css({
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.gray300
+    backgroundColor: tokens.gray300,
   }),
   aboutP: css({
-    marginTop: tokens.spacingS
+    marginTop: tokens.spacingS,
   }),
   icon: css({
     display: 'flex',
@@ -43,14 +43,14 @@ export const styles = {
     '> img': {
       display: 'block',
       width: '100px',
-      margin: `${tokens.spacingXl} 0`
-    }
+      margin: `${tokens.spacingXl} 0`,
+    },
   }),
   authConfig: css({
     marginLeft: tokens.spacing4Xl,
-    marginRight: tokens.spacing4Xl
+    marginRight: tokens.spacing4Xl,
   }),
   accessToken: css({
-    marginTop: tokens.spacingL
-  })
+    marginTop: tokens.spacingL,
+  }),
 };

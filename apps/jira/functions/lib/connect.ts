@@ -1,5 +1,5 @@
-import { getEnvVarOrThrow } from './helpers'
-import { HTTPResponse } from './lambda'
+import { getEnvVarOrThrow } from './helpers';
+import { HTTPResponse } from './lambda';
 
 export const getConnectJson = (baseUrl: string): any => ({
   key: 'contentful',
@@ -7,15 +7,15 @@ export const getConnectJson = (baseUrl: string): any => ({
   description: 'Link Contentful entries to Jira issues.',
   vendor: {
     name: 'Contentful',
-    url: 'https://www.contentful.com'
+    url: 'https://www.contentful.com',
   },
   baseUrl,
   links: {
     self: `${baseUrl}/connect.json`,
-    homepage: `${baseUrl}/connect.json`
+    homepage: `${baseUrl}/connect.json`,
   },
   authentication: {
-    type: 'none'
+    type: 'none',
   },
   scopes: ['READ', 'WRITE'],
   modules: {
@@ -24,7 +24,7 @@ export const getConnectJson = (baseUrl: string): any => ({
         key: 'jira-issue-contentful-records-link',
         name: {
           value: 'Contentful records',
-          i18n: 'contentful.records'
+          i18n: 'contentful.records',
         },
         entityType: 'issue',
         keyConfigurations: [
@@ -34,21 +34,21 @@ export const getConnectJson = (baseUrl: string): any => ({
               {
                 objectName: 'records',
                 type: 'string',
-                alias: 'contentfulRecord'
-              }
-            ]
-          }
-        ]
-      }
-    ]
+                alias: 'contentfulRecord',
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   apiMigrations: {
-    gdpr: true
-  }
-})
+    gdpr: true,
+  },
+});
 
 export const handleConnectLambdaEvent = async (): Promise<HTTPResponse> =>
   Promise.resolve({
     statusCode: 200,
-    body: getConnectJson(getEnvVarOrThrow('BASE_URL'))
-  })
+    body: getConnectJson(getEnvVarOrThrow('BASE_URL')),
+  });

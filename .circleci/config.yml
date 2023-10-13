@@ -29,16 +29,16 @@ jobs:
       - node/install
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
-      # - run:
-      #     name: Check for prettier violations
-      #     command: |
-      #       git fetch origin master # circleci doesn't fetch master by default
-      #       ./.circleci/prettier-check.sh
       - run:
           name: Install dependencies
           command: |
             npm ci
             npm run bootstrap:ci
+      - run:
+          name: Check for prettier violations
+          command: |
+            git fetch origin master # circleci doesn't fetch master by default
+            ./.circleci/prettier-check.sh
       - run:
           name: Lint
           command: npm run lint

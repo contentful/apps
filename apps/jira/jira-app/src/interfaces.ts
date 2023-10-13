@@ -119,7 +119,7 @@ declare enum HTTPMethod {
   GET = 'GET',
   POST = 'POST',
   PUT = 'PUT',
-  DELETE = 'DELETE'
+  DELETE = 'DELETE',
 }
 
 export interface RequestOptions {
@@ -164,4 +164,3 @@ export interface InstallationParameters {
 export interface CurrentState {
   [key: string]: object;
 }
-

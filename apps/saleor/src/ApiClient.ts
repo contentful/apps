@@ -23,12 +23,12 @@ class ApiClient {
   fetchVariants = async ({
     search,
     skus,
-    endCursor
+    endCursor,
   }: FetchVariantsParams): Promise<ProductVariantsData> => {
     const res = await this.fetch(fetchProductVariantsQuery(search, skus, endCursor));
 
     const {
-      data: { productVariants }
+      data: { productVariants },
     } = await res.json();
 
     return productVariants;
@@ -38,7 +38,7 @@ class ApiClient {
     const res = await this.fetch(fetchProductsQuery(productIds));
 
     const {
-      data: { products }
+      data: { products },
     } = await res.json();
 
     return products;
@@ -49,9 +49,9 @@ class ApiClient {
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ query: print(query) })
+      body: JSON.stringify({ query: print(query) }),
     });
 }
 

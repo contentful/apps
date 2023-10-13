@@ -8,28 +8,27 @@ fetchMock.get(
       url: 'https://test.atlassian.net',
       name: 'test1',
       scopes: ['write:jira-work', 'read:jira-work', 'read:jira-user'],
-      avatarUrl: 'https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/triangle.png'
+      avatarUrl: 'https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/triangle.png',
     },
     {
       id: '11111111-1111-1111-1111-111111111112',
       url: 'https://test2.atlassian.net',
       name: 'test2',
       scopes: ['write:jira-work', 'read:jira-work', 'read:jira-user'],
-      avatarUrl: 'https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/flag.png'
-    }
+      avatarUrl: 'https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/flag.png',
+    },
   ],
   {
     headers: {
-      Authorization: 'Bearer 123'
-    }
+      Authorization: 'Bearer 123',
+    },
   }
 );
 
 fetchMock.get(
   'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search?query=extensibility',
   {
-    self:
-      'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search?maxResults=50&startAt=0',
+    self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search?maxResults=50&startAt=0',
     nMKEPage:
       'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/search?maxResults=50&startAt=50',
     maxResults: 50,
@@ -39,8 +38,7 @@ fetchMock.get(
     values: [
       {
         expand: 'description,lead,issueTypes,url,projectKeys,permissions,insight',
-        self:
-          'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/10555',
+        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/10555',
         id: '10555',
         key: 'MKE',
         name: 'Project name 2',
@@ -52,28 +50,27 @@ fetchMock.get(
           '16x16':
             'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/secure/projectavatar?size=xsmall&s=xsmall&pid=10555&avatarId=10981',
           '32x32':
-            'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/secure/projectavatar?size=medium&s=medium&pid=10555&avatarId=10981'
+            'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/secure/projectavatar?size=medium&s=medium&pid=10555&avatarId=10981',
         },
         projectCategory: {
-          self:
-            'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/projectCategory/10002',
+          self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/projectCategory/10002',
           id: '10002',
           name: 'Product Development',
-          description: ''
+          description: '',
         },
         projectTypeKey: 'software',
         simplified: false,
         style: 'classic',
         isPrivate: false,
-        properties: {}
-      }
-    ]
+        properties: {},
+      },
+    ],
   },
   {
     headers: {
       Authorization: 'Bearer 123',
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   }
 );
 
@@ -88,28 +85,25 @@ fetchMock.get(
       {
         expand: 'operations,versionedRepresentations,editmeta,changelog,renderedFields',
         id: '10049',
-        self:
-          'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/10049',
+        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/10049',
         key: 'KEY-50',
         fields: {
           statuscategorychangedate: '2019-11-15T10:16:15.928-0600',
           issuetype: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issuetype/10002',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issuetype/10002',
             id: '10002',
             description: 'A small, distinct piece of work.',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/secure/viewavatar?size=medium&avatarId=10318&avatarType=issuetype',
             name: 'Task',
             subtask: false,
-            avatarId: 10318
+            avatarId: 10318,
           },
           timespent: null,
           customfield_10030: null,
           customfield_10031: null,
           project: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/project/10000',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/project/10000',
             id: '10000',
             key: 'KEY',
             name: 'Project Name',
@@ -123,8 +117,8 @@ fetchMock.get(
               '16x16':
                 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/secure/projectavatar?size=xsmall&s=xsmall&pid=10000&avatarId=10422',
               '32x32':
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/secure/projectavatar?size=medium&s=medium&pid=10000&avatarId=10422'
-            }
+                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/secure/projectavatar?size=medium&s=medium&pid=10000&avatarId=10422',
+            },
           },
           fixVersions: [],
           aggregatetimespent: null,
@@ -134,22 +128,20 @@ fetchMock.get(
           workratio: -1,
           lastViewed: '2019-12-05T08:16:01.178-0600',
           watches: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-50/watchers',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-50/watchers',
             watchCount: 1,
-            isWatching: false
+            isWatching: false,
           },
           created: '2019-11-15T10:16:15.838-0600',
           customfield_10020: null,
           customfield_10021: null,
           customfield_10022: null,
           priority: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/priority/3',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/priority/3',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/images/icons/priorities/medium.svg',
             name: 'Medium',
-            id: '3'
+            id: '3',
           },
           customfield_10023: null,
           labels: [],
@@ -160,8 +152,8 @@ fetchMock.get(
             showField: false,
             nonEditableReason: {
               reason: 'PLUGIN_LICENSE_ERROR',
-              message: 'Portfolio for Jira must be licensed for the Parent Link to be available.'
-            }
+              message: 'Portfolio for Jira must be licensed for the Parent Link to be available.',
+            },
           },
           customfield_10019: '0|i0000f:',
           aggregatetimeoriginalestimate: null,
@@ -169,8 +161,7 @@ fetchMock.get(
           versions: [],
           issuelinks: [],
           assignee: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111111',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111111',
             name: 'dean.anderson',
             key: 'dean.anderson',
             accountId: '111111111111111111111111',
@@ -183,29 +174,27 @@ fetchMock.get(
               '16x16':
                 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111111/11111111-1111-1111-1111-111111111113/128?size=16&s=16',
               '32x32':
-                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111111/11111111-1111-1111-1111-111111111113/128?size=32&s=32'
+                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111111/11111111-1111-1111-1111-111111111113/128?size=32&s=32',
             },
             displayName: 'Dean Anderson',
             active: true,
             timeZone: 'America/Chicago',
-            accountType: 'atlassian'
+            accountType: 'atlassian',
           },
           updated: '2019-12-05T08:16:01.487-0600',
           status: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/status/10000',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/status/10000',
             description: '',
             iconUrl: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/',
             name: 'To Do',
             id: '10000',
             statusCategory: {
-              self:
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/statuscategory/2',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/statuscategory/2',
               id: 2,
               key: 'new',
               colorName: 'blue-gray',
-              name: 'To Do'
-            }
+              name: 'To Do',
+            },
           },
           components: [],
           timeoriginalestimate: null,
@@ -222,8 +211,7 @@ fetchMock.get(
           customfield_10009: null,
           summary: 'Test issue 1',
           creator: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
             name: 'marc.aurel',
             key: 'marc.aurel',
             accountId: '111111111111111111111112',
@@ -236,17 +224,16 @@ fetchMock.get(
               '16x16':
                 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=16&s=16',
               '32x32':
-                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=32&s=32'
+                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=32&s=32',
             },
             displayName: 'Marc Aurel',
             active: true,
             timeZone: 'America/Chicago',
-            accountType: 'atlassian'
+            accountType: 'atlassian',
           },
           subtasks: [],
           reporter: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
             name: 'marc.aurel',
             key: 'marc.aurel',
             accountId: '111111111111111111111112',
@@ -259,12 +246,12 @@ fetchMock.get(
               '16x16':
                 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=16&s=16',
               '32x32':
-                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=32&s=32'
+                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=32&s=32',
             },
             displayName: 'Marc Aurel',
             active: true,
             timeZone: 'America/Chicago',
-            accountType: 'atlassian'
+            accountType: 'atlassian',
           },
           aggregateprogress: { progress: 0, total: 0 },
           customfield_10000: '{}',
@@ -276,37 +263,33 @@ fetchMock.get(
           duedate: null,
           progress: { progress: 0, total: 0 },
           votes: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-50/votes',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-50/votes',
             votes: 0,
-            hasVoted: false
-          }
-        }
+            hasVoted: false,
+          },
+        },
       },
       {
         expand: 'operations,versionedRepresentations,editmeta,changelog,renderedFields',
         id: '10046',
-        self:
-          'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/10046',
+        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/10046',
         key: 'KEY-47',
         fields: {
           statuscategorychangedate: '2019-11-22T04:27:01.559-0600',
           issuetype: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issuetype/10001',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issuetype/10001',
             id: '10001',
             description: 'Functionality or a feature expressed as a user goal.',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/secure/viewavatar?size=medium&avatarId=10315&avatarType=issuetype',
             name: 'Story',
             subtask: false,
-            avatarId: 10315
+            avatarId: 10315,
           },
           timespent: null,
           customfield_10030: null,
           project: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/project/10000',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/project/10000',
             id: '10000',
             key: 'KEY',
             name: 'KEYIt',
@@ -320,8 +303,8 @@ fetchMock.get(
               '16x16':
                 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/secure/projectavatar?size=xsmall&s=xsmall&pid=10000&avatarId=10422',
               '32x32':
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/secure/projectavatar?size=medium&s=medium&pid=10000&avatarId=10422'
-            }
+                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/secure/projectavatar?size=medium&s=medium&pid=10000&avatarId=10422',
+            },
           },
           customfield_10031: null,
           fixVersions: [],
@@ -331,10 +314,9 @@ fetchMock.get(
           resolutiondate: null,
           workratio: -1,
           watches: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-47/watchers',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-47/watchers',
             watchCount: 1,
-            isWatching: false
+            isWatching: false,
           },
           lastViewed: '2019-11-27T10:49:27.357-0600',
           created: '2019-11-15T10:06:17.663-0600',
@@ -342,12 +324,11 @@ fetchMock.get(
           customfield_10021: null,
           customfield_10022: null,
           priority: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/priority/3',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/priority/3',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/images/icons/priorities/medium.svg',
             name: 'Medium',
-            id: '3'
+            id: '3',
           },
           customfield_10023: null,
           customfield_10024: null,
@@ -359,8 +340,8 @@ fetchMock.get(
             showField: false,
             nonEditableReason: {
               reason: 'PLUGIN_LICENSE_ERROR',
-              message: 'Portfolio for Jira must be licensed for the Parent Link to be available.'
-            }
+              message: 'Portfolio for Jira must be licensed for the Parent Link to be available.',
+            },
           },
           customfield_10019: '0|hzzzzz:',
           aggregatetimeoriginalestimate: null,
@@ -368,8 +349,7 @@ fetchMock.get(
           versions: [],
           issuelinks: [],
           assignee: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=5dcc3f7705b5ae0ddd6fe79e',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=5dcc3f7705b5ae0ddd6fe79e',
             name: 'fschultz02+KEYit',
             key: 'fschultz02+KEYit',
             accountId: '5dcc3f7705b5ae0ddd6fe79e',
@@ -381,29 +361,27 @@ fetchMock.get(
               '16x16':
                 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5dcc3f7705b5ae0ddd6fe79e/f2395ed2-b511-4f9a-8744-640e0b6f94a0/128?size=16&s=16',
               '32x32':
-                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5dcc3f7705b5ae0ddd6fe79e/f2395ed2-b511-4f9a-8744-640e0b6f94a0/128?size=32&s=32'
+                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/5dcc3f7705b5ae0ddd6fe79e/f2395ed2-b511-4f9a-8744-640e0b6f94a0/128?size=32&s=32',
             },
             displayName: 'Fabian Schultz',
             active: true,
             timeZone: 'America/Chicago',
-            accountType: 'atlassian'
+            accountType: 'atlassian',
           },
           updated: '2019-11-22T04:27:01.558-0600',
           status: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/status/10000',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/status/10000',
             description: '',
             iconUrl: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/',
             name: 'To Do',
             id: '10000',
             statusCategory: {
-              self:
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/statuscategory/2',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/statuscategory/2',
               id: 2,
               key: 'new',
               colorName: 'blue-gray',
-              name: 'To Do'
-            }
+              name: 'To Do',
+            },
           },
           components: [],
           timeoriginalestimate: null,
@@ -420,8 +398,7 @@ fetchMock.get(
           customfield_10009: null,
           summary: 'Update getting started page to reflect new release',
           creator: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
             name: 'marc.aurel',
             key: 'marc.aurel',
             accountId: '111111111111111111111112',
@@ -434,17 +411,16 @@ fetchMock.get(
               '16x16':
                 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=16&s=16',
               '32x32':
-                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=32&s=32'
+                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=32&s=32',
             },
             displayName: 'Marc Aurel',
             active: true,
             timeZone: 'America/Chicago',
-            accountType: 'atlassian'
+            accountType: 'atlassian',
           },
           subtasks: [],
           reporter: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/user?accountId=111111111111111111111112',
             name: 'marc.aurel',
             key: 'marc.aurel',
             accountId: '111111111111111111111112',
@@ -457,12 +433,12 @@ fetchMock.get(
               '16x16':
                 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=16&s=16',
               '32x32':
-                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=32&s=32'
+                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111112/11111111-1111-1111-1111-111111111114/128?size=32&s=32',
             },
             displayName: 'Marc Aurel',
             active: true,
             timeZone: 'America/Chicago',
-            accountType: 'atlassian'
+            accountType: 'atlassian',
           },
           customfield_10000: '{}',
           aggregateprogress: { progress: 0, total: 0 },
@@ -474,14 +450,13 @@ fetchMock.get(
           duedate: null,
           progress: { progress: 0, total: 0 },
           votes: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-47/votes',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111111/rest/api/2/issue/KEY-47/votes',
             votes: 0,
-            hasVoted: false
-          }
-        }
-      }
-    ]
+            hasVoted: false,
+          },
+        },
+      },
+    ],
   }
 );
 
@@ -497,8 +472,7 @@ fetchMock.get(
         expand:
           'operations,versionedRepresentations,editmeta,changelog,renderedFields,customfield_10908.properties',
         id: '51858',
-        self:
-          'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/51858',
+        self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/51858',
         key: 'MKE-1389',
         fields: {
           customfield_11160: null,
@@ -548,10 +522,9 @@ fetchMock.get(
           customfield_10980: null,
           customfield_11035: null,
           customfield_11156: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/11089',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/11089',
             value: 'To be checked',
-            id: '11089'
+            id: '11089',
           },
           customfield_11036: null,
           customfield_10981: null,
@@ -572,8 +545,7 @@ fetchMock.get(
           customfield_10619: null,
           issuelinks: [],
           assignee: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/user?accountId=111111111111111111111111',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/user?accountId=111111111111111111111111',
             name: 'dean.anderson',
             key: 'dean.anderson',
             accountId: '111111111111111111111111',
@@ -586,29 +558,27 @@ fetchMock.get(
               '16x16':
                 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111111/11111111-1111-1111-1111-111111111113/128?size=16&s=16',
               '32x32':
-                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111111/11111111-1111-1111-1111-111111111113/128?size=32&s=32'
+                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/111111111111111111111111/11111111-1111-1111-1111-111111111113/128?size=32&s=32',
             },
             displayName: 'Dean Anderson',
             active: true,
             timeZone: 'Europe/Berlin',
-            accountType: 'atlassian'
+            accountType: 'atlassian',
           },
           components: [
             {
-              self:
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/component/10233',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/component/10233',
               id: '10233',
               name: 'Apps',
               description:
-                'https://github.com/contentful/user_interface/tree/master/src/javascripts/app/settings/apps'
+                'https://github.com/contentful/user_interface/tree/master/src/javascripts/app/settings/apps',
             },
             {
-              self:
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/component/10232',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/component/10232',
               id: '10232',
               name: 'Marketplace',
-              description: 'https://www.contentful.com/developers/marketplace/'
-            }
+              description: 'https://www.contentful.com/developers/marketplace/',
+            },
           ],
           customfield_11140: null,
           customfield_11020: null,
@@ -650,91 +620,81 @@ fetchMock.get(
             {
               id: '52188',
               key: 'MKE-1414',
-              self:
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/52188',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/52188',
               fields: {
                 summary: 'Build front end app',
                 status: {
-                  self:
-                    'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/status/10012',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/status/10012',
                   description: '',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/status_generic.gif',
                   name: 'In progress',
                   id: '10012',
                   statusCategory: {
-                    self:
-                      'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/statuscategory/4',
+                    self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/statuscategory/4',
                     id: 4,
                     key: 'indeterminate',
                     colorName: 'yellow',
-                    name: 'In Progress'
-                  }
+                    name: 'In Progress',
+                  },
                 },
                 priority: {
-                  self:
-                    'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/priority/3',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/priority/3',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/priorities/medium.svg',
                   name: 'Medium',
-                  id: '3'
+                  id: '3',
                 },
                 issuetype: {
-                  self:
-                    'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issuetype/11206',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issuetype/11206',
                   id: '11206',
                   description: 'The sub-task of the issue',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/issuetypes/subtask_alternate.png',
                   name: 'Sub-task',
-                  subtask: true
-                }
-              }
+                  subtask: true,
+                },
+              },
             },
             {
               id: '52192',
               key: 'MKE-1418',
-              self:
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/52192',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/52192',
               fields: {
                 summary: 'Figure out if this needs to be done',
                 status: {
-                  self:
-                    'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/status/10850',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/status/10850',
                   description: '',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/',
                   name: 'To Do',
                   id: '10850',
                   statusCategory: {
-                    self:
-                      'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/statuscategory/2',
+                    self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/statuscategory/2',
                     id: 2,
                     key: 'new',
                     colorName: 'blue-gray',
-                    name: 'To Do'
-                  }
+                    name: 'To Do',
+                  },
                 },
                 priority: {
-                  self:
-                    'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/priority/3',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/priority/3',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/priorities/medium.svg',
                   name: 'Medium',
-                  id: '3'
+                  id: '3',
                 },
                 issuetype: {
-                  self:
-                    'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issuetype/11206',
+                  self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issuetype/11206',
                   id: '11206',
                   description: 'The sub-task of the issue',
                   iconUrl:
                     'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/issuetypes/subtask_alternate.png',
                   name: 'Sub-task',
-                  subtask: true
-                }
-              }
-            }
+                  subtask: true,
+                },
+              },
+            },
           ],
           customfield_11130: null,
           customfield_11010: null,
@@ -742,8 +702,7 @@ fetchMock.get(
           customfield_11011: null,
           customfield_11132: null,
           reporter: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/user?accountId=557058%3A080f5211-c904-490c-8e55-93310f0f6e5b',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/user?accountId=557058%3A080f5211-c904-490c-8e55-93310f0f6e5b',
             name: 'julius.caesar',
             key: 'julius.caesar',
             accountId: '557058:080f5211-c904-490c-8e55-93310f0f6e5b',
@@ -756,12 +715,12 @@ fetchMock.get(
               '16x16':
                 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/557058:080f5211-c904-490c-8e55-93310f0f6e5b/59db14a4-6138-4822-9a70-7c17a87cb394/128?size=16&s=16',
               '32x32':
-                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/557058:080f5211-c904-490c-8e55-93310f0f6e5b/59db14a4-6138-4822-9a70-7c17a87cb394/128?size=32&s=32'
+                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/557058:080f5211-c904-490c-8e55-93310f0f6e5b/59db14a4-6138-4822-9a70-7c17a87cb394/128?size=32&s=32',
             },
             displayName: 'Julius Caesar',
             active: true,
             timeZone: 'Europe/Berlin',
-            accountType: 'atlassian'
+            accountType: 'atlassian',
           },
           customfield_11133: null,
           customfield_11012: null,
@@ -790,26 +749,23 @@ fetchMock.get(
           customfield_10958: null,
           customfield_10959: null,
           votes: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/MKE-1389/votes',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/MKE-1389/votes',
             votes: 0,
-            hasVoted: false
+            hasVoted: false,
           },
           issuetype: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issuetype/11204',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issuetype/11204',
             id: '11204',
             description: 'A user story. Created by Jira Software - do not edit or delete.',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/secure/viewavatar?size=medium&avatarId=10315&avatarType=issuetype',
             name: 'Story',
             subtask: false,
-            avatarId: 10315
+            avatarId: 10315,
           },
           customfield_11120: null,
           project: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/10555',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/project/10555',
             id: '10555',
             key: 'MKE',
             name: '[PRD] Team MKEensibility',
@@ -823,15 +779,14 @@ fetchMock.get(
               '16x16':
                 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/secure/projectavatar?size=xsmall&s=xsmall&pid=10555&avatarId=10981',
               '32x32':
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/secure/projectavatar?size=medium&s=medium&pid=10555&avatarId=10981'
+                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/secure/projectavatar?size=medium&s=medium&pid=10555&avatarId=10981',
             },
             projectCategory: {
-              self:
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/projectCategory/10002',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/projectCategory/10002',
               id: '10002',
               description: '',
-              name: 'Product Development'
-            }
+              name: 'Product Development',
+            },
           },
           customfield_11000: null,
           customfield_11121: null,
@@ -856,10 +811,9 @@ fetchMock.get(
           customfield_10948: null,
           customfield_10949: null,
           watches: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/MKE-1389/watchers',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/issue/MKE-1389/watchers',
             watchCount: 1,
-            isWatching: false
+            isWatching: false,
           },
           customfield_11111: null,
           customfield_11112: null,
@@ -893,8 +847,8 @@ fetchMock.get(
             showField: false,
             nonEditableReason: {
               reason: 'PLUGIN_LICENSE_ERROR',
-              message: 'Portfolio for Jira must be licensed for the Parent Link to be available.'
-            }
+              message: 'Portfolio for Jira must be licensed for the Parent Link to be available.',
+            },
           },
           customfield_10128: null,
           customfield_10920: null,
@@ -903,22 +857,19 @@ fetchMock.get(
           customfield_10922: null,
           customfield_10923: null,
           customfield_10924: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10622',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10622',
             value: 'TODO',
-            id: '10622'
+            id: '10622',
           },
           customfield_10925: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10625',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10625',
             value: 'TODO',
-            id: '10625'
+            id: '10625',
           },
           customfield_10926: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10627',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10627',
             value: 'TODO',
-            id: '10627'
+            id: '10627',
           },
           customfield_10927: null,
           customfield_10928: null,
@@ -933,7 +884,7 @@ fetchMock.get(
           customfield_10124: null,
           customfield_10125: null,
           customfield_10117: [
-            'com.atlassian.greenhopper.service.sprint.Sprint@5ca16bb6[id=581,rapidViewId=38,state=ACTIVE,name=Team MKEensibility Sprint 41,goal=,startDate=2019-11-25T12:23:56.930Z,endDate=2019-12-09T12:23:00.000Z,completeDate=<null>,sequence=581]'
+            'com.atlassian.greenhopper.service.sprint.Sprint@5ca16bb6[id=581,rapidViewId=38,state=ACTIVE,name=Team MKEensibility Sprint 41,goal=,startDate=2019-11-25T12:23:56.930Z,endDate=2019-12-09T12:23:00.000Z,completeDate=<null>,sequence=581]',
           ],
           environment: null,
           customfield_10118: '0|i05wjo:2',
@@ -944,10 +895,9 @@ fetchMock.get(
           customfield_10915: 13.0,
           customfield_10916: null,
           customfield_10918: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10615',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/customFieldOption/10615',
             value: 'Yes',
-            id: '10615'
+            id: '10615',
           },
           customfield_10919: null,
           statuscategorychangedate: '2019-11-25T13:41:53.790+0100',
@@ -958,38 +908,34 @@ fetchMock.get(
           customfield_10900: null,
           customfield_10908: null,
           priority: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/priority/3',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/priority/3',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/priorities/medium.svg',
             name: 'Medium',
-            id: '3'
+            id: '3',
           },
           customfield_10102: null,
           customfield_10103: null,
           versions: [],
           status: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/status/10012',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/status/10012',
             description: '',
             iconUrl:
               'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/images/icons/status_generic.gif',
             name: 'In progress',
             id: '10012',
             statusCategory: {
-              self:
-                'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/statuscategory/4',
+              self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/statuscategory/4',
               id: 4,
               key: 'indeterminate',
               colorName: 'yellow',
-              name: 'In Progress'
-            }
+              name: 'In Progress',
+            },
           },
           customfield_11090: null,
           customfield_11091: null,
           creator: {
-            self:
-              'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/user?accountId=557058%3A080f5211-c904-490c-8e55-93310f0f6e5b',
+            self: 'https://api.atlassian.com/ex/jira/11111111-1111-1111-1111-111111111112/rest/api/2/user?accountId=557058%3A080f5211-c904-490c-8e55-93310f0f6e5b',
             name: 'julius.caesar',
             key: 'julius.caesar',
             accountId: '557058:080f5211-c904-490c-8e55-93310f0f6e5b',
@@ -1002,12 +948,12 @@ fetchMock.get(
               '16x16':
                 'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/557058:080f5211-c904-490c-8e55-93310f0f6e5b/59db14a4-6138-4822-9a70-7c17a87cb394/128?size=16&s=16',
               '32x32':
-                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/557058:080f5211-c904-490c-8e55-93310f0f6e5b/59db14a4-6138-4822-9a70-7c17a87cb394/128?size=32&s=32'
+                'https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/557058:080f5211-c904-490c-8e55-93310f0f6e5b/59db14a4-6138-4822-9a70-7c17a87cb394/128?size=32&s=32',
             },
             displayName: 'Julius Caesar',
             active: true,
             timeZone: 'Europe/Berlin',
-            accountType: 'atlassian'
+            accountType: 'atlassian',
           },
           customfield_11092: null,
           customfield_11093: null,
@@ -1091,10 +1037,10 @@ fetchMock.get(
           customfield_10999: null,
           customfield_10515: null,
           customfield_10516: null,
-          customfield_10517: null
-        }
-      }
-    ]
+          customfield_10517: null,
+        },
+      },
+    ],
   }
 );
 

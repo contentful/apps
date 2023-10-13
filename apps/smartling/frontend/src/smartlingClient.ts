@@ -8,8 +8,8 @@ const smartlingClient = {
     const res = await fetch(`/entry?spaceId=${spaceId}&projectId=${projectId}&entryId=${entryId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
-        'content-type': 'application/json'
-      }
+        'content-type': 'application/json',
+      },
     });
 
     return (await res.json()) as SmartlingJobsResponse;
@@ -19,7 +19,7 @@ const smartlingClient = {
     if (!refresh_token) {
       return {
         failed: true,
-        token: ''
+        token: '',
       };
     }
 
@@ -30,14 +30,14 @@ const smartlingClient = {
 
       return {
         failed: false,
-        token: access_token
+        token: access_token,
       };
     }
 
     return {
       failed: true,
-      token: ''
+      token: '',
     };
-  }
+  },
 };
-export default smartlingClient
+export default smartlingClient;

@@ -8,10 +8,10 @@ const fetchMock = jest.fn(() => {
     async json() {
       return {
         response: {
-          data: 'foo'
-        }
+          data: 'foo',
+        },
       };
-    }
+    },
   });
 });
 
@@ -30,14 +30,14 @@ class Client {
   async callback() {
     return {
       access_token: 'access-123',
-      refresh_token: 'refresh_token-123'
+      refresh_token: 'refresh_token-123',
     };
   }
 
   async refresh(token: string) {
     if (token === 'good-123') {
       return {
-        access_token: 'access-123'
+        access_token: 'access-123',
       };
     } else if (token === 'invalid-123') {
       const e = new Error('Invalid grant');
@@ -54,7 +54,7 @@ class Client {
 const issuerMock = {
   async discover() {
     return { Client };
-  }
+  },
 };
 
 const app = makeApp(fetchMock, issuerMock);
@@ -69,73 +69,73 @@ describe('server', () => {
     }, 5000);
   });
 
-  it('should redirect correctly for /openauth', done => {
+  it('should redirect correctly for /openauth', (done) => {
     request(app)
       .get('/openauth')
       .expect(
         'Location',
         'https://sso.smartling.com/auth/realms/Smartling/protocol/openid-connect/auth?response_type=code&client_id=clientId-123'
       )
-      .expect(302, e => done(e));
+      .expect(302, (e) => done(e));
   });
 
-  it('should serve the frontend', done => {
+  it('should serve the frontend', (done) => {
     request(app)
       .get('/frontend')
-      .expect(301, e => done(e));
+      .expect(301, (e) => done(e));
   });
 
-  it('should serve the main root and give an error for no code', done => {
+  it('should serve the main root and give an error for no code', (done) => {
     request(app)
       .get('/')
       .expect(
         'Location',
         '/frontend/index.html?error=No%20code%20was%20provided%20during%20OAuth%20handshake.'
       )
-      .expect(302, e => done(e));
+      .expect(302, (e) => done(e));
   });
 
-  it('should produce a redirect with access_token', done => {
+  it('should produce a redirect with access_token', (done) => {
     request(app)
       .get('/?code=1234')
       .expect(
         'Location',
         '/frontend/index.html?access_token=access-123&refresh_token=refresh_token-123'
       )
-      .expect(302, e => done(e));
+      .expect(302, (e) => done(e));
   });
 
-  it('should give 400 if no refresh token is provided', done => {
+  it('should give 400 if no refresh token is provided', (done) => {
     request(app)
       .get('/refresh')
-      .expect(400, e => done(e));
+      .expect(400, (e) => done(e));
   });
 
-  it('should give a 401 on invalid grants', done => {
+  it('should give a 401 on invalid grants', (done) => {
     request(app)
       .get('/refresh?refresh_token=invalid-123')
-      .expect(401, e => done(e));
+      .expect(401, (e) => done(e));
   });
 
-  it('should give a 500 on general refresh error', done => {
+  it('should give a 500 on general refresh error', (done) => {
     request(app)
       .get('/refresh?refresh_token=bad-123')
-      .expect(500, e => done(e));
+      .expect(500, (e) => done(e));
   });
 
-  it('should give a 500 on general refresh error', done => {
+  it('should give a 500 on general refresh error', (done) => {
     request(app)
       .get('/refresh?refresh_token=bad-123')
-      .expect(500, e => done(e));
+      .expect(500, (e) => done(e));
   });
 
-  it('should response with a new access token on valid refresh', done => {
+  it('should response with a new access token on valid refresh', (done) => {
     request(app)
       .get('/refresh?refresh_token=good-123')
-      .expect(200, e => done(e));
+      .expect(200, (e) => done(e));
   });
 
-  it('should response with the Smartling entry response on /entry', done => {
+  it('should response with the Smartling entry response on /entry', (done) => {
     request(app)
       .get('/entry?projectId=project-1&spaceId=space-1&entryId=entry-1')
       .expect(201, (err, res) => {

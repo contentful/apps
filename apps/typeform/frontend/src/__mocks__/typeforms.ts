@@ -10,7 +10,7 @@ export const typeforms = {
         settings: { is_public: false, is_trial: false },
         self: { href: 'https://api.typeform.com/forms/Oksaodk' },
         theme: { href: 'https://api.typeform.com/themes/fkoaskfd' },
-        _links: { display: 'https://user.typeform.com/to/dsako' }
+        _links: { display: 'https://user.typeform.com/to/dsako' },
       },
       {
         id: 'sUM1zW',
@@ -19,8 +19,8 @@ export const typeforms = {
         settings: { is_public: true, is_trial: true },
         self: { href: 'https://api.typeform.com/forms/dsjao' },
         theme: { href: 'https://api.typeform.com/themes/dsajo' },
-        _links: { display: 'https://user.typeform.com/to/sjao' }
-      }
-    ]
-  }
+        _links: { display: 'https://user.typeform.com/to/sjao' },
+      },
+    ],
+  },
 };

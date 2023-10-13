@@ -8,7 +8,10 @@ import { getHost } from '../../helpers/getHost';
 export class EventsController {
   private readonly verifyRequest: typeof verifyRequest;
 
-  constructor(private readonly eventsService: EventsService, verifier = verifyRequest) {
+  constructor(
+    private readonly eventsService: EventsService,
+    verifier = verifyRequest
+  ) {
     this.verifyRequest = verifier;
   }
 

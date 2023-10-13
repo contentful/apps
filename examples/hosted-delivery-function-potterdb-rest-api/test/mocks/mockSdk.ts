@@ -8,6 +8,6 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
-}
+};
 
-export { mockSdk }
+export { mockSdk };

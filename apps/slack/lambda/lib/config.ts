@@ -21,6 +21,6 @@ export const config = {
   },
 };
 
-export type DynamoConfiguration = typeof config['dynamo'];
-export type SlackConfiguration = typeof config['slack'];
-export type ServerlessConfiguration = typeof config['serverless'];
+export type DynamoConfiguration = (typeof config)['dynamo'];
+export type SlackConfiguration = (typeof config)['slack'];
+export type ServerlessConfiguration = (typeof config)['serverless'];

@@ -55,8 +55,7 @@ export const ImagePreviewWithFocalPoint = ({
           height: wrapperHeight,
           overflow: 'hidden',
           position: 'relative',
-        }}
-      >
+        }}>
         <img
           alt="Preview with cropping applied"
           src={url}

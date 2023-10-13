@@ -46,8 +46,7 @@ function _SelectColorButton(
         endIcon={showChevron ? <ChevronDownIcon /> : undefined}
         className={styles.pickerButton}
         onClick={onClick}
-        ref={ref}
-      >
+        ref={ref}>
         <Flex alignItems="center" gap="spacingXs">
           <ColorBox color={value} />
           <Flex gap="spacing2Xs">
@@ -59,11 +58,7 @@ function _SelectColorButton(
         </Flex>
       </Button>
       {!sdk.field.required && value !== undefined && (
-        <Button
-          variant="secondary"
-          startIcon={<CloseIcon />}
-          onClick={onClearClick}
-        >
+        <Button variant="secondary" startIcon={<CloseIcon />} onClick={onClearClick}>
           Clear
         </Button>
       )}

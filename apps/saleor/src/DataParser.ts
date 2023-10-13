@@ -63,7 +63,7 @@ class DataParser {
           ({ node: { product } }: ApiProductOrVariantEdge) =>
             ({
               node: product,
-            } as ApiProductOrVariantEdge)
+            }) as ApiProductOrVariantEdge
         )
         .map<Product>(DataParser.getParsedItem)
         .filter(this.shouldDisplayProduct),

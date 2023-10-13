@@ -10,7 +10,7 @@ export interface RunReportResponse {
       {
         value: number;
         oneValue: string;
-      }
+      },
     ];
   }[];
   totals: [];

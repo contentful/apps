@@ -253,8 +253,7 @@ export const EditSiteModal = ({
       isShown={isShown}
       onClose={onCancel}
       size="medium"
-      modalContentProps={{ paddingBottom: 'spacingM' }}
-    >
+      modalContentProps={{ paddingBottom: 'spacingM' }}>
       {() => (
         <>
           <Modal.Header title={isNewSite ? 'Add site' : 'Edit site'} />
@@ -267,8 +266,7 @@ export const EditSiteModal = ({
                   name={selectId}
                   value={siteId}
                   onChange={(e) => setSiteId(e.target.value)}
-                  required
-                >
+                  required>
                   {isNewSite && (
                     <Option value={PICK_OPTION_VALUE}>
                       {availableNetlifySites.length === 0
@@ -306,8 +304,7 @@ export const EditSiteModal = ({
                   size="small"
                   isChecked={isAssetDeploysOn}
                   className={styles.assetsDeployCheckbox}
-                  onChange={(e) => setIsAssetDeploysOn(e.target.checked)}
-                >
+                  onChange={(e) => setIsAssetDeploysOn(e.target.checked)}>
                   When assets are (un)published
                 </Checkbox>
                 <Checkbox
@@ -315,8 +312,7 @@ export const EditSiteModal = ({
                   name={deploysId}
                   size="small"
                   isChecked={isDeploysOn}
-                  onChange={(e) => setIsDeploysOn(e.target.checked)}
-                >
+                  onChange={(e) => setIsDeploysOn(e.target.checked)}>
                   When entries are (un)published
                 </Checkbox>
               </FormControl>
@@ -346,8 +342,7 @@ export const EditSiteModal = ({
                           key={item.value}
                           className={
                             item.value === ALL_CONTENT_TYPES_VALUE ? styles.allContentTypes : ''
-                          }
-                        >
+                          }>
                           {item.label}
                         </span>
                       )}
@@ -375,8 +370,7 @@ export const EditSiteModal = ({
               variant="positive"
               size="small"
               onClick={onConfirm}
-              isDisabled={!siteId || siteId === PICK_OPTION_VALUE || !displayName.trim()}
-            >
+              isDisabled={!siteId || siteId === PICK_OPTION_VALUE || !displayName.trim()}>
               Confirm
             </Button>
           </Modal.Controls>

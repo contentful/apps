@@ -10,7 +10,7 @@ export async function getAndUpdateSavedParams(sdk: AppExtensionSDK): Promise<Sav
   const { space, ids } = sdk;
   const [savedParams, eisResponse] = await Promise.all([
     sdk.app.getParameters() as Promise<SavedParams>,
-    space.getEditorInterfaces() as Promise<CollectionResponse<EditorInterface>>
+    space.getEditorInterfaces() as Promise<CollectionResponse<EditorInterface>>,
   ]);
   const selectedContentTypes = (
     (eisResponse &&
@@ -19,13 +19,13 @@ export async function getAndUpdateSavedParams(sdk: AppExtensionSDK): Promise<Sav
     []
   )
     .filter(
-      ei =>
-        !!get(ei, ['sidebar'], []).find(item => {
+      (ei) =>
+        !!get(ei, ['sidebar'], []).find((item) => {
           return item.widgetNamespace === 'app' && item.widgetId === ids.app;
         })
     )
-    .map(ei => get(ei, ['sys', 'contentType', 'sys', 'id']))
-    .filter(ctId => typeof ctId === 'string' && ctId.length > 0);
+    .map((ei) => get(ei, ['sys', 'contentType', 'sys', 'id']))
+    .filter((ctId) => typeof ctId === 'string' && ctId.length > 0);
 
   const savedContentTypes: {
     [key: string]: object;
@@ -43,13 +43,13 @@ export async function getAndUpdateSavedParams(sdk: AppExtensionSDK): Promise<Sav
 
   return {
     ...savedParams,
-    contentTypes
+    contentTypes,
   };
 }
 
 const largeNumberBreakpoints = [
   { lowerLimit: 1_000_000, suffix: 'm' },
-  { lowerLimit: 1_000, suffix: 'k' }
+  { lowerLimit: 1_000, suffix: 'k' },
 ];
 
 export function formatLargeNumbers(n: number) {
@@ -67,7 +67,7 @@ export const DAY_IN_MS = 1000 * 60 * 60 * 24;
 const daysBreakpoints = [
   { lowerLimit: 29, interval: 'nthWeek' },
   { lowerLimit: 5, interval: 'date' },
-  { lowerLimit: -Infinity, interval: 'dateHour' }
+  { lowerLimit: -Infinity, interval: 'dateHour' },
 ];
 
 export function getDateRangeInterval(start: Date, end: Date) {
@@ -82,17 +82,17 @@ export function getDateRangeInterval(start: Date, end: Date) {
   return '';
 }
 
-export const docsUrl = 'https://www.contentful.com/developers/docs/extensibility/apps/google-analytics'
+export const docsUrl =
+  'https://www.contentful.com/developers/docs/extensibility/apps/google-analytics';
 
 export function getErrorNotification(error: GapiError) {
-  if (error.status === "PERMISSION_DENIED") {
-    return "Your Google OAuth client isn't correctly configured for the Google Analytics app!"
-
+  if (error.status === 'PERMISSION_DENIED') {
+    return "Your Google OAuth client isn't correctly configured for the Google Analytics app!";
   }
 
   for (const e of error.errors || []) {
     if (e.reason === 'accessNotConfigured') {
-      return "The project of your Google OAuth client doesn't have the Google Analytcs APIs enabled!"
+      return "The project of your Google OAuth client doesn't have the Google Analytcs APIs enabled!";
     }
   }
 }

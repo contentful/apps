@@ -38,7 +38,10 @@ const Dialog = (props: DialogProps) => {
         style={{ position: 'absolute', top: '1em', right: '4em', zIndex: 1 }}>
         Close{' '}
       </Button>
-      <GqlPlayground {...{ sdk, entry, cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }} />;
+      <GqlPlayground
+        {...{ sdk, entry, cpaToken, spaceId, spaceEnvironment, spaceEnvironmentAlias }}
+      />
+      ;
     </>
   );
 };

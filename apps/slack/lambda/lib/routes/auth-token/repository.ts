@@ -8,7 +8,10 @@ import { getInstallationParametersFromCma } from '../../helpers/getInstallationP
 const ONE_MINUTE = 60 * 1_000;
 
 export class AuthTokenRepository {
-  constructor(private singleTableClient: SingleTableClient, private slackClient: SlackClient) {}
+  constructor(
+    private singleTableClient: SingleTableClient,
+    private slackClient: SlackClient
+  ) {}
 
   async validate(
     code: string,

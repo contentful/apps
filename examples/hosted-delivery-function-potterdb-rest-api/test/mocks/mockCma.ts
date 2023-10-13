@@ -1,3 +1,3 @@
-const mockCma: any = {}
+const mockCma: any = {};
 
-export { mockCma }
+export { mockCma };
