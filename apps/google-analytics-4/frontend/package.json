@@ -11,7 +11,7 @@
     "@sentry/react": "^7.44.2",
     "@testing-library/user-event": "14.4.3",
     "@types/chart.js": "^2.9.37",
-    "@types/lodash": "4.14.195",
+    "@types/lodash": "4.14.199",
     "@types/react-chartjs-2": "^2.5.7",
     "chart.js": "^4.2.1",
     "contentful-management": "10.31.4",
