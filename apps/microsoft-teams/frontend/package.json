@@ -15,10 +15,8 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "test": "vitest",
-    "create-app-definition": "contentful-app-scripts create-app-definition",
-    "upload": "contentful-app-scripts upload --bundle-dir ./dist",
-    "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./dist  --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN"
+    "test": "vitest --logHeapUsage --coverage",
+    "test:ci": "vitest"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.10.2",
@@ -27,6 +25,7 @@
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
     "@vitejs/plugin-react": "4.0.1",
+    "@vitest/coverage-v8": "^0.34.6",
     "happy-dom": "9.20.3",
     "typescript": "5.1.6",
     "vite": "4.3.9",
