@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { mockCma, mockSdk } from '@test/mocks';
 import Home from './Home';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({

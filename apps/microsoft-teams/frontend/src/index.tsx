@@ -4,7 +4,7 @@ import { GlobalStyles } from '@contentful/f36-components';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 import App from './App';
-import LocalhostWarning from './components/LocalhostWarning';
+import LocalhostWarning from '@components/LocalhostWarning';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
