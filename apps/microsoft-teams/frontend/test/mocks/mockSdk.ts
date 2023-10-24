@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockSdk: any = {
   app: {
     onConfigure: vi.fn(),
