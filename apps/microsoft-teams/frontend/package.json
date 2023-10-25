@@ -1,0 +1,40 @@
+{
+  "name": "@contentful/microsoft-teams-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "4.22.0",
+    "@contentful/f36-components": "4.45.0",
+    "@contentful/f36-tokens": "4.0.2",
+    "@contentful/react-apps-toolkit": "1.2.16",
+    "contentful-management": "10.38.3",
+    "emotion": "10.0.27",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest --logHeapUsage --coverage",
+    "test:ci": "vitest"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "1.10.2",
+    "@testing-library/react": "14.0.0",
+    "@types/node": "16.18.38",
+    "@types/react": "18.2.14",
+    "@types/react-dom": "18.2.6",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "@vitejs/plugin-react": "4.0.1",
+    "@vitest/coverage-v8": "^0.34.6",
+    "eslint": "^8.52.0",
+    "eslint-plugin-react": "^7.33.2",
+    "happy-dom": "9.20.3",
+    "typescript": "5.1.6",
+    "vite": "4.3.9",
+    "vite-plugin-eslint": "^1.8.1",
+    "vitest": "0.32.4"
+  }
+}
