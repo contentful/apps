@@ -75,6 +75,7 @@ describe('App', () => {
 
   afterEach(() => {
     cleanup();
+    fetchMock.restore();
   });
 
   it('should load the AppConfig page and allow for installation', async () => {
@@ -108,9 +109,12 @@ describe('App', () => {
     expect(await mockSdk.app.onConfigure.mock.calls[0][0]()).toBe(false);
   });
 
-  it('should render the sidebar app with signing and request button', () => {
+  it('should render the sidebar app with signing and request button', async () => {
     mockSdk.location.is = (location: string) => location === locations.LOCATION_ENTRY_SIDEBAR;
+    fetchMock.get('/entry?spaceId=space-123&projectId=project-id-123&entryId=entry-123', {});
+    fetchMock.get('/refresh?refresh_token=', 401);
     const wrapper = render(<App sdk={mockSdk as AppExtensionSDK} />);
+    await wait();
     expect(wrapper).toMatchSnapshot();
   });
 
