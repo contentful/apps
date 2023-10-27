@@ -1,0 +1,32 @@
+{
+  "name": "@contentful/microsoft-teams-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "NODE_ENV=production tsc",
+    "test": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --exit",
+    "test:ci": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 CI=true mocha --exit",
+    "test:debug": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
+    "test:watch": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test"
+  },
+  "dependencies": {
+    "@contentful/node-apps-toolkit": "^2.6.0",
+    "contentful-management": "^11.3.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.0",
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "@types/sinon": "^10.0.16",
+    "@types/sinon-chai": "^3.2.9",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "sinon": "^17.0.0",
+    "sinon-chai": "^3.7.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  }
+}
+
