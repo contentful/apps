@@ -29,7 +29,7 @@ describe('sendTestNotification.handler', () => {
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
   });
 
-  it('returns the images result', async () => {
+  it('returns the ok result', async () => {
     const result = await handler({}, context);
     expect(result).to.have.property('ok', true);
   });
