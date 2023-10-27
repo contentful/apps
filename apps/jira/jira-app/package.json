@@ -29,12 +29,12 @@
     "react-scripts": "^4.0.3"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none REACT_APP_NGROK_URL=${NGROK_URL} REACT_APP_ATLASSIAN_APP_CLIENT_ID=${ATLASSIAN_APP_CLIENT_ID} react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env BROWSER=none REACT_APP_NGROK_URL=${NGROK_URL} REACT_APP_ATLASSIAN_APP_CLIENT_ID=${ATLASSIAN_APP_CLIENT_ID} react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "deploy": "aws s3 sync ./build ${STATIC_JIRA_S3_BASE} --acl public-read",
     "deploy:test": "npm run deploy",
     "test": "react-scripts test",
-    "test:ci": "react-scripts test"
+    "test:ci": "CI=true react-scripts test"
   },
   "eslintConfig": {
     "extends": "react-app"
