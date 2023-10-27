@@ -8,12 +8,12 @@
     "cross-env": "7.0.3"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 342Q2DqCjmsdN5BJCEPkrJ --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 5cb68XsD3xpF57XvKGGVJJ --token ${TEST_CMA_TOKEN}",
     "test": "react-scripts test",
-    "test:ci": "react-scripts test"
+    "test:ci": "CI=true react-scripts test"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.9.0",

@@ -26,8 +26,8 @@
     "react-scripts": "4.0.3"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/google-analytics --acl public-read",
     "deploy:test": "npm run deploy"
   },

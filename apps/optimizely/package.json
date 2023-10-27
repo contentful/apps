@@ -23,12 +23,12 @@
     "whatwg-fetch": "3.6.19"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/optimizely --acl public-read",
     "deploy:test": "npm run deploy",
     "test": "TZ=UTC react-scripts test",
-    "test:ci": "TZ=UTC react-scripts test"
+    "test:ci": "TZ=UTC CI=true react-scripts test"
   },
   "eslintConfig": {
     "extends": "react-app"

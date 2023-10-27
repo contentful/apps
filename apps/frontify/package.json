@@ -13,8 +13,8 @@
     "react-dom": "16.12.0"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5wHGALSJtz7y2EQOLfGhKH --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 2jRtAexmQcEdzaQkNQKdH6 --token ${TEST_CMA_TOKEN}"
   },

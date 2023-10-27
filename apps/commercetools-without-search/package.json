@@ -19,8 +19,8 @@
     "react-scripts": "5.0.1"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build"
+    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build"
   },
   "eslintConfig": {
     "extends": "react-app"
