@@ -31,8 +31,8 @@
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "start": "react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "GENERATE_SOURCEMAP=false react-scripts --openssl-legacy-provider build",
     "deploy": "echo 'pinned bundle, skip deploy'",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 3pH3a4bjlsvhdepgoqgWNK --token ${TEST_CMA_TOKEN}",
     "test": "react-scripts test",
