@@ -1,0 +1,75 @@
+{
+  "actions": [
+    {
+      "id": "aiigSelectEditStatic",
+      "name": "AI Image Generator Test Select and Edit",
+      "category": "Custom",
+      "description": "This action returns a static result for testing purposes",
+      "type": "function",
+      "path": "actions/aiig-static.js",
+      "entryFile": "./backend/src/actions/aiig-static.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "prompt",
+          "name": "prompt",
+          "type": "Symbol"
+        },
+        {
+          "id": "image",
+          "name": "image",
+          "type": "Symbol"
+        },
+        {
+          "id": "mask",
+          "name": "mask",
+          "type": "Symbol"
+        }
+      ]
+    },
+    {
+      "id": "aiigGenerateImage",
+      "name": "Generate AI Image",
+      "category": "Custom",
+      "description": "This action will generate an image using OpenAI DALL-E 2 given a prompt",
+      "type": "function",
+      "path": "actions/aiig-generate-image.js",
+      "entryFile": "./backend/src/actions/aiig-generate-image.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "prompt",
+          "name": "prompt",
+          "type": "Symbol"
+        }
+      ]
+    },
+    {
+      "id": "aiigSelectEdit",
+      "name": "Select and edit with AI Image",
+      "category": "Custom",
+      "description": "This action will edit an image using OpenAI DALL-E 2 given a prompt, source image, and mask",
+      "type": "function",
+      "path": "actions/aiig-select-edit.js",
+      "entryFile": "./backend/src/actions/aiig-select-edit.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "prompt",
+          "name": "prompt",
+          "type": "Symbol"
+        },
+        {
+          "id": "image",
+          "name": "image",
+          "type": "Symbol"
+        },
+        {
+          "id": "mask",
+          "name": "mask",
+          "type": "Symbol"
+        }
+      ]
+    }
+  ]
+}
