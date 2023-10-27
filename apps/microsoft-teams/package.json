@@ -1,6 +1,6 @@
 {
-  "name": "@contentful/ai-image-generator",
-  "version": "0.1.0",
+  "name": "@contentful/microsoft-teams",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "create-app-definition": "contentful-app-scripts create-app-definition",
@@ -8,12 +8,11 @@
     "build-actions": "node build-actions.js",
     "build-backend": "cd backend && npm ci && cd .. && npm run build-actions",
     "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3RheWQRagirMFgWrhMOBxL --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6H2pUZdiYcmo0WY8dlYZn5 --token ${TEST_CMA_TOKEN}",
-    "deploy:sandbox": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 3vLfusuPgGHcydK5ET8IcG --token ${TEST_CMA_TOKEN}"
+    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 7lcE2IF8TiXXKiMj2UGM8k --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 73UaKZLqfCJTTqayKn73Rv --token ${TEST_CMA_TOKEN}"
   },
   "dependencies": {
-    "@contentful/app-scripts": "1.10.2",
+    "@contentful/app-scripts": "1.13.0",
     "esbuild": "^0.19.2",
     "sharp": "^0.32.5"
   }
