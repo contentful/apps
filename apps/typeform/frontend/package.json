@@ -31,10 +31,10 @@
     "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "test": "react-scripts test",
-    "test:ci": "react-scripts test"
+    "test:ci": "CI=true react-scripts test"
   },
   "eslintConfig": {
     "extends": "react-app"
