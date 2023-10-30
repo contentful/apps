@@ -1,7 +1,7 @@
 ## Building your Delivery Function
 
 ### Creating an app
-You can create an app using CLI using `npm run create-app-definition`. This will prompt you to enter details for your new app and organization details. Make sure your app is enabled for `Entry field` option with both Short text and JSON Object selected in the supported field types.
+You can create an app using CLI using `npm run create-app-definition`. This will prompt you to enter details for your new app and organization details.
 
 Alternatively, you can set your app and organization details by setting them as environment variables.
 
