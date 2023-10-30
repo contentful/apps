@@ -30,7 +30,7 @@ describe('sendTestNotification.handler', () => {
   });
 
   it('returns the ok result', async () => {
-    const result = await handler({}, context);
+    const result = await handler({ channel: 'foo' }, context);
     expect(result).to.have.property('ok', true);
   });
 });

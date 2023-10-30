@@ -1,7 +1,9 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { AppActionCallResponse } from '../types';
 
-interface AppActionCallParameters {}
+interface AppActionCallParameters {
+  channel: string;
+}
 
 export const handler = async (
   _payload: AppActionCallParameters,
