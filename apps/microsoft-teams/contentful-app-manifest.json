@@ -2,12 +2,12 @@
   "actions": [
     {
       "id": "msteamsSendTestNotification",
-      "name": "Send a test notification to a teams channel",
+      "name": "Send test notification to channel",
       "category": "Custom",
       "description": "This action returns sends off a test message to a channel",
       "type": "function",
-      "path": "actions/send-test-notification.js",
-      "entryFile": "./backend/src/actions/send-test-notification.ts",
+      "path": "actions/send-test.js",
+      "entryFile": "./backend/src/actions/send-test.ts",
       "allowNetworks": [],
       "parameters": [
         {

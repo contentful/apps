@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { handler } from './send-test-notification';
+import { handler } from './send-test';
 import { makeMockAppActionCallContext } from '../../test/mocks';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
