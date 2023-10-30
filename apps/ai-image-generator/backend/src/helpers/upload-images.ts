@@ -15,6 +15,7 @@ export class UploadImages {
     readonly imagesWithStreams: ImageWithStream[],
     readonly cmaClient: PlainClientAPI,
     readonly spaceId: string,
+    readonly environmentId: string,
     readonly uploadHost: string
   ) {}
 
@@ -53,7 +54,10 @@ export class UploadImages {
   }
 
   private async createUpload(file: sharp.Sharp): Promise<UploadProps> {
-    return await this.cmaClient.upload.create({ spaceId: this.spaceId }, { file });
+    return await this.cmaClient.upload.create(
+      { spaceId: this.spaceId, environmentId: this.environmentId },
+      { file }
+    );
   }
 
   private urlFromUpload(upload: UploadProps): string {
@@ -70,9 +74,16 @@ export const uploadImages = async (params: {
   imagesWithStreams: ImageWithStream[];
   cmaClient: PlainClientAPI;
   spaceId: string;
+  environmentId: string;
   uploadHost: string;
 }) => {
-  const { imagesWithStreams, cmaClient, spaceId, uploadHost } = params;
-  const imageUploader = new UploadImages(imagesWithStreams, cmaClient, spaceId, uploadHost);
+  const { imagesWithStreams, cmaClient, spaceId, environmentId, uploadHost } = params;
+  const imageUploader = new UploadImages(
+    imagesWithStreams,
+    cmaClient,
+    spaceId,
+    environmentId,
+    uploadHost
+  );
   return imageUploader.execute();
 };
