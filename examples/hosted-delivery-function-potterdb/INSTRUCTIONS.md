@@ -6,7 +6,7 @@ You can create an app using CLI using `npm run create-app-definition`. This will
 Alternatively, you can set your app and organization details by setting them as environment variables.
 
 ### Using environment variables
-You can also set the following environment variables as listed below:
+You will need to set the following environment variables as listed below:
 - `CONTENTFUL_ACCESS_TOKEN`: User management token used for authentication/authorization
 - `CONTENTFUL_ORG_ID`: Organization id where the app lives under
 - `CONTENTFUL_APP_DEF_ID`: App definition id for identifying the app
