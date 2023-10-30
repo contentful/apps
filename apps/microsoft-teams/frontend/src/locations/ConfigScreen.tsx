@@ -1,8 +1,7 @@
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { Flex, Form, Heading, Paragraph } from '@contentful/f36-components';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
-import { css } from 'emotion';
 import { useCallback, useEffect, useState } from 'react';
+import ConfigPage from '@components/config/ConfigPage/ConfigPage';
 
 export interface AppInstallationParameters {}
 
@@ -57,14 +56,7 @@ const ConfigScreen = () => {
     })();
   }, [sdk]);
 
-  return (
-    <Flex flexDirection="column" className={css({ margin: '80px', maxWidth: '800px' })}>
-      <Form>
-        <Heading>App Config</Heading>
-        <Paragraph>Welcome to your contentful app. This is your config page.</Paragraph>
-      </Form>
-    </Flex>
-  );
+  return <ConfigPage />;
 };
 
 export default ConfigScreen;

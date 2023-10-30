@@ -17,8 +17,10 @@
     "jsx": "react-jsx",
     "paths": {
       "@components/*": ["./src/components/*"],
+      "@configs/*": ["./src/configs/*"],
       "@locations/*": ["./src/locations/*"],
-      "@test/*": ["./test/*"]
+      "@test/*": ["./test/*"],
+      "@utils/*": ["./src/utils*"]
     }
   },
   "include": ["src", "test"]
