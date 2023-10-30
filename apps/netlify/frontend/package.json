@@ -28,12 +28,12 @@
     "whatwg-fetch": "3.6.19"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1VchawWvbIClHuMIyxwR5m --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 537Gb0QlvPjLKQYgLEY2jr --token ${TEST_CMA_TOKEN}",
     "test": "TZ=UTC react-scripts test",
-    "test:ci": "TZ=UTC react-scripts test"
+    "test:ci": "TZ=UTC CI=true react-scripts test"
   },
   "eslintConfig": {
     "extends": "react-app"
