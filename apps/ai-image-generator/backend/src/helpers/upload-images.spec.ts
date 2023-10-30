@@ -8,6 +8,7 @@ import { expect } from 'chai';
 describe('UploadImages', () => {
   let uploadImages: UploadImages;
   const spaceId = 'spaceId';
+  const environmentId = 'environmentId';
   const uploadId = 'uploadId';
   const sourceUrl = 'http://www.example.com';
   const uploadHost = 'upload.contentful.com';
@@ -44,7 +45,13 @@ describe('UploadImages', () => {
       };
 
       const cmaClient = makeMockPlainClient([mockUploadApiResponse], cmaClientStub);
-      uploadImages = new UploadImages(imagesWithStreams, cmaClient, spaceId, uploadHost);
+      uploadImages = new UploadImages(
+        imagesWithStreams,
+        cmaClient,
+        spaceId,
+        environmentId,
+        uploadHost
+      );
     });
 
     it('returns images with correct urls', async () => {
