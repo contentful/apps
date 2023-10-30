@@ -1,0 +1,59 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
+    {
+        "type": "TextBlock",
+        "size": "Medium",
+        "weight": "Bolder",
+        "text": "${title}"
+    },
+    {
+        "type": "ColumnSet",
+        "columns": [
+            {
+                "type": "Column",
+                "width": "auto",
+                "items": [
+                    {
+                        "type": "TextBlock",
+                        "text": "${Entry} |",
+                        "wrap": true
+                    }
+                ]
+            },
+            {
+                "type": "Column",
+                "width": "auto",
+                "items": [
+                    {
+                        "type": "TextBlock",
+                        "text": "${contentType}",
+                        "wrap": true
+                    }
+                ],
+                "spacing": "Small"
+            }
+        ]
+    },
+    {
+        "type": "TextBlock",
+        "text": "${space}",
+        "wrap": true,
+        "spacing": "Small"
+    },
+    {
+        "type": "TextBlock",
+        "text": "${createddate}, by ${creator}",
+        "wrap": true
+    }
+],
+"actions": [
+    {
+        "type": "Action.OpenUrl",
+        "title": "Open in Contentful",
+        "url": "${notificationUrl}"
+      }
+]
+}
