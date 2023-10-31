@@ -15,7 +15,9 @@ You will need to set the following environment variables as listed below:
 It as simple using the CLI command `npm run upload-ci`. This will perform two actions: upload the code, linking it to the app, and then finally activating the code ready for usage in both 
 
 ### Assigning an app to a field
-Delivery functions are meant to help with resolving field data, meaning the app has to be assigned to a field location. You can read more about different app locations [here](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/). The field is also required to be of the supported types for delivery function: Short text (`Symbol`) or JSON fields (`Object`). If these requirements are met, the UI has an option to enable resolution for the content type's fields during delivery when using GraphQL.
+Delivery functions are meant to help with resolving field data, meaning the app has to be assigned to a field location. You can read more about different app locations [here](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/). 
+
+The field is required to be one of the supported types for delivery function: Short text (`Symbol`) or JSON fields (`Object`).
 
 To set up the field location for your app use the [web UI](https://app.contentful.com/deeplink?link=app-definition-list) by going under the "Locations" section in the app details UI, then selecting the appropriate supported locations. After [installing an app to your space environment](https://www.contentful.com/developers/docs/extensibility/app-framework/tutorial/#install-your-app-to-a-space), you can go under the [respective content type](https://app.contentful.com/deeplink?link=content-model) you want to assign the app and visit the appearance section for supported field and selecting the app which will reveal a checkbox to resolve the field when using Contentful's GraphQL API. 
 
