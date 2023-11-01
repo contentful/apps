@@ -132,8 +132,8 @@ const Config = () => {
   useEffect(() => {
     (async () => {
       const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
-      console.log('sdk app>>>', sdk.app);
-      console.log('app installation parameters>>>', currentParameters);
+      console.log('SLACK sdk app>>>', sdk.app);
+      console.log('SLACK app installation parameters>>>', currentParameters);
 
       setParameters({
         ...currentParameters,
@@ -141,7 +141,7 @@ const Config = () => {
         workspaces: Object.values(connectedWorkspaces).map((workspace) => workspace.id),
       });
 
-      console.log('connectedWorkspaces>>>', connectedWorkspaces);
+      console.log('SLACK connected workspaces>>>', connectedWorkspaces);
 
       if (currentParameters?.notifications) {
         setNotifications(currentParameters.notifications);
@@ -151,7 +151,7 @@ const Config = () => {
 
       setActive(typeof activeFlag === 'boolean' ? activeFlag : true);
 
-      console.log('reached setReady functionality');
+      console.log('SLACK reached setReady functionality');
       await sdk.app.setReady();
     })();
   }, [sdk, connectedWorkspaces, setNotifications, setActive, installationUuid]);
