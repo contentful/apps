@@ -26,6 +26,7 @@
     "start:prod": "NODE_ENV='production' && npm run start:preview",
     "build": "tsc && vite build --mode ${NODE_ENV:='production'}",
     "test": "vitest --logHeapUsage --coverage",
+    "test:ci": "vitest",
     "lint": "eslint src --max-warnings 0",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 3iszK8Gl7aaxLvxGyCOhgA --token ${CONTENTFUL_CMA_TOKEN}",
