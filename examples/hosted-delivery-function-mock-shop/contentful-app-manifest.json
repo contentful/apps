@@ -1,0 +1,12 @@
+{
+  "deliveryFunctions": [
+    {
+      "id": "MockShopTutorial",
+      "name": "MockShopTutorial",
+      "description": "In this tutorial, you will learn how to create a delivery function that fetches data from a mock shop API.",
+      "path": "delivery-functions/mockShop.js",
+      "entryFile": "delivery-functions/mockShop.ts",
+      "allowNetworks": ["https://mock.shop/api"]
+    }
+  ]
+}
