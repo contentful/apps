@@ -1,7 +1,6 @@
 const headerSection = {
   title: 'Set up Microsoft Teams',
-  description:
-    'Get notifications about content updates in Contentful directly in the Microsoft Teams.',
+  description: 'Get notifications about content updates in Contentful directly in Microsoft Teams.',
 };
 
 const accessSection = {

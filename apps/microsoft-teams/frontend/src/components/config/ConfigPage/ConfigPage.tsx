@@ -1,8 +1,7 @@
-import { Box, FormControl, Heading, Paragraph, TextInput } from '@contentful/f36-components';
 import { ChangeEvent } from 'react';
-import { styles } from './ConfigPage.styles';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
-import { headerSection, accessSection } from '@constants/configCopy';
+import AccessSection from '@components/config/AccessSection/AccessSection';
+import NotificationsSection from '@components/config/NotificationsSection/NotificationsSection';
 
 interface ParameterObject {
   [key: string]: string;
@@ -21,20 +20,10 @@ const ConfigPage = (props: Props) => {
   };
 
   return (
-    <Box className={styles.body}>
-      <Heading>{headerSection.title}</Heading>
-      <Paragraph>{headerSection.description}</Paragraph>
-      <hr className={styles.splitter} />
-      <FormControl data-test-id="tenant-id-section">
-        <FormControl.Label>{accessSection.fieldName}</FormControl.Label>
-        <TextInput
-          value={parameters.tenantId}
-          type="text"
-          name="tenantId"
-          onChange={handleChange}
-        />
-      </FormControl>
-    </Box>
+    <>
+      <AccessSection tenantId={parameters.tenantId ?? ''} handleChange={handleChange} />
+      <NotificationsSection />
+    </>
   );
 };
 
