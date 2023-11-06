@@ -7,7 +7,7 @@
       "description": "This action returns sends off a test message to a channel",
       "type": "function",
       "path": "actions/send-test.js",
-      "entryFile": "./backend/src/actions/send-test.ts",
+      "entryFile": "./app-actions/src/actions/send-test.ts",
       "allowNetworks": [],
       "parameters": [
         {
