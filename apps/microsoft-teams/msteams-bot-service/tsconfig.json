@@ -1,0 +1,15 @@
+{
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "build",
+    "paths": {
+      "@/*": ["./*"],
+    },
+    "sourceMap": true,
+    "inlineSources": true,
+    "sourceRoot": "/src"
+  },
+  "include": ["src", "test"],
+  "exclude": ["node_modules"]
+}
+
