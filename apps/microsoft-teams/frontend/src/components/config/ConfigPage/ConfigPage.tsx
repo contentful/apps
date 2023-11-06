@@ -2,6 +2,7 @@ import { Box, FormControl, Heading, Paragraph, TextInput } from '@contentful/f36
 import { ChangeEvent } from 'react';
 import { styles } from './ConfigPage.styles';
 import { AppInstallationParameters } from '@locations/ConfigScreen';
+import { headerSection, accessSection } from '@constants/configCopy';
 
 interface ParameterObject {
   [key: string]: string;
@@ -21,15 +22,11 @@ const ConfigPage = (props: Props) => {
 
   return (
     <Box className={styles.body}>
-      <Heading>Set up Microsoft Teams</Heading>
-      <Paragraph>
-        The Microsoft Teams app for Contentful lets you set up automatic notifications about
-        specific Contentful events so that you can quickly notify collaborators about changes
-        throughout the content lifecycle.
-      </Paragraph>
+      <Heading>{headerSection.title}</Heading>
+      <Paragraph>{headerSection.description}</Paragraph>
       <hr className={styles.splitter} />
       <FormControl data-test-id="tenant-id-section">
-        <FormControl.Label>Tenant Id</FormControl.Label>
+        <FormControl.Label>{accessSection.fieldName}</FormControl.Label>
         <TextInput
           value={parameters.tenantId}
           type="text"

@@ -17,6 +17,7 @@
     "jsx": "react-jsx",
     "paths": {
       "@components/*": ["./src/components/*"],
+      "@constants/*": ["./src/constants/*"],
       "@locations/*": ["./src/locations/*"],
       "@test/*": ["./test/*"]
     }
