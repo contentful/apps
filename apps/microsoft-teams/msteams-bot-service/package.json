@@ -1,0 +1,35 @@
+{
+  "name": "@contentful/msteams-bot-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend service for Contentful MS Teams bot app",
+  "main": "index.js",
+  "scripts": {
+    "build": "NODE_ENV=production rimraf ./build && tsc",
+    "lint": "eslint --max-warnings=0 .",
+    "test": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha",
+    "test:ci": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 CI=true mocha",
+    "test:debug": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
+    "test:watch": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.2",
+    "@types/chai": "^4.3.9",
+    "@types/chai-http": "^4.2.0",
+    "@types/express": "^4.17.20",
+    "@types/mocha": "^10.0.3",
+    "@types/node": "^20.8.10",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "chai": "^4.3.10",
+    "chai-http": "^4.4.0",
+    "eslint": "^8.53.0",
+    "mocha": "^10.2.0",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
