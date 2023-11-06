@@ -4,9 +4,8 @@
   "private": true,
   "scripts": {
     "create-app-definition": "contentful-app-scripts create-app-definition",
-    "build": "rimraf ./build && npm run build-frontend && npm run build-backend",
-    "build-actions": "node build-actions.js",
-    "build-backend": "cd backend && npm ci && cd .. && npm run build-actions",
+    "build": "rimraf ./build && npm run build-frontend && npm run build-app-actions",
+    "build-app-actions": "cd app-actions && npm ci && cd .. && node build-actions.js",
     "build-frontend": "cd frontend && npm ci --include=dev && BUILD_PATH=../build npm run build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 7lcE2IF8TiXXKiMj2UGM8k --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 73UaKZLqfCJTTqayKn73Rv --token ${TEST_CMA_TOKEN}",
