@@ -5,7 +5,6 @@ export const styles = {
   wrapper: css({
     height: 'auto',
     margin: `${tokens.spacingXl} auto`,
-    // padding: `${tokens.spacingM}`,
     maxWidth: '900px',
     backgroundColor: tokens.colorWhite,
     borderRadius: '6px',

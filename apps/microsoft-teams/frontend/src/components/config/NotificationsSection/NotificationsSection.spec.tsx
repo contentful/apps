@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { notificationsSection } from '@constants/configCopy';
 
 describe('NotificationsSection component', () => {
-  it('mounts with title', async () => {
+  it('mounts with title', () => {
     render(<NotificationsSection notifications={[]} createNewNotification={vi.fn()} />);
 
     expect(screen.getByText(notificationsSection.title)).toBeTruthy();

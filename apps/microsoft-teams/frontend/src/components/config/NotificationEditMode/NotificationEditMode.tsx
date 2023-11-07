@@ -5,10 +5,10 @@ import {
   Checkbox,
   Flex,
   FormControl,
-  Paragraph,
+  Text,
 } from '@contentful/f36-components';
 import AddButton from '@components/config/AddButton/AddButton';
-import ContentfulLogo from '../ContentfulLogo/ContentfulLogo';
+import ContentfulLogo from '@components/config/ContentfulLogo/ContentfulLogo';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 import { styles } from './NotificationEditMode.styles';
 import {
@@ -31,37 +31,38 @@ const NotificationEditMode = (props: Props) => {
         <Box marginBottom="spacingL">
           <Flex marginBottom="spacingS">
             <ContentfulLogo />
-            <Paragraph marginLeft="spacingXs" marginBottom="none">
+            <Text marginLeft="spacingXs" marginBottom="none" fontWeight="fontWeightMedium">
               {contentTypeSection.title}
-            </Paragraph>
+            </Text>
           </Flex>
           <AddButton
             buttonCopy={contentTypeSection.addButton}
+            // TODO: update this button to launch the content type selection modal
             handleClick={() => console.log('click')}
           />
         </Box>
         <Box marginBottom="spacingL">
           <Flex marginBottom="spacingS">
             <TeamsLogo />
-            <Paragraph marginLeft="spacingXs" marginBottom="none">
+            <Text marginLeft="spacingXs" marginBottom="none" fontWeight="fontWeightMedium">
               {channelSection.title}
-            </Paragraph>
+            </Text>
           </Flex>
           <AddButton
             buttonCopy={channelSection.addButton}
+            // TODO: update this button to launch the channel selection modal
             handleClick={() => console.log('click')}
           />
         </Box>
         <Box>
           <FormControl as="fieldset">
-            <FormControl.Label as="legend">{actionsSection.title}</FormControl.Label>
+            <FormControl.Label>{actionsSection.title}</FormControl.Label>
             <Checkbox.Group name="checkbox-options">
               {Object.values(actionsSection.options).map((event) => (
                 <Checkbox
                   key={event.id}
                   id={`event-${event.id}-${index}`}
-                  value={`event-${event.id}-${index}`}
-                  onChange={() => console.log('change')}>
+                  value={`event-${event.id}-${index}`}>
                   {event.text}
                 </Checkbox>
               ))}

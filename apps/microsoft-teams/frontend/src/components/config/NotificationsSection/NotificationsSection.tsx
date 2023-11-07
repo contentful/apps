@@ -2,7 +2,7 @@ import { Box, Subheading } from '@contentful/f36-components';
 import { styles } from './NotificationsSection.styles';
 import { notificationsSection } from '@constants/configCopy';
 import AddButton from '@components/config/AddButton/AddButton';
-import NotificationEditMode from '../NotificationEditMode/NotificationEditMode';
+import NotificationEditMode from '@components/config/NotificationEditMode/NotificationEditMode';
 import { Notification } from '@customTypes/configPage';
 
 interface Props {
@@ -21,12 +21,7 @@ const NotificationsSection = (props: Props) => {
         handleClick={createNewNotification}
       />
       {notifications.map((notification, index) => {
-        return (
-          <NotificationEditMode
-            key={`${index}-${notification.channelId}-${notification.contentTypeId}`}
-            index={index}
-          />
-        );
+        return <NotificationEditMode key={`notification-${index}`} index={index} />;
       })}
     </Box>
   );
