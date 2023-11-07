@@ -10,12 +10,7 @@ const accessSection = {
 
 const notificationsSection = {
   title: 'Notifications',
-  buttons: {
-    create: 'Create notification',
-    test: 'Test',
-    delete: 'Delete',
-    save: 'Save',
-  },
+  createButton: 'Create notification',
 };
 
 const contentTypeSection = {
@@ -32,9 +27,41 @@ const channelSection = {
   modalButton: 'Next',
 };
 
+enum AppEventKey {
+  PUBLISH = 'publish',
+  UNPUBLISHED = 'unpublish',
+  CREATED = 'create',
+  DELETED = 'delete',
+}
+
+const AppEvents = {
+  [AppEventKey.PUBLISH]: {
+    id: AppEventKey.PUBLISH,
+    text: 'Publish',
+  },
+  [AppEventKey.UNPUBLISHED]: {
+    id: AppEventKey.UNPUBLISHED,
+    text: 'Unpublish',
+  },
+  [AppEventKey.CREATED]: {
+    id: AppEventKey.CREATED,
+    text: 'Create',
+  },
+  [AppEventKey.DELETED]: {
+    id: AppEventKey.DELETED,
+    text: 'Delete',
+  },
+};
+
 const actionsSection = {
-  title: 'title',
-  options: ['Publish', 'Unpublish', 'Create', 'Delete', 'Edit'],
+  title: 'Actions',
+  options: AppEvents,
+};
+
+const editModeFooter = {
+  test: 'Test',
+  delete: 'Delete',
+  save: 'Save',
 };
 
 export {
@@ -44,4 +71,5 @@ export {
   contentTypeSection,
   channelSection,
   actionsSection,
+  editModeFooter,
 };

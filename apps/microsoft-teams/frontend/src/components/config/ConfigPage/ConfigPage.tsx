@@ -1,14 +1,10 @@
 import { ChangeEvent } from 'react';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
+import { AppInstallationParameters } from '@customTypes/configPage';
 import AccessSection from '@components/config/AccessSection/AccessSection';
 import NotificationsSection from '@components/config/NotificationsSection/NotificationsSection';
 
-interface ParameterObject {
-  [key: string]: string;
-}
-
 interface Props {
-  handleConfig: (value: ParameterObject) => void;
+  handleConfig: (value: AppInstallationParameters) => void;
   parameters: AppInstallationParameters;
 }
 
@@ -19,10 +15,33 @@ const ConfigPage = (props: Props) => {
     handleConfig({ tenantId: e.target.value });
   };
 
+  const createNewNotification = () => {
+    const currentNotifications = parameters.notifications ?? [];
+    const defaultNotification = {
+      channelId: '',
+      contentTypeId: '',
+      isEnabled: true,
+      selectedEvents: {
+        publish: false,
+        unpublish: false,
+        create: false,
+        delete: false,
+        edit: false,
+      },
+    };
+
+    handleConfig({
+      notifications: [defaultNotification, ...currentNotifications],
+    });
+  };
+
   return (
     <>
       <AccessSection tenantId={parameters.tenantId ?? ''} handleChange={handleChange} />
-      <NotificationsSection />
+      <NotificationsSection
+        notifications={parameters.notifications ?? []}
+        createNewNotification={createNewNotification}
+      />
     </>
   );
 };
