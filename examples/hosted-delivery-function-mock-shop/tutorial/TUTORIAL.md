@@ -20,7 +20,7 @@ Now, configure the app settings as follows:
 
 As we want to resolve products on a field check *Entry field* and as filed type short check *text* as we are going to store the product id into the field. Also check *App configuration screen* as we want to provide some basic app configuration.
 
-![App Settings - Locations](./imgweb-app-locations-settings.png)
+![App Settings - Locations](img/web-app-locations-settings.png)
 
 The next step is to configure the "Instance Parameter settings." Here, you can define fields that store parameters for each app installation. In this example, we will make the mock.shop API endpoint configurable within the delivery function. To do this, follow these steps:
 
@@ -31,7 +31,7 @@ The next step is to configure the "Instance Parameter settings." Here, you can d
 * Click "Save" to store the parameter.
 * Your custom app is now configured. As a final step, click "Save" to persist the app configuration.
 
-![App Settings - Instance Parameter settings](web-app-parameters-settings)
+![App Settings - Instance Parameter settings](img/web-app-parameters-settings)
 
 Your custom app is now configured. As a final step, click "Save" to persist the app configuration.
 
