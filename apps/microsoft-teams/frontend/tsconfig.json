@@ -17,7 +17,9 @@
     "jsx": "react-jsx",
     "paths": {
       "@components/*": ["./src/components/*"],
+      "@constants/*": ["./src/constants/*"],
       "@locations/*": ["./src/locations/*"],
+      "@customTypes/*": ["./src/customTypes/*"],
       "@test/*": ["./test/*"]
     }
   },

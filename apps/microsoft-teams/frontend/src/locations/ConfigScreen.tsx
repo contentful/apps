@@ -2,10 +2,7 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
 import { useCallback, useEffect, useState } from 'react';
 import ConfigPage from '@components/config/ConfigPage/ConfigPage';
-
-export interface AppInstallationParameters {
-  tenantId?: string;
-}
+import { AppInstallationParameters } from '@customTypes/configPage';
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({ tenantId: '' });

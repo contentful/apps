@@ -1,14 +1,10 @@
-import { Box, FormControl, Heading, Paragraph, TextInput } from '@contentful/f36-components';
 import { ChangeEvent } from 'react';
-import { styles } from './ConfigPage.styles';
-import { AppInstallationParameters } from '@locations/ConfigScreen';
-
-interface ParameterObject {
-  [key: string]: string;
-}
+import { AppInstallationParameters } from '@customTypes/configPage';
+import AccessSection from '@components/config/AccessSection/AccessSection';
+import NotificationsSection from '@components/config/NotificationsSection/NotificationsSection';
 
 interface Props {
-  handleConfig: (value: ParameterObject) => void;
+  handleConfig: (value: AppInstallationParameters) => void;
   parameters: AppInstallationParameters;
 }
 
@@ -19,25 +15,34 @@ const ConfigPage = (props: Props) => {
     handleConfig({ tenantId: e.target.value });
   };
 
+  const createNewNotification = () => {
+    const currentNotifications = parameters.notifications ?? [];
+    const defaultNotification = {
+      channelId: '',
+      contentTypeId: '',
+      isEnabled: true,
+      selectedEvents: {
+        publish: false,
+        unpublish: false,
+        create: false,
+        delete: false,
+        edit: false,
+      },
+    };
+
+    handleConfig({
+      notifications: [defaultNotification, ...currentNotifications],
+    });
+  };
+
   return (
-    <Box className={styles.body}>
-      <Heading>Set up Microsoft Teams</Heading>
-      <Paragraph>
-        The Microsoft Teams app for Contentful lets you set up automatic notifications about
-        specific Contentful events so that you can quickly notify collaborators about changes
-        throughout the content lifecycle.
-      </Paragraph>
-      <hr className={styles.splitter} />
-      <FormControl data-test-id="tenant-id-section">
-        <FormControl.Label>Tenant Id</FormControl.Label>
-        <TextInput
-          value={parameters.tenantId}
-          type="text"
-          name="tenantId"
-          onChange={handleChange}
-        />
-      </FormControl>
-    </Box>
+    <>
+      <AccessSection tenantId={parameters.tenantId ?? ''} handleChange={handleChange} />
+      <NotificationsSection
+        notifications={parameters.notifications ?? []}
+        createNewNotification={createNewNotification}
+      />
+    </>
   );
 };
 
