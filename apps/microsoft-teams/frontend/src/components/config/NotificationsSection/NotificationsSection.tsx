@@ -19,6 +19,11 @@ const NotificationsSection = (props: Props) => {
     dispatch({ type: actions.ADD_NOTIFICATION });
   };
 
+  const deleteNotification = (index: number) => {
+    notifications.splice(index, 1);
+    dispatch({ type: actions.UPDATE_NOTIFICATIONS, payload: notifications });
+  };
+
   return (
     <Box className={styles.box}>
       <Subheading>{notificationsSection.title}</Subheading>
@@ -27,7 +32,13 @@ const NotificationsSection = (props: Props) => {
         handleClick={createNewNotification}
       />
       {notifications.map((notification, index) => {
-        return <NotificationEditMode key={`notification-${index}`} index={index} />;
+        return (
+          <NotificationEditMode
+            key={`notification-${index}`}
+            index={index}
+            handleDelete={deleteNotification}
+          />
+        );
       })}
     </Box>
   );
