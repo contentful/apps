@@ -5,7 +5,7 @@ import { notificationsSection } from '@constants/configCopy';
 
 describe('NotificationsSection component', () => {
   it('mounts with title', () => {
-    render(<NotificationsSection notifications={[]} createNewNotification={vi.fn()} />);
+    render(<NotificationsSection notifications={[]} dispatch={vi.fn()} />);
 
     expect(screen.getByText(notificationsSection.title)).toBeTruthy();
   });
