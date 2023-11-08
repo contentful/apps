@@ -20,6 +20,7 @@
     "@types/express": "^4.17.20",
     "@types/mocha": "^10.0.3",
     "@types/node": "^20.8.10",
+    "@types/sinon": "^17.0.1",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "botframework-connector": "^4.21.0",
@@ -29,6 +30,7 @@
     "mocha": "^10.2.0",
     "nodemon": "^3.0.1",
     "rimraf": "^5.0.5",
+    "sinon": "^17.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
