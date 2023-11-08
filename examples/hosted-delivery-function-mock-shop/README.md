@@ -8,7 +8,7 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app --typescript
+npx create-contentful-app --example hosted-delivery-function-mock-shop
 
 # npm
 npm init contentful-app -- --typescript
