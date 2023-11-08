@@ -1,46 +1,38 @@
-import { ChangeEvent } from 'react';
-import { AppInstallationParameters } from '@customTypes/configPage';
+import { useCallback, useEffect, useReducer } from 'react';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import AccessSection from '@components/config/AccessSection/AccessSection';
 import NotificationsSection from '@components/config/NotificationsSection/NotificationsSection';
+import parameterReducer from '@components/config/parameterReducer';
+import { initialParameters } from '@constants/defaultParams';
+import useInitializeParameters from '@hooks/useInitializeParameters';
 
-interface Props {
-  handleConfig: (value: AppInstallationParameters) => void;
-  parameters: AppInstallationParameters;
-}
+const ConfigPage = () => {
+  const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
 
-const ConfigPage = (props: Props) => {
-  const { handleConfig, parameters } = props;
+  const sdk = useSDK<ConfigAppSDK>();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    handleConfig({ tenantId: e.target.value });
-  };
+  useInitializeParameters(dispatchParameters);
 
-  const createNewNotification = () => {
-    const currentNotifications = parameters.notifications ?? [];
-    const defaultNotification = {
-      channelId: '',
-      contentTypeId: '',
-      isEnabled: true,
-      selectedEvents: {
-        publish: false,
-        unpublish: false,
-        create: false,
-        delete: false,
-        edit: false,
-      },
+  const onConfigure = useCallback(async () => {
+    const currentState = await sdk.app.getCurrentState();
+
+    return {
+      parameters,
+      targetState: currentState,
     };
+  }, [parameters, sdk]);
 
-    handleConfig({
-      notifications: [defaultNotification, ...currentNotifications],
-    });
-  };
+  useEffect(() => {
+    sdk.app.onConfigure(() => onConfigure());
+  }, [sdk, onConfigure]);
 
   return (
     <>
-      <AccessSection tenantId={parameters.tenantId ?? ''} handleChange={handleChange} />
+      <AccessSection tenantId={parameters.tenantId} dispatch={dispatchParameters} />
       <NotificationsSection
-        notifications={parameters.notifications ?? []}
-        createNewNotification={createNewNotification}
+        notifications={parameters.notifications}
+        dispatch={dispatchParameters}
       />
     </>
   );

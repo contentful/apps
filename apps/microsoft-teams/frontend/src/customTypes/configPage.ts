@@ -1,6 +1,6 @@
 export interface AppInstallationParameters {
-  tenantId?: string;
-  notifications?: Notification[];
+  tenantId: string;
+  notifications: Notification[];
 }
 
 export interface Notification {

@@ -1,17 +1,23 @@
+import { Dispatch } from 'react';
 import { Box, Subheading } from '@contentful/f36-components';
 import { styles } from './NotificationsSection.styles';
 import { notificationsSection } from '@constants/configCopy';
 import AddButton from '@components/config/AddButton/AddButton';
 import NotificationEditMode from '@components/config/NotificationEditMode/NotificationEditMode';
 import { Notification } from '@customTypes/configPage';
+import { ParameterAction, actions } from '@components/config/parameterReducer';
 
 interface Props {
   notifications: Notification[];
-  createNewNotification: () => void;
+  dispatch: Dispatch<ParameterAction>;
 }
 
 const NotificationsSection = (props: Props) => {
-  const { notifications, createNewNotification } = props;
+  const { notifications, dispatch } = props;
+
+  const createNewNotification = () => {
+    dispatch({ type: actions.ADD_NOTIFICATION });
+  };
 
   return (
     <Box className={styles.box}>

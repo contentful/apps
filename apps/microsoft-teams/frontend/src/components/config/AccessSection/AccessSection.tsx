@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, Dispatch } from 'react';
 import {
   Box,
   FormControl,
@@ -9,14 +9,22 @@ import {
 } from '@contentful/f36-components';
 import { headerSection, accessSection } from '@constants/configCopy';
 import { styles } from './AccessSection.styles';
+import { ParameterAction, actions } from '@components/config/parameterReducer';
 
 interface Props {
   tenantId: string;
-  handleChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  dispatch: Dispatch<ParameterAction>;
 }
 
 const AccessSection = (props: Props) => {
-  const { tenantId, handleChange } = props;
+  const { tenantId, dispatch } = props;
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatch({
+      type: actions.UPDATE_TENANT_ID,
+      payload: e.target.value,
+    });
+  };
 
   return (
     <Box className={styles.box}>

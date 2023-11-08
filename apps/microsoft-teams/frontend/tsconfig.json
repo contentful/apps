@@ -18,6 +18,7 @@
     "paths": {
       "@components/*": ["./src/components/*"],
       "@constants/*": ["./src/constants/*"],
+      "@hooks/*": ["./src/hooks/*"],
       "@locations/*": ["./src/locations/*"],
       "@customTypes/*": ["./src/customTypes/*"],
       "@test/*": ["./test/*"]
