@@ -1,13 +1,7 @@
-import React, { useCallback, useState, useEffect, } from "react";
-import { ConfigAppSDK } from "@contentful/app-sdk";
-import {
-  Heading,
-  Form,
-  Flex,
-  TextInput,
-  FormControl,
-} from "@contentful/f36-components";
-import { useSDK } from "@contentful/react-apps-toolkit";
+import React, { useCallback, useState, useEffect } from 'react';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import { Heading, Form, Flex, TextInput, FormControl } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 export interface AppInstallationParameters {
   apiEndpoint?: string;
@@ -36,8 +30,7 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     (async () => {
-      const currentParameters: AppInstallationParameters | null =
-        await sdk.app.getParameters();
+      const currentParameters: AppInstallationParameters | null = await sdk.app.getParameters();
 
       if (currentParameters) {
         setParameters(currentParameters);

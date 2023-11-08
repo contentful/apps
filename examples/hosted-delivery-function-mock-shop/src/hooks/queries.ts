@@ -1,4 +1,4 @@
-import { gql } from "graphql-request";
+import { gql } from 'graphql-request';
 
 export const productFragment = gql`
   fragment ProductFragment on Product {
