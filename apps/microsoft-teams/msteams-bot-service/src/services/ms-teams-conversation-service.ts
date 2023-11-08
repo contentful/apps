@@ -20,10 +20,10 @@ export class MsTeamsConversationService {
     return new MsTeamsConversationService(conversationBot);
   }
 
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   async handleRequest(
     request: Request,
     response: Response,
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     logic?: (context: TurnContext) => Promise<any>
   ): Promise<void> {
     try {
