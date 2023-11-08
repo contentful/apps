@@ -20,8 +20,9 @@ const NotificationsSection = (props: Props) => {
   };
 
   const deleteNotification = (index: number) => {
-    notifications.splice(index, 1);
-    dispatch({ type: actions.UPDATE_NOTIFICATIONS, payload: notifications });
+    const notificationsPayload = [...notifications];
+    notificationsPayload.splice(index, 1);
+    dispatch({ type: actions.UPDATE_NOTIFICATIONS, payload: notificationsPayload });
   };
 
   return (

@@ -58,11 +58,11 @@ const parameterReducer = (
       };
     }
     case APPLY_CONTENTFUL_PARAMETERS: {
-      const parameter = action.payload as AppInstallationParameters;
+      const parameters = action.payload;
       return {
         ...state,
-        tenantId: parameter.tenantId ?? '',
-        notifications: parameter.notifications ?? [],
+        tenantId: parameters.tenantId ?? '',
+        notifications: parameters.notifications ?? [],
       };
     }
     default:
