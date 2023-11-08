@@ -4,15 +4,14 @@ This repo contains to the code for the mock.shop delivery function tutorial.
 
 ## How to use
 
-Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+Execute create-contentful-app with npx or yarn to bootstrap the example:
 
 ```bash
 # npx
 npx create-contentful-app --example hosted-delivery-function-mock-shop
 
-
 # Yarn
-yarn create contentful-app --typescript
+yarn create contentful-app --example hosted-delivery-function-mock-shop
 ```
 
 ## Available Scripts
