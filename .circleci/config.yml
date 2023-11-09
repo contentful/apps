@@ -30,6 +30,12 @@ jobs:
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
       - run:
+          name: Setup circle and tools
+          command: |
+            circleci version
+            docker version
+            docker compose version
+      - run:
           name: Install dependencies
           command: |
             npm ci
