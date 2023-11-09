@@ -10,13 +10,17 @@ start:
 stop:
 	@docker compose down
 
+## make build: Build all the containers required by the project
+build:
+	@docker compose build
+
 ## make initialize-db: Create the dynamodb table in the local test db
-initialize-db:
-	@docker-compose run --build --rm dynamodb-initializer || true
+initialize-db: build
+	@docker-compose run --rm dynamodb-initializer || true
 
 ## make test-ci: Run ci tests and exit
 test-ci: initialize-db
-	@docker-compose run --build --rm msteams-bot-service npm run test-ci
+	@docker-compose run --rm msteams-bot-service npm run test-ci
 
 ## make test-watch: Run tests in watch mode
 test-watch:
