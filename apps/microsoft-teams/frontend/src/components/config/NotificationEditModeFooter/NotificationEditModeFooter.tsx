@@ -3,12 +3,12 @@ import { styles } from './NotificationEditModeFooter.styles';
 import { editModeFooter } from '@constants/configCopy';
 
 interface Props {
-  index: number;
-  handleDelete: (index: number) => void;
+  handleDelete: () => void;
+  handleSave: () => void;
 }
 
 const NotificationEditModeFooter = (props: Props) => {
-  const { index, handleDelete } = props;
+  const { handleDelete, handleSave } = props;
 
   return (
     <Box className={styles.footer}>
@@ -16,10 +16,12 @@ const NotificationEditModeFooter = (props: Props) => {
         <ButtonGroup variant="spaced" spacing="spacingS">
           <Button variant="transparent">{editModeFooter.test}</Button>
           {/* TODO: implement modal to confirm deletion */}
-          <Button variant="negative" onClick={() => handleDelete(index)}>
+          <Button variant="negative" onClick={handleDelete}>
             {editModeFooter.delete}
           </Button>
-          <Button variant="primary">{editModeFooter.save}</Button>
+          <Button variant="primary" onClick={handleSave}>
+            {editModeFooter.save}
+          </Button>
         </ButtonGroup>
       </Flex>
     </Box>

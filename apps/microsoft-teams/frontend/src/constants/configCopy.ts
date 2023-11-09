@@ -22,9 +22,12 @@ const contentTypeSection = {
 const channelSection = {
   title: 'Channel',
   addButton: 'Add channel',
-  modalTitle: 'Add Teams channel',
-  modalDescription: 'The Contentful app has been added to these channels',
-  modalButton: 'Next',
+  modal: {
+    title: 'Add Teams channel',
+    description:
+      'Teams channels where the Contentful app has been installed can display notifications. Add channel',
+    button: 'Next',
+  },
 };
 
 enum AppEventKey {
