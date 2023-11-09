@@ -29,6 +29,7 @@ jobs:
       - node/install
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
+      - setup_remote_docker
       - run:
           name: Setup circle and tools
           command: |
