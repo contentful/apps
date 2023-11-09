@@ -16,7 +16,13 @@ app.post('/api/messages', async (request: Request, response: Response) => {
     config.botId,
     config.botPassword
   );
-  await msTeamsConversationService.handleRequest(request, response);
+  try {
+    await msTeamsConversationService.handleRequest(request, response);
+  } catch (e) {
+    // TODO move error handling to middleware
+    console.error('request handling error', e);
+    response.status(500).send({ ok: false, error: (e as Error).message });
+  }
 });
 
 export default app;

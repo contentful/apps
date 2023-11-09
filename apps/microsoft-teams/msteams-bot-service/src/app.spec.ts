@@ -3,7 +3,7 @@ import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import { MsTeamsConversationService } from './services/ms-teams-conversation-service';
 import sinon from 'sinon';
-import { makeMockConversationBot } from '../test/mocks';
+import { installationUpdateAdd, makeMockConversationBot } from '../test/mocks';
 
 chai.use(chaiHttp);
 
@@ -23,7 +23,7 @@ describe('app', () => {
       sinon.stub(MsTeamsConversationService, 'fromBotCredentials').returns(testConversationService);
     });
 
-    const installationUpdateActivity = { type: 'InstallationUpdate', action: 'add' };
+    const installationUpdateActivity = installationUpdateAdd;
 
     it('responds with 200', async () => {
       const response = await chai
