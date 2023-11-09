@@ -9,7 +9,8 @@
     "lint": "eslint --max-warnings=0 .",
     "start": "nodemon",
     "test": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha",
-    "test:ci": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 CI=true mocha",
+    "test:ci": "make test-ci",
+    "test-ci": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 CI=true mocha",
     "test:debug": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha -- --inspect --inspect-brk",
     "test:watch": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --watch --watch-files src --watch-files test"
   },
@@ -27,6 +28,7 @@
     "botframework-connector": "^4.21.0",
     "chai": "^4.3.10",
     "chai-http": "^4.4.0",
+    "dotenv": "^16.3.1",
     "eslint": "^8.53.0",
     "mocha": "^10.2.0",
     "nodemon": "^3.0.1",

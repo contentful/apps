@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  dynamodb:
+    image: amazon/dynamodb-local
+    restart: always
+    volumes:
+      - .:/home/dynamodblocal/data
+    ports:
+      - 8000:8000
+    command: '-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data/'
+
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - 8001:8001
+    environment:
+      DYNAMO_ENDPOINT: http://dynamodb:8000
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+    depends_on:
+      - dynamodb
+
+  dynamodb-initializer:
+    image: amazon/aws-cli
+    container_name: msteams-bot-service-dynamodb-initializer
+    working_dir: /home/dynamodblocal
+    command: >
+      dynamodb create-table
+      --cli-input-json file://sls-apps-msteams-bot-service-storage.json
+      --endpoint-url http://dynamodb:8000
+      || true
+    volumes:
+      - ./schema:/home/dynamodblocal
+    environment:
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+    depends_on:
+      - dynamodb
+
+  msteams-bot-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - '.:/msteams-bot-service'
+    ports:
+      - 3000:3000
+    environment:
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      DYNAMO_TABLE_NAME: sls-apps-msteams-bot-service-storage
+      DYNAMO_ENDPOINT: http://dynamodb:8000
+    depends_on:
+      - dynamodb
+      - dynamodb-admin
