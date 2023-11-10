@@ -13,19 +13,20 @@ const notificationsSection = {
   createButton: 'Create notification',
 };
 
-const contentTypeSection = {
+const contentTypeSelection = {
   title: 'Content type',
   addButton: 'Add content type',
   modalButton: 'Next',
 };
 
-const channelSection = {
+const channelSelection = {
   title: 'Channel',
   addButton: 'Add channel',
   modal: {
     title: 'Add Teams channel',
     description:
-      'Teams channels where the Contentful app has been installed can display notifications. Add channel',
+      'Teams channels where the Contentful app has been installed can display notifications.',
+    link: 'Add channel',
     button: 'Next',
   },
 };
@@ -71,8 +72,8 @@ export {
   headerSection,
   accessSection,
   notificationsSection,
-  contentTypeSection,
-  channelSection,
+  contentTypeSelection,
+  channelSelection,
   actionsSection,
   editModeFooter,
 };

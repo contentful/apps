@@ -1,6 +1,14 @@
 import { useState } from 'react';
-import { Button, FormControl, Modal, Paragraph, Radio, Table } from '@contentful/f36-components';
-import { channelSection } from '@constants/configCopy';
+import {
+  Button,
+  FormControl,
+  Modal,
+  Paragraph,
+  Radio,
+  Table,
+  TextLink,
+} from '@contentful/f36-components';
+import { channelSelection } from '@constants/configCopy';
 import { styles } from './ChannelSelectionModal.styles';
 import { Notification } from '@customTypes/configPage';
 import ModalHeader from '@components/config/ModalHeader/ModalHeader';
@@ -23,10 +31,13 @@ const SelectionModal = (props: Props) => {
     <Modal onClose={onClose} isShown={isShown} allowHeightOverflow size="large">
       {() => (
         <>
-          {/* <Modal.Header title={channelSection.modal.title} onClose={onClose} /> */}
-          <ModalHeader title={channelSection.modal.title} onClose={onClose} />
+          <ModalHeader title={channelSelection.modal.title} onClose={onClose} />
           <Modal.Content>
-            <Paragraph>{channelSection.modal.description}</Paragraph>
+            <Paragraph>
+              {/* TODO: add link to MS Teams App */}
+              {channelSelection.modal.description}{' '}
+              <TextLink>{channelSelection.modal.link}</TextLink>
+            </Paragraph>
             <FormControl as="fieldset" marginBottom="none">
               <Table className={styles.table}>
                 <Table.Body>
@@ -57,7 +68,7 @@ const SelectionModal = (props: Props) => {
                 onClose();
               }}
               isDisabled={!selectedChannelId}>
-              {channelSection.modal.button}
+              {channelSelection.modal.button}
             </Button>
           </Modal.Controls>
         </>

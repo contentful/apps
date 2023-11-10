@@ -5,7 +5,7 @@ import ChannelSelection from '../ChannelSelection/ChannelSelection';
 import ContentfulLogo from '@components/config/ContentfulLogo/ContentfulLogo';
 import NotificationEditModeFooter from '@components/config/NotificationEditModeFooter/NotificationEditModeFooter';
 import { styles } from './NotificationEditMode.styles';
-import { actionsSection, contentTypeSection } from '@constants/configCopy';
+import { actionsSection, contentTypeSelection } from '@constants/configCopy';
 import { Notification } from '@customTypes/configPage';
 
 interface Props {
@@ -43,11 +43,11 @@ const NotificationEditMode = (props: Props) => {
           <Flex marginBottom="spacingS" alignItems="center">
             <ContentfulLogo />
             <Text marginLeft="spacingXs" marginBottom="none" fontWeight="fontWeightMedium">
-              {contentTypeSection.title}
+              {contentTypeSelection.title}
             </Text>
           </Flex>
           <AddButton
-            buttonCopy={contentTypeSection.addButton}
+            buttonCopy={contentTypeSelection.addButton}
             // TODO: update this button to launch the content type selection modal
             handleClick={() => console.log('click')}
           />

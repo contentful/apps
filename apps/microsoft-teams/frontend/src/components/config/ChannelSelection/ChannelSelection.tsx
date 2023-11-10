@@ -2,7 +2,7 @@ import { Box, Flex, IconButton, ModalLauncher, Text, TextInput } from '@contentf
 import AddButton from '@components/config/AddButton/AddButton';
 import SelectionModal from '@components/config/ChannelSelectionModal/ChannelSelectionModal';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
-import { channelSection } from '@constants/configCopy';
+import { channelSelection } from '@constants/configCopy';
 import { Notification } from '@customTypes/configPage';
 import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ChannelSelection.styles';
@@ -33,7 +33,8 @@ const ChannelSelection = (props: Props) => {
   // TODO: update this when we start fetching channel installations
   const getChannelName = (channelId: string) => {
     const channel = mockChannels.find((channel) => channelId === channel.id);
-    return channel?.name ?? '';
+    const displayName = channel ? `${channel.name}, ${channel.teamName}` : '';
+    return displayName;
   };
 
   return (
@@ -41,7 +42,7 @@ const ChannelSelection = (props: Props) => {
       <Flex marginBottom="spacingS" alignItems="center" className={styles.logo}>
         <TeamsLogo />
         <Text marginLeft="spacingXs" marginBottom="none" fontWeight="fontWeightMedium">
-          {channelSection.title}
+          {channelSelection.title}
         </Text>
       </Flex>
       {notification.channelId ? (
@@ -61,7 +62,7 @@ const ChannelSelection = (props: Props) => {
         </TextInput.Group>
       ) : (
         <AddButton
-          buttonCopy={channelSection.addButton}
+          buttonCopy={channelSelection.addButton}
           // TODO: update this button to launch the channel selection modal
           handleClick={openSelectionModal}
         />
