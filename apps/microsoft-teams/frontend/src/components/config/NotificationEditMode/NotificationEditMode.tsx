@@ -1,48 +1,61 @@
+import { useEffect, useState } from 'react';
 import { Box, Checkbox, Flex, FormControl, Text } from '@contentful/f36-components';
 import AddButton from '@components/config/AddButton/AddButton';
+import ChannelSelection from '../ChannelSelection/ChannelSelection';
 import ContentfulLogo from '@components/config/ContentfulLogo/ContentfulLogo';
-import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 import NotificationEditModeFooter from '@components/config/NotificationEditModeFooter/NotificationEditModeFooter';
 import { styles } from './NotificationEditMode.styles';
-import { actionsSection, channelSection, contentTypeSection } from '@constants/configCopy';
+import { actionsSection, contentTypeSelection } from '@constants/configCopy';
+import { Notification } from '@customTypes/configPage';
 
 interface Props {
   index: number;
-  handleDelete: (index: number) => void;
+  deleteNotification: (index: number) => void;
+  updateNotification: (index: number, editedNotification: Partial<Notification>) => void;
+  notification: Notification;
 }
 
 const NotificationEditMode = (props: Props) => {
-  const { index, handleDelete } = props;
+  const { index, deleteNotification, updateNotification, notification } = props;
+
+  const [editedNotification, setEditedNotification] = useState<Notification>(notification);
+
+  useEffect(() => {
+    setEditedNotification(notification);
+  }, [notification]);
+
+  const handleNotificationEdit = (notificationEdit: Partial<Notification>) => {
+    setEditedNotification({ ...editedNotification, ...notificationEdit });
+  };
+
+  const handleDelete = () => {
+    deleteNotification(index);
+  };
+
+  const handleSave = () => {
+    updateNotification(index, editedNotification);
+  };
 
   return (
     <Box className={styles.wrapper}>
       <Box className={styles.main}>
         <Box marginBottom="spacingL">
-          <Flex marginBottom="spacingS">
+          <Flex marginBottom="spacingS" alignItems="center">
             <ContentfulLogo />
             <Text marginLeft="spacingXs" marginBottom="none" fontWeight="fontWeightMedium">
-              {contentTypeSection.title}
+              {contentTypeSelection.title}
             </Text>
           </Flex>
           <AddButton
-            buttonCopy={contentTypeSection.addButton}
+            buttonCopy={contentTypeSelection.addButton}
             // TODO: update this button to launch the content type selection modal
             handleClick={() => console.log('click')}
           />
         </Box>
-        <Box marginBottom="spacingL">
-          <Flex marginBottom="spacingS">
-            <TeamsLogo />
-            <Text marginLeft="spacingXs" marginBottom="none" fontWeight="fontWeightMedium">
-              {channelSection.title}
-            </Text>
-          </Flex>
-          <AddButton
-            buttonCopy={channelSection.addButton}
-            // TODO: update this button to launch the channel selection modal
-            handleClick={() => console.log('click')}
-          />
-        </Box>
+        <ChannelSelection
+          notification={editedNotification}
+          handleNotificationEdit={handleNotificationEdit}
+        />
         <Box>
           <FormControl as="fieldset">
             <FormControl.Label>{actionsSection.title}</FormControl.Label>
@@ -59,7 +72,7 @@ const NotificationEditMode = (props: Props) => {
           </FormControl>
         </Box>
       </Box>
-      <NotificationEditModeFooter index={index} handleDelete={handleDelete} />
+      <NotificationEditModeFooter handleDelete={handleDelete} handleSave={handleSave} />
     </Box>
   );
 };

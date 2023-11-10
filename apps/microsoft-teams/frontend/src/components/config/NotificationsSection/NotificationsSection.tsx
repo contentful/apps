@@ -25,6 +25,12 @@ const NotificationsSection = (props: Props) => {
     dispatch({ type: actions.UPDATE_NOTIFICATIONS, payload: notificationsPayload });
   };
 
+  const updateNotification = (index: number, editedNotification: Partial<Notification>) => {
+    const notificationsPayload = [...notifications];
+    notificationsPayload[index] = { ...notificationsPayload[index], ...editedNotification };
+    dispatch({ type: actions.UPDATE_NOTIFICATIONS, payload: notificationsPayload });
+  };
+
   return (
     <Box className={styles.box}>
       <Subheading>{notificationsSection.title}</Subheading>
@@ -37,7 +43,9 @@ const NotificationsSection = (props: Props) => {
           <NotificationEditMode
             key={`notification-${index}`}
             index={index}
-            handleDelete={deleteNotification}
+            deleteNotification={deleteNotification}
+            updateNotification={updateNotification}
+            notification={notification}
           />
         );
       })}
