@@ -1,29 +1,18 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Checkbox,
-  Flex,
-  FormControl,
-  Text,
-} from '@contentful/f36-components';
+import { Box, Checkbox, Flex, FormControl, Text } from '@contentful/f36-components';
 import AddButton from '@components/config/AddButton/AddButton';
 import ContentfulLogo from '@components/config/ContentfulLogo/ContentfulLogo';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
+import NotificationEditModeFooter from '@components/config/NotificationEditModeFooter/NotificationEditModeFooter';
 import { styles } from './NotificationEditMode.styles';
-import {
-  actionsSection,
-  channelSection,
-  contentTypeSection,
-  editModeFooter,
-} from '@constants/configCopy';
+import { actionsSection, channelSection, contentTypeSection } from '@constants/configCopy';
 
 interface Props {
   index: number;
+  handleDelete: (index: number) => void;
 }
 
 const NotificationEditMode = (props: Props) => {
-  const { index } = props;
+  const { index, handleDelete } = props;
 
   return (
     <Box className={styles.wrapper}>
@@ -70,15 +59,7 @@ const NotificationEditMode = (props: Props) => {
           </FormControl>
         </Box>
       </Box>
-      <Box className={styles.footer}>
-        <Flex justifyContent="flex-end" margin="spacingS">
-          <ButtonGroup variant="spaced" spacing="spacingS">
-            <Button variant="transparent">{editModeFooter.test}</Button>
-            <Button variant="negative">{editModeFooter.delete}</Button>
-            <Button variant="primary">{editModeFooter.save}</Button>
-          </ButtonGroup>
-        </Flex>
-      </Box>
+      <NotificationEditModeFooter index={index} handleDelete={handleDelete} />
     </Box>
   );
 };

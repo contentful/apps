@@ -1,5 +1,10 @@
 import { vi } from 'vitest';
 
+const mockParameters = {
+  tenantId: 'abc-123',
+  notifications: [],
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockSdk: any = {
   app: {
@@ -13,4 +18,4 @@ const mockSdk: any = {
   },
 };
 
-export { mockSdk };
+export { mockSdk, mockParameters };

@@ -6,7 +6,7 @@ const tenantIdValue = 'abc-123';
 
 describe('AccessSection component', () => {
   it('mounts with tenantId provided', () => {
-    render(<AccessSection handleChange={vi.fn()} tenantId={tenantIdValue} />);
+    render(<AccessSection dispatch={vi.fn()} tenantId={tenantIdValue} />);
 
     expect(screen.getByDisplayValue(tenantIdValue)).toBeTruthy();
   });

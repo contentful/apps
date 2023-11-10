@@ -14,7 +14,4 @@ export const styles = {
   main: css({
     padding: `${tokens.spacingM}`,
   }),
-  footer: css({
-    borderTop: `1px solid ${tokens.gray300}`,
-  }),
 };
