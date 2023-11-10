@@ -1,6 +1,6 @@
 import { Box, Flex, IconButton, ModalLauncher, Text, TextInput } from '@contentful/f36-components';
 import AddButton from '@components/config/AddButton/AddButton';
-import SelectionModal from '@components/config/ChannelSelectionModal/ChannelSelectionModal';
+import ChannelSelectionModal from '@components/config/ChannelSelectionModal/ChannelSelectionModal';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 import { channelSelection } from '@constants/configCopy';
 import { Notification } from '@customTypes/configPage';
@@ -17,9 +17,9 @@ interface Props {
 const ChannelSelection = (props: Props) => {
   const { notification, handleNotificationEdit } = props;
 
-  const openSelectionModal = () => {
+  const openChannelSelectionModal = () => {
     return ModalLauncher.open(({ isShown, onClose }) => (
-      <SelectionModal
+      <ChannelSelectionModal
         isShown={isShown}
         onClose={() => {
           onClose(true);
@@ -56,15 +56,14 @@ const ChannelSelection = (props: Props) => {
           <IconButton
             variant="secondary"
             icon={<EditIcon />}
-            onClick={openSelectionModal}
+            onClick={openChannelSelectionModal}
             aria-label="Change selected channel"
           />
         </TextInput.Group>
       ) : (
         <AddButton
           buttonCopy={channelSelection.addButton}
-          // TODO: update this button to launch the channel selection modal
-          handleClick={openSelectionModal}
+          handleClick={openChannelSelectionModal}
         />
       )}
     </Box>

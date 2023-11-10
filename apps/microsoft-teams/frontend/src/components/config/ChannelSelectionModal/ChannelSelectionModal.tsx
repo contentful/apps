@@ -22,7 +22,7 @@ interface Props {
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
 }
 
-const SelectionModal = (props: Props) => {
+const ChannelSelectionModal = (props: Props) => {
   const { isShown, onClose, savedChannelId, handleNotificationEdit } = props;
 
   const [selectedChannelId, setSelectedChannelId] = useState(savedChannelId ?? '');
@@ -77,4 +77,4 @@ const SelectionModal = (props: Props) => {
   );
 };
 
-export default SelectionModal;
+export default ChannelSelectionModal;
