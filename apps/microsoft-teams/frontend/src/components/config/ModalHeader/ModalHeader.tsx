@@ -1,15 +1,15 @@
 import { Box, Flex, IconButton, Subheading } from '@contentful/f36-components';
 import { CloseIcon } from '@contentful/f36-icons';
-import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 import { styles } from './ModalHeader.styles';
 
 interface Props {
   title: string;
   onClose: () => void;
+  icon?: JSX.Element;
 }
 
 const ModalHeader = (props: Props) => {
-  const { title, onClose } = props;
+  const { title, onClose, icon } = props;
 
   return (
     <Flex
@@ -18,7 +18,7 @@ const ModalHeader = (props: Props) => {
       alignItems="center"
       className={styles.header}>
       <Flex alignItems="center">
-        <TeamsLogo />
+        {icon}
         <Subheading marginBottom="none" marginLeft="spacingXs">
           {title}
         </Subheading>

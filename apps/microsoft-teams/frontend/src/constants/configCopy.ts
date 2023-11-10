@@ -16,7 +16,10 @@ const notificationsSection = {
 const contentTypeSelection = {
   title: 'Content type',
   addButton: 'Add content type',
-  modalButton: 'Next',
+  modal: {
+    title: 'Add content type',
+    button: 'Next',
+  },
 };
 
 const channelSelection = {

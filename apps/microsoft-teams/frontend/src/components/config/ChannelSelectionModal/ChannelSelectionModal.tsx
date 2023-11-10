@@ -12,6 +12,7 @@ import { channelSelection } from '@constants/configCopy';
 import { styles } from './ChannelSelectionModal.styles';
 import { Notification } from '@customTypes/configPage';
 import ModalHeader from '@components/config/ModalHeader/ModalHeader';
+import TeamsLogo from '../TeamsLogo/TeamsLogo';
 // TODO: update this when we start fetching channel installations
 import mockChannels from '@test/mocks/mockChannels.json';
 
@@ -31,7 +32,11 @@ const ChannelSelectionModal = (props: Props) => {
     <Modal onClose={onClose} isShown={isShown} allowHeightOverflow size="large">
       {() => (
         <>
-          <ModalHeader title={channelSelection.modal.title} onClose={onClose} />
+          <ModalHeader
+            title={channelSelection.modal.title}
+            onClose={onClose}
+            icon={<TeamsLogo />}
+          />
           <Modal.Content>
             <Paragraph>
               {/* TODO: add link to MS Teams App */}

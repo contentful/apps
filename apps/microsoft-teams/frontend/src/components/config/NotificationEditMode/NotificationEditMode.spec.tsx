@@ -12,6 +12,7 @@ describe('NotificationEditMode component', () => {
         deleteNotification={vi.fn()}
         updateNotification={vi.fn()}
         notification={defaultNotification}
+        contentTypes={[]}
       />
     );
 
