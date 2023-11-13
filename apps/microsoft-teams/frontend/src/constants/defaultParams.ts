@@ -1,21 +1,24 @@
-import { AppInstallationParameters } from '@customTypes/configPage';
+import { AppInstallationParameters, SelectedEvents } from '@customTypes/configPage';
+import { AppEventKey } from './configCopy';
 
 const initialParameters: AppInstallationParameters = {
   tenantId: '',
   notifications: [],
 };
 
+const getDefaultSelectedEvents = () => {
+  const selectedEvents = {} as SelectedEvents;
+  Object.values(AppEventKey).forEach((event) => {
+    selectedEvents[event] = false;
+  });
+  return selectedEvents;
+};
+
 const defaultNotification = {
   channelId: '',
   contentTypeId: '',
   isEnabled: true,
-  selectedEvents: {
-    publish: false,
-    unpublish: false,
-    create: false,
-    delete: false,
-    edit: false,
-  },
+  selectedEvents: getDefaultSelectedEvents(),
 };
 
 export { initialParameters, defaultNotification };

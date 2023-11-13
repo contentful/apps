@@ -36,11 +36,13 @@ const channelSelection = {
   notFound: 'Channel not found',
 };
 
-enum AppEventKey {
+export enum AppEventKey {
   PUBLISH = 'publish',
   UNPUBLISHED = 'unpublish',
   CREATED = 'create',
   DELETED = 'delete',
+  ARCHIVE = 'archive',
+  UNARCHIVE = 'unarchive',
 }
 
 const AppEvents = {
@@ -60,9 +62,17 @@ const AppEvents = {
     id: AppEventKey.DELETED,
     text: 'Delete',
   },
+  [AppEventKey.ARCHIVE]: {
+    id: AppEventKey.ARCHIVE,
+    text: 'Archive',
+  },
+  [AppEventKey.UNARCHIVE]: {
+    id: AppEventKey.UNARCHIVE,
+    text: 'Unarchive',
+  },
 };
 
-const actionsSection = {
+const eventsSelection = {
   title: 'Actions',
   options: AppEvents,
 };
@@ -79,6 +89,6 @@ export {
   notificationsSection,
   contentTypeSelection,
   channelSelection,
-  actionsSection,
+  eventsSelection,
   editModeFooter,
 };

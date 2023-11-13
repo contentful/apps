@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Box, Checkbox, FormControl } from '@contentful/f36-components';
-import ContentTypeSelection from '../ContentTypeSelection/ContentTypeSelection';
-import ChannelSelection from '../ChannelSelection/ChannelSelection';
+import { Box } from '@contentful/f36-components';
+import ContentTypeSelection from '@components/config/ContentTypeSelection/ContentTypeSelection';
+import ChannelSelection from '@components/config/ChannelSelection/ChannelSelection';
+import EventsSelection from '@components/config/EventsSelection/EventsSelection';
 import NotificationEditModeFooter from '@components/config/NotificationEditModeFooter/NotificationEditModeFooter';
 import { styles } from './NotificationEditMode.styles';
-import { actionsSection } from '@constants/configCopy';
 import { Notification } from '@customTypes/configPage';
 import { ContentTypeProps } from 'contentful-management';
 
@@ -49,21 +49,10 @@ const NotificationEditMode = (props: Props) => {
           notification={editedNotification}
           handleNotificationEdit={handleNotificationEdit}
         />
-        <Box>
-          <FormControl as="fieldset">
-            <FormControl.Label>{actionsSection.title}</FormControl.Label>
-            <Checkbox.Group name="checkbox-options">
-              {Object.values(actionsSection.options).map((event) => (
-                <Checkbox
-                  key={event.id}
-                  id={`event-${event.id}-${index}`}
-                  value={`event-${event.id}-${index}`}>
-                  {event.text}
-                </Checkbox>
-              ))}
-            </Checkbox.Group>
-          </FormControl>
-        </Box>
+        <EventsSelection
+          notification={editedNotification}
+          handleNotificationEdit={handleNotificationEdit}
+        />
       </Box>
       <NotificationEditModeFooter handleDelete={handleDelete} handleSave={handleSave} />
     </Box>

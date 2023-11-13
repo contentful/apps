@@ -1,7 +1,7 @@
 import NotificationEditMode from './NotificationEditMode';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { contentTypeSelection, channelSelection, actionsSection } from '@constants/configCopy';
+import { contentTypeSelection, channelSelection, eventsSelection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
 
 describe('NotificationEditMode component', () => {
@@ -18,6 +18,6 @@ describe('NotificationEditMode component', () => {
 
     expect(screen.getByText(contentTypeSelection.title)).toBeTruthy();
     expect(screen.getByText(channelSelection.title)).toBeTruthy();
-    expect(screen.getByText(actionsSection.title)).toBeTruthy();
+    expect(screen.getByText(eventsSelection.title)).toBeTruthy();
   });
 });
