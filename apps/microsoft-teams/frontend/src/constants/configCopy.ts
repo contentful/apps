@@ -20,6 +20,7 @@ const contentTypeSelection = {
     title: 'Add content type',
     button: 'Next',
   },
+  notFound: 'Content type not found',
 };
 
 const channelSelection = {
@@ -32,6 +33,7 @@ const channelSelection = {
     link: 'Add channel',
     button: 'Next',
   },
+  notFound: 'Channel not found',
 };
 
 enum AppEventKey {

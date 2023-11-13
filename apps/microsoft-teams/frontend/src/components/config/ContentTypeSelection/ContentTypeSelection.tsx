@@ -33,7 +33,7 @@ const ContentTypeSelection = (props: Props) => {
 
   const getContentTypeName = (contentTypeId: string) => {
     const contentType = contentTypes.find((contentType) => contentType.sys.id === contentTypeId);
-    return contentType ? contentType.name : '';
+    return contentType ? contentType.name : contentTypeSelection.notFound;
   };
 
   return (

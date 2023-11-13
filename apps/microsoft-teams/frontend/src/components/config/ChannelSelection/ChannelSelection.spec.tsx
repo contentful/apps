@@ -15,7 +15,7 @@ describe('ChannelSelection component', () => {
     unmount();
   });
   it('mounts and renders an input when a channel is selected', () => {
-    render(
+    const { unmount } = render(
       <ChannelSelection
         notification={{ ...defaultNotification, channelId: 'abc-123' }}
         handleNotificationEdit={vi.fn()}
@@ -23,5 +23,6 @@ describe('ChannelSelection component', () => {
     );
 
     expect(screen.getByRole('textbox')).toBeTruthy();
+    unmount();
   });
 });

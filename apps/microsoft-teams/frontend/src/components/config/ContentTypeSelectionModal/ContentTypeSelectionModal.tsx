@@ -20,7 +20,7 @@ const ContentTypeSelectionModal = (props: Props) => {
   const [selectedContentTypeId, setSelectedContentTypeId] = useState(savedContentTypeId ?? '');
 
   return (
-    <Modal onClose={onClose} isShown={isShown} allowHeightOverflow size="large">
+    <Modal onClose={onClose} isShown={isShown} size="large">
       {() => (
         <>
           <ModalHeader title={contentTypeSelection.modal.title} onClose={onClose} />

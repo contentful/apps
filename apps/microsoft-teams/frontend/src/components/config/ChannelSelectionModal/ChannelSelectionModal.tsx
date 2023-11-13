@@ -12,7 +12,7 @@ import { channelSelection } from '@constants/configCopy';
 import { styles } from './ChannelSelectionModal.styles';
 import { Notification } from '@customTypes/configPage';
 import ModalHeader from '@components/config/ModalHeader/ModalHeader';
-import TeamsLogo from '../TeamsLogo/TeamsLogo';
+import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 // TODO: update this when we start fetching channel installations
 import mockChannels from '@test/mocks/mockChannels.json';
 
@@ -29,7 +29,7 @@ const ChannelSelectionModal = (props: Props) => {
   const [selectedChannelId, setSelectedChannelId] = useState(savedChannelId ?? '');
 
   return (
-    <Modal onClose={onClose} isShown={isShown} allowHeightOverflow size="large">
+    <Modal onClose={onClose} isShown={isShown} size="large">
       {() => (
         <>
           <ModalHeader

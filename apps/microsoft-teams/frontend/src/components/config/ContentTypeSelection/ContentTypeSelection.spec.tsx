@@ -19,7 +19,7 @@ describe('ContentTypeSelection component', () => {
     unmount();
   });
   it('mounts and renders an input when a content type is selected', () => {
-    render(
+    const { unmount } = render(
       <ContentTypeSelection
         notification={{ ...defaultNotification, contentTypeId: 'blogPost' }}
         handleNotificationEdit={vi.fn()}
@@ -28,5 +28,6 @@ describe('ContentTypeSelection component', () => {
     );
 
     expect(screen.getByRole('textbox')).toBeTruthy();
+    unmount();
   });
 });
