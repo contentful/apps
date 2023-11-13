@@ -5,10 +5,11 @@ import { editModeFooter } from '@constants/configCopy';
 interface Props {
   handleDelete: () => void;
   handleSave: () => void;
+  isSaveDisabled: boolean;
 }
 
 const NotificationEditModeFooter = (props: Props) => {
-  const { handleDelete, handleSave } = props;
+  const { handleDelete, handleSave, isSaveDisabled } = props;
 
   return (
     <Box className={styles.footer}>
@@ -19,7 +20,7 @@ const NotificationEditModeFooter = (props: Props) => {
           <Button variant="negative" onClick={handleDelete}>
             {editModeFooter.delete}
           </Button>
-          <Button variant="primary" onClick={handleSave}>
+          <Button variant="primary" onClick={handleSave} isDisabled={isSaveDisabled}>
             {editModeFooter.save}
           </Button>
         </ButtonGroup>

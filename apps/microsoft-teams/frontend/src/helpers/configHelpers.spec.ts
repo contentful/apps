@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { getChannelName, getContentTypeName } from './configHelpers';
+import { getChannelName, getContentTypeName, isNotificationReadyToSave } from './configHelpers';
 import mockChannels from '@test/mocks/mockChannels.json';
 import { mockContentType } from '@test/mocks';
 import { channelSelection, contentTypeSelection } from '@constants/configCopy';
+import { defaultNotification } from '@constants/defaultParams';
+import { mockNotification } from '@test/mocks';
 
 describe('getChannelName', () => {
   it('should return the channel name', () => {
@@ -33,5 +35,15 @@ describe('getContentTypeName', () => {
     expect(
       getContentTypeName('test-not-found', [mockContentType], contentTypeSelection.notFound)
     ).toEqual(contentTypeSelection.notFound);
+  });
+});
+
+describe('isNotificationReadyToSave', () => {
+  it('should return false when it is not ready', () => {
+    expect(isNotificationReadyToSave(defaultNotification)).toEqual(false);
+  });
+
+  it('should return true when it is ready', () => {
+    expect(isNotificationReadyToSave(mockNotification)).toEqual(true);
   });
 });
