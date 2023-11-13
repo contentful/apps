@@ -15,3 +15,10 @@ export interface Notification {
 export type SelectedEvents = {
   [K in AppEventKey]: boolean;
 };
+
+export interface TeamsChannel {
+  id: string;
+  name: string;
+  teamId: string;
+  teamName: string;
+}

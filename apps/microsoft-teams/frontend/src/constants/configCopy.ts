@@ -11,6 +11,8 @@ const accessSection = {
 const notificationsSection = {
   title: 'Notifications',
   createButton: 'Create notification',
+  enabledToggle: 'Notifications enabled',
+  editButton: 'Edit',
 };
 
 const contentTypeSelection = {
