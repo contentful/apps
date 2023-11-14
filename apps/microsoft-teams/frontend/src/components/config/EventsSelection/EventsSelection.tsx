@@ -13,13 +13,7 @@ const EventsSelection = (props: Props) => {
 
   // For Checkbox.Group, creates an array of the values of the checkboxes that should be checked
   const selectedEventsArray = useMemo(
-    () =>
-      Object.values(AppEventKey).reduce((acc: string[], event) => {
-        if (!notification.selectedEvents[event]) {
-          return acc;
-        }
-        return [...acc, event];
-      }, []),
+    () => Object.values(AppEventKey).filter((event) => notification.selectedEvents[event]),
     [notification.selectedEvents]
   );
 

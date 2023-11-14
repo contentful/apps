@@ -14,10 +14,12 @@ const useGetContentTypes = () => {
 
   const getAllContentTypes = useCallback(async () => {
     try {
+      // TODO: Implement pagination for content types
       const contentTypesResponse = await sdk.cma.contentType.getMany({});
       setAllContentTypes(contentTypesResponse.items || []);
     } catch (error) {
       console.error(error);
+      throw new Error('Unable to get content types');
     }
   }, [sdk.cma.contentType]);
 

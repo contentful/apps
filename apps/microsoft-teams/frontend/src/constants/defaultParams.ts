@@ -6,12 +6,11 @@ const initialParameters: AppInstallationParameters = {
   notifications: [],
 };
 
-const getDefaultSelectedEvents = () => {
-  const selectedEvents = {} as SelectedEvents;
-  Object.values(AppEventKey).forEach((event) => {
-    selectedEvents[event] = false;
-  });
-  return selectedEvents;
+const getDefaultSelectedEvents = (): SelectedEvents => {
+  return Object.values(AppEventKey).reduce(
+    (selectedEvents, event) => ({ ...selectedEvents, [event]: false }),
+    {} as SelectedEvents
+  );
 };
 
 const defaultNotification = {
