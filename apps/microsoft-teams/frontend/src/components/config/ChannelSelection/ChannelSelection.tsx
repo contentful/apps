@@ -33,7 +33,9 @@ const ChannelSelection = (props: Props) => {
   // TODO: update this when we start fetching channel installations
   const getChannelName = (channelId: string) => {
     const channel = mockChannels.find((channel) => channelId === channel.id);
-    const displayName = channel ? `${channel.name}, ${channel.teamName}` : '';
+    const displayName = channel
+      ? `${channel.name}, ${channel.teamName}`
+      : channelSelection.notFound;
     return displayName;
   };
 

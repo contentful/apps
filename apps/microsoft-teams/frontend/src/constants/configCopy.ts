@@ -16,7 +16,11 @@ const notificationsSection = {
 const contentTypeSelection = {
   title: 'Content type',
   addButton: 'Add content type',
-  modalButton: 'Next',
+  modal: {
+    title: 'Add content type',
+    button: 'Next',
+  },
+  notFound: 'Content type not found',
 };
 
 const channelSelection = {
@@ -29,13 +33,16 @@ const channelSelection = {
     link: 'Add channel',
     button: 'Next',
   },
+  notFound: 'Channel not found',
 };
 
-enum AppEventKey {
+export enum AppEventKey {
   PUBLISH = 'publish',
   UNPUBLISHED = 'unpublish',
   CREATED = 'create',
   DELETED = 'delete',
+  ARCHIVE = 'archive',
+  UNARCHIVE = 'unarchive',
 }
 
 const AppEvents = {
@@ -55,9 +62,17 @@ const AppEvents = {
     id: AppEventKey.DELETED,
     text: 'Delete',
   },
+  [AppEventKey.ARCHIVE]: {
+    id: AppEventKey.ARCHIVE,
+    text: 'Archive',
+  },
+  [AppEventKey.UNARCHIVE]: {
+    id: AppEventKey.UNARCHIVE,
+    text: 'Unarchive',
+  },
 };
 
-const actionsSection = {
+const eventsSelection = {
   title: 'Actions',
   options: AppEvents,
 };
@@ -74,6 +89,6 @@ export {
   notificationsSection,
   contentTypeSelection,
   channelSelection,
-  actionsSection,
+  eventsSelection,
   editModeFooter,
 };

@@ -1,22 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Box, Checkbox, Flex, FormControl, Text } from '@contentful/f36-components';
-import AddButton from '@components/config/AddButton/AddButton';
-import ChannelSelection from '../ChannelSelection/ChannelSelection';
-import ContentfulLogo from '@components/config/ContentfulLogo/ContentfulLogo';
+import { Box } from '@contentful/f36-components';
+import ContentTypeSelection from '@components/config/ContentTypeSelection/ContentTypeSelection';
+import ChannelSelection from '@components/config/ChannelSelection/ChannelSelection';
+import EventsSelection from '@components/config/EventsSelection/EventsSelection';
 import NotificationEditModeFooter from '@components/config/NotificationEditModeFooter/NotificationEditModeFooter';
 import { styles } from './NotificationEditMode.styles';
-import { actionsSection, contentTypeSelection } from '@constants/configCopy';
 import { Notification } from '@customTypes/configPage';
+import { ContentTypeProps } from 'contentful-management';
 
 interface Props {
   index: number;
   deleteNotification: (index: number) => void;
   updateNotification: (index: number, editedNotification: Partial<Notification>) => void;
   notification: Notification;
+  contentTypes: ContentTypeProps[];
 }
 
 const NotificationEditMode = (props: Props) => {
-  const { index, deleteNotification, updateNotification, notification } = props;
+  const { index, deleteNotification, updateNotification, notification, contentTypes } = props;
 
   const [editedNotification, setEditedNotification] = useState<Notification>(notification);
 
@@ -39,38 +40,19 @@ const NotificationEditMode = (props: Props) => {
   return (
     <Box className={styles.wrapper}>
       <Box className={styles.main}>
-        <Box marginBottom="spacingL">
-          <Flex marginBottom="spacingS" alignItems="center">
-            <ContentfulLogo />
-            <Text marginLeft="spacingXs" marginBottom="none" fontWeight="fontWeightMedium">
-              {contentTypeSelection.title}
-            </Text>
-          </Flex>
-          <AddButton
-            buttonCopy={contentTypeSelection.addButton}
-            // TODO: update this button to launch the content type selection modal
-            handleClick={() => console.log('click')}
-          />
-        </Box>
+        <ContentTypeSelection
+          notification={editedNotification}
+          handleNotificationEdit={handleNotificationEdit}
+          contentTypes={contentTypes}
+        />
         <ChannelSelection
           notification={editedNotification}
           handleNotificationEdit={handleNotificationEdit}
         />
-        <Box>
-          <FormControl as="fieldset">
-            <FormControl.Label>{actionsSection.title}</FormControl.Label>
-            <Checkbox.Group name="checkbox-options">
-              {Object.values(actionsSection.options).map((event) => (
-                <Checkbox
-                  key={event.id}
-                  id={`event-${event.id}-${index}`}
-                  value={`event-${event.id}-${index}`}>
-                  {event.text}
-                </Checkbox>
-              ))}
-            </Checkbox.Group>
-          </FormControl>
-        </Box>
+        <EventsSelection
+          notification={editedNotification}
+          handleNotificationEdit={handleNotificationEdit}
+        />
       </Box>
       <NotificationEditModeFooter handleDelete={handleDelete} handleSave={handleSave} />
     </Box>

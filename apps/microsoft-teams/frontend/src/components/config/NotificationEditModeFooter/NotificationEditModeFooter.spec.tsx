@@ -28,11 +28,14 @@ describe('NotificationEditModeFooter component', () => {
   });
   it('handles clicking the save button', () => {
     const mockHandleSave = vi.fn();
-    render(<NotificationEditModeFooter handleSave={mockHandleSave} handleDelete={vi.fn()} />);
+    const { unmount } = render(
+      <NotificationEditModeFooter handleSave={mockHandleSave} handleDelete={vi.fn()} />
+    );
 
     const saveButton = screen.getByText(editModeFooter.save);
     saveButton.click();
 
     expect(mockHandleSave).toHaveBeenCalled();
+    unmount();
   });
 });

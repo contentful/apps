@@ -16,6 +16,11 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
+  cma: {
+    contentType: {
+      getMany: vi.fn().mockReturnValueOnce({}),
+    },
+  },
 };
 
 export { mockSdk, mockParameters };

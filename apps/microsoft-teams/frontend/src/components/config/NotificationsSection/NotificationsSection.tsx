@@ -6,6 +6,7 @@ import AddButton from '@components/config/AddButton/AddButton';
 import NotificationEditMode from '@components/config/NotificationEditMode/NotificationEditMode';
 import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
+import useGetContentTypes from '@hooks/useGetContentTypes';
 
 interface Props {
   notifications: Notification[];
@@ -14,6 +15,8 @@ interface Props {
 
 const NotificationsSection = (props: Props) => {
   const { notifications, dispatch } = props;
+
+  const contentTypes = useGetContentTypes();
 
   const createNewNotification = () => {
     dispatch({ type: actions.ADD_NOTIFICATION });
@@ -46,6 +49,7 @@ const NotificationsSection = (props: Props) => {
             deleteNotification={deleteNotification}
             updateNotification={updateNotification}
             notification={notification}
+            contentTypes={contentTypes}
           />
         );
       })}
