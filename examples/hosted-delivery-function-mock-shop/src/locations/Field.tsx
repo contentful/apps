@@ -14,6 +14,8 @@ const Field = () => {
   const value = sdk.entry.fields['productId'].getValue();
 
   useEffect(() => {
+    // Since we run in an iframe,
+    // we need to set the height of the iframe.
     sdk.window.updateHeight(100);
   }, [sdk.window]);
 

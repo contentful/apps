@@ -6,7 +6,7 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 import type { ProductCollection, Products } from '../typings';
 import * as queries from './queries';
 
-export type HookResult = {
+type HookResult = {
   products?: Products;
   isLoading: boolean;
 };

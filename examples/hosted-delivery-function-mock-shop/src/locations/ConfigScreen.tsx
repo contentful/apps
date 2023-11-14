@@ -3,7 +3,7 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Heading, Form, Flex, TextInput, FormControl } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
-export interface AppInstallationParameters {
+interface AppInstallationParameters {
   apiEndpoint?: string;
 }
 
@@ -19,8 +19,8 @@ const ConfigScreen = () => {
     };
   }, [parameters, sdk]);
 
-  function updateApiEndpoint(e: React.ChangeEvent) {
-    const value = (e.target as HTMLInputElement).value;
+  function updateApiEndpoint(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
     setParameters({ apiEndpoint: value });
   }
 

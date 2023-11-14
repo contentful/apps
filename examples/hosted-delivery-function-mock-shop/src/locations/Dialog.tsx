@@ -13,6 +13,7 @@ const Dialog = () => {
   const { isLoading, products } = useProducts();
 
   useEffect(() => {
+    // Since we run in an iframe, we need to set the height of the iframe.
     sdk.window.updateHeight(500);
   }, [sdk.window]);
 

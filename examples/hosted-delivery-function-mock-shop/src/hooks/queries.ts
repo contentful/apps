@@ -1,6 +1,6 @@
 import { gql } from 'graphql-request';
 
-export const productFragment = gql`
+const productFragment = gql`
   fragment ProductFragment on Product {
     id
     title
