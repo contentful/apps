@@ -1,15 +1,24 @@
-import { DeliveryFunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
+import type {
+  DeliveryFunctionEventHandler,
+  DeliveryFunctionEventType,
+} from '@contentful/node-apps-toolkit';
 
-const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event) => {
-  const fields = event.fields.map(({ contentTypeId, field }) => {
-    return {
-      contentTypeId,
-      fieldId: field.id,
-      graphQLOutputType: 'Product',
-      graphQLQueryField: 'product',
-      graphQLQueryArguments: { id: '' },
-    };
-  });
+type InstallationParameters = {
+  apiEndpoint: string;
+};
+
+type EventHandler = DeliveryFunctionEventHandler<DeliveryFunctionEventType, InstallationParameters>;
+type QueryHandler = DeliveryFunctionEventHandler<'graphql.query', InstallationParameters>;
+type FieldMappingHandler = DeliveryFunctionEventHandler<'graphql.field.mapping'>;
+
+const fieldMappingHandler: FieldMappingHandler = (event) => {
+  const fields = event.fields.map(({ contentTypeId, field }) => ({
+    contentTypeId,
+    fieldId: field.id,
+    graphQLOutputType: 'Product',
+    graphQLQueryField: 'product',
+    graphQLQueryArguments: { id: '' },
+  }));
 
   return {
     namespace: 'MockShopTutorial',
@@ -17,7 +26,7 @@ const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event) => {
   };
 };
 
-const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
+const queryHandler: QueryHandler = async (event, context) => {
   const { apiEndpoint } = context.appInstallationParameters;
   const response = await fetch(apiEndpoint, {
     body: JSON.stringify({
