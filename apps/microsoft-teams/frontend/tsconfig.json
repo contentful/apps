@@ -18,9 +18,10 @@
     "paths": {
       "@components/*": ["./src/components/*"],
       "@constants/*": ["./src/constants/*"],
+      "@customTypes/*": ["./src/customTypes/*"],
+      "@helpers/*": ["./src/helpers/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@locations/*": ["./src/locations/*"],
-      "@customTypes/*": ["./src/customTypes/*"],
       "@test/*": ["./test/*"]
     }
   },

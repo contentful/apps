@@ -93,14 +93,4 @@ const mockGetManyContentType = {
   total: 1,
 };
 
-const mockSelectedContentTypes = new Set(['page', 'article']);
-
-const mockEditorInterface = {
-  page: {
-    sidebar: {
-      position: 1,
-    },
-  },
-};
-
-export { mockContentType, mockGetManyContentType, mockSelectedContentTypes, mockEditorInterface };
+export { mockContentType, mockGetManyContentType };
