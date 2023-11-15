@@ -23,8 +23,8 @@ interface Props {
 
 interface State {
   smartlingEntry: SmartlingContentfulEntry | null;
-  token: string;
-  refreshToken: string;
+  token: string | null;
+  refreshToken: string | null;
   showAllSubs: boolean;
   generalError: boolean;
 }
@@ -156,8 +156,8 @@ function formatSmartlingEntry(entry: SmartlingContentfulEntry): SmartlingContent
 export default class Sidebar extends React.Component<Props, State> {
   state: State = {
     smartlingEntry: null,
-    token: window.localStorage.getItem('token') || '',
-    refreshToken: window.localStorage.getItem('refreshToken') || '',
+    token: window.localStorage.getItem('token') ?? null,
+    refreshToken: window.localStorage.getItem('refreshToken') ?? null,
     showAllSubs: false,
     generalError: false,
   };
@@ -169,10 +169,10 @@ export default class Sidebar extends React.Component<Props, State> {
   }
 
   runAuthFlow = async (tryRefreshOnly = false) => {
-    const refresh = await smartlingClient.refresh(this.state.refreshToken);
+    const refresh = await smartlingClient.refresh(this.state.refreshToken as string);
 
     if (tryRefreshOnly && refresh.failed) {
-      this.setState({ token: '', refreshToken: '' });
+      this.setState({ token: null, refreshToken: null });
     } else if (refresh.failed) {
       const smartlingWindow = window.open('/openauth', '', 'height=600,width=600,top=50,left=50');
 
@@ -185,6 +185,9 @@ export default class Sidebar extends React.Component<Props, State> {
 
         if (token) {
           this.setState({ token, refreshToken }, this.getJobs);
+
+          window.localStorage.setItem('token', token);
+          window.localStorage.setItem('refreshToken', refreshToken);
 
           if (smartlingWindow) {
             smartlingWindow.close();
@@ -203,6 +206,11 @@ export default class Sidebar extends React.Component<Props, State> {
   getJobs = async () => {
     const { sdk, projectId } = this.props;
     const { token } = this.state;
+
+    if (!token) {
+      this.runAuthFlow(true);
+      return;
+    }
 
     const res = await smartlingClient.getLinkedJobs(token, sdk.ids.space, projectId, sdk.ids.entry);
 
