@@ -10,6 +10,7 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.38.3",
     "emotion": "10.0.27",
+    "lodash": "^4.17.21",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.10.2",
     "@testing-library/react": "14.0.0",
+    "@types/lodash": "^4.14.201",
     "@types/node": "16.18.38",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",

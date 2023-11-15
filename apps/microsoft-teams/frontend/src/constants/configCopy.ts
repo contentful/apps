@@ -82,6 +82,7 @@ const eventsSelection = {
 const editModeFooter = {
   test: 'Test',
   delete: 'Delete',
+  cancel: 'Cancel',
   save: 'Save',
 };
 

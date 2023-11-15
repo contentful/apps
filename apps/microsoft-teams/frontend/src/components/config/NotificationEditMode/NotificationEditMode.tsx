@@ -7,7 +7,7 @@ import NotificationEditModeFooter from '@components/config/NotificationEditModeF
 import { styles } from './NotificationEditMode.styles';
 import { Notification } from '@customTypes/configPage';
 import { ContentTypeProps } from 'contentful-management';
-import { isNotificationReadyToSave } from '@helpers/configHelpers';
+import { isNotificationReadyToSave, isNotificationDefault } from '@helpers/configHelpers';
 
 interface Props {
   index: number;
@@ -48,6 +48,10 @@ const NotificationEditMode = (props: Props) => {
     setNotificationIndexToEdit(null);
   };
 
+  const handleCancel = () => {
+    setNotificationIndexToEdit(null);
+  };
+
   return (
     <Box className={styles.wrapper}>
       <Box className={styles.main}>
@@ -66,9 +70,11 @@ const NotificationEditMode = (props: Props) => {
         />
       </Box>
       <NotificationEditModeFooter
+        handleCancel={handleCancel}
+        isCancelDisabled={isNotificationDefault(editedNotification)}
         handleDelete={handleDelete}
         handleSave={handleSave}
-        isSaveDisabled={!isNotificationReadyToSave(editedNotification)}
+        isSaveDisabled={!isNotificationReadyToSave(editedNotification, notification)}
       />
     </Box>
   );

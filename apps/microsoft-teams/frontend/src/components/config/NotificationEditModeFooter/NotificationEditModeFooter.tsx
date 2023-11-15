@@ -3,13 +3,15 @@ import { styles } from './NotificationEditModeFooter.styles';
 import { editModeFooter } from '@constants/configCopy';
 
 interface Props {
+  handleCancel: () => void;
+  isCancelDisabled: boolean;
   handleDelete: () => void;
   handleSave: () => void;
   isSaveDisabled: boolean;
 }
 
 const NotificationEditModeFooter = (props: Props) => {
-  const { handleDelete, handleSave, isSaveDisabled } = props;
+  const { handleCancel, isCancelDisabled, handleDelete, handleSave, isSaveDisabled } = props;
 
   return (
     <Box className={styles.footer}>
@@ -19,6 +21,9 @@ const NotificationEditModeFooter = (props: Props) => {
           {/* TODO: implement modal to confirm deletion */}
           <Button variant="negative" onClick={handleDelete}>
             {editModeFooter.delete}
+          </Button>
+          <Button variant="secondary" onClick={handleCancel} isDisabled={isCancelDisabled}>
+            {editModeFooter.cancel}
           </Button>
           <Button variant="primary" onClick={handleSave} isDisabled={isSaveDisabled}>
             {editModeFooter.save}

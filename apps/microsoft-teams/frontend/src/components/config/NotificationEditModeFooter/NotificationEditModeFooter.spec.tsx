@@ -7,6 +7,8 @@ describe('NotificationEditModeFooter component', () => {
   it('mounts with correct button copy', () => {
     const { unmount } = render(
       <NotificationEditModeFooter
+        handleCancel={vi.fn()}
+        isCancelDisabled={false}
         handleSave={vi.fn()}
         handleDelete={vi.fn()}
         isSaveDisabled={false}
@@ -22,6 +24,8 @@ describe('NotificationEditModeFooter component', () => {
     const mockHandleDelete = vi.fn();
     const { unmount } = render(
       <NotificationEditModeFooter
+        handleCancel={vi.fn()}
+        isCancelDisabled={false}
         handleSave={vi.fn()}
         handleDelete={mockHandleDelete}
         isSaveDisabled={false}
@@ -38,6 +42,8 @@ describe('NotificationEditModeFooter component', () => {
     const mockHandleSave = vi.fn();
     const { unmount, rerender } = render(
       <NotificationEditModeFooter
+        handleCancel={vi.fn()}
+        isCancelDisabled={false}
         handleSave={mockHandleSave}
         handleDelete={vi.fn()}
         isSaveDisabled={false}
@@ -52,6 +58,8 @@ describe('NotificationEditModeFooter component', () => {
     const mockHandleSaveDisabled = vi.fn();
     rerender(
       <NotificationEditModeFooter
+        handleCancel={vi.fn()}
+        isCancelDisabled={false}
         handleSave={mockHandleSaveDisabled}
         handleDelete={vi.fn()}
         isSaveDisabled={true}
@@ -62,6 +70,41 @@ describe('NotificationEditModeFooter component', () => {
     saveButtonDisabled.click();
 
     expect(mockHandleSaveDisabled).not.toHaveBeenCalled();
+
+    unmount();
+  });
+  it('handles clicking the cancel button when it is enabled', () => {
+    const mockHandleCancel = vi.fn();
+    const { unmount, rerender } = render(
+      <NotificationEditModeFooter
+        handleCancel={mockHandleCancel}
+        isCancelDisabled={false}
+        handleSave={vi.fn()}
+        handleDelete={vi.fn()}
+        isSaveDisabled={false}
+      />
+    );
+
+    const cancelButton = screen.getByText(editModeFooter.cancel);
+    cancelButton.click();
+
+    expect(mockHandleCancel).toHaveBeenCalled();
+
+    const mockHandleCancelDisabled = vi.fn();
+    rerender(
+      <NotificationEditModeFooter
+        handleCancel={vi.fn()}
+        isCancelDisabled={false}
+        handleSave={mockHandleCancelDisabled}
+        handleDelete={vi.fn()}
+        isSaveDisabled={true}
+      />
+    );
+
+    const cancelButtonDisabled = screen.getByText(editModeFooter.cancel);
+    cancelButtonDisabled.click();
+
+    expect(mockHandleCancelDisabled).not.toHaveBeenCalled();
 
     unmount();
   });

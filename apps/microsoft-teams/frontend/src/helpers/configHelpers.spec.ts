@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { getChannelName, getContentTypeName, isNotificationReadyToSave } from './configHelpers';
+import {
+  getChannelName,
+  getContentTypeName,
+  isNotificationReadyToSave,
+  isNotificationDefault,
+} from './configHelpers';
 import mockChannels from '@test/mocks/mockChannels.json';
 import { mockContentType } from '@test/mocks';
 import { channelSelection, contentTypeSelection } from '@constants/configCopy';
@@ -40,10 +45,20 @@ describe('getContentTypeName', () => {
 
 describe('isNotificationReadyToSave', () => {
   it('should return false when it is not ready', () => {
-    expect(isNotificationReadyToSave(defaultNotification)).toEqual(false);
+    expect(isNotificationReadyToSave(defaultNotification, defaultNotification)).toEqual(false);
   });
 
   it('should return true when it is ready', () => {
-    expect(isNotificationReadyToSave(mockNotification)).toEqual(true);
+    expect(isNotificationReadyToSave(mockNotification, defaultNotification)).toEqual(true);
+  });
+});
+
+describe('isNotificationDefault', () => {
+  it('should return false when edited notification is not the same as default', () => {
+    expect(isNotificationDefault(mockNotification)).toEqual(false);
+  });
+
+  it('should return true when edited notification is the same as default', () => {
+    expect(isNotificationDefault(defaultNotification)).toEqual(true);
   });
 });
