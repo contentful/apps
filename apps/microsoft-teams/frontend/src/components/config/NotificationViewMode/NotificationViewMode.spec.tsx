@@ -13,6 +13,7 @@ describe('NotificationViewMode component', () => {
         notification={defaultNotification}
         contentTypes={[]}
         handleEdit={vi.fn()}
+        isEditDisabled={false}
       />
     );
 
@@ -29,6 +30,7 @@ describe('NotificationViewMode component', () => {
         notification={defaultNotification}
         contentTypes={[]}
         handleEdit={vi.fn()}
+        isEditDisabled={false}
       />
     );
 
@@ -38,15 +40,16 @@ describe('NotificationViewMode component', () => {
     expect(mockUpdateNotification).toHaveBeenCalled();
     unmount();
   });
-  it('handles clicking the edit button', () => {
+  it('handles clicking the edit button when it is enabled', () => {
     const mockHandleEdit = vi.fn();
-    const { unmount } = render(
+    const { unmount, rerender } = render(
       <NotificationViewMode
         index={0}
         updateNotification={vi.fn()}
         notification={defaultNotification}
         contentTypes={[]}
         handleEdit={mockHandleEdit}
+        isEditDisabled={false}
       />
     );
 
@@ -54,6 +57,24 @@ describe('NotificationViewMode component', () => {
     editButton.click();
 
     expect(mockHandleEdit).toHaveBeenCalled();
+
+    const mockHandleEditDisabled = vi.fn();
+    rerender(
+      <NotificationViewMode
+        index={0}
+        updateNotification={vi.fn()}
+        notification={defaultNotification}
+        contentTypes={[]}
+        handleEdit={mockHandleEdit}
+        isEditDisabled={true}
+      />
+    );
+
+    const editButtonDisabled = screen.getByText(notificationsSection.editButton);
+    editButtonDisabled.click();
+
+    expect(mockHandleEditDisabled).not.toHaveBeenCalled();
+
     unmount();
   });
 });

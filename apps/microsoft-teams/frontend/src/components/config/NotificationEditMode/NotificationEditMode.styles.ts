@@ -4,7 +4,7 @@ import tokens from '@contentful/f36-tokens';
 export const styles = {
   wrapper: css({
     height: 'auto',
-    margin: `${tokens.spacingXl} auto`,
+    margin: `${tokens.spacingXs} auto`,
     maxWidth: '900px',
     backgroundColor: tokens.colorWhite,
     borderRadius: '6px',

@@ -71,6 +71,7 @@ const NotificationsSection = (props: Props) => {
               notification={notification}
               contentTypes={contentTypes}
               handleEdit={() => setNotificationIndexToEdit(index)}
+              isEditDisabled={notificationIndexToEdit !== null}
             />
           );
         }

@@ -17,6 +17,7 @@ describe('NotificationEditModeFooter component', () => {
 
     expect(screen.getByText(editModeFooter.test)).toBeTruthy();
     expect(screen.getByText(editModeFooter.delete)).toBeTruthy();
+    expect(screen.getByText(editModeFooter.cancel)).toBeTruthy();
     expect(screen.getByText(editModeFooter.save)).toBeTruthy();
     unmount();
   });

@@ -17,10 +17,12 @@ interface Props {
   notification: Notification;
   contentTypes: ContentTypeProps[];
   handleEdit: () => void;
+  isEditDisabled: boolean;
 }
 
 const NotificationViewMode = (props: Props) => {
-  const { index, notification, updateNotification, contentTypes, handleEdit } = props;
+  const { index, notification, updateNotification, contentTypes, handleEdit, isEditDisabled } =
+    props;
 
   return (
     <Box className={styles.wrapper}>
@@ -48,7 +50,11 @@ const NotificationViewMode = (props: Props) => {
             onChange={() => updateNotification(index, { isEnabled: !notification.isEnabled })}
           />
           <Box marginLeft="spacingXs">
-            <Button variant="secondary" size="small" onClick={handleEdit}>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={handleEdit}
+              isDisabled={isEditDisabled}>
               {notificationsSection.editButton}
             </Button>
           </Box>
