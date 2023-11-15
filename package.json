@@ -13,7 +13,7 @@
     "prettier": "^2.8.8"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap --no-ci --since master --include-dependencies",
+    "bootstrap": "lerna bootstrap --no-ci --include-dependencies",
     "bootstrap:ci": "lerna bootstrap --ci --concurrency=1 --since master --include-dependencies",
     "bootstrap:ci-deploy": "lerna bootstrap --ci --concurrency=1",
     "clean": "lerna clean",
