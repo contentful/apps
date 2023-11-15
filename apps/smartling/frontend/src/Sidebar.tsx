@@ -207,10 +207,10 @@ export default class Sidebar extends React.Component<Props, State> {
     const { sdk, projectId } = this.props;
     const { token } = this.state;
 
-    // if (!token) {
-    //   this.runAuthFlow(true);
-    //   return;
-    // }
+    if (!token) {
+      this.runAuthFlow(true);
+      return;
+    }
 
     const res = await smartlingClient.getLinkedJobs(
       token!,
