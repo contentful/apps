@@ -212,12 +212,7 @@ export default class Sidebar extends React.Component<Props, State> {
       return;
     }
 
-    const res = await smartlingClient.getLinkedJobs(
-      token!,
-      sdk.ids.space,
-      projectId,
-      sdk.ids.entry
-    );
+    const res = await smartlingClient.getLinkedJobs(token, sdk.ids.space, projectId, sdk.ids.entry);
 
     if (res.code === 'AUTHENTICATION_ERROR') {
       this.runAuthFlow(true);
