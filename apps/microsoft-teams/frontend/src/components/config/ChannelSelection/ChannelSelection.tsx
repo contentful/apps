@@ -8,6 +8,7 @@ import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ChannelSelection.styles';
 // TODO: update this when we start fetching channel installations
 import mockChannels from '@test/mocks/mockChannels.json';
+import { getChannelName } from '@helpers/configHelpers';
 
 interface Props {
   notification: Notification;
@@ -30,15 +31,6 @@ const ChannelSelection = (props: Props) => {
     ));
   };
 
-  // TODO: update this when we start fetching channel installations
-  const getChannelName = (channelId: string) => {
-    const channel = mockChannels.find((channel) => channelId === channel.id);
-    const displayName = channel
-      ? `${channel.name}, ${channel.teamName}`
-      : channelSelection.notFound;
-    return displayName;
-  };
-
   return (
     <Box marginBottom="spacingL">
       <Flex marginBottom="spacingS" alignItems="center" className={styles.logo}>
@@ -52,7 +44,7 @@ const ChannelSelection = (props: Props) => {
           <TextInput
             id="selected-channel"
             isDisabled={true}
-            value={getChannelName(notification.channelId)}
+            value={getChannelName(notification.channelId, mockChannels, channelSelection.notFound)}
             className={styles.input}
           />
           <IconButton

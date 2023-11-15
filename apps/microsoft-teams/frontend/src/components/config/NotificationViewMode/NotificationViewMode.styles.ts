@@ -10,8 +10,6 @@ export const styles = {
     borderRadius: '6px',
     border: `1px solid ${tokens.gray300}`,
     zIndex: 2,
-  }),
-  main: css({
     padding: `${tokens.spacingM}`,
   }),
 };

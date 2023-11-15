@@ -7,6 +7,7 @@ import { Notification } from '@customTypes/configPage';
 import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ContentTypeSelection.styles';
 import { ContentTypeProps } from 'contentful-management';
+import { getContentTypeName } from '@helpers/configHelpers';
 
 interface Props {
   notification: Notification;
@@ -31,11 +32,6 @@ const ContentTypeSelection = (props: Props) => {
     ));
   };
 
-  const getContentTypeName = (contentTypeId: string) => {
-    const contentType = contentTypes.find((contentType) => contentType.sys.id === contentTypeId);
-    return contentType ? contentType.name : contentTypeSelection.notFound;
-  };
-
   return (
     <Box marginBottom="spacingL">
       <Flex marginBottom="spacingS" alignItems="center">
@@ -49,7 +45,11 @@ const ContentTypeSelection = (props: Props) => {
           <TextInput
             id="selected-content-type"
             isDisabled={true}
-            value={getContentTypeName(notification.contentTypeId)}
+            value={getContentTypeName(
+              notification.contentTypeId,
+              contentTypes,
+              contentTypeSelection.notFound
+            )}
             className={styles.input}
           />
           <IconButton

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Box } from '@contentful/f36-components';
 import ContentTypeSelection from '@components/config/ContentTypeSelection/ContentTypeSelection';
 import ChannelSelection from '@components/config/ChannelSelection/ChannelSelection';
@@ -7,6 +7,7 @@ import NotificationEditModeFooter from '@components/config/NotificationEditModeF
 import { styles } from './NotificationEditMode.styles';
 import { Notification } from '@customTypes/configPage';
 import { ContentTypeProps } from 'contentful-management';
+import { isNotificationReadyToSave, isNotificationDefault } from '@helpers/configHelpers';
 
 interface Props {
   index: number;
@@ -14,10 +15,18 @@ interface Props {
   updateNotification: (index: number, editedNotification: Partial<Notification>) => void;
   notification: Notification;
   contentTypes: ContentTypeProps[];
+  setNotificationIndexToEdit: Dispatch<SetStateAction<number | null>>;
 }
 
 const NotificationEditMode = (props: Props) => {
-  const { index, deleteNotification, updateNotification, notification, contentTypes } = props;
+  const {
+    index,
+    deleteNotification,
+    updateNotification,
+    notification,
+    contentTypes,
+    setNotificationIndexToEdit,
+  } = props;
 
   const [editedNotification, setEditedNotification] = useState<Notification>(notification);
 
@@ -31,10 +40,16 @@ const NotificationEditMode = (props: Props) => {
 
   const handleDelete = () => {
     deleteNotification(index);
+    setNotificationIndexToEdit(null);
   };
 
   const handleSave = () => {
     updateNotification(index, editedNotification);
+    setNotificationIndexToEdit(null);
+  };
+
+  const handleCancel = () => {
+    setNotificationIndexToEdit(null);
   };
 
   return (
@@ -54,7 +69,13 @@ const NotificationEditMode = (props: Props) => {
           handleNotificationEdit={handleNotificationEdit}
         />
       </Box>
-      <NotificationEditModeFooter handleDelete={handleDelete} handleSave={handleSave} />
+      <NotificationEditModeFooter
+        handleCancel={handleCancel}
+        isCancelDisabled={isNotificationDefault(editedNotification)}
+        handleDelete={handleDelete}
+        handleSave={handleSave}
+        isSaveDisabled={!isNotificationReadyToSave(editedNotification, notification)}
+      />
     </Box>
   );
 };

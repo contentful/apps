@@ -11,6 +11,8 @@ const accessSection = {
 const notificationsSection = {
   title: 'Notifications',
   createButton: 'Create notification',
+  enabledToggle: 'Notifications enabled',
+  editButton: 'Edit',
 };
 
 const contentTypeSelection = {
@@ -80,6 +82,7 @@ const eventsSelection = {
 const editModeFooter = {
   test: 'Test',
   delete: 'Delete',
+  cancel: 'Cancel',
   save: 'Save',
 };
 
