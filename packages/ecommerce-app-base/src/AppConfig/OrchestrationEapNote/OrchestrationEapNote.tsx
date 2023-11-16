@@ -25,7 +25,7 @@ export const OrchestrationEapNote = ({ hideOrchestrationEapNote, name }: Props) 
       className={styles.eapNote}
       withCloseButton={true}
       onClose={() => setHideOrchestrationEapNote(true)}
-      title="This app supports External references“">
+      title="This app supports External references">
       Contentful now supports unified delivery of content from both Contentful and {name} available
       on our GraphQL API.
       <br />
