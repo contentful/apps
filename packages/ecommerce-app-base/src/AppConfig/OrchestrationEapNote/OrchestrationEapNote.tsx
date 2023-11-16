@@ -25,20 +25,20 @@ export const OrchestrationEapNote = ({ hideOrchestrationEapNote, name }: Props) 
       className={styles.eapNote}
       withCloseButton={true}
       onClose={() => setHideOrchestrationEapNote(true)}
-      title="Resolve content with Third party orchestration">
-      Deliver {name} content effortlessly within Contentful using our Third party orchestration
-      feature. Resolve content referenced from {name} using the Contentful GraphQL API.
+      title="This app supports External references“">
+      Contentful now supports unified delivery of content from both Contentful and {name} available
+      on our GraphQL API.
       <br />
       <br />
-      Learn more and get started today with our{' '}
+      Learn more and get started today with our Introduction to{' '}
       <TextLink
         variant="primary"
         target="_blank"
         icon={<ExternalLinkIcon />}
         alignIcon="end"
         rel="noopener noreferrer"
-        href={`https://www.contentful.com/help/third-party-orchestration/`}>
-        Introduction to Third party orchestration
+        href={`https://www.contentful.com/help/external-references/`}>
+        External references
       </TextLink>
     </Note>
   );
