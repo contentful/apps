@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.4.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.35...@contentful/ecommerce-app-base@3.4.0) (2023-11-17)
+
+### Features
+
+- change EAP copy [MONET-1607] ([#5480](https://github.com/contentful/apps/issues/5480)) ([1e3757b](https://github.com/contentful/apps/commit/1e3757bf31a017d8e595dcebcd96fac0820db347))
+
 ## [3.3.35](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.3.34...@contentful/ecommerce-app-base@3.3.35) (2023-11-13)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
