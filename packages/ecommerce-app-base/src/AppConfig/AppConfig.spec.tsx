@@ -184,16 +184,16 @@ describe('AppConfig', () => {
     const sdk = makeSdkMock();
     renderComponent(sdk, true);
     const result = await waitFor(() =>
-      screen.getByText(/Resolve content with Third party orchestration/)
+      screen.getByText(/The Some app app supports External references/)
     );
-    expect(result).toHaveTextContent('Resolve content with Third party orchestration');
+    expect(result).toHaveTextContent('The Some app app supports External references');
   });
 
   it('does not render EAP orchestration note if it is set to false', async () => {
     const sdk = makeSdkMock();
     renderComponent(sdk, false);
     const result = await waitFor(() =>
-      screen.queryByText(/Resolve content with Third party orchestration/)
+      screen.queryByText(/The Some app app supports External references/)
     );
     expect(result).toBeNull();
   });
