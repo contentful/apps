@@ -1,5 +1,4 @@
 import { Note as F36Note, Flex, TextLink } from '@contentful/forma-36-react-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 const Note = () => {
   return (
