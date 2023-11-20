@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ExtensionUI } from '@gatsby-cloud-pkg/gatsby-cms-extension-base';
 
-import { Spinner, HelpText, Icon } from '@contentful/forma-36-react-components';
+import { Spinner, HelpText, Icon, Flex } from '@contentful/forma-36-react-components';
+import Note from './components/note/Note';
 
 const STATUS_STYLE = { textAlign: 'center', color: '#7f7c82' };
 const ICON_STYLE = { marginBottom: '-4px' };
@@ -255,6 +256,9 @@ export default class Sidebar extends React.Component {
       <div className="extension">
         <div className="flexcontainer">
           <>
+            <Flex>
+              <Note />
+            </Flex>
             <ExtensionUI
               disabled={this.state.buttonDisabled}
               disablePreviewOpen={!!contentSyncUrl}
