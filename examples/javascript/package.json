@@ -40,7 +40,7 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.13.1",
     "@testing-library/jest-dom": "5.17.0",
-    "@testing-library/react": "14.1.0",
+    "@testing-library/react": "14.1.2",
     "cross-env": "7.0.3"
   },
   "homepage": "."
