@@ -10,11 +10,13 @@ import {
   Accordion,
   AccordionItem,
   FormLabel,
+  Flex,
 } from '@contentful/forma-36-react-components';
 import GatsbyIcon from '../GatsbyIcon';
 import { isValidUrl } from '../utils';
 import ContentTypesPanel from './ContentTypesPanel';
 import styles from '../styles';
+import Note from '../components/note/Note';
 
 function editorInterfacesToEnabledContentTypes(eis, appId) {
   const findAppWidget = (item) => item.widgetNamespace === 'app' && item.widgetId === appId;
@@ -270,6 +272,9 @@ export class AppConfig extends React.Component {
       <>
         <div className={styles.background} />
         <div className={styles.body}>
+          <Flex>
+            <Note />
+          </Flex>
           <div className={styles.section}>
             <Typography>
               <Heading>About Gatsby Cloud</Heading>
