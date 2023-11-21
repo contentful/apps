@@ -15,3 +15,10 @@ export interface AppActionCallResponseError {
 }
 
 export type AppActionCallResponse<T> = AppActionCallResponseSuccess<T> | AppActionCallResponseError;
+
+export type Channel = {
+  id: string;
+  name: string;
+  teamId: string;
+  teamName: string;
+};
