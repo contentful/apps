@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Note, TextLink } from '@contentful/f36-components';
 
 import tokens from '@contentful/f36-tokens';
