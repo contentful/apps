@@ -165,6 +165,7 @@ describe('AppConfig', () => {
       parameters: {
         projectKey: 'some-key',
         clientId: '12345',
+        hideOrchestrationEapNote: false,
         clientSecret: 'some-secret',
         apiEndpoint: 'some-endpoint',
         authApiEndpoint: 'some-auth-endpoint',
