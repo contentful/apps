@@ -13,19 +13,18 @@ const styles = {
 
 interface Props {
   name: string;
-  hideOrchestrationEapNote: boolean;
+  setHideOrchestrationEapNote: (hideOrchestrationEapNote: boolean) => void;
 }
 
-export const OrchestrationEapNote = ({ hideOrchestrationEapNote, name }: Props) => {
-  const [, setHideOrchestrationEapNote] = useState(false);
+export const OrchestrationEapNote = ({ setHideOrchestrationEapNote, name }: Props) => {
   const title = `The ${name} app supports External references`;
+
+  const handleClose = () => {
+    setHideOrchestrationEapNote(true);
+  };
+
   return (
-    <Note
-      style={{ display: hideOrchestrationEapNote ? 'none' : 'grid' }}
-      className={styles.eapNote}
-      withCloseButton={true}
-      onClose={() => setHideOrchestrationEapNote(true)}
-      title={title}>
+    <Note className={styles.eapNote} withCloseButton={true} onClose={handleClose} title={title}>
       Contentful now supports unified delivery of content from both Contentful and {name} available
       on our GraphQL API.
       <br />

@@ -186,7 +186,22 @@ describe('AppConfig', () => {
     const result = await waitFor(() =>
       screen.getByText(/The Some app app supports External references/)
     );
+
     expect(result).toHaveTextContent('The Some app app supports External references');
+  });
+
+  it('hides the EAP orchestration note  note on click', async () => {
+    const sdk = makeSdkMock();
+    renderComponent(sdk, true);
+
+    const note = await screen.findByTestId('cf-ui-note-close');
+
+    fireEvent.click(note);
+
+    await waitFor(() => {
+      const hiddenNote = screen.queryByText(/The Some app app supports External references/);
+      expect(hiddenNote).not.toBeInTheDocument();
+    });
   });
 
   it('does not render EAP orchestration note if it is set to false', async () => {

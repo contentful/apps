@@ -145,14 +145,15 @@ export default class AppConfig extends React.Component<Props, State> {
         parameters: toInputParameters(this.props.parameterDefinitions, parameters),
         fieldSkuTypes: (parameters as { skuTypes?: FieldsSkuTypes })?.skuTypes ?? {},
         appReady: true,
-        hideOrchestrationEapNote: false,
+        hideOrchestrationEapNote: parameters?.hideOrchestrationEapNote || false,
       },
       () => app.setReady()
     );
   };
 
   onAppConfigure = () => {
-    const { parameters, contentTypes, selectedFields, fieldSkuTypes } = this.state;
+    const { parameters, contentTypes, selectedFields, fieldSkuTypes, hideOrchestrationEapNote } =
+      this.state;
     const error = this.props.validateParameters(parameters);
 
     if (error) {
@@ -167,7 +168,7 @@ export default class AppConfig extends React.Component<Props, State> {
     }
 
     return {
-      parameters: updatedParameters,
+      parameters: { ...updatedParameters, hideOrchestrationEapNote },
       targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
     };
   };
@@ -258,9 +259,9 @@ export default class AppConfig extends React.Component<Props, State> {
             </Form>
           </>
         )}
-        {isInOrchestrationEAP && (
+        {isInOrchestrationEAP && !hideOrchestrationEapNote && (
           <OrchestrationEapNote
-            hideOrchestrationEapNote={hideOrchestrationEapNote}
+            setHideOrchestrationEapNote={this.setHideOrchestrationEapNote.bind(this)}
             name={this.props.name}
           />
         )}
