@@ -42,7 +42,7 @@
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.1.2",
     "@tsconfig/create-react-app": "2.0.1",
-    "@types/node": "16.18.63",
+    "@types/node": "16.18.64",
     "@types/react": "18.2.38",
     "@types/react-dom": "18.2.16",
     "cross-env": "7.0.3",
