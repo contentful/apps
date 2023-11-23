@@ -261,7 +261,7 @@ export default class AppConfig extends React.Component<Props, State> {
         )}
         {isInOrchestrationEAP && !hideOrchestrationEapNote && (
           <OrchestrationEapNote
-            setHideOrchestrationEapNote={this.setHideOrchestrationEapNote.bind(this)}
+            onClose={() => this.setHideOrchestrationEapNote(true)}
             name={this.props.name}
           />
         )}
