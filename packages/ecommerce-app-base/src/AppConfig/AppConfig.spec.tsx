@@ -191,7 +191,7 @@ describe('AppConfig', () => {
     expect(result).toHaveTextContent('The Some app app supports External references');
   });
 
-  it('hides the EAP orchestration note note on click', async () => {
+  it('hides the EAP orchestration note on click', async () => {
     const sdk = makeSdkMock();
     renderComponent(sdk, true);
 
