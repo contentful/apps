@@ -47,9 +47,6 @@ export default class Config extends React.Component<Props, State> {
       this.loadEditorInterfaces(),
     ]);
 
-    console.log('JIRA app sdk>>>', app);
-    console.log('JIRA app config>>>', config);
-
     app.onConfigure(this.configure);
 
     if (config) {
@@ -59,12 +56,10 @@ export default class Config extends React.Component<Props, State> {
         (r) => r.id === resourceId
       );
       const { project } = await JiraClient.getProjectById(resourceId, this.props.token, projectId);
-      console.log('JIRA project>>>', project);
 
       // only use the saved config if the resource exists
       // we can assume the projectId is also invalid if it doesn't exist
       if (configResourceExistsInResources) {
-        console.log('JIRA config exists>>>', configResourceExistsInResources);
         // eslint-disable-next-line react/no-did-mount-set-state
         this.setState({
           checkedResource: resourceId,
@@ -72,10 +67,8 @@ export default class Config extends React.Component<Props, State> {
         });
       }
 
-      console.log('JIRA reached setReady functionality in if block');
       app.setReady();
     } else {
-      console.log('JIRA reached setReady functionality in else block');
       app.setReady();
     }
   }
