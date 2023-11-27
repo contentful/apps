@@ -18,7 +18,6 @@ const NotificationEditModeFooter = (props: Props) => {
       <Flex justifyContent="flex-end" margin="spacingS">
         <ButtonGroup variant="spaced" spacing="spacingS">
           <Button variant="transparent">{editModeFooter.test}</Button>
-          {/* TODO: implement modal to confirm deletion */}
           <Button variant="negative" onClick={handleDelete}>
             {editModeFooter.delete}
           </Button>
