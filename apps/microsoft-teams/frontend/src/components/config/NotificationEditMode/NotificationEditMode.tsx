@@ -1,9 +1,10 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { Box } from '@contentful/f36-components';
+import { Box, ModalLauncher } from '@contentful/f36-components';
 import ContentTypeSelection from '@components/config/ContentTypeSelection/ContentTypeSelection';
 import ChannelSelection from '@components/config/ChannelSelection/ChannelSelection';
 import EventsSelection from '@components/config/EventsSelection/EventsSelection';
 import NotificationEditModeFooter from '@components/config/NotificationEditModeFooter/NotificationEditModeFooter';
+import DeleteModal from '@components/config/DeleteModal/DeleteModal';
 import { styles } from './NotificationEditMode.styles';
 import { Notification } from '@customTypes/configPage';
 import { ContentTypeProps } from 'contentful-management';
@@ -39,8 +40,21 @@ const NotificationEditMode = (props: Props) => {
   };
 
   const handleDelete = () => {
-    deleteNotification(index);
-    setNotificationIndexToEdit(null);
+    ModalLauncher.open(({ isShown, onClose }) => {
+      return (
+        <DeleteModal
+          isShown={isShown}
+          handleCancel={() => {
+            onClose(true);
+          }}
+          handleDelete={() => {
+            onClose(true);
+            deleteNotification(index);
+            setNotificationIndexToEdit(null);
+          }}
+        />
+      );
+    });
   };
 
   const handleSave = () => {
