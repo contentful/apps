@@ -1,12 +1,12 @@
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
-import { handler } from './list-channels';
-import { makeMockAppActionCallContext } from '../../test/mocks';
+import sinonChai from 'sinon-chai';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
+import { handler } from './list-channels';
 import { AppActionCallResponseSuccess, Channel } from '../types';
-import { mockChannels } from '../../test/fixtures/mockChannelts';
-import sinonChai from 'sinon-chai';
+import { makeMockAppActionCallContext } from '../../test/mocks';
+import { mockChannels } from '../../test/fixtures/mockChannels';
 
 chai.use(sinonChai);
 
