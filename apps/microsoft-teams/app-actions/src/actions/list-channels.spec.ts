@@ -38,9 +38,12 @@ describe('listChannels.handler', () => {
   });
 
   it('returns the ok result', async () => {
-    const result = (await handler({ tenantId }, context)) as AppActionCallResponseSuccess<
-      Channel[]
-    >;
+    const result = (await handler(
+      {
+        tenantId,
+      },
+      context
+    )) as AppActionCallResponseSuccess<Channel[]>;
 
     expect(result).to.have.property('ok', true);
     expect(result).to.have.property('data', mockChannels);

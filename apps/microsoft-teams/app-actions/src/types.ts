@@ -18,7 +18,7 @@ export type AppActionCallResponse<T> = AppActionCallResponseSuccess<T> | AppActi
 
 export type Channel = {
   id: string;
-  name: string;
-  teamId: string;
-  teamName: string;
+  tenantId: string;
+  conversationType: string;
+  isGroup: boolean;
 };

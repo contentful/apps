@@ -16,6 +16,23 @@
           "type": "Symbol"
         }
       ]
+    },
+    {
+      "id": "msteamsListChannels",
+      "name": "List channels for msteams installations",
+      "category": "Custom",
+      "description": "This action returns returna a list of channels fr installations.",
+      "type": "function",
+      "path": "actions/list-channels.js",
+      "entryFile": "./app-actions/src/actions/list-channles.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "tenantId",
+          "name": "tenantId",
+          "type": "Symbol"
+        }
+      ]
     }
   ]
 }
