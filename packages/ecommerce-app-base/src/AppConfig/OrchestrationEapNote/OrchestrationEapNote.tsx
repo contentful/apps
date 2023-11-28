@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { Note, TextLink } from '@contentful/f36-components';
 
 import tokens from '@contentful/f36-tokens';
@@ -13,19 +12,14 @@ const styles = {
 
 interface Props {
   name: string;
-  hideOrchestrationEapNote: boolean;
+  onClose: () => void;
 }
 
-export const OrchestrationEapNote = ({ hideOrchestrationEapNote, name }: Props) => {
-  const [, setHideOrchestrationEapNote] = useState(false);
+export const OrchestrationEapNote = ({ name, onClose }: Props) => {
   const title = `The ${name} app supports External references`;
+
   return (
-    <Note
-      style={{ display: hideOrchestrationEapNote ? 'none' : 'grid' }}
-      className={styles.eapNote}
-      withCloseButton={true}
-      onClose={() => setHideOrchestrationEapNote(true)}
-      title={title}>
+    <Note className={styles.eapNote} withCloseButton={true} onClose={onClose} title={title}>
       Contentful now supports unified delivery of content from both Contentful and {name} available
       on our GraphQL API.
       <br />
