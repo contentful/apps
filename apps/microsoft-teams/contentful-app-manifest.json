@@ -24,7 +24,7 @@
       "description": "This action returns a list of channels for installations.",
       "type": "function",
       "path": "actions/list-channels.js",
-      "entryFile": "./app-actions/src/actions/list-channles.ts",
+      "entryFile": "./app-actions/src/actions/list-channels.ts",
       "allowNetworks": [],
       "parameters": [
         {
