@@ -13,10 +13,11 @@ interface Props {
   notification: Notification;
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
   contentTypes: ContentTypeProps[];
+  contentTypeConfigLink: string;
 }
 
 const ContentTypeSelection = (props: Props) => {
-  const { notification, handleNotificationEdit, contentTypes } = props;
+  const { notification, handleNotificationEdit, contentTypes, contentTypeConfigLink } = props;
 
   const openContentTypeSelectionModal = () => {
     return ModalLauncher.open(({ isShown, onClose }) => (
@@ -28,6 +29,7 @@ const ContentTypeSelection = (props: Props) => {
         handleNotificationEdit={handleNotificationEdit}
         savedContentTypeId={notification.contentTypeId}
         contentTypes={contentTypes}
+        contentTypeConfigLink={contentTypeConfigLink}
       />
     ));
   };

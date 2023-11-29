@@ -11,6 +11,7 @@ describe('ContentTypeSelection component', () => {
         notification={defaultNotification}
         handleNotificationEdit={vi.fn()}
         contentTypes={[]}
+        contentTypeConfigLink=""
       />
     );
 
@@ -24,6 +25,7 @@ describe('ContentTypeSelection component', () => {
         notification={{ ...defaultNotification, contentTypeId: 'blogPost' }}
         handleNotificationEdit={vi.fn()}
         contentTypes={[]}
+        contentTypeConfigLink=""
       />
     );
 

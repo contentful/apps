@@ -17,6 +17,7 @@ interface Props {
   notification: Notification;
   contentTypes: ContentTypeProps[];
   setNotificationIndexToEdit: Dispatch<SetStateAction<number | null>>;
+  contentTypeConfigLink: string;
 }
 
 const NotificationEditMode = (props: Props) => {
@@ -27,6 +28,7 @@ const NotificationEditMode = (props: Props) => {
     notification,
     contentTypes,
     setNotificationIndexToEdit,
+    contentTypeConfigLink,
   } = props;
 
   const [editedNotification, setEditedNotification] = useState<Notification>(notification);
@@ -73,6 +75,7 @@ const NotificationEditMode = (props: Props) => {
           notification={editedNotification}
           handleNotificationEdit={handleNotificationEdit}
           contentTypes={contentTypes}
+          contentTypeConfigLink={contentTypeConfigLink}
         />
         <ChannelSelection
           notification={editedNotification}

@@ -8,6 +8,7 @@ import NotificationViewMode from '@components/config/NotificationViewMode/Notifi
 import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
 import useGetContentTypes from '@hooks/useGetContentTypes';
+import useGetLinkForContentTypeConfig from '@hooks/useGetContentTypeConfigLink';
 
 interface Props {
   notifications: Notification[];
@@ -18,6 +19,7 @@ const NotificationsSection = (props: Props) => {
   const { notifications, dispatch } = props;
   const [notificationIndexToEdit, setNotificationIndexToEdit] = useState<number | null>(null);
   const contentTypes = useGetContentTypes();
+  const contentTypeConfigLink = useGetLinkForContentTypeConfig();
 
   const createNewNotification = () => {
     dispatch({ type: actions.ADD_NOTIFICATION });
@@ -64,6 +66,7 @@ const NotificationsSection = (props: Props) => {
               notification={notification}
               contentTypes={contentTypes}
               setNotificationIndexToEdit={setNotificationIndexToEdit}
+              contentTypeConfigLink={contentTypeConfigLink}
             />
           );
         } else {

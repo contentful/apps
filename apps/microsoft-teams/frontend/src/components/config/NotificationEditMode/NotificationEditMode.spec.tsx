@@ -14,6 +14,7 @@ describe('NotificationEditMode component', () => {
         notification={defaultNotification}
         contentTypes={[]}
         setNotificationIndexToEdit={vi.fn()}
+        contentTypeConfigLink=""
       />
     );
 

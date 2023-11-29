@@ -7,6 +7,7 @@ import { mockSdk, mockGetManyContentType } from '@test/mocks';
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useGetContentTypes: () => mockGetManyContentType,
+  useGetLinkForContentTypeConfig: () => '',
 }));
 
 describe('NotificationsSection component', () => {

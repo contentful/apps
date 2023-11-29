@@ -28,6 +28,10 @@ const contentTypeSelection = {
   modal: {
     title: 'Add content type',
     button: 'Next',
+    link: 'Add content type',
+    emptyHeading: 'No content types',
+    emptyContent:
+      'There are no content types available. If you create one, you will be able to assign it to the app from this screen. Add content type',
   },
   notFound: 'Content type not found',
 };
