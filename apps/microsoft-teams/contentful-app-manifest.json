@@ -21,7 +21,7 @@
       "id": "msteamsListChannels",
       "name": "List channels for msteams installations",
       "category": "Custom",
-      "description": "This action returns returna a list of channels fr installations.",
+      "description": "This action returns a list of channels for installations.",
       "type": "function",
       "path": "actions/list-channels.js",
       "entryFile": "./app-actions/src/actions/list-channles.ts",
