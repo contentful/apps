@@ -17,7 +17,6 @@
     "esbuild": "^0.19.2"
   },
   "devDependencies": {
-    "@tsconfig/node18": "^18.2.2",
     "contentful-management": "^11.3.0",
     "ts-node": "^10.9.1"
   }
