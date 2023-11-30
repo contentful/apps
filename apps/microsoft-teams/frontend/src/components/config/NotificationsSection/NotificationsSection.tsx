@@ -16,9 +16,7 @@ interface Props {
 
 const NotificationsSection = (props: Props) => {
   const { notifications, dispatch } = props;
-
   const [notificationIndexToEdit, setNotificationIndexToEdit] = useState<number | null>(null);
-
   const contentTypes = useGetContentTypes();
 
   const createNewNotification = () => {
@@ -29,13 +27,19 @@ const NotificationsSection = (props: Props) => {
   const deleteNotification = (index: number) => {
     const notificationsPayload = [...notifications];
     notificationsPayload.splice(index, 1);
-    dispatch({ type: actions.UPDATE_NOTIFICATIONS, payload: notificationsPayload });
+    dispatch({
+      type: actions.UPDATE_NOTIFICATIONS,
+      payload: notificationsPayload,
+    });
   };
 
   const updateNotification = (index: number, editedNotification: Partial<Notification>) => {
     const notificationsPayload = [...notifications];
     notificationsPayload[index] = { ...notificationsPayload[index], ...editedNotification };
-    dispatch({ type: actions.UPDATE_NOTIFICATIONS, payload: notificationsPayload });
+    dispatch({
+      type: actions.UPDATE_NOTIFICATIONS,
+      payload: notificationsPayload,
+    });
   };
 
   return (

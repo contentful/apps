@@ -14,8 +14,7 @@
   },
   "dependencies": {
     "@contentful/app-scripts": "1.13.0",
-    "esbuild": "^0.19.2",
-    "sharp": "^0.32.5"
+    "esbuild": "^0.19.2"
   },
   "devDependencies": {
     "contentful-management": "^11.3.0",
