@@ -1,15 +1,18 @@
 import { ChangeEvent, Dispatch } from 'react';
 import {
   Box,
+  Flex,
   FormControl,
   Heading,
   Paragraph,
   Subheading,
   TextInput,
 } from '@contentful/f36-components';
-import { headerSection, accessSection } from '@constants/configCopy';
+import { headerSection, accessSection, appDeepLink } from '@constants/configCopy';
 import { styles } from './AccessSection.styles';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
+import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
+import { HyperLink } from '@contentful/integration-component-library';
 
 interface Props {
   tenantId: string;
@@ -36,6 +39,16 @@ const AccessSection = (props: Props) => {
         <FormControl.Label>{accessSection.fieldName}</FormControl.Label>
         <TextInput value={tenantId} type="text" name="tenantId" onChange={handleChange} />
       </FormControl>
+      <Flex marginBottom="spacingS" alignItems="center" className={styles.logo}>
+        <TeamsLogo />
+        <Box marginLeft="spacingXs">
+          <HyperLink
+            body={accessSection.teamsAppInfo}
+            substring={accessSection.teamsAppLink}
+            href={appDeepLink}
+          />
+        </Box>
+      </Flex>
     </Box>
   );
 };

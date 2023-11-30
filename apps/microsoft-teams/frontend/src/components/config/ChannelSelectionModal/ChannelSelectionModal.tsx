@@ -8,11 +8,13 @@ import {
   Table,
   TextLink,
 } from '@contentful/f36-components';
-import { channelSelection } from '@constants/configCopy';
+import { appDeepLink, channelSelection } from '@constants/configCopy';
 import { styles } from './ChannelSelectionModal.styles';
 import { Notification } from '@customTypes/configPage';
 import ModalHeader from '@components/config/ModalHeader/ModalHeader';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
+import EmptyState from '@components/config/EmptyState/EmptyState';
+import EmptyFishbowl from '@components/config/EmptyState/EmptyFishbowl';
 // TODO: update this when we start fetching channel installations
 import mockChannels from '@test/mocks/mockChannels.json';
 
@@ -25,44 +27,56 @@ interface Props {
 
 const ChannelSelectionModal = (props: Props) => {
   const { isShown, onClose, savedChannelId, handleNotificationEdit } = props;
+  // TODO: update this when we start fetching channel installations
+  const channels = mockChannels;
 
   const [selectedChannelId, setSelectedChannelId] = useState(savedChannelId ?? '');
+
+  const { title, button, link, emptyContent, emptyHeading, description } = channelSelection.modal;
 
   return (
     <Modal onClose={onClose} isShown={isShown} size="large">
       {() => (
         <>
-          <ModalHeader
-            title={channelSelection.modal.title}
-            onClose={onClose}
-            icon={<TeamsLogo />}
-          />
+          <ModalHeader title={title} onClose={onClose} icon={<TeamsLogo />} />
           <Modal.Content>
-            <Paragraph>
-              {/* TODO: add link to MS Teams App */}
-              {channelSelection.modal.description}{' '}
-              <TextLink>{channelSelection.modal.link}</TextLink>
-            </Paragraph>
-            <FormControl as="fieldset" marginBottom="none">
-              <Table className={styles.table}>
-                <Table.Body>
-                  {/* TODO: update this when we start fetching channel installations */}
-                  {mockChannels.map((channel) => (
-                    <Table.Row key={channel.id}>
-                      <Table.Cell>
-                        <Radio
-                          id={channel.id}
-                          isChecked={selectedChannelId === channel.id}
-                          onChange={() => setSelectedChannelId(channel.id)}
-                          helpText={channel.teamName}>
-                          {channel.name}
-                        </Radio>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
-            </FormControl>
+            {channels.length ? (
+              <>
+                <Paragraph>
+                  {description}{' '}
+                  <TextLink href={appDeepLink} target="_blank" rel="noopener noreferrer">
+                    {link}
+                  </TextLink>
+                </Paragraph>
+                <FormControl as="fieldset" marginBottom="none">
+                  <Table className={styles.table}>
+                    <Table.Body>
+                      {channels.map((channel) => (
+                        <Table.Row key={channel.id}>
+                          <Table.Cell>
+                            <Radio
+                              id={channel.id}
+                              isChecked={selectedChannelId === channel.id}
+                              onChange={() => setSelectedChannelId(channel.id)}
+                              helpText={channel.teamName}>
+                              {channel.name}
+                            </Radio>
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table>
+                </FormControl>
+              </>
+            ) : (
+              <EmptyState
+                image={<EmptyFishbowl />}
+                heading={emptyHeading}
+                body={emptyContent}
+                linkSubstring={link}
+                linkHref={appDeepLink}
+              />
+            )}
           </Modal.Content>
           <Modal.Controls>
             <Button
@@ -73,7 +87,7 @@ const ChannelSelectionModal = (props: Props) => {
                 onClose();
               }}
               isDisabled={!selectedChannelId}>
-              {channelSelection.modal.button}
+              {button}
             </Button>
           </Modal.Controls>
         </>
