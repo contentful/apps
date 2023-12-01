@@ -1,3 +1,4 @@
+import { useContext } from 'react';
 import { Box, Flex, IconButton, ModalLauncher, Text, TextInput } from '@contentful/f36-components';
 import AddButton from '@components/config/AddButton/AddButton';
 import ContentTypeSelectionModal from '@components/config/ContentTypeSelectionModal/ContentTypeSelectionModal';
@@ -6,18 +7,17 @@ import { contentTypeSelection } from '@constants/configCopy';
 import { Notification } from '@customTypes/configPage';
 import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ContentTypeSelection.styles';
-import { ContentTypeProps } from 'contentful-management';
 import { getContentTypeName } from '@helpers/configHelpers';
+import { ContentTypeContext } from '@context/ContentTypeProvider';
 
 interface Props {
   notification: Notification;
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
-  contentTypes: ContentTypeProps[];
-  contentTypeConfigLink: string;
 }
 
 const ContentTypeSelection = (props: Props) => {
-  const { notification, handleNotificationEdit, contentTypes, contentTypeConfigLink } = props;
+  const { notification, handleNotificationEdit } = props;
+  const { contentTypes, contentTypeConfigLink } = useContext(ContentTypeContext);
 
   const openContentTypeSelectionModal = () => {
     return ModalLauncher.open(({ isShown, onClose }) => (
