@@ -18,8 +18,11 @@ const accessSection = {
 const notificationsSection = {
   title: 'Notifications',
   createButton: 'Create notification',
-  enabledToggle: 'Notifications enabled',
-  editButton: 'Edit',
+  enabledToggle: 'Notifications activated',
+  edit: 'Edit',
+  delete: 'Delete',
+  confirmDelete:
+    'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
 };
 
 const contentTypeSelection = {
@@ -95,9 +98,6 @@ const eventsSelection = {
 
 const editModeFooter = {
   test: 'Test',
-  delete: 'Delete',
-  confirmDelete:
-    'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
   cancel: 'Cancel',
   save: 'Save',
 };

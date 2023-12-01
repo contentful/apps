@@ -1,6 +1,15 @@
 import { useContext } from 'react';
 import { ContentTypeContext } from '@context/ContentTypeProvider';
-import { Box, Button, Flex, Subheading, Paragraph, Switch } from '@contentful/f36-components';
+import {
+  Box,
+  IconButton,
+  Flex,
+  Menu,
+  Subheading,
+  Paragraph,
+  Switch,
+} from '@contentful/f36-components';
+import { MoreHorizontalIcon } from '@contentful/f36-icons';
 import { styles } from './NotificationViewMode.styles';
 import { getContentTypeName, getChannelName } from '@helpers/configHelpers';
 import { Notification } from '@customTypes/configPage';
@@ -17,11 +26,13 @@ interface Props {
   updateNotification: (index: number, editedNotification: Partial<Notification>) => void;
   notification: Notification;
   handleEdit: () => void;
-  isEditDisabled: boolean;
+  isMenuDisabled: boolean;
+  handleDelete: () => void;
 }
 
 const NotificationViewMode = (props: Props) => {
-  const { index, notification, updateNotification, handleEdit, isEditDisabled } = props;
+  const { index, notification, updateNotification, handleEdit, isMenuDisabled, handleDelete } =
+    props;
   const { contentTypes } = useContext(ContentTypeContext);
 
   return (
@@ -50,13 +61,21 @@ const NotificationViewMode = (props: Props) => {
             onChange={() => updateNotification(index, { isEnabled: !notification.isEnabled })}
           />
           <Box marginLeft="spacingXs">
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={handleEdit}
-              isDisabled={isEditDisabled}>
-              {notificationsSection.editButton}
-            </Button>
+            <Menu>
+              <Menu.Trigger>
+                <IconButton
+                  testId="menu-button"
+                  variant="transparent"
+                  icon={<MoreHorizontalIcon />}
+                  aria-label="toggle menu"
+                  isDisabled={isMenuDisabled}
+                />
+              </Menu.Trigger>
+              <Menu.List>
+                <Menu.Item onClick={handleEdit}>{notificationsSection.edit}</Menu.Item>
+                <Menu.Item onClick={handleDelete}>{notificationsSection.delete}</Menu.Item>
+              </Menu.List>
+            </Menu>
           </Box>
         </Flex>
       </Flex>

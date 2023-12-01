@@ -10,33 +10,13 @@ describe('NotificationEditModeFooter component', () => {
         handleCancel={vi.fn()}
         isCancelDisabled={false}
         handleSave={vi.fn()}
-        handleDelete={vi.fn()}
         isSaveDisabled={false}
       />
     );
 
     expect(screen.getByText(editModeFooter.test)).toBeTruthy();
-    expect(screen.getByText(editModeFooter.delete)).toBeTruthy();
     expect(screen.getByText(editModeFooter.cancel)).toBeTruthy();
     expect(screen.getByText(editModeFooter.save)).toBeTruthy();
-    unmount();
-  });
-  it('handles clicking the delete button', () => {
-    const mockHandleDelete = vi.fn();
-    const { unmount } = render(
-      <NotificationEditModeFooter
-        handleCancel={vi.fn()}
-        isCancelDisabled={false}
-        handleSave={vi.fn()}
-        handleDelete={mockHandleDelete}
-        isSaveDisabled={false}
-      />
-    );
-
-    const deleteButton = screen.getByText(editModeFooter.delete);
-    deleteButton.click();
-
-    expect(mockHandleDelete).toHaveBeenCalled();
     unmount();
   });
   it('handles clicking the save button when it is enabled', () => {
@@ -46,7 +26,6 @@ describe('NotificationEditModeFooter component', () => {
         handleCancel={vi.fn()}
         isCancelDisabled={false}
         handleSave={mockHandleSave}
-        handleDelete={vi.fn()}
         isSaveDisabled={false}
       />
     );
@@ -62,7 +41,6 @@ describe('NotificationEditModeFooter component', () => {
         handleCancel={vi.fn()}
         isCancelDisabled={false}
         handleSave={mockHandleSaveDisabled}
-        handleDelete={vi.fn()}
         isSaveDisabled={true}
       />
     );
@@ -81,7 +59,6 @@ describe('NotificationEditModeFooter component', () => {
         handleCancel={mockHandleCancel}
         isCancelDisabled={false}
         handleSave={vi.fn()}
-        handleDelete={vi.fn()}
         isSaveDisabled={false}
       />
     );
@@ -97,7 +74,6 @@ describe('NotificationEditModeFooter component', () => {
         handleCancel={vi.fn()}
         isCancelDisabled={false}
         handleSave={mockHandleCancelDisabled}
-        handleDelete={vi.fn()}
         isSaveDisabled={true}
       />
     );

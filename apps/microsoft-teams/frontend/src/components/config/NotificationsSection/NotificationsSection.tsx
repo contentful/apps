@@ -1,10 +1,11 @@
 import { Dispatch, useState } from 'react';
-import { Box, Subheading } from '@contentful/f36-components';
+import { Box, ModalLauncher, Subheading } from '@contentful/f36-components';
 import { styles } from './NotificationsSection.styles';
 import { notificationsSection } from '@constants/configCopy';
 import AddButton from '@components/config/AddButton/AddButton';
 import NotificationEditMode from '@components/config/NotificationEditMode/NotificationEditMode';
 import NotificationViewMode from '@components/config/NotificationViewMode/NotificationViewMode';
+import DeleteModal from '@components/config/DeleteModal/DeleteModal';
 import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
 import { ContentTypeContextProvider } from '@context/ContentTypeProvider';
@@ -29,6 +30,24 @@ const NotificationsSection = (props: Props) => {
     dispatch({
       type: actions.UPDATE_NOTIFICATIONS,
       payload: notificationsPayload,
+    });
+  };
+
+  const handleDelete = (index: number) => {
+    ModalLauncher.open(({ isShown, onClose }) => {
+      return (
+        <DeleteModal
+          isShown={isShown}
+          handleCancel={() => {
+            onClose(true);
+          }}
+          handleDelete={() => {
+            onClose(true);
+            deleteNotification(index);
+            setNotificationIndexToEdit(null);
+          }}
+        />
+      );
     });
   };
 
@@ -59,7 +78,6 @@ const NotificationsSection = (props: Props) => {
               <NotificationEditMode
                 key={`notification-${index}`}
                 index={index}
-                deleteNotification={deleteNotification}
                 updateNotification={updateNotification}
                 notification={notification}
                 setNotificationIndexToEdit={setNotificationIndexToEdit}
@@ -73,7 +91,8 @@ const NotificationsSection = (props: Props) => {
                 updateNotification={updateNotification}
                 notification={notification}
                 handleEdit={() => setNotificationIndexToEdit(index)}
-                isEditDisabled={notificationIndexToEdit !== null}
+                isMenuDisabled={notificationIndexToEdit !== null}
+                handleDelete={() => handleDelete(index)}
               />
             );
           }
