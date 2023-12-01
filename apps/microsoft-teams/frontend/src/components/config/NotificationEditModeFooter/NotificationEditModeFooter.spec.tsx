@@ -8,7 +8,6 @@ describe('NotificationEditModeFooter component', () => {
     const { unmount } = render(
       <NotificationEditModeFooter
         handleCancel={vi.fn()}
-        isCancelDisabled={false}
         handleSave={vi.fn()}
         isSaveDisabled={false}
       />
@@ -24,7 +23,6 @@ describe('NotificationEditModeFooter component', () => {
     const { unmount, rerender } = render(
       <NotificationEditModeFooter
         handleCancel={vi.fn()}
-        isCancelDisabled={false}
         handleSave={mockHandleSave}
         isSaveDisabled={false}
       />
@@ -39,7 +37,6 @@ describe('NotificationEditModeFooter component', () => {
     rerender(
       <NotificationEditModeFooter
         handleCancel={vi.fn()}
-        isCancelDisabled={false}
         handleSave={mockHandleSaveDisabled}
         isSaveDisabled={true}
       />
@@ -57,7 +54,6 @@ describe('NotificationEditModeFooter component', () => {
     const { unmount, rerender } = render(
       <NotificationEditModeFooter
         handleCancel={mockHandleCancel}
-        isCancelDisabled={false}
         handleSave={vi.fn()}
         isSaveDisabled={false}
       />
@@ -72,7 +68,6 @@ describe('NotificationEditModeFooter component', () => {
     rerender(
       <NotificationEditModeFooter
         handleCancel={vi.fn()}
-        isCancelDisabled={false}
         handleSave={mockHandleCancelDisabled}
         isSaveDisabled={true}
       />

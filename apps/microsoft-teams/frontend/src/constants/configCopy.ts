@@ -100,6 +100,9 @@ const editModeFooter = {
   test: 'Test',
   cancel: 'Cancel',
   save: 'Save',
+  confirmCancelDescription: 'If you cancel, your changes will not be saved.',
+  goBack: 'Go back to editing',
+  confirmCancel: 'Confirm cancelation',
 };
 
 export {

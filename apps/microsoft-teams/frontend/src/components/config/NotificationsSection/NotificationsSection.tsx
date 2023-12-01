@@ -78,6 +78,7 @@ const NotificationsSection = (props: Props) => {
               <NotificationEditMode
                 key={`notification-${index}`}
                 index={index}
+                deleteNotification={deleteNotification}
                 updateNotification={updateNotification}
                 notification={notification}
                 setNotificationIndexToEdit={setNotificationIndexToEdit}

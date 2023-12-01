@@ -50,7 +50,7 @@ const isNotificationReadyToSave = (
   editedNotification: Notification,
   notification: Notification
 ): boolean => {
-  const hasChanges = !isEqual(editedNotification, notification);
+  const hasChanges = doesNotificationHaveChanges(editedNotification, notification);
 
   const hasContentType = !!editedNotification.contentTypeId;
   const hasChannel = !!editedNotification.channelId;
@@ -61,12 +61,31 @@ const isNotificationReadyToSave = (
 };
 
 /**
- * Evaluates whether the edited notification is different from the default notification
- * @param editedNotification
+ * Evaluates whether the notification is a new notification
+ * @param notification
  * @returns boolean
  */
-const isNotificationDefault = (editedNotification: Notification): boolean => {
-  return isEqual(editedNotification, defaultNotification);
+const isNotificationNew = (notification: Notification): boolean => {
+  return isEqual(notification, defaultNotification);
 };
 
-export { getContentTypeName, getChannelName, isNotificationReadyToSave, isNotificationDefault };
+/**
+ * Evaluates whether the notification has changes
+ * @param editedNotification
+ * @param notification
+ * @returns boolean
+ */
+const doesNotificationHaveChanges = (
+  editedNotification: Notification,
+  notification: Notification
+): boolean => {
+  return !isEqual(editedNotification, notification);
+};
+
+export {
+  getContentTypeName,
+  getChannelName,
+  isNotificationReadyToSave,
+  isNotificationNew,
+  doesNotificationHaveChanges,
+};

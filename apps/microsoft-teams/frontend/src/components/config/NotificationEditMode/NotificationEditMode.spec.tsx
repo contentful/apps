@@ -10,6 +10,7 @@ describe('NotificationEditMode component', () => {
     ContentTypeCustomRender(
       <NotificationEditMode
         index={0}
+        deleteNotification={vi.fn()}
         updateNotification={vi.fn()}
         notification={defaultNotification}
         setNotificationIndexToEdit={vi.fn()}
