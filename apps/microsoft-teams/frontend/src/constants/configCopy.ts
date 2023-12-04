@@ -1,6 +1,6 @@
 const headerSection = {
-  title: 'Set up Microsoft Teams',
-  description: 'Get notifications about content updates in Contentful directly in Microsoft Teams.',
+  title: 'Set up the Microsoft Teams App',
+  description: 'Get notifications about Contentful content updates directly in Microsoft Teams.',
 };
 
 // TODO: Update deep link with Teams app id
@@ -18,16 +18,19 @@ const accessSection = {
 const notificationsSection = {
   title: 'Notifications',
   createButton: 'Create notification',
-  enabledToggle: 'Notifications enabled',
-  editButton: 'Edit',
+  enabledToggle: 'Notifications activated',
+  edit: 'Edit',
+  delete: 'Delete',
+  confirmDelete:
+    'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
 };
 
 const contentTypeSelection = {
   title: 'Content type',
-  addButton: 'Add content type',
+  addButton: 'Select content type',
   modal: {
-    title: 'Add content type',
-    button: 'Next',
+    title: 'Select content type',
+    button: 'Select',
     link: 'Add content type',
     emptyHeading: 'No content types',
     emptyContent:
@@ -38,13 +41,13 @@ const contentTypeSelection = {
 
 const channelSelection = {
   title: 'Channel',
-  addButton: 'Add channel',
+  addButton: 'Select channel',
   modal: {
-    title: 'Add Teams channel',
+    title: 'Select Teams channel',
     description:
       'Teams channels where the Contentful app has been installed can display notifications.',
     link: 'Add app',
-    button: 'Next',
+    button: 'Select',
     emptyHeading: 'Add Teams channels',
     emptyContent:
       'In Teams, add the Contentful app to channels where you want to see notifications. Add app',
@@ -95,11 +98,11 @@ const eventsSelection = {
 
 const editModeFooter = {
   test: 'Test',
-  delete: 'Delete',
-  confirmDelete:
-    'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
   cancel: 'Cancel',
   save: 'Save',
+  confirmCancelDescription: 'If you cancel, your changes will not be saved.',
+  goBack: 'Go back to editing',
+  confirmCancel: 'Confirm cancelation',
 };
 
 export {

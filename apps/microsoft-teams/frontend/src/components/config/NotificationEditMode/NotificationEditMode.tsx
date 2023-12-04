@@ -4,10 +4,14 @@ import ContentTypeSelection from '@components/config/ContentTypeSelection/Conten
 import ChannelSelection from '@components/config/ChannelSelection/ChannelSelection';
 import EventsSelection from '@components/config/EventsSelection/EventsSelection';
 import NotificationEditModeFooter from '@components/config/NotificationEditModeFooter/NotificationEditModeFooter';
-import DeleteModal from '@components/config/DeleteModal/DeleteModal';
 import { styles } from './NotificationEditMode.styles';
 import { Notification } from '@customTypes/configPage';
-import { isNotificationReadyToSave, isNotificationDefault } from '@helpers/configHelpers';
+import {
+  isNotificationReadyToSave,
+  isNotificationNew,
+  doesNotificationHaveChanges,
+} from '@helpers/configHelpers';
+import CancelModal from '@components/config/CancelModal/CancelModal';
 
 interface Props {
   index: number;
@@ -36,31 +40,36 @@ const NotificationEditMode = (props: Props) => {
     setEditedNotification({ ...editedNotification, ...notificationEdit });
   };
 
-  const handleDelete = () => {
-    ModalLauncher.open(({ isShown, onClose }) => {
-      return (
-        <DeleteModal
-          isShown={isShown}
-          handleCancel={() => {
-            onClose(true);
-          }}
-          handleDelete={() => {
-            onClose(true);
-            deleteNotification(index);
-            setNotificationIndexToEdit(null);
-          }}
-        />
-      );
-    });
-  };
-
   const handleSave = () => {
     updateNotification(index, editedNotification);
     setNotificationIndexToEdit(null);
   };
 
   const handleCancel = () => {
-    setNotificationIndexToEdit(null);
+    const isNew = isNotificationNew(notification);
+    const hasChanges = doesNotificationHaveChanges(editedNotification, notification);
+
+    if (hasChanges) {
+      ModalLauncher.open(({ isShown, onClose }) => {
+        return (
+          <CancelModal
+            isShown={isShown}
+            handleCancel={() => {
+              onClose(true);
+            }}
+            handleConfirm={() => {
+              if (isNew) deleteNotification(index);
+              onClose(true);
+              setEditedNotification(notification);
+              setNotificationIndexToEdit(null);
+            }}
+          />
+        );
+      });
+    } else {
+      if (isNew) deleteNotification(index);
+      setNotificationIndexToEdit(null);
+    }
   };
 
   return (
@@ -81,8 +90,6 @@ const NotificationEditMode = (props: Props) => {
       </Box>
       <NotificationEditModeFooter
         handleCancel={handleCancel}
-        isCancelDisabled={isNotificationDefault(editedNotification)}
-        handleDelete={handleDelete}
         handleSave={handleSave}
         isSaveDisabled={!isNotificationReadyToSave(editedNotification, notification)}
       />

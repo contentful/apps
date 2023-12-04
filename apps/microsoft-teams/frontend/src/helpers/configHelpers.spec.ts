@@ -3,7 +3,8 @@ import {
   getChannelName,
   getContentTypeName,
   isNotificationReadyToSave,
-  isNotificationDefault,
+  isNotificationNew,
+  doesNotificationHaveChanges,
 } from './configHelpers';
 import mockChannels from '@test/mocks/mockChannels.json';
 import { mockContentType } from '@test/mocks';
@@ -53,12 +54,22 @@ describe('isNotificationReadyToSave', () => {
   });
 });
 
-describe('isNotificationDefault', () => {
-  it('should return false when edited notification is not the same as default', () => {
-    expect(isNotificationDefault(mockNotification)).toEqual(false);
+describe('isNotificationNew', () => {
+  it('should return false when a notification is not new', () => {
+    expect(isNotificationNew(mockNotification)).toEqual(false);
   });
 
-  it('should return true when edited notification is the same as default', () => {
-    expect(isNotificationDefault(defaultNotification)).toEqual(true);
+  it('should return true when a notification is new', () => {
+    expect(isNotificationNew(defaultNotification)).toEqual(true);
+  });
+});
+
+describe('doesNotificationHaveChanges', () => {
+  it('should return false when there are no changes', () => {
+    expect(doesNotificationHaveChanges(mockNotification, mockNotification)).toEqual(false);
+  });
+
+  it('should return true when there are changes', () => {
+    expect(doesNotificationHaveChanges(mockNotification, defaultNotification)).toEqual(true);
   });
 });
