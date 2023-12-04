@@ -1,0 +1,26 @@
+const WebApp = () => {
+  return (
+    <svg
+      width="128"
+      height="120"
+      viewBox="0 0 128 120"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink">
+      <rect width="127.164" height="120" fill="url(#pattern0)" />
+      <defs>
+        <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
+          <use xlinkHref="#image0_484_37604" transform="scale(0.00469484 0.00497512)" />
+        </pattern>
+        <image
+          id="image0_484_37604"
+          width="213"
+          height="201"
+          xlinkHref="data:image/png;base64,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"
+        />
+      </defs>
+    </svg>
+  );
+};
+
+export default WebApp;

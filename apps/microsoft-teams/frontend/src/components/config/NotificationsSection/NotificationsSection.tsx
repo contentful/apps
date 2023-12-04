@@ -7,7 +7,7 @@ import NotificationEditMode from '@components/config/NotificationEditMode/Notifi
 import NotificationViewMode from '@components/config/NotificationViewMode/NotificationViewMode';
 import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
-import useGetContentTypes from '@hooks/useGetContentTypes';
+import { ContentTypeContextProvider } from '@context/ContentTypeProvider';
 
 interface Props {
   notifications: Notification[];
@@ -17,7 +17,6 @@ interface Props {
 const NotificationsSection = (props: Props) => {
   const { notifications, dispatch } = props;
   const [notificationIndexToEdit, setNotificationIndexToEdit] = useState<number | null>(null);
-  const contentTypes = useGetContentTypes();
 
   const createNewNotification = () => {
     dispatch({ type: actions.ADD_NOTIFICATION });
@@ -51,35 +50,35 @@ const NotificationsSection = (props: Props) => {
           handleClick={createNewNotification}
         />
       </Box>
-      {notifications.map((notification, index) => {
-        const inEditMode = notificationIndexToEdit === index;
+      <ContentTypeContextProvider>
+        {notifications.map((notification, index) => {
+          const inEditMode = notificationIndexToEdit === index;
 
-        if (inEditMode) {
-          return (
-            <NotificationEditMode
-              key={`notification-${index}`}
-              index={index}
-              deleteNotification={deleteNotification}
-              updateNotification={updateNotification}
-              notification={notification}
-              contentTypes={contentTypes}
-              setNotificationIndexToEdit={setNotificationIndexToEdit}
-            />
-          );
-        } else {
-          return (
-            <NotificationViewMode
-              key={`notification-${index}`}
-              index={index}
-              updateNotification={updateNotification}
-              notification={notification}
-              contentTypes={contentTypes}
-              handleEdit={() => setNotificationIndexToEdit(index)}
-              isEditDisabled={notificationIndexToEdit !== null}
-            />
-          );
-        }
-      })}
+          if (inEditMode) {
+            return (
+              <NotificationEditMode
+                key={`notification-${index}`}
+                index={index}
+                deleteNotification={deleteNotification}
+                updateNotification={updateNotification}
+                notification={notification}
+                setNotificationIndexToEdit={setNotificationIndexToEdit}
+              />
+            );
+          } else {
+            return (
+              <NotificationViewMode
+                key={`notification-${index}`}
+                index={index}
+                updateNotification={updateNotification}
+                notification={notification}
+                handleEdit={() => setNotificationIndexToEdit(index)}
+                isEditDisabled={notificationIndexToEdit !== null}
+              />
+            );
+          }
+        })}
+      </ContentTypeContextProvider>
     </Box>
   );
 };

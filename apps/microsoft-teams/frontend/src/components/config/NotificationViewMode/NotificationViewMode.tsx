@@ -1,8 +1,9 @@
+import { useContext } from 'react';
+import { ContentTypeContext } from '@context/ContentTypeProvider';
 import { Box, Button, Flex, Subheading, Paragraph, Switch } from '@contentful/f36-components';
 import { styles } from './NotificationViewMode.styles';
 import { getContentTypeName, getChannelName } from '@helpers/configHelpers';
 import { Notification } from '@customTypes/configPage';
-import { ContentTypeProps } from 'contentful-management';
 import {
   channelSelection,
   contentTypeSelection,
@@ -15,14 +16,13 @@ interface Props {
   index: number;
   updateNotification: (index: number, editedNotification: Partial<Notification>) => void;
   notification: Notification;
-  contentTypes: ContentTypeProps[];
   handleEdit: () => void;
   isEditDisabled: boolean;
 }
 
 const NotificationViewMode = (props: Props) => {
-  const { index, notification, updateNotification, contentTypes, handleEdit, isEditDisabled } =
-    props;
+  const { index, notification, updateNotification, handleEdit, isEditDisabled } = props;
+  const { contentTypes } = useContext(ContentTypeContext);
 
   return (
     <Box className={styles.wrapper}>

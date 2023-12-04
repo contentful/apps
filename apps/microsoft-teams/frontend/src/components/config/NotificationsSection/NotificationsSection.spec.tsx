@@ -2,11 +2,10 @@ import NotificationsSection from './NotificationsSection';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { notificationsSection } from '@constants/configCopy';
-import { mockSdk, mockGetManyContentType } from '@test/mocks';
+import { mockSdk } from '@test/mocks';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
-  useGetContentTypes: () => mockGetManyContentType,
 }));
 
 describe('NotificationsSection component', () => {
