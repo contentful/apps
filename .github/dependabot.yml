@@ -53,8 +53,6 @@ updates:
     - dependency-name: "*"
       update-types: ["version-update:semver-major"]
     - dependency-name: "sharp"
-      versions:
-        - ">0.32.6"
 
 - package-ecosystem: npm
   directory: "/apps/ai-image-generator/backend"
@@ -71,8 +69,6 @@ updates:
     - dependency-name: "*"
       update-types: ["version-update:semver-major"]
     - dependency-name: "sharp"
-      versions:
-        - ">0.32.6"
 
 - package-ecosystem: npm
   directory: "/apps/slack/lambda"
