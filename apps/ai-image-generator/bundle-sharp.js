@@ -3,7 +3,14 @@ const fs = require('fs/promises');
 console.log('Copying sharp files from node_modules to build/node_modules');
 
 const copySharp = async () => {
-  await fs.cp('./node_modules/@img', './build/node_modules/@img', {
+  await fs.cp(
+    './node_modules/@img/sharp-libvips-linux-x64',
+    './build/node_modules/@img/sharp-libvips-linux-x64',
+    {
+      recursive: true,
+    }
+  );
+  await fs.cp('./node_modules/@img/sharp-linux-x64', './build/node_modules/@img/sharp-linux-x64', {
     recursive: true,
   });
   await fs.cp('./node_modules/sharp', './build/node_modules/sharp', {
