@@ -39,38 +39,6 @@ updates:
         - ">=3"
 
 - package-ecosystem: npm
-  directory: "/apps/ai-image-generator"
-  schedule:
-    interval: daily
-    time: "03:00"
-    timezone: UTC
-  open-pull-requests-limit: 15
-  commit-message:
-    prefix: "fix"
-    prefix-development: "chore"
-    include: "scope"
-  ignore:
-    - dependency-name: "*"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "sharp"
-
-- package-ecosystem: npm
-  directory: "/apps/ai-image-generator/backend"
-  schedule:
-    interval: daily
-    time: "03:00"
-    timezone: UTC
-  open-pull-requests-limit: 15
-  commit-message:
-    prefix: "fix"
-    prefix-development: "chore"
-    include: "scope"
-  ignore:
-    - dependency-name: "*"
-      update-types: ["version-update:semver-major"]
-    - dependency-name: "sharp"
-
-- package-ecosystem: npm
   directory: "/apps/slack/lambda"
   schedule:
     interval: daily
