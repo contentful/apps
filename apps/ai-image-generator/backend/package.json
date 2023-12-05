@@ -15,7 +15,7 @@
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.6.0",
     "contentful-management": "^10.44.0",
-    "openai": "^4.0.0",
+    "openai": "^4.20.1",
     "sharp": "0.32.6"
   },
   "devDependencies": {
