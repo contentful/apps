@@ -110,11 +110,13 @@ describe('aiigSelectEdit.handler', () => {
       'url',
       './test/mocks/images/landscape-result-1.png'
     );
-    expect(result.data.images[0].upload).to.have.property(
-      'url',
-      'https://s3.us-east-1.amazonaws.com/upload-api.contentful.com/space-id!upload!uploadId-0'
+
+    // using match here to just match the beginning because there's a small race condition in tests where
+    // sometimes the first image result gets assigned a different upload id
+    expect(result.data.images[0].upload.url).to.match(
+      /^https:\/\/s3\.us-east-1\.amazonaws\.com\/upload-api\.contentful\.com\/space-id!upload!uploadId/
     );
-    expect(result.data.images[0].upload.sys).to.have.property('id', 'uploadId-0');
+    expect(result.data.images[0].upload.sys.id).to.match(/^uploadId/);
   });
 
   it('calls the cma to get the key and create uploads', async () => {
