@@ -3,20 +3,22 @@ import AddButton from '@components/config/AddButton/AddButton';
 import ChannelSelectionModal from '@components/config/ChannelSelectionModal/ChannelSelectionModal';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 import { channelSelection } from '@constants/configCopy';
-import { Notification } from '@customTypes/configPage';
+import { Notification, TeamsChannel } from '@customTypes/configPage';
 import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ChannelSelection.styles';
-// TODO: update this when we start fetching channel installations
-import mockChannels from '@test/mocks/mockChannels.json';
 import { getChannelName } from '@helpers/configHelpers';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import { useState } from 'react';
 
 interface Props {
   notification: Notification;
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
+  sdk: ConfigAppSDK;
 }
 
 const ChannelSelection = (props: Props) => {
   const { notification, handleNotificationEdit } = props;
+  const [channels, setChannels] = useState<TeamsChannel[]>([]);
 
   const openChannelSelectionModal = () => {
     return ModalLauncher.open(({ isShown, onClose }) => (
@@ -27,6 +29,9 @@ const ChannelSelection = (props: Props) => {
         }}
         handleNotificationEdit={handleNotificationEdit}
         savedChannelId={notification.channelId}
+        sdk={props.sdk}
+        channels={channels}
+        setChannels={setChannels}
       />
     ));
   };
@@ -44,7 +49,7 @@ const ChannelSelection = (props: Props) => {
           <TextInput
             id="selected-channel"
             isDisabled={true}
-            value={getChannelName(notification.channelId, mockChannels, channelSelection.notFound)}
+            value={getChannelName(notification.channelId, channels, channelSelection.notFound)}
             className={styles.input}
           />
           <IconButton

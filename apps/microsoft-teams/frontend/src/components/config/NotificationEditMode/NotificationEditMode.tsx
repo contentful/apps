@@ -9,6 +9,7 @@ import { styles } from './NotificationEditMode.styles';
 import { Notification } from '@customTypes/configPage';
 import { ContentTypeProps } from 'contentful-management';
 import { isNotificationReadyToSave, isNotificationDefault } from '@helpers/configHelpers';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 
 interface Props {
   index: number;
@@ -17,6 +18,7 @@ interface Props {
   notification: Notification;
   contentTypes: ContentTypeProps[];
   setNotificationIndexToEdit: Dispatch<SetStateAction<number | null>>;
+  sdk: ConfigAppSDK;
 }
 
 const NotificationEditMode = (props: Props) => {
@@ -77,6 +79,7 @@ const NotificationEditMode = (props: Props) => {
         <ChannelSelection
           notification={editedNotification}
           handleNotificationEdit={handleNotificationEdit}
+          sdk={props.sdk}
         />
         <EventsSelection
           notification={editedNotification}

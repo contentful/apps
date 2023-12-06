@@ -2,6 +2,7 @@ import ChannelSelectionModal from './ChannelSelectionModal';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { channelSelection } from '@constants/configCopy';
+import { mockSdk } from '@test/mocks';
 
 describe('ChannelSelectionModal component', () => {
   it('mounts and renders the correct content', () => {
@@ -11,6 +12,7 @@ describe('ChannelSelectionModal component', () => {
         onClose={vi.fn()}
         savedChannelId=""
         handleNotificationEdit={vi.fn()}
+        sdk={mockSdk}
       />
     );
 
