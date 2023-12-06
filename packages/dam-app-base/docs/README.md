@@ -14,11 +14,14 @@
 
 ### Type aliases
 
+* [AdditionalData](README.md#additionaldata)
 * [Asset](README.md#asset)
 * [CompatibleFields](README.md#compatiblefields)
 * [Config](README.md#config)
+* [CustomUpdateStateValueFn](README.md#customupdatestatevaluefn)
 * [DeleteFn](README.md#deletefn)
 * [DisabledPredicateFn](README.md#disabledpredicatefn)
+* [GetAdditionalDataFn](README.md#getadditionaldatafn)
 * [OpenDialogFn](README.md#opendialogfn)
 * [RenderDialogFn](README.md#renderdialogfn)
 * [SelectedFields](README.md#selectedfields)
@@ -33,6 +36,14 @@
 * [setup](README.md#setup)
 
 ## Type aliases
+
+### AdditionalData
+
+Ƭ **AdditionalData**: { `primary`: *string*; `secondary`: *string* }
+
+Object containing additional data about the asset to display as primary and secondary information in the "more details" section
+
+___
 
 ### Asset
 
@@ -56,6 +67,22 @@ Object containing all information configured on the app configuration page.
 
 ___
 
+### CustomUpdateStateValueFn
+
+Ƭ **CustomUpdateStateValueFn**: (
+  `context`: {
+    `currentValue`: [*Asset*](README.md#asset)[];
+    `result`: [*Asset*](README.md#asset)[];
+    `config`: [*Config*](README.md#config);
+  },
+  `updateStateValue`: (`value`: [*Asset*](README.md#asset)[]) => *void*
+) => *Promise*<*void*>;
+
+Async function that takes in context about the current field value, the result from the dialog, and the app config.
+It also accepts a function to update the field state, and this should be called in the function to update the field
+
+___
+
 ### DeleteFn
 
 Ƭ **DeleteFn**: (`index`: *number*) => *void*
@@ -73,6 +100,14 @@ Function that should return true when the button should be disabled.
 **`param`** App configuration
 
 **`returns`** true, if the button in the field location should be disabled. false, if the button should be enabled
+
+___
+
+### GetAdditionalDataFn
+
+Ƭ **GetAdditionalDataFn**: (`asset`: [*Asset*](README.md#asset)) => [*AdditionalData*](README.md#additionaldata)
+
+Function that return an object that represents the primary and secondary data that should be displayed in the "more details" section of the asset card
 
 ___
 
