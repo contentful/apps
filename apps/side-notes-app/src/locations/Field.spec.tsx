@@ -6,12 +6,13 @@ import Field from './Field';
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
+  useAutoResizer: () => {},
 }));
 
 describe('Field component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Field />);
 
-    expect(getByText('Hello Entry Field Component (AppId: test-app)')).toBeTruthy();
+    expect(getByText('Invalid or missing widgets configuration')).toBeTruthy();
   });
 });

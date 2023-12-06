@@ -1,5 +1,10 @@
 import create from 'zustand/vanilla';
 import type { AnalyticsClient } from '../analytics';
+import crypto from 'crypto';
+
+const generateRandomUUID = (): string => {
+  return crypto.randomUUID();
+};
 
 export type AnalyticsStoreState = {
   isInitialized: boolean;
@@ -12,8 +17,8 @@ export type AnalyticsStoreState = {
 export const analyticsStore = create<AnalyticsStoreState>((set) => ({
   isInitialized: false,
   analyticsClient: undefined,
-  sequenceKey: window.crypto.randomUUID(),
-  refreshSequenceKey: () => set({ sequenceKey: window.crypto.randomUUID() }),
+  sequenceKey: generateRandomUUID(),
+  refreshSequenceKey: () => set({ sequenceKey: generateRandomUUID() }),
   setInitialized: () => set({ isInitialized: true }),
 }));
 

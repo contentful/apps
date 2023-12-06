@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
 const mockSdk: any = {
   app: {
@@ -7,8 +7,33 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn(),
   },
+  field: {
+    type: 'text',
+  },
   ids: {
-    app: "test-app",
+    app: 'test-app',
+  },
+  parameters: {
+    installation: {
+      defs: {},
+    },
+  },
+  entry: {
+    getSys: vi.fn(),
+    fields: [],
+    getMetadata: vi.fn(),
+    getTasks: vi.fn(),
+  },
+  contentType: {
+    sys: {
+      id: 'content-type-id',
+    },
+  },
+  access: {
+    canEditAppConfig: vi.fn().mockResolvedValue(true),
+  },
+  location: {
+    is: vi.fn().mockReturnValue(true),
   },
 };
 
