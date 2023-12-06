@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.2.0](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.1.8...@contentful/dam-app-base@2.2.0) (2023-12-06)
+
+### Features
+
+- support custom update and additional details display [INTEG-1611] ([#5682](https://github.com/contentful/apps/issues/5682)) ([742d616](https://github.com/contentful/apps/commit/742d6166ff2593ec7a51e48f791cad0d19f17c98))
+
 ## [2.1.8](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.1.7...@contentful/dam-app-base@2.1.8) (2023-11-27)
 
 **Note:** Version bump only for package @contentful/dam-app-base
