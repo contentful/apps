@@ -7,31 +7,24 @@ import { Notification, TeamsChannel } from '@customTypes/configPage';
 import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ChannelSelection.styles';
 import { getChannelName } from '@helpers/configHelpers';
-import { ConfigAppSDK } from '@contentful/app-sdk';
-import { useState } from 'react';
 
 interface Props {
   notification: Notification;
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
-  sdk: ConfigAppSDK;
+  channels: TeamsChannel[];
 }
 
 const ChannelSelection = (props: Props) => {
-  const { notification, handleNotificationEdit, sdk } = props;
-  const [channels, setChannels] = useState<TeamsChannel[]>([]);
+  const { notification, handleNotificationEdit, channels } = props;
 
   const openChannelSelectionModal = () => {
     return ModalLauncher.open(({ isShown, onClose }) => (
       <ChannelSelectionModal
         isShown={isShown}
-        onClose={() => {
-          onClose(true);
-        }}
+        onClose={() => onClose(true)}
         handleNotificationEdit={handleNotificationEdit}
         savedChannelId={notification.channelId}
-        sdk={sdk}
         channels={channels}
-        setChannels={setChannels}
       />
     ));
   };

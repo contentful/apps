@@ -32,7 +32,6 @@ const ConfigPage = () => {
       <NotificationsSection
         notifications={parameters.notifications}
         dispatch={dispatchParameters}
-        sdk={sdk}
       />
     </>
   );

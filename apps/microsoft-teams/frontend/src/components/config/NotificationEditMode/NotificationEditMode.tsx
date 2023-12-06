@@ -6,10 +6,9 @@ import EventsSelection from '@components/config/EventsSelection/EventsSelection'
 import NotificationEditModeFooter from '@components/config/NotificationEditModeFooter/NotificationEditModeFooter';
 import DeleteModal from '@components/config/DeleteModal/DeleteModal';
 import { styles } from './NotificationEditMode.styles';
-import { Notification } from '@customTypes/configPage';
+import { Notification, TeamsChannel } from '@customTypes/configPage';
 import { ContentTypeProps } from 'contentful-management';
 import { isNotificationReadyToSave, isNotificationDefault } from '@helpers/configHelpers';
-import { ConfigAppSDK } from '@contentful/app-sdk';
 
 interface Props {
   index: number;
@@ -18,7 +17,7 @@ interface Props {
   notification: Notification;
   contentTypes: ContentTypeProps[];
   setNotificationIndexToEdit: Dispatch<SetStateAction<number | null>>;
-  sdk: ConfigAppSDK;
+  channels: TeamsChannel[];
 }
 
 const NotificationEditMode = (props: Props) => {
@@ -29,6 +28,7 @@ const NotificationEditMode = (props: Props) => {
     notification,
     contentTypes,
     setNotificationIndexToEdit,
+    channels,
   } = props;
 
   const [editedNotification, setEditedNotification] = useState<Notification>(notification);
@@ -79,7 +79,7 @@ const NotificationEditMode = (props: Props) => {
         <ChannelSelection
           notification={editedNotification}
           handleNotificationEdit={handleNotificationEdit}
-          sdk={props.sdk}
+          channels={channels}
         />
         <EventsSelection
           notification={editedNotification}

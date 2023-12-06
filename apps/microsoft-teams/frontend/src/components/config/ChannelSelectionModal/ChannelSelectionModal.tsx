@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Button,
   FormControl,
@@ -10,59 +10,24 @@ import {
 } from '@contentful/f36-components';
 import { appDeepLink, channelSelection } from '@constants/configCopy';
 import { styles } from './ChannelSelectionModal.styles';
-import { AppInstallationParameters, Notification, TeamsChannel } from '@customTypes/configPage';
+import { Notification, TeamsChannel } from '@customTypes/configPage';
 import ModalHeader from '@components/config/ModalHeader/ModalHeader';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 import EmptyState from '@components/config/EmptyState/EmptyState';
 import EmptyFishbowl from '@components/config/EmptyState/EmptyFishbowl';
-import { ConfigAppSDK } from '@contentful/app-sdk';
 
 interface ChannelSelectionModalProps {
   isShown: boolean;
   onClose: () => void;
   savedChannelId: string;
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
-  sdk: ConfigAppSDK;
   channels: TeamsChannel[];
-  setChannels: (channels: TeamsChannel[]) => void;
 }
 
 const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
-  const { isShown, onClose, savedChannelId, handleNotificationEdit, sdk, channels, setChannels } =
-    props;
+  const { isShown, onClose, savedChannelId, handleNotificationEdit, channels } = props;
   const [selectedChannelId, setSelectedChannelId] = useState<string>(savedChannelId ?? '');
-  //TODO: add loading state for fetching channel list
-  const [, setLoading] = useState<boolean>(false);
-  const { tenantId } = sdk.parameters.instance as AppInstallationParameters;
   const { title, button, link, emptyContent, emptyHeading, description } = channelSelection.modal;
-
-  useEffect(() => {
-    const handleAppActionCall = async () => {
-      setLoading(true);
-      if (isShown) {
-        const { response } = await sdk.cma.appActionCall.createWithResponse(
-          {
-            appActionId: 'msteamsListChannels',
-            environmentId: sdk.ids.environment,
-            spaceId: sdk.ids.space,
-            appDefinitionId: sdk.ids.app!,
-          },
-          {
-            parameters: { tenantId },
-          }
-        );
-        const body = JSON.parse(response.body);
-        if (body.ok) {
-          setLoading(false);
-          setChannels(body.data);
-        } else {
-          setLoading(false);
-        }
-      }
-    };
-
-    handleAppActionCall();
-  }, [isShown, sdk]);
 
   return (
     <Modal onClose={onClose} isShown={isShown} size="large">

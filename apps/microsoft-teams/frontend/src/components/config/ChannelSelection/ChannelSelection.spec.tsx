@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { channelSelection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
-import { mockSdk } from '@test/mocks';
 
 describe('ChannelSelection component', () => {
   it('mounts and renders the correct title and button copy when no channel is selected', () => {
@@ -11,7 +10,7 @@ describe('ChannelSelection component', () => {
       <ChannelSelection
         notification={defaultNotification}
         handleNotificationEdit={vi.fn()}
-        sdk={mockSdk}
+        channels={[]}
       />
     );
 
@@ -24,7 +23,7 @@ describe('ChannelSelection component', () => {
       <ChannelSelection
         notification={{ ...defaultNotification, channelId: 'abc-123' }}
         handleNotificationEdit={vi.fn()}
-        sdk={mockSdk}
+        channels={[]}
       />
     );
 

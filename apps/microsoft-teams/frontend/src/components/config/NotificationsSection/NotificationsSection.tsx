@@ -8,18 +8,18 @@ import NotificationViewMode from '@components/config/NotificationViewMode/Notifi
 import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
 import useGetContentTypes from '@hooks/useGetContentTypes';
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import useGetTeamsChannels from '@hooks/useGetTeamsChannels';
 
 interface Props {
   notifications: Notification[];
   dispatch: Dispatch<ParameterAction>;
-  sdk: ConfigAppSDK;
 }
 
 const NotificationsSection = (props: Props) => {
   const { notifications, dispatch } = props;
   const [notificationIndexToEdit, setNotificationIndexToEdit] = useState<number | null>(null);
   const contentTypes = useGetContentTypes();
+  const channels = useGetTeamsChannels();
 
   const createNewNotification = () => {
     dispatch({ type: actions.ADD_NOTIFICATION });
@@ -66,7 +66,7 @@ const NotificationsSection = (props: Props) => {
               notification={notification}
               contentTypes={contentTypes}
               setNotificationIndexToEdit={setNotificationIndexToEdit}
-              sdk={props.sdk}
+              channels={channels}
             />
           );
         } else {
