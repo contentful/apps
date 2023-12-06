@@ -3,7 +3,13 @@ import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { SortableComponent } from './SortableComponent';
-import { ThumbnailFn, OpenDialogFn, DisabledPredicateFn, Asset } from '../interfaces';
+import {
+  ThumbnailFn,
+  OpenDialogFn,
+  DisabledPredicateFn,
+  Asset,
+  CustomUpdateStateValueFn,
+} from '../interfaces';
 
 import { Button, Note, TextLink } from '@contentful/f36-components';
 
@@ -16,6 +22,7 @@ interface Props {
   makeThumbnail: ThumbnailFn;
   openDialog: OpenDialogFn;
   isDisabled: DisabledPredicateFn;
+  customUpdateStateValue: CustomUpdateStateValueFn | null;
 }
 
 interface State {
@@ -88,10 +95,17 @@ export default class Field extends React.Component<Props, State> {
     const config = this.props.sdk.parameters.installation;
     const result = await this.props.openDialog(this.props.sdk, currentValue, config);
 
-    if (result.length > 0) {
-      const newValue = [...(this.state.value || []), ...result];
+    if (this.props.customUpdateStateValue) {
+      await this.props.customUpdateStateValue(
+        { currentValue, result, config },
+        this.updateStateValue
+      );
+    } else {
+      if (result.length > 0) {
+        const newValue = [...(this.state.value || []), ...result];
 
-      await this.updateStateValue(newValue);
+        await this.updateStateValue(newValue);
+      }
     }
   };
 

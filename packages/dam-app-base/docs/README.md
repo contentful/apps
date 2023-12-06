@@ -17,6 +17,7 @@
 * [Asset](README.md#asset)
 * [CompatibleFields](README.md#compatiblefields)
 * [Config](README.md#config)
+* [CustomUpdateStateValueFn](README.md#customupdatestatevaluefn)
 * [DeleteFn](README.md#deletefn)
 * [DisabledPredicateFn](README.md#disabledpredicatefn)
 * [OpenDialogFn](README.md#opendialogfn)
@@ -53,6 +54,22 @@ ___
 Ƭ **Config**: *Record*<*string*, *any*\>
 
 Object containing all information configured on the app configuration page.
+
+___
+
+### CustomUpdateStateValueFn
+
+Ƭ **CustomUpdateStateValueFn**: (
+  `context`: {
+    `currentValue`: [*Asset*](README.md#asset)[];
+    `result`: [*Asset*](README.md#asset)[];
+    `config`: [*Config*](README.md#config);
+  },
+  `updateStateValue`: (`value`: [*Asset*](README.md#asset)[]) => *void*
+) => *Promise*<*void*>;
+
+Async function that takes in context about the current field value, the result from the dialog, and the app config.
+It also accepts a function to update the field state, and this should be called in the function to update the field
 
 ___
 

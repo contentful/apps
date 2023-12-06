@@ -51,8 +51,7 @@ setup({
 These Contentful apps use `@contentful/dam-app-base`. Look at their source code to learn how they utilize this library:
 
 - [Brandfolder](../../apps/brandfolder)
-- [Bynder](../../apps/bynder)
-- [Cloudinary](../../apps/cloudinary)
+- [Bynder](https://github.com/contentful/marketplace-partner-apps/tree/main/apps/bynder)
 - [Dropbox](../../apps/dropbox)
 - [Frontify](../../apps/frontify)
 - [Mux](../../apps/mux)

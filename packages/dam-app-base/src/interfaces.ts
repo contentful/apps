@@ -120,6 +120,22 @@ export type OpenDialogFn = (
  */
 export type DisabledPredicateFn = (currentValue: Asset[], config: Config) => boolean;
 
+/**
+ * Async function that takes in context about the current field value, the result from the dialog, and the app config
+ * It also accepts a function to update the field state, and this should be called in the function to update the field
+ *
+ * @param context { currentValue, result, config }
+ * @return Promise<void>, calls the async function updateStateValue
+ */
+export type CustomUpdateStateValueFn = (
+  context: {
+    currentValue: Asset[];
+    result: Asset[];
+    config: Config;
+  },
+  updateStateValue: (value: Asset[]) => void
+) => Promise<void>;
+
 export interface Integration {
   /**
    * Text on the button that is displayed in the field location
@@ -216,4 +232,13 @@ export interface Integration {
    * @returns true, if the button in the field location should be disabled. false, if the button should be enabled
    */
   isDisabled: DisabledPredicateFn;
+
+  /**
+   * Optional async function that will override the current updateStateValue function
+   * This custom function accepts context about the asset as well as the updateStateValue function,
+   * which should be called within the custom function
+   * A use case for this is to change the default behavior where newly selected assets are appended to the current field value
+   * This is optional and if not provided, the default behavior of appending the result will be applied
+   */
+  customUpdateStateValue?: CustomUpdateStateValueFn;
 }
