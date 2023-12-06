@@ -1,9 +1,8 @@
 import create from 'zustand/vanilla';
 import type { AnalyticsClient } from '../analytics';
-import crypto from 'crypto';
 
 const generateRandomUUID = (): string => {
-  return crypto.randomUUID();
+  return window.crypto.randomUUID();
 };
 
 export type AnalyticsStoreState = {
