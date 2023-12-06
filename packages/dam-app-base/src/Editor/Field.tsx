@@ -9,6 +9,7 @@ import {
   DisabledPredicateFn,
   Asset,
   CustomUpdateStateValueFn,
+  GetAdditionalDataFn,
 } from '../interfaces';
 
 import { Button, Note, TextLink } from '@contentful/f36-components';
@@ -23,6 +24,7 @@ interface Props {
   openDialog: OpenDialogFn;
   isDisabled: DisabledPredicateFn;
   customUpdateStateValue: CustomUpdateStateValueFn | null;
+  getAdditionalData: GetAdditionalDataFn | null;
 }
 
 interface State {
@@ -138,6 +140,7 @@ export default class Field extends React.Component<Props, State> {
               onChange={this.updateStateValue}
               config={config}
               makeThumbnail={this.props.makeThumbnail}
+              getAdditionalData={this.props.getAdditionalData}
             />
           </div>
         )}

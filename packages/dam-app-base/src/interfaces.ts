@@ -136,6 +136,20 @@ export type CustomUpdateStateValueFn = (
   updateStateValue: (value: Asset[]) => void
 ) => Promise<void>;
 
+/**
+ * Object containing additional data about the asset to display as primary and secondary information in the "more details" section
+ */
+export type AdditionalData = { primary: string; secondary: string };
+
+/**
+ * Function that return an object that represents the primary and secondary data that should be displayed
+ * in the "more details" section of the asset card
+ *
+ * @param asset an asset
+ * @return object with primary and secondary properties that contain strings to display in the asset card
+ */
+export type GetAdditionalDataFn = (asset: Asset) => AdditionalData;
+
 export interface Integration {
   /**
    * Text on the button that is displayed in the field location
@@ -241,4 +255,12 @@ export interface Integration {
    * This is optional and if not provided, the default behavior of appending the result will be applied
    */
   customUpdateStateValue?: CustomUpdateStateValueFn;
+
+  /**
+   * Optional function to get additional data from the asset to be displayed in the asset card
+   * This function accepts asset info and returns an object that contains primary and secondary information to display
+   * When this function is used, a "more details" section will appear on the asset card
+   * This is optional and if not provided, the default look of the asset card will remain
+   */
+  getAdditionalData?: GetAdditionalDataFn;
 }
