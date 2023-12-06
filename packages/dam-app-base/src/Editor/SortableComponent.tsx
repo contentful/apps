@@ -155,7 +155,7 @@ const DragHandle = SortableHandle<DragHandleProps>(
               as="button"
               onClick={() => setIsExpanded((currentIsExpanded) => !currentIsExpanded)}
               className={styles.textlink}>
-              {isExpanded ? 'hide details' : 'more details'}
+              {isExpanded ? 'Hide details' : 'More details'}
             </TextLink>
           </>
         );
@@ -205,11 +205,7 @@ const SortableList = SortableContainer<SortableContainerProps>((props: SortableC
     (acc, resource, index) => {
       const [url, alt] = props.makeThumbnail(resource, props.config);
 
-      let additionalData = null;
-
-      if (props.getAdditionalData) {
-        additionalData = props.getAdditionalData(resource);
-      }
+      const additionalData = props.getAdditionalData?.(resource) || null;
 
       const item = { url, alt, key: `url-unknown-${index}`, additionalData };
       const counts = { ...acc.counts };
