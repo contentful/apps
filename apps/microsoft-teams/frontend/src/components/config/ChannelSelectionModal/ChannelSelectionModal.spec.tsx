@@ -13,6 +13,8 @@ describe('ChannelSelectionModal component', () => {
         savedChannelId=""
         handleNotificationEdit={vi.fn()}
         sdk={mockSdk}
+        channels={[]}
+        setChannels={vi.fn()}
       />
     );
 

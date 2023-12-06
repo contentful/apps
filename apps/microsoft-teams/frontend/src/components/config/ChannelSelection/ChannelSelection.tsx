@@ -17,7 +17,7 @@ interface Props {
 }
 
 const ChannelSelection = (props: Props) => {
-  const { notification, handleNotificationEdit } = props;
+  const { notification, handleNotificationEdit, sdk } = props;
   const [channels, setChannels] = useState<TeamsChannel[]>([]);
 
   const openChannelSelectionModal = () => {
@@ -29,7 +29,7 @@ const ChannelSelection = (props: Props) => {
         }}
         handleNotificationEdit={handleNotificationEdit}
         savedChannelId={notification.channelId}
-        sdk={props.sdk}
+        sdk={sdk}
         channels={channels}
         setChannels={setChannels}
       />

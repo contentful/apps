@@ -17,7 +17,7 @@ import EmptyState from '@components/config/EmptyState/EmptyState';
 import EmptyFishbowl from '@components/config/EmptyState/EmptyFishbowl';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 
-interface Props {
+interface ChannelSelectionModalProps {
   isShown: boolean;
   onClose: () => void;
   savedChannelId: string;
@@ -27,10 +27,11 @@ interface Props {
   setChannels: (channels: TeamsChannel[]) => void;
 }
 
-const ChannelSelectionModal = (props: Props) => {
+const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
   const { isShown, onClose, savedChannelId, handleNotificationEdit, sdk, channels, setChannels } =
     props;
   const [selectedChannelId, setSelectedChannelId] = useState<string>(savedChannelId ?? '');
+  //TODO: add loading state for fetching channel list
   const [, setLoading] = useState<boolean>(false);
   const { tenantId } = sdk.parameters.instance as AppInstallationParameters;
   const { title, button, link, emptyContent, emptyHeading, description } = channelSelection.modal;

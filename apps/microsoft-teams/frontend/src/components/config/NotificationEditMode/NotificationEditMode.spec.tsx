@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { contentTypeSelection, channelSelection, eventsSelection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
+import { mockSdk } from '@test/mocks';
 
 describe('NotificationEditMode component', () => {
   it('mounts with correct copy', () => {
@@ -14,6 +15,7 @@ describe('NotificationEditMode component', () => {
         notification={defaultNotification}
         contentTypes={[]}
         setNotificationIndexToEdit={vi.fn()}
+        sdk={mockSdk}
       />
     );
 
