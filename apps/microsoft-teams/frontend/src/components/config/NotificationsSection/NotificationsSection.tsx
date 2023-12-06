@@ -67,6 +67,7 @@ const NotificationsSection = (props: Props) => {
         <AddButton
           buttonCopy={notificationsSection.createButton}
           handleClick={createNewNotification}
+          isDisabled={notificationIndexToEdit !== null}
         />
       </Box>
       <ContentTypeContextProvider>
