@@ -71,7 +71,7 @@ export const ProductCard = (props: ProductCardProps) => {
         <TextLink
           as="button"
           onClick={() => setIsExpanded((currentIsExpanded) => !currentIsExpanded)}>
-          {isExpanded ? 'hide details' : 'More details'}
+          {isExpanded ? 'Hide details' : 'More details'}
         </TextLink>
       </Box>
     );
