@@ -3,9 +3,6 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { lazy, Suspense, useMemo } from 'react';
 import { HashRouter } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
-import { internalSdkStore } from './stores/internalsdk.store';
-import { CustomAPI } from './types';
-import { useInitAnalytics } from './hooks';
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -29,8 +26,6 @@ const ComponentLocationSettings = {
 
 const App = () => {
   const sdk = useSDK();
-  const internalSdk = internalSdkStore.getState().internalSdk as CustomAPI;
-  useInitAnalytics(internalSdk.analytics);
 
   const Component = useMemo(() => {
     for (const [location, componentModule] of Object.entries(ComponentLocationSettings)) {

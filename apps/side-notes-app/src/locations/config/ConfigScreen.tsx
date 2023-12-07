@@ -6,9 +6,7 @@ import { Route, Routes } from 'react-router-dom';
 import tokens from '@contentful/f36-tokens';
 import { useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { ContentTypeAssignmentEvent } from '../../analytics';
 import { useWidgetStore } from '../../stores/widgets.store';
-import { AnalyticsContentTypeAssignmentEventAction } from '../../types';
 import { ContentTypeList } from './ContentTypeList';
 import { WidgetEditor } from './editor/WidgetEditor';
 import { WidgetEditorContextProvider } from './editor/WidgetEditorContext';
@@ -68,8 +66,6 @@ const ConfigScreen = () => {
 
       return { ...acc, [el.id]: obj };
     }, {});
-
-    ContentTypeAssignmentEvent(AnalyticsContentTypeAssignmentEventAction.WIDGET_SAVED);
 
     return {
       // Parameters to be persisted as the app configuration.

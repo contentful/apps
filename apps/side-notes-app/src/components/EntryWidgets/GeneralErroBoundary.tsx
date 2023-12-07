@@ -1,5 +1,5 @@
 import { Note, TextLink } from '@contentful/f36-components';
-import { Component, ReactElement } from 'react';
+import { Component } from 'react';
 
 interface Props {
   // nothing
@@ -8,8 +8,7 @@ interface Props {
 interface State {
   hasError: boolean;
 }
-
-export class GeneralErrorBoundary extends Component<Props, State> {
+export class GeneralErrorBoundary extends Component<React.PropsWithChildren<Props>, State> {
   state: Readonly<State> = {
     hasError: false,
   };

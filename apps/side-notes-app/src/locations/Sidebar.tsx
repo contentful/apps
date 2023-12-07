@@ -3,7 +3,6 @@ import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useMemo, useState } from 'react';
 import { EntryWidgets } from '../components/EntryWidgets';
 import { WidgetElementDefinition } from '../types';
-import { WidgetRenderedEvent } from '../analytics/events/WidgetRenderedEvent';
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
@@ -30,12 +29,6 @@ const Sidebar = () => {
       return undefined;
     }
   }, [sdk.parameters.installation]);
-
-  useEffect(() => {
-    const widgets = serializedWidgets?.map((widget) => widget.type);
-
-    WidgetRenderedEvent(widgets, 'Sidebar');
-  }, [serializedWidgets]);
 
   return <EntryWidgets widgetsList={serializedWidgets} canEditAppConfig={canEditAppConfig} />;
 };

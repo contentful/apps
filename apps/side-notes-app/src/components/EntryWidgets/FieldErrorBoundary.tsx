@@ -10,7 +10,7 @@ interface State {
   hasError: boolean;
 }
 
-export class FieldErrorErroBoundary extends Component<Props, State> {
+export class FieldErrorErroBoundary extends Component<React.PropsWithChildren<Props>, State> {
   state: Readonly<State> = {
     hasError: false,
   };

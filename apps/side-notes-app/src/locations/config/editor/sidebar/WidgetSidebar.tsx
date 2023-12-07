@@ -4,15 +4,10 @@ import { useContext } from 'react';
 import { SidebarRenderProp } from './SidebarRenderProp';
 
 import { WidgetEditorContext } from '../WidgetEditorContext';
-import { WidgetLocationEvent } from '../../../../analytics';
-import {
-  WidgetType,
-  WidgetLocationEventAction,
-  AnalyticsContentTypeAssignmentWidgetLocation,
-} from '../../../../types';
+import { WidgetType } from '../../../../types';
 
 export const WidgetSidebar = () => {
-  const { selectedElementObj, setElementByKey, location } = useContext(WidgetEditorContext);
+  const { selectedElementObj, setElementByKey } = useContext(WidgetEditorContext);
 
   if (!selectedElementObj) {
     return <div>No element selected</div>;
@@ -35,12 +30,6 @@ export const WidgetSidebar = () => {
       props: propsCopy,
     };
     setElementByKey(selectedElementObj.key, newObj);
-    WidgetLocationEvent(
-      WidgetLocationEventAction.WIDGET_PROP_EDITED,
-      location === 'Field'
-        ? AnalyticsContentTypeAssignmentWidgetLocation.FIELD
-        : AnalyticsContentTypeAssignmentWidgetLocation.SIDEBAR
-    );
   };
 
   return (

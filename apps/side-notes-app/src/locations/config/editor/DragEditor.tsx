@@ -5,11 +5,6 @@ import styled from 'styled-components';
 
 import { DragDropContext, Draggable, DropResult, Droppable } from 'react-beautiful-dnd';
 
-import { WidgetLocationEvent } from '../../../analytics';
-import {
-  AnalyticsContentTypeAssignmentWidgetLocation,
-  WidgetLocationEventAction,
-} from '../../../types';
 import { DragElement } from './DragElement';
 import { FieldWrapper } from './FieldWrapper';
 import { SidebarWrapper } from './SidebarWrapper';
@@ -40,13 +35,6 @@ export const DragEditor = () => {
     const [removed] = newItems.splice(result.source.index, 1);
     newItems.splice(result.destination.index, 0, removed);
     setElements(newItems);
-    WidgetLocationEvent(
-      WidgetLocationEventAction.WIDGET_MOVED,
-      location === 'Field'
-        ? AnalyticsContentTypeAssignmentWidgetLocation.FIELD
-        : AnalyticsContentTypeAssignmentWidgetLocation.SIDEBAR,
-      removed.type
-    );
   };
 
   const VisualWrapper = locationWrappers[location];
@@ -55,9 +43,7 @@ export const DragEditor = () => {
     <Flex flexDirection="column" gap="spacingM" alignItems="center" fullWidth fullHeight>
       <EditorContent>
         <VisualWrapper>
-          {/* @ts-expect-error */}
           <DragDropContext onDragEnd={onDragEnd}>
-            {/* @ts-expect-error */}
             <Droppable droppableId="droppable">
               {(provided) => (
                 <Flex
@@ -67,7 +53,6 @@ export const DragEditor = () => {
                   ref={provided.innerRef}>
                   {elements.map((element, index) => {
                     return (
-                      // @ts-expect-error
                       <Draggable key={element.key} draggableId={element.key} index={index}>
                         {(provided) => (
                           <div

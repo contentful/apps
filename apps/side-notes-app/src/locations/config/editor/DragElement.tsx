@@ -1,13 +1,8 @@
 import { DeleteIcon, DragIcon } from '@contentful/f36-icons';
 import { useContext } from 'react';
-import { WidgetLocationEvent } from '../../../analytics';
 import { WidgetRenderer } from '../../../components/WidgetRenderer';
 
-import {
-  WidgetType,
-  WidgetLocationEventAction,
-  AnalyticsContentTypeAssignmentWidgetLocation,
-} from '../../../types';
+import { WidgetType } from '../../../types';
 import { WidgetElementDefinition } from '../../../types/types';
 import {
   DeleteButton,
@@ -25,16 +20,10 @@ export const DragElement = ({
   widgetDef: WidgetElementDefinition;
   isSelected: boolean;
 }) => {
-  const { setElements, location, selectedContentTypeDef } = useContext(WidgetEditorContext);
+  const { setElements, selectedContentTypeDef } = useContext(WidgetEditorContext);
 
   const removeWidgetElement = () => {
     setElements((prevElements) => prevElements.filter((el) => el.key !== widgetDef.key));
-    WidgetLocationEvent(
-      WidgetLocationEventAction.WIDGET_DELETED,
-      location === 'Field'
-        ? AnalyticsContentTypeAssignmentWidgetLocation.FIELD
-        : AnalyticsContentTypeAssignmentWidgetLocation.SIDEBAR
-    );
   };
   return (
     <DragElementContainer

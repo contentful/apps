@@ -4,9 +4,7 @@ import tokens from '@contentful/f36-tokens';
 import { useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { ContentTypeAssignmentEvent } from '../../analytics';
 import { useWidgetStore } from '../../stores/widgets.store';
-import { AnalyticsContentTypeAssignmentEventAction } from '../../types';
 import { ContentTypeElement } from './ContentTypeElement';
 import { ContentTypeListContext } from './ContentTypeListContext';
 
@@ -84,7 +82,6 @@ export const ContentTypeList = () => {
                 onClick={() => {
                   addNewContentType(item);
                   navigate(`/ct/${item.sys.id}/sidebar`);
-                  ContentTypeAssignmentEvent(AnalyticsContentTypeAssignmentEventAction.CREATE);
                 }}>
                 {item.name}
               </Menu.Item>

@@ -2,7 +2,6 @@ import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { useEffect, useMemo, useState } from 'react';
 import { EntryWidgets } from '../components/EntryWidgets';
-import { WidgetRenderedEvent } from '../analytics/events/WidgetRenderedEvent';
 import { WidgetElementDefinition } from '../types';
 
 const Field = () => {
@@ -30,12 +29,6 @@ const Field = () => {
       return undefined;
     }
   }, [sdk.parameters.installation]);
-
-  useEffect(() => {
-    const widgets = serializedWidgets?.map((widget) => widget.type);
-
-    WidgetRenderedEvent(widgets, 'Field', sdk.field.type);
-  }, [serializedWidgets]);
 
   return <EntryWidgets widgetsList={serializedWidgets} canEditAppConfig={canEditAppConfig} />;
 };
