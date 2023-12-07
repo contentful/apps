@@ -1,5 +1,6 @@
-import { Flex, Subheading } from '@contentful/f36-components';
+import { Box, Flex, Subheading } from '@contentful/f36-components';
 import { HyperLink } from '@contentful/integration-component-library';
+import { styles } from './EmptyState.styles';
 
 interface Props {
   image: JSX.Element;
@@ -16,7 +17,9 @@ const EmptyState = (props: Props) => {
     <Flex flexDirection="column" alignItems="center">
       {image}
       <Subheading>{heading}</Subheading>
-      <HyperLink body={body} substring={linkSubstring} href={linkHref} />
+      <Box className={styles.emptyContent}>
+        <HyperLink body={body} substring={linkSubstring} href={linkHref} />
+      </Box>
     </Flex>
   );
 };

@@ -1,5 +1,5 @@
 import { ModalConfirm, Text } from '@contentful/f36-components';
-import { editModeFooter } from '@constants/configCopy';
+import { notificationsSection } from '@constants/configCopy';
 
 interface Props {
   isShown: boolean;
@@ -16,8 +16,8 @@ const DeleteModal = (props: Props) => {
       isShown={isShown}
       onCancel={handleCancel}
       onConfirm={handleDelete}
-      confirmLabel={editModeFooter.delete}>
-      <Text>{editModeFooter.confirmDelete}</Text>
+      confirmLabel={notificationsSection.delete}>
+      <Text>{notificationsSection.confirmDelete}</Text>
     </ModalConfirm>
   );
 };

@@ -21,6 +21,11 @@ const mockSdk: any = {
   },
   ids: {
     app: 'test-app',
+    space: 'xyz789',
+    environment: 'master',
+  },
+  hostnames: {
+    webapp: 'app.contentful.com',
   },
   cma: {
     contentType: {

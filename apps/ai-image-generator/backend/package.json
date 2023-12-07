@@ -14,13 +14,13 @@
   },
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.6.0",
-    "contentful-management": "^10.44.0",
-    "openai": "^4.0.0",
+    "contentful-management": "^10.46.4",
+    "openai": "^4.20.1",
     "sharp": "^0.33.0"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.0",
-    "@types/chai": "^4.3.5",
+    "@types/chai": "^4.3.11",
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^10.0.16",
     "@types/sinon-chai": "^3.2.9",

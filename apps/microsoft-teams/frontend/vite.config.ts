@@ -26,6 +26,7 @@ export default defineConfig(() => ({
     alias: {
       '@components': path.resolve(__dirname, './src/components'),
       '@constants': path.resolve(__dirname, './src/constants'),
+      '@context': path.resolve(__dirname, './src/context'),
       '@customTypes': path.resolve(__dirname, './src/customTypes'),
       '@helpers': path.resolve(__dirname, './src/helpers'),
       '@hooks': path.resolve(__dirname, './src/hooks'),

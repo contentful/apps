@@ -120,6 +120,36 @@ export type OpenDialogFn = (
  */
 export type DisabledPredicateFn = (currentValue: Asset[], config: Config) => boolean;
 
+/**
+ * Async function that takes in context about the current field value, the result from the dialog, and the app config
+ * It also accepts a function to update the field state, and this should be called in the function to update the field
+ *
+ * @param context { currentValue, result, config }
+ * @return Promise<void>, calls the async function updateStateValue
+ */
+export type CustomUpdateStateValueFn = (
+  context: {
+    currentValue: Asset[];
+    result: Asset[];
+    config: Config;
+  },
+  updateStateValue: (value: Asset[]) => void
+) => Promise<void>;
+
+/**
+ * Object containing additional data about the asset to display as primary and secondary information in the "more details" section
+ */
+export type AdditionalData = { primary: string; secondary: string };
+
+/**
+ * Function that return an object that represents the primary and secondary data that should be displayed
+ * in the "more details" section of the asset card
+ *
+ * @param asset an asset
+ * @return object with primary and secondary properties that contain strings to display in the asset card
+ */
+export type GetAdditionalDataFn = (asset: Asset) => AdditionalData;
+
 export interface Integration {
   /**
    * Text on the button that is displayed in the field location
@@ -216,4 +246,21 @@ export interface Integration {
    * @returns true, if the button in the field location should be disabled. false, if the button should be enabled
    */
   isDisabled: DisabledPredicateFn;
+
+  /**
+   * Optional async function that will override the current updateStateValue function
+   * This custom function accepts context about the asset as well as the updateStateValue function,
+   * which should be called within the custom function
+   * A use case for this is to change the default behavior where newly selected assets are appended to the current field value
+   * This is optional and if not provided, the default behavior of appending the result will be applied
+   */
+  customUpdateStateValue?: CustomUpdateStateValueFn;
+
+  /**
+   * Optional function to get additional data from the asset to be displayed in the asset card
+   * This function accepts asset info and returns an object that contains primary and secondary information to display
+   * When this function is used, a "more details" section will appear on the asset card
+   * This is optional and if not provided, the default look of the asset card will remain
+   */
+  getAdditionalData?: GetAdditionalDataFn;
 }

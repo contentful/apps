@@ -1,17 +1,16 @@
 import ContentTypeSelection from './ContentTypeSelection';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { contentTypeSelection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
+import { ContentTypeCustomRender } from '@test/helpers/ContentTypeCustomRender';
 
 describe('ContentTypeSelection component', () => {
   it('mounts and renders the correct title and button copy when no content type is selected', () => {
-    const { unmount } = render(
+    const { unmount } = ContentTypeCustomRender(
       <ContentTypeSelection
         notification={defaultNotification}
-        handleNotificationEdit={vi.fn()}
-        contentTypes={[]}
-      />
+        handleNotificationEdit={vi.fn()}></ContentTypeSelection>
     );
 
     expect(screen.getByText(contentTypeSelection.title)).toBeTruthy();
@@ -19,12 +18,10 @@ describe('ContentTypeSelection component', () => {
     unmount();
   });
   it('mounts and renders an input when a content type is selected', () => {
-    const { unmount } = render(
+    const { unmount } = ContentTypeCustomRender(
       <ContentTypeSelection
         notification={{ ...defaultNotification, contentTypeId: 'blogPost' }}
-        handleNotificationEdit={vi.fn()}
-        contentTypes={[]}
-      />
+        handleNotificationEdit={vi.fn()}></ContentTypeSelection>
     );
 
     expect(screen.getByRole('textbox')).toBeTruthy();

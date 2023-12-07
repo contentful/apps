@@ -25,6 +25,8 @@ export function setup(integration: Integration) {
             makeThumbnail={integration.makeThumbnail}
             openDialog={integration.openDialog}
             isDisabled={integration.isDisabled}
+            customUpdateStateValue={integration.customUpdateStateValue ?? null}
+            getAdditionalData={integration.getAdditionalData ?? null}
           />
         </>,
         root
