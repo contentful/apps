@@ -12,14 +12,13 @@ import {
 import { MoreHorizontalIcon } from '@contentful/f36-icons';
 import { styles } from './NotificationViewMode.styles';
 import { getContentTypeName, getChannelName } from '@helpers/configHelpers';
-import { Notification } from '@customTypes/configPage';
+import { Notification, TeamsChannel } from '@customTypes/configPage';
 import {
   channelSelection,
   contentTypeSelection,
   notificationsSection,
 } from '@constants/configCopy';
 // TODO: update this when we start fetching channel installations
-import mockChannels from '@test/mocks/mockChannels.json';
 
 interface Props {
   index: number;
@@ -28,11 +27,19 @@ interface Props {
   handleEdit: () => void;
   isMenuDisabled: boolean;
   handleDelete: () => void;
+  channels: TeamsChannel[];
 }
 
 const NotificationViewMode = (props: Props) => {
-  const { index, notification, updateNotification, handleEdit, isMenuDisabled, handleDelete } =
-    props;
+  const {
+    index,
+    notification,
+    updateNotification,
+    handleEdit,
+    isMenuDisabled,
+    handleDelete,
+    channels,
+  } = props;
   const { contentTypes } = useContext(ContentTypeContext);
 
   return (
@@ -47,7 +54,7 @@ const NotificationViewMode = (props: Props) => {
             )}
           </Subheading>
           <Paragraph marginBottom="none">
-            {getChannelName(notification.channelId, mockChannels, channelSelection.notFound)}
+            {getChannelName(notification.channelId, channels, channelSelection.notFound)}
           </Paragraph>
         </Flex>
         <Flex alignItems="center">

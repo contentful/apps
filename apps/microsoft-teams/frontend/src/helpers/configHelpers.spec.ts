@@ -6,8 +6,7 @@ import {
   isNotificationNew,
   doesNotificationHaveChanges,
 } from './configHelpers';
-import mockChannels from '@test/mocks/mockChannels.json';
-import { mockContentType } from '@test/mocks';
+import { mockChannels, mockContentType } from '@test/mocks';
 import { channelSelection, contentTypeSelection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
 import { mockNotification } from '@test/mocks';

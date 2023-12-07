@@ -98,6 +98,7 @@ const NotificationsSection = (props: Props) => {
                 handleEdit={() => setNotificationIndexToEdit(index)}
                 isMenuDisabled={notificationIndexToEdit !== null}
                 handleDelete={() => handleDelete(index)}
+                channels={channels}
               />
             );
           }

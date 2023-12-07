@@ -4,6 +4,7 @@ import { screen } from '@testing-library/react';
 import { notificationsSection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
 import { ContentTypeCustomRender } from '@test/helpers/ContentTypeCustomRender';
+import { mockChannels } from '@test/mocks';
 
 describe('NotificationViewMode component', () => {
   it('mounts with correct copy and menu', () => {
@@ -15,6 +16,7 @@ describe('NotificationViewMode component', () => {
         handleEdit={vi.fn()}
         isMenuDisabled={false}
         handleDelete={vi.fn()}
+        channels={mockChannels}
       />
     );
 
@@ -32,6 +34,7 @@ describe('NotificationViewMode component', () => {
         handleEdit={vi.fn()}
         isMenuDisabled={false}
         handleDelete={vi.fn()}
+        channels={mockChannels}
       />
     );
 
