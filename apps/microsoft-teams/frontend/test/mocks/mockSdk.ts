@@ -12,6 +12,8 @@ const mockSdk: any = {
     getParameters: vi.fn().mockReturnValueOnce({}),
     setReady: vi.fn(),
     getCurrentState: vi.fn(),
+    onConfigurationCompleted: vi.fn(),
+    isInstalled: vi.fn().mockReturnValue(true),
   },
   parameters: {
     instance: [],
@@ -34,6 +36,9 @@ const mockSdk: any = {
     appActionCall: {
       createWithResponse: vi.fn(),
     },
+  },
+  notifier: {
+    error: vi.fn(),
   },
 };
 
