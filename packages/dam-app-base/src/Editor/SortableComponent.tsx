@@ -101,9 +101,11 @@ const styles = {
   primaryAdditionalData: css({
     fontWeight: tokens.fontWeightMedium,
     color: tokens.gray800,
+    cursor: 'default',
   }),
   secondaryAdditionalData: css({
     color: tokens.gray500,
+    cursor: 'default',
   }),
   textlink: css({
     marginTop: tokens.spacingXs,
@@ -135,22 +137,24 @@ const DragHandle = SortableHandle<DragHandleProps>(
       // if additional data is provided then the "more details" section will be visible
       if (!url) {
         return (
-          <div>
-            <Flex justifyContent="center" title={alt}>
-              <FileIcon />
-            </Flex>
-            {<AdditionalDataDisplay additionalData={additionalData} />}
-          </div>
+          <>
+            <div>
+              <Flex justifyContent="center" title={alt}>
+                <FileIcon />
+              </Flex>
+            </div>
+            <AdditionalDataDisplay additionalData={additionalData} />
+          </>
         );
       } else {
         return (
           <>
             <div>
               <img src={url} alt={alt} title={alt} />
-              <Collapse isExpanded={isExpanded}>
-                {<AdditionalDataDisplay additionalData={additionalData} />}
-              </Collapse>
             </div>
+            <Collapse isExpanded={isExpanded}>
+              {<AdditionalDataDisplay additionalData={additionalData} />}
+            </Collapse>
             <TextLink
               as="button"
               onClick={() => setIsExpanded((currentIsExpanded) => !currentIsExpanded)}
