@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { mockGetManyContentType } from './mockContentTypes';
 
 const mockParameters = {
   tenantId: 'abc-123',
@@ -31,7 +32,7 @@ const mockSdk: any = {
   },
   cma: {
     contentType: {
-      getMany: vi.fn().mockReturnValueOnce({}),
+      getMany: vi.fn().mockReturnValueOnce(mockGetManyContentType),
     },
     appActionCall: {
       createWithResponse: vi.fn(),

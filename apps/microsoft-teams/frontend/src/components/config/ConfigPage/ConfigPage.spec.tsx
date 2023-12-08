@@ -9,9 +9,9 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('ConfigPage component', () => {
-  it('mounts and renders access section', () => {
+  it('mounts and renders access section', async () => {
     render(<ConfigPage />);
 
-    expect(screen.getByText(accessSection.title)).toBeTruthy();
+    await expect(screen.getByText(accessSection.title)).toBeTruthy();
   });
 });
