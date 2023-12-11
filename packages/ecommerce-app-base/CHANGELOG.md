@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.4.10](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.4.9...@contentful/ecommerce-app-base@3.4.10) (2023-12-11)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/react-apps-toolkit from 1.2.2 to 1.2.16 ([#5716](https://github.com/contentful/apps/issues/5716)) ([1471c98](https://github.com/contentful/apps/commit/1471c98fcef395588b138e66051000355a196b19))
+
 ## [3.4.9](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.4.8...@contentful/ecommerce-app-base@3.4.9) (2023-12-08)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
