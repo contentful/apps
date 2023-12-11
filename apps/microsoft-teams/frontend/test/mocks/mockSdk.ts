@@ -13,6 +13,12 @@ const mockSdk: any = {
     setReady: vi.fn(),
     getCurrentState: vi.fn(),
   },
+  parameters: {
+    instance: [],
+    installation: {
+      tenantId: mockParameters.tenantId,
+    },
+  },
   ids: {
     app: 'test-app',
     space: 'xyz789',
@@ -24,6 +30,9 @@ const mockSdk: any = {
   cma: {
     contentType: {
       getMany: vi.fn().mockReturnValueOnce({}),
+    },
+    appActionCall: {
+      createWithResponse: vi.fn(),
     },
   },
 };

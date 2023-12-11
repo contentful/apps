@@ -8,6 +8,7 @@ import NotificationViewMode from '@components/config/NotificationViewMode/Notifi
 import DeleteModal from '@components/config/DeleteModal/DeleteModal';
 import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
+import useGetTeamsChannels from '@hooks/useGetTeamsChannels';
 import { ContentTypeContextProvider } from '@context/ContentTypeProvider';
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
 const NotificationsSection = (props: Props) => {
   const { notifications, dispatch } = props;
   const [notificationIndexToEdit, setNotificationIndexToEdit] = useState<number | null>(null);
+  const channels = useGetTeamsChannels();
 
   const createNewNotification = () => {
     dispatch({ type: actions.ADD_NOTIFICATION });
@@ -83,6 +85,7 @@ const NotificationsSection = (props: Props) => {
                 updateNotification={updateNotification}
                 notification={notification}
                 setNotificationIndexToEdit={setNotificationIndexToEdit}
+                channels={channels}
               />
             );
           } else {
@@ -95,6 +98,7 @@ const NotificationsSection = (props: Props) => {
                 handleEdit={() => setNotificationIndexToEdit(index)}
                 isMenuDisabled={notificationIndexToEdit !== null}
                 handleDelete={() => handleDelete(index)}
+                channels={channels}
               />
             );
           }

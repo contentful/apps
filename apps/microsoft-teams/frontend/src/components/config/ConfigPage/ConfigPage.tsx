@@ -9,7 +9,6 @@ import useInitializeParameters from '@hooks/useInitializeParameters';
 
 const ConfigPage = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
-
   const sdk = useSDK<ConfigAppSDK>();
 
   useInitializeParameters(dispatchParameters);

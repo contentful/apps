@@ -5,7 +5,7 @@ import ChannelSelection from '@components/config/ChannelSelection/ChannelSelecti
 import EventsSelection from '@components/config/EventsSelection/EventsSelection';
 import NotificationEditModeFooter from '@components/config/NotificationEditModeFooter/NotificationEditModeFooter';
 import { styles } from './NotificationEditMode.styles';
-import { Notification } from '@customTypes/configPage';
+import { Notification, TeamsChannel } from '@customTypes/configPage';
 import {
   isNotificationReadyToSave,
   isNotificationNew,
@@ -19,6 +19,7 @@ interface Props {
   updateNotification: (index: number, editedNotification: Partial<Notification>) => void;
   notification: Notification;
   setNotificationIndexToEdit: Dispatch<SetStateAction<number | null>>;
+  channels: TeamsChannel[];
 }
 
 const NotificationEditMode = (props: Props) => {
@@ -28,6 +29,7 @@ const NotificationEditMode = (props: Props) => {
     updateNotification,
     notification,
     setNotificationIndexToEdit,
+    channels,
   } = props;
 
   const [editedNotification, setEditedNotification] = useState<Notification>(notification);
@@ -82,6 +84,7 @@ const NotificationEditMode = (props: Props) => {
         <ChannelSelection
           notification={editedNotification}
           handleNotificationEdit={handleNotificationEdit}
+          channels={channels}
         />
         <EventsSelection
           notification={editedNotification}

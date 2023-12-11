@@ -7,7 +7,11 @@ import { defaultNotification } from '@constants/defaultParams';
 describe('ChannelSelection component', () => {
   it('mounts and renders the correct title and button copy when no channel is selected', () => {
     const { unmount } = render(
-      <ChannelSelection notification={defaultNotification} handleNotificationEdit={vi.fn()} />
+      <ChannelSelection
+        notification={defaultNotification}
+        handleNotificationEdit={vi.fn()}
+        channels={[]}
+      />
     );
 
     expect(screen.getByText(channelSelection.title)).toBeTruthy();
@@ -19,6 +23,7 @@ describe('ChannelSelection component', () => {
       <ChannelSelection
         notification={{ ...defaultNotification, channelId: 'abc-123' }}
         handleNotificationEdit={vi.fn()}
+        channels={[]}
       />
     );
 

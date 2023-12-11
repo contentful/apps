@@ -10,28 +10,23 @@ import {
 } from '@contentful/f36-components';
 import { appDeepLink, channelSelection } from '@constants/configCopy';
 import { styles } from './ChannelSelectionModal.styles';
-import { Notification } from '@customTypes/configPage';
+import { Notification, TeamsChannel } from '@customTypes/configPage';
 import ModalHeader from '@components/config/ModalHeader/ModalHeader';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 import EmptyState from '@components/config/EmptyState/EmptyState';
 import EmptyFishbowl from '@components/config/EmptyState/EmptyFishbowl';
-// TODO: update this when we start fetching channel installations
-import mockChannels from '@test/mocks/mockChannels.json';
 
-interface Props {
+interface ChannelSelectionModalProps {
   isShown: boolean;
   onClose: () => void;
   savedChannelId: string;
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
+  channels: TeamsChannel[];
 }
 
-const ChannelSelectionModal = (props: Props) => {
-  const { isShown, onClose, savedChannelId, handleNotificationEdit } = props;
-  // TODO: update this when we start fetching channel installations
-  const channels = mockChannels;
-
-  const [selectedChannelId, setSelectedChannelId] = useState(savedChannelId ?? '');
-
+const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
+  const { isShown, onClose, savedChannelId, handleNotificationEdit, channels } = props;
+  const [selectedChannelId, setSelectedChannelId] = useState<string>(savedChannelId ?? '');
   const { title, button, link, emptyContent, emptyHeading, description } = channelSelection.modal;
 
   return (

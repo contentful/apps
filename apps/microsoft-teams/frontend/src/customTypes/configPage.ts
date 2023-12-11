@@ -18,6 +18,7 @@ export type SelectedEvents = {
 
 export interface TeamsChannel {
   id: string;
+  tenantId: string;
   name: string;
   teamId: string;
   teamName: string;

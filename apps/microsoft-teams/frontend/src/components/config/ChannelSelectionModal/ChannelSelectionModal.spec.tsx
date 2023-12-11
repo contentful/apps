@@ -11,6 +11,7 @@ describe('ChannelSelectionModal component', () => {
         onClose={vi.fn()}
         savedChannelId=""
         handleNotificationEdit={vi.fn()}
+        channels={[]}
       />
     );
 
