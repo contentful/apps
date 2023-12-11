@@ -22,7 +22,7 @@
     "@contentful/field-editor-slug": "^1.2.0",
     "@contentful/field-editor-tags": "^1.2.0",
     "@contentful/field-editor-url": "^1.2.0",
-    "@contentful/react-apps-toolkit": "1.2.2",
+    "@contentful/react-apps-toolkit": "1.2.16",
     "@segment/analytics-next": "^1.51.0",
     "@uiw/react-codemirror": "^4.19.4",
     "codemirror": "5.65.16",
