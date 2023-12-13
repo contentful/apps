@@ -1,13 +1,13 @@
 import { ModalConfirm, Text } from '@contentful/f36-components';
 import { notificationsSection } from '@constants/configCopy';
 
-interface Props {
+interface DuplicateModalProps {
   isShown: boolean;
   handleCancel: () => void;
   handleConfirm: () => void;
 }
 
-const CancelModal = (props: Props) => {
+const DuplicateModal = (props: DuplicateModalProps) => {
   const { isShown, handleCancel, handleConfirm } = props;
 
   return (
@@ -24,4 +24,4 @@ const CancelModal = (props: Props) => {
   );
 };
 
-export default CancelModal;
+export default DuplicateModal;
