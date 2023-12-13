@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { notificationsSection } from '@constants/configCopy';
 import DuplicateModal from './DuplicateModal';
 
-describe('DeleteModal component', () => {
+describe('DuplicateModal component', () => {
   it('mounts and renders the correct content', () => {
     render(<DuplicateModal isShown={true} handleCancel={vi.fn()} handleConfirm={vi.fn()} />);
 
