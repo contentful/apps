@@ -10,6 +10,7 @@ import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
 import useGetTeamsChannels from '@hooks/useGetTeamsChannels';
 import { ContentTypeContextProvider } from '@context/ContentTypeProvider';
+import DuplicateModal from '../DuplicateModal/DuplicateModal';
 
 interface Props {
   notifications: Notification[];
@@ -55,10 +56,45 @@ const NotificationsSection = (props: Props) => {
 
   const updateNotification = (index: number, editedNotification: Partial<Notification>) => {
     const notificationsPayload = [...notifications];
-    notificationsPayload[index] = { ...notificationsPayload[index], ...editedNotification };
+    const existingNotification = notificationsPayload[index];
+
+    // Update the notification at the specified index
+    const updatedNotification = { ...existingNotification, ...editedNotification };
+    notificationsPayload[index] = updatedNotification;
+
+    // Deduplicate based on content
+    const uniqueNotifications = notificationsPayload.filter(
+      (notification, idx) =>
+        notificationsPayload.findIndex(
+          (n) =>
+            n.channelId === notification.channelId && n.contentTypeId === notification.contentTypeId
+        ) === idx
+    );
+
+    // Check if the updated notification is unique
+    const isUnique = uniqueNotifications.length === notificationsPayload.length;
+
+    // If not unique, open the modal and set the index for further handling
+    if (!isUnique) {
+      ModalLauncher.open(({ isShown, onClose }) => {
+        return (
+          <DuplicateModal
+            isShown={isShown}
+            handleCancel={() => {
+              onClose(true);
+            }}
+            handleConfirm={() => {
+              setNotificationIndexToEdit(index);
+              onClose(true);
+            }}
+          />
+        );
+      });
+    }
+
     dispatch({
       type: actions.UPDATE_NOTIFICATIONS,
-      payload: notificationsPayload,
+      payload: uniqueNotifications,
     });
   };
 
