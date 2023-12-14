@@ -63,7 +63,7 @@ const NotificationsSection = (props: Props) => {
     notificationsPayload[index] = updatedNotification;
 
     // Use a Set to keep track of unique keys
-    const uniqueKeys = new Set();
+    const uniqueKeys = new Set<string>();
 
     // Deduplicate based on content
     const uniqueNotifications = notificationsPayload.filter((notification) => {
