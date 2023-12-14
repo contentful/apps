@@ -13,7 +13,9 @@ const DuplicateModal = (props: DuplicateModalProps) => {
   return (
     <ModalConfirm
       intent="primary"
-      modalHeaderProps={{ title: 'Duplicate Notification' }}
+      modalHeaderProps={{
+        title: notificationsSection.duplicateModal.modalHeaderTitle,
+      }}
       isShown={isShown}
       onCancel={handleCancel}
       onConfirm={handleConfirm}

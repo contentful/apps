@@ -24,6 +24,7 @@ const notificationsSection = {
   confirmDelete:
     'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
   duplicateModal: {
+    modalHeaderTitle: 'Duplicate Notification',
     confirmDuplicate: 'Update existing notification',
     goBack: 'Go back to editing',
     confirmDuplicateDescription:
