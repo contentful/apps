@@ -1,0 +1,8 @@
+# TODO: Remove after we deprecate V1
+**/ConfigScreenV1.tsx
+**/SidebarV1.tsx
+**/DialogV1.tsx
+prompts.ts
+
+# TODO: Remove this when we update tests
+*spec.tsx
