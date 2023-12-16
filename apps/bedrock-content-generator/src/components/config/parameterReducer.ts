@@ -1,8 +1,14 @@
 import AppInstallationParameters from './appInstallationParameters';
 
+// accessKeyId: string;
+// secretAccessKey: string;
 export enum ParameterAction {
   UPDATE_MODEL = 'updateModel',
   UPDATE_APIKEY = 'updateApiKey',
+
+  UPDATE_ACCESS_KEY_ID = 'updateAccessKeyId',
+  UPDATE_SECRET_ACCESS_KEY = 'updateSecretAccessKey',
+
   UPDATE_PROFILE = 'updateProfile',
   UPDATE_BRAND_PROFILE = 'updateBrandProfile',
   APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
@@ -15,6 +21,19 @@ type ParameterStringActions = {
 
 type ParameterUpdateKeyAction = {
   type: ParameterAction.UPDATE_APIKEY;
+  value: string;
+  isValid: boolean;
+};
+
+
+type ParameterUpdateAccessKeyIDAction = {
+  type: ParameterAction.UPDATE_ACCESS_KEY_ID;
+  value: string;
+  isValid: boolean;
+};
+
+type ParameterUpdateSecretAccessKeyAction = {
+  type: ParameterAction.UPDATE_SECRET_ACCESS_KEY;
   value: string;
   isValid: boolean;
 };
@@ -42,15 +61,9 @@ export type ParameterReducer =
   | ParameterUpdateKeyAction
   | ParameterStringActions
   | ParameterProfileAction
-  | ParameterBrandProfileActions;
-
-const {
-  UPDATE_MODEL,
-  UPDATE_APIKEY,
-  UPDATE_PROFILE,
-  UPDATE_BRAND_PROFILE,
-  APPLY_CONTENTFUL_PARAMETERS,
-} = ParameterAction;
+  | ParameterBrandProfileActions
+  | ParameterUpdateAccessKeyIDAction
+  | ParameterUpdateSecretAccessKeyAction
 
 /**
  * This is a recursive type that will validate the parameter
@@ -71,7 +84,7 @@ const parameterReducer = (
   action: ParameterReducer
 ): Validator<AppInstallationParameters> => {
   switch (action.type) {
-    case UPDATE_MODEL:
+    case ParameterAction.UPDATE_MODEL:
       return {
         ...state,
         model: {
@@ -79,7 +92,7 @@ const parameterReducer = (
           isValid: action.value.length > 0,
         },
       };
-    case UPDATE_APIKEY: {
+    case ParameterAction.UPDATE_APIKEY: {
       return {
         ...state,
         key: {
@@ -88,7 +101,25 @@ const parameterReducer = (
         },
       };
     }
-    case UPDATE_PROFILE: {
+    case ParameterAction.UPDATE_ACCESS_KEY_ID: {
+      return {
+        ...state,
+        accessKeyId: {
+          value: action.value,
+          isValid: action.isValid,
+        },
+      };
+    }
+    case ParameterAction.UPDATE_SECRET_ACCESS_KEY: {
+      return {
+        ...state,
+        secretAccessKey: {
+          value: action.value,
+          isValid: action.isValid,
+        },
+      };
+    }
+    case ParameterAction.UPDATE_PROFILE: {
       const isValid = action.value.length <= action.textLimit;
 
       return {
@@ -99,7 +130,7 @@ const parameterReducer = (
         },
       };
     }
-    case UPDATE_BRAND_PROFILE: {
+    case ParameterAction.UPDATE_BRAND_PROFILE: {
       const isValid = action.value.length <= action.textLimit;
 
       return {
@@ -113,7 +144,7 @@ const parameterReducer = (
         },
       };
     }
-    case APPLY_CONTENTFUL_PARAMETERS: {
+    case ParameterAction.APPLY_CONTENTFUL_PARAMETERS: {
       const parameter = action.value as AppInstallationParameters;
       return {
         ...state,

@@ -77,6 +77,14 @@ const ConfigPage = () => {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingApiKey}`);
     }
 
+    if (!parameters.accessKeyId.isValid) {
+      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingAccessKeyId}`);
+    }
+
+    if (!parameters.secretAccessKey.isValid) {
+      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingSecretAccessKey}`);
+    }
+
     if (!parameters.model.isValid) {
       notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
     }
@@ -98,8 +106,9 @@ const ConfigPage = () => {
       <Heading>{Sections.pageHeading}</Heading>
       <hr css={styles.splitter} />
       <ConfigSection
-        apiKey={parameters.key.value}
-        isApiKeyValid={parameters.key.isValid}
+        accessKeyID={parameters.accessKeyId.value}
+        secretAccessKey={parameters.secretAccessKey.value}
+        isAccessKeyValid={parameters.secretAccessKey.isValid}
         model={parameters.model.value}
         dispatch={dispatchParameters}
       />

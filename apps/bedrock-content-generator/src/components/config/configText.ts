@@ -74,6 +74,15 @@ const APIKeyText = {
   link: 'https://platform.openai.com/account/api-keys',
 };
 
+const AccessKeyText = {
+  accessKeyIDTitle: 'AWS Access Key ID',
+  secretAccessKeyTitle: 'AWS Secret Access Key',
+  helpText:
+    'AWS Access Key. If you need to generate a key, visit our documentation(TODO) on creating a new IAM User and generating an access key.',
+  linkSubstring: 'documentation',
+  link: 'https://example.com',
+};
+
 const Sections = {
   pageHeading: 'Set up AI Content Generator',
   configHeading: 'Configuration',
@@ -99,6 +108,8 @@ const Sections = {
 
 const ConfigErrors = {
   missingApiKey: 'Invalid or missing API Key',
+  missingAccessKeyId: 'Invalid or missing Access Key ID',
+  missingSecretAccessKey: 'Invalid or missing Secret Access Key',
   missingModel: 'A valid model must be selected',
   exceededCharacterLimit: 'One or more profile fields exceeds the character limit',
   noContentTypes:
@@ -112,4 +123,4 @@ const ContentTypeText = {
   specificText: 'Select specific content types',
 };
 
-export { ModelText, BrandProfileFields, APIKeyText, Sections, ConfigErrors, ContentTypeText };
+export { ModelText, BrandProfileFields, APIKeyText, Sections, ConfigErrors, ContentTypeText, AccessKeyText };
