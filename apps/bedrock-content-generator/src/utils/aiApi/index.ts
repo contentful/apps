@@ -1,7 +1,11 @@
-import { ChatCompletionRequestMessage } from 'openai';
-import { streamToParsedText } from './aiHelpers';
-import { validateResponseStatus } from './handleAiApiErrors';
-import { defaultModelId } from '@configs/ai/gptModels';
+import { ChatCompletionRequestMessage } from "openai";
+import { streamToParsedText } from "./aiHelpers";
+import { validateResponseStatus } from "./handleAiApiErrors";
+import { defaultModelId } from "@configs/ai/gptModels";
+import {
+  BedrockClient,
+  ListFoundationModelsCommand,
+} from "@aws-sdk/client-bedrock";
 
 /**
  * This class is used to interact with OpenAI's API.
@@ -11,17 +15,26 @@ import { defaultModelId } from '@configs/ai/gptModels';
  * @param model string
  */
 class AI {
-  constructor(baseUrl: string, apiKey: string, model?: string) {
-    this.baseUrl = baseUrl;
-    this.apiKey = apiKey;
-    this.model = model ?? defaultModelId;
-    this.decoder = new TextDecoder('utf-8');
-  }
-
-  baseUrl: string;
-  apiKey: string;
-  model: string;
+  model?: string;
   decoder: TextDecoder;
+  private bedrockClient: BedrockClient;
+
+  constructor(
+    accessKeyID: string,
+    secretAccessKey: string,
+    model?: string,
+    region = "us-east-1",
+  ) {
+    this.model = model ?? defaultModelId;
+    this.decoder = new TextDecoder("utf-8");
+    this.bedrockClient = new BedrockClient({
+      region,
+      credentials: {
+        accessKeyId: accessKeyID,
+        secretAccessKey: secretAccessKey,
+      },
+    });
+  }
 
   /**
    * This function creates and returns a stream to OpenAI's API.
@@ -29,31 +42,32 @@ class AI {
    * @returns ReadableStreamDefaultReader<Uint8Array>
    */
   streamChatCompletion = async (payload: ChatCompletionRequestMessage[]) => {
-    const headers = {
-      Authorization: `Bearer ${this.apiKey}`,
-      'Content-Type': 'application/json',
-      responseType: 'stream',
-    };
+    throw new Error("Not implemented");
+    // const headers = {
+    //   Authorization: `Bearer ${this.apiKey}`,
+    //   "Content-Type": "application/json",
+    //   responseType: "stream",
+    // };
 
-    const body = JSON.stringify({
-      model: this.model,
-      messages: payload,
-      stream: true,
-    });
+    // const body = JSON.stringify({
+    //   model: this.model,
+    //   messages: payload,
+    //   stream: true,
+    // });
 
-    const streamResponse = await fetch(this.baseUrl, {
-      method: 'POST',
-      headers,
-      body,
-    });
+    // const streamResponse = await fetch(this.baseUrl, {
+    //   method: "POST",
+    //   headers,
+    //   body,
+    // });
 
-    if (streamResponse.status === 200) {
-      const stream = streamResponse.body?.getReader();
-      return stream;
-    } else {
-      const streamJson = await streamResponse.json();
-      validateResponseStatus(streamResponse, streamJson);
-    }
+    // if (streamResponse.status === 200) {
+    //   const stream = streamResponse.body?.getReader();
+    //   return stream;
+    // } else {
+    //   const streamJson = await streamResponse.json();
+    //   validateResponseStatus(streamResponse, streamJson);
+    // }
   };
 
   /**
@@ -72,13 +86,13 @@ class AI {
     const dataList = this.decoder.decode(value as Buffer);
     const lines = dataList.split(/\n{2}/);
 
-    const textData = lines.reduce(streamToParsedText, '');
+    const textData = lines.reduce(streamToParsedText, "");
 
     if (textData) {
       return textData;
     }
 
-    return '';
+    return "";
   };
 
   /**
@@ -86,30 +100,24 @@ class AI {
    * @param stream ReadableStreamDefaultReader<Uint8Array> | null
    * @returns void
    */
-  sendStopSignal = (stream: ReadableStreamDefaultReader<Uint8Array> | null | undefined) => {
+  sendStopSignal = (
+    stream: ReadableStreamDefaultReader<Uint8Array> | null | undefined,
+  ) => {
     if (stream) {
       stream.cancel();
     }
   };
 
   /**
-   * This function calls OpenAI's models endpoint in order to test whether the API Key is valid.
+   * This function calls Bedrock's ListFoundationModelsCommand to get a list of models.
    * @returns Promise<Response>
    */
-  getModels = async (): Promise<Response> => {
-    const headers = {
-      Authorization: `Bearer ${this.apiKey}`,
-      'Content-Type': 'application/json',
-    };
+  getModels = async () => {
+    const models = await this.bedrockClient.send(
+      new ListFoundationModelsCommand({}),
+    );
 
-    const res = await fetch(this.baseUrl, {
-      method: 'GET',
-      headers,
-    });
-
-    const responseJson = await res.json();
-    validateResponseStatus(res, responseJson);
-    return responseJson;
+    return models.modelSummaries ?? [];
   };
 }
 

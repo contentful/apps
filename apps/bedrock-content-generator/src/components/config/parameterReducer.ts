@@ -1,17 +1,11 @@
-import AppInstallationParameters from './appInstallationParameters';
+import AppInstallationParameters from "./appInstallationParameters";
 
-// accessKeyId: string;
-// secretAccessKey: string;
 export enum ParameterAction {
-  UPDATE_MODEL = 'updateModel',
-  UPDATE_APIKEY = 'updateApiKey',
-
-  UPDATE_ACCESS_KEY_ID = 'updateAccessKeyId',
-  UPDATE_SECRET_ACCESS_KEY = 'updateSecretAccessKey',
-
-  UPDATE_PROFILE = 'updateProfile',
-  UPDATE_BRAND_PROFILE = 'updateBrandProfile',
-  APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
+  UPDATE_MODEL = "updateModel",
+  UPDATE_CREDENTIALS = "updateCredentials",
+  UPDATE_PROFILE = "updateProfile",
+  UPDATE_BRAND_PROFILE = "updateBrandProfile",
+  APPLY_CONTENTFUL_PARAMETERS = "applyContentfulParameters",
 }
 
 type ParameterStringActions = {
@@ -19,22 +13,12 @@ type ParameterStringActions = {
   value: string;
 };
 
-type ParameterUpdateKeyAction = {
-  type: ParameterAction.UPDATE_APIKEY;
-  value: string;
-  isValid: boolean;
-};
-
-
-type ParameterUpdateAccessKeyIDAction = {
-  type: ParameterAction.UPDATE_ACCESS_KEY_ID;
-  value: string;
-  isValid: boolean;
-};
-
-type ParameterUpdateSecretAccessKeyAction = {
-  type: ParameterAction.UPDATE_SECRET_ACCESS_KEY;
-  value: string;
+type ParameterUpdateCredentialsAction = {
+  type: ParameterAction.UPDATE_CREDENTIALS;
+  value: {
+    accessKeyId: string;
+    secretAccessKey: string;
+  };
   isValid: boolean;
 };
 
@@ -58,12 +42,10 @@ type ParameterBrandProfileActions = {
 
 export type ParameterReducer =
   | ParameterObjectActions
-  | ParameterUpdateKeyAction
   | ParameterStringActions
   | ParameterProfileAction
   | ParameterBrandProfileActions
-  | ParameterUpdateAccessKeyIDAction
-  | ParameterUpdateSecretAccessKeyAction
+  | ParameterUpdateCredentialsAction;
 
 /**
  * This is a recursive type that will validate the parameter
@@ -81,7 +63,7 @@ export type Validator<Type> = {
 
 const parameterReducer = (
   state: Validator<AppInstallationParameters>,
-  action: ParameterReducer
+  action: ParameterReducer,
 ): Validator<AppInstallationParameters> => {
   switch (action.type) {
     case ParameterAction.UPDATE_MODEL:
@@ -92,29 +74,15 @@ const parameterReducer = (
           isValid: action.value.length > 0,
         },
       };
-    case ParameterAction.UPDATE_APIKEY: {
-      return {
-        ...state,
-        key: {
-          value: action.value,
-          isValid: action.isValid,
-        },
-      };
-    }
-    case ParameterAction.UPDATE_ACCESS_KEY_ID: {
+    case ParameterAction.UPDATE_CREDENTIALS: {
       return {
         ...state,
         accessKeyId: {
-          value: action.value,
+          value: action.value.accessKeyId,
           isValid: action.isValid,
         },
-      };
-    }
-    case ParameterAction.UPDATE_SECRET_ACCESS_KEY: {
-      return {
-        ...state,
         secretAccessKey: {
-          value: action.value,
+          value: action.value.secretAccessKey,
           isValid: action.isValid,
         },
       };
@@ -162,27 +130,27 @@ const parameterReducer = (
         },
         brandProfile: {
           values: {
-            value: parameter.brandProfile?.values || '',
+            value: parameter.brandProfile?.values || "",
             isValid: true,
           },
           tone: {
-            value: parameter.brandProfile?.tone || '',
+            value: parameter.brandProfile?.tone || "",
             isValid: true,
           },
           exclude: {
-            value: parameter.brandProfile?.exclude || '',
+            value: parameter.brandProfile?.exclude || "",
             isValid: true,
           },
           include: {
-            value: parameter.brandProfile?.include || '',
+            value: parameter.brandProfile?.include || "",
             isValid: true,
           },
           audience: {
-            value: parameter.brandProfile?.audience || '',
+            value: parameter.brandProfile?.audience || "",
             isValid: true,
           },
           additional: {
-            value: parameter.brandProfile?.additional || '',
+            value: parameter.brandProfile?.additional || "",
             isValid: true,
           },
         },

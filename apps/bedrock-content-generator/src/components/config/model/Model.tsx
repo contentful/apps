@@ -1,26 +1,50 @@
-import { ChangeEvent, Dispatch } from 'react';
-import { FormControl, Select } from '@contentful/f36-components';
-import { gptModels, defaultModelId } from '@configs/ai/gptModels';
-import { ModelText } from '../configText';
-import { ParameterAction, ParameterReducer } from '../parameterReducer';
-import { ConfigErrors } from '../configText';
+import { ChangeEvent, Dispatch, useEffect, useMemo, useState } from "react";
+import { FormControl, Select } from "@contentful/f36-components";
+import { gptModels, defaultModelId } from "@configs/ai/gptModels";
+import { ModelText } from "../configText";
+import { ParameterAction, ParameterReducer } from "../parameterReducer";
+import { ConfigErrors } from "../configText";
+import AI from "@utils/aiApi";
+import { FoundationModelSummary } from "@aws-sdk/client-bedrock";
 
 interface Props {
   model: string;
   dispatch: Dispatch<ParameterReducer>;
+  credentials: {
+    accessKeyID: string;
+    secretAccessKey: string;
+  };
+  credentialsValid: boolean;
 }
 
-const Model = (props: Props) => {
-  const { model, dispatch } = props;
+const Model = ({ credentials, credentialsValid, model, dispatch }: Props) => {
+  const ai = useMemo(
+    () =>
+      credentialsValid
+        ? new AI(credentials.accessKeyID, credentials.secretAccessKey)
+        : null,
+    [credentials, credentialsValid],
+  );
 
-  const modelList = gptModels.map((model) => (
-    <Select.Option key={model.id} value={model.id}>
-      {model.name}
+  const [models, setModels] = useState<FoundationModelSummary[]>([]);
+
+  useEffect(() => {
+    if (!ai) return;
+    ai.getModels().then((models) => {
+      setModels(models.filter((m) => m.responseStreamingSupported));
+    });
+  }, [ai]);
+
+  const modelList = models.map((model) => (
+    <Select.Option key={model.modelId} value={model.modelId}>
+      {model.providerName} {model.modelName}
     </Select.Option>
   ));
 
   const isInvalid = !model;
-  const isSelectionInModelList = gptModels.some((modelOption) => modelOption.id === model);
+  const isSelectionInModelList = gptModels.some(
+    (modelOption) => modelOption.id === model,
+  );
   const value = isSelectionInModelList ? model : defaultModelId;
 
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -36,7 +60,9 @@ const Model = (props: Props) => {
 
       <FormControl.HelpText>{ModelText.helpText}</FormControl.HelpText>
       {isInvalid && (
-        <FormControl.ValidationMessage>{ConfigErrors.missingModel}</FormControl.ValidationMessage>
+        <FormControl.ValidationMessage>
+          {ConfigErrors.missingModel}
+        </FormControl.ValidationMessage>
       )}
     </FormControl>
   );

@@ -1,4 +1,5 @@
-import { ChangeEvent, Dispatch, useState } from "react";
+import HyperLink from "@components/common/HyperLink/HyperLink";
+import { ConfigErrors } from "@components/config/configText";
 import {
   Flex,
   FormControl,
@@ -6,18 +7,11 @@ import {
   Text,
   TextInput,
 } from "@contentful/f36-components";
-import { APIKeyText, AccessKeyText } from "../configText";
-import HyperLink from "@components/common/HyperLink/HyperLink";
 import { ExternalLinkIcon } from "@contentful/f36-icons";
-import { ConfigErrors } from "@components/config/configText";
 import AI from "@utils/aiApi";
-import { modelsBaseUrl } from "@configs/ai/baseUrl";
+import { Dispatch, useState } from "react";
+import { AccessKeyText } from "../configText";
 import { ParameterAction, ParameterReducer } from "../parameterReducer";
-import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
-import {
-  BedrockClient,
-  ListFoundationModelsCommand,
-} from "@aws-sdk/client-bedrock";
 
 interface Props {
   apiKey?: string;
@@ -28,7 +22,6 @@ interface Props {
 }
 
 const AccessKey = ({
-  apiKey = "testtesttest",
   accessKeyID,
   secretAccessKey,
   isInvalid,
@@ -38,41 +31,14 @@ const AccessKey = ({
   const [localSecretAccessKey, setLocalSecretAccessKey] =
     useState<string>(secretAccessKey);
 
-  // const [localApiKey, setLocalApiKey] = useState<string>(apiKey);
-
-  const [isEditing, setIsEditing] = useState(false);
   const [isValidating, setIsValidating] = useState<boolean>(false);
+  // const displayInvalidMessage = !apiKey || isInvalid;
 
-  const displayInvalidMessage = !apiKey || isInvalid;
-
-  const censorApiKey = (key: string) => key?.replace(/.(?=.{4,}$)/g, "*");
-
-  // const validateApiKey = async (key: string): Promise<boolean> => {
-    // const ai = new AI(modelsBaseUrl, key, '');
-
-  //   try {
-      // await ai.getModels();
-  //     return true;
-  //   } catch (e: unknown) {
-  //     console.error(e);
-  //     return false;
-  //   }
-  // };
-
-  const validateApiKey = async () => {
-    const client = new BedrockClient({
-      credentials: {
-        accessKeyId: localAccessKeyID,
-        secretAccessKey: localSecretAccessKey,
-      },
-      region: "us-east-1",
-    });
+  const validateCredentials = async () => {
+    const ai = new AI(localAccessKeyID, localSecretAccessKey);
 
     try {
-      const foundationModels = await client.send(
-        new ListFoundationModelsCommand({}),
-      );
-      console.log(foundationModels);
+      ai.getModels();
       return true;
     } catch (e) {
       console.log(e);
@@ -81,8 +47,6 @@ const AccessKey = ({
   };
 
   const handleBlur = async () => {
-    setIsEditing(false);
-
     if (
       localAccessKeyID === accessKeyID &&
       localSecretAccessKey == secretAccessKey
@@ -91,17 +55,19 @@ const AccessKey = ({
 
     setIsValidating(true);
 
-    const isValid = await validateApiKey();
-    // dispatch({
-    //   type: ParameterAction.UPDATE_APIKEY,
-    //   value: localApiKey || apiKey,
-    //   isValid,
-    // });
+    const isValid = await validateCredentials();
+
+    dispatch({
+      type: ParameterAction.UPDATE_CREDENTIALS,
+      value: {
+        accessKeyId: localAccessKeyID || accessKeyID,
+        secretAccessKey: localSecretAccessKey || secretAccessKey,
+      },
+      isValid,
+    });
 
     setIsValidating(false);
   };
-
-  const handleClick = () => setIsEditing(true);
 
   return (
     <>
@@ -113,22 +79,14 @@ const AccessKey = ({
           type="text"
           name="accessKeyID"
           placeholder="AKIA6O......"
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setLocalAccessKeyID(e.target.value)
-          }
+          onChange={(e) => setLocalAccessKeyID(e.target.value)}
         />
 
-        {isValidating && (
-          <Flex marginTop="spacingXs">
-            <Text marginRight="spacingXs">Validating API Key</Text>
-            <Spinner />
-          </Flex>
-        )}
-        {displayInvalidMessage && (
+        {/* {displayInvalidMessage && (
           <FormControl.ValidationMessage>
             {ConfigErrors.missingApiKey}
           </FormControl.ValidationMessage>
-        )}
+        )} */}
       </FormControl>
       <FormControl isRequired>
         <FormControl.Label>
@@ -140,9 +98,7 @@ const AccessKey = ({
           type="password"
           name="secretAccessKey"
           placeholder="******"
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setLocalSecretAccessKey(e.target.value)
-          }
+          onChange={(e) => setLocalSecretAccessKey(e.target.value)}
           onBlur={handleBlur}
         />
 
@@ -161,11 +117,11 @@ const AccessKey = ({
             <Spinner />
           </Flex>
         )}
-        {displayInvalidMessage && (
+        {/* {displayInvalidMessage && (
           <FormControl.ValidationMessage>
             {ConfigErrors.missingApiKey}
           </FormControl.ValidationMessage>
-        )}
+        )} */}
       </FormControl>
     </>
   );
