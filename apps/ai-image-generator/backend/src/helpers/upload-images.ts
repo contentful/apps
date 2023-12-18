@@ -68,12 +68,10 @@ export class UploadImages {
   private urlFromUpload(upload: UploadPropsWithEnvironment): string {
     const uploadId = upload.sys.id;
     const spaceId = upload.sys.space.sys.id;
-
-    // note: since we are _creating_ the upload using the environment we expect the environment in return
-    // (it's only optional in the type to support creating uploads without specifying an environment)
-    const environmentId = upload.sys.environment!.sys.id;
-
-    const uploadPath = `${spaceId}!${environmentId}!upload!${uploadId}`;
+    const environmentId = upload.sys.environment && upload.sys.environment.sys.id;
+    const uploadPath = environmentId
+      ? `${spaceId}!${environmentId}!upload!${uploadId}`
+      : `${spaceId}!upload!${uploadId}`;
     const uploadDomain = UPLOAD_DOMAIN[this.uploadHost];
     if (!uploadDomain)
       throw new Error(`Invalid uploadHost '${this.uploadHost}' -- could not find upload bucket`);
