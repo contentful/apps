@@ -32,6 +32,13 @@ describe('UploadImages', () => {
               id: spaceId,
             },
           },
+          environment: {
+            sys: {
+              type: 'Link',
+              linkType: 'Environment',
+              id: environmentId,
+            },
+          },
           expiresAt: '2015-05-18T11:29:46.809Z',
           createdAt: '2015-05-18T11:29:46.809Z',
           createdBy: {
@@ -63,7 +70,7 @@ describe('UploadImages', () => {
       expect(relativeImageSizeDiff).to.below(0.1);
       expect(image.upload).to.have.property(
         'url',
-        `https://s3.us-east-1.amazonaws.com/upload-api.contentful.com/${spaceId}!upload!${uploadId}`
+        `https://s3.us-east-1.amazonaws.com/upload-api.contentful.com/${spaceId}!${environmentId}!upload!${uploadId}`
       );
     });
   });

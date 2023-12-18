@@ -1,4 +1,4 @@
-import { PlainClientAPI, UploadProps } from 'contentful-management';
+import { PlainClientAPI, SysLink, UploadProps } from 'contentful-management';
 import { ImageWithStream, ImageWithUpload } from '../types';
 import sharp from 'sharp';
 import { toDimensions } from '../utils';
@@ -8,6 +8,11 @@ const UPLOAD_DOMAIN: Record<string, URL> = {
   'upload.eu.contentful.com': new URL(
     'https://s3.eu-west-1.amazonaws.com/upload-api.eu.contentful.com'
   ),
+};
+
+type UploadPropsWithEnvironment = {
+  // TODO: use upstream UplpadProps directly once environment id has been added
+  sys: UploadProps['sys'] & { environment?: SysLink };
 };
 
 export class UploadImages {
@@ -53,16 +58,22 @@ export class UploadImages {
     return { dimensions, size };
   }
 
-  private async createUpload(file: sharp.Sharp): Promise<UploadProps> {
+  private async createUpload(file: sharp.Sharp): Promise<UploadPropsWithEnvironment> {
     return await this.cmaClient.upload.create(
       { spaceId: this.spaceId, environmentId: this.environmentId },
       { file }
     );
   }
 
-  private urlFromUpload(upload: UploadProps): string {
+  private urlFromUpload(upload: UploadPropsWithEnvironment): string {
     const uploadId = upload.sys.id;
-    const uploadPath = `${this.spaceId}!upload!${uploadId}`;
+    const spaceId = upload.sys.space.sys.id;
+
+    // note: since we are _creating_ the upload using the environment we expect the environment in return
+    // (it's only optional in the type to support creating uploads without specifying an environment)
+    const environmentId = upload.sys.environment!.sys.id;
+
+    const uploadPath = `${spaceId}!${environmentId}!upload!${uploadId}`;
     const uploadDomain = UPLOAD_DOMAIN[this.uploadHost];
     if (!uploadDomain)
       throw new Error(`Invalid uploadHost '${this.uploadHost}' -- could not find upload bucket`);
