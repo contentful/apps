@@ -6,6 +6,10 @@ import {
   BedrockClient,
   ListFoundationModelsCommand,
 } from "@aws-sdk/client-bedrock";
+import {
+  BedrockRuntimeClient,
+  InvokeModelWithResponseStreamCommand,
+} from "@aws-sdk/client-bedrock-runtime";
 
 /**
  * This class is used to interact with OpenAI's API.
@@ -18,6 +22,7 @@ class AI {
   model?: string;
   decoder: TextDecoder;
   private bedrockClient: BedrockClient;
+  private bedrockRuntimeClient: BedrockRuntimeClient;
 
   constructor(
     accessKeyID: string,
@@ -25,15 +30,18 @@ class AI {
     model?: string,
     region = "us-east-1",
   ) {
-    this.model = model ?? defaultModelId;
+    this.model = model;
     this.decoder = new TextDecoder("utf-8");
-    this.bedrockClient = new BedrockClient({
+    const config = {
       region,
       credentials: {
         accessKeyId: accessKeyID,
         secretAccessKey: secretAccessKey,
       },
-    });
+    };
+
+    this.bedrockClient = new BedrockClient(config);
+    this.bedrockRuntimeClient = new BedrockRuntimeClient(config);
   }
 
   /**
@@ -41,8 +49,16 @@ class AI {
    * @param payload ChatCompletionRequestMessage[]
    * @returns ReadableStreamDefaultReader<Uint8Array>
    */
-  streamChatCompletion = async (payload: ChatCompletionRequestMessage[]) => {
+  streamChatCompletion = async (
+    payload: ChatCompletionRequestMessage[],
+    modelId: string,
+  ) => {
+    // this.bedrockRuntimeClient.send(new InvokeModelWithResponseStreamCommand({
+    //   modelId,
+
+    // }))
     throw new Error("Not implemented");
+
     // const headers = {
     //   Authorization: `Bearer ${this.apiKey}`,
     //   "Content-Type": "application/json",

@@ -1,5 +1,15 @@
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
+# initialize
+
+To get started run:
+
+```
+npm i \
+npm run create-app-definition \
+npm start
+```
+
 ## How to use
 
 Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
