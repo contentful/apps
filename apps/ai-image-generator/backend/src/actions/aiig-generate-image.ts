@@ -1,5 +1,4 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { PlainClientAPI } from 'contentful-management';
 import { OpenAiApiService } from '../services/openaiApiService';
 import { AppActionCallResponse, Image } from '../types';
 import { fetchOpenAiApiKey } from '../utils';

@@ -1,4 +1,5 @@
-import { PlainClientAPI, UploadProps } from 'contentful-management';
+import { SysLink, UploadProps } from 'contentful-management';
+import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { ImageWithStream, ImageWithUpload } from '../types';
 import sharp from 'sharp';
 import { toDimensions } from '../utils';
@@ -10,11 +11,17 @@ const UPLOAD_DOMAIN: Record<string, URL> = {
   ),
 };
 
+type UploadPropsWithEnvironment = {
+  // TODO: use upstream UploadProps directly once environment id has been added
+  sys: UploadProps['sys'] & { environment?: SysLink };
+};
+
 export class UploadImages {
   constructor(
     readonly imagesWithStreams: ImageWithStream[],
-    readonly cmaClient: PlainClientAPI,
+    readonly cmaClient: AppActionCallContext['cma'],
     readonly spaceId: string,
+    readonly environmentId: string,
     readonly uploadHost: string
   ) {}
 
@@ -52,13 +59,20 @@ export class UploadImages {
     return { dimensions, size };
   }
 
-  private async createUpload(file: sharp.Sharp): Promise<UploadProps> {
-    return await this.cmaClient.upload.create({ spaceId: this.spaceId }, { file });
+  private async createUpload(file: sharp.Sharp): Promise<UploadPropsWithEnvironment> {
+    return await this.cmaClient.upload.create(
+      { spaceId: this.spaceId, environmentId: this.environmentId },
+      { file }
+    );
   }
 
-  private urlFromUpload(upload: UploadProps): string {
+  private urlFromUpload(upload: UploadPropsWithEnvironment): string {
     const uploadId = upload.sys.id;
-    const uploadPath = `${this.spaceId}!upload!${uploadId}`;
+    const spaceId = upload.sys.space.sys.id;
+    const environmentId = upload.sys.environment && upload.sys.environment.sys.id;
+    const uploadPath = environmentId
+      ? `${spaceId}!${environmentId}!upload!${uploadId}`
+      : `${spaceId}!upload!${uploadId}`;
     const uploadDomain = UPLOAD_DOMAIN[this.uploadHost];
     if (!uploadDomain)
       throw new Error(`Invalid uploadHost '${this.uploadHost}' -- could not find upload bucket`);
@@ -68,11 +82,18 @@ export class UploadImages {
 
 export const uploadImages = async (params: {
   imagesWithStreams: ImageWithStream[];
-  cmaClient: PlainClientAPI;
+  cmaClient: AppActionCallContext['cma'];
   spaceId: string;
+  environmentId: string;
   uploadHost: string;
 }) => {
-  const { imagesWithStreams, cmaClient, spaceId, uploadHost } = params;
-  const imageUploader = new UploadImages(imagesWithStreams, cmaClient, spaceId, uploadHost);
+  const { imagesWithStreams, cmaClient, spaceId, environmentId, uploadHost } = params;
+  const imageUploader = new UploadImages(
+    imagesWithStreams,
+    cmaClient,
+    spaceId,
+    environmentId,
+    uploadHost
+  );
   return imageUploader.execute();
 };

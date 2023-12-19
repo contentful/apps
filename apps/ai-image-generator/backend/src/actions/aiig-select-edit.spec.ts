@@ -37,7 +37,14 @@ describe('aiigSelectEdit.handler', () => {
         sys: {
           type: 'Link',
           linkType: 'Space',
-          id: 'spaceId',
+          id: 'space-id',
+        },
+      },
+      environment: {
+        sys: {
+          type: 'Link',
+          linkType: 'Environment',
+          id: 'environment-id',
         },
       },
       expiresAt: '2015-05-18T11:29:46.809Z',
@@ -114,7 +121,7 @@ describe('aiigSelectEdit.handler', () => {
     // using match here to just match the beginning because there's a small race condition in tests where
     // sometimes the first image result gets assigned a different upload id
     expect(result.data.images[0].upload.url).to.match(
-      /^https:\/\/s3\.us-east-1\.amazonaws\.com\/upload-api\.contentful\.com\/space-id!upload!uploadId/
+      /^https:\/\/s3\.us-east-1\.amazonaws\.com\/upload-api\.contentful\.com\/space-id!environment-id!upload!uploadId/
     );
     expect(result.data.images[0].upload.sys.id).to.match(/^uploadId/);
   });

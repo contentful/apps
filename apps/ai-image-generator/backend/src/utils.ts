@@ -1,4 +1,4 @@
-import { PlainClientAPI } from 'contentful-management';
+import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { default as sharp } from 'sharp';
 import { Dimensions } from './types';
 
@@ -8,7 +8,7 @@ export interface AreEqualColorOpts {
 }
 
 export async function fetchOpenAiApiKey(
-  cma: PlainClientAPI,
+  cma: AppActionCallContext['cma'],
   appInstallationId: string
 ): Promise<string> {
   const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
