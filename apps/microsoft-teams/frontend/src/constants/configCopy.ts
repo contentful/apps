@@ -3,9 +3,9 @@ const headerSection = {
   description: 'Get notifications about Contentful content updates directly in Microsoft Teams.',
 };
 
-// TODO: Update deep link with Teams app id
+// TODO: Update to deep link with Teams app id
 // https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/deep-link-application?tabs=teamsjs-v2#deep-link-to-open-application-install-dialog
-const appDeepLink = 'https://teams.microsoft.com/l/app/';
+const appDeepLink = 'https://teams.microsoft.com/';
 
 const accessSection = {
   title: 'Access',
@@ -40,7 +40,7 @@ const contentTypeSelection = {
 };
 
 const channelSelection = {
-  title: 'Channel',
+  title: 'Microsoft Teams channel',
   addButton: 'Select channel',
   modal: {
     title: 'Select Microsoft Teams channel',
