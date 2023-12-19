@@ -53,6 +53,7 @@ class AI {
     payload: ChatCompletionRequestMessage[],
     modelId: string,
   ) => {
+    modelId = "anthropic.claude-v2:1"
     const stream = await this.bedrockRuntimeClient.send(
       new InvokeModelWithResponseStreamCommand({
         modelId,
