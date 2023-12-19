@@ -8,7 +8,7 @@ import {
   Subheading,
   TextInput,
 } from '@contentful/f36-components';
-import { headerSection, accessSection, appDeepLink } from '@constants/configCopy';
+import { headerSection, accessSection } from '@constants/configCopy';
 import { styles } from './AccessSection.styles';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
@@ -45,7 +45,8 @@ const AccessSection = (props: Props) => {
           <HyperLink
             body={accessSection.teamsAppInfo}
             substring={accessSection.teamsAppLink}
-            href={appDeepLink}
+            // TODO: update link to app documentation
+            href={'https://www.contentful.com/help/apps-at-contentful/'}
           />
         </Box>
       </Flex>

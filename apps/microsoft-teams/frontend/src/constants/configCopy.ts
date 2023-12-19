@@ -3,9 +3,9 @@ const headerSection = {
   description: 'Get notifications about Contentful content updates directly in Microsoft Teams.',
 };
 
-// TODO: Update deep link with Teams app id
+// TODO: Update to deep link with Teams app id
 // https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/deep-link-application?tabs=teamsjs-v2#deep-link-to-open-application-install-dialog
-const appDeepLink = 'https://teams.microsoft.com/l/app/';
+const appDeepLink = 'https://teams.microsoft.com/';
 
 const accessSection = {
   title: 'Access',
@@ -40,17 +40,17 @@ const contentTypeSelection = {
 };
 
 const channelSelection = {
-  title: 'Channel',
+  title: 'Microsoft Teams channel',
   addButton: 'Select channel',
   modal: {
-    title: 'Select Teams channel',
+    title: 'Select Microsoft Teams channel',
     description:
-      'Teams channels where the Contentful app has been installed can display notifications.',
+      'Microsoft Teams channels where the Contentful app has been installed can display notifications.',
     link: 'Add app',
     button: 'Select',
-    emptyHeading: 'Add Teams channels',
+    emptyHeading: 'Add Microsoft Teams channels',
     emptyContent:
-      'In Teams, add the Contentful app to channels where you want to see notifications. Add app',
+      'In Microsoft Teams, add the Contentful app to the general channel of the teams where you want to see notifications. Add app',
   },
   notFound: 'Channel not found',
 };
