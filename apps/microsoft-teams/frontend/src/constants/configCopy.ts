@@ -43,14 +43,14 @@ const channelSelection = {
   title: 'Channel',
   addButton: 'Select channel',
   modal: {
-    title: 'Select Teams channel',
+    title: 'Select Microsoft Teams channel',
     description:
-      'Teams channels where the Contentful app has been installed can display notifications.',
+      'Microsoft Teams channels where the Contentful app has been installed can display notifications.',
     link: 'Add app',
     button: 'Select',
-    emptyHeading: 'Add Teams channels',
+    emptyHeading: 'Add Microsoft Teams channels',
     emptyContent:
-      'In Teams, add the Contentful app to channels where you want to see notifications. Add app',
+      'In Microsoft Teams, add the Contentful app to the general channel of the teams where you want to see notifications. Add app',
   },
   notFound: 'Channel not found',
 };

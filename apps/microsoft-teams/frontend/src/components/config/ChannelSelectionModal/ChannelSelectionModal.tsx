@@ -34,9 +34,9 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
       {() => (
         <>
           <ModalHeader title={title} onClose={onClose} icon={<TeamsLogo />} />
-          <Modal.Content>
-            {channels.length ? (
-              <>
+          {channels.length ? (
+            <>
+              <Modal.Content>
                 <Paragraph>
                   {description}{' '}
                   <TextLink href={appDeepLink} target="_blank" rel="noopener noreferrer">
@@ -62,8 +62,22 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
                     </Table.Body>
                   </Table>
                 </FormControl>
-              </>
-            ) : (
+              </Modal.Content>
+              <Modal.Controls>
+                <Button
+                  size="small"
+                  variant="primary"
+                  onClick={() => {
+                    handleNotificationEdit({ channelId: selectedChannelId });
+                    onClose();
+                  }}
+                  isDisabled={!selectedChannelId}>
+                  {button}
+                </Button>
+              </Modal.Controls>
+            </>
+          ) : (
+            <Modal.Content>
               <EmptyState
                 image={<EmptyFishbowl />}
                 heading={emptyHeading}
@@ -71,20 +85,8 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
                 linkSubstring={link}
                 linkHref={appDeepLink}
               />
-            )}
-          </Modal.Content>
-          <Modal.Controls>
-            <Button
-              size="small"
-              variant="primary"
-              onClick={() => {
-                handleNotificationEdit({ channelId: selectedChannelId });
-                onClose();
-              }}
-              isDisabled={!selectedChannelId}>
-              {button}
-            </Button>
-          </Modal.Controls>
+            </Modal.Content>
+          )}
         </>
       )}
     </Modal>

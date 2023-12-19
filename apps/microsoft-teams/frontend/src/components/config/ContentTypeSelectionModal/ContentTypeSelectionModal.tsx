@@ -36,27 +36,43 @@ const ContentTypeSelectionModal = (props: Props) => {
       {() => (
         <>
           <ModalHeader title={title} onClose={onClose} />
-          <Modal.Content>
-            {contentTypes.length ? (
-              <FormControl as="fieldset" marginBottom="none">
-                <Table className={styles.table}>
-                  <Table.Body>
-                    {contentTypes.map((contentType) => (
-                      <Table.Row key={contentType.sys.id}>
-                        <Table.Cell>
-                          <Radio
-                            id={contentType.sys.id}
-                            isChecked={selectedContentTypeId === contentType.sys.id}
-                            onChange={() => setSelectedContentTypeId(contentType.sys.id)}>
-                            {contentType.name}
-                          </Radio>
-                        </Table.Cell>
-                      </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table>
-              </FormControl>
-            ) : (
+          {contentTypes.length ? (
+            <>
+              <Modal.Content>
+                <FormControl as="fieldset" marginBottom="none">
+                  <Table className={styles.table}>
+                    <Table.Body>
+                      {contentTypes.map((contentType) => (
+                        <Table.Row key={contentType.sys.id}>
+                          <Table.Cell>
+                            <Radio
+                              id={contentType.sys.id}
+                              isChecked={selectedContentTypeId === contentType.sys.id}
+                              onChange={() => setSelectedContentTypeId(contentType.sys.id)}>
+                              {contentType.name}
+                            </Radio>
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table>
+                </FormControl>
+              </Modal.Content>
+              <Modal.Controls>
+                <Button
+                  size="small"
+                  variant="primary"
+                  onClick={() => {
+                    handleNotificationEdit({ contentTypeId: selectedContentTypeId });
+                    onClose();
+                  }}
+                  isDisabled={!selectedContentTypeId}>
+                  {button}
+                </Button>
+              </Modal.Controls>
+            </>
+          ) : (
+            <Modal.Content>
               <EmptyState
                 image={<WebApp />}
                 heading={emptyHeading}
@@ -64,20 +80,8 @@ const ContentTypeSelectionModal = (props: Props) => {
                 linkSubstring={link}
                 linkHref={contentTypeConfigLink}
               />
-            )}
-          </Modal.Content>
-          <Modal.Controls>
-            <Button
-              size="small"
-              variant="primary"
-              onClick={() => {
-                handleNotificationEdit({ contentTypeId: selectedContentTypeId });
-                onClose();
-              }}
-              isDisabled={!selectedContentTypeId}>
-              {button}
-            </Button>
-          </Modal.Controls>
+            </Modal.Content>
+          )}
         </>
       )}
     </Modal>

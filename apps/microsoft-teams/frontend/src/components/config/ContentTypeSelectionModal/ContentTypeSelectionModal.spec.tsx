@@ -1,7 +1,7 @@
 import ContentTypeSelectionModal from './ContentTypeSelectionModal';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { channelSelection } from '@constants/configCopy';
+import { contentTypeSelection } from '@constants/configCopy';
 
 describe('ContentTypeSelectionModal component', () => {
   it('mounts and renders the correct content', () => {
@@ -16,6 +16,6 @@ describe('ContentTypeSelectionModal component', () => {
       />
     );
 
-    expect(screen.getByText(channelSelection.modal.button)).toBeTruthy();
+    expect(screen.getByText(contentTypeSelection.modal.title)).toBeTruthy();
   });
 });

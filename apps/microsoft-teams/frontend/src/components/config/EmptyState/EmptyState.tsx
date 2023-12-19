@@ -17,7 +17,7 @@ const EmptyState = (props: Props) => {
     <Flex flexDirection="column" alignItems="center">
       {image}
       <Subheading>{heading}</Subheading>
-      <Box className={styles.emptyContent}>
+      <Box className={styles.emptyContent} marginBottom="spacingM">
         <HyperLink body={body} substring={linkSubstring} href={linkHref} />
       </Box>
     </Flex>

@@ -15,6 +15,6 @@ describe('ChannelSelectionModal component', () => {
       />
     );
 
-    expect(screen.getByText(channelSelection.modal.button)).toBeTruthy();
+    expect(screen.getByText(channelSelection.modal.title)).toBeTruthy();
   });
 });
