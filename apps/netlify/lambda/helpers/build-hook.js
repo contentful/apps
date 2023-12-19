@@ -5,7 +5,6 @@ const getHost = require('./getHost');
 
 const privateKey = process.env['APP_IDENTITY_PRIVATE_KEY'] || '';
 const appInstallationId = (process.env['APP_DEFINITION_ID'] || '').trim();
-const baseUrl = 'https://api.contentful.com/';
 const buildBaseURL = 'https://api.netlify.com/build_hooks/';
 const assetTypes = ['Asset', 'DeletedAsset'];
 const validEventTypes = ['Entry', 'DeletedEntry', ...assetTypes];
@@ -76,7 +75,7 @@ const getBuildHooksFromAppInstallationParams = async (
   });
 
   const rawResult = await fetch(
-    `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/app_installations/${appInstallationId}`,
+    `https://${host}/spaces/${spaceId}/environments/${environmentId}/app_installations/${appInstallationId}`,
     {
       headers: {
         authorization: `Bearer ${token}`,
