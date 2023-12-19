@@ -53,10 +53,26 @@ class AI {
     payload: ChatCompletionRequestMessage[],
     modelId: string,
   ) => {
-    // this.bedrockRuntimeClient.send(new InvokeModelWithResponseStreamCommand({
-    //   modelId,
+    modelId = "anthropic.claude-v2:1"
+    const stream = await this.bedrockRuntimeClient.send(
+      new InvokeModelWithResponseStreamCommand({
+        modelId,
+        body: "hello",
+      }),
+    );
 
-    // }))
+    // listen to stream.body, which is AsyncIterable<ResponseStream> | undefined
+
+    if (!stream.body) return;
+
+    for await (const chunk of stream.body) {
+      if (chunk.chunk) {
+        const textData = this.decoder.decode(chunk.chunk.bytes);
+        console.log(textData);
+      }
+    }
+
+
     throw new Error("Not implemented");
 
     // const headers = {

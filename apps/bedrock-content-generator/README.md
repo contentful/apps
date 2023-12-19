@@ -10,6 +10,7 @@ npm run create-app-definition \
 npm start
 ```
 
+Then open the contentful apps and navigate to custom apps and click on install.
 ## How to use
 
 Execute create-contentful-app with npm, npx or yarn to bootstrap the example:

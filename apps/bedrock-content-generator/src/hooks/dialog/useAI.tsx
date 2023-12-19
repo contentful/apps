@@ -24,9 +24,8 @@ const useAI = () => {
   const ai = useMemo(
     () =>
       new AI(
-        chatCompletionsBaseUrl,
-        sdk.parameters.installation.key,
-        sdk.parameters.installation.model ?? defaultModelId
+        sdk.parameters.installation.accessKeyId,
+        sdk.parameters.installation.secretAccessKey,
       ),
     [sdk.parameters.installation]
   );
@@ -77,7 +76,8 @@ const useAI = () => {
         targetLocale
       );
 
-      const stream = await ai.streamChatCompletion(payload);
+      //const stream = await ai.streamChatCompletion(payload);
+      const stream = undefined
       setStream(stream);
 
       while (stream) {
