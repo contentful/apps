@@ -1,4 +1,5 @@
-import { PlainClientAPI, SysLink, UploadProps } from 'contentful-management';
+import { SysLink, UploadProps } from 'contentful-management';
+import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { ImageWithStream, ImageWithUpload } from '../types';
 import sharp from 'sharp';
 import { toDimensions } from '../utils';
@@ -18,7 +19,7 @@ type UploadPropsWithEnvironment = {
 export class UploadImages {
   constructor(
     readonly imagesWithStreams: ImageWithStream[],
-    readonly cmaClient: PlainClientAPI,
+    readonly cmaClient: AppActionCallContext['cma'],
     readonly spaceId: string,
     readonly environmentId: string,
     readonly uploadHost: string
@@ -81,7 +82,7 @@ export class UploadImages {
 
 export const uploadImages = async (params: {
   imagesWithStreams: ImageWithStream[];
-  cmaClient: PlainClientAPI;
+  cmaClient: AppActionCallContext['cma'];
   spaceId: string;
   environmentId: string;
   uploadHost: string;
