@@ -12,7 +12,7 @@ const UPLOAD_DOMAIN: Record<string, URL> = {
 };
 
 type UploadPropsWithEnvironment = {
-  // TODO: use upstream UplpadProps directly once environment id has been added
+  // TODO: use upstream UploadProps directly once environment id has been added
   sys: UploadProps['sys'] & { environment?: SysLink };
 };
 
