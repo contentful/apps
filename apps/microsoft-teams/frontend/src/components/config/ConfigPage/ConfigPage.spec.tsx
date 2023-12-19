@@ -2,26 +2,22 @@ import ConfigPage from './ConfigPage';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { accessSection } from '@constants/configCopy';
-import { mockSdk, mockGetManyContentType, mockChannels } from '@test/mocks';
+import { mockSdk } from '@test/mocks';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 
-describe('ConfigPage component', () => {
-  it('mounts and renders access section', async () => {
-    mockSdk.cma.contentType.getMany = vi.fn().mockReturnValueOnce(mockGetManyContentType);
-    mockSdk.cma.appActionCall.createWithResponse = vi.fn().mockReturnValueOnce({
-      response: {
-        body: JSON.stringify({
-          ok: true,
-          data: mockChannels,
-        }),
-      },
-    });
+vi.mock('@components/config/NotificationsSection/NotificationsSection', () => ({
+  default: () => {
+    return <div>Mock Notification Section</div>;
+  },
+}));
 
+describe('ConfigPage component', () => {
+  it('mounts and renders access section', () => {
     render(<ConfigPage />);
 
-    await expect(screen.getByText(accessSection.title)).toBeTruthy();
+    expect(screen.getByText(accessSection.title)).toBeTruthy();
   });
 });
