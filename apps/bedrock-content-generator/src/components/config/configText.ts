@@ -3,9 +3,9 @@ import { ProfileFields } from "./appInstallationParameters";
 const ModelText = {
   title: "Machine Learning Model",
   helpText:
-    "According to the provider, for many basic tasks, the difference between GPT-4 and GPT-3.5 " +
-    "models is not significant. However, in more complex reasoning situations, GPT-4 is much more " +
-    "capable than any previous models.",
+    "According to the provider, there are different models with individual strengths and weaknesses " +
+    "depending on your needs, try different models to find the perfect fit for you " +
+    "as some are more capable than others.",
 };
 
 export enum FieldTypes {
@@ -67,15 +67,15 @@ const BrandProfileFields = [
     textLimit: 1000,
   },
 ];
-
+/*
 const APIKeyText = {
-  title: "OpenAI API Key",
+  title: 'AWS API Key',
   helpText:
     "Enter your OpenAI API Key. If you need to generate a key, visit your OpenAI API Keys page",
   linkSubstring: "OpenAI API Keys page",
   link: "https://platform.openai.com/account/api-keys",
 };
-
+*/
 const AccessKeyText = {
   accessKeyIDTitle: "AWS Access Key ID",
   secretAccessKeyTitle: "AWS Secret Access Key",
@@ -94,19 +94,21 @@ const Sections = {
   addToSidebarHeading: "Add to sidebar views",
   addToSidebarDescription: "Assign AI Content Generator to content types.",
   costHeading: "Cost",
-  costSubheading: "Generating content incurs a cost.",
-  costDescription: "View the current pricing model at openai.com/pricing",
-  costLinkSubstring: "openai.com/pricing",
-  costLink: "https://openai.com/pricing",
-  rateLimitDescription:
-    "Chat GPT enforces usage quotas. Learn about Chat GPT's rate limits",
-  rateLimitLinkSubstring: "Chat GPT's rate limits",
-  rateLimitLink: "https://platform.openai.com/docs/guides/rate-limits/overview",
+  costSubheading:
+    "Generating content uses AWS resources, depending on the amount of tokens you generate.",
+  costDescription:
+    "View the current pricing model at aws.amazon.com/bedrock/pricing",
+  costLinkSubstring: "aws.amazon.com/bedrock/pricing",
+  costLink: "https://aws.amazon.com/bedrock/pricing/",
+  rateLimitDescription: "AWS enforces quota limitation. Learn about AWS quotas",
+  rateLimitLinkSubstring: "AWS quotas",
+  rateLimitLink:
+    "https://docs.aws.amazon.com/bedrock/latest/userguide/quotas.html",
   disclaimerHeading: "Disclaimer",
   disclaimerDescription:
     "This feature uses a third party AI tool. Please ensure your use of the tool and any AI-generated content complies with applicable laws, your company's policies, and all other Terms and Policies",
   disclaimerLinkSubstring: "Terms and Policies",
-  disclaimerLink: "https://openai.com/policies",
+  disclaimerLink: "https://aws.amazon.com/bedrock/security-compliance/",
 };
 
 const ConfigErrors = {
@@ -130,7 +132,6 @@ const ContentTypeText = {
 export {
   ModelText,
   BrandProfileFields,
-  APIKeyText,
   Sections,
   ConfigErrors,
   ContentTypeText,
