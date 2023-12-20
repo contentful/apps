@@ -22,7 +22,7 @@ const styles = {
 
 const Header = () => {
   const sdk = useSDK<DialogAppSDK>();
-  const { feature, trackGeneratorEvent } = useContext(GeneratorContext);
+  const { feature } = useContext(GeneratorContext);
   const title = featureConfig[feature].dialogTitle;
 
   return (
@@ -44,7 +44,6 @@ const Header = () => {
           icon={<CloseIcon />}
           size="large"
           onClick={() => {
-            trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.CANCELED);
             sdk.close();
           }}
           css={styles.closeButton}

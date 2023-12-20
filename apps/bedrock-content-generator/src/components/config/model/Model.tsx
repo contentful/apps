@@ -20,7 +20,7 @@ interface Props {
 const Model = ({ credentials, credentialsValid, model, dispatch }: Props) => {
   const ai = useMemo(
     () =>
-      credentialsValid
+      credentialsValid && credentials.accessKeyID && credentials.secretAccessKey
         ? new AI(credentials.accessKeyID, credentials.secretAccessKey)
         : null,
     [credentials, credentialsValid],

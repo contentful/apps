@@ -3,8 +3,8 @@ import { AIFeature } from '@configs/features/featureConfig';
 import { ContentTypeProps, EntryProps } from 'contentful-management';
 import { Dispatch, createContext, useContext, useState } from 'react';
 import { FieldLocales } from '@locations/Dialog';
-import { SegmentAction, SegmentEventData, SegmentEvents } from '@configs/segment/segmentEvent';
-import { SegmentAnalyticsContext } from './segmentAnalyticsProvider';
+// import { SegmentAction, SegmentEventData, SegmentEvents } from '@configs/segment/segmentEvent';
+// import { SegmentAnalyticsContext } from './segmentAnalyticsProvider';
 
 export interface LocaleNames {
   [key: string]: string;
@@ -21,8 +21,8 @@ interface GeneratorContextProps {
   defaultLocale: string;
 
   dispatch: Dispatch<GeneratorReducer>;
-  trackGeneratorEvent: (event: SegmentEvents, action?: SegmentAction) => void;
-  segmentEventData?: SegmentEventData;
+  // trackGeneratorEvent: (event: SegmentEvents, action?: SegmentAction) => void;
+  // segmentEventData?: SegmentEventData;
   feature: AIFeature;
 }
 
@@ -46,7 +46,7 @@ const defaultContext = {
   fieldLocales: {},
   localeNames: {},
   defaultLocale: '',
-  trackGeneratorEvent: (() => {}) as (event: SegmentEvents, action?: SegmentAction) => void,
+  // trackGeneratorEvent: (() => {}) as (event: SegmentEvents, action?: SegmentAction) => void,
 
   dispatch: (() => {}) as Dispatch<GeneratorReducer>,
   feature: AIFeature.TITLE,
@@ -55,7 +55,7 @@ const defaultContext = {
 const GeneratorContext = createContext<GeneratorContextProps>(defaultContext);
 
 const GeneratorProvider = (props: GeneratorProviderProps) => {
-  const { trackEvent } = useContext(SegmentAnalyticsContext);
+  // const { trackEvent } = useContext(SegmentAnalyticsContext);
   const { entryId, children, feature, fieldLocales, localeNames, defaultLocale } = props;
   const [providerData, setProviderData] = useState<GeneratorContextProps>({
     ...defaultContext,
@@ -70,16 +70,16 @@ const GeneratorProvider = (props: GeneratorProviderProps) => {
     setProviderData({ ...providerData, ...newProviderData });
   };
 
-  const trackGeneratorEvent = (event: SegmentEvents, action?: SegmentAction) => {
-    trackEvent(event, { ...providerData.segmentEventData, action });
-  };
+  // const trackGeneratorEvent = (event: SegmentEvents, action?: SegmentAction) => {
+  //   trackEvent(event, { ...providerData.segmentEventData, action });
+  // };
 
   return (
     <GeneratorContext.Provider
       value={{
         ...providerData,
         setProviderData: updateProviderData,
-        trackGeneratorEvent,
+        // trackGeneratorEvent,
       }}>
       {children}
     </GeneratorContext.Provider>

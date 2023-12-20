@@ -1,10 +1,10 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
-import { AppState, ConfigAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { useEffect, useCallback, useContext } from 'react';
-import { generateEditorInterfaceAssignments } from '@utils/config/contentTypeHelpers';
-import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
-import { SegmentEvents } from '@configs/segment/segmentEvent';
+import AppInstallationParameters from "@components/config/appInstallationParameters";
+import { AppState, ConfigAppSDK } from "@contentful/app-sdk";
+import { useSDK } from "@contentful/react-apps-toolkit";
+import { useEffect, useCallback, useContext } from "react";
+import { generateEditorInterfaceAssignments } from "@utils/config/contentTypeHelpers";
+// import { SegmentAnalyticsContext } from "@providers/segmentAnalyticsProvider";
+import { SegmentEvents } from "@configs/segment/segmentEvent";
 
 /**
  * This hook is used to save the parameters of the app.
@@ -16,10 +16,10 @@ import { SegmentEvents } from '@configs/segment/segmentEvent';
 const useSaveConfigHandler = (
   parameters: AppInstallationParameters,
   validateParams: (params: AppInstallationParameters) => string[],
-  contentTypes: Set<string>
+  contentTypes: Set<string>,
 ) => {
   const sdk = useSDK<ConfigAppSDK>();
-  const { trackEvent } = useContext(SegmentAnalyticsContext);
+  // const { trackEvent } = useContext(SegmentAnalyticsContext);
 
   const getCurrentState = useCallback(async () => {
     const notifierErrors = validateParams(parameters);
@@ -37,11 +37,11 @@ const useSaveConfigHandler = (
     const newEditorInterfaceAssignments = generateEditorInterfaceAssignments(
       currentEditorInterface,
       Array.from(contentTypes),
-      'sidebar',
-      1
+      "sidebar",
+      1,
     );
 
-    trackEvent(SegmentEvents.CONFIG_SAVED);
+    // trackEvent(SegmentEvents.CONFIG_SAVED);
     const newAppState: AppState = {
       EditorInterface: newEditorInterfaceAssignments,
     };
@@ -50,7 +50,14 @@ const useSaveConfigHandler = (
       parameters,
       targetState: newAppState,
     };
-  }, [trackEvent, contentTypes, parameters, sdk.app, sdk.notifier, validateParams]);
+  }, [
+    // trackEvent,
+    contentTypes,
+    parameters,
+    sdk.app,
+    sdk.notifier,
+    validateParams,
+  ]);
 
   const changeSaveConfigHandler = useCallback(() => {
     sdk.app.onConfigure(() => getCurrentState());

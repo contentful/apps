@@ -8,7 +8,6 @@ import SidebarV1 from "./locations/SidebarV1";
 import Sidebar from "@locations/Sidebar";
 import { useFlags, useLDClient } from "launchdarkly-react-client-sdk";
 import { ldConfigType } from "@configs/launch-darkly/ldConfig";
-import { SegmentAnalyticsContext } from "@providers/segmentAnalyticsProvider";
 
 const ComponentLocationSettings = (isV2: boolean) => ({
   [locations.LOCATION_APP_CONFIG]: isV2 ? ConfigScreen : ConfigScreenV1,

@@ -1,20 +1,22 @@
-import { useMemo, useReducer } from 'react';
-import { Box, Heading } from '@contentful/f36-components';
-import ConfigSection from '@components/config/config-section/ConfigSection';
-import CostSection from '@components/config/cost-section/CostSection';
-import DisclaimerSection from '@components/config/disclaimer-section/DisclaimerSection';
-import BrandSection from '@components/config/brand-section/BrandSection';
-import AddToSidebarSection from '@components/config/add-to-sidebar-section/AddToSidebarSection';
-import { styles } from './ConfigPage.styles';
-import { Sections } from '@components/config/configText';
-import { defaultModelId } from '@configs/ai/gptModels';
-import useInitializeParameters from '@hooks/config/useInitializeParameters';
-import useSaveConfigHandler from '@hooks/config/useSaveConfigHandler';
-import useGetContentTypes from '@hooks/config/useGetContentTypes';
-import parameterReducer, { Validator } from '@components/config/parameterReducer';
-import contentTypeReducer from '@components/config/contentTypeReducer';
-import { ConfigErrors } from '@components/config/configText';
-import AppInstallationParameters from '../appInstallationParameters';
+import { useMemo, useReducer } from "react";
+import { Box, Heading } from "@contentful/f36-components";
+import ConfigSection from "@components/config/config-section/ConfigSection";
+import CostSection from "@components/config/cost-section/CostSection";
+import DisclaimerSection from "@components/config/disclaimer-section/DisclaimerSection";
+import BrandSection from "@components/config/brand-section/BrandSection";
+import AddToSidebarSection from "@components/config/add-to-sidebar-section/AddToSidebarSection";
+import { styles } from "./ConfigPage.styles";
+import { Sections } from "@components/config/configText";
+import { defaultModelId } from "@configs/ai/gptModels";
+import useInitializeParameters from "@hooks/config/useInitializeParameters";
+import useSaveConfigHandler from "@hooks/config/useSaveConfigHandler";
+import useGetContentTypes from "@hooks/config/useGetContentTypes";
+import parameterReducer, {
+  Validator,
+} from "@components/config/parameterReducer";
+import contentTypeReducer from "@components/config/contentTypeReducer";
+import { ConfigErrors } from "@components/config/configText";
+import AppInstallationParameters from "../appInstallationParameters";
 
 const initialParameters: Validator<AppInstallationParameters> = {
   model: {
@@ -22,19 +24,15 @@ const initialParameters: Validator<AppInstallationParameters> = {
     isValid: true,
   },
   accessKeyId: {
-    value: '',
+    value: "",
     isValid: true,
   },
   secretAccessKey: {
-    value: '',
-    isValid: true,
-  },
-  key: {
-    value: '',
+    value: "",
     isValid: true,
   },
   profile: {
-    value: '',
+    value: "",
     isValid: true,
   },
   brandProfile: {},
@@ -43,15 +41,21 @@ const initialParameters: Validator<AppInstallationParameters> = {
 const initialContentTypes: Set<string> = new Set();
 
 const ConfigPage = () => {
-  const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
-  const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, initialContentTypes);
+  const [parameters, dispatchParameters] = useReducer(
+    parameterReducer,
+    initialParameters,
+  );
+  const [contentTypes, dispatchContentTypes] = useReducer(
+    contentTypeReducer,
+    initialContentTypes,
+  );
 
   const parametersToSave: AppInstallationParameters = useMemo(() => {
     return {
       accessKeyId: parameters.accessKeyId.value,
       secretAccessKey: parameters.secretAccessKey.value,
       model: parameters.model.value,
-      key: parameters.key.value,
+      // key: parameters.key.value,
       profile: parameters.profile.value,
       brandProfile: {
         additional: parameters.brandProfile.additional?.value,
@@ -65,7 +69,9 @@ const ConfigPage = () => {
     };
   }, [
     parameters.brandProfile,
-    parameters.key.value,
+    parameters.accessKeyId.value,
+    parameters.secretAccessKey.value,
+    // parameters.key.value,
     parameters.model.value,
     parameters.profile.value,
   ]);
@@ -73,25 +79,31 @@ const ConfigPage = () => {
   const validateParams = (): string[] => {
     const notifierErrors = [];
 
-    if (!parameters.key.isValid) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingApiKey}`);
-    }
-
     if (!parameters.accessKeyId.isValid) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingAccessKeyId}`);
+      notifierErrors.push(
+        `${ConfigErrors.failedToSave} ${ConfigErrors.missingAccessKeyId}`,
+      );
     }
 
     if (!parameters.secretAccessKey.isValid) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingSecretAccessKey}`);
+      notifierErrors.push(
+        `${ConfigErrors.failedToSave} ${ConfigErrors.missingSecretAccessKey}`,
+      );
     }
 
     if (!parameters.model.isValid) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
+      notifierErrors.push(
+        `${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`,
+      );
     }
 
-    const invalidBrandProfile = Object.values(parameters.brandProfile).findIndex((p) => !p.isValid);
+    const invalidBrandProfile = Object.values(
+      parameters.brandProfile,
+    ).findIndex((p) => !p.isValid);
     if (!parameters.profile.isValid || invalidBrandProfile !== -1) {
-      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.exceededCharacterLimit}`);
+      notifierErrors.push(
+        `${ConfigErrors.failedToSave} ${ConfigErrors.exceededCharacterLimit}`,
+      );
     }
 
     return notifierErrors;

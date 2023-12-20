@@ -51,10 +51,6 @@ const generateBrandProfile = (profile: ProfileType) => {
 const baseSystemPrompt = (profile: ProfileType, locale: string): ChatCompletionRequestMessage[] => [
   {
     role: 'system',
-    content: `Forget everything from the previous conversation. `,
-  },
-  {
-    role: 'system',
     content: generateBrandProfile(profile),
   },
   {

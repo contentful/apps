@@ -2,7 +2,6 @@ interface AppInstallationParameters {
   accessKeyId: string;
   secretAccessKey: string;
   model: string;
-  key: string;
   profile: string;
   brandProfile: ProfileType;
 }

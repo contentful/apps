@@ -5,7 +5,6 @@ import { asyncWithLDProvider } from "launchdarkly-react-client-sdk";
 import LocalHostWarning from "@components/common/LocalHostWarning";
 import ldConfig from "@configs/launch-darkly/ldConfig";
 import App from "./App";
-import { SegmentAnalyticsProvider } from "@providers/segmentAnalyticsProvider";
 
 (async () => {
   // const LDProvider = await asyncWithLDProvider(ldConfig);
@@ -19,12 +18,10 @@ import { SegmentAnalyticsProvider } from "@providers/segmentAnalyticsProvider";
   } else {
     root.render(
       <SDKProvider>
-        <SegmentAnalyticsProvider>
-          {/* <LDProvider> */}
-          <GlobalStyles />
-          <App />
-          {/* </LDProvider> */}
-        </SegmentAnalyticsProvider>
+        {/* <LDProvider> */}
+        <GlobalStyles />
+        <App />
+        {/* </LDProvider> */}
       </SDKProvider>,
     );
   }

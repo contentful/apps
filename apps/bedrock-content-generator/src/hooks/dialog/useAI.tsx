@@ -1,17 +1,18 @@
-import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
-import { chatCompletionsBaseUrl } from '@configs/ai/baseUrl';
-import { DialogAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import AI from '@utils/aiApi';
-import { ChatCompletionRequestMessage } from 'openai';
-import { useEffect, useMemo, useState } from 'react';
-import { defaultModelId } from '@configs/ai/gptModels';
+import baseSystemPrompt from "@configs/prompts/baseSystemPrompt";
+import { DialogAppSDK } from "@contentful/app-sdk";
+import { useSDK } from "@contentful/react-apps-toolkit";
+import AI from "@utils/aiApi";
+import { ChatCompletionRequestMessage } from "openai";
+import { useEffect, useMemo, useState } from "react";
 import AppInstallationParameters, {
   ProfileType,
-} from '@components/config/appInstallationParameters';
-import { AiApiError, AiApiErrorType } from '@utils/aiApi/handleAiApiErrors';
+} from "@components/config/appInstallationParameters";
+import { AiApiError, AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
 
-export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
+export type GenerateMessage = (
+  prompt: string,
+  targetLocale: string,
+) => Promise<string>;
 
 /**
  * This hook is used to generate messages using the OpenAI API
@@ -27,35 +28,64 @@ const useAI = () => {
         sdk.parameters.installation.accessKeyId,
         sdk.parameters.installation.secretAccessKey,
       ),
-    [sdk.parameters.installation]
+    [sdk.parameters.installation],
   );
-  const [output, setOutput] = useState<string>('');
-  const [stream, setStream] = useState<ReadableStreamDefaultReader<Uint8Array> | null | undefined>(
-    null
-  );
+  const [output, setOutput] = useState<string>("");
+  const [stream, setStream] = useState<AsyncGenerator<
+    string,
+    string,
+    unknown
+  > | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<AiApiErrorType | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
 
-  const createGPTPayload = (
+  const createModelPayload = (
     content: string,
     profile: ProfileType,
-    targetLocale: string
-  ): ChatCompletionRequestMessage[] => {
+    targetLocale: string,
+  ): string => {
     const userPrompt: ChatCompletionRequestMessage = {
-      role: 'user',
+      role: "user",
       content,
     };
 
-    return [...baseSystemPrompt(profile, targetLocale), userPrompt];
+    function chatCompletionRequestMessageToClaudePrompt(
+      msgs: ChatCompletionRequestMessage[],
+    ): string {
+      return msgs
+        .map((msg) => {
+          let role = "";
+          switch (msg.role) {
+            case "user":
+              role = "Assistant";
+              break;
+            case "system":
+              role = "Human";
+              break;
+            case "assistant":
+              role = "Assistant";
+              break;
+          }
+
+          return `${role}: ${msg.content}`;
+        })
+        .join("\n");
+    }
+
+    let answer = chatCompletionRequestMessageToClaudePrompt([
+      ...baseSystemPrompt(profile, targetLocale),
+      userPrompt,
+    ]);
+
+    answer += "\nAssistant:";
+
+    return answer;
   };
 
   const resetOutput = () => {
-    setOutput('');
+    setOutput("");
     setError(null);
-    if (stream) {
-      stream.cancel();
-    }
     setStream(null);
 
     setHasError(false);
@@ -63,30 +93,23 @@ const useAI = () => {
 
   const generateMessage = async (prompt: string, targetLocale: string) => {
     resetOutput();
-    let completeMessage = '';
+    let completeMessage = "";
     setIsGenerating(true);
 
     try {
-      const payload = createGPTPayload(
+      const payload = createModelPayload(
         prompt,
         {
           ...sdk.parameters.installation.brandProfile,
           profile: sdk.parameters.installation.profile,
         },
-        targetLocale
+        targetLocale,
       );
 
-      //const stream = await ai.streamChatCompletion(payload);
-      const stream = undefined
-      setStream(stream);
+      let stream = await ai.streamChatCompletion(payload);
+      if (!stream) throw new Error("Stream is null");
 
-      while (stream) {
-        const streamOutput = await ai.parseStream(stream);
-
-        if (streamOutput === false) {
-          break;
-        }
-
+      for await (const streamOutput of stream) {
         setOutput((prev) => prev + streamOutput);
         completeMessage += streamOutput;
       }
@@ -100,19 +123,11 @@ const useAI = () => {
       setHasError(true);
       setIsGenerating(false);
     } finally {
+      setIsGenerating(false);
       setStream(null);
     }
 
     return completeMessage;
-  };
-
-  const sendStopSignal = async () => {
-    try {
-      await ai.sendStopSignal(stream);
-      setStream(null);
-    } catch (error: unknown) {
-      console.error(error);
-    }
   };
 
   useEffect(() => {
@@ -125,7 +140,6 @@ const useAI = () => {
     output,
     setOutput,
     resetOutput,
-    sendStopSignal,
     error,
     hasError,
   };

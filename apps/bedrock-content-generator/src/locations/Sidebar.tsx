@@ -7,19 +7,19 @@ import { disclaimerMessage } from '@components/app/sidebar/sidebarText';
 import HyperLink from '@components/common/HyperLink/HyperLink';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { useContext, useEffect } from 'react';
-import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
-import { SegmentEvents } from '@configs/segment/segmentEvent';
+// import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
+// import { SegmentEvents } from '@configs/segment/segmentEvent';
 import DisplaySidebarWarning from '@components/app/sidebar/DisplaySidebarWarning';
 
 const Sidebar = () => {
   const { hasBrandProfile, apiError } = useSidebarParameters();
   useAutoResizer();
 
-  const { trackEvent } = useContext(SegmentAnalyticsContext);
+  // const { trackEvent } = useContext(SegmentAnalyticsContext);
 
-  useEffect(() => {
-    trackEvent(SegmentEvents.SIDEBAR_RENDERED);
-  }, [trackEvent]);
+  // useEffect(() => {
+  //   trackEvent(SegmentEvents.SIDEBAR_RENDERED);
+  // }, [trackEvent]);
 
   return (
     <>
