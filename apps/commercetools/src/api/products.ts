@@ -11,14 +11,11 @@ import { getLocalizedValue } from './localisation-helpers';
 const MAX_LIMIT = 500;
 
 function getProductAttributes(definitions: AttributeDefinition[], attributes: Attribute[]) {
-  const indexedDefinitions = definitions.reduce(
-    (acc, definition) => {
-      acc[definition.name] = definition;
+  const indexedDefinitions = definitions.reduce((acc, definition) => {
+    acc[definition.name] = definition;
 
-      return acc;
-    },
-    {} as Record<string, AttributeDefinition>
-  );
+    return acc;
+  }, {} as Record<string, AttributeDefinition>);
   const productAttributes: { name: string; value: string }[] = [];
 
   for (const attribute of attributes) {
@@ -104,23 +101,43 @@ export async function fetchProductPreviews(
 export async function fetchProducts(
   config: ConfigurationParameters,
   search: string,
-  pagination: { offset: number; limit: number }
+  pagination: { offset: number; limit: number },
+  hasSkuSearch: boolean
 ): Promise<{
   pagination: Pagination;
   products: CommerceToolsProduct[];
 }> {
   const client = createClient(config);
-  const response = await client
-    .productProjections()
-    .search()
-    .get({
-      queryArgs: {
-        [`text.${config.locale}`]: search,
-        limit: pagination?.limit,
-        offset: pagination?.offset,
-      },
-    })
-    .execute();
+
+  let response;
+
+  if (search && hasSkuSearch) {
+    response = await client
+      .productProjections()
+      .search()
+      .get({
+        queryArgs: {
+          // [`text.${config.locale}`]: search,
+          'filter.query': [`variants.sku:"${search}"`],
+          limit: pagination?.limit,
+          offset: pagination?.offset,
+        },
+      })
+      .execute();
+  } else {
+    response = await client
+      .productProjections()
+      .search()
+      .get({
+        queryArgs: {
+          [`text.${config.locale}`]: search,
+          // 'filter.query': [`variants.sku:${search}}`],
+          limit: pagination?.limit,
+          offset: pagination?.offset,
+        },
+      })
+      .execute();
+  }
 
   if (response.statusCode === 200) {
     return {

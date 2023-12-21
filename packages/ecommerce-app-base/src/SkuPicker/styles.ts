@@ -73,4 +73,9 @@ export const styles = {
   loadMoreButton: css({
     marginTop: tokens.spacingXs,
   }),
+  skuSearch: css({
+    display: 'flex',
+    alignItems: 'center',
+    marginLeft: tokens.spacingM,
+  }),
 };

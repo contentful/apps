@@ -10,7 +10,7 @@ import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
 import { mapSort } from '../utils';
 
-import { Button, TextInput } from '@contentful/f36-components';
+import { Button, Checkbox, TextInput } from '@contentful/f36-components';
 
 import { SearchIcon } from '@contentful/f36-icons';
 
@@ -31,6 +31,7 @@ interface State {
   products: Product[];
   selectedProducts: Product[];
   selectedSKUs: string[];
+  hasSkuSearch: boolean;
 }
 
 const DEFAULT_SEARCH_DELAY = 250;
@@ -59,6 +60,7 @@ export class SkuPicker extends Component<Props, State> {
     products: [],
     selectedProducts: [],
     selectedSKUs: get(this.props, ['sdk', 'parameters', 'invocation', 'fieldValue'], []),
+    hasSkuSearch: false,
   };
 
   setSearchCallback: () => void;
@@ -87,7 +89,7 @@ export class SkuPicker extends Component<Props, State> {
         search,
       } = this.state;
       const offset = (activePage - 1) * limit;
-      const fetched = await this.props.fetchProducts(search, { offset });
+      const fetched = await this.props.fetchProducts(search, { offset }, this.state.hasSkuSearch);
       // If the request has been cancelled because a new one has been launched
       // then fetchProducts will return null
       if (fetched && fetched.pagination && fetched.products) {
@@ -148,7 +150,8 @@ export class SkuPicker extends Component<Props, State> {
   };
 
   render() {
-    const { search, pagination, products, selectedProducts, selectedSKUs } = this.state;
+    const { search, pagination, products, selectedProducts, selectedSKUs, hasSkuSearch } =
+      this.state;
     const { makeSaveBtnText = defaultGetSaveBtnText, skuType, hideSearch = false } = this.props;
     const infiniteScrollingPaginationMode = 'hasNextPage' in pagination;
     const pageCount = Math.ceil(pagination.total / pagination.limit);
@@ -176,6 +179,17 @@ export class SkuPicker extends Component<Props, State> {
                 Total results: {pagination.total.toLocaleString()}
               </span>
             )}
+          </div>
+          <div className={styles.skuSearch}>
+            <Checkbox
+              name="has-sku-search"
+              id="has-sku-search"
+              isChecked={hasSkuSearch}
+              onChange={() =>
+                this.setState((oldState) => ({ hasSkuSearch: !oldState.hasSkuSearch }))
+              }>
+              Search only for SKU
+            </Checkbox>
           </div>
           <div className={styles.rightSideControls}>
             <ProductSelectionList products={selectedProducts} selectProduct={this.selectProduct} />

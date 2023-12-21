@@ -23,13 +23,22 @@ export function createResolver(sdk: DialogAppSDK, skuType: SkuType): ProductsFn 
 
   const fetchFn = skuType === 'category' ? fetchCategories : fetchProducts;
 
-  return async (search: string, updatedPagination?: Partial<Pagination>) => {
+  return async (
+    search: string,
+    updatedPagination?: Partial<Pagination>,
+    hasSkuSearch?: boolean
+  ) => {
     offset = updatedPagination?.offset ?? offset;
 
-    const fetched = await fetchFn(sdk.parameters.installation, search, {
-      offset: offset,
-      limit: LIMIT,
-    });
+    const fetched = await fetchFn(
+      sdk.parameters.installation,
+      search,
+      {
+        offset: offset,
+        limit: LIMIT,
+      },
+      !!hasSkuSearch
+    );
 
     offset += fetched.pagination.count;
 
