@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.2](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.2.1...@contentful/dam-app-base@2.2.2) (2023-12-22)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-tokens from 4.0.1 to 4.0.3 ([#5755](https://github.com/contentful/apps/issues/5755)) ([abddde7](https://github.com/contentful/apps/commit/abddde7f0dd64e8d9a9d825a6922481a8a03fd32))
+
 ## [2.2.1](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.2.0...@contentful/dam-app-base@2.2.1) (2023-12-07)
 
 ### Bug Fixes
