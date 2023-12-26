@@ -22,7 +22,11 @@ import {
 
 interface Props {
   index: number;
-  updateNotification: (index: number, editedNotification: Partial<Notification>) => void;
+  updateNotification: (
+    index: number,
+    editedNotification: Partial<Notification>,
+    isNew?: boolean
+  ) => void;
   notification: Notification;
   handleEdit: () => void;
   isMenuDisabled: boolean;

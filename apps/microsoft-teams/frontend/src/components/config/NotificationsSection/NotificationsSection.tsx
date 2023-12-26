@@ -11,6 +11,7 @@ import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
 import useGetTeamsChannels from '@hooks/useGetTeamsChannels';
 import { ContentTypeContextProvider } from '@context/ContentTypeProvider';
+import { getUniqueNotifications, getDuplicateNotificationIndex } from '@helpers/configHelpers';
 
 interface Props {
   notifications: Notification[];
@@ -54,7 +55,11 @@ const NotificationsSection = (props: Props) => {
     });
   };
 
-  const updateNotification = (index: number, editedNotification: Partial<Notification>) => {
+  const updateNotification = (
+    index: number,
+    editedNotification: Partial<Notification>,
+    isNew?: boolean
+  ) => {
     const notificationsPayload = [...notifications];
     const existingNotification = notificationsPayload[index];
 
@@ -62,20 +67,8 @@ const NotificationsSection = (props: Props) => {
     const updatedNotification = { ...existingNotification, ...editedNotification };
     notificationsPayload[index] = updatedNotification;
 
-    // Use a Set to keep track of unique keys
-    const uniqueKeys = new Set<string>();
-
-    // Deduplicate based on content
-    const uniqueNotifications = notificationsPayload.filter((notification) => {
-      const key = `${notification.channelId}-${notification.contentTypeId}`;
-      if (!uniqueKeys.has(key)) {
-        uniqueKeys.add(key);
-        return true;
-      }
-      return false;
-    });
-
     // Check if the updated notification is unique
+    const uniqueNotifications = getUniqueNotifications(notificationsPayload);
     const isUnique = uniqueNotifications.length === notificationsPayload.length;
 
     // If not unique, open the modal and set the index for further handling
@@ -88,18 +81,39 @@ const NotificationsSection = (props: Props) => {
               onClose(true);
             }}
             handleConfirm={() => {
-              setNotificationIndexToEdit(index);
-              onClose(true);
+              if (isNew) {
+                // If the updated notification is new, delete it from state
+                notificationsPayload.splice(index, 1);
+                const duplicateNotificationIndex = getDuplicateNotificationIndex(
+                  notificationsPayload,
+                  updatedNotification
+                );
+
+                onClose(true);
+                deleteNotification(index);
+                setNotificationIndexToEdit(duplicateNotificationIndex);
+              } else {
+                const duplicateNotificationIndex = getDuplicateNotificationIndex(
+                  notificationsPayload,
+                  updatedNotification,
+                  index
+                );
+
+                onClose(true);
+                setNotificationIndexToEdit(duplicateNotificationIndex);
+              }
             }}
           />
         );
       });
+    } else {
+      // If new notification is unique, update state
+      setNotificationIndexToEdit(null);
+      dispatch({
+        type: actions.UPDATE_NOTIFICATIONS,
+        payload: uniqueNotifications,
+      });
     }
-
-    dispatch({
-      type: actions.UPDATE_NOTIFICATIONS,
-      payload: uniqueNotifications,
-    });
   };
 
   return (
