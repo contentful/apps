@@ -58,7 +58,7 @@ const NotificationViewMode = (props: Props) => {
             )}
           </Subheading>
           <Paragraph marginBottom="none">
-            {getChannelName(notification.channelId, channels, channelSelection.notFound)}
+            {getChannelName(notification.channel.id, channels, channelSelection.notFound)}
           </Paragraph>
         </Flex>
         <Flex alignItems="center">

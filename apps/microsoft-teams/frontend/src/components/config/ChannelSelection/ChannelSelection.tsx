@@ -23,7 +23,7 @@ const ChannelSelection = (props: Props) => {
         isShown={isShown}
         onClose={() => onClose(true)}
         handleNotificationEdit={handleNotificationEdit}
-        savedChannelId={notification.channelId}
+        savedChannel={notification.channel}
         channels={channels}
       />
     ));
@@ -37,12 +37,12 @@ const ChannelSelection = (props: Props) => {
           {channelSelection.title}
         </Text>
       </Flex>
-      {notification.channelId ? (
+      {notification.channel.id ? (
         <TextInput.Group>
           <TextInput
             id="selected-channel"
             isDisabled={true}
-            value={getChannelName(notification.channelId, channels, channelSelection.notFound)}
+            value={getChannelName(notification.channel.id, channels, channelSelection.notFound)}
             className={styles.input}
           />
           <IconButton
