@@ -16,7 +16,11 @@ import CancelModal from '@components/config/CancelModal/CancelModal';
 interface Props {
   index: number;
   deleteNotification: (index: number) => void;
-  updateNotification: (index: number, editedNotification: Partial<Notification>) => void;
+  updateNotification: (
+    index: number,
+    editedNotification: Partial<Notification>,
+    isNew?: boolean
+  ) => void;
   notification: Notification;
   setNotificationIndexToEdit: Dispatch<SetStateAction<number | null>>;
   channels: TeamsChannel[];
@@ -43,8 +47,8 @@ const NotificationEditMode = (props: Props) => {
   };
 
   const handleSave = () => {
-    updateNotification(index, editedNotification);
-    setNotificationIndexToEdit(null);
+    const isNew = isNotificationNew(notification);
+    updateNotification(index, editedNotification, isNew);
   };
 
   const handleCancel = () => {

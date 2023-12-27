@@ -23,6 +23,13 @@ const notificationsSection = {
   delete: 'Delete',
   confirmDelete:
     'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
+  duplicateModal: {
+    modalHeaderTitle: 'Duplicate Notification',
+    confirmDuplicate: 'Update existing notification',
+    goBack: 'Go back to editing',
+    confirmDuplicateDescription:
+      'You already have a notification set up for this content type and MS Teams channel. Would you like to update the existing notification instead of creating a new one?',
+  },
 };
 
 const contentTypeSelection = {

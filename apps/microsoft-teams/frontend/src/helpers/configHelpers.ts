@@ -82,10 +82,62 @@ const doesNotificationHaveChanges = (
   return !isEqual(editedNotification, notification);
 };
 
+/**
+ * Returns a list of unique notifications with duplicates removed
+ * Duplicates are ones that have the same content type and channel
+ * @param notifications
+ * @returns Notification[]
+ */
+const getUniqueNotifications = (notifications: Notification[]): Notification[] => {
+  // Use a Set to keep track of unique keys
+  const uniqueKeys = new Set<string>();
+
+  // Deduplicate based on content
+  const uniqueNotifications = notifications.filter((notification) => {
+    const key = `${notification.channelId}-${notification.contentTypeId}`;
+    if (!uniqueKeys.has(key)) {
+      uniqueKeys.add(key);
+      return true;
+    }
+    return false;
+  });
+
+  return uniqueNotifications;
+};
+
+/**
+ * Finds the index of the notification that is a duplicate of another
+ * @param notifications
+ * @param notificationToFind
+ * @param index
+ * @returns number
+ */
+const getDuplicateNotificationIndex = (
+  notifications: Notification[],
+  notificationToFind: Notification,
+  index?: number
+): number => {
+  const duplicateNotificationIndex = notifications.reduce((matchedIndex, notification, idx) => {
+    const isDuplicate =
+      notification.channelId === notificationToFind.channelId &&
+      notification.contentTypeId === notificationToFind.contentTypeId &&
+      index !== idx;
+    if (isDuplicate) {
+      matchedIndex = idx;
+    }
+
+    return matchedIndex;
+  }, -1);
+
+  return duplicateNotificationIndex;
+};
+
 export {
   getContentTypeName,
   getChannelName,
   isNotificationReadyToSave,
   isNotificationNew,
   doesNotificationHaveChanges,
+  getUniqueNotifications,
+  getDuplicateNotificationIndex,
 };

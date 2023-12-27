@@ -5,6 +5,8 @@ import {
   isNotificationReadyToSave,
   isNotificationNew,
   doesNotificationHaveChanges,
+  getUniqueNotifications,
+  getDuplicateNotificationIndex,
 } from './configHelpers';
 import { mockChannels, mockContentType } from '@test/mocks';
 import { channelSelection, contentTypeSelection } from '@constants/configCopy';
@@ -70,5 +72,41 @@ describe('doesNotificationHaveChanges', () => {
 
   it('should return true when there are changes', () => {
     expect(doesNotificationHaveChanges(mockNotification, defaultNotification)).toEqual(true);
+  });
+});
+
+describe('getUniqueNotifications', () => {
+  it('should return a list of unique notifications when there are duplicates', () => {
+    expect(getUniqueNotifications([mockNotification, mockNotification]).length).toEqual(1);
+  });
+});
+
+describe('getDuplicateNotificationIndex', () => {
+  it('should return -1 when there are no duplicates', () => {
+    expect(
+      getDuplicateNotificationIndex([mockNotification], {
+        ...mockNotification,
+        contentTypeId: 'page',
+      })
+    ).toEqual(-1);
+  });
+
+  it('should return the correct index when there are duplicates', () => {
+    expect(
+      getDuplicateNotificationIndex(
+        [mockNotification, { ...mockNotification, contentTypeId: 'page' }],
+        mockNotification
+      )
+    ).toEqual(0);
+  });
+
+  it('should return the correct index when there are duplicates and index is passed in', () => {
+    expect(
+      getDuplicateNotificationIndex(
+        [{ ...mockNotification, contentTypeId: 'page' }, mockNotification, mockNotification],
+        mockNotification,
+        2
+      )
+    ).toEqual(1);
   });
 });
