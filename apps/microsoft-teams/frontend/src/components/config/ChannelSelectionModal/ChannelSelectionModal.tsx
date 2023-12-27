@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   FormControl,
@@ -26,11 +26,16 @@ interface ChannelSelectionModalProps {
 }
 
 const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
-  const { isShown, onClose, savedChannel: savedChannel, handleNotificationEdit, channels } = props;
+  const { isShown, onClose, savedChannel, handleNotificationEdit, channels } = props;
   const [selectedChannel, setSelectedChannel] = useState<TeamsChannel>(
     savedChannel ?? defaultNotification.channel
   );
   const { title, button, link, emptyContent, emptyHeading, description } = channelSelection.modal;
+
+  useEffect(() => {
+    const foundChannel = channels.find((channel) => channel.id === savedChannel.id);
+    setSelectedChannel(foundChannel ?? defaultNotification.channel);
+  }, [savedChannel]);
 
   return (
     <Modal onClose={onClose} isShown={isShown} size="large">
