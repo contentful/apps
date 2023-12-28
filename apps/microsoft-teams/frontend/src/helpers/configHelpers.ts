@@ -1,5 +1,5 @@
 import { ContentTypeProps } from 'contentful-management';
-import { Notification, TeamsChannel } from '@customTypes/configPage';
+import { Notification } from '@customTypes/configPage';
 import isEqual from 'lodash/isEqual';
 import { defaultNotification } from '@constants/defaultParams';
 
@@ -18,25 +18,6 @@ const getContentTypeName = (
 ): string => {
   const contentType = contentTypes.find((contentType) => contentType.sys.id === contentTypeId);
   return contentType ? contentType.name : notFoundCopy;
-};
-
-// TODO: update this function when we start fetching channel installations
-/**
- * Gets the channel and team name for a given channel id
- * returns a not found string if the channel is not found
- * @param channelId
- * @param channels
- * @param notFoundCopy
- * @returns string
- */
-const getChannelName = (
-  channelId: string,
-  channels: TeamsChannel[],
-  notFoundCopy: string
-): string => {
-  const channel = channels.find((channel) => channelId === channel.id);
-  const displayName = channel ? `${channel.name}, ${channel.teamName}` : notFoundCopy;
-  return displayName;
 };
 
 /**
@@ -134,7 +115,6 @@ const getDuplicateNotificationIndex = (
 
 export {
   getContentTypeName,
-  getChannelName,
   isNotificationReadyToSave,
   isNotificationNew,
   doesNotificationHaveChanges,

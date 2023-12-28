@@ -59,7 +59,6 @@ const channelSelection = {
     emptyContent:
       'In Microsoft Teams, add the Contentful app to the general channel of the teams where you want to see notifications. Add app',
   },
-  notFound: 'Channel not found',
 };
 
 export enum AppEventKey {
