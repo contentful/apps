@@ -170,7 +170,7 @@ describe('message-processor', () => {
 
       expect(state).toEqual({
         busy: true,
-        info: expect.stringMatching(/at 2:26:02 PM/),
+        info: expect.stringMatching(/at 2:26:02 PM.$/),
         ok: true,
         status: 'Triggering...',
       });
@@ -185,7 +185,7 @@ describe('message-processor', () => {
 
       expect(state).toEqual({
         busy: true,
-        info: expect.stringMatching(/by Jakub.+at 2:26:02 PM/),
+        info: expect.stringMatching(/by Jakub.+at 2:26:02 PM.$/),
         ok: true,
         status: 'Triggering...',
       });
@@ -226,7 +226,7 @@ describe('message-processor', () => {
       expect(state).toEqual({
         busy: false,
         ok: true,
-        info: expect.stringMatching(/Last built.+at 2:26:02 PM/),
+        info: expect.stringMatching(/Last built.+at 2:26:02 PM.$/),
       });
     });
 
