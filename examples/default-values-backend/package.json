@@ -25,7 +25,7 @@
     "typescript": "5.1.6"
   },
   "devDependencies": {
-    "parcel": "2.9.3",
+    "parcel": "2.10.3",
     "ts-node": "10.9.1"
   },
   "browserslist": [
