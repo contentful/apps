@@ -14,7 +14,6 @@ import { styles } from './NotificationViewMode.styles';
 import { getContentTypeName } from '@helpers/configHelpers';
 import { Notification } from '@customTypes/configPage';
 import { contentTypeSelection, notificationsSection } from '@constants/configCopy';
-// TODO: update this when we start fetching channel installations
 
 interface Props {
   index: number;
