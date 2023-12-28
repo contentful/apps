@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   FormControl,
@@ -15,19 +15,27 @@ import ModalHeader from '@components/config/ModalHeader/ModalHeader';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 import EmptyState from '@components/config/EmptyState/EmptyState';
 import EmptyFishbowl from '@components/config/EmptyState/EmptyFishbowl';
+import { defaultNotification } from '@constants/defaultParams';
 
 interface ChannelSelectionModalProps {
   isShown: boolean;
   onClose: () => void;
-  savedChannelId: string;
+  savedChannel: TeamsChannel;
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
   channels: TeamsChannel[];
 }
 
 const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
-  const { isShown, onClose, savedChannelId, handleNotificationEdit, channels } = props;
-  const [selectedChannelId, setSelectedChannelId] = useState<string>(savedChannelId ?? '');
+  const { isShown, onClose, savedChannel, handleNotificationEdit, channels } = props;
+  const [selectedChannel, setSelectedChannel] = useState<TeamsChannel>(
+    savedChannel ?? defaultNotification.channel
+  );
   const { title, button, link, emptyContent, emptyHeading, description } = channelSelection.modal;
+
+  useEffect(() => {
+    const foundChannel = channels.find((channel) => channel.id === savedChannel.id);
+    setSelectedChannel(foundChannel ?? defaultNotification.channel);
+  }, [savedChannel]);
 
   return (
     <Modal onClose={onClose} isShown={isShown} size="large">
@@ -51,8 +59,8 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
                           <Table.Cell>
                             <Radio
                               id={channel.id}
-                              isChecked={selectedChannelId === channel.id}
-                              onChange={() => setSelectedChannelId(channel.id)}
+                              isChecked={selectedChannel.id === channel.id}
+                              onChange={() => setSelectedChannel(channel)}
                               helpText={channel.teamName}>
                               {channel.name}
                             </Radio>
@@ -68,10 +76,10 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
                   size="small"
                   variant="primary"
                   onClick={() => {
-                    handleNotificationEdit({ channelId: selectedChannelId });
+                    handleNotificationEdit({ channel: selectedChannel });
                     onClose();
                   }}
-                  isDisabled={!selectedChannelId}>
+                  isDisabled={!selectedChannel.id}>
                   {button}
                 </Button>
               </Modal.Controls>

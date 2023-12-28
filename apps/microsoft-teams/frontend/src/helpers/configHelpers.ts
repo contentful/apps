@@ -1,5 +1,5 @@
 import { ContentTypeProps } from 'contentful-management';
-import { Notification, TeamsChannel } from '@customTypes/configPage';
+import { Notification } from '@customTypes/configPage';
 import isEqual from 'lodash/isEqual';
 import { defaultNotification } from '@constants/defaultParams';
 
@@ -20,25 +20,6 @@ const getContentTypeName = (
   return contentType ? contentType.name : notFoundCopy;
 };
 
-// TODO: update this function when we start fetching channel installations
-/**
- * Gets the channel and team name for a given channel id
- * returns a not found string if the channel is not found
- * @param channelId
- * @param channels
- * @param notFoundCopy
- * @returns string
- */
-const getChannelName = (
-  channelId: string,
-  channels: TeamsChannel[],
-  notFoundCopy: string
-): string => {
-  const channel = channels.find((channel) => channelId === channel.id);
-  const displayName = channel ? `${channel.name}, ${channel.teamName}` : notFoundCopy;
-  return displayName;
-};
-
 /**
  * Evaluates whether the edited notification is different from the saved notification
  * and whether all of the necessary fields are completed
@@ -53,7 +34,7 @@ const isNotificationReadyToSave = (
   const hasChanges = doesNotificationHaveChanges(editedNotification, notification);
 
   const hasContentType = !!editedNotification.contentTypeId;
-  const hasChannel = !!editedNotification.channelId;
+  const hasChannel = !!editedNotification.channel.id;
   const hasEventEnabled = Object.values(editedNotification.selectedEvents).includes(true);
   const hasAllFieldsCompleted = hasContentType && hasChannel && hasEventEnabled;
 
@@ -94,7 +75,7 @@ const getUniqueNotifications = (notifications: Notification[]): Notification[] =
 
   // Deduplicate based on content
   const uniqueNotifications = notifications.filter((notification) => {
-    const key = `${notification.channelId}-${notification.contentTypeId}`;
+    const key = `${notification.channel.id}-${notification.contentTypeId}`;
     if (!uniqueKeys.has(key)) {
       uniqueKeys.add(key);
       return true;
@@ -119,7 +100,7 @@ const getDuplicateNotificationIndex = (
 ): number => {
   const duplicateNotificationIndex = notifications.reduce((matchedIndex, notification, idx) => {
     const isDuplicate =
-      notification.channelId === notificationToFind.channelId &&
+      notification.channel.id === notificationToFind.channel.id &&
       notification.contentTypeId === notificationToFind.contentTypeId &&
       index !== idx;
     if (isDuplicate) {
@@ -134,7 +115,6 @@ const getDuplicateNotificationIndex = (
 
 export {
   getContentTypeName,
-  getChannelName,
   isNotificationReadyToSave,
   isNotificationNew,
   doesNotificationHaveChanges,

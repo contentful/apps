@@ -3,15 +3,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { channelSelection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
+import { mockChannels } from '@test/mocks';
 
 describe('ChannelSelection component', () => {
   it('mounts and renders the correct title and button copy when no channel is selected', () => {
     const { unmount } = render(
-      <ChannelSelection
-        notification={defaultNotification}
-        handleNotificationEdit={vi.fn()}
-        channels={[]}
-      />
+      <ChannelSelection notification={defaultNotification} handleNotificationEdit={vi.fn()} />
     );
 
     expect(screen.getByText(channelSelection.title)).toBeTruthy();
@@ -21,9 +18,11 @@ describe('ChannelSelection component', () => {
   it('mounts and renders an input when a channel is selected', () => {
     const { unmount } = render(
       <ChannelSelection
-        notification={{ ...defaultNotification, channelId: 'abc-123' }}
+        notification={{
+          ...defaultNotification,
+          channel: mockChannels[0],
+        }}
         handleNotificationEdit={vi.fn()}
-        channels={[]}
       />
     );
 

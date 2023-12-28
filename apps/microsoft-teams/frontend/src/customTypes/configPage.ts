@@ -6,7 +6,7 @@ export interface AppInstallationParameters {
 }
 
 export interface Notification {
-  channelId: string;
+  channel: TeamsChannel;
   contentTypeId: string;
   isEnabled: boolean;
   selectedEvents: SelectedEvents;

@@ -14,7 +14,6 @@ describe('NotificationEditMode component', () => {
         updateNotification={vi.fn()}
         notification={defaultNotification}
         setNotificationIndexToEdit={vi.fn()}
-        channels={[]}
       />
     );
 

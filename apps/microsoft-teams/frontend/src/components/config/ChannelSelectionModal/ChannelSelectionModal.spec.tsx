@@ -2,6 +2,7 @@ import ChannelSelectionModal from './ChannelSelectionModal';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { channelSelection } from '@constants/configCopy';
+import { defaultNotification } from '@constants/defaultParams';
 
 describe('ChannelSelectionModal component', () => {
   it('mounts and renders the correct content', () => {
@@ -9,7 +10,7 @@ describe('ChannelSelectionModal component', () => {
       <ChannelSelectionModal
         isShown={true}
         onClose={vi.fn()}
-        savedChannelId=""
+        savedChannel={defaultNotification.channel}
         handleNotificationEdit={vi.fn()}
         channels={[]}
       />

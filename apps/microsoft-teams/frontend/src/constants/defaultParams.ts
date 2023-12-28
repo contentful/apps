@@ -14,7 +14,13 @@ const getDefaultSelectedEvents = (): SelectedEvents => {
 };
 
 const defaultNotification = {
-  channelId: '',
+  channel: {
+    id: '',
+    name: '',
+    teamId: '',
+    teamName: '',
+    tenantId: '',
+  },
   contentTypeId: '',
   isEnabled: true,
   selectedEvents: getDefaultSelectedEvents(),
