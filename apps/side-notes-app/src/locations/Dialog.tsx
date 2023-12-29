@@ -1,10 +1,10 @@
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { renderRichTextDialog } from '@contentful/field-editor-rich-text';
 import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import { renderMarkdownDialog } from '@contentful/field-editor-markdown';
 
 const Dialog = () => {
-  const sdk = useSDK<DialogExtensionSDK>();
+  const sdk = useSDK<DialogAppSDK>();
   useAutoResizer();
 
   if (
