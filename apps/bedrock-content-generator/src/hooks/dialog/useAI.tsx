@@ -27,6 +27,7 @@ const useAI = () => {
       new AI(
         sdk.parameters.installation.accessKeyId,
         sdk.parameters.installation.secretAccessKey,
+        sdk.parameters.installation.region,
       ),
     [sdk.parameters.installation],
   );

@@ -12,6 +12,7 @@ import AI from "@utils/aiApi";
 import { Dispatch, useState } from "react";
 import { AccessKeyText } from "../configText";
 import { ParameterAction, ParameterReducer } from "../parameterReducer";
+import { styles } from "./AccessKey.styles";
 
 interface Props {
   apiKey?: string;
@@ -32,13 +33,14 @@ const AccessKey = ({
     useState<string>(secretAccessKey);
 
   const [isValidating, setIsValidating] = useState<boolean>(false);
-  // const displayInvalidMessage = !apiKey || isInvalid;
+  const [showValidation, setShowValidation] = useState<boolean>(false);
+
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const validateCredentials = async () => {
-    const ai = new AI(localAccessKeyID, localSecretAccessKey);
-
     try {
-      ai.getModels();
+      const ai = new AI(localAccessKeyID, localSecretAccessKey, "us-east-1");
+      await ai.getModels();
       return true;
     } catch (e) {
       console.log(e);
@@ -47,15 +49,19 @@ const AccessKey = ({
   };
 
   const handleBlur = async () => {
+    setIsEditing(false);
+    console.log("handleBlur");
+
     if (
       localAccessKeyID === accessKeyID &&
       localSecretAccessKey == secretAccessKey
     )
-      return;
+      return console.log("no change");
 
     setIsValidating(true);
+    const isValid = localSecretAccessKey != "" && (await validateCredentials());
 
-    const isValid = await validateCredentials();
+    console.log("isValid", isValid);
 
     dispatch({
       type: ParameterAction.UPDATE_CREDENTIALS,
@@ -67,7 +73,14 @@ const AccessKey = ({
     });
 
     setIsValidating(false);
+    setShowValidation(true);
   };
+
+  const secretAccessKeyError = !localSecretAccessKey
+    ? ConfigErrors.missingSecretAccessKey
+    : isInvalid
+      ? ConfigErrors.invalidCredentials
+      : null;
 
   return (
     <>
@@ -79,14 +92,16 @@ const AccessKey = ({
           type="text"
           name="accessKeyID"
           placeholder="AKIA6O......"
+          onClick={() => setIsEditing(true)}
           onChange={(e) => setLocalAccessKeyID(e.target.value)}
+          onBlur={handleBlur}
         />
 
-        {/* {displayInvalidMessage && (
+        {showValidation && !localAccessKeyID && (
           <FormControl.ValidationMessage>
-            {ConfigErrors.missingApiKey}
+            {ConfigErrors.missingAccessKeyID}
           </FormControl.ValidationMessage>
-        )} */}
+        )}
       </FormControl>
       <FormControl isRequired>
         <FormControl.Label>
@@ -98,6 +113,7 @@ const AccessKey = ({
           type="password"
           name="secretAccessKey"
           placeholder="******"
+          onClick={() => setIsEditing(true)}
           onChange={(e) => setLocalSecretAccessKey(e.target.value)}
           onBlur={handleBlur}
         />
@@ -117,11 +133,18 @@ const AccessKey = ({
             <Spinner />
           </Flex>
         )}
-        {/* {displayInvalidMessage && (
-          <FormControl.ValidationMessage>
-            {ConfigErrors.missingApiKey}
-          </FormControl.ValidationMessage>
-        )} */}
+        {showValidation &&
+          !isValidating &&
+          secretAccessKeyError &&
+          !isEditing && (
+            <FormControl.ValidationMessage>
+              {secretAccessKeyError}
+            </FormControl.ValidationMessage>
+          )}
+
+        {!isInvalid && !isValidating && (
+          <p css={styles.successMessage}>Credentials are Valid! 🎉</p>
+        )}
       </FormControl>
     </>
   );

@@ -25,16 +25,9 @@ class AI {
   private bedrockClient: BedrockClient;
   private bedrockRuntimeClient: BedrockRuntimeClient;
 
-  constructor(
-    accessKeyID: string,
-    secretAccessKey: string,
-    model?: string,
-    region = "us-east-1",
-  ) {
-    region = "eu-central-1"; // TODO: CHANGE
-
-    this.model = model;
+  constructor(accessKeyID: string, secretAccessKey: string, region: string) {
     this.decoder = new TextDecoder("utf-8");
+
     const config = {
       region,
       credentials: {

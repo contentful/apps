@@ -10,6 +10,7 @@ import { FoundationModelSummary } from "@aws-sdk/client-bedrock";
 interface Props {
   model: string;
   dispatch: Dispatch<ParameterReducer>;
+  region: string;
   credentials: {
     accessKeyID: string;
     secretAccessKey: string;
@@ -17,11 +18,11 @@ interface Props {
   credentialsValid: boolean;
 }
 
-const Model = ({ credentials, credentialsValid, model, dispatch }: Props) => {
+const Model = ({ credentials, credentialsValid, model, region, dispatch }: Props) => {
   const ai = useMemo(
     () =>
       credentialsValid && credentials.accessKeyID && credentials.secretAccessKey
-        ? new AI(credentials.accessKeyID, credentials.secretAccessKey)
+        ? new AI(credentials.accessKeyID, credentials.secretAccessKey, region)
         : null,
     [credentials, credentialsValid],
   );
@@ -37,7 +38,7 @@ const Model = ({ credentials, credentialsValid, model, dispatch }: Props) => {
 
   const modelList = models.map((model) => (
     <Select.Option key={model.modelId} value={model.modelId}>
-      {model.providerName} {model.modelName}
+      {model.providerName} {model.modelName} {model.modelId}
     </Select.Option>
   ));
 
@@ -54,7 +55,11 @@ const Model = ({ credentials, credentialsValid, model, dispatch }: Props) => {
   return (
     <FormControl isRequired marginBottom="none" isInvalid={isInvalid}>
       <FormControl.Label>{ModelText.title}</FormControl.Label>
-      <Select value={value} onChange={handleChange}>
+      <Select
+        value={value}
+        onChange={handleChange}
+        isDisabled={models.length < 1}
+      >
         {modelList}
       </Select>
 

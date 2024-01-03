@@ -8,6 +8,14 @@ const ModelText = {
     "as some are more capable than others.",
 };
 
+const RegionText = {
+  title: "AWS Region",
+  helpText:
+    "Select the AWS region to use for accessing the Bedrock API. Bedrock isn't yet available in every region and model availability differs by region. Check the documentation for up-to-date information.",
+  linkSubstring: "documentation",
+  link: "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html#bedrock-regions",
+};
+
 export enum FieldTypes {
   TEXTAREA = "textarea",
   TEXTINPUT = "textinput",
@@ -112,9 +120,10 @@ const Sections = {
 };
 
 const ConfigErrors = {
-  missingApiKey: "Invalid or missing API Key",
-  missingAccessKeyId: "Invalid or missing Access Key ID",
-  missingSecretAccessKey: "Invalid or missing Secret Access Key",
+  missingAccessKeyID: "Missing Access Key ID",
+  missingSecretAccessKey: "Missing Secret Access Key",
+  invalidCredentials: "Credentials are invalid",
+
   missingModel: "A valid model must be selected",
   exceededCharacterLimit:
     "One or more profile fields exceeds the character limit",
@@ -136,4 +145,5 @@ export {
   ConfigErrors,
   ContentTypeText,
   AccessKeyText,
+  RegionText,
 };

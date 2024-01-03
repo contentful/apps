@@ -1,17 +1,13 @@
 import AppInstallationParameters from "./appInstallationParameters";
 
 export enum ParameterAction {
-  UPDATE_MODEL = "updateModel",
   UPDATE_CREDENTIALS = "updateCredentials",
+  UPDATE_REGION = "updateRegion",
+  UPDATE_MODEL = "updateModel",
   UPDATE_PROFILE = "updateProfile",
   UPDATE_BRAND_PROFILE = "updateBrandProfile",
   APPLY_CONTENTFUL_PARAMETERS = "applyContentfulParameters",
 }
-
-type ParameterStringActions = {
-  type: ParameterAction.UPDATE_MODEL;
-  value: string;
-};
 
 type ParameterUpdateCredentialsAction = {
   type: ParameterAction.UPDATE_CREDENTIALS;
@@ -20,6 +16,16 @@ type ParameterUpdateCredentialsAction = {
     secretAccessKey: string;
   };
   isValid: boolean;
+};
+
+type ParameterUpdateRegionAction = {
+  type: ParameterAction.UPDATE_REGION;
+  value: string;
+};
+
+type ParameterStringActions = {
+  type: ParameterAction.UPDATE_MODEL;
+  value: string;
 };
 
 type ParameterObjectActions = {
@@ -45,7 +51,8 @@ export type ParameterReducer =
   | ParameterStringActions
   | ParameterProfileAction
   | ParameterBrandProfileActions
-  | ParameterUpdateCredentialsAction;
+  | ParameterUpdateCredentialsAction
+  | ParameterUpdateRegionAction;
 
 /**
  * This is a recursive type that will validate the parameter
@@ -66,14 +73,6 @@ const parameterReducer = (
   action: ParameterReducer,
 ): Validator<AppInstallationParameters> => {
   switch (action.type) {
-    case ParameterAction.UPDATE_MODEL:
-      return {
-        ...state,
-        model: {
-          value: action.value,
-          isValid: action.value.length > 0,
-        },
-      };
     case ParameterAction.UPDATE_CREDENTIALS: {
       return {
         ...state,
@@ -87,6 +86,23 @@ const parameterReducer = (
         },
       };
     }
+    case ParameterAction.UPDATE_REGION: {
+      return {
+        ...state,
+        region: {
+          value: action.value,
+          isValid: action.value.length > 0,
+        },
+      };
+    }
+    case ParameterAction.UPDATE_MODEL:
+      return {
+        ...state,
+        model: {
+          value: action.value,
+          isValid: action.value.length > 0,
+        },
+      };
     case ParameterAction.UPDATE_PROFILE: {
       const isValid = action.value.length <= action.textLimit;
 
@@ -116,13 +132,10 @@ const parameterReducer = (
       const parameter = action.value as AppInstallationParameters;
       return {
         ...state,
+        
         model: {
           value: parameter.model,
           isValid: parameter.model?.length > 0,
-        },
-        key: {
-          value: parameter.key,
-          isValid: true,
         },
         profile: {
           value: parameter.profile,

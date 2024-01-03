@@ -17,19 +17,24 @@ import parameterReducer, {
 import contentTypeReducer from "@components/config/contentTypeReducer";
 import { ConfigErrors } from "@components/config/configText";
 import AppInstallationParameters from "../appInstallationParameters";
+import { defaultRegionId } from "@configs/aws/region";
 
 const initialParameters: Validator<AppInstallationParameters> = {
   model: {
     value: defaultModelId,
     isValid: true,
   },
+  region: {
+    value: defaultRegionId,
+    isValid: true,
+  },
   accessKeyId: {
     value: "",
-    isValid: true,
+    isValid: false,
   },
   secretAccessKey: {
     value: "",
-    isValid: true,
+    isValid: false,
   },
   profile: {
     value: "",
@@ -55,7 +60,7 @@ const ConfigPage = () => {
       accessKeyId: parameters.accessKeyId.value,
       secretAccessKey: parameters.secretAccessKey.value,
       model: parameters.model.value,
-      // key: parameters.key.value,
+      region: parameters.region.value,
       profile: parameters.profile.value,
       brandProfile: {
         additional: parameters.brandProfile.additional?.value,
@@ -81,7 +86,7 @@ const ConfigPage = () => {
 
     if (!parameters.accessKeyId.isValid) {
       notifierErrors.push(
-        `${ConfigErrors.failedToSave} ${ConfigErrors.missingAccessKeyId}`,
+        `${ConfigErrors.failedToSave} ${ConfigErrors.missingAccessKeyID}`,
       );
     }
 
@@ -122,6 +127,7 @@ const ConfigPage = () => {
         secretAccessKey={parameters.secretAccessKey.value}
         isAccessKeyValid={parameters.secretAccessKey.isValid}
         model={parameters.model.value}
+        region={parameters.region.value}
         dispatch={dispatchParameters}
       />
       <hr css={styles.splitter} />
