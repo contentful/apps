@@ -18,7 +18,13 @@ interface Props {
   credentialsValid: boolean;
 }
 
-const Model = ({ credentials, credentialsValid, model, region, dispatch }: Props) => {
+const Model = ({
+  credentials,
+  credentialsValid,
+  model,
+  region,
+  dispatch,
+}: Props) => {
   const ai = useMemo(
     () =>
       credentialsValid && credentials.accessKeyID && credentials.secretAccessKey

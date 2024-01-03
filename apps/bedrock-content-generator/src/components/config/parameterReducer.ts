@@ -132,7 +132,7 @@ const parameterReducer = (
       const parameter = action.value as AppInstallationParameters;
       return {
         ...state,
-        
+
         model: {
           value: parameter.model,
           isValid: parameter.model?.length > 0,
