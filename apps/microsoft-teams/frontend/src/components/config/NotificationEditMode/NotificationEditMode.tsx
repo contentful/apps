@@ -12,6 +12,8 @@ import {
   doesNotificationHaveChanges,
 } from '@helpers/configHelpers';
 import CancelModal from '@components/config/CancelModal/CancelModal';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface Props {
   index: number;
@@ -36,12 +38,45 @@ const NotificationEditMode = (props: Props) => {
 
   const [editedNotification, setEditedNotification] = useState<Notification>(notification);
 
+  const sdk = useSDK<ConfigAppSDK>();
+
   useEffect(() => {
     setEditedNotification(notification);
   }, [notification]);
 
   const handleNotificationEdit = (notificationEdit: Partial<Notification>) => {
     setEditedNotification({ ...editedNotification, ...notificationEdit });
+  };
+
+  const handleTest = async (notification: Notification) => {
+    console.log(notification);
+    try {
+      const parameters = {
+        channelId: notification.channel.id,
+        teamId: notification.channel.teamId,
+        tenantId: sdk.parameters.installation.tenantId,
+        contentTypeId: notification.contentTypeId,
+      };
+      const { response } = await sdk.cma.appActionCall.createWithResponse(
+        {
+          appActionId: 'msteamsSendTestNotification',
+          environmentId: sdk.ids.environment,
+          spaceId: sdk.ids.space,
+          appDefinitionId: sdk.ids.app!,
+        },
+        {
+          parameters,
+        }
+      );
+      const body = JSON.parse(response.body);
+      if (body.ok) {
+        console.log('sent successfully');
+      } else {
+        throw new Error('Failed to send test message');
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleSave = () => {
@@ -93,6 +128,7 @@ const NotificationEditMode = (props: Props) => {
         />
       </Box>
       <NotificationEditModeFooter
+        handleTest={() => handleTest(editedNotification)}
         handleCancel={handleCancel}
         handleSave={handleSave}
         isSaveDisabled={!isNotificationReadyToSave(editedNotification, notification)}

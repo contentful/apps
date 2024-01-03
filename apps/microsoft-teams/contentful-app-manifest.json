@@ -11,8 +11,23 @@
       "allowNetworks": [],
       "parameters": [
         {
-          "id": "channel",
-          "name": "channel",
+          "id": "channelId",
+          "name": "channelId",
+          "type": "Symbol"
+        },
+        {
+          "id": "teamId",
+          "name": "teamId",
+          "type": "Symbol"
+        },
+        {
+          "id": "tenantId",
+          "name": "tenantId",
+          "type": "Symbol"
+        },
+        {
+          "id": "contentTypeId",
+          "name": "contentTypeId",
           "type": "Symbol"
         }
       ]
