@@ -76,7 +76,7 @@ const ConfigPage = () => {
     parameters.brandProfile,
     parameters.accessKeyId.value,
     parameters.secretAccessKey.value,
-    // parameters.key.value,
+    parameters.region.value,
     parameters.model.value,
     parameters.profile.value,
   ]);
