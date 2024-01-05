@@ -102,7 +102,7 @@ export async function fetchProducts(
   config: ConfigurationParameters,
   search: string,
   pagination: { offset: number; limit: number },
-  hasSkuSearch: boolean
+  searchBySku: boolean
 ): Promise<{
   pagination: Pagination;
   products: CommerceToolsProduct[];
@@ -111,13 +111,12 @@ export async function fetchProducts(
 
   let response;
 
-  if (search && hasSkuSearch) {
+  if (search && searchBySku) {
     response = await client
       .productProjections()
       .search()
       .get({
         queryArgs: {
-          // [`text.${config.locale}`]: search,
           'filter.query': [`variants.sku:"${search}"`],
           limit: pagination?.limit,
           offset: pagination?.offset,
@@ -131,7 +130,6 @@ export async function fetchProducts(
       .get({
         queryArgs: {
           [`text.${config.locale}`]: search,
-          // 'filter.query': [`variants.sku:${search}}`],
           limit: pagination?.limit,
           offset: pagination?.offset,
         },

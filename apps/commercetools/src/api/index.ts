@@ -26,7 +26,7 @@ export function createResolver(sdk: DialogAppSDK, skuType: SkuType): ProductsFn 
   return async (
     search: string,
     updatedPagination?: Partial<Pagination>,
-    hasSkuSearch?: boolean
+    searchBySku?: boolean
   ) => {
     offset = updatedPagination?.offset ?? offset;
 
@@ -37,7 +37,7 @@ export function createResolver(sdk: DialogAppSDK, skuType: SkuType): ProductsFn 
         offset: offset,
         limit: LIMIT,
       },
-      !!hasSkuSearch
+      !!searchBySku
     );
 
     offset += fetched.pagination.count;
