@@ -190,6 +190,7 @@ export class SkuPicker extends Component<Props, State> {
                   <div className={styles.skuSearch}>
                     <Checkbox
                       name="search-by-sku"
+                      testId="search-by-sku"
                       id="search-by-sku"
                       isChecked={searchBySku}
                       onChange={() => this.setSearchBySku()}>

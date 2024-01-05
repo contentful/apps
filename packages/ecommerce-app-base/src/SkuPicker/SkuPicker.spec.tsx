@@ -63,6 +63,11 @@ describe('SkuPicker', () => {
     expect(getByTestId('sku-search')).toBeInTheDocument();
   });
 
+  it('should render search by sku option if showSearchBySkuOption is passed', async () => {
+    const { getByTestId } = await renderComponent({ ...defaultProps, showSearchBySkuOption: true });
+    expect(getByTestId('search-by-sku')).toBeInTheDocument();
+  });
+
   describe('when it has infinite scrolling mode pagination', () => {
     it('should render the "Load more" text link if there is a next page', async () => {
       const { findByTestId } = await renderComponent({
