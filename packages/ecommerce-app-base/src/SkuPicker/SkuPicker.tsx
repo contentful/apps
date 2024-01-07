@@ -169,8 +169,8 @@ export class SkuPicker extends Component<Props, State> {
     return (
       <>
         <header className={styles.header}>
-          {!hideSearch && (
-            <div>
+          <div>
+            {!hideSearch && (
               <div className={styles.searchWrapper}>
                 <div className={styles.leftSideControls}>
                   <TextInput
@@ -199,14 +199,14 @@ export class SkuPicker extends Component<Props, State> {
                   </div>
                 )}
               </div>
+            )}
 
-              {!!pagination.total && (
-                <Text className={styles.total}>
-                  {pagination.total.toLocaleString()} total results
-                </Text>
-              )}
-            </div>
-          )}
+            {!!pagination.total && (
+              <Text className={styles.total}>
+                {pagination.total.toLocaleString()} total results
+              </Text>
+            )}
+          </div>
 
           <div className={styles.rightSideControls}>
             <ProductSelectionList products={selectedProducts} selectProduct={this.selectProduct} />

@@ -58,12 +58,19 @@ describe('SkuPicker', () => {
   });
   afterEach(cleanup);
 
-  it('should render successfully with no products selected', async () => {
-    const { getByTestId } = await renderComponent(defaultProps);
+  it('should render basic search successfully with no products selected', async () => {
+    const { getByTestId, queryByTestId } = await renderComponent(defaultProps);
     expect(getByTestId('sku-search')).toBeInTheDocument();
+    expect(queryByTestId('search-by-sku')).not.toBeInTheDocument();
   });
 
-  it('should render search by sku option if showSearchBySkuOption is passed', async () => {
+  it('should not render search when hideSearch is true', async () => {
+    const { queryByTestId } = await renderComponent({ ...defaultProps, hideSearch: true });
+    expect(queryByTestId('sku-search')).not.toBeInTheDocument();
+    expect(queryByTestId('search-by-sku')).not.toBeInTheDocument();
+  });
+
+  it('should render search by sku option if showSearchBySkuOption is true', async () => {
     const { getByTestId } = await renderComponent({ ...defaultProps, showSearchBySkuOption: true });
     expect(getByTestId('search-by-sku')).toBeInTheDocument();
   });
