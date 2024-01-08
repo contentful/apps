@@ -1,18 +1,17 @@
-import { useContext } from "react";
-import { Button, Tabs } from "@contentful/f36-components";
-import { GeneratorContext } from "@providers/generatorProvider";
-import TextFieldWithButtons from "@components/common/text-field-with-buttons/TextFieldWIthButtons";
 import { GeneratorAction } from "@components/app/dialog/common-generator/generatorReducer";
-import { OutputTab } from "../../Output";
+import TextFieldWithButtons from "@components/common/text-field-with-buttons/TextFieldWIthButtons";
 import { DialogText } from "@configs/features/featureTypes";
-import { css } from "@emotion/react";
 import { tokenWarning } from "@configs/token-warning/tokenWarning";
+import { Button, Tabs } from "@contentful/f36-components";
+import { css } from "@emotion/react";
+import { GeneratorContext } from "@providers/generatorProvider";
+import { useContext } from "react";
+import { OutputTab } from "../../Output";
 // import { SegmentEvents } from '@configs/segment/segmentEvent';
-import { useSDK } from "@contentful/react-apps-toolkit";
+import { errorMessages } from "@components/app/dialog/common-generator/errorMessages";
 import AppInstallationParameters from "@components/config/appInstallationParameters";
 import { DialogAppSDK } from "@contentful/app-sdk";
-import { gptModels } from "@configs/ai/gptModels";
-import { errorMessages } from "@components/app/dialog/common-generator/errorMessages";
+import { useSDK } from "@contentful/react-apps-toolkit";
 
 const styles = {
   panel: css({
@@ -49,10 +48,6 @@ const OriginalTextPanel = (props: Props) => {
   };
 
   const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
-  const model = gptModels.find(
-    (model) => model.id === sdk.parameters.installation.model,
-  );
-  const textLimit = model?.textLimit;
 
   const handleOriginalTextChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -67,7 +62,6 @@ const OriginalTextPanel = (props: Props) => {
   };
 
   const isTextAreaDisabled = isNewText ? false : !inputText;
-  const textaboveLimit = inputText.length >= (textLimit || Infinity);
 
   const isGenerateButtonDisabled = !inputText || !hasOutputField;
   const placeholderText = isNewText
@@ -90,14 +84,11 @@ const OriginalTextPanel = (props: Props) => {
         placeholder={placeholderText}
         hasError={hasError}
         errorMessage={errorMessages.defaultOriginalError}
-        sizeValidation={{ max: textLimit }}
         {...helpTextProps}
       >
         <Button
           onClick={handleGenerate}
-          isDisabled={
-            isGenerateButtonDisabled || textaboveLimit || isGenerating
-          }
+          isDisabled={isGenerateButtonDisabled || isGenerating}
         >
           Generate
         </Button>
