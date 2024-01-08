@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.5.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.4.22...@contentful/ecommerce-app-base@3.5.0) (2024-01-08)
+
+### Features
+
+- add search by sku functionality to ecommerce base package ([#5881](https://github.com/contentful/apps/issues/5881)) ([c9bcbfe](https://github.com/contentful/apps/commit/c9bcbfed7338c9585d3cb7373d5a87126a26774d))
+
 ## [3.4.22](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.4.21...@contentful/ecommerce-app-base@3.4.22) (2024-01-08)
 
 ### Bug Fixes
