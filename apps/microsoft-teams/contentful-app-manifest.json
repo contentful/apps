@@ -4,7 +4,7 @@
       "id": "msteamsSendTestNotification",
       "name": "Send test notification to channel",
       "category": "Custom",
-      "description": "This action returns sends off a test message to a channel",
+      "description": "This action returns sends off a test notification to a channel",
       "type": "function",
       "path": "actions/send-test.js",
       "entryFile": "./app-actions/src/actions/send-test.ts",
@@ -18,11 +18,6 @@
         {
           "id": "teamId",
           "name": "teamId",
-          "type": "Symbol"
-        },
-        {
-          "id": "tenantId",
-          "name": "tenantId",
           "type": "Symbol"
         },
         {

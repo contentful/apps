@@ -54,7 +54,6 @@ const NotificationEditMode = (props: Props) => {
       const parameters = {
         channelId: notification.channel.id,
         teamId: notification.channel.teamId,
-        tenantId: sdk.parameters.installation.tenantId,
         contentTypeId: notification.contentTypeId,
       };
       const { response } = await sdk.cma.appActionCall.createWithResponse(
