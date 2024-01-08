@@ -347,7 +347,7 @@ ___
 
 ### ProductsFn
 
-Ƭ **ProductsFn**<`P`\>: (`search`: `string`, `pagination?`: `Partial`<[`Pagination`](README.md#pagination)\>) => `Promise`<`ProductsFnResponse`<`P`\>\>
+Ƭ **ProductsFn**\<`P`\>: (`search`: `string`, `pagination?`: `Partial`\<[`Pagination`](README.md#pagination)\>, `searchBySku?`: `boolean`) => `Promise`\<`ProductsFnResponse`\<`P`\>\>
 
 #### Type parameters
 
@@ -357,18 +357,19 @@ ___
 
 #### Type declaration
 
-▸ (`search`, `pagination?`): `Promise`<`ProductsFnResponse`<`P`\>\>
+▸ (`search`, `pagination?`, `searchBySku?`): `Promise`\<`ProductsFnResponse`\<`P`\>\>
 
 ##### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `search` | `string` |
-| `pagination?` | `Partial`<[`Pagination`](README.md#pagination)\> |
+| `pagination?` | `Partial`\<[`Pagination`](README.md#pagination)\> |
+| `searchBySku?` | `boolean` |
 
 ##### Returns
 
-`Promise`<`ProductsFnResponse`<`P`\>\>
+`Promise`\<`ProductsFnResponse`\<`P`\>\>
 
 ___
 
