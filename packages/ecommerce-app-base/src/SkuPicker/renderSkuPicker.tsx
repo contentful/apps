@@ -12,6 +12,7 @@ interface Props<> {
   skuType?: string;
   makeSaveBtnText?: MakeSaveBtnTextFn;
   hideSearch?: boolean;
+  showSearchBySkuOption?: boolean;
 }
 
 export function renderSkuPicker(
@@ -24,6 +25,7 @@ export function renderSkuPicker(
     skuType,
     makeSaveBtnText,
     hideSearch,
+    showSearchBySkuOption,
   }: Props
 ): void {
   const root = document.getElementById(elementId);
@@ -37,6 +39,7 @@ export function renderSkuPicker(
       skuType={skuType}
       makeSaveBtnText={makeSaveBtnText}
       hideSearch={hideSearch}
+      showSearchBySkuOption={showSearchBySkuOption}
     />,
     root
   );

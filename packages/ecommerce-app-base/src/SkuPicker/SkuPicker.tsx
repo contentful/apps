@@ -10,7 +10,7 @@ import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
 import { mapSort } from '../utils';
 
-import { Button, TextInput } from '@contentful/f36-components';
+import { Button, Checkbox, Text, TextInput } from '@contentful/f36-components';
 
 import { SearchIcon } from '@contentful/f36-icons';
 
@@ -22,6 +22,7 @@ export interface Props {
   skuType?: string;
   makeSaveBtnText?: MakeSaveBtnTextFn;
   hideSearch?: boolean;
+  showSearchBySkuOption?: boolean;
 }
 
 interface State {
@@ -31,6 +32,7 @@ interface State {
   products: Product[];
   selectedProducts: Product[];
   selectedSKUs: string[];
+  searchBySku: boolean;
 }
 
 const DEFAULT_SEARCH_DELAY = 250;
@@ -59,6 +61,7 @@ export class SkuPicker extends Component<Props, State> {
     products: [],
     selectedProducts: [],
     selectedSKUs: get(this.props, ['sdk', 'parameters', 'invocation', 'fieldValue'], []),
+    searchBySku: false,
   };
 
   setSearchCallback: () => void;
@@ -79,6 +82,10 @@ export class SkuPicker extends Component<Props, State> {
     this.setState({ search }, this.setSearchCallback);
   };
 
+  setSearchBySku = () => {
+    this.setState({ searchBySku: !this.state.searchBySku }, this.setSearchCallback);
+  };
+
   updateProducts = async () => {
     try {
       const {
@@ -87,7 +94,7 @@ export class SkuPicker extends Component<Props, State> {
         search,
       } = this.state;
       const offset = (activePage - 1) * limit;
-      const fetched = await this.props.fetchProducts(search, { offset });
+      const fetched = await this.props.fetchProducts(search, { offset }, this.state.searchBySku);
       // If the request has been cancelled because a new one has been launched
       // then fetchProducts will return null
       if (fetched && fetched.pagination && fetched.products) {
@@ -148,35 +155,59 @@ export class SkuPicker extends Component<Props, State> {
   };
 
   render() {
-    const { search, pagination, products, selectedProducts, selectedSKUs } = this.state;
-    const { makeSaveBtnText = defaultGetSaveBtnText, skuType, hideSearch = false } = this.props;
+    const { search, pagination, products, selectedProducts, selectedSKUs, searchBySku } =
+      this.state;
+    const {
+      makeSaveBtnText = defaultGetSaveBtnText,
+      skuType,
+      hideSearch = false,
+      showSearchBySkuOption,
+    } = this.props;
     const infiniteScrollingPaginationMode = 'hasNextPage' in pagination;
     const pageCount = Math.ceil(pagination.total / pagination.limit);
 
     return (
       <>
         <header className={styles.header}>
-          <div className={styles.leftSideControls}>
+          <div>
             {!hideSearch && (
-              <>
-                <TextInput
-                  placeholder="Search for a product..."
-                  type="search"
-                  name="sku-search"
-                  id="sku-search"
-                  testId="sku-search"
-                  value={search}
-                  onChange={(event) => this.setSearch((event.target as HTMLInputElement).value)}
-                />
-                <SearchIcon variant="muted" />
-              </>
+              <div className={styles.searchWrapper}>
+                <div className={styles.leftSideControls}>
+                  <TextInput
+                    placeholder="Search for a product..."
+                    type="search"
+                    name="sku-search"
+                    id="sku-search"
+                    testId="sku-search"
+                    value={search}
+                    onChange={(event) => this.setSearch((event.target as HTMLInputElement).value)}
+                  />
+
+                  <SearchIcon variant="muted" />
+                </div>
+
+                {showSearchBySkuOption && (
+                  <div className={styles.skuSearch}>
+                    <Checkbox
+                      name="search-by-sku"
+                      testId="search-by-sku"
+                      id="search-by-sku"
+                      isChecked={searchBySku}
+                      onChange={() => this.setSearchBySku()}>
+                      Search only by SKU
+                    </Checkbox>
+                  </div>
+                )}
+              </div>
             )}
+
             {!!pagination.total && (
-              <span className={styles.total}>
-                Total results: {pagination.total.toLocaleString()}
-              </span>
+              <Text className={styles.total}>
+                {pagination.total.toLocaleString()} total results
+              </Text>
             )}
           </div>
+
           <div className={styles.rightSideControls}>
             <ProductSelectionList products={selectedProducts} selectProduct={this.selectProduct} />
             <Button

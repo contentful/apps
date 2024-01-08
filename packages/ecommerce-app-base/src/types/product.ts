@@ -26,5 +26,6 @@ type ProductsFnResponse<P extends Product = Product> = {
 
 export type ProductsFn<P extends Product = Product> = (
   search: string,
-  pagination?: Partial<Pagination>
+  pagination?: Partial<Pagination>,
+  searchBySku?: boolean
 ) => Promise<ProductsFnResponse<P>>;
