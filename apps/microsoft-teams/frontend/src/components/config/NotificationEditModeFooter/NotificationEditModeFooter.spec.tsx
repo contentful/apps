@@ -7,6 +7,7 @@ describe('NotificationEditModeFooter component', () => {
   it('mounts with correct button copy', () => {
     const { unmount } = render(
       <NotificationEditModeFooter
+        handleTest={vi.fn()}
         handleCancel={vi.fn()}
         handleSave={vi.fn()}
         isSaveDisabled={false}
@@ -22,6 +23,7 @@ describe('NotificationEditModeFooter component', () => {
     const mockHandleSave = vi.fn();
     const { unmount, rerender } = render(
       <NotificationEditModeFooter
+        handleTest={vi.fn()}
         handleCancel={vi.fn()}
         handleSave={mockHandleSave}
         isSaveDisabled={false}
@@ -36,6 +38,7 @@ describe('NotificationEditModeFooter component', () => {
     const mockHandleSaveDisabled = vi.fn();
     rerender(
       <NotificationEditModeFooter
+        handleTest={vi.fn()}
         handleCancel={vi.fn()}
         handleSave={mockHandleSaveDisabled}
         isSaveDisabled={true}
@@ -53,6 +56,7 @@ describe('NotificationEditModeFooter component', () => {
     const mockHandleCancel = vi.fn();
     const { unmount, rerender } = render(
       <NotificationEditModeFooter
+        handleTest={vi.fn()}
         handleCancel={mockHandleCancel}
         handleSave={vi.fn()}
         isSaveDisabled={false}
@@ -67,6 +71,7 @@ describe('NotificationEditModeFooter component', () => {
     const mockHandleCancelDisabled = vi.fn();
     rerender(
       <NotificationEditModeFooter
+        handleTest={vi.fn()}
         handleCancel={vi.fn()}
         handleSave={mockHandleCancelDisabled}
         isSaveDisabled={true}
