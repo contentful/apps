@@ -52,6 +52,12 @@ export const handler = async (
         body: JSON.stringify(payload),
       }
     );
+
+    if (response.ok) {
+      console.log('sent successfully');
+    } else {
+      throw new Error('Failed to send test message');
+    }
   } catch (err) {
     if (!(err instanceof Error)) {
       return {
