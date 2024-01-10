@@ -92,12 +92,12 @@ const AccessKey = ({
           type="text"
           name="accessKeyID"
           placeholder="AKIA6O......"
-          onClick={() => setIsEditing(true)}
+          onMouseDown={() => setIsEditing(true)}
           onChange={(e) => setLocalAccessKeyID(e.target.value)}
           onBlur={handleBlur}
         />
 
-        {showValidation && !localAccessKeyID && (
+        {showValidation && !isEditing && !localAccessKeyID && (
           <FormControl.ValidationMessage>
             {ConfigErrors.missingAccessKeyID}
           </FormControl.ValidationMessage>
@@ -113,9 +113,15 @@ const AccessKey = ({
           type="password"
           name="secretAccessKey"
           placeholder="******"
-          onClick={() => setIsEditing(true)}
+          onMouseDown={() => setIsEditing(true)}
           onChange={(e) => setLocalSecretAccessKey(e.target.value)}
           onBlur={handleBlur}
+          // detect paste
+          // onPaste={(e) => {
+          //   console.log("secret access key");
+          //   handleBlur();
+          //   setIsEditing(true);
+          // }}
         />
 
         <FormControl.HelpText>

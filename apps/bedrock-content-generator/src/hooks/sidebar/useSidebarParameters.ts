@@ -22,7 +22,7 @@ const useSidebarParameters = () => {
   useEffect(() => {
     console.log(sdk.parameters.installation);
 
-    const validateApiKey = async () => {
+    const validateCredentials = async () => {
       const ai = new AI(accessKeyId, secretAccessKey, region);
       try {
         await ai.getModels();
@@ -36,7 +36,7 @@ const useSidebarParameters = () => {
       }
     };
 
-    validateApiKey();
+    validateCredentials();
     setHasBrandProfile(!!profile);
   }, [accessKeyId, secretAccessKey, profile]);
 

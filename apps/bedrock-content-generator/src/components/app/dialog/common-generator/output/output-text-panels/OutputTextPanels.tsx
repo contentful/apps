@@ -1,14 +1,14 @@
-import { useContext } from 'react';
-import { GeneratorContext } from '@providers/generatorProvider';
-import useEntryAndContentType from '@hooks/dialog/useEntryAndContentType';
-import useAI, { GenerateMessage } from '@hooks/dialog/useAI';
-import GeneratedTextPanel from './generated-text-panel/GeneratedTextPanel';
-import OriginalTextPanel from './original-text-panel/OriginalTextPanel';
-import featureConfig from '@configs/features/featureConfig';
-import { ContentTypeFieldValidation } from 'contentful-management';
-import { SegmentAction, SegmentEvents } from '@configs/segment/segmentEvent';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import { DialogAppSDK } from '@contentful/app-sdk';
+import { useContext } from "react";
+import { GeneratorContext } from "@providers/generatorProvider";
+import useEntryAndContentType from "@hooks/dialog/useEntryAndContentType";
+import useAI, { GenerateMessage } from "@hooks/dialog/useAI";
+import GeneratedTextPanel from "./generated-text-panel/GeneratedTextPanel";
+import OriginalTextPanel from "./original-text-panel/OriginalTextPanel";
+import featureConfig from "@configs/features/featureConfig";
+import { ContentTypeFieldValidation } from "contentful-management";
+import { SegmentAction, SegmentEvents } from "@configs/segment/segmentEvent";
+import { useSDK } from "@contentful/react-apps-toolkit";
+import { DialogAppSDK } from "@contentful/app-sdk";
 
 interface Props {
   onGenerate: (generateMessage: GenerateMessage) => void;
@@ -30,19 +30,25 @@ const OutputTextPanels = (props: Props) => {
     outputFieldValidation,
     isNewText,
   } = props;
-  const { feature, entryId, trackGeneratorEvent } = useContext(GeneratorContext);
+  const { feature, entryId } = useContext(GeneratorContext);
   const { updateEntry } = useEntryAndContentType(entryId);
   const sdk = useSDK<DialogAppSDK>();
 
   const handleEntryApply = async () => {
-    const success = await updateEntry(outputFieldId, outputFieldLocale, ai.output);
+    const success = await updateEntry(
+      outputFieldId,
+      outputFieldLocale,
+      ai.output,
+    );
     if (success) {
-      trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
-      sdk.notifier.success('Content applied successfully.');
+      // trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
+      sdk.notifier.success("Content applied successfully.");
 
       sdk.close();
     } else {
-      sdk.notifier.error('Content did not apply successfully. Please try again.');
+      sdk.notifier.error(
+        "Content did not apply successfully. Please try again.",
+      );
     }
   };
 
