@@ -6,22 +6,22 @@ interface AppActionCallParameters {
   channelId: string;
   teamId: string;
   contentTypeId: string;
+  spaceName: string;
 }
 
 export const handler = async (
   _payload: AppActionCallParameters,
   _context: AppActionCallContext
 ): Promise<AppActionCallResponse<Response | undefined>> => {
-  const { channelId, teamId, contentTypeId } = _payload;
+  const { channelId, teamId, contentTypeId, spaceName } = _payload;
   const {
     cma,
-    appActionCallContext: { spaceId, appInstallationId },
+    appActionCallContext: { appInstallationId },
   } = _context;
 
   let response;
 
   try {
-    const { name: spaceName } = await cma.space.get({ spaceId });
     const { name: contentTypeName } = await cma.contentType.get({ contentTypeId });
     const tenantId = await fetchTenantId(cma, appInstallationId);
 

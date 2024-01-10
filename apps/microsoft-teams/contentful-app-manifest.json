@@ -24,6 +24,11 @@
           "id": "contentTypeId",
           "name": "contentTypeId",
           "type": "Symbol"
+        },
+        {
+          "id": "spaceName",
+          "name": "spaceName",
+          "type": "Symbol"
         }
       ]
     },
