@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { SidebarAppSDK } from "@contentful/app-sdk";
-import AI from "@utils/aiApi";
-import { modelsBaseUrl } from "@configs/ai/baseUrl";
-import { AiApiError, AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
 import AppInstallationParameters from "@components/config/appInstallationParameters";
+import { SidebarAppSDK } from "@contentful/app-sdk";
+import { useSDK } from "@contentful/react-apps-toolkit";
+import AI from "@utils/aiApi";
+import { AiApiError, AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
+import { useEffect, useState } from "react";
 
 /**
  * This hook is used to get the installation parameters from the sidebar location,
@@ -17,13 +16,14 @@ const useSidebarParameters = () => {
   const [hasBrandProfile, setHasBrandProfile] = useState(true);
 
   const sdk = useSDK<SidebarAppSDK<AppInstallationParameters>>();
-  const { accessKeyId, secretAccessKey, profile } = sdk.parameters.installation;
+  const { accessKeyId, secretAccessKey, profile, region } =
+    sdk.parameters.installation;
 
   useEffect(() => {
     console.log(sdk.parameters.installation);
 
     const validateApiKey = async () => {
-      const ai = new AI(accessKeyId, secretAccessKey);
+      const ai = new AI(accessKeyId, secretAccessKey, region);
       try {
         await ai.getModels();
       } catch (e: unknown) {

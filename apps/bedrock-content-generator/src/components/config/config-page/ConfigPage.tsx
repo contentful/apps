@@ -1,27 +1,25 @@
-import { useMemo, useReducer } from "react";
-import { Box, Heading } from "@contentful/f36-components";
+import AddToSidebarSection from "@components/config/add-to-sidebar-section/AddToSidebarSection";
+import BrandSection from "@components/config/brand-section/BrandSection";
 import ConfigSection from "@components/config/config-section/ConfigSection";
+import { ConfigErrors, Sections } from "@components/config/configText";
+import contentTypeReducer from "@components/config/contentTypeReducer";
 import CostSection from "@components/config/cost-section/CostSection";
 import DisclaimerSection from "@components/config/disclaimer-section/DisclaimerSection";
-import BrandSection from "@components/config/brand-section/BrandSection";
-import AddToSidebarSection from "@components/config/add-to-sidebar-section/AddToSidebarSection";
-import { styles } from "./ConfigPage.styles";
-import { Sections } from "@components/config/configText";
-import { defaultModelId } from "@configs/ai/gptModels";
-import useInitializeParameters from "@hooks/config/useInitializeParameters";
-import useSaveConfigHandler from "@hooks/config/useSaveConfigHandler";
-import useGetContentTypes from "@hooks/config/useGetContentTypes";
 import parameterReducer, {
   Validator,
 } from "@components/config/parameterReducer";
-import contentTypeReducer from "@components/config/contentTypeReducer";
-import { ConfigErrors } from "@components/config/configText";
-import AppInstallationParameters from "../appInstallationParameters";
 import { defaultRegionId } from "@configs/aws/region";
+import { Box, Heading } from "@contentful/f36-components";
+import useGetContentTypes from "@hooks/config/useGetContentTypes";
+import useInitializeParameters from "@hooks/config/useInitializeParameters";
+import useSaveConfigHandler from "@hooks/config/useSaveConfigHandler";
+import { useMemo, useReducer } from "react";
+import AppInstallationParameters from "../appInstallationParameters";
+import { styles } from "./ConfigPage.styles";
 
 const initialParameters: Validator<AppInstallationParameters> = {
   model: {
-    value: defaultModelId,
+    value: "",
     isValid: true,
   },
   region: {

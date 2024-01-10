@@ -1,11 +1,9 @@
-import { ChangeEvent, Dispatch, useEffect, useMemo, useState } from "react";
-import { FormControl, Select } from "@contentful/f36-components";
-import { gptModels, defaultModelId } from "@configs/ai/gptModels";
-import { ModelText } from "../configText";
-import { ParameterAction, ParameterReducer } from "../parameterReducer";
-import { ConfigErrors } from "../configText";
-import AI from "@utils/aiApi";
 import { FoundationModelSummary } from "@aws-sdk/client-bedrock";
+import { FormControl, Select } from "@contentful/f36-components";
+import AI from "@utils/aiApi";
+import { ChangeEvent, Dispatch, useEffect, useMemo, useState } from "react";
+import { ConfigErrors, ModelText } from "../configText";
+import { ParameterAction, ParameterReducer } from "../parameterReducer";
 
 interface Props {
   model: string;
@@ -49,10 +47,10 @@ const Model = ({
   ));
 
   const isInvalid = !model;
-  const isSelectionInModelList = gptModels.some(
-    (modelOption) => modelOption.id === model,
+  const isSelectionInModelList = models.some(
+    (modelOption) => modelOption.modelId === model,
   );
-  const value = isSelectionInModelList ? model : defaultModelId;
+  const value = isSelectionInModelList ? model : "";
 
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     dispatch({ type: ParameterAction.UPDATE_MODEL, value: e.target.value });
