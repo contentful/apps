@@ -49,7 +49,6 @@ const NotificationEditMode = (props: Props) => {
   };
 
   const handleTest = async (notification: Notification) => {
-    console.log({ notification });
     try {
       const { name: spaceName } = await sdk.cma.space.get({ spaceId: sdk.ids.space });
       const parameters = {
@@ -58,7 +57,7 @@ const NotificationEditMode = (props: Props) => {
         contentTypeId: notification.contentTypeId,
         spaceName,
       };
-      console.log({ parameters });
+
       const { response } = await sdk.cma.appActionCall.createWithResponse(
         {
           appActionId: 'msteamsSendTestNotification',
@@ -71,12 +70,15 @@ const NotificationEditMode = (props: Props) => {
         }
       );
       const body = JSON.parse(response.body);
+
       if (body.ok) {
-        console.log('sent successfully');
+        // TODO: display success toast
+        console.log(`Test sent successfully, message id: ${body.data}`);
       } else {
-        throw new Error('Failed to send test message');
+        throw new Error(`Failed to send test message: ${body.errors?.[0]?.message}`);
       }
     } catch (error) {
+      // TODO: display error to user if test notification fails
       console.error(error);
     }
   };

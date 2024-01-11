@@ -9,6 +9,13 @@ describe('sendTestNotification.handler', () => {
   let cmaRequestStub: sinon.SinonStub;
   let context: AppActionCallContext;
 
+  const parameters = {
+    channelId: '111-222',
+    teamId: '333-444',
+    contentTypeId: 'blogPost',
+    spaceName: 'My test space',
+  };
+
   const cmaClientMockResponses: [AppInstallationProps] = [
     {
       sys: {
@@ -20,7 +27,9 @@ describe('sendTestNotification.handler', () => {
         createdAt: 'createdAt',
         updatedAt: 'updatedAt',
       },
-      parameters: {},
+      parameters: {
+        tenantId: 'my-tenant-id',
+      },
     },
   ];
 
@@ -29,8 +38,11 @@ describe('sendTestNotification.handler', () => {
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
   });
 
-  it('returns the ok result', async () => {
-    const result = await handler({ channel: 'foo' }, context);
-    expect(result).to.have.property('ok', true);
+  it('calls the cma to get the tenant id from app installation params', async () => {
+    await handler(parameters, context);
+    expect(cmaRequestStub).to.have.been.calledWithMatch({
+      entityType: 'AppInstallation',
+      action: 'get',
+    });
   });
 });

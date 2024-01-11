@@ -9,19 +9,38 @@ interface AppActionCallParameters {
   spaceName: string;
 }
 
+interface BotServiceResponse {
+  ok: boolean;
+  data?: string;
+  error?: string;
+}
+
 export const handler = async (
   _payload: AppActionCallParameters,
   _context: AppActionCallContext
-): Promise<AppActionCallResponse<Response | undefined>> => {
+): Promise<AppActionCallResponse<string>> => {
   const { channelId, teamId, contentTypeId, spaceName } = _payload;
   const {
     cma,
     appActionCallContext: { appInstallationId },
   } = _context;
 
+  const config = {
+    botServiceUrl: process.env.MSTEAMS_BOT_SERVICE_URL ?? '',
+    apiKey: process.env.MSTEAMS_CLIENT_API_KEY ?? '',
+  };
+
   let response;
 
   try {
+    if (config.botServiceUrl === undefined) {
+      throw new Error('MS Teams Bot Service URL not provided.');
+    }
+
+    if (!config.apiKey === undefined) {
+      throw new Error('MS Teams Bot Service API Key not provided.');
+    }
+
     const { name: contentTypeName } = await cma.contentType.get({ contentTypeId });
     const tenantId = await fetchTenantId(cma, appInstallationId);
 
@@ -33,30 +52,19 @@ export const handler = async (
       contentTypeName,
     };
 
-    // const sampleData = {
-    //   teamId: '19:de561ed5596d41339d75472650563f9d@thread.tacv2',
-    //   channelId: '19:22eb6915433146709722018f16bc6e89@thread.tacv2',
-    //   tenantId: '666e56a6-1f2a-47c7-b88c-1ed9e1bb8668',
-    //   spaceName: 'Microsoft Teams (development)',
-    //   contentTypeName: 'Blog Post',
-    // };
+    const res = await fetch(config.botServiceUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': config.apiKey,
+      },
+      body: JSON.stringify(payload),
+    });
 
-    response = await fetch(
-      'https://msteams-bot-service.contentful.ngrok.dev/dev/api/notifications/test_notification',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': '486ca60b-8c2c-443e-b54e-67c74a4fb925',
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    response = (await res.json()) as BotServiceResponse;
 
-    if (response.ok) {
-      console.log('sent successfully');
-    } else {
-      throw new Error('Failed to send test message');
+    if (!res.ok) {
+      throw new Error(response.error ?? 'Failed to send test message');
     }
   } catch (err) {
     if (!(err instanceof Error)) {
@@ -83,6 +91,6 @@ export const handler = async (
 
   return {
     ok: true,
-    data: response,
+    data: response.data ?? '',
   };
 };
