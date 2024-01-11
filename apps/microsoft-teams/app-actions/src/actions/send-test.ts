@@ -1,6 +1,7 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { AppActionCallResponse } from '../types';
 import { fetchTenantId } from '../utils';
+import helpers from '../helpers';
 
 interface AppActionCallParameters {
   channelId: string;
@@ -9,7 +10,7 @@ interface AppActionCallParameters {
   spaceName: string;
 }
 
-interface BotServiceResponse {
+export interface BotServiceResponse {
   ok: boolean;
   data?: string;
   error?: string;
@@ -26,11 +27,11 @@ export const handler = async (
   } = _context;
 
   const config = {
-    botServiceUrl: process.env.MSTEAMS_BOT_SERVICE_URL ?? '',
+    botServiceUrl: process.env.MSTEAMS_BOT_SERVICE_BASE_URL ?? '',
     apiKey: process.env.MSTEAMS_CLIENT_API_KEY ?? '',
   };
 
-  let response;
+  let response: BotServiceResponse;
 
   try {
     if (config.botServiceUrl === undefined) {
@@ -52,18 +53,9 @@ export const handler = async (
       contentTypeName,
     };
 
-    const res = await fetch(config.botServiceUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': config.apiKey,
-      },
-      body: JSON.stringify(payload),
-    });
+    response = await helpers.sendTestNotification(config.botServiceUrl, config.apiKey, payload);
 
-    response = (await res.json()) as BotServiceResponse;
-
-    if (!res.ok) {
+    if (!response.ok) {
       throw new Error(response.error ?? 'Failed to send test message');
     }
   } catch (err) {

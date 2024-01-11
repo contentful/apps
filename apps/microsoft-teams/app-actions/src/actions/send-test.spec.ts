@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import { handler } from './send-test';
 import { makeMockAppActionCallContext } from '../../test/mocks';
-import { AppInstallationProps, SysLink } from 'contentful-management';
+import { SysLink, ContentTypeProps, ContentFields } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 
 describe('sendTestNotification.handler', () => {
@@ -16,20 +16,21 @@ describe('sendTestNotification.handler', () => {
     spaceName: 'My test space',
   };
 
-  const cmaClientMockResponses: [AppInstallationProps] = [
+  const cmaClientMockResponses: ContentTypeProps[] = [
     {
       sys: {
-        type: 'AppInstallation',
-        appDefinition: {} as SysLink,
-        environment: {} as SysLink,
-        space: {} as SysLink,
+        type: 'ContentType',
+        id: 'blogPost',
         version: 1,
         createdAt: 'createdAt',
         updatedAt: 'updatedAt',
+        environment: {} as SysLink,
+        space: {} as SysLink,
       },
-      parameters: {
-        tenantId: 'my-tenant-id',
-      },
+      name: 'Blog Post',
+      description: 'description',
+      displayField: 'displayField',
+      fields: [] as ContentFields[],
     },
   ];
 
@@ -41,7 +42,7 @@ describe('sendTestNotification.handler', () => {
   it('calls the cma to get the tenant id from app installation params', async () => {
     await handler(parameters, context);
     expect(cmaRequestStub).to.have.been.calledWithMatch({
-      entityType: 'AppInstallation',
+      entityType: 'ContentType',
       action: 'get',
     });
   });
