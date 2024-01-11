@@ -67,6 +67,8 @@ jobs:
           name: Build
           command: |
             NODE_ENV='production' \
+            MSTEAMS_BOT_SERVICE_BASE_URL=$MSTEAMS_BOT_SERVICE_BASE_URL_TEST \
+            MSTEAMS_CLIENT_API_KEY=$MSTEAMS_CLIENT_API_KEY_TEST \
             npm run build
 
   deploy-staging:
