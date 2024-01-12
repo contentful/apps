@@ -1,13 +1,10 @@
-import useDialogParameters from '@hooks/dialog/useDialogParameters';
-import { AIFeature } from '@configs/features/featureConfig';
-import CommonGenerator from '@components/app/dialog/common-generator/CommonGenerator';
-import GeneratorProvider from '@providers/generatorProvider';
-import { useSDK, useAutoResizer } from '@contentful/react-apps-toolkit';
-import { DialogAppSDK } from '@contentful/app-sdk';
-import RewriteGenerator from '@components/app/dialog/rewrite-generator/RewriteGenerator';
-import { useContext } from 'react';
-// import { SegmentAnalyticsContext } from '@providers/segmentAnalyticsProvider';
-// import { SegmentEvents } from '@configs/segment/segmentEvent';
+import CommonGenerator from "@components/app/dialog/common-generator/CommonGenerator";
+import RewriteGenerator from "@components/app/dialog/rewrite-generator/RewriteGenerator";
+import { AIFeature } from "@configs/features/featureConfig";
+import { DialogAppSDK } from "@contentful/app-sdk";
+import { useAutoResizer, useSDK } from "@contentful/react-apps-toolkit";
+import useDialogParameters from "@hooks/dialog/useDialogParameters";
+import GeneratorProvider from "@providers/generatorProvider";
 
 export interface FieldLocales {
   [key: string]: string[];
@@ -21,8 +18,6 @@ type DialogInvocationParameters = {
 
 const Dialog = () => {
   const { feature, entryId, isLoading, fieldLocales } = useDialogParameters();
-  // const { trackEvent } = useContext(SegmentAnalyticsContext);
-
   const sdk = useSDK<DialogAppSDK>();
 
   useAutoResizer();
@@ -30,10 +25,6 @@ const Dialog = () => {
   if (isLoading) {
     return null;
   }
-
-  // trackEvent(SegmentEvents.FLOW_START, {
-  //   feature_id: feature,
-  // });
 
   const localeNames = sdk.locales.names;
   const defaultLocale = sdk.locales.default;
@@ -54,7 +45,8 @@ const Dialog = () => {
       entryId={entryId}
       fieldLocales={fieldLocales}
       localeNames={localeNames}
-      defaultLocale={defaultLocale}>
+      defaultLocale={defaultLocale}
+    >
       {getGenerator(feature)}
     </GeneratorProvider>
   );

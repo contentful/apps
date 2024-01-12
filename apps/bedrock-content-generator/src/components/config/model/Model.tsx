@@ -28,7 +28,7 @@ const Model = ({
       credentialsValid && credentials.accessKeyID && credentials.secretAccessKey
         ? new AI(credentials.accessKeyID, credentials.secretAccessKey, region)
         : null,
-    [credentials, credentialsValid],
+    [credentials, credentialsValid, region],
   );
 
   const [models, setModels] = useState<FoundationModelSummary[]>([]);

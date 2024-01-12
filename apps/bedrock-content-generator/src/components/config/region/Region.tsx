@@ -43,7 +43,7 @@ const Region = ({ region, dispatch }: Props) => {
       {isInvalid && (
         <FormControl.ValidationMessage>
           {ConfigErrors.missingModel}
-          {/* @TODO: Configure correct error */}
+          {/* TODO: Configure correct error */}
         </FormControl.ValidationMessage>
       )}
     </FormControl>

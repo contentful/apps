@@ -107,7 +107,7 @@ const useAI = () => {
         targetLocale,
       );
 
-      let stream = await ai.streamChatCompletion(payload);
+      const stream = await ai.streamChatCompletion(payload);
       if (!stream) throw new Error("Stream is null");
 
       for await (const streamOutput of stream) {

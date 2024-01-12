@@ -13,17 +13,6 @@ const ComponentLocationSettings = () => ({
 
 const App = () => {
   const sdk = useSDK();
-  // const { identify } = useContext(SegmentAnalyticsContext);
-  // const ldClient = useLDClient();
-
-  // useEffect(() => {
-  //   ldClient?.identify({
-  //     key: sdk.user.sys.id,
-  //     custom: {
-  //       currentSpaceId: sdk.ids.space,
-  //     },
-  //   });
-  // }, [ldClient, sdk.ids.space, sdk.user.sys.id]);
 
   const Component = useMemo(() => {
     const locations = ComponentLocationSettings();

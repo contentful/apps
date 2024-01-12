@@ -1,10 +1,8 @@
 import AppInstallationParameters from "@components/config/appInstallationParameters";
 import { AppState, ConfigAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
-import { useEffect, useCallback, useContext } from "react";
 import { generateEditorInterfaceAssignments } from "@utils/config/contentTypeHelpers";
-// import { SegmentAnalyticsContext } from "@providers/segmentAnalyticsProvider";
-import { SegmentEvents } from "@configs/segment/segmentEvent";
+import { useCallback, useEffect } from "react";
 
 /**
  * This hook is used to save the parameters of the app.

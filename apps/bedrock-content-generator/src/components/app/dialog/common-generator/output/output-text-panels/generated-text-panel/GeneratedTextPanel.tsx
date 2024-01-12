@@ -1,19 +1,17 @@
+import { errorMessages } from "@components/app/dialog/common-generator/errorMessages";
+import Hyperlink from "@components/common/HyperLink/HyperLink";
+import TextFieldWithButtons from "@components/common/text-field-with-buttons/TextFieldWIthButtons";
 import {
   Button,
   CopyButton,
-  Tabs,
   Paragraph,
+  Tabs,
 } from "@contentful/f36-components";
 import { ExternalLinkIcon } from "@contentful/f36-icons";
-import Hyperlink from "@components/common/HyperLink/HyperLink";
 import useAI from "@hooks/dialog/useAI";
-import TextFieldWithButtons from "@components/common/text-field-with-buttons/TextFieldWIthButtons";
-import { OutputTab } from "../../Output";
 import { ContentTypeFieldValidation } from "contentful-management";
-import { useContext, useEffect, useState } from "react";
-import { SegmentAction, SegmentEvents } from "@configs/segment/segmentEvent";
-import { GeneratorContext } from "@providers/generatorProvider";
-import { errorMessages } from "@components/app/dialog/common-generator/errorMessages";
+import { useEffect, useState } from "react";
+import { OutputTab } from "../../Output";
 import { styles } from "./GeneratedTextPanel.styles";
 
 interface Props {
@@ -26,7 +24,6 @@ interface Props {
 const GeneratedTextPanel = (props: Props) => {
   const { generate, ai, outputFieldValidation, apply } = props;
   const { output, setOutput, isGenerating, hasError, error } = ai;
-  const {} = useContext(GeneratorContext);
 
   const [canApply, setCanApply] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -36,19 +33,13 @@ const GeneratedTextPanel = (props: Props) => {
   ) => {
     if (!isDirty) {
       setIsDirty(true);
-      // trackGeneratorEvent(SegmentEvents.GENERATED_CONTENT_EDITED);
     }
 
     setOutput(event.target.value);
   };
 
   const handleRegenerate = () => {
-    // trackGeneratorEvent(SegmentEvents.REGENERATION_CLICKED);
     generate();
-  };
-
-  const trackCopy = () => {
-    // trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.COPIED);
   };
 
   const checkIfCanApply = () => {
@@ -115,7 +106,7 @@ const GeneratedTextPanel = (props: Props) => {
           errorMessage={hasError && getModalErrorMessage()}
         >
           <>
-            <CopyButton value={output} onClickCapture={trackCopy} />
+            <CopyButton value={output} />
             <Button onClick={handleRegenerate} css={styles.button}>
               Regenerate
             </Button>

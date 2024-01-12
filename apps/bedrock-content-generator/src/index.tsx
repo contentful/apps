@@ -5,7 +5,6 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 
 (async () => {
-
   const container = document.getElementById("root")!;
   const root = createRoot(container);
 
@@ -15,10 +14,8 @@ import App from "./App";
   } else {
     root.render(
       <SDKProvider>
-        {/* <LDProvider> */}
         <GlobalStyles />
         <App />
-        {/* </LDProvider> */}
       </SDKProvider>,
     );
   }

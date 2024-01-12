@@ -20,8 +20,6 @@ const useSidebarParameters = () => {
     sdk.parameters.installation;
 
   useEffect(() => {
-    console.log(sdk.parameters.installation);
-
     const validateCredentials = async () => {
       const ai = new AI(accessKeyId, secretAccessKey, region);
       try {
@@ -38,7 +36,7 @@ const useSidebarParameters = () => {
 
     validateCredentials();
     setHasBrandProfile(!!profile);
-  }, [accessKeyId, secretAccessKey, profile]);
+  }, [accessKeyId, secretAccessKey, profile, region]);
 
   return {
     hasBrandProfile,

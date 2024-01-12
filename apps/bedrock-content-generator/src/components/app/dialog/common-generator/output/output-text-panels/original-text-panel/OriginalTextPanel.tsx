@@ -9,9 +9,6 @@ import { useContext } from "react";
 import { OutputTab } from "../../Output";
 // import { SegmentEvents } from '@configs/segment/segmentEvent';
 import { errorMessages } from "@components/app/dialog/common-generator/errorMessages";
-import AppInstallationParameters from "@components/config/appInstallationParameters";
-import { DialogAppSDK } from "@contentful/app-sdk";
-import { useSDK } from "@contentful/react-apps-toolkit";
 
 const styles = {
   panel: css({
@@ -43,11 +40,8 @@ const OriginalTextPanel = (props: Props) => {
   const { dispatch } = useContext(GeneratorContext);
 
   const handleGenerate = () => {
-    // trackGeneratorEvent(SegmentEvents.GENERATE_CLICKED);
     generate();
   };
-
-  const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
 
   const handleOriginalTextChange = (
     event: React.ChangeEvent<HTMLInputElement>,

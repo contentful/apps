@@ -1,14 +1,13 @@
-import { useContext } from "react";
-import { GeneratorContext } from "@providers/generatorProvider";
-import useEntryAndContentType from "@hooks/dialog/useEntryAndContentType";
+import featureConfig from "@configs/features/featureConfig";
+import { DialogAppSDK } from "@contentful/app-sdk";
+import { useSDK } from "@contentful/react-apps-toolkit";
 import useAI, { GenerateMessage } from "@hooks/dialog/useAI";
+import useEntryAndContentType from "@hooks/dialog/useEntryAndContentType";
+import { GeneratorContext } from "@providers/generatorProvider";
+import { ContentTypeFieldValidation } from "contentful-management";
+import { useContext } from "react";
 import GeneratedTextPanel from "./generated-text-panel/GeneratedTextPanel";
 import OriginalTextPanel from "./original-text-panel/OriginalTextPanel";
-import featureConfig from "@configs/features/featureConfig";
-import { ContentTypeFieldValidation } from "contentful-management";
-import { SegmentAction, SegmentEvents } from "@configs/segment/segmentEvent";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { DialogAppSDK } from "@contentful/app-sdk";
 
 interface Props {
   onGenerate: (generateMessage: GenerateMessage) => void;
@@ -41,7 +40,6 @@ const OutputTextPanels = (props: Props) => {
       ai.output,
     );
     if (success) {
-      // trackGeneratorEvent(SegmentEvents.FLOW_END, SegmentAction.APPLIED);
       sdk.notifier.success("Content applied successfully.");
 
       sdk.close();

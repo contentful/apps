@@ -45,7 +45,7 @@ class AI {
    * @returns ReadableStreamDefaultReader<Uint8Array>
    */
   streamChatCompletion = async (prompt: string) => {
-    let modelId = "anthropic.claude-instant-v1";
+    const modelId = "anthropic.claude-instant-v1"; // TODO: Make this dynamic
     const stream = await this.bedrockRuntimeClient.send(
       new InvokeModelWithResponseStreamCommand({
         modelId,
