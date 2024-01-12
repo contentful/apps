@@ -33,6 +33,8 @@ const AccessKey = ({
     useState<string>(secretAccessKey);
 
   const [isValidating, setIsValidating] = useState<boolean>(false);
+
+  // only display validation messages if the user entered something
   const [showValidation, setShowValidation] = useState<boolean>(false);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -48,10 +50,7 @@ const AccessKey = ({
     }
   };
 
-  const handleBlur = async () => {
-    setIsEditing(false);
-    console.log("handleBlur");
-
+  const updateCredentials = async () => {
     if (
       localAccessKeyID === accessKeyID &&
       localSecretAccessKey == secretAccessKey
@@ -76,6 +75,13 @@ const AccessKey = ({
     setShowValidation(true);
   };
 
+  const handleBlur = async () => {
+    console.log("handleBlur");
+    await updateCredentials();
+    setIsEditing(false);
+    setShowValidation(true);
+  };
+
   const secretAccessKeyError = !localSecretAccessKey
     ? ConfigErrors.missingSecretAccessKey
     : isInvalid
@@ -92,7 +98,7 @@ const AccessKey = ({
           type="text"
           name="accessKeyID"
           placeholder="AKIA6O......"
-          onMouseDown={() => setIsEditing(true)}
+          onFocus={() => setIsEditing(true)}
           onChange={(e) => setLocalAccessKeyID(e.target.value)}
           onBlur={handleBlur}
         />
@@ -113,15 +119,9 @@ const AccessKey = ({
           type="password"
           name="secretAccessKey"
           placeholder="******"
-          onMouseDown={() => setIsEditing(true)}
+          onFocus={() => setIsEditing(true)}
           onChange={(e) => setLocalSecretAccessKey(e.target.value)}
           onBlur={handleBlur}
-          // detect paste
-          // onPaste={(e) => {
-          //   console.log("secret access key");
-          //   handleBlur();
-          //   setIsEditing(true);
-          // }}
         />
 
         <FormControl.HelpText>

@@ -15,7 +15,6 @@ const App = () => {
   const sdk = useSDK();
   // const { identify } = useContext(SegmentAnalyticsContext);
   // const ldClient = useLDClient();
-  const isV2 = true;
 
   // useEffect(() => {
   //   ldClient?.identify({
@@ -34,7 +33,7 @@ const App = () => {
         return component;
       }
     }
-  }, [sdk.location, isV2]);
+  }, [sdk.location]);
 
   return Component ? <Component /> : null;
 };

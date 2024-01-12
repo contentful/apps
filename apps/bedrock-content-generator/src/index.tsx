@@ -1,13 +1,10 @@
-import { createRoot } from "react-dom/client";
+import LocalHostWarning from "@components/common/LocalHostWarning";
 import { GlobalStyles } from "@contentful/f36-components";
 import { SDKProvider } from "@contentful/react-apps-toolkit";
-import { asyncWithLDProvider } from "launchdarkly-react-client-sdk";
-import LocalHostWarning from "@components/common/LocalHostWarning";
-import ldConfig from "@configs/launch-darkly/ldConfig";
+import { createRoot } from "react-dom/client";
 import App from "./App";
 
 (async () => {
-  // const LDProvider = await asyncWithLDProvider(ldConfig);
 
   const container = document.getElementById("root")!;
   const root = createRoot(container);
