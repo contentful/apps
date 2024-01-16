@@ -8,7 +8,7 @@ import DisclaimerSection from "@components/config/disclaimer-section/DisclaimerS
 import parameterReducer, {
   Validator,
 } from "@components/config/parameterReducer";
-import { defaultRegionId } from "@configs/aws/region";
+import { defaultRegionId } from "@configs/aws/bedrockRegions";
 import { Box, Heading } from "@contentful/f36-components";
 import useGetContentTypes from "@hooks/config/useGetContentTypes";
 import useInitializeParameters from "@hooks/config/useInitializeParameters";
@@ -125,6 +125,7 @@ const ConfigPage = () => {
         secretAccessKey={parameters.secretAccessKey.value}
         isAccessKeyValid={parameters.secretAccessKey.isValid}
         model={parameters.model.value}
+        modelValid={parameters.model.isValid}
         region={parameters.region.value}
         dispatch={dispatchParameters}
       />

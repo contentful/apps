@@ -4,6 +4,7 @@ import {
 } from "@aws-sdk/client-bedrock";
 import {
   BedrockRuntimeClient,
+  InvokeModelCommand,
   InvokeModelWithResponseStreamCommand,
   ResponseStream,
 } from "@aws-sdk/client-bedrock-runtime";
@@ -56,7 +57,6 @@ class AI {
       decoder: TextDecoder,
       stream: AsyncIterable<ResponseStream>,
     ) {
-
       for await (const chunk of stream) {
         if (chunk.chunk) {
           const textData = decoder.decode(chunk.chunk.bytes);
@@ -71,20 +71,32 @@ class AI {
     return transformStream(this.decoder, stream.body);
   };
 
-
-
   /**
-   * This function will send a stop signal to OpenAI's API.
-   * @param stream ReadableStreamDefaultReader<Uint8Array> | null
-   * @returns void
+   * This function calls Bedrock's InvokeModelCommand to check if the model is available in the account.
+   * @param modelId string
+   * @returns Promise<boolean> true if model is available, false if not
    */
-  // sendStopSignal = (
-  //   stream: ReadableStreamDefaultReader<Uint8Array> | null | undefined,
-  // ) => {
-  //   if (stream) {
-  //     stream.cancel();
-  //   }
-  // };
+  isModelAvailable = async (modelId: string) => {
+    return this.bedrockRuntimeClient
+      .send(
+        new InvokeModelCommand({
+          modelId,
+          contentType: "application/json",
+          body: JSON.stringify({
+            prompt: "Human: \n Assistant: ",
+            max_tokens_to_sample: 1,
+          }),
+        }),
+      )
+      .then((res) => {
+        console.log(res);
+        return true;
+      })
+      .catch((e) => {
+        console.log(e);
+        return false;
+      });
+  };
 
   /**
    * This function calls Bedrock's ListFoundationModelsCommand to get a list of models.

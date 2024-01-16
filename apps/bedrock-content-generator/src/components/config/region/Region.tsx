@@ -1,5 +1,5 @@
 import HyperLink from "@components/common/HyperLink/HyperLink";
-import { regions } from "@configs/aws/region";
+import { bedrockRegions } from "@configs/aws/bedrockRegions";
 import { FormControl, Select } from "@contentful/f36-components";
 import { ExternalLinkIcon } from "@contentful/f36-icons";
 import { ChangeEvent, Dispatch } from "react";
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const Region = ({ region, dispatch }: Props) => {
-  const regionList = regions.map((region) => (
+  const regionList = bedrockRegions.map((region) => (
     <Select.Option key={region.id} value={region.id}>
       {region.name}
     </Select.Option>

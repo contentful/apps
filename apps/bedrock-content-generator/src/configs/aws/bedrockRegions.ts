@@ -1,4 +1,4 @@
-export const regions = [
+export const bedrockRegions = [
   {
     id: "us-east-1",
     name: "US East (N. Virginia)",
@@ -13,4 +13,4 @@ export const regions = [
   },
 ];
 
-export const defaultRegionId = regions[0].id;
+export const defaultRegionId = bedrockRegions[0].id;

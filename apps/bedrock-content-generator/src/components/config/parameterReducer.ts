@@ -26,6 +26,7 @@ type ParameterUpdateRegionAction = {
 type ParameterStringActions = {
   type: ParameterAction.UPDATE_MODEL;
   value: string;
+  isValid: boolean;
 };
 
 type ParameterObjectActions = {
@@ -100,7 +101,7 @@ const parameterReducer = (
         ...state,
         model: {
           value: action.value,
-          isValid: action.value.length > 0,
+          isValid: action.isValid,
         },
       };
     case ParameterAction.UPDATE_PROFILE: {
