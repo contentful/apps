@@ -79,5 +79,9 @@ export function validateParameters(parameters: ConfigurationParameters): string 
     return 'Provide the commercetools data locale.';
   }
 
+  if (parameters.authApiEndpoint?.endsWith('/')) {
+    parameters.apiEndpoint = parameters.apiEndpoint?.slice(0, -1);
+  }
+
   return null;
 }
