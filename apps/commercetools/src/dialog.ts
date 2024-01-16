@@ -51,7 +51,6 @@ export async function renderDialog(sdk: DialogAppSDK) {
     skuType,
     makeSaveBtnText: makeSaveBtnText(skuType),
     hideSearch: skuType === 'category',
-    showSearchBySkuOption: true,
   });
 
   sdk.window.startAutoResizer();
