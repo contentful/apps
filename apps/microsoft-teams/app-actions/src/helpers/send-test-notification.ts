@@ -1,4 +1,4 @@
-import { BotServiceResponse } from '../actions/send-test';
+import { AppActionCallResponse } from '../types';
 
 interface TestNotificationPayload {
   teamId: string;
@@ -12,7 +12,7 @@ export const sendTestNotification = async (
   botServiceUrl: string,
   apiKey: string,
   payload: TestNotificationPayload
-): Promise<BotServiceResponse> => {
+): Promise<AppActionCallResponse<string>> => {
   const res = await fetch(`${botServiceUrl}/api/notifications/test_notification`, {
     method: 'POST',
     headers: {
@@ -22,7 +22,8 @@ export const sendTestNotification = async (
     body: JSON.stringify(payload),
   });
 
-  const response = (await res.json()) as BotServiceResponse;
+  // TODO: Parse the response instead of the assertion here
+  const response = (await res.json()) as AppActionCallResponse<string>;
 
   return response;
 };

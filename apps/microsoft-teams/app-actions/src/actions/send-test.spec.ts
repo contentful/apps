@@ -39,6 +39,7 @@ describe('sendTestNotification.handler', () => {
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
   });
 
+  // TODO: add test to verify the output
   it('calls the cma to get the tenant id from app installation params', async () => {
     await handler(parameters, context);
     expect(cmaRequestStub).to.have.been.calledWithMatch({
