@@ -4,10 +4,7 @@
     "outDir": "./build",
     "sourceMap": false,
     "target": "es2022"
-
   },
   "include": ["src"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "exclude": ["node_modules"]
 }
-
-
