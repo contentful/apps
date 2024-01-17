@@ -75,15 +75,6 @@ const BrandProfileFields = [
     textLimit: 1000,
   },
 ];
-/*
-const APIKeyText = {
-  title: 'AWS API Key',
-  helpText:
-    "Enter your OpenAI API Key. If you need to generate a key, visit your OpenAI API Keys page",
-  linkSubstring: "OpenAI API Keys page",
-  link: "https://platform.openai.com/account/api-keys",
-};
-*/
 const AccessKeyText = {
   accessKeyIDTitle: "AWS Access Key ID",
   secretAccessKeyTitle: "AWS Secret Access Key",
@@ -139,11 +130,11 @@ const ContentTypeText = {
 };
 
 export {
-  ModelText,
+  AccessKeyText,
   BrandProfileFields,
-  Sections,
   ConfigErrors,
   ContentTypeText,
-  AccessKeyText,
+  ModelText,
   RegionText,
+  Sections,
 };

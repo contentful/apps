@@ -1,10 +1,10 @@
-import { Box } from '@contentful/f36-components';
-import ParametersMissingWarning from '@components/app/sidebar/ParametersMissingWarning';
-import BrandProfileMissingWarning from '@components/app/sidebar/BrandProfileMissingWarning';
-import { warningMessages } from '@components/app/sidebar/sidebarText';
-import { css } from '@emotion/react';
-import tokens from '@contentful/f36-tokens';
-import { AiApiErrorType } from '@utils/aiApi/handleAiApiErrors';
+import BrandProfileMissingWarning from "@components/app/sidebar/BrandProfileMissingWarning";
+import ParametersMissingWarning from "@components/app/sidebar/ParametersMissingWarning";
+import { warningMessages } from "@components/app/sidebar/sidebarText";
+import { Box } from "@contentful/f36-components";
+import tokens from "@contentful/f36-tokens";
+import { css } from "@emotion/react";
+import { AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
 
 const styles = {
   msgWrapper: css({
@@ -42,7 +42,7 @@ const DisplaySidebarWarning = (props: Props) => {
       return (
         <Box css={styles.msgWrapper}>
           <ParametersMissingWarning
-            message={`${warningMessages.openAiErrorMessage} ${
+            message={`${warningMessages.BedrockErrorMessage} ${
               message ?? warningMessages.defaultError
             }`}
           />

@@ -1,13 +1,12 @@
-import baseSystemPrompt from "@configs/prompts/baseSystemPrompt";
-import { DialogAppSDK } from "@contentful/app-sdk";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import AI from "@utils/aiApi";
-import { ChatCompletionRequestMessage } from "openai";
-import { useEffect, useMemo, useState } from "react";
 import AppInstallationParameters, {
   ProfileType,
 } from "@components/config/appInstallationParameters";
+import baseSystemPrompt, { Message } from "@configs/prompts/baseSystemPrompt";
+import { DialogAppSDK } from "@contentful/app-sdk";
+import { useSDK } from "@contentful/react-apps-toolkit";
+import AI from "@utils/aiApi";
 import { AiApiError, AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
+import { useEffect, useMemo, useState } from "react";
 
 export type GenerateMessage = (
   prompt: string,
@@ -15,7 +14,7 @@ export type GenerateMessage = (
 ) => Promise<string>;
 
 /**
- * This hook is used to generate messages using the OpenAI API
+ * This hook is used to generate messages using the Bedrock API
  * output will stream messages just like a chatbot
  *
  * @returns { generateMessage, resetOutput, output, sendStopSignal }
@@ -28,13 +27,14 @@ const useAI = () => {
         sdk.parameters.installation.accessKeyId,
         sdk.parameters.installation.secretAccessKey,
         sdk.parameters.installation.region,
+        sdk.parameters.installation.model,
       ),
     [sdk.parameters.installation],
   );
   const [output, setOutput] = useState<string>("");
   const [stream, setStream] = useState<AsyncGenerator<
     string,
-    string,
+    void,
     unknown
   > | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -46,14 +46,13 @@ const useAI = () => {
     profile: ProfileType,
     targetLocale: string,
   ): string => {
-    const userPrompt: ChatCompletionRequestMessage = {
+    const userPrompt: Message = {
       role: "user",
       content,
     };
 
-    function chatCompletionRequestMessageToClaudePrompt(
-      msgs: ChatCompletionRequestMessage[],
-    ): string {
+    function messageToClaudePrompt(msgs: Message[]): string {
+      // TODO specific for Claude, how does it work with others?
       return msgs
         .map((msg) => {
           let role = "";
@@ -74,7 +73,7 @@ const useAI = () => {
         .join("\n");
     }
 
-    let answer = chatCompletionRequestMessageToClaudePrompt([
+    let answer = messageToClaudePrompt([
       ...baseSystemPrompt(profile, targetLocale),
       userPrompt,
     ]);
@@ -109,6 +108,7 @@ const useAI = () => {
 
       const stream = await ai.streamChatCompletion(payload);
       if (!stream) throw new Error("Stream is null");
+      setStream(stream);
 
       for await (const streamOutput of stream) {
         setOutput((prev) => prev + streamOutput);

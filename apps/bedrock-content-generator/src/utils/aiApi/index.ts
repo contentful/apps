@@ -9,19 +9,24 @@ import {
 } from "@aws-sdk/client-bedrock-runtime";
 
 /**
- * This class is used to interact with OpenAI's API.
+ * This class is used to interact with the Bedrock API.
  * Allowing us to create and manage a stream to the API, similar to openai's node package.
  * @param baseUrl string
  * @param apiKey string
  * @param model string
  */
 class AI {
-  model?: string;
+  modelId?: string;
   decoder: TextDecoder;
   private bedrockClient: BedrockClient;
   private bedrockRuntimeClient: BedrockRuntimeClient;
 
-  constructor(accessKeyID: string, secretAccessKey: string, region: string) {
+  constructor(
+    accessKeyID: string,
+    secretAccessKey: string,
+    region: string,
+    modelId?: string,
+  ) {
     this.decoder = new TextDecoder("utf-8");
 
     const config = {
@@ -31,26 +36,26 @@ class AI {
         secretAccessKey: secretAccessKey,
       },
     };
-
-    if (!accessKeyID || !secretAccessKey)
-      throw new Error("Missing access key id or secret access key");
-
     this.bedrockClient = new BedrockClient(config);
     this.bedrockRuntimeClient = new BedrockRuntimeClient(config);
+    this.modelId = modelId;
   }
 
   /**
-   * This function creates and returns a stream to OpenAI's API.
-   * @param payload ChatCompletionRequestMessage[]
-   * @returns ReadableStreamDefaultReader<Uint8Array>
+   * This function creates and returns a stream to Bedrock's API.
+   * @param prompt string
+   * @returns Promise<AsyncGenerator<string, void, unknown>
    */
-  streamChatCompletion = async (prompt: string) => {
-    const modelId = "anthropic.claude-instant-v1"; // TODO: Make this dynamic
+  streamChatCompletion = async (
+    prompt: string,
+  ): Promise<AsyncGenerator<string, void, unknown> | undefined> => {
+    console.log(`modelId: ${this.modelId}`);
     const stream = await this.bedrockRuntimeClient.send(
       new InvokeModelWithResponseStreamCommand({
-        modelId,
+        modelId: this.modelId,
         contentType: "application/json",
         body: JSON.stringify({
+          // TODO this is Claude specific
           prompt: prompt,
           max_tokens_to_sample: 800,
         }),
@@ -76,44 +81,6 @@ class AI {
 
     return transformStream(this.decoder, stream.body);
   };
-
-  /**
-   * Use this function in a while loop to parse the stream returned from OpenAI's API.
-   * This function will return false if the stream is done.
-   * @param stream ReadableStreamDefaultReader<Uint8Array>
-   * @returns string | false
-   */
-  // parseStream = async (stream: ReadableStreamDefaultReader<Uint8Array>) => {
-  //   const { done, value } = await stream.read();
-
-  //   if (done) {
-  //     return false;
-  //   }
-
-  //   const dataList = this.decoder.decode(value as Buffer);
-  //   const lines = dataList.split(/\n{2}/);
-
-  //   const textData = lines.reduce(streamToParsedText, "");
-
-  //   if (textData) {
-  //     return textData;
-  //   }
-
-  //   return "";
-  // };
-
-  /**
-   * This function will send a stop signal to OpenAI's API.
-   * @param stream ReadableStreamDefaultReader<Uint8Array> | null
-   * @returns void
-   */
-  // sendStopSignal = (
-  //   stream: ReadableStreamDefaultReader<Uint8Array> | null | undefined,
-  // ) => {
-  //   if (stream) {
-  //     stream.cancel();
-  //   }
-  // };
 
   /**
    * This function calls Bedrock's ListFoundationModelsCommand to get a list of models.
