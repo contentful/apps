@@ -1,6 +1,7 @@
 import AppInstallationParameters, {
   ProfileType,
 } from "@components/config/appInstallationParameters";
+import { featuredModels } from "@configs/aws/featuredModels";
 import baseSystemPrompt, { Message } from "@configs/prompts/baseSystemPrompt";
 import { DialogAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
@@ -21,13 +22,16 @@ export type GenerateMessage = (
  */
 const useAI = () => {
   const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
+  const model = featuredModels.find(
+    (m) => m.id === sdk.parameters.installation.model,
+  );
   const ai = useMemo(
     () =>
       new AI(
         sdk.parameters.installation.accessKeyId,
         sdk.parameters.installation.secretAccessKey,
         sdk.parameters.installation.region,
-        sdk.parameters.installation.model,
+        model,
       ),
     [sdk.parameters.installation],
   );

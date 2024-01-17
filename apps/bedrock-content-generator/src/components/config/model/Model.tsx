@@ -30,6 +30,13 @@ interface Props {
   };
   credentialsValid: boolean;
 }
+export interface BedrockModel {
+  id: string;
+  name: string;
+  family: ModelFamily;
+}
+
+export type ModelFamily = "CLAUDE" | "LLAMA" | "TITAN" | "COHERE";
 
 export type ModelAvailability =
   | "AVAILABLE"
@@ -38,7 +45,7 @@ export type ModelAvailability =
   | "FORBIDDEN"
   | "OTHER_ERROR";
 
-interface ModelWithAvailability {
+interface ModelWithAvailability extends BedrockModel {
   id: string;
   name: string;
   availability: ModelAvailability;
@@ -106,7 +113,7 @@ const Model = ({
           let availability = model.availability;
           let error: Error | undefined;
           if (model.availability === "AVAILABLE") {
-            const availabilityOrError = await ai.getModelAvailability(model.id);
+            const availabilityOrError = await ai.getModelAvailability(model);
             if (availabilityOrError instanceof Error) {
               availability = "OTHER_ERROR";
               error = availabilityOrError;
