@@ -23,32 +23,33 @@ const DisplaySidebarWarning = (props: Props) => {
   if (apiError) {
     const { status, message } = apiError;
 
-    if (status === 401 || status === 404) {
-      return (
-        <Box css={styles.msgWrapper}>
-          <ParametersMissingWarning
-            message={warningMessages.paramsMissing}
-            linkSubstring={warningMessages.linkSubstring}
-          />
-        </Box>
-      );
-    } else if (status === 500 || status === 503) {
-      return (
-        <Box css={styles.msgWrapper}>
-          <ParametersMissingWarning message={warningMessages.unavailable} />
-        </Box>
-      );
-    } else {
-      return (
-        <Box css={styles.msgWrapper}>
-          <ParametersMissingWarning
-            message={`${warningMessages.BedrockErrorMessage} ${
-              message ?? warningMessages.defaultError
-            }`}
-          />
-        </Box>
-      );
-    }
+    // TODO fine-grained errors
+    // if (status === 401 || status === 404) {
+    //   return (
+    //     <Box css={styles.msgWrapper}>
+    //       <ParametersMissingWarning
+    //         message={warningMessages.paramsMissing}
+    //         linkSubstring={warningMessages.linkSubstring}
+    //       />
+    //     </Box>
+    //   );
+    // } else if (status === 500 || status === 503) {
+    //   return (
+    //     <Box css={styles.msgWrapper}>
+    //       <ParametersMissingWarning message={warningMessages.unavailable} />
+    //     </Box>
+    //   );
+    // } else {
+    return (
+      <Box css={styles.msgWrapper}>
+        <ParametersMissingWarning
+          message={`${warningMessages.BedrockErrorMessage} ${
+            message ?? warningMessages.defaultError
+          }`}
+        />
+      </Box>
+    );
+    // }
   }
 
   if (!hasBrandProfile) {

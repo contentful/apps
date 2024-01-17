@@ -21,57 +21,58 @@ describe("Display Sidebar Warning", () => {
     unmount();
   });
 
-  it("Renders 401 and 404 error", () => {
-    const { getByText, rerender, unmount } = render(
-      <DisplaySidebarWarning
-        hasBrandProfile={false}
-        apiError={{ status: 401 }}
-      />,
-    );
+  //TODO specific errors
+  // it("Renders 401 and 404 error", () => {
+  //   const { getByText, rerender, unmount } = render(
+  //     <DisplaySidebarWarning
+  //       hasBrandProfile={false}
+  //       apiError={{ status: 401 }}
+  //     />,
+  //   );
 
-    expect(getByText("Invalid or missing API Key.")).toBeTruthy();
+  //   expect(getByText("Invalid or missing API Key.")).toBeTruthy();
 
-    rerender(
-      <DisplaySidebarWarning
-        hasBrandProfile={false}
-        apiError={{ status: 404 }}
-      />,
-    );
+  //   rerender(
+  //     <DisplaySidebarWarning
+  //       hasBrandProfile={false}
+  //       apiError={{ status: 404 }}
+  //     />,
+  //   );
 
-    expect(getByText("Invalid or missing API Key.")).toBeTruthy();
-    unmount();
-  });
+  //   expect(getByText("Invalid or missing API Key.")).toBeTruthy();
+  //   unmount();
+  // });
 
-  it("Renders 500 and 503 error", () => {
-    const { getByText, rerender, unmount } = render(
-      <DisplaySidebarWarning
-        hasBrandProfile={false}
-        apiError={{ status: 500 }}
-      />,
-    );
+  // it("Renders 500 and 503 error", () => {
+  //   const { getByText, rerender, unmount } = render(
+  //     <DisplaySidebarWarning
+  //       hasBrandProfile={false}
+  //       apiError={{ status: 500 }}
+  //     />,
+  //   );
 
-    expect(getByText("Chat GPT is currently unavailable.")).toBeTruthy();
+  //   expect(getByText("Chat GPT is currently unavailable.")).toBeTruthy();
 
-    rerender(
-      <DisplaySidebarWarning
-        hasBrandProfile={false}
-        apiError={{ status: 503 }}
-      />,
-    );
+  //   rerender(
+  //     <DisplaySidebarWarning
+  //       hasBrandProfile={false}
+  //       apiError={{ status: 503 }}
+  //     />,
+  //   );
 
-    expect(getByText("Chat GPT is currently unavailable.")).toBeTruthy();
-    unmount();
-  });
+  //   expect(getByText("Chat GPT is currently unavailable.")).toBeTruthy();
+  //   unmount();
+  // });
 
   it("Renders catch all error", () => {
-    const { getByText, unmount } = render(
+    const element = render(
       <DisplaySidebarWarning
         hasBrandProfile={false}
         apiError={{ status: 999, message: "Dog" }}
       />,
     );
 
-    expect(getByText("Amazon Bedrock Error: Dog")).toBeTruthy();
-    unmount();
+    expect(element.getByText("Amazon Bedrock Error: Dog")).toBeTruthy();
+    element.unmount();
   });
 });

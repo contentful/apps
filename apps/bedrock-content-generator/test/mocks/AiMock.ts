@@ -7,7 +7,7 @@ function getStubbedGenerator(
   const streamData = textToStream.split(" ");
 
   async function* generate() {
-    for (let value in streamData) {
+    for (const value in streamData) {
       yield value;
       await new Promise((r) => setTimeout(r, 200));
     }
