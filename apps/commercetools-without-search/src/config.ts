@@ -80,7 +80,7 @@ export function validateParameters(parameters: ConfigurationParameters): string 
   }
 
   if (parameters.authApiEndpoint?.endsWith('/')) {
-    parameters.apiEndpoint = parameters.apiEndpoint?.slice(0, -1);
+    parameters.authApiEndpoint = parameters.authApiEndpoint?.slice(0, -1);
   }
 
   return null;
