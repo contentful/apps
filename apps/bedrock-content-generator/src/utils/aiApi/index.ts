@@ -4,17 +4,11 @@ import {
 } from "@aws-sdk/client-bedrock";
 import {
   BedrockRuntimeClient,
+  InvokeModelCommand,
   InvokeModelWithResponseStreamCommand,
   ResponseStream,
 } from "@aws-sdk/client-bedrock-runtime";
 
-/**
- * This class is used to interact with the Bedrock API.
- * Allowing us to create and manage a stream to the API, similar to openai's node package.
- * @param baseUrl string
- * @param apiKey string
- * @param model string
- */
 class AI {
   modelId?: string;
   decoder: TextDecoder;
@@ -80,6 +74,33 @@ class AI {
     };
 
     return transformStream(this.decoder, stream.body);
+  };
+
+  /**
+   * This function calls Bedrock's InvokeModelCommand to check if the model is available in the account.
+   * @param modelId string
+   * @returns Promise<boolean> true if model is available, false if not
+   */
+  isModelAvailable = async (modelId: string) => {
+    return this.bedrockRuntimeClient
+      .send(
+        new InvokeModelCommand({
+          modelId,
+          contentType: "application/json",
+          body: JSON.stringify({
+            prompt: "Human: \n Assistant: ",
+            max_tokens_to_sample: 1,
+          }),
+        }),
+      )
+      .then((res) => {
+        console.log(res);
+        return true;
+      })
+      .catch((e) => {
+        console.log(e);
+        return false;
+      });
   };
 
   /**

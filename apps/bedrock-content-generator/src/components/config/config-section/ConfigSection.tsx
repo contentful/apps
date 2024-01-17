@@ -12,6 +12,7 @@ interface Props {
   isAccessKeyValid: boolean;
   region: string;
   model: string;
+  modelValid: boolean;
   dispatch: Dispatch<ParameterReducer>;
 }
 
@@ -19,6 +20,7 @@ const ConfigSection = ({
   accessKeyID,
   secretAccessKey,
   model,
+  modelValid,
   dispatch,
   isAccessKeyValid,
   region,
@@ -39,6 +41,7 @@ const ConfigSection = ({
 
           <Model
             model={model}
+            modelValid={modelValid}
             dispatch={dispatch}
             credentials={{ accessKeyID, secretAccessKey }}
             region={region}
