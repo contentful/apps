@@ -5,6 +5,8 @@ const { hideBin } = require('yargs/helpers');
 
 const manifest = require('./contentful-app-manifest.json');
 
+require('dotenv').config({ path: './app-actions/.env' });
+
 const argv = yargs(hideBin(process.argv)).argv;
 
 const validateActions = () => {
@@ -60,7 +62,13 @@ const main = async (watch = false) => {
       logLevel: 'info',
       format: 'cjs',
       target: 'es2022',
-      external: ['node:*', 'sharp'],
+      external: ['node:*'],
+      define: {
+        'process.env.MSTEAMS_BOT_SERVICE_BASE_URL': JSON.stringify(
+          process.env.MSTEAMS_BOT_SERVICE_BASE_URL
+        ),
+        'process.env.MSTEAMS_CLIENT_API_KEY': JSON.stringify(process.env.MSTEAMS_CLIENT_API_KEY),
+      },
     };
 
     if (watch) {

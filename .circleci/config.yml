@@ -195,12 +195,15 @@ workflows:
       - apps-test:
           context:
             - vault
+            - apps-staging
       - build:
           context:
             - vault
+            - apps-staging
       - deploy-staging:
           context:
             - vault
+            - apps-staging
           requires:
             - build
             - apps-test
@@ -212,6 +215,7 @@ workflows:
       - deploy-prod:
           context:
             - vault
+            - apps-production
           requires:
             - build
             - apps-test

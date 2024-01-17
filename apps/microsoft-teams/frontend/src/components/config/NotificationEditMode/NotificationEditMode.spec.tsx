@@ -4,6 +4,11 @@ import { screen } from '@testing-library/react';
 import { contentTypeSelection, channelSelection, eventsSelection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
 import { ContentTypeCustomRender } from '@test/helpers/ContentTypeCustomRender';
+import { mockSdk } from '@test/mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('NotificationEditMode component', () => {
   it('mounts with correct copy', () => {

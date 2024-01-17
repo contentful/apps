@@ -3,19 +3,22 @@ import { styles } from './NotificationEditModeFooter.styles';
 import { editModeFooter } from '@constants/configCopy';
 
 interface Props {
+  handleTest: () => void;
   handleCancel: () => void;
   handleSave: () => void;
   isSaveDisabled: boolean;
 }
 
 const NotificationEditModeFooter = (props: Props) => {
-  const { handleCancel, handleSave, isSaveDisabled } = props;
+  const { handleTest, handleCancel, handleSave, isSaveDisabled } = props;
 
   return (
     <Box className={styles.footer}>
       <Flex justifyContent="flex-end" margin="spacingS">
         <ButtonGroup variant="spaced" spacing="spacingS">
-          <Button variant="transparent">{editModeFooter.test}</Button>
+          <Button variant="transparent" onClick={handleTest}>
+            {editModeFooter.test}
+          </Button>
           <Button variant="secondary" onClick={handleCancel}>
             {editModeFooter.cancel}
           </Button>
