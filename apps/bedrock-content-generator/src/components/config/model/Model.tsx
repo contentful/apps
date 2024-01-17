@@ -1,18 +1,23 @@
+import { featuredModels } from "@configs/aws/featuredModels";
 import {
   Flex,
   FormControl,
   Select,
   Spinner,
-  TextLink,
   Text,
+  TextLink,
 } from "@contentful/f36-components";
 import AI from "@utils/aiApi";
 import { ChangeEvent, Dispatch, useEffect, useMemo, useState } from "react";
 import { ConfigErrors, ModelText } from "../configText";
 import { ParameterAction, ParameterReducer } from "../parameterReducer";
-import { featuredModels } from "@configs/aws/featuredModels";
 import s from "./Model.module.css";
-import { modelNotInAccountError, modelNotInRegionError } from "./modelErrors";
+import {
+  modelForbiddenError,
+  modelNotInAccountError,
+  modelNotInRegionError,
+  modelOtherError,
+} from "./modelErrors";
 
 interface Props {
   model: string;
@@ -26,10 +31,18 @@ interface Props {
   credentialsValid: boolean;
 }
 
+export type ModelAvailability =
+  | "AVAILABLE"
+  | "NOT_IN_REGION"
+  | "NOT_IN_ACCOUNT"
+  | "FORBIDDEN"
+  | "OTHER_ERROR";
+
 interface ModelWithAvailability {
   id: string;
   name: string;
-  availability: "AVAILABLE" | "NOT_IN_REGION" | "NOT_IN_ACCOUNT";
+  availability: ModelAvailability;
+  error?: Error;
 }
 
 const Model = ({
@@ -61,6 +74,12 @@ const Model = ({
   const modelsNotInAccount = models.filter(
     (m) => m.availability === "NOT_IN_ACCOUNT",
   );
+  const modelsWithForbiddenError = models.filter(
+    (m) => m.availability === "FORBIDDEN",
+  );
+  const modelsWithOtherError = models.filter(
+    (m) => m.availability === "OTHER_ERROR",
+  );
 
   /** Fetch models */
   useEffect(() => {
@@ -85,15 +104,20 @@ const Model = ({
       const modelsWithAccountAvailability = modelsWithRegionAvailability.map(
         async (model) => {
           let availability = model.availability;
+          let error: Error | undefined;
           if (model.availability === "AVAILABLE") {
-            const isAvailableInAccount = await ai.isModelAvailable(model.id);
-            availability = isAvailableInAccount
-              ? availability
-              : "NOT_IN_ACCOUNT";
+            const availabilityOrError = await ai.getModelAvailability(model.id);
+            if (availabilityOrError instanceof Error) {
+              availability = "OTHER_ERROR";
+              error = availabilityOrError;
+            } else {
+              availability = availabilityOrError;
+            }
           }
           return {
             ...model,
             availability,
+            error,
           } as ModelWithAvailability;
         },
       );
@@ -179,6 +203,20 @@ const Model = ({
             AWS Console
           </TextLink>{" "}
           to request access.
+        </FormControl.ValidationMessage>
+      )}
+      {modelsWithForbiddenError.length > 0 && (
+        <FormControl.ValidationMessage className={s.validationWarning}>
+          {modelForbiddenError(modelsWithForbiddenError)}
+          Check the instructions on top of this page to make sure you have set
+          up your IAM user correctly.
+        </FormControl.ValidationMessage>
+      )}
+      {modelsWithOtherError.length > 0 && (
+        <FormControl.ValidationMessage className={s.validationWarning}>
+          {modelOtherError(modelsWithOtherError)}
+          {modelsWithOtherError[0].error?.name}:{" "}
+          {modelsWithOtherError[0].error?.message}
         </FormControl.ValidationMessage>
       )}
 
