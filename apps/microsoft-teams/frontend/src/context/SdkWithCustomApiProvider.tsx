@@ -35,7 +35,10 @@ interface CustomSDKProviderProps {
 export class CustomApi {
   constructor(private readonly channel: Channel) {}
 
-  async install(parameters: FreeFormParameters): Promise<void> {
+  // calling this method will trigger a save of the app config with the provided paramaters. if the app
+  // is not yet installed, it will be installed. the parameters will still pass through parameter handlers
+  // attached by the app
+  async saveConfiguration(parameters: FreeFormParameters): Promise<void> {
     // eslint-disable-line @typescript-eslint/no-explicit-any
     return this.channel.call('callAppMethod', 'install', [parameters]);
   }
