@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.6.0",
+    "botbuilder": "^4.21.4",
     "contentful-management": "^11.3.0"
   },
   "devDependencies": {

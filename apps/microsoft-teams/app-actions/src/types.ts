@@ -23,3 +23,22 @@ export type Channel = {
   teamId: string;
   teamName: string;
 };
+
+import { ChannelInfo as MSChannelInfo, TeamDetails as MSTeamDetails } from 'botbuilder';
+
+// same object as the MS parent, but with required id and name
+export interface TeamDetails extends MSTeamDetails {
+  id: NonNullable<MSTeamDetails['id']>;
+  name: NonNullable<MSTeamDetails['name']>;
+}
+
+// same object as the MS parent, but with required id and name
+export interface ChannelInfo extends MSChannelInfo {
+  id: NonNullable<MSChannelInfo['id']>;
+  name: NonNullable<MSChannelInfo['name']>;
+}
+export interface TeamInstallation {
+  conversationReferenceKey: string;
+  teamDetails: TeamDetails;
+  channelInfos: ChannelInfo[];
+}
