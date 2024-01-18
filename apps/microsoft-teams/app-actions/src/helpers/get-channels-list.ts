@@ -24,7 +24,10 @@ export const getChannelsList = async (
   return channelsList;
 };
 
-const transformInstallationsToChannelsList = (data: TeamInstallation[], tenantId: string) => {
+export const transformInstallationsToChannelsList = (
+  data: TeamInstallation[],
+  tenantId: string
+) => {
   const teamIds: Set<string> = new Set();
   const channelsList = data.reduce((channels, installation) => {
     const {

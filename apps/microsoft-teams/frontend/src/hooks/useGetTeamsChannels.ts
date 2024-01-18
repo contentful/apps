@@ -19,9 +19,7 @@ const useGetTeamsChannels = () => {
           appDefinitionId: sdk.ids.app!,
         },
         {
-          parameters: {
-            tenantId,
-          },
+          parameters: {},
         }
       );
       const body = JSON.parse(response.body);

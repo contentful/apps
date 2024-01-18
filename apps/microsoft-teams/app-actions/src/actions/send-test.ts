@@ -2,6 +2,7 @@ import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { AppActionCallResponse } from '../types';
 import { fetchTenantId } from '../utils';
 import helpers from '../helpers';
+import { config } from '../config';
 
 interface AppActionCallParameters {
   channelId: string;
@@ -19,12 +20,6 @@ export const handler = async (
     cma,
     appActionCallContext: { appInstallationId },
   } = context;
-
-  // TODO: Move this to its own file so it can be shared across actions
-  const config = {
-    botServiceUrl: process.env.MSTEAMS_BOT_SERVICE_BASE_URL,
-    apiKey: process.env.MSTEAMS_CLIENT_API_KEY,
-  };
 
   let response: AppActionCallResponse<string>;
 
