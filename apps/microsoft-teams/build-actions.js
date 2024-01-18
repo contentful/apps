@@ -5,7 +5,9 @@ const { hideBin } = require('yargs/helpers');
 
 const manifest = require('./contentful-app-manifest.json');
 
-require('dotenv').config({ path: './app-actions/.env' });
+const env = process.env.NODE_ENV;
+const path = `./app-actions/.env${env === 'development' ? `.${env}` : ''}`;
+require('dotenv').config({ path });
 
 const argv = yargs(hideBin(process.argv)).argv;
 
