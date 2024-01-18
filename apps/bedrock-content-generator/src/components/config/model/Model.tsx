@@ -1,4 +1,4 @@
-import { featuredModels } from "@configs/aws/featuredModels";
+import { BedrockModel, featuredModels } from "@configs/aws/featuredModels";
 import {
   Flex,
   FormControl,
@@ -30,13 +30,6 @@ interface Props {
   };
   credentialsValid: boolean;
 }
-export interface BedrockModel {
-  id: string;
-  name: string;
-  family: ModelFamily;
-}
-
-export type ModelFamily = "CLAUDE" | "LLAMA" | "TITAN" | "COHERE";
 
 export type ModelAvailability =
   | "AVAILABLE"
@@ -46,8 +39,6 @@ export type ModelAvailability =
   | "OTHER_ERROR";
 
 interface ModelWithAvailability extends BedrockModel {
-  id: string;
-  name: string;
   availability: ModelAvailability;
   error?: Error;
 }

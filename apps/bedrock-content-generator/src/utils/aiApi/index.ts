@@ -5,63 +5,59 @@ import {
 import {
   BedrockRuntimeClient,
   InvokeModelCommand,
-  InvokeModelCommandInput,
   InvokeModelWithResponseStreamCommand,
   ResponseStream,
 } from "@aws-sdk/client-bedrock-runtime";
-import {
-  BedrockModel,
-  ModelAvailability,
-  ModelFamily,
-} from "@components/config/model/Model";
+import { ModelAvailability } from "@components/config/model/Model";
+import { BedrockModel } from "@configs/aws/featuredModels";
 
-function invokeModelPayload(
-  model: BedrockModel,
-  prompt: string,
-  maxTokens?: number,
-): InvokeModelCommandInput {
-  let body = {};
-  switch (model.family) {
-    case "CLAUDE":
-      body = {
-        prompt,
-        ...(maxTokens && { max_tokens_to_sample: maxTokens }),
-      };
-      break;
-    case "LLAMA":
-      body = {
-        prompt,
-        ...(maxTokens && { max_gen_len: maxTokens }),
-      };
-      break;
-    // case "TITAN":
-    //   body = {
-    //     inputText: prompt,
-    //     textGenerationConfig: {
-    //       ...(maxTokens && { maxTokenCount: maxTokens }),
-    //     },
-    //   };
-    //   break;
-    // case "AI21":
-    //   body = {
-    //     prompt,
-    //     maxTokens,
-    //   };
-    //   break;
-    // case "COHERE":
-    //   body = {
-    //     prompt,
-    //     max_tokens: maxTokens,
-    //   };
-    //   break;
-  }
+// function invokeModelPayload(
+//   model: BedrockModel,
+//   prompt: string,
+//   maxTokens?: number,
+// ): InvokeModelCommandInput {
+//   let body = {};
+//   switch (model.family) {
+//     case "CLAUDE":
+//       body = {
+//         prompt,
+//         ...(maxTokens && { max_tokens_to_sample: maxTokens }),
+//       };
+//       break;
+//     case "LLAMA":
+//       body = {
+//         prompt,
+//         ...(maxTokens && { max_gen_len: maxTokens }),
+//       };
+//       break;
+//     // case "TITAN":
+//     //   body = {
+//     //     inputText: prompt,
+//     //     textGenerationConfig: {
+//     //       ...(maxTokens && { maxTokenCount: maxTokens }),
+//     //     },
+//     //   };
+//     //   break;
+//     // case "AI21":
+//     //   body = {
+//     //     prompt,
+//     //     maxTokens,
+//     //   };
+//     //   break;
+//     // case "COHERE":
+//     //   body = {
+//     //     prompt,
+//     //     max_tokens: maxTokens,
+//     //   };
+//     //   break;
+//   }
 
-  return {
-    modelId: model.id,
-    contentType: "application/json",
-    body: JSON.stringify(body),
-  };
-}
+//   return {
+//     modelId: model.id,
+//     contentType: "application/json",
+//     body: JSON.stringify(body),
+//   };
+// }
 
 class AI {
   model?: BedrockModel;
@@ -102,18 +98,11 @@ class AI {
     console.log(`prompt: ${prompt}`);
     const stream = await this.bedrockRuntimeClient.send(
       new InvokeModelWithResponseStreamCommand(
-        invokeModelPayload(model, prompt, 2048),
+        model.invokeCommand("", prompt, 2048),
       ),
     );
 
     if (!stream.body) return;
-
-    const outputKeys: Record<ModelFamily, string> = {
-      LLAMA: "generation",
-      CLAUDE: "completion",
-      TITAN: "outputText",
-      COHERE: "text",
-    };
 
     const transformStream = async function* (
       decoder: TextDecoder,
@@ -125,7 +114,7 @@ class AI {
           const message = JSON.parse(textData);
 
           // response format depends on model family
-          yield message[outputKeys[model.family]];
+          yield message[model.outputKey];
         }
       }
       return;
@@ -145,7 +134,7 @@ class AI {
     try {
       await this.bedrockRuntimeClient.send(
         new InvokeModelCommand(
-          invokeModelPayload(model, "Human: \n Assistant: ", 1),
+          model.invokeCommand("", "Human: \n Assistant: ", 1),
         ),
       );
     } catch (e: any) {

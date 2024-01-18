@@ -45,7 +45,7 @@ const useAI = () => {
   const [error, setError] = useState<AiApiErrorType | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
 
-  const createModelPayload = (
+  const createPrompt = (
     content: string,
     profile: ProfileType,
     targetLocale: string,
@@ -96,12 +96,13 @@ const useAI = () => {
   };
 
   const generateMessage = async (prompt: string, targetLocale: string) => {
+    console.log("generateMessage prompt", prompt);
     resetOutput();
     let completeMessage = "";
     setIsGenerating(true);
 
     try {
-      const payload = createModelPayload(
+      const payload = createPrompt(
         prompt,
         {
           ...sdk.parameters.installation.brandProfile,
@@ -110,7 +111,7 @@ const useAI = () => {
         targetLocale,
       );
 
-      const stream = await ai.streamChatCompletion(payload);
+      const stream = await ai.streamChatCompletion(prompt);
       if (!stream) throw new Error("Stream is null");
       setStream(stream);
 
