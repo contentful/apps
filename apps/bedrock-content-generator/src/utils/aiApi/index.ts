@@ -48,8 +48,6 @@ class AI {
   ): Promise<AsyncGenerator<string, void, unknown> | undefined> => {
     const model = this.model!;
     console.log(`modelId: ${model.id}`);
-    console.log(`systemPrompt: ${systemPrompt}`);
-    console.log(`prompt: ${prompt}`);
     const stream = await this.bedrockRuntimeClient.send(
       new InvokeModelWithResponseStreamCommand(
         model.invokeCommand(systemPrompt, prompt, 2048),

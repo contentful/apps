@@ -27,10 +27,14 @@ class ClaudeModel implements BedrockModel {
     const completePrompt = `
 ${systemPrompt}
 
+Make sure you follow the exact requirements in the input.
+
 Human: ${prompt}
 
-Assistant:
+Assistant: Here is a creative response:
 `;
+
+    console.log(`completePrompt: ${completePrompt}`);
     return {
       modelId: this.id,
       contentType: "application/json",
@@ -64,6 +68,7 @@ Human: ${prompt}
 Assistant:
 `;
 
+    console.log(`completePrompt: ${completePrompt}`);
     return {
       modelId: this.id,
       contentType: "application/json",

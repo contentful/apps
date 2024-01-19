@@ -62,8 +62,6 @@ Your response should not include any harmful, unethical, racist, sexist, toxic, 
 
 Your response should only be in the following language: ${locale}.
 
-If you don't have enough context to respond, be creative and don't say that you cannot answer.
-
 Output your answer without an introduction or summary.`;
 
 export default baseSystemPrompt;
