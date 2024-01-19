@@ -1,4 +1,5 @@
 import { ChannelInfo as MSChannelInfo, TeamDetails as MSTeamDetails } from 'botbuilder';
+import { TOPIC_ACTION_MAP } from './constants';
 
 export interface ActionError {
   type: string;
@@ -76,8 +77,8 @@ export interface EntryActivity {
   entryId: string;
   spaceId: string;
   contentTypeId: string;
-  activity: string; // publish | delete | create | etc
-  username: string;
+  action: string; // published | deleted | created | etc
+  actorName: string;
   at: string;
 }
 
@@ -108,3 +109,7 @@ export interface MessageResult {
   entryActivityMessage: EntryActivityMessage;
   messageResponse: MessageResponse;
 }
+
+export type Topic = keyof typeof TOPIC_ACTION_MAP;
+export type Action = (typeof TOPIC_ACTION_MAP)[Topic];
+export type ActionType = 'creation' | 'update' | 'deletion';
