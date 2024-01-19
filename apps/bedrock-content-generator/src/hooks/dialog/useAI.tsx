@@ -31,7 +31,7 @@ const useAI = () => {
         sdk.parameters.installation.region,
         model,
       ),
-    [sdk.parameters.installation],
+    [sdk.parameters.installation, model],
   );
   const [output, setOutput] = useState<string>("");
   const [stream, setStream] = useState<AsyncGenerator<
@@ -94,6 +94,13 @@ const useAI = () => {
     setIsGenerating(stream !== null);
   }, [stream]);
 
+  const stopMessageGeneration = () => {
+    if (stream) {
+      stream.return();
+      setStream(null);
+    }
+  };
+
   return {
     generateMessage,
     isGenerating,
@@ -102,6 +109,7 @@ const useAI = () => {
     resetOutput,
     error,
     hasError,
+    stopMessageGeneration
   };
 };
 
