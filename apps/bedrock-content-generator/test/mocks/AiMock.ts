@@ -3,7 +3,6 @@ import { vi } from "vitest";
 function getStubbedGenerator(
   textToStream: string,
 ): Promise<AsyncGenerator<string, void, unknown> | undefined> {
-  // return async () => {
   const streamData = textToStream.split(" ");
 
   async function* generate() {
@@ -14,7 +13,6 @@ function getStubbedGenerator(
   }
 
   return Promise.resolve(generate());
-  // };
 }
 
 const AIMock = vi.fn().mockImplementation(() => {
