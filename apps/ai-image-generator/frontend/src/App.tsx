@@ -8,6 +8,7 @@ import Field from './locations/Field';
 import Page from './locations/Page';
 import Sidebar from './locations/Sidebar';
 import Home from './locations/Home';
+import { sentryMarketplaceAppsSDK } from '@contentful/integration-frontend-toolkit/sdks';
 
 const ComponentLocationSettings = {
   [locations.LOCATION_APP_CONFIG]: ConfigScreen,
@@ -19,12 +20,15 @@ const ComponentLocationSettings = {
   [locations.LOCATION_HOME]: Home,
 };
 
+const APP_NAME = 'aiImageGenerator';
+
 const App = () => {
   const sdk = useSDK();
 
   const Component = useMemo(() => {
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {
       if (sdk.location.is(location)) {
+        sentryMarketplaceAppsSDK.setContentfulSentryContext(sdk.ids, sdk.location, APP_NAME)
         return component;
       }
     }
