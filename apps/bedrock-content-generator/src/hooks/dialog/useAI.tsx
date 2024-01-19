@@ -1,7 +1,6 @@
-import AppInstallationParameters, {
-  ProfileType,
-} from "@components/config/appInstallationParameters";
-import baseSystemPrompt, { Message } from "@configs/prompts/baseSystemPrompt";
+import AppInstallationParameters from "@components/config/appInstallationParameters";
+import { featuredModels } from "@configs/aws/featuredModels";
+import baseSystemPrompt from "@configs/prompts/baseSystemPrompt";
 import { DialogAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import AI from "@utils/aiApi";
@@ -21,13 +20,16 @@ export type GenerateMessage = (
  */
 const useAI = () => {
   const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
+  const model = featuredModels.find(
+    (m) => m.id === sdk.parameters.installation.model,
+  );
   const ai = useMemo(
     () =>
       new AI(
         sdk.parameters.installation.accessKeyId,
         sdk.parameters.installation.secretAccessKey,
         sdk.parameters.installation.region,
-        sdk.parameters.installation.model,
+        model,
       ),
     [sdk.parameters.installation],
   );
@@ -40,48 +42,6 @@ const useAI = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<AiApiErrorType | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
-
-  const createModelPayload = (
-    content: string,
-    profile: ProfileType,
-    targetLocale: string,
-  ): string => {
-    const userPrompt: Message = {
-      role: "user",
-      content,
-    };
-
-    function messageToClaudePrompt(msgs: Message[]): string {
-      // TODO specific for Claude, how does it work with others?
-      return msgs
-        .map((msg) => {
-          let role = "";
-          switch (msg.role) {
-            case "user":
-              role = "Assistant";
-              break;
-            case "system":
-              role = "Human";
-              break;
-            case "assistant":
-              role = "Assistant";
-              break;
-          }
-
-          return `${role}: ${msg.content}`;
-        })
-        .join("\n");
-    }
-
-    let answer = messageToClaudePrompt([
-      ...baseSystemPrompt(profile, targetLocale),
-      userPrompt,
-    ]);
-
-    answer += "\nAssistant:";
-
-    return answer;
-  };
 
   const resetOutput = () => {
     setOutput("");
@@ -97,8 +57,7 @@ const useAI = () => {
     setIsGenerating(true);
 
     try {
-      const payload = createModelPayload(
-        prompt,
+      const systemPrompt = baseSystemPrompt(
         {
           ...sdk.parameters.installation.brandProfile,
           profile: sdk.parameters.installation.profile,
@@ -106,7 +65,7 @@ const useAI = () => {
         targetLocale,
       );
 
-      const stream = await ai.streamChatCompletion(payload);
+      const stream = await ai.streamChatCompletion(systemPrompt, prompt);
       if (!stream) throw new Error("Stream is null");
       setStream(stream);
 

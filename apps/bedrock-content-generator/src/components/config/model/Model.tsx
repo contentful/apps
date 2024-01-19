@@ -1,4 +1,4 @@
-import { featuredModels } from "@configs/aws/featuredModels";
+import { BedrockModel, featuredModels } from "@configs/aws/featuredModels";
 import {
   Flex,
   FormControl,
@@ -38,9 +38,7 @@ export type ModelAvailability =
   | "FORBIDDEN"
   | "OTHER_ERROR";
 
-interface ModelWithAvailability {
-  id: string;
-  name: string;
+interface ModelWithAvailability extends BedrockModel {
   availability: ModelAvailability;
   error?: Error;
 }
@@ -88,25 +86,25 @@ const Model = ({
     setIsFetchingModels(true);
 
     ai.getModels().then((allModels) => {
-      const modelsWithRegionAvailability = featuredModels.map(
-        (featuredModel) => {
+      const modelsWithRegionAvailability: ModelWithAvailability[] =
+        featuredModels.map((featuredModel) => {
           const isInRegion = allModels.some(
             (m) => m.modelId === featuredModel.id,
           );
 
           return {
             ...featuredModel,
+            invokeCommand: featuredModel.invokeCommand,
             availability: isInRegion ? "AVAILABLE" : "NOT_IN_REGION",
           };
-        },
-      );
+        });
 
       const modelsWithAccountAvailability = modelsWithRegionAvailability.map(
         async (model) => {
           let availability = model.availability;
           let error: Error | undefined;
           if (model.availability === "AVAILABLE") {
-            const availabilityOrError = await ai.getModelAvailability(model.id);
+            const availabilityOrError = await ai.getModelAvailability(model);
             if (availabilityOrError instanceof Error) {
               availability = "OTHER_ERROR";
               error = availabilityOrError;

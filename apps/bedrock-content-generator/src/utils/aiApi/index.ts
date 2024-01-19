@@ -9,9 +9,10 @@ import {
   ResponseStream,
 } from "@aws-sdk/client-bedrock-runtime";
 import { ModelAvailability } from "@components/config/model/Model";
+import { BedrockModel } from "@configs/aws/featuredModels";
 
 class AI {
-  modelId?: string;
+  model?: BedrockModel;
   decoder: TextDecoder;
   private bedrockClient: BedrockClient;
   private bedrockRuntimeClient: BedrockRuntimeClient;
@@ -20,7 +21,7 @@ class AI {
     accessKeyID: string,
     secretAccessKey: string,
     region: string,
-    modelId?: string,
+    model?: BedrockModel,
   ) {
     this.decoder = new TextDecoder("utf-8");
 
@@ -33,7 +34,7 @@ class AI {
     };
     this.bedrockClient = new BedrockClient(config);
     this.bedrockRuntimeClient = new BedrockRuntimeClient(config);
-    this.modelId = modelId;
+    this.model = model;
   }
 
   /**
@@ -42,19 +43,15 @@ class AI {
    * @returns Promise<AsyncGenerator<string, void, unknown>
    */
   streamChatCompletion = async (
+    systemPrompt: string,
     prompt: string,
   ): Promise<AsyncGenerator<string, void, unknown> | undefined> => {
-    console.log(`modelId: ${this.modelId}`);
+    const model = this.model!;
+    console.log(`modelId: ${model.id}`);
     const stream = await this.bedrockRuntimeClient.send(
-      new InvokeModelWithResponseStreamCommand({
-        modelId: this.modelId,
-        contentType: "application/json",
-        body: JSON.stringify({
-          // TODO this is Claude specific
-          prompt: prompt,
-          max_tokens_to_sample: 800,
-        }),
-      }),
+      new InvokeModelWithResponseStreamCommand(
+        model.invokeCommand(systemPrompt, prompt, 2048),
+      ),
     );
 
     if (!stream.body) return;
@@ -66,9 +63,10 @@ class AI {
       for await (const chunk of stream) {
         if (chunk.chunk) {
           const textData = decoder.decode(chunk.chunk.bytes);
-          const message = JSON.parse(textData) as { completion: string };
+          const message = JSON.parse(textData);
 
-          yield message.completion;
+          // response format depends on model family
+          yield message[model.outputKey];
         }
       }
       return;
@@ -83,18 +81,14 @@ class AI {
    * @returns Promise<ModelAvailability> with the availability status
    */
   getModelAvailability: (
-    modelId: string,
-  ) => Promise<ModelAvailability | Error> = async (modelId: string) => {
+    model: BedrockModel,
+  ) => Promise<ModelAvailability | Error> = async (model: BedrockModel) => {
     try {
-      const response = await this.bedrockRuntimeClient.send(
-        new InvokeModelCommand({
-          modelId,
-          contentType: "application/json",
-          body: JSON.stringify({
-            prompt: "Human: \n Assistant: ",
-            max_tokens_to_sample: 1,
-          }),
-        }),
+      console.log(model);
+      await this.bedrockRuntimeClient.send(
+        new InvokeModelCommand(
+          model.invokeCommand("", "Human: \n Assistant: ", 1),
+        ),
       );
     } catch (e: any) {
       if (!e.hasOwnProperty("message") || !e.hasOwnProperty("name")) {

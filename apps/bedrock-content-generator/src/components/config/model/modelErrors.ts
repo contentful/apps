@@ -1,7 +1,7 @@
-import { FeaturedModel } from "@configs/aws/featuredModels";
+import { BedrockModel } from "@configs/aws/featuredModels";
 
 export const modelNotInRegionError = (
-  models: FeaturedModel[],
+  models: BedrockModel[],
   region: string,
 ) => {
   let t = "The ";
@@ -14,7 +14,7 @@ export const modelNotInRegionError = (
   return t;
 };
 
-export const modelNotInAccountError = (models: FeaturedModel[]) => {
+export const modelNotInAccountError = (models: BedrockModel[]) => {
   let t = "The ";
   t += models.length > 1 ? " models " : " model ";
   t += models.map((m) => m.name).join(", ");
@@ -23,7 +23,7 @@ export const modelNotInAccountError = (models: FeaturedModel[]) => {
   return t;
 };
 
-export const modelForbiddenError = (models: FeaturedModel[]) => {
+export const modelForbiddenError = (models: BedrockModel[]) => {
   let t = "The ";
   t += models.length > 1 ? " models " : " model ";
   t += models.map((m) => m.name).join(", ");
@@ -32,7 +32,7 @@ export const modelForbiddenError = (models: FeaturedModel[]) => {
   return t;
 };
 
-export const modelOtherError = (models: FeaturedModel[]) => {
+export const modelOtherError = (models: BedrockModel[]) => {
   let t = "The ";
   t += models.length > 1 ? " models " : " model ";
   t += models.map((m) => m.name).join(", ");
