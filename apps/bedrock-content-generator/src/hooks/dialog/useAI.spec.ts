@@ -40,15 +40,15 @@ describe("useAI", () => {
   });
 
   // TODO implement
-  // it('should stop generating when triggered and reset output', async () => {
-  //   const { result } = renderHook(() => useAI());
-  //   result.current.generateMessage(titlePrompt('this is a test'), 'en-US');
-  //   await waitFor(() => expect(result.current.isGenerating).toBe(true));
+  it("should stop generating when triggered and reset output", async () => {
+    const { result } = renderHook(() => useAI());
+    result.current.generateMessage(titlePrompt("this is a test"), "en-US");
+    await waitFor(() => expect(result.current.isGenerating).toBe(true));
 
-  //   result.current.sendStopSignal();
-  //   await waitFor(() => expect(result.current.isGenerating).toBe(false));
+    result.current.stopMessageGeneration();
+    await waitFor(() => expect(result.current.isGenerating).toBe(false));
 
-  //   result.current.resetOutput();
-  //   await waitFor(() => expect(result.current.output).toEqual(''));
-  // });
+    result.current.resetOutput();
+    await waitFor(() => expect(result.current.output).toEqual(""));
+  });
 });
