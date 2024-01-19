@@ -1,6 +1,7 @@
 import { KnownAppSDK, init as sdkInit } from '@contentful/app-sdk';
 import { FC, PropsWithChildren, ReactElement, createContext, useEffect, useState } from 'react';
 import { FreeFormParameters } from 'contentful-management/types';
+import { SDKContext } from '@contentful/react-apps-toolkit';
 
 const DELAY_TIMEOUT = 4 * 1000;
 
@@ -48,10 +49,9 @@ const makeCustomApi: CustomApiMaker = (channel: Channel) => new CustomApi(channe
 
 // this context and the below provider is a reimplimentation of the SdkProvider that includes a customApi attribute, which is secretly
 // supported by the App SDK. We will use it to expose the ability to self install to our app.
-export const SDKWithCustomApiContext = createContext<{
-  sdk: KnownAppSDK | null;
+export const CustomApiContext = createContext<{
   customApi: CustomApi | null;
-}>({ sdk: null, customApi: null });
+}>({ customApi: null });
 
 export const SdkWithCustomApiProvider: FC<PropsWithChildren<CustomSDKProviderProps>> = (props) => {
   const [sdk, setSDK] = useState<KnownAppSDK | undefined>();
@@ -82,8 +82,8 @@ export const SdkWithCustomApiProvider: FC<PropsWithChildren<CustomSDKProviderPro
   }
 
   return (
-    <SDKWithCustomApiContext.Provider value={{ sdk, customApi }}>
-      {props.children}
-    </SDKWithCustomApiContext.Provider>
+    <CustomApiContext.Provider value={{ customApi }}>
+      <SDKContext.Provider value={{ sdk }}>{props.children}</SDKContext.Provider>
+    </CustomApiContext.Provider>
   );
 };

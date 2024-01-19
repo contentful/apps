@@ -1,8 +1,8 @@
-import { CustomApi, SDKWithCustomApiContext } from '@context/SdkWithCustomApiProvider';
+import { CustomApi, CustomApiContext } from '@context/SdkWithCustomApiProvider';
 import { useContext } from 'react';
 
 export function useCustomApi(): CustomApi {
-  const { customApi } = useContext(SDKWithCustomApiContext);
+  const { customApi } = useContext(CustomApiContext);
 
   if (!customApi) {
     throw new Error(
