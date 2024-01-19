@@ -7,6 +7,7 @@ import { handler } from './list-channels';
 import { AppActionCallResponseSuccess, Channel } from '../types';
 import { makeMockAppActionCallContext } from '../../test/mocks';
 import { mockChannels } from '../../test/fixtures/mockChannels';
+import helpers from '../helpers';
 
 chai.use(sinonChai);
 
@@ -35,6 +36,7 @@ describe('listChannels.handler', () => {
   beforeEach(() => {
     cmaRequestStub = sinon.stub();
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
+    sinon.stub(helpers, 'getChannelsList').returns(Promise.resolve(mockChannels));
   });
 
   it('returns the ok result', async () => {
