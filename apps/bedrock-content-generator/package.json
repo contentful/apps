@@ -15,7 +15,6 @@
     "@segment/analytics-next": "^1.55.0",
     "contentful-management": "10.28.1",
     "launchdarkly-react-client-sdk": "^3.0.8",
-    "openai": "^3.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "usehooks-ts": "^2.9.1"

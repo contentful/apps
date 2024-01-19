@@ -1,11 +1,21 @@
 import { GeneratorReducer } from "@components/app/dialog/common-generator/generatorReducer";
 import { AIFeature } from "@configs/features/featureConfig";
+import { FieldLocales } from "@locations/Dialog";
 import { ContentTypeProps, EntryProps } from "contentful-management";
 import { Dispatch, createContext, useState } from "react";
-import { FieldLocales } from "@locations/Dialog";
 
 export interface LocaleNames {
   [key: string]: string;
+}
+
+// taken from original SegmentEventData
+export interface GeneratorState {
+  feature_id?: string;
+  from_prompt?: boolean;
+  content_generation_prompt?: string;
+  source_field?: string;
+  target_locale?: string;
+  rewrite_prompt?: string;
 }
 
 interface GeneratorContextProps {
@@ -19,6 +29,7 @@ interface GeneratorContextProps {
   defaultLocale: string;
 
   dispatch: Dispatch<GeneratorReducer>;
+  state?: GeneratorState;
   feature: AIFeature;
 }
 

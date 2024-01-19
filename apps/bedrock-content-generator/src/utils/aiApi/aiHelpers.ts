@@ -15,7 +15,7 @@ interface ParsedLine {
 const findLineWithTextData = (line: string) => {
   const trimmedLine = line.trim();
 
-  if (trimmedLine === '' || trimmedLine === '[DONE]') {
+  if (trimmedLine === "" || trimmedLine === "[DONE]") {
     return false;
   }
 
@@ -41,26 +41,6 @@ const getContentFromParsedLine = (parsedLine: ParsedLine): string => {
  * @param line
  * @returns
  */
-const isEmptyOrDone = (line: string) => line === '' || line === '[DONE]';
+const isEmptyOrDone = (line: string) => line === "" || line === "[DONE]";
 
-/**
- * A reducer function that parses the stream returned from OpenAI's API.
- * @param acc
- * @param line
- * @returns
- */
-const streamToParsedText = (acc: string, line: string) => {
-  const dataPrepend = /(\n)?^data:\s*/;
-  const textWithoutDataPrepend = line.replace(dataPrepend, '').trim();
-
-  if (isEmptyOrDone(textWithoutDataPrepend)) {
-    return acc;
-  }
-
-  const parsedLine = JSON.parse(textWithoutDataPrepend);
-  const content = getContentFromParsedLine(parsedLine) || '';
-
-  return acc + content;
-};
-
-export { findLineWithTextData, getContentFromParsedLine, streamToParsedText };
+export { findLineWithTextData, getContentFromParsedLine };

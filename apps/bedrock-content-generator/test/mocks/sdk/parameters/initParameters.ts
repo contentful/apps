@@ -1,17 +1,22 @@
-import AppInstallationParameters from '@components/config/appInstallationParameters';
-import { AIFeature } from '@configs/features/featureConfig';
-import { DialogInvocationParameters } from '@locations/Dialog';
+import AppInstallationParameters from "@components/config/appInstallationParameters";
+import { AIFeature } from "@configs/features/featureConfig";
+import { DialogInvocationParameters } from "@locations/Dialog";
 
-const init: { installation: AppInstallationParameters; invocation?: DialogInvocationParameters } = {
+const init: {
+  installation: AppInstallationParameters;
+  invocation?: DialogInvocationParameters;
+} = {
   installation: {
-    model: '',
-    key: '',
-    profile: '',
+    model: "",
+    profile: "",
     brandProfile: {},
+    accessKeyId: "",
+    secretAccessKey: "",
+    region: "",
   },
   invocation: {
     feature: AIFeature.TITLE,
-    entryId: '',
+    entryId: "",
     fieldLocales: {},
   },
 };

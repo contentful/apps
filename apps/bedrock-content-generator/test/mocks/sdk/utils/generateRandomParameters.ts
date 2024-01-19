@@ -6,9 +6,9 @@ const generateRandomParameters = (): AppInstallationParameters => {
   return {
     model: "meta.llama2-70b-v1",
     profile: randomProfile,
-    accessKeyId: "",
-    secretAccessKey: "",
-    region: "",
+    accessKeyId: "AKIAAAAAAAAAAAAAAAAA",
+    secretAccessKey: "1234",
+    region: "us-east-1",
     brandProfile: {},
   };
 };

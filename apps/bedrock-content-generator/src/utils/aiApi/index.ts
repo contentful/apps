@@ -10,12 +10,17 @@ import {
 } from "@aws-sdk/client-bedrock-runtime";
 
 class AI {
-  model?: string;
+  modelId?: string;
   decoder: TextDecoder;
   private bedrockClient: BedrockClient;
   private bedrockRuntimeClient: BedrockRuntimeClient;
 
-  constructor(accessKeyID: string, secretAccessKey: string, region: string) {
+  constructor(
+    accessKeyID: string,
+    secretAccessKey: string,
+    region: string,
+    modelId?: string,
+  ) {
     this.decoder = new TextDecoder("utf-8");
 
     const config = {
@@ -25,26 +30,26 @@ class AI {
         secretAccessKey: secretAccessKey,
       },
     };
-
-    if (!accessKeyID || !secretAccessKey)
-      throw new Error("Missing access key id or secret access key");
-
     this.bedrockClient = new BedrockClient(config);
     this.bedrockRuntimeClient = new BedrockRuntimeClient(config);
+    this.modelId = modelId;
   }
 
   /**
-   * This function creates and returns a stream to OpenAI's API.
-   * @param payload ChatCompletionRequestMessage[]
-   * @returns ReadableStreamDefaultReader<Uint8Array>
+   * This function creates and returns a stream to Bedrock's API.
+   * @param prompt string
+   * @returns Promise<AsyncGenerator<string, void, unknown>
    */
-  streamChatCompletion = async (prompt: string) => {
-    const modelId = "anthropic.claude-instant-v1"; // TODO: Make this dynamic
+  streamChatCompletion = async (
+    prompt: string,
+  ): Promise<AsyncGenerator<string, void, unknown> | undefined> => {
+    console.log(`modelId: ${this.modelId}`);
     const stream = await this.bedrockRuntimeClient.send(
       new InvokeModelWithResponseStreamCommand({
-        modelId,
+        modelId: this.modelId,
         contentType: "application/json",
         body: JSON.stringify({
+          // TODO this is Claude specific
           prompt: prompt,
           max_tokens_to_sample: 800,
         }),
