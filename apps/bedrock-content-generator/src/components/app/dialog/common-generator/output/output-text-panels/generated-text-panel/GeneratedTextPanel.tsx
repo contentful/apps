@@ -23,7 +23,14 @@ interface Props {
 
 const GeneratedTextPanel = (props: Props) => {
   const { generate, ai, outputFieldValidation, apply } = props;
-  const { output, setOutput, isGenerating, hasError, error } = ai;
+  const {
+    output,
+    setOutput,
+    isGenerating,
+    hasError,
+    error,
+    stopMessageGeneration,
+  } = ai;
 
   const [canApply, setCanApply] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -96,7 +103,9 @@ const GeneratedTextPanel = (props: Props) => {
           inputText={output}
           sizeValidation={outputFieldValidation?.size}
         >
-          <Button onClick={() => alert("todo")}>Stop Generating</Button>
+          <Button onClick={() => stopMessageGeneration()}>
+            Stop Generating
+          </Button>
         </TextFieldWithButtons>
       ) : (
         <TextFieldWithButtons
