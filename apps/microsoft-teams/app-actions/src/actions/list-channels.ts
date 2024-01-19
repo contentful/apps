@@ -16,14 +16,6 @@ export const handler = async (
   let channels: Channel[];
 
   try {
-    if (config.botServiceUrl === undefined) {
-      throw new Error('MS Teams Bot Service URL not provided.');
-    }
-
-    if (config.apiKey === undefined) {
-      throw new Error('MS Teams Bot Service API Key not provided.');
-    }
-
     const tenantId = await fetchTenantId(cma, appInstallationId);
     channels = await helpers.getChannelsList(config.botServiceUrl, config.apiKey, tenantId);
   } catch (err) {

@@ -24,14 +24,6 @@ export const handler = async (
   let response: AppActionCallResponse<string>;
 
   try {
-    if (config.botServiceUrl === undefined) {
-      throw new Error('MS Teams Bot Service URL not provided.');
-    }
-
-    if (config.apiKey === undefined) {
-      throw new Error('MS Teams Bot Service API Key not provided.');
-    }
-
     const { name: contentTypeName } = await cma.contentType.get({ contentTypeId });
     const tenantId = await fetchTenantId(cma, appInstallationId);
 
