@@ -8,6 +8,7 @@ interface EntryEvent {
   eventDatetime: string;
 }
 
+// comment
 export const buildEntryActivity = async (
   entryEvent: EntryEvent,
   cma: PlainClientAPI
