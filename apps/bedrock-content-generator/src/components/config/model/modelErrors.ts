@@ -22,3 +22,24 @@ export const modelNotInAccountError = (models: FeaturedModel[]) => {
   t += "not been granted access in your account. ";
   return t;
 };
+
+export const modelForbiddenError = (models: FeaturedModel[]) => {
+  let t = "The ";
+  t += models.length > 1 ? " models " : " model ";
+  t += models.map((m) => m.name).join(", ");
+  t += models.length > 1 ? " have " : " has ";
+  t += "not been granted access in your account. ";
+  return t;
+};
+
+export const modelOtherError = (models: FeaturedModel[]) => {
+  let t = "The ";
+  t += models.length > 1 ? " models " : " model ";
+  t += models.map((m) => m.name).join(", ");
+  t += " could not be accessed for an unexpected reason.";
+  t +=
+    models.length > 1
+      ? " The error for the first of these models is: "
+      : " The error is: ";
+  return t;
+};

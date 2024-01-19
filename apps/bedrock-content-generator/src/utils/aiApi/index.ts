@@ -8,6 +8,7 @@ import {
   InvokeModelWithResponseStreamCommand,
   ResponseStream,
 } from "@aws-sdk/client-bedrock-runtime";
+import { ModelAvailability } from "@components/config/model/Model";
 
 class AI {
   modelId?: string;
@@ -79,11 +80,13 @@ class AI {
   /**
    * This function calls Bedrock's InvokeModelCommand to check if the model is available in the account.
    * @param modelId string
-   * @returns Promise<boolean> true if model is available, false if not
+   * @returns Promise<ModelAvailability> with the availability status
    */
-  isModelAvailable = async (modelId: string) => {
-    return this.bedrockRuntimeClient
-      .send(
+  getModelAvailability: (
+    modelId: string,
+  ) => Promise<ModelAvailability | Error> = async (modelId: string) => {
+    try {
+      const response = await this.bedrockRuntimeClient.send(
         new InvokeModelCommand({
           modelId,
           contentType: "application/json",
@@ -92,15 +95,30 @@ class AI {
             max_tokens_to_sample: 1,
           }),
         }),
-      )
-      .then((res) => {
-        console.log(res);
-        return true;
-      })
-      .catch((e) => {
-        console.log(e);
-        return false;
-      });
+      );
+    } catch (e: any) {
+      if (!e.hasOwnProperty("message") || !e.hasOwnProperty("name")) {
+        return Error(e);
+      }
+      console.log(e.message);
+      if (e.name === "AccessDeniedException") {
+        console.log(e.message);
+        if (
+          e.message.includes(
+            "is not authorized to perform: bedrock:InvokeModel",
+          )
+        )
+          return "FORBIDDEN";
+        if (
+          e.message.includes(
+            "You don't have access to the model with the specified model ID.",
+          )
+        )
+          return "NOT_IN_ACCOUNT";
+      }
+      return e as Error;
+    }
+    return "AVAILABLE";
   };
 
   /**
