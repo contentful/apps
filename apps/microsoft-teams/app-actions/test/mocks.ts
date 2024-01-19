@@ -1,6 +1,13 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { Adapter, PlainClientAPI, createClient } from 'contentful-management';
+import {
+  Adapter,
+  AppInstallationProps,
+  PlainClientAPI,
+  SysLink,
+  createClient,
+} from 'contentful-management';
 import sinon from 'sinon';
+import { AppInstallationParameters } from '../src/types';
 
 export const makeMockPlainClient = (responses: any[], stub: sinon.SinonStub): PlainClientAPI => {
   for (const [callNumber, response] of responses.entries()) {
@@ -83,5 +90,46 @@ export const mockEntry = {
     title: {
       'en-US': 'Sample Title',
     },
+  },
+};
+
+export const mockNotification = {
+  channel: {
+    id: 'abc-123',
+    name: 'Corporate Marketing',
+    teamId: '789-def',
+    teamName: 'Marketing Department',
+    tenantId: '9876-5432',
+  },
+  contentTypeId: 'blogPost',
+  isEnabled: true,
+  selectedEvents: {
+    publish: true,
+    unpublish: false,
+    create: false,
+    delete: false,
+    archive: false,
+    unarchive: false,
+  },
+};
+
+export const mockAppInstallationParameters: AppInstallationParameters = {
+  tenantId: 'tenant-id',
+  notifications: [mockNotification],
+};
+
+export const mockAppInstallation: AppInstallationProps = {
+  sys: {
+    type: 'AppInstallation',
+    appDefinition: {} as SysLink,
+    environment: {} as SysLink,
+    space: {} as SysLink,
+    version: 1,
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  parameters: {
+    tenantId: 'tenant-id',
+    notifications: [mockNotification],
   },
 };
