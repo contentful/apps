@@ -11,54 +11,6 @@ import {
 import { ModelAvailability } from "@components/config/model/Model";
 import { BedrockModel } from "@configs/aws/featuredModels";
 
-// function invokeModelPayload(
-//   model: BedrockModel,
-//   prompt: string,
-//   maxTokens?: number,
-// ): InvokeModelCommandInput {
-//   let body = {};
-//   switch (model.family) {
-//     case "CLAUDE":
-//       body = {
-//         prompt,
-//         ...(maxTokens && { max_tokens_to_sample: maxTokens }),
-//       };
-//       break;
-//     case "LLAMA":
-//       body = {
-//         prompt,
-//         ...(maxTokens && { max_gen_len: maxTokens }),
-//       };
-//       break;
-//     // case "TITAN":
-//     //   body = {
-//     //     inputText: prompt,
-//     //     textGenerationConfig: {
-//     //       ...(maxTokens && { maxTokenCount: maxTokens }),
-//     //     },
-//     //   };
-//     //   break;
-//     // case "AI21":
-//     //   body = {
-//     //     prompt,
-//     //     maxTokens,
-//     //   };
-//     //   break;
-//     // case "COHERE":
-//     //   body = {
-//     //     prompt,
-//     //     max_tokens: maxTokens,
-//     //   };
-//     //   break;
-//   }
-
-//   return {
-//     modelId: model.id,
-//     contentType: "application/json",
-//     body: JSON.stringify(body),
-//   };
-// }
-
 class AI {
   model?: BedrockModel;
   decoder: TextDecoder;
@@ -91,14 +43,16 @@ class AI {
    * @returns Promise<AsyncGenerator<string, void, unknown>
    */
   streamChatCompletion = async (
+    systemPrompt: string,
     prompt: string,
   ): Promise<AsyncGenerator<string, void, unknown> | undefined> => {
     const model = this.model!;
     console.log(`modelId: ${model.id}`);
+    console.log(`systemPrompt: ${systemPrompt}`);
     console.log(`prompt: ${prompt}`);
     const stream = await this.bedrockRuntimeClient.send(
       new InvokeModelWithResponseStreamCommand(
-        model.invokeCommand("", prompt, 2048),
+        model.invokeCommand(systemPrompt, prompt, 2048),
       ),
     );
 
@@ -132,6 +86,7 @@ class AI {
     model: BedrockModel,
   ) => Promise<ModelAvailability | Error> = async (model: BedrockModel) => {
     try {
+      console.log(model);
       await this.bedrockRuntimeClient.send(
         new InvokeModelCommand(
           model.invokeCommand("", "Human: \n Assistant: ", 1),

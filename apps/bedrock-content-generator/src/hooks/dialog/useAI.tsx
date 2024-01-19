@@ -1,8 +1,6 @@
-import AppInstallationParameters, {
-  ProfileType,
-} from "@components/config/appInstallationParameters";
+import AppInstallationParameters from "@components/config/appInstallationParameters";
 import { featuredModels } from "@configs/aws/featuredModels";
-import baseSystemPrompt, { Message } from "@configs/prompts/baseSystemPrompt";
+import baseSystemPrompt from "@configs/prompts/baseSystemPrompt";
 import { DialogAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import AI from "@utils/aiApi";
@@ -45,48 +43,6 @@ const useAI = () => {
   const [error, setError] = useState<AiApiErrorType | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
 
-  const createPrompt = (
-    content: string,
-    profile: ProfileType,
-    targetLocale: string,
-  ): string => {
-    const userPrompt: Message = {
-      role: "user",
-      content,
-    };
-
-    function messageToClaudePrompt(msgs: Message[]): string {
-      // TODO specific for Claude, how does it work with others?
-      return msgs
-        .map((msg) => {
-          let role = "";
-          switch (msg.role) {
-            case "user":
-              role = "Assistant";
-              break;
-            case "system":
-              role = "Human";
-              break;
-            case "assistant":
-              role = "Assistant";
-              break;
-          }
-
-          return `${role}: ${msg.content}`;
-        })
-        .join("\n");
-    }
-
-    let answer = messageToClaudePrompt([
-      ...baseSystemPrompt(profile, targetLocale),
-      userPrompt,
-    ]);
-
-    answer += "\nAssistant:";
-
-    return answer;
-  };
-
   const resetOutput = () => {
     setOutput("");
     setError(null);
@@ -96,14 +52,12 @@ const useAI = () => {
   };
 
   const generateMessage = async (prompt: string, targetLocale: string) => {
-    console.log("generateMessage prompt", prompt);
     resetOutput();
     let completeMessage = "";
     setIsGenerating(true);
 
     try {
-      const payload = createPrompt(
-        prompt,
+      const systemPrompt = baseSystemPrompt(
         {
           ...sdk.parameters.installation.brandProfile,
           profile: sdk.parameters.installation.profile,
@@ -111,7 +65,7 @@ const useAI = () => {
         targetLocale,
       );
 
-      const stream = await ai.streamChatCompletion(prompt);
+      const stream = await ai.streamChatCompletion(systemPrompt, prompt);
       if (!stream) throw new Error("Stream is null");
       setStream(stream);
 

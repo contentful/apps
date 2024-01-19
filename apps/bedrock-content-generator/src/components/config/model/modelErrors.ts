@@ -1,4 +1,4 @@
-import { BedrockModel } from "./Model";
+import { BedrockModel } from "@configs/aws/featuredModels";
 
 export const modelNotInRegionError = (
   models: BedrockModel[],

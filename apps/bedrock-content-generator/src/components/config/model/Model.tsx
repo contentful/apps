@@ -86,18 +86,18 @@ const Model = ({
     setIsFetchingModels(true);
 
     ai.getModels().then((allModels) => {
-      const modelsWithRegionAvailability = featuredModels.map(
-        (featuredModel) => {
+      const modelsWithRegionAvailability: ModelWithAvailability[] =
+        featuredModels.map((featuredModel) => {
           const isInRegion = allModels.some(
             (m) => m.modelId === featuredModel.id,
           );
 
           return {
             ...featuredModel,
+            invokeCommand: featuredModel.invokeCommand,
             availability: isInRegion ? "AVAILABLE" : "NOT_IN_REGION",
           };
-        },
-      );
+        });
 
       const modelsWithAccountAvailability = modelsWithRegionAvailability.map(
         async (model) => {

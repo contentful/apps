@@ -55,20 +55,15 @@ const generateBrandProfile = (profile: ProfileType) => {
   return profilePrompt;
 };
 
-export interface Message {
-  role: string;
-  content: string;
-}
+const baseSystemPrompt = (profile: ProfileType, locale: string): string =>
+  `You're a professional content editor. ${generateBrandProfile(profile)}
 
-const baseSystemPrompt = (profile: ProfileType, locale: string): Message[] => [
-  {
-    role: "system",
-    content: generateBrandProfile(profile),
-  },
-  {
-    role: "system",
-    content: `Your response should only be in the following language: ${locale}.`,
-  },
-];
+Your response should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. 
+
+Your response should only be in the following language: ${locale}.
+
+If you don't have enough context to respond, be creative and don't say that you cannot answer.
+
+Output your answer without an introduction or summary.`;
 
 export default baseSystemPrompt;

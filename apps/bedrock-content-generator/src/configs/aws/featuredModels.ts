@@ -24,12 +24,20 @@ class ClaudeModel implements BedrockModel {
     prompt: string,
     maxTokens?: number,
   ): InvokeModelCommandInput {
+    const completePrompt = `
+${systemPrompt}
+
+Human: ${prompt}
+
+Assistant:
+`;
     return {
       modelId: this.id,
       contentType: "application/json",
       body: JSON.stringify({
-        prompt,
+        prompt: completePrompt,
         ...(maxTokens && { max_tokens_to_sample: maxTokens }),
+        temperature: 0.8,
       }),
     };
   }
@@ -48,11 +56,19 @@ class LlamaModel implements BedrockModel {
     prompt: string,
     maxTokens?: number,
   ): InvokeModelCommandInput {
+    const completePrompt = `
+${systemPrompt}
+
+Human: ${prompt}
+
+Assistant:
+`;
+
     return {
       modelId: this.id,
       contentType: "application/json",
       body: JSON.stringify({
-        prompt,
+        prompt: completePrompt,
         ...(maxTokens && { max_gen_len: maxTokens }),
       }),
     };
