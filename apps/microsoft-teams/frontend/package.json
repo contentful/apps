@@ -8,6 +8,7 @@
     "@contentful/f36-icons": "^4.27.0",
     "@contentful/f36-tokens": "4.0.4",
     "@contentful/integration-component-library": "^1.1.41",
+    "@contentful/integration-frontend-toolkit": "file:~/contentful-integration-frontend-toolkit-1.0.0-semantic-release.tgz",
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.38.3",
     "emotion": "10.0.27",

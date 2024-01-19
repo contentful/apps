@@ -5,6 +5,11 @@ import { GlobalStyles } from '@contentful/f36-components';
 import App from './App';
 import LocalhostWarning from '@components/LocalhostWarning';
 import { SdkWithCustomApiProvider } from '@context/SdkWithCustomApiProvider';
+import { sentryMarketplaceAppsSDK } from '@contentful/integration-frontend-toolkit/sdks';
+
+const { client: SentryClient, init: SentryInit } = sentryMarketplaceAppsSDK
+
+SentryInit();
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
@@ -14,9 +19,11 @@ if (import.meta.env.DEV && window.self === window.top) {
   root.render(<LocalhostWarning />);
 } else {
   root.render(
-    <SdkWithCustomApiProvider>
-      <GlobalStyles />
-      <App />
-    </SdkWithCustomApiProvider>
+    <SentryClient.ErrorBoundary>
+      <SdkWithCustomApiProvider>
+        <GlobalStyles />
+        <App />
+      </SdkWithCustomApiProvider>
+    </SentryClient.ErrorBoundary>
   );
 }

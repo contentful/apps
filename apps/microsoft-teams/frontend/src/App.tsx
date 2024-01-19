@@ -1,5 +1,6 @@
 import { locations } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { sentryMarketplaceAppsSDK } from '@contentful/integration-frontend-toolkit/sdks';
 import { useMemo } from 'react';
 import ConfigScreen from '@locations/ConfigScreen';
 import Dialog from '@locations/Dialog';
@@ -19,12 +20,15 @@ const ComponentLocationSettings = {
   [locations.LOCATION_HOME]: Home,
 };
 
+const APP_NAME = 'microsoftTeams';
+
 const App = () => {
   const sdk = useSDK();
 
   const Component = useMemo(() => {
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {
       if (sdk.location.is(location)) {
+        sentryMarketplaceAppsSDK.setContentfulSentryContext(sdk.ids, sdk.location, APP_NAME)
         return component;
       }
     }
