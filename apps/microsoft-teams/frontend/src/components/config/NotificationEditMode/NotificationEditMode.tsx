@@ -72,13 +72,14 @@ const NotificationEditMode = (props: Props) => {
       const body = JSON.parse(response.body);
 
       if (body.ok) {
-        // TODO: display success toast
-        console.log(`Test sent successfully, message id: ${body.data}`);
+        sdk.notifier.success('A test message was sent');
       } else {
         throw new Error(`Failed to send test message: ${body.errors?.[0]?.message}`);
       }
     } catch (error) {
-      // TODO: display error to user if test notification fails
+      if (error instanceof Error) {
+        sdk.notifier.error(error.message || 'Failed to send test message');
+      }
       console.error(error);
     }
   };
