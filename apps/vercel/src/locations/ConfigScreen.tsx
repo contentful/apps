@@ -100,7 +100,7 @@ const ConfigScreen = () => {
                   rel="noopener noreferrer">
                   these detailed instructions
                 </TextLink>{' '}
-                to create an access token in the vercel dashboard.
+                to create an access token in the Vercel dashboard.
               </HelpText>
             </FormControl>
           </Box>
