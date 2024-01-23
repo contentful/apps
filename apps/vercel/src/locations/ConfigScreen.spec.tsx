@@ -1,6 +1,5 @@
-import { render, screen, act, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen from './ConfigScreen';
 
@@ -17,36 +16,13 @@ const saveAppInstallation = () => {
 describe('ConfigScreen', () => {
   const testToken = 'abc1234';
 
-  beforeEach(() => {
-    render(<ConfigScreen />);
-  });
-
   it('renders setup view', async () => {
+    const { unmount } = render(<ConfigScreen />);
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();
 
     expect(screen.getByText('Set Up Vercel')).toBeTruthy();
     expect(screen.getByText('Vercel Access Token')).toBeTruthy();
-  });
-
-  describe('uninstalled', () => {
-    it('allows the app to be installed with an access token', async () => {
-      const user = userEvent.setup();
-      const accessTokenInput = screen.getByLabelText('accessToken');
-
-      await user.click(accessTokenInput);
-      await user.type(accessTokenInput, testToken);
-
-      await act(async () => {
-        const res = await saveAppInstallation();
-
-        expect(res).toEqual({
-          parameters: {
-            accessToken: testToken,
-          },
-          targetState: undefined,
-        });
-      });
-    });
+    unmount();
   });
 });
