@@ -17,7 +17,6 @@ import {
 } from '../../test/mocks';
 import { EntryEvent } from '../types';
 
-// TDOO Could add some more tests around user activity (choosing which user did the thing)
 describe('buildEntryActivity', () => {
   let cmaRequestStub: sinon.SinonStub;
   let cmaClientMockResponses: [ContentTypeProps, CollectionProp<LocaleProps>, UserProps];
@@ -44,7 +43,7 @@ describe('buildEntryActivity', () => {
     expect(result).to.have.property('eventDatetime', entryEvent.eventDatetime);
   });
 
-  describe('when when no displayField in content type', () => {
+  describe('when no displayField in content type', () => {
     beforeEach(() => {
       cmaClientMockResponses = [
         //
@@ -63,7 +62,8 @@ describe('buildEntryActivity', () => {
     });
   });
 
-  // there should always be a default locale in the entry, but it's po
+  // there should always be a default locale in the entry, but just a small sanity
+  // check to make sure our fallback logic works
   describe('when default locale not in entry', () => {
     beforeEach(() => {
       entryEvent = {

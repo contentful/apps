@@ -1,7 +1,7 @@
 {
   "actions": [
     {
-      "id": "handleAppEvent",
+      "id": "msteamsHandleAppEvent",
       "name": "Handle incoming app events",
       "category": "Custom",
       "description": "This action handles incoming app events and sends data to channels",

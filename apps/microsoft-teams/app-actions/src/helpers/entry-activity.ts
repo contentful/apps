@@ -2,7 +2,6 @@ import { LocaleProps, EntryProps, PlainClientAPI, SysLink } from 'contentful-man
 import { Action, ActionType, EntryActivity, EntryEvent, Topic } from '../types';
 import { TOPIC_ACTION_MAP } from '../constants';
 
-// comment
 export const buildEntryActivity = async (
   entryEvent: EntryEvent,
   cma: PlainClientAPI
