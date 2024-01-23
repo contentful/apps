@@ -2,7 +2,7 @@
   "actions": [
     {
       "id": "handleAppEvent",
-      "name": "Handle incoming app event subscribed to by this app",
+      "name": "Handle incoming app events",
       "category": "Custom",
       "description": "This action handles incoming app events and sends data to channels",
       "type": "function",
