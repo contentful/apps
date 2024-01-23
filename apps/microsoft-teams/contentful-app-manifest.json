@@ -1,6 +1,33 @@
 {
   "actions": [
     {
+      "id": "msteamsHandleAppEvent",
+      "name": "Handle incoming app events",
+      "category": "Custom",
+      "description": "This action handles incoming app events and sends data to channels",
+      "type": "function",
+      "path": "actions/handle-app-event.js",
+      "entryFile": "./app-actions/src/actions/handle-app-event.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "payload",
+          "name": "payload",
+          "type": "Symbol"
+        },
+        {
+          "id": "topic",
+          "name": "topic",
+          "type": "Symbol"
+        },
+        {
+          "id": "eventDatetime",
+          "name": "eventDatetime",
+          "type": "Symbol"
+        }
+      ]
+    },
+    {
       "id": "msteamsSendTestNotification",
       "name": "Send test notification to channel",
       "category": "Custom",

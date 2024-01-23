@@ -1,3 +1,7 @@
+import { ChannelInfo as MSChannelInfo, TeamDetails as MSTeamDetails } from 'botbuilder';
+import { TOPIC_ACTION_MAP } from './constants';
+import { EntryProps } from 'contentful-management';
+
 export interface ActionError {
   type: string;
   message: string;
@@ -16,6 +20,15 @@ export interface AppActionCallResponseError {
 
 export type AppActionCallResponse<T> = AppActionCallResponseSuccess<T> | AppActionCallResponseError;
 
+export enum AppEventKey {
+  PUBLISH = 'publish',
+  UNPUBLISHED = 'unpublish',
+  CREATED = 'create',
+  DELETED = 'delete',
+  ARCHIVE = 'archive',
+  UNARCHIVE = 'unarchive',
+}
+
 export type Channel = {
   id: string;
   tenantId: string;
@@ -23,8 +36,6 @@ export type Channel = {
   teamId: string;
   teamName: string;
 };
-
-import { ChannelInfo as MSChannelInfo, TeamDetails as MSTeamDetails } from 'botbuilder';
 
 // same object as the MS parent, but with required id and name
 export interface TeamDetails extends MSTeamDetails {
@@ -42,3 +53,70 @@ export interface TeamInstallation {
   teamDetails: TeamDetails;
   channelInfos: ChannelInfo[];
 }
+
+export interface AppInstallationParameters {
+  tenantId: string;
+  notifications: Notification[];
+}
+
+export interface Notification {
+  channel: Channel;
+  contentTypeId: string;
+  isEnabled: boolean;
+  selectedEvents: SelectedEvents;
+}
+
+export type SelectedEvents = {
+  [K in AppEventKey]: boolean;
+};
+
+// this is jsut a simple starter for now
+export interface EntryActivity {
+  spaceName: string;
+  contentTypeName: string;
+  entryTitle: string;
+  entryId: string;
+  spaceId: string;
+  contentTypeId: string;
+  action: string; // published | deleted | created | etc
+  actorName: string;
+  eventDatetime: string;
+}
+
+export interface EntryActivityMessage {
+  channel: {
+    teamId: string;
+    channelId: string;
+  };
+  entryActivity: EntryActivity;
+}
+
+export interface MessageResponseSuccess {
+  ok: true;
+  data: {
+    messageId: string;
+  };
+}
+
+export interface MessageResponseError {
+  ok: false;
+  error: string;
+}
+
+export type MessageResponse = MessageResponseSuccess | MessageResponseError;
+
+export interface MessageResult {
+  notificationId: string;
+  entryActivityMessage: EntryActivityMessage;
+  messageResponse: MessageResponse;
+}
+
+export interface EntryEvent {
+  entry: EntryProps;
+  topic: Topic;
+  eventDatetime: string;
+}
+
+export type Topic = keyof typeof TOPIC_ACTION_MAP;
+export type Action = (typeof TOPIC_ACTION_MAP)[Topic];
+export type ActionType = 'creation' | 'update' | 'deletion' | 'publication';
