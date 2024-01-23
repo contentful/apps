@@ -39,7 +39,7 @@ describe('buildEntryActivity', () => {
     expect(result).to.have.property('entryId', entryEvent.entry.sys.id);
     expect(result).to.have.property('spaceId', entryEvent.entry.sys.space.sys.id);
     expect(result).to.have.property('contentTypeId', mockContentType.sys.id);
-    expect(result).to.have.property('action', 'published');
+    expect(result).to.have.property('action', 'saved');
     expect(result).to.have.property('actorName', 'Gavin Matthews');
     expect(result).to.have.property('eventDatetime', entryEvent.eventDatetime);
   });

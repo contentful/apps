@@ -119,4 +119,4 @@ export interface EntryEvent {
 
 export type Topic = keyof typeof TOPIC_ACTION_MAP;
 export type Action = (typeof TOPIC_ACTION_MAP)[Topic];
-export type ActionType = 'creation' | 'update' | 'deletion';
+export type ActionType = 'creation' | 'update' | 'deletion' | 'publication';

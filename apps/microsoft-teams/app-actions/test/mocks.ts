@@ -140,7 +140,7 @@ export const mockAppInstallation: AppInstallationProps = {
 
 export const mockEntryEvent: EntryEvent = {
   entry: mockEntry,
-  topic: 'ContentManagement.Entry.publish',
+  topic: 'ContentManagement.Entry.save',
   eventDatetime: '2024-01-22T16:31:13Z',
 };
 

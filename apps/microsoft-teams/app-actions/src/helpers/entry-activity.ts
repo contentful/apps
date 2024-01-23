@@ -42,11 +42,12 @@ const actionToActionType = (action: Action): ActionType => {
   switch (action) {
     case 'created':
       return 'creation';
+    case 'published':
+      return 'publication';
     case 'saved':
     case 'auto saved':
     case 'archived':
     case 'unarchived':
-    case 'published':
     case 'unpublished':
       return 'update';
     case 'deleted':
@@ -62,11 +63,21 @@ const computeActorName = async (
   const UNKNOWN_USER = 'A space user';
   const actionType = actionToActionType(action);
 
+  const {
+    sys: {
+      space: {
+        sys: { id: spaceId },
+      },
+    },
+  } = entry;
+
   let actor: SysLink | undefined;
   if (actionType == 'creation') {
     actor = entry.sys.createdBy;
   } else if (actionType == 'update') {
     actor = entry.sys.updatedBy;
+  } else if (actionType == 'publication') {
+    actor = entry.sys.publishedBy;
   } else if (actionType == 'deletion') {
     actor = entry.sys.deletedBy;
   }
@@ -74,10 +85,15 @@ const computeActorName = async (
   if (!actor) return UNKNOWN_USER;
 
   if (actor.sys.linkType == 'User') {
+    const {
+      sys: { id: userId },
+    } = actor;
     let user;
     try {
-      user = await cma.user.getForSpace({ userId: actor.sys.id });
-    } catch {
+      user = await cma.user.getForSpace({ spaceId, userId });
+    } catch (e) {
+      // TODO figure out how to access the space user API (currently erroring)
+      console.log({ errorMessage: (e as Error).message, spaceId, userId });
       return UNKNOWN_USER;
     }
     return `${user.firstName} ${user.lastName}`;
