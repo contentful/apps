@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { AppInstallationProps } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { AppActionCallResponseSuccess, EntryActivity } from '../types';
+import { EntryActivity } from '../types';
 import { makeMockAppActionCallContext, mockAppInstallation, mockEntry } from '../../test/mocks';
 import { handler } from './handle-app-event';
 import helpers from '../helpers';
@@ -26,7 +26,7 @@ describe('handle-app-event.handler', () => {
   it('returns the ok result', async () => {
     const result = await handler(
       {
-        payload: mockEntry,
+        payload: JSON.stringify(mockEntry),
         topic: 'ContentManagement.Entry.publish',
         eventDatetime: '2024-01-18T21:43:54.267Z',
       },
