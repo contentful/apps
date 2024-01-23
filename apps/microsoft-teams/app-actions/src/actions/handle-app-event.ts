@@ -1,6 +1,7 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { AppActionCallResponse } from '../types';
+import { AppActionCallResponse, EntryActivityMessage, Topic } from '../types';
 import { EntryProps } from 'contentful-management/types';
+import helpers from '../helpers';
 
 interface AppActionCallParameters {
   payload: EntryProps;
@@ -11,22 +12,33 @@ interface AppActionCallParameters {
 export const handler = async (
   parameters: AppActionCallParameters,
   context: AppActionCallContext
-): Promise<AppActionCallResponse<boolean>> => {
+): Promise<AppActionCallResponse<EntryActivityMessage>> => {
   const {
     cma,
     appActionCallContext: { appInstallationId },
   } = context;
+  // TODO parse entry and topic
+  const { payload: entry, topic: topicString, eventDatetime } = parameters;
+  const topic = topicString as Topic;
 
-  const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
-  console.log(appInstallation);
+  const entryActivity = await helpers.buildEntryActivity({ entry, topic, eventDatetime }, cma);
 
   // check app config to see if there are any subscriptions matching, return if none
-  // build event activity
-  // for each notifcation subscription build event message
+  const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
+
+  // fetch all the notification subscriptions
+  // for each notifcation subscription build event message with channel id / team id + entry activity
+  // call the MS teams bot API for each message and collect results
   // return a list of message results
 
   return {
     ok: true,
-    data: true,
+    data: {
+      channel: {
+        channelId: 'TODO-channel-id',
+        teamId: 'TODO-team-id',
+      },
+      entryActivity,
+    },
   };
 };

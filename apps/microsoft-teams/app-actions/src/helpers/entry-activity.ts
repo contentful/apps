@@ -1,12 +1,6 @@
-import { EntryProps, PlainClientAPI, SysLink } from 'contentful-management';
-import { Action, ActionType, EntryActivity, Topic } from '../types';
+import { LocaleProps, EntryProps, PlainClientAPI, SysLink } from 'contentful-management';
+import { Action, ActionType, EntryActivity, EntryEvent, Topic } from '../types';
 import { TOPIC_ACTION_MAP } from '../constants';
-
-interface EntryEvent {
-  entry: EntryProps;
-  topic: Topic;
-  eventDatetime: string;
-}
 
 // comment
 export const buildEntryActivity = async (
@@ -14,15 +8,18 @@ export const buildEntryActivity = async (
   cma: PlainClientAPI
 ): Promise<EntryActivity> => {
   const { entry, topic, eventDatetime } = entryEvent;
-  const contentTypeId = entry.sys.contentType.sys.id;
-  const { name: contentTypeName, displayField } = await cma.contentType.get({ contentTypeId });
 
-  const entryTitle = entry.fields[displayField] || 'No display field specified';
   const entryId = entry.sys.id;
   const spaceId = entry.sys.space.sys.id;
+  const contentTypeId = entry.sys.contentType.sys.id;
 
-  // we can't get the space name
-  const spaceName = 'How can we get this?';
+  const { name: contentTypeName, displayField } = await cma.contentType.get({ contentTypeId });
+  const localeCollection = await cma.locale.getMany({});
+
+  const entryTitle = computeEntryTitle(entry, displayField, localeCollection.items);
+
+  // we can't get the space name for now
+  const spaceName = 'TODO: Space name';
 
   const action = topicToAction(topic);
   const actorName = await computeActorName(entry, action, cma);
@@ -36,7 +33,7 @@ export const buildEntryActivity = async (
     contentTypeId,
     action,
     actorName,
-    at: eventDatetime,
+    eventDatetime,
   };
 };
 
@@ -62,6 +59,7 @@ const computeActorName = async (
   action: Action,
   cma: PlainClientAPI
 ): Promise<string> => {
+  const UNKNOWN_USER = 'A space user';
   const actionType = actionToActionType(action);
 
   let actor: SysLink | undefined;
@@ -73,14 +71,41 @@ const computeActorName = async (
     actor = entry.sys.deletedBy;
   }
 
-  if (!actor) return 'Unknown';
+  if (!actor) return UNKNOWN_USER;
 
   if (actor.sys.linkType == 'User') {
-    const user = await cma.user.getForSpace({ userId: actor.sys.id });
+    let user;
+    try {
+      user = await cma.user.getForSpace({ userId: actor.sys.id });
+    } catch {
+      return UNKNOWN_USER;
+    }
     return `${user.firstName} ${user.lastName}`;
   } else {
     // it could be an AppDefinition or something? For now let's just return
     // what type of thing it is to be slightly more useful
     return actor.sys.linkType;
   }
+};
+
+const computeEntryTitle = (
+  entry: EntryProps,
+  displayField: string | null,
+  locales: LocaleProps[]
+): string => {
+  const NO_ENTRY_TITLE = `Entry ID ${entry.sys.id}`;
+  if (!displayField) return NO_ENTRY_TITLE;
+
+  const defaultLocaleCode = computeDefaultLocaleCode(locales);
+  const entryTitleField = entry.fields[displayField];
+
+  if (!entryTitleField) return NO_ENTRY_TITLE;
+
+  return entryTitleField[defaultLocaleCode] || NO_ENTRY_TITLE;
+};
+
+const computeDefaultLocaleCode = (locales: LocaleProps[]): string => {
+  const defaultLocale = locales.find((locale) => locale.default);
+  if (!defaultLocale) throw new Error('No default locale found in space');
+  return defaultLocale.code;
 };

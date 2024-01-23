@@ -1,5 +1,6 @@
 import { ChannelInfo as MSChannelInfo, TeamDetails as MSTeamDetails } from 'botbuilder';
 import { TOPIC_ACTION_MAP } from './constants';
+import { EntryProps } from 'contentful-management';
 
 export interface ActionError {
   type: string;
@@ -79,7 +80,7 @@ export interface EntryActivity {
   contentTypeId: string;
   action: string; // published | deleted | created | etc
   actorName: string;
-  at: string;
+  eventDatetime: string;
 }
 
 export interface EntryActivityMessage {
@@ -108,6 +109,12 @@ export interface MessageResult {
   notificationId: string;
   entryActivityMessage: EntryActivityMessage;
   messageResponse: MessageResponse;
+}
+
+export interface EntryEvent {
+  entry: EntryProps;
+  topic: Topic;
+  eventDatetime: string;
 }
 
 export type Topic = keyof typeof TOPIC_ACTION_MAP;
