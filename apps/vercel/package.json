@@ -15,7 +15,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "test": "vitest",
+    "test:ci": "vitest",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEFINITIONS_ORG_ID} --definition-id 4QsJrTg4fFjX7UmQDkeayq --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id 1oxLxW5fY54lZLmnO11Ofn --token ${TEST_CMA_TOKEN}"
