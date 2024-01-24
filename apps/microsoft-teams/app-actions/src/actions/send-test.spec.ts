@@ -10,9 +10,9 @@ import {
 } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import helpers from '../helpers';
-import { AppActionCallResponseSuccess } from '../types';
+import { AppActionCallResponseSuccess, MessageResponse } from '../types';
 
-describe('sendTestNotification.handler', () => {
+describe('sendTestMessage.handler', () => {
   let cmaRequestStub: sinon.SinonStub;
   let context: AppActionCallContext;
 
@@ -20,7 +20,6 @@ describe('sendTestNotification.handler', () => {
     channelId: '111-222',
     teamId: '333-444',
     contentTypeId: 'blogPost',
-    spaceName: 'My test space',
   };
   const tenantId = 'msteams-tenant-id';
 
@@ -60,8 +59,8 @@ describe('sendTestNotification.handler', () => {
     cmaRequestStub = sinon.stub();
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
     sinon
-      .stub(helpers, 'sendTestNotification')
-      .returns(Promise.resolve({ ok: true, data: 'message-id' }));
+      .stub(helpers, 'sendTestMessage')
+      .returns(Promise.resolve({ ok: true, data: { messageResponseId: 'message-id' } }));
   });
 
   it('calls the cma to get the content type name', async () => {
@@ -73,8 +72,11 @@ describe('sendTestNotification.handler', () => {
   });
 
   it('returns the ok result', async () => {
-    const result = (await handler(parameters, context)) as AppActionCallResponseSuccess<string>;
+    const result = (await handler(
+      parameters,
+      context
+    )) as AppActionCallResponseSuccess<MessageResponse>;
     expect(result).to.have.property('ok', true);
-    expect(result).to.have.property('data', 'message-id');
+    expect(result.data.messageResponseId).to.equal('message-id');
   });
 });

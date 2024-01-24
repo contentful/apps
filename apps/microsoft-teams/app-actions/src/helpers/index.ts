@@ -1,5 +1,5 @@
-import { sendTestNotification } from './send-test-notification';
+import { sendTestMessage } from './send-test-message';
 import { getChannelsList } from './get-channels-list';
 import { buildEntryActivity } from './entry-activity';
 
-export default { sendTestNotification, getChannelsList, buildEntryActivity };
+export default { sendTestMessage, getChannelsList, buildEntryActivity };
