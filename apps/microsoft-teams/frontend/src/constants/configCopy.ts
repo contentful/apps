@@ -1,3 +1,5 @@
+import { AppEventKey } from '@customTypes/configPage';
+
 const headerSection = {
   title: 'Set up the Microsoft Teams App',
   description: 'Get notifications about Contentful content updates directly in Microsoft Teams.',
@@ -60,15 +62,6 @@ const channelSelection = {
       'In Microsoft Teams, add the Contentful app to the general channel of the teams where you want to see notifications. Add app',
   },
 };
-
-export enum AppEventKey {
-  PUBLISH = 'publish',
-  UNPUBLISHED = 'unpublish',
-  CREATED = 'create',
-  DELETED = 'delete',
-  ARCHIVE = 'archive',
-  UNARCHIVE = 'unarchive',
-}
 
 const AppEvents = {
   [AppEventKey.PUBLISH]: {
