@@ -3,21 +3,15 @@ import { BedrockClientMock, BedrockRuntimeClientMock } from "@test/mocks";
 import { describe, expect, it, vi } from "vitest";
 import AI from ".";
 
-vi.mock("@aws-sdk/client-bedrock", async () => {
-  const actualBedrockClient = (await vi.importActual(
-    "@aws-sdk/client-bedrock",
-  )) as object;
+vi.mock("@aws-sdk/client-bedrock", async (importOriginal) => {
   return {
-    ...actualBedrockClient,
+    ...((await importOriginal()) as object),
     BedrockClient: BedrockClientMock,
   };
 });
-vi.mock("@aws-sdk/client-bedrock-runtime", async () => {
-  const actualBedrockRuntimeClient = (await vi.importActual(
-    "@aws-sdk/client-bedrock-runtime",
-  )) as object;
+vi.mock("@aws-sdk/client-bedrock-runtime", async (importOriginal) => {
   return {
-    ...actualBedrockRuntimeClient,
+    ...((await importOriginal()) as object),
     BedrockRuntimeClient: BedrockRuntimeClientMock,
   };
 });
@@ -35,8 +29,5 @@ describe("AI", () => {
       text += " ";
     }
     expect(text).toBe("This is a test ");
-
-    // expect(result.current.isGenerating).toBe(false);
-    // expect(result.current.output).toBe("");
   });
 });
