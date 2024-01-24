@@ -30,8 +30,7 @@ export const handler = async (
 
   // TODO check app config to see if there are any subscriptions matching, return if none
   const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
-  const appParamaters = parametersFromAppInstallation(appInstallation);
-  const { tenantId, notifications } = appParamaters;
+  const { tenantId, notifications } = parametersFromAppInstallation(appInstallation);
 
   const matchingNotifications = notifications.filter((notification) => {
     // don't send if the notification is for a different content type
