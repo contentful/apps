@@ -3,17 +3,18 @@ import { ProfileFields } from "./appInstallationParameters";
 const ModelText = {
   title: "Machine Learning Model",
   helpText:
-    "According to the provider, there are different models with individual strengths and weaknesses " +
-    "depending on your needs, try different models to find the perfect fit for you " +
-    "as some are more capable than others.",
+    "If you don't know which model to choose, we suggest starting with Anthropic Claude v2.1, " +
+    "which is the most capable model. Models have different capabilities and prices. For an overview, visit the AWS console.",
+  linkSubstring: "AWS console",
+  link: "https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/models",
 };
 
 const RegionText = {
   title: "AWS Region",
   helpText:
-    "Select the AWS region to use for accessing the Bedrock API. Bedrock isn't yet available in every region and model availability differs by region. Check the documentation for up-to-date information.",
+    "Select the AWS region to use for accessing Amazon Bedrock. Not all models are available in all regions. For the broadest choice of models, choose US East or US West. Learn more in the documentation.",
   linkSubstring: "documentation",
-  link: "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html#bedrock-regions",
+  link: "https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html",
 };
 
 export enum FieldTypes {
@@ -68,7 +69,7 @@ const BrandProfileFields = [
   {
     id: ProfileFields.ADDITIONAL,
     title:
-      "Is there anything else that AI should know about your brand or product?",
+      "Is there anything else that the model should know about your brand or product?",
     textAreaPlaceholder:
       "Example: Contentful is a leading composable content platform. It was a headless CMS category maker that now has company in the marketplace, but remains to be the preferred choice for medium, large and enterprise companies.",
     fieldType: FieldTypes.TEXTAREA,
@@ -79,28 +80,29 @@ const AccessKeyText = {
   accessKeyIDTitle: "AWS Access Key ID",
   secretAccessKeyTitle: "AWS Secret Access Key",
   helpText:
-    "AWS Access Key. If you need to generate a key, visit our documentation(TODO) on creating a new IAM User and generating an access key.",
+    "AWS IAM user credentials. You need administrator permissions to an AWS account to create an IAM user. Please use this documentation to create a new IAM user with minimum permissions with a few clicks. Re-using an existing user and its credentials is a security risk and may lead to severe negative business impact, such as data disclosure to third parties.",
   linkSubstring: "documentation",
-  link: "https://example.com",
+  link: "https://github.com/contentful/apps/tree/master/apps/bedrock-content-generator/aws_setup",
 };
 
 const Sections = {
-  pageHeading: "Set up AI Content Generator",
+  pageHeading: "Set up Amazon Bedrock Content Generator",
   configHeading: "Configuration",
   brandHeading: "Brand profile",
   brandDescription:
     "Add details about your brand to power accurate and on-brand content for all of your prompts.",
   addToSidebarHeading: "Add to sidebar views",
-  addToSidebarDescription: "Assign AI Content Generator to content types.",
+  addToSidebarDescription: "Assign Content Generator to content types.",
   costHeading: "Cost",
   costSubheading:
-    "Generating content uses AWS resources, depending on the amount of tokens you generate.",
+    "Using this app incurs AWS costs, depending on the amount of tokens you generate.",
   costDescription:
-    "View the current pricing model at aws.amazon.com/bedrock/pricing",
+    "The cost depends on the region and model you choose. View the current pricing at aws.amazon.com/bedrock/pricing.",
   costLinkSubstring: "aws.amazon.com/bedrock/pricing",
   costLink: "https://aws.amazon.com/bedrock/pricing/",
-  rateLimitDescription: "AWS enforces quota limitation. Learn about AWS quotas",
-  rateLimitLinkSubstring: "AWS quotas",
+  rateLimitDescription:
+    "If you plan to use this app very heavily, make sure to read the service quota documentation.",
+  rateLimitLinkSubstring: "service quota documentation",
   rateLimitLink:
     "https://docs.aws.amazon.com/bedrock/latest/userguide/quotas.html",
   disclaimerHeading: "Disclaimer",
