@@ -96,7 +96,6 @@ const GeneratedTextPanel = (props: Props) => {
   };
 
   return (
-    // TODO cancel generation
     <Tabs.Panel id={OutputTab.GENERATED_TEXT} css={styles.panel}>
       {isGenerating ? (
         <TextFieldWithButtons
