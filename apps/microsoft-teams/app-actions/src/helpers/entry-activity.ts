@@ -43,8 +43,6 @@ const actionToActionType = (action: Action): ActionType => {
       return 'creation';
     case 'published':
       return 'publication';
-    case 'saved':
-    case 'auto saved':
     case 'archived':
     case 'unarchived':
     case 'unpublished':

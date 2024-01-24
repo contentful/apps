@@ -21,12 +21,12 @@ export interface AppActionCallResponseError {
 export type AppActionCallResponse<T> = AppActionCallResponseSuccess<T> | AppActionCallResponseError;
 
 export enum AppEventKey {
-  PUBLISH = 'publish',
-  UNPUBLISHED = 'unpublish',
-  CREATED = 'create',
-  DELETED = 'delete',
-  ARCHIVE = 'archive',
-  UNARCHIVE = 'unarchive',
+  ENTRY_PUBLISH = 'ContentManagement.Entry.publish',
+  ENTRY_UNPUBLISHED = 'ContentManagement.Entry.unpublish',
+  ENTRY_CREATED = 'ContentManagement.Entry.create',
+  ENTRY_DELETED = 'ContentManagement.Entry.delete',
+  ENTRY_ARCHIVE = 'ContentManagement.Entry.archive',
+  ENTRY_UNARCHIVE = 'ContentManagement.Entry.unarchive',
 }
 
 export type Channel = {
