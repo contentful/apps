@@ -74,6 +74,7 @@ const useAI = () => {
         completeMessage += streamOutput;
       }
     } catch (error: unknown) {
+      // TODO  handle aws specific errors
       console.error(error);
       if (error instanceof AiApiError) {
         setError(error);
@@ -109,7 +110,7 @@ const useAI = () => {
     resetOutput,
     error,
     hasError,
-    stopMessageGeneration
+    stopMessageGeneration,
   };
 };
 
