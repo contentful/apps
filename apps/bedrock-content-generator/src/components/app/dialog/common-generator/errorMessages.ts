@@ -1,11 +1,7 @@
 const errorMessages = {
-  // TODO
-  rateLimitMessage:
-    "Your Chat GPT usage quota has been met. Learn about rate limits",
-  rateLimitSubstring: "Learn about rate limits",
-  rateLimitLink: "https://platform.openai.com/docs/guides/rate-limits/overview",
-  defaultGenerateError: "The stream was interrupted. Please try again.",
-  defaultOriginalError: "No results were returned. Please try again.",
+  openSettingsMessage:
+    "You can change your AWS credentials on your settings page.",
+  openSettingsSubstring: "settings page",
 };
 
 export { errorMessages };

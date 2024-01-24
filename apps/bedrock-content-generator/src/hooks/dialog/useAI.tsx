@@ -4,7 +4,7 @@ import baseSystemPrompt from "@configs/prompts/baseSystemPrompt";
 import { DialogAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import AI from "@utils/aiApi";
-import { AiApiError, AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
+import { AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
 import { useEffect, useMemo, useState } from "react";
 
 export type GenerateMessage = (
@@ -74,13 +74,9 @@ const useAI = () => {
         completeMessage += streamOutput;
       }
     } catch (error: unknown) {
-      // TODO  handle aws specific errors
-      console.error(error);
-      if (error instanceof AiApiError) {
-        setError(error);
-      } else {
-        setError(new AiApiError({}));
-      }
+      const e = error as AiApiErrorType;
+      console.error(e);
+      setError(e);
       setHasError(true);
       setIsGenerating(false);
     } finally {

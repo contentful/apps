@@ -2,7 +2,7 @@ import AppInstallationParameters from "@components/config/appInstallationParamet
 import { SidebarAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import AI from "@utils/aiApi";
-import { AiApiError, AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
+import { AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
 import { useEffect, useState } from "react";
 
 /**
@@ -24,13 +24,9 @@ const useSidebarParameters = () => {
       const ai = new AI(accessKeyId, secretAccessKey, region);
       try {
         await ai.getModels();
-      } catch (e: unknown) {
-        console.error(e);
-        if (e instanceof AiApiError) {
-          setApiError(e);
-        } else {
-          setApiError(new AiApiError({}));
-        }
+      } catch (error: unknown) {
+        const e = error as AiApiErrorType;
+        setApiError(e);
       }
     };
 
