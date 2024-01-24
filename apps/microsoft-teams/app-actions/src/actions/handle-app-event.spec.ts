@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { AppInstallationProps } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { EntryActivity } from '../types';
+import { AppActionCallResponseSuccess, EntryActivity, EntryActivityMessage } from '../types';
 import { makeMockAppActionCallContext, mockAppInstallation, mockEntry } from '../../test/mocks';
 import { handler } from './handle-app-event';
 import helpers from '../helpers';
@@ -24,20 +24,20 @@ describe('handle-app-event.handler', () => {
   });
 
   it('returns the ok result', async () => {
-    const result = await handler(
+    const result = (await handler(
       {
         payload: JSON.stringify(mockEntry),
         topic: 'ContentManagement.Entry.publish',
         eventDatetime: '2024-01-18T21:43:54.267Z',
       },
       context
-    );
+    )) as AppActionCallResponseSuccess<EntryActivityMessage[]>;
 
     expect(result).to.have.property('ok', true);
-    expect(result).to.have.deep.property('data', {
+    expect(result.data).to.deep.include({
       channel: {
-        channelId: 'TODO-channel-id',
-        teamId: 'TODO-team-id',
+        channelId: 'channel-id',
+        teamId: 'team-id',
       },
       entryActivity: mockEntryActivity,
     });

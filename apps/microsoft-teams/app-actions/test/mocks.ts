@@ -99,6 +99,26 @@ export const mockEntry = {
 
 export const mockNotification = {
   channel: {
+    id: 'channel-id',
+    name: 'Corporate Marketing',
+    teamId: 'team-id',
+    teamName: 'Marketing Department',
+    tenantId: '9876-5432',
+  },
+  contentTypeId: 'blogPost',
+  isEnabled: true,
+  selectedEvents: {
+    'ContentManagement.Entry.publish': true,
+    'ContentManagement.Entry.unpublish': true,
+    'ContentManagement.Entry.create': true,
+    'ContentManagement.Entry.delete': true,
+    'ContentManagement.Entry.archive': true,
+    'ContentManagement.Entry.unarchive': true,
+  },
+};
+
+export const mockNotificationUnsubscribed = {
+  channel: {
     id: 'abc-123',
     name: 'Corporate Marketing',
     teamId: '789-def',
@@ -108,18 +128,18 @@ export const mockNotification = {
   contentTypeId: 'blogPost',
   isEnabled: true,
   selectedEvents: {
-    publish: true,
-    unpublish: false,
-    create: false,
-    delete: false,
-    archive: false,
-    unarchive: false,
+    'ContentManagement.Entry.publish': false,
+    'ContentManagement.Entry.unpublish': false,
+    'ContentManagement.Entry.create': false,
+    'ContentManagement.Entry.delete': false,
+    'ContentManagement.Entry.archive': false,
+    'ContentManagement.Entry.unarchive': false,
   },
 };
 
 export const mockAppInstallationParameters: AppInstallationParameters = {
   tenantId: 'tenant-id',
-  notifications: [mockNotification],
+  notifications: [mockNotification, mockNotificationUnsubscribed],
 };
 
 export const mockAppInstallation: AppInstallationProps = {
@@ -140,7 +160,7 @@ export const mockAppInstallation: AppInstallationProps = {
 
 export const mockEntryEvent: EntryEvent = {
   entry: mockEntry,
-  topic: 'ContentManagement.Entry.save',
+  topic: 'ContentManagement.Entry.archive',
   eventDatetime: '2024-01-22T16:31:13Z',
 };
 
