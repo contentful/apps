@@ -1,4 +1,11 @@
-import { AppEventKey } from '@constants/configCopy';
+export enum AppEventKey {
+  ENTRY_PUBLISH = 'ContentManagement.Entry.publish',
+  ENTRY_UNPUBLISHED = 'ContentManagement.Entry.unpublish',
+  ENTRY_CREATED = 'ContentManagement.Entry.create',
+  ENTRY_DELETED = 'ContentManagement.Entry.delete',
+  ENTRY_ARCHIVE = 'ContentManagement.Entry.archive',
+  ENTRY_UNARCHIVE = 'ContentManagement.Entry.unarchive',
+}
 
 export interface AppInstallationParameters {
   tenantId: string;

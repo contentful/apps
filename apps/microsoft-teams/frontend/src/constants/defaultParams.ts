@@ -1,5 +1,4 @@
-import { AppInstallationParameters, SelectedEvents } from '@customTypes/configPage';
-import { AppEventKey } from './configCopy';
+import { AppEventKey, AppInstallationParameters, SelectedEvents } from '@customTypes/configPage';
 
 const initialParameters: AppInstallationParameters = {
   tenantId: '',

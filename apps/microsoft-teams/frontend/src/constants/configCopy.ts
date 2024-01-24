@@ -1,3 +1,5 @@
+import { AppEventKey } from '@customTypes/configPage';
+
 const headerSection = {
   title: 'Set up the Microsoft Teams App',
   description: 'Get notifications about Contentful content updates directly in Microsoft Teams.',
@@ -61,38 +63,29 @@ const channelSelection = {
   },
 };
 
-export enum AppEventKey {
-  PUBLISH = 'publish',
-  UNPUBLISHED = 'unpublish',
-  CREATED = 'create',
-  DELETED = 'delete',
-  ARCHIVE = 'archive',
-  UNARCHIVE = 'unarchive',
-}
-
 const AppEvents = {
-  [AppEventKey.PUBLISH]: {
-    id: AppEventKey.PUBLISH,
+  [AppEventKey.ENTRY_PUBLISH]: {
+    id: AppEventKey.ENTRY_PUBLISH,
     text: 'Publish',
   },
-  [AppEventKey.UNPUBLISHED]: {
-    id: AppEventKey.UNPUBLISHED,
+  [AppEventKey.ENTRY_UNPUBLISHED]: {
+    id: AppEventKey.ENTRY_UNPUBLISHED,
     text: 'Unpublish',
   },
-  [AppEventKey.CREATED]: {
-    id: AppEventKey.CREATED,
+  [AppEventKey.ENTRY_CREATED]: {
+    id: AppEventKey.ENTRY_CREATED,
     text: 'Create',
   },
-  [AppEventKey.DELETED]: {
-    id: AppEventKey.DELETED,
+  [AppEventKey.ENTRY_DELETED]: {
+    id: AppEventKey.ENTRY_DELETED,
     text: 'Delete',
   },
-  [AppEventKey.ARCHIVE]: {
-    id: AppEventKey.ARCHIVE,
+  [AppEventKey.ENTRY_ARCHIVE]: {
+    id: AppEventKey.ENTRY_ARCHIVE,
     text: 'Archive',
   },
-  [AppEventKey.UNARCHIVE]: {
-    id: AppEventKey.UNARCHIVE,
+  [AppEventKey.ENTRY_UNARCHIVE]: {
+    id: AppEventKey.ENTRY_UNARCHIVE,
     text: 'Unarchive',
   },
 };

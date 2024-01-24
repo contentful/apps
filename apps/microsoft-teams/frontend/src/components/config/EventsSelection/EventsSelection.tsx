@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Box, Checkbox, FormControl } from '@contentful/f36-components';
-import { Notification } from '@customTypes/configPage';
-import { AppEventKey, eventsSelection } from '@constants/configCopy';
+import { AppEventKey, Notification } from '@customTypes/configPage';
+import { eventsSelection } from '@constants/configCopy';
 
 interface Props {
   notification: Notification;
