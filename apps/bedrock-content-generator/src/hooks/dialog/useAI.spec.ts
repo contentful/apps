@@ -12,11 +12,9 @@ import useAI from "./useAI";
 const invocationParameters = generateRandomInvocationParameters();
 const mockSdk = new MockSdk({ invocation: invocationParameters });
 const sdk = mockSdk.sdk;
-const cma = sdk.cma;
 
 vi.mock("@contentful/react-apps-toolkit", () => ({
   useSDK: () => sdk,
-  useCMA: () => cma,
 }));
 
 vi.mock("@utils/aiApi", () => AIMock);

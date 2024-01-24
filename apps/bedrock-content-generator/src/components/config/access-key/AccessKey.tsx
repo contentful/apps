@@ -15,7 +15,6 @@ import { ParameterAction, ParameterReducer } from "../parameterReducer";
 import { styles } from "./AccessKey.styles";
 
 interface Props {
-  apiKey?: string;
   accessKeyID: string;
   secretAccessKey: string;
   isInvalid: boolean;
