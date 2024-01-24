@@ -1,3 +1,4 @@
+import { errorMessages } from "@components/app/dialog/common-generator/errorMessages";
 import { GeneratorAction } from "@components/app/dialog/common-generator/generatorReducer";
 import TextFieldWithButtons from "@components/common/text-field-with-buttons/TextFieldWIthButtons";
 import { DialogText } from "@configs/features/featureTypes";
@@ -7,8 +8,6 @@ import { css } from "@emotion/react";
 import { GeneratorContext } from "@providers/generatorProvider";
 import { useContext } from "react";
 import { OutputTab } from "../../Output";
-// import { SegmentEvents } from '@configs/segment/segmentEvent';
-import { errorMessages } from "@components/app/dialog/common-generator/errorMessages";
 
 const styles = {
   panel: css({

@@ -39,7 +39,6 @@ describe("useAI", () => {
     await waitFor(() => expect(result.current.output).toBeTruthy());
   });
 
-  // TODO implement
   it("should stop generating when triggered and reset output", async () => {
     const { result } = renderHook(() => useAI());
     result.current.generateMessage(titlePrompt("this is a test"), "en-US");
