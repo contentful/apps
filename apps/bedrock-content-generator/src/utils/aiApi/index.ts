@@ -3,6 +3,7 @@ import {
   ListFoundationModelsCommand,
 } from "@aws-sdk/client-bedrock";
 import {
+  AccessDeniedException,
   BedrockRuntimeClient,
   InvokeModelCommand,
   InvokeModelWithResponseStreamCommand,
@@ -86,17 +87,13 @@ class AI {
     try {
       console.log(model);
       await this.bedrockRuntimeClient.send(
-        new InvokeModelCommand(
-          model.invokeCommand("", "Human: \n Assistant: ", 1),
-        ),
+        new InvokeModelCommand(model.invokeCommand("", "", 1)),
       );
-    } catch (e: any) {
-      if (!e.hasOwnProperty("message") || !e.hasOwnProperty("name")) {
-        return Error(e);
+    } catch (e: unknown) {
+      if (!(e instanceof Error)) {
+        return Error("An unexpected error has occurred");
       }
-      console.log(e.message);
-      if (e.name === "AccessDeniedException") {
-        console.log(e.message);
+      if (e instanceof AccessDeniedException) {
         if (
           e.message.includes(
             "is not authorized to perform: bedrock:InvokeModel",
@@ -110,7 +107,7 @@ class AI {
         )
           return "NOT_IN_ACCOUNT";
       }
-      return e as Error;
+      return e;
     }
     return "AVAILABLE";
   };

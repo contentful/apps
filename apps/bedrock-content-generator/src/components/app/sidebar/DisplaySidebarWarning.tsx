@@ -21,7 +21,7 @@ const DisplaySidebarWarning = (props: Props) => {
   const { hasBrandProfile, apiError } = props;
 
   if (apiError) {
-    const { status, message } = apiError;
+    const { message } = apiError;
 
     // TODO fine-grained errors
     // if (status === 401 || status === 404) {
