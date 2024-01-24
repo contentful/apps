@@ -10,12 +10,12 @@ export const TOPIC_ACTION_MAP = {
 } as const;
 
 export enum AppEventKey {
-  PUBLISH = 'ContentManagement.Entry.publish',
-  UNPUBLISHED = 'ContentManagement.Entry.unpublish',
-  CREATED = 'ContentManagement.Entry.create',
-  DELETED = 'ContentManagement.Entry.delete',
-  ARCHIVE = 'ContentManagement.Entry.archive',
-  UNARCHIVE = 'ContentManagement.Entry.unarchive',
+  ENTRY_PUBLISH = 'ContentManagement.Entry.publish',
+  ENTRY_UNPUBLISHED = 'ContentManagement.Entry.unpublish',
+  ENTRY_CREATED = 'ContentManagement.Entry.create',
+  ENTRY_DELETED = 'ContentManagement.Entry.delete',
+  ENTRY_ARCHIVE = 'ContentManagement.Entry.archive',
+  ENTRY_UNARCHIVE = 'ContentManagement.Entry.unarchive',
 }
 
 export interface AppInstallationParameters {

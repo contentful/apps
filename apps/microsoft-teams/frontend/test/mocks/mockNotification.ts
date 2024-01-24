@@ -1,4 +1,6 @@
-const mockNotification = {
+import { Notification } from '@customTypes/configPage';
+
+const mockNotification: Notification = {
   channel: {
     id: 'abc-123',
     name: 'Corporate Marketing',
@@ -9,12 +11,12 @@ const mockNotification = {
   contentTypeId: 'blogPost',
   isEnabled: true,
   selectedEvents: {
-    publish: true,
-    unpublish: false,
-    create: false,
-    delete: false,
-    archive: false,
-    unarchive: false,
+    'ContentManagement.Entry.publish': true,
+    'ContentManagement.Entry.unpublish': true,
+    'ContentManagement.Entry.create': true,
+    'ContentManagement.Entry.delete': true,
+    'ContentManagement.Entry.archive': true,
+    'ContentManagement.Entry.unarchive': true,
   },
 };
 
