@@ -1,3 +1,4 @@
+import HyperLink from "@components/common/HyperLink/HyperLink";
 import { BedrockModel, featuredModels } from "@configs/aws/featuredModels";
 import {
   Flex,
@@ -7,6 +8,7 @@ import {
   Text,
   TextLink,
 } from "@contentful/f36-components";
+import { ExternalLinkIcon } from "@contentful/f36-icons";
 import AI from "@utils/aiApi";
 import { ChangeEvent, Dispatch, useEffect, useMemo, useState } from "react";
 import { ConfigErrors, ModelText } from "../configText";
@@ -176,7 +178,16 @@ const Model = ({
         {modelList}
       </Select>
 
-      <FormControl.HelpText>{ModelText.helpText}</FormControl.HelpText>
+      <FormControl.HelpText>
+        <HyperLink
+          body={ModelText.helpText}
+          substring={ModelText.linkSubstring}
+          hyperLinkHref={ModelText.link}
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
+        />
+      </FormControl.HelpText>
+      {/* <FormControl.HelpText>{ModelText.helpText}</FormControl.HelpText> */}
 
       {isFetchingModels && (
         <Flex marginTop="spacingXs">
