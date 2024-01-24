@@ -96,7 +96,7 @@ const eventsSelection = {
 };
 
 const editModeFooter = {
-  test: 'Test',
+  test: 'Send test message',
   cancel: 'Cancel',
   save: 'Save',
   confirmCancelDescription: 'If you cancel, your changes will not be saved.',
