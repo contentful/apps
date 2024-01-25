@@ -42,29 +42,25 @@ export const handler = async (
     );
 
     if (!response.ok) {
-      throw new Error(response.errors?.[0]?.message ?? 'Failed to send test message');
+      throw new Error(response.error.message ?? 'Failed to send test message');
     }
   } catch (err) {
     // TODO: Refactor to utilize an error handler
     if (!(err instanceof Error)) {
       return {
         ok: false,
-        errors: [
-          {
-            message: 'Unknown error occurred',
-            type: 'UnknownError',
-          },
-        ],
+        error: {
+          message: 'Unknown error occurred',
+          type: 'UnknownError',
+        },
       };
     }
     return {
       ok: false,
-      errors: [
-        {
-          message: err.message,
-          type: err.constructor.name,
-        },
-      ],
+      error: {
+        message: err.message,
+        type: err.constructor.name,
+      },
     };
   }
 

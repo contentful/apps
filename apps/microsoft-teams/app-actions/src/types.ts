@@ -15,7 +15,7 @@ export interface AppActionCallResponseSuccess<TResult> {
 
 export interface AppActionCallResponseError {
   ok: false;
-  errors: ActionError[];
+  error: ActionError;
 }
 
 export type AppActionCallResponse<T> = AppActionCallResponseSuccess<T> | AppActionCallResponseError;
@@ -91,24 +91,26 @@ export interface EntryActivityMessage {
   entryActivity: EntryActivity;
 }
 
-export interface MessageResponseSuccess {
-  ok: true;
-  data: {
-    messageId: string;
-  };
+interface MessageResponse {
+  messageResponseId: string;
 }
 
-export interface MessageResponseError {
+export interface SendMessageSuccess {
+  ok: true;
+  data: MessageResponse;
+}
+
+export interface SendMessageError {
   ok: false;
+  // TODO: this might need to be updated if we return an error object from MS teams bot service
   error: string;
 }
 
-export type MessageResponse = MessageResponseSuccess | MessageResponseError;
+export type SendMessageResult = SendMessageSuccess | SendMessageError;
 
-export interface MessageResult {
-  notificationId: string;
+export interface SendEntryActivityMessageResult {
   entryActivityMessage: EntryActivityMessage;
-  messageResponse: MessageResponse;
+  sendMessageResult: SendMessageResult;
 }
 
 export interface EntryEvent {

@@ -25,6 +25,14 @@ export const makeMockPlainClient = (responses: any[], stub: sinon.SinonStub): Pl
   return createClient({ apiAdapter }, { type: 'plain' });
 };
 
+export const makeMockFetchResponse = (
+  body: object,
+  headers: Record<string, string> = {}
+): Response => {
+  const responseBody = JSON.stringify(body);
+  return new Response(responseBody, { headers });
+};
+
 export const makeMockAppActionCallContext = (
   responses: any[],
   cmaStub = sinon.stub()
