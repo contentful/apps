@@ -23,22 +23,18 @@ export const handler = async (
     if (!(err instanceof Error)) {
       return {
         ok: false,
-        errors: [
-          {
-            message: 'Unknown error occurred',
-            type: 'UnknownError',
-          },
-        ],
+        error: {
+          message: 'Unknown error occurred',
+          type: 'UnknownError',
+        },
       };
     }
     return {
       ok: false,
-      errors: [
-        {
-          message: err.message,
-          type: err.constructor.name,
-        },
-      ],
+      error: {
+        message: err.message,
+        type: err.constructor.name,
+      },
     };
   }
 

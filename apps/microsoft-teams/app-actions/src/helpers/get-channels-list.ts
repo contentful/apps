@@ -17,7 +17,7 @@ export const getChannelsList = async (
   const response = (await res.json()) as AppActionCallResponse<TeamInstallation[]>;
 
   if (!response.ok) {
-    throw new Error(response.errors?.[0]?.message ?? 'Failed to get channels');
+    throw new Error(response.error.message ?? 'Failed to get channels');
   }
 
   const channelsList = transformInstallationsToChannelsList(response.data, tenantId);
