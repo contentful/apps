@@ -1,9 +1,9 @@
-import { Dispatch } from "react";
 import { Box, Flex, Form, Subheading } from "@contentful/f36-components";
-import Model from "../model/Model";
-import { Sections } from "../configText";
-import { ParameterReducer } from "../parameterReducer";
+import { Dispatch } from "react";
 import AccessKey from "../access-key/AccessKey";
+import { Sections } from "../configText";
+import Model from "../model/Model";
+import { ParameterReducer } from "../parameterReducer";
 import Region from "../region/Region";
 
 interface Props {
@@ -35,6 +35,7 @@ const ConfigSection = ({
           <AccessKey
             accessKeyID={accessKeyID}
             secretAccessKey={secretAccessKey}
+            region={region}
             isInvalid={!isAccessKeyValid}
             dispatch={dispatch}
           />

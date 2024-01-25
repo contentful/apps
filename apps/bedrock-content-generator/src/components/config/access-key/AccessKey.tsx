@@ -17,6 +17,7 @@ import { styles } from "./AccessKey.styles";
 interface Props {
   accessKeyID: string;
   secretAccessKey: string;
+  region: string;
   isInvalid: boolean;
   dispatch: Dispatch<ParameterReducer>;
 }
@@ -24,6 +25,7 @@ interface Props {
 const AccessKey = ({
   accessKeyID,
   secretAccessKey,
+  region,
   isInvalid,
   dispatch,
 }: Props) => {
@@ -40,7 +42,7 @@ const AccessKey = ({
 
   const validateCredentials = async () => {
     try {
-      const ai = new AI(localAccessKeyID, localSecretAccessKey, "us-east-1");
+      const ai = new AI(localAccessKeyID, localSecretAccessKey, region);
       await ai.getModels();
       return true;
     } catch (e) {
