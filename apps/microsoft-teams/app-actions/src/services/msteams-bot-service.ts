@@ -4,7 +4,7 @@ export class MsTeamsBotService {
   constructor(public readonly botServiceUrl: string, public readonly apiKey: string) {}
 
   async sendEntryActivityMessage(
-    entryActivitytMessage: EntryActivityMessage,
+    entryActivityMessage: EntryActivityMessage,
     tenantId: string
   ): Promise<SendMessageResult> {
     const res = await fetch(
@@ -15,7 +15,7 @@ export class MsTeamsBotService {
           'Content-Type': 'application/json',
           'x-api-key': this.apiKey,
         },
-        body: JSON.stringify(entryActivitytMessage),
+        body: JSON.stringify(entryActivityMessage),
       }
     );
     const responseBody = await res.json();
@@ -27,6 +27,6 @@ export class MsTeamsBotService {
     if (typeof value !== 'object' || !value)
       throw new TypeError('invalid type returned from MsTeamsBotService');
     if (!('ok' in value))
-      throw new TypeError('malformed SendMessageResult returrnd from MsTeamsBotService API');
+      throw new TypeError('malformed SendMessageResult returned from MsTeamsBotService API');
   }
 }
