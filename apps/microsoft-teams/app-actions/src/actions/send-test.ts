@@ -1,7 +1,6 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { AppActionCallResponse, MessageResponse, SendMessageResult } from '../types';
+import { AppActionCallResponse, MessageResponse } from '../types';
 import { fetchTenantId } from '../utils';
-import helpers from '../helpers';
 import { config } from '../config';
 import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 
@@ -21,9 +20,6 @@ export const handler = withAsyncAppActionErrorHandling(
       cma,
       appActionCallContext: { appInstallationId },
     } = context;
-
-    let response: SendMessageResult;
-
     const { name: contentTypeName } = await cma.contentType.get({ contentTypeId });
     const tenantId = await fetchTenantId(cma, appInstallationId);
 
@@ -35,20 +31,16 @@ export const handler = withAsyncAppActionErrorHandling(
       contentTypeName,
     };
 
-    response = await helpers.sendTestMessage(
-      config.botServiceUrl,
-      config.apiKey,
-      tenantId,
-      testMessagePayload
+    const msTeamsBotServiceResponse = await config.msTeamsBotService.sendTestMessage(
+      testMessagePayload,
+      tenantId
     );
 
-    if (!response.ok) {
-      throw new Error(response.error ?? 'Failed to send test message');
+    //
+    if (!msTeamsBotServiceResponse.ok) {
+      throw new Error(msTeamsBotServiceResponse.error ?? 'Failed to send test message');
     }
 
-    return {
-      ok: true,
-      data: response.data ?? '',
-    };
+    return msTeamsBotServiceResponse;
   }
 );

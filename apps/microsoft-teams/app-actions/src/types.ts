@@ -91,41 +91,36 @@ export interface EntryActivityMessage {
   entryActivity: EntryActivity;
 }
 
+export interface TestMessage {
+  channel: {
+    teamId: string;
+    channelId: string;
+  };
+  contentTypeName: string;
+}
+
 export interface MessageResponse {
   messageResponseId: string;
 }
 
-export interface SendMessageSuccess {
-  ok: true;
-  data: MessageResponse;
-}
-
-export interface SendMessageError {
-  ok: false;
-  // TODO: this might need to be updated if we return an error object from MS teams bot service
-  error: string;
-}
-
-export type SendMessageResult = SendMessageSuccess | SendMessageError;
-
-export interface MsTeamsBotServiceCallSuccess<T> {
+export interface MsTeamsBotServiceSuccessResponse<T> {
   ok: true;
   data: T;
 }
 
-export interface MsTeamsBotServiceCallError {
+export interface MsTeamsBotServiceErrorResponse {
   ok: false;
   // TODO: this might need to be updated if we return an error object from MS teams bot service
   error: string;
 }
 
-export type MsTeamsBotServiceCallResult<T> =
-  | MsTeamsBotServiceCallSuccess<T>
-  | MsTeamsBotServiceCallError;
+export type MsTeamsBotServiceResponse<T> =
+  | MsTeamsBotServiceSuccessResponse<T>
+  | MsTeamsBotServiceErrorResponse;
 
 export interface SendEntryActivityMessageResult {
   entryActivityMessage: EntryActivityMessage;
-  sendMessageResult: MsTeamsBotServiceCallResult<MessageResponse>;
+  sendMessageResult: MsTeamsBotServiceResponse<MessageResponse>;
 }
 
 export interface EntryEvent {

@@ -3,7 +3,7 @@ import chai, { expect } from 'chai';
 import sinonChai from 'sinon-chai';
 import { MsTeamsBotService } from './msteams-bot-service';
 import { makeMockFetchResponse, mockTeamInstallation } from '../../test/mocks';
-import { EntryActivityMessage } from '../types';
+import { EntryActivityMessage, TestMessage } from '../types';
 
 chai.use(sinonChai);
 
@@ -11,7 +11,6 @@ describe('MsTeamsBotService', () => {
   const botServiceUrl = 'https://example.com';
   const apiKey = 'apiKey';
   const tenantId = 'tenant-id';
-  const entryActivityMessage = { channel: {} } as EntryActivityMessage;
   const msTeamsBotService = new MsTeamsBotService(botServiceUrl, apiKey);
   const messageResponseId = 'messageResponseId';
   let stubbedFetch: sinon.SinonStub;
@@ -27,6 +26,8 @@ describe('MsTeamsBotService', () => {
   });
 
   describe('sendEntryActivityMessage', () => {
+    const entryActivityMessage = { channel: {} } as EntryActivityMessage;
+
     it('returns the result object from the service', async () => {
       const result = await msTeamsBotService.sendEntryActivityMessage(
         entryActivityMessage,
@@ -39,6 +40,30 @@ describe('MsTeamsBotService', () => {
       await msTeamsBotService.sendEntryActivityMessage(entryActivityMessage, tenantId);
       expect(stubbedFetch).to.have.been.calledWith(
         'https://example.com/api/tenant/tenant-id/entry_activity_messages',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': 'apiKey',
+          },
+          body: '{"channel":{}}',
+        }
+      );
+    });
+  });
+
+  describe('sendTestMessage', () => {
+    const testMessage = { channel: {} } as TestMessage;
+
+    it('returns the result object from the service', async () => {
+      const result = await msTeamsBotService.sendTestMessage(testMessage, tenantId);
+      expect(result).to.have.property('ok', true);
+    });
+
+    it('calls fetch with the appropriate values', async () => {
+      await msTeamsBotService.sendTestMessage(testMessage, tenantId);
+      expect(stubbedFetch).to.have.been.calledWith(
+        'https://example.com/api/tenant/tenant-id/test_messages',
         {
           method: 'POST',
           headers: {
