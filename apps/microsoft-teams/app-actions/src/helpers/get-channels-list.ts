@@ -1,23 +1,11 @@
+import { config } from '../config';
 import { AppActionCallResponse, Channel, TeamInstallation } from '../types';
 
-export const getChannelsList = async (
-  botServiceUrl: string,
-  apiKey: string,
-  tenantId: string
-): Promise<Channel[]> => {
-  const res = await fetch(`${botServiceUrl}/api/tenants/${tenantId}/team_installations`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-    },
-  });
-
-  // TODO: Parse the response instead of the assertion here
-  const response = (await res.json()) as AppActionCallResponse<TeamInstallation[]>;
+export const getChannelsList = async (tenantId: string): Promise<Channel[]> => {
+  const response = await config.msTeamsBotService.getTeamInstallations(tenantId);
 
   if (!response.ok) {
-    throw new Error(response.error.message ?? 'Failed to get channels');
+    throw new Error(response.error ?? 'Failed to get channels');
   }
 
   const channelsList = transformInstallationsToChannelsList(response.data, tenantId);
