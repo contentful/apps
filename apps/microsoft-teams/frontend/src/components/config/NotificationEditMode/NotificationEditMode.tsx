@@ -37,6 +37,7 @@ const NotificationEditMode = (props: Props) => {
   } = props;
 
   const [editedNotification, setEditedNotification] = useState<Notification>(notification);
+  const [isTestSending, setIsTestSending] = useState<boolean>(false);
 
   const sdk = useSDK<ConfigAppSDK>();
 
@@ -50,6 +51,7 @@ const NotificationEditMode = (props: Props) => {
 
   const handleTest = async (notification: Notification) => {
     try {
+      setIsTestSending(true);
       const { name: spaceName } = await sdk.cma.space.get({ spaceId: sdk.ids.space });
       const parameters = {
         channelId: notification.channel.id,
@@ -81,6 +83,8 @@ const NotificationEditMode = (props: Props) => {
         sdk.notifier.error(error.message || 'Failed to send test message');
       }
       console.error(error);
+    } finally {
+      setIsTestSending(false);
     }
   };
 
@@ -137,6 +141,7 @@ const NotificationEditMode = (props: Props) => {
         handleCancel={handleCancel}
         handleSave={handleSave}
         isSaveDisabled={!isNotificationReadyToSave(editedNotification, notification)}
+        isTestSending={isTestSending}
       />
     </Box>
   );
