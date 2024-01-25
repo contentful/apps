@@ -36,7 +36,8 @@ export const handler = withAsyncAppActionErrorHandling(
       tenantId
     );
 
-    //
+    // if we align the error types from the bot service and our app action error we could just return
+    // the response directly instead of doing this slight redirection
     if (!msTeamsBotServiceResponse.ok) {
       throw new Error(msTeamsBotServiceResponse.error ?? 'Failed to send test message');
     }
