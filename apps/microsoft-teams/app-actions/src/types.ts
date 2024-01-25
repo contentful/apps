@@ -91,7 +91,7 @@ export interface EntryActivityMessage {
   entryActivity: EntryActivity;
 }
 
-interface MessageResponse {
+export interface MessageResponse {
   messageResponseId: string;
 }
 

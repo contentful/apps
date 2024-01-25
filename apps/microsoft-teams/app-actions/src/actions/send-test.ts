@@ -1,5 +1,5 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { AppActionCallResponse } from '../types';
+import { AppActionCallResponse, MessageResponse, SendMessageResult } from '../types';
 import { fetchTenantId } from '../utils';
 import helpers from '../helpers';
 import { config } from '../config';
@@ -9,41 +9,41 @@ interface AppActionCallParameters {
   channelId: string;
   teamId: string;
   contentTypeId: string;
-  spaceName: string;
 }
 
 export const handler = withAsyncAppActionErrorHandling(
   async (
     payload: AppActionCallParameters,
     context: AppActionCallContext
-  ): Promise<AppActionCallResponse<string>> => {
-    const { channelId, teamId, contentTypeId, spaceName } = payload;
+  ): Promise<AppActionCallResponse<MessageResponse>> => {
+    const { channelId, teamId, contentTypeId } = payload;
     const {
       cma,
       appActionCallContext: { appInstallationId },
     } = context;
 
-    let response: AppActionCallResponse<string>;
+    let response: SendMessageResult;
 
     const { name: contentTypeName } = await cma.contentType.get({ contentTypeId });
     const tenantId = await fetchTenantId(cma, appInstallationId);
 
-    const testNotificationPayload = {
-      teamId,
-      channelId,
-      tenantId,
-      spaceName,
+    const testMessagePayload = {
+      channel: {
+        teamId,
+        channelId,
+      },
       contentTypeName,
     };
 
-    response = await helpers.sendTestNotification(
+    response = await helpers.sendTestMessage(
       config.botServiceUrl,
       config.apiKey,
-      testNotificationPayload
+      tenantId,
+      testMessagePayload
     );
 
     if (!response.ok) {
-      throw new Error(response.error.message ?? 'Failed to send test message');
+      throw new Error(response.error ?? 'Failed to send test message');
     }
 
     return {

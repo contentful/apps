@@ -52,17 +52,15 @@ const NotificationEditMode = (props: Props) => {
   const handleTest = async (notification: Notification) => {
     try {
       setIsTestSending(true);
-      const { name: spaceName } = await sdk.cma.space.get({ spaceId: sdk.ids.space });
       const parameters = {
         channelId: notification.channel.id,
         teamId: notification.channel.teamId,
         contentTypeId: notification.contentTypeId,
-        spaceName,
       };
 
       const { response } = await sdk.cma.appActionCall.createWithResponse(
         {
-          appActionId: 'msteamsSendTestNotification',
+          appActionId: 'msteamsSendTestMessage',
           environmentId: sdk.ids.environment,
           spaceId: sdk.ids.space,
           appDefinitionId: sdk.ids.app!,
