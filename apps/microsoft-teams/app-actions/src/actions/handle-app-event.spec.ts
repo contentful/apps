@@ -7,7 +7,6 @@ import {
   AppActionCallResponseError,
   AppActionCallResponseSuccess,
   EntryActivity,
-  EntryActivityMessage,
   SendEntryActivityMessageResult,
   SendMessageResult,
 } from '../types';

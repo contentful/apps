@@ -3,43 +3,26 @@ import { AppActionCallResponse, Channel } from '../types';
 import { fetchTenantId } from '../utils';
 import helpers from '../helpers';
 import { config } from '../config';
+import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 
-export const handler = async (
-  _payload: {},
-  context: AppActionCallContext
-): Promise<AppActionCallResponse<Channel[]>> => {
-  const {
-    cma,
-    appActionCallContext: { appInstallationId },
-  } = context;
+export const handler = withAsyncAppActionErrorHandling(
+  async (
+    _payload: {},
+    context: AppActionCallContext
+  ): Promise<AppActionCallResponse<Channel[]>> => {
+    const {
+      cma,
+      appActionCallContext: { appInstallationId },
+    } = context;
 
-  let channels: Channel[];
+    let channels: Channel[];
 
-  try {
     const tenantId = await fetchTenantId(cma, appInstallationId);
     channels = await helpers.getChannelsList(config.botServiceUrl, config.apiKey, tenantId);
-  } catch (err) {
-    // TODO: Refactor to utilize an error handler
-    if (!(err instanceof Error)) {
-      return {
-        ok: false,
-        error: {
-          message: 'Unknown error occurred',
-          type: 'UnknownError',
-        },
-      };
-    }
+
     return {
-      ok: false,
-      error: {
-        message: err.message,
-        type: err.constructor.name,
-      },
+      ok: true,
+      data: channels,
     };
   }
-
-  return {
-    ok: true,
-    data: channels,
-  };
-};
+);

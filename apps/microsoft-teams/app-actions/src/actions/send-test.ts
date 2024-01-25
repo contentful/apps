@@ -3,6 +3,7 @@ import { AppActionCallResponse } from '../types';
 import { fetchTenantId } from '../utils';
 import helpers from '../helpers';
 import { config } from '../config';
+import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 
 interface AppActionCallParameters {
   channelId: string;
@@ -11,19 +12,19 @@ interface AppActionCallParameters {
   spaceName: string;
 }
 
-export const handler = async (
-  payload: AppActionCallParameters,
-  context: AppActionCallContext
-): Promise<AppActionCallResponse<string>> => {
-  const { channelId, teamId, contentTypeId, spaceName } = payload;
-  const {
-    cma,
-    appActionCallContext: { appInstallationId },
-  } = context;
+export const handler = withAsyncAppActionErrorHandling(
+  async (
+    payload: AppActionCallParameters,
+    context: AppActionCallContext
+  ): Promise<AppActionCallResponse<string>> => {
+    const { channelId, teamId, contentTypeId, spaceName } = payload;
+    const {
+      cma,
+      appActionCallContext: { appInstallationId },
+    } = context;
 
-  let response: AppActionCallResponse<string>;
+    let response: AppActionCallResponse<string>;
 
-  try {
     const { name: contentTypeName } = await cma.contentType.get({ contentTypeId });
     const tenantId = await fetchTenantId(cma, appInstallationId);
 
@@ -44,28 +45,10 @@ export const handler = async (
     if (!response.ok) {
       throw new Error(response.error.message ?? 'Failed to send test message');
     }
-  } catch (err) {
-    // TODO: Refactor to utilize an error handler
-    if (!(err instanceof Error)) {
-      return {
-        ok: false,
-        error: {
-          message: 'Unknown error occurred',
-          type: 'UnknownError',
-        },
-      };
-    }
+
     return {
-      ok: false,
-      error: {
-        message: err.message,
-        type: err.constructor.name,
-      },
+      ok: true,
+      data: response.data ?? '',
     };
   }
-
-  return {
-    ok: true,
-    data: response.data ?? '',
-  };
-};
+);

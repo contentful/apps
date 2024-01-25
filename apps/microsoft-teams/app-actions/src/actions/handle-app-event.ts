@@ -9,6 +9,7 @@ import { EntryProps } from 'contentful-management/types';
 import helpers from '../helpers';
 import { parametersFromAppInstallation } from '../helpers/app-installation';
 import { config } from '../config';
+import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 
 interface AppActionCallParameters {
   payload: string;
@@ -16,11 +17,11 @@ interface AppActionCallParameters {
   eventDatetime: string;
 }
 
-export const handler = async (
-  parameters: AppActionCallParameters,
-  context: AppActionCallContext
-): Promise<AppActionCallResponse<SendEntryActivityMessageResult[]>> => {
-  try {
+export const handler = withAsyncAppActionErrorHandling(
+  async (
+    parameters: AppActionCallParameters,
+    context: AppActionCallContext
+  ): Promise<AppActionCallResponse<SendEntryActivityMessageResult[]>> => {
     const {
       cma,
       appActionCallContext: { appInstallationId },
@@ -73,14 +74,5 @@ export const handler = async (
       ok: true,
       data: sendEntryActiviyMessageResult,
     };
-  } catch (e) {
-    const error = e as Error;
-    return {
-      ok: false,
-      error: {
-        type: error.constructor.name,
-        message: error.message,
-      },
-    };
   }
-};
+);
