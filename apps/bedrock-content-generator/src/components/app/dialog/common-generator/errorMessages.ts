@@ -1,7 +1,7 @@
 const errorMessages = {
   openSettingsMessage:
-    "You can change your AWS credentials on your settings page.",
-  openSettingsSubstring: "settings page",
+    "If this error persists, please update your app configuration.",
+  openSettingsSubstring: "app configuration",
 };
 
 export { errorMessages };
