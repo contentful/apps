@@ -2,7 +2,6 @@ import { useEffect, useCallback, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { AppInstallationParameters, TeamsChannel } from '@customTypes/configPage';
-import { mockChannels } from '@test/mocks/mockChannels';
 
 const useGetTeamsChannels = () => {
   const [channels, setChannels] = useState<TeamsChannel[]>([]);
@@ -37,7 +36,7 @@ const useGetTeamsChannels = () => {
     getAllChannels();
   }, [getAllChannels]);
 
-  return import.meta.env.DEV ? mockChannels : channels;
+  return channels;
 };
 
 export default useGetTeamsChannels;
