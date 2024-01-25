@@ -11,7 +11,7 @@ import {
   createClient,
 } from 'contentful-management';
 import sinon from 'sinon';
-import { AppInstallationParameters, EntryEvent } from '../src/types';
+import { AppInstallationParameters, EntryEvent, TeamInstallation } from '../src/types';
 
 export const makeMockPlainClient = (responses: any[], stub: sinon.SinonStub): PlainClientAPI => {
   for (const [callNumber, response] of responses.entries()) {
@@ -282,6 +282,29 @@ export const mockContentType: ContentTypeProps = {
       validations: [],
       disabled: false,
       omitted: false,
+    },
+  ],
+};
+
+export const mockTeamInstallation: TeamInstallation = {
+  conversationReferenceKey:
+    '_666e56a6-1f2a-47c7-b88c-1ed9e1bb8668:19:78a324c40ede43b0a541512f0fcee973@thread.tacv2',
+  teamDetails: {
+    id: '19:78a324c40ede43b0a541512f0fcee973@thread.tacv2',
+    name: 'U.S. Sales',
+    aadGroupId: '08dcc55f-ae23-45bf-b3e8-73360825b277',
+    type: 'standard',
+    channelCount: 3,
+    memberCount: 17,
+  },
+  channelInfos: [
+    {
+      id: '19:3bccfda604454e63bd839399e6752ba3@thread.tacv2',
+      name: 'Sales West',
+    },
+    {
+      id: '19:78a324c40ede43b0a541512f0fcee973@thread.tacv2',
+      name: 'General',
     },
   ],
 };

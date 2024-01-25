@@ -108,9 +108,24 @@ export interface SendMessageError {
 
 export type SendMessageResult = SendMessageSuccess | SendMessageError;
 
+export interface MsTeamsBotServiceCallSuccess<T> {
+  ok: true;
+  data: T;
+}
+
+export interface MsTeamsBotServiceCallError {
+  ok: false;
+  // TODO: this might need to be updated if we return an error object from MS teams bot service
+  error: string;
+}
+
+export type MsTeamsBotServiceCallResult<T> =
+  | MsTeamsBotServiceCallSuccess<T>
+  | MsTeamsBotServiceCallError;
+
 export interface SendEntryActivityMessageResult {
   entryActivityMessage: EntryActivityMessage;
-  sendMessageResult: SendMessageResult;
+  sendMessageResult: MsTeamsBotServiceCallResult<MessageResponse>;
 }
 
 export interface EntryEvent {
