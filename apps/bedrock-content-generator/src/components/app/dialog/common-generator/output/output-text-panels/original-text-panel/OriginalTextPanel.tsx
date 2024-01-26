@@ -1,4 +1,3 @@
-import { errorMessages } from "@components/app/dialog/common-generator/errorMessages";
 import { GeneratorAction } from "@components/app/dialog/common-generator/generatorReducer";
 import TextFieldWithButtons from "@components/common/text-field-with-buttons/TextFieldWIthButtons";
 import { DialogText } from "@configs/features/featureTypes";
@@ -23,6 +22,7 @@ interface Props {
   outputFieldLocale: string;
   hasOutputField: boolean;
   hasError: boolean;
+  errorText?: string;
   dialogText: DialogText;
 }
 
@@ -35,6 +35,7 @@ const OriginalTextPanel = (props: Props) => {
     hasOutputField,
     dialogText,
     hasError,
+    errorText,
   } = props;
   const { dispatch } = useContext(GeneratorContext);
 
@@ -76,7 +77,7 @@ const OriginalTextPanel = (props: Props) => {
         isDisabled={isTextAreaDisabled}
         placeholder={placeholderText}
         hasError={hasError}
-        errorMessage={errorMessages.defaultOriginalError}
+        errorMessage={errorText}
         {...helpTextProps}
       >
         <Button

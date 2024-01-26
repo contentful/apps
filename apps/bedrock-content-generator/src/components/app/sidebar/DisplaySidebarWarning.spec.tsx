@@ -14,7 +14,7 @@ vi.mock("@contentful/react-apps-toolkit", () => ({
 describe("Display Sidebar Warning", () => {
   it("renders", () => {
     const { getByText, unmount } = render(
-      <DisplaySidebarWarning hasBrandProfile={false} apiError={undefined} />,
+      <DisplaySidebarWarning hasBrandProfile={false} />,
     );
 
     expect(getByText("Missing brand profile.")).toBeTruthy();
@@ -63,16 +63,4 @@ describe("Display Sidebar Warning", () => {
   //   expect(getByText("Chat GPT is currently unavailable.")).toBeTruthy();
   //   unmount();
   // });
-
-  it("Renders catch all error", () => {
-    const element = render(
-      <DisplaySidebarWarning
-        hasBrandProfile={false}
-        apiError={{ status: 999, message: "Dog" }}
-      />,
-    );
-
-    expect(element.getByText("Amazon Bedrock Error: Dog")).toBeTruthy();
-    element.unmount();
-  });
 });
