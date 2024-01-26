@@ -13,7 +13,7 @@ import AI from "@utils/aiApi";
 import { ChangeEvent, Dispatch, useEffect, useMemo, useState } from "react";
 import { ConfigErrors, ModelText } from "../configText";
 import { ParameterAction, ParameterReducer } from "../parameterReducer";
-import s from "./Model.module.css";
+import s from "./model.module.css";
 import {
   modelForbiddenError,
   modelNotInAccountError,
