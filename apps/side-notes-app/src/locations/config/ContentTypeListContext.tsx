@@ -15,10 +15,13 @@ export const ContentTypeListContextProvider = ({ children }: { children: ReactNo
   const { data: allContentTypes } = useSWR('content-types', cma.contentType.getMany);
 
   const allContentTypesMap = useMemo(() => {
-    return (allContentTypes?.items || []).reduce((result, item) => {
-      result[item.sys.id] = item;
-      return result;
-    }, {} as Record<string, ContentTypeProps>);
+    return (allContentTypes?.items || []).reduce(
+      (result, item) => {
+        result[item.sys.id] = item;
+        return result;
+      },
+      {} as Record<string, ContentTypeProps>
+    );
   }, [allContentTypes?.items]);
 
   return (

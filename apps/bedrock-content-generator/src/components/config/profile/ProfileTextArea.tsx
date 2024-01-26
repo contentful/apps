@@ -1,9 +1,9 @@
-import { ChangeEvent, Dispatch, useEffect, useState } from 'react';
-import { Textarea } from '@contentful/f36-components';
-import { ParameterAction, ParameterReducer } from '../parameterReducer';
-import { useDebounce } from 'usehooks-ts';
-import TextCounter from '@components/common/text-counter/TextCounter';
-import { ProfileFields } from '../appInstallationParameters';
+import { ChangeEvent, Dispatch, useEffect, useState } from "react";
+import { Textarea } from "@contentful/f36-components";
+import { ParameterAction, ParameterReducer } from "../parameterReducer";
+import { useDebounce } from "usehooks-ts";
+import TextCounter from "@components/common/text-counter/TextCounter";
+import { ProfileFields } from "../appInstallationParameters";
 
 interface Props {
   value: string;
@@ -18,7 +18,7 @@ const TEXTAREA_ROWS = 5;
 
 const ProfileTextArea = (props: Props) => {
   const { value, name, id, placeholder, textLimit, dispatch } = props;
-  const [fieldValue, setFieldValue] = useState('');
+  const [fieldValue, setFieldValue] = useState("");
   const debouncedValue = useDebounce<string>(fieldValue, 300);
 
   useEffect(() => {
@@ -27,7 +27,11 @@ const ProfileTextArea = (props: Props) => {
 
   useEffect(() => {
     if (id === ProfileFields.PROFILE) {
-      dispatch({ type: ParameterAction.UPDATE_PROFILE, value: debouncedValue, textLimit });
+      dispatch({
+        type: ParameterAction.UPDATE_PROFILE,
+        value: debouncedValue,
+        textLimit,
+      });
     } else {
       dispatch({
         type: ParameterAction.UPDATE_BRAND_PROFILE,

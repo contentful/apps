@@ -1,6 +1,6 @@
-import { Flex, Paragraph } from '@contentful/f36-components';
-import { ErrorCircleOutlineIcon } from '@contentful/f36-icons';
-import { styles } from './TextCounter.styles';
+import { Flex, Paragraph } from "@contentful/f36-components";
+import { ErrorCircleOutlineIcon } from "@contentful/f36-icons";
+import { styles } from "./TextCounter.styles";
 
 interface Props {
   text: string;
@@ -24,7 +24,7 @@ const TextCounter = (props: Props) => {
   const style = isValid ? styles.validCount : styles.invalidCount;
 
   const getCharLimitsToDisplay = () => {
-    let displayContent = '';
+    let displayContent = "";
 
     if (maxLength && minLength) {
       displayContent = `Requires between ${minLength} and ${maxLength} characters`;
@@ -44,7 +44,11 @@ const TextCounter = (props: Props) => {
   };
 
   return (
-    <Flex flexDirection="column" marginBottom="spacingM" data-testid="text-counter">
+    <Flex
+      flexDirection="column"
+      marginBottom="spacingM"
+      data-testid="text-counter"
+    >
       <Flex justifyContent="space-between">
         <Flex alignContent="center" marginTop="spacing2Xs">
           {!isValid ? (

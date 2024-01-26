@@ -1,23 +1,23 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import useInitializeParameters from './useInitializeParameters';
-import { mockCma, MockSdk, mockSdkParameters } from '../../../test/mocks';
-import { ParameterAction } from '@components/config/parameterReducer';
+import { renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import useInitializeParameters from "./useInitializeParameters";
+import { mockCma, MockSdk, mockSdkParameters } from "../../../test/mocks";
+import { ParameterAction } from "@components/config/parameterReducer";
 
 const mockSdk = new MockSdk({ installation: mockSdkParameters.happyPath });
 const sdk = mockSdk.sdk;
 
-vi.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock("@contentful/react-apps-toolkit", () => ({
   useSDK: () => sdk,
   useCMA: () => mockCma,
 }));
 
-describe('useInitializeParameters', () => {
+describe("useInitializeParameters", () => {
   beforeEach(() => {
     mockSdk.reset();
   });
 
-  it('should dispatch Contentful parameters and call setReady', async () => {
+  it("should dispatch Contentful parameters and call setReady", async () => {
     const dispatchMock = vi.fn((val) => val);
 
     renderHook(() => useInitializeParameters(dispatchMock));
@@ -31,7 +31,7 @@ describe('useInitializeParameters', () => {
     expect(sdk.app.setReady).toBeCalled();
   });
 
-  it('should not dispatch anything if parameters are not present', async () => {
+  it("should not dispatch anything if parameters are not present", async () => {
     const dispatchMock = vi.fn((val) => val);
     sdk.app.getParameters = vi.fn().mockReturnValueOnce(undefined);
 

@@ -4,10 +4,9 @@ This guide will help you to setup your AWS account for Contentful to access Amaz
 
 Amazon Bedrock is a fully managed service and it is serverless in nature that provides a selection of high-performing foundation models (FMs) from leading AI companies, including AI21 Labs, Anthropic, Cohere, Meta, Stability AI, and Amazon itself. The service offers a unified API and a range of features to simplify the development of generative AI applications, making it accessible to a wider range of users without compromising on privacy and security.
 
-
 ## Prerequisites
 
- You will need an AWS account and have to be logged in. Refer to the AWS Account Creation Documentation for a detailed [guide](https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-creating.html).
+You will need an AWS account and have to be logged in. Refer to the AWS Account Creation Documentation for a detailed [guide](https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-creating.html).
 
 > Note: A credit card is required for account creation, but you won't be billed for this step.
 > :warning:
@@ -20,24 +19,23 @@ Usage of Bedrock will incur cost. Please see the [Amazon Bedrock pricing](https:
 
 ## Setup instructions
 
-
 ## 1. **Enable Access to Bedrock Large Language Models:**
 
-*Note* Bedrock is not supported in all regions, and the availablity for models may vary by region. Please select the region that matches your needs. The access key won't be limited to a region - you may use the same key for multiple regions. You will have to request model access for each region.
-    
-*   Log into the AWS Console and select your preferred region.
-*   Navigate to Bedrock and select 'Model access' from the left hand menu. ![Alt text](<instructions/bedrock-model-access.png>)
-*   Enable the models you wish to use.
-*   ![Screenshot of the model selection screen](./instructions/overview.png)
-*   By clicking on **Manage model access** you can request the models you’d like access to, and then click **Save changes**.
+_Note_ Bedrock is not supported in all regions, and the availablity for models may vary by region. Please select the region that matches your needs. The access key won't be limited to a region - you may use the same key for multiple regions. You will have to request model access for each region.
 
-*Note You won’t be charged for just having access to the model; charges only accrue when you use the model. Also, not all models will be available, and some (like Claude) will require you to submit a use case before access is granted.*
+- Log into the AWS Console and select your preferred region.
+- Navigate to Bedrock and select 'Model access' from the left hand menu. ![Alt text](instructions/bedrock-model-access.png)
+- Enable the models you wish to use.
+- ![Screenshot of the model selection screen](./instructions/overview.png)
+- By clicking on **Manage model access** you can request the models you’d like access to, and then click **Save changes**.
+
+_Note You won’t be charged for just having access to the model; charges only accrue when you use the model. Also, not all models will be available, and some (like Claude) will require you to submit a use case before access is granted._
 
 For detailed instructions, see [Model Access Documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html).
 
 ## 2. Set Up Permissions and get the API Key
-    
-*Note: This template should work in all regions, not limited ot the region Bedrock is available. In the selected region the Access Token is going to be stored in AWS Secrets Manager.*
+
+_Note: This template should work in all regions, not limited ot the region Bedrock is available. In the selected region the Access Token is going to be stored in AWS Secrets Manager._
 
 To prepare your AWS account to be used for Contentful simply click one of the buttons at the end of this chapter and follow the instructions (no changes are needed to the given defaults). This will deploy a CloudFormation stack in your account, creating the required IAM User with the needed permissions, and generates access keys for you.
 
@@ -45,19 +43,19 @@ Once the stack completes you can find a link to the credentials in the `output` 
 
 ![Alt text](instructions/secretsmanager.png)
 
-| Region |     | CloudFormation Stack |
-| ---    | --- | --- |
-| US East (N. Virginia) | **us-east-1** | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/bedrock.yml) |
-| Europe (Frankfurt) | **eu-central-1** | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/bedrock.yml) |
-| Use currently active region | --- | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/bedrock.yml) |
+| Region                      |                  | CloudFormation Stack                                                                                                                                                                                                                                                                                                                        |
+| --------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US East (N. Virginia)       | **us-east-1**    | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/bedrock.yml)       |
+| Europe (Frankfurt)          | **eu-central-1** | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/bedrock.yml) |
+| Use currently active region | ---              | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/bedrock.yml)                                 |
 
 #### Supported Regions
-*Note: Models vary by region.*
 
->- US East (N. Virginia)
->- US West (Oregon)
->- Europe (Frankfurt)
+_Note: Models vary by region._
 
+> - US East (N. Virginia)
+> - US West (Oregon)
+> - Europe (Frankfurt)
 
 ## 3. Maintainability / Updates / Next Steps
 
@@ -65,14 +63,13 @@ Once the stack completes you can find a link to the credentials in the `output` 
 
 To provide you an easy entry to cost controling we created a CloudFormation template for you which sets up a soft and hard limit for your accounts Bedrock usage. upon reaching the limits you will be notified via your supplied email address and/or phone number. Upon reaching the hard limit, the created IAM User for accessing Bedrock will have it's policies removed for acessing Bedrock. That way no further Bedrock usage can be issued until the Budget Limits have been raised and the policy has been reattached.
 
-| Region |     | CloudFormation Stack |
-| ---    | --- | --- |
-| US East (N. Virginia) | **us-east-1** | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/billing-alarm.yml) |
-| Europe (Frankfurt) | **eu-central-1** | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/billing-alarm.yml) |
-| Use currently active region | --- | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/billing-alarm.yml) |
+| Region                      |                  | CloudFormation Stack                                                                                                                                                                                                                                                                                                                              |
+| --------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US East (N. Virginia)       | **us-east-1**    | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/billing-alarm.yml)       |
+| Europe (Frankfurt)          | **eu-central-1** | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/billing-alarm.yml) |
+| Use currently active region | ---              | [![Launch stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=ContentfulBedrockIntegration&templateURL=https://raw.githubusercontent.com/AndreBaumeier/contentful-bedrock/main/billing-alarm.yml)                                 |
 
 Learn more about [cost alerts and budgets](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html).
-
 
 ### Access to new models
 
@@ -94,6 +91,6 @@ The cost control part of the CloudFormation template is solved using a Lambda fu
 
 In case you no longer want to use this solution you can delete the executed cloudformation templates which will rollback any generated resources, leaving you with whatever has been configured before in your AWS account.
 
-## Further Documentation ##
+## Further Documentation
 
 This [Blog Post](https://community.aws/content/2ZAHJMCN4Ffi6W2DPJFIgq8MHkX/aws-bedrock---learning-series---blog-1) goes into further details on how to set up Bedrock.

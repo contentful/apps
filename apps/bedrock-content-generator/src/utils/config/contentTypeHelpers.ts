@@ -1,4 +1,4 @@
-import { EditorInterface } from '@contentful/app-sdk';
+import { EditorInterface } from "@contentful/app-sdk";
 
 interface EditorInterfaceAssignment {
   [key: string]: { [key: string]: { position: number } };
@@ -8,11 +8,13 @@ export const generateEditorInterfaceAssignments = (
   currentEditorInterface: Partial<EditorInterface>,
   contentTypeIds: string[],
   location: string,
-  position: number
+  position: number,
 ): EditorInterfaceAssignment => {
   const savedContentTypeAssignments = Object.keys(currentEditorInterface);
 
-  const newAssignments = { ...(currentEditorInterface as EditorInterfaceAssignment) };
+  const newAssignments = {
+    ...(currentEditorInterface as EditorInterfaceAssignment),
+  };
 
   for (const key in currentEditorInterface) {
     if (!contentTypeIds.includes(key)) {
@@ -32,7 +34,7 @@ export const generateEditorInterfaceAssignments = (
 
       return acc;
     },
-    {}
+    {},
   );
 
   return { ...newAssignments, ...assignmentsToAdd };

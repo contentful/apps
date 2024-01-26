@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
-import { ContentTypeProps, EntryProps } from 'contentful-management';
-import { DialogAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import richTextModel from '@utils/dialog/common-generator/richTextModel';
+import { useEffect, useState, useCallback } from "react";
+import { ContentTypeProps, EntryProps } from "contentful-management";
+import { DialogAppSDK } from "@contentful/app-sdk";
+import { useSDK } from "@contentful/react-apps-toolkit";
+import richTextModel from "@utils/dialog/common-generator/richTextModel";
 
 /**
  * This hook is used to get the entry and content type of the entry.
@@ -32,20 +32,26 @@ const useEntryAndContentType = (entryId: string) => {
     return { entry: null, contentType: null };
   }, [cma.contentType, cma.entry, entryId]);
 
-  const updateEntry = async (fieldKey: string, fieldLocale: string, updatedText: string) => {
+  const updateEntry = async (
+    fieldKey: string,
+    fieldLocale: string,
+    updatedText: string,
+  ) => {
     try {
       const { entry, contentType } = await getEntryAndContentType();
       if (entry === null || contentType === null) {
-        throw new Error('Entry or content type is null');
+        throw new Error("Entry or content type is null");
       }
-      const fieldType = contentType?.fields.find((field) => field.id === fieldKey)?.type;
-      const isRichText = fieldType === 'RichText';
+      const fieldType = contentType?.fields.find(
+        (field) => field.id === fieldKey,
+      )?.type;
+      const isRichText = fieldType === "RichText";
 
       const formattedText = isRichText
         ? richTextModel(updatedText)
         : updatedText
-            .replace(/^\s+|\s+$/g, '')
-            .replace(/^['"]+|['"]+$/g, '')
+            .replace(/^\s+|\s+$/g, "")
+            .replace(/^['"]+|['"]+$/g, "")
             .trim();
 
       if (!entry.fields[fieldKey]) {
@@ -60,7 +66,7 @@ const useEntryAndContentType = (entryId: string) => {
         {
           entryId,
         },
-        entry
+        entry,
       );
 
       return true;

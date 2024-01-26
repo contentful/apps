@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
-import { isSupported } from '@utils/dialog/supported-fields/supportedFieldsHelpers';
-import useEntryAndContentType from './useEntryAndContentType';
-import { FieldLocales } from '@locations/Dialog';
-import { LocaleNames } from '@providers/generatorProvider';
-import { ContentTypeFieldValidation } from 'contentful-management/types';
+import { useMemo } from "react";
+import { isSupported } from "@utils/dialog/supported-fields/supportedFieldsHelpers";
+import useEntryAndContentType from "./useEntryAndContentType";
+import { FieldLocales } from "@locations/Dialog";
+import { LocaleNames } from "@providers/generatorProvider";
+import { ContentTypeFieldValidation } from "contentful-management/types";
 
 interface Field {
   id: string;
@@ -17,9 +17,9 @@ interface Field {
 }
 
 enum SupportedFieldTypes {
-  RICH_TEXT = 'RichText',
-  SYMBOL = 'Symbol',
-  TEXT = 'Text',
+  RICH_TEXT = "RichText",
+  SYMBOL = "Symbol",
+  TEXT = "Text",
 }
 
 const RichTextFields = [SupportedFieldTypes.RICH_TEXT];
@@ -56,24 +56,37 @@ const useSupportedFields = (
   supportedFields: SupportedFieldTypes[],
   fieldLocales: FieldLocales,
   localeNames: LocaleNames,
-  defaultLocale: string
+  defaultLocale: string,
 ) => {
   const { entry, contentType } = useEntryAndContentType(entryId);
   const fields = useMemo(() => {
     if (entry && contentType) {
       const validatedFields: SupportedFieldsOutput = contentType.fields.reduce(
-        isSupported(entry, supportedFields, fieldLocales, localeNames, defaultLocale),
+        isSupported(
+          entry,
+          supportedFields,
+          fieldLocales,
+          localeNames,
+          defaultLocale,
+        ),
         {
           supportedFieldsWithContent: [],
           allSupportedFields: [],
-        }
+        },
       );
 
       return validatedFields;
     }
 
     return { supportedFieldsWithContent: [], allSupportedFields: [] };
-  }, [entry, contentType, supportedFields, fieldLocales, localeNames, defaultLocale]);
+  }, [
+    entry,
+    contentType,
+    supportedFields,
+    fieldLocales,
+    localeNames,
+    defaultLocale,
+  ]);
 
   return { ...fields };
 };

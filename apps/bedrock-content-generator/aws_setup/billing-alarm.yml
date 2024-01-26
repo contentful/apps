@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Description: Setup for Budget Alarms with Email Notifications
 
 Metadata:
@@ -36,14 +36,14 @@ Parameters:
   EmailAddress:
     Type: String
     Description: Email address to receive budget alerts.
-  
+
   PhoneNumber:
     Type: String
-    Default: ''
+    Default: ""
     Description: "Optional. Phone number for SMS alerts in E.164 format, e.g., +12065550100."
 
 Conditions:
-  CreateSMSNotification: !Not [!Equals [!Ref PhoneNumber, '']]
+  CreateSMSNotification: !Not [!Equals [!Ref PhoneNumber, ""]]
   CreateHardLimit: !Not [!Equals [!Ref HardLimit, 0]]
   CreateSMSAndHardLimit: !And
     - Condition: CreateSMSNotification
@@ -53,26 +53,25 @@ Conditions:
     - Condition: CreateHardLimit
 
 Resources:
-
   BedrockNotificationTopic:
-    Type: 'AWS::SNS::Topic'
+    Type: "AWS::SNS::Topic"
 
   SoftLimitAlarmTopic:
-    Type: 'AWS::SNS::Topic'
+    Type: "AWS::SNS::Topic"
 
   HardLimitAlarmTopic:
-    Type: 'AWS::SNS::Topic'
+    Type: "AWS::SNS::Topic"
     Condition: CreateHardLimit
 
   EmailSubscription:
-    Type: 'AWS::SNS::Subscription'
+    Type: "AWS::SNS::Subscription"
     Properties:
       Protocol: email
       Endpoint: !Ref EmailAddress
       TopicArn: !Ref BedrockNotificationTopic
 
   SMSSubscription:
-    Type: 'AWS::SNS::Subscription'
+    Type: "AWS::SNS::Subscription"
     Condition: CreateSMSNotification
     Properties:
       Protocol: sms
@@ -80,7 +79,7 @@ Resources:
       TopicArn: !Ref BedrockNotificationTopic
 
   SoftLimitBudget:
-    Type: 'AWS::Budgets::Budget'
+    Type: "AWS::Budgets::Budget"
     Properties:
       Budget:
         BudgetLimit:
@@ -100,7 +99,7 @@ Resources:
               Address: !Ref SoftLimitAlarmTopic
 
   HardLimitBudget:
-    Type: 'AWS::Budgets::Budget'
+    Type: "AWS::Budgets::Budget"
     Condition: CreateHardLimit
     Properties:
       Budget:
@@ -119,12 +118,12 @@ Resources:
           Subscribers:
             - SubscriptionType: SNS
               Address: !Ref HardLimitAlarmTopic
-   
+
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -133,23 +132,22 @@ Resources:
       Policies:
         - PolicyName: LambdaPolicyDetachIamPolicy
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
                   - iam:DetachUserPolicy
                   - iam:ListAttachedUserPolicies
-                Resource: !Join 
-                  - ''
-                  - - 'arn:aws:iam::'
-                    - !Ref 'AWS::AccountId'
-                    - ':user/bedrock/'
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:iam::"
+                    - !Ref "AWS::AccountId"
+                    - ":user/bedrock/"
                     - !ImportValue ContentfulBedrockUserName
               - Effect: Allow
                 Action:
                   - sns:Publish
                 Resource: !Ref BedrockNotificationTopic
-
 
   BudgetLimitExceededFunction:
     Type: AWS::Lambda::Function
@@ -195,8 +193,8 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt BudgetLimitExceededFunction.Arn
-      Action: 'lambda:InvokeFunction'
-      Principal: 'sns.amazonaws.com'
+      Action: "lambda:InvokeFunction"
+      Principal: "sns.amazonaws.com"
       SourceArn: !Ref HardLimitAlarmTopic
   HardLimitSNSSubscription:
     Type: AWS::SNS::Subscription
@@ -204,8 +202,6 @@ Resources:
       TopicArn: !Ref HardLimitAlarmTopic
       Protocol: lambda
       Endpoint: !GetAtt BudgetLimitExceededFunction.Arn
-
-
 
 Outputs:
   SoftLimitAlarmTopicArn:

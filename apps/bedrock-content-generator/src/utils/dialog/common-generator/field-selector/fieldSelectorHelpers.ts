@@ -1,9 +1,9 @@
 import {
   GeneratorAction,
   GeneratorReducer,
-} from '@components/app/dialog/common-generator/generatorReducer';
-import { Field } from '@hooks/dialog/useSupportedFields';
-import { Dispatch } from 'react';
+} from "@components/app/dialog/common-generator/generatorReducer";
+import { Field } from "@hooks/dialog/useSupportedFields";
+import { Dispatch } from "react";
 
 /**
  * This finds a field in a list of fields and returns the field id, key, name, locale, and data.
@@ -15,12 +15,12 @@ const getFieldData = (fieldKey: string, fields: Field[]) => {
   const field = fields.find((field) => field.key === fieldKey);
   return (
     field ?? {
-      id: '',
-      key: '',
-      name: '',
-      locale: '',
-      data: '',
-      language: '',
+      id: "",
+      key: "",
+      name: "",
+      locale: "",
+      data: "",
+      language: "",
       sizeValidation: null,
       isDefaultLocale: false,
     }
@@ -36,7 +36,7 @@ const getFieldData = (fieldKey: string, fields: Field[]) => {
 const updateSourceField = (
   sourceField: Field,
   fallbackField: Field,
-  dispatch: Dispatch<GeneratorReducer>
+  dispatch: Dispatch<GeneratorReducer>,
 ) => {
   dispatch({
     type: GeneratorAction.UPDATE_SOURCE_FIELD,
@@ -54,7 +54,7 @@ const updateSourceField = (
 const updateOutputField = (
   outputField: Field,
   fallbackField: Field,
-  dispatch: Dispatch<GeneratorReducer>
+  dispatch: Dispatch<GeneratorReducer>,
 ) => {
   dispatch({
     type: GeneratorAction.UPDATE_OUTPUT_FIELD,
@@ -70,8 +70,13 @@ const updateOutputField = (
  * @param isNewText
  * @param dispatch
  */
-const handleContentSourceChange = (isNewText: boolean, dispatch: Dispatch<GeneratorReducer>) => {
-  const type = !isNewText ? GeneratorAction.IS_NEW_TEXT : GeneratorAction.IS_NOT_NEW_TEXT;
+const handleContentSourceChange = (
+  isNewText: boolean,
+  dispatch: Dispatch<GeneratorReducer>,
+) => {
+  const type = !isNewText
+    ? GeneratorAction.IS_NEW_TEXT
+    : GeneratorAction.IS_NOT_NEW_TEXT;
   dispatch({ type });
 };
 
@@ -85,7 +90,7 @@ const handleContentSourceChange = (isNewText: boolean, dispatch: Dispatch<Genera
 const handleSourceFieldChange = (
   newField: string,
   fields: Field[],
-  dispatch: Dispatch<GeneratorReducer>
+  dispatch: Dispatch<GeneratorReducer>,
 ) => {
   const sourceFieldData = getFieldData(newField, fields);
   updateSourceField(sourceFieldData, fields[0], dispatch);
@@ -101,10 +106,14 @@ const handleSourceFieldChange = (
 const handleOutputFieldChange = (
   newField: string,
   fields: Field[],
-  dispatch: Dispatch<GeneratorReducer>
+  dispatch: Dispatch<GeneratorReducer>,
 ) => {
   const outputFieldData = getFieldData(newField, fields);
   updateOutputField(outputFieldData, fields[0], dispatch);
 };
 
-export { handleContentSourceChange, handleSourceFieldChange, handleOutputFieldChange };
+export {
+  handleContentSourceChange,
+  handleSourceFieldChange,
+  handleOutputFieldChange,
+};

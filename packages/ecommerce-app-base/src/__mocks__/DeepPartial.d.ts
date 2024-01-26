@@ -3,10 +3,10 @@
 export type DeepPartial<Thing> = Thing extends Function
   ? Thing
   : Thing extends Array<infer InferredArrayMember>
-  ? DeepPartialArray<InferredArrayMember>
-  : Thing extends object
-  ? DeepPartialObject<Thing>
-  : Thing | undefined;
+    ? DeepPartialArray<InferredArrayMember>
+    : Thing extends object
+      ? DeepPartialObject<Thing>
+      : Thing | undefined;
 
 interface DeepPartialArray<Thing> extends Array<DeepPartial<Thing>> {}
 

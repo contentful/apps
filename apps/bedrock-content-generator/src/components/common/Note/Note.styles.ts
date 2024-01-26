@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import { css } from "@emotion/react";
 
 export const styles = {
   note: css(`
@@ -10,7 +10,7 @@ export const styles = {
     width: '100%',
   `),
   noteContent: css({
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
+    textOverflow: "ellipsis",
+    overflow: "hidden",
   }),
 };

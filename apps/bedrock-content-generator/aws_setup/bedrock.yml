@@ -3,7 +3,6 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Contentful Bedrock Deployment
 
 Resources:
-
   ContentfulBedrockUser:
     Type: AWS::IAM::User
     Properties:
@@ -33,7 +32,7 @@ Resources:
         Version: "2012-10-17"
         Statement:
           - Effect: "Allow"
-            Action: 
+            Action:
               - "bedrock:InvokeModel"
               - "bedrock:GetFoundationModel"
               - "bedrock:InvokeModelWithResponseStream"

@@ -1,7 +1,7 @@
-import { Flex, Paragraph, Subheading, Text } from '@contentful/f36-components';
-import { Sections } from '../configText';
-import Hyperlink from '@components/common/HyperLink/HyperLink';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { Flex, Paragraph, Subheading, Text } from "@contentful/f36-components";
+import { Sections } from "../configText";
+import Hyperlink from "@components/common/HyperLink/HyperLink";
+import { ExternalLinkIcon } from "@contentful/f36-icons";
 
 const CostSection = () => {
   const {

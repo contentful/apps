@@ -25,8 +25,8 @@ const Dialog = () => {
         ? 'products'
         : 'categories'
       : fieldType === 'product'
-      ? 'a product'
-      : 'a category';
+        ? 'a product'
+        : 'a category';
 
     return title;
   };

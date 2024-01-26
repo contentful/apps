@@ -1,5 +1,5 @@
-import { Box, FormControl, Select } from '@contentful/f36-components';
-import { ChangeEvent } from 'react';
+import { Box, FormControl, Select } from "@contentful/f36-components";
+import { ChangeEvent } from "react";
 
 interface Props {
   title: string;
@@ -14,7 +14,11 @@ function Selector(props: Props) {
 
   return (
     <Box css={{ width: selectFieldWidth }}>
-      <FormControl marginLeft="spacingXs" marginRight="spacingXs" marginBottom="none">
+      <FormControl
+        marginLeft="spacingXs"
+        marginRight="spacingXs"
+        marginBottom="none"
+      >
         <FormControl.Label>{title}</FormControl.Label>
         <Select value={selectedValue} onChange={onChange}>
           {options}

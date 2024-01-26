@@ -1,17 +1,19 @@
-import useSupportedFields, { SupportedFieldTypes } from '@hooks/dialog/useSupportedFields';
-import { Box, Flex, Select } from '@contentful/f36-components';
-import { GeneratorParameters } from '../generatorReducer';
-import { ChangeEvent, useContext } from 'react';
-import Selector from './selector/Selector';
-import { Field } from '@hooks/dialog/useSupportedFields';
-import { GeneratorContext } from '@providers/generatorProvider';
+import useSupportedFields, {
+  SupportedFieldTypes,
+} from "@hooks/dialog/useSupportedFields";
+import { Box, Flex, Select } from "@contentful/f36-components";
+import { GeneratorParameters } from "../generatorReducer";
+import { ChangeEvent, useContext } from "react";
+import Selector from "./selector/Selector";
+import { Field } from "@hooks/dialog/useSupportedFields";
+import { GeneratorContext } from "@providers/generatorProvider";
 import {
   handleContentSourceChange,
   handleSourceFieldChange,
   handleOutputFieldChange,
-} from '@utils/dialog/common-generator/field-selector/fieldSelectorHelpers';
-import { css } from '@emotion/react';
-import tokens from '@contentful/f36-tokens';
+} from "@utils/dialog/common-generator/field-selector/fieldSelectorHelpers";
+import { css } from "@emotion/react";
+import tokens from "@contentful/f36-tokens";
 
 const SELECT_WIDTH = 280;
 
@@ -23,8 +25,8 @@ const styles = {
 };
 
 enum ContentSourceOptions {
-  FIELD = 'field',
-  PROMPT = 'prompt',
+  FIELD = "field",
+  PROMPT = "prompt",
 }
 
 interface Props {
@@ -43,13 +45,13 @@ const SourceAndFieldSelectors = (props: Props) => {
     fieldTypes,
     fieldLocales,
     localeNames,
-    defaultLocale
+    defaultLocale,
   );
 
   const getSourceOptions = () => {
     const sources = [
-      { id: ContentSourceOptions.FIELD, name: 'Field' },
-      { id: ContentSourceOptions.PROMPT, name: 'Prompt' },
+      { id: ContentSourceOptions.FIELD, name: "Field" },
+      { id: ContentSourceOptions.PROMPT, name: "Prompt" },
     ];
 
     return sources.map((source) => (
@@ -75,10 +77,15 @@ const SourceAndFieldSelectors = (props: Props) => {
     return [defaultOption, ...fieldOptions];
   };
 
-  const onContentSourceChange = () => handleContentSourceChange(isNewText, dispatch);
+  const onContentSourceChange = () =>
+    handleContentSourceChange(isNewText, dispatch);
 
   const onSourceFieldChange = (event: ChangeEvent<HTMLSelectElement>) =>
-    handleSourceFieldChange(event.target.value, supportedFieldsWithContent, dispatch);
+    handleSourceFieldChange(
+      event.target.value,
+      supportedFieldsWithContent,
+      dispatch,
+    );
 
   const onOutputFieldChange = (event: ChangeEvent<HTMLSelectElement>) =>
     handleOutputFieldChange(event.target.value, allSupportedFields, dispatch);
@@ -88,7 +95,9 @@ const SourceAndFieldSelectors = (props: Props) => {
       <Flex justifyContent="center">
         <Selector
           title="Content source"
-          selectedValue={isNewText ? ContentSourceOptions.PROMPT : ContentSourceOptions.FIELD}
+          selectedValue={
+            isNewText ? ContentSourceOptions.PROMPT : ContentSourceOptions.FIELD
+          }
           options={getSourceOptions()}
           onChange={onContentSourceChange}
           selectFieldWidth={SELECT_WIDTH}

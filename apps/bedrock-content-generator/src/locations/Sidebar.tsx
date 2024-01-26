@@ -10,9 +10,7 @@ const Sidebar = () => {
   return (
     <>
       <SidebarButtons />
-      <DisplaySidebarWarning
-        hasBrandProfile={hasBrandProfile}
-      />
+      <DisplaySidebarWarning hasBrandProfile={hasBrandProfile} />
     </>
   );
 };

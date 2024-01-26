@@ -1,12 +1,12 @@
-import { ContentTypeFieldValidation } from 'contentful-management/types';
+import { ContentTypeFieldValidation } from "contentful-management/types";
 
 export enum GeneratorAction {
-  IS_NEW_TEXT = 'isNewText',
-  IS_NOT_NEW_TEXT = 'isNotNewText',
-  UPDATE_SOURCE_FIELD = 'changeSourceField',
-  UPDATE_OUTPUT_FIELD = 'changeOutputField',
-  UPDATE_ORIGINAL_TEXT_PROMPT = 'changeOriginalTextPrompt',
-  UPDATE_ORIGINAL_TEXT_FIELD = 'changeOriginalTextField',
+  IS_NEW_TEXT = "isNewText",
+  IS_NOT_NEW_TEXT = "isNotNewText",
+  UPDATE_SOURCE_FIELD = "changeSourceField",
+  UPDATE_OUTPUT_FIELD = "changeOutputField",
+  UPDATE_ORIGINAL_TEXT_PROMPT = "changeOriginalTextPrompt",
+  UPDATE_ORIGINAL_TEXT_FIELD = "changeOriginalTextField",
 }
 
 export type GeneratorParameters = {
@@ -72,7 +72,7 @@ const {
 
 const generatorReducer = (
   state: GeneratorParameters,
-  action: GeneratorReducer
+  action: GeneratorReducer,
 ): GeneratorParameters => {
   switch (action.type) {
     case IS_NEW_TEXT:
@@ -85,7 +85,9 @@ const generatorReducer = (
     case UPDATE_SOURCE_FIELD:
       return {
         ...state,
-        canGenerateTextFromField: Boolean(action.sourceField && state.output.fieldId),
+        canGenerateTextFromField: Boolean(
+          action.sourceField && state.output.fieldId,
+        ),
         sourceField: action.sourceField,
         originalText: { ...state.originalText, field: action.value },
       };
@@ -101,9 +103,15 @@ const generatorReducer = (
         },
       };
     case UPDATE_ORIGINAL_TEXT_PROMPT:
-      return { ...state, originalText: { ...state.originalText, prompt: action.value } };
+      return {
+        ...state,
+        originalText: { ...state.originalText, prompt: action.value },
+      };
     case UPDATE_ORIGINAL_TEXT_FIELD:
-      return { ...state, originalText: { ...state.originalText, field: action.value } };
+      return {
+        ...state,
+        originalText: { ...state.originalText, field: action.value },
+      };
     default:
       return state;
   }

@@ -1,12 +1,12 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 import {
   mockGetManyContentType,
   mockEditorInterface,
   mockContentType,
-} from '../contentTypes/mockContentType';
-import { mockEntry } from '../entry/mockEntry';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
-import { DialogInvocationParameters } from '@locations/Dialog';
+} from "../contentTypes/mockContentType";
+import { mockEntry } from "../entry/mockEntry";
+import AppInstallationParameters from "@components/config/appInstallationParameters";
+import { DialogInvocationParameters } from "@locations/Dialog";
 
 interface SdkParameters {
   installation: AppInstallationParameters;
@@ -19,13 +19,15 @@ const createSDK = (parameters: SdkParameters) => {
       onConfigure: vi.fn(),
       getParameters: vi.fn().mockReturnValueOnce(parameters),
       setReady: vi.fn(),
-      getCurrentState: vi.fn().mockReturnValue({ EditorInterface: mockEditorInterface }),
+      getCurrentState: vi
+        .fn()
+        .mockReturnValue({ EditorInterface: mockEditorInterface }),
     },
     entry: {
       fields: {},
     },
     ids: {
-      app: 'test-app',
+      app: "test-app",
     },
     notifier: {
       error: vi.fn(),
@@ -41,7 +43,7 @@ const createSDK = (parameters: SdkParameters) => {
     },
     locales: {},
     hostnames: {
-      webapp: '',
+      webapp: "",
     },
     parameters: { ...parameters },
   };

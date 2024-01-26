@@ -1,14 +1,14 @@
-import { mockSdkParameters } from '..';
-import { createSDK } from './utils/createSdk';
-import { vi } from 'vitest';
+import { mockSdkParameters } from "..";
+import { createSDK } from "./utils/createSdk";
+import { vi } from "vitest";
 import {
   mockGetManyContentType,
   mockEditorInterface,
   mockContentType,
-} from './contentTypes/mockContentType';
-import { mockEntry } from './entry/mockEntry';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
-import { DialogInvocationParameters } from '@locations/Dialog';
+} from "./contentTypes/mockContentType";
+import { mockEntry } from "./entry/mockEntry";
+import AppInstallationParameters from "@components/config/appInstallationParameters";
+import { DialogInvocationParameters } from "@locations/Dialog";
 
 class MockSdk {
   sdk: ReturnType<typeof createSDK>;
@@ -22,8 +22,10 @@ class MockSdk {
     invocation?: DialogInvocationParameters;
   }) {
     const mockParameters = mockSdkParameters.init;
-    const newInstallationParameters = parameters?.installation || mockParameters.installation;
-    const newInvocationParameters = parameters?.invocation || mockParameters.invocation;
+    const newInstallationParameters =
+      parameters?.installation || mockParameters.installation;
+    const newInvocationParameters =
+      parameters?.invocation || mockParameters.invocation;
 
     this.sdk = createSDK({
       installation: newInstallationParameters,
@@ -37,7 +39,9 @@ class MockSdk {
 
   reset() {
     this.sdk.app.onConfigure = vi.fn();
-    this.sdk.app.getParameters = vi.fn().mockReturnValueOnce(this.originalData.installation);
+    this.sdk.app.getParameters = vi
+      .fn()
+      .mockReturnValueOnce(this.originalData.installation);
     this.sdk.parameters.installation = this.originalData.installation;
     if (this.originalData.invocation) {
       this.sdk.parameters.invocation = this.originalData.invocation;
@@ -47,7 +51,9 @@ class MockSdk {
       .fn()
       .mockReturnValue({ EditorInterface: mockEditorInterface });
     this.sdk.notifier.error = vi.fn();
-    this.sdk.cma.contentType.getMany = vi.fn().mockReturnValue(mockGetManyContentType);
+    this.sdk.cma.contentType.getMany = vi
+      .fn()
+      .mockReturnValue(mockGetManyContentType);
     this.sdk.cma.contentType.get = vi.fn().mockReturnValue(mockContentType);
     this.sdk.cma.entry.get = vi.fn().mockReturnValue(mockEntry);
   }
