@@ -4,15 +4,14 @@ import { useAutoResizer } from "@contentful/react-apps-toolkit";
 import useSidebarParameters from "@hooks/sidebar/useSidebarParameters";
 
 const Sidebar = () => {
-  const { hasBrandProfile, apiError } = useSidebarParameters();
+  const { hasBrandProfile } = useSidebarParameters();
   useAutoResizer();
 
   return (
     <>
-      <SidebarButtons shouldDisableButtons={!!apiError} />
+      <SidebarButtons />
       <DisplaySidebarWarning
         hasBrandProfile={hasBrandProfile}
-        apiError={apiError}
       />
     </>
   );

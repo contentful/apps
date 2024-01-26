@@ -39,7 +39,7 @@ describe("Display Model", () => {
           secretAccessKey: "abc",
         }}
         credentialsValid={true}
-      />,
+    />,
     );
     await waitFor(() => {
       expect(getByText("Anthropic Claude v2.1")).toBeTruthy();

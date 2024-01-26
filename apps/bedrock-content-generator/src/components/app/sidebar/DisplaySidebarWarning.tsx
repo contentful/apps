@@ -1,10 +1,8 @@
 import BrandProfileMissingWarning from "@components/app/sidebar/BrandProfileMissingWarning";
-import ParametersMissingWarning from "@components/app/sidebar/ParametersMissingWarning";
 import { warningMessages } from "@components/app/sidebar/sidebarText";
 import { Box } from "@contentful/f36-components";
 import tokens from "@contentful/f36-tokens";
 import { css } from "@emotion/react";
-import { AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
 
 const styles = {
   msgWrapper: css({
@@ -14,24 +12,10 @@ const styles = {
 
 interface Props {
   hasBrandProfile: boolean;
-  apiError: AiApiErrorType | undefined;
 }
 
 const DisplaySidebarWarning = (props: Props) => {
-  const { hasBrandProfile, apiError } = props;
-
-  if (apiError) {
-    const { message } = apiError;
-    return (
-      <Box css={styles.msgWrapper}>
-        <ParametersMissingWarning
-          message={`${warningMessages.BedrockErrorMessage} ${
-            message ?? warningMessages.defaultError
-          }`}
-        />
-      </Box>
-    );
-  }
+  const { hasBrandProfile } = props;
 
   if (!hasBrandProfile) {
     return (

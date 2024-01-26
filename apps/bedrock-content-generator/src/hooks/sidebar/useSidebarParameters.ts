@@ -1,8 +1,6 @@
 import AppInstallationParameters from "@components/config/appInstallationParameters";
 import { SidebarAppSDK } from "@contentful/app-sdk";
 import { useSDK } from "@contentful/react-apps-toolkit";
-import AI from "@utils/aiApi";
-import { AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
 import { useEffect, useState } from "react";
 
 /**
@@ -12,31 +10,17 @@ import { useEffect, useState } from "react";
  * @returns {hasBrandProfile, apiError}
  */
 const useSidebarParameters = () => {
-  const [apiError, setApiError] = useState<AiApiErrorType>();
   const [hasBrandProfile, setHasBrandProfile] = useState(true);
 
   const sdk = useSDK<SidebarAppSDK<AppInstallationParameters>>();
-  const { accessKeyId, secretAccessKey, profile, region } =
-    sdk.parameters.installation;
+  const { profile } = sdk.parameters.installation;
 
   useEffect(() => {
-    const validateCredentials = async () => {
-      const ai = new AI(accessKeyId, secretAccessKey, region);
-      try {
-        await ai.getModels();
-      } catch (error: unknown) {
-        const e = error as AiApiErrorType;
-        setApiError(e);
-      }
-    };
-
-    validateCredentials();
     setHasBrandProfile(!!profile);
-  }, [accessKeyId, secretAccessKey, profile, region]);
+  }, [profile]);
 
   return {
     hasBrandProfile,
-    apiError,
   };
 };
 
