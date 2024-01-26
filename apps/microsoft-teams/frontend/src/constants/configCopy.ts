@@ -20,7 +20,6 @@ const accessSection = {
 const notificationsSection = {
   title: 'Notifications',
   createButton: 'Create notification',
-  enabledToggle: 'Notifications activated',
   edit: 'Edit',
   delete: 'Delete',
   confirmDelete:

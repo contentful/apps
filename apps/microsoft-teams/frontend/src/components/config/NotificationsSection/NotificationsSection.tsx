@@ -145,8 +145,6 @@ const NotificationsSection = (props: Props) => {
               return (
                 <NotificationViewMode
                   key={`notification-${index}`}
-                  index={index}
-                  updateNotification={updateNotification}
                   notification={notification}
                   handleEdit={() => setNotificationIndexToEdit(index)}
                   isMenuDisabled={notificationIndexToEdit !== null}
