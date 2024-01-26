@@ -70,6 +70,7 @@ describe("OriginalTextPanel", () => {
           isNewText
           hasOutputField
           hasError
+          errorText="No results were returned. Please try again."
           dialogText={featureConfig.content.dialogText}
         />
       </Tabs>,

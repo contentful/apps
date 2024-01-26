@@ -1,5 +1,3 @@
-import { errorMessages } from "@components/app/dialog/common-generator/errorMessages";
-import Hyperlink from "@components/common/HyperLink/HyperLink";
 import TextFieldWithButtons from "@components/common/text-field-with-buttons/TextFieldWIthButtons";
 import {
   Button,
@@ -7,7 +5,6 @@ import {
   Paragraph,
   Tabs,
 } from "@contentful/f36-components";
-import { ExternalLinkIcon } from "@contentful/f36-icons";
 import useAI from "@hooks/dialog/useAI";
 import { ContentTypeFieldValidation } from "contentful-management";
 import { useEffect, useState } from "react";
@@ -23,6 +20,7 @@ interface Props {
 
 const GeneratedTextPanel = (props: Props) => {
   const { generate, ai, outputFieldValidation, apply } = props;
+
   const {
     output,
     setOutput,
@@ -71,28 +69,9 @@ const GeneratedTextPanel = (props: Props) => {
   ]);
 
   const getModalErrorMessage = () => {
-    if (error?.status === 429) {
-      return (
-        <>
-          <Paragraph css={styles.errorMessage}>
-            <Hyperlink
-              body={errorMessages.rateLimitMessage}
-              substring={errorMessages.rateLimitSubstring}
-              hyperLinkHref={errorMessages.rateLimitLink}
-              icon={<ExternalLinkIcon />}
-              alignIcon="end"
-              textLinkStyle={styles.errorLink}
-            />
-          </Paragraph>
-        </>
-      );
-    } else {
-      return (
-        <Paragraph css={styles.errorMessage}>
-          {errorMessages.defaultGenerateError}
-        </Paragraph>
-      );
-    }
+    if (!error) return null;
+
+    return <Paragraph css={styles.errorMessage}>{error.message}</Paragraph>;
   };
 
   return (

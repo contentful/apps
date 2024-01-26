@@ -27,7 +27,6 @@ describe("useSidebarParameters", () => {
 
     await waitFor(() => {
       expect(result.current).toHaveProperty("hasBrandProfile", true);
-      expect(result.current).toHaveProperty("apiError", undefined);
     });
   });
 });
