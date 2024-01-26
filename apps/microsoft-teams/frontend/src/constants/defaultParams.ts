@@ -21,7 +21,6 @@ const defaultNotification = {
     tenantId: '',
   },
   contentTypeId: '',
-  isEnabled: true,
   selectedEvents: getDefaultSelectedEvents(),
 };
 

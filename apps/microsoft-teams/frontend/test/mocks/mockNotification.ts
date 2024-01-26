@@ -9,7 +9,6 @@ const mockNotification: Notification = {
     tenantId: '9876-5432',
   },
   contentTypeId: 'blogPost',
-  isEnabled: true,
   selectedEvents: {
     'ContentManagement.Entry.publish': true,
     'ContentManagement.Entry.unpublish': true,

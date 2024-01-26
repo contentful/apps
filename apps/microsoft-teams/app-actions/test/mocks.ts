@@ -114,7 +114,6 @@ export const mockNotification = {
     tenantId: '9876-5432',
   },
   contentTypeId: 'blogPost',
-  isEnabled: true,
   selectedEvents: {
     'ContentManagement.Entry.publish': true,
     'ContentManagement.Entry.unpublish': true,
@@ -134,7 +133,6 @@ export const mockNotificationUnsubscribed = {
     tenantId: '9876-5432',
   },
   contentTypeId: 'blogPost',
-  isEnabled: true,
   selectedEvents: {
     'ContentManagement.Entry.publish': false,
     'ContentManagement.Entry.unpublish': false,
