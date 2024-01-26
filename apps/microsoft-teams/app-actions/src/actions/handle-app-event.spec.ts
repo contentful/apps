@@ -8,7 +8,8 @@ import {
   AppActionCallResponseSuccess,
   EntryActivity,
   SendEntryActivityMessageResult,
-  SendMessageResult,
+  MsTeamsBotServiceResponse,
+  MessageResponse,
 } from '../types';
 import { makeMockAppActionCallContext, mockAppInstallation, mockEntry } from '../../test/mocks';
 import { handler } from './handle-app-event';
@@ -23,7 +24,7 @@ describe('handle-app-event.handler', () => {
   let context: AppActionCallContext;
   let buildEntryActivityStub: sinon.SinonStub;
   const mockEntryActivity = {} as EntryActivity;
-  const sendMessageResult: SendMessageResult = {
+  const sendMessageResult: MsTeamsBotServiceResponse<MessageResponse> = {
     ok: true,
     data: { messageResponseId: 'message-response-id' },
   };

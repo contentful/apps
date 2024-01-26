@@ -10,7 +10,9 @@ import {
 } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import helpers from '../helpers';
-import { AppActionCallResponseSuccess, MessageResponse } from '../types';
+import { AppActionCallResponseSuccess, MessageResponse, MsTeamsBotServiceResponse } from '../types';
+import { MsTeamsBotService } from '../services/msteams-bot-service';
+import { config } from '../config';
 
 describe('sendTestMessage.handler', () => {
   let cmaRequestStub: sinon.SinonStub;
@@ -22,6 +24,10 @@ describe('sendTestMessage.handler', () => {
     contentTypeId: 'blogPost',
   };
   const tenantId = 'msteams-tenant-id';
+  const msTeamsBotServiceResponse: MsTeamsBotServiceResponse<MessageResponse> = {
+    ok: true,
+    data: { messageResponseId: 'message-response-id' },
+  };
 
   const cmaClientMockResponses: (ContentTypeProps | AppInstallationProps)[] = [
     {
@@ -56,11 +62,11 @@ describe('sendTestMessage.handler', () => {
   ];
 
   beforeEach(() => {
+    const mockMsTeamsBotService = sinon.createStubInstance(MsTeamsBotService);
+    sinon.stub(config, 'msTeamsBotService').value(mockMsTeamsBotService);
+    mockMsTeamsBotService.sendTestMessage.resolves(msTeamsBotServiceResponse);
     cmaRequestStub = sinon.stub();
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
-    sinon
-      .stub(helpers, 'sendTestMessage')
-      .returns(Promise.resolve({ ok: true, data: { messageResponseId: 'message-id' } }));
   });
 
   it('calls the cma to get the content type name', async () => {
@@ -77,6 +83,6 @@ describe('sendTestMessage.handler', () => {
       context
     )) as AppActionCallResponseSuccess<MessageResponse>;
     expect(result).to.have.property('ok', true);
-    expect(result.data.messageResponseId).to.equal('message-id');
+    expect(result.data).to.have.property('messageResponseId', 'message-response-id');
   });
 });

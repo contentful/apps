@@ -1,4 +1,10 @@
-import { EntryActivityMessage, SendMessageResult } from '../types';
+import {
+  EntryActivityMessage,
+  MessageResponse,
+  MsTeamsBotServiceResponse,
+  TeamInstallation,
+  TestMessage,
+} from '../types';
 
 export class MsTeamsBotService {
   constructor(public readonly botServiceUrl: string, public readonly apiKey: string) {}
@@ -6,27 +12,91 @@ export class MsTeamsBotService {
   async sendEntryActivityMessage(
     entryActivityMessage: EntryActivityMessage,
     tenantId: string
-  ): Promise<SendMessageResult> {
+  ): Promise<MsTeamsBotServiceResponse<MessageResponse>> {
     const res = await fetch(
       `${this.botServiceUrl}/api/tenant/${tenantId}/entry_activity_messages`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey,
-        },
+        headers: this.requestHeaders,
         body: JSON.stringify(entryActivityMessage),
       }
     );
     const responseBody = await res.json();
-    this.assertSendMessageResult(responseBody);
+    this.assertMsTeamsBotServiceCallResult<MessageResponse>(
+      responseBody,
+      this.assertMessageResponse
+    );
     return responseBody;
   }
 
-  private assertSendMessageResult(value: unknown): asserts value is SendMessageResult {
+  async sendTestMessage(
+    testMessage: TestMessage,
+    tenantId: string
+  ): Promise<MsTeamsBotServiceResponse<MessageResponse>> {
+    const res = await fetch(`${this.botServiceUrl}/api/tenant/${tenantId}/test_messages`, {
+      method: 'POST',
+      headers: this.requestHeaders,
+      body: JSON.stringify(testMessage),
+    });
+    const responseBody = await res.json();
+    this.assertMsTeamsBotServiceCallResult<MessageResponse>(
+      responseBody,
+      this.assertMessageResponse
+    );
+    return responseBody;
+  }
+
+  async getTeamInstallations(
+    tenantId: string
+  ): Promise<MsTeamsBotServiceResponse<TeamInstallation[]>> {
+    const res = await fetch(`${this.botServiceUrl}/api/tenants/${tenantId}/team_installations`, {
+      method: 'GET',
+      headers: this.requestHeaders,
+    });
+    const responseBody = await res.json();
+    this.assertMsTeamsBotServiceCallResult<TeamInstallation[]>(responseBody, (data) => {
+      if (!Array.isArray(data)) throw new TypeError('invalid data type');
+    });
+    return responseBody;
+  }
+
+  private get requestHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'x-api-key': this.apiKey,
+    };
+  }
+
+  private assertMsTeamsBotServiceCallResult<T>(
+    value: unknown,
+    assertsT: (data: unknown) => asserts data is T = () => {}
+  ): asserts value is MsTeamsBotServiceResponse<T> {
     if (typeof value !== 'object' || !value)
       throw new TypeError('invalid type returned from MsTeamsBotService');
     if (!('ok' in value))
-      throw new TypeError('malformed SendMessageResult returned from MsTeamsBotService API');
+      throw new TypeError(
+        'malformed MsTeamsBotServiceResponse returned from MsTeamsBotService API'
+      );
+    if (value.ok) {
+      // success object
+      if (!('data' in value))
+        throw new TypeError(
+          'missing `data` attribute in value returned from MsTeamsBotService API'
+        );
+
+      // defer to provided data assertion checker to check value.data type
+      assertsT(value.data);
+    } else {
+      // error object
+      if (!('error' in value))
+        throw new TypeError(
+          'missing `error` attribute in value returned from MsTeamsBotService API'
+        );
+    }
+  }
+
+  private assertMessageResponse(data: unknown) {
+    if (typeof data !== 'object' || !data) throw new TypeError('invalid data type');
+    if (!('messageResponseId' in data)) throw new TypeError('not a MessageResponse');
   }
 }
