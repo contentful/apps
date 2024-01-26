@@ -71,14 +71,12 @@ export type SelectedEvents = {
 
 // this is jsut a simple starter for now
 export interface EntryActivity {
-  spaceName: string;
   contentTypeName: string;
   entryTitle: string;
   entryId: string;
   spaceId: string;
   contentTypeId: string;
   action: string; // published | deleted | created | etc
-  actorName: string;
   eventDatetime: string;
 }
 

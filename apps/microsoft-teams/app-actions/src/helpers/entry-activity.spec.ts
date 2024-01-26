@@ -32,14 +32,12 @@ describe('buildEntryActivity', () => {
 
   it('returns an entry activity object', async () => {
     const result = await buildEntryActivity(entryEvent, cma);
-    expect(result).to.have.property('spaceName', 'TODO: Space name');
     expect(result).to.have.property('contentTypeName', mockContentType.name);
     expect(result).to.have.property('entryTitle', entryEvent.entry.fields.title['en-US']);
     expect(result).to.have.property('entryId', entryEvent.entry.sys.id);
     expect(result).to.have.property('spaceId', entryEvent.entry.sys.space.sys.id);
     expect(result).to.have.property('contentTypeId', mockContentType.sys.id);
     expect(result).to.have.property('action', 'archived');
-    expect(result).to.have.property('actorName', 'Gavin Matthews');
     expect(result).to.have.property('eventDatetime', entryEvent.eventDatetime);
   });
 
