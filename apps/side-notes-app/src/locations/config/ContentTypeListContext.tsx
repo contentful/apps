@@ -12,7 +12,7 @@ export const ContentTypeListContext = createContext<ContentTypeListContextType>(
 export const ContentTypeListContextProvider = ({ children }: { children: ReactNode }) => {
   const cma = useCMA();
 
-  const { data: allContentTypes } = useSWR('content-types', cma.contentType.getMany);
+  const { data: allContentTypes } = useSWR('content-types', cma.contentType.getMany, {});
 
   const allContentTypesMap = useMemo(() => {
     return (allContentTypes?.items || []).reduce((result, item) => {
