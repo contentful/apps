@@ -11,14 +11,11 @@ import { getLocalizedValue } from './localisation-helpers';
 const MAX_LIMIT = 500;
 
 function getProductAttributes(definitions: AttributeDefinition[], attributes: Attribute[]) {
-  const indexedDefinitions = definitions.reduce(
-    (acc, definition) => {
-      acc[definition.name] = definition;
+  const indexedDefinitions = definitions.reduce((acc, definition) => {
+    acc[definition.name] = definition;
 
-      return acc;
-    },
-    {} as Record<string, AttributeDefinition>
-  );
+    return acc;
+  }, {} as Record<string, AttributeDefinition>);
   const productAttributes: { name: string; value: string }[] = [];
 
   for (const attribute of attributes) {

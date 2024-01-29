@@ -10,7 +10,7 @@ import { setState as setSdkState } from './stores/sdk.store';
 
 type CompleteInit = <
   T extends KnownSDK = KnownSDK,
-  C extends ((channel: any, params: any) => any) | undefined = undefined,
+  C extends ((channel: any, params: any) => any) | undefined = undefined
 >(
   initCallback: C extends Function ? (sdk: T, customSdk: ReturnType<C>) => any : (sdk: T) => any,
   options?: { makeCustomApi: C; supressIframeWarning?: boolean }

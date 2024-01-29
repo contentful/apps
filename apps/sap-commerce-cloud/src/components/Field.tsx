@@ -50,8 +50,8 @@ function makeCTAText(fieldType: string, pickerMode: 'category' | 'product') {
         ? 'categories'
         : 'a category'
       : isArray
-        ? 'products'
-        : 'a product';
+      ? 'products'
+      : 'a product';
   return `Select ${beingSelected}`;
 }
 
