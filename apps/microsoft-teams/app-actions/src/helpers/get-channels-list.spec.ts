@@ -1,7 +1,6 @@
 import { expect } from 'chai';
-import { transformInstallationsToChannelsList } from './get-channels-list';
-import { mockChannels } from '../../test/fixtures/mockChannels';
-import { mockTeamInstallations } from '../../test/mocks';
+import { transformInstallationsToChannelsList, sortChannels } from './get-channels-list';
+import { mockTeamInstallations, mockChannels } from '../../test/mocks';
 
 describe('transformInstallationsToChannelsList', () => {
   it('formats installation data to channels list', () => {
@@ -20,5 +19,16 @@ describe('transformInstallationsToChannelsList', () => {
     );
 
     expect(channelsList).to.eql(mockChannels);
+  });
+});
+
+describe('sortChannels', () => {
+  it('sorts teams and and channels in the correct order', () => {
+    const sortedChannels = mockChannels.sort(sortChannels);
+
+    expect(sortedChannels[0].teamName).to.equal('Marketing Team');
+    expect(sortedChannels[0].name).to.equal('General');
+    expect(sortedChannels[1].name).to.equal('Branding');
+    expect(sortedChannels[3].teamName).to.equal('Sales Team');
   });
 });
