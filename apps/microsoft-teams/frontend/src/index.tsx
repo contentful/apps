@@ -7,7 +7,7 @@ import LocalhostWarning from '@components/LocalhostWarning';
 import { SdkWithCustomApiProvider } from '@context/SdkWithCustomApiProvider';
 import { sentryMarketplaceAppsSDK } from '@contentful/integration-frontend-toolkit/sdks';
 
-const { client: SentryClient, init: SentryInit } = sentryMarketplaceAppsSDK
+const { client: SentryClient, init: SentryInit } = sentryMarketplaceAppsSDK;
 
 SentryInit();
 

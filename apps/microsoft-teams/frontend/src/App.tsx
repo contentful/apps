@@ -28,7 +28,7 @@ const App = () => {
   const Component = useMemo(() => {
     for (const [location, component] of Object.entries(ComponentLocationSettings)) {
       if (sdk.location.is(location)) {
-        sentryMarketplaceAppsSDK.setContentfulSentryContext(sdk.ids, sdk.location, APP_NAME)
+        sentryMarketplaceAppsSDK.setContentfulSentryContext(sdk.ids, sdk.location, APP_NAME);
         return component;
       }
     }
