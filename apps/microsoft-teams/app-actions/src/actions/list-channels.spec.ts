@@ -5,8 +5,7 @@ import { AppInstallationProps, SysLink } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { handler } from './list-channels';
 import { AppActionCallResponseSuccess, Channel } from '../types';
-import { makeMockAppActionCallContext } from '../../test/mocks';
-import { mockChannels } from '../../test/fixtures/mockChannels';
+import { makeMockAppActionCallContext, mockChannels } from '../../test/mocks';
 import helpers from '../helpers';
 
 chai.use(sinonChai);
