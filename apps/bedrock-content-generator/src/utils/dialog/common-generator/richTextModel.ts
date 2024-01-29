@@ -5,17 +5,17 @@
  * @returns
  */
 const richTextModel = (text: string) => {
-  const textLines = text.split("\n");
+  const textLines = text.split('\n');
 
   return {
-    nodeType: "document",
+    nodeType: 'document',
     data: {},
     content: textLines.map((line) => ({
-      nodeType: "paragraph",
+      nodeType: 'paragraph',
       data: {},
       content: [
         {
-          nodeType: "text",
+          nodeType: 'text',
           value: line,
           marks: [],
           data: {},

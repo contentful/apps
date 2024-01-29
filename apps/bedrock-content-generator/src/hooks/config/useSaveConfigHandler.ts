@@ -1,8 +1,8 @@
-import AppInstallationParameters from "@components/config/appInstallationParameters";
-import { AppState, ConfigAppSDK } from "@contentful/app-sdk";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { generateEditorInterfaceAssignments } from "@utils/config/contentTypeHelpers";
-import { useCallback, useEffect } from "react";
+import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { AppState, ConfigAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { generateEditorInterfaceAssignments } from '@utils/config/contentTypeHelpers';
+import { useCallback, useEffect } from 'react';
 
 /**
  * This hook is used to save the parameters of the app.
@@ -14,7 +14,7 @@ import { useCallback, useEffect } from "react";
 const useSaveConfigHandler = (
   parameters: AppInstallationParameters,
   validateParams: (params: AppInstallationParameters) => string[],
-  contentTypes: Set<string>,
+  contentTypes: Set<string>
 ) => {
   const sdk = useSDK<ConfigAppSDK>();
   // const { trackEvent } = useContext(SegmentAnalyticsContext);
@@ -35,8 +35,8 @@ const useSaveConfigHandler = (
     const newEditorInterfaceAssignments = generateEditorInterfaceAssignments(
       currentEditorInterface,
       Array.from(contentTypes),
-      "sidebar",
-      1,
+      'sidebar',
+      1
     );
 
     // trackEvent(SegmentEvents.CONFIG_SAVED);

@@ -1,14 +1,10 @@
-import { AIFeature } from "./featureConfig";
+import { AIFeature } from './featureConfig';
 
 /**
  * Core Types
  */
 
-export type Prompt = (
-  input: string,
-  targetLocale: string,
-  ...args: string[]
-) => string;
+export type Prompt = (input: string, targetLocale: string, ...args: string[]) => string;
 
 /**
  * Feature Items

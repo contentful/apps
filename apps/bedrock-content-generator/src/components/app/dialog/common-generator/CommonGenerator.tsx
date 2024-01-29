@@ -1,42 +1,31 @@
-import SourceAndFieldSelectors from "@components/app/dialog/common-generator/field-selector/SourceAndFieldSelectors";
-import Header from "@components/app/dialog/common-generator/header/Header";
-import Output from "@components/app/dialog/common-generator/output/Output";
-import featureConfig from "@configs/features/featureConfig";
-import { Box, Flex } from "@contentful/f36-components";
-import { GenerateMessage } from "@hooks/dialog/useAI";
-import { TextFields } from "@hooks/dialog/useSupportedFields";
-import { GeneratorContext, GeneratorState } from "@providers/generatorProvider";
-import {
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import generatorReducer, { GeneratorParameters } from "./generatorReducer";
+import SourceAndFieldSelectors from '@components/app/dialog/common-generator/field-selector/SourceAndFieldSelectors';
+import Header from '@components/app/dialog/common-generator/header/Header';
+import Output from '@components/app/dialog/common-generator/output/Output';
+import featureConfig from '@configs/features/featureConfig';
+import { Box, Flex } from '@contentful/f36-components';
+import { GenerateMessage } from '@hooks/dialog/useAI';
+import { TextFields } from '@hooks/dialog/useSupportedFields';
+import { GeneratorContext, GeneratorState } from '@providers/generatorProvider';
+import { useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import generatorReducer, { GeneratorParameters } from './generatorReducer';
 
 const initialParameters: GeneratorParameters = {
   isNewText: false,
-  sourceField: "",
+  sourceField: '',
   output: {
-    fieldId: "",
-    fieldKey: "",
-    locale: "",
+    fieldId: '',
+    fieldKey: '',
+    locale: '',
     validation: null,
   },
-  originalText: { prompt: "", field: "" },
+  originalText: { prompt: '', field: '' },
   canGenerateTextFromField: false,
 };
 
 const CommonGenerator = () => {
-  const { setProviderData, feature, localeNames, state } =
-    useContext(GeneratorContext);
+  const { setProviderData, feature, localeNames, state } = useContext(GeneratorContext);
 
-  const [parameters, dispatch] = useReducer(
-    generatorReducer,
-    initialParameters,
-  );
+  const [parameters, dispatch] = useReducer(generatorReducer, initialParameters);
   const [headerHeight, setHeaderHeight] = useState(0);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -44,9 +33,7 @@ const CommonGenerator = () => {
     () => ({
       feature_id: feature,
       from_prompt: parameters.isNewText,
-      source_field: parameters.isNewText
-        ? ""
-        : parameters.sourceField.split(":")[1],
+      source_field: parameters.isNewText ? '' : parameters.sourceField.split(':')[1],
       content_generation_prompt: parameters.originalText.prompt || undefined,
       target_locale: parameters.output.locale,
     }),
@@ -56,7 +43,7 @@ const CommonGenerator = () => {
       parameters.originalText.prompt,
       parameters.output.locale,
       parameters.sourceField,
-    ],
+    ]
   );
 
   const updateProviderData = () => {
@@ -93,10 +80,7 @@ const CommonGenerator = () => {
     <Flex flexDirection="column">
       <Box ref={headerRef}>
         <Header />
-        <SourceAndFieldSelectors
-          parameters={parameters}
-          fieldTypes={TextFields}
-        />
+        <SourceAndFieldSelectors parameters={parameters} fieldTypes={TextFields} />
       </Box>
       <Output
         onGenerate={handleGenerate}

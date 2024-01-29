@@ -1,28 +1,14 @@
-import {
-  Box,
-  Button,
-  Flex,
-  FormLabel,
-  TextInput,
-} from "@contentful/f36-components";
-import { useEffect, useState } from "react";
-import { useDebounce } from "usehooks-ts";
-import { styles } from "./ButtonTextField.styles";
+import { Box, Button, Flex, FormLabel, TextInput } from '@contentful/f36-components';
+import { useEffect, useState } from 'react';
+import { useDebounce } from 'usehooks-ts';
+import { styles } from './ButtonTextField.styles';
 
 interface Props {
   inputValue: string;
   handleInputChange: (inputData: string | ((prev: string) => string)) => void;
 }
 
-export const buttons = [
-  "Shorter",
-  "Longer",
-  "Casual",
-  "Formal",
-  "Simple",
-  "Witty",
-  "Tolkien",
-];
+export const buttons = ['Shorter', 'Longer', 'Casual', 'Formal', 'Simple', 'Witty', 'Tolkien'];
 
 const ButtonTextField = (props: Props) => {
   const { inputValue, handleInputChange } = props;
@@ -50,14 +36,9 @@ const ButtonTextField = (props: Props) => {
     const labelWithExtraSpacesRegex = new RegExp(`\\s*${label}\\s*,`);
 
     handleInputChange((prevValue) => {
-      const valueWithoutLabel = prevValue.replace(
-        labelWithExtraSpacesRegex,
-        "",
-      );
+      const valueWithoutLabel = prevValue.replace(labelWithExtraSpacesRegex, '');
       const trimmedValue = valueWithoutLabel.trim();
-      const updatedText = trimmedValue.endsWith(",")
-        ? trimmedValue + " "
-        : trimmedValue;
+      const updatedText = trimmedValue.endsWith(',') ? trimmedValue + ' ' : trimmedValue;
 
       return updatedText;
     });
@@ -71,7 +52,7 @@ const ButtonTextField = (props: Props) => {
         return `${label}, `;
       }
 
-      const delimiter = trimmedPrev.endsWith(",") ? " " : ", ";
+      const delimiter = trimmedPrev.endsWith(',') ? ' ' : ', ';
       return trimmedPrev + delimiter + `${label}, `;
     });
   };
@@ -84,7 +65,7 @@ const ButtonTextField = (props: Props) => {
     const updateActiveButtons = () => {
       const inputDataArray = debouncedInputValue
         .toLowerCase()
-        .split(",")
+        .split(',')
         ?.map((value) => value.trim());
 
       const inputSet = new Set(inputDataArray || []);
@@ -107,14 +88,13 @@ const ButtonTextField = (props: Props) => {
   return (
     <Box width={100} css={styles.wrapper}>
       <FormLabel>Select tone options</FormLabel>
-      <Flex flexWrap="wrap" marginBottom={"spacingL"}>
+      <Flex flexWrap="wrap" marginBottom={'spacingL'}>
         {buttons.map((buttonLabel) => (
           <Button
             css={styles.button}
             key={buttonLabel}
             onClick={() => handleButtonClick(buttonLabel)}
-            isActive={activeButtons.has(buttonLabel.toLowerCase())}
-          >
+            isActive={activeButtons.has(buttonLabel.toLowerCase())}>
             {buttonLabel}
           </Button>
         ))}

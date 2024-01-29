@@ -1,22 +1,22 @@
-import { css } from "@emotion/react";
-import tokens from "@contentful/f36-tokens";
+import { css } from '@emotion/react';
+import tokens from '@contentful/f36-tokens';
 
 export const styles = {
   container: css({
-    height: "100%",
+    height: '100%',
   }),
   textarea: css({
     flexGrow: 1,
   }),
   helpText: css({
-    display: "flex",
-    alignItems: "center",
+    display: 'flex',
+    alignItems: 'center',
     color: `${tokens.gray500}`,
     margin: `0 ${tokens.spacingS}`,
   }),
   warningContainer: css({
-    display: "flex",
-    alignItems: "center",
+    display: 'flex',
+    alignItems: 'center',
     margin: `0 ${tokens.spacingS}`,
   }),
   warningMessage: css({

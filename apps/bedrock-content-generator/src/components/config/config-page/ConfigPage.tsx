@@ -1,25 +1,23 @@
-import AddToSidebarSection from "@components/config/add-to-sidebar-section/AddToSidebarSection";
-import BrandSection from "@components/config/brand-section/BrandSection";
-import ConfigSection from "@components/config/config-section/ConfigSection";
-import { ConfigErrors, Sections } from "@components/config/configText";
-import contentTypeReducer from "@components/config/contentTypeReducer";
-import CostSection from "@components/config/cost-section/CostSection";
-import DisclaimerSection from "@components/config/disclaimer-section/DisclaimerSection";
-import parameterReducer, {
-  Validator,
-} from "@components/config/parameterReducer";
-import { defaultRegionId } from "@configs/aws/bedrockRegions";
-import { Box, Heading } from "@contentful/f36-components";
-import useGetContentTypes from "@hooks/config/useGetContentTypes";
-import useInitializeParameters from "@hooks/config/useInitializeParameters";
-import useSaveConfigHandler from "@hooks/config/useSaveConfigHandler";
-import { useMemo, useReducer } from "react";
-import AppInstallationParameters from "../appInstallationParameters";
-import { styles } from "./ConfigPage.styles";
+import AddToSidebarSection from '@components/config/add-to-sidebar-section/AddToSidebarSection';
+import BrandSection from '@components/config/brand-section/BrandSection';
+import ConfigSection from '@components/config/config-section/ConfigSection';
+import { ConfigErrors, Sections } from '@components/config/configText';
+import contentTypeReducer from '@components/config/contentTypeReducer';
+import CostSection from '@components/config/cost-section/CostSection';
+import DisclaimerSection from '@components/config/disclaimer-section/DisclaimerSection';
+import parameterReducer, { Validator } from '@components/config/parameterReducer';
+import { defaultRegionId } from '@configs/aws/bedrockRegions';
+import { Box, Heading } from '@contentful/f36-components';
+import useGetContentTypes from '@hooks/config/useGetContentTypes';
+import useInitializeParameters from '@hooks/config/useInitializeParameters';
+import useSaveConfigHandler from '@hooks/config/useSaveConfigHandler';
+import { useMemo, useReducer } from 'react';
+import AppInstallationParameters from '../appInstallationParameters';
+import { styles } from './ConfigPage.styles';
 
 const initialParameters: Validator<AppInstallationParameters> = {
   model: {
-    value: "",
+    value: '',
     isValid: true,
   },
   region: {
@@ -27,15 +25,15 @@ const initialParameters: Validator<AppInstallationParameters> = {
     isValid: true,
   },
   accessKeyId: {
-    value: "",
+    value: '',
     isValid: false,
   },
   secretAccessKey: {
-    value: "",
+    value: '',
     isValid: false,
   },
   profile: {
-    value: "",
+    value: '',
     isValid: true,
   },
   brandProfile: {},
@@ -44,14 +42,8 @@ const initialParameters: Validator<AppInstallationParameters> = {
 const initialContentTypes: Set<string> = new Set();
 
 const ConfigPage = () => {
-  const [parameters, dispatchParameters] = useReducer(
-    parameterReducer,
-    initialParameters,
-  );
-  const [contentTypes, dispatchContentTypes] = useReducer(
-    contentTypeReducer,
-    initialContentTypes,
-  );
+  const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
+  const [contentTypes, dispatchContentTypes] = useReducer(contentTypeReducer, initialContentTypes);
 
   const parametersToSave: AppInstallationParameters = useMemo(() => {
     return {
@@ -83,30 +75,20 @@ const ConfigPage = () => {
     const notifierErrors = [];
 
     if (!parameters.accessKeyId.isValid) {
-      notifierErrors.push(
-        `${ConfigErrors.failedToSave} ${ConfigErrors.missingAccessKeyID}`,
-      );
+      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingAccessKeyID}`);
     }
 
     if (!parameters.secretAccessKey.isValid) {
-      notifierErrors.push(
-        `${ConfigErrors.failedToSave} ${ConfigErrors.missingSecretAccessKey}`,
-      );
+      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingSecretAccessKey}`);
     }
 
     if (!parameters.model.isValid) {
-      notifierErrors.push(
-        `${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`,
-      );
+      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.missingModel}`);
     }
 
-    const invalidBrandProfile = Object.values(
-      parameters.brandProfile,
-    ).findIndex((p) => !p.isValid);
+    const invalidBrandProfile = Object.values(parameters.brandProfile).findIndex((p) => !p.isValid);
     if (!parameters.profile.isValid || invalidBrandProfile !== -1) {
-      notifierErrors.push(
-        `${ConfigErrors.failedToSave} ${ConfigErrors.exceededCharacterLimit}`,
-      );
+      notifierErrors.push(`${ConfigErrors.failedToSave} ${ConfigErrors.exceededCharacterLimit}`);
     }
 
     return notifierErrors;

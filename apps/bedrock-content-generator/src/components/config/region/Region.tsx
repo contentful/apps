@@ -1,10 +1,10 @@
-import HyperLink from "@components/common/HyperLink/HyperLink";
-import { bedrockRegions } from "@configs/aws/bedrockRegions";
-import { FormControl, Select } from "@contentful/f36-components";
-import { ExternalLinkIcon } from "@contentful/f36-icons";
-import { ChangeEvent, Dispatch } from "react";
-import { ConfigErrors, RegionText } from "../configText";
-import { ParameterAction, ParameterReducer } from "../parameterReducer";
+import HyperLink from '@components/common/HyperLink/HyperLink';
+import { bedrockRegions } from '@configs/aws/bedrockRegions';
+import { FormControl, Select } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { ChangeEvent, Dispatch } from 'react';
+import { ConfigErrors, RegionText } from '../configText';
+import { ParameterAction, ParameterReducer } from '../parameterReducer';
 
 interface Props {
   dispatch: Dispatch<ParameterReducer>;

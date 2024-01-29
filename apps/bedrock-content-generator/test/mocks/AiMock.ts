@@ -1,9 +1,9 @@
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
 function getStubbedGenerator(
-  textToStream: string,
+  textToStream: string
 ): Promise<AsyncGenerator<string, void, unknown> | undefined> {
-  const streamData = textToStream.split(" ");
+  const streamData = textToStream.split(' ');
 
   async function* generate() {
     for (const value in streamData) {
@@ -19,25 +19,21 @@ const AIMock = vi.fn().mockImplementation(() => {
   return {
     streamChatCompletion: vi
       .fn()
-      .mockResolvedValue(
-        Promise.resolve(getStubbedGenerator("This is a test")),
-      ),
+      .mockResolvedValue(Promise.resolve(getStubbedGenerator('This is a test'))),
     parseStream: vi
       .fn()
-      .mockImplementation(
-        async (stream: ReadableStreamDefaultReader<Uint8Array>) => {
-          if (stream) {
-            const { done, value } = await stream.read();
-            if (done) {
-              return false;
-            }
-
-            const decodedValue = new TextDecoder("utf-8").decode(value);
-
-            return decodedValue;
+      .mockImplementation(async (stream: ReadableStreamDefaultReader<Uint8Array>) => {
+        if (stream) {
+          const { done, value } = await stream.read();
+          if (done) {
+            return false;
           }
-        },
-      ),
+
+          const decodedValue = new TextDecoder('utf-8').decode(value);
+
+          return decodedValue;
+        }
+      }),
     sendStopSignal: vi.fn().mockResolvedValue(Promise.resolve()),
   };
 });

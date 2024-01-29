@@ -1,10 +1,10 @@
-import { Box, Flex, Form, Subheading } from "@contentful/f36-components";
-import { Dispatch } from "react";
-import AccessKey from "../access-key/AccessKey";
-import { Sections } from "../configText";
-import Model from "../model/Model";
-import { ParameterReducer } from "../parameterReducer";
-import Region from "../region/Region";
+import { Box, Flex, Form, Subheading } from '@contentful/f36-components';
+import { Dispatch } from 'react';
+import AccessKey from '../access-key/AccessKey';
+import { Sections } from '../configText';
+import Model from '../model/Model';
+import { ParameterReducer } from '../parameterReducer';
+import Region from '../region/Region';
 
 interface Props {
   accessKeyID: string;

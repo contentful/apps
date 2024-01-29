@@ -8,13 +8,13 @@ interface AppInstallationParameters {
 }
 
 export enum ProfileFields {
-  PROFILE = "profile",
-  VALUES = "values",
-  TONE = "tone",
-  EXCLUDE = "exclude",
-  INCLUDE = "include",
-  AUDIENCE = "audience",
-  ADDITIONAL = "additional",
+  PROFILE = 'profile',
+  VALUES = 'values',
+  TONE = 'tone',
+  EXCLUDE = 'exclude',
+  INCLUDE = 'include',
+  AUDIENCE = 'audience',
+  ADDITIONAL = 'additional',
 }
 
 export type ProfileType = {

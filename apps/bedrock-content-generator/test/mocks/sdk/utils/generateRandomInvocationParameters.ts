@@ -1,6 +1,6 @@
-import { AIFeature } from "@configs/features/featureConfig";
-import { DialogInvocationParameters } from "@locations/Dialog";
-import { generateRandomString } from "@test/mocks";
+import { AIFeature } from '@configs/features/featureConfig';
+import { DialogInvocationParameters } from '@locations/Dialog';
+import { generateRandomString } from '@test/mocks';
 
 const generateRandomInvocationParameters = (): DialogInvocationParameters => {
   const features = Object.values(AIFeature);

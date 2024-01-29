@@ -1,16 +1,13 @@
-import {
-  BedrockClient,
-  ListFoundationModelsCommand,
-} from "@aws-sdk/client-bedrock";
+import { BedrockClient, ListFoundationModelsCommand } from '@aws-sdk/client-bedrock';
 import {
   AccessDeniedException,
   BedrockRuntimeClient,
   InvokeModelCommand,
   InvokeModelWithResponseStreamCommand,
   ResponseStream,
-} from "@aws-sdk/client-bedrock-runtime";
-import { ModelAvailability } from "@components/config/model/Model";
-import { BedrockModel } from "@configs/aws/featuredModels";
+} from '@aws-sdk/client-bedrock-runtime';
+import { ModelAvailability } from '@components/config/model/Model';
+import { BedrockModel } from '@configs/aws/featuredModels';
 
 class AI {
   model?: BedrockModel;
@@ -18,13 +15,8 @@ class AI {
   private bedrockClient: BedrockClient;
   private bedrockRuntimeClient: BedrockRuntimeClient;
 
-  constructor(
-    accessKeyID: string,
-    secretAccessKey: string,
-    region: string,
-    model?: BedrockModel,
-  ) {
-    this.decoder = new TextDecoder("utf-8");
+  constructor(accessKeyID: string, secretAccessKey: string, region: string, model?: BedrockModel) {
+    this.decoder = new TextDecoder('utf-8');
 
     const config = {
       region,
@@ -45,21 +37,19 @@ class AI {
    */
   streamChatCompletion = async (
     systemPrompt: string,
-    prompt: string,
+    prompt: string
   ): Promise<AsyncGenerator<string, void, unknown> | undefined> => {
     const model = this.model!;
     console.log(`modelId: ${model.id}`);
     const stream = await this.bedrockRuntimeClient.send(
-      new InvokeModelWithResponseStreamCommand(
-        model.invokeCommand(systemPrompt, prompt, 2048),
-      ),
+      new InvokeModelWithResponseStreamCommand(model.invokeCommand(systemPrompt, prompt, 2048))
     );
 
     if (!stream.body) return;
 
     const transformStream = async function* (
       decoder: TextDecoder,
-      stream: AsyncIterable<ResponseStream>,
+      stream: AsyncIterable<ResponseStream>
     ) {
       for await (const chunk of stream) {
         if (chunk.chunk) {
@@ -81,35 +71,25 @@ class AI {
    * @param modelId string
    * @returns Promise<ModelAvailability> with the availability status
    */
-  getModelAvailability: (
-    model: BedrockModel,
-  ) => Promise<ModelAvailability | Error> = async (model: BedrockModel) => {
+  getModelAvailability: (model: BedrockModel) => Promise<ModelAvailability | Error> = async (
+    model: BedrockModel
+  ) => {
     try {
       console.log(model);
-      await this.bedrockRuntimeClient.send(
-        new InvokeModelCommand(model.invokeCommand("", "", 1)),
-      );
+      await this.bedrockRuntimeClient.send(new InvokeModelCommand(model.invokeCommand('', '', 1)));
     } catch (e: unknown) {
       if (!(e instanceof Error)) {
-        return Error("An unexpected error has occurred");
+        return Error('An unexpected error has occurred');
       }
       if (e instanceof AccessDeniedException) {
-        if (
-          e.message.includes(
-            "is not authorized to perform: bedrock:InvokeModel",
-          )
-        )
-          return "FORBIDDEN";
-        if (
-          e.message.includes(
-            "You don't have access to the model with the specified model ID.",
-          )
-        )
-          return "NOT_IN_ACCOUNT";
+        if (e.message.includes('is not authorized to perform: bedrock:InvokeModel'))
+          return 'FORBIDDEN';
+        if (e.message.includes("You don't have access to the model with the specified model ID."))
+          return 'NOT_IN_ACCOUNT';
       }
       return e;
     }
-    return "AVAILABLE";
+    return 'AVAILABLE';
   };
 
   /**
@@ -117,9 +97,7 @@ class AI {
    * @returns Promise<Response>
    */
   getModels = async () => {
-    const models = await this.bedrockClient.send(
-      new ListFoundationModelsCommand({}),
-    );
+    const models = await this.bedrockClient.send(new ListFoundationModelsCommand({}));
 
     return models.modelSummaries ?? [];
   };

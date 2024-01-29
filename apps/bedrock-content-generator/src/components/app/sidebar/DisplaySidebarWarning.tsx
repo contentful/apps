@@ -1,8 +1,8 @@
-import BrandProfileMissingWarning from "@components/app/sidebar/BrandProfileMissingWarning";
-import { warningMessages } from "@components/app/sidebar/sidebarText";
-import { Box } from "@contentful/f36-components";
-import tokens from "@contentful/f36-tokens";
-import { css } from "@emotion/react";
+import BrandProfileMissingWarning from '@components/app/sidebar/BrandProfileMissingWarning';
+import { warningMessages } from '@components/app/sidebar/sidebarText';
+import { Box } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
+import { css } from '@emotion/react';
 
 const styles = {
   msgWrapper: css({

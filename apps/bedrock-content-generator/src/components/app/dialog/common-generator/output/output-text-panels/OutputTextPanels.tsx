@@ -1,13 +1,13 @@
-import featureConfig from "@configs/features/featureConfig";
-import { DialogAppSDK } from "@contentful/app-sdk";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import useAI, { GenerateMessage } from "@hooks/dialog/useAI";
-import useEntryAndContentType from "@hooks/dialog/useEntryAndContentType";
-import { GeneratorContext } from "@providers/generatorProvider";
-import { ContentTypeFieldValidation } from "contentful-management";
-import { useContext } from "react";
-import GeneratedTextPanel from "./generated-text-panel/GeneratedTextPanel";
-import OriginalTextPanel from "./original-text-panel/OriginalTextPanel";
+import featureConfig from '@configs/features/featureConfig';
+import { DialogAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import useAI, { GenerateMessage } from '@hooks/dialog/useAI';
+import useEntryAndContentType from '@hooks/dialog/useEntryAndContentType';
+import { GeneratorContext } from '@providers/generatorProvider';
+import { ContentTypeFieldValidation } from 'contentful-management';
+import { useContext } from 'react';
+import GeneratedTextPanel from './generated-text-panel/GeneratedTextPanel';
+import OriginalTextPanel from './original-text-panel/OriginalTextPanel';
 
 interface Props {
   onGenerate: (generateMessage: GenerateMessage) => void;
@@ -34,19 +34,13 @@ const OutputTextPanels = (props: Props) => {
   const sdk = useSDK<DialogAppSDK>();
 
   const handleEntryApply = async () => {
-    const success = await updateEntry(
-      outputFieldId,
-      outputFieldLocale,
-      ai.output,
-    );
+    const success = await updateEntry(outputFieldId, outputFieldLocale, ai.output);
     if (success) {
-      sdk.notifier.success("Content applied successfully.");
+      sdk.notifier.success('Content applied successfully.');
 
       sdk.close();
     } else {
-      sdk.notifier.error(
-        "Content did not apply successfully. Please try again.",
-      );
+      sdk.notifier.error('Content did not apply successfully. Please try again.');
     }
   };
 

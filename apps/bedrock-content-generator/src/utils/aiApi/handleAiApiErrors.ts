@@ -9,7 +9,7 @@ import {
   ServiceQuotaExceededException,
   ThrottlingException,
   ValidationException,
-} from "@aws-sdk/client-bedrock-runtime";
+} from '@aws-sdk/client-bedrock-runtime';
 
 export interface AiApiErrorType {
   message?: string;

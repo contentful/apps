@@ -1,23 +1,23 @@
-import { render, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { AIMock, mockCma, MockSdk } from "@test/mocks";
-import GeneratedTextPanel from "./GeneratedTextPanel";
-import useAI from "@hooks/dialog/useAI";
-import { Tabs } from "@contentful/f36-components";
-import { OutputTab } from "../../Output";
+import { render, renderHook } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { AIMock, mockCma, MockSdk } from '@test/mocks';
+import GeneratedTextPanel from './GeneratedTextPanel';
+import useAI from '@hooks/dialog/useAI';
+import { Tabs } from '@contentful/f36-components';
+import { OutputTab } from '../../Output';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
 
-vi.mock("@contentful/react-apps-toolkit", () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
   useCMA: () => mockCma,
 }));
 
-vi.mock("@utils/aiApi", () => AIMock);
+vi.mock('@utils/aiApi', () => AIMock);
 
-describe("GeneratedTextPanel", () => {
-  it("renders", () => {
+describe('GeneratedTextPanel', () => {
+  it('renders', () => {
     const hook = renderHook(() => useAI());
     const { getByText, unmount, rerender } = render(
       <Tabs currentTab={OutputTab.GENERATED_TEXT}>
@@ -27,10 +27,10 @@ describe("GeneratedTextPanel", () => {
           outputFieldValidation={null}
           apply={() => {}}
         />
-      </Tabs>,
+      </Tabs>
     );
-    expect(getByText("Regenerate")).toBeTruthy();
-    hook.result.current.output = "test";
+    expect(getByText('Regenerate')).toBeTruthy();
+    hook.result.current.output = 'test';
 
     rerender(
       <Tabs currentTab={OutputTab.GENERATED_TEXT}>
@@ -40,10 +40,10 @@ describe("GeneratedTextPanel", () => {
           outputFieldValidation={null}
           apply={() => {}}
         />
-      </Tabs>,
+      </Tabs>
     );
 
-    expect(getByText("4 characters")).toBeTruthy();
+    expect(getByText('4 characters')).toBeTruthy();
     unmount();
   });
 
@@ -62,10 +62,10 @@ describe("GeneratedTextPanel", () => {
           }}
           apply={() => {}}
         />
-      </Tabs>,
+      </Tabs>
     );
 
-    expect(getByText("Requires between 5 and 10 characters")).toBeTruthy();
+    expect(getByText('Requires between 5 and 10 characters')).toBeTruthy();
     unmount();
   });
 });

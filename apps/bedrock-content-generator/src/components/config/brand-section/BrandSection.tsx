@@ -1,19 +1,13 @@
-import { Dispatch } from "react";
-import {
-  Box,
-  Flex,
-  Form,
-  Paragraph,
-  Subheading,
-} from "@contentful/f36-components";
-import Profile from "../profile/Profile";
-import { Sections } from "../configText";
-import { ParameterReducer, Validator } from "../parameterReducer";
-import { css } from "@emotion/react";
-import { ProfileType } from "../appInstallationParameters";
+import { Dispatch } from 'react';
+import { Box, Flex, Form, Paragraph, Subheading } from '@contentful/f36-components';
+import Profile from '../profile/Profile';
+import { Sections } from '../configText';
+import { ParameterReducer, Validator } from '../parameterReducer';
+import { css } from '@emotion/react';
+import { ProfileType } from '../appInstallationParameters';
 
 export const styles = css({
-  width: "100%",
+  width: '100%',
 });
 
 interface Props {

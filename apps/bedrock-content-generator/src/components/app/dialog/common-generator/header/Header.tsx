@@ -1,13 +1,13 @@
-import { useContext } from "react";
-import { GeneratorContext } from "@providers/generatorProvider";
-import { Box, Flex, IconButton, Subheading } from "@contentful/f36-components";
-import { CloseIcon } from "@contentful/f36-icons";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { DialogAppSDK } from "@contentful/app-sdk";
-import featureConfig from "@configs/features/featureConfig";
-import SparkleFill from "@components/common/sparkle-icon/SparkleFill.svg";
-import { css } from "@emotion/react";
-import tokens from "@contentful/f36-tokens";
+import { useContext } from 'react';
+import { GeneratorContext } from '@providers/generatorProvider';
+import { Box, Flex, IconButton, Subheading } from '@contentful/f36-components';
+import { CloseIcon } from '@contentful/f36-icons';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { DialogAppSDK } from '@contentful/app-sdk';
+import featureConfig from '@configs/features/featureConfig';
+import SparkleFill from '@components/common/sparkle-icon/SparkleFill.svg';
+import { css } from '@emotion/react';
+import tokens from '@contentful/f36-tokens';
 
 const styles = {
   header: css({
@@ -29,8 +29,7 @@ const Header = () => {
       data-test-id="dialog-header"
       justifyContent="space-between"
       alignItems="center"
-      css={styles.header}
-    >
+      css={styles.header}>
       <Flex>
         <img src={SparkleFill} alt="Sparkle Icon"></img>
         <Subheading marginBottom="none" marginLeft="spacingXs">

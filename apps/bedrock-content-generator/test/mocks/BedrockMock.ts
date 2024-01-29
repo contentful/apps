@@ -1,9 +1,7 @@
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
-function getStubbedGenerator(
-  textToStream: string,
-): AsyncGenerator<any, void, unknown> | undefined {
-  const streamData = textToStream.split(" ").map((input: string) => {
+function getStubbedGenerator(textToStream: string): AsyncGenerator<any, void, unknown> | undefined {
+  const streamData = textToStream.split(' ').map((input: string) => {
     return new TextEncoder().encode(JSON.stringify({ completion: input }));
   });
 
@@ -23,7 +21,7 @@ export const BedrockClientMock = vi.fn().mockImplementation(() => {
 
 export const BedrockRuntimeClientMock = vi.fn().mockImplementation(() => {
   const stream = {
-    body: getStubbedGenerator("This is a test"),
+    body: getStubbedGenerator('This is a test'),
   };
   return {
     send: vi.fn().mockResolvedValue(Promise.resolve(stream)),

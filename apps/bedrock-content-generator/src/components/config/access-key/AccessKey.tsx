@@ -1,18 +1,12 @@
-import HyperLink from "@components/common/HyperLink/HyperLink";
-import { ConfigErrors } from "@components/config/configText";
-import {
-  Flex,
-  FormControl,
-  Spinner,
-  Text,
-  TextInput,
-} from "@contentful/f36-components";
-import { ExternalLinkIcon } from "@contentful/f36-icons";
-import AI from "@utils/aiApi";
-import { Dispatch, useState } from "react";
-import { AccessKeyText } from "../configText";
-import { ParameterAction, ParameterReducer } from "../parameterReducer";
-import { styles } from "./AccessKey.styles";
+import HyperLink from '@components/common/HyperLink/HyperLink';
+import { ConfigErrors } from '@components/config/configText';
+import { Flex, FormControl, Spinner, Text, TextInput } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
+import AI from '@utils/aiApi';
+import { Dispatch, useState } from 'react';
+import { AccessKeyText } from '../configText';
+import { ParameterAction, ParameterReducer } from '../parameterReducer';
+import { styles } from './AccessKey.styles';
 
 interface Props {
   accessKeyID: string;
@@ -22,16 +16,9 @@ interface Props {
   dispatch: Dispatch<ParameterReducer>;
 }
 
-const AccessKey = ({
-  accessKeyID,
-  secretAccessKey,
-  region,
-  isInvalid,
-  dispatch,
-}: Props) => {
+const AccessKey = ({ accessKeyID, secretAccessKey, region, isInvalid, dispatch }: Props) => {
   const [localAccessKeyID, setLocalAccessKeyID] = useState<string>(accessKeyID);
-  const [localSecretAccessKey, setLocalSecretAccessKey] =
-    useState<string>(secretAccessKey);
+  const [localSecretAccessKey, setLocalSecretAccessKey] = useState<string>(secretAccessKey);
 
   const [isValidating, setIsValidating] = useState<boolean>(false);
 
@@ -52,16 +39,13 @@ const AccessKey = ({
   };
 
   const updateCredentials = async () => {
-    if (
-      localAccessKeyID === accessKeyID &&
-      localSecretAccessKey == secretAccessKey
-    )
-      return console.log("no change");
+    if (localAccessKeyID === accessKeyID && localSecretAccessKey == secretAccessKey)
+      return console.log('no change');
 
     setIsValidating(true);
-    const isValid = localSecretAccessKey != "" && (await validateCredentials());
+    const isValid = localSecretAccessKey != '' && (await validateCredentials());
 
-    console.log("isValid", isValid);
+    console.log('isValid', isValid);
 
     dispatch({
       type: ParameterAction.UPDATE_CREDENTIALS,
@@ -77,7 +61,7 @@ const AccessKey = ({
   };
 
   const handleBlur = async () => {
-    console.log("handleBlur");
+    console.log('handleBlur');
     await updateCredentials();
     setIsEditing(false);
     setShowValidation(true);
@@ -111,9 +95,7 @@ const AccessKey = ({
         )}
       </FormControl>
       <FormControl isRequired>
-        <FormControl.Label>
-          {AccessKeyText.secretAccessKeyTitle}
-        </FormControl.Label>
+        <FormControl.Label>{AccessKeyText.secretAccessKeyTitle}</FormControl.Label>
 
         <TextInput
           value={localSecretAccessKey}
@@ -140,14 +122,9 @@ const AccessKey = ({
             <Spinner />
           </Flex>
         )}
-        {showValidation &&
-          !isValidating &&
-          secretAccessKeyError &&
-          !isEditing && (
-            <FormControl.ValidationMessage>
-              {secretAccessKeyError}
-            </FormControl.ValidationMessage>
-          )}
+        {showValidation && !isValidating && secretAccessKeyError && !isEditing && (
+          <FormControl.ValidationMessage>{secretAccessKeyError}</FormControl.ValidationMessage>
+        )}
 
         {!isInvalid && !isValidating && (
           <p css={styles.successMessage}>Credentials are Valid! 🎉</p>

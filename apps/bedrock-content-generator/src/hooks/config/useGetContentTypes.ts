@@ -1,11 +1,8 @@
-import { Dispatch, useEffect, useCallback, useState } from "react";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { ConfigAppSDK, AppState } from "@contentful/app-sdk";
-import { ContentTypeProps } from "contentful-management";
-import {
-  ContentTypeReducer,
-  ContentTypeAction,
-} from "@components/config/contentTypeReducer";
+import { Dispatch, useEffect, useCallback, useState } from 'react';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { ConfigAppSDK, AppState } from '@contentful/app-sdk';
+import { ContentTypeProps } from 'contentful-management';
+import { ContentTypeReducer, ContentTypeAction } from '@components/config/contentTypeReducer';
 
 /**
  * This hook is used to get all the content types for the space
@@ -14,9 +11,7 @@ import {
  * @returns allContentTypes
  */
 const useGetContentTypes = (dispatch: Dispatch<ContentTypeReducer>) => {
-  const [allContentTypes, setAllContentTypes] = useState<ContentTypeProps[]>(
-    [],
-  );
+  const [allContentTypes, setAllContentTypes] = useState<ContentTypeProps[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
 
   const getAllContentTypes = useCallback(async () => {

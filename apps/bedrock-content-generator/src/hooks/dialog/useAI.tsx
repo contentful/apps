@@ -1,16 +1,13 @@
-import AppInstallationParameters from "@components/config/appInstallationParameters";
-import { featuredModels } from "@configs/aws/featuredModels";
-import baseSystemPrompt from "@configs/prompts/baseSystemPrompt";
-import { DialogAppSDK } from "@contentful/app-sdk";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import AI from "@utils/aiApi";
-import { AiApiErrorType } from "@utils/aiApi/handleAiApiErrors";
-import { useEffect, useMemo, useState } from "react";
+import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { featuredModels } from '@configs/aws/featuredModels';
+import baseSystemPrompt from '@configs/prompts/baseSystemPrompt';
+import { DialogAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import AI from '@utils/aiApi';
+import { AiApiErrorType } from '@utils/aiApi/handleAiApiErrors';
+import { useEffect, useMemo, useState } from 'react';
 
-export type GenerateMessage = (
-  prompt: string,
-  targetLocale: string,
-) => Promise<string>;
+export type GenerateMessage = (prompt: string, targetLocale: string) => Promise<string>;
 
 /**
  * This hook is used to generate messages using the Bedrock API
@@ -20,31 +17,25 @@ export type GenerateMessage = (
  */
 const useAI = () => {
   const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
-  const model = featuredModels.find(
-    (m) => m.id === sdk.parameters.installation.model,
-  );
+  const model = featuredModels.find((m) => m.id === sdk.parameters.installation.model);
   const ai = useMemo(
     () =>
       new AI(
         sdk.parameters.installation.accessKeyId,
         sdk.parameters.installation.secretAccessKey,
         sdk.parameters.installation.region,
-        model,
+        model
       ),
-    [sdk.parameters.installation, model],
+    [sdk.parameters.installation, model]
   );
-  const [output, setOutput] = useState<string>("");
-  const [stream, setStream] = useState<AsyncGenerator<
-    string,
-    void,
-    unknown
-  > | null>(null);
+  const [output, setOutput] = useState<string>('');
+  const [stream, setStream] = useState<AsyncGenerator<string, void, unknown> | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<AiApiErrorType | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
 
   const resetOutput = () => {
-    setOutput("");
+    setOutput('');
     setError(null);
     setStream(null);
 
@@ -53,7 +44,7 @@ const useAI = () => {
 
   const generateMessage = async (prompt: string, targetLocale: string) => {
     resetOutput();
-    let completeMessage = "";
+    let completeMessage = '';
     setIsGenerating(true);
 
     try {
@@ -62,11 +53,11 @@ const useAI = () => {
           ...sdk.parameters.installation.brandProfile,
           profile: sdk.parameters.installation.profile,
         },
-        targetLocale,
+        targetLocale
       );
 
       const stream = await ai.streamChatCompletion(systemPrompt, prompt);
-      if (!stream) throw new Error("Stream is null");
+      if (!stream) throw new Error('Stream is null');
       setStream(stream);
 
       for await (const streamOutput of stream) {

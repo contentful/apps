@@ -1,23 +1,21 @@
-import { render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { MockSdk, mockCma } from "../../../../test/mocks";
-import DisplaySidebarWarning from "./DisplaySidebarWarning";
+import { render } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { MockSdk, mockCma } from '../../../../test/mocks';
+import DisplaySidebarWarning from './DisplaySidebarWarning';
 
 const mockSdk = new MockSdk();
 const sdk = mockSdk.sdk;
 
-vi.mock("@contentful/react-apps-toolkit", () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => sdk,
   useCMA: () => mockCma,
 }));
 
-describe("Display Sidebar Warning", () => {
-  it("renders", () => {
-    const { getByText, unmount } = render(
-      <DisplaySidebarWarning hasBrandProfile={false} />,
-    );
+describe('Display Sidebar Warning', () => {
+  it('renders', () => {
+    const { getByText, unmount } = render(<DisplaySidebarWarning hasBrandProfile={false} />);
 
-    expect(getByText("Missing brand profile.")).toBeTruthy();
+    expect(getByText('Missing brand profile.')).toBeTruthy();
     unmount();
   });
 

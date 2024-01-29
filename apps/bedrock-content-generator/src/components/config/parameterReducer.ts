@@ -1,12 +1,12 @@
-import AppInstallationParameters from "./appInstallationParameters";
+import AppInstallationParameters from './appInstallationParameters';
 
 export enum ParameterAction {
-  UPDATE_CREDENTIALS = "updateCredentials",
-  UPDATE_REGION = "updateRegion",
-  UPDATE_MODEL = "updateModel",
-  UPDATE_PROFILE = "updateProfile",
-  UPDATE_BRAND_PROFILE = "updateBrandProfile",
-  APPLY_CONTENTFUL_PARAMETERS = "applyContentfulParameters",
+  UPDATE_CREDENTIALS = 'updateCredentials',
+  UPDATE_REGION = 'updateRegion',
+  UPDATE_MODEL = 'updateModel',
+  UPDATE_PROFILE = 'updateProfile',
+  UPDATE_BRAND_PROFILE = 'updateBrandProfile',
+  APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
 }
 
 type ParameterUpdateCredentialsAction = {
@@ -71,7 +71,7 @@ export type Validator<Type> = {
 
 const parameterReducer = (
   state: Validator<AppInstallationParameters>,
-  action: ParameterReducer,
+  action: ParameterReducer
 ): Validator<AppInstallationParameters> => {
   switch (action.type) {
     case ParameterAction.UPDATE_CREDENTIALS: {
@@ -144,27 +144,27 @@ const parameterReducer = (
         },
         brandProfile: {
           values: {
-            value: parameter.brandProfile?.values || "",
+            value: parameter.brandProfile?.values || '',
             isValid: true,
           },
           tone: {
-            value: parameter.brandProfile?.tone || "",
+            value: parameter.brandProfile?.tone || '',
             isValid: true,
           },
           exclude: {
-            value: parameter.brandProfile?.exclude || "",
+            value: parameter.brandProfile?.exclude || '',
             isValid: true,
           },
           include: {
-            value: parameter.brandProfile?.include || "",
+            value: parameter.brandProfile?.include || '',
             isValid: true,
           },
           audience: {
-            value: parameter.brandProfile?.audience || "",
+            value: parameter.brandProfile?.audience || '',
             isValid: true,
           },
           additional: {
-            value: parameter.brandProfile?.additional || "",
+            value: parameter.brandProfile?.additional || '',
             isValid: true,
           },
         },

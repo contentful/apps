@@ -1,7 +1,7 @@
-import AppInstallationParameters from "@components/config/appInstallationParameters";
-import { SidebarAppSDK } from "@contentful/app-sdk";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { useEffect, useState } from "react";
+import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { SidebarAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { useEffect, useState } from 'react';
 
 /**
  * This hook is used to get the installation parameters from the sidebar location,

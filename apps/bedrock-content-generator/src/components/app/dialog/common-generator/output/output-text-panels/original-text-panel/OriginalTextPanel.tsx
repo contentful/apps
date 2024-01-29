@@ -1,12 +1,12 @@
-import { GeneratorAction } from "@components/app/dialog/common-generator/generatorReducer";
-import TextFieldWithButtons from "@components/common/text-field-with-buttons/TextFieldWIthButtons";
-import { DialogText } from "@configs/features/featureTypes";
-import { tokenWarning } from "@configs/token-warning/tokenWarning";
-import { Button, Tabs } from "@contentful/f36-components";
-import { css } from "@emotion/react";
-import { GeneratorContext } from "@providers/generatorProvider";
-import { useContext } from "react";
-import { OutputTab } from "../../Output";
+import { GeneratorAction } from '@components/app/dialog/common-generator/generatorReducer';
+import TextFieldWithButtons from '@components/common/text-field-with-buttons/TextFieldWIthButtons';
+import { DialogText } from '@configs/features/featureTypes';
+import { tokenWarning } from '@configs/token-warning/tokenWarning';
+import { Button, Tabs } from '@contentful/f36-components';
+import { css } from '@emotion/react';
+import { GeneratorContext } from '@providers/generatorProvider';
+import { useContext } from 'react';
+import { OutputTab } from '../../Output';
 
 const styles = {
   panel: css({
@@ -43,9 +43,7 @@ const OriginalTextPanel = (props: Props) => {
     generate();
   };
 
-  const handleOriginalTextChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleOriginalTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const type = isNewText
       ? GeneratorAction.UPDATE_ORIGINAL_TEXT_PROMPT
       : GeneratorAction.UPDATE_ORIGINAL_TEXT_FIELD;
@@ -58,16 +56,10 @@ const OriginalTextPanel = (props: Props) => {
   const isTextAreaDisabled = isNewText ? false : !inputText;
 
   const isGenerateButtonDisabled = !inputText || !hasOutputField;
-  const placeholderText = isNewText
-    ? dialogText.promptPlaceholder
-    : dialogText.fieldPlaceholder;
+  const placeholderText = isNewText ? dialogText.promptPlaceholder : dialogText.fieldPlaceholder;
 
-  const helpText = isNewText
-    ? dialogText.promptHelpText
-    : dialogText.fieldHelpText;
-  const helpTextProps = isGenerateButtonDisabled
-    ? { helpText }
-    : { warningMessage: tokenWarning };
+  const helpText = isNewText ? dialogText.promptHelpText : dialogText.fieldHelpText;
+  const helpTextProps = isGenerateButtonDisabled ? { helpText } : { warningMessage: tokenWarning };
 
   return (
     <Tabs.Panel id={OutputTab.UPDATE_ORIGINAL_TEXT} css={styles.panel}>
@@ -78,12 +70,8 @@ const OriginalTextPanel = (props: Props) => {
         placeholder={placeholderText}
         hasError={hasError}
         errorMessage={errorText}
-        {...helpTextProps}
-      >
-        <Button
-          onClick={handleGenerate}
-          isDisabled={isGenerateButtonDisabled || isGenerating}
-        >
+        {...helpTextProps}>
+        <Button onClick={handleGenerate} isDisabled={isGenerateButtonDisabled || isGenerating}>
           Generate
         </Button>
       </TextFieldWithButtons>

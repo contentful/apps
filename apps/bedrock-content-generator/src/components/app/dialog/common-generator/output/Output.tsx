@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import { Flex, Tabs } from "@contentful/f36-components";
-import useAI, { GenerateMessage } from "@hooks/dialog/useAI";
-import OutputTextPanels from "./output-text-panels/OutputTextPanels";
-import { ContentTypeFieldValidation } from "contentful-management";
-import { styles, makeOutputStyle } from "./Output.styles";
+import { useEffect, useState } from 'react';
+import { Flex, Tabs } from '@contentful/f36-components';
+import useAI, { GenerateMessage } from '@hooks/dialog/useAI';
+import OutputTextPanels from './output-text-panels/OutputTextPanels';
+import { ContentTypeFieldValidation } from 'contentful-management';
+import { styles, makeOutputStyle } from './Output.styles';
 
 enum OutputTab {
-  UPDATE_ORIGINAL_TEXT = "original-text",
-  GENERATED_TEXT = "generated-text",
+  UPDATE_ORIGINAL_TEXT = 'original-text',
+  GENERATED_TEXT = 'generated-text',
 }
 
 interface Props {
@@ -47,19 +47,15 @@ const Output = (props: Props) => {
       <Tabs
         currentTab={currentTab}
         onTabChange={(tab) => setCurrentTab(tab as OutputTab)}
-        css={styles.tabsContainer}
-      >
+        css={styles.tabsContainer}>
         <Tabs.List css={styles.tabsList}>
           <Tabs.Tab panelId={OutputTab.UPDATE_ORIGINAL_TEXT} css={styles.tab}>
             Source
           </Tabs.Tab>
           <Tabs.Tab
             panelId={OutputTab.GENERATED_TEXT}
-            isDisabled={
-              (ai.isGenerating && !ai.output.length) || !ai.output.length
-            }
-            css={styles.tab}
-          >
+            isDisabled={(ai.isGenerating && !ai.output.length) || !ai.output.length}
+            css={styles.tab}>
             Result
           </Tabs.Tab>
         </Tabs.List>

@@ -1,12 +1,9 @@
-import { Dispatch, useState, useEffect } from "react";
-import { Checkbox, FormControl, Table } from "@contentful/f36-components";
-import { ContentTypeProps } from "contentful-management";
-import { ContentTypeText } from "@components/config/configText";
-import {
-  ContentTypeAction,
-  ContentTypeReducer,
-} from "@components/config/contentTypeReducer";
-import { styles } from "./ContentTypeSelection.styles";
+import { Dispatch, useState, useEffect } from 'react';
+import { Checkbox, FormControl, Table } from '@contentful/f36-components';
+import { ContentTypeProps } from 'contentful-management';
+import { ContentTypeText } from '@components/config/configText';
+import { ContentTypeAction, ContentTypeReducer } from '@components/config/contentTypeReducer';
+import { styles } from './ContentTypeSelection.styles';
 
 interface Props {
   allContentTypes: ContentTypeProps[];
@@ -19,8 +16,7 @@ const ContentTypeSelection = (props: Props) => {
   const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
 
   useEffect(() => {
-    const areAllItemsChecked =
-      allContentTypes.length === selectedContentTypes.size;
+    const areAllItemsChecked = allContentTypes.length === selectedContentTypes.size;
     setIsSelectAllChecked(areAllItemsChecked);
   }, [allContentTypes.length, selectedContentTypes.size]);
 
@@ -33,10 +29,7 @@ const ContentTypeSelection = (props: Props) => {
     }
   };
 
-  const handleCheckboxChange = (
-    contentType: ContentTypeProps,
-    isChecked: boolean,
-  ) => {
+  const handleCheckboxChange = (contentType: ContentTypeProps, isChecked: boolean) => {
     const action = isChecked ? ContentTypeAction.REMOVE : ContentTypeAction.ADD;
     dispatch({ type: action, value: contentType.sys.id });
   };
@@ -55,8 +48,9 @@ const ContentTypeSelection = (props: Props) => {
                 id="select-all"
                 isChecked={isSelectAllChecked}
                 onChange={() => handleSelectAll()}
-                css={styles.selectAll}
-              >{`${ContentTypeText.allText} (${allContentTypes.length})`}</Checkbox>
+                css={
+                  styles.selectAll
+                }>{`${ContentTypeText.allText} (${allContentTypes.length})`}</Checkbox>
             </Table.Cell>
           </Table.Row>
         </Table.Head>
@@ -67,13 +61,7 @@ const ContentTypeSelection = (props: Props) => {
                 <Checkbox
                   id={contentType.sys.id}
                   isChecked={isChecked(contentType.sys.id)}
-                  onChange={() =>
-                    handleCheckboxChange(
-                      contentType,
-                      isChecked(contentType.sys.id),
-                    )
-                  }
-                >
+                  onChange={() => handleCheckboxChange(contentType, isChecked(contentType.sys.id))}>
                   {contentType.name}
                 </Checkbox>
               </Table.Cell>

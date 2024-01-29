@@ -1,9 +1,9 @@
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { SidebarAppSDK } from "@contentful/app-sdk";
-import Note from "@components/common/Note/Note";
-import HyperLink from "@components/common/HyperLink/HyperLink";
-import { css } from "@emotion/react";
-import tokens from "@contentful/f36-tokens";
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { SidebarAppSDK } from '@contentful/app-sdk';
+import Note from '@components/common/Note/Note';
+import HyperLink from '@components/common/HyperLink/HyperLink';
+import { css } from '@emotion/react';
+import tokens from '@contentful/f36-tokens';
 
 interface ParametersMissingProps {
   message: string;
@@ -13,7 +13,7 @@ interface ParametersMissingProps {
 const warningLinkStyles = css({
   color: `${tokens.gray700} !important`,
   fontWeight: `${tokens.fontWeightNormal} !important`,
-  textDecoration: "underline",
+  textDecoration: 'underline',
 });
 
 const ParametersMissingWarning = (props: ParametersMissingProps) => {

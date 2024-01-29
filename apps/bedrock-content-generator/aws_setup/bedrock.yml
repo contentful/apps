@@ -26,22 +26,22 @@ Resources:
   ContentfulBedrockManagedPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
-      Description: "Managed policy for accessing Bedrock"
+      Description: 'Managed policy for accessing Bedrock'
       Path: /
       PolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
-          - Effect: "Allow"
+          - Effect: 'Allow'
             Action:
-              - "bedrock:InvokeModel"
-              - "bedrock:GetFoundationModel"
-              - "bedrock:InvokeModelWithResponseStream"
-              - "bedrock:ListFoundationModels"
-            Resource: "*"
+              - 'bedrock:InvokeModel'
+              - 'bedrock:GetFoundationModel'
+              - 'bedrock:InvokeModelWithResponseStream'
+              - 'bedrock:ListFoundationModels'
+            Resource: '*'
 Outputs:
   SecretManagerURL:
-    Description: "URL to the Access and Secret Key in Secrets Manager"
-    Value: !Sub "https://console.aws.amazon.com/secretsmanager/home?region=${AWS::Region}#/secret?name=${ContentfulBedrockUserCredentialsStored}"
+    Description: 'URL to the Access and Secret Key in Secrets Manager'
+    Value: !Sub 'https://console.aws.amazon.com/secretsmanager/home?region=${AWS::Region}#/secret?name=${ContentfulBedrockUserCredentialsStored}'
   UserName:
     Value: !Ref ContentfulBedrockUser
     Export:

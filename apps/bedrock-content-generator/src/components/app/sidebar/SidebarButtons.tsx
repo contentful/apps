@@ -1,7 +1,7 @@
-import { Box } from "@contentful/f36-components";
-import featureConfig, { AIFeature } from "@configs/features/featureConfig";
-import FeatureButton from "./feature-button/FeatureButton";
-import { useState } from "react";
+import { Box } from '@contentful/f36-components';
+import featureConfig, { AIFeature } from '@configs/features/featureConfig';
+import FeatureButton from './feature-button/FeatureButton';
+import { useState } from 'react';
 
 const SidebarButtons = () => {
   const [isSaving, setIsSaving] = useState(false);

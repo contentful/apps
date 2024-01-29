@@ -1,13 +1,13 @@
-import { documentToPlainTextString } from "@contentful/rich-text-plain-text-renderer";
+import { documentToPlainTextString } from '@contentful/rich-text-plain-text-renderer';
 import {
   Field,
   SupportedFieldTypes,
   SupportedFieldsOutput,
-} from "@hooks/dialog/useSupportedFields";
-import { ContentFields, EntryProps } from "contentful-management";
-import { FieldLocales } from "@locations/Dialog";
-import { LocaleNames } from "@providers/generatorProvider";
-import { ContentTypeFieldValidation } from "contentful-management/types";
+} from '@hooks/dialog/useSupportedFields';
+import { ContentFields, EntryProps } from 'contentful-management';
+import { FieldLocales } from '@locations/Dialog';
+import { LocaleNames } from '@providers/generatorProvider';
+import { ContentTypeFieldValidation } from 'contentful-management/types';
 
 /**
  * This creates the size validation for the field
@@ -20,7 +20,7 @@ import { ContentTypeFieldValidation } from "contentful-management/types";
  */
 const createSizeValidation = (
   fieldValidations: ContentTypeFieldValidation[] | undefined,
-  fieldType: string,
+  fieldType: string
 ): ContentTypeFieldValidation => {
   const DEFAULT_CHAR_LENGTH = {
     [SupportedFieldTypes.RICH_TEXT]: 200000,
@@ -29,9 +29,7 @@ const createSizeValidation = (
   };
   const defaultMax = DEFAULT_CHAR_LENGTH[fieldType as SupportedFieldTypes];
 
-  const customSizeValidation = fieldValidations?.find(
-    (validation) => validation?.size,
-  ) || {
+  const customSizeValidation = fieldValidations?.find((validation) => validation?.size) || {
     size: { max: defaultMax },
   };
 
@@ -56,20 +54,20 @@ const formatField = (
   entry: EntryProps,
   locale: string,
   localeNames: LocaleNames,
-  defaultLocale: string,
+  defaultLocale: string
 ): Field => {
   const formattedField = {
     id: field.id,
     key: `${field.id}:${locale}`,
     name: `${field.name} - ${localeNames[locale]}`,
-    data: entry.fields[field.id] ? entry.fields[field.id][locale] : "",
+    data: entry.fields[field.id] ? entry.fields[field.id][locale] : '',
     locale: locale,
     language: localeNames[locale],
     sizeValidation: createSizeValidation(field.validations, field.type),
     isDefaultLocale: defaultLocale === locale,
   };
 
-  if (field.type === "RichText") {
+  if (field.type === 'RichText') {
     formattedField.data = documentToPlainTextString(formattedField.data);
   }
 
@@ -112,12 +110,10 @@ const isSupported = (
   supportedFields: SupportedFieldTypes[],
   fieldLocales: FieldLocales,
   localeNames: LocaleNames,
-  defaultLocale: string,
+  defaultLocale: string
 ) => {
   return (fieldAcc: SupportedFieldsOutput, field: ContentFields) => {
-    const isSupportedFieldType = supportedFields.includes(
-      field.type as SupportedFieldTypes,
-    );
+    const isSupportedFieldType = supportedFields.includes(field.type as SupportedFieldTypes);
     const isFieldVisible = !field.disabled;
 
     if (isSupportedFieldType && isFieldVisible) {
@@ -126,13 +122,7 @@ const isSupported = (
 
       fieldLocales[field.id].forEach((locale) => {
         const hasContent = entry.fields[field.id]?.[locale];
-        const formattedField = formatField(
-          field,
-          entry,
-          locale,
-          localeNames,
-          defaultLocale,
-        );
+        const formattedField = formatField(field, entry, locale, localeNames, defaultLocale);
 
         if (hasContent) {
           fieldsWithContent.push(formattedField);
@@ -140,19 +130,14 @@ const isSupported = (
         allFields.push(formattedField);
       });
 
-      const sortedFieldsWithContent = fieldsWithContent.sort(
-        sortFieldOptionsByLanguage,
-      );
+      const sortedFieldsWithContent = fieldsWithContent.sort(sortFieldOptionsByLanguage);
       const sortedAllFields = allFields.sort(sortFieldOptionsByLanguage);
 
       fieldAcc.supportedFieldsWithContent = [
         ...fieldAcc.supportedFieldsWithContent,
         ...sortedFieldsWithContent,
       ];
-      fieldAcc.allSupportedFields = [
-        ...fieldAcc.allSupportedFields,
-        ...sortedAllFields,
-      ];
+      fieldAcc.allSupportedFields = [...fieldAcc.allSupportedFields, ...sortedAllFields];
     }
 
     return fieldAcc;

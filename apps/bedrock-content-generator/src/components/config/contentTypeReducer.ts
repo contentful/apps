@@ -1,15 +1,12 @@
 export enum ContentTypeAction {
-  ADD = "add",
-  REMOVE = "remove",
-  ADD_ALL = "addAll",
-  REMOVE_ALL = "removeAll",
+  ADD = 'add',
+  REMOVE = 'remove',
+  ADD_ALL = 'addAll',
+  REMOVE_ALL = 'removeAll',
 }
 
 type ContentTypeActions = {
-  type: Exclude<
-    ContentTypeAction,
-    ContentTypeAction.REMOVE_ALL | ContentTypeAction.ADD_ALL
-  >;
+  type: Exclude<ContentTypeAction, ContentTypeAction.REMOVE_ALL | ContentTypeAction.ADD_ALL>;
   value: string;
 };
 

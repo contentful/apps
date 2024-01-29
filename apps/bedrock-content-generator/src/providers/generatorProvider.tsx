@@ -1,8 +1,8 @@
-import { GeneratorReducer } from "@components/app/dialog/common-generator/generatorReducer";
-import { AIFeature } from "@configs/features/featureConfig";
-import { FieldLocales } from "@locations/Dialog";
-import { ContentTypeProps, EntryProps } from "contentful-management";
-import { Dispatch, createContext, useState } from "react";
+import { GeneratorReducer } from '@components/app/dialog/common-generator/generatorReducer';
+import { AIFeature } from '@configs/features/featureConfig';
+import { FieldLocales } from '@locations/Dialog';
+import { ContentTypeProps, EntryProps } from 'contentful-management';
+import { Dispatch, createContext, useState } from 'react';
 
 export interface LocaleNames {
   [key: string]: string;
@@ -45,14 +45,14 @@ interface GeneratorProviderProps {
 }
 
 const defaultContext = {
-  entryId: "",
+  entryId: '',
   setProviderData: (() => {}) as (data: Partial<GeneratorContextProps>) => void,
 
   entry: null,
   contentType: null,
   fieldLocales: {},
   localeNames: {},
-  defaultLocale: "",
+  defaultLocale: '',
 
   dispatch: (() => {}) as Dispatch<GeneratorReducer>,
   feature: AIFeature.TITLE,
@@ -61,14 +61,7 @@ const defaultContext = {
 const GeneratorContext = createContext<GeneratorContextProps>(defaultContext);
 
 const GeneratorProvider = (props: GeneratorProviderProps) => {
-  const {
-    entryId,
-    children,
-    feature,
-    fieldLocales,
-    localeNames,
-    defaultLocale,
-  } = props;
+  const { entryId, children, feature, fieldLocales, localeNames, defaultLocale } = props;
   const [providerData, setProviderData] = useState<GeneratorContextProps>({
     ...defaultContext,
     entryId,
@@ -78,9 +71,7 @@ const GeneratorProvider = (props: GeneratorProviderProps) => {
     defaultLocale,
   });
 
-  const updateProviderData = (
-    newProviderData: Partial<GeneratorContextProps>,
-  ) => {
+  const updateProviderData = (newProviderData: Partial<GeneratorContextProps>) => {
     setProviderData({ ...providerData, ...newProviderData });
   };
 
@@ -89,8 +80,7 @@ const GeneratorProvider = (props: GeneratorProviderProps) => {
       value={{
         ...providerData,
         setProviderData: updateProviderData,
-      }}
-    >
+      }}>
       {children}
     </GeneratorContext.Provider>
   );

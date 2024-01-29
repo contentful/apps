@@ -1,8 +1,8 @@
-import AppInstallationParameters from "@components/config/appInstallationParameters";
-import { DialogAppSDK } from "@contentful/app-sdk";
-import { useSDK } from "@contentful/react-apps-toolkit";
-import { DialogInvocationParameters } from "@locations/Dialog";
-import { useEffect, useState } from "react";
+import AppInstallationParameters from '@components/config/appInstallationParameters';
+import { DialogAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { DialogInvocationParameters } from '@locations/Dialog';
+import { useEffect, useState } from 'react';
 
 type loadingState = {
   isLoading: true;
@@ -23,12 +23,8 @@ export type DialogParameters = loadingState | resolvedState;
  * @returns DialogInvocationParameters
  */
 const useDialogParameters = (): DialogParameters => {
-  const sdk =
-    useSDK<
-      DialogAppSDK<AppInstallationParameters, DialogInvocationParameters>
-    >();
-  const [parameters, setParameters] =
-    useState<DialogInvocationParameters | null>(null);
+  const sdk = useSDK<DialogAppSDK<AppInstallationParameters, DialogInvocationParameters>>();
+  const [parameters, setParameters] = useState<DialogInvocationParameters | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleDialogParameters = () => {

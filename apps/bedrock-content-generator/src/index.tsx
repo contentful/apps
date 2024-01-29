@@ -1,11 +1,11 @@
-import LocalHostWarning from "@components/common/LocalHostWarning";
-import { GlobalStyles } from "@contentful/f36-components";
-import { SDKProvider } from "@contentful/react-apps-toolkit";
-import { createRoot } from "react-dom/client";
-import App from "./App";
+import LocalHostWarning from '@components/common/LocalHostWarning';
+import { GlobalStyles } from '@contentful/f36-components';
+import { SDKProvider } from '@contentful/react-apps-toolkit';
+import { createRoot } from 'react-dom/client';
+import App from './App';
 
 (async () => {
-  const container = document.getElementById("root")!;
+  const container = document.getElementById('root')!;
   const root = createRoot(container);
 
   if (import.meta.env.DEV && window.self === window.top) {
@@ -16,7 +16,7 @@ import App from "./App";
       <SDKProvider>
         <GlobalStyles />
         <App />
-      </SDKProvider>,
+      </SDKProvider>
     );
   }
 })();

@@ -1,15 +1,10 @@
-import TextFieldWithButtons from "@components/common/text-field-with-buttons/TextFieldWIthButtons";
-import {
-  Button,
-  CopyButton,
-  Paragraph,
-  Tabs,
-} from "@contentful/f36-components";
-import useAI from "@hooks/dialog/useAI";
-import { ContentTypeFieldValidation } from "contentful-management";
-import { useEffect, useState } from "react";
-import { OutputTab } from "../../Output";
-import { styles } from "./GeneratedTextPanel.styles";
+import TextFieldWithButtons from '@components/common/text-field-with-buttons/TextFieldWIthButtons';
+import { Button, CopyButton, Paragraph, Tabs } from '@contentful/f36-components';
+import useAI from '@hooks/dialog/useAI';
+import { ContentTypeFieldValidation } from 'contentful-management';
+import { useEffect, useState } from 'react';
+import { OutputTab } from '../../Output';
+import { styles } from './GeneratedTextPanel.styles';
 
 interface Props {
   generate: () => void;
@@ -21,21 +16,12 @@ interface Props {
 const GeneratedTextPanel = (props: Props) => {
   const { generate, ai, outputFieldValidation, apply } = props;
 
-  const {
-    output,
-    setOutput,
-    isGenerating,
-    hasError,
-    error,
-    stopMessageGeneration,
-  } = ai;
+  const { output, setOutput, isGenerating, hasError, error, stopMessageGeneration } = ai;
 
   const [canApply, setCanApply] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
-  const handleGeneratedTextChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleGeneratedTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!isDirty) {
       setIsDirty(true);
     }
@@ -77,13 +63,8 @@ const GeneratedTextPanel = (props: Props) => {
   return (
     <Tabs.Panel id={OutputTab.GENERATED_TEXT} css={styles.panel}>
       {isGenerating ? (
-        <TextFieldWithButtons
-          inputText={output}
-          sizeValidation={outputFieldValidation?.size}
-        >
-          <Button onClick={() => stopMessageGeneration()}>
-            Stop Generating
-          </Button>
+        <TextFieldWithButtons inputText={output} sizeValidation={outputFieldValidation?.size}>
+          <Button onClick={() => stopMessageGeneration()}>Stop Generating</Button>
         </TextFieldWithButtons>
       ) : (
         <TextFieldWithButtons
@@ -91,19 +72,13 @@ const GeneratedTextPanel = (props: Props) => {
           sizeValidation={outputFieldValidation?.size}
           onFieldChange={handleGeneratedTextChange}
           hasError={hasError}
-          errorMessage={hasError && getModalErrorMessage()}
-        >
+          errorMessage={hasError && getModalErrorMessage()}>
           <>
             <CopyButton value={output} />
             <Button onClick={handleRegenerate} css={styles.button}>
               Regenerate
             </Button>
-            <Button
-              isDisabled={!canApply}
-              onClick={apply}
-              css={styles.button}
-              variant="primary"
-            >
+            <Button isDisabled={!canApply} onClick={apply} css={styles.button} variant="primary">
               Apply
             </Button>
           </>
