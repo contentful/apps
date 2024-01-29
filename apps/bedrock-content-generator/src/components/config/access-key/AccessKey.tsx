@@ -70,8 +70,8 @@ const AccessKey = ({ accessKeyID, secretAccessKey, region, isInvalid, dispatch }
   const secretAccessKeyError = !localSecretAccessKey
     ? ConfigErrors.missingSecretAccessKey
     : isInvalid
-      ? ConfigErrors.invalidCredentials
-      : null;
+    ? ConfigErrors.invalidCredentials
+    : null;
 
   return (
     <>

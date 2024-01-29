@@ -20,10 +20,10 @@
       "@locations/*": ["./src/locations/*"],
       "@providers/*": ["./src/providers/*"],
       "@utils/*": ["./src/utils/*"],
-      "@test/*": ["./test/*"],
+      "@test/*": ["./test/*"]
     },
     "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "react-jsx"
   },
-  "include": ["src"],
+  "include": ["src"]
 }

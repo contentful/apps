@@ -56,8 +56,9 @@ describe('useSaveConfigHandler', () => {
       rerender(parameters);
       await waitFor(() => expect(sdk.app.onConfigure).toHaveBeenCalledTimes(currentTimesCalled));
 
-      const configureCallback2 =
-        await sdk.app.onConfigure.mock.calls[onConfigureCallbackIndex][0]();
+      const configureCallback2 = await sdk.app.onConfigure.mock.calls[
+        onConfigureCallbackIndex
+      ][0]();
       expect(configureCallback2.parameters).toEqual(parameters);
     };
 
