@@ -4,6 +4,7 @@ import {
   SinonStubbedInstance,
   useFakeTimers,
   stub,
+  restore,
 } from 'sinon';
 
 import { AuthTokenRepository } from './repository';
@@ -45,6 +46,10 @@ describe('AuthTokenRepository', () => {
 
   before(() => {
     stub(helpers, 'getInstallationParametersFromCma').resolves(expectedParams);
+  });
+
+  after(() => {
+    restore();
   });
 
   afterEach(() => {
