@@ -1,0 +1,214 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Setup for Budget Alarms with Email Notifications
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'Notification Settings'
+        Parameters:
+          - EmailAddress
+          - PhoneNumber
+      - Label:
+          default: 'Budget Settings'
+        Parameters:
+          - SoftLimit
+          - HardLimit
+
+Parameters:
+  SoftLimit:
+    Type: Number
+    Default: 100
+    Description: >
+      Sets the soft limit for budget alerts in USD. This limit serves as a preliminary 
+      warning threshold. When actual or forecasted monthly usage reaches this limit, 
+      you will receive a notification. This alert allows for proactive budget management 
+      and enables you to adjust your usage or budget before the hard limit is reached.
+  HardLimit:
+    Type: Number
+    Default: 0
+    Description: >
+      Optional. Specifies the hard limit for budget alerts in USD. When this limit is reached, 
+      the IAM policy of the ContentfulBedrockUser, which grants access to Bedrock services, 
+      will be automatically removed. This action serves as a cost control measure, 
+      preventing further usage of Bedrock services. To restore access, the budget limit 
+      needs to be adjusted, and the IAM policy must be manually reattached.
+  EmailAddress:
+    Type: String
+    Description: Email address to receive budget alerts.
+
+  PhoneNumber:
+    Type: String
+    Default: ''
+    Description: 'Optional. Phone number for SMS alerts in E.164 format, e.g., +12065550100.'
+
+Conditions:
+  CreateSMSNotification: !Not [!Equals [!Ref PhoneNumber, '']]
+  CreateHardLimit: !Not [!Equals [!Ref HardLimit, 0]]
+  CreateSMSAndHardLimit: !And
+    - Condition: CreateSMSNotification
+    - Condition: CreateHardLimit
+  CreateEmailAndHardLimit: !And
+    - Condition: CreateSMSNotification
+    - Condition: CreateHardLimit
+
+Resources:
+  BedrockNotificationTopic:
+    Type: 'AWS::SNS::Topic'
+
+  SoftLimitAlarmTopic:
+    Type: 'AWS::SNS::Topic'
+
+  HardLimitAlarmTopic:
+    Type: 'AWS::SNS::Topic'
+    Condition: CreateHardLimit
+
+  EmailSubscription:
+    Type: 'AWS::SNS::Subscription'
+    Properties:
+      Protocol: email
+      Endpoint: !Ref EmailAddress
+      TopicArn: !Ref BedrockNotificationTopic
+
+  SMSSubscription:
+    Type: 'AWS::SNS::Subscription'
+    Condition: CreateSMSNotification
+    Properties:
+      Protocol: sms
+      Endpoint: !Ref PhoneNumber
+      TopicArn: !Ref BedrockNotificationTopic
+
+  SoftLimitBudget:
+    Type: 'AWS::Budgets::Budget'
+    Properties:
+      Budget:
+        BudgetLimit:
+          Amount: !Ref SoftLimit
+          Unit: USD
+        TimeUnit: MONTHLY
+        BudgetType: COST
+        CostFilters:
+          Service: ['Bedrock']
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 75
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Ref SoftLimitAlarmTopic
+
+  HardLimitBudget:
+    Type: 'AWS::Budgets::Budget'
+    Condition: CreateHardLimit
+    Properties:
+      Budget:
+        BudgetLimit:
+          Amount: !Ref HardLimit
+          Unit: USD
+        TimeUnit: MONTHLY
+        BudgetType: COST
+        CostFilters:
+          Service: ['Bedrock']
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Ref HardLimitAlarmTopic
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaPolicyDetachIamPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:DetachUserPolicy
+                  - iam:ListAttachedUserPolicies
+                Resource: !Join
+                  - ''
+                  - - 'arn:aws:iam::'
+                    - !Ref 'AWS::AccountId'
+                    - ':user/bedrock/'
+                    - !ImportValue ContentfulBedrockUserName
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref BedrockNotificationTopic
+
+  BudgetLimitExceededFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.12
+      Environment:
+        Variables:
+          USERNAME: !ImportValue ContentfulBedrockUserName
+          BEDROCK_NOTIFICATION_TOPIC_ARN: !Ref BedrockNotificationTopic
+
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+          import os
+
+          def handler(event, context):
+              user_name = os.environ['USERNAME']
+              iam_client = boto3.client('iam')
+              sns_client = boto3.client('sns')
+              topic_arn = os.environ['BEDROCK_NOTIFICATION_TOPIC_ARN']
+
+              response = iam_client.list_attached_user_policies(UserName=user_name)
+              detached_policies = []
+              for policy in response['AttachedPolicies']:
+                  iam_client.detach_user_policy(UserName=user_name, PolicyArn=policy['PolicyArn'])
+                  detached_policies.append(policy['PolicyArn'])
+
+              message = {
+                  'User': user_name,
+                  'DetachedPolicies': detached_policies,
+                  'Message': 'Policies detached due to hard limit budget breach'
+              }
+              sns_client.publish(TopicArn=topic_arn, Message=json.dumps(message))
+
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps('Policies detached successfully.')
+              }
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt BudgetLimitExceededFunction.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: 'sns.amazonaws.com'
+      SourceArn: !Ref HardLimitAlarmTopic
+  HardLimitSNSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref HardLimitAlarmTopic
+      Protocol: lambda
+      Endpoint: !GetAtt BudgetLimitExceededFunction.Arn
+
+Outputs:
+  SoftLimitAlarmTopicArn:
+    Description: 'ARN of the Soft Limit Alarm SNS Topic'
+    Value: !Ref SoftLimitAlarmTopic
+
+  HardLimitAlarmTopicArn:
+    Condition: CreateHardLimit
+    Description: 'ARN of the Hard Limit Alarm SNS Topic'
+    Value: !Ref HardLimitAlarmTopic

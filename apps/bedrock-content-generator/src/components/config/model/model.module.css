@@ -1,0 +1,7 @@
+.validationWarning p {
+  color: #f07f23;
+}
+
+.validationWarning svg {
+  fill: #f07f23;
+}

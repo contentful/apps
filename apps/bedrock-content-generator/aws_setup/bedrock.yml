@@ -1,0 +1,48 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Contentful Bedrock Deployment
+
+Resources:
+  ContentfulBedrockUser:
+    Type: AWS::IAM::User
+    Properties:
+      Path: /bedrock/
+      UserName: !Ref AWS::StackName
+      ManagedPolicyArns:
+        - !Ref ContentfulBedrockManagedPolicy
+
+  ContentfulBedrockUserCredentials:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      Status: Active
+      UserName: !Ref ContentfulBedrockUser
+
+  ContentfulBedrockUserCredentialsStored:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub /contentful/credentials/${ContentfulBedrockUser}
+      SecretString: !Sub '{"ACCESS_KEY":"${ContentfulBedrockUserCredentials}","SECRET_KEY":"${ContentfulBedrockUserCredentials.SecretAccessKey}"}'
+
+  ContentfulBedrockManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: 'Managed policy for accessing Bedrock'
+      Path: /
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Action:
+              - 'bedrock:InvokeModel'
+              - 'bedrock:GetFoundationModel'
+              - 'bedrock:InvokeModelWithResponseStream'
+              - 'bedrock:ListFoundationModels'
+            Resource: '*'
+Outputs:
+  SecretManagerURL:
+    Description: 'URL to the Access and Secret Key in Secrets Manager'
+    Value: !Sub 'https://console.aws.amazon.com/secretsmanager/home?region=${AWS::Region}#/secret?name=${ContentfulBedrockUserCredentialsStored}'
+  UserName:
+    Value: !Ref ContentfulBedrockUser
+    Export:
+      Name: ContentfulBedrockUserName
