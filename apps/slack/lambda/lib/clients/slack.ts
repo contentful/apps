@@ -116,6 +116,7 @@ export class SlackClient {
         cursor,
         limit: 1000,
         exclude_archived: true,
+        types: 'public_channel,private_channel',
       })
     );
 
