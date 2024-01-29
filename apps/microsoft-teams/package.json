@@ -17,7 +17,7 @@
   "dependencies": {
     "@contentful/app-scripts": "1.13.0",
     "dotenv": "^16.3.1",
-    "esbuild": "^0.19.2"
+    "esbuild": "^0.20.0"
   },
   "devDependencies": {
     "contentful-management": "^11.3.0",
