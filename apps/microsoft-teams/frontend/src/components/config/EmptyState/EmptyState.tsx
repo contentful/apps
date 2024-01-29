@@ -1,5 +1,5 @@
 import { Box, Flex, Subheading } from '@contentful/f36-components';
-import { HyperLink } from '@contentful/integration-component-library';
+import { HyperLink } from '@contentful/integration-frontend-toolkit/components';
 import { styles } from './EmptyState.styles';
 
 interface Props {

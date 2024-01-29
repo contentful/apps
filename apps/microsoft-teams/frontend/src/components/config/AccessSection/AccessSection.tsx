@@ -12,7 +12,7 @@ import { headerSection, accessSection } from '@constants/configCopy';
 import { styles } from './AccessSection.styles';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
-import { HyperLink } from '@contentful/integration-component-library';
+import { HyperLink } from '@contentful/integration-frontend-toolkit/components';
 
 interface Props {
   tenantId: string;
