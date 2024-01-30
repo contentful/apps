@@ -1,2 +1,0 @@
-domainName: ecommerce.ctfapps.net
-appConfigs: ${ssm:/aws/reference/secretsmanager/ci/apps/ecommerce-action/prd/app-configs}
