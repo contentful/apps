@@ -19,10 +19,4 @@ export const styles = {
     height: '1px',
     backgroundColor: tokens.gray300,
   }),
-  logo: css(`
-  svg {
-    height: 16px;
-    width: 16px;
-  }
-`),
 };

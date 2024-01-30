@@ -25,6 +25,7 @@ export default defineConfig(() => ({
   resolve: {
     alias: {
       '@components': path.resolve(__dirname, './src/components'),
+      '@configs': path.resolve(__dirname, './src/configs'),
       '@constants': path.resolve(__dirname, './src/constants'),
       '@context': path.resolve(__dirname, './src/context'),
       '@customTypes': path.resolve(__dirname, './src/customTypes'),
@@ -32,6 +33,7 @@ export default defineConfig(() => ({
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@locations': path.resolve(__dirname, './src/locations'),
       '@test': path.resolve(__dirname, './test'),
+      '@utils': path.resolve(__dirname, './utils'),
     },
   },
   test: {

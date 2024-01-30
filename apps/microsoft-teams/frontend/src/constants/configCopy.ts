@@ -11,7 +11,11 @@ const appDeepLink = 'https://teams.microsoft.com/';
 
 const accessSection = {
   title: 'Access',
+  description:
+    'Authorize Microsoft Teams here. Then, add the Contentful app to your Teams channel.',
   fieldName: 'Tenant Id',
+  login: 'Connect to Teams',
+  logout: 'Disconnect',
   teamsAppInfo:
     'Install the Contentful app in Microsoft Teams channels where you would like to receive notifications.  View Teams docs',
   teamsAppLink: 'View Teams docs',

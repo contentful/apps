@@ -46,7 +46,7 @@ const ConfigPage = () => {
 
   return (
     <>
-      <AccessSection tenantId={parameters.tenantId} dispatch={dispatchParameters} />
+      <AccessSection />
       {isAppInstalled && (
         <NotificationsSection
           notifications={parameters.notifications}
