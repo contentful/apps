@@ -84,6 +84,9 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
       () => sdk.app.setReady()
     );
 
+    // Since GA is deprecated we will NOT hunt down the problem here. But if there's a runtime error
+    // we can investgiate
+    // @ts-ignore: Type mismatch revealed on TS upgrade.
     sdk.app.onConfigure(() => this.configureApp());
   }
 
@@ -363,7 +366,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   isDisabled={!key}
                   hasError={key ? !slugField : false}
                   value={slugField}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
                     this.handleContentTypeFieldChange(key, 'slugField', event.target.value)
                   }>
                   <option disabled value="">

@@ -20,6 +20,12 @@ const CHART_HEIGHT = 200;
 const externalUrlBase = 'https://analytics.google.com/analytics/web/#/report/content-pages';
 const externalUrlPageQuery = '_r.drilldown=analytics.pagePath:';
 
+interface GapiResult {
+  result: {
+    error: GapiError;
+  };
+}
+
 export default class Timeline extends React.Component<TimelineProps, TimelineState> {
   timeline!: HTMLElement;
   dataChart!: DataChart;
@@ -50,7 +56,9 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
       const accounts = (await gapi.client.analytics.management.accountSummaries.list()) || [];
       viewUrl = this.getExternalUrl(accounts);
     } catch (e) {
-      const error: GapiError = e.result ? e.result.error : e;
+      const error: GapiError = (e as GapiResult).result
+        ? (e as GapiResult).result.error
+        : (e as GapiError);
 
       return this.onError({ error: error });
     }
