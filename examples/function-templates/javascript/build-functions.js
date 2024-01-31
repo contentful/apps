@@ -15,7 +15,7 @@ const validateFunctions = () => {
     requiredProperties.forEach((property) => {
       if (!contentfulFunction.hasOwnProperty(property)) {
         throw new Error(
-          `Delivery function with name: '${contentfulFunction.name}' is missing the '${property}' property`
+          `Function with name: '${contentfulFunction.name}' is missing the '${property}' property`
         );
       }
     });

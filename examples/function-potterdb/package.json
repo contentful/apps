@@ -1,5 +1,5 @@
 {
-  "name": "potterdb-delivery-fn-example-app",
+  "name": "potterdb-fn-example-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -16,13 +16,13 @@
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build && npm run build:delivery-functions",
+    "build": "react-scripts build && npm run build:functions",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "upload": "contentful-app-scripts upload --bundle-dir ./build",
     "upload-ci": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id $CONTENTFUL_ORG_ID --definition-id $CONTENTFUL_APP_DEF_ID --token $CONTENTFUL_ACCESS_TOKEN",
-    "build:delivery-functions": "node build-delivery-functions.js"
+    "build:functions": "node build-functions.js"
   },
   "eslintConfig": {
     "extends": "react-app"

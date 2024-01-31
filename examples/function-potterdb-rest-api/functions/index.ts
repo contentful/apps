@@ -1,4 +1,4 @@
-import type { DeliveryFunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
+import type { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
 import { createSchema, createYoga } from 'graphql-yoga';
 import { GraphQLError } from 'graphql';
 
