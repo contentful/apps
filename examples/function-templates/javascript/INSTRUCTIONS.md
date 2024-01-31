@@ -13,7 +13,7 @@ You will need to set the following environment variables as listed below:
 It as simple using the CLI command `npm run upload-ci`. This will perform two actions: upload the code, linking it to the app, and then finally activating the code ready for usage in both 
 
 ### Assigning an app to a field
-Functions are meant to help with resolving field data, meaning the app has to be assigned to a field location. You can read more about different app locations [here](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/). 
+Functions that support resolving field data on the GraphQL API have to be assigned to a field location. You can read more about different app locations [here](https://www.contentful.com/developers/docs/extensibility/app-framework/locations/). 
 
 Supported field types for field data resolution are: Short text (`Symbol`) or JSON fields (`Object`).
 
