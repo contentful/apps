@@ -4,8 +4,11 @@ import { Channel, TeamInstallation } from '../types';
 
 const GENERAL_CHANNEL_NAME = 'general';
 
-export const getChannelsList = async (tenantId: string): Promise<Channel[]> => {
-  const response = await config.msTeamsBotService.getTeamInstallations(tenantId);
+export const getChannelsList = async (
+  tenantId: string,
+  requestContext: any
+): Promise<Channel[]> => {
+  const response = await config.msTeamsBotService.getTeamInstallations(tenantId, requestContext);
 
   if (!response.ok) {
     throw new ApiError(response.error);
