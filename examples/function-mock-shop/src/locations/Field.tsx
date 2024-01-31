@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { Button } from '@contentful/f36-components';
 
 import type { Product as ProductProps } from '../typings';
@@ -8,29 +8,25 @@ import { useProduct } from '../hooks/useProduct';
 import { Product } from '../components/Product';
 
 const Field = () => {
-  const [productId, setProductId] = useState<string | undefined>();
   const sdk = useSDK<FieldAppSDK>();
+  const [productId, setProductId] = useFieldValue<String>(sdk.field.id, sdk.field.locale);
   const { isLoading, product } = useProduct(productId);
-  const value = sdk.field.getValue();
 
   useEffect(() => {
     // Since we run in an iframe,
     // we need to set the height of the iframe.
-    sdk.window.updateHeight(100);
+    sdk.window.updateHeight(130);
   }, [sdk.window]);
-
-  useEffect(() => {
-    if (value) {
-      setProductId(value);
-    }
-  }, [value]);
 
   async function openModal() {
     const product: ProductProps = await sdk.dialogs.openCurrentApp();
     if (product) {
-      sdk.field.setValue(product.id);
-      setProductId(product.id);
+      setProductId(product.id).catch(() => null);
     }
+  }
+
+  async function removeProduct() {
+    setProductId(null).catch(() => null);
   }
 
   if (isLoading) {
@@ -41,7 +37,12 @@ const Field = () => {
     return <Button onClick={openModal}>Select Product</Button>;
   }
 
-  return <Product product={product} onClick={openModal} ctaText="Select product" />;
+  return (
+    <div>
+      <Product product={product} onClick={removeProduct} ctaText="Remove" />
+      <Button onClick={openModal}>Select Product</Button>
+    </div>
+  );
 };
 
 export default Field;
