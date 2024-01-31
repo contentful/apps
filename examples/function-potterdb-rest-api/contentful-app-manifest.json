@@ -1,0 +1,12 @@
+{
+  "functions": [
+    {
+      "id": "PotterDBRestAPI",
+      "name": "PotterDB Function",
+      "description": "Example Function querying Potter-DB REST API",
+      "path": "functions/index.js",
+      "entryFile": "functions/index.ts",
+      "allowNetworks": ["api.potterdb.com"]
+    }
+  ]
+}

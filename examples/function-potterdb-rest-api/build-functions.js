@@ -7,26 +7,26 @@ const manifest = require('./contentful-app-manifest.json');
 
 const argv = yargs(hideBin(process.argv)).argv;
 
-const validateDeliveryFunctions = () => {
+const validateFunctions = () => {
   const requiredProperties = ['id', 'path', 'entryFile'];
   const uniqueValues = new Set();
 
-  manifest.deliveryFunctions.forEach((deliveryFunction) => {
+  manifest.functions.forEach((contentfulFunction) => {
     requiredProperties.forEach((property) => {
-      if (!deliveryFunction.hasOwnProperty(property)) {
+      if (!contentfulFunction.hasOwnProperty(property)) {
         throw new Error(
-          `Delivery function with name: '${deliveryFunction.name}' is missing the '${property}' property`
+          `Function with name: '${contentfulFunction.name}' is missing the '${property}' property`
         );
       }
     });
 
-    const { id, path, entryFile } = deliveryFunction;
+    const { id, path, entryFile } = contentfulFunction;
 
     if (uniqueValues.has(id)) {
-      throw new Error(`Duplicate deliveryFunction id: '${id}'`);
+      throw new Error(`Duplicate function id: '${id}'`);
     }
     if (uniqueValues.has(path)) {
-      throw new Error(`Duplicate deliveryFunction path: '${path}'`);
+      throw new Error(`Duplicate function path: '${path}'`);
     }
     if (uniqueValues.has(entryFile)) {
       throw new Error(`Duplicate entryFile path: '${entryFile}'`);
@@ -39,11 +39,11 @@ const validateDeliveryFunctions = () => {
 };
 
 const getEntryPoints = () => {
-  return manifest.deliveryFunctions.reduce((result, deliveryFunction) => {
-    const fileProperties = parse(deliveryFunction.path);
+  return manifest.functions.reduce((result, contentfulFunction) => {
+    const fileProperties = parse(contentfulFunction.path);
     const fileName = join(fileProperties.dir, fileProperties.name);
 
-    result[fileName] = resolve(__dirname, deliveryFunction.entryFile);
+    result[fileName] = resolve(__dirname, contentfulFunction.entryFile);
 
     return result;
   }, {});
@@ -51,8 +51,8 @@ const getEntryPoints = () => {
 
 const main = async (watch = false) => {
   try {
-    console.log('Building delivery functions');
-    validateDeliveryFunctions();
+    console.log('Building functions');
+    validateFunctions();
 
     const config = {
       entryPoints: getEntryPoints(),
@@ -73,9 +73,9 @@ const main = async (watch = false) => {
       await esbuild.build(config);
     }
   } catch (e) {
-    console.error('Error building delivery functions');
+    console.error('Error building functions');
     throw Error(e);
   }
 };
 
-main(argv._.includes('watch')).then(() => console.log('delivery functions built successfully'));
+main(argv._.includes('watch')).then(() => console.log('functions built successfully'));

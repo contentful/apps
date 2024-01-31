@@ -1,15 +1,12 @@
-import type {
-  DeliveryFunctionEventHandler,
-  DeliveryFunctionEventType,
-} from '@contentful/node-apps-toolkit';
+import type { FunctionEventHandler, FunctionEventType } from '@contentful/node-apps-toolkit';
 
 type InstallationParameters = {
   apiEndpoint: string;
 };
 
-type EventHandler = DeliveryFunctionEventHandler<DeliveryFunctionEventType, InstallationParameters>;
-type QueryHandler = DeliveryFunctionEventHandler<'graphql.query', InstallationParameters>;
-type FieldMappingHandler = DeliveryFunctionEventHandler<'graphql.field.mapping'>;
+type EventHandler = FunctionEventHandler<FunctionEventType, InstallationParameters>;
+type QueryHandler = FunctionEventHandler<'graphql.query', InstallationParameters>;
+type FieldMappingHandler = FunctionEventHandler<'graphql.field.mapping'>;
 
 const fieldMappingHandler: FieldMappingHandler = (event) => {
   // Define the field mapping to map the external api to

@@ -1,4 +1,4 @@
-import { DeliveryFunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
+import { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
 
 const fieldMappingHandler: EventHandler<'graphql.field.mapping'> = (event, context) => {
   const fields = event.fields.map(({ contentTypeId, field }) => {
