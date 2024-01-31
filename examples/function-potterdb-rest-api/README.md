@@ -1,5 +1,5 @@
-# Hosted Delivery Function - PotterDB
-This is an example of a hosted delivery function that uses the PotterDB REST API to enrich
+# Function - PotterDB
+This is an example of a function that uses the PotterDB REST API to enrich
 entries with data from the Harry Potter universe. Even though PotterDB has a GraphQL API
 itself, we use the REST API to showcase how to potentially wrap any API.
 
@@ -11,7 +11,7 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app --example hosted-delivery-function-potterdb-rest-api
+npx create-contentful-app --example function-potterdb-rest-api
 
 ```
 

@@ -1,6 +1,6 @@
-# mock.shop Delivery Function Tutorial
+# mock.shop Function Tutorial
 
-This repo contains to the code for the mock.shop delivery function tutorial.
+This repo contains to the code for the mock.shop function tutorial.
 
 ## How to use
 
@@ -8,7 +8,7 @@ Execute create-contentful-app with npx to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app --example hosted-delivery-function-mock-shop
+npx create-contentful-app --example function-mock-shop
 ```
 
 ## Available Scripts

@@ -1,5 +1,5 @@
-# Hosted Delivery Function - PotterDB
-This is an example of a hosted delivery function that uses the PotterDB API to enrich
+# Function - PotterDB
+This is an example of a function that uses the PotterDB API to enrich
 entries with data from the Harry Potter universe.
 
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
@@ -10,7 +10,7 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app --example hosted-delivery-function-potterdb
+npx create-contentful-app --example function-potterdb
 ```
 
 ## Available Scripts
