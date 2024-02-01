@@ -19,6 +19,12 @@ const accessSection = {
   teamsAppInfo:
     'Install the Contentful app in Microsoft Teams channels where you would like to receive notifications.  View Teams docs',
   teamsAppLink: 'View Teams docs',
+  disconnectModal: {
+    confirmDisonnect: 'Disconnect',
+    goBack: 'Go back',
+    description:
+      'By disconnecting, you will no longer see configured notifications for this tenant. Are you sure you want to disconnect?',
+  },
 };
 
 const notificationsSection = {

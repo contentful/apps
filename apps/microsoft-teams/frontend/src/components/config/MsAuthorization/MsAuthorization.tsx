@@ -1,5 +1,13 @@
 import { Dispatch } from 'react';
-import { Box, Button, Card, Flex, Paragraph, Subheading } from '@contentful/f36-components';
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  ModalLauncher,
+  Paragraph,
+  Subheading,
+} from '@contentful/f36-components';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from '@azure/msal-react';
 import { loginRequest } from '@configs/authConfig';
 import { accessSection } from '@constants/configCopy';
@@ -10,6 +18,7 @@ import { ParameterAction, actions } from '@components/config/parameterReducer';
 import { useCustomApi } from '@hooks/useCustomApi';
 import { AppInstallationParameters } from '@customTypes/configPage';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import DisconnectModal from '@components/config/DisconnectModal/DisconnectModal';
 
 interface Props {
   dispatch: Dispatch<ParameterAction>;
@@ -41,8 +50,23 @@ const MsAuthorization = (props: Props) => {
     }
   };
 
-  const handleLogout = async () => {
-    console.log('logout');
+  const handleLogout = () => {
+    ModalLauncher.open(({ isShown, onClose }) => {
+      return (
+        <DisconnectModal
+          isShown={isShown}
+          handleCancel={() => {
+            onClose(true);
+          }}
+          handleDelete={async () => {
+            onClose(true);
+            await instance.logoutPopup({
+              mainWindowRedirectUri: '/',
+            });
+          }}
+        />
+      );
+    });
   };
 
   return (

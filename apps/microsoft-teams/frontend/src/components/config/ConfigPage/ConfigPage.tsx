@@ -6,12 +6,14 @@ import NotificationsSection from '@components/config/NotificationsSection/Notifi
 import parameterReducer from '@components/config/parameterReducer';
 import { initialParameters } from '@constants/defaultParams';
 import useInitializeParameters from '@hooks/useInitializeParameters';
+import { useMsal } from '@azure/msal-react';
 
 const ConfigPage = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
 
   const sdk = useSDK<ConfigAppSDK>();
+  const { accounts } = useMsal();
 
   useInitializeParameters(dispatchParameters);
 
@@ -51,12 +53,12 @@ const ConfigPage = () => {
         parameters={parameters}
         isAppInstalled={isAppInstalled}
       />
-      {isAppInstalled && (
+      {isAppInstalled && accounts.length ? (
         <NotificationsSection
           notifications={parameters.notifications}
           dispatch={dispatchParameters}
         />
-      )}
+      ) : null}
     </>
   );
 };
