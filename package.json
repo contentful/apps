@@ -26,8 +26,9 @@
     "deploy:test": "lerna run deploy:test --concurrency=3",
     "post-deploy": "lerna run post-deploy",
     "publish-packages": "lerna version --conventional-commits --no-private --force-git-tag --create-release github --yes && lerna publish from-git --yes",
-    "prettier": "prettier --write '**/*.{js,jsx,ts,tsx}'",
-    "prettier:check": "prettier --check '**/*.{js,jsx,ts,tsx}'",
+    "prettier:list": "npx prettier@2.8.8 --list-different",
+    "prettier:write": "npx prettier@2.8.8 --write",
+    "prettier:check": "npx prettier@2.8.8 --check '**/*.{js,jsx,ts,tsx}'",
     "prepare": "husky install",
     "sentry-release": "SENTRY_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug new -p marketplace-apps $SENTRY_RELEASE && sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $SENTRY_RELEASE && sentry-cli releases --log-level=debug finalize $SENTRY_RELEASE && sentry-cli releases --log-level=debug deploys $SENTRY_RELEASE new -e production"
   },
@@ -36,7 +37,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write"
+      "npm run prettier:write"
     ]
   }
 }
