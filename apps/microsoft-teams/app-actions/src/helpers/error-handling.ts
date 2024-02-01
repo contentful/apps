@@ -1,3 +1,4 @@
+import { ApiError } from '../errors';
 import { AppActionCallResponse, AppActionCallResponseError } from '../types';
 
 // for the purposes of the error handler, a HandlerFunction is one that can take any arguments and return any value -- provided
@@ -28,6 +29,19 @@ export const withAsyncAppActionErrorHandling = <
           },
         };
       }
+
+      // an easier handler for directly passing errors from the MS Teams service to the app action caller
+      if (e instanceof ApiError) {
+        return {
+          ok: false,
+          error: {
+            message: e.message,
+            type: e.type,
+            details: e.details,
+          },
+        };
+      }
+
       return {
         ok: false,
         error: {
