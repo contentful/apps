@@ -46,7 +46,11 @@ const ConfigPage = () => {
 
   return (
     <>
-      <AccessSection />
+      <AccessSection
+        dispatch={dispatchParameters}
+        parameters={parameters}
+        isAppInstalled={isAppInstalled}
+      />
       {isAppInstalled && (
         <NotificationsSection
           notifications={parameters.notifications}
