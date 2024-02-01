@@ -16,6 +16,7 @@ updates:
     - dependency-name: "*"
       update-types: ["version-update:semver-major"]
     - dependency-name: "@contentful/app-sdk"
+    - dependency-name: "prettier"
     - dependency-name: "serverless"
       versions:
         - ">=3"
