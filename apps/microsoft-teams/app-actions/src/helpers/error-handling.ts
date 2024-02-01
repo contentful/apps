@@ -30,7 +30,7 @@ export const withAsyncAppActionErrorHandling = <
         };
       }
 
-      // an easier handler for directly passing errors from the MS Teams backend through to the app action caller
+      // an easier handler for directly passing errors from the MS Teams backend to the app action caller
       if (e instanceof ApiError) {
         return {
           ok: false,
