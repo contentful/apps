@@ -107,8 +107,14 @@ export interface MsTeamsBotServiceSuccessResponse<T> {
 
 export interface MsTeamsBotServiceErrorResponse {
   ok: false;
-  // TODO: this might need to be updated if we return an error object from MS teams bot service
-  error: string;
+  error: ApiErrorObject;
+}
+
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+export interface ApiErrorObject<T extends Record<string, any> = Record<string, any>> {
+  type: string;
+  message: string;
+  details?: T;
 }
 
 export type MsTeamsBotServiceResponse<T> =
