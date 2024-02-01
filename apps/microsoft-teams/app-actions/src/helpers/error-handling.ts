@@ -11,7 +11,7 @@ type HandlerFunction<TFnReturn, TFnArgs extends unknown[]> = (
 export const withAsyncAppActionErrorHandling = <
   TResponseType,
   TFnReturn extends AppActionCallResponse<TResponseType>,
-  TFnArgs extends unknown[],
+  TFnArgs extends unknown[]
 >(
   fn: HandlerFunction<TFnReturn, TFnArgs>
 ): HandlerFunction<TFnReturn, TFnArgs> => {
@@ -30,7 +30,7 @@ export const withAsyncAppActionErrorHandling = <
         };
       }
 
-      // an easier handler for directly passing errors from the MS Teams backend to the app action caller
+      // an easier handler for directly passing errors from the MS Teams service to the app action caller
       if (e instanceof ApiError) {
         return {
           ok: false,
