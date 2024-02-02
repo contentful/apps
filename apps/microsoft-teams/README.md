@@ -4,6 +4,11 @@ An app that allows space admins to set up notifications to push messages to sele
 
 ## Testing
 
+### Local development (frontend)
+
+- Set the following environment variable in `frontend/.env.development` using the `.env.development.example` file:
+- `VITE_MS_APP_CLIENT_ID`: Client Id for Contentful app (from 1password)
+
 ### Testing backend actions
 
 - Set the following environment variables in `app-actions/.env.development` using the `.env.development.example` file:
