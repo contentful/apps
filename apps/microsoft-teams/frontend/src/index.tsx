@@ -9,8 +9,9 @@ import { sentryMarketplaceAppsSDK } from '@contentful/integration-frontend-toolk
 import AuthProvider from '@context/AuthProvider';
 
 const { client: SentryClient, init: SentryInit } = sentryMarketplaceAppsSDK;
+const environment = import.meta.env.PROD ? 'production' : 'development';
 
-SentryInit();
+SentryInit({ environment });
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
