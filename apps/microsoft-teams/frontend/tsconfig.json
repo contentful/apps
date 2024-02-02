@@ -24,8 +24,7 @@
       "@helpers/*": ["./src/helpers/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@locations/*": ["./src/locations/*"],
-      "@test/*": ["./test/*"],
-      "@utils/*": ["./utils/*"]
+      "@test/*": ["./test/*"]
     }
   },
   "include": ["src", "test"]
