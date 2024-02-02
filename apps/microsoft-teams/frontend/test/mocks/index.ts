@@ -3,4 +3,4 @@ export { mockParameters, mockSdk } from './mockSdk';
 export { mockContentType, mockGetManyContentType } from './mockContentTypes';
 export { mockNotification } from './mockNotification';
 export { mockChannels } from './mockChannels';
-export { mockMsal } from './mockMsal';
+export { mockMsalWithAccounts, mockMsalWithoutAccounts } from './mockMsal';

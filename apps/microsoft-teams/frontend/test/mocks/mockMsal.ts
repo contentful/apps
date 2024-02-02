@@ -5,11 +5,21 @@ import { IPublicClientApplication } from '@azure/msal-browser';
 type MockMsal = {
   instance: MockInstance;
   accounts: MockAccount[];
+  inProgress: string;
 };
 type MockInstance = Partial<IPublicClientApplication>;
 type MockAccount = Partial<AccountInfo>;
 
-const mockMsal: MockMsal = {
+const mockMsalWithoutAccounts: MockMsal = {
+  instance: {
+    loginPopup: vi.fn(),
+    logoutPopup: vi.fn(),
+  },
+  accounts: [],
+  inProgress: 'none',
+};
+
+const mockMsalWithAccounts: MockMsal = {
   instance: {
     loginPopup: vi.fn(),
     logoutPopup: vi.fn(),
@@ -24,6 +34,7 @@ const mockMsal: MockMsal = {
       name: 'Company ABC',
     },
   ],
+  inProgress: 'none',
 };
 
-export { mockMsal };
+export { mockMsalWithoutAccounts, mockMsalWithAccounts };
