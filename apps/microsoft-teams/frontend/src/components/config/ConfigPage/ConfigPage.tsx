@@ -44,9 +44,16 @@ const ConfigPage = () => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
+  console.log({ parameters });
+
   return (
     <>
-      <AccessSection tenantId={parameters.tenantId} dispatch={dispatchParameters} />
+      <AccessSection
+        tenantId={parameters.tenantId}
+        dispatch={dispatchParameters}
+        parameters={parameters}
+        handler={onConfigure}
+      />
       {isAppInstalled && (
         <NotificationsSection
           notifications={parameters.notifications}

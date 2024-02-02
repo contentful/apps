@@ -1,4 +1,4 @@
-import { KnownAppSDK, init as sdkInit } from '@contentful/app-sdk';
+import { KnownAppSDK, OnConfigureHandler, init as sdkInit } from '@contentful/app-sdk';
 import { FC, PropsWithChildren, ReactElement, createContext, useEffect, useState } from 'react';
 import { FreeFormParameters } from 'contentful-management/types';
 import { SDKContext } from '@contentful/react-apps-toolkit';
@@ -42,6 +42,11 @@ export class CustomApi {
   async saveConfiguration(parameters: FreeFormParameters): Promise<void> {
     // eslint-disable-line @typescript-eslint/no-explicit-any
     return this.channel.call('callAppMethod', 'install', [parameters]);
+  }
+
+  async onConfigure(handler: OnConfigureHandler): Promise<void> {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    return this.channel.call('callAppMethod', 'onConfigure', [() => handler]);
   }
 }
 
