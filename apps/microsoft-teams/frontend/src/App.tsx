@@ -20,7 +20,7 @@ const ComponentLocationSettings = {
   [locations.LOCATION_HOME]: Home,
 };
 
-const APP_NAME = 'microsoftTeams';
+const APP_NAME = 'microsoft-teams';
 
 const App = () => {
   const sdk = useSDK();
