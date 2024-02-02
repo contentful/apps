@@ -1,11 +1,17 @@
 import ConfigPage from './ConfigPage';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { accessSection } from '@constants/configCopy';
 import { mockSdk } from '@test/mocks';
+import { headerSection } from '@constants/configCopy';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
+}));
+
+vi.mock('@components/config/AccessSection/AccessSection', () => ({
+  default: () => {
+    return <div>Mock Access Section</div>;
+  },
 }));
 
 vi.mock('@components/config/NotificationsSection/NotificationsSection', () => ({
@@ -15,9 +21,9 @@ vi.mock('@components/config/NotificationsSection/NotificationsSection', () => ({
 }));
 
 describe('ConfigPage component', () => {
-  it('mounts and renders access section', () => {
+  it('mounts and renders title', () => {
     render(<ConfigPage />);
 
-    expect(screen.getByText(accessSection.title)).toBeTruthy();
+    expect(screen.getByText(headerSection.title)).toBeTruthy();
   });
 });

@@ -1,22 +1,45 @@
 import AccessSection from './AccessSection';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { accessSection } from '@constants/configCopy';
+import {
+  mockMsalWithAccounts,
+  mockMsalWithoutAccounts,
+  mockParameters,
+  mockSdk,
+} from '@test/mocks';
 
-const tenantIdValue = 'abc-123';
+const mocks = vi.hoisted(() => {
+  return { useMsal: vi.fn() };
+});
+
+vi.mock('@azure/msal-react', () => ({
+  useMsal: mocks.useMsal,
+}));
+
+vi.mock('@hooks/useCustomApi', () => ({
+  useCustomApi: vi.fn(),
+}));
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('AccessSection component', () => {
-  it('mounts with tenantId provided', () => {
-    const { unmount } = render(<AccessSection dispatch={vi.fn()} tenantId={tenantIdValue} />);
-
-    expect(screen.getByDisplayValue(tenantIdValue)).toBeTruthy();
-    unmount();
+  afterEach(() => {
+    vi.clearAllMocks();
   });
-  it('displays correct copy', () => {
-    const { unmount } = render(<AccessSection dispatch={vi.fn()} tenantId={''} />);
 
-    expect(screen.getByText(accessSection.title)).toBeTruthy();
-    expect(screen.getByText(accessSection.fieldName)).toBeTruthy();
-    unmount();
+  it('displays correct copy when unathorized', () => {
+    mocks.useMsal.mockReturnValue(mockMsalWithoutAccounts);
+    render(<AccessSection dispatch={vi.fn()} parameters={mockParameters} isAppInstalled={false} />);
+
+    expect(screen.getByText('Connect to Teams')).toBeTruthy();
+  });
+
+  it('displays correct copy when authorized', () => {
+    mocks.useMsal.mockReturnValue(mockMsalWithAccounts);
+    render(<AccessSection dispatch={vi.fn()} parameters={mockParameters} isAppInstalled={true} />);
+
+    expect(screen.getByText('Disconnect')).toBeTruthy();
   });
 });
