@@ -4,11 +4,11 @@ import { accessSection } from '@constants/configCopy';
 interface Props {
   isShown: boolean;
   handleCancel: () => void;
-  handleDelete: () => void;
+  handleDisconnect: () => void;
 }
 
 const DisconnectModal = (props: Props) => {
-  const { isShown, handleCancel, handleDelete } = props;
+  const { isShown, handleCancel, handleDisconnect } = props;
   const { confirmDisonnect, goBack, description } = accessSection.disconnectModal;
 
   return (
@@ -16,7 +16,7 @@ const DisconnectModal = (props: Props) => {
       intent="negative"
       isShown={isShown}
       onCancel={handleCancel}
-      onConfirm={handleDelete}
+      onConfirm={handleDisconnect}
       cancelLabel={goBack}
       confirmLabel={confirmDisonnect}>
       <Text>{description}</Text>

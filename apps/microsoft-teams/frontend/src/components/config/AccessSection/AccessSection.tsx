@@ -58,7 +58,7 @@ const AccessSection = (props: Props) => {
           handleCancel={() => {
             onClose(true);
           }}
-          handleDelete={async () => {
+          handleDisconnect={async () => {
             onClose(true);
             await instance.logoutPopup({
               mainWindowRedirectUri: '/',
