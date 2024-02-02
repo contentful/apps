@@ -33,7 +33,7 @@ const notificationsSection = {
   edit: 'Edit',
   delete: 'Delete',
   confirmDelete:
-    'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
+    'By disconnecting, the notifications you currently have configured will no longer function. Are you sure you want to disconnect?',
   duplicateModal: {
     modalHeaderTitle: 'Duplicate Notification',
     confirmDuplicate: 'Update existing notification',
