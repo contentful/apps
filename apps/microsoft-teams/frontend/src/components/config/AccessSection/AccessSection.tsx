@@ -29,6 +29,8 @@ interface Props {
 const AccessSection = (props: Props) => {
   const { dispatch, parameters, isAppInstalled } = props;
   const { instance, accounts, inProgress } = useMsal();
+  const loginInProgress = inProgress === 'login';
+  const logoutInProgress = inProgress === 'logout';
   const customApi = useCustomApi();
   const sdk = useSDK();
   const { logout, login, teamsAppInfo, teamsAppLink, description } = accessSection;
@@ -46,7 +48,7 @@ const AccessSection = (props: Props) => {
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to authenticate with Microsoft';
       sdk.notifier.error(message);
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -78,8 +80,8 @@ const AccessSection = (props: Props) => {
           <Box>
             <Button
               onClick={() => handleLogin()}
-              isDisabled={inProgress === 'login'}
-              isLoading={inProgress === 'login'}>
+              isDisabled={loginInProgress}
+              isLoading={loginInProgress}>
               {login}
             </Button>
           </Box>
@@ -96,8 +98,8 @@ const AccessSection = (props: Props) => {
               </Flex>
               <Button
                 onClick={() => handleLogout()}
-                isDisabled={inProgress === 'logout'}
-                isLoading={inProgress === 'logout'}>
+                isDisabled={logoutInProgress}
+                isLoading={logoutInProgress}>
                 {logout}
               </Button>
             </Flex>
