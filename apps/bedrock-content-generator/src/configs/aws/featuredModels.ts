@@ -30,7 +30,6 @@ Human: ${prompt}
 Assistant: Here is a creative response:
 `;
 
-    console.log(`completePrompt: ${completePrompt}`);
     return {
       modelId: this.id,
       contentType: 'application/json',
@@ -60,7 +59,6 @@ Human: ${prompt}
 Assistant:
 `;
 
-    console.log(`completePrompt: ${completePrompt}`);
     return {
       modelId: this.id,
       contentType: 'application/json',

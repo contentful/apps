@@ -5,3 +5,40 @@
 .validationWarning svg {
   fill: #f07f23;
 }
+
+.modelRadioGroup {
+  width: 100%;
+}
+
+.modelRadioGroup div {
+  width: 100%;
+}
+
+.modelRadio {
+  width: 100%;
+  --model: "Radio"
+}
+
+.modelRadio [data-prefered="true"] {
+  font-weight: bold;
+}
+
+
+.modelRadio label {
+  width: 100%;
+}
+
+.modelRadio input[disabled] +span + div {
+  color: #67728A; 
+}
+
+.modelRadioWarning {
+  color: #f07f23;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  svg {
+    fill: #f07f23;
+  }
+}
