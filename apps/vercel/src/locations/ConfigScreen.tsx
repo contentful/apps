@@ -65,10 +65,10 @@ const ConfigScreen = () => {
   useEffect(() => {
     async function getDeployments() {
       const res = await fetch('https://api.vercel.com/v6/deployments', {
+        method: 'GET',
         headers: {
           Authorization: `Bearer ${parameters.vercelAccessToken}`,
         },
-        method: 'get',
       });
 
       // TODO: Figure out if we want to continue with deployments
