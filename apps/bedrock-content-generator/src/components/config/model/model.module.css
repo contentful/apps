@@ -16,20 +16,19 @@
 
 .modelRadio {
   width: 100%;
-  --model: "Radio"
+  --model: 'Radio';
 }
 
-.modelRadio [data-prefered="true"] {
+.modelRadio [data-prefered='true'] {
   font-weight: bold;
 }
-
 
 .modelRadio label {
   width: 100%;
 }
 
-.modelRadio input[disabled] +span + div {
-  color: #67728A; 
+.modelRadio input[disabled] + span + div {
+  color: #67728a;
 }
 
 .modelRadioWarning {
