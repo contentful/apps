@@ -71,9 +71,9 @@ const ConfigScreen = () => {
         method: 'get',
       });
 
-      // TODO: Figure out if we want to continue wil deployments
+      // TODO: Figure out if we want to continue with deployments
       // Contains deployment response, currently we aren't doing anything with deployments
-      // we just want to make sure a successful call goes through with vali access token
+      // we just want to make sure a successful call goes through with valid access token
 
       // const body = await res.json();
 
