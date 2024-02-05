@@ -25,7 +25,8 @@ const SDK_MOCK = {
   },
   field: {
     getValue: () => ({}),
-    onValueChanged: () => ({}),
+    /* eslint-disable-next-line @typescript-eslint/no-empty-function */
+    onValueChanged: () => () => {},
     setValue: () => ({}),
   },
   window: {
