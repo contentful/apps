@@ -5,7 +5,7 @@ export enum actions {
   APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
 }
 
-type TenantIdAction = {
+type VercelAccessTokenAction = {
   type: actions.UPDATE_VERCEL_ACCESS_TOKEN;
   payload: string;
 };
@@ -15,7 +15,7 @@ type ApplyContentfulParametersAction = {
   payload: AppInstallationParameters;
 };
 
-export type ParameterAction = TenantIdAction | ApplyContentfulParametersAction;
+export type ParameterAction = VercelAccessTokenAction | ApplyContentfulParametersAction;
 
 const { UPDATE_VERCEL_ACCESS_TOKEN, APPLY_CONTENTFUL_PARAMETERS } = actions;
 
