@@ -17,7 +17,7 @@ const mockSdk: any = {
   parameters: {
     instance: [],
     installation: {
-      tenantId: mockParameters.vercelAccessToken,
+      vercelAccessToken: mockParameters.vercelAccessToken,
     },
   },
   ids: {
