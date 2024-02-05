@@ -3,8 +3,9 @@ import { ProfileFields } from './appInstallationParameters';
 const ModelText = {
   title: 'Machine Learning Model',
   helpText:
+    
     "If you don't know which model to choose, we suggest starting with Anthropic Claude v2.1, " +
-    'which is the most capable model. Models have different capabilities and prices. For an overview, visit the AWS console.',
+    'which is the most capable model. To maximize compatibility, this app only supports a subset of all possible models. Models have different capabilities and prices. For an overview, visit the AWS console.',
   linkSubstring: 'AWS console',
   link: 'https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/models',
 };

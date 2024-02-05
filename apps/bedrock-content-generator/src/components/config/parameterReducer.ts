@@ -133,7 +133,14 @@ const parameterReducer = (
       const parameter = action.value as AppInstallationParameters;
       return {
         ...state,
-
+        accessKeyId: {
+          value: parameter.accessKeyId,
+          isValid: parameter.accessKeyId?.length > 0,
+        },
+        secretAccessKey: {
+          value: parameter.secretAccessKey,
+          isValid: parameter.secretAccessKey?.length > 0,
+        },
         model: {
           value: parameter.model,
           isValid: parameter.model?.length > 0,
