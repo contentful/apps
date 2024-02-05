@@ -41,9 +41,6 @@ describe('buildEntryActivity', () => {
 
     expect(result).to.have.property('contentTypeName', mockContentType.name);
     expect(result).to.have.property('entryTitle', entryEvent.entry.fields.title['en-US']);
-    expect(result).to.have.property('entryId', entryId);
-    expect(result).to.have.property('spaceId', spaceId);
-    expect(result).to.have.property('contentTypeId', mockContentType.sys.id);
     expect(result).to.have.property('action', 'archived');
     expect(result).to.have.property('eventDatetime', entryEvent.eventDatetime);
     expect(result).to.have.property('entryUrl', url);

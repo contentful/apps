@@ -9,8 +9,6 @@ export const buildEntryActivity = async (
 ): Promise<EntryActivity> => {
   const { entry, topic, eventDatetime } = entryEvent;
 
-  const entryId = entry.sys.id;
-  const spaceId = entry.sys.space.sys.id;
   const contentTypeId = entry.sys.contentType.sys.id;
 
   const { name: contentTypeName, displayField } = await cma.contentType.get({ contentTypeId });
@@ -25,9 +23,6 @@ export const buildEntryActivity = async (
   return {
     contentTypeName,
     entryTitle,
-    entryId,
-    spaceId,
-    contentTypeId,
     action,
     eventDatetime,
     entryUrl,
