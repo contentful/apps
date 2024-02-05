@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.24.0",
-    "@contentful/f36-components": "4.59.0",
+    "@contentful/f36-components": "4.59.1",
     "@contentful/f36-tokens": "4.0.4",
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.46.4",
@@ -40,7 +40,7 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.13.4",
     "@testing-library/jest-dom": "5.17.0",
-    "@testing-library/react": "14.2.0",
+    "@testing-library/react": "14.2.1",
     "cross-env": "7.0.3"
   },
   "homepage": "."

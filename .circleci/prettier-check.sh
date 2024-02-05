@@ -15,7 +15,7 @@ test -z "$CHANGED_FILES" && echo "No files for prettier to check. Skipping..." &
 echo "Running 'prettier -l' against changed files to check for problems..."
 echo ""
 
-PRETTIER_OUTPUT=$(./node_modules/.bin/prettier -l $CHANGED_FILES)
+PRETTIER_OUTPUT=$(npm run --silent prettier:list -- $CHANGED_FILES)
 echo ""
 test -n "$PRETTIER_OUTPUT" && echo "prettier violations found:" || echo "no violations found"
 echo "$PRETTIER_OUTPUT"

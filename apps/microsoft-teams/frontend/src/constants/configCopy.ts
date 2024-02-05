@@ -11,10 +11,20 @@ const appDeepLink = 'https://teams.microsoft.com/';
 
 const accessSection = {
   title: 'Access',
+  description:
+    'Authorize Microsoft Teams here. Then, add the Contentful app to your Teams channel.',
   fieldName: 'Tenant Id',
+  login: 'Connect to Teams',
+  logout: 'Disconnect',
   teamsAppInfo:
     'Install the Contentful app in Microsoft Teams channels where you would like to receive notifications.  View Teams docs',
   teamsAppLink: 'View Teams docs',
+  disconnectModal: {
+    confirmDisonnect: 'Disconnect',
+    goBack: 'Go back',
+    description:
+      'By disconnecting, you will no longer see configured notifications for this tenant. Are you sure you want to disconnect?',
+  },
 };
 
 const notificationsSection = {
@@ -23,7 +33,7 @@ const notificationsSection = {
   edit: 'Edit',
   delete: 'Delete',
   confirmDelete:
-    'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
+    'By disconnecting, the notifications you currently have configured will no longer function. Are you sure you want to disconnect?',
   duplicateModal: {
     modalHeaderTitle: 'Duplicate Notification',
     confirmDuplicate: 'Update existing notification',

@@ -6,6 +6,7 @@ import App from './App';
 import LocalhostWarning from '@components/LocalhostWarning';
 import { SdkWithCustomApiProvider } from '@context/SdkWithCustomApiProvider';
 import { sentryMarketplaceAppsSDK } from '@contentful/integration-frontend-toolkit/sdks';
+import AuthProvider from '@context/AuthProvider';
 
 const { client: SentryClient, init: SentryInit } = sentryMarketplaceAppsSDK;
 
@@ -21,8 +22,10 @@ if (import.meta.env.DEV && window.self === window.top) {
   root.render(
     <SentryClient.ErrorBoundary>
       <SdkWithCustomApiProvider>
-        <GlobalStyles />
-        <App />
+        <AuthProvider>
+          <GlobalStyles />
+          <App />
+        </AuthProvider>
       </SdkWithCustomApiProvider>
     </SentryClient.ErrorBoundary>
   );
