@@ -11,11 +11,16 @@ export const handler = withAsyncAppActionErrorHandling(
   ): Promise<AppActionCallResponse<Channel[]>> => {
     const {
       cma,
-      appActionCallContext: { appInstallationId },
+      appActionCallContext: { appInstallationId, userId, environmentId, spaceId },
     } = context;
 
     const tenantId = await fetchTenantId(cma, appInstallationId);
-    const channels = await helpers.getChannelsList(tenantId);
+    const channels = await helpers.getChannelsList(tenantId, {
+      appInstallationId,
+      userId,
+      environmentId,
+      spaceId,
+    });
 
     return {
       ok: true,

@@ -16,6 +16,7 @@ const useGetTeamsChannels = () => {
           environmentId: sdk.ids.environment,
           spaceId: sdk.ids.space,
           appDefinitionId: sdk.ids.app!,
+          userId: sdk.ids.user,
         },
         {
           parameters: {},

@@ -353,3 +353,12 @@ export const mockChannels: Channel[] = [
     tenantId: '666e56a6-1f2a-47c7-b88c-1ed9e1bb8668',
   },
 ];
+
+export const mockRequestHeaders = {
+  'Content-Type': 'application/json',
+  'x-api-key': 'api-key',
+  'X-Contentful-App': 'app-installation-id',
+  'X-Contentful-Environment': 'environment-id',
+  'X-Contentful-Space': 'space-id',
+  'X-Contentful-User': 'user-id',
+};

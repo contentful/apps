@@ -18,7 +18,7 @@ export const handler = withAsyncAppActionErrorHandling(
     const { channelId, teamId, contentTypeId } = payload;
     const {
       cma,
-      appActionCallContext: { appInstallationId },
+      appActionCallContext: { appInstallationId, environmentId, userId, spaceId },
     } = context;
     const { name: contentTypeName } = await cma.contentType.get({ contentTypeId });
     const tenantId = await fetchTenantId(cma, appInstallationId);
@@ -33,7 +33,8 @@ export const handler = withAsyncAppActionErrorHandling(
 
     const msTeamsBotServiceResponse = await config.msTeamsBotService.sendTestMessage(
       testMessagePayload,
-      tenantId
+      tenantId,
+      { appInstallationId, environmentId, userId, spaceId }
     );
 
     return msTeamsBotServiceResponse;

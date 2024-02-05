@@ -1,6 +1,7 @@
 import { ChannelInfo as MSChannelInfo, TeamDetails as MSTeamDetails } from 'botbuilder';
 import { TOPIC_ACTION_MAP } from './constants';
 import { EntryProps } from 'contentful-management';
+import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 
 export interface ActionError {
   type: string;
@@ -135,3 +136,7 @@ export interface EntryEvent {
 export type Topic = keyof typeof TOPIC_ACTION_MAP;
 export type Action = (typeof TOPIC_ACTION_MAP)[Topic];
 export type ActionType = 'creation' | 'update' | 'deletion' | 'publication';
+export type AppActionRequestContext = Omit<
+  AppActionCallContext['appActionCallContext'],
+  'cmaHost' | 'uploadHost'
+>;

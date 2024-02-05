@@ -1,11 +1,14 @@
 import { config } from '../config';
 import { ApiError } from '../errors';
-import { Channel, TeamInstallation } from '../types';
+import { AppActionRequestContext, Channel, TeamInstallation } from '../types';
 
 const GENERAL_CHANNEL_NAME = 'general';
 
-export const getChannelsList = async (tenantId: string): Promise<Channel[]> => {
-  const response = await config.msTeamsBotService.getTeamInstallations(tenantId);
+export const getChannelsList = async (
+  tenantId: string,
+  requestContext: AppActionRequestContext
+): Promise<Channel[]> => {
+  const response = await config.msTeamsBotService.getTeamInstallations(tenantId, requestContext);
 
   if (!response.ok) {
     throw new ApiError(response.error);
