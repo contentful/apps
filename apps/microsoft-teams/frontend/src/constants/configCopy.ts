@@ -41,7 +41,7 @@ const notificationsSection = {
     confirmDuplicate: 'Update existing notification',
     goBack: 'Go back to editing',
     confirmDuplicateDescription:
-      'You already have a notification set up for this content type and MS Teams channel. Would you like to update the existing notification instead of creating a new one?',
+      'You already have a notification set up for this content type and Teams channel. Would you like to update the existing notification or create a new one?',
   },
   updateConfirmation: 'Notification settings updated',
   saveWarning: 'Save the app to persist these settings',

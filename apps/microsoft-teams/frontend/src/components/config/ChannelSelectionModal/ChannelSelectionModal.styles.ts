@@ -3,8 +3,12 @@ import tokens from '@contentful/f36-tokens';
 
 export const styles = {
   table: css({
-    borderRadius: 'none !important',
+    borderRadius: '0 !important',
     boxShadow: 'none !important',
     borderBottom: `1px solid ${tokens.gray200}`,
   }),
+
+  tableRow: css({
+    cursor: 'pointer'
+  })
 };
