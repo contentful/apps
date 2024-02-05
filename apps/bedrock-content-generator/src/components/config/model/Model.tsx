@@ -108,12 +108,6 @@ const Model = ({ credentials, credentialsValid, model, modelValid, region, dispa
       Promise.all(modelsWithAccountAvailability).then((models) => {
         setModels(models);
         setIsFetchingModels(false);
-        if (!model) {
-          const availableModel = models.find((m) => m.availability === 'AVAILABLE');
-          if (availableModel) {
-            setModel(availableModel.id, true);
-          }
-        }
       });
     });
   }, [ai, dispatch]);
