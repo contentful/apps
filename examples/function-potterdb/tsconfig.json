@@ -6,5 +6,5 @@
     "lib": ["dom", "dom.iterable", "esnext"]
   },
   "include": ["src"],
-  "exclude": ["functions"]
+  "exclude": ["actions", "functions"]
 }
