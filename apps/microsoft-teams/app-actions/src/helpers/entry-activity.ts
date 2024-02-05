@@ -4,7 +4,8 @@ import { TOPIC_ACTION_MAP } from '../constants';
 
 export const buildEntryActivity = async (
   entryEvent: EntryEvent,
-  cma: PlainClientAPI
+  cma: PlainClientAPI,
+  cmaHost: string
 ): Promise<EntryActivity> => {
   const { entry, topic, eventDatetime } = entryEvent;
 
@@ -19,6 +20,8 @@ export const buildEntryActivity = async (
 
   const action = topicToAction(topic);
 
+  const entryUrl = computeEntryUrl(entry, cmaHost);
+
   return {
     contentTypeName,
     entryTitle,
@@ -27,6 +30,7 @@ export const buildEntryActivity = async (
     contentTypeId,
     action,
     eventDatetime,
+    entryUrl,
   };
 };
 
@@ -52,4 +56,20 @@ const computeDefaultLocaleCode = (locales: LocaleProps[]): string => {
   const defaultLocale = locales.find((locale) => locale.default);
   if (!defaultLocale) throw new Error('No default locale found in space');
   return defaultLocale.code;
+};
+
+const computeEntryUrl = (entry: EntryProps, cmaHost: string): string => {
+  const CONTENTFUL_SITE_URL = 'app.contentful.com';
+  const CONTENTFUL_EU_SITE_URL = 'app.eu.contentful.com';
+
+  const spaceId = entry.sys.space.sys.id;
+  const environmentId = entry.sys.environment.sys.id;
+  const entryId = entry.sys.id;
+  const webapp = cmaHost.includes('.eu.') ? CONTENTFUL_EU_SITE_URL : CONTENTFUL_SITE_URL;
+  const url =
+    environmentId === 'master'
+      ? `https://${webapp}/spaces/${spaceId}/entries/${entryId}`
+      : `https://${webapp}/spaces/${spaceId}/environments/${environmentId}/entries/${entryId}`;
+
+  return url;
 };

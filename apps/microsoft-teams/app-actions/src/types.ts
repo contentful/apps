@@ -79,6 +79,7 @@ export interface EntryActivity {
   contentTypeId: string;
   action: string; // published | deleted | created | etc
   eventDatetime: string;
+  entryUrl: string;
 }
 
 export interface EntryActivityMessage {
