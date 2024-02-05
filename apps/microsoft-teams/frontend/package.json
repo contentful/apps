@@ -19,6 +19,7 @@
   },
   "scripts": {
     "start": "vite",
+    "dev": "vite --force",
     "build": "tsc && vite build",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest --logHeapUsage --coverage",
