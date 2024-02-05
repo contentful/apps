@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, ChangeEvent } from 'react';
+import React, { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
@@ -10,56 +10,92 @@ import {
   Stack,
   TextInput,
   TextLink,
+  Text,
+  Badge,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { styles } from '../components/config-screen/ConfigScreen.styles';
 import VercelIcon from '../components/common/VercelIcon';
-
-export interface AppInstallationParameters {
-  accessToken?: string;
-}
+import useInitializeParameters from '../hooks/useInitializeParameters';
+import parameterReducer, { actions } from '../components/parameterReducer';
+import { initialParameters } from '../constants/defaultParams';
 
 const ConfigScreen = () => {
+  const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
+  const [appInstalled, setIsAppInstalled] = useState(false);
+  const [tokenError, setTokenError] = useState<boolean | null>();
+  const [tokenValid, setTokenValid] = useState<boolean | null>();
+  // TODO: figure out if deployments are infact useful here
+  // const [deployments, setDeployments] = useState<Deployments>();
+
   const sdk = useSDK<ConfigAppSDK>();
-  const [parameters, setParameters] = useState<AppInstallationParameters>({});
-  const [accessToken, setAccessToken] = useState<string>('');
+
+  useInitializeParameters(dispatchParameters);
+
+  const getIsAppInstalled = useCallback(async () => {
+    const isInstalled = await sdk.app.isInstalled();
+
+    setIsAppInstalled(isInstalled);
+  }, [sdk]);
+
+  useEffect(() => {
+    getIsAppInstalled();
+    sdk.app.onConfigurationCompleted(() => setIsAppInstalled(true));
+  }, [sdk]);
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    const parametersToSave = {
-      ...parameters,
-      accessToken,
-    };
-
-    setParameters(parametersToSave);
+    if (!parameters.vercelAccessToken) {
+      sdk.notifier.error('A valid Vercel access token is required');
+      return false;
+    }
 
     return {
-      parameters: parametersToSave,
+      parameters,
       targetState: currentState,
     };
-  }, [parameters, sdk, accessToken]);
+  }, [parameters, sdk]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
   useEffect(() => {
-    (async () => {
-      const currentParameters = await sdk.app.getParameters();
+    async function getDeployments() {
+      const res = await fetch('https://api.vercel.com/v6/deployments', {
+        headers: {
+          Authorization: `Bearer ${parameters.vercelAccessToken}`,
+        },
+        method: 'get',
+      });
 
-      if (currentParameters) {
-        setParameters(currentParameters);
-        setAccessToken(currentParameters.accessToken);
+      // TODO: Figure out if we want to continue wil deployments
+      // Contains deployment response, currently we aren't doing anything with deployments
+      // we just want to make sure a successful call goes through with vali access token
+
+      // const body = await res.json();
+
+      if (res.ok) {
+        setTokenError(null);
+        setTokenValid(true);
+      } else {
+        setTokenError(true);
+        setTokenValid(false);
       }
+    }
 
-      sdk.app.setReady();
-    })();
-  }, [sdk]);
+    if (appInstalled && parameters && parameters.vercelAccessToken) {
+      getDeployments();
+    }
+  }, [parameters, appInstalled]);
 
-  const handleAccessTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setAccessToken(e.target.value);
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    dispatchParameters({
+      type: actions.UPDATE_VERCEL_ACCESS_TOKEN,
+      payload: e.target.value,
+    });
   };
 
   return (
@@ -75,6 +111,7 @@ const ConfigScreen = () => {
             dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat.
           </Paragraph>
         </Box>
+
         <Stack spacing="spacingL" flexDirection="column">
           <Box style={styles.box}>
             <FormControl id="accessToken" isRequired={true}>
@@ -87,8 +124,8 @@ const ConfigScreen = () => {
                 name="accessToken"
                 type="password"
                 placeholder={'ex. atE2sdftcIp01O1isdfXc3QTdT4...'}
-                value={accessToken}
-                onChange={handleAccessTokenChange}
+                value={parameters.vercelAccessToken}
+                onChange={handleChange}
               />
               <HelpText>
                 Follow{' '}
@@ -103,6 +140,22 @@ const ConfigScreen = () => {
                 to create an access token in the Vercel dashboard.
               </HelpText>
             </FormControl>
+            <Box style={{ width: '100%' }}>
+              <Flex fullWidth flexDirection="column">
+                <Text fontWeight="fontWeightDemiBold" marginRight="spacing2Xs">
+                  Status
+                </Text>
+                <Box>
+                  {appInstalled && parameters.vercelAccessToken && tokenValid ? (
+                    <Badge variant="positive">Valid access token</Badge>
+                  ) : tokenError ? (
+                    <Badge variant="negative">Invalid access token</Badge>
+                  ) : (
+                    <Badge variant="warning">Token not configured</Badge>
+                  )}
+                </Box>
+              </Flex>
+            </Box>
           </Box>
         </Stack>
       </Box>
