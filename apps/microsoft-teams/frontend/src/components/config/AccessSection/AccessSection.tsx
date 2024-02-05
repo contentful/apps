@@ -40,11 +40,11 @@ const AccessSection = (props: Props) => {
       const authResult = await instance.loginPopup(loginRequest);
       if (!isAppInstalled) {
         await customApi.saveConfiguration({ ...parameters, tenantId: authResult.tenantId });
-        dispatch({
-          type: actions.UPDATE_TENANT_ID,
-          payload: authResult.tenantId,
-        });
       }
+      dispatch({
+        type: actions.UPDATE_TENANT_ID,
+        payload: authResult.tenantId,
+      });
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to authenticate with Microsoft';
       sdk.notifier.error(message);
@@ -63,7 +63,12 @@ const AccessSection = (props: Props) => {
           handleDisconnect={async () => {
             onClose(true);
             await instance.logoutPopup({
-              mainWindowRedirectUri: '/',
+              postLogoutRedirectUri: '/',
+              account: accounts[0],
+            });
+            dispatch({
+              type: actions.UPDATE_TENANT_ID,
+              payload: '',
             });
           }}
         />
