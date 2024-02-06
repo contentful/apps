@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.2.8](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.2.7...@contentful/dam-app-base@2.2.8) (2024-02-06)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.40.6 to 4.59.2 ([#6275](https://github.com/contentful/apps/issues/6275)) ([6385235](https://github.com/contentful/apps/commit/638523520c98abfdaddedee12822076423f515e2))
+
 ## [2.2.7](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.2.6...@contentful/dam-app-base@2.2.7) (2024-02-02)
 
 ### Bug Fixes
