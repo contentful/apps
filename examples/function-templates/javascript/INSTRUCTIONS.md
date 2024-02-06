@@ -1,5 +1,11 @@
 ## Building your Function
 
+Use this command below to install the template.
+
+```
+npx create-contentful-app@latest --function --javascript
+```
+
 ### Creating an app
 You can create an app using CLI using `npm run create-app-definition`. This will prompt you to enter details for your new app and organization details. You can also create an app definition by [visiting the apps section](https://app.contentful.com/deeplink?link=app-definition-list) under your organization settings in the Contentful web UI and clicking on the "Create App" button on the top right.
 
