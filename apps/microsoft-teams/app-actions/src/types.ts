@@ -74,11 +74,9 @@ export type SelectedEvents = {
 export interface EntryActivity {
   contentTypeName: string;
   entryTitle: string;
-  entryId: string;
-  spaceId: string;
-  contentTypeId: string;
   action: string; // published | deleted | created | etc
   eventDatetime: string;
+  entryUrl: string;
 }
 
 export interface EntryActivityMessage {

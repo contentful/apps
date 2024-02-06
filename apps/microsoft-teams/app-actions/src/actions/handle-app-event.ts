@@ -24,7 +24,7 @@ export const handler = withAsyncAppActionErrorHandling(
   ): Promise<AppActionCallResponse<SendEntryActivityMessageResult[]>> => {
     const {
       cma,
-      appActionCallContext: { appInstallationId, environmentId, spaceId, userId },
+      appActionCallContext: { appInstallationId, environmentId, spaceId, userId, cmaHost },
     } = context;
 
     const { payload, topic: topicString, eventDatetime } = parameters;
@@ -34,7 +34,11 @@ export const handler = withAsyncAppActionErrorHandling(
     const contentTypeId = entry.sys.contentType.sys.id;
     const topic = topicString as Topic;
 
-    const entryActivity = await helpers.buildEntryActivity({ entry, topic, eventDatetime }, cma);
+    const entryActivity = await helpers.buildEntryActivity(
+      { entry, topic, eventDatetime },
+      cma,
+      cmaHost
+    );
 
     const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
     const { tenantId, notifications } = parametersFromAppInstallation(appInstallation);
