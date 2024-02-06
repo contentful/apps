@@ -1,0 +1,12 @@
+{
+  "functions": [
+    {
+      "id": "PotterDB",
+      "name": "PotterDB Function",
+      "description": "Example Function querying Potter-DB GraphQL API",
+      "path": "functions/index.js",
+      "entryFile": "functions/index.ts",
+      "allowNetworks": ["api.potterdb.com"]
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import {
+  AppActionRequestContext,
   EntryActivityMessage,
   MessageResponse,
   MsTeamsBotServiceResponse,
@@ -11,13 +12,14 @@ export class MsTeamsBotService {
 
   async sendEntryActivityMessage(
     entryActivityMessage: EntryActivityMessage,
-    tenantId: string
+    tenantId: string,
+    requestContext: AppActionRequestContext
   ): Promise<MsTeamsBotServiceResponse<MessageResponse>> {
     const res = await fetch(
       `${this.botServiceUrl}/api/tenant/${tenantId}/entry_activity_messages`,
       {
         method: 'POST',
-        headers: this.requestHeaders,
+        headers: this.getRequestHeaders(requestContext),
         body: JSON.stringify(entryActivityMessage),
       }
     );
@@ -31,11 +33,12 @@ export class MsTeamsBotService {
 
   async sendTestMessage(
     testMessage: TestMessage,
-    tenantId: string
+    tenantId: string,
+    requestContext: AppActionRequestContext
   ): Promise<MsTeamsBotServiceResponse<MessageResponse>> {
     const res = await fetch(`${this.botServiceUrl}/api/tenant/${tenantId}/test_messages`, {
       method: 'POST',
-      headers: this.requestHeaders,
+      headers: this.getRequestHeaders(requestContext),
       body: JSON.stringify(testMessage),
     });
     const responseBody = await res.json();
@@ -47,11 +50,12 @@ export class MsTeamsBotService {
   }
 
   async getTeamInstallations(
-    tenantId: string
+    tenantId: string,
+    requestContext: AppActionRequestContext
   ): Promise<MsTeamsBotServiceResponse<TeamInstallation[]>> {
     const res = await fetch(`${this.botServiceUrl}/api/tenants/${tenantId}/team_installations`, {
       method: 'GET',
-      headers: this.requestHeaders,
+      headers: this.getRequestHeaders(requestContext),
     });
     const responseBody = await res.json();
     this.assertMsTeamsBotServiceCallResult<TeamInstallation[]>(responseBody, (data) => {
@@ -60,10 +64,15 @@ export class MsTeamsBotService {
     return responseBody;
   }
 
-  private get requestHeaders() {
+  private getRequestHeaders(requestContext: AppActionRequestContext) {
+    const { environmentId, userId, spaceId, appInstallationId } = requestContext;
     return {
       'Content-Type': 'application/json',
       'x-api-key': this.apiKey,
+      'X-Contentful-App': appInstallationId,
+      'X-Contentful-Environment': environmentId,
+      'X-Contentful-Space': spaceId,
+      'X-Contentful-User': userId,
     };
   }
 

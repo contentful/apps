@@ -17,9 +17,9 @@ import {
 } from '@contentful/f36-components';
 import { Form, FormControl, Checkbox, TextInput } from '@contentful/f36-forms';
 
-import MuxPlayer from '@mux/mux-player-react/dist/index.cjs';
-import MuxUploader from '@mux/mux-uploader-react/dist/index.cjs';
-import { MuxUploaderDrop } from '@mux/mux-uploader-react/dist/index.cjs';
+import MuxPlayer from '@mux/mux-player-react';
+import MuxUploader from '@mux/mux-uploader-react';
+import { MuxUploaderDrop } from '@mux/mux-uploader-react';
 
 import Config from './locations/config';
 import ApiClient from './util/apiClient';

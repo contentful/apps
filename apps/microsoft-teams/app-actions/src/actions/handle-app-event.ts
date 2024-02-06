@@ -24,7 +24,7 @@ export const handler = withAsyncAppActionErrorHandling(
   ): Promise<AppActionCallResponse<SendEntryActivityMessageResult[]>> => {
     const {
       cma,
-      appActionCallContext: { appInstallationId },
+      appActionCallContext: { appInstallationId, environmentId, spaceId, userId },
     } = context;
 
     const { payload, topic: topicString, eventDatetime } = parameters;
@@ -60,7 +60,8 @@ export const handler = withAsyncAppActionErrorHandling(
 
       const sendMessageResult = await config.msTeamsBotService.sendEntryActivityMessage(
         entryActivityMessage,
-        tenantId
+        tenantId,
+        { appInstallationId, environmentId, userId, spaceId }
       );
 
       return { sendMessageResult, entryActivityMessage };
