@@ -50,9 +50,6 @@ const isEmptyOrDone = (line: string) => line === '' || line === '[DONE]';
  * @returns
  */
 const streamToParsedText = (acc: string, line: string) => {
-  console.log('hi');
-  console.log({ acc });
-  console.log({ line });
   const dataPrepend = /(\n)?data:\s*/;
   const textWithoutDataPrepend = line.replace(dataPrepend, '').trim();
 
