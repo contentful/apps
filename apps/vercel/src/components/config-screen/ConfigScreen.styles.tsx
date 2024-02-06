@@ -28,6 +28,9 @@ export const styles = {
     width: '100%',
     marginTop: '22px',
   },
+  badgeContainer: {
+    width: '100%',
+  },
   icon: {
     marginTop: '41px',
   },

@@ -98,6 +98,16 @@ const ConfigScreen = () => {
     });
   };
 
+  const renderStatusBadge = () => {
+    if (appInstalled && parameters.vercelAccessToken && tokenValid) {
+      return <Badge variant="positive">Valid access token</Badge>;
+    } else if (tokenError) {
+      return <Badge variant="negative">Invalid access token</Badge>;
+    } else {
+      return <Badge variant="warning">Token not configured</Badge>;
+    }
+  };
+
   return (
     <>
       <Box className={styles.background} />
@@ -140,20 +150,12 @@ const ConfigScreen = () => {
                 to create an access token in the Vercel dashboard.
               </HelpText>
             </FormControl>
-            <Box style={{ width: '100%' }}>
+            <Box style={styles.badgeContainer}>
               <Flex fullWidth flexDirection="column">
                 <Text fontWeight="fontWeightDemiBold" marginRight="spacing2Xs">
                   Status
                 </Text>
-                <Box>
-                  {appInstalled && parameters.vercelAccessToken && tokenValid ? (
-                    <Badge variant="positive">Valid access token</Badge>
-                  ) : tokenError ? (
-                    <Badge variant="negative">Invalid access token</Badge>
-                  ) : (
-                    <Badge variant="warning">Token not configured</Badge>
-                  )}
-                </Box>
+                <Box>{renderStatusBadge()}</Box>
               </Flex>
             </Box>
           </Box>
