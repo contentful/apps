@@ -1,9 +1,17 @@
 import HyperLink from '@components/common/HyperLink/HyperLink';
-import { BedrockModel, featuredModels } from '@configs/aws/featuredModels';
-import { Flex, FormControl, Select, Spinner, Text, TextLink } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { BedrockModel, defaultModelId, featuredModels } from '@configs/aws/featuredModels';
+import {
+  Flex,
+  FormControl,
+  Radio,
+  Spinner,
+  Stack,
+  Text,
+  TextLink,
+} from '@contentful/f36-components';
+import { ExternalLinkIcon, WarningIcon } from '@contentful/f36-icons';
 import AI from '@utils/aiApi';
-import { ChangeEvent, Dispatch, useEffect, useMemo, useState } from 'react';
+import { Dispatch, useEffect, useMemo, useState } from 'react';
 import { ConfigErrors, ModelText } from '../configText';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 import s from './model.module.css';
@@ -47,12 +55,17 @@ const Model = ({ credentials, credentialsValid, model, modelValid, region, dispa
     [credentials.accessKeyID, credentials.secretAccessKey, credentialsValid, region]
   );
 
-  const [models, setModels] = useState<ModelWithAvailability[]>([]);
+  const [models, setModels] = useState<ModelWithAvailability[]>(
+    featuredModels.map((m) => ({ ...m, availability: 'AVAILABLE' }))
+  );
   const [isFetchingModels, setIsFetchingModels] = useState<boolean>(false);
   const modelsNotInRegion = models.filter((m) => m.availability === 'NOT_IN_REGION');
   const modelsNotInAccount = models.filter((m) => m.availability === 'NOT_IN_ACCOUNT');
   const modelsWithForbiddenError = models.filter((m) => m.availability === 'FORBIDDEN');
   const modelsWithOtherError = models.filter((m) => m.availability === 'OTHER_ERROR');
+
+  const setModel = (model: string, isValid: boolean) =>
+    dispatch({ type: ParameterAction.UPDATE_MODEL, value: model, isValid });
 
   /** Fetch models */
   useEffect(() => {
@@ -97,49 +110,39 @@ const Model = ({ credentials, credentialsValid, model, modelValid, region, dispa
         setIsFetchingModels(false);
       });
     });
-  }, [ai]);
-
-  const modelList = models.map((model) => (
-    <Select.Option key={model.id} value={model.id} isDisabled={model.availability != 'AVAILABLE'}>
-      {model.name}
-    </Select.Option>
-  ));
-
-  /** Validate model selection. We need to do this here, because validity can change if e.g. region changes */
-  useEffect(() => {
-    if (model == '' || models.length == 0) return;
-
-    const isSelectionValid = models.some((m) => m.availability === 'AVAILABLE' && m.id === model);
-
-    if (isSelectionValid) return;
-
-    dispatch({
-      type: ParameterAction.UPDATE_MODEL,
-      value: model,
-      isValid: false,
-    });
-  }, [model, models, dispatch]);
-
-  const handleChange = (e: ChangeEvent<HTMLSelectElement>) =>
-    dispatch({
-      type: ParameterAction.UPDATE_MODEL,
-      value: e.target.value,
-      isValid: true,
-    });
+  }, [ai, dispatch]);
 
   return (
     <FormControl isRequired marginBottom="none" isInvalid={!modelValid}>
       <FormControl.Label>{ModelText.title}</FormControl.Label>
-      <Select
+      <Radio.Group
+        name="permission"
         value={model}
-        onChange={handleChange}
-        isDisabled={
-          models.length < 1 ||
-          models.find((m) => m.availability === 'AVAILABLE') === undefined ||
-          isFetchingModels
-        }>
-        {modelList}
-      </Select>
+        className={s.modelRadioGroup}
+        onChange={(e) => {
+          setModel(e.target.value, true);
+        }}>
+        {models.map((model) => (
+          <Radio
+            isDisabled={!ai || isFetchingModels || model.availability !== 'AVAILABLE'}
+            key={model.id}
+            value={model.id}
+            className={s.modelRadio}>
+            <Stack flexDirection="row" justifyContent="space-between" fullWidth>
+              <p data-prefered={model.id == defaultModelId}>{model.name}</p>
+
+              {model.availability == 'NOT_IN_ACCOUNT' && (
+                <p className={s.modelRadioWarning}>
+                  <WarningIcon /> Access not granted
+                </p>
+              )}
+              {model.availability == 'NOT_IN_REGION' && <p>Not available in region</p>}
+              {model.availability == 'FORBIDDEN' && <p>Access Forbidden</p>}
+              {model.availability == 'OTHER_ERROR' && <p>Error accessing</p>}
+            </Stack>
+          </Radio>
+        ))}
+      </Radio.Group>
 
       <FormControl.HelpText>
         <HyperLink
@@ -150,7 +153,6 @@ const Model = ({ credentials, credentialsValid, model, modelValid, region, dispa
           alignIcon="end"
         />
       </FormControl.HelpText>
-      {/* <FormControl.HelpText>{ModelText.helpText}</FormControl.HelpText> */}
 
       {isFetchingModels && (
         <Flex marginTop="spacingXs">

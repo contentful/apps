@@ -81,14 +81,18 @@ describe('Display Model', () => {
     await waitFor(() => {
       expect(getByText('Anthropic Claude v2.1')).toBeTruthy();
     });
-    expect(
-      getByText('The model Meta Llama 2 70B is not available in the abc region.')
-    ).toBeTruthy();
-    expect(
-      findByText(
-        'The model Anthropic Claude Instant v1.2 has not been granted access in your account.'
-      )
-    ).toBeTruthy();
+    await waitFor(() => {
+      expect(
+        getByText('The model Meta Llama 2 70B is not available in the abc region.')
+      ).toBeTruthy();
+    });
+    await waitFor(() => {
+      expect(
+        findByText(
+          'The model Anthropic Claude Instant v1.2 has not been granted access in your account.'
+        )
+      ).toBeTruthy();
+    });
     unmount();
   });
 });
