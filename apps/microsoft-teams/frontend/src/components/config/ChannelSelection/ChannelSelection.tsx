@@ -16,7 +16,7 @@ interface Props {
 
 const ChannelSelection = (props: Props) => {
   const { notification, handleNotificationEdit } = props;
-  const { channels } = useContext(ChannelContext);
+  const { channels, loading, error } = useContext(ChannelContext);
 
   const openChannelSelectionModal = () => {
     return ModalLauncher.open(({ isShown, onClose }) => (
@@ -26,6 +26,8 @@ const ChannelSelection = (props: Props) => {
         handleNotificationEdit={handleNotificationEdit}
         savedChannel={notification.channel}
         channels={channels}
+        loading={loading}
+        error={Boolean(error)}
       />
     ));
   };

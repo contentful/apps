@@ -5,6 +5,8 @@ import { AppInstallationParameters, TeamsChannel } from '@customTypes/configPage
 
 const useGetTeamsChannels = () => {
   const [channels, setChannels] = useState<TeamsChannel[]>([]);
+  const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState<boolean>(true);
   const sdk = useSDK<ConfigAppSDK>();
   const { tenantId } = sdk.parameters.installation as AppInstallationParameters;
 
@@ -26,18 +28,26 @@ const useGetTeamsChannels = () => {
       if (body.ok) {
         setChannels(body.data);
       } else {
-        throw new Error('Failed to fetch Teams channels');
+        const error = new Error('Failed to fetch Teams channels');
+        setError(error);
+        throw error;
       }
-    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(
+        error?.message ? error : new Error('Unknown error occured. Please try again later.')
+      );
       console.error(error);
     }
+
+    setLoading(false);
   }, [sdk.cma.appActionCall, sdk.ids.environment, sdk.ids.space, sdk.ids.app, tenantId]);
 
   useEffect(() => {
     getAllChannels();
   }, [getAllChannels]);
 
-  return channels;
+  return { channels, loading, error };
 };
 
 export default useGetTeamsChannels;
