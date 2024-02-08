@@ -11,7 +11,13 @@ import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
 import { ContentTypeContextProvider } from '@context/ContentTypeProvider';
 import { ChannelContextProvider } from '@context/ChannelProvider';
-import { getUniqueNotifications, getDuplicateNotificationIndex } from '@helpers/configHelpers';
+import {
+  getUniqueNotifications,
+  getDuplicateNotificationIndex,
+  displayConfirmationNotifications,
+} from '@helpers/configHelpers';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 interface Props {
   notifications: Notification[];
@@ -21,6 +27,8 @@ interface Props {
 const NotificationsSection = (props: Props) => {
   const { notifications, dispatch } = props;
   const [notificationIndexToEdit, setNotificationIndexToEdit] = useState<number | null>(null);
+
+  const sdk = useSDK<ConfigAppSDK>();
 
   const createNewNotification = () => {
     dispatch({ type: actions.ADD_NOTIFICATION });
@@ -48,6 +56,11 @@ const NotificationsSection = (props: Props) => {
             onClose(true);
             deleteNotification(index);
             setNotificationIndexToEdit(null);
+            displayConfirmationNotifications(
+              sdk,
+              notificationsSection.updateConfirmation,
+              notificationsSection.saveWarning
+            );
           }}
         />
       );
@@ -112,6 +125,11 @@ const NotificationsSection = (props: Props) => {
         type: actions.UPDATE_NOTIFICATIONS,
         payload: uniqueNotifications,
       });
+      displayConfirmationNotifications(
+        sdk,
+        notificationsSection.updateConfirmation,
+        notificationsSection.saveWarning
+      );
     }
   };
 

@@ -18,7 +18,9 @@ import { ParameterAction, actions } from '@components/config/parameterReducer';
 import { useCustomApi } from '@hooks/useCustomApi';
 import { AppInstallationParameters } from '@customTypes/configPage';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import DisconnectModal from '@components/config/DisconnectModal/DisconnectModal';
+import { displayConfirmationNotifications } from '@helpers/configHelpers';
 
 interface Props {
   dispatch: Dispatch<ParameterAction>;
@@ -32,7 +34,7 @@ const AccessSection = (props: Props) => {
   const loginInProgress = inProgress === 'login';
   const logoutInProgress = inProgress === 'logout';
   const customApi = useCustomApi();
-  const sdk = useSDK();
+  const sdk = useSDK<ConfigAppSDK>();
   const { logout, login, teamsAppInfo, teamsAppLink, description } = accessSection;
 
   const handleLogin = async () => {
@@ -45,6 +47,13 @@ const AccessSection = (props: Props) => {
         type: actions.UPDATE_TENANT_ID,
         payload: authResult.tenantId,
       });
+      if (isAppInstalled && authResult.tenantId !== parameters.tenantId) {
+        displayConfirmationNotifications(
+          sdk,
+          accessSection.updateConfirmation,
+          accessSection.saveWarning
+        );
+      }
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to authenticate with Microsoft';
       sdk.notifier.error(message);
