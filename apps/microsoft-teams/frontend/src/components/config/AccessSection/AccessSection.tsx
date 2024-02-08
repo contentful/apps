@@ -1,4 +1,4 @@
-import { Dispatch } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -21,6 +21,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import DisconnectModal from '@components/config/DisconnectModal/DisconnectModal';
 import { displayConfirmationNotifications } from '@helpers/configHelpers';
+import MsGraph from '@utils/msGraphApi';
 
 interface Props {
   dispatch: Dispatch<ParameterAction>;
@@ -30,12 +31,22 @@ interface Props {
 
 const AccessSection = (props: Props) => {
   const { dispatch, parameters, isAppInstalled } = props;
+  const [orgName, setOrgName] = useState<string>('');
+  const [orgLogo, setOrgLogo] = useState<string>('');
+
   const { instance, accounts, inProgress } = useMsal();
-  const loginInProgress = inProgress === 'login';
-  const logoutInProgress = inProgress === 'logout';
   const customApi = useCustomApi();
   const sdk = useSDK<ConfigAppSDK>();
+
+  const loginInProgress = inProgress === 'login';
+  const logoutInProgress = inProgress === 'logout';
   const { logout, login, teamsAppInfo, teamsAppLink, description } = accessSection;
+
+  useEffect(() => {
+    if (accounts.length && parameters.tenantId) {
+      getOrgDetails();
+    }
+  }, [accounts, parameters.tenantId]);
 
   const handleLogin = async () => {
     try {
@@ -79,10 +90,26 @@ const AccessSection = (props: Props) => {
               type: actions.UPDATE_TENANT_ID,
               payload: '',
             });
+            setOrgName('');
+            setOrgLogo('');
           }}
         />
       );
     });
+  };
+
+  const getOrgDetails = async () => {
+    try {
+      const msGraph = new MsGraph(instance, accounts[0]);
+      const [orgName, orgLogo] = await Promise.all([
+        msGraph.getOrganizationDisplayName(),
+        msGraph.getOrganizationLogo(),
+      ]);
+      setOrgName(orgName);
+      setOrgLogo(orgLogo);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const accessComponent = () => {
@@ -106,9 +133,14 @@ const AccessSection = (props: Props) => {
         <>
           <Card padding="large">
             <Flex justifyContent="space-between">
-              <Flex flexDirection="column">
-                <Subheading marginBottom="none">{accounts[0]?.name}</Subheading>
-                <Paragraph marginBottom="none">{accounts[0]?.username}</Paragraph>
+              <Flex>
+                <Flex alignItems="center" marginRight="spacingM">
+                  {orgLogo && <img className={styles.orgLogo} src={orgLogo}></img>}
+                </Flex>
+                <Flex flexDirection="column">
+                  <Subheading marginBottom="none">{orgName}</Subheading>
+                  <Paragraph marginBottom="none">{accounts[0]?.username}</Paragraph>
+                </Flex>
               </Flex>
               <Button
                 onClick={() => handleLogout()}
