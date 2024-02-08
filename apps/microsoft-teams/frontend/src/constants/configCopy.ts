@@ -25,6 +25,8 @@ const accessSection = {
     description:
       'By disconnecting, you will no longer see configured notifications for this tenant. Are you sure you want to disconnect?',
   },
+  updateConfirmation: 'Microsoft organization updated',
+  saveWarning: 'Save the app to persist these settings',
 };
 
 const notificationsSection = {
@@ -33,7 +35,7 @@ const notificationsSection = {
   edit: 'Edit',
   delete: 'Delete',
   confirmDelete:
-    'By disconnecting, the notifications you currently have configured will no longer function. Are you sure you want to disconnect?',
+    'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
   duplicateModal: {
     modalHeaderTitle: 'Duplicate Notification',
     confirmDuplicate: 'Update existing notification',
@@ -41,6 +43,8 @@ const notificationsSection = {
     confirmDuplicateDescription:
       'You already have a notification set up for this content type and MS Teams channel. Would you like to update the existing notification instead of creating a new one?',
   },
+  updateConfirmation: 'Notification settings updated',
+  saveWarning: 'Save the app to persist these settings',
 };
 
 const contentTypeSelection = {
