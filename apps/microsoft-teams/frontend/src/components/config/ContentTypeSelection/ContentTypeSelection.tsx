@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Box, Flex, IconButton, ModalLauncher, Text, TextInput } from '@contentful/f36-components';
 import AddButton from '@components/config/AddButton/AddButton';
 import ContentTypeSelectionModal from '@components/config/ContentTypeSelectionModal/ContentTypeSelectionModal';
@@ -18,12 +18,19 @@ interface Props {
 const ContentTypeSelection = (props: Props) => {
   const { notification, handleNotificationEdit } = props;
   const [areContentTypesLoading, setAreContentTypesLoading] = useState<boolean>(false);
+  const [addButtonClicked, setAddButtonClicked] = useState<boolean>(false);
   const { contentTypes, contentTypesLoading, contentTypesError, contentTypeConfigLink } =
     useContext(ContentTypeContext);
+
+  useEffect(() => {
+    // ensure the loading state updates once it is done loading
+    if (addButtonClicked) setAreContentTypesLoading(contentTypesLoading);
+  }, [contentTypesLoading, addButtonClicked]);
 
   const openContentTypeSelectionModal = () => {
     if (contentTypesLoading != areContentTypesLoading) {
       setAreContentTypesLoading(contentTypesLoading);
+      setAddButtonClicked(true);
       return;
     } else if (!areContentTypesLoading)
       return ModalLauncher.open(({ isShown, onClose }) => (
@@ -66,14 +73,14 @@ const ContentTypeSelection = (props: Props) => {
             icon={<EditIcon />}
             onClick={openContentTypeSelectionModal}
             aria-label="Change selected content type"
-            isLoading={contentTypesLoading}
+            isLoading={areContentTypesLoading}
           />
         </TextInput.Group>
       ) : (
         <AddButton
           buttonCopy={contentTypeSelection.addButton}
           handleClick={openContentTypeSelectionModal}
-          isLoading={contentTypesLoading}
+          isLoading={areContentTypesLoading}
         />
       )}
     </Box>

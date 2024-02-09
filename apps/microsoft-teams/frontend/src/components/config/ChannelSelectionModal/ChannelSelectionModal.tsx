@@ -17,7 +17,6 @@ interface ChannelSelectionModalProps {
   savedChannel: TeamsChannel;
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
   channels: TeamsChannel[];
-  loading: boolean;
   error: boolean;
 }
 

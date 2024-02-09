@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Box, Flex, IconButton, ModalLauncher, Text, TextInput } from '@contentful/f36-components';
 import AddButton from '@components/config/AddButton/AddButton';
 import ChannelSelectionModal from '@components/config/ChannelSelectionModal/ChannelSelectionModal';
@@ -18,10 +18,17 @@ const ChannelSelection = (props: Props) => {
   const { notification, handleNotificationEdit } = props;
   const { channels, loading, error } = useContext(ChannelContext);
   const [areChannelsLoading, setAreChannelsLoading] = useState<boolean>(false);
+  const [addButtonClicked, setAddButtonClicked] = useState<boolean>(false);
+
+  useEffect(() => {
+    // ensure the loading state updates once it is done loading
+    if (addButtonClicked) setAreChannelsLoading(loading);
+  }, [loading, addButtonClicked]);
 
   const openChannelSelectionModal = () => {
     if (loading != areChannelsLoading) {
       setAreChannelsLoading(loading);
+      setAddButtonClicked(true);
       return;
     } else if (!areChannelsLoading)
       return ModalLauncher.open(({ isShown, onClose }) => (
@@ -31,7 +38,6 @@ const ChannelSelection = (props: Props) => {
           handleNotificationEdit={handleNotificationEdit}
           savedChannel={notification.channel}
           channels={channels}
-          loading={loading}
           error={Boolean(error)}
         />
       ));
