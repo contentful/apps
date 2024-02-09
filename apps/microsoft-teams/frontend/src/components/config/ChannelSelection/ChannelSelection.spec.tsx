@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { channelSelection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
 import { mockChannels } from '@test/mocks';
+import { ChannelContext } from '@context/ChannelProvider';
 
 describe('ChannelSelection component', () => {
   it('mounts and renders the correct title and button copy when no channel is selected', () => {
@@ -15,6 +16,7 @@ describe('ChannelSelection component', () => {
     expect(screen.getByText(channelSelection.addButton)).toBeTruthy();
     unmount();
   });
+
   it('mounts and renders an input when a channel is selected', () => {
     const { unmount } = render(
       <ChannelSelection
@@ -27,6 +29,20 @@ describe('ChannelSelection component', () => {
     );
 
     expect(screen.getByRole('textbox')).toBeTruthy();
+    unmount();
+  });
+
+  it('mounts and does not render modal for channel selection if channels are loading', () => {
+    const { unmount } = render(
+      <ChannelContext.Provider value={{ loading: true, channels: [], error: undefined }}>
+        <ChannelSelection notification={defaultNotification} handleNotificationEdit={vi.fn()} />
+      </ChannelContext.Provider>
+    );
+
+    const addButton = screen.getByText(channelSelection.addButton);
+    addButton.click();
+
+    expect(screen.queryByTestId('cf-ui-modal')).toBeFalsy();
     unmount();
   });
 });
