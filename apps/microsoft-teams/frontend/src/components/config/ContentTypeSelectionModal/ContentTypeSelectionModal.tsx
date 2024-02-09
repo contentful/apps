@@ -7,6 +7,7 @@ import ModalHeader from '@components/config/ModalHeader/ModalHeader';
 import { ContentTypeProps } from 'contentful-management';
 import EmptyState from '@components/config/EmptyState/EmptyState';
 import WebApp from '@components/config/EmptyState/WebApp';
+import ChannelsErrorMessage from '../ChannelsErrorMessage/ChannelsErrorMessage';
 
 interface Props {
   isShown: boolean;
@@ -15,6 +16,7 @@ interface Props {
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
   contentTypes: ContentTypeProps[];
   contentTypeConfigLink: string;
+  error: boolean;
 }
 
 const ContentTypeSelectionModal = (props: Props) => {
@@ -25,63 +27,81 @@ const ContentTypeSelectionModal = (props: Props) => {
     handleNotificationEdit,
     contentTypes,
     contentTypeConfigLink,
+    error,
   } = props;
 
   const [selectedContentTypeId, setSelectedContentTypeId] = useState(savedContentTypeId ?? '');
 
-  const { title, button, link, emptyContent, emptyHeading } = contentTypeSelection.modal;
+  const { title, button, link, emptyContent, emptyHeading, errorMessage } =
+    contentTypeSelection.modal;
+
+  const renderModalContent = () => {
+    if (error) {
+      return (
+        <Modal.Content>
+          <ChannelsErrorMessage errorMessage={errorMessage} />
+        </Modal.Content>
+      );
+    }
+
+    if (contentTypes.length) {
+      return (
+        <>
+          <Modal.Content>
+            <FormControl as="fieldset" marginBottom="none">
+              <Table className={styles.table}>
+                <Table.Body>
+                  {contentTypes.map((contentType) => (
+                    <Table.Row key={contentType.sys.id}>
+                      <Table.Cell>
+                        <Radio
+                          id={contentType.sys.id}
+                          isChecked={selectedContentTypeId === contentType.sys.id}
+                          onChange={() => setSelectedContentTypeId(contentType.sys.id)}>
+                          {contentType.name}
+                        </Radio>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
+            </FormControl>
+          </Modal.Content>
+          <Modal.Controls>
+            <Button
+              size="small"
+              variant="primary"
+              onClick={() => {
+                handleNotificationEdit({ contentTypeId: selectedContentTypeId });
+                onClose();
+              }}
+              isDisabled={!selectedContentTypeId}>
+              {button}
+            </Button>
+          </Modal.Controls>
+        </>
+      );
+    }
+
+    return (
+      <Modal.Content>
+        <EmptyState
+          image={<WebApp />}
+          heading={emptyHeading}
+          body={emptyContent}
+          linkSubstring={link}
+          linkHref={contentTypeConfigLink}
+        />
+      </Modal.Content>
+    );
+  };
 
   return (
     <Modal onClose={onClose} isShown={isShown} size="large">
       {() => (
         <>
           <ModalHeader title={title} onClose={onClose} />
-          {contentTypes.length ? (
-            <>
-              <Modal.Content>
-                <FormControl as="fieldset" marginBottom="none">
-                  <Table className={styles.table}>
-                    <Table.Body>
-                      {contentTypes.map((contentType) => (
-                        <Table.Row key={contentType.sys.id}>
-                          <Table.Cell>
-                            <Radio
-                              id={contentType.sys.id}
-                              isChecked={selectedContentTypeId === contentType.sys.id}
-                              onChange={() => setSelectedContentTypeId(contentType.sys.id)}>
-                              {contentType.name}
-                            </Radio>
-                          </Table.Cell>
-                        </Table.Row>
-                      ))}
-                    </Table.Body>
-                  </Table>
-                </FormControl>
-              </Modal.Content>
-              <Modal.Controls>
-                <Button
-                  size="small"
-                  variant="primary"
-                  onClick={() => {
-                    handleNotificationEdit({ contentTypeId: selectedContentTypeId });
-                    onClose();
-                  }}
-                  isDisabled={!selectedContentTypeId}>
-                  {button}
-                </Button>
-              </Modal.Controls>
-            </>
-          ) : (
-            <Modal.Content>
-              <EmptyState
-                image={<WebApp />}
-                heading={emptyHeading}
-                body={emptyContent}
-                linkSubstring={link}
-                linkHref={contentTypeConfigLink}
-              />
-            </Modal.Content>
-          )}
+          {renderModalContent()}
         </>
       )}
     </Modal>

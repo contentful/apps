@@ -26,7 +26,7 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
   const [selectedChannel, setSelectedChannel] = useState<TeamsChannel>(
     savedChannel ?? defaultNotification.channel
   );
-  const { title, link, emptyContent, emptyHeading } = channelSelection.modal;
+  const { title, link, emptyContent, emptyHeading, errorMessage } = channelSelection.modal;
 
   useEffect(() => {
     const foundChannel = channels.find((channel) => channel.id === savedChannel.id);
@@ -46,7 +46,7 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
     if (error) {
       return (
         <Modal.Content>
-          <ChannelsErrorMessage />
+          <ChannelsErrorMessage errorMessage={errorMessage} />
         </Modal.Content>
       );
     }

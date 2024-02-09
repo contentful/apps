@@ -5,6 +5,8 @@ import useGetLinkForContentTypeConfig from '@hooks/useGetContentTypeConfigLink';
 
 interface ContentTypeContextValue {
   contentTypes: ContentTypeProps[];
+  contentTypesLoading: boolean;
+  contentTypesError?: Error;
   contentTypeConfigLink: string;
 }
 
@@ -16,11 +18,17 @@ export const ContentTypeContext = createContext({} as ContentTypeContextValue);
 
 export const ContentTypeContextProvider = (props: ContentTypeContextProviderProps) => {
   const { children } = props;
-  const contentTypes = useGetContentTypes();
+  const { contentTypes, loading, error } = useGetContentTypes();
   const contentTypeConfigLink = useGetLinkForContentTypeConfig();
 
   return (
-    <ContentTypeContext.Provider value={{ contentTypes, contentTypeConfigLink }}>
+    <ContentTypeContext.Provider
+      value={{
+        contentTypes,
+        contentTypesLoading: loading,
+        contentTypesError: error,
+        contentTypeConfigLink,
+      }}>
       {children}
     </ContentTypeContext.Provider>
   );

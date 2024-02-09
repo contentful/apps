@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Box, Flex, IconButton, ModalLauncher, Text, TextInput } from '@contentful/f36-components';
 import AddButton from '@components/config/AddButton/AddButton';
 import ContentTypeSelectionModal from '@components/config/ContentTypeSelectionModal/ContentTypeSelectionModal';
@@ -17,21 +17,28 @@ interface Props {
 
 const ContentTypeSelection = (props: Props) => {
   const { notification, handleNotificationEdit } = props;
-  const { contentTypes, contentTypeConfigLink } = useContext(ContentTypeContext);
+  const [areContentTypesLoading, setAreContentTypesLoading] = useState<boolean>(false);
+  const { contentTypes, contentTypesLoading, contentTypesError, contentTypeConfigLink } =
+    useContext(ContentTypeContext);
 
   const openContentTypeSelectionModal = () => {
-    return ModalLauncher.open(({ isShown, onClose }) => (
-      <ContentTypeSelectionModal
-        isShown={isShown}
-        onClose={() => {
-          onClose(true);
-        }}
-        handleNotificationEdit={handleNotificationEdit}
-        savedContentTypeId={notification.contentTypeId}
-        contentTypes={contentTypes}
-        contentTypeConfigLink={contentTypeConfigLink}
-      />
-    ));
+    if (contentTypesLoading != areContentTypesLoading) {
+      setAreContentTypesLoading(contentTypesLoading);
+      return;
+    } else if (!areContentTypesLoading)
+      return ModalLauncher.open(({ isShown, onClose }) => (
+        <ContentTypeSelectionModal
+          isShown={isShown}
+          onClose={() => {
+            onClose(true);
+          }}
+          handleNotificationEdit={handleNotificationEdit}
+          savedContentTypeId={notification.contentTypeId}
+          contentTypes={contentTypes}
+          contentTypeConfigLink={contentTypeConfigLink}
+          error={Boolean(contentTypesError)}
+        />
+      ));
   };
 
   return (
@@ -59,12 +66,14 @@ const ContentTypeSelection = (props: Props) => {
             icon={<EditIcon />}
             onClick={openContentTypeSelectionModal}
             aria-label="Change selected content type"
+            isLoading={contentTypesLoading}
           />
         </TextInput.Group>
       ) : (
         <AddButton
           buttonCopy={contentTypeSelection.addButton}
           handleClick={openContentTypeSelectionModal}
+          isLoading={contentTypesLoading}
         />
       )}
     </Box>

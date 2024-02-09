@@ -13,7 +13,6 @@ describe('ChannelSelectionModal component', () => {
         savedChannel={defaultNotification.channel}
         handleNotificationEdit={vi.fn()}
         channels={[]}
-        loading={false}
         error={false}
       />
     );
@@ -31,7 +30,6 @@ describe('ChannelSelectionModal component', () => {
         savedChannel={defaultNotification.channel}
         handleNotificationEdit={vi.fn()}
         channels={[]}
-        loading={false}
         error={true}
       />
     );
