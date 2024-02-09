@@ -13,9 +13,27 @@ describe('ContentTypeSelectionModal component', () => {
         handleNotificationEdit={vi.fn()}
         contentTypes={[]}
         contentTypeConfigLink=""
+        error={false}
       />
     );
 
     expect(screen.getByText(contentTypeSelection.modal.title)).toBeTruthy();
+  });
+
+  it('mounts and renders error content when error is present', () => {
+    const { errorMessage } = contentTypeSelection.modal;
+    render(
+      <ContentTypeSelectionModal
+        isShown={true}
+        onClose={vi.fn()}
+        savedContentTypeId=""
+        handleNotificationEdit={vi.fn()}
+        contentTypes={[]}
+        contentTypeConfigLink=""
+        error={false}
+      />
+    );
+
+    expect(screen.getByText(errorMessage)).toBeTruthy();
   });
 });

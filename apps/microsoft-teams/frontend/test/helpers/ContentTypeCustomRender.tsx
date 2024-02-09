@@ -5,7 +5,12 @@ import { ContentTypeContext } from '@context/ContentTypeProvider';
 const ContentTypeCustomRender = (component: React.ReactElement) => {
   return render(
     <ContentTypeContext.Provider
-      value={{ contentTypes: mockGetManyContentType.items, contentTypeConfigLink: '' }}>
+      value={{
+        contentTypes: mockGetManyContentType.items,
+        contentTypeConfigLink: '',
+        contentTypesError: undefined,
+        contentTypesLoading: false,
+      }}>
       {component}
     </ContentTypeContext.Provider>
   );
@@ -17,7 +22,12 @@ const ContentTypeCustomRerender = (
 ) => {
   return rerender(
     <ContentTypeContext.Provider
-      value={{ contentTypes: mockGetManyContentType.items, contentTypeConfigLink: '' }}>
+      value={{
+        contentTypes: mockGetManyContentType.items,
+        contentTypeConfigLink: '',
+        contentTypesError: undefined,
+        contentTypesLoading: false,
+      }}>
       {component}
     </ContentTypeContext.Provider>
   );
