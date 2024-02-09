@@ -30,7 +30,7 @@ describe('ContentTypeSelectionModal component', () => {
         handleNotificationEdit={vi.fn()}
         contentTypes={[]}
         contentTypeConfigLink=""
-        error={false}
+        error={true}
       />
     );
 
