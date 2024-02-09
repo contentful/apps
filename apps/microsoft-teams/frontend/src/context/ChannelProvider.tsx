@@ -19,7 +19,7 @@ export const ChannelContextProvider = (props: ChannelContextProviderProps) => {
   const { channels, loading, error } = useGetTeamsChannels();
 
   return (
-    <ChannelContext.Provider value={{ channels, loading, error }}>
+    <ChannelContext.Provider value={{ channels: channels, loading: loading, error: error }}>
       {children}
     </ChannelContext.Provider>
   );

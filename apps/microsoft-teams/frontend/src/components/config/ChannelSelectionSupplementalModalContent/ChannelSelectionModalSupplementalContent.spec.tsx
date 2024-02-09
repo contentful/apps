@@ -12,9 +12,9 @@ describe('ChannelSelectionSupplementalModalContent component', () => {
       <ChannelSelectionSupplementalModalContent
         onClose={() => null}
         handleNotificationEdit={() => null}
-        selectedChannel={mockChannels[0]}
-        children={<div>{childrenContent}</div>}
-      />
+        selectedChannel={mockChannels[0]}>
+        <div>{childrenContent}</div>
+      </ChannelSelectionSupplementalModalContent>
     );
 
     const message = getByText(childrenContent);

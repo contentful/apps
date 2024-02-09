@@ -9,7 +9,6 @@ import EmptyState from '@components/config/EmptyState/EmptyState';
 import EmptyFishbowl from '@components/config/EmptyState/EmptyFishbowl';
 import ChannelsErrorMessage from '@components/config/ChannelsErrorMessage/ChannelsErrorMessage';
 import { defaultNotification } from '@constants/defaultParams';
-import ChannelsLoadingState from '../ChannelsLoadingState/ChannelsLoadingState';
 import ChannelSelectionSupplementalModalContent from '../ChannelSelectionSupplementalModalContent/ChannelSelectionSupplementalModalContent';
 
 interface ChannelSelectionModalProps {
@@ -23,15 +22,7 @@ interface ChannelSelectionModalProps {
 }
 
 const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
-  const {
-    isShown,
-    onClose,
-    savedChannel,
-    handleNotificationEdit,
-    channels,
-    loading,
-    error = true,
-  } = props;
+  const { isShown, onClose, savedChannel, handleNotificationEdit, channels, error } = props;
   const [selectedChannel, setSelectedChannel] = useState<TeamsChannel>(
     savedChannel ?? defaultNotification.channel
   );
@@ -52,13 +43,6 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
   );
 
   const renderMainModalContent = () => {
-    if (loading)
-      return (
-        <SupplementalModalContent>
-          <ChannelsLoadingState />
-        </SupplementalModalContent>
-      );
-
     if (error) {
       return (
         <Modal.Content>

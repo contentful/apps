@@ -12,6 +12,7 @@ const useGetTeamsChannels = () => {
 
   const getAllChannels = useCallback(async () => {
     try {
+      setLoading(true);
       const { response } = await sdk.cma.appActionCall.createWithResponse(
         {
           appActionId: 'msteamsListChannels',
@@ -25,8 +26,9 @@ const useGetTeamsChannels = () => {
         }
       );
       const body = JSON.parse(response.body);
-      if (body.ok) {
+      if (body?.ok) {
         setChannels(body.data);
+        setError(undefined);
       } else {
         const error = new Error('Failed to fetch Teams channels');
         setError(error);

@@ -22,22 +22,6 @@ describe('ChannelSelectionModal component', () => {
     expect(screen.getByText(channelSelection.modal.emptyHeading)).toBeTruthy();
   });
 
-  it('mounts and renders loading content when loading is true', () => {
-    render(
-      <ChannelSelectionModal
-        isShown={true}
-        onClose={vi.fn()}
-        savedChannel={defaultNotification.channel}
-        handleNotificationEdit={vi.fn()}
-        channels={[]}
-        loading={true}
-        error={false}
-      />
-    );
-
-    expect(screen.getByTestId('channels-loading')).toBeTruthy();
-  });
-
   it('mounts and renders error content when error is present', () => {
     const { errorMessage } = channelSelection.modal;
     render(
