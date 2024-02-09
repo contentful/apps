@@ -7,7 +7,7 @@ import ModalHeader from '@components/config/ModalHeader/ModalHeader';
 import { ContentTypeProps } from 'contentful-management';
 import EmptyState from '@components/config/EmptyState/EmptyState';
 import WebApp from '@components/config/EmptyState/WebApp';
-import ChannelsErrorMessage from '../ChannelsErrorMessage/ChannelsErrorMessage';
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
 
 interface Props {
   isShown: boolean;
@@ -39,7 +39,7 @@ const ContentTypeSelectionModal = (props: Props) => {
     if (error) {
       return (
         <Modal.Content>
-          <ChannelsErrorMessage errorMessage={errorMessage} />
+          <ErrorMessage errorMessage={errorMessage} />
         </Modal.Content>
       );
     }

@@ -7,7 +7,7 @@ import ModalHeader from '@components/config/ModalHeader/ModalHeader';
 import TeamsLogo from '@components/config/TeamsLogo/TeamsLogo';
 import EmptyState from '@components/config/EmptyState/EmptyState';
 import EmptyFishbowl from '@components/config/EmptyState/EmptyFishbowl';
-import ChannelsErrorMessage from '@components/config/ChannelsErrorMessage/ChannelsErrorMessage';
+import ErrorMessage from '@components/config/ErrorMessage/ErrorMessage';
 import { defaultNotification } from '@constants/defaultParams';
 import ChannelSelectionSupplementalModalContent from '../ChannelSelectionSupplementalModalContent/ChannelSelectionSupplementalModalContent';
 
@@ -45,7 +45,7 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
     if (error) {
       return (
         <Modal.Content>
-          <ChannelsErrorMessage errorMessage={errorMessage} />
+          <ErrorMessage errorMessage={errorMessage} />
         </Modal.Content>
       );
     }

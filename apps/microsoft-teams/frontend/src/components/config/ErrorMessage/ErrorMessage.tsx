@@ -6,7 +6,7 @@ interface Props {
   errorMessage: string;
 }
 
-const ChannelsErrorMessage = (props: Props) => {
+const ErrorMessage = (props: Props) => {
   const { errorMessage } = props;
   return (
     <Flex alignItems="center" gap={tokens.spacingXs} paddingTop="spacingL" paddingBottom="spacingL">
@@ -16,4 +16,4 @@ const ChannelsErrorMessage = (props: Props) => {
   );
 };
 
-export default ChannelsErrorMessage;
+export default ErrorMessage;
