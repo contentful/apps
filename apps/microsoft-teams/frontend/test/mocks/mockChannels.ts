@@ -24,7 +24,7 @@ const mockChannels: TeamsChannel[] = [
   },
   {
     id: '19:3bccfda604454e63bd839399e6752ba3@thread.tacv2',
-    name: 'General',
+    name: 'Sales General',
     teamId: '1a91e6ef-ac80-4b9b-9989-d3416c38671c',
     tenantId: '666e56a6-1f2a-47c7-b88c-1ed9e1bb8668',
     teamName: 'Sales Team',
