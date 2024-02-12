@@ -8,7 +8,7 @@ const manifest = require('./contentful-app-manifest.json');
 const argv = yargs(hideBin(process.argv)).argv;
 
 const validateFunctions = () => {
-  const requiredProperties = ['id', 'path', 'entryFile'];
+  const requiredProperties = ['id', 'path', 'entryFile', 'accepts'];
   const uniqueValues = new Set();
 
   manifest.functions.forEach((contentfulFunction) => {
@@ -20,7 +20,7 @@ const validateFunctions = () => {
       }
     });
 
-    const { id, path, entryFile } = contentfulFunction;
+    const { id, path, entryFile, accepts } = contentfulFunction;
 
     if (uniqueValues.has(id)) {
       throw new Error(`Duplicate function id: '${id}'`);
@@ -31,10 +31,14 @@ const validateFunctions = () => {
     if (uniqueValues.has(entryFile)) {
       throw new Error(`Duplicate entryFile path: '${entryFile}'`);
     }
+    if (uniqueValues.has(accepts)) {
+      throw new Error(`Duplicate entryFile path: '${entryFile}'`);
+    }
 
     uniqueValues.add(entryFile);
     uniqueValues.add(path);
     uniqueValues.add(id);
+    uniqueValues.add(accepts);
   });
 };
 
