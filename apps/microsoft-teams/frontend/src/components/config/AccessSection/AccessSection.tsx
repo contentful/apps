@@ -55,10 +55,7 @@ const AccessSection = (props: Props) => {
 
       // TODO: remove this conditional when we get the new saveConfiguration updated
       if (!isAppInstalled) {
-        await customApi.saveConfiguration({
-          ...parameters,
-          ...msAccountInfo,
-        });
+        await customApi.saveConfiguration();
       }
       dispatch({
         type: actions.UPDATE_MS_ACCOUNT_INFO,

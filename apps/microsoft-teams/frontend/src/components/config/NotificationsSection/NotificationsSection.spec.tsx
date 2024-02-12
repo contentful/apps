@@ -2,10 +2,14 @@ import NotificationsSection from './NotificationsSection';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { notificationsSection } from '@constants/configCopy';
-import { mockSdk } from '@test/mocks';
+import { mockSdk, mockCustomApi } from '@test/mocks';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
+}));
+
+vi.mock('@hooks/useCustomApi', () => ({
+  useCustomApi: () => mockCustomApi,
 }));
 
 describe('NotificationsSection component', () => {

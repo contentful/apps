@@ -11,13 +11,8 @@ import { Notification } from '@customTypes/configPage';
 import { ParameterAction, actions } from '@components/config/parameterReducer';
 import { ContentTypeContextProvider } from '@context/ContentTypeProvider';
 import { ChannelContextProvider } from '@context/ChannelProvider';
-import {
-  getUniqueNotifications,
-  getDuplicateNotificationIndex,
-  displayConfirmationNotifications,
-} from '@helpers/configHelpers';
-import { ConfigAppSDK } from '@contentful/app-sdk';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { getUniqueNotifications, getDuplicateNotificationIndex } from '@helpers/configHelpers';
+import { useCustomApi } from '@hooks/useCustomApi';
 
 interface Props {
   notifications: Notification[];
@@ -29,7 +24,7 @@ interface Props {
 const NotificationsSection = (props: Props) => {
   const { notifications, dispatch, notificationIndexToEdit, setNotificationIndexToEdit } = props;
 
-  const sdk = useSDK<ConfigAppSDK>();
+  const customApi = useCustomApi();
 
   const createNewNotification = () => {
     dispatch({ type: actions.ADD_NOTIFICATION });
@@ -54,14 +49,10 @@ const NotificationsSection = (props: Props) => {
             onClose(true);
           }}
           handleDelete={() => {
+            customApi.quickSaveConfiguration();
             onClose(true);
             deleteNotification(index);
             setNotificationIndexToEdit(null);
-            displayConfirmationNotifications(
-              sdk,
-              notificationsSection.updateConfirmation,
-              notificationsSection.saveWarning
-            );
           }}
         />
       );
@@ -121,16 +112,12 @@ const NotificationsSection = (props: Props) => {
       });
     } else {
       // If new notification is unique, update state
+      customApi.quickSaveConfiguration();
       setNotificationIndexToEdit(null);
       dispatch({
         type: actions.UPDATE_NOTIFICATIONS,
         payload: uniqueNotifications,
       });
-      displayConfirmationNotifications(
-        sdk,
-        notificationsSection.updateConfirmation,
-        notificationsSection.saveWarning
-      );
     }
   };
 
