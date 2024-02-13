@@ -6,7 +6,8 @@
       "description": "Example Function querying Potter-DB GraphQL API",
       "path": "functions/index.js",
       "entryFile": "functions/index.ts",
-      "allowNetworks": ["api.potterdb.com"]
+      "allowNetworks": ["api.potterdb.com"],
+      "accepts": ["graphql.field.mapping", "graphql.query"]
     }
   ]
 }
