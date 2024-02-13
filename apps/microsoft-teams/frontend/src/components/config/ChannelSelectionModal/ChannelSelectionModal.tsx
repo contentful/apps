@@ -57,12 +57,17 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
             <Table className={styles.table}>
               <Table.Body>
                 {channels.map((channel) => (
-                  <Table.Row key={channel.id}>
+                  <Table.Row
+                    key={channel.id}
+                    onClick={() => setSelectedChannel(channel)}
+                    className={styles.tableRow}>
                     <Table.Cell>
                       <Radio
                         id={channel.id}
                         isChecked={selectedChannel.id === channel.id}
-                        onChange={() => setSelectedChannel(channel)}
+                        onChange={() => {
+                          /* clicking entire row checks this radio, i.e. do nothing here */
+                        }}
                         helpText={channel.teamName}>
                         {channel.name}
                       </Radio>

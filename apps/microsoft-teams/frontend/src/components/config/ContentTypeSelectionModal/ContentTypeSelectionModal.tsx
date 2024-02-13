@@ -52,12 +52,17 @@ const ContentTypeSelectionModal = (props: Props) => {
               <Table className={styles.table}>
                 <Table.Body>
                   {contentTypes.map((contentType) => (
-                    <Table.Row key={contentType.sys.id}>
+                    <Table.Row
+                      key={contentType.sys.id}
+                      onClick={() => setSelectedContentTypeId(contentType.sys.id)}
+                      className={styles.tableRow}>
                       <Table.Cell>
                         <Radio
                           id={contentType.sys.id}
                           isChecked={selectedContentTypeId === contentType.sys.id}
-                          onChange={() => setSelectedContentTypeId(contentType.sys.id)}>
+                          onChange={() => {
+                            /* clicking entire row checks this radio, i.e. do nothing here */
+                          }}>
                           {contentType.name}
                         </Radio>
                       </Table.Cell>
