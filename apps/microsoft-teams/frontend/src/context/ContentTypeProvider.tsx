@@ -5,8 +5,8 @@ import useGetLinkForContentTypeConfig from '@hooks/useGetContentTypeConfigLink';
 
 interface ContentTypeContextValue {
   contentTypes: ContentTypeProps[];
-  contentTypesLoading: boolean;
-  contentTypesError?: Error;
+  loading: boolean;
+  error?: Error;
   contentTypeConfigLink: string;
 }
 
@@ -25,8 +25,8 @@ export const ContentTypeContextProvider = (props: ContentTypeContextProviderProp
     <ContentTypeContext.Provider
       value={{
         contentTypes,
-        contentTypesLoading: loading,
-        contentTypesError: error,
+        loading: loading,
+        error: error,
         contentTypeConfigLink,
       }}>
       {children}

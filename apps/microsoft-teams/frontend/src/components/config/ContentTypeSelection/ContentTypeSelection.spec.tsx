@@ -30,13 +30,13 @@ describe('ContentTypeSelection component', () => {
     unmount();
   });
 
-  it('mounts and does not render modal for content type selection if channels are loading', () => {
+  it('mounts and does not render modal for content type selection if content types are loading', () => {
     const { unmount } = ContentTypeCustomRender(
       <ContentTypeContext.Provider
         value={{
-          contentTypesLoading: true,
+          loading: true,
           contentTypes: [],
-          contentTypesError: undefined,
+          error: undefined,
           contentTypeConfigLink: '',
         }}>
         <ContentTypeSelection notification={defaultNotification} handleNotificationEdit={vi.fn()} />

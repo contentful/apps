@@ -5,7 +5,7 @@ import { TeamsChannel } from '@customTypes/configPage';
 interface ChannelContextValue {
   channels: TeamsChannel[];
   loading: boolean;
-  error?: Error;
+  error: Error | undefined;
 }
 
 interface ChannelContextProviderProps {

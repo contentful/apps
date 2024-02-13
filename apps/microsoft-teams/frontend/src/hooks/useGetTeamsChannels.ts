@@ -26,7 +26,7 @@ const useGetTeamsChannels = () => {
         }
       );
       const body = JSON.parse(response.body);
-      if (body?.ok) {
+      if (body.ok) {
         setChannels(body.data);
         setError(undefined);
       } else {

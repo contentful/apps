@@ -19,17 +19,16 @@ const ContentTypeSelection = (props: Props) => {
   const { notification, handleNotificationEdit } = props;
   const [areContentTypesLoading, setAreContentTypesLoading] = useState<boolean>(false);
   const [addButtonClicked, setAddButtonClicked] = useState<boolean>(false);
-  const { contentTypes, contentTypesLoading, contentTypesError, contentTypeConfigLink } =
-    useContext(ContentTypeContext);
+  const { contentTypes, loading, error, contentTypeConfigLink } = useContext(ContentTypeContext);
 
   useEffect(() => {
     // ensure the loading state updates once it is done loading
-    if (addButtonClicked) setAreContentTypesLoading(contentTypesLoading);
-  }, [contentTypesLoading, addButtonClicked]);
+    if (addButtonClicked) setAreContentTypesLoading(loading);
+  }, [loading, addButtonClicked]);
 
   const openContentTypeSelectionModal = () => {
-    if (contentTypesLoading != areContentTypesLoading) {
-      setAreContentTypesLoading(contentTypesLoading);
+    if (loading != areContentTypesLoading) {
+      setAreContentTypesLoading(loading);
       setAddButtonClicked(true);
       return;
     } else if (!areContentTypesLoading)
@@ -43,7 +42,7 @@ const ContentTypeSelection = (props: Props) => {
           savedContentTypeId={notification.contentTypeId}
           contentTypes={contentTypes}
           contentTypeConfigLink={contentTypeConfigLink}
-          error={Boolean(contentTypesError)}
+          error={Boolean(error)}
         />
       ));
   };

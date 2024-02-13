@@ -8,8 +8,8 @@ const ContentTypeCustomRender = (component: React.ReactElement) => {
       value={{
         contentTypes: mockGetManyContentType.items,
         contentTypeConfigLink: '',
-        contentTypesError: undefined,
-        contentTypesLoading: false,
+        error: undefined,
+        loading: false,
       }}>
       {component}
     </ContentTypeContext.Provider>
@@ -25,8 +25,8 @@ const ContentTypeCustomRerender = (
       value={{
         contentTypes: mockGetManyContentType.items,
         contentTypeConfigLink: '',
-        contentTypesError: undefined,
-        contentTypesLoading: false,
+        error: undefined,
+        loading: false,
       }}>
       {component}
     </ContentTypeContext.Provider>
