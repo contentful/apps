@@ -10,24 +10,31 @@ import { ContentTypeProps } from 'contentful-management';
  */
 const useGetContentTypes = () => {
   const [allContentTypes, setAllContentTypes] = useState<ContentTypeProps[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error>();
+
   const sdk = useSDK<ConfigAppSDK>();
 
   const getAllContentTypes = useCallback(async () => {
     try {
+      setLoading(true);
       // TODO: Implement pagination for content types
       const contentTypesResponse = await sdk.cma.contentType.getMany({});
       setAllContentTypes(contentTypesResponse.items || []);
     } catch (error) {
+      const err = new Error('Unable to get content types');
+      setError(err);
       console.error(error);
-      throw new Error('Unable to get content types');
     }
+
+    setLoading(false);
   }, [sdk.cma.contentType]);
 
   useEffect(() => {
     getAllContentTypes();
   }, [sdk, getAllContentTypes]);
 
-  return allContentTypes;
+  return { contentTypes: allContentTypes, loading, error };
 };
 
 export default useGetContentTypes;

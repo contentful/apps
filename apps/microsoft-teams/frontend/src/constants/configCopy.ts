@@ -57,6 +57,7 @@ const contentTypeSelection = {
     emptyHeading: 'No content types',
     emptyContent:
       'There are no content types available. If you create one, you will be able to assign it to the app from this screen. Add content type',
+    errorMessage: 'Content types did not load. Please try again later.',
   },
   notFound: 'Content type not found',
 };
@@ -73,6 +74,7 @@ const channelSelection = {
     emptyHeading: 'Add Microsoft Teams channels',
     emptyContent:
       'In Microsoft Teams, add the Contentful app to the general channel of the teams where you want to see notifications. Add app',
+    errorMessage: 'Channels did not load. Please try again later.',
   },
 };
 

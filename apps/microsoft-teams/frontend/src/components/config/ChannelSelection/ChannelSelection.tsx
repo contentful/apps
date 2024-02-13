@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { Box, Flex, IconButton, ModalLauncher, Text, TextInput } from '@contentful/f36-components';
 import AddButton from '@components/config/AddButton/AddButton';
 import ChannelSelectionModal from '@components/config/ChannelSelectionModal/ChannelSelectionModal';
@@ -16,18 +16,31 @@ interface Props {
 
 const ChannelSelection = (props: Props) => {
   const { notification, handleNotificationEdit } = props;
-  const { channels } = useContext(ChannelContext);
+  const { channels, loading, error } = useContext(ChannelContext);
+  const [areChannelsLoading, setAreChannelsLoading] = useState<boolean>(false);
+  const [addButtonClicked, setAddButtonClicked] = useState<boolean>(false);
+
+  useEffect(() => {
+    // ensure the loading state updates once it is done loading
+    if (addButtonClicked) setAreChannelsLoading(loading);
+  }, [loading, addButtonClicked]);
 
   const openChannelSelectionModal = () => {
-    return ModalLauncher.open(({ isShown, onClose }) => (
-      <ChannelSelectionModal
-        isShown={isShown}
-        onClose={() => onClose(true)}
-        handleNotificationEdit={handleNotificationEdit}
-        savedChannel={notification.channel}
-        channels={channels}
-      />
-    ));
+    if (loading != areChannelsLoading) {
+      setAreChannelsLoading(loading);
+      setAddButtonClicked(true);
+      return;
+    } else if (!areChannelsLoading)
+      return ModalLauncher.open(({ isShown, onClose }) => (
+        <ChannelSelectionModal
+          isShown={isShown}
+          onClose={() => onClose(true)}
+          handleNotificationEdit={handleNotificationEdit}
+          savedChannel={notification.channel}
+          channels={channels}
+          error={Boolean(error)}
+        />
+      ));
   };
 
   return (
@@ -51,12 +64,14 @@ const ChannelSelection = (props: Props) => {
             icon={<EditIcon />}
             onClick={openChannelSelectionModal}
             aria-label="Change selected channel"
+            isLoading={areChannelsLoading}
           />
         </TextInput.Group>
       ) : (
         <AddButton
           buttonCopy={channelSelection.addButton}
           handleClick={openChannelSelectionModal}
+          isLoading={areChannelsLoading}
         />
       )}
     </Box>

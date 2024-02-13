@@ -4,6 +4,8 @@ import { TeamsChannel } from '@customTypes/configPage';
 
 interface ChannelContextValue {
   channels: TeamsChannel[];
+  loading: boolean;
+  error: Error | undefined;
 }
 
 interface ChannelContextProviderProps {
@@ -14,9 +16,11 @@ export const ChannelContext = createContext({} as ChannelContextValue);
 
 export const ChannelContextProvider = (props: ChannelContextProviderProps) => {
   const { children } = props;
-  const channels = useGetTeamsChannels();
+  const { channels, loading, error } = useGetTeamsChannels();
 
   return (
-    <ChannelContext.Provider value={{ channels: channels }}>{children}</ChannelContext.Provider>
+    <ChannelContext.Provider value={{ channels: channels, loading: loading, error: error }}>
+      {children}
+    </ChannelContext.Provider>
   );
 };
