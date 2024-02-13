@@ -32,7 +32,7 @@ const validateFunctions = () => {
       throw new Error(`Duplicate entryFile path: '${entryFile}'`);
     }
     if (uniqueValues.has(accepts)) {
-      throw new Error(`Duplicate accepts path: '${accepts}'`);
+      throw new Error(`Duplicate accepts: '${accepts}'`);
     }
 
     uniqueValues.add(entryFile);
