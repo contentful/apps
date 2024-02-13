@@ -9,6 +9,14 @@ interface Props {
   selectedChannel: TeamsChannel;
 }
 
+/**
+ * Wrapper component to add supplemental modal content and controls to main modal content
+ * @param {React.ReactNode} props.children - main modal content
+ * @param {Function} props.onClose - handler for closing the modal
+ * @param {Function} props.handleNotificationEdit - handlers for editing a notification
+ * @param {TeamsChannel} props.selectedChannel - selected channel for the notification
+ */
+
 const ChannelSelectionSupplementalModalContent = (props: Props) => {
   const { children, onClose, handleNotificationEdit, selectedChannel } = props;
   const { button, link, description } = channelSelection.modal;
