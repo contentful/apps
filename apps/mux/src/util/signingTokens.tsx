@@ -1,21 +1,53 @@
-import * as jwt from 'jsonwebtoken';
+import { SignJWT, importPKCS8, importSPKI } from 'jose';
 
-const getPrivateKey = (key: string) => Buffer.from(key, 'base64');
+const getPrivateKey = async (key: string, alg: string) => {
+  const pkcs8 = `-----BEGIN PRIVATE KEY-----${key}-----END PRIVATE KEY-----`;
+  try {
+    const algorithm = 'ES256';
+    const ecPrivateKey = await importPKCS8(pkcs8, algorithm);
 
-const sign = (playbackId: string, signingKeyId: string, signingKeyPrivate: string, aud: string) =>
-  jwt.sign({}, getPrivateKey(signingKeyPrivate), {
-    algorithm: 'RS256',
-    keyid: signingKeyId,
-    audience: aud,
-    subject: playbackId,
-    noTimestamp: true,
-    expiresIn: '12h',
-  });
+    console.log(ecPrivateKey);
+    return ecPrivateKey;
+    // return await importSPKI(pkcs8, alg);
+    // return await importPKCS8(testKey, alg);
+  } catch (e) {
+    console.error('Error importing private key', JSON.stringify(e));
+  }
+};
+
+const sign = async (
+  playbackId: string,
+  signingKeyId: string,
+  signingKeyPrivate: string,
+  aud: string
+) => {
+  try {
+    const alg = 'RS256';
+    // console.log('creating private key...');
+    const privateKey = await getPrivateKey(signingKeyPrivate, alg);
+    // console.log('privateKey', privateKey);
+    if (!privateKey) {
+      throw new Error('');
+    }
+
+    return new SignJWT()
+      .setProtectedHeader({ alg, kid: signingKeyId })
+      .setIssuedAt()
+      .setAudience(aud)
+      .setSubject(playbackId)
+      .setExpirationTime('12h')
+      .sign(privateKey);
+  } catch (e) {
+    console.error('Error creating signing token', e);
+  }
+};
+
 export const createSignedPlaybackToken = (
   playbackId: string,
   signingKeyId: string,
   signingKeyPrivate: string
 ) => {
+  console.log('creating signed playback');
   return sign(playbackId, signingKeyId, signingKeyPrivate, 'v');
 };
 
