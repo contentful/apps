@@ -43,9 +43,7 @@
     "test:ci": "CI=true react-app-rewired test --runInBand",
     "eject": "react-app-rewired eject",
     "lint": "eslint --max-warnings=0 .",
-    "create-app-definition": "contentful-app-scripts create-app-definition",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 5l4WmuXdhJGcADHfCm1v4k --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 2Z5q0FnYZjRN79MjTE4ofn --token ${TEST_CMA_TOKEN}"
+    "create-app-definition": "contentful-app-scripts create-app-definition"
   },
   "browserslist": {
     "production": [
