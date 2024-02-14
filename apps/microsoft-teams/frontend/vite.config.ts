@@ -33,9 +33,11 @@ export default defineConfig(() => ({
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@locations': path.resolve(__dirname, './src/locations'),
       '@test': path.resolve(__dirname, './test'),
+      '@utils': path.resolve(__dirname, './src/utils'),
     },
   },
   test: {
     environment: 'happy-dom',
+    setupFiles: ['./test/setup.ts'],
   },
 }));

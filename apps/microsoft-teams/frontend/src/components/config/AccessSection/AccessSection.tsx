@@ -1,4 +1,4 @@
-import { Dispatch } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -21,6 +21,7 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import DisconnectModal from '@components/config/DisconnectModal/DisconnectModal';
 import { displayConfirmationNotifications } from '@helpers/configHelpers';
+import MsGraph from '@utils/msGraphApi';
 
 interface Props {
   dispatch: Dispatch<ParameterAction>;
@@ -28,14 +29,29 @@ interface Props {
   isAppInstalled: boolean;
 }
 
+const defaultOrgDetails = {
+  orgName: '',
+  orgLogo: '',
+};
+
 const AccessSection = (props: Props) => {
   const { dispatch, parameters, isAppInstalled } = props;
+  const [orgDetails, setOrgDetails] = useState(defaultOrgDetails);
+
   const { instance, accounts, inProgress } = useMsal();
-  const loginInProgress = inProgress === 'login';
-  const logoutInProgress = inProgress === 'logout';
   const customApi = useCustomApi();
   const sdk = useSDK<ConfigAppSDK>();
-  const { logout, login, teamsAppInfo, teamsAppLink, description } = accessSection;
+
+  const loginInProgress = inProgress === 'login';
+  const logoutInProgress = inProgress === 'logout';
+  const { logout, login, teamsAppInfo, teamsAppLink, description, authError, orgDetailsError } =
+    accessSection;
+
+  useEffect(() => {
+    if (accounts.length && parameters.tenantId) {
+      getOrgDetails();
+    }
+  }, [accounts, parameters.tenantId]);
 
   const handleLogin = async () => {
     try {
@@ -55,7 +71,7 @@ const AccessSection = (props: Props) => {
         );
       }
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Failed to authenticate with Microsoft';
+      const message = e instanceof Error ? e.message : authError;
       sdk.notifier.error(message);
       console.error(e);
     }
@@ -71,6 +87,7 @@ const AccessSection = (props: Props) => {
           }}
           handleDisconnect={async () => {
             onClose(true);
+            setOrgDetails(defaultOrgDetails);
             await instance.logoutPopup({
               postLogoutRedirectUri: '/',
               account: accounts[0],
@@ -83,6 +100,20 @@ const AccessSection = (props: Props) => {
         />
       );
     });
+  };
+
+  const getOrgDetails = async () => {
+    try {
+      const msGraph = new MsGraph(instance, accounts[0]);
+      const [orgName, orgLogo] = await Promise.all([
+        msGraph.getOrganizationDisplayName(),
+        msGraph.getOrganizationLogo(),
+      ]);
+      setOrgDetails({ orgName, orgLogo });
+    } catch (e) {
+      sdk.notifier.error(orgDetailsError);
+      console.error(e);
+    }
   };
 
   const accessComponent = () => {
@@ -105,10 +136,17 @@ const AccessSection = (props: Props) => {
       return (
         <>
           <Card padding="large">
-            <Flex justifyContent="space-between">
-              <Flex flexDirection="column">
-                <Subheading marginBottom="none">{accounts[0]?.name}</Subheading>
-                <Paragraph marginBottom="none">{accounts[0]?.username}</Paragraph>
+            <Flex justifyContent="space-between" alignItems="center">
+              <Flex>
+                <Flex alignItems="center" marginRight="spacingM">
+                  {orgDetails.orgLogo && (
+                    <img className={styles.orgLogo} src={orgDetails.orgLogo} alt="logo"></img>
+                  )}
+                </Flex>
+                <Flex flexDirection="column">
+                  <Subheading marginBottom="none">{orgDetails.orgName}</Subheading>
+                  <Paragraph marginBottom="none">{accounts[0]?.username}</Paragraph>
+                </Flex>
               </Flex>
               <Button
                 onClick={() => handleLogout()}

@@ -7,4 +7,8 @@ export const styles = {
     width: 16px;
   }
 `),
+  orgLogo: css({
+    /** Setting size to default size for favicon in MS organizational branding */
+    height: 32,
+  }),
 };
