@@ -1,4 +1,4 @@
-import { ModalConfirm, Text } from '@contentful/f36-components';
+import { ModalConfirm, Text, Box } from '@contentful/f36-components';
 import { notificationsSection } from '@constants/configCopy';
 
 interface DuplicateModalProps {
@@ -21,7 +21,12 @@ const DuplicateModal = (props: DuplicateModalProps) => {
       onConfirm={handleConfirm}
       confirmLabel={notificationsSection.duplicateModal.confirmDuplicate}
       cancelLabel={notificationsSection.duplicateModal.goBack}>
-      <Text>{notificationsSection.duplicateModal.confirmDuplicateDescription}</Text>
+      <Box marginBottom="spacingM">
+        <Text>{notificationsSection.duplicateModal.confirmDuplicateDescription}</Text>
+      </Box>
+      <Box>
+        <Text>{notificationsSection.duplicateModal.confirmDuplicateDescriptionTwo}</Text>
+      </Box>
     </ModalConfirm>
   );
 };
