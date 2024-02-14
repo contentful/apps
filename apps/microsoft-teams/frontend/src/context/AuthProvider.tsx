@@ -8,7 +8,6 @@ interface Props {
 }
 
 const msalInstance = new PublicClientApplication(msalConfig);
-await msalInstance.initialize();
 
 const AuthProvider = (props: Props) => {
   const { children } = props;

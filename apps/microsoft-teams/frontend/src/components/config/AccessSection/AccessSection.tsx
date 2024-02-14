@@ -87,6 +87,7 @@ const AccessSection = (props: Props) => {
           }}
           handleDisconnect={async () => {
             onClose(true);
+            setOrgDetails(defaultOrgDetails);
             await instance.logoutPopup({
               postLogoutRedirectUri: '/',
               account: accounts[0],
@@ -95,7 +96,6 @@ const AccessSection = (props: Props) => {
               type: actions.UPDATE_TENANT_ID,
               payload: '',
             });
-            setOrgDetails(defaultOrgDetails);
           }}
         />
       );
