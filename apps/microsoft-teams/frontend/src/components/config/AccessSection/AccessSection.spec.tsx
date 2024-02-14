@@ -1,6 +1,6 @@
 import AccessSection from './AccessSection';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   mockMsalWithAccounts,
   mockMsalWithoutAccounts,
@@ -36,10 +36,13 @@ describe('AccessSection component', () => {
     expect(screen.getByText('Connect to Teams')).toBeTruthy();
   });
 
-  it('displays correct copy when authorized', () => {
+  it('displays correct copy when authorized', async () => {
     mocks.useMsal.mockReturnValue(mockMsalWithAccounts);
     render(<AccessSection dispatch={vi.fn()} parameters={mockParameters} isAppInstalled={true} />);
 
     expect(screen.getByText('Disconnect')).toBeTruthy();
+    expect(screen.getByText('username@companyabc.com')).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('Company ABC')).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole('img')).toBeTruthy());
   });
 });

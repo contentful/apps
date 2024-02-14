@@ -135,7 +135,7 @@ const AccessSection = (props: Props) => {
             <Flex justifyContent="space-between">
               <Flex>
                 <Flex alignItems="center" marginRight="spacingM">
-                  {orgLogo && <img className={styles.orgLogo} src={orgLogo}></img>}
+                  {orgLogo && <img className={styles.orgLogo} src={orgLogo} alt="logo"></img>}
                 </Flex>
                 <Flex flexDirection="column">
                   <Subheading marginBottom="none">{orgName}</Subheading>

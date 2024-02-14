@@ -23,6 +23,7 @@ const mockMsalWithAccounts: MockMsal = {
   instance: {
     loginPopup: vi.fn(),
     logoutPopup: vi.fn(),
+    acquireTokenSilent: vi.fn().mockResolvedValue({ accessToken: 'mock-token' }),
   },
   accounts: [
     {

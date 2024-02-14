@@ -15,7 +15,7 @@ export class MsGraphApiError extends Error {
 
   constructor(res: MsGraphApiErrorType) {
     super(res.message ?? '');
-    this.status = res.status ?? 0;
+    this.status = res.status;
   }
 }
 
@@ -86,7 +86,7 @@ class MsGraph {
 
     const options = {
       method: 'GET',
-      headers: headers,
+      headers,
     };
 
     return options;
