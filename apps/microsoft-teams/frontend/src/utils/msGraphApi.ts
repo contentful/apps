@@ -113,22 +113,14 @@ class MsGraph {
     const headers = new Headers();
     headers.append('Content-Type', 'application/json');
 
-    let orgName = '';
+    const accessToken = await this.getAccessToken();
+    const options = this.constructOptions(headers, accessToken);
 
-    try {
-      const accessToken = await this.getAccessToken();
-      const options = this.constructOptions(headers, accessToken);
+    const res = await fetch(endpoint, options);
+    const resJson = await res.json();
+    this.validateResponseStatus(res, resJson);
 
-      const res = await fetch(endpoint, options);
-      const resJson = await res.json();
-      this.validateResponseStatus(res, resJson);
-
-      orgName = resJson.displayName;
-    } catch (error) {
-      console.error(error);
-    }
-
-    return orgName;
+    return resJson.displayName;
   };
 
   /**
@@ -142,22 +134,14 @@ class MsGraph {
     // Required additional header, passing in 0 returns the default organizational branding object
     headers.append('Accept-Language', '0');
 
-    let image = '';
+    const accessToken = await this.getAccessToken();
+    const options = this.constructOptions(headers, accessToken);
 
-    try {
-      const accessToken = await this.getAccessToken();
-      const options = this.constructOptions(headers, accessToken);
+    const res = await fetch(endpoint, options);
+    const resJson = await res.json();
+    this.validateResponseStatus(res, resJson);
 
-      const res = await fetch(endpoint, options);
-      const resJson = await res.json();
-      this.validateResponseStatus(res, resJson);
-
-      image = this.constructImageUrl(resJson);
-    } catch (error) {
-      console.error(error);
-    }
-
-    return image;
+    return this.constructImageUrl(resJson);
   };
 
   /**

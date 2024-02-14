@@ -27,6 +27,8 @@ const accessSection = {
   },
   updateConfirmation: 'Microsoft organization updated',
   saveWarning: 'Save the app to persist these settings',
+  authError: 'Failed to authenticate with Microsoft',
+  orgDetailsError: 'Failed to get Microsoft organization details',
 };
 
 const notificationsSection = {

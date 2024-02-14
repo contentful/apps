@@ -29,10 +29,14 @@ interface Props {
   isAppInstalled: boolean;
 }
 
+const defaultOrgDetails = {
+  orgName: '',
+  orgLogo: '',
+};
+
 const AccessSection = (props: Props) => {
   const { dispatch, parameters, isAppInstalled } = props;
-  const [orgName, setOrgName] = useState<string>('');
-  const [orgLogo, setOrgLogo] = useState<string>('');
+  const [orgDetails, setOrgDetails] = useState(defaultOrgDetails);
 
   const { instance, accounts, inProgress } = useMsal();
   const customApi = useCustomApi();
@@ -40,7 +44,8 @@ const AccessSection = (props: Props) => {
 
   const loginInProgress = inProgress === 'login';
   const logoutInProgress = inProgress === 'logout';
-  const { logout, login, teamsAppInfo, teamsAppLink, description } = accessSection;
+  const { logout, login, teamsAppInfo, teamsAppLink, description, authError, orgDetailsError } =
+    accessSection;
 
   useEffect(() => {
     if (accounts.length && parameters.tenantId) {
@@ -66,7 +71,7 @@ const AccessSection = (props: Props) => {
         );
       }
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Failed to authenticate with Microsoft';
+      const message = e instanceof Error ? e.message : authError;
       sdk.notifier.error(message);
       console.error(e);
     }
@@ -90,8 +95,7 @@ const AccessSection = (props: Props) => {
               type: actions.UPDATE_TENANT_ID,
               payload: '',
             });
-            setOrgName('');
-            setOrgLogo('');
+            setOrgDetails(defaultOrgDetails);
           }}
         />
       );
@@ -105,9 +109,9 @@ const AccessSection = (props: Props) => {
         msGraph.getOrganizationDisplayName(),
         msGraph.getOrganizationLogo(),
       ]);
-      setOrgName(orgName);
-      setOrgLogo(orgLogo);
+      setOrgDetails({ orgName, orgLogo });
     } catch (e) {
+      sdk.notifier.error(orgDetailsError);
       console.error(e);
     }
   };
@@ -132,13 +136,15 @@ const AccessSection = (props: Props) => {
       return (
         <>
           <Card padding="large">
-            <Flex justifyContent="space-between">
+            <Flex justifyContent="space-between" alignItems="center">
               <Flex>
                 <Flex alignItems="center" marginRight="spacingM">
-                  {orgLogo && <img className={styles.orgLogo} src={orgLogo} alt="logo"></img>}
+                  {orgDetails.orgLogo && (
+                    <img className={styles.orgLogo} src={orgDetails.orgLogo} alt="logo"></img>
+                  )}
                 </Flex>
                 <Flex flexDirection="column">
-                  <Subheading marginBottom="none">{orgName}</Subheading>
+                  <Subheading marginBottom="none">{orgDetails.orgName}</Subheading>
                   <Paragraph marginBottom="none">{accounts[0]?.username}</Paragraph>
                 </Flex>
               </Flex>
