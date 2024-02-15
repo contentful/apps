@@ -1,4 +1,4 @@
-import { Dispatch, useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { Box, ModalLauncher, Subheading } from '@contentful/f36-components';
 import { styles } from './NotificationsSection.styles';
 import { notificationsSection } from '@constants/configCopy';
@@ -22,11 +22,12 @@ import { useSDK } from '@contentful/react-apps-toolkit';
 interface Props {
   notifications: Notification[];
   dispatch: Dispatch<ParameterAction>;
+  notificationIndexToEdit: number | null;
+  setNotificationIndexToEdit: Dispatch<SetStateAction<number | null>>;
 }
 
 const NotificationsSection = (props: Props) => {
-  const { notifications, dispatch } = props;
-  const [notificationIndexToEdit, setNotificationIndexToEdit] = useState<number | null>(null);
+  const { notifications, dispatch, notificationIndexToEdit, setNotificationIndexToEdit } = props;
 
   const sdk = useSDK<ConfigAppSDK>();
 
