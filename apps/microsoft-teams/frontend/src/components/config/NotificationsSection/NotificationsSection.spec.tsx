@@ -10,7 +10,14 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 
 describe('NotificationsSection component', () => {
   it('mounts with title and button', () => {
-    render(<NotificationsSection notifications={[]} dispatch={vi.fn()} />);
+    render(
+      <NotificationsSection
+        notifications={[]}
+        dispatch={vi.fn()}
+        notificationIndexToEdit={null}
+        setNotificationIndexToEdit={vi.fn()}
+      />
+    );
 
     expect(screen.getByText(notificationsSection.title)).toBeTruthy();
     expect(screen.getByText(notificationsSection.createButton)).toBeTruthy();

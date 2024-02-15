@@ -45,6 +45,12 @@ const notificationsSection = {
   },
   updateConfirmation: 'Notification settings updated',
   saveWarning: 'Save the app to persist these settings',
+  pendingChangesModal: {
+    areYouSure: 'Are you sure?',
+    ok: 'ok',
+    description:
+      'A notification is in an undefined state. Undefined or incomplete notifications will be lost if you save changes.',
+  },
 };
 
 const contentTypeSelection = {

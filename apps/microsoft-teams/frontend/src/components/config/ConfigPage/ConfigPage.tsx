@@ -9,7 +9,8 @@ import useInitializeParameters from '@hooks/useInitializeParameters';
 import { useMsal } from '@azure/msal-react';
 import { styles } from './ConfigPage.styles';
 import { headerSection } from '@constants/configCopy';
-import { Box, Heading, Paragraph } from '@contentful/f36-components';
+import { Box, Heading, ModalLauncher, Paragraph } from '@contentful/f36-components';
+import PendingChangesModal from '../PendingChangesModal/PendingChangesModal';
 
 const ConfigPage = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
@@ -36,6 +37,25 @@ const ConfigPage = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
+    // search for any pending changes.  Pending changes defined as any notifications in "open/editting" mode,
+    const pendingChanges = notificationIndexToEdit !== null;
+
+    // 2. if any "open" notifications are found, inform the user via modal that they have unsaved changes that
+    //    they need to either save/cancel via <NotificationEditModeFooter />
+    if (pendingChanges) {
+      ModalLauncher.open(({ isShown, onClose }) => {
+        return (
+          <PendingChangesModal
+            isShown={isShown}
+            onClose={() => {
+              onClose(true);
+            }}
+          />
+        );
+      });
+      return false;
+    }
+
     if (!parameters.tenantId) {
       sdk.notifier.error('A valid Tenant Id is required');
       return false;
@@ -45,7 +65,7 @@ const ConfigPage = () => {
       parameters,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, notificationIndexToEdit]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
