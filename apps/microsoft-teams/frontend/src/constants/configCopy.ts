@@ -40,10 +40,12 @@ const notificationsSection = {
     'If you delete this notification you will no longer get updates about this content type in Microsoft Teams.',
   duplicateModal: {
     modalHeaderTitle: 'Duplicate Notification',
-    confirmDuplicate: 'Update existing notification',
-    goBack: 'Go back to editing',
+    confirmDuplicate: 'Yes',
+    goBack: 'Cancel',
     confirmDuplicateDescription:
-      'You already have a notification set up for this content type and MS Teams channel. Would you like to update the existing notification instead of creating a new one?',
+      'You already have a notification set up for this content type and Teams channel. Do you want to make changes to the existing notification?',
+    confirmDuplicateDescriptionTwo:
+      'If yes, edits to entry actions will apply to your existing notification.  If you prefer to cancel, you can then edit the content type or Teams channel.',
   },
   updateConfirmation: 'Notification settings updated',
   saveWarning: 'Save the app to persist these settings',
