@@ -14,6 +14,7 @@ import { Box, Heading, Paragraph } from '@contentful/f36-components';
 const ConfigPage = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const [notificationIndexToEdit, setNotificationIndexToEdit] = useState<number | null>(null);
 
   const sdk = useSDK<ConfigAppSDK>();
   // A hook that returns the PublicClientApplication instance from MSAL to see if there is an authenticated account
@@ -66,6 +67,8 @@ const ConfigPage = () => {
         <NotificationsSection
           notifications={parameters.notifications}
           dispatch={dispatchParameters}
+          notificationIndexToEdit={notificationIndexToEdit}
+          setNotificationIndexToEdit={setNotificationIndexToEdit}
         />
       ) : null}
     </>
