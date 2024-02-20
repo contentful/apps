@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@babel/types": "7.22.5",
-    "@contentful/app-scripts": "1.10.2",
+    "@contentful/app-scripts": "1.15.0",
     "@rushstack/eslint-patch": "1.3.2",
     "@types/jsdom": "21.1.1",
     "@types/node": "16.18.38",
