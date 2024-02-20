@@ -21,7 +21,7 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.10.2",
+    "@contentful/app-scripts": "1.15.0",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "14.0.0",
     "@types/node": "16.18.38",
