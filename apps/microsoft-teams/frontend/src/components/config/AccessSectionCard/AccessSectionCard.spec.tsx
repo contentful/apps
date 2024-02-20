@@ -5,7 +5,7 @@ import { mockParameters } from '@test/mocks';
 import { accessSection } from '@constants/configCopy';
 
 describe('AccessSectionCard component', () => {
-  it('displays correct copy when authorized', () => {
+  it('displays correct copy when authorized with full org details', () => {
     const { unmount } = render(
       <AccessSectionCard
         parameters={mockParameters}
@@ -21,7 +21,7 @@ describe('AccessSectionCard component', () => {
     unmount();
   });
 
-  it('displays correct copy when unauthorized', () => {
+  it('displays correct copy when authorized with no org details', () => {
     const { unmount } = render(
       <AccessSectionCard
         parameters={{ ...mockParameters, orgName: '' }}
