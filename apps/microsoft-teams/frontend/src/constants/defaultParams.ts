@@ -2,6 +2,9 @@ import { AppEventKey, AppInstallationParameters, SelectedEvents } from '@customT
 
 const initialParameters: AppInstallationParameters = {
   tenantId: '',
+  orgName: '',
+  orgLogo: '',
+  authenticatedUsername: '',
   notifications: [],
 };
 

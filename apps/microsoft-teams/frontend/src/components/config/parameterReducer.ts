@@ -2,15 +2,15 @@ import { AppInstallationParameters, Notification } from '@customTypes/configPage
 import { defaultNotification } from '@constants/defaultParams';
 
 export enum actions {
-  UPDATE_TENANT_ID = 'updateTenantId',
+  UPDATE_MS_ACCOUNT_INFO = 'updateMsAccountInfo',
   UPDATE_NOTIFICATIONS = 'updateNotifications',
   ADD_NOTIFICATION = 'addNotification',
   APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
 }
 
-type TenantIdAction = {
-  type: actions.UPDATE_TENANT_ID;
-  payload: string;
+type MsAccountInfoAction = {
+  type: actions.UPDATE_MS_ACCOUNT_INFO;
+  payload: Omit<AppInstallationParameters, 'notifications'>;
 };
 
 type NotificationsAction = {
@@ -28,24 +28,33 @@ type ApplyContentfulParametersAction = {
 };
 
 export type ParameterAction =
-  | TenantIdAction
+  | MsAccountInfoAction
   | NotificationsAction
   | AddNotificationAction
   | ApplyContentfulParametersAction;
 
-const { UPDATE_TENANT_ID, UPDATE_NOTIFICATIONS, ADD_NOTIFICATION, APPLY_CONTENTFUL_PARAMETERS } =
-  actions;
+const {
+  UPDATE_MS_ACCOUNT_INFO,
+  UPDATE_NOTIFICATIONS,
+  ADD_NOTIFICATION,
+  APPLY_CONTENTFUL_PARAMETERS,
+} = actions;
 
 const parameterReducer = (
   state: AppInstallationParameters,
   action: ParameterAction
 ): AppInstallationParameters => {
   switch (action.type) {
-    case UPDATE_TENANT_ID:
+    case UPDATE_MS_ACCOUNT_INFO: {
+      const msAccountInfo = action.payload;
       return {
         ...state,
-        tenantId: action.payload,
+        tenantId: msAccountInfo.tenantId,
+        orgName: msAccountInfo.orgName,
+        orgLogo: msAccountInfo.orgLogo,
+        authenticatedUsername: msAccountInfo.authenticatedUsername,
       };
+    }
     case UPDATE_NOTIFICATIONS:
       return {
         ...state,
@@ -60,8 +69,10 @@ const parameterReducer = (
     case APPLY_CONTENTFUL_PARAMETERS: {
       const parameters = action.payload;
       return {
-        ...state,
         tenantId: parameters.tenantId ?? '',
+        orgName: parameters.orgName ?? '',
+        orgLogo: parameters.orgLogo ?? '',
+        authenticatedUsername: parameters.authenticatedUsername ?? '',
         notifications: parameters.notifications ?? [],
       };
     }

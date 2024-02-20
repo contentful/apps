@@ -9,6 +9,9 @@ export enum AppEventKey {
 
 export interface AppInstallationParameters {
   tenantId: string;
+  orgName: string;
+  orgLogo: string;
+  authenticatedUsername: string;
   notifications: Notification[];
 }
 
