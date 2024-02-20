@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { mockChannels } from './mockChannels';
 
 const mockParameters = {
   tenantId: 'abc-123',
@@ -9,7 +10,23 @@ const mockParameters = {
 const mockSdk: any = {
   app: {
     onConfigure: vi.fn(),
-    getParameters: vi.fn().mockReturnValueOnce({}),
+    getParameters: vi.fn().mockReturnValue({
+      tenantId: 'tenantId',
+      notifications: [
+        {
+          channel: mockChannels[0],
+          contentTypeId: 'blogPost',
+          selectedEvents: {
+            'ContentManagement.Entry.archive': false,
+            'ContentManagement.Entry.create': false,
+            'ContentManagement.Entry.delete': false,
+            'ContentManagement.Entry.publish': false,
+            'ContentManagement.Entry.unarchive': false,
+            'ContentManagement.Entry.unpublish': false,
+          },
+        },
+      ],
+    }),
     setReady: vi.fn(),
     getCurrentState: vi.fn(),
     onConfigurationCompleted: vi.fn(),

@@ -8,7 +8,7 @@ import { initialParameters } from '@constants/defaultParams';
 import useInitializeParameters from '@hooks/useInitializeParameters';
 import { useMsal } from '@azure/msal-react';
 import { styles } from './ConfigPage.styles';
-import { headerSection } from '@constants/configCopy';
+import { headerSection, notificationsSection } from '@constants/configCopy';
 import { Box, Heading, Paragraph } from '@contentful/f36-components';
 
 const ConfigPage = () => {
@@ -35,6 +35,13 @@ const ConfigPage = () => {
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
+    // pending changes defined as an notifications that have been opened but not saved via <NotificationEditModeFooter/>
+    const pendingChanges = notificationIndexToEdit !== null;
+
+    if (pendingChanges) {
+      sdk.notifier.error(notificationsSection.pendingChangesWarning);
+      return false;
+    }
 
     if (!parameters.tenantId) {
       sdk.notifier.error('A valid Tenant Id is required');
@@ -45,7 +52,7 @@ const ConfigPage = () => {
       parameters,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, notificationIndexToEdit]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());

@@ -49,6 +49,7 @@ const notificationsSection = {
   },
   updateConfirmation: 'Notification settings updated',
   saveWarning: 'Save the app to persist these settings',
+  pendingChangesWarning: 'Notification changes are not saved. Please try again.',
 };
 
 const contentTypeSelection = {
