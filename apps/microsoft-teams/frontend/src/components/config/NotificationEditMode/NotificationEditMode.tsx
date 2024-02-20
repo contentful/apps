@@ -146,6 +146,7 @@ const NotificationEditMode = (props: Props) => {
         isSaveDisabled={!isNotificationReadyToSave(editedNotification, notification)}
         isTestSending={isTestSending}
         isTestDisabled={!canTestNotificationBeSent(editedNotification, notification)}
+        isNew={isNotificationNew(notification)}
       />
     </Box>
   );

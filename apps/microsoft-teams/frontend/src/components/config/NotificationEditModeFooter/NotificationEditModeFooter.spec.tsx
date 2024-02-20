@@ -13,15 +13,32 @@ describe('NotificationEditModeFooter component', () => {
         isSaveDisabled={false}
         isTestSending={false}
         isTestDisabled={false}
+        isNew={false}
       />
     );
 
     expect(screen.getByText(editModeFooter.test)).toBeTruthy();
     expect(screen.getByText(editModeFooter.cancel)).toBeTruthy();
-    expect(screen.getByText(editModeFooter.save)).toBeTruthy();
+    expect(screen.getByText(editModeFooter.update)).toBeTruthy();
     unmount();
   });
-  it('handles clicking the save button when it is enabled', () => {
+  it('displays create button when notification is new', () => {
+    const { unmount } = render(
+      <NotificationEditModeFooter
+        handleTest={vi.fn()}
+        handleCancel={vi.fn()}
+        handleSave={vi.fn()}
+        isSaveDisabled={false}
+        isTestSending={false}
+        isTestDisabled={false}
+        isNew={true}
+      />
+    );
+
+    expect(screen.getByText(editModeFooter.create)).toBeTruthy();
+    unmount();
+  });
+  it('handles clicking the update button when it is enabled', () => {
     const mockHandleSave = vi.fn();
     const { unmount, rerender } = render(
       <NotificationEditModeFooter
@@ -31,10 +48,11 @@ describe('NotificationEditModeFooter component', () => {
         isSaveDisabled={false}
         isTestSending={false}
         isTestDisabled={false}
+        isNew={false}
       />
     );
 
-    const saveButton = screen.getByText(editModeFooter.save);
+    const saveButton = screen.getByText(editModeFooter.update);
     saveButton.click();
 
     expect(mockHandleSave).toHaveBeenCalled();
@@ -48,10 +66,11 @@ describe('NotificationEditModeFooter component', () => {
         isSaveDisabled={true}
         isTestSending={false}
         isTestDisabled={false}
+        isNew={false}
       />
     );
 
-    const saveButtonDisabled = screen.getByText(editModeFooter.save);
+    const saveButtonDisabled = screen.getByText(editModeFooter.update);
     saveButtonDisabled.click();
 
     expect(mockHandleSaveDisabled).not.toHaveBeenCalled();
@@ -68,6 +87,7 @@ describe('NotificationEditModeFooter component', () => {
         isSaveDisabled={false}
         isTestSending={false}
         isTestDisabled={false}
+        isNew={false}
       />
     );
 
@@ -85,6 +105,7 @@ describe('NotificationEditModeFooter component', () => {
         isSaveDisabled={true}
         isTestSending={false}
         isTestDisabled={false}
+        isNew={false}
       />
     );
 
