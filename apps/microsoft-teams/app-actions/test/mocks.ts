@@ -145,6 +145,9 @@ export const mockNotificationUnsubscribed = {
 
 export const mockAppInstallationParameters: AppInstallationParameters = {
   tenantId: 'tenant-id',
+  orgName: 'Company ABC',
+  orgLogo: 'https://example.image/squareLogo',
+  authenticatedUsername: 'person1@companyabc.com',
   notifications: [mockNotification, mockNotificationUnsubscribed],
 };
 

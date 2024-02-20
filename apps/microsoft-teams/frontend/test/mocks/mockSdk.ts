@@ -1,8 +1,12 @@
 import { vi } from 'vitest';
 import { mockChannels } from './mockChannels';
+import { AppInstallationParameters } from '@customTypes/configPage';
 
-const mockParameters = {
+const mockParameters: AppInstallationParameters = {
   tenantId: 'abc-123',
+  orgName: 'Company ABC',
+  orgLogo: 'https://example.image/squareLogo',
+  authenticatedUsername: 'person1@companyabc.com',
   notifications: [],
 };
 
@@ -34,9 +38,7 @@ const mockSdk: any = {
   },
   parameters: {
     instance: [],
-    installation: {
-      tenantId: mockParameters.tenantId,
-    },
+    installation: mockParameters,
   },
   ids: {
     app: 'test-app',

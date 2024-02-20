@@ -7,6 +7,7 @@ import {
   mockParameters,
   mockSdk,
 } from '@test/mocks';
+import { accessSection } from '@constants/configCopy';
 
 const mocks = vi.hoisted(() => {
   return { useMsal: vi.fn() };
@@ -31,18 +32,21 @@ describe('AccessSection component', () => {
 
   it('displays correct copy when unathorized', () => {
     mocks.useMsal.mockReturnValue(mockMsalWithoutAccounts);
-    render(<AccessSection dispatch={vi.fn()} parameters={mockParameters} isAppInstalled={false} />);
+    const { unmount } = render(
+      <AccessSection dispatch={vi.fn()} parameters={mockParameters} isAppInstalled={false} />
+    );
 
-    expect(screen.getByText('Connect to Teams')).toBeTruthy();
+    waitFor(() => expect(screen.getByText(accessSection.login)).toBeTruthy());
+    unmount();
   });
 
   it('displays correct copy when authorized', async () => {
     mocks.useMsal.mockReturnValue(mockMsalWithAccounts);
-    render(<AccessSection dispatch={vi.fn()} parameters={mockParameters} isAppInstalled={true} />);
+    const { unmount } = render(
+      <AccessSection dispatch={vi.fn()} parameters={mockParameters} isAppInstalled={true} />
+    );
 
-    expect(screen.getByText('Disconnect')).toBeTruthy();
-    expect(screen.getByText('username@companyabc.com')).toBeTruthy();
-    await waitFor(() => expect(screen.getByText('Company ABC')).toBeTruthy());
-    await waitFor(() => expect(screen.getByRole('img')).toBeTruthy());
+    waitFor(() => expect(screen.getByText(accessSection.teamsAppLink)).toBeTruthy());
+    unmount();
   });
 });

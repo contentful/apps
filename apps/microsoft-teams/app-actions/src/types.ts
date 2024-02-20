@@ -57,6 +57,9 @@ export interface TeamInstallation {
 
 export interface AppInstallationParameters {
   tenantId: string;
+  orgName: string;
+  orgLogo: string;
+  authenticatedUsername: string;
   notifications: Notification[];
 }
 

@@ -16,6 +16,7 @@ const accessSection = {
   fieldName: 'Tenant Id',
   login: 'Connect to Teams',
   logout: 'Disconnect',
+  retry: 'Retry Authorization',
   teamsAppInfo:
     'Install the Contentful app in Microsoft Teams channels where you would like to receive notifications.  View Teams docs',
   teamsAppLink: 'View Teams docs',
@@ -27,7 +28,7 @@ const accessSection = {
   },
   updateConfirmation: 'Microsoft organization updated',
   saveWarning: 'Save the app to persist these settings',
-  authError: 'Failed to authenticate with Microsoft',
+  authError: 'Unable to connect to Microsoft. Check your credentials and try again.',
   orgDetailsError: 'Failed to get Microsoft organization details',
 };
 
