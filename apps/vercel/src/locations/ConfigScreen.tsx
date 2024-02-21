@@ -22,6 +22,7 @@ import useInitializeParameters from '../hooks/useInitializeParameters';
 import parameterReducer, { actions } from '../components/parameterReducer';
 import { initialParameters } from '../constants/defaultParams';
 import VercelClient from '../clients/vercel';
+import { debounce } from 'lodash';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
@@ -85,11 +86,11 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     async function getProjects() {
-      const projects = await vercelClient.listProjects();
+      const data = await vercelClient.listProjects();
 
       dispatchParameters({
         type: actions.UPDATE_VERCEL_PROJECTS,
-        payload: projects,
+        payload: data.projects,
       });
     }
 
