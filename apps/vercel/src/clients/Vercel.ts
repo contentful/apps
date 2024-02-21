@@ -4,7 +4,7 @@ interface Project {
 }
 
 interface VercelAPIClient {
-  listProjects: () => Promise<Project[]>;
+  listProjects: () => Promise<{ projects: Project[] }>;
 }
 
 export default class VercelClient implements VercelAPIClient {
@@ -28,7 +28,7 @@ export default class VercelClient implements VercelAPIClient {
   }
 
   async checkToken(): Promise<boolean> {
-    const res = await fetch(`${this.baseEndpoint}/v9/projects`, {
+    const res = await fetch(`${this.baseEndpoint}/v5/user/tokens`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
@@ -40,14 +40,12 @@ export default class VercelClient implements VercelAPIClient {
     }
   }
 
-  async listProjects(): Promise<Project[]> {
+  async listProjects(): Promise<{ projects: Project[] }> {
     const res = await fetch(`${this.baseEndpoint}/v9/projects`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
 
-    const body = await res.json();
-
-    return body.projects;
+    return await res.json();
   }
 }
