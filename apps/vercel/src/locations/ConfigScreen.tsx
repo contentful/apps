@@ -22,7 +22,6 @@ import useInitializeParameters from '../hooks/useInitializeParameters';
 import parameterReducer, { actions } from '../components/parameterReducer';
 import { initialParameters } from '../constants/defaultParams';
 import VercelClient from '../clients/vercel';
-import { debounce } from 'lodash';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);

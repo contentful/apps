@@ -1,5 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Mock, afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import VercelClient from './vercel';
+
+global.fetch = vi.fn();
 
 describe('VercelClient', () => {
   let client: VercelClient;
@@ -8,38 +10,80 @@ describe('VercelClient', () => {
     client = new VercelClient();
   });
 
-  afterEach(() => {
+  afterAll(() => {
     vi.restoreAllMocks();
   });
 
+  describe('#checkToken', () => {
+    describe('valid', () => {
+      beforeEach(() => {
+        (fetch as Mock).mockImplementationOnce(() => ({
+          ok: true,
+          json: vi.fn(),
+        }));
+      });
+
+      afterEach(() => {
+        vi.restoreAllMocks();
+      });
+
+      it('returns true for valid token', async () => {
+        const res = await client.checkToken();
+
+        expect(res).toBe(true);
+      });
+    });
+
+    describe('invalid', () => {
+      beforeEach(() => {
+        (fetch as Mock).mockImplementationOnce(() => ({
+          ok: false,
+          json: vi.fn(),
+        }));
+      });
+
+      afterEach(() => {
+        vi.restoreAllMocks();
+      });
+
+      it('returns false for invalid token', async () => {
+        const res = await client.checkToken();
+
+        expect(res).toBe(false);
+      });
+    });
+  });
+
   describe('#listProjects', () => {
-    const expectedProjects = [
-      {
-        id: 2,
-      },
-      {
-        id: 3,
-      },
-    ];
+    const expectedProjects = {
+      projects: [
+        {
+          id: 2,
+          name: 'vite',
+        },
+        {
+          id: 3,
+          name: 'vue',
+        },
+      ],
+    };
 
     beforeEach(() => {
-      global.fetch = vi.fn().mockImplementation(() => ({
+      (fetch as Mock).mockImplementation(() => ({
         ok: true,
-        json: vi.fn(
-          () =>
-            new Promise((resolve) =>
-              resolve({
-                data: expectedProjects,
-              })
-            )
-        ),
+        json: vi.fn(() => new Promise((resolve) => resolve(expectedProjects))),
       }));
     });
 
-    it('lists all projects for an authenticated user', async () => {
-      const projects = await client.listProjects();
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
 
-      expect(projects.length).toBe(2);
+    it('lists all projects for an authenticated user', async () => {
+      const data = await client.listProjects();
+
+      expect(data.projects.length).toBe(2);
+      expect(data.projects).toBe(expectedProjects.projects);
     });
   });
 });

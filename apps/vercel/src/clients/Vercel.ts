@@ -4,6 +4,7 @@ interface Project {
 }
 
 interface VercelAPIClient {
+  checkToken: () => Promise<boolean>;
   listProjects: () => Promise<{ projects: Project[] }>;
 }
 
@@ -16,15 +17,11 @@ export default class VercelClient implements VercelAPIClient {
     this.accessToken = accessToken;
   }
 
-  private buildHeaders(
-    overrides: {
-      [key: string]: string;
-    } = {}
-  ): { [key: string]: string } {
-    return {
+  private buildHeaders(overrides: Headers = new Headers({})): Headers {
+    return new Headers({
       Authorization: `Bearer ${this.accessToken}`,
       ...overrides,
-    };
+    });
   }
 
   async checkToken(): Promise<boolean> {
