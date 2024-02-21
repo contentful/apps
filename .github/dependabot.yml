@@ -129,6 +129,96 @@ updates:
       versions:
         - ">=11"
 
+- package-ecosystem: npm
+  directory: "/examples/function-mock-shop"
+  schedule:
+    interval: daily
+    time: "03:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "emotion"
+      versions:
+        - ">=11"
+
+- package-ecosystem: npm
+  directory: "/examples/function-potterdb"
+  schedule:
+    interval: daily
+    time: "03:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "emotion"
+      versions:
+        - ">=11"
+
+- package-ecosystem: npm
+  directory: "/examples/function-potterdb-rest-api"
+  schedule:
+    interval: daily
+    time: "03:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "emotion"
+      versions:
+        - ">=11"
+
+- package-ecosystem: npm
+  directory: "/examples/function-templates-javascript"
+  schedule:
+    interval: daily
+    time: "03:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "emotion"
+      versions:
+        - ">=11"
+
+- package-ecosystem: npm
+  directory: "/examples/function-templates-typescript"
+  schedule:
+    interval: daily
+    time: "03:00"
+    timezone: UTC
+  open-pull-requests-limit: 15
+  commit-message:
+    prefix: "fix"
+    prefix-development: "chore"
+    include: "scope"
+  ignore:
+    - dependency-name: "*"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "emotion"
+      versions:
+        - ">=11"
+
 - package-ecosystem: docker
   directory: "/apps/slack/lambda/"
   schedule:
