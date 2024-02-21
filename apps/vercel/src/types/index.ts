@@ -1,9 +1,9 @@
-export interface AppInstallationParameters {
-  vercelAccessToken: string;
+interface Project {
+  id: string;
+  name: string;
 }
 
-// interface Deployments {
-//   temporary until we flush out deployment interface further
-//   deployments: { [key: string]: object }[];
-//   pagination: { count: number; next: null; prev: null };
-// }
+export interface AppInstallationParameters {
+  vercelAccessToken: string;
+  projects: Project[];
+}
