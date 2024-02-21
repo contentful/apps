@@ -10,6 +10,7 @@ import {
   isNotificationReadyToSave,
   isNotificationNew,
   doesNotificationHaveChanges,
+  canTestNotificationBeSent,
 } from '@helpers/configHelpers';
 import CancelModal from '@components/config/CancelModal/CancelModal';
 import { ConfigAppSDK } from '@contentful/app-sdk';
@@ -141,6 +142,7 @@ const NotificationEditMode = (props: Props) => {
         handleSave={handleSave}
         isSaveDisabled={!isNotificationReadyToSave(editedNotification, notification)}
         isTestSending={isTestSending}
+        isTestDisabled={!canTestNotificationBeSent(editedNotification, notification)}
       />
     </Box>
   );

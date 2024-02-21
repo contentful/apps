@@ -33,13 +33,40 @@ const isNotificationReadyToSave = (
   notification: Notification
 ): boolean => {
   const hasChanges = doesNotificationHaveChanges(editedNotification, notification);
-
-  const hasContentType = !!editedNotification.contentTypeId;
-  const hasChannel = !!editedNotification.channel.id;
-  const hasEventEnabled = Object.values(editedNotification.selectedEvents).includes(true);
-  const hasAllFieldsCompleted = hasContentType && hasChannel && hasEventEnabled;
+  const hasAllFieldsCompleted = areAllFieldsCompleted(editedNotification);
 
   return hasChanges && hasAllFieldsCompleted;
+};
+
+/**
+ * Evaluates whether a test notification can be sent based on whether all necessary fields are completed
+ * @param editedNotification
+ * @param notification
+ * @returns boolean
+ */
+const canTestNotificationBeSent = (
+  editedNotification: Notification,
+  notification: Notification
+): boolean => {
+  const hasChanges = doesNotificationHaveChanges(editedNotification, notification);
+  const hasAllFieldsCompleted = areAllFieldsCompleted(
+    hasChanges ? editedNotification : notification
+  );
+
+  return hasAllFieldsCompleted;
+};
+
+/**
+ * Evaluates whether all necessary fields (content type, channel, events) are completed for a given notification
+ * @param notification
+ * @returns boolean
+ */
+const areAllFieldsCompleted = (notification: Notification): boolean => {
+  const hasContentType = !!notification.contentTypeId;
+  const hasChannel = !!notification.channel.id;
+  const hasEventEnabled = Object.values(notification.selectedEvents).includes(true);
+
+  return hasContentType && hasChannel && hasEventEnabled;
 };
 
 /**
@@ -133,6 +160,8 @@ const displayConfirmationNotifications = (
 export {
   getContentTypeName,
   isNotificationReadyToSave,
+  canTestNotificationBeSent,
+  areAllFieldsCompleted,
   isNotificationNew,
   doesNotificationHaveChanges,
   getUniqueNotifications,

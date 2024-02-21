@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   getContentTypeName,
   isNotificationReadyToSave,
+  canTestNotificationBeSent,
+  areAllFieldsCompleted,
   isNotificationNew,
   doesNotificationHaveChanges,
   getUniqueNotifications,
@@ -33,6 +35,26 @@ describe('isNotificationReadyToSave', () => {
 
   it('should return true when it is ready', () => {
     expect(isNotificationReadyToSave(mockNotification, defaultNotification)).toEqual(true);
+  });
+});
+
+describe('canTestNotificationBeSent', () => {
+  it('should return false when it is not ready to be sent', () => {
+    expect(canTestNotificationBeSent(defaultNotification, defaultNotification)).toEqual(false);
+  });
+
+  it('should return true when it is ready to be sent', () => {
+    expect(canTestNotificationBeSent(mockNotification, defaultNotification)).toEqual(true);
+  });
+});
+
+describe('areAllFieldsCompleted', () => {
+  it('should return false when fields are not completed', () => {
+    expect(areAllFieldsCompleted(defaultNotification)).toEqual(false);
+  });
+
+  it('should return true when fields are completed', () => {
+    expect(areAllFieldsCompleted(mockNotification)).toEqual(true);
   });
 });
 

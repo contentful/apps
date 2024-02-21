@@ -12,6 +12,7 @@ describe('NotificationEditModeFooter component', () => {
         handleSave={vi.fn()}
         isSaveDisabled={false}
         isTestSending={false}
+        isTestDisabled={false}
       />
     );
 
@@ -29,6 +30,7 @@ describe('NotificationEditModeFooter component', () => {
         handleSave={mockHandleSave}
         isSaveDisabled={false}
         isTestSending={false}
+        isTestDisabled={false}
       />
     );
 
@@ -45,6 +47,7 @@ describe('NotificationEditModeFooter component', () => {
         handleSave={mockHandleSaveDisabled}
         isSaveDisabled={true}
         isTestSending={false}
+        isTestDisabled={false}
       />
     );
 
@@ -64,6 +67,7 @@ describe('NotificationEditModeFooter component', () => {
         handleSave={vi.fn()}
         isSaveDisabled={false}
         isTestSending={false}
+        isTestDisabled={false}
       />
     );
 
@@ -80,6 +84,7 @@ describe('NotificationEditModeFooter component', () => {
         handleSave={mockHandleCancelDisabled}
         isSaveDisabled={true}
         isTestSending={false}
+        isTestDisabled={false}
       />
     );
 
