@@ -20,6 +20,7 @@ import VercelIcon from '../components/common/VercelIcon';
 import useInitializeParameters from '../hooks/useInitializeParameters';
 import parameterReducer, { actions } from '../components/parameterReducer';
 import { initialParameters } from '../constants/defaultParams';
+import VercelClient from '../clients/vercel';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
@@ -28,8 +29,8 @@ const ConfigScreen = () => {
   const [tokenValid, setTokenValid] = useState<boolean | null>();
   // TODO: figure out if deployments are infact useful here
   // const [deployments, setDeployments] = useState<Deployments>();
-
   const sdk = useSDK<ConfigAppSDK>();
+  const vercelClient = new VercelClient(parameters.vercelAccessToken);
 
   useInitializeParameters(dispatchParameters);
 
@@ -63,31 +64,14 @@ const ConfigScreen = () => {
   }, [sdk, onConfigure]);
 
   useEffect(() => {
-    async function getDeployments() {
-      const res = await fetch('https://api.vercel.com/v6/deployments', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${parameters.vercelAccessToken}`,
-        },
-      });
+    async function getProjects() {
+      const projects = await vercelClient.listProjects();
 
-      // TODO: Figure out if we want to continue with deployments
-      // Contains deployment response, currently we aren't doing anything with deployments
-      // we just want to make sure a successful call goes through with valid access token
-
-      // const body = await res.json();
-
-      if (res.ok) {
-        setTokenError(null);
-        setTokenValid(true);
-      } else {
-        setTokenError(true);
-        setTokenValid(false);
-      }
+      console.log({ projects });
     }
 
     if (appInstalled && parameters && parameters.vercelAccessToken) {
-      getDeployments();
+      getProjects();
     }
   }, [parameters, appInstalled]);
 
@@ -110,15 +94,11 @@ const ConfigScreen = () => {
 
   return (
     <>
-      <Box className={styles.background} />
       <Box className={styles.body}>
         <Box>
-          <Heading>Set Up Vercel</Heading>
+          <Heading>Set up the Vercel App</Heading>
           <Paragraph>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-            dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat.
+            Preview and deploy automatically and securely from the entry editor.
           </Paragraph>
         </Box>
 
