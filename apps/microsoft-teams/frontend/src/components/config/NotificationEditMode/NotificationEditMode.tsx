@@ -15,6 +15,7 @@ import {
 import CancelModal from '@components/config/CancelModal/CancelModal';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
+import { editModeFooter } from '@constants/configCopy';
 
 interface Props {
   index: number;
@@ -74,13 +75,15 @@ const NotificationEditMode = (props: Props) => {
       const body = JSON.parse(response.body);
 
       if (body.ok) {
-        sdk.notifier.success('A test message was sent');
+        sdk.notifier.success(editModeFooter.testSuccess);
       } else {
-        throw new Error(`Failed to send test message: ${body.errors?.[0]?.message}`);
+        throw new Error(`${editModeFooter.testError}: ${body.error.message}`);
       }
     } catch (error) {
       if (error instanceof Error) {
-        sdk.notifier.error(error.message || 'Failed to send test message');
+        sdk.notifier.error(error.message || editModeFooter.testError);
+      } else {
+        sdk.notifier.error(editModeFooter.testError);
       }
       console.error(error);
     } finally {
