@@ -61,11 +61,7 @@ const ConfigPage = () => {
         <Heading>{headerSection.title}</Heading>
         <Paragraph>{headerSection.description}</Paragraph>
         <hr className={styles.splitter} />
-        <AccessSection
-          dispatch={dispatchParameters}
-          parameters={parameters}
-          isAppInstalled={isAppInstalled}
-        />
+        <AccessSection dispatch={dispatchParameters} parameters={parameters} />
       </Box>
       {isAppInstalled && parameters.tenantId ? (
         <NotificationsSection

@@ -32,9 +32,7 @@ describe('AccessSection component', () => {
 
   it('displays correct copy when unathorized', () => {
     mocks.useMsal.mockReturnValue(mockMsalWithoutAccounts);
-    const { unmount } = render(
-      <AccessSection dispatch={vi.fn()} parameters={mockParameters} isAppInstalled={false} />
-    );
+    const { unmount } = render(<AccessSection dispatch={vi.fn()} parameters={mockParameters} />);
 
     waitFor(() => expect(screen.getByText(accessSection.login)).toBeTruthy());
     unmount();
@@ -42,9 +40,7 @@ describe('AccessSection component', () => {
 
   it('displays correct copy when authorized', async () => {
     mocks.useMsal.mockReturnValue(mockMsalWithAccounts);
-    const { unmount } = render(
-      <AccessSection dispatch={vi.fn()} parameters={mockParameters} isAppInstalled={true} />
-    );
+    const { unmount } = render(<AccessSection dispatch={vi.fn()} parameters={mockParameters} />);
 
     waitFor(() => expect(screen.getByText(accessSection.teamsAppLink)).toBeTruthy());
     unmount();
