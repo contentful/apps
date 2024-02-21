@@ -15,16 +15,16 @@ describe('VercelClient', () => {
   });
 
   describe('#checkToken', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
     describe('valid', () => {
       beforeEach(() => {
         (fetch as Mock).mockImplementationOnce(() => ({
           ok: true,
           json: vi.fn(),
         }));
-      });
-
-      afterEach(() => {
-        vi.restoreAllMocks();
       });
 
       it('returns true for valid token', async () => {
@@ -40,10 +40,6 @@ describe('VercelClient', () => {
           ok: false,
           json: vi.fn(),
         }));
-      });
-
-      afterEach(() => {
-        vi.restoreAllMocks();
       });
 
       it('returns false for invalid token', async () => {

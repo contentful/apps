@@ -21,7 +21,7 @@ describe('ConfigScreen', () => {
     // simulate the user clicking the install button
     await mockSdk.app.onConfigure.mock.calls[0][0]();
 
-    expect(screen.getByText('Set Up Vercel')).toBeTruthy();
+    expect(screen.getByText('Connect Vercel')).toBeTruthy();
     expect(screen.getByText('Vercel Access Token')).toBeTruthy();
     unmount();
   });
