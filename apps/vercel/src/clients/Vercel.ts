@@ -1,5 +1,6 @@
 interface Project {
   id: string;
+  name: string;
 }
 
 interface VercelAPIClient {
@@ -26,7 +27,20 @@ export default class VercelClient implements VercelAPIClient {
     };
   }
 
-  async listProjects(): Promise<any[]> {
+  async checkToken(): Promise<boolean> {
+    const res = await fetch(`${this.baseEndpoint}/v9/projects`, {
+      headers: this.buildHeaders(),
+      method: 'GET',
+    });
+
+    if (res.ok) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async listProjects(): Promise<Project[]> {
     const res = await fetch(`${this.baseEndpoint}/v9/projects`, {
       headers: this.buildHeaders(),
       method: 'GET',

@@ -26,9 +26,16 @@ export const styles = {
   }),
   box: {
     width: '100%',
-    marginTop: '22px',
   },
+  splitter: css({
+    marginTop: tokens.spacingL,
+    marginBottom: tokens.spacingL,
+    border: 0,
+    height: '1px',
+    backgroundColor: tokens.gray300,
+  }),
   badgeContainer: {
+    marginTop: '10px',
     width: '100%',
   },
   icon: {
