@@ -9,11 +9,20 @@ interface Props {
   isSaveDisabled: boolean;
   isTestSending: boolean;
   isTestDisabled: boolean;
+  isNew: boolean;
 }
 
 const NotificationEditModeFooter = (props: Props) => {
-  const { handleTest, handleCancel, handleSave, isSaveDisabled, isTestSending, isTestDisabled } =
-    props;
+  const {
+    handleTest,
+    handleCancel,
+    handleSave,
+    isSaveDisabled,
+    isTestSending,
+    isNew,
+    isTestDisabled,
+  } = props;
+  const { test, cancel, create, update } = editModeFooter;
 
   return (
     <Box className={styles.footer}>
@@ -24,13 +33,13 @@ const NotificationEditModeFooter = (props: Props) => {
             onClick={handleTest}
             isLoading={isTestSending}
             isDisabled={isTestDisabled || isTestSending}>
-            {editModeFooter.test}
+            {test}
           </Button>
           <Button variant="secondary" onClick={handleCancel}>
-            {editModeFooter.cancel}
+            {cancel}
           </Button>
           <Button variant="primary" onClick={handleSave} isDisabled={isSaveDisabled}>
-            {editModeFooter.save}
+            {isNew ? create : update}
           </Button>
         </ButtonGroup>
       </Flex>

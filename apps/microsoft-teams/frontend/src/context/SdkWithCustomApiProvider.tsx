@@ -1,6 +1,5 @@
 import { KnownAppSDK, init as sdkInit } from '@contentful/app-sdk';
 import { FC, PropsWithChildren, ReactElement, createContext, useEffect, useState } from 'react';
-import { FreeFormParameters } from 'contentful-management/types';
 import { SDKContext } from '@contentful/react-apps-toolkit';
 
 const DELAY_TIMEOUT = 4 * 1000;
@@ -31,17 +30,26 @@ interface CustomSDKProviderProps {
   loading?: ReactElement;
 }
 
-// methods can be implemented here that call the low level channel directly. those methods must be defined
-// on the "receiving" end in user interface / experience pacakges
+// These methods must be defined on the "receiving" end in user interface / experience packages
 export class CustomApi {
   constructor(private readonly channel: Channel) {}
 
-  // calling this method will trigger a save of the app config with the provided paramaters. if the app
-  // is not yet installed, it will be installed. the parameters will still pass through parameter handlers
-  // attached by the app
-  async saveConfiguration(parameters: FreeFormParameters): Promise<void> {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
-    return this.channel.call('callAppMethod', 'install', [parameters]);
+  /**
+   * Calling this method will trigger a save of the app config with the overlay
+   * If the app is not yet installed, it will be installed, otherwise it will perform an update
+   * @returns Promise<void>
+   */
+  async saveConfiguration(): Promise<void> {
+    return this.channel.call('callAppMethod', 'save', []);
+  }
+
+  /**
+   * Calling this method will trigger a save of the app config without the overlay
+   * If the app is not yet installed, it will be installed, otherwise it will perform an update
+   * @returns Promise<void>
+   */
+  async quickSaveConfiguration(): Promise<void> {
+    return this.channel.call('callAppMethod', 'quickSave', []);
   }
 }
 

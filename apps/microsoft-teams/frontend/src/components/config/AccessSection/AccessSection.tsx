@@ -12,7 +12,6 @@ import { AppInstallationParameters } from '@customTypes/configPage';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import DisconnectModal from '@components/config/DisconnectModal/DisconnectModal';
-import { displayConfirmationNotifications } from '@helpers/configHelpers';
 import MsGraph from '@utils/msGraphApi';
 import { AccountInfo } from '@azure/msal-browser';
 import AccessSectionCard from '@components/config/AccessSectionCard/AccessSectionCard';
@@ -20,7 +19,6 @@ import AccessSectionCard from '@components/config/AccessSectionCard/AccessSectio
 interface Props {
   dispatch: Dispatch<ParameterAction>;
   parameters: AppInstallationParameters;
-  isAppInstalled: boolean;
 }
 
 const defaultOrgDetails = {
@@ -29,7 +27,7 @@ const defaultOrgDetails = {
 };
 
 const AccessSection = (props: Props) => {
-  const { dispatch, parameters, isAppInstalled } = props;
+  const { dispatch, parameters } = props;
 
   // A hook that returns the PublicClientApplication instance from MSAL to see if there is an authenticated account
   const { instance, accounts, inProgress } = useMsal();
@@ -53,25 +51,12 @@ const AccessSection = (props: Props) => {
         ...orgDetails,
       };
 
-      // TODO: remove this conditional when we get the new saveConfiguration updated
-      if (!isAppInstalled) {
-        await customApi.saveConfiguration({
-          ...parameters,
-          ...msAccountInfo,
-        });
-      }
       dispatch({
         type: actions.UPDATE_MS_ACCOUNT_INFO,
         payload: msAccountInfo,
       });
 
-      if (isAppInstalled && authResult.tenantId !== parameters.tenantId) {
-        displayConfirmationNotifications(
-          sdk,
-          accessSection.updateConfirmation,
-          accessSection.saveWarning
-        );
-      }
+      await customApi.saveConfiguration();
     } catch (e) {
       sdk.notifier.error(authError);
       console.error(e);

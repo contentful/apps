@@ -2,7 +2,6 @@ import { ContentTypeProps } from 'contentful-management';
 import { Notification } from '@customTypes/configPage';
 import isEqual from 'lodash/isEqual';
 import { defaultNotification } from '@constants/defaultParams';
-import { ConfigAppSDK } from '@contentful/app-sdk';
 
 /**
  * Gets the content type name for a given content type id
@@ -141,22 +140,6 @@ const getDuplicateNotificationIndex = (
   return duplicateNotificationIndex;
 };
 
-/**
- * Displays notifications to confirm an update and then a warning to save the app config
- * @param sdk
- * @param confirmationCopy
- * @param warningCopy
- * @returns void
- */
-const displayConfirmationNotifications = (
-  sdk: ConfigAppSDK,
-  confirmationCopy: string,
-  warningCopy: string
-) => {
-  sdk.notifier.success(confirmationCopy);
-  setTimeout(() => sdk.notifier.warning(warningCopy), 1000);
-};
-
 export {
   getContentTypeName,
   isNotificationReadyToSave,
@@ -166,5 +149,4 @@ export {
   doesNotificationHaveChanges,
   getUniqueNotifications,
   getDuplicateNotificationIndex,
-  displayConfirmationNotifications,
 };
