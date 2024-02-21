@@ -118,6 +118,8 @@ const eventsSelection = {
 
 const editModeFooter = {
   test: 'Send test message',
+  testSuccess: 'A test message was sent',
+  testError: 'Failed to send test message',
   cancel: 'Cancel',
   save: 'Save',
   confirmCancelDescription: 'If you cancel, your changes will not be saved.',

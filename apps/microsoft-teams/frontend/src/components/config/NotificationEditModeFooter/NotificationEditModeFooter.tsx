@@ -8,10 +8,12 @@ interface Props {
   handleSave: () => void;
   isSaveDisabled: boolean;
   isTestSending: boolean;
+  isTestDisabled: boolean;
 }
 
 const NotificationEditModeFooter = (props: Props) => {
-  const { handleTest, handleCancel, handleSave, isSaveDisabled, isTestSending } = props;
+  const { handleTest, handleCancel, handleSave, isSaveDisabled, isTestSending, isTestDisabled } =
+    props;
 
   return (
     <Box className={styles.footer}>
@@ -21,7 +23,7 @@ const NotificationEditModeFooter = (props: Props) => {
             variant="transparent"
             onClick={handleTest}
             isLoading={isTestSending}
-            isDisabled={isTestSending}>
+            isDisabled={isTestDisabled || isTestSending}>
             {editModeFooter.test}
           </Button>
           <Button variant="secondary" onClick={handleCancel}>
