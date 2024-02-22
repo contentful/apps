@@ -12,7 +12,6 @@ import {
   TextLink,
   Text,
   Badge,
-  Select,
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
