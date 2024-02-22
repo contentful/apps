@@ -31,6 +31,8 @@ const ConfigScreen = () => {
 
   useInitializeParameters(dispatchParameters);
 
+  const vercelClient = new VercelClient(parameters.vercelAccessToken);
+
   const getIsAppInstalled = useCallback(async () => {
     const isInstalled = await sdk.app.isInstalled();
 
@@ -98,27 +100,34 @@ const ConfigScreen = () => {
     }
   }, [parameters.vercelAccessToken, appInstalled]);
 
+  useEffect(() => {
+    async function getContentTypes() {
+      const contentTypesResponse = await sdk.cma.contentType.getMany({});
+
+      if (contentTypesResponse.items.length) {
+        dispatchParameters({
+          type: actions.UPDATE_CONTENT_TYPES,
+          payload: contentTypesResponse.items,
+        });
+      } else {
+        dispatchParameters({
+          type: actions.UPDATE_CONTENT_TYPES,
+          payload: [],
+        });
+      }
+    }
+
+    if (appInstalled) {
+      getContentTypes();
+    }
+  }, [appInstalled]);
+
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatchParameters({
       type: actions.UPDATE_VERCEL_ACCESS_TOKEN,
       payload: e.target.value,
     });
   };
-
-  useEffect(() => {
-    async function getContentTypes() {
-      const contentTypesResponse = await sdk.cma.contentType.getMany({});
-
-      if (appInstalled) {
-        dispatchParameters({
-          type: actions.UPDATE_CONTENT_TYPES,
-          payload: contentTypesResponse.items,
-        });
-      }
-    }
-
-    getContentTypes();
-  }, [appInstalled]);
 
   const handleProjectChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatchParameters({
@@ -127,17 +136,22 @@ const ConfigScreen = () => {
     });
   };
 
+  const handleContentTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    dispatchParameters({
+      type: actions.APPLY_SELECTED_CONTENT_TYPE,
+      payload: event.target.value,
+    });
+  };
+
   const renderStatusBadge = () => {
     if (appInstalled && parameters.vercelAccessToken && parameters.vercelAccessTokenStatus) {
       return <Badge variant="positive">Valid access token</Badge>;
-    } else if (tokenError) {
+    } else if (tokenError || !parameters.vercelAccessTokenStatus) {
       return <Badge variant="negative">Invalid access token</Badge>;
     } else {
       return <Badge variant="warning">Token not configured</Badge>;
     }
   };
-
-  const vercelClient = new VercelClient(parameters.vercelAccessToken);
 
   return (
     <>
@@ -225,19 +239,28 @@ const ConfigScreen = () => {
             <Box style={{ width: '50%' }}>
               <FormControl id="contentTypeSelect">
                 <FormControl.Label>Content Types</FormControl.Label>
-                <Select id="contentTypeSelect" name="contentTypeSelect">
+                <Select
+                  id="contentTypeSelect"
+                  name="contentTypeSelect"
+                  value={parameters.selectedContentType}
+                  onChange={handleContentTypeChange}>
                   {parameters.contentTypes && parameters.contentTypes.length ? (
                     <>
                       <Select.Option value="" isDisabled>
                         Please select a Content Type...
                       </Select.Option>
-                      {parameters.contentTypes.map((contentType) => (
-                        <Select.Option
-                          key={`option-${contentType.sys.id}`}
-                          value={contentType.sys.id}>
-                          {contentType.name}
-                        </Select.Option>
-                      ))}
+                      {parameters.contentTypes.map(
+                        (contentType) => (
+                          console.log({ contentType }),
+                          (
+                            <Select.Option
+                              key={`option-${contentType.sys.id}`}
+                              value={contentType.sys.id}>
+                              {contentType.name}
+                            </Select.Option>
+                          )
+                        )
+                      )}
                     </>
                   ) : (
                     <Select.Option value="">No Content Types currently configured.</Select.Option>

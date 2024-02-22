@@ -8,6 +8,7 @@ export enum actions {
   UPDATE_VERCEL_PROJECTS = 'updateVercelProjects',
   APPLY_SELECTED_PROJECT = 'applySelectedProject',
   UPDATE_CONTENT_TYPES = 'updateContentTypes',
+  APPLY_SELECTED_CONTENT_TYPE = 'applySelectedContentType',
 }
 
 type VercelAccessTokenAction = {
@@ -35,6 +36,11 @@ type ContentTypesAction = {
   payload: ContentType[];
 };
 
+type SelectedContentTypeAction = {
+  type: actions.APPLY_SELECTED_CONTENT_TYPE;
+  payload: string;
+};
+
 type ApplyContentfulParametersAction = {
   type: actions.APPLY_CONTENTFUL_PARAMETERS;
   payload: AppInstallationParameters;
@@ -46,7 +52,8 @@ export type ParameterAction =
   | VercelProjectsAction
   | VercelSelectedProjectAction
   | VercelAccessTokenStatusAction
-  | ContentTypesAction;
+  | ContentTypesAction
+  | SelectedContentTypeAction;
 
 const {
   UPDATE_VERCEL_ACCESS_TOKEN,
@@ -55,6 +62,7 @@ const {
   UPDATE_VERCEL_PROJECTS,
   APPLY_SELECTED_PROJECT,
   UPDATE_CONTENT_TYPES,
+  APPLY_SELECTED_CONTENT_TYPE,
 } = actions;
 
 const parameterReducer = (
@@ -98,6 +106,13 @@ const parameterReducer = (
       return {
         ...state,
         contentTypes: contentTypes ?? [],
+      };
+    }
+    case APPLY_SELECTED_CONTENT_TYPE: {
+      const selectedContentType = action.payload;
+      return {
+        ...state,
+        selectedContentType: selectedContentType ?? '',
       };
     }
     default:
