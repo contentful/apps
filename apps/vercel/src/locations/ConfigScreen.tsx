@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
+import { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
@@ -17,11 +17,12 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { styles } from '../components/config-screen/ConfigScreen.styles';
-import VercelIcon from '../components/common/VercelIcon';
 import useInitializeParameters from '../hooks/useInitializeParameters';
 import parameterReducer, { actions } from '../components/parameterReducer';
 import { initialParameters } from '../constants/defaultParams';
 import VercelClient from '../clients/Vercel';
+import ContentTypeSelect from '../components/config-screen/ContentTypeSelect';
+import ProjectSelect from '../components/config-screen/ProjectSelect';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
@@ -85,61 +86,10 @@ const ConfigScreen = () => {
     }
   }, [parameters.vercelAccessToken]);
 
-  useEffect(() => {
-    async function getProjects() {
-      const data = await vercelClient.listProjects();
-
-      dispatchParameters({
-        type: actions.UPDATE_VERCEL_PROJECTS,
-        payload: data.projects,
-      });
-    }
-
-    if (appInstalled && parameters && parameters.vercelAccessToken) {
-      getProjects();
-    }
-  }, [parameters.vercelAccessToken, appInstalled]);
-
-  useEffect(() => {
-    async function getContentTypes() {
-      const contentTypesResponse = await sdk.cma.contentType.getMany({});
-
-      if (contentTypesResponse.items.length) {
-        dispatchParameters({
-          type: actions.UPDATE_CONTENT_TYPES,
-          payload: contentTypesResponse.items,
-        });
-      } else {
-        dispatchParameters({
-          type: actions.UPDATE_CONTENT_TYPES,
-          payload: [],
-        });
-      }
-    }
-
-    if (appInstalled) {
-      getContentTypes();
-    }
-  }, [appInstalled]);
-
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatchParameters({
       type: actions.UPDATE_VERCEL_ACCESS_TOKEN,
       payload: e.target.value,
-    });
-  };
-
-  const handleProjectChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    dispatchParameters({
-      type: actions.APPLY_SELECTED_PROJECT,
-      payload: event.target.value,
-    });
-  };
-
-  const handleContentTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    dispatchParameters({
-      type: actions.APPLY_SELECTED_CONTENT_TYPE,
-      payload: event.target.value,
     });
   };
 
@@ -203,78 +153,24 @@ const ConfigScreen = () => {
             </FormControl>
           </Box>
           <Box style={styles.box}>
-            <Heading style={{ fontSize: '1rem' }}>Configure Deployment</Heading>
-            <FormControl id="optionProjectSelect" isRequired={true}>
-              <FormControl.Label>Project</FormControl.Label>
-              <Select
-                id="optionProjectSelect"
-                name="optionProjectSelect"
-                value={parameters.selectedProject}
-                onChange={handleProjectChange}>
-                {parameters.projects && parameters.projects.length ? (
-                  <>
-                    <Select.Option value="" isDisabled>
-                      Please select a project...
-                    </Select.Option>
-                    {parameters.projects.map((project) => (
-                      <Select.Option key={`option-${project.id}`} value={project.id}>
-                        {project.name}
-                      </Select.Option>
-                    ))}
-                  </>
-                ) : (
-                  <Select.Option value="">No Projects currently configured.</Select.Option>
-                )}
-              </Select>
-            </FormControl>
+            <Heading style={styles.selectSection.heading}>Configure Deployment</Heading>
+            <ProjectSelect
+              parameters={parameters}
+              dispatch={dispatchParameters}
+              client={vercelClient}
+            />
             <hr className={styles.splitter} />
           </Box>
           <Box style={styles.box}>
-            <Heading marginBottom="none" style={{ fontSize: '1rem' }}>
+            <Heading marginBottom="none" style={styles.selectSection.heading}>
               Assign Content Types
             </Heading>
             <Paragraph marginTop="spacingXs">
               The deployment status will be displayed on the sidebars of these content types.
             </Paragraph>
-            <Box style={{ width: '50%' }}>
-              <FormControl id="contentTypeSelect">
-                <FormControl.Label>Content Types</FormControl.Label>
-                <Select
-                  id="contentTypeSelect"
-                  name="contentTypeSelect"
-                  value={parameters.selectedContentType}
-                  onChange={handleContentTypeChange}>
-                  {parameters.contentTypes && parameters.contentTypes.length ? (
-                    <>
-                      <Select.Option value="" isDisabled>
-                        Please select a Content Type...
-                      </Select.Option>
-                      {parameters.contentTypes.map(
-                        (contentType) => (
-                          console.log({ contentType }),
-                          (
-                            <Select.Option
-                              key={`option-${contentType.sys.id}`}
-                              value={contentType.sys.id}>
-                              {contentType.name}
-                            </Select.Option>
-                          )
-                        )
-                      )}
-                    </>
-                  ) : (
-                    <Select.Option value="">No Content Types currently configured.</Select.Option>
-                  )}
-                </Select>
-              </FormControl>
-            </Box>
+            <ContentTypeSelect parameters={parameters} dispatch={dispatchParameters} sdk={sdk} />
           </Box>
         </Stack>
-      </Box>
-      <Box style={styles.icon}>
-        <Flex alignItems="center" justifyContent="center">
-          <VercelIcon />
-        </Flex>
       </Box>
     </>
   );

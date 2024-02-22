@@ -41,4 +41,12 @@ export const styles = {
   icon: {
     marginTop: '41px',
   },
+  selectSection: {
+    heading: {
+      fontSize: '1rem',
+    },
+    select: {
+      width: '50%',
+    },
+  },
 };
