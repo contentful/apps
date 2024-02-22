@@ -34,7 +34,7 @@ const queryHandler: QueryHandler = async (event, context) => {
   const { apiEndpoint } = context.appInstallationParameters;
 
   // Make a request to the third party API.
-  // The expected return tpe aligns with the
+  // The expected return type aligns with the
   // one outlined in the GraphQL specs:
   // https://spec.graphql.org/October2021/#sec-Response
   const response = await fetch(apiEndpoint, {
