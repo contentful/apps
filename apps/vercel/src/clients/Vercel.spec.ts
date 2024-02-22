@@ -1,5 +1,5 @@
 import { Mock, afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import VercelClient from './vercel';
+import VercelClient from './Vercel';
 
 global.fetch = vi.fn();
 
