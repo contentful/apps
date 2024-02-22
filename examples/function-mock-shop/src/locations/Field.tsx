@@ -11,7 +11,7 @@ const Field = () => {
   const [productId, setProductId] = useState<string | undefined>();
   const sdk = useSDK<FieldAppSDK>();
   const { isLoading, product } = useProduct(productId);
-  const value = sdk.entry.fields['productId'].getValue();
+  const value = sdk.field.getValue();
 
   useEffect(() => {
     // Since we run in an iframe,
@@ -28,7 +28,7 @@ const Field = () => {
   async function openModal() {
     const product: ProductProps = await sdk.dialogs.openCurrentApp();
     if (product) {
-      sdk.entry.fields['productId'].setValue(product.id);
+      sdk.field.setValue(product.id);
       setProductId(product.id);
     }
   }
