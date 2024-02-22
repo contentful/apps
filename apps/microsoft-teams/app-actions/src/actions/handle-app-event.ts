@@ -44,6 +44,9 @@ export const handler = withAsyncAppActionErrorHandling(
     const { tenantId, notifications } = parametersFromAppInstallation(appInstallation);
 
     const matchingNotifications = notifications.filter((notification) => {
+      // don't send if tenant id doesn't match
+      if (notification.channel.tenantId !== tenantId) return false;
+
       // don't send if the notification is for a different content type
       if (notification.contentTypeId !== contentTypeId) return false;
 
