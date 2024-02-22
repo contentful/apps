@@ -26,12 +26,9 @@ import ProjectSelect from '../components/config-screen/ProjectSelect';
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [appInstalled, setIsAppInstalled] = useState(false);
-  const [tokenError, setTokenError] = useState<boolean | null>();
   const sdk = useSDK<ConfigAppSDK>();
 
   useInitializeParameters(dispatchParameters);
-
-  const vercelClient = new VercelClient(parameters.vercelAccessToken);
 
   const getIsAppInstalled = useCallback(async () => {
     const isInstalled = await sdk.app.isInstalled();
@@ -62,6 +59,8 @@ const ConfigScreen = () => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
+  const vercelClient = new VercelClient(parameters.vercelAccessToken);
+
   useEffect(() => {
     async function checkToken() {
       const tokenValid = await vercelClient.checkToken();
@@ -72,7 +71,6 @@ const ConfigScreen = () => {
           payload: true,
         });
       } else {
-        setTokenError(true);
         dispatchParameters({
           type: actions.UPDATE_VERCEL_ACCESS_TOKEN_STATUS,
           payload: false,
@@ -95,10 +93,10 @@ const ConfigScreen = () => {
   const renderStatusBadge = () => {
     if (appInstalled && parameters.vercelAccessToken && parameters.vercelAccessTokenStatus) {
       return <Badge variant="positive">Valid access token</Badge>;
-    } else if (tokenError || !parameters.vercelAccessTokenStatus) {
+    } else if (!parameters.vercelAccessTokenStatus) {
       return <Badge variant="negative">Invalid access token</Badge>;
     } else {
-      return <Badge variant="warning">Token not configured</Badge>;
+      return <Badge variant="secondary">Token not configured</Badge>;
     }
   };
 
