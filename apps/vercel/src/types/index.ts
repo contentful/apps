@@ -7,8 +7,9 @@ export interface Project {
 
 export interface AppInstallationParameters {
   vercelAccessToken: string;
-  vercelAccessTokenStatus: boolean;
+  vercelAccessTokenStatus: boolean | null;
   projects: Project[];
   selectedProject: string;
   contentTypes: ContentType[];
+  selectedContentType: string;
 }
