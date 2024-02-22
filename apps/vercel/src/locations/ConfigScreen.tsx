@@ -21,7 +21,7 @@ import VercelIcon from '../components/common/VercelIcon';
 import useInitializeParameters from '../hooks/useInitializeParameters';
 import parameterReducer, { actions } from '../components/parameterReducer';
 import { initialParameters } from '../constants/defaultParams';
-import VercelClient from '../clients/vercel';
+import VercelClient from '../clients/Vercel';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
@@ -105,6 +105,21 @@ const ConfigScreen = () => {
     });
   };
 
+  useEffect(() => {
+    async function getContentTypes() {
+      const contentTypesResponse = await sdk.cma.contentType.getMany({});
+
+      if (appInstalled) {
+        dispatchParameters({
+          type: actions.UPDATE_CONTENT_TYPES,
+          payload: contentTypesResponse.items,
+        });
+      }
+    }
+
+    getContentTypes();
+  }, [appInstalled]);
+
   const handleProjectChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatchParameters({
       type: actions.APPLY_SELECTED_PROJECT,
@@ -182,14 +197,20 @@ const ConfigScreen = () => {
                 name="optionProjectSelect"
                 value={parameters.selectedProject}
                 onChange={handleProjectChange}>
-                <Select.Option value="" isDisabled>
-                  Please select a project...
-                </Select.Option>
-                {parameters.projects.map((project) => (
-                  <Select.Option key={`option-${project.id}`} value={project.id}>
-                    {project.name}
-                  </Select.Option>
-                ))}
+                {parameters.projects && parameters.projects.length ? (
+                  <>
+                    <Select.Option value="" isDisabled>
+                      Please select a project...
+                    </Select.Option>
+                    {parameters.projects.map((project) => (
+                      <Select.Option key={`option-${project.id}`} value={project.id}>
+                        {project.name}
+                      </Select.Option>
+                    ))}
+                  </>
+                ) : (
+                  <Select.Option value="">No Projects currently configured.</Select.Option>
+                )}
               </Select>
             </FormControl>
             <hr className={styles.splitter} />
@@ -205,8 +226,22 @@ const ConfigScreen = () => {
               <FormControl id="contentTypeSelect">
                 <FormControl.Label>Content Types</FormControl.Label>
                 <Select id="contentTypeSelect" name="contentTypeSelect">
-                  <Select.Option value="Blog">Blog</Select.Option>
-                  <Select.Option value="Post">Post</Select.Option>
+                  {parameters.contentTypes && parameters.contentTypes.length ? (
+                    <>
+                      <Select.Option value="" isDisabled>
+                        Please select a Content Type...
+                      </Select.Option>
+                      {parameters.contentTypes.map((contentType) => (
+                        <Select.Option
+                          key={`option-${contentType.sys.id}`}
+                          value={contentType.sys.id}>
+                          {contentType.name}
+                        </Select.Option>
+                      ))}
+                    </>
+                  ) : (
+                    <Select.Option value="">No Content Types currently configured.</Select.Option>
+                  )}
                 </Select>
               </FormControl>
             </Box>

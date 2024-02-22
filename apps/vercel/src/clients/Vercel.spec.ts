@@ -7,7 +7,7 @@ describe('VercelClient', () => {
   let client: VercelClient;
 
   beforeEach(() => {
-    client = new VercelClient();
+    client = new VercelClient('access-token');
   });
 
   afterAll(() => {
@@ -18,7 +18,6 @@ describe('VercelClient', () => {
     afterEach(() => {
       vi.restoreAllMocks();
     });
-
     describe('valid', () => {
       beforeEach(() => {
         (fetch as Mock).mockImplementationOnce(() => ({
@@ -33,7 +32,6 @@ describe('VercelClient', () => {
         expect(res).toBe(true);
       });
     });
-
     describe('invalid', () => {
       beforeEach(() => {
         (fetch as Mock).mockImplementationOnce(() => ({
@@ -65,7 +63,7 @@ describe('VercelClient', () => {
     };
 
     beforeEach(() => {
-      (fetch as Mock).mockImplementation(() => ({
+      (fetch as Mock).mockImplementationOnce(() => ({
         ok: true,
         json: vi.fn(() => new Promise((resolve) => resolve(expectedProjects))),
       }));

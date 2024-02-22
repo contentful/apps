@@ -23,6 +23,14 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
+  cma: {
+    contentType: {
+      getMany: vi.fn().mockReturnValueOnce({}),
+    },
+    appActionCall: {
+      createWithResponse: vi.fn(),
+    },
+  },
   notifier: {
     error: vi.fn(),
   },
