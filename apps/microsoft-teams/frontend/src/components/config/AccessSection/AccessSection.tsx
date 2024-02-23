@@ -1,4 +1,4 @@
-import { Dispatch } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import { Box, Button, Flex, ModalLauncher, Paragraph } from '@contentful/f36-components';
 import { useMsal } from '@azure/msal-react';
 import { loginRequest } from '@configs/authConfig';
@@ -28,6 +28,11 @@ const defaultOrgDetails = {
 
 const AccessSection = (props: Props) => {
   const { dispatch, parameters } = props;
+  const [hasUpdatedMsAuth, setHasUpdatedMsAuth] = useState<boolean>(false);
+  const [hasUpdatedOrgDetails, setHasUpdatedOrgDetails] = useState<boolean>(false);
+  const [hasDisconnected, setHasDisconnected] = useState<boolean>(false);
+  const [updatedMsAccountInfo, setUpdatedMsAccountInfo] =
+    useState<Omit<AppInstallationParameters, 'notifications'>>(parameters);
 
   // A hook that returns the PublicClientApplication instance from MSAL to see if there is an authenticated account
   const { instance, accounts, inProgress } = useMsal();
@@ -39,10 +44,56 @@ const AccessSection = (props: Props) => {
   const { login, teamsAppInfo, teamsAppLink, description, authError, orgDetailsError } =
     accessSection;
 
+  // saves the app config page after dispatch completes and parameters are updated
+  const saveMsAccountInfo = async () => {
+    await customApi.saveConfiguration();
+    setHasUpdatedMsAuth(false);
+    setHasUpdatedOrgDetails(false);
+    setHasDisconnected(false);
+    setUpdatedMsAccountInfo(parameters);
+  };
+
+  useEffect(() => {
+    // for initial login and auth changes
+    if (
+      parameters.tenantId &&
+      parameters.tenantId === updatedMsAccountInfo.tenantId &&
+      hasUpdatedMsAuth
+    ) {
+      saveMsAccountInfo();
+    }
+
+    // for when a user disconnects
+    if (
+      !parameters.tenantId &&
+      parameters.tenantId === updatedMsAccountInfo.tenantId &&
+      hasDisconnected
+    ) {
+      saveMsAccountInfo();
+    }
+  }, [parameters.tenantId]);
+
+  useEffect(() => {
+    // for when there are updated orgDetails
+    if (
+      (parameters.orgName === updatedMsAccountInfo.orgName ||
+        parameters.orgLogo === updatedMsAccountInfo.orgLogo) &&
+      hasUpdatedOrgDetails
+    ) {
+      saveMsAccountInfo();
+    }
+  }, [parameters.orgName, parameters.orgLogo]);
+
   const handleLogin = async () => {
     try {
       const authResult = await instance.loginPopup(loginRequest);
       const { tenantId, account } = authResult;
+      setHasUpdatedMsAuth(true);
+      setUpdatedMsAccountInfo({
+        ...updatedMsAccountInfo,
+        tenantId,
+        authenticatedUsername: account.username,
+      });
 
       const orgDetails = await getOrgDetails(account);
       const msAccountInfo: Omit<AppInstallationParameters, 'notifications'> = {
@@ -55,8 +106,6 @@ const AccessSection = (props: Props) => {
         type: actions.UPDATE_MS_ACCOUNT_INFO,
         payload: msAccountInfo,
       });
-
-      await customApi.saveConfiguration();
     } catch (e) {
       sdk.notifier.error(authError);
       console.error(e);
@@ -77,15 +126,20 @@ const AccessSection = (props: Props) => {
               postLogoutRedirectUri: '/',
               account: accounts[0],
             });
+
             const msAccountInfo: Omit<AppInstallationParameters, 'notifications'> = {
               tenantId: '',
               authenticatedUsername: '',
               ...defaultOrgDetails,
             };
+            setUpdatedMsAccountInfo(msAccountInfo);
+
             dispatch({
               type: actions.UPDATE_MS_ACCOUNT_INFO,
               payload: msAccountInfo,
             });
+
+            setHasDisconnected(true);
           }}
         />
       );
@@ -101,6 +155,9 @@ const AccessSection = (props: Props) => {
         msGraph.getOrganizationLogo(),
       ]);
       orgDetails = { orgName, orgLogo };
+
+      setHasUpdatedOrgDetails(true);
+      setUpdatedMsAccountInfo({ ...updatedMsAccountInfo, orgName, orgLogo });
     } catch (e) {
       sdk.notifier.error(orgDetailsError);
       console.error(e);

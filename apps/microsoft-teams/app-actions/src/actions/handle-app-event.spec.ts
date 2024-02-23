@@ -60,6 +60,8 @@ describe('handle-app-event.handler', () => {
         entryActivity: mockEntryActivity,
       },
     });
+    // ensures that notifications that don't match tenant id, content type, and selected events are filtered out
+    expect(result.data.length).to.equal(1);
   });
 
   describe('when an error is encountered', () => {

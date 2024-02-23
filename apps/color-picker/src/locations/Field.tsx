@@ -1,4 +1,3 @@
-import { FieldExtensionSDK } from '@contentful/app-sdk';
 import { Flex, Form, Menu } from '@contentful/f36-components';
 import { useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
@@ -6,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorBox } from '../components/ColorBox';
 import { SelectColorButton } from '../components/SelectColorButton';
 import { Color, Theme } from '../types';
+import tokens from '@contentful/f36-tokens';
+import { FieldAppSDK } from '@contentful/app-sdk';
 
 const styles = {
   displayNone: css({
@@ -14,6 +15,13 @@ const styles = {
   menuList: css({
     width: 'calc(100% - 2px)', // -2px to keep borders visible
     left: 0,
+  }),
+  hexValue: css({
+    color: tokens.gray500,
+    fontVariantNumeric: 'tabular-nums',
+    width: '70px',
+    display: 'inline-block',
+    textAlign: 'left',
   }),
 };
 
@@ -25,15 +33,36 @@ const HEIGHT_ITEM = 36;
 type FieldValue = Color | string | undefined;
 
 const Field = () => {
-  const sdk = useSDK<FieldExtensionSDK>();
+  const sdk = useSDK<FieldAppSDK>();
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useFieldValue<FieldValue>();
   const customColorPicker = useRef<HTMLInputElement>(null);
 
   const storeHexValue = sdk.field.type === 'Symbol';
-  const allowCustomValue = sdk.parameters.instance.withCustomValue;
+
+  const allowCustomValue = useMemo(() => {
+    const { validations } = sdk.field;
+
+    const instanceParam = sdk.parameters.instance.withCustomValue;
+    const hasValidation = validations.find((validation) => validation.in)?.in;
+
+    return instanceParam && !hasValidation;
+  }, [sdk.field, sdk.parameters.instance]);
+
   // @ts-ignore
   const theme: Theme = sdk.parameters.installation.themes[0];
+
+  const validatedColors = useMemo(() => {
+    const { validations } = sdk.field;
+
+    const acceptedValues = validations.find((validation) => validation.in)?.in;
+
+    if (acceptedValues?.at(0) && theme.colors?.at(0)) {
+      return theme.colors.filter((color) => acceptedValues?.includes(color.value));
+    }
+
+    return theme.colors;
+  }, [sdk.field, theme.colors]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -42,11 +71,11 @@ const Field = () => {
     }
 
     // @ts-ignore
-    const customItemHeight = sdk.parameters.instance.withCustomValue ? HEIGHT_ITEM : 0;
-    const calculatedHeight = HEIGHT_BASE + customItemHeight + theme.colors.length * HEIGHT_ITEM;
+    const customItemHeight = allowCustomValue ? HEIGHT_ITEM : 0;
+    const calculatedHeight = HEIGHT_BASE + customItemHeight + validatedColors.length * HEIGHT_ITEM;
 
     sdk.window.updateHeight(calculatedHeight <= 400 ? calculatedHeight : 400);
-  }, [isOpen, sdk, theme]);
+  }, [isOpen, sdk, theme, validatedColors, allowCustomValue]);
 
   const name = useMemo<string>(() => {
     switch (typeof value) {
@@ -97,13 +126,16 @@ const Field = () => {
             />
           </Menu.Trigger>
           <Menu.List className={styles.menuList}>
-            {theme.colors.map((color: Color) => (
+            {validatedColors.map((color: Color) => (
               <Menu.Item
                 key={color.id}
                 onClick={() => setValue(storeHexValue ? color.value : color)}>
                 <Flex alignItems="center" gap="spacingXs">
                   <ColorBox color={color} />
-                  {color.name}
+                  <Flex gap="spacing2Xs">
+                    {color.name}
+                    <span className={styles.hexValue}>{color.value}</span>
+                  </Flex>
                 </Flex>
               </Menu.Item>
             ))}

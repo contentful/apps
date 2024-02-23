@@ -15,7 +15,8 @@ const FIELDS_TO_PERSIST = [
 ];
 
 function makeThumbnail(file) {
-  const url = file.thumbnailLink.split('?')[0] + '?bounding_box=256&mode=fit';
+  // TODO: update this to create a fallback for when there isn't an thumbnail
+  const url = file.thumbnailLink?.split('?')[0] + '?bounding_box=256&mode=fit';
   const alt = file.name;
 
   return [url, alt];
@@ -29,7 +30,6 @@ async function openDialog() {
       linkType: 'preview',
       multiselect: true,
       folderselect: false,
-      extensions: ['.jpg', '.jpeg', '.gif', '.svg', '.png'],
     });
   });
 }

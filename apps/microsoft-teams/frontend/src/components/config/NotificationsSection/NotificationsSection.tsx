@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { Box, ModalLauncher, Subheading } from '@contentful/f36-components';
+import { Box, ModalLauncher, Paragraph, Subheading } from '@contentful/f36-components';
 import { styles } from './NotificationsSection.styles';
 import { notificationsSection } from '@constants/configCopy';
 import AddButton from '@components/config/AddButton/AddButton';
@@ -124,6 +124,7 @@ const NotificationsSection = (props: Props) => {
   return (
     <Box className={styles.box}>
       <Subheading>{notificationsSection.title}</Subheading>
+      <Paragraph>{notificationsSection.description}</Paragraph>
       <Box marginBottom="spacingXl">
         <AddButton
           buttonCopy={notificationsSection.createButton}

@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.5.34](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.33...@contentful/ecommerce-app-base@3.5.34) (2024-03-06)
+
+### Bug Fixes
+
+- **deps:** bump usehooks-ts from 2.15.0 to 2.16.0 ([#6678](https://github.com/contentful/apps/issues/6678)) ([92fdfea](https://github.com/contentful/apps/commit/92fdfea027d4ea084b549cadd55fa57d7f8580f2))
+
+## [3.5.33](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.32...@contentful/ecommerce-app-base@3.5.33) (2024-03-04)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [3.5.32](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.31...@contentful/ecommerce-app-base@3.5.32) (2024-03-01)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.60.2 to 4.61.0 ([#6646](https://github.com/contentful/apps/issues/6646)) ([9de6616](https://github.com/contentful/apps/commit/9de661639f25850fbd4159a5d2ef4f2a6c5a3583))
+
+## [3.5.31](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.30...@contentful/ecommerce-app-base@3.5.31) (2024-02-28)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.60.1 to 4.60.2 ([#6579](https://github.com/contentful/apps/issues/6579)) ([2813c9a](https://github.com/contentful/apps/commit/2813c9a79a2d426ba280d25d2f27556e45a8c572))
+
+## [3.5.30](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.29...@contentful/ecommerce-app-base@3.5.30) (2024-02-26)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.60.0 to 4.60.1 ([#6529](https://github.com/contentful/apps/issues/6529)) ([487c5eb](https://github.com/contentful/apps/commit/487c5ebc2b9f5dba146a63186e976f136ae2f468))
+
 ## [3.5.29](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.28...@contentful/ecommerce-app-base@3.5.29) (2024-02-23)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base

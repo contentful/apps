@@ -111,7 +111,7 @@ export const mockNotification = {
     name: 'Corporate Marketing',
     teamId: 'team-id',
     teamName: 'Marketing Department',
-    tenantId: '9876-5432',
+    tenantId: 'tenant-id',
   },
   contentTypeId: 'blogPost',
   selectedEvents: {
@@ -125,14 +125,7 @@ export const mockNotification = {
 };
 
 export const mockNotificationUnsubscribed = {
-  channel: {
-    id: 'abc-123',
-    name: 'Corporate Marketing',
-    teamId: '789-def',
-    teamName: 'Marketing Department',
-    tenantId: '9876-5432',
-  },
-  contentTypeId: 'blogPost',
+  ...mockNotification,
   selectedEvents: {
     'ContentManagement.Entry.publish': false,
     'ContentManagement.Entry.unpublish': false,
@@ -143,12 +136,33 @@ export const mockNotificationUnsubscribed = {
   },
 };
 
+export const mockNotificationDifferentTenant = {
+  ...mockNotification,
+  channel: {
+    id: 'abc-123',
+    name: 'Corporate Marketing',
+    teamId: '789-def',
+    teamName: 'Marketing Department',
+    tenantId: 'different-tenant-id',
+  },
+};
+
+export const mockNotificationDifferentContentType = {
+  ...mockNotification,
+  contentTypeId: 'productPage',
+};
+
 export const mockAppInstallationParameters: AppInstallationParameters = {
   tenantId: 'tenant-id',
   orgName: 'Company ABC',
   orgLogo: 'https://example.image/squareLogo',
   authenticatedUsername: 'person1@companyabc.com',
-  notifications: [mockNotification, mockNotificationUnsubscribed],
+  notifications: [
+    mockNotification,
+    mockNotificationUnsubscribed,
+    mockNotificationDifferentTenant,
+    mockNotificationDifferentContentType,
+  ],
 };
 
 export const mockAppInstallation: AppInstallationProps = {
@@ -161,10 +175,7 @@ export const mockAppInstallation: AppInstallationProps = {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
   },
-  parameters: {
-    tenantId: 'tenant-id',
-    notifications: [mockNotification],
-  },
+  parameters: mockAppInstallationParameters,
 };
 
 export const mockEntryEvent: EntryEvent = {
