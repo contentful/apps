@@ -12,9 +12,9 @@ const appDeepLink = 'https://teams.microsoft.com/';
 const accessSection = {
   title: 'Access',
   description:
-    'Authorize Microsoft Teams here. Then, add the Contentful app to your Teams channel.',
+    'Authorize your Microsoft Account here. Then, add the Contentful app to your Teams channel.',
   fieldName: 'Tenant Id',
-  login: 'Connect to Teams',
+  login: 'Connect Microsoft Account',
   logout: 'Disconnect',
   retry: 'Retry Authorization',
   teamsAppInfo:
@@ -24,7 +24,7 @@ const accessSection = {
     confirmDisonnect: 'Disconnect',
     goBack: 'Go back',
     description:
-      'By disconnecting, you will no longer see configured notifications for this tenant. Are you sure you want to disconnect?',
+      'By disconnecting, you will no longer see configured notifications for this account. Are you sure you want to disconnect?',
   },
   updateConfirmation: 'Microsoft organization updated',
   saveWarning: 'Save the app to persist these settings',
@@ -34,6 +34,7 @@ const accessSection = {
 
 const notificationsSection = {
   title: 'Notifications',
+  description: 'Specify Microsoft Teams channels, content types, and entry actions.',
   createButton: 'Create notification',
   edit: 'Edit',
   delete: 'Delete',
@@ -75,11 +76,11 @@ const channelSelection = {
     title: 'Select Microsoft Teams channel',
     description:
       'Microsoft Teams channels where the Contentful app has been installed can display notifications.',
-    link: 'Add app',
+    link: 'Add the app',
     button: 'Select',
     emptyHeading: 'Add Microsoft Teams channels',
     emptyContent:
-      'In Microsoft Teams, add the Contentful app to the general channel of the teams where you want to see notifications. Add app',
+      'In Microsoft Teams, add the Contentful app to the general channel of the teams where you want to see notifications. Add the app and then refresh the page.',
     errorMessage: 'Channels did not load. Please try again later.',
   },
 };

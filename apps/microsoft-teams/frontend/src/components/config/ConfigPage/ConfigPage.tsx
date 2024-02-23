@@ -40,7 +40,8 @@ const ConfigPage = () => {
       return false;
     }
 
-    if (!parameters.tenantId) {
+    // prevent save on initial installation if there isn't a tenant id
+    if (!parameters.tenantId && !isAppInstalled) {
       sdk.notifier.error('A valid Tenant Id is required');
       return false;
     }
