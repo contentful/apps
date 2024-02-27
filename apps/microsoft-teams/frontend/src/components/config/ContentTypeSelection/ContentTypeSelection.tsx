@@ -9,6 +9,7 @@ import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ContentTypeSelection.styles';
 import { getContentTypeName } from '@helpers/configHelpers';
 import { ContentTypeContext } from '@context/ContentTypeProvider';
+import { SdkWithCustomApiProvider } from '@context/SdkWithCustomApiProvider';
 
 interface Props {
   notification: Notification;
@@ -33,17 +34,19 @@ const ContentTypeSelection = (props: Props) => {
       return;
     } else if (!areContentTypesLoading)
       return ModalLauncher.open(({ isShown, onClose }) => (
-        <ContentTypeSelectionModal
-          isShown={isShown}
-          onClose={() => {
-            onClose(true);
-          }}
-          handleNotificationEdit={handleNotificationEdit}
-          savedContentTypeId={notification.contentTypeId}
-          contentTypes={contentTypes}
-          contentTypeConfigLink={contentTypeConfigLink}
-          error={Boolean(error)}
-        />
+        <SdkWithCustomApiProvider>
+          <ContentTypeSelectionModal
+            isShown={isShown}
+            onClose={() => {
+              onClose(true);
+            }}
+            handleNotificationEdit={handleNotificationEdit}
+            savedContentTypeId={notification.contentTypeId}
+            contentTypes={contentTypes}
+            contentTypeConfigLink={contentTypeConfigLink}
+            error={Boolean(error)}
+          />
+        </SdkWithCustomApiProvider>
       ));
   };
 

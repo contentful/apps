@@ -1,13 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import {
-  Box,
-  Button,
-  FormControl,
-  IconButton,
-  Modal,
-  Radio,
-  Table,
-} from '@contentful/f36-components';
+import { Button, FormControl, Modal, Radio, Table } from '@contentful/f36-components';
 import { contentTypeSelection } from '@constants/configCopy';
 import { styles } from './ContentTypeSelectionModal.styles';
 import { Notification } from '@customTypes/configPage';
@@ -16,10 +8,10 @@ import { ContentTypeProps } from 'contentful-management';
 import EmptyState from '@components/config/EmptyState/EmptyState';
 import WebApp from '@components/config/EmptyState/WebApp';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
-import { TextInput } from '@contentful/f36-components';
 import Fuse from 'fuse.js';
-import { debounce } from 'lodash';
-import { SearchIcon } from '@contentful/f36-icons';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import ContentTypeSearch from './ContentTypeSearch';
 
 interface Props {
   isShown: boolean;
@@ -42,6 +34,7 @@ const ContentTypeSelectionModal = (props: Props) => {
     error,
   } = props;
 
+  const sdk = useSDK<ConfigAppSDK>();
   const [selectedContentTypeId, setSelectedContentTypeId] = useState(savedContentTypeId ?? '');
   const [filteredContentTypes, setFilteredContentTypes] =
     useState<ContentTypeProps[]>(contentTypes);
@@ -49,7 +42,7 @@ const ContentTypeSelectionModal = (props: Props) => {
   const { title, button, link, emptyContent, emptyHeading, errorMessage, searchPlaceholder } =
     contentTypeSelection.modal;
 
-  const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearch = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value === '') {
       // revert to default full list of available contentTypes
       setFilteredContentTypes(contentTypes);
@@ -67,10 +60,21 @@ const ContentTypeSelectionModal = (props: Props) => {
     // extract actual contentType objects from fuse search result object;
     const extractedSearchResults = fuseSearchResultObj.map((result) => result.item);
 
+    if (extractedSearchResults.length === 0 && contentTypes.length >= 5) {
+      const contentTypesResponse = await sdk.cma.contentType.getMany({
+        query: {
+          name: e.target.value,
+        },
+      });
+
+      if (contentTypesResponse.items.length) {
+        extractedSearchResults.unshift(...contentTypesResponse.items);
+        contentTypes.unshift(...contentTypesResponse.items);
+      }
+    }
+
     setFilteredContentTypes(extractedSearchResults);
   }, []);
-
-  const debouncedHandleSearchUpdate = useMemo(() => debounce(handleSearch, 1000), []);
 
   const renderModalContent = () => {
     if (error) {
@@ -86,19 +90,7 @@ const ContentTypeSelectionModal = (props: Props) => {
         <>
           <Modal.Content>
             <FormControl as="fieldset" marginBottom="none">
-              <Box marginBottom="spacingM">
-                <TextInput.Group>
-                  <TextInput
-                    placeholder={searchPlaceholder}
-                    onChange={debouncedHandleSearchUpdate}
-                  />
-                  <IconButton
-                    variant="secondary"
-                    icon={<SearchIcon />}
-                    aria-label="magnifying glass icon"
-                  />
-                </TextInput.Group>
-              </Box>
+              <ContentTypeSearch placeholder={searchPlaceholder} handleChange={handleSearch} />
               <Table className={styles.table}>
                 <Table.Body>
                   {filteredContentTypes.map((contentType) => (
@@ -140,6 +132,7 @@ const ContentTypeSelectionModal = (props: Props) => {
 
     return (
       <Modal.Content>
+        <ContentTypeSearch placeholder="searchPlaceholder" handleChange={handleSearch} />
         <EmptyState
           image={<WebApp />}
           heading={emptyHeading}

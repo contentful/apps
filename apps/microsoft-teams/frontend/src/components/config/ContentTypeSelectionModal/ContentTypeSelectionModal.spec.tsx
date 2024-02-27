@@ -4,6 +4,11 @@ import { fireEvent, render, screen, waitFor, act } from '@testing-library/react'
 import { contentTypeSelection } from '@constants/configCopy';
 import { mockContentType } from '@test/mocks';
 import { cloneDeep } from 'lodash';
+import { mockSdk } from '@test/mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('ContentTypeSelectionModal component', () => {
   it('mounts and renders the correct content', () => {
@@ -78,7 +83,7 @@ describe('ContentTypeSelectionModal component', () => {
   });
 
   describe('searching for a content type', () => {
-    it('fuzzy searches the list of content types', () => {
+    it('fuzzy searches the originally fetched "context" list of content types', () => {
       const blogContentType = cloneDeep(mockContentType);
       blogContentType.displayField = 'Xyz Asdf 78AUB';
       blogContentType.name = 'xyz Asdf 78aub';
@@ -117,5 +122,7 @@ describe('ContentTypeSelectionModal component', () => {
 
       unmount();
     });
+
+    it('attempts to retrieve the content type from API if request content type cannot be found in fuzzy search', () => {});
   });
 });
