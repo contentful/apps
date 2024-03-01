@@ -8,7 +8,7 @@ commands:
   publish:
     steps:
       - vault/get-secrets:
-          template-preset: 'semantic-release-ecosystem'
+          template-preset: 'semantic-release'
       - vault/configure-lerna
       - run:
           name: Setup NPM
