@@ -1,16 +1,22 @@
-import * as jwt from 'jsonwebtoken';
+import { SignJWT } from 'jose';
 
-const getPrivateKey = (key: string) => Buffer.from(key, 'base64');
+const encode = (value: string) => new TextEncoder().encode(value);
 
-const sign = (playbackId: string, signingKeyId: string, signingKeyPrivate: string, aud: string) =>
-  jwt.sign({}, getPrivateKey(signingKeyPrivate), {
-    algorithm: 'RS256',
-    keyid: signingKeyId,
-    audience: aud,
-    subject: playbackId,
-    noTimestamp: true,
-    expiresIn: '12h',
-  });
+const sign = async (
+  playbackId: string,
+  signingKeyId: string,
+  signingKeyPrivate: string,
+  aud: string
+) => {
+  const alg = 'HS256';
+  return await new SignJWT({ sub: playbackId })
+    .setProtectedHeader({ alg })
+    .setIssuedAt()
+    .setAudience(aud)
+    .setExpirationTime('12h')
+    .sign(encode(signingKeyPrivate));
+};
+
 export const createSignedPlaybackToken = (
   playbackId: string,
   signingKeyId: string,
