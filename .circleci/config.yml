@@ -11,10 +11,10 @@ commands:
           template-preset: 'semantic-release'
       - vault/configure-lerna
       - run:
-          name: Setup GitHub packages
+          name: Setup NPM
           command: |
-            echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_WRITE_TOKEN}" > ~/.npmrc
-            echo "@contentful:registry=https://npm.pkg.github.com" >> ~/.npmrc
+            echo $'@contentful:registry=https://registry.npmjs.org/
+            //registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
       - run:
           name: Publish packages
           command: npm run publish-packages

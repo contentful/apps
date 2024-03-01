@@ -39,8 +39,5 @@
     "*.{js,jsx,ts,tsx}": [
       "npm run prettier:write"
     ]
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
   }
 }
