@@ -29,6 +29,7 @@ describe('VercelClient', () => {
         expect(res).toBe(true);
       });
     });
+
     describe('invalid', () => {
       beforeEach(() => {
         (fetch as Mock).mockImplementationOnce(() => ({
