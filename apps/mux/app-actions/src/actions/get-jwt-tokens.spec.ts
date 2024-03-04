@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { makeMockAppActionCallContext } from '../../test/mocks';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { handler } from './get-signed-url-tokens';
+import { handler } from './get-jwt-tokens';
 
 describe('get-signed-url-tokens.handler', () => {
   let cmaRequestStub: sinon.SinonStub;

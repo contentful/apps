@@ -1,4 +1,15 @@
 {
   "actions": [
+    {
+      "id": "muxGetSignedUrlTokens",
+      "name": "Get signed URL tokens",
+      "category": "Custom",
+      "description": "This action returns signed JWT tokens for securing Mux video playback",
+      "type": "function",
+      "path": "actions/get-jwt-tokens.js",
+      "entryFile": "./app-actions/src/actions/get-jwt-tokens.ts",
+      "allowNetworks": [],
+      "parameters": [ ]
+    }
   ]
 }
