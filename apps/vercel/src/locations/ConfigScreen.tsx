@@ -100,6 +100,8 @@ const ConfigScreen = () => {
     }
   };
 
+  console.log(parameters);
+
   return (
     <>
       <Box className={styles.body}>

@@ -15,9 +15,6 @@ describe('VercelClient', () => {
   });
 
   describe('#checkToken', () => {
-    afterEach(() => {
-      vi.restoreAllMocks();
-    });
     describe('valid', () => {
       beforeEach(() => {
         (fetch as Mock).mockImplementationOnce(() => ({

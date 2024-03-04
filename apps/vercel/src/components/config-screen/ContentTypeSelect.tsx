@@ -18,7 +18,7 @@ const ContentTypeSelect = ({
     async function getContentTypes() {
       const contentTypesResponse = await sdk.cma.contentType.getMany({});
 
-      if (contentTypesResponse.items.length) {
+      if (contentTypesResponse.items && contentTypesResponse.items.length) {
         dispatch({
           type: actions.UPDATE_CONTENT_TYPES,
           payload: contentTypesResponse.items,
