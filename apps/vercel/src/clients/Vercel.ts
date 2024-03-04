@@ -45,4 +45,25 @@ export default class VercelClient implements VercelAPIClient {
 
     return await res.json();
   }
+
+  async createDeployment() {
+    const res = await fetch('https://api.vercel.com/v13/deployments', {
+      headers: this.buildHeaders(),
+      body: JSON.stringify({
+        name: 'vite-puck-demo',
+        // files: [],
+        // project: 'prj_BcGPd5kyoggXaTyUCSdBNkt1jixd',
+        deploymentId: 'dpl_7exDvp7nUi6ZLyLdk4dvx6dwwEyo', // original deployment id
+        gitSource: {
+          ref: 'main',
+          repoId: '747862663',
+          sha: '3cccfadaa1b7ba0af6372698d4cb4a2e4f548a4b',
+          type: 'github',
+        },
+      }),
+      method: 'POST',
+    });
+
+    return await res.json();
+  }
 }
