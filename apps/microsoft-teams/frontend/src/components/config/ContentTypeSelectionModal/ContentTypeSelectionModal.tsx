@@ -7,7 +7,9 @@ import ModalHeader from '@components/config/ModalHeader/ModalHeader';
 import { ContentTypeProps } from 'contentful-management';
 import EmptyState from '@components/config/EmptyState/EmptyState';
 import WebApp from '@components/config/EmptyState/WebApp';
+import DebouncedSearchInput from '@components/config/DebouncedSearchInput/DebouncedSearchInput';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
+import SearchableList from '../SearchableList/SearchableList';
 
 interface Props {
   isShown: boolean;
@@ -31,9 +33,40 @@ const ContentTypeSelectionModal = (props: Props) => {
   } = props;
 
   const [selectedContentTypeId, setSelectedContentTypeId] = useState(savedContentTypeId ?? '');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const { title, button, link, emptyContent, emptyHeading, errorMessage } =
+  const { title, button, link, emptyContent, emptyHeading, errorMessage, searchPlaceholder } =
     contentTypeSelection.modal;
+
+  /**
+   * The search input and the list of content types must be kept separate so that the rerendering
+   * of the list does unnecessarily re-render input (and lose focus/state). So we are maintaining
+   * search query in this component that is received from <DebouncedSearchInput> and passing it
+   * to <SearchableList>
+   */
+  const handleSearchQueryUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const renderRow = (contentType: ContentTypeProps) => {
+    return (
+      <Table.Row
+        key={contentType.sys.id}
+        onClick={() => setSelectedContentTypeId(contentType.sys.id)}
+        className={styles.tableRow}>
+        <Table.Cell>
+          <Radio
+            id={contentType.sys.id}
+            isChecked={selectedContentTypeId === contentType.sys.id}
+            onChange={() => {
+              /* clicking entire row checks this radio, i.e. do nothing here */
+            }}>
+            {contentType.name}
+          </Radio>
+        </Table.Cell>
+      </Table.Row>
+    );
+  };
 
   const renderModalContent = () => {
     if (error) {
@@ -49,25 +82,18 @@ const ContentTypeSelectionModal = (props: Props) => {
         <>
           <Modal.Content>
             <FormControl as="fieldset" marginBottom="none">
+              <DebouncedSearchInput
+                placeholder={searchPlaceholder}
+                onChange={handleSearchQueryUpdate}
+              />
               <Table className={styles.table}>
                 <Table.Body>
-                  {contentTypes.map((contentType) => (
-                    <Table.Row
-                      key={contentType.sys.id}
-                      onClick={() => setSelectedContentTypeId(contentType.sys.id)}
-                      className={styles.tableRow}>
-                      <Table.Cell>
-                        <Radio
-                          id={contentType.sys.id}
-                          isChecked={selectedContentTypeId === contentType.sys.id}
-                          onChange={() => {
-                            /* clicking entire row checks this radio, i.e. do nothing here */
-                          }}>
-                          {contentType.name}
-                        </Radio>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
+                  <SearchableList
+                    list={contentTypes}
+                    searchQuery={searchQuery}
+                    renderListItem={renderRow}
+                    searchKeys={['sys.id', 'displayField', 'name', 'description']}
+                  />
                 </Table.Body>
               </Table>
             </FormControl>
@@ -90,6 +116,11 @@ const ContentTypeSelectionModal = (props: Props) => {
 
     return (
       <Modal.Content>
+        <DebouncedSearchInput
+          placeholder={searchPlaceholder}
+          onChange={handleSearchQueryUpdate}
+          disabled={true}
+        />
         <EmptyState
           image={<WebApp />}
           heading={emptyHeading}
