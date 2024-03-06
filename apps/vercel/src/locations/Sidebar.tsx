@@ -33,7 +33,7 @@ const Sidebar = () => {
       <Button variant="primary" isFullWidth onClick={handleDeploy}>
         {loading ? (
           <>
-            <Spinner size="small" style={{ color: 'white' }} />
+            <Spinner size="small" />
           </>
         ) : (
           `Deploy ${project.name}`
