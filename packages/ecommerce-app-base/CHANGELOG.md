@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.5.34](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.33...@contentful/ecommerce-app-base@3.5.34) (2024-03-06)
+
+### Bug Fixes
+
+- **deps:** bump usehooks-ts from 2.15.0 to 2.16.0 ([#6678](https://github.com/contentful/apps/issues/6678)) ([92fdfea](https://github.com/contentful/apps/commit/92fdfea027d4ea084b549cadd55fa57d7f8580f2))
+
 ## [3.5.33](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.32...@contentful/ecommerce-app-base@3.5.33) (2024-03-04)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
