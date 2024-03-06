@@ -6,6 +6,7 @@ import ConfigScreen from './ConfigScreen';
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
+  useAutoResizer: () => {},
 }));
 
 const saveAppInstallation = () => {

@@ -18,6 +18,13 @@ const mockSdk: any = {
     instance: [],
     installation: {
       vercelAccessToken: mockParameters.vercelAccessToken,
+      selectedProject: 'test-project-id',
+      projects: [
+        {
+          id: 'test-project-id',
+          name: 'test project',
+        },
+      ],
     },
   },
   ids: {

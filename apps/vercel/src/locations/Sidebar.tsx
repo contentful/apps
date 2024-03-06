@@ -30,7 +30,7 @@ const Sidebar = () => {
 
   return (
     <Box>
-      <Button variant="primary" isFullWidth={true} onClick={handleDeploy}>
+      <Button variant="primary" isFullWidth onClick={handleDeploy}>
         {loading ? (
           <>
             <Spinner size="small" style={{ color: 'white' }} />

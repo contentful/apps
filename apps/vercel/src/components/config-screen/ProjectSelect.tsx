@@ -28,6 +28,8 @@ const ContentTypeSelect = ({
     }
   }, [parameters.vercelAccessToken]);
 
+  useEffect(() => {}, []);
+
   const handleProjectChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatch({
       type: actions.APPLY_SELECTED_PROJECT,
