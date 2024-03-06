@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button, FormControl, Modal, Radio, Table } from '@contentful/f36-components';
 import { contentTypeSelection } from '@constants/configCopy';
 import { styles } from './ContentTypeSelectionModal.styles';
@@ -9,7 +9,7 @@ import EmptyState from '@components/config/EmptyState/EmptyState';
 import WebApp from '@components/config/EmptyState/WebApp';
 import DebouncedSearchInput from '@components/config/DebouncedSearchInput/DebouncedSearchInput';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
-import SearchableList from '../SearchableList/SearchableList';
+import SearchableList from '@components/config/SearchableList/SearchableList';
 
 interface Props {
   isShown: boolean;
@@ -38,35 +38,27 @@ const ContentTypeSelectionModal = (props: Props) => {
   const { title, button, link, emptyContent, emptyHeading, errorMessage, searchPlaceholder } =
     contentTypeSelection.modal;
 
-  /**
-   * The search input and the list of content types must be kept separate so that the rerendering
-   * of the list does unnecessarily re-render input (and lose focus/state). So we are maintaining
-   * search query in this component that is received from <DebouncedSearchInput> and passing it
-   * to <SearchableList>
-   */
   const handleSearchQueryUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const renderRow = (contentType: ContentTypeProps) => {
-    return (
-      <Table.Row
-        key={contentType.sys.id}
-        onClick={() => setSelectedContentTypeId(contentType.sys.id)}
-        className={styles.tableRow}>
-        <Table.Cell>
-          <Radio
-            id={contentType.sys.id}
-            isChecked={selectedContentTypeId === contentType.sys.id}
-            onChange={() => {
-              /* clicking entire row checks this radio, i.e. do nothing here */
-            }}>
-            {contentType.name}
-          </Radio>
-        </Table.Cell>
-      </Table.Row>
-    );
-  };
+  const renderRow = useCallback(
+    (contentType: ContentTypeProps) => {
+      return (
+        <Table.Row
+          key={contentType.sys.id}
+          onClick={() => setSelectedContentTypeId(contentType.sys.id)}
+          className={styles.tableRow}>
+          <Table.Cell>
+            <Radio id={contentType.sys.id} isChecked={selectedContentTypeId === contentType.sys.id}>
+              {contentType.name}
+            </Radio>
+          </Table.Cell>
+        </Table.Row>
+      );
+    },
+    [selectedContentTypeId]
+  );
 
   const renderModalContent = () => {
     if (error) {
@@ -116,11 +108,7 @@ const ContentTypeSelectionModal = (props: Props) => {
 
     return (
       <Modal.Content>
-        <DebouncedSearchInput
-          placeholder={searchPlaceholder}
-          onChange={handleSearchQueryUpdate}
-          disabled={true}
-        />
+        <DebouncedSearchInput placeholder={searchPlaceholder} disabled={true} />
         <EmptyState
           image={<WebApp />}
           heading={emptyHeading}

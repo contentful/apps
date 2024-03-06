@@ -83,6 +83,7 @@ const channelSelection = {
     emptyContent:
       'In Microsoft Teams, add the Contentful app to the general channel of the teams where you want to see notifications. Add the app and then refresh the page.',
     errorMessage: 'Channels did not load. Please try again later.',
+    searchPlaceholder: 'Search for a channel',
   },
 };
 
