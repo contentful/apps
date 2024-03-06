@@ -84,35 +84,35 @@ const parameterReducer = (
       const parameters = action.payload;
       return {
         ...state,
-        vercelAccessToken: parameters.vercelAccessToken ?? '',
+        vercelAccessToken: parameters.vercelAccessToken,
       };
     }
     case UPDATE_VERCEL_PROJECTS: {
       const projects = action.payload;
       return {
         ...state,
-        projects: projects ?? [],
+        projects,
       };
     }
     case APPLY_SELECTED_PROJECT: {
       const selectedProject = action.payload;
       return {
         ...state,
-        selectedProject: selectedProject ?? '',
+        selectedProject: selectedProject,
       };
     }
     case UPDATE_CONTENT_TYPES: {
       const contentTypes = action.payload;
       return {
         ...state,
-        contentTypes: contentTypes ?? [],
+        contentTypes,
       };
     }
     case APPLY_SELECTED_CONTENT_TYPE: {
       const selectedContentType = action.payload;
       return {
         ...state,
-        selectedContentType: selectedContentType ?? '',
+        selectedContentType,
       };
     }
     default:

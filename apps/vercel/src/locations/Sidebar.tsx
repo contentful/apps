@@ -1,30 +1,43 @@
 import { SidebarAppSDK } from '@contentful/app-sdk';
-import { Box, Button } from '@contentful/f36-components';
-import { useSDK } from '@contentful/react-apps-toolkit';
+import { Box, Button, Spinner } from '@contentful/f36-components';
+import { useAutoResizer, useSDK } from '@contentful/react-apps-toolkit';
 import VercelClient from '../clients/Vercel';
 import { Project } from '../types';
+import { useEffect, useState } from 'react';
 
 const Sidebar = () => {
+  const [loading, setIsLoading] = useState<boolean>(false);
   const sdk = useSDK<SidebarAppSDK>();
   const { projects, selectedProject, vercelAccessToken } = sdk.parameters.installation;
-  const client = new VercelClient(vercelAccessToken);
+  const vercel = new VercelClient(vercelAccessToken);
+
+  useAutoResizer();
 
   const project = projects.find((project: Project) => project.id === selectedProject);
 
   const handleDeploy = async (e: any) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
-      await client.createDeployment(project);
+      await vercel.createDeployment({ project });
     } catch (err) {
       console.log(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Box>
       <Button variant="primary" isFullWidth={true} onClick={handleDeploy}>
-        Deploy
+        {loading ? (
+          <>
+            <Spinner size="small" style={{ color: 'white' }} />
+          </>
+        ) : (
+          `Deploy ${project.name}`
+        )}
       </Button>
     </Box>
   );

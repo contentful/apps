@@ -1,16 +1,10 @@
-interface Project {
-  id: string;
-  name: string;
-  targets: {
-    production: {
-      id: string;
-    };
-  };
-}
+import { ListProjectsResponse, CreateDeploymentInput, Deployment } from '../types';
 
 interface VercelAPIClient {
   checkToken: () => Promise<boolean>;
-  listProjects: () => Promise<{ projects: Project[] }>;
+  listProjects: () => Promise<ListProjectsResponse>;
+  createDeployment: (input: CreateDeploymentInput) => Promise<Deployment>;
+  getDeploymentById: (deploymentId: string) => Promise<Deployment>;
 }
 
 export default class VercelClient implements VercelAPIClient {
@@ -42,16 +36,18 @@ export default class VercelClient implements VercelAPIClient {
     }
   }
 
-  async listProjects(): Promise<{ projects: Project[] }> {
+  async listProjects(): Promise<ListProjectsResponse> {
     const res = await fetch(`${this.baseEndpoint}/v9/projects`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
 
-    return await res.json();
+    const data = await res.json();
+
+    return data;
   }
 
-  async createDeployment(project: Project) {
+  async createDeployment({ project }: CreateDeploymentInput): Promise<Deployment> {
     const res = await fetch(`${this.baseEndpoint}/v13/deployments`, {
       headers: this.buildHeaders(),
       method: 'POST',
@@ -62,6 +58,19 @@ export default class VercelClient implements VercelAPIClient {
       }),
     });
 
-    return await res.json();
+    const data = await res.json();
+
+    return data;
+  }
+
+  async getDeploymentById(deploymentId: string): Promise<Deployment> {
+    const res = await fetch(`${this.baseEndpoint}/v13/deployments/${deploymentId}`, {
+      headers: this.buildHeaders(),
+      method: 'GET',
+    });
+
+    const data = await res.json();
+
+    return data;
   }
 }
