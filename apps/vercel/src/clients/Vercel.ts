@@ -1,4 +1,4 @@
-import { ListProjectsResponse, CreateDeploymentInput, Deployment } from '../types';
+import { CreateDeploymentInput, Deployment, ListProjectsResponse } from '../types';
 
 interface VercelAPIClient {
   checkToken: () => Promise<boolean>;
