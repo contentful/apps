@@ -4,13 +4,13 @@ import { SearchIcon } from '@contentful/f36-icons';
 import { debounce } from 'lodash';
 
 type Props = {
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
 };
 
-const DebouncedSearchInput = ({ onChange, placeholder, disabled = false }: Props) => {
-  const debouncedHandleChange = useMemo(() => debounce(onChange, 1000), []);
+const DebouncedSearchInput = ({ onChange = () => {}, placeholder, disabled = false }: Props) => {
+  const debouncedHandleChange = useMemo(() => debounce(onChange, 300), []);
 
   return (
     <Box marginBottom="spacingM">
@@ -25,7 +25,7 @@ const DebouncedSearchInput = ({ onChange, placeholder, disabled = false }: Props
           icon={<SearchIcon />}
           aria-label="magnifying glass icon"
           aria-hidden={true}
-          isDisabled={disabled}
+          isDisabled={true}
         />
       </TextInput.Group>
     </Box>

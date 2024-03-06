@@ -1,6 +1,5 @@
 import Fuse from 'fuse.js';
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
-import React from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
 interface Props<T> {
   list: T[];
@@ -26,19 +25,22 @@ const SearchableList = <T,>({ list, searchQuery, searchKeys, renderListItem }: P
     [list, searchQuery, searchKeys, fuseOptions]
   );
 
-  const filterList = useCallback((searchPattern: string) => {
-    if (searchPattern === '') {
-      // revert to default full list of available contentTypes
-      setFilteredList(list);
-      return;
-    }
+  const filterList = useCallback(
+    (searchPattern: string) => {
+      if (searchPattern === '') {
+        // revert to default full list of available contentTypes
+        setFilteredList(list);
+        return;
+      }
 
-    const fuseSearchResultObj = fuse.search(searchPattern);
-    // extract actual contentType objects from fuse search result object;
-    const extractedSearchResults = fuseSearchResultObj.map((result) => result.item);
+      const fuseSearchResultObj = fuse.search(searchPattern);
+      // extract actual contentType objects from fuse search result object;
+      const extractedSearchResults = fuseSearchResultObj.map((result) => result.item);
 
-    setFilteredList(extractedSearchResults);
-  }, []);
+      setFilteredList(extractedSearchResults);
+    },
+    [fuse, list, fuseOptions]
+  );
 
   useEffect(() => {
     if (searchQuery || searchQuery === '') {

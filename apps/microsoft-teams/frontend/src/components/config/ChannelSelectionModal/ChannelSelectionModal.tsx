@@ -1,5 +1,13 @@
-import { useEffect, useState } from 'react';
-import { FormControl, Modal, Radio, Table } from '@contentful/f36-components';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  Button,
+  FormControl,
+  Modal,
+  Paragraph,
+  Radio,
+  Table,
+  TextLink,
+} from '@contentful/f36-components';
 import { appDeepLink, channelSelection } from '@constants/configCopy';
 import { styles } from './ChannelSelectionModal.styles';
 import { Notification, TeamsChannel } from '@customTypes/configPage';
@@ -9,7 +17,8 @@ import EmptyState from '@components/config/EmptyState/EmptyState';
 import EmptyFishbowl from '@components/config/EmptyState/EmptyFishbowl';
 import ErrorMessage from '@components/config/ErrorMessage/ErrorMessage';
 import { defaultNotification } from '@constants/defaultParams';
-import ChannelSelectionSupplementalModalContent from '../ChannelSelectionSupplementalModalContent/ChannelSelectionSupplementalModalContent';
+import DebouncedSearchInput from '@components/config/DebouncedSearchInput/DebouncedSearchInput';
+import SearchableList from '@components/config/SearchableList/SearchableList';
 
 interface ChannelSelectionModalProps {
   isShown: boolean;
@@ -22,23 +31,49 @@ interface ChannelSelectionModalProps {
 
 const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
   const { isShown, onClose, savedChannel, handleNotificationEdit, channels, error } = props;
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedChannel, setSelectedChannel] = useState<TeamsChannel>(
     savedChannel ?? defaultNotification.channel
   );
-  const { title, link, emptyContent, emptyHeading, errorMessage } = channelSelection.modal;
+  const {
+    title,
+    link,
+    emptyContent,
+    emptyHeading,
+    errorMessage,
+    searchPlaceholder,
+    description,
+    button,
+  } = channelSelection.modal;
 
   useEffect(() => {
     const foundChannel = channels.find((channel) => channel.id === savedChannel.id);
     setSelectedChannel(foundChannel ?? defaultNotification.channel);
   }, [savedChannel]);
 
-  const SupplementalModalContent = ({ children }: { children: React.ReactNode }) => (
-    <ChannelSelectionSupplementalModalContent
-      onClose={onClose}
-      handleNotificationEdit={handleNotificationEdit}
-      selectedChannel={selectedChannel}>
-      {children}
-    </ChannelSelectionSupplementalModalContent>
+  const handleSearchQueryUpdate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const renderRow = useCallback(
+    (channel: TeamsChannel) => {
+      return (
+        <Table.Row
+          key={channel.id}
+          onClick={() => setSelectedChannel(channel)}
+          className={styles.tableRow}>
+          <Table.Cell>
+            <Radio
+              id={channel.id}
+              isChecked={selectedChannel.id === channel.id}
+              helpText={channel.teamName}>
+              {channel.name}
+            </Radio>
+          </Table.Cell>
+        </Table.Row>
+      );
+    },
+    [selectedChannel]
   );
 
   const renderMainModalContent = () => {
@@ -52,37 +87,51 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
 
     if (channels.length) {
       return (
-        <SupplementalModalContent>
-          <FormControl as="fieldset" marginBottom="none">
-            <Table className={styles.table}>
-              <Table.Body>
-                {channels.map((channel) => (
-                  <Table.Row
-                    key={channel.id}
-                    onClick={() => setSelectedChannel(channel)}
-                    className={styles.tableRow}>
-                    <Table.Cell>
-                      <Radio
-                        id={channel.id}
-                        isChecked={selectedChannel.id === channel.id}
-                        onChange={() => {
-                          /* clicking entire row checks this radio, i.e. do nothing here */
-                        }}
-                        helpText={channel.teamName}>
-                        {channel.name}
-                      </Radio>
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table>
-          </FormControl>
-        </SupplementalModalContent>
+        <>
+          <Modal.Content>
+            <Paragraph>
+              {description}{' '}
+              <TextLink href={appDeepLink} target="_blank" rel="noopener noreferrer">
+                {link}
+              </TextLink>
+            </Paragraph>
+
+            <FormControl as="fieldset" marginBottom="none">
+              <DebouncedSearchInput
+                placeholder={searchPlaceholder}
+                onChange={handleSearchQueryUpdate}
+              />
+              <Table className={styles.table}>
+                <Table.Body>
+                  <SearchableList
+                    list={channels}
+                    renderListItem={renderRow}
+                    searchKeys={['name', 'teamName']}
+                    searchQuery={searchQuery}
+                  />
+                </Table.Body>
+              </Table>
+            </FormControl>
+          </Modal.Content>
+          <Modal.Controls>
+            <Button
+              size="small"
+              variant="primary"
+              onClick={() => {
+                handleNotificationEdit({ channel: selectedChannel });
+                onClose();
+              }}
+              isDisabled={!selectedChannel.id}>
+              {button}
+            </Button>
+          </Modal.Controls>
+        </>
       );
     }
 
     return (
       <Modal.Content>
+        <DebouncedSearchInput placeholder={searchPlaceholder} disabled={true} />
         <EmptyState
           image={<EmptyFishbowl />}
           heading={emptyHeading}

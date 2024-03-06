@@ -21,7 +21,7 @@ describe('ContentTypeSelectionModal component', () => {
   });
 
   describe('searching for a content type', () => {
-    it('fuzzy searches for content types', async () => {
+    it('fuzzy searches for content types', () => {
       const list = ['videos', 'blog posts', 'tutorials'];
       const searchQuery = 'Blgo-Potts'; // intentionally misspelled to trigger fuzzy search
       const renderListItem = vi.fn().mockImplementation((item, idx) => <p key={idx}>{item}</p>);
