@@ -21,8 +21,7 @@ const DebouncedSearchInput = ({ onChange = () => {}, placeholder, disabled = fal
           isDisabled={disabled}
         />
         <IconButton
-          variant="secondary"
-          icon={<SearchIcon />}
+          icon={<SearchIcon variant="muted" />}
           aria-label="magnifying glass icon"
           aria-hidden={true}
           isDisabled={true}

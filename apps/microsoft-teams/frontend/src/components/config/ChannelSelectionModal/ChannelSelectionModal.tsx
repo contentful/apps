@@ -66,6 +66,7 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
             <Radio
               id={channel.id}
               isChecked={selectedChannel.id === channel.id}
+              onChange={() => null /* noop, since clicking entire row selects this radio */}
               helpText={channel.teamName}>
               {channel.name}
             </Radio>
@@ -84,6 +85,8 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
         </Modal.Content>
       );
     }
+
+    const pinnedChannels: TeamsChannel[] = channels.filter((c) => c.id === selectedChannel.id);
 
     if (channels.length) {
       return (
@@ -104,7 +107,8 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
               <Table className={styles.table}>
                 <Table.Body>
                   <SearchableList
-                    list={channels}
+                    items={channels}
+                    pinnedItems={pinnedChannels}
                     renderListItem={renderRow}
                     searchKeys={['name', 'teamName']}
                     searchQuery={searchQuery}
