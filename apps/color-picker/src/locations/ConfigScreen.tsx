@@ -1,4 +1,4 @@
-import { AppExtensionSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Button,
   Card,
@@ -45,7 +45,7 @@ const ConfigScreen = () => {
       },
     ],
   });
-  const sdk = useSDK<AppExtensionSDK>();
+  const sdk = useSDK<ConfigAppSDK>();
 
   const addSwatch = () => {
     setParameters({
