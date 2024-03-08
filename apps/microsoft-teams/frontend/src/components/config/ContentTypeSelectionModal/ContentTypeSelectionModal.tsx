@@ -50,7 +50,10 @@ const ContentTypeSelectionModal = (props: Props) => {
           onClick={() => setSelectedContentTypeId(contentType.sys.id)}
           className={styles.tableRow}>
           <Table.Cell>
-            <Radio id={contentType.sys.id} isChecked={selectedContentTypeId === contentType.sys.id}>
+            <Radio
+              id={contentType.sys.id}
+              isChecked={selectedContentTypeId === contentType.sys.id}
+              onChange={() => null /* noop, since clicking entire row selects this radio */}>
               {contentType.name}
             </Radio>
           </Table.Cell>
@@ -69,6 +72,10 @@ const ContentTypeSelectionModal = (props: Props) => {
       );
     }
 
+    const pinnedContentTypes: ContentTypeProps[] = contentTypes.filter(
+      (c) => c.sys.id === selectedContentTypeId
+    );
+
     if (contentTypes.length) {
       return (
         <>
@@ -81,9 +88,10 @@ const ContentTypeSelectionModal = (props: Props) => {
               <Table className={styles.table}>
                 <Table.Body>
                   <SearchableList
-                    list={contentTypes}
-                    searchQuery={searchQuery}
+                    items={contentTypes}
+                    pinnedItems={pinnedContentTypes}
                     renderListItem={renderRow}
+                    searchQuery={searchQuery}
                     searchKeys={['sys.id', 'displayField', 'name', 'description']}
                   />
                 </Table.Body>

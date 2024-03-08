@@ -2,9 +2,10 @@ import Fuse from 'fuse.js';
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 
 interface Props<T> {
-  list: T[];
-  searchQuery: string;
+  items: T[];
+  pinnedItems?: T[];
   renderListItem: (item: T) => ReactNode;
+  searchQuery: string;
   searchKeys: string[];
 }
 
@@ -13,40 +14,49 @@ interface Props<T> {
  * implementation of the search options, as well as the rendering of filtered items is left up to
  * the consumer of this component.
  */
-const SearchableList = <T,>({ list, searchQuery, searchKeys, renderListItem }: Props<T>) => {
-  const [filteredList, setFilteredList] = useState<T[]>(list);
+const SearchableList = <T,>({
+  items,
+  pinnedItems = [],
+  renderListItem,
+  searchQuery,
+  searchKeys,
+}: Props<T>) => {
+  const [filteredList, setFilteredList] = useState<T[]>(items);
   const fuseOptions = {
     isCaseSensitive: false,
     keys: searchKeys,
   };
 
   const fuse = useMemo(
-    () => new Fuse(list, fuseOptions),
-    [list, searchQuery, searchKeys, fuseOptions]
+    () => new Fuse(items, fuseOptions),
+    [items, searchQuery, searchKeys, fuseOptions]
   );
 
   const filterList = useCallback(
     (searchPattern: string) => {
       if (searchPattern === '') {
+        const uniqueDefaultSet = new Set([...pinnedItems, ...items]);
+
         // revert to default full list of available contentTypes
-        setFilteredList(list);
+        setFilteredList([...uniqueDefaultSet]);
         return;
       }
 
       const fuseSearchResultObj = fuse.search(searchPattern);
       // extract actual contentType objects from fuse search result object;
       const extractedSearchResults = fuseSearchResultObj.map((result) => result.item);
+      const uniqueItems = new Set([...pinnedItems, ...extractedSearchResults]);
 
-      setFilteredList(extractedSearchResults);
+      setFilteredList([...uniqueItems]);
     },
-    [fuse, list, fuseOptions]
+    [fuse, items, fuseOptions]
   );
 
   useEffect(() => {
     if (searchQuery || searchQuery === '') {
       filterList(searchQuery);
     }
-  }, [list, searchQuery]);
+  }, [items, searchQuery]);
 
   return (
     <>
