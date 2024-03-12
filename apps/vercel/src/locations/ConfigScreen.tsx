@@ -59,7 +59,10 @@ const ConfigScreen = () => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
-  const vercelClient = new VercelClient(parameters.vercelAccessToken);
+  const vercelClient = new VercelClient({
+    baseEndpoint: 'https://api.vercel.com',
+    accessToken: parameters.vercelAccessToken,
+  });
 
   useEffect(() => {
     async function checkToken() {
@@ -82,6 +85,36 @@ const ConfigScreen = () => {
       checkToken();
     }
   }, [parameters.vercelAccessToken]);
+
+  useEffect(() => {
+    async function getProjects() {
+      const data = await vercelClient.listProjects();
+
+      dispatchParameters({
+        type: actions.UPDATE_VERCEL_PROJECTS,
+        payload: data.projects,
+      });
+    }
+
+    if (parameters && parameters.vercelAccessToken) {
+      getProjects();
+    }
+  }, [parameters.vercelAccessToken]);
+
+  useEffect(() => {
+    async function getContentTypes() {
+      const contentTypesResponse = await sdk.cma.contentType.getMany({});
+
+      if (contentTypesResponse.items && contentTypesResponse.items.length) {
+        dispatchParameters({
+          type: actions.UPDATE_CONTENT_TYPES,
+          payload: contentTypesResponse.items,
+        });
+      }
+    }
+
+    getContentTypes();
+  }, []);
 
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatchParameters({
@@ -151,11 +184,7 @@ const ConfigScreen = () => {
           </Box>
           <Box style={styles.box}>
             <Heading style={styles.selectSection.heading}>Configure Deployment</Heading>
-            <ProjectSelect
-              parameters={parameters}
-              dispatch={dispatchParameters}
-              client={vercelClient}
-            />
+            <ProjectSelect parameters={parameters} dispatch={dispatchParameters} />
             <hr className={styles.splitter} />
           </Box>
           <Box style={styles.box}>

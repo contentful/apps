@@ -7,37 +7,32 @@ interface VercelAPIClient {
   getDeploymentById: (deploymentId: string) => Promise<Deployment>;
 }
 
-export default class VercelClient implements VercelAPIClient {
-  baseEndpoint: string;
+interface VercelClientOptions {
   accessToken: string;
+  baseEndpoint: string;
+}
 
-  constructor(accessToken: string = '') {
-    this.baseEndpoint = 'https://api.vercel.com';
-    this.accessToken = accessToken;
-  }
+export default class VercelClient implements VercelAPIClient {
+  constructor(public options: VercelClientOptions) {}
 
   private buildHeaders(overrides: Headers = new Headers({})): Headers {
     return new Headers({
-      Authorization: `Bearer ${this.accessToken}`,
+      Authorization: `Bearer ${this.options.accessToken}`,
       ...overrides,
     });
   }
 
   async checkToken(): Promise<boolean> {
-    const res = await fetch(`${this.baseEndpoint}/v5/user/tokens`, {
+    const res = await fetch(`${this.options.baseEndpoint}/v5/user/tokens`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
 
-    if (res.ok) {
-      return true;
-    } else {
-      return false;
-    }
+    return res.ok;
   }
 
   async listProjects(): Promise<ListProjectsResponse> {
-    const res = await fetch(`${this.baseEndpoint}/v9/projects`, {
+    const res = await fetch(`${this.options.baseEndpoint}/v9/projects`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
@@ -48,7 +43,7 @@ export default class VercelClient implements VercelAPIClient {
   }
 
   async createDeployment({ project }: CreateDeploymentInput): Promise<Deployment> {
-    const res = await fetch(`${this.baseEndpoint}/v13/deployments`, {
+    const res = await fetch(`${this.options.baseEndpoint}/v13/deployments`, {
       headers: this.buildHeaders(),
       method: 'POST',
       body: JSON.stringify({
@@ -64,7 +59,7 @@ export default class VercelClient implements VercelAPIClient {
   }
 
   async getDeploymentById(deploymentId: string): Promise<Deployment> {
-    const res = await fetch(`${this.baseEndpoint}/v13/deployments/${deploymentId}`, {
+    const res = await fetch(`${this.options.baseEndpoint}/v13/deployments/${deploymentId}`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });

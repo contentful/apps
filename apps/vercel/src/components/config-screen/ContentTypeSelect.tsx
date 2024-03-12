@@ -14,27 +14,14 @@ const ContentTypeSelect = ({
   dispatch: Dispatch<SetStateAction<any>>;
   sdk: ConfigAppSDK;
 }) => {
-  useEffect(() => {
-    async function getContentTypes() {
-      const contentTypesResponse = await sdk.cma.contentType.getMany({});
-
-      if (contentTypesResponse.items && contentTypesResponse.items.length) {
-        dispatch({
-          type: actions.UPDATE_CONTENT_TYPES,
-          payload: contentTypesResponse.items,
-        });
-      }
-    }
-
-    getContentTypes();
-  }, []);
-
   const handleContentTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatch({
       type: actions.APPLY_SELECTED_CONTENT_TYPE,
       payload: event.target.value,
     });
   };
+
+  const { selectedContentType, contentTypes } = parameters;
 
   return (
     <Box style={styles.selectSection.select}>
@@ -43,14 +30,14 @@ const ContentTypeSelect = ({
         <Select
           id="contentTypeSelect"
           name="contentTypeSelect"
-          value={parameters.selectedContentType}
+          value={selectedContentType}
           onChange={handleContentTypeChange}>
-          {parameters.contentTypes && parameters.contentTypes.length ? (
+          {contentTypes && contentTypes.length ? (
             <>
               <Select.Option value="" isDisabled>
                 Please select a Content Type...
               </Select.Option>
-              {parameters.contentTypes.map((contentType) => (
+              {contentTypes.map((contentType) => (
                 <Select.Option key={`option-${contentType.sys.id}`} value={contentType.sys.id}>
                   {contentType.name}
                 </Select.Option>
