@@ -8,27 +8,10 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 const ContentTypeSelect = ({
   parameters,
   dispatch,
-  sdk,
 }: {
   parameters: AppInstallationParameters;
   dispatch: Dispatch<SetStateAction<any>>;
-  sdk: ConfigAppSDK;
 }) => {
-  useEffect(() => {
-    async function getContentTypes() {
-      const contentTypesResponse = await sdk.cma.contentType.getMany({});
-
-      if (contentTypesResponse.items && contentTypesResponse.items.length) {
-        dispatch({
-          type: actions.UPDATE_CONTENT_TYPES,
-          payload: contentTypesResponse.items,
-        });
-      }
-    }
-
-    getContentTypes();
-  }, []);
-
   const handleContentTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatch({
       type: actions.APPLY_SELECTED_CONTENT_TYPE,

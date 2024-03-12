@@ -83,6 +83,21 @@ const ConfigScreen = () => {
     }
   }, [parameters.vercelAccessToken]);
 
+  useEffect(() => {
+    async function getContentTypes() {
+      const contentTypesResponse = await sdk.cma.contentType.getMany({});
+
+      if (contentTypesResponse.items && contentTypesResponse.items.length) {
+        dispatchParameters({
+          type: actions.UPDATE_CONTENT_TYPES,
+          payload: contentTypesResponse.items,
+        });
+      }
+    }
+
+    getContentTypes();
+  }, []);
+
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatchParameters({
       type: actions.UPDATE_VERCEL_ACCESS_TOKEN,
@@ -151,11 +166,7 @@ const ConfigScreen = () => {
           </Box>
           <Box style={styles.box}>
             <Heading style={styles.selectSection.heading}>Configure Deployment</Heading>
-            <ProjectSelect
-              parameters={parameters}
-              dispatch={dispatchParameters}
-              client={vercelClient}
-            />
+            <ProjectSelect parameters={parameters} dispatch={dispatchParameters} />
             <hr className={styles.splitter} />
           </Box>
           <Box style={styles.box}>
@@ -165,7 +176,7 @@ const ConfigScreen = () => {
             <Paragraph marginTop="spacingXs">
               The deployment status will be displayed on the sidebars of these content types.
             </Paragraph>
-            <ContentTypeSelect parameters={parameters} dispatch={dispatchParameters} sdk={sdk} />
+            <ContentTypeSelect parameters={parameters} dispatch={dispatchParameters} />
           </Box>
         </Stack>
       </Box>

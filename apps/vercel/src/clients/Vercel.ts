@@ -8,13 +8,10 @@ interface VercelAPIClient {
 }
 
 export default class VercelClient implements VercelAPIClient {
-  baseEndpoint: string;
-  accessToken: string;
-
-  constructor(accessToken: string = '') {
-    this.baseEndpoint = 'https://api.vercel.com';
-    this.accessToken = accessToken;
-  }
+  constructor(
+    public baseEndpoint: string = 'https://api.vercel.com',
+    public accessToken: string = ''
+  ) {}
 
   private buildHeaders(overrides: Headers = new Headers({})): Headers {
     return new Headers({
@@ -29,11 +26,7 @@ export default class VercelClient implements VercelAPIClient {
       method: 'GET',
     });
 
-    if (res.ok) {
-      return true;
-    } else {
-      return false;
-    }
+    return res.ok;
   }
 
   async listProjects(): Promise<ListProjectsResponse> {
@@ -43,6 +36,8 @@ export default class VercelClient implements VercelAPIClient {
     });
 
     const data = await res.json();
+
+    console.log({ data });
 
     return data;
   }

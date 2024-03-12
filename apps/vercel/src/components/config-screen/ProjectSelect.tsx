@@ -4,30 +4,13 @@ import { AppInstallationParameters } from '../../types';
 import { actions } from '../parameterReducer';
 import VercelClient from '../../clients/Vercel';
 
-const ContentTypeSelect = ({
+const ProjectSelect = ({
   parameters,
   dispatch,
-  client,
 }: {
   parameters: AppInstallationParameters;
   dispatch: Dispatch<SetStateAction<any>>;
-  client: VercelClient;
 }) => {
-  useEffect(() => {
-    async function getProjects() {
-      const data = await client.listProjects();
-
-      dispatch({
-        type: actions.UPDATE_VERCEL_PROJECTS,
-        payload: data.projects,
-      });
-    }
-
-    if (parameters && parameters.vercelAccessToken) {
-      getProjects();
-    }
-  }, [parameters.vercelAccessToken]);
-
   const handleProjectChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatch({
       type: actions.APPLY_SELECTED_PROJECT,
@@ -64,4 +47,4 @@ const ContentTypeSelect = ({
   );
 };
 
-export default ContentTypeSelect;
+export default ProjectSelect;
