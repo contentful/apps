@@ -48,7 +48,7 @@
     "@tsconfig/create-react-app": "2.0.2",
     "@tsconfig/recommended": "1.0.3",
     "@types/node": "16.18.87",
-    "@types/react": "18.2.64",
+    "@types/react": "18.2.65",
     "@types/react-dom": "18.2.21",
     "cross-env": "7.0.3",
     "esbuild": "0.20.1",
