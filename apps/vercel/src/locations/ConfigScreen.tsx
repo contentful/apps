@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
+import { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import {
   Box,
@@ -16,19 +16,16 @@ import {
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { styles } from '../components/config-screen/ConfigScreen.styles';
-import VercelIcon from '../components/common/VercelIcon';
 import useInitializeParameters from '../hooks/useInitializeParameters';
 import parameterReducer, { actions } from '../components/parameterReducer';
 import { initialParameters } from '../constants/defaultParams';
+import VercelClient from '../clients/Vercel';
+import ContentTypeSelect from '../components/config-screen/ContentTypeSelect';
+import ProjectSelect from '../components/config-screen/ProjectSelect';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [appInstalled, setIsAppInstalled] = useState(false);
-  const [tokenError, setTokenError] = useState<boolean | null>();
-  const [tokenValid, setTokenValid] = useState<boolean | null>();
-  // TODO: figure out if deployments are infact useful here
-  // const [deployments, setDeployments] = useState<Deployments>();
-
   const sdk = useSDK<ConfigAppSDK>();
 
   useInitializeParameters(dispatchParameters);
@@ -62,36 +59,46 @@ const ConfigScreen = () => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
+  const vercelClient = new VercelClient(parameters.vercelAccessToken);
+
   useEffect(() => {
-    async function getDeployments() {
-      const res = await fetch('https://api.vercel.com/v6/deployments', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${parameters.vercelAccessToken}`,
-        },
-      });
+    async function checkToken() {
+      const tokenValid = await vercelClient.checkToken();
 
-      // TODO: Figure out if we want to continue with deployments
-      // Contains deployment response, currently we aren't doing anything with deployments
-      // we just want to make sure a successful call goes through with valid access token
-
-      // const body = await res.json();
-
-      if (res.ok) {
-        setTokenError(null);
-        setTokenValid(true);
+      if (tokenValid) {
+        dispatchParameters({
+          type: actions.UPDATE_VERCEL_ACCESS_TOKEN_STATUS,
+          payload: true,
+        });
       } else {
-        setTokenError(true);
-        setTokenValid(false);
+        dispatchParameters({
+          type: actions.UPDATE_VERCEL_ACCESS_TOKEN_STATUS,
+          payload: false,
+        });
       }
     }
 
     if (appInstalled && parameters && parameters.vercelAccessToken) {
-      getDeployments();
+      checkToken();
     }
-  }, [parameters, appInstalled]);
+  }, [parameters.vercelAccessToken]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    async function getContentTypes() {
+      const contentTypesResponse = await sdk.cma.contentType.getMany({});
+
+      if (contentTypesResponse.items && contentTypesResponse.items.length) {
+        dispatchParameters({
+          type: actions.UPDATE_CONTENT_TYPES,
+          payload: contentTypesResponse.items,
+        });
+      }
+    }
+
+    getContentTypes();
+  }, []);
+
+  const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatchParameters({
       type: actions.UPDATE_VERCEL_ACCESS_TOKEN,
       payload: e.target.value,
@@ -99,31 +106,28 @@ const ConfigScreen = () => {
   };
 
   const renderStatusBadge = () => {
-    if (appInstalled && parameters.vercelAccessToken && tokenValid) {
+    if (appInstalled && parameters.vercelAccessToken && parameters.vercelAccessTokenStatus) {
       return <Badge variant="positive">Valid access token</Badge>;
-    } else if (tokenError) {
+    } else if (!parameters.vercelAccessTokenStatus) {
       return <Badge variant="negative">Invalid access token</Badge>;
     } else {
-      return <Badge variant="warning">Token not configured</Badge>;
+      return <Badge variant="secondary">Token not configured</Badge>;
     }
   };
 
   return (
     <>
-      <Box className={styles.background} />
       <Box className={styles.body}>
         <Box>
-          <Heading>Set Up Vercel</Heading>
+          <Heading>Set up the Vercel App</Heading>
           <Paragraph>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-            dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat.
+            Preview and deploy automatically and securely from the entry editor.
           </Paragraph>
         </Box>
-
-        <Stack spacing="spacingL" flexDirection="column">
+        <hr className={styles.splitter} />
+        <Stack spacing="spacingS" flexDirection="column">
           <Box style={styles.box}>
+            <Heading style={{ fontSize: '1rem' }}>Connect Vercel</Heading>
             <FormControl id="accessToken" isRequired={true}>
               <FormControl.Label aria-label="accessToken" htmlFor="accessToken">
                 Vercel Access Token
@@ -135,7 +139,7 @@ const ConfigScreen = () => {
                 type="password"
                 placeholder={'ex. atE2sdftcIp01O1isdfXc3QTdT4...'}
                 value={parameters.vercelAccessToken}
-                onChange={handleChange}
+                onChange={handleTokenChange}
               />
               <HelpText>
                 Follow{' '}
@@ -149,22 +153,32 @@ const ConfigScreen = () => {
                 </TextLink>{' '}
                 to create an access token in the Vercel dashboard.
               </HelpText>
+              <Box style={styles.badgeContainer}>
+                <Flex fullWidth flexDirection="column">
+                  <Text fontWeight="fontWeightDemiBold" marginRight="spacing2Xs">
+                    Status
+                  </Text>
+                  <Box>{renderStatusBadge()}</Box>
+                </Flex>
+              </Box>
+              <hr className={styles.splitter} />
             </FormControl>
-            <Box style={styles.badgeContainer}>
-              <Flex fullWidth flexDirection="column">
-                <Text fontWeight="fontWeightDemiBold" marginRight="spacing2Xs">
-                  Status
-                </Text>
-                <Box>{renderStatusBadge()}</Box>
-              </Flex>
-            </Box>
+          </Box>
+          <Box style={styles.box}>
+            <Heading style={styles.selectSection.heading}>Configure Deployment</Heading>
+            <ProjectSelect parameters={parameters} dispatch={dispatchParameters} />
+            <hr className={styles.splitter} />
+          </Box>
+          <Box style={styles.box}>
+            <Heading marginBottom="none" style={styles.selectSection.heading}>
+              Assign Content Types
+            </Heading>
+            <Paragraph marginTop="spacingXs">
+              The deployment status will be displayed on the sidebars of these content types.
+            </Paragraph>
+            <ContentTypeSelect parameters={parameters} dispatch={dispatchParameters} />
           </Box>
         </Stack>
-      </Box>
-      <Box style={styles.icon}>
-        <Flex alignItems="center" justifyContent="center">
-          <VercelIcon />
-        </Flex>
       </Box>
     </>
   );

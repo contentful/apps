@@ -2,6 +2,13 @@ import { vi } from 'vitest';
 
 export const mockParameters = {
   vercelAccessToken: 'abc-123',
+  selectedProject: 'test-project-id',
+  projects: [
+    {
+      id: 'test-project-id',
+      name: 'test project',
+    },
+  ],
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,10 +25,20 @@ const mockSdk: any = {
     instance: [],
     installation: {
       vercelAccessToken: mockParameters.vercelAccessToken,
+      selectedProject: mockParameters.selectedProject,
+      projects: mockParameters.projects,
     },
   },
   ids: {
     app: 'test-app',
+  },
+  cma: {
+    contentType: {
+      getMany: vi.fn().mockReturnValueOnce({}),
+    },
+    appActionCall: {
+      createWithResponse: vi.fn(),
+    },
   },
   notifier: {
     error: vi.fn(),
