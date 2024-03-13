@@ -59,10 +59,7 @@ const ConfigScreen = () => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
-  const vercelClient = new VercelClient({
-    accessToken: parameters.vercelAccessToken,
-    baseEndpoint,
-  });
+  const vercelClient = new VercelClient(parameters.vercelAccessToken);
 
   useEffect(() => {
     async function checkToken() {
