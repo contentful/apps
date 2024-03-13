@@ -7,7 +7,7 @@ describe('VercelClient', () => {
   let client: VercelClient;
 
   beforeEach(() => {
-    client = new VercelClient({ accessToken: 'access-token', baseEndpoint: '' });
+    client = new VercelClient({ accessToken: '', baseEndpoint: '' });
   });
 
   afterAll(() => {
