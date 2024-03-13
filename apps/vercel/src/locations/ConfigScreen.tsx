@@ -18,7 +18,7 @@ import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { styles } from '../components/config-screen/ConfigScreen.styles';
 import useInitializeParameters from '../hooks/useInitializeParameters';
 import parameterReducer, { actions } from '../components/parameterReducer';
-import { baseEndpoint, initialParameters } from '../constants/defaultParams';
+import { initialParameters } from '../constants/defaultParams';
 import VercelClient from '../clients/Vercel';
 import ContentTypeSelect from '../components/config-screen/ContentTypeSelect';
 import ProjectSelect from '../components/config-screen/ProjectSelect';
