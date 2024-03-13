@@ -8,10 +8,7 @@ interface VercelAPIClient {
 }
 
 export default class VercelClient implements VercelAPIClient {
-  constructor(
-    public baseEndpoint: string = 'https://api.vercel.com',
-    public accessToken: string = ''
-  ) {}
+  constructor(public accessToken = '', private baseEndpoint = 'https://api.vercel.com') {}
 
   private buildHeaders(overrides: Headers = new Headers({})): Headers {
     return new Headers({
@@ -36,8 +33,6 @@ export default class VercelClient implements VercelAPIClient {
     });
 
     const data = await res.json();
-
-    console.log({ data });
 
     return data;
   }

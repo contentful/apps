@@ -26,6 +26,9 @@ export const styles = {
   }),
   box: {
     width: '100%',
+    heading: {
+      fontSize: '1rem',
+    },
   },
   splitter: css({
     marginTop: tokens.spacingL,

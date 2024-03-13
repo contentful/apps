@@ -98,6 +98,21 @@ const ConfigScreen = () => {
     getContentTypes();
   }, []);
 
+  useEffect(() => {
+    async function getProjects() {
+      const data = await vercelClient.listProjects();
+
+      if (parameters.vercelAccessToken) {
+        dispatchParameters({
+          type: actions.UPDATE_VERCEL_PROJECTS,
+          payload: data.projects,
+        });
+      }
+    }
+
+    getProjects();
+  }, [parameters.vercelAccessToken]);
+
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatchParameters({
       type: actions.UPDATE_VERCEL_ACCESS_TOKEN,
@@ -127,7 +142,7 @@ const ConfigScreen = () => {
         <hr className={styles.splitter} />
         <Stack spacing="spacingS" flexDirection="column">
           <Box style={styles.box}>
-            <Heading style={{ fontSize: '1rem' }}>Connect Vercel</Heading>
+            <Heading style={styles.box.heading}>Connect Vercel</Heading>
             <FormControl id="accessToken" isRequired={true}>
               <FormControl.Label aria-label="accessToken" htmlFor="accessToken">
                 Vercel Access Token
