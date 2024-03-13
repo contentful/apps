@@ -18,7 +18,7 @@ import { ExternalLinkIcon } from '@contentful/f36-icons';
 import { styles } from '../components/config-screen/ConfigScreen.styles';
 import useInitializeParameters from '../hooks/useInitializeParameters';
 import parameterReducer, { actions } from '../components/parameterReducer';
-import { initialParameters } from '../constants/defaultParams';
+import { baseEndpoint, initialParameters } from '../constants/defaultParams';
 import VercelClient from '../clients/Vercel';
 import ContentTypeSelect from '../components/config-screen/ContentTypeSelect';
 import ProjectSelect from '../components/config-screen/ProjectSelect';
@@ -61,7 +61,7 @@ const ConfigScreen = () => {
 
   const vercelClient = new VercelClient({
     accessToken: parameters.vercelAccessToken,
-    baseEndpoint: 'https://api.vercel.com',
+    baseEndpoint,
   });
 
   useEffect(() => {

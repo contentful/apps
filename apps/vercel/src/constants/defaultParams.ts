@@ -8,3 +8,5 @@ export const initialParameters: AppInstallationParameters = {
   selectedProject: '',
   selectedContentType: '',
 };
+
+export const baseEndpoint = 'https://api.vercel.com';

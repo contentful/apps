@@ -8,7 +8,7 @@ interface VercelAPIClient {
 }
 
 interface VercelClientOptions {
-  baseEndpoint?: string;
+  baseEndpoint: string;
   accessToken: string;
 }
 
