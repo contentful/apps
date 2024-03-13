@@ -1,0 +1,15 @@
+{
+  "actions": [
+    {
+      "id": "vercelGetPreviewEnvironment",
+      "name": "Get signed URL tokens",
+      "category": "Custom",
+      "description": "This action returns signed JWT tokens for securing Mux video playback",
+      "type": "function",
+      "path": "actions/get-preview-env.js",
+      "entryFile": "./app-actions/src/actions/get-preview-env.ts",
+      "allowNetworks": [],
+      "parameters": [ ]
+    }
+  ]
+}
