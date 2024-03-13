@@ -14,7 +14,7 @@
     "call-app-action": "npx ts-node scripts/call-app-action.ts"
   },
   "dependencies": {
-    "@contentful/app-scripts": "1.13.0",
+    "@contentful/app-scripts": "1.15.0",
     "dotenv": "^16.3.1",
     "esbuild": "^0.20.0"
   },
