@@ -2,7 +2,6 @@ import { ChangeEvent, Dispatch, SetStateAction, useEffect } from 'react';
 import { Box, FormControl, Select } from '@contentful/f36-components';
 import { AppInstallationParameters } from '../../types';
 import { actions } from '../parameterReducer';
-import VercelClient from '../../clients/Vercel';
 
 const ProjectSelect = ({
   parameters,
@@ -18,6 +17,8 @@ const ProjectSelect = ({
     });
   };
 
+  const { selectedProject, projects } = parameters;
+
   return (
     <Box>
       <FormControl id="optionProjectSelect" isRequired={true}>
@@ -25,14 +26,14 @@ const ProjectSelect = ({
         <Select
           id="optionProjectSelect"
           name="optionProjectSelect"
-          value={parameters.selectedProject}
+          value={selectedProject}
           onChange={handleProjectChange}>
-          {parameters.projects && parameters.projects.length ? (
+          {projects && projects.length ? (
             <>
               <Select.Option value="" isDisabled>
                 Please select a project...
               </Select.Option>
-              {parameters.projects.map((project) => (
+              {projects.map((project) => (
                 <Select.Option key={`option-${project.id}`} value={project.id}>
                   {project.name}
                 </Select.Option>

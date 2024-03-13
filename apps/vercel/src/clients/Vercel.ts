@@ -7,21 +7,28 @@ interface VercelAPIClient {
   getDeploymentById: (deploymentId: string) => Promise<Deployment>;
 }
 
+interface VercelClientOptions {
+  baseEndpoint?: string;
+  accessToken: string;
+}
+
 export default class VercelClient implements VercelAPIClient {
   constructor(
-    public baseEndpoint: string = 'https://api.vercel.com',
-    public accessToken: string = ''
+    public options: VercelClientOptions = {
+      accessToken: '',
+      baseEndpoint: '',
+    }
   ) {}
 
   private buildHeaders(overrides: Headers = new Headers({})): Headers {
     return new Headers({
-      Authorization: `Bearer ${this.accessToken}`,
+      Authorization: `Bearer ${this.options.accessToken}`,
       ...overrides,
     });
   }
 
   async checkToken(): Promise<boolean> {
-    const res = await fetch(`${this.baseEndpoint}/v5/user/tokens`, {
+    const res = await fetch(`${this.options.baseEndpoint}/v5/user/tokens`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
@@ -30,20 +37,18 @@ export default class VercelClient implements VercelAPIClient {
   }
 
   async listProjects(): Promise<ListProjectsResponse> {
-    const res = await fetch(`${this.baseEndpoint}/v9/projects`, {
+    const res = await fetch(`${this.options.baseEndpoint}/v9/projects`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
 
     const data = await res.json();
 
-    console.log({ data });
-
     return data;
   }
 
   async createDeployment({ project }: CreateDeploymentInput): Promise<Deployment> {
-    const res = await fetch(`${this.baseEndpoint}/v13/deployments`, {
+    const res = await fetch(`${this.options.baseEndpoint}/v13/deployments`, {
       headers: this.buildHeaders(),
       method: 'POST',
       body: JSON.stringify({
@@ -59,7 +64,7 @@ export default class VercelClient implements VercelAPIClient {
   }
 
   async getDeploymentById(deploymentId: string): Promise<Deployment> {
-    const res = await fetch(`${this.baseEndpoint}/v13/deployments/${deploymentId}`, {
+    const res = await fetch(`${this.options.baseEndpoint}/v13/deployments/${deploymentId}`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });

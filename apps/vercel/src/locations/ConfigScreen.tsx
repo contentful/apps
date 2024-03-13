@@ -59,7 +59,10 @@ const ConfigScreen = () => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
-  const vercelClient = new VercelClient(parameters.vercelAccessToken);
+  const vercelClient = new VercelClient({
+    accessToken: parameters.vercelAccessToken,
+    baseEndpoint: 'https://api.vercel.com',
+  });
 
   useEffect(() => {
     async function checkToken() {
@@ -97,6 +100,21 @@ const ConfigScreen = () => {
 
     getContentTypes();
   }, []);
+
+  useEffect(() => {
+    async function getProjects() {
+      const data = await vercelClient.listProjects();
+
+      if (parameters.vercelAccessToken) {
+        dispatchParameters({
+          type: actions.UPDATE_VERCEL_PROJECTS,
+          payload: data.projects,
+        });
+      }
+    }
+
+    getProjects();
+  }, [parameters.vercelAccessToken]);
 
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatchParameters({

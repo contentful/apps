@@ -19,6 +19,8 @@ const ContentTypeSelect = ({
     });
   };
 
+  const { selectedContentType, contentTypes } = parameters;
+
   return (
     <Box style={styles.selectSection.select}>
       <FormControl id="contentTypeSelect">
@@ -26,14 +28,14 @@ const ContentTypeSelect = ({
         <Select
           id="contentTypeSelect"
           name="contentTypeSelect"
-          value={parameters.selectedContentType}
+          value={selectedContentType}
           onChange={handleContentTypeChange}>
-          {parameters.contentTypes && parameters.contentTypes.length ? (
+          {contentTypes && contentTypes.length ? (
             <>
               <Select.Option value="" isDisabled>
                 Please select a Content Type...
               </Select.Option>
-              {parameters.contentTypes.map((contentType) => (
+              {contentTypes.map((contentType) => (
                 <Select.Option key={`option-${contentType.sys.id}`} value={contentType.sys.id}>
                   {contentType.name}
                 </Select.Option>
