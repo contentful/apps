@@ -1,17 +1,6 @@
-import {
-  FunctionEventHandler,
-  FunctionEventType,
-  FunctionEventContext,
-} from '@contentful/node-apps-toolkit';
-import {
-  AppEventFilterRequest,
-  AppEventFilterResponse,
-} from '@contentful/node-apps-toolkit/lib/requests/typings';
+import { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
 
-const appEventFilteringHandler: FunctionEventHandler<'appevent.filter'> = (
-  event: AppEventFilterRequest,
-  context: FunctionEventContext
-): AppEventFilterResponse => {
+const appEventFilteringHandler: EventHandler<'appevent.filter'> = (event, context) => {
   // Filter out all events that are not of type 'Entry' (Assets, etc.)
   return {
     result: event.entityType === 'Entry',
@@ -19,10 +8,7 @@ const appEventFilteringHandler: FunctionEventHandler<'appevent.filter'> = (
   };
 };
 
-export const handler: FunctionEventHandler = (
-  event: any,
-  context: FunctionEventContext
-): AppEventFilterResponse | Promise<AppEventFilterResponse> => {
+export const handler: EventHandler = (event, context) => {
   if (event.type === 'appevent.filter') {
     return appEventFilteringHandler(event, context);
   }
