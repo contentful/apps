@@ -4,6 +4,7 @@ import { buildEntryActivity } from './entry-activity';
 import {
   CollectionProp,
   ContentTypeProps,
+  EntryProps,
   LocaleProps,
   PlainClientAPI,
   UserProps,
@@ -58,6 +59,23 @@ describe('buildEntryActivity', () => {
       ];
       cma = makeMockPlainClient(cmaClientMockResponses, cmaRequestStub);
       cmaHost = 'api.contentful.com';
+    });
+
+    it('returns an entry activity object', async () => {
+      const result = await buildEntryActivity(entryEvent, cma, cmaHost);
+      expect(result).to.have.property('entryTitle', 'Entry ID abc123');
+    });
+  });
+
+  describe('when there are no fields in the entry (e.g. entry was deleted)', () => {
+    beforeEach(() => {
+      // Here we are mocking an entry that lacks fields, which is the case when the entry type is DeletedEntry
+      // (i.e. for unpublish and delete events)
+      const mockDeletedEntry = {
+        ...mockEntryEvent.entry,
+        fields: undefined,
+      } as unknown as EntryProps;
+      entryEvent = { ...mockEntryEvent, entry: mockDeletedEntry };
     });
 
     it('returns an entry activity object', async () => {
