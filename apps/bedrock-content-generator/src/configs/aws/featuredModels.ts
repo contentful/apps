@@ -8,7 +8,67 @@ export interface BedrockModel {
     prompt: string,
     maxTokens?: number
   ) => InvokeModelCommandInput;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parseResponse: (response: any) => string;
+}
+
+interface ContentBlockDeltaMsg {
+  type: 'content_block_delta';
+  delta: {
+    text: string;
+    type: 'text_delta';
+  };
+}
+
+interface ContentBlockStartMsg {
+  type: 'content_block_start';
+  content_block: {
+    text: string;
+    type: 'text';
+  };
+}
+
+class ClaudeMessageModel implements BedrockModel {
+  id: string;
+  name: string;
+
+  constructor(id: string, name: string) {
+    this.id = id;
+    this.name = name;
+  }
+
+  invokeCommand(systemPrompt: string, prompt: string, maxTokens?: number): InvokeModelCommandInput {
+    const messages = [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: prompt || 'hi',
+          },
+        ],
+      },
+    ];
+
+    return {
+      modelId: this.id,
+      contentType: 'application/json',
+
+      body: JSON.stringify({
+        anthropic_version: 'bedrock-2023-05-31',
+        max_tokens: maxTokens || 128,
+        system: systemPrompt,
+        messages,
+      }),
+    };
+  }
+
+  parseResponse(response: ContentBlockDeltaMsg | ContentBlockStartMsg) {
+    console.log('res', response);
+    if (response.type == 'content_block_delta') return response.delta.text;
+
+    return '';
+  }
 }
 
 class ClaudeModel implements BedrockModel {
@@ -105,7 +165,7 @@ class MistralModel implements BedrockModel {
 }
 
 export const featuredModels: BedrockModel[] = [
-  new ClaudeModel('anthropic.claude-3-sonnet-20240229-v1:0', 'Anthropic Claude v3 Sonnet'),
+  new ClaudeMessageModel('anthropic.claude-3-sonnet-20240229-v1:0', 'Anthropic Claude v3 Sonnet'),
   new ClaudeModel('anthropic.claude-v2:1', 'Anthropic Claude v2.1'),
   new ClaudeModel('anthropic.claude-instant-v1', 'Anthropic Claude Instant v1.2'),
   new LlamaModel('meta.llama2-70b-chat-v1', 'Meta Llama 2 70B'),
