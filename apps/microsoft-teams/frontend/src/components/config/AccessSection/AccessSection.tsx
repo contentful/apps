@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useState } from 'react';
+import { Dispatch, useContext, useEffect, useState } from 'react';
 import { Box, Button, Flex, ModalLauncher, Paragraph } from '@contentful/f36-components';
 import { useMsal } from '@azure/msal-react';
 import { loginRequest } from '@configs/authConfig';
@@ -15,6 +15,10 @@ import DisconnectModal from '@components/config/DisconnectModal/DisconnectModal'
 import MsGraph from '@utils/msGraphApi';
 import { AccountInfo } from '@azure/msal-browser';
 import AccessSectionCard from '@components/config/AccessSectionCard/AccessSectionCard';
+import {
+  SegmentAnalyticsContext,
+  ConfigAction,
+} from '@contentful/integration-frontend-toolkit/sdks';
 
 interface Props {
   dispatch: Dispatch<ParameterAction>;
@@ -38,6 +42,7 @@ const AccessSection = (props: Props) => {
   const { instance, accounts, inProgress } = useMsal();
   const customApi = useCustomApi();
   const sdk = useSDK<ConfigAppSDK>();
+  const { trackEvent } = useContext(SegmentAnalyticsContext);
 
   const loginInProgress = inProgress === 'login';
   const logoutInProgress = inProgress === 'logout';
@@ -106,6 +111,13 @@ const AccessSection = (props: Props) => {
         type: actions.UPDATE_MS_ACCOUNT_INFO,
         payload: msAccountInfo,
       });
+
+      trackEvent('configSaved', {
+        action: ConfigAction.Installed,
+        metaData: {
+          tenantId,
+        },
+      });
     } catch (e) {
       sdk.notifier.error(authError);
       console.error(e);
@@ -114,11 +126,20 @@ const AccessSection = (props: Props) => {
 
   const handleLogout = () => {
     ModalLauncher.open(({ isShown, onClose }) => {
+      const { trackEvent } = useContext(SegmentAnalyticsContext);
+
       return (
         <DisconnectModal
           isShown={isShown}
           handleCancel={() => {
             onClose(true);
+
+            trackEvent('configSaved', {
+              action: ConfigAction.Cancelled,
+              metaData: {
+                tenantId: parameters.tenantId,
+              },
+            });
           }}
           handleDisconnect={async () => {
             onClose(true);
@@ -137,6 +158,13 @@ const AccessSection = (props: Props) => {
             dispatch({
               type: actions.UPDATE_MS_ACCOUNT_INFO,
               payload: msAccountInfo,
+            });
+
+            trackEvent('configSaved', {
+              action: ConfigAction.Updated,
+              metaData: {
+                tenantId: msAccountInfo.tenantId,
+              },
             });
 
             setHasDisconnected(true);
