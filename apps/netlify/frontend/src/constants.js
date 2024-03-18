@@ -16,8 +16,8 @@ export const NETLIFY_STATE_TO_EVENT = {
   error: EVENT_BUILD_FAILED,
 };
 
-export const PUBNUB_PUBLISH_KEY = 'pub-c-a99421b9-4f21-467b-ac0c-d0292824e8e1';
-export const PUBNUB_SUBSCRIBE_KEY = 'sub-c-3992b1ae-f7c9-11e8-adf7-5a5b31762c0f';
+export const PUBNUB_PUBLISH_KEY = 'pub-c-51df0950-e61c-4547-a621-b83f4a96652a';
+export const PUBNUB_SUBSCRIBE_KEY = 'sub-c-72137dd0-3607-4bf8-b97f-fc223e76ad23';
 
 export const NETLIFY_CLIENT_ID = 'a1d06395eadd312fc45ab6f0f6d7fd6665642c9fcb697839739d157f93bbe918';
 export const NETLIFY_API_BASE = 'https://api.netlify.com/api/v1';
