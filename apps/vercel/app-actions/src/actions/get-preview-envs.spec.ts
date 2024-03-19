@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { makeMockAppActionCallContext } from '../../test/mocks';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { handler } from './get-preview-env';
+import { handler } from './get-preview-envs';
 import { AppActionCallResponseSuccess, ContentPreviewEnvironment } from '../types';
 
 describe('get-preview-env.handler', () => {
