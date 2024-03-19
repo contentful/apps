@@ -10,6 +10,7 @@ import {
   SendEntryActivityMessageResult,
   MsTeamsBotServiceResponse,
   MessageResponse,
+  SendWorkflowUpdateMessageResult,
 } from '../types';
 import { makeMockAppActionCallContext, mockAppInstallation, mockEntry } from '../../test/mocks';
 import { handler } from './handle-app-event';
@@ -28,6 +29,10 @@ describe('handle-app-event.handler', () => {
     ok: true,
     data: { messageResponseId: 'message-response-id' },
   };
+  const sendWorkflowUpdateMessageResult: MsTeamsBotServiceResponse<MessageResponse> = {
+    ok: true,
+    data: { messageResponseId: 'workflow-message-response-id' },
+  };
   const cmaClientMockResponses: [AppInstallationProps] = [mockAppInstallation];
 
   beforeEach(() => {
@@ -37,6 +42,7 @@ describe('handle-app-event.handler', () => {
     buildEntryActivityStub = sinon.stub(helpers, 'buildEntryActivity').resolves(mockEntryActivity);
     sinon.stub(config, 'msTeamsBotService').value(mockMsTeamsBotService);
     mockMsTeamsBotService.sendEntryActivityMessage.resolves(sendMessageResult);
+    mockMsTeamsBotService.sendWorkflowUpdateMessage.resolves(sendWorkflowUpdateMessageResult);
   });
 
   it('returns the ok result', async () => {
@@ -62,6 +68,35 @@ describe('handle-app-event.handler', () => {
     });
     // ensures that notifications that don't match tenant id, content type, and selected events are filtered out
     expect(result.data.length).to.equal(1);
+  });
+
+  describe('handling workflow updates', () => {
+    it('builds a workflow update message payload, and passes it to botService.sendWorkflowUpdateMessage()', async () => {
+      buildEntryActivityStub.resolves({
+        contentTypeName: 'blogPost',
+        entryTitle: 'My Blog Post Title',
+        action: 'published',
+        eventDatetime: '2024-01-18T21:43:54.267Z',
+        entryUrl: 'https://example.com/asdf',
+      });
+
+      try {
+        const result = (await handler(
+          {
+            payload: JSON.stringify(mockEntry),
+            topic: 'Workflow.Step.notifyMicrosoftTeams',
+            eventDatetime: '2024-01-18T21:43:54.267Z',
+          },
+          context
+        )) as AppActionCallResponseSuccess<SendWorkflowUpdateMessageResult>;
+
+        expect(result.ok).to.equal(true);
+        expect(result.data.sendWorkflowUpdateResult.ok).to.equal(true);
+        expect(result.data.workflowUpdateMessage).not.to.equal(undefined);
+      } catch (err) {
+        console.error(err);
+      }
+    });
   });
 
   describe('when an error is encountered', () => {

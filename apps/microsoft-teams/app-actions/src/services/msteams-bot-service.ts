@@ -5,10 +5,33 @@ import {
   MsTeamsBotServiceResponse,
   TeamInstallation,
   TestMessage,
+  WorkflowUpdateMessage,
 } from '../types';
 
 export class MsTeamsBotService {
   constructor(public readonly botServiceUrl: string, public readonly apiKey: string) {}
+
+  async sendWorkflowUpdateMessage(
+    workflowUpdateMessage: WorkflowUpdateMessage,
+    tenantId: string,
+    requestContext: AppActionRequestContext
+  ): Promise<MsTeamsBotServiceResponse<MessageResponse>> {
+    const res = await fetch(
+      `${this.botServiceUrl}/api/tenant/${tenantId}/workflow_update_messages`,
+      {
+        method: 'POST',
+        headers: this.getRequestHeaders(requestContext),
+        body: JSON.stringify(workflowUpdateMessage),
+      }
+    );
+
+    const responseBody = await res.json();
+    this.assertMsTeamsBotServiceCallResult<MessageResponse>(
+      responseBody,
+      this.assertMessageResponse
+    );
+    return responseBody;
+  }
 
   async sendEntryActivityMessage(
     entryActivityMessage: EntryActivityMessage,
