@@ -43,6 +43,13 @@ const AccessSection = (props: Props) => {
   const customApi = useCustomApi();
   const sdk = useSDK<ConfigAppSDK>();
   const { trackEvent } = useContext(SegmentAnalyticsContext);
+  const trackingEventInfo = {
+    environment_key: sdk.ids.environment,
+    space_key: sdk.ids.space,
+    organization_key: sdk.ids.organization,
+    app_key: sdk.ids.app,
+    app_name: 'microsoft-teams',
+  };
 
   const loginInProgress = inProgress === 'login';
   const logoutInProgress = inProgress === 'logout';
@@ -117,6 +124,7 @@ const AccessSection = (props: Props) => {
         metaData: {
           tenantId,
         },
+        ...trackingEventInfo,
       });
     } catch (e) {
       sdk.notifier.error(authError);
@@ -139,6 +147,7 @@ const AccessSection = (props: Props) => {
               metaData: {
                 tenantId: parameters.tenantId,
               },
+              ...trackingEventInfo,
             });
           }}
           handleDisconnect={async () => {
@@ -165,6 +174,7 @@ const AccessSection = (props: Props) => {
               metaData: {
                 tenantId: msAccountInfo.tenantId,
               },
+              ...trackingEventInfo,
             });
 
             setHasDisconnected(true);
