@@ -400,17 +400,17 @@ export class App extends React.Component<AppProps, AppState> {
       return;
     }
     this.setState({
-      playbackToken: await createSignedPlaybackToken(
+      playbackToken: createSignedPlaybackToken(
         signedPlaybackId,
         muxSigningKeyId!,
         muxSigningKeyPrivate!
       ),
-      posterToken: await createSignedThumbnailToken(
+      posterToken: createSignedThumbnailToken(
         signedPlaybackId,
         muxSigningKeyId!,
         muxSigningKeyPrivate!
       ),
-      storyboardToken: await createSignedStoryboardToken(
+      storyboardToken: createSignedStoryboardToken(
         signedPlaybackId,
         muxSigningKeyId!,
         muxSigningKeyPrivate!
