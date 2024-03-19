@@ -4,6 +4,13 @@ import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 import * as jwt from 'jsonwebtoken';
 import { AppInstallationProps, FreeFormParameters } from 'contentful-management';
 
+// See https://docs.mux.com/guides/secure-video-playback#4-generate-a-json-web-token-jwt
+export const TOKEN_AUDIENCE = {
+  playback: 'v',
+  thumbnail: 't',
+  storyboard: 's',
+};
+
 interface AppActionCallParameters {
   playbackId: string;
 }
@@ -68,9 +75,24 @@ export const handler = withAsyncAppActionErrorHandling(
     return {
       ok: true,
       data: {
-        playbackToken: sign(playbackId, muxSigningKeyId, muxSigningKeyPrivate, 'v'),
-        posterToken: sign(playbackId, muxSigningKeyId, muxSigningKeyPrivate, 't'),
-        storyboardToken: sign(playbackId, muxSigningKeyId, muxSigningKeyPrivate, 's'),
+        playbackToken: sign(
+          playbackId,
+          muxSigningKeyId,
+          muxSigningKeyPrivate,
+          TOKEN_AUDIENCE.playback
+        ),
+        posterToken: sign(
+          playbackId,
+          muxSigningKeyId,
+          muxSigningKeyPrivate,
+          TOKEN_AUDIENCE.thumbnail
+        ),
+        storyboardToken: sign(
+          playbackId,
+          muxSigningKeyId,
+          muxSigningKeyPrivate,
+          TOKEN_AUDIENCE.storyboard
+        ),
       },
     };
   }

@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { makeMockAppActionCallContext } from '../../test/mocks';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { handler } from './get-jwt-tokens';
+import { TOKEN_AUDIENCE, handler } from './get-jwt-tokens';
 import { AppActionCallResponseSuccess, SignedUrlTokens } from '../types';
 
 const parseJwt = (token: string) => {
@@ -58,11 +58,11 @@ describe('get-signed-url-tokens.handler', () => {
     );
 
     expect(playbackToken).to.have.property('sub', playbackId);
-    expect(playbackToken).to.have.property('aud', 'v');
+    expect(playbackToken).to.have.property('aud', TOKEN_AUDIENCE.playback);
     expect(posterToken).to.have.property('sub', playbackId);
-    expect(posterToken).to.have.property('aud', 't');
+    expect(posterToken).to.have.property('aud', TOKEN_AUDIENCE.thumbnail);
     expect(storyboardToken).to.have.property('sub', playbackId);
-    expect(storyboardToken).to.have.property('aud', 's');
+    expect(storyboardToken).to.have.property('aud', TOKEN_AUDIENCE.storyboard);
   });
 
   describe('when mux signed urls is not enabled', () => {
