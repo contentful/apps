@@ -5,4 +5,5 @@ export const TOPIC_ACTION_MAP = {
   'ContentManagement.Entry.publish': 'published',
   'ContentManagement.Entry.unpublish': 'unpublished',
   'ContentManagement.Entry.delete': 'deleted',
+  'Workflow.Step.notifyMicrosoftTeams': 'Workflow.Step.notifyMicrosoftTeams',
 } as const;

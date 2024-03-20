@@ -1,14 +1,13 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigAppSDK } from '@contentful/app-sdk';
-import { AppInstallationParameters, TeamsChannel } from '@customTypes/configPage';
+import { TeamsChannel } from '@customTypes/configPage';
 
 const useGetTeamsChannels = () => {
   const [channels, setChannels] = useState<TeamsChannel[]>([]);
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(true);
   const sdk = useSDK<ConfigAppSDK>();
-  const { tenantId } = sdk.parameters.installation as AppInstallationParameters;
 
   const getAllChannels = useCallback(async () => {
     try {
@@ -43,7 +42,7 @@ const useGetTeamsChannels = () => {
     }
 
     setLoading(false);
-  }, [sdk.cma.appActionCall, sdk.ids.environment, sdk.ids.space, sdk.ids.app, tenantId]);
+  }, [sdk.cma.appActionCall, sdk.ids.environment, sdk.ids.space, sdk.ids.app]);
 
   useEffect(() => {
     getAllChannels();
