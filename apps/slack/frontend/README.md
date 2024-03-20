@@ -2,11 +2,11 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
 
 ## Local development
 
-In the project directory, run:
-
 - Set the following variables in `frontend/.env.development` using the `.env.development.example` file:
   - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (https://api.slack.com/apps/ -> Select the app you plan to integrate -> Basic Information -> App Credentials -> Client ID)
   - `REACT_APP_BACKEND_BASE_URL`: The ngrok URL
+
+In the project directory, run:
 
 #### `npm i`
 #### `npm start`
