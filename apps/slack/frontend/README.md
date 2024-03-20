@@ -1,35 +1,44 @@
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
-## Available Scripts
+## Local development
 
-In the project directory, you can run:
+In the project directory, run:
 
+- Set the following variables in `frontend/.env.development` using the `.env.development.example` file:
+  - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (https://api.slack.com/apps/ -> Select the app you plan to integrate -> Basic Information -> App Credentials -> Client ID)
+  - `REACT_APP_BACKEND_BASE_URL`: The ngrok URL
+
+#### `npm i`
 #### `npm start`
 
-Creates or updates your app definition in Contentful, and runs the app in development mode.
+This creates or updates your app definition in Contentful, and runs the app in development mode.
 Open your app to view it in the browser.
 
 The page will reload if you make edits.
 You will also see any lint errors in the console.
 
+## Build and upload process
+
+In the project directory, run:
+
 #### `npm run build`
 
-- Set the following variables in `frontend/.env.development` using the `.env.development.example` file:
-  - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (https://api.slack.com/apps/ -> Select the app you plan to integrate -> Basic Information -> App Credentials -> Client ID)
-  - `REACT_APP_BACKEND_BASE_URL`: The ngrok URL
-- Run the frontend with `npm run start`
 
-Builds the app for production to the `build` folder.
+This builds the app for production to the `build` folder.
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
 The build is minified and the filenames include the hashes.
 Your app is ready to be deployed!
 
+Next, run:
+
 #### `npm run upload`
 
-Uploads the build folder to contentful and creates a bundle that is automatically activated.
+This uploads the build folder to contentful and creates a bundle that is automatically activated.
 The command guides you through the deployment process and asks for all required arguments.
-Read [here](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/#deploy-with-contentful) for more information about the deployment process.
+Read [here](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/#deploy-with-contentful) for more information about the deployment process. You should be set!
+
+For a CI upload, do the following:
 
 #### `npm run upload-ci`
 

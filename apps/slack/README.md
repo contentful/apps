@@ -68,7 +68,7 @@ If you require support, or want to request a new feature then please use the [Gi
 
 ### Security
 
-An organization's Slack workspace is the most sensitive part of a Company's internal communication. We therefore use all available feature by the used services to maximize security.
+An organization's Slack workspace is the most sensitive part of a Company's internal communication. We therefore use all available features by the used services to maximize security.
 
 - We are using [request verification for App Events from Contentful](https://www.contentful.com/developers/docs/extensibility/app-framework/request-verification/)
 - We are using [request verification for webhook requests from Slack](https://api.slack.com/authentication/verifying-requests-from-slack)
@@ -89,15 +89,18 @@ This sections explains how to run the Slack app locally.
 
 ### General
 
-- Start ngrok with `ngrok http 3000 --subdomain slack-backend-dev` (the `--subdomain` flagwill not work without paid ngrok account)
-- Create a new Slack app [here](https://api.slack.com/apps)
-  - Add the ngrok URL as redirect URL (Features -> OAuth & Permissions -> Redirect URLs)
-  - Enable token rotation (Features -> OAuth & Permissions)
+- You will ultimately have the following three services running: 
+1. Lambda
+
+2. Frontend
+
+3. Ngrok proxy
+
 
 ### Lambda
 
 - Copy `lambda/config/serverless.dev.yml.example` to `lambda/config/serverless.dev.yml`
-- Create a new Contentful app
+- Create a new Contentful app, if this has not been done already.
   - Set frontend URL to `http://localhost:1234`
   - Enable config location
   - Eneable request verification and store the secret in `lambda/config/serverless.dev.yml` (`signingSecret` -> `signing_secret`)
@@ -107,7 +110,7 @@ This sections explains how to run the Slack app locally.
   - Store Client ID and Client Secret (Basic Information -> App Credentials) in `lambda/config/serverless.dev.yml` (`oauthCredentials` -> `client_id` / `client_secret`)
   - Store Signing Secret (Basic Information -> App Credentials) in `lambda/config/serverless.dev.yml` (`slackSigningSecret` -> `signing_secret`)
 - Add the ngrok URL to in the `lambda/config/serverless.dev.yml` (`customDomain` -> `domainName`). Remove the `https://` from the URL. Add a trailing `/dev` to the URL (e.g.: `domainName: be25-95-91-246-99.ngrok.io/dev`)
-- Start a docker container with a local DynamoDB instance using `make go` from within the lamda directory
+- Ensure docker is running on your local device. Start a docker container with a local DynamoDB instance using `make go` from within the lamda directory.
 
 ### Frontend
 
@@ -115,3 +118,9 @@ This sections explains how to run the Slack app locally.
   - `REACT_APP_SLACK_CLIENT_ID`: The Slack app Client ID (https://api.slack.com/apps/ -> Select the app you plan to integrate -> Basic Information -> App Credentials -> Client ID)
   - `REACT_APP_BACKEND_BASE_URL`: The ngrok URL
 - Run the frontend with `npm run start`
+
+### Proxy
+- Start ngrok with `ngrok http 3000 --subdomain slack-backend-dev` (the `--subdomain` flagwill not work without paid ngrok account)
+- This ngrok URL is configured as the redirect URL for an already created Slack app [here](https://api.slack.com/apps). If it is not, create the Slack app and complete the following steps: 
+  - Add the ngrok URL as redirect URL (Features -> OAuth & Permissions -> Redirect URLs)
+  - Enable token rotation (Features -> OAuth & Permissions)
