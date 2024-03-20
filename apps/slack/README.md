@@ -103,7 +103,7 @@ This sections explains how to run the Slack app locally.
 - Create a new Contentful app, if this has not been done already.
   - Set frontend URL to `http://localhost:1234`
   - Enable config location
-  - Eneable request verification and store the secret in `lambda/config/serverless.dev.yml` (`signingSecret` -> `signing_secret`)
+  - Enable request verification and store the secret in `lambda/config/serverless.dev.yml` (`signingSecret` -> `signing_secret`)
   - Create a key pair. Save the private key at `lamba/private-key.pem`
   - Within `serverless.dev.yml`, `app` => `id` should reference the app id of the newly created app (located on the App details page within Contentful)
 - Configure Slack
