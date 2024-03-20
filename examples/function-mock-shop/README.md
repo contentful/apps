@@ -8,7 +8,7 @@ Execute create-contentful-app with npx to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app --example function-mock-shop
+npx create-contentful-app@latest --example function-mock-shop
 ```
 
 ## Available Scripts
