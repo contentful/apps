@@ -20,7 +20,7 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.136",
     "@types/lodash": "^4.17.0",
-    "@types/chai": "^4.3.13",
+    "@types/chai": "^4.3.14",
     "@types/mocha": "^9.1.1",
     "@types/node": "^12.12.14",
     "@types/node-fetch": "^2.6.4",
