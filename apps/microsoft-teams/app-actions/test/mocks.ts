@@ -114,6 +114,7 @@ export const mockNotification = {
     tenantId: 'tenant-id',
   },
   contentTypeId: 'blogPost',
+  contentTypeName: 'Blog Post',
   selectedEvents: {
     'ContentManagement.Entry.publish': true,
     'ContentManagement.Entry.unpublish': true,

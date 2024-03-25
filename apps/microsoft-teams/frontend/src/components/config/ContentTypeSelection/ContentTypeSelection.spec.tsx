@@ -22,7 +22,11 @@ describe('ContentTypeSelection component', () => {
   it('mounts and renders an input when a content type is selected', () => {
     const { unmount } = ContentTypeCustomRender(
       <ContentTypeSelection
-        notification={{ ...defaultNotification, contentTypeId: 'blogPost' }}
+        notification={{
+          ...defaultNotification,
+          contentTypeId: 'blogPost',
+          contentTypeName: 'Blog Post',
+        }}
         handleNotificationEdit={vi.fn()}></ContentTypeSelection>
     );
 

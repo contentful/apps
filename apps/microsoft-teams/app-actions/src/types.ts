@@ -66,6 +66,7 @@ export interface AppInstallationParameters {
 export interface Notification {
   channel: Channel;
   contentTypeId: string;
+  contentTypeName: string;
   selectedEvents: SelectedEvents;
 }
 

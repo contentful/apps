@@ -15,6 +15,7 @@ interface Props {
   isShown: boolean;
   onClose: () => void;
   savedContentTypeId: string;
+  savedContentTypeName: string;
   handleNotificationEdit: (notificationEdit: Partial<Notification>) => void;
   contentTypes: ContentTypeProps[];
   contentTypeConfigLink: string;
@@ -26,13 +27,17 @@ const ContentTypeSelectionModal = (props: Props) => {
     isShown,
     onClose,
     savedContentTypeId,
+    savedContentTypeName,
     handleNotificationEdit,
     contentTypes,
     contentTypeConfigLink,
     error,
   } = props;
 
-  const [selectedContentTypeId, setSelectedContentTypeId] = useState(savedContentTypeId ?? '');
+  const [selectedContentType, setSelectedContentType] = useState({
+    contentTypeId: savedContentTypeId,
+    contentTypeName: savedContentTypeName,
+  });
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const { title, button, link, emptyContent, emptyHeading, errorMessage, searchPlaceholder } =
@@ -47,12 +52,17 @@ const ContentTypeSelectionModal = (props: Props) => {
       return (
         <Table.Row
           key={contentType.sys.id}
-          onClick={() => setSelectedContentTypeId(contentType.sys.id)}
+          onClick={() =>
+            setSelectedContentType({
+              contentTypeId: contentType.sys.id,
+              contentTypeName: contentType.name,
+            })
+          }
           className={styles.tableRow}>
           <Table.Cell>
             <Radio
               id={contentType.sys.id}
-              isChecked={selectedContentTypeId === contentType.sys.id}
+              isChecked={selectedContentType.contentTypeId === contentType.sys.id}
               onChange={() => null /* noop, since clicking entire row selects this radio */}>
               {contentType.name}
             </Radio>
@@ -60,7 +70,7 @@ const ContentTypeSelectionModal = (props: Props) => {
         </Table.Row>
       );
     },
-    [selectedContentTypeId]
+    [selectedContentType]
   );
 
   const renderModalContent = () => {
@@ -73,7 +83,7 @@ const ContentTypeSelectionModal = (props: Props) => {
     }
 
     const pinnedContentTypes: ContentTypeProps[] = contentTypes.filter(
-      (c) => c.sys.id === selectedContentTypeId
+      (c) => c.sys.id === selectedContentType.contentTypeId
     );
 
     if (contentTypes.length) {
@@ -103,10 +113,10 @@ const ContentTypeSelectionModal = (props: Props) => {
               size="small"
               variant="primary"
               onClick={() => {
-                handleNotificationEdit({ contentTypeId: selectedContentTypeId });
+                handleNotificationEdit(selectedContentType);
                 onClose();
               }}
-              isDisabled={!selectedContentTypeId}>
+              isDisabled={!selectedContentType}>
               {button}
             </Button>
           </Modal.Controls>

@@ -7,7 +7,6 @@ import { contentTypeSelection } from '@constants/configCopy';
 import { Notification } from '@customTypes/configPage';
 import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ContentTypeSelection.styles';
-import { getContentTypeName } from '@helpers/configHelpers';
 import { ContentTypeContext } from '@context/ContentTypeProvider';
 
 interface Props {
@@ -40,6 +39,7 @@ const ContentTypeSelection = (props: Props) => {
           }}
           handleNotificationEdit={handleNotificationEdit}
           savedContentTypeId={notification.contentTypeId}
+          savedContentTypeName={notification.contentTypeName}
           contentTypes={contentTypes}
           contentTypeConfigLink={contentTypeConfigLink}
           error={Boolean(error)}
@@ -60,11 +60,7 @@ const ContentTypeSelection = (props: Props) => {
           <TextInput
             id="selected-content-type"
             isDisabled={true}
-            value={getContentTypeName(
-              notification.contentTypeId,
-              contentTypes,
-              contentTypeSelection.notFound
-            )}
+            value={notification.contentTypeName}
             className={styles.input}
           />
           <IconButton

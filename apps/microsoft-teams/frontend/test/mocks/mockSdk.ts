@@ -20,6 +20,7 @@ const mockSdk: any = {
         {
           channel: mockChannels[0],
           contentTypeId: 'blogPost',
+          contentTypeName: 'Blog Post',
           selectedEvents: {
             'ContentManagement.Entry.archive': false,
             'ContentManagement.Entry.create': false,

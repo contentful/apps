@@ -90,6 +90,7 @@ describe('getDuplicateNotificationIndex', () => {
       getDuplicateNotificationIndex([mockNotification], {
         ...mockNotification,
         contentTypeId: 'page',
+        contentTypeName: 'Page',
       })
     ).toEqual(-1);
   });
@@ -97,7 +98,7 @@ describe('getDuplicateNotificationIndex', () => {
   it('should return the correct index when there are duplicates', () => {
     expect(
       getDuplicateNotificationIndex(
-        [mockNotification, { ...mockNotification, contentTypeId: 'page' }],
+        [mockNotification, { ...mockNotification, contentTypeId: 'page', contentTypeName: 'Page' }],
         mockNotification
       )
     ).toEqual(0);
@@ -106,7 +107,11 @@ describe('getDuplicateNotificationIndex', () => {
   it('should return the correct index when there are duplicates and index is passed in', () => {
     expect(
       getDuplicateNotificationIndex(
-        [{ ...mockNotification, contentTypeId: 'page' }, mockNotification, mockNotification],
+        [
+          { ...mockNotification, contentTypeId: 'page', contentTypeName: 'Page' },
+          mockNotification,
+          mockNotification,
+        ],
         mockNotification,
         2
       )

@@ -15,6 +15,7 @@ describe('NotificationViewMode component', () => {
       />
     );
 
+    expect(screen.getByText('Blog Post')).toBeTruthy();
     expect(screen.getByText('Corporate Marketing, Marketing Department')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'toggle menu' })).toBeTruthy();
     unmount();

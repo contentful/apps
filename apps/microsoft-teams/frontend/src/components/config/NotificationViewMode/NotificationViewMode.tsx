@@ -1,11 +1,8 @@
-import { useContext } from 'react';
-import { ContentTypeContext } from '@context/ContentTypeProvider';
 import { Box, IconButton, Flex, Menu, Subheading, Paragraph } from '@contentful/f36-components';
 import { MoreHorizontalIcon } from '@contentful/f36-icons';
 import { styles } from './NotificationViewMode.styles';
-import { getContentTypeName } from '@helpers/configHelpers';
 import { Notification } from '@customTypes/configPage';
-import { contentTypeSelection, notificationsSection } from '@constants/configCopy';
+import { notificationsSection } from '@constants/configCopy';
 
 interface Props {
   notification: Notification;
@@ -16,19 +13,12 @@ interface Props {
 
 const NotificationViewMode = (props: Props) => {
   const { notification, handleEdit, isMenuDisabled, handleDelete } = props;
-  const { contentTypes } = useContext(ContentTypeContext);
 
   return (
     <Box className={styles.wrapper}>
       <Flex justifyContent="space-between">
         <Flex flexDirection="column">
-          <Subheading marginBottom="none">
-            {getContentTypeName(
-              notification.contentTypeId,
-              contentTypes,
-              contentTypeSelection.notFound
-            )}
-          </Subheading>
+          <Subheading marginBottom="none">{notification.contentTypeName}</Subheading>
           <Paragraph marginBottom="none">
             {`${notification.channel.name}, ${notification.channel.teamName}`}
           </Paragraph>
