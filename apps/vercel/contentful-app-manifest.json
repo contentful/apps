@@ -9,7 +9,13 @@
       "path": "actions/get-preview-envs.js",
       "entryFile": "./app-actions/src/actions/get-preview-envs.ts",
       "allowNetworks": [],
-      "parameters": [ ]
+      "parameters": [
+        {
+          "id": "contentTypeId",
+          "name": "Content type id",
+          "type": "Symbol"
+        }
+      ]
     }
   ]
 }
