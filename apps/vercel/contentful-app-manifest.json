@@ -2,7 +2,7 @@
   "actions": [
     {
       "id": "vercelGetPreviewEnvironments",
-      "name": "Get preview environments provided by the Vercel app",
+      "name": "Get preview environments from Vercel",
       "category": "Custom",
       "description": "This action returns preview environments provided by Vercel",
       "type": "function",
