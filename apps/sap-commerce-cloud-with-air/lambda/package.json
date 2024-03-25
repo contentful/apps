@@ -20,7 +20,7 @@
     "@sentry/node": "^7.38.0",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
-    "express": "^4.17.3",
+    "express": "^4.19.2",
     "express-rate-limit": "^6.7.0",
     "serverless-http": "^3.1.0"
   },
