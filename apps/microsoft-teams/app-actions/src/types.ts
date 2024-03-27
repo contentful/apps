@@ -73,13 +73,14 @@ export type SelectedEvents = {
   [K in AppEventKey]: boolean;
 };
 
-// this is jsut a simple starter for now
+// this is just a simple starter for now
 export interface EntryActivity {
   contentTypeName: string;
   entryTitle: string;
   action: string; // published | deleted | created | etc
   eventDatetime: string;
   entryUrl: string;
+  entryId: string;
 }
 
 export interface WorkflowUpdateMessage {

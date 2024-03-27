@@ -78,6 +78,7 @@ describe('handle-app-event.handler', () => {
         action: 'published',
         eventDatetime: '2024-01-18T21:43:54.267Z',
         entryUrl: 'https://example.com/asdf',
+        entryId: '1234',
       });
 
       try {

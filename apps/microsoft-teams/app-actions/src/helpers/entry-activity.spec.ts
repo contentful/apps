@@ -45,6 +45,7 @@ describe('buildEntryActivity', () => {
     expect(result).to.have.property('action', 'archived');
     expect(result).to.have.property('eventDatetime', entryEvent.eventDatetime);
     expect(result).to.have.property('entryUrl', url);
+    expect(result).to.have.property('entryId', entryId);
   });
 
   describe('when no displayField in content type', () => {
