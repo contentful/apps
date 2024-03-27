@@ -20,12 +20,15 @@ export const buildEntryActivity = async (
 
   const entryUrl = computeEntryUrl(entry, cmaHost);
 
+  const entryId = entry.sys.id;
+
   return {
     contentTypeName,
     entryTitle,
     action,
     eventDatetime,
     entryUrl,
+    entryId,
   };
 };
 

@@ -131,13 +131,13 @@ export const handler = withAsyncAppActionErrorHandling(
       return { sendMessageResult, entryActivityMessage };
     });
 
-    const sendEntryActiviyMessageResult: SendEntryActivityMessageResult[] = await Promise.all(
+    const sendEntryActivityMessageResult: SendEntryActivityMessageResult[] = await Promise.all(
       entryActivityMessages
     );
 
     return {
       ok: true,
-      data: sendEntryActiviyMessageResult,
+      data: sendEntryActivityMessageResult,
     };
   }
 );
