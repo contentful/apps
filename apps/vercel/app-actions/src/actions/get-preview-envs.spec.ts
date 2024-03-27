@@ -10,9 +10,7 @@ describe('get-preview-env.handler', () => {
   let cmaRequestStub: sinon.SinonStub;
   let context: AppActionCallContext;
 
-  const callParameters = {
-    contentTypeId: 'contentTypeId',
-  };
+  const callParameters = {};
 
   const cmaClientMockResponses: [AppInstallationProps] = [
     {
