@@ -48,6 +48,8 @@ export const ContentTypePreviewPathSelectionList: React.FC<Props> = ({
     Boolean(addRow.length) || !Boolean(contentTypePreviewPathSelections.length);
 
   const renderSelectionRow = () => {
+    // TO DO: Handle case where contentTypes are not present - do not render add button etc.
+    if (!contentTypes?.length) return;
     if (!contentTypePreviewPathSelections?.length) {
       return (
         <ContentTypePreviewPathSelectionRow

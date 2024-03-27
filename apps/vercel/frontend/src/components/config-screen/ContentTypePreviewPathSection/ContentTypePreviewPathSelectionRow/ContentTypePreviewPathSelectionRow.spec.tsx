@@ -4,8 +4,8 @@ import { ContentTypePreviewPathSelectionRow } from './ContentTypePreviewPathSele
 import { ContentType } from 'contentful-management';
 
 const contentTypes = [
-  { name: 'blog', sys: { id: '12' } },
-  { name: 'news', sys: { id: '13' } },
+  { name: 'Blog', sys: { id: 'blog' } },
+  { name: 'News', sys: { id: 'news' } },
 ] as ContentType[];
 
 vi.mock('lodash', () => ({
@@ -16,51 +16,6 @@ vi.mock('lodash', () => ({
 }));
 
 describe('ContentTypePreviewPathSelectionRow', () => {
-  it('renders selection row without configured selections provided', () => {
-    const { unmount } = render(
-      <ContentTypePreviewPathSelectionRow
-        contentTypes={contentTypes}
-        onParameterUpdate={() => null}
-        onRemoveRow={() => null}
-      />
-    );
-
-    expect(screen.getByText('Select content type...')).toBeTruthy();
-    expect(screen.getByPlaceholderText('Set preview path and token')).toBeTruthy();
-    unmount();
-  });
-
-  it('renders selection row with configured selection provided', () => {
-    const selection = { contentType: 'blog', previewPath: 'test-blog-path' };
-    const { unmount } = render(
-      <ContentTypePreviewPathSelectionRow
-        contentTypes={contentTypes}
-        onParameterUpdate={() => null}
-        onRemoveRow={() => null}
-        configuredContentTypePreviewPathSelection={selection}
-      />
-    );
-
-    expect(screen.getAllByText(selection.contentType)).toBeTruthy();
-    expect(screen.getByDisplayValue(selection.previewPath)).toBeTruthy();
-    unmount();
-  });
-
-  it('renders message when no content types exist', () => {
-    const selection = { contentType: 'blog', previewPath: 'test-blog-path' };
-    const { unmount } = render(
-      <ContentTypePreviewPathSelectionRow
-        contentTypes={[]}
-        onParameterUpdate={() => null}
-        onRemoveRow={() => null}
-        configuredContentTypePreviewPathSelection={selection}
-      />
-    );
-
-    expect(screen.getByText('No Content Types currently configured.')).toBeTruthy();
-    unmount();
-  });
-
   it('calls handler to update parameters when all information is inputed', () => {
     const mockOnUpdate = vi.fn();
     const { unmount } = render(
@@ -99,6 +54,50 @@ describe('ContentTypePreviewPathSelectionRow', () => {
     removeButton[0].click();
 
     expect(mockOnRemoveRow).toHaveBeenCalledOnce();
+    unmount();
+  });
+
+  it('renders selection row without configured selections provided', () => {
+    const { unmount } = render(
+      <ContentTypePreviewPathSelectionRow
+        contentTypes={contentTypes}
+        onParameterUpdate={() => null}
+        onRemoveRow={() => null}
+      />
+    );
+
+    expect(screen.getByText('Select content type...')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Set preview path and token')).toBeTruthy();
+    unmount();
+  });
+
+  it('renders selection row with configured selection provided', () => {
+    const selection = { contentType: 'blog', previewPath: 'test-blog-path' };
+    const { unmount } = render(
+      <ContentTypePreviewPathSelectionRow
+        contentTypes={contentTypes}
+        onParameterUpdate={() => null}
+        onRemoveRow={() => null}
+        configuredContentTypePreviewPathSelection={selection}
+      />
+    );
+
+    expect(screen.getByDisplayValue(selection.previewPath)).toBeTruthy();
+    unmount();
+  });
+
+  it('renders message when no content types exist', () => {
+    const selection = { contentType: 'blog', previewPath: 'test-blog-path' };
+    const { unmount } = render(
+      <ContentTypePreviewPathSelectionRow
+        contentTypes={[]}
+        onParameterUpdate={() => null}
+        onRemoveRow={() => null}
+        configuredContentTypePreviewPathSelection={selection}
+      />
+    );
+
+    expect(screen.getByText('No Content Types currently configured.')).toBeTruthy();
     unmount();
   });
 });

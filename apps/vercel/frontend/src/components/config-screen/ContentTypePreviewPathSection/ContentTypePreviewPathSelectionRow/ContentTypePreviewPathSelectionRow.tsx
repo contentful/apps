@@ -60,7 +60,8 @@ export const ContentTypePreviewPathSelectionRow = ({
     }
   }, [contentTypesPreviewPathSelection.contentType, contentTypesPreviewPathSelection.previewPath]);
 
-  const { contentType, previewPath } = configuredContentTypePreviewPathSelection;
+  const { contentType: configuredContentType, previewPath: configuredPreviewPath } =
+    configuredContentTypePreviewPathSelection;
 
   return (
     <Box className={styles.wrapper}>
@@ -73,7 +74,7 @@ export const ContentTypePreviewPathSelectionRow = ({
             id="contentTypeSelect"
             name="contentTypeSelect"
             className={styles.select}
-            defaultValue={contentType}
+            defaultValue={configuredContentType}
             onChange={handleContentTypeChange}>
             {contentTypes && contentTypes.length ? (
               <>
@@ -91,7 +92,7 @@ export const ContentTypePreviewPathSelectionRow = ({
             )}
           </Select>
           <TextInput
-            defaultValue={previewPath}
+            defaultValue={configuredPreviewPath}
             onChange={debouncedHandlePreviewPathInputChange}
             placeholder="Set preview path and token"
           />
