@@ -28,7 +28,7 @@ interface ContentBlockStartMsg {
   };
 }
 
-class ClaudeMessageModel implements BedrockModel {
+class ClaudeModel implements BedrockModel {
   id: string;
   name: string;
 
@@ -68,40 +68,6 @@ class ClaudeMessageModel implements BedrockModel {
     if (response.type == 'content_block_delta') return response.delta.text;
 
     return '';
-  }
-}
-
-class ClaudeModel implements BedrockModel {
-  id: string;
-  name: string;
-
-  constructor(id: string, name: string) {
-    this.id = id;
-    this.name = name;
-  }
-  invokeCommand(systemPrompt: string, prompt: string, maxTokens?: number): InvokeModelCommandInput {
-    const completePrompt = `
-${systemPrompt}
-
-Make sure you follow the exact requirements in the input.
-
-Human: ${prompt}
-
-Assistant:`;
-
-    return {
-      modelId: this.id,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        prompt: completePrompt,
-        ...(maxTokens && { max_tokens_to_sample: maxTokens }),
-        temperature: 0.8,
-      }),
-    };
-  }
-
-  parseResponse(response: { completion: string }) {
-    return response.completion;
   }
 }
 
@@ -165,7 +131,7 @@ class MistralModel implements BedrockModel {
 }
 
 export const featuredModels: BedrockModel[] = [
-  new ClaudeMessageModel('anthropic.claude-3-sonnet-20240229-v1:0', 'Anthropic Claude v3 Sonnet'),
+  new ClaudeModel('anthropic.claude-3-sonnet-20240229-v1:0', 'Anthropic Claude v3 Sonnet'),
   new ClaudeModel('anthropic.claude-v2:1', 'Anthropic Claude v2.1'),
   new ClaudeModel('anthropic.claude-instant-v1', 'Anthropic Claude Instant v1.2'),
   new LlamaModel('meta.llama2-70b-chat-v1', 'Meta Llama 2 70B'),
