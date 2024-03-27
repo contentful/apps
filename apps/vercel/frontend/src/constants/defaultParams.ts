@@ -6,5 +6,5 @@ export const initialParameters: AppInstallationParameters = {
   projects: [],
   contentTypes: [],
   selectedProject: '',
-  selectedContentType: '',
+  contentTypePreviewPathSelections: [{ contentType: '', previewPath: '' }],
 };
