@@ -5,7 +5,10 @@ import { GlobalStyles } from '@contentful/f36-components';
 import App from './App';
 import LocalhostWarning from '@components/LocalhostWarning';
 import { SdkWithCustomApiProvider } from '@context/SdkWithCustomApiProvider';
-import { sentryMarketplaceAppsSDK } from '@contentful/integration-frontend-toolkit/sdks';
+import {
+  SegmentAnalyticsProvider,
+  sentryMarketplaceAppsSDK,
+} from '@contentful/integration-frontend-toolkit/sdks';
 import AuthProvider from '@context/AuthProvider';
 
 const { client: SentryClient, init: SentryInit } = sentryMarketplaceAppsSDK;
@@ -23,10 +26,12 @@ if (import.meta.env.DEV && window.self === window.top) {
   root.render(
     <SentryClient.ErrorBoundary>
       <SdkWithCustomApiProvider>
-        <AuthProvider>
-          <GlobalStyles />
-          <App />
-        </AuthProvider>
+        <SegmentAnalyticsProvider writeKey={import.meta.env.VITE_APP_SEGMENT_WRITE_KEY}>
+          <AuthProvider>
+            <GlobalStyles />
+            <App />
+          </AuthProvider>
+        </SegmentAnalyticsProvider>
       </SdkWithCustomApiProvider>
     </SentryClient.ErrorBoundary>
   );

@@ -14,13 +14,13 @@
     "start": "npm run build && serverless offline --httpPort 3000"
   },
   "dependencies": {
-    "aws-sdk": "^2.1576.0",
+    "aws-sdk": "^2.1586.0",
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.136",
     "@types/lodash": "^4.17.0",
-    "@types/chai": "^4.3.12",
+    "@types/chai": "^4.3.14",
     "@types/mocha": "^9.1.1",
     "@types/node": "^12.12.14",
     "@types/node-fetch": "^2.6.4",
@@ -40,6 +40,6 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
     "tslint-no-unused-expression-chai": "^0.1.4",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.3"
   }
 }

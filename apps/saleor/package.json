@@ -5,13 +5,13 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.2.1",
     "cross-env": "7.0.3",
-    "react-scripts": "4.0.3"
+    "react-scripts": "5.0.1"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.13.0",
     "@contentful/ecommerce-app-base": "3.1.48",
     "@types/lodash": "4.17.0",
-    "core-js": "3.36.0",
+    "core-js": "3.36.1",
     "graphql": "15.8.0",
     "graphql-tag": "2.12.6",
     "lodash": "4.17.21",

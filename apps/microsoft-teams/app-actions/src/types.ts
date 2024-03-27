@@ -82,6 +82,15 @@ export interface EntryActivity {
   entryUrl: string;
 }
 
+export interface WorkflowUpdateMessage {
+  title: string;
+  currentStep: string;
+  previousStep: string;
+  contentType: string;
+  callToActionUrl: string; // URL
+  updateDateTime: string; // DateTime '2024-01-18T21:43:54.267Z',
+}
+
 export interface EntryActivityMessage {
   channel: {
     teamId: string;
@@ -126,6 +135,11 @@ export type MsTeamsBotServiceResponse<T> =
 export interface SendEntryActivityMessageResult {
   entryActivityMessage: EntryActivityMessage;
   sendMessageResult: MsTeamsBotServiceResponse<MessageResponse>;
+}
+
+export interface SendWorkflowUpdateMessageResult {
+  workflowUpdateMessage: WorkflowUpdateMessage;
+  sendWorkflowUpdateResult: MsTeamsBotServiceResponse<MessageResponse>;
 }
 
 export interface EntryEvent {

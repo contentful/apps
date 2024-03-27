@@ -40,7 +40,10 @@ const computeEntryTitle = (
   if (!displayField) return NO_ENTRY_TITLE;
 
   const defaultLocaleCode = computeDefaultLocaleCode(locales);
-  const entryTitleField = entry.fields[displayField];
+
+  // the entry here could be a DeletedEntry which is lacking a fields attribute. We will do a runtime
+  // check here to catch this
+  const entryTitleField = entry.fields && entry.fields[displayField];
 
   if (!entryTitleField) return NO_ENTRY_TITLE;
 
