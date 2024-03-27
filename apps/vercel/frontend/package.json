@@ -16,7 +16,8 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "test:ci": "vitest"
+    "test:ci": "vitest",
+    "test": "vitest --watch"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.10.2",
