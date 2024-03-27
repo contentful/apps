@@ -1,12 +1,16 @@
 import { ContentType } from '@contentful/app-sdk';
 
+export type ContentTypePreviewPathSelection = {
+  contentType: string;
+  previewPath: string;
+};
 export interface AppInstallationParameters {
   vercelAccessToken: string;
   vercelAccessTokenStatus: boolean | null;
   projects: Project[];
   selectedProject: string;
+  contentTypePreviewPathSelections: ContentTypePreviewPathSelection[];
   contentTypes: ContentType[];
-  selectedContentType: string;
 }
 
 export interface Project {

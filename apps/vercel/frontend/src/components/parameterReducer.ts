@@ -1,5 +1,5 @@
 import { ContentType } from '@contentful/app-sdk';
-import { AppInstallationParameters, Project } from '../types';
+import { AppInstallationParameters, ContentTypePreviewPathSelection, Project } from '../types';
 
 export enum actions {
   UPDATE_VERCEL_ACCESS_TOKEN = 'updateVercelAccessToken',
@@ -8,7 +8,8 @@ export enum actions {
   UPDATE_VERCEL_PROJECTS = 'updateVercelProjects',
   APPLY_SELECTED_PROJECT = 'applySelectedProject',
   UPDATE_CONTENT_TYPES = 'updateContentTypes',
-  APPLY_SELECTED_CONTENT_TYPE = 'applySelectedContentType',
+  ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION = 'addContentTypePreviewPathSelection',
+  REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION = 'removeContentTypePreviewPathSelection',
 }
 
 type VercelAccessTokenAction = {
@@ -36,14 +37,19 @@ type ContentTypesAction = {
   payload: ContentType[];
 };
 
-type SelectedContentTypeAction = {
-  type: actions.APPLY_SELECTED_CONTENT_TYPE;
-  payload: string;
-};
-
 type ApplyContentfulParametersAction = {
   type: actions.APPLY_CONTENTFUL_PARAMETERS;
   payload: AppInstallationParameters;
+};
+
+type AddContentTypePreviewPathSelectionAction = {
+  type: actions.ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION;
+  payload: ContentTypePreviewPathSelection;
+};
+
+type RemoveContentTypePreviewPathSelection = {
+  type: actions.REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION;
+  payload: ContentTypePreviewPathSelection;
 };
 
 export type ParameterAction =
@@ -53,7 +59,8 @@ export type ParameterAction =
   | VercelSelectedProjectAction
   | VercelAccessTokenStatusAction
   | ContentTypesAction
-  | SelectedContentTypeAction;
+  | AddContentTypePreviewPathSelectionAction
+  | RemoveContentTypePreviewPathSelection;
 
 const {
   UPDATE_VERCEL_ACCESS_TOKEN,
@@ -62,7 +69,8 @@ const {
   UPDATE_VERCEL_PROJECTS,
   APPLY_SELECTED_PROJECT,
   UPDATE_CONTENT_TYPES,
-  APPLY_SELECTED_CONTENT_TYPE,
+  ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
+  REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
 } = actions;
 
 const parameterReducer = (
@@ -85,6 +93,8 @@ const parameterReducer = (
       return {
         ...state,
         vercelAccessToken: parameters.vercelAccessToken,
+        contentTypePreviewPathSelections: parameters.contentTypePreviewPathSelections,
+        projects: parameters.projects,
       };
     }
     case UPDATE_VERCEL_PROJECTS: {
@@ -108,11 +118,25 @@ const parameterReducer = (
         contentTypes,
       };
     }
-    case APPLY_SELECTED_CONTENT_TYPE: {
-      const selectedContentType = action.payload;
+    case ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION: {
+      const contentTypePreviewPathSelection = action.payload;
+      const currentState = state.contentTypePreviewPathSelections || [];
       return {
         ...state,
-        selectedContentType,
+        contentTypePreviewPathSelections: [...currentState, contentTypePreviewPathSelection],
+      };
+    }
+    case REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION: {
+      const contentTypePreviewPathSelection = action.payload;
+      const { contentType, previewPath } = contentTypePreviewPathSelection;
+
+      const filteredSelections = state.contentTypePreviewPathSelections.filter(
+        (selection) =>
+          selection.contentType !== contentType && selection.previewPath !== previewPath
+      );
+      return {
+        ...state,
+        contentTypePreviewPathSelections: filteredSelections,
       };
     }
     default:

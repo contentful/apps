@@ -20,8 +20,8 @@ import useInitializeParameters from '../hooks/useInitializeParameters';
 import parameterReducer, { actions } from '../components/parameterReducer';
 import { initialParameters } from '../constants/defaultParams';
 import VercelClient from '../clients/Vercel';
-import ContentTypeSelect from '../components/config-screen/ContentTypeSelect';
 import ProjectSelect from '../components/config-screen/ProjectSelect';
+import { ContentTypePreviewPathSection } from '../components/config-screen/ContentTypePreviewPathSection/ContentTypePreviewPathSection';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
@@ -141,8 +141,8 @@ const ConfigScreen = () => {
         </Box>
         <hr className={styles.splitter} />
         <Stack spacing="spacingS" flexDirection="column">
-          <Box style={styles.box}>
-            <Heading style={styles.box.heading}>Connect Vercel</Heading>
+          <Box className={styles.box}>
+            <Heading className={styles.heading}>Connect Vercel</Heading>
             <FormControl id="accessToken" isRequired={true}>
               <FormControl.Label aria-label="accessToken" htmlFor="accessToken">
                 Vercel Access Token
@@ -168,7 +168,7 @@ const ConfigScreen = () => {
                 </TextLink>{' '}
                 to create an access token in the Vercel dashboard.
               </HelpText>
-              <Box style={styles.badgeContainer}>
+              <Box className={styles.badgeContainer}>
                 <Flex fullWidth flexDirection="column">
                   <Text fontWeight="fontWeightDemiBold" marginRight="spacing2Xs">
                     Status
@@ -179,20 +179,15 @@ const ConfigScreen = () => {
               <hr className={styles.splitter} />
             </FormControl>
           </Box>
-          <Box style={styles.box}>
-            <Heading style={styles.selectSection.heading}>Configure Deployment</Heading>
+          <Box className={styles.box}>
+            <Heading className={styles.heading}>Configure Deployment</Heading>
             <ProjectSelect parameters={parameters} dispatch={dispatchParameters} />
             <hr className={styles.splitter} />
           </Box>
-          <Box style={styles.box}>
-            <Heading marginBottom="none" style={styles.selectSection.heading}>
-              Assign Content Types
-            </Heading>
-            <Paragraph marginTop="spacingXs">
-              The deployment status will be displayed on the sidebars of these content types.
-            </Paragraph>
-            <ContentTypeSelect parameters={parameters} dispatch={dispatchParameters} />
-          </Box>
+          <ContentTypePreviewPathSection
+            parameters={parameters}
+            dispatchParameters={dispatchParameters}
+          />
         </Stack>
       </Box>
     </>

@@ -24,12 +24,9 @@ export const styles = {
     height: '300px',
     backgroundColor: VercelBrand.primaryColor,
   }),
-  box: {
+  box: css({
     width: '100%',
-    heading: {
-      fontSize: '1rem',
-    },
-  },
+  }),
   splitter: css({
     marginTop: tokens.spacingL,
     marginBottom: tokens.spacingL,
@@ -37,19 +34,14 @@ export const styles = {
     height: '1px',
     backgroundColor: tokens.gray300,
   }),
-  badgeContainer: {
+  badgeContainer: css({
     marginTop: '10px',
     width: '100%',
-  },
-  icon: {
+  }),
+  icon: css({
     marginTop: '41px',
-  },
-  selectSection: {
-    heading: {
-      fontSize: '1rem',
-    },
-    select: {
-      width: '50%',
-    },
-  },
+  }),
+  heading: css({
+    fontSize: '1rem',
+  }),
 };
