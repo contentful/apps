@@ -1,4 +1,4 @@
-import { ContentType } from 'contentful-management';
+import { ContentType } from '@contentful/app-sdk';
 import { PlusIcon } from '@contentful/f36-icons';
 import { Button } from '@contentful/f36-components';
 import { useState, Dispatch, SetStateAction } from 'react';
