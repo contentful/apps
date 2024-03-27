@@ -1,7 +1,7 @@
 import { ContentType } from '@contentful/app-sdk';
 
 export type ContentTypePreviewPathSelection = {
-  contentType: ContentType;
+  contentType: string;
   previewPath: string;
 };
 export interface AppInstallationParameters {
