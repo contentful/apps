@@ -1,9 +1,9 @@
 import { Paragraph, Flex, Modal, Button, Box, TextLink } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 
-import { GrayInfoBox } from '../../../common/GrayInfoBox/GrayInfoBox';
+import { GrayInfoBox } from '@components/common/GrayInfoBox/GrayInfoBox';
+import { copies } from '@constants/copies';
 import { InformationalTables } from './InformationalTables/InformationalTables';
-import { copies } from '../../../../constants/copies';
 import { styles } from './InformationalModal.styles';
 
 interface Props {

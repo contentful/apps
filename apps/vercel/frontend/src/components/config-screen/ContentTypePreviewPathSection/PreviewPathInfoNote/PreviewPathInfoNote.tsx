@@ -1,10 +1,10 @@
 import { Note, TextLink, Flex, ModalLauncher } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 
-import { GrayInfoBox } from '../../../common/GrayInfoBox/GrayInfoBox';
+import { GrayInfoBox } from '@components/common/GrayInfoBox/GrayInfoBox';
 import { InformationalModal } from '../InformationalModal/InformationalModal';
 import { styles } from './PreviewPathInfoNote.styles';
-import { copies } from '../../../../constants/copies';
+import { copies } from '@constants/copies';
 
 // this gap is tailored specifically to the designs of the modal
 const FLEX_GAP = '11rem';

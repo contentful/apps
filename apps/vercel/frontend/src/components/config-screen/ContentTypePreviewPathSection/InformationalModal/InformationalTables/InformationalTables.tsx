@@ -1,11 +1,11 @@
 import tokens from '@contentful/f36-tokens';
 
 import { InfoTable } from './InfoTable/InfoTable';
-import { GrayInfoBox } from '../../../../common/GrayInfoBox/GrayInfoBox';
-import { copies } from '../../../../../constants/copies';
+import { GrayInfoBox } from '@components/common/GrayInfoBox/GrayInfoBox';
+import { copies } from '@constants/copies';
 import { TextLink, Paragraph, Box } from '@contentful/f36-components';
 import { styles } from './InformationalTables.styles';
-import { INFORMATIONAL_MODAL_COLUMN_WIDTH } from '../../../../../constants/styles';
+import { INFORMATIONAL_MODAL_COLUMN_WIDTH } from '@constants/styles';
 
 type TableRow = {
   example: string;

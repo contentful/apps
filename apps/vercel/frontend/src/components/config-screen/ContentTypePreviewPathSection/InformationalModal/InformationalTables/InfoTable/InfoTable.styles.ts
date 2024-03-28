@@ -1,6 +1,6 @@
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import { INFORMATIONAL_MODAL_COLUMN_WIDTH } from '../../../../../../constants/styles';
+import { INFORMATIONAL_MODAL_COLUMN_WIDTH } from '@constants/styles';
 
 export const styles = {
   headersWrapper: css({
