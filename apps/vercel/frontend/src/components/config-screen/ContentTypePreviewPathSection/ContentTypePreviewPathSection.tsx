@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { ContentTypePreviewPathSelectionList } from './ContentTypePreviewPathSelectionList/ContentTypePreviewPathSelectionList';
 import { styles } from '../ConfigScreen.styles';
 import { AppInstallationParameters } from '../../../types';
+import { PreviewPathInfoNote } from './PreviewPathInfoNote/PreviewPathInfoNote';
 
 interface Props {
   parameters: AppInstallationParameters;
@@ -13,6 +14,7 @@ interface Props {
 export const ContentTypePreviewPathSection = ({ parameters, dispatchParameters }: Props) => {
   // TO DO: Adjust logic to limit content type duplication of preview path and token
   const { contentTypes, contentTypePreviewPathSelections } = parameters;
+
   return (
     <Box className={styles.box}>
       <Heading marginBottom="none" className={styles.heading}>
@@ -21,6 +23,7 @@ export const ContentTypePreviewPathSection = ({ parameters, dispatchParameters }
       <Paragraph marginTop="spacingXs">
         Select applicable content types and define corresponding preview paths and preview tokens.
       </Paragraph>
+      <PreviewPathInfoNote />
       <ContentTypePreviewPathSelectionList
         contentTypes={contentTypes}
         contentTypePreviewPathSelections={contentTypePreviewPathSelections}
