@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  Box,
   Button,
   FormControl,
   Modal,
@@ -81,7 +82,9 @@ const ChannelSelectionModal = (props: ChannelSelectionModalProps) => {
     if (error) {
       return (
         <Modal.Content>
-          <ErrorMessage errorMessage={errorMessage} />
+          <Box paddingTop="spacingL" paddingBottom="spacingL">
+            <ErrorMessage errorMessage={errorMessage} fontColor="gray700" hasOutlineIcon={false} />
+          </Box>
         </Modal.Content>
       );
     }

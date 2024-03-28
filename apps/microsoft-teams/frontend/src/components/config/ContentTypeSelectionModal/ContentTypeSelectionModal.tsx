@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Button, FormControl, Modal, Radio, Table } from '@contentful/f36-components';
+import { Box, Button, FormControl, Modal, Radio, Table } from '@contentful/f36-components';
 import { contentTypeSelection } from '@constants/configCopy';
 import { styles } from './ContentTypeSelectionModal.styles';
 import { Notification } from '@customTypes/configPage';
@@ -77,7 +77,9 @@ const ContentTypeSelectionModal = (props: Props) => {
     if (error) {
       return (
         <Modal.Content>
-          <ErrorMessage errorMessage={errorMessage} />
+          <Box paddingTop="spacingL" paddingBottom="spacingL">
+            <ErrorMessage errorMessage={errorMessage} fontColor="gray700" hasOutlineIcon={false} />
+          </Box>
         </Modal.Content>
       );
     }
