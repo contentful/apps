@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getContentTypeName,
+  isContentTypeValid,
   isNotificationReadyToSave,
   canTestNotificationBeSent,
   areAllFieldsCompleted,
@@ -10,21 +10,16 @@ import {
   getDuplicateNotificationIndex,
 } from './configHelpers';
 import { mockContentType } from '@test/mocks';
-import { contentTypeSelection } from '@constants/configCopy';
 import { defaultNotification } from '@constants/defaultParams';
 import { mockNotification } from '@test/mocks';
 
-describe('getContentTypeName', () => {
-  it('should return the content type name', () => {
-    expect(getContentTypeName('page', [mockContentType], contentTypeSelection.notFound)).toEqual(
-      'Page'
-    );
+describe('isContentTypeValid', () => {
+  it('should return true if the content type is valid', () => {
+    expect(isContentTypeValid('page', [mockContentType])).toEqual(true);
   });
 
-  it('should return not found message if content type does not exist', () => {
-    expect(
-      getContentTypeName('test-not-found', [mockContentType], contentTypeSelection.notFound)
-    ).toEqual(contentTypeSelection.notFound);
+  it('should return false if the content type is not valid', () => {
+    expect(isContentTypeValid('test-not-found', [mockContentType])).toEqual(false);
   });
 });
 

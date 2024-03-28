@@ -4,20 +4,14 @@ import isEqual from 'lodash/isEqual';
 import { defaultNotification } from '@constants/defaultParams';
 
 /**
- * Gets the content type name for a given content type id
- * returns a not found string if the content type is not found
+ * Checks to see if a given content type id is valid based on the content types available
  * @param contentTypeId
  * @param contentTypes
- * @param notFoundCopy
- * @returns string
+ * @returns boolean
  */
-const getContentTypeName = (
-  contentTypeId: string,
-  contentTypes: ContentTypeProps[],
-  notFoundCopy: string
-): string => {
+const isContentTypeValid = (contentTypeId: string, contentTypes: ContentTypeProps[]): boolean => {
   const contentType = contentTypes.find((contentType) => contentType.sys.id === contentTypeId);
-  return contentType ? contentType.name : notFoundCopy;
+  return !!contentType;
 };
 
 /**
@@ -141,7 +135,7 @@ const getDuplicateNotificationIndex = (
 };
 
 export {
-  getContentTypeName,
+  isContentTypeValid,
   isNotificationReadyToSave,
   canTestNotificationBeSent,
   areAllFieldsCompleted,
