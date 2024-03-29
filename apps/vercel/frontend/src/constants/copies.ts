@@ -1,5 +1,11 @@
 export const copies = {
   configPage: {
+    projectSelectionSection: {
+      heading: 'Configure a live preview for a project',
+      subHeading: 'Select one of your Vercel projects in order to configure live preview.',
+      footer: 'Projects are populated based on your Vercel account.',
+      link: 'Learn how to construct a preview path and token.',
+    },
     contentTypePreviewPathSection: {
       infoNote: {
         infoBoxExample: '/blogs/{entry.fields.slug}',

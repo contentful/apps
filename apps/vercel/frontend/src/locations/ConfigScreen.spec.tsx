@@ -9,14 +9,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useAutoResizer: () => {},
 }));
 
-const saveAppInstallation = () => {
-  // We manually call the LAST onConfigure() callback (this is important, as earlier calls have stale data)
-  return mockSdk.app.onConfigure.mock.calls.at(-1)[0]();
-};
-
 describe('ConfigScreen', () => {
-  const testToken = 'abc1234';
-
   it('renders setup view', async () => {
     const { unmount } = render(<ConfigScreen />);
     // simulate the user clicking the install button

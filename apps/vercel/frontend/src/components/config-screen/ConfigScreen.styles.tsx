@@ -28,11 +28,12 @@ export const styles = {
     width: '100%',
   }),
   splitter: css({
-    marginTop: tokens.spacingL,
+    marginTop: tokens.spacingM,
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
     backgroundColor: tokens.gray300,
+    width: '100%',
   }),
   badgeContainer: css({
     marginTop: '10px',

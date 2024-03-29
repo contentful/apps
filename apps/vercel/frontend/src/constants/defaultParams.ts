@@ -1,10 +1,8 @@
-import { AppInstallationParameters } from '../types';
+import { AppInstallationParameters } from '@customTypes/configPage';
 
 export const initialParameters: AppInstallationParameters = {
   vercelAccessToken: '',
   vercelAccessTokenStatus: null,
-  projects: [],
-  contentTypes: [],
   selectedProject: '',
   contentTypePreviewPathSelections: [],
 };

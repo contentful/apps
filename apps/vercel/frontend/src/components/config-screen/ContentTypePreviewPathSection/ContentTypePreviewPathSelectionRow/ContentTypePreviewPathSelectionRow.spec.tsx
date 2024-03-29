@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { ContentType } from '@contentful/app-sdk';
 import { ContentTypePreviewPathSelectionRow } from './ContentTypePreviewPathSelectionRow';
-import { ContentType } from 'contentful-management';
 
 const contentTypes = [
   { name: 'Blog', sys: { id: 'blog' } },
@@ -9,7 +9,7 @@ const contentTypes = [
 ] as ContentType[];
 
 vi.mock('lodash', () => ({
-  debounce: (fn: { cancel: any }) => {
+  debounce: (fn: { cancel: () => void }) => {
     fn.cancel = vi.fn();
     return fn;
   },

@@ -16,8 +16,9 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "test:ci": "vitest",
-    "test": "vitest --watch"
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest --watch",
+    "test:ci": "vitest"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.10.2",

@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK, ContentType } from '@contentful/app-sdk';
 import {
   Box,
   Flex,
@@ -15,17 +15,20 @@ import {
 } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-import { styles } from '../components/config-screen/ConfigScreen.styles';
-import useInitializeParameters from '../hooks/useInitializeParameters';
-import parameterReducer, { actions } from '../components/parameterReducer';
-import { initialParameters } from '../constants/defaultParams';
-import VercelClient from '../clients/Vercel';
-import ProjectSelect from '../components/config-screen/ProjectSelect';
-import { ContentTypePreviewPathSection } from '../components/config-screen/ContentTypePreviewPathSection/ContentTypePreviewPathSection';
+import { styles } from '@components/config-screen/ConfigScreen.styles';
+import useInitializeParameters from '@hooks/useInitializeParameters';
+import parameterReducer, { actions } from '@components/parameterReducer';
+import { ContentTypePreviewPathSection } from '@components/config-screen/ContentTypePreviewPathSection/ContentTypePreviewPathSection';
+import { ProjectSelectionSection } from '@components/config-screen/ProjectSelectionSection/ProjectSelectionSection';
+import { initialParameters } from '@constants/defaultParams';
+import VercelClient from '@clients/Vercel';
+import { Project } from '@customTypes/configPage';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [appInstalled, setIsAppInstalled] = useState(false);
+  const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
 
   useInitializeParameters(dispatchParameters);
@@ -88,10 +91,7 @@ const ConfigScreen = () => {
       const contentTypesResponse = await sdk.cma.contentType.getMany({});
 
       if (contentTypesResponse.items && contentTypesResponse.items.length) {
-        dispatchParameters({
-          type: actions.UPDATE_CONTENT_TYPES,
-          payload: contentTypesResponse.items,
-        });
+        setContentTypes(contentTypesResponse.items);
       }
     }
 
@@ -103,10 +103,7 @@ const ConfigScreen = () => {
       const data = await vercelClient.listProjects();
 
       if (parameters.vercelAccessToken) {
-        dispatchParameters({
-          type: actions.UPDATE_VERCEL_PROJECTS,
-          payload: data.projects,
-        });
+        setProjects(data.projects);
       }
     }
 
@@ -176,17 +173,19 @@ const ConfigScreen = () => {
                   <Box>{renderStatusBadge()}</Box>
                 </Flex>
               </Box>
-              <hr className={styles.splitter} />
             </FormControl>
           </Box>
-          <Box className={styles.box}>
-            <Heading className={styles.heading}>Configure Deployment</Heading>
-            <ProjectSelect parameters={parameters} dispatch={dispatchParameters} />
-            <hr className={styles.splitter} />
-          </Box>
+          <hr className={styles.splitter} />
+          <ProjectSelectionSection
+            parameters={parameters}
+            dispatch={dispatchParameters}
+            projects={projects}
+          />
+          <hr className={styles.splitter} />
           <ContentTypePreviewPathSection
             parameters={parameters}
-            dispatchParameters={dispatchParameters}
+            dispatch={dispatchParameters}
+            contentTypes={contentTypes}
           />
         </Stack>
       </Box>

@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { InformationalModal } from './InformationalModal';
 import { copies } from '@constants/copies';
+import { InformationalModal } from './InformationalModal';
 
 const { title, button, exampleOne, exampleTwo, exampleThree } =
   copies.configPage.contentTypePreviewPathSection.exampleModal;

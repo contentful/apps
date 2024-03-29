@@ -5,8 +5,8 @@ import { debounce } from 'lodash';
 import tokens from '@contentful/f36-tokens';
 import { ContentType } from '@contentful/app-sdk';
 
+import { ContentTypePreviewPathSelection } from '@customTypes/configPage';
 import { styles } from './ContentTypePreviewPathSelectionRow.styles';
-import { ContentTypePreviewPathSelection } from '../../../../types';
 
 interface Props {
   contentTypes: ContentType[];

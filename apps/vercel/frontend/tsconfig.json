@@ -19,7 +19,7 @@
       "@components/*": ["./src/components/*"],
       "@constants/*": ["./src/constants/*"],
       "@hooks/*": ["./src/hooks/*"],
-      "@types/*": ["./src/types/*"],
+      "@customTypes/*": ["./src/customTypes/*"],
     },
     "jsx": "react-jsx"
   },

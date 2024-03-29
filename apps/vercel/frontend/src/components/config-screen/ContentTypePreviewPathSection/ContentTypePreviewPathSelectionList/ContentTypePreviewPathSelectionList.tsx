@@ -1,29 +1,29 @@
 import { ContentType } from '@contentful/app-sdk';
 import { PlusIcon } from '@contentful/f36-icons';
 import { Button } from '@contentful/f36-components';
-import { useState, Dispatch, SetStateAction } from 'react';
+import { useState, Dispatch } from 'react';
 
+import { ParameterAction, actions } from '@components/parameterReducer';
+import { ContentTypePreviewPathSelection } from '@customTypes/configPage';
 import { ContentTypePreviewPathSelectionRow } from '../ContentTypePreviewPathSelectionRow/ContentTypePreviewPathSelectionRow';
-import { ContentTypePreviewPathSelection } from '../../../../types';
-import { actions } from '../../../parameterReducer';
 
 interface Props {
   contentTypes: ContentType[];
-  dispatchParameters: Dispatch<SetStateAction<any>>;
+  dispatch: Dispatch<ParameterAction>;
   contentTypePreviewPathSelections: ContentTypePreviewPathSelection[];
 }
 
-export const ContentTypePreviewPathSelectionList: React.FC<Props> = ({
+export const ContentTypePreviewPathSelectionList = ({
   contentTypes,
-  dispatchParameters,
+  dispatch,
   contentTypePreviewPathSelections = [],
-}) => {
+}: Props) => {
   const [addRow, setAddRow] = useState<number[]>([]);
 
   const handleUpdateParameters = (parameters: ContentTypePreviewPathSelection) => {
     if (parameters.contentType && parameters.previewPath) {
       if (addRow.length) setAddRow([]);
-      dispatchParameters({
+      dispatch({
         type: actions.ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
         payload: parameters,
       });
@@ -33,7 +33,7 @@ export const ContentTypePreviewPathSelectionList: React.FC<Props> = ({
   const handleRemoveRow = (parameters: ContentTypePreviewPathSelection) => {
     if (addRow.length) setAddRow([]);
 
-    dispatchParameters({
+    dispatch({
       type: actions.REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
       payload: parameters,
     });
@@ -45,7 +45,7 @@ export const ContentTypePreviewPathSelectionList: React.FC<Props> = ({
   };
 
   const isAddButtonDisabled =
-    Boolean(addRow.length) || !Boolean(contentTypePreviewPathSelections.length);
+    Boolean(addRow.length) || contentTypePreviewPathSelections.length === 0;
 
   const renderSelectionRow = () => {
     // TO DO: Handle case where contentTypes are not present - do not render add button etc.
