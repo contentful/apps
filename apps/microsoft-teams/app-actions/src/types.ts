@@ -83,13 +83,25 @@ export interface EntryActivity {
   entryId: string;
 }
 
-export interface WorkflowUpdateMessage {
+export interface WorkflowUpdate {
   title: string;
   currentStep: string;
   previousStep: string;
   contentType: string;
   callToActionUrl: string; // URL
-  updateDateTime: string; // DateTime '2024-01-18T21:43:54.267Z',
+}
+
+export interface WorkflowUpdateMessage {
+  channel: {
+    teamId: string;
+    channelId: string;
+  };
+  workflowUpdate: WorkflowUpdate & { eventDatetime: string };
+}
+
+export interface WorkflowPayload extends WorkflowUpdate {
+  teamId: string;
+  channelId: string;
 }
 
 export interface EntryActivityMessage {
