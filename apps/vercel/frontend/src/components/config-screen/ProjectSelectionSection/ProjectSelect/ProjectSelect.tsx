@@ -1,15 +1,17 @@
-import { ChangeEvent, Dispatch, SetStateAction, useEffect } from 'react';
+import { ChangeEvent, Dispatch } from 'react';
 import { Box, FormControl, Select } from '@contentful/f36-components';
-import { AppInstallationParameters } from '../../types';
-import { actions } from '../parameterReducer';
 
-const ProjectSelect = ({
-  parameters,
-  dispatch,
-}: {
+import { ParameterAction, actions } from '@components/parameterReducer';
+import { AppInstallationParameters, Project } from '../../../../types';
+import { styles } from './ProjectSelect.styles';
+
+interface Props {
   parameters: AppInstallationParameters;
-  dispatch: Dispatch<SetStateAction<any>>;
-}) => {
+  projects: Project[];
+  dispatch: Dispatch<ParameterAction>;
+}
+
+export const ProjectSelect = ({ parameters, projects, dispatch }: Props) => {
   const handleProjectChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatch({
       type: actions.APPLY_SELECTED_PROJECT,
@@ -17,11 +19,11 @@ const ProjectSelect = ({
     });
   };
 
-  const { selectedProject, projects } = parameters;
+  const { selectedProject } = parameters;
 
   return (
     <Box>
-      <FormControl id="optionProjectSelect" isRequired={true}>
+      <FormControl className={styles.formControl} id="optionProjectSelect" isRequired={true}>
         <FormControl.Label>Project</FormControl.Label>
         <Select
           id="optionProjectSelect"
@@ -47,5 +49,3 @@ const ProjectSelect = ({
     </Box>
   );
 };
-
-export default ProjectSelect;

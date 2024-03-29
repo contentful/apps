@@ -9,7 +9,7 @@ const contentTypes = [
 ] as ContentType[];
 
 vi.mock('lodash', () => ({
-  debounce: (fn: { cancel: any }) => {
+  debounce: (fn: { cancel: () => void }) => {
     fn.cancel = vi.fn();
     return fn;
   },

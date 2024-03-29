@@ -1,6 +1,8 @@
 import { Box, Heading, Paragraph } from '@contentful/f36-components';
-import { Dispatch, SetStateAction } from 'react';
+import { ContentType } from '@contentful/app-sdk';
+import { Dispatch } from 'react';
 
+import { ParameterAction } from '@components/parameterReducer';
 import { ContentTypePreviewPathSelectionList } from './ContentTypePreviewPathSelectionList/ContentTypePreviewPathSelectionList';
 import { styles } from '../ConfigScreen.styles';
 import { AppInstallationParameters } from '../../../types';
@@ -8,12 +10,13 @@ import { PreviewPathInfoNote } from './PreviewPathInfoNote/PreviewPathInfoNote';
 
 interface Props {
   parameters: AppInstallationParameters;
-  dispatchParameters: Dispatch<SetStateAction<any>>;
+  dispatch: Dispatch<ParameterAction>;
+  contentTypes: ContentType[];
 }
 
-export const ContentTypePreviewPathSection = ({ parameters, dispatchParameters }: Props) => {
+export const ContentTypePreviewPathSection = ({ parameters, dispatch, contentTypes }: Props) => {
   // TO DO: Adjust logic to limit content type duplication of preview path and token
-  const { contentTypes, contentTypePreviewPathSelections } = parameters;
+  const { contentTypePreviewPathSelections } = parameters;
 
   return (
     <Box className={styles.box}>
@@ -27,7 +30,7 @@ export const ContentTypePreviewPathSection = ({ parameters, dispatchParameters }
       <ContentTypePreviewPathSelectionList
         contentTypes={contentTypes}
         contentTypePreviewPathSelections={contentTypePreviewPathSelections}
-        dispatchParameters={dispatchParameters}
+        dispatch={dispatch}
       />
     </Box>
   );

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { ContentTypePreviewPathSelectionList } from './ContentTypePreviewPathSelectionList';
 import { ContentType } from 'contentful-management';
 
@@ -18,7 +18,7 @@ describe('ContentTypePreviewPathSelectionList', () => {
           ] as ContentType[]
         }
         contentTypePreviewPathSelections={selections}
-        dispatchParameters={() => null}
+        dispatch={() => null}
       />
     );
 

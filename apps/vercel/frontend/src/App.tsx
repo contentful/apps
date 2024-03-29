@@ -1,4 +1,3 @@
-import React from 'react';
 import { locations } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { useMemo } from 'react';
