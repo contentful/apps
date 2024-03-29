@@ -19,7 +19,7 @@ export const InformationalModal = ({ onClose, isShown }: Props) => {
     <Modal onClose={onClose} isShown={isShown} size="large">
       {() => (
         <>
-          <Modal.Header title={title} />
+          <Modal.Header title={title} onClose={onClose} />
           <Modal.Content>
             <Flex flexDirection="column" gap={tokens.spacingS}>
               <Flex flexDirection="column" gap={tokens.spacingL}>
@@ -54,7 +54,7 @@ export const InformationalModal = ({ onClose, isShown }: Props) => {
             </Flex>
           </Modal.Content>
           <Modal.Controls>
-            <Button variant="primary" onClick={onClose}>
+            <Button size="small" variant="primary" onClick={onClose}>
               {button}
             </Button>
           </Modal.Controls>

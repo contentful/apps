@@ -17,7 +17,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --max-warnings 0",
-    "test": "vitest --logHeapUsage --coverage",
+    "test": "vitest --watch",
     "test:ci": "vitest"
   },
   "devDependencies": {
