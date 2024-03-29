@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { AppInstallationParameters, Project } from '@customTypes/configPage';
 import { ProjectSelect } from './ProjectSelect';
-import { AppInstallationParameters, Project } from '../../../../types/index';
 
 describe('ProjectSelect', () => {
   it('renders list of projects to select', () => {

@@ -2,7 +2,7 @@ import { ChangeEvent, Dispatch } from 'react';
 import { Box, FormControl, Select } from '@contentful/f36-components';
 
 import { ParameterAction, actions } from '@components/parameterReducer';
-import { AppInstallationParameters, Project } from '../../../../types';
+import { AppInstallationParameters, Project } from '@customTypes/configPage';
 import { styles } from './ProjectSelect.styles';
 
 interface Props {

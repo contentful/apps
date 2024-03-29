@@ -20,9 +20,9 @@ import useInitializeParameters from '@hooks/useInitializeParameters';
 import parameterReducer, { actions } from '@components/parameterReducer';
 import { ContentTypePreviewPathSection } from '@components/config-screen/ContentTypePreviewPathSection/ContentTypePreviewPathSection';
 import { ProjectSelectionSection } from '@components/config-screen/ProjectSelectionSection/ProjectSelectionSection';
-import { initialParameters } from '../constants/defaultParams';
-import VercelClient from '../clients/Vercel';
-import { Project } from '../types';
+import { initialParameters } from '@constants/defaultParams';
+import VercelClient from '@clients/Vercel';
+import { Project } from '@customTypes/configPage';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);

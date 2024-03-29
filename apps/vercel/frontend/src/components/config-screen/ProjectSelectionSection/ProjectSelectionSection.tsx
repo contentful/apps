@@ -3,7 +3,7 @@ import { Dispatch } from 'react';
 
 import { ParameterAction } from '@components/parameterReducer';
 import { copies } from '@constants/copies';
-import { AppInstallationParameters, Project } from '../../../types';
+import { AppInstallationParameters, Project } from '@customTypes/configPage';
 import { styles } from '../ConfigScreen.styles';
 import { ProjectSelect } from './ProjectSelect/ProjectSelect';
 

@@ -1,4 +1,4 @@
-import { CreateDeploymentInput, Deployment, ListProjectsResponse } from '../types';
+import { CreateDeploymentInput, Deployment, ListProjectsResponse } from '@customTypes/configPage';
 
 interface VercelAPIClient {
   checkToken: () => Promise<boolean>;

@@ -1,4 +1,7 @@
-import { AppInstallationParameters, ContentTypePreviewPathSelection } from '../types';
+import {
+  AppInstallationParameters,
+  ContentTypePreviewPathSelection,
+} from '@customTypes/configPage';
 
 export enum actions {
   UPDATE_VERCEL_ACCESS_TOKEN = 'updateVercelAccessToken',

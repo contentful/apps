@@ -4,8 +4,8 @@ import { Button } from '@contentful/f36-components';
 import { useState, Dispatch } from 'react';
 
 import { ParameterAction, actions } from '@components/parameterReducer';
+import { ContentTypePreviewPathSelection } from '@customTypes/configPage';
 import { ContentTypePreviewPathSelectionRow } from '../ContentTypePreviewPathSelectionRow/ContentTypePreviewPathSelectionRow';
-import { ContentTypePreviewPathSelection } from '../../../../types';
 
 interface Props {
   contentTypes: ContentType[];
