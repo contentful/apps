@@ -7,7 +7,7 @@ import { contentTypeSelection } from '@constants/configCopy';
 import { Notification } from '@customTypes/configPage';
 import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ContentTypeSelection.styles';
-import { isContentTypeValid } from '@helpers/configHelpers';
+import { isItemValid } from '@helpers/configHelpers';
 import { ContentTypeContext } from '@context/ContentTypeProvider';
 import ErrorMessage from '@components/config/ErrorMessage/ErrorMessage';
 
@@ -30,7 +30,7 @@ const ContentTypeSelection = (props: Props) => {
 
   useEffect(() => {
     if (notification.contentTypeId && loading === false && error === undefined) {
-      const isValid = isContentTypeValid(notification.contentTypeId, contentTypes);
+      const isValid = isItemValid(notification.contentTypeId, contentTypes, 'contentType');
       setIsSavedContentTypeValid(isValid);
     }
   }, [loading, error, notification.contentTypeId]);

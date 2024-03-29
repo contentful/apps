@@ -8,6 +8,8 @@ import { Notification } from '@customTypes/configPage';
 import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ChannelSelection.styles';
 import { ChannelContext } from '@context/ChannelProvider';
+import { isItemValid } from '@helpers/configHelpers';
+import ErrorMessage from '@components/config/ErrorMessage/ErrorMessage';
 
 interface Props {
   notification: Notification;
@@ -19,11 +21,19 @@ const ChannelSelection = (props: Props) => {
   const { channels, loading, error } = useContext(ChannelContext);
   const [areChannelsLoading, setAreChannelsLoading] = useState<boolean>(false);
   const [addButtonClicked, setAddButtonClicked] = useState<boolean>(false);
+  const [isSavedChannelValid, setIsSavedChannelValid] = useState<boolean>(true);
 
   useEffect(() => {
     // ensure the loading state updates once it is done loading
     if (addButtonClicked) setAreChannelsLoading(loading);
   }, [loading, addButtonClicked]);
+
+  useEffect(() => {
+    if (notification.channel.id && loading === false && error === undefined) {
+      const isValid = isItemValid(notification.channel.id, channels, 'channel');
+      setIsSavedChannelValid(isValid);
+    }
+  }, [loading, error, notification.channel.id]);
 
   const openChannelSelectionModal = () => {
     if (loading != areChannelsLoading) {
@@ -52,21 +62,30 @@ const ChannelSelection = (props: Props) => {
         </Text>
       </Flex>
       {notification.channel.id ? (
-        <TextInput.Group>
-          <TextInput
-            id="selected-channel"
-            isDisabled={true}
-            value={`${notification.channel.name}, ${notification.channel.teamName}`}
-            className={styles.input}
-          />
-          <IconButton
-            variant="secondary"
-            icon={<EditIcon />}
-            onClick={openChannelSelectionModal}
-            aria-label="Change selected channel"
-            isLoading={areChannelsLoading}
-          />
-        </TextInput.Group>
+        <Flex flexDirection="row" justifyContent="flex-start" alignItems="center">
+          <Box>
+            <TextInput.Group>
+              <TextInput
+                id="selected-channel"
+                isDisabled={true}
+                value={`${notification.channel.name}, ${notification.channel.teamName}`}
+                className={styles.input}
+              />
+              <IconButton
+                variant="secondary"
+                icon={<EditIcon />}
+                onClick={openChannelSelectionModal}
+                aria-label="Change selected channel"
+                isLoading={areChannelsLoading}
+              />
+            </TextInput.Group>
+          </Box>
+          {!isSavedChannelValid && (
+            <Box marginLeft="spacingXs">
+              <ErrorMessage errorMessage={channelSelection.notFound} />
+            </Box>
+          )}
+        </Flex>
       ) : (
         <AddButton
           buttonCopy={channelSelection.addButton}

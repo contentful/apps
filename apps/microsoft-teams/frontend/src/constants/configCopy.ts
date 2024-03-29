@@ -85,6 +85,7 @@ const channelSelection = {
     errorMessage: 'Channels did not load. Please try again later.',
     searchPlaceholder: 'Search for a channel',
   },
+  notFound: 'Teams channel not found',
 };
 
 const AppEvents = {

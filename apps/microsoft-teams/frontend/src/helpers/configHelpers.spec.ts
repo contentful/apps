@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  isContentTypeValid,
+  isItemValid,
   isNotificationReadyToSave,
   canTestNotificationBeSent,
   areAllFieldsCompleted,
@@ -9,17 +9,27 @@ import {
   getUniqueNotifications,
   getDuplicateNotificationIndex,
 } from './configHelpers';
-import { mockContentType } from '@test/mocks';
+import { mockContentType, mockChannels } from '@test/mocks';
 import { defaultNotification } from '@constants/defaultParams';
 import { mockNotification } from '@test/mocks';
 
-describe('isContentTypeValid', () => {
+describe('isItemValid', () => {
+  it('should return true if the channel is valid', () => {
+    expect(
+      isItemValid('19:e3a386bd1e0f4e00a286b4e86b0cfbe9@thread.tacv2', mockChannels, 'channel')
+    ).toEqual(true);
+  });
+
+  it('should return false if the channel is not valid', () => {
+    expect(isItemValid('channel-not-found', mockChannels, 'channel')).toEqual(false);
+  });
+
   it('should return true if the content type is valid', () => {
-    expect(isContentTypeValid('page', [mockContentType])).toEqual(true);
+    expect(isItemValid('page', [mockContentType], 'contentType')).toEqual(true);
   });
 
   it('should return false if the content type is not valid', () => {
-    expect(isContentTypeValid('test-not-found', [mockContentType])).toEqual(false);
+    expect(isItemValid('ct-not-found', [mockContentType], 'contentType')).toEqual(false);
   });
 });
 

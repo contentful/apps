@@ -2,16 +2,29 @@ import { ContentTypeProps } from 'contentful-management';
 import { Notification } from '@customTypes/configPage';
 import isEqual from 'lodash/isEqual';
 import { defaultNotification } from '@constants/defaultParams';
+import { TeamsChannel } from '@customTypes/configPage';
 
 /**
- * Checks to see if a given content type id is valid based on the content types available
- * @param contentTypeId
- * @param contentTypes
+ * Checks to see if a given channel or content type id is valid based on the channels or content types available
+ * @param itemId
+ * @param items
+ * @param itemType
  * @returns boolean
  */
-const isContentTypeValid = (contentTypeId: string, contentTypes: ContentTypeProps[]): boolean => {
-  const contentType = contentTypes.find((contentType) => contentType.sys.id === contentTypeId);
-  return !!contentType;
+const isItemValid = (
+  itemId: string,
+  items: TeamsChannel[] | ContentTypeProps[],
+  itemType: 'channel' | 'contentType'
+): boolean => {
+  let foundItem;
+
+  if (itemType === 'channel') {
+    foundItem = (items as TeamsChannel[]).find((item) => item.id === itemId);
+  } else {
+    foundItem = (items as ContentTypeProps[]).find((item) => item.sys.id === itemId);
+  }
+
+  return !!foundItem;
 };
 
 /**
@@ -135,7 +148,7 @@ const getDuplicateNotificationIndex = (
 };
 
 export {
-  isContentTypeValid,
+  isItemValid,
   isNotificationReadyToSave,
   canTestNotificationBeSent,
   areAllFieldsCompleted,
