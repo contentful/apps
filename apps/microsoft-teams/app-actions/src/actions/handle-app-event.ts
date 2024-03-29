@@ -5,6 +5,7 @@ import {
   SendEntryActivityMessageResult,
   SendWorkflowUpdateMessageResult,
   Topic,
+  WorkflowPayload,
   WorkflowUpdateMessage,
 } from '../types';
 import { EntryProps } from 'contentful-management/types';
@@ -14,7 +15,6 @@ import { config } from '../config';
 import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 import { TOPIC_ACTION_MAP } from '../constants';
 
-// Todo: expand this to describe Workflows payload
 interface AppActionCallParameters {
   payload: string;
   topic: string;
@@ -39,7 +39,7 @@ export const handler = withAsyncAppActionErrorHandling(
      * In the interest of time, as well as prototyping/learning we made the explicit choice
      * to re-use/extend this "app-events" app-action to handle "workflow" events as well.
      *
-     * This block of code to handle workflow topics is intentionally repetative and intrusive.
+     * This block of code to handle workflow topics is intentionally repetitive and intrusive.
      * The end goal is to create a new app action to specifically handle "workflow" events.
      * Ideally, at that time, it will be a simple copy/paste operation, leaving this
      * app-action unchanged.
@@ -48,25 +48,33 @@ export const handler = withAsyncAppActionErrorHandling(
       const appInstallation = await cma.appInstallation.get({ appDefinitionId: appInstallationId });
       const { tenantId } = parametersFromAppInstallation(appInstallation);
 
-      // request body
-      const entry = JSON.parse(payload) as EntryProps;
+      // TODO parse workflow event and topic
+      const workflowUpdate = JSON.parse(payload) as WorkflowPayload;
+      const {
+        title,
+        contentType,
+        currentStep,
+        previousStep,
+        callToActionUrl,
+        eventDatetime,
+        channelId,
+        teamId,
+      } = workflowUpdate;
 
-      const entryActivity = await helpers.buildEntryActivity(
-        { entry, topic: topicString, eventDatetime },
-        cma,
-        cmaHost
-      );
-
-      const title = entryActivity.entryTitle;
-      const contentTypeId = entry.sys.contentType.sys.id;
-
+      // TODO: We could update the payload in the workflow-consumer so that we could just directly pass the payload to the bot service
       const workflowUpdateMessage: WorkflowUpdateMessage = {
-        title: title,
-        contentType: contentTypeId,
-        currentStep: 'currentStep', // hard-coded - to be replaced with correct step once payload from workflow-consumer-api is determined.
-        previousStep: 'previousStep', // hard-coded - to be replaced with correct step once payload from workflow-consumer-api is determined.
-        callToActionUrl: entryActivity.entryUrl,
-        updateDateTime: entryActivity.eventDatetime,
+        channel: {
+          teamId,
+          channelId,
+        },
+        workflowUpdate: {
+          title,
+          contentType,
+          currentStep,
+          previousStep,
+          callToActionUrl,
+          eventDatetime,
+        },
       };
 
       const sendWorkflowUpdateResult = await config.msTeamsBotService.sendWorkflowUpdateMessage(
