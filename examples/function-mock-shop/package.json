@@ -41,7 +41,7 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.17.0",
+    "@contentful/app-scripts": "1.18.0",
     "@contentful/node-apps-toolkit": "^3.3.0",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.2.2",
