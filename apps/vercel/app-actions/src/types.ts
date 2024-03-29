@@ -1,3 +1,5 @@
+import { ContentType } from 'contentful-management';
+
 export interface ActionError {
   type: string;
   message: string;
@@ -35,3 +37,24 @@ export type ContentPreviewEnvironment = {
   configurations: ContentPreviewConfiguration[];
   envId: string;
 };
+
+export type ContentTypePreviewPathSelection = {
+  contentType: string;
+  previewPath: string;
+};
+
+export interface AppInstallationContextProps {
+  spaceId: string;
+  environmentId: string;
+  appInstallationId: string;
+}
+
+/* START copied over from frontend app installation types */
+
+export interface AppInstallationParameters {
+  vercelAccessToken: string;
+  selectedProject: string;
+  contentTypePreviewPathSelections: ContentTypePreviewPathSelection[];
+}
+
+/* END copied over from frontend app installation types */
