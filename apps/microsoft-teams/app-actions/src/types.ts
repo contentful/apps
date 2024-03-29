@@ -89,7 +89,6 @@ export interface WorkflowUpdate {
   previousStep: string;
   contentType: string;
   callToActionUrl: string; // URL
-  eventDatetime: string; // DateTime '2024-01-18T21:43:54.267Z',
 }
 
 export interface WorkflowUpdateMessage {
@@ -97,7 +96,7 @@ export interface WorkflowUpdateMessage {
     teamId: string;
     channelId: string;
   };
-  workflowUpdate: WorkflowUpdate;
+  workflowUpdate: WorkflowUpdate & { eventDatetime: string };
 }
 
 export interface WorkflowPayload extends WorkflowUpdate {

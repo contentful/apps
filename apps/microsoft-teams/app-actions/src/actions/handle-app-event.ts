@@ -50,16 +50,8 @@ export const handler = withAsyncAppActionErrorHandling(
 
       // TODO parse workflow event and topic
       const workflowUpdate = JSON.parse(payload) as WorkflowPayload;
-      const {
-        title,
-        contentType,
-        currentStep,
-        previousStep,
-        callToActionUrl,
-        eventDatetime,
-        channelId,
-        teamId,
-      } = workflowUpdate;
+      const { title, contentType, currentStep, previousStep, callToActionUrl, channelId, teamId } =
+        workflowUpdate;
 
       // TODO: We could update the payload in the workflow-consumer so that we could just directly pass the payload to the bot service
       const workflowUpdateMessage: WorkflowUpdateMessage = {
