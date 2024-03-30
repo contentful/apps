@@ -24,8 +24,8 @@ describe('ContentTypeSelection component', () => {
       <ContentTypeSelection
         notification={{
           ...defaultNotification,
-          contentTypeId: 'blogPost',
-          contentTypeName: 'Blog Post',
+          contentTypeId: 'page',
+          contentTypeName: 'Page',
         }}
         handleNotificationEdit={vi.fn()}></ContentTypeSelection>
     );
@@ -51,6 +51,21 @@ describe('ContentTypeSelection component', () => {
     addButton.click();
 
     expect(screen.queryByTestId('cf-ui-modal')).toBeFalsy();
+    unmount();
+  });
+
+  it('mounts and renders an error message if the saved content type is invalid', () => {
+    const { unmount } = ContentTypeCustomRender(
+      <ContentTypeSelection
+        notification={{
+          ...defaultNotification,
+          contentTypeId: 'blogPost',
+          contentTypeName: 'Blog Post',
+        }}
+        handleNotificationEdit={vi.fn()}></ContentTypeSelection>
+    );
+
+    expect(screen.getByText(contentTypeSelection.notFound)).toBeTruthy();
     unmount();
   });
 });
