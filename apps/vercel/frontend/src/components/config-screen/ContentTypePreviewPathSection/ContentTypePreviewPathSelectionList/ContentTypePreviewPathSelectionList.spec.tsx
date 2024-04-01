@@ -6,7 +6,7 @@ import { mockContentTypePreviewPathSelections } from '@test/mocks/mockContentTyp
 
 describe('ContentTypePreviewPathSelectionList', () => {
   it('renders list of selections', () => {
-    render(
+    const { unmount } = render(
       <ContentTypePreviewPathSelectionList
         contentTypes={mockContentTypes}
         contentTypePreviewPathSelections={mockContentTypePreviewPathSelections}
@@ -22,5 +22,33 @@ describe('ContentTypePreviewPathSelectionList', () => {
     expect(
       screen.getByDisplayValue(mockContentTypePreviewPathSelections[1].previewPath)
     ).toBeTruthy();
+    expect(screen.getByText('Add Content Type')).toBeTruthy();
+
+    unmount();
+  });
+
+  it('hides add button if all content types have been configured', () => {
+    const { unmount } = render(
+      <ContentTypePreviewPathSelectionList
+        contentTypes={mockContentTypes}
+        contentTypePreviewPathSelections={[
+          ...mockContentTypePreviewPathSelections,
+          { contentType: 'article', previewPath: 'test-article-path' },
+        ]}
+        dispatch={() => null}
+      />
+    );
+
+    expect(screen.getAllByText('Blog')).toBeTruthy();
+    expect(
+      screen.getByDisplayValue(mockContentTypePreviewPathSelections[0].previewPath)
+    ).toBeTruthy();
+    expect(screen.getAllByText('News')).toBeTruthy();
+    expect(
+      screen.getByDisplayValue(mockContentTypePreviewPathSelections[1].previewPath)
+    ).toBeTruthy();
+    expect(screen.queryByText('Add Content Type')).toBeFalsy();
+
+    unmount();
   });
 });

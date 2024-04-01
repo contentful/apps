@@ -50,6 +50,9 @@ export const ContentTypePreviewPathSelectionList = ({
     setAddRow([...addRow, addRow.length]);
   };
 
+  // render add button if there are content types that are not selected
+  const renderAddButton = contentTypePreviewPathSelections.length !== contentTypes.length;
+  // disable add button if there is a row with empty fields present
   const isAddButtonDisabled =
     Boolean(addRow.length) || contentTypePreviewPathSelections.length === 0;
 
@@ -68,7 +71,7 @@ export const ContentTypePreviewPathSelectionList = ({
     }
     return contentTypePreviewPathSelections.map((contentTypePreviewPathSelection, index) => (
       <ContentTypePreviewPathSelectionRow
-        key={index}
+        key={contentTypePreviewPathSelection.previewPath}
         configuredContentTypePreviewPathSelection={contentTypePreviewPathSelection}
         contentTypes={filterContentTypes(contentTypePreviewPathSelection.contentType)}
         onParameterUpdate={handleUpdateParameters}
@@ -91,9 +94,11 @@ export const ContentTypePreviewPathSelectionList = ({
         />
       ))}
 
-      <Button isDisabled={isAddButtonDisabled} onClick={handleAddRow} startIcon={<PlusIcon />}>
-        Add Content Type
-      </Button>
+      {renderAddButton && (
+        <Button isDisabled={isAddButtonDisabled} onClick={handleAddRow} startIcon={<PlusIcon />}>
+          Add Content Type
+        </Button>
+      )}
     </>
   );
 };
