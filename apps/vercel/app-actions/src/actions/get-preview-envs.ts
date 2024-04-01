@@ -6,6 +6,8 @@ import {
 } from '../types';
 import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 import { buildPreviewUrlsForContentTypes } from '../helpers/build-preview-urls-for-content-types';
+import { fetchAppInstallationParameters } from '../helpers/fetch-app-installation-parameters';
+import { VercelService } from '../services/vercel-service';
 
 interface AppActionCallParameters {}
 
@@ -16,10 +18,20 @@ export const handler = withAsyncAppActionErrorHandling(
   ): Promise<AppActionCallResponse<ContentPreviewEnvironment[]>> => {
     const { cma, appActionCallContext } = context;
     const envId = 'vercel-app-preview-environment';
-    const previewUrlsByContentType = await buildPreviewUrlsForContentTypes(
-      appActionCallContext,
-      cma
+    const {
+      vercelAccessToken,
+      selectedProject: vercelProjectId,
+      contentTypePreviewPathSelections,
+    } = await fetchAppInstallationParameters(appActionCallContext, cma);
+
+    const vercelService = new VercelService(vercelAccessToken);
+    const vercelProject = await vercelService.getProject(vercelProjectId);
+
+    const previewUrlsByContentType = buildPreviewUrlsForContentTypes(
+      vercelProject,
+      contentTypePreviewPathSelections
     );
+
     const configurations = Object.entries(
       previewUrlsByContentType
     ).map<ContentPreviewConfiguration>(([contentType, url]) => ({

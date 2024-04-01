@@ -1,13 +1,10 @@
-import { VercelService } from '../services/vercel-service';
-import { VercelPreviewUrlParts } from '../types';
+import { VercelPreviewUrlParts, VercelProject } from '../types';
 
-export const constructVercelPreviewUrlParts = async (
-  vercelAccessToken: string,
-  vercelProjectId: string
-): Promise<VercelPreviewUrlParts> => {
-  const vercelService = new VercelService(vercelAccessToken);
-  const domain = await vercelService.getTargetProductionUrl(vercelProjectId);
-  const xVercelProtectionBypass = await vercelService.getProtectionBypass(vercelProjectId);
+export const constructVercelPreviewUrlParts = (
+  vercelProject: VercelProject
+): VercelPreviewUrlParts => {
+  const domain = vercelProject.targets.production.url;
+  const xVercelProtectionBypass = Object.keys(vercelProject.protectionBypass)[0];
   return {
     origin: `https://${domain}`,
     xVercelProtectionBypass,

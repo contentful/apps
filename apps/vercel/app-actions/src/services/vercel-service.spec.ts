@@ -18,14 +18,14 @@ describe('VercelService', () => {
     stubbedFetch.resolves(mockFetchResponse);
   });
 
-  describe('#getTargetProductionUrl', () => {
+  describe('#getProject', () => {
     it('returns the correct url', async () => {
-      const result = await vercelService.getTargetProductionUrl(vercelProjectId);
-      expect(result).to.eq('team-integrations-vercel-playground-gqmys2z3c.vercel.app');
+      const result = await vercelService.getProject(vercelProjectId);
+      expect(result).to.deep.eq(mockVercelProject);
     });
 
     it('calls fetch with the appropriate values', async () => {
-      await vercelService.getTargetProductionUrl(vercelProjectId);
+      await vercelService.getProject(vercelProjectId);
       expect(stubbedFetch).to.have.been.calledWith(
         'https://api.vercel.com/v10/projects/vercel-project-id',
         {
@@ -38,7 +38,4 @@ describe('VercelService', () => {
       );
     });
   });
-
-  // TODO write tests for actual implementation
-  it('returns ');
 });

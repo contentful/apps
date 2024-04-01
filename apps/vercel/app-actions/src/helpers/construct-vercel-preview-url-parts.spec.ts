@@ -1,14 +1,13 @@
 import { expect } from 'chai';
-import sinon from 'sinon';
 import { constructVercelPreviewUrlParts } from './construct-vercel-preview-url-parts';
+import { mockVercelProject } from '../../test/mocks';
 
 describe('constructVercelPreviewUrlParts', () => {
-  const vercelAccessToken = 'vercel-access-token';
-  const vercelProjectId = 'vercel-project-id';
+  const vercelProject = mockVercelProject;
 
   it('returns the parts of the URL', async () => {
-    const result = await constructVercelPreviewUrlParts(vercelAccessToken, vercelProjectId);
+    const result = constructVercelPreviewUrlParts(vercelProject);
     expect(result.origin).to.include('https://');
-    expect(result.xVercelProtectionBypass).to.be.a('string');
+    expect(result.xVercelProtectionBypass).to.eql('ukkdTdqAgnG5DQHwFkIeQ22N1nUDWeU7');
   });
 });

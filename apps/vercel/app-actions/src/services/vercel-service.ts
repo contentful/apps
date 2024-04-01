@@ -1,28 +1,9 @@
 import { VercelProject } from '../types';
 
 export class VercelService {
-  readonly projectCache: Record<string, VercelProject> = {};
-
   constructor(readonly accessToken: string) {}
 
-  // https://team-integrations-vercel-playground-master.vercel.app/api/enable-draft?path=/blogs/the-journey-has-begun&x-vercel-protection-bypass=ukkdTdqAgnG5DQHwFkIeQ22N1nUDWeU7
-  public async getTargetProductionUrl(projectId: string): Promise<string> {
-    // path in project is targets.production.url
-    this.getVercelProject(projectId);
-    return 'team-integrations-vercel-playground-master.vercel.app';
-  }
-
-  public async getProtectionBypass(projectId: string): Promise<string> {
-    // path in project is protectionBypass.keys[0]
-    return 'ukkdTdqAgnG5DQHwFkIeQ22N1nUDWeU7';
-  }
-
-  private async getVercelProject(projectId: string): Promise<VercelProject> {
-    return this.fetchVercelProject(projectId);
-  }
-
-  private async fetchVercelProject(projectId: string): Promise<VercelProject> {
-    console.log('go');
+  public async getProject(projectId: string): Promise<VercelProject> {
     const response = await fetch(this.buildProjectUrl(projectId), {
       method: 'POST',
       headers: this.buildRequestHeaders(),
@@ -46,5 +27,14 @@ export class VercelService {
   private assertVercelProject(value: unknown): asserts value is VercelProject {
     if (!value) throw new Error('value is undefined');
     if (typeof value !== 'object') throw new TypeError('value is not an object');
+
+    const vercelProject = value as VercelProject;
+    if (!vercelProject.targets) throw new TypeError('Vercel project is missing targets');
+    if (!vercelProject.targets.production)
+      throw new TypeError('Vercel project is missing production target');
+    if (!vercelProject.targets.production.url)
+      throw new TypeError('Vercel project is missing production target URL');
+    if (!vercelProject.protectionBypass)
+      throw new TypeError('Vercel project is missing protection bypass configuration');
   }
 }
