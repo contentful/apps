@@ -1,19 +1,39 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { AppActionCallResponse, ContentPreviewEnvironment } from '../types';
+import {
+  AppActionCallResponse,
+  ContentPreviewConfiguration,
+  ContentPreviewEnvironment,
+} from '../types';
 import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
+import { buildPreviewUrlsForContentTypes } from '../helpers/build-preview-urls-for-content-types';
 
 interface AppActionCallParameters {}
 
 export const handler = withAsyncAppActionErrorHandling(
   async (
     _parameters: AppActionCallParameters,
-    _context: AppActionCallContext
+    context: AppActionCallContext
   ): Promise<AppActionCallResponse<ContentPreviewEnvironment[]>> => {
+    const { cma, appActionCallContext } = context;
     const envId = 'vercel-app-preview-environment';
+    const previewUrlsByContentType = await buildPreviewUrlsForContentTypes(
+      appActionCallContext,
+      cma
+    );
+    const configurations = Object.entries(
+      previewUrlsByContentType
+    ).map<ContentPreviewConfiguration>(([contentType, url]) => ({
+      contentType,
+      enabled: true,
+      example: false,
+      name: '',
+      url,
+      contentTypeFields: [],
+    }));
     return {
       ok: true,
 
-      // TODO for now this value is intentionally hard coded
+      // for now this value is intentionally hard coded
       data: [
         {
           sys: {
@@ -23,26 +43,7 @@ export const handler = withAsyncAppActionErrorHandling(
           },
           name: 'Vercel App',
           description: 'Content preview environment provided by Vercel app',
-          configurations: [
-            {
-              contentType: 'post',
-              enabled: true,
-              example: false,
-              name: '',
-              // hardcoded URL is for intentional testing purposes
-              url: 'https://team-integrations-vercel-playground-{env_id}.vercel.app/api/enable-draft?path=/blogs/{entry.fields.slug}&x-vercel-protection-bypass=ukkdTdqAgnG5DQHwFkIeQ22N1nUDWeU7',
-              contentTypeFields: [],
-            },
-            {
-              contentType: 'food',
-              enabled: true,
-              example: false,
-              name: '',
-              // hardcoded URL is for intentional testing purposes
-              url: 'https://team-integrations-vercel-playground-{env_id}.vercel.app/api/enable-draft?path=/food/{entry.fields.slug}&x-vercel-protection-bypass=ukkdTdqAgnG5DQHwFkIeQ22N1nUDWeU7',
-              contentTypeFields: [],
-            },
-          ],
+          configurations,
           envId,
         },
       ],

@@ -1,9 +1,5 @@
 import { VercelService } from '../services/vercel-service';
-
-interface VercelPreviewUrlParts {
-  origin: string;
-  xVercelProtectionBypass: string;
-}
+import { VercelPreviewUrlParts } from '../types';
 
 export const constructVercelPreviewUrlParts = async (
   vercelAccessToken: string,

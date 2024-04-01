@@ -17,7 +17,7 @@ describe('buildPreviewUrlsForContentTypes', () => {
   it('returns a mapping of preview URls by content type', async () => {
     const result = await buildPreviewUrlsForContentTypes(context, cmaClient);
     expect(result['blog']).to.eql(
-      'https://team-integrations-vercel-playground-master.vercel.app/api/enable-draft?path=/blogs/{entry.fields.slug}&x-vercel-protection-bypass=ukkdTdqAgnG5DQHwFkIeQ22N1nUDWeU7'
+      'https://team-integrations-vercel-playground-master.vercel.app/api/enable-draft?path=%2Fblogs%2F%7Bentry.fields.slug%7D&x-vercel-protection-bypass=ukkdTdqAgnG5DQHwFkIeQ22N1nUDWeU7'
     );
   });
 });

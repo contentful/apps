@@ -49,7 +49,9 @@ export const makeMockAppActionCallContext = (
 export const mockAppInstallationParameters: AppInstallationParameters = {
   vercelAccessToken: 'vercel-access-token',
   selectedProject: 'selected-project-id',
-  contentTypePreviewPathSelections: [{ contentType: 'blog', previewPath: 'test-blog-path' }],
+  contentTypePreviewPathSelections: [
+    { contentType: 'blog', previewPath: '/blogs/{entry.fields.slug}' },
+  ],
 };
 
 export const makeMockAppInstallation = (

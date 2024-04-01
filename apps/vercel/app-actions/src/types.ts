@@ -58,3 +58,8 @@ export interface AppInstallationParameters {
 }
 
 /* END copied over from frontend app installation types */
+
+export interface VercelPreviewUrlParts {
+  origin: string;
+  xVercelProtectionBypass: string;
+}
