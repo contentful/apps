@@ -63,3 +63,5 @@ export interface VercelPreviewUrlParts {
   origin: string;
   xVercelProtectionBypass: string;
 }
+
+export interface VercelProject {}

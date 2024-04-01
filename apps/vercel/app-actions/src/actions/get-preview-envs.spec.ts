@@ -21,7 +21,6 @@ describe('get-preview-env.handler', () => {
 
   it('returns a list of preview environments', async () => {
     const result = await handler(callParameters, context);
-    console.log({ result });
     expect(result).to.have.property('ok', true);
 
     const contentPreviewEnvironments = (
