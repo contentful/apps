@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { makeMockAppActionCallContext } from '../../test/mocks';
+import { makeMockAppActionCallContext, makeMockAppInstallation } from '../../test/mocks';
 import { AppInstallationProps, SysLink } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { handler } from './get-preview-envs';
@@ -12,22 +12,7 @@ describe('get-preview-env.handler', () => {
 
   const callParameters = {};
 
-  const cmaClientMockResponses: [AppInstallationProps] = [
-    {
-      sys: {
-        type: 'AppInstallation',
-        appDefinition: {} as SysLink,
-        environment: {} as SysLink,
-        space: {} as SysLink,
-        version: 1,
-        createdAt: 'createdAt',
-        updatedAt: 'updatedAt',
-      },
-      parameters: {
-        apiKey: 'openai-api-key',
-      },
-    },
-  ];
+  const cmaClientMockResponses: [AppInstallationProps] = [makeMockAppInstallation()];
 
   beforeEach(() => {
     cmaRequestStub = sinon.stub();
