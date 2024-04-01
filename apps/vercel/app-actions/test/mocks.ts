@@ -1,6 +1,13 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import { Adapter, PlainClientAPI, createClient } from 'contentful-management';
+import {
+  Adapter,
+  AppInstallationProps,
+  PlainClientAPI,
+  SysLink,
+  createClient,
+} from 'contentful-management';
 import sinon from 'sinon';
+import { AppInstallationParameters } from '../src/types';
 
 export const makeMockPlainClient = (responses: any[], stub: sinon.SinonStub): PlainClientAPI => {
   for (const [callNumber, response] of responses.entries()) {
@@ -38,3 +45,26 @@ export const makeMockAppActionCallContext = (
     },
   };
 };
+
+export const mockAppInstallationParameters: AppInstallationParameters = {
+  vercelAccessToken: 'vercel-access-token',
+  selectedProject: 'selected-project-id',
+  contentTypePreviewPathSelections: [
+    { contentType: 'blog', previewPath: '/blogs/{entry.fields.slug}' },
+  ],
+};
+
+export const makeMockAppInstallation = (
+  parameters = mockAppInstallationParameters
+): AppInstallationProps => ({
+  sys: {
+    type: 'AppInstallation',
+    appDefinition: {} as SysLink,
+    environment: {} as SysLink,
+    space: {} as SysLink,
+    version: 1,
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  },
+  parameters,
+});

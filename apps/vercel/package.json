@@ -16,12 +16,11 @@
   },
   "dependencies": {
     "@contentful/app-scripts": "1.15.0",
+    "contentful-management": "^11.24.3",
     "dotenv": "^16.3.1",
     "esbuild": "^0.20.0"
   },
   "devDependencies": {
-    "contentful-management": "^11.3.0",
     "ts-node": "^10.9.1"
   }
 }
-
