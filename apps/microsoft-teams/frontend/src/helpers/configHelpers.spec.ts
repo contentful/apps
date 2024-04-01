@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  getContentTypeName,
+  isItemValid,
   isNotificationReadyToSave,
   canTestNotificationBeSent,
   areAllFieldsCompleted,
@@ -9,22 +9,27 @@ import {
   getUniqueNotifications,
   getDuplicateNotificationIndex,
 } from './configHelpers';
-import { mockContentType } from '@test/mocks';
-import { contentTypeSelection } from '@constants/configCopy';
+import { mockContentType, mockChannels } from '@test/mocks';
 import { defaultNotification } from '@constants/defaultParams';
 import { mockNotification } from '@test/mocks';
 
-describe('getContentTypeName', () => {
-  it('should return the content type name', () => {
-    expect(getContentTypeName('page', [mockContentType], contentTypeSelection.notFound)).toEqual(
-      'Page'
-    );
+describe('isItemValid', () => {
+  it('should return true if the channel is valid', () => {
+    expect(
+      isItemValid('19:e3a386bd1e0f4e00a286b4e86b0cfbe9@thread.tacv2', mockChannels, 'channel')
+    ).toEqual(true);
   });
 
-  it('should return not found message if content type does not exist', () => {
-    expect(
-      getContentTypeName('test-not-found', [mockContentType], contentTypeSelection.notFound)
-    ).toEqual(contentTypeSelection.notFound);
+  it('should return false if the channel is not valid', () => {
+    expect(isItemValid('channel-not-found', mockChannels, 'channel')).toEqual(false);
+  });
+
+  it('should return true if the content type is valid', () => {
+    expect(isItemValid('page', [mockContentType], 'contentType')).toEqual(true);
+  });
+
+  it('should return false if the content type is not valid', () => {
+    expect(isItemValid('ct-not-found', [mockContentType], 'contentType')).toEqual(false);
   });
 });
 
@@ -90,6 +95,7 @@ describe('getDuplicateNotificationIndex', () => {
       getDuplicateNotificationIndex([mockNotification], {
         ...mockNotification,
         contentTypeId: 'page',
+        contentTypeName: 'Page',
       })
     ).toEqual(-1);
   });
@@ -97,7 +103,7 @@ describe('getDuplicateNotificationIndex', () => {
   it('should return the correct index when there are duplicates', () => {
     expect(
       getDuplicateNotificationIndex(
-        [mockNotification, { ...mockNotification, contentTypeId: 'page' }],
+        [mockNotification, { ...mockNotification, contentTypeId: 'page', contentTypeName: 'Page' }],
         mockNotification
       )
     ).toEqual(0);
@@ -106,7 +112,11 @@ describe('getDuplicateNotificationIndex', () => {
   it('should return the correct index when there are duplicates and index is passed in', () => {
     expect(
       getDuplicateNotificationIndex(
-        [{ ...mockNotification, contentTypeId: 'page' }, mockNotification, mockNotification],
+        [
+          { ...mockNotification, contentTypeId: 'page', contentTypeName: 'Page' },
+          mockNotification,
+          mockNotification,
+        ],
         mockNotification,
         2
       )

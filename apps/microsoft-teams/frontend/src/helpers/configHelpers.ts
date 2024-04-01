@@ -2,22 +2,29 @@ import { ContentTypeProps } from 'contentful-management';
 import { Notification } from '@customTypes/configPage';
 import isEqual from 'lodash/isEqual';
 import { defaultNotification } from '@constants/defaultParams';
+import { TeamsChannel } from '@customTypes/configPage';
 
 /**
- * Gets the content type name for a given content type id
- * returns a not found string if the content type is not found
- * @param contentTypeId
- * @param contentTypes
- * @param notFoundCopy
- * @returns string
+ * Checks to see if a given channel or content type id is valid based on the channels or content types available
+ * @param itemId
+ * @param items
+ * @param itemType
+ * @returns boolean
  */
-const getContentTypeName = (
-  contentTypeId: string,
-  contentTypes: ContentTypeProps[],
-  notFoundCopy: string
-): string => {
-  const contentType = contentTypes.find((contentType) => contentType.sys.id === contentTypeId);
-  return contentType ? contentType.name : notFoundCopy;
+const isItemValid = (
+  itemId: string,
+  items: TeamsChannel[] | ContentTypeProps[],
+  itemType: 'channel' | 'contentType'
+): boolean => {
+  let foundItem;
+
+  if (itemType === 'channel') {
+    foundItem = (items as TeamsChannel[]).find((item) => item.id === itemId);
+  } else {
+    foundItem = (items as ContentTypeProps[]).find((item) => item.sys.id === itemId);
+  }
+
+  return !!foundItem;
 };
 
 /**
@@ -141,7 +148,7 @@ const getDuplicateNotificationIndex = (
 };
 
 export {
-  getContentTypeName,
+  isItemValid,
   isNotificationReadyToSave,
   canTestNotificationBeSent,
   areAllFieldsCompleted,

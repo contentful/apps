@@ -45,4 +45,26 @@ describe('ChannelSelection component', () => {
     expect(screen.queryByTestId('cf-ui-modal')).toBeFalsy();
     unmount();
   });
+
+  it('mounts and renders an error message if the saved channel is invalid', () => {
+    const invalidNotification = {
+      ...defaultNotification,
+      channel: {
+        id: 'not-valid-id',
+        name: 'My channel',
+        teamId: 'ed57f808-c14f-4a53-bf53-e36de0783385',
+        tenantId: '666e56a6-1f2a-47c7-b88c-1ed9e1bb8668',
+        teamName: 'Marketing Team',
+      },
+    };
+
+    const { unmount } = render(
+      <ChannelContext.Provider value={{ loading: false, channels: mockChannels, error: undefined }}>
+        <ChannelSelection notification={invalidNotification} handleNotificationEdit={vi.fn()} />
+      </ChannelContext.Provider>
+    );
+
+    expect(screen.getByText(channelSelection.notFound)).toBeTruthy();
+    unmount();
+  });
 });

@@ -7,8 +7,9 @@ import { contentTypeSelection } from '@constants/configCopy';
 import { Notification } from '@customTypes/configPage';
 import { EditIcon } from '@contentful/f36-icons';
 import { styles } from './ContentTypeSelection.styles';
-import { getContentTypeName } from '@helpers/configHelpers';
+import { isItemValid } from '@helpers/configHelpers';
 import { ContentTypeContext } from '@context/ContentTypeProvider';
+import ErrorMessage from '@components/config/ErrorMessage/ErrorMessage';
 
 interface Props {
   notification: Notification;
@@ -19,12 +20,20 @@ const ContentTypeSelection = (props: Props) => {
   const { notification, handleNotificationEdit } = props;
   const [areContentTypesLoading, setAreContentTypesLoading] = useState<boolean>(false);
   const [addButtonClicked, setAddButtonClicked] = useState<boolean>(false);
+  const [isSavedContentTypeValid, setIsSavedContentTypeValid] = useState<boolean>(true);
   const { contentTypes, loading, error, contentTypeConfigLink } = useContext(ContentTypeContext);
 
   useEffect(() => {
     // ensure the loading state updates once it is done loading
     if (addButtonClicked) setAreContentTypesLoading(loading);
   }, [loading, addButtonClicked]);
+
+  useEffect(() => {
+    if (notification.contentTypeId && loading === false && error === undefined) {
+      const isValid = isItemValid(notification.contentTypeId, contentTypes, 'contentType');
+      setIsSavedContentTypeValid(isValid);
+    }
+  }, [loading, error, notification.contentTypeId]);
 
   const openContentTypeSelectionModal = () => {
     if (loading != areContentTypesLoading) {
@@ -40,6 +49,7 @@ const ContentTypeSelection = (props: Props) => {
           }}
           handleNotificationEdit={handleNotificationEdit}
           savedContentTypeId={notification.contentTypeId}
+          savedContentTypeName={notification.contentTypeName}
           contentTypes={contentTypes}
           contentTypeConfigLink={contentTypeConfigLink}
           error={Boolean(error)}
@@ -56,25 +66,30 @@ const ContentTypeSelection = (props: Props) => {
         </Text>
       </Flex>
       {notification.contentTypeId ? (
-        <TextInput.Group>
-          <TextInput
-            id="selected-content-type"
-            isDisabled={true}
-            value={getContentTypeName(
-              notification.contentTypeId,
-              contentTypes,
-              contentTypeSelection.notFound
-            )}
-            className={styles.input}
-          />
-          <IconButton
-            variant="secondary"
-            icon={<EditIcon />}
-            onClick={openContentTypeSelectionModal}
-            aria-label="Change selected content type"
-            isLoading={areContentTypesLoading}
-          />
-        </TextInput.Group>
+        <Flex flexDirection="row" justifyContent="flex-start" alignItems="center">
+          <Box>
+            <TextInput.Group>
+              <TextInput
+                id="selected-content-type"
+                isDisabled={true}
+                value={notification.contentTypeName}
+                className={styles.input}
+              />
+              <IconButton
+                variant="secondary"
+                icon={<EditIcon />}
+                onClick={openContentTypeSelectionModal}
+                aria-label="Change selected content type"
+                isLoading={areContentTypesLoading}
+              />
+            </TextInput.Group>
+          </Box>
+          {!isSavedContentTypeValid && (
+            <Box marginLeft="spacingXs">
+              <ErrorMessage errorMessage={contentTypeSelection.notFound} />
+            </Box>
+          )}
+        </Flex>
       ) : (
         <AddButton
           buttonCopy={contentTypeSelection.addButton}
