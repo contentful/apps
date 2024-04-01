@@ -20,6 +20,8 @@
       "@constants/*": ["./src/constants/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@customTypes/*": ["./src/customTypes/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@test/*": ["./test/*"],
     },
     "jsx": "react-jsx"
   },

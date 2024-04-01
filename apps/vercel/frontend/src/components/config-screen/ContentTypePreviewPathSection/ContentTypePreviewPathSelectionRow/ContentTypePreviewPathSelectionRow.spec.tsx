@@ -1,12 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { ContentType } from '@contentful/app-sdk';
 import { ContentTypePreviewPathSelectionRow } from './ContentTypePreviewPathSelectionRow';
-
-const contentTypes = [
-  { name: 'Blog', sys: { id: 'blog' } },
-  { name: 'News', sys: { id: 'news' } },
-] as ContentType[];
+import { mockContentTypes } from '@test/mocks/mockContentTypes';
 
 vi.mock('lodash', () => ({
   debounce: (fn: { cancel: () => void }) => {
@@ -20,14 +15,14 @@ describe('ContentTypePreviewPathSelectionRow', () => {
     const mockOnUpdate = vi.fn();
     const { unmount } = render(
       <ContentTypePreviewPathSelectionRow
-        contentTypes={contentTypes}
+        contentTypes={mockContentTypes}
         onParameterUpdate={mockOnUpdate}
         onRemoveRow={() => null}
       />
     );
 
     const select = document.querySelector('select');
-    fireEvent.change(select!, { target: { value: contentTypes[0].sys.id } });
+    fireEvent.change(select!, { target: { value: mockContentTypes[0].sys.id } });
 
     expect(mockOnUpdate).not.toHaveBeenCalled();
 
@@ -43,7 +38,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
     const mockOnRemoveRow = vi.fn();
     const { unmount } = render(
       <ContentTypePreviewPathSelectionRow
-        contentTypes={contentTypes}
+        contentTypes={mockContentTypes}
         onParameterUpdate={() => null}
         onRemoveRow={mockOnRemoveRow}
         configuredContentTypePreviewPathSelection={selection}
@@ -60,7 +55,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
   it('renders selection row without configured selections provided', () => {
     const { unmount } = render(
       <ContentTypePreviewPathSelectionRow
-        contentTypes={contentTypes}
+        contentTypes={mockContentTypes}
         onParameterUpdate={() => null}
         onRemoveRow={() => null}
       />
@@ -75,7 +70,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
     const selection = { contentType: 'blog', previewPath: 'test-blog-path' };
     const { unmount } = render(
       <ContentTypePreviewPathSelectionRow
-        contentTypes={contentTypes}
+        contentTypes={mockContentTypes}
         onParameterUpdate={() => null}
         onRemoveRow={() => null}
         configuredContentTypePreviewPathSelection={selection}

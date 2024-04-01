@@ -6,6 +6,7 @@ import { useState, Dispatch } from 'react';
 import { ParameterAction, actions } from '@components/parameterReducer';
 import { ContentTypePreviewPathSelection } from '@customTypes/configPage';
 import { ContentTypePreviewPathSelectionRow } from '../ContentTypePreviewPathSelectionRow/ContentTypePreviewPathSelectionRow';
+import { getAvailableContentTypes } from '@utils/getAvailableContentTypes';
 
 interface Props {
   contentTypes: ContentType[];
@@ -19,6 +20,11 @@ export const ContentTypePreviewPathSelectionList = ({
   contentTypePreviewPathSelections = [],
 }: Props) => {
   const [addRow, setAddRow] = useState<number[]>([]);
+
+  const filterContentTypes = getAvailableContentTypes(
+    contentTypes,
+    contentTypePreviewPathSelections
+  );
 
   const handleUpdateParameters = (parameters: ContentTypePreviewPathSelection) => {
     if (parameters.contentType && parameters.previewPath) {
@@ -53,7 +59,7 @@ export const ContentTypePreviewPathSelectionList = ({
     if (!contentTypePreviewPathSelections?.length) {
       return (
         <ContentTypePreviewPathSelectionRow
-          contentTypes={contentTypes}
+          contentTypes={filterContentTypes()}
           onParameterUpdate={handleUpdateParameters}
           onRemoveRow={handleRemoveRow}
           renderLabel
@@ -64,7 +70,7 @@ export const ContentTypePreviewPathSelectionList = ({
       <ContentTypePreviewPathSelectionRow
         key={index}
         configuredContentTypePreviewPathSelection={contentTypePreviewPathSelection}
-        contentTypes={contentTypes}
+        contentTypes={filterContentTypes(contentTypePreviewPathSelection.contentType)}
         onParameterUpdate={handleUpdateParameters}
         onRemoveRow={handleRemoveRow}
         renderLabel={index === 0}
@@ -79,7 +85,7 @@ export const ContentTypePreviewPathSelectionList = ({
       {addRow.map((row) => (
         <ContentTypePreviewPathSelectionRow
           key={row}
-          contentTypes={contentTypes}
+          contentTypes={filterContentTypes()}
           onParameterUpdate={handleUpdateParameters}
           onRemoveRow={handleRemoveRow}
         />
