@@ -56,22 +56,14 @@ export const ContentTypePreviewPathSelectionList = ({
   const isAddButtonDisabled = addRow || contentTypePreviewPathSelections.length === 0;
 
   const renderSelectionRow = () => {
-    // TO DO: Handle case where contentTypes are not present - do not render add button etc.
-    const selectionsWithBlankRow = addRow
-      ? contentTypePreviewPathSelections.concat({ contentType: '', previewPath: '' })
-      : contentTypePreviewPathSelections;
+    const selectionsWithBlankRow =
+      addRow || !contentTypePreviewPathSelections?.length
+        ? contentTypePreviewPathSelections.concat({ contentType: '', previewPath: '' })
+        : contentTypePreviewPathSelections;
 
+    // TO DO: Handle case where contentTypes are not present - do not render add button etc.
     if (!contentTypes?.length) return;
-    if (!contentTypePreviewPathSelections?.length) {
-      return (
-        <ContentTypePreviewPathSelectionRow
-          contentTypes={filterContentTypes()}
-          onParameterUpdate={handleUpdateParameters}
-          onRemoveRow={handleRemoveRow}
-          renderLabel
-        />
-      );
-    }
+
     return selectionsWithBlankRow.map((contentTypePreviewPathSelection, index) => (
       <ContentTypePreviewPathSelectionRow
         key={contentTypePreviewPathSelection.contentType}
