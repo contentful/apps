@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AppInstallationParameters, Project } from '@customTypes/configPage';
+import { AppInstallationParameters } from '@customTypes/configPage';
 import { ApiPathSelect } from './ApiPathSelect';
 
 const parameters = { selectedApiPath: '' } as AppInstallationParameters;
