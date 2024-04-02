@@ -8,8 +8,8 @@ export const copies = {
     },
     // TO DO: Adjust copies based on future designs
     pathSelectionSection: {
-      heading: 'Configure API paths',
-      subHeading: 'Select the API paths you want to expose to Contentful.',
+      heading: 'Configure API path',
+      subHeading: 'Select the API path you want to expose to Contentful.',
       footer: 'API paths are populated based on your Vercel account.',
     },
     contentTypePreviewPathSection: {
