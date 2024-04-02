@@ -2,7 +2,9 @@ import { vi } from 'vitest';
 
 function getStubbedGenerator(textToStream: string): AsyncGenerator<any, void, unknown> | undefined {
   const streamData = textToStream.split(' ').map((input: string) => {
-    return new TextEncoder().encode(JSON.stringify({ type: 'content_block_delta', delta: { text: input} }));
+    return new TextEncoder().encode(
+      JSON.stringify({ type: 'content_block_delta', delta: { text: input } })
+    );
   });
 
   async function* generate() {
