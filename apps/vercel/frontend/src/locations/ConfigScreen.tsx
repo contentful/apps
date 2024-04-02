@@ -23,6 +23,13 @@ import { ProjectSelectionSection } from '@components/config-screen/ProjectSelect
 import { initialParameters } from '@constants/defaultParams';
 import VercelClient from '@clients/Vercel';
 import { Project } from '@customTypes/configPage';
+import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
+
+// TO DO: Remove mock paths once api functionality is implemented to fetch these paths
+const mockPaths = [
+  { id: '1', name: 'api/enable-draft' },
+  { id: '2', name: 'api/disable-draft' },
+];
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
@@ -180,6 +187,12 @@ const ConfigScreen = () => {
             parameters={parameters}
             dispatch={dispatchParameters}
             projects={projects}
+          />
+          <hr className={styles.splitter} />
+          <ApiPathSelectionSection
+            parameters={parameters}
+            dispatch={dispatchParameters}
+            paths={mockPaths}
           />
           <hr className={styles.splitter} />
           <ContentTypePreviewPathSection

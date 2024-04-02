@@ -14,6 +14,7 @@ export interface AppInstallationParameters {
   vercelAccessTokenStatus: boolean | null;
   selectedProject: string;
   contentTypePreviewPathSelections: ContentTypePreviewPathSelection[];
+  selectedApiPath: string;
 }
 
 export interface Project {
@@ -24,6 +25,11 @@ export interface Project {
       id: string;
     };
   };
+}
+
+export interface Path {
+  id: string;
+  name: string;
 }
 
 export interface Deployment {

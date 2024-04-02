@@ -6,6 +6,12 @@ export const copies = {
       footer: 'Projects are populated based on your Vercel account.',
       link: 'Learn how to construct a preview path and token.',
     },
+    // TO DO: Adjust copies based on future designs
+    pathSelectionSection: {
+      heading: 'Configure API paths',
+      subHeading: 'Select the API paths you want to expose to Contentful.',
+      footer: 'API paths are populated based on your Vercel account.',
+    },
     contentTypePreviewPathSection: {
       infoNote: {
         infoBoxExample: '/blogs/{entry.fields.slug}',
