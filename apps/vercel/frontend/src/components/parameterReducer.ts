@@ -1,5 +1,6 @@
 import {
   AppInstallationParameters,
+  ApplyContentTypePreviewPathSelectionPayload,
   ContentTypePreviewPathSelection,
 } from '@customTypes/configPage';
 
@@ -34,7 +35,7 @@ type ApplyContentfulParametersAction = {
 
 type AddContentTypePreviewPathSelectionAction = {
   type: actions.ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION;
-  payload: ContentTypePreviewPathSelection;
+  payload: ApplyContentTypePreviewPathSelectionPayload;
 };
 
 type RemoveContentTypePreviewPathSelection = {
@@ -91,20 +92,30 @@ const parameterReducer = (
       };
     }
     case ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION: {
-      const contentTypePreviewPathSelection = action.payload;
-      const currentState = state.contentTypePreviewPathSelections || [];
+      const { oldContentType, newContentType, newPreviewPath } = action.payload;
+      const currentState = state.contentTypePreviewPathSelections;
+      const manipulatedState = currentState.map((obj) => {
+        if (obj.contentType === oldContentType) {
+          obj.previewPath = newPreviewPath;
+          obj.contentType = newContentType;
+        }
+
+        return obj;
+      });
+      const stateWithNewSelection = oldContentType
+        ? manipulatedState
+        : [...manipulatedState, { contentType: newContentType, previewPath: newPreviewPath }];
       return {
         ...state,
-        contentTypePreviewPathSelections: [...currentState, contentTypePreviewPathSelection],
+        contentTypePreviewPathSelections: stateWithNewSelection,
       };
     }
     case REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION: {
       const contentTypePreviewPathSelection = action.payload;
-      const { contentType, previewPath } = contentTypePreviewPathSelection;
+      const { contentType } = contentTypePreviewPathSelection;
 
       const filteredSelections = state.contentTypePreviewPathSelections.filter(
-        (selection) =>
-          selection.contentType !== contentType && selection.previewPath !== previewPath
+        (selection) => selection.contentType !== contentType
       );
       return {
         ...state,

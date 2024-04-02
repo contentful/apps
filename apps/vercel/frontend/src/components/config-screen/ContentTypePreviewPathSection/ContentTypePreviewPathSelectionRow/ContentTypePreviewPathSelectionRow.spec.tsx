@@ -11,7 +11,7 @@ vi.mock('lodash', () => ({
 }));
 
 describe('ContentTypePreviewPathSelectionRow', () => {
-  it('calls handler to update parameters when all information is inputed', () => {
+  it('calls handler to update parameters when each input is provided', () => {
     const mockOnUpdate = vi.fn();
     const { unmount } = render(
       <ContentTypePreviewPathSelectionRow
@@ -24,7 +24,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
     const select = document.querySelector('select');
     fireEvent.change(select!, { target: { value: mockContentTypes[0].sys.id } });
 
-    expect(mockOnUpdate).not.toHaveBeenCalled();
+    expect(mockOnUpdate).toHaveBeenCalled();
 
     const previewPathInput = screen.getByPlaceholderText('Set preview path and token');
     fireEvent.change(previewPathInput, { target: { value: 'test-path' } });
@@ -34,7 +34,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
   });
 
   it('calls handler to remove row when remove button is clicked', () => {
-    const selection = { contentType: 'blog', previewPath: 'test-blog-path' };
+    const selection = { contentType: 'blog', previewPath: 'test-blog-path-1' };
     const mockOnRemoveRow = vi.fn();
     const { unmount } = render(
       <ContentTypePreviewPathSelectionRow
@@ -67,7 +67,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
   });
 
   it('renders selection row with configured selection provided', () => {
-    const selection = { contentType: 'blog', previewPath: 'test-blog-path' };
+    const selection = { contentType: 'blog', previewPath: 'test-blog-path-2' };
     const { unmount } = render(
       <ContentTypePreviewPathSelectionRow
         contentTypes={mockContentTypes}
@@ -82,7 +82,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
   });
 
   it('renders message when no content types exist', () => {
-    const selection = { contentType: 'blog', previewPath: 'test-blog-path' };
+    const selection = { contentType: 'blog', previewPath: 'test-blog-path-3' };
     const { unmount } = render(
       <ContentTypePreviewPathSelectionRow
         contentTypes={[]}

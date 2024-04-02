@@ -2,6 +2,13 @@ export type ContentTypePreviewPathSelection = {
   contentType: string;
   previewPath: string;
 };
+
+export type ApplyContentTypePreviewPathSelectionPayload = {
+  newPreviewPath: string;
+  oldContentType: string;
+  newContentType: string;
+};
+
 export interface AppInstallationParameters {
   vercelAccessToken: string;
   vercelAccessTokenStatus: boolean | null;
