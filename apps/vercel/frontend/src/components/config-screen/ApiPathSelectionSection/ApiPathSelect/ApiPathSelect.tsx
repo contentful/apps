@@ -33,7 +33,7 @@ export const ApiPathSelect = ({ parameters, paths, dispatch }: Props) => {
           {paths && paths.length ? (
             <>
               <Select.Option value="" isDisabled>
-                Please select an API path...
+                Please select a path...
               </Select.Option>
               {paths.map((path) => (
                 <Select.Option key={`option-${path.id}`} value={path.id}>
