@@ -9,9 +9,12 @@ export const getAvailableContentTypes =
   (currentSelection?: string) => {
     if (contentTypes.length) {
       const availableContentTypes = contentTypes.filter((contentType) => {
-        if (currentSelection && contentType.sys.id === currentSelection) return true;
-        return !contentTypePreviewPathSelections.some(
-          (selection) => selection.contentType === contentType.sys.id
+        const currentSelectionExists = currentSelection && contentType.sys.id === currentSelection;
+        return (
+          currentSelectionExists ||
+          !contentTypePreviewPathSelections.some(
+            (selection) => selection.contentType === contentType.sys.id
+          )
         );
       });
 
