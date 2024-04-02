@@ -9,7 +9,7 @@ describe('featuredModels', () => {
 
     const body = JSON.parse(command.body.toString());
 
-    expect(body).toHaveProperty('max_tokens_to_sample');
+    expect(body).toHaveProperty('max_tokens');
   });
   it('should generate correct schema for Llama', () => {
     const model = featuredModels.find((m: BedrockModel) => m.name.includes('Llama'))!;

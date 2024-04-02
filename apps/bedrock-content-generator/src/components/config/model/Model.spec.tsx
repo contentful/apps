@@ -83,7 +83,7 @@ describe('Display Model', () => {
     });
     await waitFor(() => {
       expect(
-        getByText('The model Meta Llama 2 70B is not available in the abc region.')
+        getByText(/The models .*, Meta Llama 2 70B, .* are not available in the abc region./)
       ).toBeTruthy();
     });
     await waitFor(() => {
