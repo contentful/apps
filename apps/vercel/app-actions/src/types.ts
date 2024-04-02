@@ -1,5 +1,3 @@
-import { ContentType } from 'contentful-management';
-
 export interface ActionError {
   type: string;
   message: string;
@@ -62,4 +60,16 @@ export interface AppInstallationParameters {
 export interface VercelPreviewUrlParts {
   origin: string;
   xVercelProtectionBypass: string;
+}
+
+export interface VercelProject {
+  targets: {
+    production: {
+      url: string;
+      [key: string]: any;
+    };
+    [key: string]: any;
+  };
+  protectionBypass: Record<string, { [key: string]: any }>;
+  [key: string]: any;
 }
