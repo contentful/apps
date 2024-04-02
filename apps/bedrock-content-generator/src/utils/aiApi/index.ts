@@ -55,9 +55,7 @@ class AI {
         if (chunk.chunk) {
           const textData = decoder.decode(chunk.chunk.bytes);
           const message = JSON.parse(textData);
-
-          // response format depends on model family
-          yield message[model.outputKey];
+          yield model.parseResponse(message);
         }
       }
       return;
