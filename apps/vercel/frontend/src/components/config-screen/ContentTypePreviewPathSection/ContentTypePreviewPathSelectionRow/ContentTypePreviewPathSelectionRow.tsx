@@ -1,17 +1,20 @@
-import { ChangeEvent, useEffect, useState, useMemo } from 'react';
+import { ChangeEvent, useMemo } from 'react';
 import { Box, FormControl, Select, TextInput, Flex, IconButton } from '@contentful/f36-components';
 import { CloseIcon } from '@contentful/f36-icons';
 import { debounce } from 'lodash';
 import tokens from '@contentful/f36-tokens';
 import { ContentType } from '@contentful/app-sdk';
 
-import { ContentTypePreviewPathSelection } from '@customTypes/configPage';
+import {
+  ApplyContentTypePreviewPathSelectionPayload,
+  ContentTypePreviewPathSelection,
+} from '@customTypes/configPage';
 import { styles } from './ContentTypePreviewPathSelectionRow.styles';
 
 interface Props {
   contentTypes: ContentType[];
   configuredContentTypePreviewPathSelection?: ContentTypePreviewPathSelection;
-  onParameterUpdate: (parameters: ContentTypePreviewPathSelection) => void;
+  onParameterUpdate: (parameters: ApplyContentTypePreviewPathSelectionPayload) => void;
   onRemoveRow: (parameters: ContentTypePreviewPathSelection) => void;
   renderLabel?: boolean;
 }
@@ -23,23 +26,23 @@ export const ContentTypePreviewPathSelectionRow = ({
   onRemoveRow,
   renderLabel,
 }: Props) => {
-  const [contentTypesPreviewPathSelection, setContentTypePreviewPathSelection] = useState({
-    contentType: '',
-    previewPath: '',
-  });
+  const { contentType: configuredContentType, previewPath: configuredPreviewPath } =
+    configuredContentTypePreviewPathSelection;
 
   const handlePreviewPathInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setContentTypePreviewPathSelection((prevState) => ({
-      ...prevState,
-      previewPath: event.target.value,
-    }));
+    onParameterUpdate({
+      oldContentType: configuredContentType,
+      newContentType: configuredContentType,
+      newPreviewPath: event.target.value,
+    });
   };
 
   const handleContentTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setContentTypePreviewPathSelection((prevState) => ({
-      ...prevState,
-      contentType: event.target.value,
-    }));
+    onParameterUpdate({
+      oldContentType: configuredContentType,
+      newContentType: event.target.value,
+      newPreviewPath: configuredPreviewPath,
+    });
   };
 
   const handleRemoveRow = () => {
@@ -50,18 +53,6 @@ export const ContentTypePreviewPathSelectionRow = ({
     () => debounce(handlePreviewPathInput, 700),
     []
   );
-
-  useEffect(() => {
-    if (
-      contentTypesPreviewPathSelection.contentType &&
-      contentTypesPreviewPathSelection.previewPath
-    ) {
-      onParameterUpdate(contentTypesPreviewPathSelection);
-    }
-  }, [contentTypesPreviewPathSelection.contentType, contentTypesPreviewPathSelection.previewPath]);
-
-  const { contentType: configuredContentType, previewPath: configuredPreviewPath } =
-    configuredContentTypePreviewPathSelection;
 
   return (
     <Box className={styles.wrapper}>
@@ -93,6 +84,7 @@ export const ContentTypePreviewPathSelectionRow = ({
           </Select>
           <TextInput
             defaultValue={configuredPreviewPath}
+            isDisabled={!configuredContentType}
             onChange={debouncedHandlePreviewPathInputChange}
             placeholder="Set preview path and token"
           />
