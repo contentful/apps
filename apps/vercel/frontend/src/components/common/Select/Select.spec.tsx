@@ -13,7 +13,7 @@ const defaultProps = {
 };
 
 describe('Select', () => {
-  it('renders list of paths to select', () => {
+  it('renders list of options to select', () => {
     render(<Select options={options} {...defaultProps} />);
     const select = screen.getByText(defaultProps.placeholder);
     expect(select).toBeTruthy();
@@ -23,7 +23,7 @@ describe('Select', () => {
     expect(screen.getByText(options[0].name)).toBeTruthy();
   });
 
-  it('renders message when no paths exist', () => {
+  it('renders message when no options exist', () => {
     render(<Select options={[]} {...defaultProps} />);
     const emptyMessage = screen.getByText(defaultProps.emptyMessage);
 
