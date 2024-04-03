@@ -29,7 +29,7 @@
     "@vitejs/plugin-react": "4.0.1",
     "happy-dom": "9.20.3",
     "typescript": "5.1.6",
-    "vite": "4.5.2",
+    "vite": "4.5.3",
     "vitest": "0.32.4"
   }
 }
