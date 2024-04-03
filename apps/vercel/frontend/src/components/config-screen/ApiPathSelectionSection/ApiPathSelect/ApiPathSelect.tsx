@@ -1,9 +1,9 @@
 import { ChangeEvent, Dispatch } from 'react';
-import { Box, FormControl, Select } from '@contentful/f36-components';
 
 import { ParameterAction, actions } from '@components/parameterReducer';
+import { Select } from '@components/common/Select/Select';
 import { AppInstallationParameters, Path } from '@customTypes/configPage';
-import { styles } from './ApiPathSelect.styles';
+import { copies } from '@constants/copies';
 
 interface Props {
   parameters: AppInstallationParameters;
@@ -12,7 +12,8 @@ interface Props {
 }
 
 export const ApiPathSelect = ({ parameters, paths, dispatch }: Props) => {
-  const handleProjectChange = (event: ChangeEvent<HTMLSelectElement>) => {
+  const { placeholder, label, emptyMessage } = copies.configPage.pathSelectionSection.dropdown;
+  const handlePathChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatch({
       type: actions.APPLY_API_PATH,
       payload: event.target.value,
@@ -22,30 +23,13 @@ export const ApiPathSelect = ({ parameters, paths, dispatch }: Props) => {
   const { selectedApiPath } = parameters;
 
   return (
-    <Box>
-      <FormControl className={styles.formControl} id="pathSelect" isRequired={true}>
-        <FormControl.Label>API Path</FormControl.Label>
-        <Select
-          id="pathSelect"
-          name="pathSelect"
-          value={selectedApiPath}
-          onChange={handleProjectChange}>
-          {paths && paths.length ? (
-            <>
-              <Select.Option value="" isDisabled>
-                Please select a path...
-              </Select.Option>
-              {paths.map((path) => (
-                <Select.Option key={`option-${path.id}`} value={path.id}>
-                  {path.name}
-                </Select.Option>
-              ))}
-            </>
-          ) : (
-            <Select.Option value="">No paths currently configured.</Select.Option>
-          )}
-        </Select>
-      </FormControl>
-    </Box>
+    <Select
+      value={selectedApiPath}
+      onChange={handlePathChange}
+      placeholder={placeholder}
+      emptyMessage={emptyMessage}
+      options={paths}
+      label={label}
+    />
   );
 };

@@ -1,9 +1,9 @@
 import { ChangeEvent, Dispatch } from 'react';
-import { Box, FormControl, Select } from '@contentful/f36-components';
 
 import { ParameterAction, actions } from '@components/parameterReducer';
 import { AppInstallationParameters, Project } from '@customTypes/configPage';
-import { styles } from './ProjectSelect.styles';
+import { Select } from '@components/common/Select/Select';
+import { copies } from '@constants/copies';
 
 interface Props {
   parameters: AppInstallationParameters;
@@ -12,6 +12,7 @@ interface Props {
 }
 
 export const ProjectSelect = ({ parameters, projects, dispatch }: Props) => {
+  const { placeholder, label, emptyMessage } = copies.configPage.projectSelectionSection.dropdown;
   const handleProjectChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatch({
       type: actions.APPLY_SELECTED_PROJECT,
@@ -22,30 +23,13 @@ export const ProjectSelect = ({ parameters, projects, dispatch }: Props) => {
   const { selectedProject } = parameters;
 
   return (
-    <Box>
-      <FormControl className={styles.formControl} id="optionProjectSelect" isRequired={true}>
-        <FormControl.Label>Project</FormControl.Label>
-        <Select
-          id="optionProjectSelect"
-          name="optionProjectSelect"
-          value={selectedProject}
-          onChange={handleProjectChange}>
-          {projects && projects.length ? (
-            <>
-              <Select.Option value="" isDisabled>
-                Please select a project...
-              </Select.Option>
-              {projects.map((project) => (
-                <Select.Option key={`option-${project.id}`} value={project.id}>
-                  {project.name}
-                </Select.Option>
-              ))}
-            </>
-          ) : (
-            <Select.Option value="">No Projects currently configured.</Select.Option>
-          )}
-        </Select>
-      </FormControl>
-    </Box>
+    <Select
+      value={selectedProject}
+      onChange={handleProjectChange}
+      placeholder={placeholder}
+      emptyMessage={emptyMessage}
+      options={projects}
+      label={label}
+    />
   );
 };

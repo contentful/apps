@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AppInstallationParameters, Project } from '@customTypes/configPage';
+import { AppInstallationParameters } from '@customTypes/configPage';
 import { ProjectSelect } from './ProjectSelect';
 
 const parameters = { selectedProject: '' } as AppInstallationParameters;
@@ -18,13 +18,5 @@ describe('ProjectSelect', () => {
     select.click();
 
     expect(screen.getByText('Project 1')).toBeTruthy();
-  });
-
-  it('renders message when no projects exist', () => {
-    const projects: Project[] = [];
-    render(<ProjectSelect dispatch={vi.fn()} parameters={parameters} projects={projects} />);
-    const emptyMessage = screen.getByText('No Projects currently configured.');
-
-    expect(emptyMessage).toBeTruthy();
   });
 });

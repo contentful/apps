@@ -17,11 +17,4 @@ describe('ApiPathSelect', () => {
 
     expect(screen.getByText('Path/1')).toBeTruthy();
   });
-
-  it('renders message when no paths exist', () => {
-    render(<ApiPathSelect dispatch={vi.fn()} parameters={parameters} paths={[]} />);
-    const emptyMessage = screen.getByText('No paths currently configured.');
-
-    expect(emptyMessage).toBeTruthy();
-  });
 });
