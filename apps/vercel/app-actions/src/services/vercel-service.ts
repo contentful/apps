@@ -5,7 +5,7 @@ export class VercelService {
 
   public async getProject(projectId: string): Promise<VercelProject> {
     const response = await fetch(this.buildProjectUrl(projectId), {
-      method: 'POST',
+      method: 'GET',
       headers: this.buildRequestHeaders(),
     });
     const vercelProject = await response.json();
@@ -21,7 +21,7 @@ export class VercelService {
   }
 
   private buildProjectUrl(projectId: string) {
-    return `https://api.vercel.com/v10/projects/${projectId}`;
+    return `https://api.vercel.com/v9/projects/${projectId}`;
   }
 
   private assertVercelProject(value: unknown): asserts value is VercelProject {

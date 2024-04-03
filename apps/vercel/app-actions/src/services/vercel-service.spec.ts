@@ -27,9 +27,9 @@ describe('VercelService', () => {
     it('calls fetch with the appropriate values', async () => {
       await vercelService.getProject(vercelProjectId);
       expect(stubbedFetch).to.have.been.calledWith(
-        'https://api.vercel.com/v10/projects/vercel-project-id',
+        'https://api.vercel.com/v9/projects/vercel-project-id',
         {
-          method: 'POST',
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             Authorization: 'Bearer vercel-access-token',
