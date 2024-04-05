@@ -9,9 +9,19 @@ const buildPreviewUrl = (
   previewPath: string
 ): string => {
   const url = new URL(apiPath, previewUrlParts.origin);
-  url.searchParams.set('path', previewPath);
   url.searchParams.set('x-vercel-protection-bypass', previewUrlParts.xVercelProtectionBypass);
-  return url.toString();
+
+  // since `url.searchParams.set` is automatically encoded, our curly brackets are not being read
+  // correctly during variable interpolation on the contentful preview pages. so we have to manually
+  // decode those specific values and then manually add them to the URL
+  const encodedPreviewPath = encodeURIComponent(previewPath);
+  const partiallyDecodedPreviewPath = decodeCurlyBrackets(encodedPreviewPath);
+
+  return `${url.toString()}&path=${partiallyDecodedPreviewPath}`;
+};
+
+const decodeCurlyBrackets = (str: string): string => {
+  return str.replaceAll(/%7B/g, '{').replaceAll(/%7D/g, '}');
 };
 
 export const buildPreviewUrlsForContentTypes = (
