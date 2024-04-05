@@ -5,4 +5,5 @@ export const initialParameters: AppInstallationParameters = {
   vercelAccessTokenStatus: null,
   selectedProject: '',
   contentTypePreviewPathSelections: [],
+  selectedApiPath: '',
 };

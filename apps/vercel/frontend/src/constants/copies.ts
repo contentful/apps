@@ -5,6 +5,22 @@ export const copies = {
       subHeading: 'Select one of your Vercel projects in order to configure live preview.',
       footer: 'Projects are populated based on your Vercel account.',
       link: 'Learn how to construct a preview path and token.',
+      dropdown: {
+        label: 'Project',
+        placeholder: 'Please select a project...',
+        emptyMessage: 'No Projects currently configured.',
+      },
+    },
+    // TO DO: Adjust copies based on future designs
+    pathSelectionSection: {
+      heading: 'Configure API path',
+      subHeading: 'Select the API path you want to expose to Contentful.',
+      footer: 'API paths are populated based on your Vercel account.',
+      dropdown: {
+        label: 'API Path',
+        placeholder: 'Please select a path...',
+        emptyMessage: 'No paths currently configured.',
+      },
     },
     contentTypePreviewPathSection: {
       infoNote: {
