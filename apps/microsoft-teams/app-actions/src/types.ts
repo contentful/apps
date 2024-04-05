@@ -87,7 +87,9 @@ export interface EntryActivity {
 export interface WorkflowUpdate {
   title: string;
   currentStep: string;
+  currentStepColor: string;
   previousStep: string;
+  previousStepColor: string;
   contentType: string;
   callToActionUrl: string; // URL
 }
