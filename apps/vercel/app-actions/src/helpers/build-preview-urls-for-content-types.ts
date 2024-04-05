@@ -32,14 +32,19 @@ export const buildPreviewUrlsForContentTypes = (
   const apiPath = '/api/enable-draft'; // later we won't hard code this but get it from params
 
   const previewUrlsForContentTypes = contentTypePreviewPaths.reduce<PreviewUrlsForContentTypes>(
-    (mapping, contentTypePreviewPath) => ({
-      ...mapping,
-      [contentTypePreviewPath.contentType]: buildPreviewUrl(
-        previewUrlParts,
-        apiPath,
-        contentTypePreviewPath.previewPath
-      ),
-    }),
+    (mapping, contentTypePreviewPath) => {
+      // if a preview path is not specified we don't want to include the configuration at all
+      if (!contentTypePreviewPath.previewPath.trim()) return mapping;
+
+      return {
+        ...mapping,
+        [contentTypePreviewPath.contentType]: buildPreviewUrl(
+          previewUrlParts,
+          apiPath,
+          contentTypePreviewPath.previewPath
+        ),
+      };
+    },
     {}
   );
 
