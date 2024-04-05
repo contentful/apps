@@ -5,7 +5,7 @@
   "dependencies": {
     "@contentful/app-sdk": "4.22.0",
     "@contentful/f36-components": "4.62.0",
-    "@contentful/f36-tokens": "4.0.4",
+    "@contentful/f36-tokens": "4.0.5",
     "@contentful/integration-component-library": "^1.1.41",
     "@contentful/node-apps-toolkit": "^2.2.0",
     "@contentful/react-apps-toolkit": "1.2.16",
