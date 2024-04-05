@@ -12,10 +12,14 @@ node_modules
 dist
 dist-ssr
 coverage
-*.local
 
 /cypress/videos/
 /cypress/screenshots/
+
+# dotenv environment variables file
+.env
+.env.*
+!.env*.example
 
 # Editor directories and files
 .vscode/*
