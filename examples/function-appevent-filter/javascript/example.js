@@ -2,7 +2,6 @@ const appEventFilteringHandler = (event, context) => {
   // Filter out all events that are not of type 'Entry' (Assets, etc.)
   return {
     result: event.entityType === 'Entry',
-    errors: [],
   };
 };
 
