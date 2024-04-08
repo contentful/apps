@@ -1,5 +1,6 @@
 import { Mock, afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import VercelClient from './Vercel';
+import { mockDeploymentSummary } from '@test/mocks';
 
 global.fetch = vi.fn();
 
@@ -76,6 +77,37 @@ describe('VercelClient', () => {
 
       expect(data.projects.length).toBe(2);
       expect(data.projects).toBe(expectedProjects.projects);
+    });
+  });
+
+  describe('#listApiPaths', () => {
+    const projectId = '1234';
+    const expectedDeploymentSummary = mockDeploymentSummary;
+    const expectedApiPaths = [
+      { name: 'api/enable-draft', id: 'api/enable-draft' },
+      { name: 'api/disable-draft', id: 'api/disable-draft' },
+    ];
+
+    beforeEach(() => {
+      (fetch as Mock).mockImplementationOnce(() => ({
+        ok: true,
+        json: vi.fn(() => new Promise((resolve) => resolve({ deployments: [{ uid: '1234' }] }))),
+      }));
+      (fetch as Mock).mockImplementationOnce(() => ({
+        ok: true,
+        json: vi.fn(() => new Promise((resolve) => resolve(expectedDeploymentSummary))),
+      }));
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('lists all projects for an authenticated user', async () => {
+      const data = await client.listApiPaths(projectId);
+
+      expect(data.length).toBe(2);
+      expect(data).toStrictEqual(expectedApiPaths);
     });
   });
 });
