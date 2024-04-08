@@ -18,7 +18,7 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.136",
+    "@types/aws-lambda": "^8.10.137",
     "@types/lodash": "^4.17.0",
     "@types/chai": "^4.3.14",
     "@types/mocha": "^10.0.6",
