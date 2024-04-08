@@ -22,7 +22,7 @@ import { ContentTypePreviewPathSection } from '@components/config-screen/Content
 import { ProjectSelectionSection } from '@components/config-screen/ProjectSelectionSection/ProjectSelectionSection';
 import { initialParameters } from '@constants/defaultParams';
 import VercelClient from '@clients/Vercel';
-import { Project } from '@customTypes/configPage';
+import { ApiPath, Project } from '@customTypes/configPage';
 import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
 
 const ConfigScreen = () => {
@@ -30,7 +30,7 @@ const ConfigScreen = () => {
   const [appInstalled, setIsAppInstalled] = useState(false);
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [apiPaths, setApiPaths] = useState<any[]>([]);
+  const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
 
   useInitializeParameters(dispatchParameters);
