@@ -44,7 +44,7 @@ export default class VercelClient implements VercelAPIClient {
     return data;
   }
 
-  async listDeploymentSummaries(
+  async listDeploymentSummary(
     projectId: string,
     deploymentId?: string
   ): Promise<ListDeploymentSummaryResponse> {
@@ -63,7 +63,7 @@ export default class VercelClient implements VercelAPIClient {
   }
 
   async listApiPaths(projectId: string): Promise<ApiPath[]> {
-    const data = await this.listDeploymentSummaries(projectId);
+    const data = await this.listDeploymentSummary(projectId);
 
     const apiPaths = this.filterServerlessFunctions(data.serverlessFunctions);
     const formattedApiPaths = this.formatApiPaths(apiPaths);

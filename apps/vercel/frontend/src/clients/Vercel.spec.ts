@@ -103,7 +103,7 @@ describe('VercelClient', () => {
       vi.restoreAllMocks();
     });
 
-    it('lists all projects for an authenticated user', async () => {
+    it('lists all api paths for an authenticated user', async () => {
       const data = await client.listApiPaths(projectId);
 
       expect(data.length).toBe(2);
