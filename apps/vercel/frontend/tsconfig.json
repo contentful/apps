@@ -17,6 +17,7 @@
     "paths": {
       "@clients/*": ["./src/clients/*"],
       "@components/*": ["./src/components/*"],
+      "@locations/*": ["./src/locations/*"],
       "@constants/*": ["./src/constants/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@customTypes/*": ["./src/customTypes/*"],
