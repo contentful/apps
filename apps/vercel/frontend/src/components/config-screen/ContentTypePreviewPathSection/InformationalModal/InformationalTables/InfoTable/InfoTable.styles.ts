@@ -23,7 +23,7 @@ export const styles = {
   }),
   rowWrapper: css({
     borderBottom: `1px solid ${tokens.gray200}`,
-    paddingRight: tokens.spacing2Xl,
+    paddingRight: tokens.spacingM,
   }),
   rowDescription: css({
     paddingLeft: tokens.spacingM,

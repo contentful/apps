@@ -9,6 +9,6 @@ export const styles = {
     marginBottom: 0,
   }),
   footer: css({
-    margin: `${tokens.spacingL} 0`,
+    margin: `${tokens.spacingXs} 0`,
   }),
 };

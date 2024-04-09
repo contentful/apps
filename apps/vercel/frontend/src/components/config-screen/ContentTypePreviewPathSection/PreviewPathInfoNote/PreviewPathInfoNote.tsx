@@ -7,11 +7,10 @@ import { InformationalModal } from '../InformationalModal/InformationalModal';
 import { styles } from './PreviewPathInfoNote.styles';
 
 // this gap is tailored specifically to the designs of the modal
-const FLEX_GAP = '11rem';
+const FLEX_GAP = '14rem';
 
 export const PreviewPathInfoNote = () => {
-  const { infoBoxCopyDescription, infoBoxExample, infoBoxTextLink } =
-    copies.configPage.contentTypePreviewPathSection.infoNote;
+  const { description, example, link } = copies.configPage.contentTypePreviewPathSection.infoNote;
 
   const renderExampleInfoModal = () => {
     ModalLauncher.open(({ isShown, onClose }) => (
@@ -23,10 +22,12 @@ export const PreviewPathInfoNote = () => {
     <Note className={styles.root} variant="neutral">
       <Flex justifyContent="space-between" alignItems="center" gap={FLEX_GAP}>
         <Flex alignItems="center" gap={tokens.spacingXs}>
-          {infoBoxCopyDescription}
-          <GrayInfoBox withCopy>{infoBoxExample}</GrayInfoBox>
+          {description}
+          <GrayInfoBox withCopy>{example}</GrayInfoBox>
         </Flex>
-        <TextLink onClick={renderExampleInfoModal}>{infoBoxTextLink}</TextLink>
+        <TextLink className={styles.link} onClick={renderExampleInfoModal}>
+          {link.copy}
+        </TextLink>
       </Flex>
     </Note>
   );

@@ -1,21 +1,30 @@
 export const copies = {
   configPage: {
+    authenticationSection: {
+      heading: 'Connect Vercel',
+      subheading: 'Vercel Access Token',
+      input: {
+        placeholder: 'ex. atE2sdftcIp01O1isdfXc3QTdT4...',
+      },
+      link: {
+        href: 'https://vercel.com/docs/rest-api#creating-an-access-token',
+      },
+      statusMessages: {
+        valid: 'Valid access token',
+        invalid: 'Invalid access token',
+        notConfigured: 'Token not configured',
+      },
+    },
     projectSelectionSection: {
-      heading: 'Configure a live preview for a project',
-      subHeading: 'Select one of your Vercel projects in order to configure live preview.',
-      footer: 'Projects are populated based on your Vercel account.',
-      link: 'Learn how to construct a preview path and token.',
+      helpText: 'Select one of your Vercel projects.',
       dropdown: {
         label: 'Project',
         placeholder: 'Please select a project...',
         emptyMessage: 'No Projects currently configured.',
       },
     },
-    // TO DO: Adjust copies based on future designs
     pathSelectionSection: {
-      heading: 'Configure API path',
-      subHeading: 'Select the API path you want to expose to Contentful.',
-      footer: 'API paths are populated based on your Vercel account.',
+      helpText: 'Select one one of your Vercel routes.',
       dropdown: {
         label: 'API Path',
         placeholder: 'Please select a path...',
@@ -24,65 +33,84 @@ export const copies = {
     },
     contentTypePreviewPathSection: {
       infoNote: {
-        infoBoxExample: '/blogs/{entry.fields.slug}',
-        infoBoxCopyDescription: 'Preview path and token example:',
-        infoBoxTextLink: 'View more examples',
+        example: '/blogs/{entry.fields.slug}',
+        description: 'Preview path and token example:',
+        link: {
+          copy: 'View tokens',
+        },
       },
       exampleModal: {
         title: 'Preview URLs',
         button: 'Got it',
         exampleOne: {
           description: 'For each content type, create a URL according to this structure:',
-          example: 'https://[YOUR_PREVIEW_DOMAIN]/[PLACEHOLDER_TOKEN]',
+          example: '[preview_domain]/[placeholder_token]',
         },
         exampleTwo: {
-          description:
-            'The base path of your preview website or app (Example: https://myapp.com/entities)',
-          example: '[YOUR_PREVIEW_DOMAIN]',
+          description: 'The base path of your preview website or app (Example: /entities)',
+          example: '[preview_domain]',
         },
         exampleThree: {
           description:
             'A token that is resolved into an actual value when a user clicks on the preview link. You can add one or multiple tokens. Premium plan customers can specify',
-          example: '[PLACEHOLDER_TOKEN]',
+          example: '[placeholder_token]',
+          link: {
+            copy: 'custom preview tokens.',
+            href: 'https://www.contentful.com/developers/docs/tutorials/general/content-preview/',
+          },
         },
-        tableOne: [
-          {
-            description: 'The environment ID for the entry',
-            example: '{env_id}',
+        tableOne: {
+          headers: ['Placholder token', 'Definition'],
+          rows: [
+            {
+              description: 'The environment ID for the entry',
+              example: '{env_id}',
+            },
+            {
+              description: 'An object containing all the properties and their values for the entry',
+              example: '{entry}',
+            },
+            {
+              description: 'ID of the current entry',
+              example: '{entry.sys.id}',
+            },
+            {
+              description:
+                'The value of the slug field, based on the localization provided (will not fallback to default locale in case of invalid locale)',
+              example: '{entry.fields.slug}',
+              exampleTwo: '[LOCALE_CODE]',
+            },
+            {
+              description:
+                'The code for your current selected locale. In multi-locale mode it will use the default locale of your space',
+              example: '{locale}',
+            },
+          ],
+        },
+        tableTwo: {
+          headers: ['Linked entries', 'Definition'],
+          rows: [
+            {
+              description:
+                'ID of the entry, which is referencing the current entry (the one you have opened in the editor)',
+              example: '{entry.linkedBy.sys.id}',
+            },
+            {
+              description:
+                'Value of the slug field for the entry, which references entry from the previous example',
+              example: '{entry.linkedBy.fields.slug}',
+            },
+          ],
+        },
+        tableTwoSubHeading: {
+          link: {
+            href: 'https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/search-parameters/links-to-entry',
           },
-          {
-            description: 'An object containing all the properties and their values for the entry',
-            example: '{entry}',
-          },
-          {
-            description: 'ID of the current entry',
-            example: '{entry.sys.id}',
-          },
-          {
-            description:
-              'The value of the slug field, based on the localization provided (will not fallback to default locale in case of invalid locale)',
-            example: '{entry.fields.slug}',
-            exampleTwo: '[LOCALE_CODE]',
-          },
-          {
-            description:
-              'The code for your current selected locale. In multi-locale mode it will use the default locale of your space',
-            example: '{locale}',
-          },
-        ],
-        tableTwo: [
-          {
-            description:
-              'ID of the entry, which is referencing the current entry (the one you have opened in the editor)',
-            example: '{entry.linkedBy.sys.id}',
-          },
-          {
-            description:
-              'Value of the slug field for the entry, which references entry from the previous example',
-            example: '{entry.linkedBy.fields.slug}',
-          },
-        ],
-        footer: 'For more detail about preview URLs, read the docs.',
+        },
+        footer: {
+          copy: 'Learn more about setting up content preview.',
+          href: 'https://www.contentful.com/developers/docs/tutorials/general/content-preview/',
+        },
       },
     },
   },

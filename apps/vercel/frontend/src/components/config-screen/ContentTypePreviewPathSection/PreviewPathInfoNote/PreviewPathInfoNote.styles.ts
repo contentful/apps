@@ -7,4 +7,10 @@ export const styles = {
     alignItems: 'center',
     marginBottom: tokens.spacingL,
   }),
+  link: css({
+    '> span': {
+      color: tokens.blue500,
+      fontWeight: 700,
+    },
+  }),
 };

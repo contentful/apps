@@ -1,21 +1,8 @@
 import { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
 import { ConfigAppSDK, ContentType } from '@contentful/app-sdk';
-import {
-  Box,
-  Flex,
-  FormControl,
-  Heading,
-  HelpText,
-  Paragraph,
-  Stack,
-  TextInput,
-  TextLink,
-  Text,
-  Badge,
-} from '@contentful/f36-components';
+import { Box, Heading, Paragraph, Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
-import { styles } from '@components/config-screen/ConfigScreen.styles';
+import { styles } from './ConfigScreen.styles';
 import useInitializeParameters from '@hooks/useInitializeParameters';
 import parameterReducer, { actions } from '@components/parameterReducer';
 import { ContentTypePreviewPathSection } from '@components/config-screen/ContentTypePreviewPathSection/ContentTypePreviewPathSection';
@@ -24,10 +11,11 @@ import { initialParameters } from '@constants/defaultParams';
 import VercelClient from '@clients/Vercel';
 import { ApiPath, Project } from '@customTypes/configPage';
 import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
+import { AuthenticationSection } from '@components/config-screen/AuthenticationSection/AuthenticationSection';
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
-  const [appInstalled, setIsAppInstalled] = useState(false);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
@@ -83,7 +71,7 @@ const ConfigScreen = () => {
       }
     }
 
-    if (appInstalled && parameters && parameters.vercelAccessToken) {
+    if (isAppInstalled && parameters && parameters.vercelAccessToken) {
       checkToken();
     }
   }, [parameters.vercelAccessToken]);
@@ -141,16 +129,6 @@ const ConfigScreen = () => {
     });
   };
 
-  const renderStatusBadge = () => {
-    if (appInstalled && parameters.vercelAccessToken && parameters.vercelAccessTokenStatus) {
-      return <Badge variant="positive">Valid access token</Badge>;
-    } else if (!parameters.vercelAccessTokenStatus) {
-      return <Badge variant="negative">Invalid access token</Badge>;
-    } else {
-      return <Badge variant="secondary">Token not configured</Badge>;
-    }
-  };
-
   return (
     <>
       <Box className={styles.body}>
@@ -162,56 +140,21 @@ const ConfigScreen = () => {
         </Box>
         <hr className={styles.splitter} />
         <Stack spacing="spacingS" flexDirection="column">
-          <Box className={styles.box}>
-            <Heading className={styles.heading}>Connect Vercel</Heading>
-            <FormControl id="accessToken" isRequired={true}>
-              <FormControl.Label aria-label="accessToken" htmlFor="accessToken">
-                Vercel Access Token
-              </FormControl.Label>
-              <TextInput
-                testId="accessToken"
-                spellCheck={false}
-                name="accessToken"
-                type="password"
-                placeholder={'ex. atE2sdftcIp01O1isdfXc3QTdT4...'}
-                value={parameters.vercelAccessToken}
-                onChange={handleTokenChange}
-              />
-              <HelpText>
-                Follow{' '}
-                <TextLink
-                  icon={<ExternalLinkIcon />}
-                  alignIcon="end"
-                  href="https://vercel.com/docs/rest-api#creating-an-access-token"
-                  target="_blank"
-                  rel="noopener noreferrer">
-                  these detailed instructions
-                </TextLink>{' '}
-                to create an access token in the Vercel dashboard.
-              </HelpText>
-              <Box className={styles.badgeContainer}>
-                <Flex fullWidth flexDirection="column">
-                  <Text fontWeight="fontWeightDemiBold" marginRight="spacing2Xs">
-                    Status
-                  </Text>
-                  <Box>{renderStatusBadge()}</Box>
-                </Flex>
-              </Box>
-            </FormControl>
-          </Box>
-          <hr className={styles.splitter} />
+          <AuthenticationSection
+            parameters={parameters}
+            isAppInstalled={isAppInstalled}
+            handleTokenChange={handleTokenChange}
+          />
           <ProjectSelectionSection
             parameters={parameters}
             dispatch={dispatchParameters}
             projects={projects}
           />
-          <hr className={styles.splitter} />
           <ApiPathSelectionSection
             parameters={parameters}
             dispatch={dispatchParameters}
             paths={apiPaths}
           />
-          <hr className={styles.splitter} />
           <ContentTypePreviewPathSection
             parameters={parameters}
             dispatch={dispatchParameters}
