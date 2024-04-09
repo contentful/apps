@@ -79,6 +79,7 @@ export default class VercelClient implements VercelAPIClient {
 
     const data = await res.json();
 
+    // Vercel returns deployments sorted by date in descending order
     return data.deployments[0].uid;
   }
 
