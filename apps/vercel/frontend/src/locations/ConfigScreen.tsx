@@ -22,20 +22,15 @@ import { ContentTypePreviewPathSection } from '@components/config-screen/Content
 import { ProjectSelectionSection } from '@components/config-screen/ProjectSelectionSection/ProjectSelectionSection';
 import { initialParameters } from '@constants/defaultParams';
 import VercelClient from '@clients/Vercel';
-import { Project } from '@customTypes/configPage';
+import { ApiPath, Project } from '@customTypes/configPage';
 import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
-
-// TO DO: Remove mock paths once api functionality is implemented to fetch these paths
-const mockPaths = [
-  { id: '1', name: 'api/enable-draft' },
-  { id: '2', name: 'api/disable-draft' },
-];
 
 const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [appInstalled, setIsAppInstalled] = useState(false);
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
   const sdk = useSDK<ConfigAppSDK>();
 
   useInitializeParameters(dispatchParameters);
@@ -117,6 +112,18 @@ const ConfigScreen = () => {
     getProjects();
   }, [parameters.vercelAccessToken]);
 
+  useEffect(() => {
+    async function getApiPaths() {
+      const data = await vercelClient.listApiPaths(parameters.selectedProject);
+
+      if (parameters.vercelAccessToken) {
+        setApiPaths(data);
+      }
+    }
+
+    if (parameters.selectedProject) getApiPaths();
+  }, [parameters.selectedProject]);
+
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     dispatchParameters({
       type: actions.UPDATE_VERCEL_ACCESS_TOKEN,
@@ -192,7 +199,7 @@ const ConfigScreen = () => {
           <ApiPathSelectionSection
             parameters={parameters}
             dispatch={dispatchParameters}
-            paths={mockPaths}
+            paths={apiPaths}
           />
           <hr className={styles.splitter} />
           <ContentTypePreviewPathSection

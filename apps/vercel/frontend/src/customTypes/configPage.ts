@@ -34,13 +34,13 @@ export interface Path {
 }
 
 export interface Deployment {
-  id: string;
   name: string;
   status: string;
   target: string;
   projectId: string;
   bootedAt: Date;
   createdAt: Date;
+  uid: string;
 }
 
 export interface ListProjectsResponse {
@@ -50,3 +50,20 @@ export interface ListProjectsResponse {
 export interface CreateDeploymentInput {
   project: Project;
 }
+
+export type ServerlessFunction = {
+  path: string;
+  regions: string[];
+  runtime: string;
+  size: number;
+  type: string;
+};
+
+export interface ListDeploymentSummaryResponse {
+  serverlessFunctions: ServerlessFunction[];
+}
+
+export type ApiPath = {
+  id: string;
+  name: string;
+};
