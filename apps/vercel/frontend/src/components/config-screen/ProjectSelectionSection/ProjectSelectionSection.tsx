@@ -16,7 +16,7 @@ interface Props {
 export const ProjectSelectionSection = ({ parameters, dispatch, projects }: Props) => {
   const { heading, subHeading, link, footer } = copies.configPage.projectSelectionSection;
   return (
-    <Box className={styles.box}>
+    <Box data-testid="project-selection-section" className={styles.box}>
       <Heading marginBottom="none" className={styles.heading}>
         {heading}
       </Heading>

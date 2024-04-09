@@ -16,7 +16,7 @@ interface Props {
 export const ApiPathSelectionSection = ({ parameters, dispatch, paths }: Props) => {
   const { heading, subHeading, footer } = copies.configPage.pathSelectionSection;
   return (
-    <Box className={styles.box}>
+    <Box data-testid="api-path-selection-section" className={styles.box}>
       <Heading marginBottom="none" className={styles.heading}>
         {heading}
       </Heading>

@@ -121,7 +121,17 @@ const ConfigScreen = () => {
       }
     }
 
-    if (parameters.selectedProject) getApiPaths();
+    if (parameters.selectedProject) {
+      // reset the selected api path only when the project changes
+      if (apiPaths.length) {
+        dispatchParameters({
+          type: actions.APPLY_API_PATH,
+          payload: '',
+        });
+      }
+
+      getApiPaths();
+    }
   }, [parameters.selectedProject]);
 
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {

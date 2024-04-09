@@ -19,7 +19,7 @@ export const ContentTypePreviewPathSection = ({ parameters, dispatch, contentTyp
   const { contentTypePreviewPathSelections } = parameters;
 
   return (
-    <Box className={styles.box}>
+    <Box data-testid="content-type-preview-path-section" className={styles.box}>
       <Heading marginBottom="none" className={styles.heading}>
         Content type and preview path and token
       </Heading>

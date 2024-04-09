@@ -17,6 +17,9 @@ describe('ConfigScreen', () => {
 
     expect(screen.getByText('Connect Vercel')).toBeTruthy();
     expect(screen.getByText('Vercel Access Token')).toBeTruthy();
+    expect(screen.getByTestId('project-selection-section')).toBeTruthy();
+    expect(screen.getByTestId('api-path-selection-section')).toBeTruthy();
+    expect(screen.getByTestId('content-type-preview-path-section')).toBeTruthy();
     unmount();
   });
 });
