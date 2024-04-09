@@ -12,7 +12,7 @@ interface Props {
 }
 
 export const InformationalModal = ({ onClose, isShown }: Props) => {
-  const { title, button, exampleOne, exampleTwo, exampleThree } =
+  const { title, button, exampleOne, exampleTwo, exampleThree, footer } =
     copies.configPage.contentTypePreviewPathSection.exampleModal;
 
   return (
@@ -21,7 +21,7 @@ export const InformationalModal = ({ onClose, isShown }: Props) => {
         <>
           <Modal.Header title={title} onClose={onClose} />
           <Modal.Content>
-            <Flex flexDirection="column" gap={tokens.spacingS}>
+            <Flex flexDirection="column" alignItems="baseline" gap={tokens.spacingS}>
               <Flex flexDirection="column" gap={tokens.spacingL}>
                 <Box>
                   <Paragraph className={styles.firstParagraph}>{exampleOne.description}</Paragraph>
@@ -41,16 +41,24 @@ export const InformationalModal = ({ onClose, isShown }: Props) => {
                 <Flex alignItems="flex-start" gap={tokens.spacingS}>
                   <GrayInfoBox>{exampleThree.example}</GrayInfoBox>
                   <Paragraph>
-                    {exampleThree.description} <TextLink>custom preview tokens</TextLink>
+                    {exampleThree.description}{' '}
+                    <TextLink
+                      href={exampleThree.link.href}
+                      target="_blank"
+                      rel="noopener noreferrer">
+                      {exampleThree.link.copy}
+                    </TextLink>
                   </Paragraph>
                 </Flex>
               </Flex>
-
               <InformationalTables />
-
-              <Paragraph className={styles.footer}>
-                For more details about preview URLs, <TextLink>read the docs.</TextLink>{' '}
-              </Paragraph>
+              <TextLink
+                target="_blank"
+                rel="noopener noreferrer"
+                href={footer.href}
+                className={styles.footer}>
+                {footer.copy}
+              </TextLink>{' '}
             </Flex>
           </Modal.Content>
           <Modal.Controls>

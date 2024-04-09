@@ -22,6 +22,7 @@ export default defineConfig(() => ({
       '@customTypes': path.resolve(__dirname, './src/customTypes'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@test': path.resolve(__dirname, './test'),
+      '@locations': path.resolve(__dirname, './src/locations'),
     },
   },
 

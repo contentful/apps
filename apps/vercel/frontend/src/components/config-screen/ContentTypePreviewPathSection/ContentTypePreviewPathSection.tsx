@@ -3,7 +3,7 @@ import { ContentType } from '@contentful/app-sdk';
 import { Dispatch } from 'react';
 
 import { ParameterAction } from '@components/parameterReducer';
-import { styles } from '@components/config-screen/ConfigScreen.styles';
+import { styles } from '@locations/ConfigScreen.styles';
 import { AppInstallationParameters } from '@customTypes/configPage';
 import { ContentTypePreviewPathSelectionList } from './ContentTypePreviewPathSelectionList/ContentTypePreviewPathSelectionList';
 import { PreviewPathInfoNote } from './PreviewPathInfoNote/PreviewPathInfoNote';

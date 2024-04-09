@@ -15,7 +15,8 @@ type TableRow = {
 const EXAMPLE_PROPERTY = '{entry.linkedBy}';
 
 export const InformationalTables = () => {
-  const { tableOne, tableTwo } = copies.configPage.contentTypePreviewPathSection.exampleModal;
+  const { tableOne, tableTwo, tableTwoSubHeading } =
+    copies.configPage.contentTypePreviewPathSection.exampleModal;
   const infoBoxCustomStyling = {
     width: INFORMATIONAL_MODAL_COLUMN_WIDTH,
     margin: tokens.spacingXs,
@@ -33,14 +34,17 @@ export const InformationalTables = () => {
 
   return (
     <Box>
-      <InfoTable headers={['Placholder token', 'Definition']} rows={renderTableRows(tableOne)} />
+      <InfoTable headers={tableOne.headers} rows={renderTableRows(tableOne.rows)} />
 
       <Paragraph className={styles.link}>
-        Additionally, you can query <TextLink>incoming links to entry by</TextLink> using the{' '}
-        {EXAMPLE_PROPERTY} property (the first entry in response will be used)
+        Additionally, you can query{' '}
+        <TextLink target="_blank" rel="noopener noreferrer" href={tableTwoSubHeading.link.href}>
+          incoming links to entry by
+        </TextLink>{' '}
+        using the {EXAMPLE_PROPERTY} property (the first entry in response will be used)
       </Paragraph>
 
-      <InfoTable headers={['Linked entries', 'Definition']} rows={renderTableRows(tableTwo)} />
+      <InfoTable headers={tableTwo.headers} rows={renderTableRows(tableTwo.rows)} />
     </Box>
   );
 };
