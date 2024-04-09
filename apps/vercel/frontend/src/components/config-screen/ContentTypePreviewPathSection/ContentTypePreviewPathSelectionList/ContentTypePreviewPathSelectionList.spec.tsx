@@ -27,7 +27,7 @@ describe('ContentTypePreviewPathSelectionList', () => {
     unmount();
   });
 
-  it('hides add button if all content types have been configured', () => {
+  it('disables add button if all content types have been configured', () => {
     const { unmount } = render(
       <ContentTypePreviewPathSelectionList
         contentTypes={mockContentTypes}
@@ -47,7 +47,10 @@ describe('ContentTypePreviewPathSelectionList', () => {
     expect(
       screen.getByDisplayValue(mockContentTypePreviewPathSelections[1].previewPath)
     ).toBeTruthy();
-    expect(screen.queryByText('Add Content Type')).toBeFalsy();
+    expect(screen.getByRole('button', { name: 'Add Content Type' })).toHaveProperty(
+      'disabled',
+      true
+    );
 
     unmount();
   });
