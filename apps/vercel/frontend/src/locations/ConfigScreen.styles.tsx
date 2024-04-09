@@ -8,6 +8,7 @@ export const styles = {
     minHeight: '40vh',
     margin: '0 auto',
     marginTop: tokens.spacingXl,
+    marginBottom: tokens.spacingXl,
     padding: `${tokens.spacingXl} ${tokens.spacing2Xl}`,
     maxWidth: '900px',
     backgroundColor: tokens.colorWhite,
