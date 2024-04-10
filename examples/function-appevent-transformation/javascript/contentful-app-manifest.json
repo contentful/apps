@@ -6,7 +6,7 @@
       "description": "This is an example to help you learn how App Event transformation functions work.",
       "path": "functions/example.js",
       "entryFile": "functions/example.js",
-      "allowNetworks": [],
+      "allowNetworks": ["maps.googleapis.com"],
       "accepts": ["appevent.transformation"]
     }
   ]

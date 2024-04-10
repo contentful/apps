@@ -22,6 +22,6 @@ You will need to set the following environment variables as listed below:
 
 It as simple using the CLI command `npm run upload-ci`. This will perform two actions: upload the code, linking it to the app, and then finally activating the code ready for usage in both
 
-## Utilizing app event filter functions
+## Utilizing app event transformation functions
 
-When you create an app that utilizes [app events](https://www.contentful.com/developers/docs/extensibility/app-framework/app-events/), you can define the entities and topics for these events. However, you may also want to do some additional filtering for these app events. For example, you might want to filter Entry events so that they are only sent for certain content types. App event filter functions are a flexible way of making app events even more powerful for your apps.
+When you create an app that utilizes [app events](https://www.contentful.com/developers/docs/extensibility/app-framework/app-events/), you can define the entities and topics for these events. App event transformation function allows you to transform the payload of these events before they are sent to your app. This example demonstrates how to use the app event transformation function to transform the payload of the `entry.publish` event, by geocoding a latitude and longitude field to a human-readable address.
