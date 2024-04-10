@@ -1,7 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
+import { mockSdk } from '@test/mocks';
 import { GrayInfoBox } from './GrayInfoBox';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('GrayInfoBox', () => {
   it('renders content with copy icon', () => {

@@ -4,6 +4,7 @@ import { Flex, IconButton, Paragraph } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 
 import { useStyles } from './GrayInfoBox.styles';
+import { useNotifier } from '@hooks/useNotifier/useNotifier';
 
 interface Props {
   children: string;
@@ -13,8 +14,10 @@ interface Props {
 
 export const GrayInfoBox = ({ children, withCopy, rootStylingOptions }: Props) => {
   const styles = useStyles(rootStylingOptions);
+  const notifier = useNotifier();
   const handleCopyClick = () => {
     navigator.clipboard.writeText(children);
+    notifier.copySuccess(children);
   };
 
   return (

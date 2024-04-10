@@ -1,9 +1,9 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { mockSdk } from '@test/mocks';
+import { actions } from '@components/parameterReducer';
+import { mockParameters } from '@test/mocks/mockSdk';
 import useInitializeParameters from './useInitializeParameters';
-import { mockSdk } from '../../test/mocks';
-import { actions } from '../components/parameterReducer';
-import { mockParameters } from '../../test/mocks/mockSdk';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,

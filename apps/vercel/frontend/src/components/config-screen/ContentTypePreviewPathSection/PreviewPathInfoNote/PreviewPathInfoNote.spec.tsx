@@ -1,8 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { PreviewPathInfoNote } from './PreviewPathInfoNote';
 import { copies } from '@constants/copies';
+import { mockSdk } from '@test/mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('PreviewPathInfoNote', () => {
   const { description, link } = copies.configPage.contentTypePreviewPathSection.infoNote;

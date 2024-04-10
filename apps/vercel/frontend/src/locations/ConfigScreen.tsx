@@ -3,7 +3,7 @@ import { ConfigAppSDK, ContentType } from '@contentful/app-sdk';
 import { Box, Heading, Paragraph, Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './ConfigScreen.styles';
-import useInitializeParameters from '@hooks/useInitializeParameters';
+import useInitializeParameters from '@hooks/useInitializeParameters/useInitializeParameters';
 import parameterReducer, { actions } from '@components/parameterReducer';
 import { ContentTypePreviewPathSection } from '@components/config-screen/ContentTypePreviewPathSection/ContentTypePreviewPathSection';
 import { ProjectSelectionSection } from '@components/config-screen/ProjectSelectionSection/ProjectSelectionSection';
