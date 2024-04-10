@@ -2,12 +2,12 @@
   "functions": [
     {
       "id": "example",
-      "name": "Example App Event Filter Function",
-      "description": "This is an example to help you learn how App Event filter functions work.",
+      "name": "Example App Event Transformation Function",
+      "description": "This is an example to help you learn how App Event transformation functions work.",
       "path": "functions/example.js",
       "entryFile": "functions/example.js",
       "allowNetworks": [],
-      "accepts": ["appevent.filter"]
+      "accepts": ["appevent.transformation"]
     }
   ]
 }
