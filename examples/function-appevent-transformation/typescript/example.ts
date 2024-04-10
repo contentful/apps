@@ -1,14 +1,18 @@
 import { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
+import {
+  AppEventRequest,
+  FunctionEventContext,
+} from '@contentful/node-apps-toolkit/lib/requests/typings';
 import https from 'https';
 
 const appEventTransformationingHandler: EventHandler<'appevent.transformation'> = (
-  event,
-  context
-) => {
+  event: AppEventRequest,
+  context: FunctionEventContext
+): object => {
   // If event is an entry, get lat and long fields and geocode them
   if (event.entityType === 'Entry') {
-    const lat = event.entityProps.fields.lat;
-    const long = event.entityProps.fields.long;
+    const lat: string = event.entityProps.fields.lat;
+    const long: string = event.entityProps.fields.long;
     if (lat && long) {
       const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=YOUR_API_KEY`;
 
@@ -22,13 +26,12 @@ const appEventTransformationingHandler: EventHandler<'appevent.transformation'> 
 
           response.on('end', () => {
             const result = JSON.parse(data);
-            console.log(result);
-
             if (result.results.length > 0) {
               const address = result.results[0].formatted_address;
-              console.log(`Geocoded address: ${address}`);
+              return address;
             } else {
               console.log('No results found.');
+              return null;
             }
           });
         })
@@ -40,6 +43,8 @@ const appEventTransformationingHandler: EventHandler<'appevent.transformation'> 
     // If event is not an entry, throw an error
     throw new Error('Event is not an Entry');
   }
+
+  return {};
 };
 
 export const handler: EventHandler = (event, context) => {

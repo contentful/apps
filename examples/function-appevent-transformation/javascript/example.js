@@ -1,4 +1,3 @@
-import { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
 import https from 'https';
 
 const appEventTransformationingHandler = (event, context) => {
@@ -19,13 +18,12 @@ const appEventTransformationingHandler = (event, context) => {
 
           response.on('end', () => {
             const result = JSON.parse(data);
-            console.log(result);
-
             if (result.results.length > 0) {
               const address = result.results[0].formatted_address;
-              console.log(`Geocoded address: ${address}`);
+              return address;
             } else {
               console.log('No results found.');
+              return null;
             }
           });
         })
@@ -37,6 +35,8 @@ const appEventTransformationingHandler = (event, context) => {
     // If event is not an entry, throw an error
     throw new Error('Event is not an Entry');
   }
+
+  return {};
 };
 
 export const handler = (event, context) => {
