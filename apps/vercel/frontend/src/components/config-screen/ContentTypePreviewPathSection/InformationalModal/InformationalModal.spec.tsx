@@ -1,8 +1,15 @@
+import { PropsWithChildren } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { copies } from '@constants/copies';
+import { mockSdk } from '@test/mocks';
 import { InformationalModal } from './InformationalModal';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+  SDKProvider: ({ children }: PropsWithChildren<React.ReactNode>) => children,
+}));
 
 const { title, button, exampleOne, exampleTwo, exampleThree } =
   copies.configPage.contentTypePreviewPathSection.exampleModal;
