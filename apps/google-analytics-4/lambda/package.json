@@ -52,14 +52,14 @@
     "@aws-sdk/client-dynamodb": "^3.347.1",
     "@aws-sdk/lib-dynamodb": "^3.293.0",
     "@contentful/node-apps-toolkit": "^2.0.4",
-    "@google-analytics/admin": "^4.3.1",
-    "@google-analytics/data": "^3.2.1",
+    "@google-analytics/admin": "^7.2.0",
+    "@google-analytics/data": "^4.4.0",
     "@grpc/grpc-js": "^1.8.4",
     "@sentry/node": "^7.38.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "google-auth-library": "^8.7.0",
-    "google-gax": "^3.5.2",
+    "google-gax": "^4.3.2",
     "googleapis": "^110.0.0",
     "serverless-http": "^3.1.0"
   }
