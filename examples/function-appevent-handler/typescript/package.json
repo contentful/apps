@@ -3,5 +3,8 @@
     "@contentful/node-apps-toolkit": "^3.4.0",
     "@tsconfig/recommended": "1.0.3",
     "esbuild": "0.19.2"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.13"
   }
 }
