@@ -10,7 +10,7 @@ const appEventHandlerHandler: EventHandler<'appevent.handler'> = (
   // This function will check to see if the event is an Entry and then send it to multiple external services to be handled
   if (event.entityType === 'Entry') {
     exampleAuditServerHandler(event);
-    exampleEmailServerHandler(event);
+    exampleAnalyticsHandler(event);
   }
 
   // AppEvent Handlers don't have a response
@@ -18,7 +18,7 @@ const appEventHandlerHandler: EventHandler<'appevent.handler'> = (
 };
 
 const exampleAuditServerHandler = (event: AppEventRequest) => {
-  // Post event to external audit log server
+  // Post entire event to external audit log server
   const postData = JSON.stringify(event);
   const options = {
     hostname: 'FakeAuditLogServer.com',
@@ -47,34 +47,41 @@ const exampleAuditServerHandler = (event: AppEventRequest) => {
   req.end();
 };
 
-const exampleEmailServerHandler = (event: AppEventRequest) => {
-  // Send an email with the event data
+const exampleAnalyticsHandler = (event: AppEventRequest) => {
+  if (event.entityType !== 'Entry') {
+    return;
+  }
 
-  // Create a nodemailer transporter
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'your-email@gmail.com',
-      pass: 'your-password',
-    },
+  // Create a summary of just event and post it to an external analytics server
+  const postData = JSON.stringify({
+    userId: event.entityProps.sys.updatedBy,
+    eventType: 'EntryUpdated',
   });
-
-  // Set up the email options
-  const mailOptions = {
-    from: 'your-email@gmail.com',
-    to: 'recipient-email@example.com',
-    subject: 'Example Email',
-    text: `This is an example email. Event: ${JSON.stringify(event)}`,
+  const options = {
+    hostname: 'FakeAnalyticsServer.com',
+    port: 80,
+    path: '/path/to/your/resource',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData),
+    },
   };
 
-  // Send the email
-  transporter.sendMail(mailOptions, (error: any, info: any) => {
-    if (error) {
-      console.error(error);
-    } else {
-      console.log('Email sent: ' + info.response);
-    }
+  const req = http.request(options, (res: any) => {
+    console.log(`statusCode: ${res.statusCode}`);
+
+    res.on('data', (res: any) => {
+      console.log(res);
+    });
   });
+
+  req.on('error', (error: any) => {
+    console.error(error);
+  });
+
+  req.write(postData);
+  req.end();
 };
 
 export const handler: EventHandler = (event, context) => {

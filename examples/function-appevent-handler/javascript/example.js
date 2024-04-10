@@ -1,10 +1,9 @@
 const http = require('http');
-const nodemailer = require('nodemailer');
 
 const appEventHandlerHandler = (event, context) => {
   if (event.entityType === 'Entry') {
     exampleAuditServerHandler(event);
-    exampleEmailServerHandler(event);
+    exampleAnalyticsHandler(event);
   }
 
   return;
@@ -39,29 +38,40 @@ const exampleAuditServerHandler = (event) => {
   req.end();
 };
 
-const exampleEmailServerHandler = (event) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'your-email@gmail.com',
-      pass: 'your-password',
-    },
-  });
+const exampleAnalyticsHandler = (event) => {
+  if (event.entityType !== 'Entry') {
+    return;
+  }
 
-  const mailOptions = {
-    from: 'your-email@gmail.com',
-    to: 'recipient-email@example.com',
-    subject: 'Example Email',
-    text: `This is an example email. Event: ${JSON.stringify(event)}`,
+  const postData = JSON.stringify({
+    userId: event.entityProps.sys.updatedBy,
+    eventType: 'EntryUpdated',
+  });
+  const options = {
+    hostname: 'FakeAnalyticsServer.com',
+    port: 80,
+    path: '/path/to/your/resource',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData),
+    },
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error(error);
-    } else {
-      console.log('Email sent: ' + info.response);
-    }
+  const req = http.request(options, (res) => {
+    console.log(`statusCode: ${res.statusCode}`);
+
+    res.on('data', (res) => {
+      console.log(res);
+    });
   });
+
+  req.on('error', (error) => {
+    console.error(error);
+  });
+
+  req.write(postData);
+  req.end();
 };
 
 export const handler = (event, context) => {
