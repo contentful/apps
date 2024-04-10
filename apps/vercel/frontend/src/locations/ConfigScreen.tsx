@@ -14,25 +14,15 @@ import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelect
 import { AuthenticationSection } from '@components/config-screen/AuthenticationSection/AuthenticationSection';
 
 const ConfigScreen = () => {
-  const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
-  const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const [isTokenValid, setIsTokenValid] = useState(false);
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
+
+  const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const sdk = useSDK<ConfigAppSDK>();
 
   useInitializeParameters(dispatchParameters);
-
-  const getIsAppInstalled = useCallback(async () => {
-    const isInstalled = await sdk.app.isInstalled();
-
-    setIsAppInstalled(isInstalled);
-  }, [sdk]);
-
-  useEffect(() => {
-    getIsAppInstalled();
-    sdk.app.onConfigurationCompleted(() => setIsAppInstalled(true));
-  }, [sdk]);
 
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
@@ -57,21 +47,10 @@ const ConfigScreen = () => {
   useEffect(() => {
     async function checkToken() {
       const tokenValid = await vercelClient.checkToken();
-
-      if (tokenValid) {
-        dispatchParameters({
-          type: actions.UPDATE_VERCEL_ACCESS_TOKEN_STATUS,
-          payload: true,
-        });
-      } else {
-        dispatchParameters({
-          type: actions.UPDATE_VERCEL_ACCESS_TOKEN_STATUS,
-          payload: false,
-        });
-      }
+      setIsTokenValid(tokenValid);
     }
 
-    if (isAppInstalled && parameters && parameters.vercelAccessToken) {
+    if (parameters && parameters.vercelAccessToken) {
       checkToken();
     }
   }, [parameters.vercelAccessToken]);
@@ -142,24 +121,33 @@ const ConfigScreen = () => {
         <Stack spacing="spacingS" flexDirection="column">
           <AuthenticationSection
             parameters={parameters}
-            isAppInstalled={isAppInstalled}
             handleTokenChange={handleTokenChange}
+            isTokenValid={isTokenValid}
           />
-          <ProjectSelectionSection
-            parameters={parameters}
-            dispatch={dispatchParameters}
-            projects={projects}
-          />
-          <ApiPathSelectionSection
-            parameters={parameters}
-            dispatch={dispatchParameters}
-            paths={apiPaths}
-          />
-          <ContentTypePreviewPathSection
-            parameters={parameters}
-            dispatch={dispatchParameters}
-            contentTypes={contentTypes}
-          />
+
+          {isTokenValid && (
+            <ProjectSelectionSection
+              parameters={parameters}
+              dispatch={dispatchParameters}
+              projects={projects}
+            />
+          )}
+
+          {isTokenValid && parameters.selectedProject && (
+            <ApiPathSelectionSection
+              parameters={parameters}
+              dispatch={dispatchParameters}
+              paths={apiPaths}
+            />
+          )}
+
+          {isTokenValid && parameters.selectedProject && parameters.selectedApiPath && (
+            <ContentTypePreviewPathSection
+              parameters={parameters}
+              dispatch={dispatchParameters}
+              contentTypes={contentTypes}
+            />
+          )}
         </Stack>
       </Box>
     </>

@@ -11,7 +11,6 @@ export type ApplyContentTypePreviewPathSelectionPayload = {
 
 export interface AppInstallationParameters {
   vercelAccessToken: string;
-  vercelAccessTokenStatus: boolean | null;
   selectedProject: string;
   contentTypePreviewPathSelections: ContentTypePreviewPathSelection[];
   selectedApiPath: string;

@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, expect, it, vi, beforeAll } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen from './ConfigScreen';
+import VercelClient from '@clients/Vercel';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -10,16 +11,34 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 }));
 
 describe('ConfigScreen', () => {
-  it('renders setup view', async () => {
+  beforeAll(() => {
+    mockSdk.cma.contentType.getMany = vi.fn().mockResolvedValue({ items: [] });
+  });
+  it('renders only authentication section on mount', async () => {
     const { unmount } = render(<ConfigScreen />);
-    // simulate the user clicking the install button
-    await mockSdk.app.onConfigure.mock.calls[0][0]();
 
     expect(screen.getByText('Connect Vercel')).toBeTruthy();
     expect(screen.getByText('Vercel Access Token')).toBeTruthy();
-    expect(screen.getByTestId('project-selection-section')).toBeTruthy();
-    expect(screen.getByTestId('api-path-selection-section')).toBeTruthy();
-    expect(screen.getByTestId('content-type-preview-path-section')).toBeTruthy();
+    expect(screen.queryByTestId('project-selection-section')).toBeFalsy();
+    expect(screen.queryByTestId('api-path-selection-section')).toBeFalsy();
+    expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
+    unmount();
+  });
+
+  it('renders the project sections once there is a valid token', async () => {
+    vi.spyOn(VercelClient.prototype, 'checkToken').mockResolvedValue(true);
+    const { unmount } = render(<ConfigScreen />);
+
+    expect(screen.getByText('Connect Vercel')).toBeTruthy();
+    expect(screen.getByText('Vercel Access Token')).toBeTruthy();
+
+    const input = screen.getByTestId('access-token');
+    fireEvent.change(input, { target: { value: '12345' } });
+
+    const projectSection = await screen.findByTestId('project-selection-section');
+    expect(projectSection).toBeTruthy();
+    expect(screen.queryByTestId('api-path-selection-section')).toBeFalsy();
+    expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
     unmount();
   });
 });

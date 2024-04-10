@@ -17,7 +17,7 @@ describe('AuthenticationSection', () => {
       <AuthenticationSection
         handleTokenChange={vi.fn()}
         parameters={parameters}
-        isAppInstalled={false}
+        isTokenValid={false}
       />
     );
 
@@ -34,7 +34,7 @@ describe('AuthenticationSection', () => {
       vercelAccessTokenStatus: 'valid',
     } as unknown as AppInstallationParameters;
     render(
-      <AuthenticationSection handleTokenChange={vi.fn()} parameters={parameters} isAppInstalled />
+      <AuthenticationSection handleTokenChange={vi.fn()} parameters={parameters} isTokenValid />
     );
 
     const status = screen.getByText(statusMessages.valid);

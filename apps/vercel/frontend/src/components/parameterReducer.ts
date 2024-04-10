@@ -6,7 +6,6 @@ import {
 
 export enum actions {
   UPDATE_VERCEL_ACCESS_TOKEN = 'updateVercelAccessToken',
-  UPDATE_VERCEL_ACCESS_TOKEN_STATUS = 'updateVercelAccessTokenStatus',
   APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
   APPLY_SELECTED_PROJECT = 'applySelectedProject',
   ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION = 'addContentTypePreviewPathSelection',
@@ -17,11 +16,6 @@ export enum actions {
 type VercelAccessTokenAction = {
   type: actions.UPDATE_VERCEL_ACCESS_TOKEN;
   payload: string;
-};
-
-type VercelAccessTokenStatusAction = {
-  type: actions.UPDATE_VERCEL_ACCESS_TOKEN_STATUS;
-  payload: boolean;
 };
 
 type VercelSelectedProjectAction = {
@@ -53,14 +47,12 @@ export type ParameterAction =
   | VercelAccessTokenAction
   | ApplyContentfulParametersAction
   | VercelSelectedProjectAction
-  | VercelAccessTokenStatusAction
   | AddContentTypePreviewPathSelectionAction
   | RemoveContentTypePreviewPathSelection
   | ApplyApiPath;
 
 const {
   UPDATE_VERCEL_ACCESS_TOKEN,
-  UPDATE_VERCEL_ACCESS_TOKEN_STATUS,
   APPLY_CONTENTFUL_PARAMETERS,
   APPLY_SELECTED_PROJECT,
   ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
@@ -77,11 +69,6 @@ const parameterReducer = (
       return {
         ...state,
         vercelAccessToken: action.payload,
-      };
-    case UPDATE_VERCEL_ACCESS_TOKEN_STATUS:
-      return {
-        ...state,
-        vercelAccessTokenStatus: action.payload,
       };
     case APPLY_CONTENTFUL_PARAMETERS: {
       const parameters = action.payload;
