@@ -22,6 +22,7 @@ export const handler = withAsyncAppActionErrorHandling(
       vercelAccessToken,
       selectedProject: vercelProjectId,
       contentTypePreviewPathSelections,
+      selectedApiPath,
     } = await fetchAppInstallationParameters(appActionCallContext, cma);
 
     const vercelService = new VercelService(vercelAccessToken);
@@ -29,7 +30,8 @@ export const handler = withAsyncAppActionErrorHandling(
 
     const previewUrlsByContentType = buildPreviewUrlsForContentTypes(
       vercelProject,
-      contentTypePreviewPathSelections
+      contentTypePreviewPathSelections,
+      selectedApiPath
     );
 
     const configurations = Object.entries(

@@ -53,6 +53,7 @@ export interface AppInstallationParameters {
   vercelAccessToken: string;
   selectedProject: string;
   contentTypePreviewPathSelections: ContentTypePreviewPathSelection[];
+  selectedApiPath: string;
 }
 
 /* END copied over from frontend app installation types */
