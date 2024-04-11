@@ -1,7 +1,6 @@
 import { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
 import { AppEventRequest } from '@contentful/node-apps-toolkit/lib/requests/typings';
 const http = require('http');
-const nodemailer = require('nodemailer');
 
 const appEventHandlerHandler: EventHandler<'appevent.handler'> = (
   event: AppEventRequest,
