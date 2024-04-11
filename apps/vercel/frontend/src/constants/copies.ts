@@ -12,11 +12,11 @@ export const copies = {
       invalidTokenMessage: 'Invalid access token',
     },
     projectSelectionSection: {
-      helpText: 'Select one of your Vercel projects.',
+      helpText: 'Connect to a project associated with your website or experience.',
       dropdown: {
         label: 'Project',
         placeholder: 'Please select a project...',
-        emptyMessage: 'No Projects currently configured.',
+        emptyMessage: 'No Vercel projects are available',
       },
     },
     pathSelectionSection: {

@@ -20,12 +20,18 @@ export const Select = ({
   onChange,
   emptyMessage = 'No options to select',
 }: Props) => {
+  const optionsExist = Boolean(options && options.length);
   return (
     <Box>
       <FormControl className={styles.formControl} id="optionsSelect" isRequired={true}>
         <FormControl.Label>{label}</FormControl.Label>
-        <F36Select id="optionsSelect" name="optionsSelect" value={value} onChange={onChange}>
-          {options && options.length ? (
+        <F36Select
+          isDisabled={!optionsExist}
+          id="optionsSelect"
+          name="optionsSelect"
+          value={value}
+          onChange={onChange}>
+          {optionsExist ? (
             <>
               <F36Select.Option value="" isDisabled>
                 {placeholder}
