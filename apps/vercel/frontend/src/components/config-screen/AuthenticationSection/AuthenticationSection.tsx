@@ -18,18 +18,18 @@ import { copies } from '@constants/copies';
 
 interface Props {
   parameters: AppInstallationParameters;
-  isAppInstalled: boolean;
+  isTokenValid: boolean;
   handleTokenChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const AuthenticationSection = ({ parameters, isAppInstalled, handleTokenChange }: Props) => {
+export const AuthenticationSection = ({ parameters, handleTokenChange, isTokenValid }: Props) => {
   const { heading, subheading, input, link, statusMessages } =
     copies.configPage.authenticationSection;
 
   const renderStatusBadge = () => {
-    if (isAppInstalled && parameters.vercelAccessToken && parameters.vercelAccessTokenStatus) {
+    if (parameters.vercelAccessToken && isTokenValid) {
       return <Badge variant="positive">{statusMessages.valid}</Badge>;
-    } else if (!parameters.vercelAccessTokenStatus) {
+    } else if (!isTokenValid) {
       return <Badge variant="negative">{statusMessages.invalid}</Badge>;
     } else {
       return <Badge variant="secondary">{statusMessages.notConfigured}</Badge>;
@@ -43,7 +43,7 @@ export const AuthenticationSection = ({ parameters, isAppInstalled, handleTokenC
           {subheading}
         </FormControl.Label>
         <TextInput
-          testId="accessToken"
+          data-testid="access-token"
           spellCheck={false}
           name="accessToken"
           type="password"

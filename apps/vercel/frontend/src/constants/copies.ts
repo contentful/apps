@@ -40,10 +40,11 @@ export const copies = {
         },
       },
       exampleModal: {
-        title: 'Preview URLs',
+        title: 'Preview paths and tokens',
         button: 'Got it',
         exampleOne: {
-          description: 'For each content type, create a URL according to this structure:',
+          description:
+            'For each content type, create a preview path and token according to this structure:',
           example: '[preview_domain]/[placeholder_token]',
         },
         exampleTwo: {
@@ -76,9 +77,14 @@ export const copies = {
             },
             {
               description:
+                'The value of the slug field for the current entry (default locale unless otherwise specified)',
+              example: '{entry.fields.slug}',
+            },
+            {
+              description:
                 'The value of the slug field, based on the localization provided (will not fallback to default locale in case of invalid locale)',
               example: '{entry.fields.slug}',
-              exampleTwo: '[LOCALE_CODE]',
+              exampleTwo: '[locale_code]',
             },
             {
               description:

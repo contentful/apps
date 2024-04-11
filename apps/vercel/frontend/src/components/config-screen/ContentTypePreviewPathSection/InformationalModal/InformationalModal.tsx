@@ -48,6 +48,7 @@ export const InformationalModal = ({ onClose, isShown }: Props) => {
                       {exampleThree.description}{' '}
                       <TextLink
                         href={exampleThree.link.href}
+                        className={styles.link}
                         target="_blank"
                         rel="noopener noreferrer">
                         {exampleThree.link.copy}
@@ -56,13 +57,15 @@ export const InformationalModal = ({ onClose, isShown }: Props) => {
                   </Flex>
                 </Flex>
                 <InformationalTables />
-                <TextLink
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={footer.href}
-                  className={styles.footer}>
-                  {footer.copy}
-                </TextLink>{' '}
+                <Box className={styles.footer}>
+                  <TextLink
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.link}
+                    href={footer.href}>
+                    {footer.copy}
+                  </TextLink>{' '}
+                </Box>
               </Flex>
             </Modal.Content>
             <Modal.Controls>

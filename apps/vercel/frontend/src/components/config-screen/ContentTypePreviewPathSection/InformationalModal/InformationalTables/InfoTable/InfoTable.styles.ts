@@ -27,8 +27,8 @@ export const styles = {
   }),
   rowDescription: css({
     paddingLeft: tokens.spacingM,
-    paddingTop: tokens.spacingXs,
-    paddingBottom: tokens.spacingXs,
+    paddingTop: tokens.spacing2Xs,
+    paddingBottom: tokens.spacing2Xs,
     margin: 0,
   }),
   rowDescriptionWrapper: css({
