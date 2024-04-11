@@ -1,14 +1,12 @@
 import { ChangeEvent } from 'react';
 import {
   Box,
-  Flex,
   FormControl,
   Heading,
   HelpText,
   TextInput,
   TextLink,
-  Text,
-  Badge,
+  ValidationMessage,
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 
@@ -23,18 +21,11 @@ interface Props {
 }
 
 export const AuthenticationSection = ({ parameters, handleTokenChange, isTokenValid }: Props) => {
-  const { heading, subheading, input, link, statusMessages } =
+  const { heading, subheading, input, link, invalidTokenMessage } =
     copies.configPage.authenticationSection;
 
-  const renderStatusBadge = () => {
-    if (parameters.vercelAccessToken && isTokenValid) {
-      return <Badge variant="positive">{statusMessages.valid}</Badge>;
-    } else if (!isTokenValid) {
-      return <Badge variant="negative">{statusMessages.invalid}</Badge>;
-    } else {
-      return <Badge variant="secondary">{statusMessages.notConfigured}</Badge>;
-    }
-  };
+  const showError = Boolean(parameters.vercelAccessToken && !isTokenValid);
+
   return (
     <Box className={styles.box}>
       <Heading className={styles.heading}>{heading}</Heading>
@@ -50,6 +41,7 @@ export const AuthenticationSection = ({ parameters, handleTokenChange, isTokenVa
           placeholder={input.placeholder}
           value={parameters.vercelAccessToken}
           onChange={handleTokenChange}
+          isInvalid={showError}
         />
         <HelpText>
           Follow{' '}
@@ -63,14 +55,7 @@ export const AuthenticationSection = ({ parameters, handleTokenChange, isTokenVa
           </TextLink>{' '}
           to create an access token for your account.
         </HelpText>
-        <Box className={styles.badgeContainer}>
-          <Flex fullWidth flexDirection="column">
-            <Text fontWeight="fontWeightDemiBold" marginRight="spacing2Xs">
-              Status
-            </Text>
-            <Box>{renderStatusBadge()}</Box>
-          </Flex>
-        </Box>
+        {showError && <ValidationMessage>{invalidTokenMessage}</ValidationMessage>}
       </FormControl>
     </Box>
   );

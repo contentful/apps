@@ -9,11 +9,7 @@ export const copies = {
       link: {
         href: 'https://vercel.com/docs/rest-api#creating-an-access-token',
       },
-      statusMessages: {
-        valid: 'Valid access token',
-        invalid: 'Invalid access token',
-        notConfigured: 'Token not configured',
-      },
+      invalidTokenMessage: 'Invalid access token',
     },
     projectSelectionSection: {
       helpText: 'Select one of your Vercel projects.',

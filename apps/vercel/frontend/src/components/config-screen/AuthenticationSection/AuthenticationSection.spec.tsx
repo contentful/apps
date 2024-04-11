@@ -5,7 +5,7 @@ import { AppInstallationParameters } from '@customTypes/configPage';
 import { AuthenticationSection } from './AuthenticationSection';
 import { copies } from '@constants/copies';
 
-const { input, statusMessages } = copies.configPage.authenticationSection;
+const { input, invalidTokenMessage } = copies.configPage.authenticationSection;
 
 describe('AuthenticationSection', () => {
   it('renders input when token is not yet inputed', () => {
@@ -21,7 +21,7 @@ describe('AuthenticationSection', () => {
       />
     );
 
-    const status = screen.getByText(statusMessages.invalid);
+    const status = screen.getByText(invalidTokenMessage);
     const tokenInput = screen.getByPlaceholderText(input.placeholder);
 
     expect(status).toBeTruthy();
@@ -37,10 +37,8 @@ describe('AuthenticationSection', () => {
       <AuthenticationSection handleTokenChange={vi.fn()} parameters={parameters} isTokenValid />
     );
 
-    const status = screen.getByText(statusMessages.valid);
     const token = screen.queryByText(parameters.vercelAccessToken);
 
-    expect(status).toBeTruthy();
     expect(token).toBeFalsy();
   });
 });
