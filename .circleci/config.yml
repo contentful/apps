@@ -19,14 +19,26 @@ commands:
           name: Publish packages
           command: npm run publish-packages
 
+  set_since:
+    steps:
+      - run:
+          name: Set SINCE environment variable
+          command: |
+            if [ "$CIRCLE_BRANCH" = "master" ] || [ "$CIRCLE_BRANCH" = "staging" ]; then
+              echo "export SINCE=HEAD^" >> $BASH_ENV
+            else
+              echo "export SINCE=master" >> $BASH_ENV
+            fi
+            source $BASH_ENV
+
 jobs:
   apps-test:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:18.20
     resource_class: medium+
     steps:
       - checkout
-      - node/install
+      - set_since
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
       - run:
@@ -53,11 +65,12 @@ jobs:
 
   build:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:18.20
     resource_class: medium+
+    working_directory: ~/apps
     steps:
       - checkout
-      - node/install
+      - set_since
       - run:
           name: Install dependencies
           command: |
@@ -71,19 +84,16 @@ jobs:
 
   deploy-staging:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:18.20
     resource_class: medium+
     steps:
       - checkout
+      - set_since
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
-      - node/install
       - run:
-          name: Install dependencies
-          no_output_timeout: 20m
-          command: |
-            npm ci
-            npm run bootstrap:ci-deploy
+          name: Bootstrap
+          command: npm run bootstrap:ci
       - run:
           name: Install awscli
           command: |
@@ -96,7 +106,7 @@ jobs:
             REACT_APP_BACKEND_BASE_URL=$BACKEND_BASE_URL_TEST \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_TEST \
             NODE_ENV='staging' \
-            npm run build:deploy
+            npm run build
       - run:
           name: Deploy apps to staging
           command: |
@@ -111,19 +121,16 @@ jobs:
 
   deploy-prod:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:18.20
     resource_class: medium+
     steps:
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
       - checkout
-      - node/install
-      - node/install-packages
+      - set_since
       - run:
           name: Bootstrap
-          no_output_timeout: 20m
-          command: |
-            npm run bootstrap:ci-deploy
+          command: npm run bootstrap:ci
       - run:
           name: Install awscli
           command: |
@@ -136,7 +143,7 @@ jobs:
             REACT_APP_BACKEND_BASE_URL=$APP_SLACK_BACKEND_BASE_URL_PROD \
             REACT_APP_SLACK_CLIENT_ID=$SLACK_CLIENT_ID_PROD \
             NODE_ENV='production' \
-            npm run build:deploy
+            npm run build
       - publish
       - run:
           name: Deploy apps to prod
@@ -158,10 +165,9 @@ jobs:
 
   test-ts-example:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:18.20
     steps:
       - checkout
-      - node/install
       - run:
           name: Install dependencies
           command: cd examples/typescript && npm ci
@@ -174,10 +180,9 @@ jobs:
 
   test-js-example:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:18.20
     steps:
       - checkout
-      - node/install
       - run:
           name: Install dependencies
           command: cd examples/javascript && npm ci
