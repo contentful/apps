@@ -26,11 +26,10 @@ const decodeCurlyBrackets = (str: string): string => {
 
 export const buildPreviewUrlsForContentTypes = (
   vercelProject: VercelProject,
-  contentTypePreviewPaths: ContentTypePreviewPathSelection[]
+  contentTypePreviewPaths: ContentTypePreviewPathSelection[],
+  apiPath: string
 ): PreviewUrlsForContentTypes => {
   const previewUrlParts = constructVercelPreviewUrlParts(vercelProject);
-  const apiPath = '/api/enable-draft'; // later we won't hard code this but get it from params
-
   const previewUrlsForContentTypes = contentTypePreviewPaths.reduce<PreviewUrlsForContentTypes>(
     (mapping, contentTypePreviewPath) => {
       // if a preview path is not specified we don't want to include the configuration at all

@@ -5,6 +5,7 @@ const REQUIRED_PARAMS = [
   'vercelAccessToken',
   'selectedProject',
   'contentTypePreviewPathSelections',
+  'selectedApiPath',
 ];
 
 function assertAppInstallationParameters(

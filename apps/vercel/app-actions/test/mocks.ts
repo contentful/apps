@@ -52,6 +52,7 @@ export const mockAppInstallationParameters: AppInstallationParameters = {
   contentTypePreviewPathSelections: [
     { contentType: 'blog', previewPath: '/blogs/{entry.fields.slug}' },
   ],
+  selectedApiPath: 'api/enable-draft',
 };
 
 export const makeMockAppInstallation = (
