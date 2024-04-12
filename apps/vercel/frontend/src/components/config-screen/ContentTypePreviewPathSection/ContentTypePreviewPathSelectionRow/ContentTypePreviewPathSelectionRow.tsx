@@ -73,6 +73,7 @@ export const ContentTypePreviewPathSelectionRow = ({
               value={configuredContentType}
               emptyMessage={inputs.contentType.emptyMessage}
               options={contentTypes}
+              isRequired={true}
               onChange={handleContentTypeChange}></Select>
           </Box>
           <Box className={styles.inputWrapper}>

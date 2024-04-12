@@ -8,6 +8,7 @@ interface Props {
   emptyMessage?: string;
   value: string;
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
+  isRequired?: boolean;
 }
 
 export const Select = ({
@@ -17,11 +18,12 @@ export const Select = ({
   value,
   onChange,
   emptyMessage = 'No options to select',
+  isRequired,
 }: Props) => {
   const optionsExist = Boolean(options && options.length);
   return (
     <Box>
-      {label && <FormControl.Label>{label}</FormControl.Label>}
+      {label && <FormControl.Label isRequired={isRequired}>{label}</FormControl.Label>}
       <F36Select
         isDisabled={!optionsExist}
         id="optionsSelect"
