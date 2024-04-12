@@ -21,17 +21,16 @@ interface Props {
 }
 
 export const AuthenticationSection = ({ parameters, handleTokenChange, isTokenValid }: Props) => {
-  const { heading, subheading, input, link, invalidTokenMessage } =
-    copies.configPage.authenticationSection;
+  const { title, input, link } = copies.configPage.authenticationSection;
 
   const showError = Boolean(parameters.vercelAccessToken && !isTokenValid);
 
   return (
     <Box className={styles.box}>
-      <Heading className={styles.heading}>{heading}</Heading>
+      <Heading className={styles.heading}>{title}</Heading>
       <FormControl id="accessToken" isRequired={true}>
         <FormControl.Label aria-label="accessToken" htmlFor="accessToken">
-          {subheading}
+          {input.label}
         </FormControl.Label>
         <TextInput
           data-testid="access-token"
@@ -55,7 +54,7 @@ export const AuthenticationSection = ({ parameters, handleTokenChange, isTokenVa
           </TextLink>{' '}
           to create an access token for your account.
         </HelpText>
-        {showError && <ValidationMessage>{invalidTokenMessage}</ValidationMessage>}
+        {showError && <ValidationMessage>{input.errorMessage}</ValidationMessage>}
       </FormControl>
     </Box>
   );

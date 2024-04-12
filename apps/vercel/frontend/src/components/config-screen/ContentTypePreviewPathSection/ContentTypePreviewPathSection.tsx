@@ -17,14 +17,14 @@ interface Props {
 
 export const ContentTypePreviewPathSection = ({ parameters, dispatch, contentTypes }: Props) => {
   const { contentTypePreviewPathSelections } = parameters;
-  const { heading, subHeading } = copies.configPage.contentTypePreviewPathSection;
+  const { title, description } = copies.configPage.contentTypePreviewPathSection;
 
   return (
     <Box data-testid="content-type-preview-path-section" className={styles.box}>
       <Heading marginBottom="none" className={styles.heading}>
-        {heading}
+        {title}
       </Heading>
-      <Paragraph marginTop="spacingXs">{subHeading}</Paragraph>
+      <Paragraph marginTop="spacingXs">{description}</Paragraph>
       <PreviewPathInfoNote />
       <ContentTypePreviewPathSelectionList
         contentTypes={contentTypes}

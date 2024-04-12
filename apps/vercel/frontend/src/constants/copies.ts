@@ -1,17 +1,17 @@
 export const copies = {
   configPage: {
-    heading: 'Set up the Vercel App',
-    subHeading: 'Preview and edit content quickly and securely with the Vercel platform.',
+    title: 'Set up the Vercel App',
+    description: 'Preview and edit content quickly and securely with the Vercel platform.',
     authenticationSection: {
-      heading: 'Connect Vercel',
-      subheading: 'Vercel Access Token',
+      title: 'Connect Vercel',
       input: {
+        label: 'Vercel Access Token',
         placeholder: 'ex. atE2sdftcIp01O1isdfXc3QTdT4...',
+        errorMessage: 'Invalid access token',
       },
       link: {
         href: 'https://vercel.com/docs/rest-api#creating-an-access-token',
       },
-      invalidTokenMessage: 'Invalid access token',
     },
     projectSelectionSection: {
       helpText: 'Connect to a project associated with your website or experience.',
@@ -30,8 +30,8 @@ export const copies = {
       },
     },
     contentTypePreviewPathSection: {
-      heading: 'Preview settings',
-      subHeading:
+      title: 'Preview settings',
+      description:
         'Select a content type that you would like to preview. For each content type, add a preview path and optionally a token.',
       inputs: {
         contentType: {

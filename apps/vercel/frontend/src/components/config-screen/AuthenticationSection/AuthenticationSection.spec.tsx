@@ -5,7 +5,7 @@ import { AppInstallationParameters } from '@customTypes/configPage';
 import { AuthenticationSection } from './AuthenticationSection';
 import { copies } from '@constants/copies';
 
-const { input, invalidTokenMessage } = copies.configPage.authenticationSection;
+const { input } = copies.configPage.authenticationSection;
 
 describe('AuthenticationSection', () => {
   it('renders input when token is not yet inputed', () => {
@@ -53,7 +53,7 @@ describe('AuthenticationSection', () => {
       />
     );
 
-    const status = screen.getByText(invalidTokenMessage);
+    const status = screen.getByText(input.errorMessage);
     const token = screen.queryByText(parameters.vercelAccessToken);
 
     expect(status).toBeTruthy();

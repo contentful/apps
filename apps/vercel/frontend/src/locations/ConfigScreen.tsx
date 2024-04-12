@@ -23,7 +23,7 @@ const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const sdk = useSDK<ConfigAppSDK>();
 
-  const { heading, subHeading } = copies.configPage;
+  const { title, description } = copies.configPage;
 
   useInitializeParameters(dispatchParameters);
 
@@ -115,8 +115,8 @@ const ConfigScreen = () => {
     <>
       <Box className={styles.body}>
         <Box>
-          <Heading>{heading}</Heading>
-          <Paragraph>{subHeading}</Paragraph>
+          <Heading>{title}</Heading>
+          <Paragraph>{description}</Paragraph>
         </Box>
         <hr className={styles.splitter} />
         <Stack spacing="spacingS" flexDirection="column">
