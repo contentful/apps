@@ -7,6 +7,7 @@ import { styles } from '@locations/ConfigScreen.styles';
 import { AppInstallationParameters } from '@customTypes/configPage';
 import { ContentTypePreviewPathSelectionList } from './ContentTypePreviewPathSelectionList/ContentTypePreviewPathSelectionList';
 import { PreviewPathInfoNote } from './PreviewPathInfoNote/PreviewPathInfoNote';
+import { copies } from '@constants/copies';
 
 interface Props {
   parameters: AppInstallationParameters;
@@ -15,17 +16,15 @@ interface Props {
 }
 
 export const ContentTypePreviewPathSection = ({ parameters, dispatch, contentTypes }: Props) => {
-  // TO DO: Adjust logic to limit content type duplication of preview path and token
   const { contentTypePreviewPathSelections } = parameters;
+  const { heading, subHeading } = copies.configPage.contentTypePreviewPathSection;
 
   return (
     <Box data-testid="content-type-preview-path-section" className={styles.box}>
       <Heading marginBottom="none" className={styles.heading}>
-        Content type and preview path and token
+        {heading}
       </Heading>
-      <Paragraph marginTop="spacingXs">
-        Select applicable content types and define corresponding preview paths and preview tokens.
-      </Paragraph>
+      <Paragraph marginTop="spacingXs">{subHeading}</Paragraph>
       <PreviewPathInfoNote />
       <ContentTypePreviewPathSelectionList
         contentTypes={contentTypes}

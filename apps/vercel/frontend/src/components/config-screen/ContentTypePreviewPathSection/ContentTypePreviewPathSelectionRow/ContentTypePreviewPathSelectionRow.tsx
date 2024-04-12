@@ -1,5 +1,5 @@
 import { ChangeEvent, useMemo } from 'react';
-import { Box, FormControl, Select, TextInput, Flex, IconButton } from '@contentful/f36-components';
+import { Box, FormControl, TextInput, Flex, IconButton } from '@contentful/f36-components';
 import { CloseIcon } from '@contentful/f36-icons';
 import { debounce } from 'lodash';
 import tokens from '@contentful/f36-tokens';
@@ -10,6 +10,8 @@ import {
   ContentTypePreviewPathSelection,
 } from '@customTypes/configPage';
 import { styles } from './ContentTypePreviewPathSelectionRow.styles';
+import { copies } from '@constants/copies';
+import { Select } from '@components/common/Select/Select';
 
 interface Props {
   contentTypes: ContentType[];
@@ -28,6 +30,8 @@ export const ContentTypePreviewPathSelectionRow = ({
 }: Props) => {
   const { contentType: configuredContentType, previewPath: configuredPreviewPath } =
     configuredContentTypePreviewPathSelection;
+
+  const { inputs } = copies.configPage.contentTypePreviewPathSection;
 
   const handlePreviewPathInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     onParameterUpdate({
@@ -56,38 +60,32 @@ export const ContentTypePreviewPathSelectionRow = ({
 
   return (
     <Box className={styles.wrapper}>
-      <FormControl id="contentTypeSelect">
-        {renderLabel && (
-          <FormControl.Label isRequired>Content type and preview path</FormControl.Label>
-        )}
-        <Flex flexDirection="row" justifyContent="space-evenly" gap={tokens.spacingXs}>
-          <Select
-            id="contentTypeSelect"
-            name="contentTypeSelect"
-            className={styles.select}
-            defaultValue={configuredContentType}
-            onChange={handleContentTypeChange}>
-            {contentTypes && contentTypes.length ? (
-              <>
-                <Select.Option value="" isDisabled>
-                  Select content type...
-                </Select.Option>
-                {contentTypes.map((contentType) => (
-                  <Select.Option key={`option-${contentType.sys.id}`} value={contentType.sys.id}>
-                    {contentType.name}
-                  </Select.Option>
-                ))}
-              </>
-            ) : (
-              <Select.Option value="">No Content Types currently configured.</Select.Option>
+      <FormControl id="contentTypePreviewPathSelection">
+        <Flex
+          flexDirection="row"
+          justifyContent="space-evenly"
+          alignItems="flex-end"
+          gap={tokens.spacingXs}>
+          <Box className={styles.inputWrapper}>
+            <Select
+              placeholder={inputs.contentType.placeholder}
+              label={renderLabel ? inputs.contentType.label : undefined}
+              value={configuredContentType}
+              emptyMessage={inputs.contentType.emptyMessage}
+              options={contentTypes}
+              onChange={handleContentTypeChange}></Select>
+          </Box>
+          <Box className={styles.inputWrapper}>
+            {renderLabel && (
+              <FormControl.Label isRequired>{inputs.previewPath.label}</FormControl.Label>
             )}
-          </Select>
-          <TextInput
-            defaultValue={configuredPreviewPath}
-            isDisabled={!configuredContentType}
-            onChange={debouncedHandlePreviewPathInputChange}
-            placeholder="Set preview path and token"
-          />
+            <TextInput
+              defaultValue={configuredPreviewPath}
+              isDisabled={!configuredContentType}
+              onChange={debouncedHandlePreviewPathInputChange}
+              placeholder={inputs.previewPath.placeholder}
+            />
+          </Box>
           <IconButton onClick={handleRemoveRow} icon={<CloseIcon />} aria-label={'Delete row'} />
         </Flex>
       </FormControl>

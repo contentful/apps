@@ -1,5 +1,7 @@
 export const copies = {
   configPage: {
+    heading: 'Set up the Vercel App',
+    subHeading: 'Preview and edit content quickly and securely with the Vercel platform.',
     authenticationSection: {
       heading: 'Connect Vercel',
       subheading: 'Vercel Access Token',
@@ -15,19 +17,33 @@ export const copies = {
       helpText: 'Connect to a project associated with your website or experience.',
       dropdown: {
         label: 'Project',
-        placeholder: 'Please select a project...',
+        placeholder: 'Select a project',
         emptyMessage: 'No Vercel projects are available',
       },
     },
     pathSelectionSection: {
-      helpText: 'Select one one of your Vercel routes.',
+      helpText: 'Select a Vercel route to render your preview.',
       dropdown: {
         label: 'API Path',
-        placeholder: 'Please select a path...',
+        placeholder: 'Select a path',
         emptyMessage: 'No paths currently configured.',
       },
     },
     contentTypePreviewPathSection: {
+      heading: 'Preview settings',
+      subHeading:
+        'Select a content type that you would like to preview. For each content type, add a preview path and optionally a token.',
+      inputs: {
+        contentType: {
+          label: 'Content type',
+          placeholder: 'Select content type',
+          emptyMessage: 'There are no content types available',
+        },
+        previewPath: {
+          label: 'Preview path',
+          placeholder: 'Set preview path and token',
+        },
+      },
       infoNote: {
         example: '/blogs/{entry.fields.slug}',
         description: 'Preview path and token example:',

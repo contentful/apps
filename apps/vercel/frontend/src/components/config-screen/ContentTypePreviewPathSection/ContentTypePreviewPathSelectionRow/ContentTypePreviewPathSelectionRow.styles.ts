@@ -4,7 +4,7 @@ export const styles = {
   wrapper: css({
     width: '100%',
   }),
-  select: css({
+  inputWrapper: css({
     width: '100%',
   }),
 };
