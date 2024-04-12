@@ -4,6 +4,7 @@ import { ParameterAction, actions } from '@components/parameterReducer';
 import { Select } from '@components/common/Select/Select';
 import { AppInstallationParameters, Path } from '@customTypes/configPage';
 import { copies } from '@constants/copies';
+import { FormControl } from '@contentful/f36-components';
 
 interface Props {
   parameters: AppInstallationParameters;
@@ -23,13 +24,15 @@ export const ApiPathSelect = ({ parameters, paths, dispatch }: Props) => {
   const { selectedApiPath } = parameters;
 
   return (
-    <Select
-      value={selectedApiPath}
-      onChange={handlePathChange}
-      placeholder={placeholder}
-      emptyMessage={emptyMessage}
-      options={paths}
-      label={label}
-    />
+    <FormControl marginBottom="spacingS" id="apiPathSelect" isRequired={true}>
+      <Select
+        value={selectedApiPath}
+        onChange={handlePathChange}
+        placeholder={placeholder}
+        emptyMessage={emptyMessage}
+        options={paths}
+        label={label}
+      />
+    </FormControl>
   );
 };

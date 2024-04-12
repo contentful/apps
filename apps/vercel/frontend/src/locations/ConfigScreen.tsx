@@ -12,6 +12,7 @@ import VercelClient from '@clients/Vercel';
 import { ApiPath, Project } from '@customTypes/configPage';
 import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
 import { AuthenticationSection } from '@components/config-screen/AuthenticationSection/AuthenticationSection';
+import { copies } from '@constants/copies';
 
 const ConfigScreen = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);
@@ -21,6 +22,8 @@ const ConfigScreen = () => {
 
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const sdk = useSDK<ConfigAppSDK>();
+
+  const { title, description } = copies.configPage;
 
   useInitializeParameters(dispatchParameters);
 
@@ -112,10 +115,8 @@ const ConfigScreen = () => {
     <>
       <Box className={styles.body}>
         <Box>
-          <Heading>Set up the Vercel App</Heading>
-          <Paragraph>
-            Preview and deploy automatically and securely from the entry editor.
-          </Paragraph>
+          <Heading>{title}</Heading>
+          <Paragraph>{description}</Paragraph>
         </Box>
         <hr className={styles.splitter} />
         <Stack spacing="spacingS" flexDirection="column">

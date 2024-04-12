@@ -4,6 +4,7 @@ import { ParameterAction, actions } from '@components/parameterReducer';
 import { AppInstallationParameters, Project } from '@customTypes/configPage';
 import { Select } from '@components/common/Select/Select';
 import { copies } from '@constants/copies';
+import { FormControl } from '@contentful/f36-components';
 
 interface Props {
   parameters: AppInstallationParameters;
@@ -23,13 +24,15 @@ export const ProjectSelect = ({ parameters, projects, dispatch }: Props) => {
   const { selectedProject } = parameters;
 
   return (
-    <Select
-      value={selectedProject}
-      onChange={handleProjectChange}
-      placeholder={placeholder}
-      emptyMessage={emptyMessage}
-      options={projects}
-      label={label}
-    />
+    <FormControl marginBottom="spacingS" id="projectSelect" isRequired={true}>
+      <Select
+        value={selectedProject}
+        onChange={handleProjectChange}
+        placeholder={placeholder}
+        emptyMessage={emptyMessage}
+        options={projects}
+        label={label}
+      />
+    </FormControl>
   );
 };

@@ -3,8 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { AppInstallationParameters } from '@customTypes/configPage';
 import { ProjectSelect } from './ProjectSelect';
+import { copies } from '@constants/copies';
 
 const parameters = { selectedProject: '' } as AppInstallationParameters;
+const { placeholder } = copies.configPage.projectSelectionSection.dropdown;
 
 describe('ProjectSelect', () => {
   it('renders list of projects to select', () => {
@@ -12,7 +14,7 @@ describe('ProjectSelect', () => {
       { id: 'project-1', name: 'Project 1', targets: { production: { id: 'project-1' } } },
     ];
     render(<ProjectSelect dispatch={vi.fn()} parameters={parameters} projects={projects} />);
-    const select = screen.getByText('Please select a project...');
+    const select = screen.getByText(placeholder);
     expect(select).toBeTruthy();
 
     select.click();

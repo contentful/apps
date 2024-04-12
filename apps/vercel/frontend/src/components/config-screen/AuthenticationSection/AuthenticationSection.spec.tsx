@@ -5,7 +5,7 @@ import { AppInstallationParameters } from '@customTypes/configPage';
 import { AuthenticationSection } from './AuthenticationSection';
 import { copies } from '@constants/copies';
 
-const { input, statusMessages } = copies.configPage.authenticationSection;
+const { input } = copies.configPage.authenticationSection;
 
 describe('AuthenticationSection', () => {
   it('renders input when token is not yet inputed', () => {
@@ -21,14 +21,12 @@ describe('AuthenticationSection', () => {
       />
     );
 
-    const status = screen.getByText(statusMessages.invalid);
     const tokenInput = screen.getByPlaceholderText(input.placeholder);
 
-    expect(status).toBeTruthy();
     expect(tokenInput).toBeTruthy();
   });
 
-  it('renders hidden token and valid content when token is valid and app is installed', () => {
+  it('renders hidden token and valid content when token is valid', () => {
     const parameters = {
       vercelAccessToken: '12345',
       vercelAccessTokenStatus: 'valid',
@@ -37,7 +35,25 @@ describe('AuthenticationSection', () => {
       <AuthenticationSection handleTokenChange={vi.fn()} parameters={parameters} isTokenValid />
     );
 
-    const status = screen.getByText(statusMessages.valid);
+    const token = screen.queryByText(parameters.vercelAccessToken);
+
+    expect(token).toBeFalsy();
+  });
+
+  it('renders hidden token and invalid content when token is invalid', () => {
+    const parameters = {
+      vercelAccessToken: '12345',
+      vercelAccessTokenStatus: 'valid',
+    } as unknown as AppInstallationParameters;
+    render(
+      <AuthenticationSection
+        handleTokenChange={vi.fn()}
+        parameters={parameters}
+        isTokenValid={false}
+      />
+    );
+
+    const status = screen.getByText(input.errorMessage);
     const token = screen.queryByText(parameters.vercelAccessToken);
 
     expect(status).toBeTruthy();

@@ -2,6 +2,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { ContentTypePreviewPathSelectionRow } from './ContentTypePreviewPathSelectionRow';
 import { mockContentTypes } from '@test/mocks/mockContentTypes';
+import { copies } from '@constants/copies';
+
+const { inputs } = copies.configPage.contentTypePreviewPathSection;
 
 vi.mock('lodash', () => ({
   debounce: (fn: { cancel: () => void }) => {
@@ -26,7 +29,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
 
     expect(mockOnUpdate).toHaveBeenCalled();
 
-    const previewPathInput = screen.getByPlaceholderText('Set preview path and token');
+    const previewPathInput = screen.getByPlaceholderText(inputs.previewPath.placeholder);
     fireEvent.change(previewPathInput, { target: { value: 'test-path' } });
 
     expect(mockOnUpdate).toHaveBeenCalled();
@@ -61,8 +64,8 @@ describe('ContentTypePreviewPathSelectionRow', () => {
       />
     );
 
-    expect(screen.getByText('Select content type...')).toBeTruthy();
-    expect(screen.getByPlaceholderText('Set preview path and token')).toBeTruthy();
+    expect(screen.getByText(inputs.contentType.placeholder)).toBeTruthy();
+    expect(screen.getByPlaceholderText(inputs.previewPath.placeholder)).toBeTruthy();
     unmount();
   });
 
@@ -92,7 +95,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
       />
     );
 
-    expect(screen.getByText('No Content Types currently configured.')).toBeTruthy();
+    expect(screen.getByText(inputs.contentType.emptyMessage)).toBeTruthy();
     unmount();
   });
 });

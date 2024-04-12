@@ -1,37 +1,49 @@
 export const copies = {
   configPage: {
+    title: 'Set up the Vercel App',
+    description: 'Preview and edit content quickly and securely with the Vercel platform.',
     authenticationSection: {
-      heading: 'Connect Vercel',
-      subheading: 'Vercel Access Token',
+      title: 'Connect Vercel',
       input: {
+        label: 'Vercel Access Token',
         placeholder: 'ex. atE2sdftcIp01O1isdfXc3QTdT4...',
+        errorMessage: 'Invalid access token',
       },
       link: {
         href: 'https://vercel.com/docs/rest-api#creating-an-access-token',
       },
-      statusMessages: {
-        valid: 'Valid access token',
-        invalid: 'Invalid access token',
-        notConfigured: 'Token not configured',
-      },
     },
     projectSelectionSection: {
-      helpText: 'Select one of your Vercel projects.',
+      helpText: 'Connect to a project associated with your website or experience.',
       dropdown: {
         label: 'Project',
-        placeholder: 'Please select a project...',
-        emptyMessage: 'No Projects currently configured.',
+        placeholder: 'Select a project',
+        emptyMessage: 'No Vercel projects are available',
       },
     },
     pathSelectionSection: {
-      helpText: 'Select one one of your Vercel routes.',
+      helpText: 'Select a Vercel route to render your preview.',
       dropdown: {
         label: 'API Path',
-        placeholder: 'Please select a path...',
+        placeholder: 'Select a path',
         emptyMessage: 'No paths currently configured.',
       },
     },
     contentTypePreviewPathSection: {
+      title: 'Preview settings',
+      description:
+        'Select a content type that you would like to preview. For each content type, add a preview path and optionally a token.',
+      inputs: {
+        contentType: {
+          label: 'Content type',
+          placeholder: 'Select content type',
+          emptyMessage: 'There are no content types available',
+        },
+        previewPath: {
+          label: 'Preview path',
+          placeholder: 'Set preview path and token',
+        },
+      },
       infoNote: {
         example: '/blogs/{entry.fields.slug}',
         description: 'Preview path and token example:',
