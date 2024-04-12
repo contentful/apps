@@ -53,7 +53,7 @@ export const SelectSection = ({
         options={options}
         label={label}
         helpText={helpText}
-        errorMessage={!isSelectionValid ? errorMessage : undefined}
+        errorMessage={isSelectionValid ? errorMessage : undefined}
       />
     </FormControl>
   );
