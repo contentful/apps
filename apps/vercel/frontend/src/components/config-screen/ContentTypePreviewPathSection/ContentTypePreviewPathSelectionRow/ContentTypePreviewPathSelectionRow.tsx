@@ -58,6 +58,15 @@ export const ContentTypePreviewPathSelectionRow = ({
     []
   );
 
+  const contentTypeOptions = useMemo(
+    () =>
+      contentTypes.map((contentType) => ({
+        id: contentType.sys.id,
+        name: contentType.name,
+      })),
+    [contentTypes]
+  );
+
   return (
     <Box className={styles.wrapper}>
       <FormControl id="contentTypePreviewPathSelection">
@@ -72,7 +81,7 @@ export const ContentTypePreviewPathSelectionRow = ({
               label={renderLabel ? inputs.contentType.label : undefined}
               value={configuredContentType}
               emptyMessage={inputs.contentType.emptyMessage}
-              options={contentTypes}
+              options={contentTypeOptions}
               isRequired={true}
               onChange={handleContentTypeChange}></Select>
           </Box>
