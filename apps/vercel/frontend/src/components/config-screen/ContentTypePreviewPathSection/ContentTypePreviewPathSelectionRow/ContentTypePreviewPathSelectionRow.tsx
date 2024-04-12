@@ -69,7 +69,7 @@ export const ContentTypePreviewPathSelectionRow = ({
 
   return (
     <Box className={styles.wrapper}>
-      <FormControl id="contentTypePreviewPathSelection">
+      <FormControl marginBottom="spacingM" id="contentTypePreviewPathSelection">
         <Flex
           flexDirection="row"
           justifyContent="space-evenly"
