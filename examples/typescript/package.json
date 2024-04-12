@@ -40,7 +40,7 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.18.0",
     "@testing-library/jest-dom": "5.17.0",
-    "@testing-library/react": "14.3.0",
+    "@testing-library/react": "14.3.1",
     "@tsconfig/create-react-app": "2.0.4",
     "@types/node": "16.18.96",
     "@types/react": "18.2.75",
