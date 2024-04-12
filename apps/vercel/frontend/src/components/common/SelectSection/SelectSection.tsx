@@ -39,9 +39,10 @@ export const SelectSection = ({
   };
 
   useEffect(() => {
-    const isValidSelection = options.some((item) => item.id === selectedOption);
+    const isValidSelection =
+      options.some((item) => item.id === selectedOption) || selectedOption === '';
     setIsSelectionValid(!isValidSelection);
-  }, [selectedOption]);
+  }, [selectedOption, options]);
 
   return (
     <FormControl marginBottom="spacingS" id={id} isRequired={true}>
