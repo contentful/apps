@@ -1,11 +1,10 @@
-import { Box, HelpText } from '@contentful/f36-components';
 import { Dispatch } from 'react';
 
 import { ParameterAction } from '@components/parameterReducer';
-import { copies } from '@constants/copies';
 import { AppInstallationParameters, Project } from '@customTypes/configPage';
-import { ProjectSelect } from './ProjectSelect/ProjectSelect';
-import { styles } from './ProjectSelectionSection.styles';
+import { SectionWrapper } from '@components/common/SectionWrapper/SectionWrapper';
+import { SelectSection } from '@components/common/SelectSection/SelectSection';
+import { actions, singleSelectionSections } from '@constants/enums';
 
 interface Props {
   parameters: AppInstallationParameters;
@@ -14,11 +13,17 @@ interface Props {
 }
 
 export const ProjectSelectionSection = ({ parameters, dispatch, projects }: Props) => {
-  const { helpText } = copies.configPage.projectSelectionSection;
+  const sectionId = singleSelectionSections.PROJECT_SELECTION_SECTION;
   return (
-    <Box data-testid="project-selection-section" className={styles.box}>
-      <ProjectSelect parameters={parameters} dispatch={dispatch} projects={projects} />
-      <HelpText className={styles.helpText}>{helpText}</HelpText>
-    </Box>
+    <SectionWrapper testId={sectionId}>
+      <SelectSection
+        selectedOption={parameters.selectedProject}
+        options={projects}
+        action={actions.APPLY_SELECTED_PROJECT}
+        dispatch={dispatch}
+        section={sectionId}
+        id={sectionId}
+      />
+    </SectionWrapper>
   );
 };

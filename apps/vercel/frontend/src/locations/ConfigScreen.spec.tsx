@@ -3,6 +3,10 @@ import { describe, expect, it, vi, beforeAll } from 'vitest';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen from './ConfigScreen';
 import VercelClient from '@clients/Vercel';
+import { singleSelectionSections } from '@constants/enums';
+
+const projectSelectionSectionTestId = singleSelectionSections.PROJECT_SELECTION_SECTION;
+const pathSelectionSectionTestId = singleSelectionSections.API_PATH_SELECTION_SECTION;
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -19,8 +23,8 @@ describe('ConfigScreen', () => {
 
     expect(screen.getByText('Connect Vercel')).toBeTruthy();
     expect(screen.getByText('Vercel Access Token')).toBeTruthy();
-    expect(screen.queryByTestId('project-selection-section')).toBeFalsy();
-    expect(screen.queryByTestId('api-path-selection-section')).toBeFalsy();
+    expect(screen.queryByTestId(projectSelectionSectionTestId)).toBeFalsy();
+    expect(screen.queryByTestId(pathSelectionSectionTestId)).toBeFalsy();
     expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
     unmount();
   });
@@ -35,9 +39,9 @@ describe('ConfigScreen', () => {
     const input = screen.getByTestId('access-token');
     fireEvent.change(input, { target: { value: '12345' } });
 
-    const projectSection = await screen.findByTestId('project-selection-section');
+    const projectSection = await screen.findByTestId(projectSelectionSectionTestId);
     expect(projectSection).toBeTruthy();
-    expect(screen.queryByTestId('api-path-selection-section')).toBeFalsy();
+    expect(screen.queryByTestId(pathSelectionSectionTestId)).toBeFalsy();
     expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
     unmount();
   });
