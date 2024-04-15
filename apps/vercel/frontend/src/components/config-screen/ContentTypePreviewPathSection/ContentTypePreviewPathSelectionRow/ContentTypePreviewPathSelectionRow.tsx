@@ -78,7 +78,7 @@ export const ContentTypePreviewPathSelectionRow = ({
   );
 
   const isPreviewPathInvalid = useMemo(() => {
-    return Boolean(isAppConfigureCalled && !configuredPreviewPath && configuredContentType);
+    return isAppConfigureCalled && !configuredPreviewPath && !!configuredContentType;
   }, [isAppConfigureCalled, configuredPreviewPath, configuredContentType]);
 
   return (
@@ -87,7 +87,7 @@ export const ContentTypePreviewPathSelectionRow = ({
         <Flex
           flexDirection="row"
           justifyContent="space-evenly"
-          alignItems={isPreviewPathInvalid ? 'flex-start' : 'flex-end'}
+          alignItems={isPreviewPathInvalid ? 'normal' : 'flex-end'}
           gap={tokens.spacingXs}>
           <Box className={styles.inputWrapper}>
             <Select
