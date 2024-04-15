@@ -87,13 +87,15 @@ jobs:
       - image: cimg/node:18.20
     resource_class: medium+
     steps:
-      - checkout
-      - set_since
       - vault/get-secrets:
           template-preset: 'aws-push-artifacts'
+      - checkout
+      - set_since
       - run:
           name: Bootstrap
-          command: npm run bootstrap:ci
+          command: |
+            npm ci
+            npm run bootstrap:ci
       - run:
           name: Install awscli
           command: |
@@ -121,7 +123,7 @@ jobs:
 
   build-deploy-prod:
     docker:
-      - image: cimg/base:18.20
+      - image: cimg/node:18.20
     resource_class: medium+
     steps:
       - vault/get-secrets:
@@ -130,7 +132,9 @@ jobs:
       - set_since
       - run:
           name: Bootstrap
-          command: npm run bootstrap:ci
+          command: |
+            npm ci
+            npm run bootstrap:ci
       - run:
           name: Install awscli
           command: |
@@ -205,6 +209,11 @@ workflows:
           context:
             - vault
             - apps-staging
+          filters:
+            branches:
+              ignore:
+                - master
+                - staging
       - build-deploy-staging:
           context:
             - vault
