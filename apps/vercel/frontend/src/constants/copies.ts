@@ -40,6 +40,7 @@ export const copies = {
         previewPath: {
           label: 'Preview path',
           placeholder: 'Set preview path and token',
+          errorMessage: 'This field is empty and not saved',
         },
       },
       infoNote: {
