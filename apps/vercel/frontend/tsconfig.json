@@ -23,6 +23,7 @@
       "@customTypes/*": ["./src/customTypes/*"],
       "@utils/*": ["./src/utils/*"],
       "@test/*": ["./test/*"],
+      "@contexts/*": ["./src/contexts/*"],
     },
     "jsx": "react-jsx"
   },

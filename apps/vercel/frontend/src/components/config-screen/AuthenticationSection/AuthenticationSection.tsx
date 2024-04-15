@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useContext } from 'react';
 import {
   Box,
   FormControl,
@@ -11,17 +11,17 @@ import {
 import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 import { styles } from './AuthenticationSection.styles';
-import { AppInstallationParameters } from '@customTypes/configPage';
 import { copies } from '@constants/copies';
+import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 
 interface Props {
-  parameters: AppInstallationParameters;
   isTokenValid: boolean;
   handleTokenChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const AuthenticationSection = ({ parameters, handleTokenChange, isTokenValid }: Props) => {
+export const AuthenticationSection = ({ handleTokenChange, isTokenValid }: Props) => {
   const { title, input, link } = copies.configPage.authenticationSection;
+  const { parameters } = useContext(ConfigPageContext);
 
   const showError = Boolean(parameters.vercelAccessToken && !isTokenValid);
 

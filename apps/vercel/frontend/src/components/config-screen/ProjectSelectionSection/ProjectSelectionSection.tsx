@@ -1,19 +1,19 @@
-import { Dispatch } from 'react';
+import { useContext } from 'react';
 
-import { ParameterAction } from '@components/parameterReducer';
-import { AppInstallationParameters, Project } from '@customTypes/configPage';
+import { Project } from '@customTypes/configPage';
 import { SectionWrapper } from '@components/common/SectionWrapper/SectionWrapper';
 import { SelectSection } from '@components/common/SelectSection/SelectSection';
 import { actions, singleSelectionSections } from '@constants/enums';
+import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 
 interface Props {
-  parameters: AppInstallationParameters;
   projects: Project[];
-  dispatch: Dispatch<ParameterAction>;
 }
 
-export const ProjectSelectionSection = ({ parameters, dispatch, projects }: Props) => {
+export const ProjectSelectionSection = ({ projects }: Props) => {
   const sectionId = singleSelectionSections.PROJECT_SELECTION_SECTION;
+  const { dispatch, parameters } = useContext(ConfigPageContext);
+
   return (
     <SectionWrapper testId={sectionId}>
       <SelectSection

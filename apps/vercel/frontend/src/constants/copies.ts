@@ -29,6 +29,10 @@ export const copies = {
     },
     contentTypePreviewPathSection: {
       title: 'Preview settings',
+      button: {
+        copy: 'Add Content Type',
+        tooltip: 'All content types have been configured',
+      },
       description:
         'Select a content type that you would like to preview. For each content type, add a preview path and optionally a token.',
       inputs: {
