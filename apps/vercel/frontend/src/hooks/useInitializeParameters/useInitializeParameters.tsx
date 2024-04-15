@@ -2,7 +2,8 @@ import { Dispatch, useEffect, useCallback } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import type { ConfigAppSDK } from '@contentful/app-sdk';
 import { AppInstallationParameters } from '@customTypes/configPage';
-import { ParameterAction, actions } from '@components/parameterReducer';
+import { ParameterAction } from '@components/parameterReducer';
+import { actions } from '@constants/enums';
 
 /**
  * This hook is used to initialize the parameters of the app.
