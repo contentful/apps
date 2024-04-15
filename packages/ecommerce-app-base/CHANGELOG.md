@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.5.44](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.43...@contentful/ecommerce-app-base@3.5.44) (2024-04-15)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-icons from 4.27.0 to 4.28.0 ([#7276](https://github.com/contentful/apps/issues/7276)) ([474295d](https://github.com/contentful/apps/commit/474295dbaced10f3c2f88d7efee07fe6d00da174))
+
 ## [3.5.43](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.42...@contentful/ecommerce-app-base@3.5.43) (2024-04-08)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
