@@ -4,7 +4,7 @@ import { Box, Heading, Paragraph, Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './ConfigScreen.styles';
 import useInitializeParameters from '@hooks/useInitializeParameters/useInitializeParameters';
-import parameterReducer, { actions } from '@components/parameterReducer';
+import parameterReducer from '@components/parameterReducer';
 import { ContentTypePreviewPathSection } from '@components/config-screen/ContentTypePreviewPathSection/ContentTypePreviewPathSection';
 import { ProjectSelectionSection } from '@components/config-screen/ProjectSelectionSection/ProjectSelectionSection';
 import { initialParameters } from '@constants/defaultParams';
@@ -13,6 +13,7 @@ import { ApiPath, Project } from '@customTypes/configPage';
 import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
 import { AuthenticationSection } from '@components/config-screen/AuthenticationSection/AuthenticationSection';
 import { copies } from '@constants/copies';
+import { actions } from '@constants/enums';
 
 const ConfigScreen = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);

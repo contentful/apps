@@ -3,13 +3,14 @@ import { PlusIcon } from '@contentful/f36-icons';
 import { Button } from '@contentful/f36-components';
 import { useState, Dispatch } from 'react';
 
-import { ParameterAction, actions } from '@components/parameterReducer';
+import { ParameterAction } from '@components/parameterReducer';
 import {
   ApplyContentTypePreviewPathSelectionPayload,
   ContentTypePreviewPathSelection,
 } from '@customTypes/configPage';
 import { ContentTypePreviewPathSelectionRow } from '../ContentTypePreviewPathSelectionRow/ContentTypePreviewPathSelectionRow';
 import { getAvailableContentTypes } from '@utils/getAvailableContentTypes';
+import { actions } from '@constants/enums';
 
 interface Props {
   contentTypes: ContentType[];

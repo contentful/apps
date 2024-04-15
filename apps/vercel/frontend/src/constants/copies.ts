@@ -14,20 +14,18 @@ export const copies = {
       },
     },
     projectSelectionSection: {
+      label: 'Project',
+      placeholder: 'Select a project',
+      emptyMessage: 'No Vercel projects are available',
+      errorMessage: 'This project is no longer available. Please select another one.',
       helpText: 'Connect to a project associated with your website or experience.',
-      dropdown: {
-        label: 'Project',
-        placeholder: 'Select a project',
-        emptyMessage: 'No Vercel projects are available',
-      },
     },
     pathSelectionSection: {
+      label: 'API Path',
+      placeholder: 'Select a path',
+      emptyMessage: 'No paths currently configured.',
+      errorMessage: 'This path is no longer available. Please select another one.',
       helpText: 'Select a Vercel route to render your preview.',
-      dropdown: {
-        label: 'API Path',
-        placeholder: 'Select a path',
-        emptyMessage: 'No paths currently configured.',
-      },
     },
     contentTypePreviewPathSection: {
       title: 'Preview settings',

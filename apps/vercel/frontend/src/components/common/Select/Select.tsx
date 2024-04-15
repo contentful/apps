@@ -1,14 +1,22 @@
 import { ChangeEvent } from 'react';
-import { Box, FormControl, Select as F36Select } from '@contentful/f36-components';
+import {
+  Box,
+  FormControl,
+  Select as F36Select,
+  HelpText,
+  ValidationMessage,
+} from '@contentful/f36-components';
 
 interface Props {
   options: { id: string; name: string }[];
-  label?: string;
   placeholder: string;
-  emptyMessage?: string;
   value: string;
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
+  label?: string;
   isRequired?: boolean;
+  helpText?: string;
+  errorMessage?: string;
+  emptyMessage?: string;
 }
 
 export const Select = ({
@@ -19,6 +27,8 @@ export const Select = ({
   onChange,
   emptyMessage = 'No options to select',
   isRequired,
+  helpText,
+  errorMessage,
 }: Props) => {
   const optionsExist = Boolean(options && options.length);
   return (
@@ -45,6 +55,8 @@ export const Select = ({
           <F36Select.Option value="">{emptyMessage}</F36Select.Option>
         )}
       </F36Select>
+      {helpText && <HelpText marginBottom="spacingXs">{helpText}</HelpText>}
+      {errorMessage && <ValidationMessage>{errorMessage}</ValidationMessage>}
     </Box>
   );
 };
