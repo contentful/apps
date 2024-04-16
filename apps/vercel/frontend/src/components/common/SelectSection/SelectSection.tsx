@@ -29,7 +29,7 @@ export const SelectSection = ({
   section,
   id,
 }: Props) => {
-  const [isSelectionValid, setIsSelectionValid] = useState<boolean>(false);
+  const [isSelectionInvalid, setIsSelectionInvalid] = useState<boolean>(false);
   const { placeholder, label, emptyMessage, helpText, errorMessage } = copies.configPage[section];
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatch({
@@ -39,9 +39,9 @@ export const SelectSection = ({
   };
 
   useEffect(() => {
-    const isValidSelection =
-      options.some((item) => item.id === selectedOption) || selectedOption === '';
-    setIsSelectionValid(!isValidSelection);
+    const isValidSelection = options.some((item) => item.id === selectedOption) || !selectedOption;
+    const areOptionsAvailable = options.length === 0;
+    setIsSelectionInvalid(!isValidSelection && !areOptionsAvailable);
   }, [selectedOption, options]);
 
   return (
@@ -54,7 +54,7 @@ export const SelectSection = ({
         options={options}
         label={label}
         helpText={helpText}
-        errorMessage={isSelectionValid ? errorMessage : undefined}
+        errorMessage={isSelectionInvalid ? errorMessage : undefined}
       />
     </FormControl>
   );
