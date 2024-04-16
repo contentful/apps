@@ -96,7 +96,7 @@ export async function fetchCategories(
         queryArgs: {
           limit: 100,
           offset: pagination?.offset,
-          where: `key="${search}"`,
+          where: `key="${search}" or name(${config.locale}="${search}") or slug(${config.locale}="${search}")`,
         },
       })
       .execute();
