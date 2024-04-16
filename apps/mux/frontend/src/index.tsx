@@ -606,7 +606,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     if (signedPlayback) {
-      this.setSignedPlayback(signedPlayback.id);
+      await this.setSignedPlayback(signedPlayback.id);
     }
 
     const trackPreparing = captions
