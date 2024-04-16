@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
+import { useCallback, useState, useEffect, useReducer, ChangeEvent, isValidElement } from 'react';
 import { ConfigAppSDK, ContentType } from '@contentful/app-sdk';
 import { Box, Heading, Paragraph, Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -18,6 +18,8 @@ import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
 
 const ConfigScreen = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasTokenBeenValidated, setHasTokenBeenValidated] = useState(false);
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
@@ -46,22 +48,40 @@ const ConfigScreen = () => {
     };
   }, [parameters, sdk]);
 
+  const vercelClient = new VercelClient(parameters.vercelAccessToken);
+
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
   }, [sdk, onConfigure]);
 
-  const vercelClient = new VercelClient(parameters.vercelAccessToken);
-
   useEffect(() => {
+    setIsLoading(true);
+
     async function checkToken() {
+      console.log('not hitting here>>>');
       const tokenValid = await vercelClient.checkToken();
+
       setIsTokenValid(tokenValid);
+      console.log('tokenValid>>>>', tokenValid);
+
+      setIsLoading(false);
+      setHasTokenBeenValidated(true);
     }
 
-    if (parameters && parameters.vercelAccessToken) {
+    if (!hasTokenBeenValidated) {
       checkToken();
+      // setHasTokenBeenValidated(true)
     }
+
+    // setHasTokenBeenValidated(true)
+
+    // if (parameters.vercelAccessToken === '') {
+    //   setHasTokenBeenValidated(true);
+    //   setIsLoading(false)
+    // }
   }, [parameters.vercelAccessToken]);
+
+  console.log('hasTokenBeenValidated', hasTokenBeenValidated, 'isTokenValid>>', isTokenValid);
 
   useEffect(() => {
     async function getContentTypes() {
@@ -77,23 +97,29 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     async function getProjects() {
+      // setIsLoading(true)
       const data = await vercelClient.listProjects();
 
-      if (parameters.vercelAccessToken) {
+      if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) {
         setProjects(data.projects);
       }
+
+      // setIsLoading(false);
     }
 
     getProjects();
-  }, [parameters.vercelAccessToken]);
+  }, [parameters.vercelAccessToken, hasTokenBeenValidated, isTokenValid]);
 
   useEffect(() => {
     async function getApiPaths() {
+      setIsLoading(true);
       const data = await vercelClient.listApiPaths(parameters.selectedProject);
 
       if (parameters.vercelAccessToken) {
         setApiPaths(data);
       }
+
+      setIsLoading(false);
     }
 
     if (parameters.selectedProject) {
@@ -110,15 +136,29 @@ const ConfigScreen = () => {
   }, [parameters.selectedProject]);
 
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setIsLoading(true);
+
     dispatchParameters({
       type: actions.UPDATE_VERCEL_ACCESS_TOKEN,
       payload: e.target.value,
     });
+
+    async function checkToken() {
+      console.log('only hitting here>>>>>>');
+      const tokenValid = await new VercelClient(e.target.value).checkToken();
+      setIsTokenValid(tokenValid);
+      setIsLoading(false);
+      setHasTokenBeenValidated(true);
+    }
+
+    checkToken();
   };
 
   const handleAppConfigurationChange = () => {
     setIsAppConfigurationSaved(false);
   };
+
+  const renderPostAuthComponents = isTokenValid && parameters.vercelAccessToken;
 
   return (
     <ConfigPageProvider
@@ -126,6 +166,7 @@ const ConfigScreen = () => {
       isAppConfigurationSaved={isAppConfigurationSaved}
       handleAppConfigurationChange={handleAppConfigurationChange}
       dispatch={dispatchParameters}
+      isLoading={isLoading}
       parameters={parameters}>
       <Box className={styles.body}>
         <Box>
@@ -134,18 +175,20 @@ const ConfigScreen = () => {
         </Box>
         <hr className={styles.splitter} />
         <Stack spacing="spacingS" flexDirection="column">
-          <AuthenticationSection
-            handleTokenChange={handleTokenChange}
-            isTokenValid={isTokenValid}
-          />
+          {hasTokenBeenValidated && (
+            <AuthenticationSection
+              handleTokenChange={handleTokenChange}
+              isTokenValid={isTokenValid}
+            />
+          )}
 
-          {isTokenValid && <ProjectSelectionSection projects={projects} />}
+          {renderPostAuthComponents && <ProjectSelectionSection projects={projects} />}
 
-          {isTokenValid && parameters.selectedProject && (
+          {renderPostAuthComponents && parameters.selectedProject && (
             <ApiPathSelectionSection paths={apiPaths} />
           )}
 
-          {isTokenValid && parameters.selectedProject && parameters.selectedApiPath && (
+          {renderPostAuthComponents && parameters.selectedProject && parameters.selectedApiPath && (
             <ContentTypePreviewPathSection />
           )}
         </Stack>

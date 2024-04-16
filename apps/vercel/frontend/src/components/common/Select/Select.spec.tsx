@@ -14,19 +14,29 @@ const defaultProps = {
 
 describe('Select', () => {
   it('renders list of options to select', () => {
-    render(<Select options={options} {...defaultProps} />);
+    const { unmount } = render(<Select options={options} isLoading={false} {...defaultProps} />);
     const select = screen.getByText(defaultProps.placeholder);
     expect(select).toBeTruthy();
 
     select.click();
 
     expect(screen.getByText(options[0].name)).toBeTruthy();
+    unmount();
   });
 
   it('renders message when no options exist', () => {
-    render(<Select options={[]} {...defaultProps} />);
+    const { unmount } = render(<Select options={[]} isLoading={false} {...defaultProps} />);
     const emptyMessage = screen.getByText(defaultProps.emptyMessage);
 
     expect(emptyMessage).toBeTruthy();
+    unmount();
+  });
+
+  it('does not render empty message when in loading state', () => {
+    const { unmount } = render(<Select options={[]} isLoading={true} {...defaultProps} />);
+    const emptyMessage = screen.queryByText(defaultProps.emptyMessage);
+
+    expect(emptyMessage).toBeFalsy();
+    unmount();
   });
 });

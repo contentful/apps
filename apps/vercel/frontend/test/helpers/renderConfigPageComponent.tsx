@@ -22,6 +22,7 @@ export const renderConfigPageComponent = (
         dispatch: () => null,
         isAppConfigurationSaved: false,
         handleAppConfigurationChange: () => null,
+        isLoading: false,
         ...overrides,
       }}>
       {children}
