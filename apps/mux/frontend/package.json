@@ -8,7 +8,6 @@
     "@testing-library/react": "12.1.5",
     "@testing-library/user-event": "14.4.3",
     "@types/jest": "28.1.7",
-    "@types/jsonwebtoken": "9.0.6",
     "@types/node": "18.7.14",
     "@types/react": "17.0.39",
     "@types/react-dom": "17.0.11",
@@ -16,7 +15,6 @@
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.1",
     "cross-env": "7.0.3",
-    "react-app-rewired": "^2.2.1",
     "resize-observer-polyfill": "^1.5.1",
     "typescript": "^4.7.4"
   },
@@ -28,7 +26,6 @@
     "@mux/mux-player-react": "2.3.2",
     "@mux/mux-uploader-react": "1.0.0-beta.15",
     "crypto-browserify": "^3.12.0",
-    "jsonwebtoken": "9.0.2",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-error-overlay": "6.0.11",
@@ -37,11 +34,11 @@
     "util": "^0.12.5"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-app-rewired --openssl-legacy-provider start",
-    "build": "GENERATE_SOURCEMAP=false react-app-rewired --openssl-legacy-provider build",
-    "test": "react-app-rewired test",
-    "test:ci": "CI=true react-app-rewired test --runInBand",
-    "eject": "react-app-rewired eject",
+    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
+    "build": "GENERATE_SOURCEMAP=false react-scripts --openssl-legacy-provider build",
+    "test": "react-scripts test",
+    "test:ci": "CI=true react-scripts test --runInBand",
+    "eject": "react-scripts eject",
     "lint": "eslint --max-warnings=0 .",
     "create-app-definition": "contentful-app-scripts create-app-definition"
   },

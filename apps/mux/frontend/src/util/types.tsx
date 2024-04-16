@@ -20,6 +20,7 @@ export interface AppState {
   errorShowResetAction: boolean | false;
   isDeleting: boolean | false;
   isReloading: boolean | false;
+  isTokenLoading: boolean | false;
   playbackToken?: string;
   posterToken?: string;
   storyboardToken?: string;
