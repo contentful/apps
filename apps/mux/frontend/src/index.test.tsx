@@ -13,6 +13,10 @@ const SDK_MOCK = {
   state: {
     isDeleting: false,
   },
+  ids: {
+    environment: 'environment-id',
+    space: 'space-id',
+  },
   parameters: {
     installation: {
       muxAccessTokenId: 'abcd1234',

@@ -23,11 +23,6 @@ import { MuxUploaderDrop } from '@mux/mux-uploader-react';
 
 import Config from './locations/config';
 import ApiClient from './util/apiClient';
-import {
-  createSignedPlaybackToken,
-  createSignedThumbnailToken,
-  createSignedStoryboardToken,
-} from './util/signingTokens';
 import { countries } from './util/countries';
 
 import Menu from './components/menu';
@@ -43,11 +38,19 @@ import {
 } from './util/types';
 
 import './index.css';
+import { createClient, PlainClientAPI } from 'contentful-management';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+interface SignedTokens {
+  playbackToken: string;
+  posterToken: string;
+  storyboardToken: string;
+}
+
 export class App extends React.Component<AppProps, AppState> {
   apiClient: ApiClient;
+  cmaClient: PlainClientAPI;
 
   constructor(props: AppProps) {
     super(props);
@@ -56,12 +59,24 @@ export class App extends React.Component<AppProps, AppState> {
       .installation as InstallationParams;
     this.apiClient = new ApiClient(muxAccessTokenId, muxAccessTokenSecret);
 
+    this.cmaClient = createClient(
+      { apiAdapter: this.props.sdk.cmaAdapter },
+      {
+        type: 'plain',
+        defaults: {
+          environmentId: this.props.sdk.ids.environmentAlias ?? this.props.sdk.ids.environment,
+          spaceId: this.props.sdk.ids.space,
+        },
+      }
+    );
+
     const field = props.sdk.field.getValue();
 
     this.state = {
       value: field,
       isDeleting: false,
       isReloading: false,
+      isTokenLoading: false,
       error:
         (!muxAccessTokenId || !muxAccessTokenSecret) &&
         "It doesn't look like you've specified your Mux Access Token ID or Secret in the extension configuration.",
@@ -388,6 +403,44 @@ export class App extends React.Component<AppProps, AppState> {
     }
   };
 
+  private fetchSignedTokens = async (playbackId: string): Promise<SignedTokens> => {
+    if (this.state.isTokenLoading) {
+      return {
+        playbackToken: 'loading',
+        posterToken: 'loading',
+        storyboardToken: 'loading',
+      };
+    }
+
+    this.setState({ isTokenLoading: true });
+
+    try {
+      const {
+        response: { body },
+      } = await this.cmaClient.appActionCall.createWithResponse(
+        {
+          appDefinitionId: this.props.sdk.ids.app!,
+          appActionId: 'muxGetSignedUrlTokens',
+        },
+        { parameters: { playbackId } }
+      );
+      const parsedBody = JSON.parse(body);
+      if (!parsedBody.ok) throw new Error(parsedBody.error);
+
+      const tokens = parsedBody.data as SignedTokens;
+      this.setState({ isTokenLoading: false });
+      return tokens;
+    } catch (e) {
+      console.error(e);
+      this.setState({ isTokenLoading: false });
+      return {
+        playbackToken: 'playback-token-not-found',
+        posterToken: 'poster-token-not-found',
+        storyboardToken: 'storyboard-token-not-found',
+      };
+    }
+  };
+
   setSignedPlayback = async (signedPlaybackId: string) => {
     const { muxSigningKeyId, muxSigningKeyPrivate } = this.props.sdk.parameters
       .installation as InstallationParams;
@@ -399,23 +452,10 @@ export class App extends React.Component<AppProps, AppState> {
       });
       return;
     }
-    this.setState({
-      playbackToken: createSignedPlaybackToken(
-        signedPlaybackId,
-        muxSigningKeyId!,
-        muxSigningKeyPrivate!
-      ),
-      posterToken: createSignedThumbnailToken(
-        signedPlaybackId,
-        muxSigningKeyId!,
-        muxSigningKeyPrivate!
-      ),
-      storyboardToken: createSignedStoryboardToken(
-        signedPlaybackId,
-        muxSigningKeyId!,
-        muxSigningKeyPrivate!
-      ),
-    });
+    const { playbackToken, posterToken, storyboardToken } = await this.fetchSignedTokens(
+      signedPlaybackId
+    );
+    this.setState({ playbackToken, posterToken, storyboardToken });
   };
 
   getAsset = async (assetId: string) => {
@@ -895,14 +935,16 @@ export class App extends React.Component<AppProps, AppState> {
               </Box>
             )}
 
-            {this.state.value.signedPlaybackId && !this.state.playbackToken && (
-              <Box marginBottom="spacingM">
-                <Note variant="negative" data-testid="nosigningtoken">
-                  No signing key to create a playback token. Preview playback may not work. Try
-                  toggling the global signing key settings.
-                </Note>
-              </Box>
-            )}
+            {this.state.value.signedPlaybackId &&
+              !this.state.playbackToken &&
+              !this.state.isTokenLoading && (
+                <Box marginBottom="spacingM">
+                  <Note variant="negative" data-testid="nosigningtoken">
+                    No signing key to create a playback token. Preview playback may not work. Try
+                    toggling the global signing key settings.
+                  </Note>
+                </Box>
+              )}
 
             <section className="player" style={this.getPlayerAspectRatio()}>
               {!this.state.isReloading &&

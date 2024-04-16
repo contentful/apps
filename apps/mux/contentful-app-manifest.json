@@ -9,7 +9,13 @@
       "path": "actions/get-jwt-tokens.js",
       "entryFile": "./app-actions/src/actions/get-jwt-tokens.ts",
       "allowNetworks": [],
-      "parameters": [ ]
+      "parameters": [
+        {
+          "id": "playbackId",
+          "name": "playbackId",
+          "type": "Symbol"
+        }
+      ]
     }
   ]
 }
