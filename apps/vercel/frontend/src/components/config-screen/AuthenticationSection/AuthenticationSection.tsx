@@ -50,7 +50,7 @@ export const AuthenticationSection = ({ handleTokenChange, isTokenValid }: Props
             href={link.href}
             target="_blank"
             rel="noopener noreferrer">
-            Vercel's instructions
+            Vercel&apos;s instructions
           </TextLink>{' '}
           to create an access token for your account.
         </HelpText>
