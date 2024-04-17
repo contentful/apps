@@ -25,7 +25,7 @@ export const copies = {
       placeholder: 'Select a path',
       emptyMessage: 'No paths currently configured.',
       errorMessage: 'This path is no longer available. Please select another one.',
-      helpText: 'Select a Vercel route to render your preview.',
+      helpText: 'Select a Vercel route to enable your draft mode.',
     },
     contentTypePreviewPathSection: {
       title: 'Preview settings',
