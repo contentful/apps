@@ -39,11 +39,10 @@ export const styles = {
     },
   }),
   body: makeBodyStyle(),
-  total: css({
-    fontSize: tokens.fontSizeS,
-    color: tokens.gray600,
+  helpText: css({
+    color: tokens.gray500,
     display: 'block',
-    marginTop: tokens.spacingS,
+    marginTop: tokens.spacingXs,
   }),
   saveBtn: css({
     marginRight: tokens.spacingM,
@@ -55,6 +54,7 @@ export const styles = {
   leftSideControls: css({
     position: 'relative',
     zIndex: 0,
+    minWidth: '320px',
     svg: css({
       zIndex: 1,
       position: 'absolute',
@@ -80,7 +80,8 @@ export const styles = {
   }),
   skuSearch: css({
     display: 'flex',
-    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginTop: tokens.spacingXs,
     marginLeft: tokens.spacingM,
     marginRight: tokens.spacingXs,
   }),
