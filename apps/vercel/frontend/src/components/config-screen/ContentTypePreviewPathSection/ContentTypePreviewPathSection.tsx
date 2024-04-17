@@ -9,11 +9,11 @@ import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 
 export const ContentTypePreviewPathSection = () => {
   const { title, description } = copies.configPage.contentTypePreviewPathSection;
-  const { clearIsAppConfigureCalled } = useContext(ConfigPageContext);
+  const { handleAppConfigurationChange } = useContext(ConfigPageContext);
 
   return (
     <Box
-      onClick={clearIsAppConfigureCalled}
+      onClick={handleAppConfigurationChange}
       data-testid="content-type-preview-path-section"
       className={styles.box}>
       <Heading marginBottom="none" className={styles.heading}>

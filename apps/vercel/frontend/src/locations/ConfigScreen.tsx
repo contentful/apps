@@ -21,7 +21,7 @@ const ConfigScreen = () => {
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
-  const [isAppConfigureCalled, setIsAppConfigureCalled] = useState(false);
+  const [isAppConfigurationSaved, setIsAppConfigurationSaved] = useState(true);
 
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const sdk = useSDK<ConfigAppSDK>();
@@ -38,7 +38,7 @@ const ConfigScreen = () => {
       return false;
     }
 
-    setIsAppConfigureCalled(true);
+    setIsAppConfigurationSaved(true);
 
     return {
       parameters,
@@ -116,15 +116,15 @@ const ConfigScreen = () => {
     });
   };
 
-  const clearIsAppConfigureCalled = () => {
-    setIsAppConfigureCalled(false);
+  const handleAppConfigurationChange = () => {
+    setIsAppConfigurationSaved(false);
   };
 
   return (
     <ConfigPageProvider
       contentTypes={contentTypes}
-      isAppConfigureCalled={isAppConfigureCalled}
-      clearIsAppConfigureCalled={clearIsAppConfigureCalled}
+      isAppConfigurationSaved={isAppConfigurationSaved}
+      handleAppConfigurationChange={handleAppConfigurationChange}
       dispatch={dispatchParameters}
       parameters={parameters}>
       <Box className={styles.body}>

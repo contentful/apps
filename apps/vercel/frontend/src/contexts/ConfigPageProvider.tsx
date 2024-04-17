@@ -4,20 +4,15 @@ import { ParameterAction } from '@components/parameterReducer';
 import { AppInstallationParameters } from '@customTypes/configPage';
 
 interface ConfigPageContextValue {
-  isAppConfigureCalled: boolean;
+  isAppConfigurationSaved: boolean;
   contentTypes: ContentType[];
   parameters: AppInstallationParameters;
   dispatch: Dispatch<ParameterAction>;
-  clearIsAppConfigureCalled: () => void;
+  handleAppConfigurationChange: () => void;
 }
 
-export interface ChannelContextProviderProps {
+export interface ChannelContextProviderProps extends ConfigPageContextValue {
   children: React.ReactNode;
-  isAppConfigureCalled: boolean;
-  contentTypes: ContentType[];
-  parameters: AppInstallationParameters;
-  dispatch: Dispatch<ParameterAction>;
-  clearIsAppConfigureCalled: () => void;
 }
 
 export const ConfigPageContext = createContext({} as ConfigPageContextValue);
@@ -25,21 +20,21 @@ export const ConfigPageContext = createContext({} as ConfigPageContextValue);
 export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
   const {
     children,
-    isAppConfigureCalled,
+    isAppConfigurationSaved,
     contentTypes,
     dispatch,
     parameters,
-    clearIsAppConfigureCalled,
+    handleAppConfigurationChange,
   } = props;
 
   return (
     <ConfigPageContext.Provider
       value={{
-        isAppConfigureCalled,
+        isAppConfigurationSaved,
         contentTypes,
         dispatch,
         parameters,
-        clearIsAppConfigureCalled,
+        handleAppConfigurationChange,
       }}>
       {children}
     </ConfigPageContext.Provider>

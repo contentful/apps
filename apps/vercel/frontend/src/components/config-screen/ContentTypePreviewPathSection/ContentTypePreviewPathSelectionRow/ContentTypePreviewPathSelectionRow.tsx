@@ -41,7 +41,7 @@ export const ContentTypePreviewPathSelectionRow = ({
 
   const { inputs } = copies.configPage.contentTypePreviewPathSection;
 
-  const { isAppConfigureCalled } = useContext(ConfigPageContext);
+  const { isAppConfigurationSaved, parameters } = useContext(ConfigPageContext);
 
   const handlePreviewPathInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     onParameterUpdate({
@@ -78,8 +78,8 @@ export const ContentTypePreviewPathSelectionRow = ({
   );
 
   const isPreviewPathInvalid = useMemo(() => {
-    return isAppConfigureCalled && !configuredPreviewPath && !!configuredContentType;
-  }, [isAppConfigureCalled, configuredPreviewPath, configuredContentType]);
+    return isAppConfigurationSaved && !configuredPreviewPath;
+  }, [isAppConfigurationSaved, configuredPreviewPath]);
 
   return (
     <Box className={styles.wrapper}>
@@ -87,7 +87,7 @@ export const ContentTypePreviewPathSelectionRow = ({
         <Flex
           flexDirection="row"
           justifyContent="space-evenly"
-          alignItems={isPreviewPathInvalid ? 'normal' : 'flex-end'}
+          alignItems={isPreviewPathInvalid ? 'flex-start' : 'flex-end'}
           gap={tokens.spacingXs}>
           <Box className={styles.inputWrapper}>
             <Select

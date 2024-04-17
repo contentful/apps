@@ -20,8 +20,8 @@ export const renderConfigPageComponent = (
           contentTypePreviewPathSelections: mockContentTypePreviewPathSelections,
         } as AppInstallationParameters,
         dispatch: () => null,
-        isAppConfigureCalled: false,
-        clearIsAppConfigureCalled: () => null,
+        isAppConfigurationSaved: false,
+        handleAppConfigurationChange: () => null,
         ...overrides,
       }}>
       {children}
