@@ -25,15 +25,10 @@ export default class VercelClient implements VercelAPIClient {
   }
 
   async checkToken(): Promise<boolean> {
-    let res: { ok: boolean } = { ok: false };
-    try {
-      res = await fetch(`${this.baseEndpoint}/v5/user/tokens`, {
-        headers: this.buildHeaders(),
-        method: 'GET',
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    const res = await fetch(`${this.baseEndpoint}/v5/user/tokens`, {
+      headers: this.buildHeaders(),
+      method: 'GET',
+    });
 
     return res.ok;
   }
