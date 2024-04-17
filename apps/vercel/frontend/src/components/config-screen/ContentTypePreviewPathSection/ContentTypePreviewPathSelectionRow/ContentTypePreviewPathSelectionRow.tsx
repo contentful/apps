@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useMemo } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import {
   Box,
   FormControl,
@@ -36,6 +36,8 @@ export const ContentTypePreviewPathSelectionRow = ({
   onRemoveRow,
   renderLabel,
 }: Props) => {
+  const [isPreviewPathInvalid, setIsPreviewPathInvalid] = useState(false);
+  const [isPreviewPathEmpty, setIsPreviewPathEmpty] = useState(false);
   const { contentType: configuredContentType, previewPath: configuredPreviewPath } =
     configuredContentTypePreviewPathSelection;
 
@@ -77,16 +79,28 @@ export const ContentTypePreviewPathSelectionRow = ({
     [contentTypes]
   );
 
-  const isPreviewPathInvalid = useMemo(() => {
-    return isAppConfigurationSaved && !configuredPreviewPath && !!configuredContentType;
+  useEffect(() => {
+    const isPreviewPathEmpty =
+      isAppConfigurationSaved && !configuredPreviewPath && !!configuredContentType;
+    setIsPreviewPathEmpty(isPreviewPathEmpty);
   }, [isAppConfigurationSaved, configuredPreviewPath, configuredContentType]);
 
+  useEffect(() => {
+    if (configuredPreviewPath && isAppConfigurationSaved) {
+      const isPreviewPathValid = validatePreviewPath(configuredPreviewPath);
+      setIsPreviewPathInvalid(!isPreviewPathValid);
+    }
+  }, [isAppConfigurationSaved, configuredPreviewPath]);
+
+  const validatePreviewPath = (previewPath: string) =>
+    [/^\/.*{([^}]+)}.*$/].some((regex) => regex.test(previewPath));
+
   const itemAlignment = useMemo(() => {
-    if (isPreviewPathInvalid) {
+    if (isPreviewPathEmpty || isPreviewPathInvalid) {
       return !renderLabel ? 'baseline' : 'normal';
     }
     return 'flex-end';
-  }, [isPreviewPathInvalid, renderLabel]);
+  }, [isPreviewPathInvalid, isPreviewPathEmpty, renderLabel]);
 
   return (
     <Box className={styles.wrapper}>
@@ -118,8 +132,11 @@ export const ContentTypePreviewPathSelectionRow = ({
               placeholder={inputs.previewPath.placeholder}
               isInvalid={isPreviewPathInvalid}
             />
+            {isPreviewPathEmpty && (
+              <ValidationMessage>{inputs.previewPath.emptyErrorMessage}</ValidationMessage>
+            )}
             {isPreviewPathInvalid && (
-              <ValidationMessage>{inputs.previewPath.errorMessage}</ValidationMessage>
+              <ValidationMessage>{inputs.previewPath.invalidFormattingMessage}</ValidationMessage>
             )}
           </Box>
           <IconButton onClick={handleRemoveRow} icon={<CloseIcon />} aria-label={'Delete row'} />
