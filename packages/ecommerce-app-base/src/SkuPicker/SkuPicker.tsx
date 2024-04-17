@@ -5,7 +5,14 @@ import debounce from 'lodash/debounce';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { Paginator } from './Paginator';
-import { MakeSaveBtnTextFn, Pagination, Product, ProductPreviewsFn, ProductsFn } from '../types';
+import {
+  MakeSaveBtnTextFn,
+  MakeSearchPlaceholderText,
+  Pagination,
+  Product,
+  ProductPreviewsFn,
+  ProductsFn,
+} from '../types';
 import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
 import { mapSort } from '../utils';
@@ -21,6 +28,7 @@ export interface Props {
   searchDelay?: number;
   skuType?: string;
   makeSaveBtnText?: MakeSaveBtnTextFn;
+  makeSearchPlaceholderText?: MakeSearchPlaceholderText;
   hideSearch?: boolean;
   showSearchBySkuOption?: boolean;
 }
@@ -36,6 +44,10 @@ interface State {
 }
 
 const DEFAULT_SEARCH_DELAY = 250;
+
+function defaultMakeSearchPlaceholderText(_skuType?: string): string {
+  return 'Search for a product...';
+}
 
 function defaultGetSaveBtnText(selectedSKUs: string[]): string {
   switch (selectedSKUs.length) {
@@ -159,6 +171,7 @@ export class SkuPicker extends Component<Props, State> {
       this.state;
     const {
       makeSaveBtnText = defaultGetSaveBtnText,
+      makeSearchPlaceholderText = defaultMakeSearchPlaceholderText,
       skuType,
       hideSearch = false,
       showSearchBySkuOption,
@@ -174,7 +187,7 @@ export class SkuPicker extends Component<Props, State> {
               <div className={styles.searchWrapper}>
                 <div className={styles.leftSideControls}>
                   <TextInput
-                    placeholder="Search for a product..."
+                    placeholder={makeSearchPlaceholderText(skuType)}
                     type="search"
                     name="sku-search"
                     id="sku-search"

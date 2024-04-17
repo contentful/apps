@@ -2,7 +2,12 @@ import * as React from 'react';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { render } from 'react-dom';
 import { SkuPicker } from './SkuPicker';
-import { MakeSaveBtnTextFn, ProductPreviewsFn, ProductsFn } from '../types';
+import {
+  MakeSaveBtnTextFn,
+  MakeSearchPlaceholderText,
+  ProductPreviewsFn,
+  ProductsFn,
+} from '../types';
 
 interface Props<> {
   sdk: DialogAppSDK;
@@ -11,6 +16,7 @@ interface Props<> {
   searchDelay?: number;
   skuType?: string;
   makeSaveBtnText?: MakeSaveBtnTextFn;
+  makeSearchPlaceholderText?: MakeSearchPlaceholderText;
   hideSearch?: boolean;
   showSearchBySkuOption?: boolean;
 }
@@ -24,6 +30,7 @@ export function renderSkuPicker(
     searchDelay,
     skuType,
     makeSaveBtnText,
+    makeSearchPlaceholderText,
     hideSearch,
     showSearchBySkuOption,
   }: Props
@@ -38,6 +45,7 @@ export function renderSkuPicker(
       searchDelay={searchDelay}
       skuType={skuType}
       makeSaveBtnText={makeSaveBtnText}
+      makeSearchPlaceholderText={makeSearchPlaceholderText}
       hideSearch={hideSearch}
       showSearchBySkuOption={showSearchBySkuOption}
     />,
