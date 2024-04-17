@@ -39,6 +39,14 @@ function makeSearchPlaceholderText(skuType: string | undefined): string {
   }
 }
 
+function makeSearchHelpText(skuType: string | undefined): string {
+  if (skuType === 'category') {
+    return 'Search value must be an exact match';
+  } else {
+    return '';
+  }
+}
+
 export async function renderDialog(sdk: DialogAppSDK) {
   const DIALOG_ID = 'dialog-root';
 
@@ -59,6 +67,7 @@ export async function renderDialog(sdk: DialogAppSDK) {
     skuType,
     makeSaveBtnText: makeSaveBtnText(skuType),
     makeSearchPlaceholderText,
+    makeSearchHelpText,
     hideSearch: false,
     showSearchBySkuOption: skuType === 'product',
   });
