@@ -31,6 +31,14 @@ function makeSaveBtnText(skuType: SkuType) {
   }
 }
 
+function makeSearchPlaceholderText(skuType: string | undefined): string {
+  if (skuType === 'category') {
+    return 'Search by category name, slug, or key...';
+  } else {
+    return 'Search for a product...';
+  }
+}
+
 export async function renderDialog(sdk: DialogAppSDK) {
   const DIALOG_ID = 'dialog-root';
 
@@ -50,6 +58,7 @@ export async function renderDialog(sdk: DialogAppSDK) {
     searchDelay: 750,
     skuType,
     makeSaveBtnText: makeSaveBtnText(skuType),
+    makeSearchPlaceholderText,
     hideSearch: false,
     showSearchBySkuOption: skuType === 'product',
   });
