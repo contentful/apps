@@ -38,6 +38,7 @@ export const Select = ({
         isDisabled={!optionsExist}
         id="optionsSelect"
         name="optionsSelect"
+        isInvalid={Boolean(errorMessage)}
         value={value}
         onChange={onChange}>
         {optionsExist ? (

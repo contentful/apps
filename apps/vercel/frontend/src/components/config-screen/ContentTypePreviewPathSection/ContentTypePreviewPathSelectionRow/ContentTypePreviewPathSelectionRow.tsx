@@ -1,5 +1,12 @@
-import { ChangeEvent, useMemo } from 'react';
-import { Box, FormControl, TextInput, Flex, IconButton } from '@contentful/f36-components';
+import { ChangeEvent, useContext, useMemo } from 'react';
+import {
+  Box,
+  FormControl,
+  TextInput,
+  Flex,
+  IconButton,
+  ValidationMessage,
+} from '@contentful/f36-components';
 import { CloseIcon } from '@contentful/f36-icons';
 import { debounce } from 'lodash';
 import tokens from '@contentful/f36-tokens';
@@ -12,6 +19,7 @@ import {
 import { styles } from './ContentTypePreviewPathSelectionRow.styles';
 import { copies } from '@constants/copies';
 import { Select } from '@components/common/Select/Select';
+import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 
 interface Props {
   contentTypes: ContentType[];
@@ -32,6 +40,8 @@ export const ContentTypePreviewPathSelectionRow = ({
     configuredContentTypePreviewPathSelection;
 
   const { inputs } = copies.configPage.contentTypePreviewPathSection;
+
+  const { isAppConfigurationSaved } = useContext(ConfigPageContext);
 
   const handlePreviewPathInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     onParameterUpdate({
@@ -67,13 +77,24 @@ export const ContentTypePreviewPathSelectionRow = ({
     [contentTypes]
   );
 
+  const isPreviewPathInvalid = useMemo(() => {
+    return isAppConfigurationSaved && !configuredPreviewPath && !!configuredContentType;
+  }, [isAppConfigurationSaved, configuredPreviewPath, configuredContentType]);
+
+  const itemAlignment = useMemo(() => {
+    if (isPreviewPathInvalid) {
+      return !renderLabel ? 'baseline' : 'normal';
+    }
+    return 'flex-end';
+  }, [isPreviewPathInvalid, renderLabel]);
+
   return (
     <Box className={styles.wrapper}>
       <FormControl marginBottom="spacingM" id="contentTypePreviewPathSelection">
         <Flex
           flexDirection="row"
           justifyContent="space-evenly"
-          alignItems="flex-end"
+          alignItems={itemAlignment}
           gap={tokens.spacingXs}>
           <Box className={styles.inputWrapper}>
             <Select
@@ -91,10 +112,14 @@ export const ContentTypePreviewPathSelectionRow = ({
             )}
             <TextInput
               defaultValue={configuredPreviewPath}
-              isDisabled={!configuredContentType}
+              isDisabled={!configuredContentType || !contentTypes.length}
               onChange={debouncedHandlePreviewPathInputChange}
               placeholder={inputs.previewPath.placeholder}
+              isInvalid={isPreviewPathInvalid}
             />
+            {isPreviewPathInvalid && (
+              <ValidationMessage>{inputs.previewPath.errorMessage}</ValidationMessage>
+            )}
           </Box>
           <IconButton onClick={handleRemoveRow} icon={<CloseIcon />} aria-label={'Delete row'} />
         </Flex>

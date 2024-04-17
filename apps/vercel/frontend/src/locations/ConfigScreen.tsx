@@ -14,12 +14,14 @@ import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelect
 import { AuthenticationSection } from '@components/config-screen/AuthenticationSection/AuthenticationSection';
 import { copies } from '@constants/copies';
 import { actions } from '@constants/enums';
+import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
 
 const ConfigScreen = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
+  const [isAppConfigurationSaved, setIsAppConfigurationSaved] = useState(true);
 
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const sdk = useSDK<ConfigAppSDK>();
@@ -35,6 +37,8 @@ const ConfigScreen = () => {
       sdk.notifier.error('A valid Vercel access token is required');
       return false;
     }
+
+    setIsAppConfigurationSaved(true);
 
     return {
       parameters,
@@ -112,8 +116,17 @@ const ConfigScreen = () => {
     });
   };
 
+  const handleAppConfigurationChange = () => {
+    setIsAppConfigurationSaved(false);
+  };
+
   return (
-    <>
+    <ConfigPageProvider
+      contentTypes={contentTypes}
+      isAppConfigurationSaved={isAppConfigurationSaved}
+      handleAppConfigurationChange={handleAppConfigurationChange}
+      dispatch={dispatchParameters}
+      parameters={parameters}>
       <Box className={styles.body}>
         <Box>
           <Heading>{title}</Heading>
@@ -122,37 +135,22 @@ const ConfigScreen = () => {
         <hr className={styles.splitter} />
         <Stack spacing="spacingS" flexDirection="column">
           <AuthenticationSection
-            parameters={parameters}
             handleTokenChange={handleTokenChange}
             isTokenValid={isTokenValid}
           />
 
-          {isTokenValid && (
-            <ProjectSelectionSection
-              parameters={parameters}
-              dispatch={dispatchParameters}
-              projects={projects}
-            />
-          )}
+          {isTokenValid && <ProjectSelectionSection projects={projects} />}
 
           {isTokenValid && parameters.selectedProject && (
-            <ApiPathSelectionSection
-              parameters={parameters}
-              dispatch={dispatchParameters}
-              paths={apiPaths}
-            />
+            <ApiPathSelectionSection paths={apiPaths} />
           )}
 
           {isTokenValid && parameters.selectedProject && parameters.selectedApiPath && (
-            <ContentTypePreviewPathSection
-              parameters={parameters}
-              dispatch={dispatchParameters}
-              contentTypes={contentTypes}
-            />
+            <ContentTypePreviewPathSection />
           )}
         </Stack>
       </Box>
-    </>
+    </ConfigPageProvider>
   );
 };
 

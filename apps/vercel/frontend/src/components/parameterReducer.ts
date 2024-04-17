@@ -1,17 +1,9 @@
+import { actions } from '@constants/enums';
 import {
   AppInstallationParameters,
   ApplyContentTypePreviewPathSelectionPayload,
   ContentTypePreviewPathSelection,
 } from '@customTypes/configPage';
-
-export enum actions {
-  UPDATE_VERCEL_ACCESS_TOKEN = 'updateVercelAccessToken',
-  APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
-  APPLY_SELECTED_PROJECT = 'applySelectedProject',
-  ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION = 'addContentTypePreviewPathSelection',
-  REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION = 'removeContentTypePreviewPathSelection',
-  APPLY_API_PATH = 'applyApiPath',
-}
 
 type VercelAccessTokenAction = {
   type: actions.UPDATE_VERCEL_ACCESS_TOKEN;

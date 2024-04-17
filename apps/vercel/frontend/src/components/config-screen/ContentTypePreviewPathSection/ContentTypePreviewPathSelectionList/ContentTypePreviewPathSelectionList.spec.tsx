@@ -1,18 +1,13 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ContentTypePreviewPathSelectionList } from './ContentTypePreviewPathSelectionList';
-import { mockContentTypes } from '@test/mocks/mockContentTypes';
 import { mockContentTypePreviewPathSelections } from '@test/mocks/mockContentTypePreviewPathSelections';
+import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
+import { AppInstallationParameters } from '@customTypes/configPage';
 
 describe('ContentTypePreviewPathSelectionList', () => {
   it('renders list of selections', () => {
-    const { unmount } = render(
-      <ContentTypePreviewPathSelectionList
-        contentTypes={mockContentTypes}
-        contentTypePreviewPathSelections={mockContentTypePreviewPathSelections}
-        dispatch={() => null}
-      />
-    );
+    const { unmount } = renderConfigPageComponent(<ContentTypePreviewPathSelectionList />);
 
     expect(screen.getAllByText('Blog')).toBeTruthy();
     expect(
@@ -28,16 +23,13 @@ describe('ContentTypePreviewPathSelectionList', () => {
   });
 
   it('disables add button if all content types have been configured', () => {
-    const { unmount } = render(
-      <ContentTypePreviewPathSelectionList
-        contentTypes={mockContentTypes}
-        contentTypePreviewPathSelections={[
-          ...mockContentTypePreviewPathSelections,
-          { contentType: 'article', previewPath: 'test-article-path' },
-        ]}
-        dispatch={() => null}
-      />
-    );
+    const contentTypePreviewPathSelections = [
+      ...mockContentTypePreviewPathSelections,
+      { contentType: 'article', previewPath: 'test-article-path' },
+    ];
+    const { unmount } = renderConfigPageComponent(<ContentTypePreviewPathSelectionList />, {
+      parameters: { contentTypePreviewPathSelections } as unknown as AppInstallationParameters,
+    });
 
     expect(screen.getAllByText('Blog')).toBeTruthy();
     expect(
@@ -47,6 +39,22 @@ describe('ContentTypePreviewPathSelectionList', () => {
     expect(
       screen.getByDisplayValue(mockContentTypePreviewPathSelections[1].previewPath)
     ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Add Content Type' })).toHaveProperty(
+      'disabled',
+      true
+    );
+
+    unmount();
+  });
+
+  it('disables add button if no content types exist', () => {
+    const { unmount } = renderConfigPageComponent(<ContentTypePreviewPathSelectionList />, {
+      parameters: {
+        contentTypePreviewPathSelections: mockContentTypePreviewPathSelections,
+      } as unknown as AppInstallationParameters,
+      contentTypes: [],
+    });
+
     expect(screen.getByRole('button', { name: 'Add Content Type' })).toHaveProperty(
       'disabled',
       true
