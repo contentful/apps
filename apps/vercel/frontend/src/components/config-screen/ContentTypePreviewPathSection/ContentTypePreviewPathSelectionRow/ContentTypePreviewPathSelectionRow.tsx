@@ -81,13 +81,20 @@ export const ContentTypePreviewPathSelectionRow = ({
     return isAppConfigurationSaved && !configuredPreviewPath && !!configuredContentType;
   }, [isAppConfigurationSaved, configuredPreviewPath, configuredContentType]);
 
+  const itemAlignment = useMemo(() => {
+    if (isPreviewPathInvalid) {
+      return !renderLabel ? 'baseline' : 'normal';
+    }
+    return 'flex-end';
+  }, [isPreviewPathInvalid, renderLabel]);
+
   return (
     <Box className={styles.wrapper}>
       <FormControl marginBottom="spacingM" id="contentTypePreviewPathSelection">
         <Flex
           flexDirection="row"
           justifyContent="space-evenly"
-          alignItems={isPreviewPathInvalid ? 'normal' : 'flex-end'}
+          alignItems={itemAlignment}
           gap={tokens.spacingXs}>
           <Box className={styles.inputWrapper}>
             <Select
