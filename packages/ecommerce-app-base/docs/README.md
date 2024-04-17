@@ -14,6 +14,8 @@
 - [Integration](README.md#integration)
 - [MakeCTAFn](README.md#makectafn)
 - [MakeSaveBtnTextFn](README.md#makesavebtntextfn)
+- [MakeSearchHelpText](README.md#makesearchhelptext)
+- [MakeSearchPlaceholderText](README.md#makesearchplaceholdertext)
 - [OpenDialogFn](README.md#opendialogfn)
 - [Pagination](README.md#pagination)
 - [ParameterDefinition](README.md#parameterdefinition)
@@ -213,6 +215,50 @@ Returns the text that is used for confirming the dialog selection.
 Text that should be displayed on the button
 
 ___
+
+### MakeSearchHelpText
+
+Ƭ **MakeSearchHelpText**: (`skuType?`: `string`) => `string`
+
+Returns the text that is used as the help text for the SkuPicker search.
+
+#### Type declaration
+
+▸ (`skuType?`): `string`
+
+##### Parameters
+
+| Name       | Type     | Description                                                                                 |
+| :--------- | :------- | :------------------------------------------------------------------------------------------ |
+| `skuType?` | `string` | SKU type of the current field. Undefined if only a single SKU type is supported by the app. |
+
+##### Returns
+
+`string`
+
+---
+
+### MakeSearchPlaceholderText
+
+Ƭ **MakeSearchPlaceholderText**: (`skuType?`: `string`) => `string`
+
+Returns the text that is used as the placeholder for the SkuPicker search.
+
+#### Type declaration
+
+▸ (`skuType?`): `string`
+
+##### Parameters
+
+| Name       | Type     | Description                                                                                 |
+| :--------- | :------- | :------------------------------------------------------------------------------------------ |
+| `skuType?` | `string` | SKU type of the current field. Undefined if only a single SKU type is supported by the app. |
+
+##### Returns
+
+`string`
+
+---
 
 ### OpenDialogFn
 
