@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useReducer, ChangeEvent, isValidElement } from 'react';
+import { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
 import { ConfigAppSDK, ContentType } from '@contentful/app-sdk';
 import { Box, Heading, Paragraph, Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
@@ -58,30 +58,17 @@ const ConfigScreen = () => {
     setIsLoading(true);
 
     async function checkToken() {
-      console.log('not hitting here>>>');
-      const tokenValid = await vercelClient.checkToken();
+      const response = await vercelClient.checkToken();
+      if (response) setIsLoading(false);
 
-      setIsTokenValid(tokenValid);
-      console.log('tokenValid>>>>', tokenValid);
-
-      setIsLoading(false);
+      setIsTokenValid(response);
       setHasTokenBeenValidated(true);
     }
 
     if (!hasTokenBeenValidated) {
       checkToken();
-      // setHasTokenBeenValidated(true)
     }
-
-    // setHasTokenBeenValidated(true)
-
-    // if (parameters.vercelAccessToken === '') {
-    //   setHasTokenBeenValidated(true);
-    //   setIsLoading(false)
-    // }
   }, [parameters.vercelAccessToken]);
-
-  console.log('hasTokenBeenValidated', hasTokenBeenValidated, 'isTokenValid>>', isTokenValid);
 
   useEffect(() => {
     async function getContentTypes() {
@@ -97,14 +84,13 @@ const ConfigScreen = () => {
 
   useEffect(() => {
     async function getProjects() {
-      // setIsLoading(true)
+      setIsLoading(true);
       const data = await vercelClient.listProjects();
 
       if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) {
         setProjects(data.projects);
+        setIsLoading(false);
       }
-
-      // setIsLoading(false);
     }
 
     getProjects();
@@ -144,7 +130,6 @@ const ConfigScreen = () => {
     });
 
     async function checkToken() {
-      console.log('only hitting here>>>>>>');
       const tokenValid = await new VercelClient(e.target.value).checkToken();
       setIsTokenValid(tokenValid);
       setIsLoading(false);

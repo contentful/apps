@@ -33,7 +33,7 @@ export const Select = ({
   errorMessage,
 }: Props) => {
   const optionsExist = Boolean(options && options.length);
-  console.log('isLoading', isLoading);
+
   return (
     <Box>
       {label && <FormControl.Label isRequired={isRequired}>{label}</FormControl.Label>}
