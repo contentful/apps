@@ -5,6 +5,7 @@ import { SkuPicker } from './SkuPicker';
 import {
   MakeSaveBtnTextFn,
   MakeSearchPlaceholderText,
+  MakeSearchHelpText,
   ProductPreviewsFn,
   ProductsFn,
 } from '../types';
@@ -17,6 +18,7 @@ interface Props<> {
   skuType?: string;
   makeSaveBtnText?: MakeSaveBtnTextFn;
   makeSearchPlaceholderText?: MakeSearchPlaceholderText;
+  makeSearchHelpText?: MakeSearchHelpText;
   hideSearch?: boolean;
   showSearchBySkuOption?: boolean;
 }
@@ -31,6 +33,7 @@ export function renderSkuPicker(
     skuType,
     makeSaveBtnText,
     makeSearchPlaceholderText,
+    makeSearchHelpText,
     hideSearch,
     showSearchBySkuOption,
   }: Props
@@ -46,6 +49,7 @@ export function renderSkuPicker(
       skuType={skuType}
       makeSaveBtnText={makeSaveBtnText}
       makeSearchPlaceholderText={makeSearchPlaceholderText}
+      makeSearchHelpText={makeSearchHelpText}
       hideSearch={hideSearch}
       showSearchBySkuOption={showSearchBySkuOption}
     />,

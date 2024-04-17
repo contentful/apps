@@ -28,6 +28,14 @@ export type MakeSaveBtnTextFn = (selectedSKUs: string[], skuType?: string) => st
 export type MakeSearchPlaceholderText = (skuType?: string) => string;
 
 /**
+ * Returns the text that is used as the help text for the SkuPicker search.
+ *
+ * @param skuType SKU type of the current field. Undefined if only a single SKU type is supported by the app.
+ * @returns Text that should be displayed as the help text
+ */
+export type MakeSearchHelpText = (skuType?: string) => string;
+
+/**
  * Custom code that validates installation parameters that is run before saving.
  *
  * @param parameters Object containg the entered parameters.
