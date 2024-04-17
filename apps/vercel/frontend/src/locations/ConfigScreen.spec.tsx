@@ -21,7 +21,7 @@ describe('ConfigScreen', () => {
   it('renders only authentication section on mount', async () => {
     const { unmount } = render(<ConfigScreen />);
 
-    expect(screen.getByText('Connect Vercel')).toBeTruthy();
+    expect(await screen.findByText('Connect Vercel')).toBeTruthy();
     expect(screen.getByText('Vercel Access Token')).toBeTruthy();
     expect(screen.queryByTestId(projectSelectionSectionTestId)).toBeFalsy();
     expect(screen.queryByTestId(pathSelectionSectionTestId)).toBeFalsy();
@@ -33,7 +33,7 @@ describe('ConfigScreen', () => {
     vi.spyOn(VercelClient.prototype, 'checkToken').mockResolvedValue(true);
     const { unmount } = render(<ConfigScreen />);
 
-    expect(screen.getByText('Connect Vercel')).toBeTruthy();
+    expect(await screen.findByText('Connect Vercel')).toBeTruthy();
     expect(screen.getByText('Vercel Access Token')).toBeTruthy();
 
     const input = screen.getByTestId('access-token');
