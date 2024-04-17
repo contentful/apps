@@ -86,14 +86,11 @@ const ConfigScreen = () => {
     async function getProjects() {
       setIsLoading(true);
       const data = await vercelClient.listProjects();
-
-      if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) {
-        setProjects(data.projects);
-        setIsLoading(false);
-      }
+      setProjects(data.projects);
+      setIsLoading(false);
     }
 
-    getProjects();
+    if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) getProjects();
   }, [parameters.vercelAccessToken, hasTokenBeenValidated, isTokenValid]);
 
   useEffect(() => {
