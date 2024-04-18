@@ -38,12 +38,11 @@ export const ContentTypePreviewPathSelectionRow = ({
 }: Props) => {
   const [isPreviewPathInvalid, setIsPreviewPathInvalid] = useState(false);
   const [isPreviewPathEmpty, setIsPreviewPathEmpty] = useState(false);
+  const { isAppConfigurationSaved, isLoading } = useContext(ConfigPageContext);
+
   const { contentType: configuredContentType, previewPath: configuredPreviewPath } =
     configuredContentTypePreviewPathSelection;
-
   const { inputs } = copies.configPage.contentTypePreviewPathSection;
-
-  const { isAppConfigurationSaved, isLoading } = useContext(ConfigPageContext);
 
   const handlePreviewPathInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     onParameterUpdate({
@@ -64,6 +63,9 @@ export const ContentTypePreviewPathSelectionRow = ({
   const handleRemoveRow = () => {
     onRemoveRow(configuredContentTypePreviewPathSelection);
   };
+
+  const validatePreviewPath = (previewPath: string) =>
+    [/^\/.*{([^}]+)}.*$/].some((regex) => regex.test(previewPath));
 
   const debouncedHandlePreviewPathInputChange = useMemo(
     () => debounce(handlePreviewPathInput, 700),
@@ -91,9 +93,6 @@ export const ContentTypePreviewPathSelectionRow = ({
       setIsPreviewPathInvalid(!isPreviewPathValid);
     }
   }, [isAppConfigurationSaved, configuredPreviewPath]);
-
-  const validatePreviewPath = (previewPath: string) =>
-    [/^\/.*{([^}]+)}.*$/].some((regex) => regex.test(previewPath));
 
   const itemAlignment = useMemo(() => {
     if (isPreviewPathEmpty || isPreviewPathInvalid) {
