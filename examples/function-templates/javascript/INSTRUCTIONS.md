@@ -3,7 +3,7 @@
 Use this command below to install the template.
 
 ```
-npx create-contentful-app@latest --function --javascript
+npx create-contentful-app@latest --javascript --function external-references
 ```
 
 ### Creating an app
