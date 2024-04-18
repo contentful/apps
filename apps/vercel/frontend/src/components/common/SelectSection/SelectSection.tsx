@@ -49,7 +49,7 @@ export const SelectSection = ({
   return (
     <FormControl marginBottom="spacingS" id={id} isRequired={true}>
       <Select
-        value={selectedOption}
+        value={isSelectionInvalid ? '' : selectedOption}
         onChange={handleChange}
         placeholder={placeholder}
         emptyMessage={emptyMessage}
