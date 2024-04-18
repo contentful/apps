@@ -114,6 +114,8 @@ export default class Field extends React.Component<Props, State> {
   render = () => {
     const { value, valid, editingDisabled } = this.state;
 
+    console.log('[ DAM::Editior::Field ] render() {see value} this.state => ', this.state);
+
     if (!valid) {
       return (
         <Note variant="warning" title="Field value is incompatibile">

@@ -187,6 +187,8 @@ const DragHandle = SortableHandle<DragHandleProps>(
 );
 
 const SortableItem = SortableElement<SortableElementProps>((props: SortableElementProps) => {
+  console.log('[ SortableItem ] props => ', props);
+
   return (
     <Card className={styles.card(props.disabled)}>
       <DragHandle url={props.url} alt={props.alt} additionalData={props.additionalData} />
@@ -204,6 +206,8 @@ const SortableItem = SortableElement<SortableElementProps>((props: SortableEleme
 });
 
 const SortableList = SortableContainer<SortableContainerProps>((props: SortableContainerProps) => {
+  console.log('[ <SortableList> ] props => ', props);
+
   // Provide stable keys for all resources so images don't blink.
   const { list } = props.resources.reduce(
     (acc, resource, index) => {
@@ -231,6 +235,8 @@ const SortableList = SortableContainer<SortableContainerProps>((props: SortableC
     },
     { counts: {}, list: [] }
   ) as { list: Asset[] };
+
+  console.log('[ <SortableList> ] list => ', list);
 
   return (
     <div className={styles.container}>
@@ -266,6 +272,8 @@ export class SortableComponent extends React.Component<Props> {
   };
 
   render() {
+    console.log('[ <SortableComponent> ] render() this.props => ', this.props);
+
     return (
       <SortableList
         disabled={this.props.disabled}
