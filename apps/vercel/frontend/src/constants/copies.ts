@@ -17,14 +17,16 @@ export const copies = {
       label: 'Project',
       placeholder: 'Select a project',
       emptyMessage: 'No Vercel projects are available',
-      errorMessage: 'This project is no longer available. Please select another one.',
+      errorMessage:
+        'The project you have configured is no longer available. Please select another one.',
       helpText: 'Connect to a project associated with your website or experience.',
     },
     pathSelectionSection: {
       label: 'API Path',
       placeholder: 'Select a path',
       emptyMessage: 'No paths currently configured.',
-      errorMessage: 'This path is no longer available. Please select another one.',
+      errorMessage:
+        'The path you have configured is no longer available. Please select another one.',
       helpText: 'Select a Vercel route to enable your draft mode.',
     },
     contentTypePreviewPathSection: {
