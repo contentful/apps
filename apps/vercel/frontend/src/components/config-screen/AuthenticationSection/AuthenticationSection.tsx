@@ -21,9 +21,9 @@ interface Props {
 
 export const AuthenticationSection = ({ handleTokenChange, isTokenValid }: Props) => {
   const { title, input, link } = copies.configPage.authenticationSection;
-  const { parameters } = useContext(ConfigPageContext);
+  const { parameters, isLoading } = useContext(ConfigPageContext);
 
-  const showError = Boolean(parameters.vercelAccessToken && !isTokenValid);
+  const showError = Boolean(parameters.vercelAccessToken && !isTokenValid && !isLoading);
 
   return (
     <Box className={styles.box}>
@@ -50,7 +50,7 @@ export const AuthenticationSection = ({ handleTokenChange, isTokenValid }: Props
             href={link.href}
             target="_blank"
             rel="noopener noreferrer">
-            Vercel instructions
+            Vercel&apos;s instructions
           </TextLink>{' '}
           to create an access token for your account.
         </HelpText>

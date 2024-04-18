@@ -9,6 +9,7 @@ interface ConfigPageContextValue {
   parameters: AppInstallationParameters;
   dispatch: Dispatch<ParameterAction>;
   handleAppConfigurationChange: () => void;
+  isLoading: boolean;
 }
 
 export interface ChannelContextProviderProps extends ConfigPageContextValue {
@@ -25,6 +26,7 @@ export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
     dispatch,
     parameters,
     handleAppConfigurationChange,
+    isLoading,
   } = props;
 
   return (
@@ -35,6 +37,7 @@ export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
         dispatch,
         parameters,
         handleAppConfigurationChange,
+        isLoading,
       }}>
       {children}
     </ConfigPageContext.Provider>

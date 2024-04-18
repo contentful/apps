@@ -41,7 +41,7 @@ export const ContentTypePreviewPathSelectionRow = ({
 
   const { inputs } = copies.configPage.contentTypePreviewPathSection;
 
-  const { isAppConfigurationSaved } = useContext(ConfigPageContext);
+  const { isAppConfigurationSaved, isLoading } = useContext(ConfigPageContext);
 
   const handlePreviewPathInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     onParameterUpdate({
@@ -104,6 +104,7 @@ export const ContentTypePreviewPathSelectionRow = ({
               emptyMessage={inputs.contentType.emptyMessage}
               options={contentTypeOptions}
               isRequired={true}
+              isLoading={isLoading}
               onChange={handleContentTypeChange}></Select>
           </Box>
           <Box className={styles.inputWrapper}>

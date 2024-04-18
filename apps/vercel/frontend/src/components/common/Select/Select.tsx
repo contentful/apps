@@ -12,6 +12,7 @@ interface Props {
   placeholder: string;
   value: string;
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
+  isLoading: boolean;
   label?: string;
   isRequired?: boolean;
   helpText?: string;
@@ -25,12 +26,14 @@ export const Select = ({
   placeholder,
   value,
   onChange,
+  isLoading,
   emptyMessage = 'No options to select',
   isRequired,
   helpText,
   errorMessage,
 }: Props) => {
   const optionsExist = Boolean(options && options.length);
+
   return (
     <Box>
       {label && <FormControl.Label isRequired={isRequired}>{label}</FormControl.Label>}
@@ -41,7 +44,7 @@ export const Select = ({
         isInvalid={Boolean(errorMessage)}
         value={value}
         onChange={onChange}>
-        {optionsExist ? (
+        {optionsExist || isLoading ? (
           <>
             <F36Select.Option value="" isDisabled>
               {placeholder}
@@ -57,7 +60,7 @@ export const Select = ({
         )}
       </F36Select>
       {helpText && <HelpText marginBottom="spacingXs">{helpText}</HelpText>}
-      {errorMessage && <ValidationMessage>{errorMessage}</ValidationMessage>}
+      {errorMessage && !isLoading && <ValidationMessage>{errorMessage}</ValidationMessage>}
     </Box>
   );
 };
