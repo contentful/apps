@@ -184,7 +184,7 @@ updates:
         - ">=11"
 
 - package-ecosystem: npm
-  directory: "/examples/function-templates-javascript"
+  directory: "/examples/function-templates/javascript"
   schedule:
     interval: daily
     time: "03:00"
@@ -202,7 +202,7 @@ updates:
         - ">=11"
 
 - package-ecosystem: npm
-  directory: "/examples/function-templates-typescript"
+  directory: "/examples/function-templates/typescript"
   schedule:
     interval: daily
     time: "03:00"
