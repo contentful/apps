@@ -88,7 +88,8 @@ export const ContentTypePreviewPathSelectionRow = ({
   }, [isAppConfigurationSaved, configuredPreviewPath, configuredContentType]);
 
   useEffect(() => {
-    if (configuredPreviewPath && isAppConfigurationSaved) {
+    if (!isAppConfigurationSaved) setIsPreviewPathInvalid(false);
+    else if (configuredPreviewPath) {
       const isPreviewPathValid = validatePreviewPath(configuredPreviewPath);
       setIsPreviewPathInvalid(!isPreviewPathValid);
     }

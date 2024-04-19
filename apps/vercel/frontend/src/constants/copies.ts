@@ -46,8 +46,8 @@ export const copies = {
         previewPath: {
           label: 'Preview path',
           placeholder: 'Set preview path and token',
-          emptyErrorMessage: 'Field is empty and omitted from configuration',
-          invalidFormattingMessage: 'Formatting is invalid and omitted from configuration',
+          emptyErrorMessage: 'Field is empty',
+          invalidFormattingMessage: 'Path must start with a "/", and include a {token}',
         },
       },
       infoNote: {
