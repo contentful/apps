@@ -58,9 +58,9 @@ function defaultGetSaveBtnText(selectedSKUs: string[]): string {
   }
 }
 
-function defaultMakeSearchPlaceholderText(_skuType?: string): string {
+const defaultMakeSearchPlaceholderText: MakeSearchPlaceholderText = (_skuType) => {
   return 'Search for a product...';
-}
+};
 
 export class SkuPicker extends Component<Props, State> {
   state: State = {
