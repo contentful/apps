@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.6.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.45...@contentful/ecommerce-app-base@3.6.0) (2024-04-19)
+
+### Features
+
+- make SkuPicker search placeholder and help text configurable [INTEG-2017] ([#7337](https://github.com/contentful/apps/issues/7337)) ([460be1b](https://github.com/contentful/apps/commit/460be1b5c2ddaec2a6ed74ddaf4b3e50e6257781))
+
 ## [3.5.45](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.5.44...@contentful/ecommerce-app-base@3.5.45) (2024-04-17)
 
 ### Bug Fixes
