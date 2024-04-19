@@ -75,6 +75,24 @@ describe('SkuPicker', () => {
     expect(getByTestId('search-by-sku')).toBeInTheDocument();
   });
 
+  it('should render custom placeholder text in search box when makeSearchPlaceholderText exists', async () => {
+    const makeSearchPlaceholderText = jest.fn(() => 'My custom placeholder text');
+    const { getByPlaceholderText } = await renderComponent({
+      ...defaultProps,
+      makeSearchPlaceholderText,
+    });
+    expect(getByPlaceholderText('My custom placeholder text')).toBeInTheDocument();
+  });
+
+  it('should render custom help text under search box when makeSearchHelpText exists', async () => {
+    const makeSearchHelpText = jest.fn(() => 'My custom help text');
+    const { getByText } = await renderComponent({
+      ...defaultProps,
+      makeSearchHelpText,
+    });
+    expect(getByText('My custom help text')).toBeInTheDocument();
+  });
+
   describe('when it has infinite scrolling mode pagination', () => {
     it('should render the "Load more" text link if there is a next page', async () => {
       const { findByTestId } = await renderComponent({

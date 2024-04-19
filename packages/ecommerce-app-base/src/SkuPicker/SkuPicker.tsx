@@ -5,12 +5,20 @@ import debounce from 'lodash/debounce';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { Paginator } from './Paginator';
-import { MakeSaveBtnTextFn, Pagination, Product, ProductPreviewsFn, ProductsFn } from '../types';
+import {
+  MakeSaveBtnTextFn,
+  MakeSearchPlaceholderText,
+  MakeSearchHelpText,
+  Pagination,
+  Product,
+  ProductPreviewsFn,
+  ProductsFn,
+} from '../types';
 import { ProductSelectionList } from './ProductSelectionList';
 import { styles } from './styles';
 import { mapSort } from '../utils';
 
-import { Button, Checkbox, Text, TextInput } from '@contentful/f36-components';
+import { Button, Checkbox, Flex, Text, TextInput } from '@contentful/f36-components';
 
 import { SearchIcon } from '@contentful/f36-icons';
 
@@ -21,6 +29,8 @@ export interface Props {
   searchDelay?: number;
   skuType?: string;
   makeSaveBtnText?: MakeSaveBtnTextFn;
+  makeSearchPlaceholderText?: MakeSearchPlaceholderText;
+  makeSearchHelpText?: MakeSearchHelpText;
   hideSearch?: boolean;
   showSearchBySkuOption?: boolean;
 }
@@ -47,6 +57,10 @@ function defaultGetSaveBtnText(selectedSKUs: string[]): string {
       return `Save ${selectedSKUs.length} products`;
   }
 }
+
+const defaultMakeSearchPlaceholderText: MakeSearchPlaceholderText = (_skuType) => {
+  return 'Search for a product...';
+};
 
 export class SkuPicker extends Component<Props, State> {
   state: State = {
@@ -154,11 +168,37 @@ export class SkuPicker extends Component<Props, State> {
     }
   };
 
+  constructSearchAdditionalInfo = (
+    makeSearchHelpText: MakeSearchHelpText | undefined,
+    skuType: string | undefined,
+    paginationTotal: number
+  ) => {
+    const helpText = makeSearchHelpText ? makeSearchHelpText(skuType) : '';
+    const totalResults = !!paginationTotal
+      ? `${paginationTotal.toLocaleString()} total results`
+      : '';
+
+    if (helpText && totalResults) {
+      return (
+        <Flex justifyContent="space-between">
+          <Text marginRight="spacingXl" className={styles.helpText}>
+            {helpText}
+          </Text>
+          <Text className={styles.helpText}>{totalResults}</Text>
+        </Flex>
+      );
+    } else {
+      return <Text className={styles.helpText}>{helpText || totalResults}</Text>;
+    }
+  };
+
   render() {
     const { search, pagination, products, selectedProducts, selectedSKUs, searchBySku } =
       this.state;
     const {
       makeSaveBtnText = defaultGetSaveBtnText,
+      makeSearchPlaceholderText = defaultMakeSearchPlaceholderText,
+      makeSearchHelpText,
       skuType,
       hideSearch = false,
       showSearchBySkuOption,
@@ -174,7 +214,7 @@ export class SkuPicker extends Component<Props, State> {
               <div className={styles.searchWrapper}>
                 <div className={styles.leftSideControls}>
                   <TextInput
-                    placeholder="Search for a product..."
+                    placeholder={makeSearchPlaceholderText(skuType)}
                     type="search"
                     name="sku-search"
                     id="sku-search"
@@ -182,8 +222,12 @@ export class SkuPicker extends Component<Props, State> {
                     value={search}
                     onChange={(event) => this.setSearch((event.target as HTMLInputElement).value)}
                   />
-
                   <SearchIcon variant="muted" />
+                  {this.constructSearchAdditionalInfo(
+                    makeSearchHelpText,
+                    skuType,
+                    pagination.total
+                  )}
                 </div>
 
                 {showSearchBySkuOption && (
@@ -199,12 +243,6 @@ export class SkuPicker extends Component<Props, State> {
                   </div>
                 )}
               </div>
-            )}
-
-            {!!pagination.total && (
-              <Text className={styles.total}>
-                {pagination.total.toLocaleString()} total results
-              </Text>
             )}
           </div>
 
