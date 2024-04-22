@@ -1,3 +1,4 @@
+import VercelClient from '@clients/Vercel';
 import { ContentType } from '@contentful/app-sdk';
 
 export type ContentTypePreviewPathSelection = {
@@ -73,4 +74,5 @@ export interface ConfigPageState {
   contentTypes: ContentType[];
   projects: Project[];
   apiPaths: ApiPath[];
+  vercelClient: VercelClient | null;
 }
