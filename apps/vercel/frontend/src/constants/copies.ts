@@ -137,5 +137,16 @@ export const copies = {
         },
       },
     },
+    gettingStartedSection: {
+      title: 'Getting started',
+      contentPreviewSidebar: {
+        copy: 'After you install the app, you can preview content from the entry editor sidebar.',
+        src: './images/content-preview-sidebar-screen-capture.png',
+      },
+      contentPreviewSettings: {
+        copy: 'Within the content preview settings, you will see Vercel as an option.',
+        src: './images/content-preview-settings-screen-capture.png',
+      },
+    },
   },
 };

@@ -15,6 +15,7 @@ import { AuthenticationSection } from '@components/config-screen/AuthenticationS
 import { copies } from '@constants/copies';
 import { actions } from '@constants/enums';
 import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
+import { GettingStartedSection } from '@components/config-screen/GettingStartedSection/GettingStartedSection';
 
 const ConfigScreen = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);
@@ -171,7 +172,11 @@ const ConfigScreen = () => {
           )}
 
           {renderPostAuthComponents && parameters.selectedProject && parameters.selectedApiPath && (
-            <ContentTypePreviewPathSection />
+            <>
+              <ContentTypePreviewPathSection />
+              <hr className={styles.splitter} />
+              <GettingStartedSection />
+            </>
           )}
         </Stack>
       </Box>
