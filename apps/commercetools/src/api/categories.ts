@@ -80,37 +80,22 @@ export async function fetchCategoryPreviews(
 
 export async function fetchCategories(
   config: ConfigurationParameters,
-  search: string,
+  _search: string,
   pagination: { offset: number; limit: number }
 ): Promise<{
   pagination: Pagination;
   products: CommerceToolsProduct[];
 }> {
   const client = createClient(config);
-  let response;
-
-  if (search) {
-    response = await client
-      .categories()
-      .get({
-        queryArgs: {
-          limit: pagination?.limit,
-          offset: pagination?.offset,
-          where: `key="${search}" or name(${config.locale}="${search}") or slug(${config.locale}="${search}")`,
-        },
-      })
-      .execute();
-  } else {
-    response = await client
-      .categories()
-      .get({
-        queryArgs: {
-          limit: pagination?.limit,
-          offset: pagination?.offset,
-        },
-      })
-      .execute();
-  }
+  const response = await client
+    .categories()
+    .get({
+      queryArgs: {
+        limit: pagination?.limit,
+        offset: pagination?.offset,
+      },
+    })
+    .execute();
 
   if (response.statusCode === 200) {
     return {

@@ -31,22 +31,6 @@ function makeSaveBtnText(skuType: SkuType) {
   }
 }
 
-function makeSearchPlaceholderText(skuType: string | undefined): string {
-  if (skuType === 'category') {
-    return 'Search by category name, slug, or key...';
-  } else {
-    return 'Search for a product...';
-  }
-}
-
-function makeSearchHelpText(skuType: string | undefined): string {
-  if (skuType === 'category') {
-    return 'Search value must be an exact match';
-  } else {
-    return '';
-  }
-}
-
 export async function renderDialog(sdk: DialogAppSDK) {
   const DIALOG_ID = 'dialog-root';
 
@@ -66,10 +50,8 @@ export async function renderDialog(sdk: DialogAppSDK) {
     searchDelay: 750,
     skuType,
     makeSaveBtnText: makeSaveBtnText(skuType),
-    makeSearchPlaceholderText,
-    makeSearchHelpText,
-    hideSearch: false,
-    showSearchBySkuOption: skuType === 'product',
+    hideSearch: skuType === 'category',
+    showSearchBySkuOption: true,
   });
 
   sdk.window.startAutoResizer();
