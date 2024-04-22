@@ -105,7 +105,9 @@ const ConfigScreen = () => {
       setIsLoading(false);
     }
 
-    if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) getProjects();
+    if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) {
+      getProjects();
+    }
   }, [parameters.vercelAccessToken, hasTokenBeenValidated, isTokenValid, vercelClient]);
 
   useEffect(() => {
