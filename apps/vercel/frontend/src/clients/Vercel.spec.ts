@@ -27,7 +27,7 @@ describe('VercelClient', () => {
       it('returns true for valid token', async () => {
         const res = await client.checkToken();
 
-        expect(res).toBe(true);
+        expect(res.ok).toBe(true);
       });
     });
 
@@ -42,7 +42,7 @@ describe('VercelClient', () => {
       it('returns false for invalid token', async () => {
         const res = await client.checkToken();
 
-        expect(res).toBe(false);
+        expect(res.ok).toBe(false);
       });
     });
   });

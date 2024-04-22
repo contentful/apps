@@ -36,7 +36,7 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    if (!parameters.vercelAccessToken) {
+    if (!parameters.vercelAccessToken || !isTokenValid) {
       sdk.notifier.error('A valid Vercel access token is required');
       return false;
     }
@@ -47,7 +47,7 @@ const ConfigScreen = () => {
       parameters,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, isTokenValid]);
 
   const vercelClient = new VercelClient(parameters.vercelAccessToken);
 
@@ -60,14 +60,19 @@ const ConfigScreen = () => {
 
     async function checkToken() {
       const response = await vercelClient.checkToken();
-      if (response) setIsLoading(false);
-
-      setIsTokenValid(response);
-      setHasTokenBeenValidated(true);
+      if (response) {
+        setIsLoading(false);
+        setIsTokenValid(response.ok);
+        setHasTokenBeenValidated(true);
+      }
     }
 
-    if (!hasTokenBeenValidated) {
+    if (!hasTokenBeenValidated && parameters.vercelAccessToken) {
       checkToken();
+    } else if (!parameters.vercelAccessToken) {
+      setHasTokenBeenValidated(true);
+      setIsLoading(false);
+      setIsTokenValid(true);
     }
   }, [parameters.vercelAccessToken]);
 
@@ -128,8 +133,8 @@ const ConfigScreen = () => {
     });
 
     async function checkToken() {
-      const tokenValid = await new VercelClient(e.target.value).checkToken();
-      setIsTokenValid(tokenValid);
+      const response = await new VercelClient(e.target.value).checkToken();
+      setIsTokenValid(response.ok);
       setIsLoading(false);
       setHasTokenBeenValidated(true);
     }
