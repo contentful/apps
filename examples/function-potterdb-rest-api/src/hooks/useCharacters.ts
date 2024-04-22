@@ -11,7 +11,7 @@ type HookResult = {
   isLoading: boolean;
 };
 
-type Character =  {
+export type Character =  {
     slug: string
     name?: string
     aliasNames: string[]
@@ -22,7 +22,7 @@ type Character =  {
     wiki: string
   }
 
-export function useProducts(): HookResult {
+export function useCharacters(): HookResult {
 
   const { isLoading, data: characters } = useQuery<Character[]>({
     queryKey: ['characters'],
