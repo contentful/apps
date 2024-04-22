@@ -25,6 +25,7 @@ const ConfigScreen = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
   const [isAppConfigurationSaved, setIsAppConfigurationSaved] = useState(true);
+  const [vercelClient, setVercelClient] = useState<VercelClient | null>(null);
 
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const sdk = useSDK<ConfigAppSDK>();
@@ -49,7 +50,11 @@ const ConfigScreen = () => {
     };
   }, [parameters, sdk, isTokenValid]);
 
-  const vercelClient = new VercelClient(parameters.vercelAccessToken);
+  useEffect(() => {
+    if (parameters.vercelAccessToken) {
+      setVercelClient(new VercelClient(parameters.vercelAccessToken));
+    }
+  }, [parameters.vercelAccessToken]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -59,11 +64,13 @@ const ConfigScreen = () => {
     setIsLoading(true);
 
     async function checkToken() {
-      const response = await vercelClient.checkToken();
-      if (response) {
-        setIsLoading(false);
-        setIsTokenValid(response.ok);
-        setHasTokenBeenValidated(true);
+      if (vercelClient) {
+        const response = await vercelClient.checkToken();
+        if (response) {
+          setIsLoading(false);
+          setIsTokenValid(response.ok);
+          setHasTokenBeenValidated(true);
+        }
       }
     }
 
@@ -91,20 +98,21 @@ const ConfigScreen = () => {
   useEffect(() => {
     async function getProjects() {
       setIsLoading(true);
-      const data = await vercelClient.listProjects();
-      setProjects(data.projects);
+      if (vercelClient) {
+        const data = await vercelClient.listProjects();
+        setProjects(data.projects);
+      }
       setIsLoading(false);
     }
 
     if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) getProjects();
-  }, [parameters.vercelAccessToken, hasTokenBeenValidated, isTokenValid]);
+  }, [parameters.vercelAccessToken, hasTokenBeenValidated, isTokenValid, vercelClient]);
 
   useEffect(() => {
     async function getApiPaths() {
       setIsLoading(true);
-      const data = await vercelClient.listApiPaths(parameters.selectedProject);
-
-      if (parameters.vercelAccessToken) {
+      if (vercelClient) {
+        const data = await vercelClient.listApiPaths(parameters.selectedProject);
         setApiPaths(data);
       }
 
@@ -122,7 +130,7 @@ const ConfigScreen = () => {
 
       getApiPaths();
     }
-  }, [parameters.selectedProject]);
+  }, [parameters.selectedProject, vercelClient]);
 
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     setIsLoading(true);
