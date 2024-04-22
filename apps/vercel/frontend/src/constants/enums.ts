@@ -7,6 +7,13 @@ export enum actions {
   APPLY_API_PATH = 'applyApiPath',
 }
 
+export enum configPageActions {
+  UPDATE_CONTENT_TYPES = 'updateContentTypes',
+  UPDATE_PROJECTS = 'updateProjects',
+  UPDATE_API_PATHS = 'updateApiPaths',
+  UPDATE_VERCEL_CLIENT = 'updateVercelClient',
+}
+
 export enum singleSelectionSections {
   PROJECT_SELECTION_SECTION = 'projectSelectionSection',
   API_PATH_SELECTION_SECTION = 'pathSelectionSection',

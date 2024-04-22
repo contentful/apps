@@ -1,3 +1,5 @@
+import { ContentType } from '@contentful/app-sdk';
+
 export type ContentTypePreviewPathSelection = {
   contentType: string;
   previewPath: string;
@@ -66,3 +68,9 @@ export type ApiPath = {
   id: string;
   name: string;
 };
+
+export interface ConfigPageState {
+  contentTypes: ContentType[];
+  projects: Project[];
+  apiPaths: ApiPath[];
+}
