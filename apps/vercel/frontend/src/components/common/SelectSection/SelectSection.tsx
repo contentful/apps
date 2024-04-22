@@ -41,10 +41,13 @@ export const SelectSection = ({
   };
 
   useEffect(() => {
-    const isValidSelection = options.some((item) => item.id === selectedOption) || !selectedOption;
-    const areOptionsAvailable = options.length === 0;
-    setIsSelectionInvalid(!isValidSelection && !areOptionsAvailable);
-  }, [selectedOption, options]);
+    if (!isLoading) {
+      const isValidSelection =
+        options.some((item) => item.id === selectedOption) || !selectedOption;
+      const areOptionsAvailable = options.length === 0;
+      setIsSelectionInvalid(!isValidSelection && !areOptionsAvailable);
+    }
+  }, [selectedOption, options, isLoading]);
 
   return (
     <FormControl marginBottom="spacingS" id={id} isRequired={true}>

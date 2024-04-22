@@ -83,7 +83,7 @@ const ConfigScreen = () => {
       const contentTypesResponse = await sdk.cma.contentType.getMany({});
 
       if (contentTypesResponse.items && contentTypesResponse.items.length) {
-        setContentTypes(contentTypesResponse.items);
+        setContentTypes(contentTypesResponse.items || []);
       }
     }
 
@@ -95,7 +95,7 @@ const ConfigScreen = () => {
       setIsLoading(true);
       if (vercelClient) {
         const data = await vercelClient.listProjects();
-        setProjects(data.projects);
+        setProjects(data.projects || []);
       }
       setIsLoading(false);
     }
@@ -110,7 +110,7 @@ const ConfigScreen = () => {
       setIsLoading(true);
       if (vercelClient) {
         const data = await vercelClient.listApiPaths(parameters.selectedProject);
-        setApiPaths(data);
+        setApiPaths(data || []);
       }
 
       setIsLoading(false);
