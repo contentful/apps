@@ -10,11 +10,11 @@ export const GettingStartedSection = () => {
       <Heading className={styles.heading}>{title}</Heading>
       <Flex>
         <Paragraph>{contentPreviewSidebar.copy}</Paragraph>
-        <img src={contentPreviewSidebar.src} />
+        <img src={contentPreviewSidebar.src} alt="Content preview sidebar screen capture" />
       </Flex>
       <Flex>
         <Paragraph>{contentPreviewSettings.copy}</Paragraph>
-        <img src={contentPreviewSettings.src} />
+        <img src={contentPreviewSettings.src} alt="Content preview settings screen capture" />
       </Flex>
     </Box>
   );

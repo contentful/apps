@@ -140,7 +140,7 @@ export const copies = {
     gettingStartedSection: {
       title: 'Getting started',
       contentPreviewSidebar: {
-        copy: 'After you install the app, you can preview content from the entry editor.',
+        copy: 'After you install the app, you can preview content from the entry editor sidebar.',
         src: './images/content-preview-sidebar-screen-capture.png',
       },
       contentPreviewSettings: {
