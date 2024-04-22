@@ -9,7 +9,7 @@ interface Props {
 
 const DisconnectModal = (props: Props) => {
   const { isShown, handleCancel, handleDisconnect } = props;
-  const { confirmDisonnect, goBack, description } = accessSection.disconnectModal;
+  const { confirmDisconnect, goBack, description } = accessSection.disconnectModal;
 
   return (
     <ModalConfirm
@@ -18,7 +18,7 @@ const DisconnectModal = (props: Props) => {
       onCancel={handleCancel}
       onConfirm={handleDisconnect}
       cancelLabel={goBack}
-      confirmLabel={confirmDisonnect}>
+      confirmLabel={confirmDisconnect}>
       <Text>{description}</Text>
     </ModalConfirm>
   );

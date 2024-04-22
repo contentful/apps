@@ -7,6 +7,6 @@ describe('DisconnectModal component', () => {
   it('mounts and renders the correct content', () => {
     render(<DisconnectModal isShown={true} handleCancel={vi.fn()} handleDisconnect={vi.fn()} />);
 
-    expect(screen.getByText(accessSection.disconnectModal.confirmDisonnect)).toBeTruthy();
+    expect(screen.getByText(accessSection.disconnectModal.confirmDisconnect)).toBeTruthy();
   });
 });
