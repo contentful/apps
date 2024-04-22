@@ -66,20 +66,15 @@ const ConfigScreen = () => {
     async function checkToken() {
       if (vercelClient) {
         const response = await vercelClient.checkToken();
-        if (response) {
-          setIsLoading(false);
-          setIsTokenValid(response.ok);
-          setHasTokenBeenValidated(true);
-        }
+        if (response) updateTokenValidityState(response.ok);
       }
     }
 
-    if (!hasTokenBeenValidated && parameters.vercelAccessToken) {
+    if (!parameters.vercelAccessToken) {
+      const isTokenEmpty = true;
+      updateTokenValidityState(isTokenEmpty);
+    } else if (!hasTokenBeenValidated) {
       checkToken();
-    } else if (!parameters.vercelAccessToken) {
-      setHasTokenBeenValidated(true);
-      setIsLoading(false);
-      setIsTokenValid(true);
     }
   }, [parameters.vercelAccessToken]);
 
@@ -134,6 +129,12 @@ const ConfigScreen = () => {
     }
   }, [parameters.selectedProject, vercelClient]);
 
+  const updateTokenValidityState = (tokenValidity: boolean) => {
+    setIsLoading(false);
+    setIsTokenValid(tokenValidity);
+    setHasTokenBeenValidated(true);
+  };
+
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     setIsLoading(true);
 
@@ -144,9 +145,7 @@ const ConfigScreen = () => {
 
     async function checkToken() {
       const response = await new VercelClient(e.target.value).checkToken();
-      setIsTokenValid(response.ok);
-      setIsLoading(false);
-      setHasTokenBeenValidated(true);
+      updateTokenValidityState(response.ok);
     }
 
     checkToken();
