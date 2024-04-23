@@ -1,14 +1,21 @@
 import React from 'react';
 import type { ReactElement } from 'react';
-import { Flex, Button, Subheading, SkeletonImage, Skeleton, Box } from '@contentful/f36-components';
+import {
+  Flex,
+  Button,
+  SkeletonImage,
+  Skeleton,
+  Box,
+  Caption,
+} from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { CharacterAttributes } from '../types';
 
-
 const styles = {
   image: css`
     width: 100px;
+    max-height: 80px;
     padding-right: ${tokens.spacingM};
   `,
   title: css`
@@ -42,10 +49,22 @@ export function CharacterBox({ character, onClick, ctaText = 'Select' }: Props):
   }
 
   return (
-    <Flex alignItems="center">
-      {/* <img src={product.featuredImage.url} alt={product.title} className={styles.image} /> */}
-      <Subheading className={styles.title}>{character.name}</Subheading>
-      {onClick && <Button onClick={() => onClick(character)}>{ctaText}</Button>}
+    <Flex justifyContent="space-between" alignItems="center">
+      <Flex>
+        <img src={character?.image} alt={character?.name} className={styles.image} />
+        <Flex flexDirection="column">
+          <Caption fontWeight="fontWeightMedium" className={styles.title}>{character?.name}</Caption>
+          <Flex>
+            <Caption>Born: {character?.born?.slice(0, 25) ?? '??'}</Caption>
+            <Caption>Gender: {character?.gender ?? '??'}</Caption>
+          </Flex>
+        </Flex>
+      </Flex>
+      {onClick && (
+        <Button style={{ maxHeight: '20px' }} onClick={() => onClick(character)}>
+          {ctaText}
+        </Button>
+      )}
     </Flex>
   );
 }

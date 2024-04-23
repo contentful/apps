@@ -2,11 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { CharacterAttributes, CharacterProps } from '../types';
 
 async function fetchCharacters(): Promise<CharacterAttributes[]> {
-      const characterProps:  Promise<CharacterProps[]> = await fetch("https://api.potterdb.com/v1/characters?page[size]=25")
+      const characterProps:  CharacterProps[] = await fetch("https://api.potterdb.com/v1/characters?page[size]=70")
       .then(response => response.json())
       .then(data => data.data)
 
-      return (await characterProps).map((character) => ({ ...character.attributes }))
+      return characterProps
+      .map((character) => ({ ...character.attributes }))
+      .filter(character => character.image !== null)
   }
 
 type HookResult = {
