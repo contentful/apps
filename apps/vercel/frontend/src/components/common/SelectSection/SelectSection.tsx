@@ -4,7 +4,7 @@ import { Select } from '@components/common/Select/Select';
 import { Path, Project } from '@customTypes/configPage';
 import { copies } from '@constants/copies';
 import { FormControl } from '@contentful/f36-components';
-import { actions } from '@constants/enums';
+import { actions, singleSelectionSections } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 
 type CopySection = Extract<
@@ -25,7 +25,10 @@ export const SelectSection = ({ selectedOption, options, action, section, id }: 
   const { placeholder, label, emptyMessage, helpText, errorMessage } = copies.configPage[section];
   const { isLoading, dispatch, handleAppConfigurationChange } = useContext(ConfigPageContext);
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    handleAppConfigurationChange();
+    // indicate app config change when project has been re-selected
+    if (section === singleSelectionSections.PROJECT_SELECTION_SECTION)
+      handleAppConfigurationChange();
+
     dispatch({
       type: action,
       payload: event.target.value,
