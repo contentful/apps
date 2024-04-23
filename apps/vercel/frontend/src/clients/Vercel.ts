@@ -7,8 +7,12 @@ import {
   ServerlessFunction,
 } from '@customTypes/configPage';
 
+interface CheckTokenResponse {
+  ok: boolean;
+}
+
 interface VercelAPIClient {
-  checkToken: () => Promise<boolean>;
+  checkToken: () => Promise<CheckTokenResponse>;
   listProjects: () => Promise<ListProjectsResponse>;
   createDeployment: (input: CreateDeploymentInput) => Promise<Deployment>;
   getDeploymentById: (deploymentId: string) => Promise<Deployment>;
@@ -24,13 +28,13 @@ export default class VercelClient implements VercelAPIClient {
     });
   }
 
-  async checkToken(): Promise<boolean> {
+  async checkToken(): Promise<CheckTokenResponse> {
     const res = await fetch(`${this.baseEndpoint}/v5/user/tokens`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
 
-    return res.ok;
+    return { ok: res.ok };
   }
 
   async listProjects(): Promise<ListProjectsResponse> {
