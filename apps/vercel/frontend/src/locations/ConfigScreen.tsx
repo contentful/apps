@@ -117,17 +117,19 @@ const ConfigScreen = () => {
     }
 
     if (parameters.selectedProject) {
-      // reset the selected api path only when the project changes
-      if (apiPaths.length) {
-        dispatchParameters({
-          type: actions.APPLY_API_PATH,
-          payload: '',
-        });
-      }
-
       getApiPaths();
     }
   }, [parameters.selectedProject, vercelClient]);
+
+  useEffect(() => {
+    if (parameters.selectedProject && !isLoading && !isAppConfigurationSaved) {
+      // reset the selected api path only when the project changes
+      dispatchParameters({
+        type: actions.APPLY_API_PATH,
+        payload: '',
+      });
+    }
+  }, [parameters.selectedProject, isLoading, isAppConfigurationSaved]);
 
   const updateTokenValidityState = (tokenValidity: boolean) => {
     setIsLoading(false);

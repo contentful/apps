@@ -23,8 +23,9 @@ interface Props {
 export const SelectSection = ({ selectedOption, options, action, section, id }: Props) => {
   const [isSelectionInvalid, setIsSelectionInvalid] = useState<boolean>(false);
   const { placeholder, label, emptyMessage, helpText, errorMessage } = copies.configPage[section];
-  const { isLoading, dispatch } = useContext(ConfigPageContext);
+  const { isLoading, dispatch, handleAppConfigurationChange } = useContext(ConfigPageContext);
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    handleAppConfigurationChange();
     dispatch({
       type: action,
       payload: event.target.value,
