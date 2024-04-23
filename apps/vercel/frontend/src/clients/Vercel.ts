@@ -56,7 +56,7 @@ export default class VercelClient implements VercelAPIClient {
     try {
       const latestDeploymentId = deploymentId || (await this.getLatestDeploymentId(projectId));
       const res = await fetch(
-        `${this.baseEndpoint}/v6/deployments/${latestDeploymentId}/fil/outputs?file=..%2Fdeploy_metadata.json`,
+        `${this.baseEndpoint}/v6/deployments/${latestDeploymentId}/files/outputs?file=..%2Fdeploy_metadata.json`,
         {
           headers: this.buildHeaders(),
           method: 'GET',
