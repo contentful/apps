@@ -7,7 +7,6 @@ import {
   SkeletonImage,
   Skeleton,
   Box,
-  Paragraph,
   Caption,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';

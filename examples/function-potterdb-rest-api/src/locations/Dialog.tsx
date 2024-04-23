@@ -14,9 +14,6 @@ const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   const { isLoading, characters } = useCharacters();
 
-  console.log("Dialog")
-  console.log({ characters })
-
   useEffect(() => {
     // Since we run in an iframe, we need to set the height of the iframe.
     sdk.window.updateHeight(500);
@@ -32,7 +29,7 @@ const Dialog = () => {
 
   return (
     <Box padding="spacingM">
-      <Modal.Header title="Select a product">
+      <Modal.Header title="Select a Character">
         <Button onClick={() => selectCharacter(undefined)}>Dismiss</Button>
       </Modal.Header>
       <Modal.Content>
