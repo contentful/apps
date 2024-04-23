@@ -12,6 +12,7 @@ type HookResult = {
 };
 
 export type Character =  {
+    id: string
     slug: string
     name?: string
     aliasNames: string[]
