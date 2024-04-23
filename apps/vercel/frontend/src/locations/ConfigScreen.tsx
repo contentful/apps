@@ -110,8 +110,13 @@ const ConfigScreen = () => {
     async function getApiPaths() {
       setIsLoading(true);
       if (vercelClient) {
-        const data = await vercelClient.listApiPaths(parameters.selectedProject);
-        setApiPaths(validateApiPathData(data) ? data : []);
+        try {
+          const data = await vercelClient.listApiPaths(parameters.selectedProject);
+          setApiPaths(validateApiPathData(data) ? data : []);
+        } catch (e) {
+          console.error(e);
+          setApiPaths([]);
+        }
       }
 
       setIsLoading(false);
