@@ -1,6 +1,5 @@
-import { ChangeEvent, Dispatch, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
 
-import { ParameterAction } from '@components/parameterReducer';
 import { Select } from '@components/common/Select/Select';
 import { Path, Project } from '@customTypes/configPage';
 import { copies } from '@constants/copies';
