@@ -7,6 +7,7 @@ import {
   Skeleton,
   Box,
   Caption,
+  Subheading,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
@@ -19,8 +20,7 @@ const styles = {
     padding-right: ${tokens.spacingM};
   `,
   title: css`
-    flex: 1;
-    text-align: left;
+    margin-bottom: ${tokens.spacingS};
   `,
 };
 
@@ -53,11 +53,27 @@ export function CharacterBox({ character, onClick, ctaText = 'Select' }: Props):
       <Flex>
         <img src={character?.image} alt={character?.name} className={styles.image} />
         <Flex flexDirection="column">
-          <Caption fontWeight="fontWeightMedium" className={styles.title}>{character?.name}</Caption>
+          <Subheading className={styles.title}>{character?.name}</Subheading>
           <Flex>
-            <Caption>Born: {character?.born?.slice(0, 25) ?? '??'}</Caption>
-            <Caption>Gender: {character?.gender ?? '??'}</Caption>
-          </Flex>
+              <Flex>
+                <Caption fontWeight="fontWeightMedium" marginRight='spacing2Xs'>Born:</Caption>{' '}
+                <Caption>{character?.born?.slice(0, 25) ?? '??'}</Caption>
+              </Flex>
+              <Flex marginLeft={'spacingS'}>
+                <Caption fontWeight="fontWeightMedium" marginRight='spacing2Xs'>Gender:</Caption>{' '}
+                <Caption>{character.gender ?? '??'}</Caption>
+              </Flex>
+            </Flex>
+            <Flex  marginTop={'spacingM'}>
+              <Flex>
+                <Caption fontWeight="fontWeightMedium" marginRight='spacing2Xs'>House:</Caption>{' '}
+                <Caption>{character?.house ?? '??'}</Caption>
+              </Flex>
+              <Flex marginLeft={'spacingS'}>
+                <Caption fontWeight="fontWeightMedium" marginRight='spacing2Xs'> Species:</Caption>{' '}
+                <Caption>{character.species ?? '??'}</Caption>
+              </Flex>
+            </Flex>
         </Flex>
       </Flex>
       {onClick && (
