@@ -24,10 +24,12 @@ export const copies = {
     pathSelectionSection: {
       label: 'API Path',
       placeholder: 'Select a path',
+      textInputPlaceholder: 'Ex: api/enable-draft',
       emptyMessage: 'No paths currently configured.',
       errorMessage:
         'The path you have configured is no longer available. Please select another one.',
       helpText: 'Select a Vercel route to enable your draft mode.',
+      textInputHelpText: 'Set a Vercel route to enable your draft mode.',
     },
     contentTypePreviewPathSection: {
       title: 'Preview settings',

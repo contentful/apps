@@ -16,6 +16,7 @@ import { copies } from '@constants/copies';
 import { actions } from '@constants/enums';
 import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
 import { GettingStartedSection } from '@components/config-screen/GettingStartedSection/GettingStartedSection';
+import { validateApiPathData } from '@utils/validateApiPathData/validateApiPathData';
 
 const ConfigScreen = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);
@@ -109,25 +110,32 @@ const ConfigScreen = () => {
     async function getApiPaths() {
       setIsLoading(true);
       if (vercelClient) {
-        const data = await vercelClient.listApiPaths(parameters.selectedProject);
-        setApiPaths(data || []);
+        try {
+          const data = await vercelClient.listApiPaths(parameters.selectedProject);
+          setApiPaths(validateApiPathData(data) ? data : []);
+        } catch (e) {
+          console.error(e);
+          setApiPaths([]);
+        }
       }
 
       setIsLoading(false);
     }
 
     if (parameters.selectedProject) {
-      // reset the selected api path only when the project changes
-      if (apiPaths.length) {
-        dispatchParameters({
-          type: actions.APPLY_API_PATH,
-          payload: '',
-        });
-      }
-
       getApiPaths();
     }
   }, [parameters.selectedProject, vercelClient]);
+
+  useEffect(() => {
+    if (parameters.selectedProject && !isLoading && !isAppConfigurationSaved) {
+      // reset the selected api path only when the project changes
+      dispatchParameters({
+        type: actions.APPLY_API_PATH,
+        payload: '',
+      });
+    }
+  }, [parameters.selectedProject, isLoading, isAppConfigurationSaved]);
 
   const updateTokenValidityState = (tokenValidity: boolean) => {
     setIsLoading(false);
