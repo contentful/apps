@@ -39,6 +39,7 @@ export const Select = ({
       <F36Select
         isDisabled={!optionsExist}
         id="optionsSelect"
+        data-testid="optionsSelect"
         name="optionsSelect"
         isInvalid={Boolean(errorMessage)}
         value={value}
