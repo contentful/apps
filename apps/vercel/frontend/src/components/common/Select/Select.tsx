@@ -1,11 +1,6 @@
 import { ChangeEvent } from 'react';
-import {
-  Box,
-  FormControl,
-  Select as F36Select,
-  HelpText,
-  ValidationMessage,
-} from '@contentful/f36-components';
+import { Select as F36Select } from '@contentful/f36-components';
+import { SelectionWrapper } from '../SelectionWrapper/SelectionWrapper';
 
 interface Props {
   options: { id: string; name: string }[];
@@ -35,8 +30,12 @@ export const Select = ({
   const optionsExist = Boolean(options && options.length);
 
   return (
-    <Box>
-      {label && <FormControl.Label isRequired={isRequired}>{label}</FormControl.Label>}
+    <SelectionWrapper
+      label={label}
+      isLoading={isLoading}
+      isRequired={isRequired}
+      helpText={helpText}
+      errorMessage={errorMessage}>
       <F36Select
         isDisabled={!optionsExist}
         id="optionsSelect"
@@ -59,8 +58,6 @@ export const Select = ({
           <F36Select.Option value="">{emptyMessage}</F36Select.Option>
         )}
       </F36Select>
-      {helpText && <HelpText marginBottom="spacingXs">{helpText}</HelpText>}
-      {errorMessage && !isLoading && <ValidationMessage>{errorMessage}</ValidationMessage>}
-    </Box>
+    </SelectionWrapper>
   );
 };

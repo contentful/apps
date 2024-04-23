@@ -123,7 +123,6 @@ export default class VercelClient implements VercelAPIClient {
   private formatApiPaths(data: ServerlessFunction[]): ApiPath[] {
     return data.map((file: ServerlessFunction) => {
       const filePath = file.path;
-      // TO DO: Add compound key for ID property
       return {
         name: filePath,
         id: filePath,

@@ -16,23 +16,15 @@ type CopySection = Extract<
 interface Props {
   selectedOption: string;
   options: Path[] | Project[];
-  dispatch: Dispatch<ParameterAction>;
   action: actions.APPLY_API_PATH | actions.APPLY_SELECTED_PROJECT;
   section: CopySection;
   id: string;
 }
 
-export const SelectSection = ({
-  selectedOption,
-  options,
-  dispatch,
-  action,
-  section,
-  id,
-}: Props) => {
+export const SelectSection = ({ selectedOption, options, action, section, id }: Props) => {
   const [isSelectionInvalid, setIsSelectionInvalid] = useState<boolean>(false);
   const { placeholder, label, emptyMessage, helpText, errorMessage } = copies.configPage[section];
-  const { isLoading } = useContext(ConfigPageContext);
+  const { isLoading, dispatch } = useContext(ConfigPageContext);
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatch({
       type: action,

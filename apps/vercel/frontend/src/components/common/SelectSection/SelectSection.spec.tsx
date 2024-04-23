@@ -18,7 +18,6 @@ describe('SelectSection', () => {
     const { placeholder, helpText, errorMessage } = copies.configPage.pathSelectionSection;
     render(
       <SelectSection
-        dispatch={vi.fn()}
         options={paths}
         section={ID}
         id={ID}
@@ -41,7 +40,6 @@ describe('SelectSection', () => {
     const { placeholder, helpText, errorMessage } = copies.configPage.projectSelectionSection;
     render(
       <SelectSection
-        dispatch={vi.fn()}
         options={projects}
         section={ID}
         id={ID}
@@ -64,7 +62,6 @@ describe('SelectSection', () => {
     const { errorMessage } = copies.configPage.projectSelectionSection;
     render(
       <SelectSection
-        dispatch={vi.fn()}
         options={projects}
         section={ID}
         id={ID}
