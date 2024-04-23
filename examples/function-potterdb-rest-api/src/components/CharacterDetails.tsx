@@ -8,7 +8,6 @@ import {
   Skeleton,
   Box,
   Paragraph,
-  Text,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
@@ -51,26 +50,25 @@ export function CharacterDetails({ character, onClick, ctaText = 'Select' }: Pro
 
   return (
     <Flex flexDirection="column">
-      {/* <img src={product.featuredImage.url} alt={product.title} className={styles.image} /> */}
-      <Flex alignItems="center">
-        <Subheading className={styles.title}>{character.name}</Subheading>
+      <Flex>
+        <img src={character?.image} alt={character?.name} className={styles.image} />
+        <Flex marginLeft={'spacingM'} flexDirection='column'>
+          <Flex alignItems="center">
+            <Subheading className={styles.title}>{character.name}</Subheading>
+          </Flex>
+          <Flex justifyContent="space-between">
+            <Flex flexDirection="column">
+              <Paragraph>Born: {character?.born?.slice(0, 25)  ?? '??'}</Paragraph>
+              <Paragraph>Gender: {character.gender ?? '??'}</Paragraph>
+            </Flex>
+            <Flex flexDirection="column" marginLeft={'spacingM'}>
+              <Paragraph>House: {character.house ?? '??'}</Paragraph>
+              <Paragraph>Species: {character.species ?? '??'}</Paragraph>
+            </Flex>
+          </Flex>
+        </Flex>
       </Flex>
-      <Flex justifyContent='space-around'>
-        <Flex flexDirection="column">
-          <Paragraph>
-            <Text as='u'>Born:</Text> {character.born}</Paragraph>
-          <Paragraph>Gender: {character.gender ?? '??'}</Paragraph>
-        </Flex>
-        <Flex flexDirection="column">
-        <Paragraph>Nationality: {character.nationality ?? '??'}</Paragraph>
-          <Paragraph>Species: {character.species ?? '??'}</Paragraph>
-        </Flex>
-        <Flex flexDirection="column">
-          <Paragraph>House: {character.house ?? '??'}</Paragraph>
-          <Paragraph>Jobs: {character.jobs?.join(', ')}</Paragraph>
-        </Flex>
-      </Flex>
-        {onClick && <Button onClick={() => onClick(character)}>{ctaText}</Button>}
+      {onClick && <Button style={{ marginTop: '20px', marginBottom: '20px', width: '90px' }} size="small" onClick={() => onClick(character)}>{ctaText}</Button>}
     </Flex>
   );
 }

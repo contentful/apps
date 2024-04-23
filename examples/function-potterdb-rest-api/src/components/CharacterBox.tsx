@@ -14,8 +14,8 @@ import { CharacterAttributes } from '../types';
 
 const styles = {
   image: css`
-    width: 100px;
-    max-height: 80px;
+    width: 120px;
+    max-height: 90px;
     padding-right: ${tokens.spacingM};
   `,
   title: css`
