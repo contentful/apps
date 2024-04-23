@@ -16,6 +16,7 @@ import { copies } from '@constants/copies';
 import { actions } from '@constants/enums';
 import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
 import { GettingStartedSection } from '@components/config-screen/GettingStartedSection/GettingStartedSection';
+import { validateApiPathData } from '@utils/validateApiPathData/validateApiPathData';
 
 const ConfigScreen = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);
@@ -110,7 +111,7 @@ const ConfigScreen = () => {
       setIsLoading(true);
       if (vercelClient) {
         const data = await vercelClient.listApiPaths(parameters.selectedProject);
-        setApiPaths(data || []);
+        setApiPaths(validateApiPathData(data) ? data : []);
       }
 
       setIsLoading(false);
