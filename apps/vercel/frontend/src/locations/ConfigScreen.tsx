@@ -71,8 +71,8 @@ const ConfigScreen = () => {
     }
 
     if (!parameters.vercelAccessToken) {
-      const isTokenEmpty = true;
-      updateTokenValidityState(isTokenEmpty);
+      // if there is no value set for the access token we will consider it valid
+      updateTokenValidityState(true);
     } else if (!hasTokenBeenValidated) {
       checkToken();
     }
