@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-
-import { Character } from './useCharacters';
+import { CharacterAttributes } from '../types';
 
 async function fetchCharacter(slug: string) {
     return fetch(`https://api.potterdb.com/v1/characters/${slug}`)
@@ -10,14 +9,14 @@ async function fetchCharacter(slug: string) {
 
 
 type HookResult = {
-  character?: Character;
+  character?: CharacterAttributes;
   isLoading: boolean;
 };
 
 
 
 export function useCharacter(slug: string = ''): HookResult {
-  const { isLoading, data: character } = useQuery<Character>({
+  const { isLoading, data: character } = useQuery<CharacterAttributes>({
     queryKey: ['slug', slug],
     queryFn: () => fetchCharacter(slug),
     enabled: !!slug,

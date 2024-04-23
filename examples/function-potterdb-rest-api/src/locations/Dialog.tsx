@@ -4,9 +4,10 @@ import { Box, Button, Modal } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
-import { Character, useCharacters } from '../hooks/useCharacters';
+import { useCharacters } from '../hooks/useCharacters';
 import { CharacterBox } from '../components/CharacterBox';
 import { CharactersList } from '../components/CharactersList';
+import { CharacterAttributes } from '../types';
 
 
 const Dialog = () => {
@@ -25,7 +26,7 @@ const Dialog = () => {
     return new Array(10).fill(undefined).map((_, index) => <CharacterBox key={index} />);
   }
 
-  function selectCharacter(character?: Character) {
+  function selectCharacter(character?: CharacterAttributes) {
     sdk.close(character);
   }
 

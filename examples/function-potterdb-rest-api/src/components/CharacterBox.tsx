@@ -3,7 +3,8 @@ import type { ReactElement } from 'react';
 import { Flex, Button, Subheading, SkeletonImage, Skeleton, Box } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import { Character } from '../hooks/useCharacters';
+import { CharacterAttributes } from '../types';
+
 
 const styles = {
   image: css`
@@ -17,8 +18,8 @@ const styles = {
 };
 
 type Props = {
-  character?: Character;
-  onClick?: (character: Character) => void;
+  character?: CharacterAttributes;
+  onClick?: (character: CharacterAttributes) => void;
   ctaText?: string;
 };
 

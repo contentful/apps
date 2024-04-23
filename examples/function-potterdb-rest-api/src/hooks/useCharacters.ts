@@ -1,31 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
+import { CharacterAttributes, CharacterProps } from '../types';
 
-async function fetchCharacters() {
-    return fetch("https://api.potterdb.com/v1/characters?page[size]=25")
+async function fetchCharacters(): Promise<CharacterAttributes[]> {
+      const characterProps:  Promise<CharacterProps[]> = await fetch("https://api.potterdb.com/v1/characters?page[size]=25")
       .then(response => response.json())
       .then(data => data.data)
+
+      return (await characterProps).map((character) => ({ ...character.attributes }))
   }
 
 type HookResult = {
-  characters?: any[];
+  characters?: CharacterAttributes[];
   isLoading: boolean;
 };
 
-export type Character =  {
-    id: string
-    slug: string
-    name?: string
-    aliasNames: string[]
-    familyMembers: string[]
-    house: string
-    image: string
-    titles: string[]
-    wiki: string
-  }
 
 export function useCharacters(): HookResult {
 
-  const { isLoading, data: characters } = useQuery<Character[]>({
+  const { isLoading, data: characters } = useQuery<CharacterAttributes[]>({
     queryKey: ['characters'],
     queryFn: fetchCharacters,
     retry: false,

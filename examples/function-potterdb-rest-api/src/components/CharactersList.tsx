@@ -4,9 +4,8 @@ import { List } from '@contentful/f36-components';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 
-
-import { Character } from '../hooks/useCharacters';
 import { CharacterBox } from './CharacterBox';
+import { CharacterAttributes } from '../types';
 
 
 const styles = {
@@ -28,15 +27,15 @@ const styles = {
 };
 
 type Props = {
-  characters?: Character[];
-  onSelect: (product: Character) => void;
+  characters?: CharacterAttributes[];
+  onSelect: (product: CharacterAttributes) => void;
 };
 
 export function CharactersList({ characters, onSelect }: Props): ReactElement {
   return (
     <List className={styles.characterList}>
       {characters?.map((character) => (
-        <List.Item key={character.id} className={styles.characterItem}>
+        <List.Item key={character.slug} className={styles.characterItem}>
           <CharacterBox character={character} onClick={() => onSelect(character)} />
         </List.Item>
       ))}

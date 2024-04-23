@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
-import { Character } from '../hooks/useCharacters';
 import { Button } from '@contentful/f36-components';
 import { useCharacter } from '../hooks/useCharacter';
 import { CharacterBox } from '../components/CharacterBox';
+import { CharacterAttributes } from '../types';
 
 const Field = () => {
   const sdk = useSDK<FieldAppSDK>();
@@ -20,7 +20,7 @@ const Field = () => {
   }, [sdk.window]);
 
   async function openModal() {
-    const character: Character = await sdk.dialogs.openCurrentApp();
+    const character: CharacterAttributes = await sdk.dialogs.openCurrentApp();
     if (character) {
       setCharacterSlug(character.slug).catch(() => null);
     }
