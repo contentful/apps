@@ -2,31 +2,30 @@ import React from 'react';
 import type { ReactElement } from 'react';
 import {
   Flex,
-  Button,
-  Subheading,
   SkeletonImage,
   Skeleton,
   Box,
   Caption,
+  EntryCard,
+  IconButton,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
 import { CharacterAttributes } from '../types';
+import { CloseIcon } from '@contentful/f36-icons';
 
 const styles = {
   image: css`
-    width: 100px;
-    padding-right: ${tokens.spacingM};
+    border-radius: 10%;
   `,
-  title: css`
-    flex: 1;
-    text-align: left;
+  description: css`
+    font-color: ${tokens.gray100};
   `,
 };
 
 type Props = {
   character?: CharacterAttributes;
-  onClick?: (character: CharacterAttributes) => void;
+  onClick: (character: CharacterAttributes) => void;
   ctaText?: string;
 };
 
@@ -49,53 +48,51 @@ export function CharacterDetails({ character, onClick, ctaText = 'Select' }: Pro
   }
 
   return (
-    <Flex flexDirection="column">
-      <Flex>
+    <EntryCard
+      contentType="Avatar"
+      title={character?.name}
+      thumbnailElement={
         <img src={character?.image} alt={character?.name} className={styles.image} />
-        <Flex marginLeft={'spacingM'} flexDirection="column">
-          <Flex alignItems="center">
-            <Subheading className={styles.title}>{character.name}</Subheading>
+      }
+      customActionButton={
+        <IconButton
+          aria-label="Actions"
+          icon={<CloseIcon variant="muted" />}
+          size="small"
+          variant="transparent"
+          onClick={() => onClick(character)}
+        />
+      }>
+      <Flex className={styles.description}>
+        <Flex flexDirection="column">
+          <Flex marginBottom="spacing2Xs">
+            <Caption marginRight="spacingXs">Nationality:</Caption>{' '}
+            <Caption>{character?.nationality ?? '??'}</Caption>
           </Flex>
-          <Flex justifyContent="space-between">
-            <Flex flexDirection="column">
-              <Flex>
-                <Caption fontWeight="fontWeightMedium" marginRight='spacingS'>Born:</Caption>{' '}
-                <Caption>{character?.born?.slice(0, 25) ?? '??'}</Caption>
-              </Flex>
-              <Flex>
-                <Caption fontWeight="fontWeightMedium" marginRight='spacingS'>Nationality:</Caption>{' '}
-                <Caption>{character?.nationality?? '??'}</Caption>
-              </Flex>
-              <Flex>
-                <Caption fontWeight="fontWeightMedium" marginRight='spacingS'>Gender:</Caption>{' '}
-                <Caption>{character.gender ?? '??'}</Caption>
-              </Flex>
-            </Flex>
-            <Flex flexDirection="column" marginLeft={'spacingM'}>
-              <Flex>
-                <Caption fontWeight="fontWeightMedium" marginRight='spacingS'>House:</Caption>{' '}
-                <Caption>{character?.house ?? '??'}</Caption>
-              </Flex>
-              <Flex>
-                <Caption fontWeight="fontWeightMedium" marginRight='spacingS'> Species:</Caption>{' '}
-                <Caption>{character.species ?? '??'}</Caption>
-              </Flex>
-              <Flex>
-                <Caption fontWeight="fontWeightMedium" marginRight='spacingS'> Titles:</Caption>{' '}
-                <Caption>{character.titles?.join(', ') ?? '??'}</Caption>
-              </Flex>
-            </Flex>
+          <Flex marginRight="spacingL" marginBottom="spacing2Xs">
+            <Caption marginRight="spacingXs">House:</Caption>{' '}
+            <Caption>{character?.house ?? '??'}</Caption>
+          </Flex>
+          <Flex marginBottom="spacing2Xs">
+            <Caption marginRight="spacingXs">Gender:</Caption>{' '}
+            <Caption>{character.gender ?? '??'}</Caption>
+          </Flex>
+        </Flex>
+        <Flex flexDirection="column" marginLeft={'spacingM'}>
+          <Flex marginBottom="spacing2Xs">
+            <Caption marginRight="spacingXs"> Species:</Caption>{' '}
+            <Caption>{character.species ?? '??'}</Caption>
+          </Flex>
+          <Flex marginBottom="spacing2Xs">
+            <Caption marginRight="spacingXs">Born:</Caption>{' '}
+            <Caption>{character?.born?.slice(0, 25) ?? '??'}</Caption>
+          </Flex>
+          <Flex marginBottom="spacing2Xs">
+            <Caption marginRight="spacingXs"> Titles:</Caption>{' '}
+            <Caption>{character.titles?.join(', ') ?? '??'}</Caption>
           </Flex>
         </Flex>
       </Flex>
-      {onClick && (
-        <Button
-          style={{ marginTop: '20px', marginBottom: '20px', width: '90px' }}
-          size="small"
-          onClick={() => onClick(character)}>
-          {ctaText}
-        </Button>
-      )}
-    </Flex>
+    </EntryCard>
   );
 }
