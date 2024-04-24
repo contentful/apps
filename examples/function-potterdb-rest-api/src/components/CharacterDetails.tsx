@@ -23,17 +23,16 @@ const styles = {
     margin-right: ${tokens.spacingM};
   `,
   description: css`
-    font-color: ${tokens.gray100};
+    font-color: ${tokens.gray900};
   `,
 };
 
 type Props = {
   character?: CharacterAttributes;
   onClick: (character: CharacterAttributes) => void;
-  ctaText?: string;
 };
 
-export function CharacterDetails({ character, onClick, ctaText = 'Select' }: Props): ReactElement {
+export function CharacterDetails({ character, onClick }: Props): ReactElement {
   if (!character) {
     return (
       <Flex alignItems="center">

@@ -7,21 +7,20 @@ import tokens from '@contentful/f36-tokens';
 import { CharacterBox } from './CharacterBox';
 import { CharacterAttributes } from '../types';
 
-
 const styles = {
   characterList: css`
     padding: 0;
   `,
   characterItemContainer: css`
-    max-height: 100px;
+    max-height: 200px;
   `,
   characterItem: css`
-    max-height: 100px;
+    max-height: 200px;
     box-sizing: border-box;
     padding: ${tokens.spacingS} 0;
     list-style: none;
     &:hover {
-      background-color: ${tokens.gray100};
+      border-color: ${tokens.blue500};
     }
   `,
 };
