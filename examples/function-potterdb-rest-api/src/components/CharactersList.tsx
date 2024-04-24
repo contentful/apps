@@ -26,11 +26,11 @@ const styles = {
 };
 
 type Props = {
-  characters?: CharacterAttributes[];
+  characters: CharacterAttributes[];
   onSelect: (product: CharacterAttributes) => void;
 };
 
-export function CharactersList({ characters, onSelect }: Props): ReactElement {
+export function CharactersList({ characters = [], onSelect }: Props): ReactElement {
   return (
     <List className={styles.characterList}>
       {characters?.map((character) => (

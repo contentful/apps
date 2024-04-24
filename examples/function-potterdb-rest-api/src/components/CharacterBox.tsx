@@ -19,28 +19,30 @@ const styles = {
       background-color: ${tokens.blue100};
     }
   `,
+  containerMargin: css`
+    margin-bottom: ${tokens.spacing2Xs};
+  `,
   image: css`
     border-radius: 10%;
-    width: 85px;
-    max-height: 90px;
+    width: 90px;
+    max-height: 100px;
     margin-right: ${tokens.spacingM};
   `,
-  title: css`
-    margin-bottom: ${tokens.spacingS};
-  `,
-
   description: css`
     gap: ${tokens.spacingM};
   `,
+
+  captionField: css`
+    margin-right: ${tokens.spacingXs};
+  `,
 };
 
-type Props = {
+type CharacterBoxProps = {
   character?: CharacterAttributes;
   onClick: (character: CharacterAttributes) => void;
-  ctaText?: string;
 };
 
-export function CharacterBox({ character, onClick, ctaText = 'Select' }: Props): ReactElement {
+export function CharacterBox({ character, onClick }: CharacterBoxProps): ReactElement {
   if (!character) {
     return (
       <Flex alignItems="center">
@@ -62,34 +64,34 @@ export function CharacterBox({ character, onClick, ctaText = 'Select' }: Props):
     <EntryCard className={styles.card} onClick={() => onClick(character)}>
       <Flex>
         <img src={character?.image} alt={character?.name} className={styles.image} />
-        <Flex flexDirection="column" marginTop="spacingXs">
+        <Flex flexDirection="column" marginTop="spacing2Xs">
           <Subheading>{character?.name}</Subheading>
           <Flex className={styles.description}>
             <Flex flexDirection="column">
-              <Flex marginBottom="spacing2Xs">
-                <Caption marginRight="spacingXs">Nationality:</Caption>{' '}
+              <Flex className={styles.containerMargin}>
+                <Caption className={styles.captionField}>Nationality:</Caption>{' '}
                 <Caption>{character?.nationality ?? '??'}</Caption>
               </Flex>
-              <Flex marginRight="spacingL" marginBottom="spacing2Xs">
-                <Caption marginRight="spacingXs">House:</Caption>{' '}
+              <Flex className={styles.containerMargin}>
+                <Caption className={styles.captionField}>House:</Caption>{' '}
                 <Caption>{character?.house ?? '??'}</Caption>
               </Flex>
-              <Flex marginBottom="spacing2Xs">
-                <Caption marginRight="spacingXs">Gender:</Caption>{' '}
+              <Flex className={styles.containerMargin}>
+                <Caption className={styles.captionField}>Gender:</Caption>{' '}
                 <Caption>{character.gender ?? '??'}</Caption>
               </Flex>
             </Flex>
-            <Flex flexDirection="column" marginLeft={'spacingM'}>
-              <Flex marginBottom="spacing2Xs">
-                <Caption marginRight="spacingXs"> Species:</Caption>{' '}
+            <Flex flexDirection="column" marginLeft="spacingM">
+              <Flex className={styles.containerMargin}>
+                <Caption className={styles.captionField}> Species:</Caption>{' '}
                 <Caption>{character.species ?? '??'}</Caption>
               </Flex>
-              <Flex marginBottom="spacing2Xs">
-                <Caption marginRight="spacingXs">Born:</Caption>{' '}
+              <Flex className={styles.containerMargin}>
+                <Caption className={styles.captionField}>Born:</Caption>{' '}
                 <Caption>{character?.born?.slice(0, 25) ?? '??'}</Caption>
               </Flex>
-              <Flex marginBottom="spacing2Xs">
-                <Caption marginRight="spacingXs"> Titles:</Caption>{' '}
+              <Flex className={styles.containerMargin}>
+                <Caption className={styles.captionField}> Titles:</Caption>{' '}
                 <Caption>{character.titles?.join(', ') ?? '??'}</Caption>
               </Flex>
             </Flex>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { useAutoResizer, useFieldValue, useSDK } from '@contentful/react-apps-toolkit';
 import { Button } from '@contentful/f36-components';
@@ -13,16 +13,9 @@ const Field = () => {
   const [characterSlug, setCharacterSlug] = useFieldValue<string>(sdk.field.id, sdk.field.locale);
   const { isLoading, character } = useCharacter(characterSlug);
 
-  useEffect(() => {
-    // Since we run in an iframe,
-    // we need to set the height of the iframe.
-    sdk.window.updateHeight(130);
-  }, [sdk.window]);
-
   async function openModal() {
     const character: CharacterAttributes = await sdk.dialogs.openCurrentApp();
     if (character) {
-      console.log('Character selected:', character);
       setCharacterSlug(character.slug).catch(() => null);
     }
   }
@@ -41,7 +34,7 @@ const Field = () => {
 
   return (
     <div>
-      <CharacterDetails character={character} onClick={removeCharacter} ctaText="Remove" />
+      <CharacterDetails character={character} onClick={removeCharacter} />
       <Button style={{ marginTop: '32px' }} onClick={openModal}>Select Character</Button>
     </div>
   );
