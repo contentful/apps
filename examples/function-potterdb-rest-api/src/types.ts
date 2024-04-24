@@ -7,10 +7,10 @@ export type CharacterAttributes =  {
     born?: string
     species?: string
     nationality?: string
-    aliasNames: string[]
-    familyMembers: string[]
     house?: string
     image?: string
+    familyMembers: string[]
+    aliasNames: string[]
     titles?: string[]
     jobs?: string[]
     wiki: string

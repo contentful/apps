@@ -26,7 +26,7 @@ const styles = {
 };
 
 type Props = {
-  characters: CharacterAttributes[];
+  characters?: CharacterAttributes[];
   onSelect: (product: CharacterAttributes) => void;
 };
 

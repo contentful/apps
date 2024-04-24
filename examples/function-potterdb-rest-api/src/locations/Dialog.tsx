@@ -16,11 +16,11 @@ const Dialog = () => {
 
   useEffect(() => {
     // Since we run in an iframe, we need to set the height of the iframe.
-    sdk.window.updateHeight(500);
+    sdk.window.updateHeight(680);
   }, [sdk.window]);
 
   if (isLoading && !characters) {
-    return new Array(10).fill(undefined).map((_, index) => <CharacterBox key={index} />);
+    return new Array(10).fill(undefined).map((_, index) => <CharacterBox key={index} onClick={() => ({})}/>);
   }
 
   function selectCharacter(character?: CharacterAttributes) {

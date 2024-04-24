@@ -9,12 +9,15 @@ const typeDefs = `
 type Character {
   slug: String!
   name: String
+  nationality: String
+  image: String
+  house: String
+  wiki: String
+  species: String
+  gender: String
   aliasNames: [String!]
   familyMembers: [String!]
-  house: String
-  image: String
   titles: [String!]
-  wiki: String
 }
 
 type Query {
