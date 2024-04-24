@@ -32,7 +32,7 @@ const Field = () => {
   }
 
   if (isLoading) {
-    return <CharacterDetails />;
+    return <CharacterDetails onClick={() => ({})}/>;
   }
 
   if (!character) {
@@ -42,7 +42,7 @@ const Field = () => {
   return (
     <div>
       <CharacterDetails character={character} onClick={removeCharacter} ctaText="Remove" />
-      <Button onClick={openModal}>Select Character</Button>
+      <Button style={{ marginTop: '32px' }} onClick={openModal}>Select Character</Button>
     </div>
   );
 };
