@@ -30,7 +30,7 @@ describe('ConfigScreen', () => {
   });
 
   it('renders the project sections once there is a valid token', async () => {
-    vi.spyOn(VercelClient.prototype, 'checkToken').mockResolvedValue(true);
+    vi.spyOn(VercelClient.prototype, 'checkToken').mockResolvedValue({ ok: true });
     const { unmount } = render(<ConfigScreen />);
 
     expect(await screen.findByText('Connect Vercel')).toBeTruthy();

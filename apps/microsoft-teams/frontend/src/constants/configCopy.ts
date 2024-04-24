@@ -1,13 +1,13 @@
 import { AppEventKey } from '@customTypes/configPage';
+import { MS_TEAMS_APP_ID } from './msTeamsAppId';
 
 const headerSection = {
   title: 'Set up the Microsoft Teams App',
   description: 'Get notifications about Contentful content updates directly in Microsoft Teams.',
 };
 
-// TODO: Update to deep link with Teams app id
 // https://learn.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/deep-link-application?tabs=teamsjs-v2#deep-link-to-open-application-install-dialog
-const appDeepLink = 'https://teams.microsoft.com/';
+const appDeepLink = `https://teams.microsoft.com/l/app/${MS_TEAMS_APP_ID}`;
 
 const accessSection = {
   title: 'Access',
@@ -21,7 +21,7 @@ const accessSection = {
     'Install the Contentful app in Microsoft Teams channels where you would like to receive notifications.  View Teams docs',
   teamsAppLink: 'View Teams docs',
   disconnectModal: {
-    confirmDisonnect: 'Disconnect',
+    confirmDisconnect: 'Disconnect',
     goBack: 'Go back',
     description:
       'By disconnecting, you will no longer see configured notifications for this account. Are you sure you want to disconnect?',

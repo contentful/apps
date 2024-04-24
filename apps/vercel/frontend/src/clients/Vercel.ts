@@ -7,8 +7,12 @@ import {
   ServerlessFunction,
 } from '@customTypes/configPage';
 
+interface CheckTokenResponse {
+  ok: boolean;
+}
+
 interface VercelAPIClient {
-  checkToken: () => Promise<boolean>;
+  checkToken: () => Promise<CheckTokenResponse>;
   listProjects: () => Promise<ListProjectsResponse>;
   createDeployment: (input: CreateDeploymentInput) => Promise<Deployment>;
   getDeploymentById: (deploymentId: string) => Promise<Deployment>;
@@ -24,13 +28,13 @@ export default class VercelClient implements VercelAPIClient {
     });
   }
 
-  async checkToken(): Promise<boolean> {
+  async checkToken(): Promise<CheckTokenResponse> {
     const res = await fetch(`${this.baseEndpoint}/v5/user/tokens`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
 
-    return res.ok;
+    return { ok: res.ok };
   }
 
   async listProjects(): Promise<ListProjectsResponse> {
@@ -48,24 +52,36 @@ export default class VercelClient implements VercelAPIClient {
     projectId: string,
     deploymentId?: string
   ): Promise<ListDeploymentSummaryResponse> {
-    const latestDeploymentId = deploymentId || (await this.getLatestDeploymentId(projectId));
-    const res = await fetch(
-      `${this.baseEndpoint}/v6/deployments/${latestDeploymentId}/files/outputs?file=..%2Fdeploy_metadata.json`,
-      {
-        headers: this.buildHeaders(),
-        method: 'GET',
-      }
-    );
+    let data: ListDeploymentSummaryResponse = { serverlessFunctions: [] };
+    try {
+      const latestDeploymentId = deploymentId || (await this.getLatestDeploymentId(projectId));
+      const res = await fetch(
+        `${this.baseEndpoint}/v6/deployments/${latestDeploymentId}/files/outputs?file=..%2Fdeploy_metadata.json`,
+        {
+          headers: this.buildHeaders(),
+          method: 'GET',
+        }
+      );
 
-    const data = await res.json();
+      data = await res.json();
+    } catch (e) {
+      console.error(e);
+      throw new Error('Failed to fetch deployment summary.');
+    }
 
     return data;
   }
 
   async listApiPaths(projectId: string): Promise<ApiPath[]> {
-    const data = await this.listDeploymentSummary(projectId);
+    let deploymentData: ListDeploymentSummaryResponse = { serverlessFunctions: [] };
+    try {
+      deploymentData = await this.listDeploymentSummary(projectId);
+    } catch (e) {
+      console.error(e);
+      throw new Error('Failed to fetch API paths.');
+    }
 
-    const apiPaths = this.filterServerlessFunctions(data.serverlessFunctions);
+    const apiPaths = this.filterServerlessFunctions(deploymentData.serverlessFunctions);
     const formattedApiPaths = this.formatApiPaths(apiPaths);
 
     return formattedApiPaths;
@@ -119,7 +135,6 @@ export default class VercelClient implements VercelAPIClient {
   private formatApiPaths(data: ServerlessFunction[]): ApiPath[] {
     return data.map((file: ServerlessFunction) => {
       const filePath = file.path;
-      // TO DO: Add compound key for ID property
       return {
         name: filePath,
         id: filePath,

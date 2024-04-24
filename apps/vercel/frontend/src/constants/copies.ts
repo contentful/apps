@@ -24,10 +24,12 @@ export const copies = {
     pathSelectionSection: {
       label: 'API Path',
       placeholder: 'Select a path',
+      textInputPlaceholder: 'Ex: api/enable-draft',
       emptyMessage: 'No paths currently configured.',
       errorMessage:
         'The path you have configured is no longer available. Please select another one.',
       helpText: 'Select a Vercel route to enable your draft mode.',
+      textInputHelpText: 'Set a Vercel route to enable your draft mode.',
     },
     contentTypePreviewPathSection: {
       title: 'Preview settings',
@@ -135,6 +137,17 @@ export const copies = {
           copy: 'Learn more about setting up content preview.',
           href: 'https://www.contentful.com/developers/docs/tutorials/general/content-preview/',
         },
+      },
+    },
+    gettingStartedSection: {
+      title: 'Getting started',
+      contentPreviewSidebar: {
+        copy: 'After you install the app, you can preview content from the entry editor sidebar.',
+        src: './images/content-preview-sidebar-screen-capture.png',
+      },
+      contentPreviewSettings: {
+        copy: 'Within the content preview settings, you will see Vercel as an option.',
+        src: './images/content-preview-settings-screen-capture.png',
       },
     },
   },

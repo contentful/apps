@@ -15,6 +15,8 @@ import { AuthenticationSection } from '@components/config-screen/AuthenticationS
 import { copies } from '@constants/copies';
 import { actions } from '@constants/enums';
 import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
+import { GettingStartedSection } from '@components/config-screen/GettingStartedSection/GettingStartedSection';
+import { validateApiPathData } from '@utils/validateApiPathData/validateApiPathData';
 
 const ConfigScreen = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);
@@ -24,6 +26,7 @@ const ConfigScreen = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
   const [isAppConfigurationSaved, setIsAppConfigurationSaved] = useState(true);
+  const [vercelClient, setVercelClient] = useState<VercelClient | null>(null);
 
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const sdk = useSDK<ConfigAppSDK>();
@@ -35,7 +38,7 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    if (!parameters.vercelAccessToken) {
+    if (!parameters.vercelAccessToken || !isTokenValid) {
       sdk.notifier.error('A valid Vercel access token is required');
       return false;
     }
@@ -46,9 +49,13 @@ const ConfigScreen = () => {
       parameters,
       targetState: currentState,
     };
-  }, [parameters, sdk]);
+  }, [parameters, sdk, isTokenValid]);
 
-  const vercelClient = new VercelClient(parameters.vercelAccessToken);
+  useEffect(() => {
+    if (parameters.vercelAccessToken) {
+      setVercelClient(new VercelClient(parameters.vercelAccessToken));
+    }
+  }, [parameters.vercelAccessToken]);
 
   useEffect(() => {
     sdk.app.onConfigure(() => onConfigure());
@@ -58,14 +65,16 @@ const ConfigScreen = () => {
     setIsLoading(true);
 
     async function checkToken() {
-      const response = await vercelClient.checkToken();
-      if (response) setIsLoading(false);
-
-      setIsTokenValid(response);
-      setHasTokenBeenValidated(true);
+      if (vercelClient) {
+        const response = await vercelClient.checkToken();
+        if (response) updateTokenValidityState(response.ok);
+      }
     }
 
-    if (!hasTokenBeenValidated) {
+    if (!parameters.vercelAccessToken) {
+      // if there is no value set for the access token we will consider it valid
+      updateTokenValidityState(true);
+    } else if (!hasTokenBeenValidated) {
       checkToken();
     }
   }, [parameters.vercelAccessToken]);
@@ -75,7 +84,7 @@ const ConfigScreen = () => {
       const contentTypesResponse = await sdk.cma.contentType.getMany({});
 
       if (contentTypesResponse.items && contentTypesResponse.items.length) {
-        setContentTypes(contentTypesResponse.items);
+        setContentTypes(contentTypesResponse.items || []);
       }
     }
 
@@ -85,38 +94,54 @@ const ConfigScreen = () => {
   useEffect(() => {
     async function getProjects() {
       setIsLoading(true);
-      const data = await vercelClient.listProjects();
-      setProjects(data.projects);
+      if (vercelClient) {
+        const data = await vercelClient.listProjects();
+        setProjects(data.projects || []);
+      }
       setIsLoading(false);
     }
 
-    if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) getProjects();
-  }, [parameters.vercelAccessToken, hasTokenBeenValidated, isTokenValid]);
+    if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) {
+      getProjects();
+    }
+  }, [parameters.vercelAccessToken, hasTokenBeenValidated, isTokenValid, vercelClient]);
 
   useEffect(() => {
     async function getApiPaths() {
       setIsLoading(true);
-      const data = await vercelClient.listApiPaths(parameters.selectedProject);
-
-      if (parameters.vercelAccessToken) {
-        setApiPaths(data);
+      if (vercelClient) {
+        try {
+          const data = await vercelClient.listApiPaths(parameters.selectedProject);
+          setApiPaths(validateApiPathData(data) ? data : []);
+        } catch (e) {
+          console.error(e);
+          setApiPaths([]);
+        }
       }
 
       setIsLoading(false);
     }
 
     if (parameters.selectedProject) {
-      // reset the selected api path only when the project changes
-      if (apiPaths.length) {
-        dispatchParameters({
-          type: actions.APPLY_API_PATH,
-          payload: '',
-        });
-      }
-
       getApiPaths();
     }
-  }, [parameters.selectedProject]);
+  }, [parameters.selectedProject, vercelClient]);
+
+  useEffect(() => {
+    if (parameters.selectedProject && !isLoading && !isAppConfigurationSaved) {
+      // reset the selected api path only when the project changes
+      dispatchParameters({
+        type: actions.APPLY_API_PATH,
+        payload: '',
+      });
+    }
+  }, [parameters.selectedProject, isLoading, isAppConfigurationSaved]);
+
+  const updateTokenValidityState = (tokenValidity: boolean) => {
+    setIsLoading(false);
+    setIsTokenValid(tokenValidity);
+    setHasTokenBeenValidated(true);
+  };
 
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     setIsLoading(true);
@@ -127,10 +152,8 @@ const ConfigScreen = () => {
     });
 
     async function checkToken() {
-      const tokenValid = await new VercelClient(e.target.value).checkToken();
-      setIsTokenValid(tokenValid);
-      setIsLoading(false);
-      setHasTokenBeenValidated(true);
+      const response = await new VercelClient(e.target.value).checkToken();
+      updateTokenValidityState(response.ok);
     }
 
     checkToken();
@@ -171,7 +194,11 @@ const ConfigScreen = () => {
           )}
 
           {renderPostAuthComponents && parameters.selectedProject && parameters.selectedApiPath && (
-            <ContentTypePreviewPathSection />
+            <>
+              <ContentTypePreviewPathSection />
+              <hr className={styles.splitter} />
+              <GettingStartedSection />
+            </>
           )}
         </Stack>
       </Box>

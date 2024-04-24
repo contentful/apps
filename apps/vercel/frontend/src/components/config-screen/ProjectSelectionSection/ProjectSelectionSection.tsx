@@ -12,7 +12,7 @@ interface Props {
 
 export const ProjectSelectionSection = ({ projects }: Props) => {
   const sectionId = singleSelectionSections.PROJECT_SELECTION_SECTION;
-  const { dispatch, parameters } = useContext(ConfigPageContext);
+  const { parameters } = useContext(ConfigPageContext);
 
   return (
     <SectionWrapper testId={sectionId}>
@@ -20,7 +20,6 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
         selectedOption={parameters.selectedProject}
         options={projects}
         action={actions.APPLY_SELECTED_PROJECT}
-        dispatch={dispatch}
         section={sectionId}
         id={sectionId}
       />
