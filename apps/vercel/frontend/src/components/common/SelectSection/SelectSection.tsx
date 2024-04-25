@@ -4,7 +4,7 @@ import { Select } from '@components/common/Select/Select';
 import { Path, Project } from '@customTypes/configPage';
 import { copies } from '@constants/copies';
 import { FormControl } from '@contentful/f36-components';
-import { actions, singleSelectionSections } from '@constants/enums';
+import { parametersActions, singleSelectionSections } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 
 type CopySection = Extract<
@@ -15,7 +15,7 @@ type CopySection = Extract<
 interface Props {
   selectedOption: string;
   options: Path[] | Project[];
-  action: actions.APPLY_API_PATH | actions.APPLY_SELECTED_PROJECT;
+  action: parametersActions.APPLY_API_PATH | parametersActions.APPLY_SELECTED_PROJECT;
   section: CopySection;
   id: string;
   helpText?: string | React.ReactNode;

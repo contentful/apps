@@ -4,7 +4,7 @@ import { Box, Heading, Paragraph, Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './ConfigScreen.styles';
 import useInitializeParameters from '@hooks/useInitializeParameters/useInitializeParameters';
-import parameterReducer from '@components/parameterReducer';
+import parameterReducer from '../reducers/parameterReducer';
 import { ContentTypePreviewPathSection } from '@components/config-screen/ContentTypePreviewPathSection/ContentTypePreviewPathSection';
 import { ProjectSelectionSection } from '@components/config-screen/ProjectSelectionSection/ProjectSelectionSection';
 import { initialParameters } from '@constants/defaultParams';
@@ -13,10 +13,11 @@ import { ApiPath, Project } from '@customTypes/configPage';
 import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
 import { AuthenticationSection } from '@components/config-screen/AuthenticationSection/AuthenticationSection';
 import { copies } from '@constants/copies';
-import { actions } from '@constants/enums';
+import { parametersActions } from '@constants/enums';
 import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
 import { GettingStartedSection } from '@components/config-screen/GettingStartedSection/GettingStartedSection';
 import { validateApiPathData } from '@utils/validateApiPathData/validateApiPathData';
+import { validateToken } from '@utils/validateToken/validateToken';
 
 const ConfigScreen = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);
@@ -66,8 +67,7 @@ const ConfigScreen = () => {
 
     async function checkToken() {
       if (vercelClient) {
-        const response = await vercelClient.checkToken();
-        if (response) updateTokenValidityState(response.ok);
+        validateToken(vercelClient, updateTokenValidityState, dispatchParameters);
       }
     }
 
@@ -77,7 +77,7 @@ const ConfigScreen = () => {
     } else if (!hasTokenBeenValidated) {
       checkToken();
     }
-  }, [parameters.vercelAccessToken]);
+  }, [parameters.vercelAccessToken, parameters.teamId]);
 
   useEffect(() => {
     async function getContentTypes() {
@@ -94,8 +94,8 @@ const ConfigScreen = () => {
   useEffect(() => {
     async function getProjects() {
       setIsLoading(true);
-      if (vercelClient) {
-        const data = await vercelClient.listProjects();
+      if (vercelClient && parameters.teamId) {
+        const data = await vercelClient.listProjects(parameters.teamId);
         setProjects(data.projects || []);
       }
       setIsLoading(false);
@@ -111,7 +111,10 @@ const ConfigScreen = () => {
       setIsLoading(true);
       if (vercelClient) {
         try {
-          const data = await vercelClient.listApiPaths(parameters.selectedProject);
+          const data = await vercelClient.listApiPaths(
+            parameters.selectedProject,
+            parameters.teamId
+          );
           setApiPaths(validateApiPathData(data) ? data : []);
         } catch (e) {
           console.error(e);
@@ -137,13 +140,16 @@ const ConfigScreen = () => {
     setIsLoading(true);
 
     dispatchParameters({
-      type: actions.UPDATE_VERCEL_ACCESS_TOKEN,
+      type: parametersActions.UPDATE_VERCEL_ACCESS_TOKEN,
       payload: e.target.value,
     });
 
     async function checkToken() {
-      const response = await new VercelClient(e.target.value).checkToken();
-      updateTokenValidityState(response.ok);
+      await validateToken(
+        new VercelClient(e.target.value),
+        updateTokenValidityState,
+        dispatchParameters
+      );
     }
 
     checkToken();

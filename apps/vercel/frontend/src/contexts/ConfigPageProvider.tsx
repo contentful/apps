@@ -1,6 +1,6 @@
 import { createContext, Dispatch } from 'react';
 import { ContentType } from '@contentful/app-sdk';
-import { ParameterAction } from '@components/parameterReducer';
+import { ParameterAction } from '@reducers/parameterReducer';
 import { AppInstallationParameters } from '@customTypes/configPage';
 
 interface ConfigPageContextValue {

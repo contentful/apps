@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AppInstallationParameters } from '@customTypes/configPage';
 import { SelectSection } from './SelectSection';
 import { copies } from '@constants/copies';
-import { actions, singleSelectionSections } from '@constants/enums';
+import { parametersActions, singleSelectionSections } from '@constants/enums';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
 
 const parameters = { selectedApiPath: '', selectedProject: '' } as AppInstallationParameters;
@@ -23,7 +23,7 @@ describe('SelectSection', () => {
         options={paths}
         section={ID}
         id={ID}
-        action={actions.APPLY_API_PATH}
+        action={parametersActions.APPLY_API_PATH}
         selectedOption={parameters.selectedApiPath}
       />
     );
@@ -48,7 +48,7 @@ describe('SelectSection', () => {
         options={projects}
         section={ID}
         id={ID}
-        action={actions.APPLY_API_PATH}
+        action={parametersActions.APPLY_API_PATH}
         selectedOption={parameters.selectedApiPath}
       />,
       { handleAppConfigurationChange: mockHandleAppConfigurationChange }
@@ -74,7 +74,7 @@ describe('SelectSection', () => {
         options={projects}
         section={ID}
         id={ID}
-        action={actions.APPLY_API_PATH}
+        action={parametersActions.APPLY_API_PATH}
         selectedOption={'non-existent-id'}
       />
     );
