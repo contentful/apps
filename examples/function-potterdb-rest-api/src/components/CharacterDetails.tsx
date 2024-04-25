@@ -66,36 +66,36 @@ export function CharacterDetails({ character, onClick }: Props): ReactElement {
         <img src={character?.image} alt={character?.name} className={styles.image} />
         <Flex flexDirection="column">
           <Subheading>{character?.name}</Subheading>
-        <Flex className={styles.description}>
-          <Flex flexDirection="column">
-            <Flex marginBottom="spacing2Xs">
-              <Caption marginRight="spacingXs">Nationality:</Caption>{' '}
-              <Caption>{character?.nationality ?? '??'}</Caption>
+          <Flex className={styles.description}>
+            <Flex flexDirection="column">
+              <Flex marginBottom="spacing2Xs">
+                <Caption marginRight="spacingXs">Nationality:</Caption>{' '}
+                <Caption>{character?.nationality ?? '??'}</Caption>
+              </Flex>
+              <Flex marginRight="spacingL" marginBottom="spacing2Xs">
+                <Caption marginRight="spacingXs">House:</Caption>{' '}
+                <Caption>{character?.house ?? '??'}</Caption>
+              </Flex>
+              <Flex marginBottom="spacing2Xs">
+                <Caption marginRight="spacingXs">Gender:</Caption>{' '}
+                <Caption>{character.gender ?? '??'}</Caption>
+              </Flex>
             </Flex>
-            <Flex marginRight="spacingL" marginBottom="spacing2Xs">
-              <Caption marginRight="spacingXs">House:</Caption>{' '}
-              <Caption>{character?.house ?? '??'}</Caption>
-            </Flex>
-            <Flex marginBottom="spacing2Xs">
-              <Caption marginRight="spacingXs">Gender:</Caption>{' '}
-              <Caption>{character.gender ?? '??'}</Caption>
+            <Flex flexDirection="column" marginLeft={'spacingM'}>
+              <Flex marginBottom="spacing2Xs">
+                <Caption marginRight="spacingXs"> Species:</Caption>{' '}
+                <Caption>{character.species ?? '??'}</Caption>
+              </Flex>
+              <Flex marginBottom="spacing2Xs">
+                <Caption marginRight="spacingXs">Born:</Caption>{' '}
+                <Caption>{character?.born?.slice(0, 25) ?? '??'}</Caption>
+              </Flex>
+              <Flex marginBottom="spacing2Xs">
+                <Caption marginRight="spacingXs"> Titles:</Caption>{' '}
+                <Caption>{character.titles?.join(', ') ?? '??'}</Caption>
+              </Flex>
             </Flex>
           </Flex>
-          <Flex flexDirection="column" marginLeft={'spacingM'}>
-            <Flex marginBottom="spacing2Xs">
-              <Caption marginRight="spacingXs"> Species:</Caption>{' '}
-              <Caption>{character.species ?? '??'}</Caption>
-            </Flex>
-            <Flex marginBottom="spacing2Xs">
-              <Caption marginRight="spacingXs">Born:</Caption>{' '}
-              <Caption>{character?.born?.slice(0, 25) ?? '??'}</Caption>
-            </Flex>
-            <Flex marginBottom="spacing2Xs">
-              <Caption marginRight="spacingXs"> Titles:</Caption>{' '}
-              <Caption>{character.titles?.join(', ') ?? '??'}</Caption>
-            </Flex>
-          </Flex>
-        </Flex>
         </Flex>
       </Flex>
     </EntryCard>

@@ -53,6 +53,16 @@ For this command to work, the following environment variables must be set:
 - `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
 - `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
 
+## Understating this example
+
+The main files that compose this event are 
+
+- `contentful-app-manifest.json` 
+- `Functions/index.ts` here is all the logic to resolve 3 party API's and wrap them with graphql
+- `Locations/*`
+
+
+
 ## Libraries to use
 
 To make your app look and feel like Contentful use the following libraries:

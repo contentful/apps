@@ -25,7 +25,7 @@ const Field = () => {
   }
 
   if (isLoading) {
-    return <CharacterDetails onClick={() => ({})}/>;
+    return <CharacterDetails onClick={() => ({})} />;
   }
 
   if (!character) {
@@ -35,7 +35,9 @@ const Field = () => {
   return (
     <div>
       <CharacterDetails character={character} onClick={removeCharacter} />
-      <Button style={{ marginTop: '32px' }} onClick={openModal}>Select Character</Button>
+      <Button style={{ marginTop: '32px' }} onClick={openModal}>
+        Select Character
+      </Button>
     </div>
   );
 };

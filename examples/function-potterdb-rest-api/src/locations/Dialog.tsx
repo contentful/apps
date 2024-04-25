@@ -9,7 +9,6 @@ import { CharacterBox } from '../components/CharacterBox';
 import { CharactersList } from '../components/CharactersList';
 import { CharacterAttributes } from '../types';
 
-
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
   const { isLoading, characters } = useCharacters();
@@ -20,7 +19,9 @@ const Dialog = () => {
   }, [sdk.window]);
 
   if (isLoading && !characters) {
-    return new Array(10).fill(undefined).map((_, index) => <CharacterBox key={index} onClick={() => ({})}/>);
+    return new Array(10)
+      .fill(undefined)
+      .map((_, index) => <CharacterBox key={index} onClick={() => ({})} />);
   }
 
   function selectCharacter(character?: CharacterAttributes) {
