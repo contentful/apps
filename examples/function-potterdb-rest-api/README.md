@@ -53,13 +53,148 @@ For this command to work, the following environment variables must be set:
 - `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
 - `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
 
-## Understating this example
+## Understating this example 🪄
 
-The main files that compose this event are 
+We can divide the important areas to understand in two parts: **Visual components** and **Functions**
 
-- `contentful-app-manifest.json` 
-- `Functions/index.ts` here is all the logic to resolve 3 party API's and wrap them with graphql
-- `Locations/*`
+### Visual components: Locations
+
+The visual components will render on the contentful side as widgets, 
+and will allow the web app users to configure the content that they wish to orchestrate from 3rd party API's, in this example PotterDB.
+
+This app example will render in two locations: `Dialog` and `Field`
+
+### Dialog
+
+![LIST](public/characters-list.png)
+
+The `Dialog` is the component that will be render when we open the Modal to select the PotterDB Characters.
+This component makes use a of custom hook **useCharacters** to fetch a list of characters and render them with **Forma36** components.
+
+### Field 
+
+![SELECTED](public/selected-character.png)
+
+Once the character is selected We will update the entry field value with the slug of the selected character, which is the value that we will use later to resolve the content on delivery with **Functions**, and finally we will render the selected character with an EntryBox in the location `Field` in entry editor.
+
+
+### Functions ✨
+
+The main take away from this whole example, is to show that **you can add any REST response into your GraphQL query tree**,
+you can take all teh advantages of our graphQL API and append content from any external REST API into GraphQL using [Yoga](https://github.com/dotansimha/graphql-yoga).
+
+
+In order to make Yoga work you need to provide a type definition and the query resolvers.
+
+**Type Definition**
+
+```js
+const typeDefs = `
+type Character {
+  slug: String!
+  name: String
+  nationality: String
+  image: String
+  house: String
+  wiki: String
+  species: String
+  gender: String
+  aliasNames: [String!]
+  familyMembers: [String!]
+  titles: [String!]
+}
+
+type Query {
+  character(slug: String!): Character
+}`;
+```
+
+**Resolvers**
+
+```js
+
+const resolvers = {
+    Query: {
+      character: async (_parent, { slug }, _context) => {
+        const response = await fetch(`https://api.potterdb.com/v1/characters/${slug}`);
+
+        if (!response.ok) {
+          throw new GraphQLError(`PotterDB returned a non-200 status code: ${response.status}`);
+        }
+
+        const character = await response.json();
+        const {
+          name,
+          alias_names: aliasNames,
+          family_members: familyMembers,
+          house,
+          image,
+          titles,
+          wiki,
+        } = character.data.attributes;
+
+        return {
+          slug,
+          name,
+          aliasNames,
+          familyMembers,
+          house,
+          image,
+          titles,
+          wiki,
+        };
+      },
+    },
+  }
+
+```
+
+Then we create the GraphQL Schema.
+
+```js
+const schema = createSchema({
+  typeDefs,
+  resolvers
+  })
+
+  const yoga = createYoga({ schema, graphiql: false });
+```
+
+In the `queryHandler` function we grab the request event, we take the arguments needed to execute our query, in our example this will be the `slug` of the PotterDB character, which value is store in the entry field, and then we prepare the request and execute it with Yoga.
+
+```js
+const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
+  const { query, operationName, variables } = event;
+  const body = JSON.stringify({
+    query,
+    operationName,
+    variables,
+  });
+
+  const request = {
+    body,
+    method: 'post',
+    headers: {
+      accept: 'application/graphql-response+json',
+      'content-type': 'application/json',
+    },
+  };
+
+  const response = await yoga.fetch('http://this-does-not-matter.com/graphql', request, context);
+
+  if (response.type !== 'default') {
+    throw new Error('Unsupported GraphQL result type');
+  }
+
+  return response.json();
+};
+
+```
+
+Now the result will be stitched into our GraphQL response in the Content Delivery API (CDA).
+
+
+An additional information is that contentful knows where your functions are by reading the `contentful-app-manifest.json`, if you want to have more than one function running in your app, you need to include them there.
 
 
 
