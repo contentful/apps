@@ -10,7 +10,7 @@ interface Props {
   isLoading: boolean;
   label?: string;
   isRequired?: boolean;
-  helpText?: string;
+  helpText?: string | React.ReactNode;
   errorMessage?: string;
   emptyMessage?: string;
 }

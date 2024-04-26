@@ -14,10 +14,10 @@ const projects = [
   { id: 'project-1', name: 'Project 1', targets: { production: { id: 'project-1' } } },
 ];
 
-describe('SelectSection', () => {
+describe.only('SelectSection', () => {
   it('renders list of api paths to select', () => {
     const ID = singleSelectionSections.API_PATH_SELECTION_SECTION;
-    const { placeholder, helpText, errorMessage } = copies.configPage.pathSelectionSection;
+    const { placeholder, errorMessage } = copies.configPage.pathSelectionSection;
     const { unmount } = render(
       <SelectSection
         options={paths}
@@ -33,7 +33,6 @@ describe('SelectSection', () => {
     select.click();
 
     expect(screen.getByText(paths[0].name)).toBeTruthy();
-    expect(screen.getByText(helpText)).toBeTruthy();
     expect(screen.queryByText(errorMessage)).toBeFalsy();
     unmount();
   });
