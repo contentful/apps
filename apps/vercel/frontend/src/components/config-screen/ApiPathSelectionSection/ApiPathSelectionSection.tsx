@@ -6,6 +6,8 @@ import { SelectSection } from '@components/common/SelectSection/SelectSection';
 import { actions, singleSelectionSections } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { TextFieldSection } from './TextFieldSection/TextFieldSection';
+import { HelpText, TextLink } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
 
 interface Props {
   paths: Path[];
@@ -20,6 +22,21 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
     setRenderSelect(paths.length > 0 || isLoading);
   }, [paths, isLoading]);
 
+  const helpText = (
+    <HelpText>
+      Select the route from your application that enables Draft Mode. See our{' '}
+      <TextLink
+        icon={<ExternalLinkIcon />}
+        alignIcon="end"
+        href="http://www.example.com"
+        target="_blank"
+        rel="noopener noreferrer">
+        Vercel developer guide
+      </TextLink>{' '}
+      for instructions on setting up a Draft Mode route handler. UPDATE LINK
+    </HelpText>
+  );
+
   return (
     <SectionWrapper testId={sectionId}>
       {renderSelect ? (
@@ -29,6 +46,7 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
           action={actions.APPLY_API_PATH}
           section={sectionId}
           id={sectionId}
+          helpText={helpText}
         />
       ) : (
         <TextFieldSection value={parameters.selectedApiPath} />
