@@ -10,7 +10,7 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.46.4",
     "emotion": "10.0.27",
-    "react": "18.2.0",
+    "react": "18.3.0",
     "react-dom": "18.2.0",
     "react-scripts": "5.0.1"
   },
@@ -46,7 +46,7 @@
     "@testing-library/react": "14.3.1",
     "@tsconfig/create-react-app": "2.0.4",
     "@types/node": "16.18.96",
-    "@types/react": "18.2.79",
+    "@types/react": "18.3.0",
     "@types/react-dom": "18.2.25",
     "cross-env": "7.0.3",
     "esbuild": "0.20.2",
