@@ -40,8 +40,14 @@ export const SelectSection = ({
   const { isLoading, dispatch, handleAppConfigurationChange } = useContext(ConfigPageContext);
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     // indicate app config change when project has been re-selected
-    if (section === singleSelectionSections.PROJECT_SELECTION_SECTION)
+    if (section === singleSelectionSections.PROJECT_SELECTION_SECTION) {
+      // reset the selected api path only when the project changes
+      dispatch({
+        type: actions.APPLY_API_PATH,
+        payload: '',
+      });
       handleAppConfigurationChange();
+    }
 
     dispatch({
       type: action,
