@@ -1,11 +1,12 @@
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { ChangeEvent, useContext, useEffect } from 'react';
 
 import { Select } from '@components/common/Select/Select';
-import { Path, Project } from '@customTypes/configPage';
+import { Errors, Path, Project } from '@customTypes/configPage';
 import { copies } from '@constants/copies';
 import { FormControl } from '@contentful/f36-components';
 import { parametersActions, singleSelectionSections } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
+import { useError } from '@hooks/useError/useError';
 
 type CopySection = Extract<
   keyof typeof copies.configPage,
@@ -15,42 +16,43 @@ type CopySection = Extract<
 interface Props {
   selectedOption: string;
   options: Path[] | Project[];
-  action: parametersActions.APPLY_API_PATH | parametersActions.APPLY_SELECTED_PROJECT;
+  parameterAction: parametersActions.APPLY_API_PATH | parametersActions.APPLY_SELECTED_PROJECT;
   section: CopySection;
   id: string;
+  handleInvalidSelectionError: () => void;
   helpText?: string | React.ReactNode;
+  error?: Errors['projectSelection'] | Errors['apiPathSelection'];
 }
 
 export const SelectSection = ({
   selectedOption,
   options,
-  action,
+  parameterAction,
   section,
   id,
   helpText,
+  error,
+  handleInvalidSelectionError,
 }: Props) => {
-  const [isSelectionInvalid, setIsSelectionInvalid] = useState<boolean>(false);
-  const {
-    placeholder,
-    label,
-    emptyMessage,
-    helpText: helpTextCopy,
-    errorMessage,
-  } = copies.configPage[section];
-  const { isLoading, dispatch, handleAppConfigurationChange } = useContext(ConfigPageContext);
+  const { placeholder, label, emptyMessage, helpText: helpTextCopy } = copies.configPage[section];
+  const { isLoading, dispatchParameters, handleAppConfigurationChange } =
+    useContext(ConfigPageContext);
+    
+  const { isError, message } = useError(error);
+
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    // indicate app config change when project has been re-selected
     if (section === singleSelectionSections.PROJECT_SELECTION_SECTION) {
+      // indicate app config change when project has been re-selected
+      handleAppConfigurationChange();
       // reset the selected api path only when the project changes
-      dispatch({
-        type: actions.APPLY_API_PATH,
+      dispatchParameters({
+        type: parametersActions.APPLY_API_PATH,
         payload: '',
       });
-      handleAppConfigurationChange();
     }
 
-    dispatch({
-      type: action,
+    dispatchParameters({
+      type: parameterAction,
       payload: event.target.value,
     });
   };
@@ -60,21 +62,24 @@ export const SelectSection = ({
       const isValidSelection =
         options.some((item) => item.id === selectedOption) || !selectedOption;
       const areOptionsAvailable = options.length === 0;
-      setIsSelectionInvalid(!isValidSelection && !areOptionsAvailable);
+
+      if (!isValidSelection && !areOptionsAvailable) {
+        handleInvalidSelectionError();
+      }
     }
   }, [selectedOption, options, isLoading]);
 
   return (
     <FormControl marginBottom="spacingS" id={id} isRequired={true}>
       <Select
-        value={isSelectionInvalid ? '' : selectedOption}
+        value={isError ? '' : selectedOption}
         onChange={handleChange}
         placeholder={placeholder}
         emptyMessage={emptyMessage}
         options={options}
         label={label}
         helpText={helpText || helpTextCopy}
-        errorMessage={isSelectionInvalid && !isLoading ? errorMessage : undefined}
+        errorMessage={message}
         isLoading={isLoading}
       />
     </FormControl>

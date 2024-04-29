@@ -1,12 +1,15 @@
 import VercelClient from '@clients/Vercel';
 import { ParameterAction } from '../../reducers/parameterReducer';
-import { parametersActions } from '@constants/enums';
+import { errorsActions, parametersActions } from '@constants/enums';
 import { Dispatch } from 'react';
+import { ErrorAction } from '@reducers/errorsReducer';
+import { Errors } from '@customTypes/configPage';
 
 export const validateToken = async (
   vercelClient: VercelClient,
   onComplete: (tokenValidity: boolean) => void,
-  dispatchParameters: Dispatch<ParameterAction>
+  dispatchParameters: Dispatch<ParameterAction>,
+  dispatchErrors: Dispatch<ErrorAction>
 ) => {
   try {
     const response = await vercelClient.checkToken();
@@ -19,10 +22,17 @@ export const validateToken = async (
         });
       }
 
+      dispatchErrors({
+        type: errorsActions.RESET_AUTHENTICATION_ERRORS,
+      });
+
       onComplete(response.ok);
     }
   } catch (e) {
-    // dispatch error state here
-    console.log('error state here>>>>>>>>', e);
+    const err = e as Error;
+    dispatchErrors({
+      type: errorsActions.UPDATE_AUTHENTICATION_ERRORS,
+      payload: (err.message as keyof Errors['authentication']) || 'invalidToken',
+    });
   }
 };

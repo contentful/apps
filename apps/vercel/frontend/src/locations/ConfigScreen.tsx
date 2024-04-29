@@ -7,7 +7,7 @@ import useInitializeParameters from '@hooks/useInitializeParameters/useInitializ
 import parameterReducer from '../reducers/parameterReducer';
 import { ContentTypePreviewPathSection } from '@components/config-screen/ContentTypePreviewPathSection/ContentTypePreviewPathSection';
 import { ProjectSelectionSection } from '@components/config-screen/ProjectSelectionSection/ProjectSelectionSection';
-import { initialParameters } from '@constants/defaultParams';
+import { initialErrors, initialParameters } from '@constants/defaultParams';
 import VercelClient from '@clients/Vercel';
 import { ApiPath, Project } from '@customTypes/configPage';
 import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
@@ -16,11 +16,11 @@ import { copies } from '@constants/copies';
 import { parametersActions } from '@constants/enums';
 import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
 import { GettingStartedSection } from '@components/config-screen/GettingStartedSection/GettingStartedSection';
-import { validateApiPathData } from '@utils/validateApiPathData/validateApiPathData';
-import { validateToken } from '@utils/validateToken/validateToken';
+import errorsReducer from '@reducers/errorsReducer';
+import { useError } from '@hooks/useError/useError';
+import { useFetchAndValidateData } from '@hooks/useFetchAndValidateData/useFetchAndValidateData';
 
 const ConfigScreen = () => {
-  const [isTokenValid, setIsTokenValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasTokenBeenValidated, setHasTokenBeenValidated] = useState(false);
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
@@ -30,6 +30,15 @@ const ConfigScreen = () => {
   const [vercelClient, setVercelClient] = useState<VercelClient | null>(null);
 
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
+  const [errors, dispatchErrors] = useReducer(errorsReducer, initialErrors);
+  const { isError: isAuthenticationError } = useError(errors.authentication);
+  const { validateToken, fetchProjects, fetchApiPaths } = useFetchAndValidateData({
+    dispatchErrors,
+    dispatchParameters,
+    vercelClient,
+    teamId: parameters.teamId,
+  });
+
   const sdk = useSDK<ConfigAppSDK>();
 
   const { title, description } = copies.configPage;
@@ -39,7 +48,7 @@ const ConfigScreen = () => {
   const onConfigure = useCallback(async () => {
     const currentState = await sdk.app.getCurrentState();
 
-    if (!parameters.vercelAccessToken || !isTokenValid) {
+    if (!parameters.vercelAccessToken || isAuthenticationError) {
       sdk.notifier.error('A valid Vercel access token is required');
       return false;
     }
@@ -50,7 +59,7 @@ const ConfigScreen = () => {
       parameters,
       targetState: currentState,
     };
-  }, [parameters, sdk, isTokenValid]);
+  }, [parameters, sdk, isAuthenticationError]);
 
   useEffect(() => {
     if (parameters.vercelAccessToken) {
@@ -67,17 +76,17 @@ const ConfigScreen = () => {
 
     async function checkToken() {
       if (vercelClient) {
-        validateToken(vercelClient, updateTokenValidityState, dispatchParameters);
+        validateToken(updateTokenValidityState);
       }
     }
 
     if (!parameters.vercelAccessToken) {
       // if there is no value set for the access token we will consider it valid
-      updateTokenValidityState(true);
-    } else if (!hasTokenBeenValidated) {
+      updateTokenValidityState();
+    } else {
       checkToken();
     }
-  }, [parameters.vercelAccessToken, parameters.teamId]);
+  }, [parameters.vercelAccessToken, parameters.teamId, vercelClient]);
 
   useEffect(() => {
     async function getContentTypes() {
@@ -94,34 +103,25 @@ const ConfigScreen = () => {
   useEffect(() => {
     async function getProjects() {
       setIsLoading(true);
-      if (vercelClient && parameters.teamId) {
-        const data = await vercelClient.listProjects(parameters.teamId);
-        setProjects(data.projects || []);
-      }
+      fetchProjects(setProjects);
       setIsLoading(false);
     }
 
-    if (parameters.vercelAccessToken && hasTokenBeenValidated && isTokenValid) {
+    if (parameters.vercelAccessToken && hasTokenBeenValidated && !isAuthenticationError) {
       getProjects();
     }
-  }, [parameters.vercelAccessToken, hasTokenBeenValidated, isTokenValid, vercelClient]);
+  }, [
+    parameters.vercelAccessToken,
+    hasTokenBeenValidated,
+    isAuthenticationError,
+    vercelClient,
+    parameters.teamId,
+  ]);
 
   useEffect(() => {
     async function getApiPaths() {
       setIsLoading(true);
-      if (vercelClient) {
-        try {
-          const data = await vercelClient.listApiPaths(
-            parameters.selectedProject,
-            parameters.teamId
-          );
-          setApiPaths(validateApiPathData(data) ? data : []);
-        } catch (e) {
-          console.error(e);
-          setApiPaths([]);
-        }
-      }
-
+      fetchApiPaths(setApiPaths, parameters.selectedProject);
       setIsLoading(false);
     }
 
@@ -130,9 +130,8 @@ const ConfigScreen = () => {
     }
   }, [parameters.selectedProject, vercelClient]);
 
-  const updateTokenValidityState = (tokenValidity: boolean) => {
+  const updateTokenValidityState = () => {
     setIsLoading(false);
-    setIsTokenValid(tokenValidity);
     setHasTokenBeenValidated(true);
   };
 
@@ -145,11 +144,7 @@ const ConfigScreen = () => {
     });
 
     async function checkToken() {
-      await validateToken(
-        new VercelClient(e.target.value),
-        updateTokenValidityState,
-        dispatchParameters
-      );
+      validateToken(updateTokenValidityState, new VercelClient(e.target.value));
     }
 
     checkToken();
@@ -159,16 +154,18 @@ const ConfigScreen = () => {
     setIsAppConfigurationSaved(false);
   };
 
-  const renderPostAuthComponents = isTokenValid && parameters.vercelAccessToken;
+  const renderPostAuthComponents = !isAuthenticationError && parameters.vercelAccessToken;
 
   return (
     <ConfigPageProvider
       contentTypes={contentTypes}
       isAppConfigurationSaved={isAppConfigurationSaved}
       handleAppConfigurationChange={handleAppConfigurationChange}
-      dispatch={dispatchParameters}
+      dispatchParameters={dispatchParameters}
+      dispatchErrors={dispatchErrors}
       isLoading={isLoading}
-      parameters={parameters}>
+      parameters={parameters}
+      errors={errors}>
       <Box className={styles.body}>
         <Box>
           <Heading>{title}</Heading>
@@ -176,12 +173,7 @@ const ConfigScreen = () => {
         </Box>
         <hr className={styles.splitter} />
         <Stack spacing="spacingS" flexDirection="column">
-          {hasTokenBeenValidated && (
-            <AuthenticationSection
-              handleTokenChange={handleTokenChange}
-              isTokenValid={isTokenValid}
-            />
-          )}
+          {hasTokenBeenValidated && <AuthenticationSection handleTokenChange={handleTokenChange} />}
 
           {renderPostAuthComponents && <ProjectSelectionSection projects={projects} />}
 

@@ -1,3 +1,4 @@
+import { errorTypes } from '@constants/enums';
 import {
   ApiPath,
   ListDeploymentSummaryResponse,
@@ -36,9 +37,9 @@ export default class VercelClient implements VercelAPIClient {
     const res = await this.getToken();
     const { token } = await res.json();
 
-    if (!res.ok) throw new Error('Token is invalid.');
-    if (!token.teamId) throw new Error('Token not scoped to a team.');
-    if (Number(token.expiresAt) <= Date.now()) throw new Error('Token has expired.');
+    if (!res.ok) throw new Error(errorTypes.INVALID_TOKEN);
+    if (!token.teamId) throw new Error(errorTypes.INVALID_TEAM_SCOPE);
+    if (Number(token.expiresAt) <= Date.now()) throw new Error(errorTypes.EXPIRED_TOKEN);
 
     return { ok: res.ok, data: token };
   }
@@ -53,16 +54,21 @@ export default class VercelClient implements VercelAPIClient {
   }
 
   async listProjects(teamId?: string): Promise<ListProjectsResponse> {
-    const res = await fetch(
-      `${this.baseEndpoint}/v9/projects?${this.buildTeamIdQueryParam(teamId)}`,
-      {
-        headers: this.buildHeaders(),
-        method: 'GET',
-      }
-    );
+    let projectData: Response;
+    try {
+      projectData = await fetch(
+        `${this.baseEndpoint}/v9/projects?${this.buildTeamIdQueryParam(teamId)}`,
+        {
+          headers: this.buildHeaders(),
+          method: 'GET',
+        }
+      );
+    } catch (e) {
+      console.error(e);
+      throw new Error(errorTypes.CANNOT_FETCH_PROJECTS);
+    }
 
-    const data = await res.json();
-
+    const data = await projectData.json();
     return data;
   }
 
@@ -72,7 +78,7 @@ export default class VercelClient implements VercelAPIClient {
       deploymentData = await this.listDeploymentSummary(projectId, teamId);
     } catch (e) {
       console.error(e);
-      throw new Error('Failed to fetch API paths.');
+      throw new Error(errorTypes.CANNOT_FETCH_API_PATHS);
     }
 
     const apiPaths = this.filterServerlessFunctions(deploymentData.serverlessFunctions);

@@ -1,9 +1,13 @@
 import { useContext, useState, useEffect } from 'react';
-
 import { Path } from '@customTypes/configPage';
 import { SectionWrapper } from '@components/common/SectionWrapper/SectionWrapper';
 import { SelectSection } from '@components/common/SelectSection/SelectSection';
-import { actions, singleSelectionSections } from '@constants/enums';
+import {
+  errorTypes,
+  errorsActions,
+  parametersActions,
+  singleSelectionSections,
+} from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { TextFieldSection } from './TextFieldSection/TextFieldSection';
 import { HelpText, TextLink } from '@contentful/f36-components';
@@ -16,7 +20,14 @@ interface Props {
 export const ApiPathSelectionSection = ({ paths }: Props) => {
   const [renderSelect, setRenderSelect] = useState(false);
   const sectionId = singleSelectionSections.API_PATH_SELECTION_SECTION;
-  const { parameters, isLoading } = useContext(ConfigPageContext);
+  const { parameters, isLoading, dispatchErrors } = useContext(ConfigPageContext);
+
+  const handleInvalidSelectionError = () => {
+    dispatchErrors({
+      type: errorsActions.UPDATE_PROJECT_SELECTION_ERRORS,
+      payload: errorTypes.PROJECT_NOT_FOUND,
+    });
+  };
 
   useEffect(() => {
     setRenderSelect(paths.length > 0 || isLoading);
@@ -43,7 +54,8 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
         <SelectSection
           selectedOption={parameters.selectedApiPath}
           options={paths}
-          action={actions.APPLY_API_PATH}
+          parameterAction={parametersActions.APPLY_API_PATH}
+          handleInvalidSelectionError={handleInvalidSelectionError}
           section={sectionId}
           id={sectionId}
           helpText={helpText}

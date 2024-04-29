@@ -77,7 +77,7 @@ export type Errors = {
     cannotFetchApiPaths: boolean;
   };
   previewPathSelection: {
-    invalidFormat: boolean;
-    emptyInput: boolean;
+    invalidPreviewPathFormat: boolean;
+    emptyPreviewPathInput: boolean;
   };
 };

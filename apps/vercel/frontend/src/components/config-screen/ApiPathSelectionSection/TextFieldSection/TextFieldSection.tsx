@@ -2,7 +2,7 @@ import { useContext, useMemo } from 'react';
 
 import { copies } from '@constants/copies';
 import { FormControl, TextInput } from '@contentful/f36-components';
-import { actions, singleSelectionSections } from '@constants/enums';
+import { parametersActions, singleSelectionSections } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { SelectionWrapper } from '@components/common/SelectionWrapper/SelectionWrapper';
 import { debounce } from 'lodash';
@@ -13,10 +13,10 @@ interface Props {
 
 export const TextFieldSection = ({ value }: Props) => {
   const { textInputPlaceholder, label, textInputHelpText } = copies.configPage.pathSelectionSection;
-  const { isLoading, dispatch } = useContext(ConfigPageContext);
+  const { isLoading, dispatchParameters } = useContext(ConfigPageContext);
   const handleApiPathInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: actions.APPLY_API_PATH,
+    dispatchParameters({
+      type: parametersActions.APPLY_API_PATH,
       payload: event.target.value,
     });
   };
