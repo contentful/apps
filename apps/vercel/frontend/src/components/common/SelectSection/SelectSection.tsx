@@ -18,11 +18,25 @@ interface Props {
   action: actions.APPLY_API_PATH | actions.APPLY_SELECTED_PROJECT;
   section: CopySection;
   id: string;
+  helpText?: string | React.ReactNode;
 }
 
-export const SelectSection = ({ selectedOption, options, action, section, id }: Props) => {
+export const SelectSection = ({
+  selectedOption,
+  options,
+  action,
+  section,
+  id,
+  helpText,
+}: Props) => {
   const [isSelectionInvalid, setIsSelectionInvalid] = useState<boolean>(false);
-  const { placeholder, label, emptyMessage, helpText, errorMessage } = copies.configPage[section];
+  const {
+    placeholder,
+    label,
+    emptyMessage,
+    helpText: helpTextCopy,
+    errorMessage,
+  } = copies.configPage[section];
   const { isLoading, dispatch, handleAppConfigurationChange } = useContext(ConfigPageContext);
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     // indicate app config change when project has been re-selected
@@ -53,7 +67,7 @@ export const SelectSection = ({ selectedOption, options, action, section, id }: 
         emptyMessage={emptyMessage}
         options={options}
         label={label}
-        helpText={helpText}
+        helpText={helpText || helpTextCopy}
         errorMessage={isSelectionInvalid && !isLoading ? errorMessage : undefined}
         isLoading={isLoading}
       />

@@ -22,13 +22,13 @@ export const copies = {
       helpText: 'Connect to a project associated with your website or experience.',
     },
     pathSelectionSection: {
-      label: 'API Path',
-      placeholder: 'Select a path',
+      label: 'Draft Mode route handler',
+      placeholder: 'Select a route',
       textInputPlaceholder: 'Ex: api/enable-draft',
       emptyMessage: 'No paths currently configured.',
       errorMessage:
         'The path you have configured is no longer available. Please select another one.',
-      helpText: 'Select a Vercel route to enable your draft mode.',
+      helpText: undefined, // defined as React component
       textInputHelpText: 'Set a Vercel route to enable your draft mode.',
     },
     contentTypePreviewPathSection: {

@@ -134,8 +134,6 @@ const AccessSection = (props: Props) => {
 
   const handleLogout = () => {
     ModalLauncher.open(({ isShown, onClose }) => {
-      const { trackEvent } = useContext(SegmentAnalyticsContext);
-
       return (
         <DisconnectModal
           isShown={isShown}
