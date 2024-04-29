@@ -4,17 +4,21 @@ import { GraphQLError } from 'graphql';
 
 /*
  * We re-create a basic subset of the actual payloads in order to showcase how to wrap a REST API.
+ * this schema will be use to handle upcomming graphql queries
  */
 const typeDefs = `
 type Character {
   slug: String!
   name: String
+  nationality: String
+  image: String
+  house: String
+  wiki: String
+  species: String
+  gender: String
   aliasNames: [String!]
   familyMembers: [String!]
-  house: String
-  image: String
   titles: [String!]
-  wiki: String
 }
 
 type Query {
@@ -26,6 +30,9 @@ const schema = createSchema({
   resolvers: {
     Query: {
       character: async (_parent, { slug }, _context) => {
+        /**
+         * We grab the query argument `slug` and use it to fetch the character from the PotterDB API.
+         */
         const response = await fetch(`https://api.potterdb.com/v1/characters/${slug}`);
 
         if (!response.ok) {
@@ -42,6 +49,12 @@ const schema = createSchema({
           titles,
           wiki,
         } = character.data.attributes;
+
+        /**
+         * The PotterDB API returns all the character information, so we grab the subset of it
+         * that matches with the defined graphql schema.
+         *
+         */
 
         return {
           slug,
@@ -92,6 +105,12 @@ const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
       'content-type': 'application/json',
     },
   };
+
+  /**
+   * We take the graphql query from the event and prepare a request for the yoga server.
+   * The yoga server will then execute the query using the schema and the resolver we defined above.
+   */
+
   const response = await yoga.fetch('http://this-does-not-matter.com/graphql', request, context);
 
   if (response.type !== 'default') {
