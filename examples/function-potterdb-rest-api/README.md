@@ -81,7 +81,7 @@ Once the character is selected We will update the entry field value with the slu
 ### Functions ✨
 
 The main take away from this whole example, is to show that **you can add any REST response into your GraphQL query tree**,
-you can take all teh advantages of our graphQL API and append content from any external REST API into GraphQL using [Yoga](https://github.com/dotansimha/graphql-yoga).
+you can take all the advantages of our graphQL API and append content from any external REST API into GraphQL using [Yoga](https://github.com/dotansimha/graphql-yoga).
 
 
 In order to make Yoga work you need to provide a type definition and the query resolvers.
@@ -160,7 +160,7 @@ const schema = createSchema({
   const yoga = createYoga({ schema, graphiql: false });
 ```
 
-In the `queryHandler` function we grab the request event, we take the arguments needed to execute our query, in our example this will be the `slug` of the PotterDB character, which value is store in the entry field, and then we prepare the request and execute it with Yoga.
+In the `queryHandler` function we grab the request event, we take the arguments needed to execute our query, in our example this will be the `slug` of the PotterDB character, which value is stored in the entry field, and then we prepare the request and execute it with Yoga.
 
 ```js
 const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
@@ -192,6 +192,8 @@ const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
 ```
 
 Now the result will be stitched into our GraphQL response in the Content Delivery API (CDA).
+
+![gql](public/graphql-playground.png)
 
 
 An additional information is that contentful knows where your functions are by reading the `contentful-app-manifest.json`, if you want to have more than one function running in your app, you need to include them there.

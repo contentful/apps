@@ -3,7 +3,7 @@ import { CharacterAttributes, CharacterProps } from '../types';
 
 async function fetchCharacters(): Promise<CharacterAttributes[]> {
   const characterProps: CharacterProps[] = await fetch(
-    'https://api.potterdb.com/v1/characters?page[size]=100'
+    'https://api.potterdb.com/v1/characters?page[size]=200'
   )
     .then((response) => response.json())
     .then((data) => data.data);
