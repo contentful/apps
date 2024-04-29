@@ -53,7 +53,7 @@ For this command to work, the following environment variables must be set:
 - `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
 - `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
 
-## Understating this example 🪄
+## Understanding this example 🪄
 
 We can divide the important areas to understand in two parts: **Visual components** and **Functions**
 
