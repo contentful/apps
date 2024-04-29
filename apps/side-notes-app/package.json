@@ -41,8 +41,7 @@
     "preview": "vite preview",
     "build": "tsc && vite build",
     "test": "vitest",
-    "test:ci": "vitest",
-    "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build  --organization-id ${DEFINITIONS_ORG_ID} --definition-id 6KyvAKw1VPdABdmocRB6NH --token ${CONTENTFUL_CMA_TOKEN}"
+    "test:ci": "vitest"
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.1.11",
