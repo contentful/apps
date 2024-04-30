@@ -5,6 +5,7 @@ import {
   ListProjectsResponse,
   ServerlessFunction,
   AccessToken,
+  Deployment,
 } from '@customTypes/configPage';
 
 interface GetToken {
@@ -35,9 +36,10 @@ export default class VercelClient implements VercelAPIClient {
 
   async checkToken(): Promise<GetToken> {
     const res = await this.getToken();
+    if (!res.ok) throw new Error(errorTypes.INVALID_TOKEN);
+
     const { token } = await res.json();
 
-    if (!res.ok) throw new Error(errorTypes.INVALID_TOKEN);
     if (!token.teamId) throw new Error(errorTypes.INVALID_TEAM_SCOPE);
     if (Number(token.expiresAt) <= Date.now()) throw new Error(errorTypes.EXPIRED_TOKEN);
 
@@ -94,8 +96,8 @@ export default class VercelClient implements VercelAPIClient {
   ): Promise<ListDeploymentSummaryResponse> {
     let data: ListDeploymentSummaryResponse = { serverlessFunctions: [] };
     try {
-      const latestDeploymentId =
-        deploymentId || (await this.getLatestDeploymentId(projectId, teamId));
+      const latestDeployment = await this.getLatestProjectDeployment(projectId, teamId);
+      const latestDeploymentId = deploymentId || latestDeployment.uid;
       const res = await fetch(
         `${
           this.baseEndpoint
@@ -117,7 +119,7 @@ export default class VercelClient implements VercelAPIClient {
     return data;
   }
 
-  async getLatestDeploymentId(projectId: string, teamId?: string): Promise<string> {
+  async getLatestProjectDeployment(projectId: string, teamId?: string): Promise<Deployment> {
     const res = await fetch(
       `${this.baseEndpoint}/v6/deployments?projectId=${projectId}&${this.buildTeamIdQueryParam(
         teamId
@@ -131,7 +133,7 @@ export default class VercelClient implements VercelAPIClient {
     const data = await res.json();
 
     // Vercel returns deployments sorted by date in descending order
-    return data.deployments[0].uid;
+    return data.deployments[0];
   }
 
   private filterServerlessFunctions(data: ServerlessFunction[]) {

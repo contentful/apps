@@ -27,6 +27,16 @@ export interface Project {
   };
 }
 
+export interface Deployment {
+  name: string;
+  status: string;
+  target: string;
+  projectId: string;
+  bootedAt: Date;
+  createdAt: Date;
+  uid: string;
+}
+
 // TO DO: Add missing properties based on API implementation
 export interface Path {
   id: string;

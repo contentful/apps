@@ -17,11 +17,10 @@ type ErrorKeys =
 
 export const getErrorMessage = (error: Error, contentType?: string) => {
   const currentError = pickBy(error);
-  let errorKey: ErrorKeys;
 
-  if (contentType) {
-    errorKey = Object.keys(currentError)[1] as ErrorKeys;
-  } else errorKey = Object.keys(currentError)[0] as ErrorKeys;
+  const errorKey: ErrorKeys = contentType
+    ? (Object.keys(currentError)[1] as ErrorKeys)
+    : (Object.keys(currentError)[0] as ErrorKeys);
 
   const message = errorMessages[errorKey];
   return message;
