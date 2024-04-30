@@ -61,7 +61,7 @@ export type AccessToken = {
   expiresAt: string;
 };
 
-type PreviewPathError = {
+export type PreviewPathError = {
   contentType: string;
   invalidPreviewPathFormat: boolean;
   emptyPreviewPathInput: boolean;
