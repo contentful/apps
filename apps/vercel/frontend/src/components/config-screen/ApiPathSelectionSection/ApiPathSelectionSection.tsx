@@ -20,7 +20,7 @@ interface Props {
 export const ApiPathSelectionSection = ({ paths }: Props) => {
   const [renderSelect, setRenderSelect] = useState(false);
   const sectionId = singleSelectionSections.API_PATH_SELECTION_SECTION;
-  const { parameters, isLoading, dispatchErrors } = useContext(ConfigPageContext);
+  const { parameters, isLoading, dispatchErrors, errors } = useContext(ConfigPageContext);
 
   const handleInvalidSelectionError = () => {
     dispatchErrors({
@@ -59,6 +59,7 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
           section={sectionId}
           id={sectionId}
           helpText={helpText}
+          error={errors.apiPathSelection}
         />
       ) : (
         <TextFieldSection value={parameters.selectedApiPath} />

@@ -57,6 +57,9 @@ export const useFetchAndValidateData = ({
       try {
         const data = await vercelClient.listProjects(teamId);
         setProjects(data.projects || []);
+        dispatchErrors({
+          type: errorsActions.RESET_PROJECT_SELECTION_ERRORS,
+        });
       } catch (e) {
         console.error(e);
         dispatchErrors({
@@ -75,6 +78,9 @@ export const useFetchAndValidateData = ({
       try {
         const data = await vercelClient.listApiPaths(selectedProject, teamId);
         setApiPaths(validateApiPathData(data) ? data : []);
+        dispatchErrors({
+          type: errorsActions.RESET_API_PATH_SELECTION_ERRORS,
+        });
       } catch (e) {
         console.error(e);
         dispatchErrors({

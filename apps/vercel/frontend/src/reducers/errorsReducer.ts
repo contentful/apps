@@ -16,9 +16,17 @@ type UpdateProjectSelectionError = {
   payload: keyof Errors['projectSelection'];
 };
 
+type ResetProjectSelectionErrors = {
+  type: errorsActions.RESET_PROJECT_SELECTION_ERRORS;
+};
+
 type UpdateApiPathSelectionError = {
   type: errorsActions.UPDATE_API_PATH_SELECTION_ERRORS;
   payload: keyof Errors['apiPathSelection'];
+};
+
+type ResetApiPathSelectionErrors = {
+  type: errorsActions.RESET_API_PATH_SELECTION_ERRORS;
 };
 
 type UpdatePreviewPathError = {
@@ -34,7 +42,9 @@ export type ErrorAction =
   | UpdateAuthenticationError
   | ResetAuthenticationErrors
   | UpdateProjectSelectionError
+  | ResetProjectSelectionErrors
   | UpdateApiPathSelectionError
+  | ResetApiPathSelectionErrors
   | UpdatePreviewPathError
   | ResetPreviewPathErrors;
 
@@ -45,6 +55,8 @@ const {
   UPDATE_API_PATH_SELECTION_ERRORS,
   UPDATE_PREVIEW_PATH_ERRORS,
   RESET_PREVIEW_PATH_ERRORS,
+  RESET_API_PATH_SELECTION_ERRORS,
+  RESET_PROJECT_SELECTION_ERRORS,
 } = errorsActions;
 
 const errorsReducer = (state: Errors, action: ErrorAction): Errors => {
@@ -77,13 +89,29 @@ const errorsReducer = (state: Errors, action: ErrorAction): Errors => {
         },
       };
     }
-    case UPDATE_API_PATH_SELECTION_ERRORS: {
-      const apiPathErrorType = action.payload;
+    case RESET_PROJECT_SELECTION_ERRORS: {
       return {
         ...state,
         projectSelection: {
           ...initialErrors.projectSelection,
+        },
+      };
+    }
+    case UPDATE_API_PATH_SELECTION_ERRORS: {
+      const apiPathErrorType = action.payload;
+      return {
+        ...state,
+        apiPathSelection: {
+          ...initialErrors.apiPathSelection,
           [apiPathErrorType]: true,
+        },
+      };
+    }
+    case RESET_API_PATH_SELECTION_ERRORS: {
+      return {
+        ...state,
+        apiPathSelection: {
+          ...initialErrors.apiPathSelection,
         },
       };
     }

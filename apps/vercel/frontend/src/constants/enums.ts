@@ -17,7 +17,9 @@ export enum errorsActions {
   UPDATE_AUTHENTICATION_ERRORS = 'updateAuthenticationErrors',
   RESET_AUTHENTICATION_ERRORS = 'restAuthenticationErrors',
   UPDATE_PROJECT_SELECTION_ERRORS = 'updateProjectSelectionErrors',
+  RESET_PROJECT_SELECTION_ERRORS = 'resetProjectSelectionErrors',
   UPDATE_API_PATH_SELECTION_ERRORS = 'updateApiPathSelectionErrors',
+  RESET_API_PATH_SELECTION_ERRORS = 'resetApiPathSelectionErrors',
   UPDATE_PREVIEW_PATH_ERRORS = 'updatePreviewPathErrors',
   RESET_PREVIEW_PATH_ERRORS = 'resetPreviewPathErrors',
 }
