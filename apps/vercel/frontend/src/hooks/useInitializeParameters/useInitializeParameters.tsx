@@ -2,7 +2,7 @@ import { Dispatch, useEffect, useCallback } from 'react';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import type { ConfigAppSDK } from '@contentful/app-sdk';
 import { AppInstallationParameters } from '@customTypes/configPage';
-import { ParameterAction } from '../../reducers/parameterReducer';
+import { ParameterAction } from '@reducers/parameterReducer';
 import { parametersActions } from '@constants/enums';
 
 /**

@@ -24,8 +24,8 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
 
   const handleInvalidSelectionError = () => {
     dispatchErrors({
-      type: errorsActions.UPDATE_PROJECT_SELECTION_ERRORS,
-      payload: errorTypes.PROJECT_NOT_FOUND,
+      type: errorsActions.UPDATE_API_PATH_SELECTION_ERRORS,
+      payload: errorTypes.API_PATH_NOT_FOUND,
     });
   };
 
