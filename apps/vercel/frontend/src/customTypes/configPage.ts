@@ -14,6 +14,7 @@ export interface AppInstallationParameters {
   selectedProject: string;
   contentTypePreviewPathSelections: ContentTypePreviewPathSelection[];
   selectedApiPath: string;
+  teamId?: string;
 }
 
 export interface Project {
@@ -26,12 +27,6 @@ export interface Project {
   };
 }
 
-// TO DO: Add missing properties based on API implementation
-export interface Path {
-  id: string;
-  name: string;
-}
-
 export interface Deployment {
   name: string;
   status: string;
@@ -42,12 +37,14 @@ export interface Deployment {
   uid: string;
 }
 
-export interface ListProjectsResponse {
-  projects: Project[];
+// TO DO: Add missing properties based on API implementation
+export interface Path {
+  id: string;
+  name: string;
 }
 
-export interface CreateDeploymentInput {
-  project: Project;
+export interface ListProjectsResponse {
+  projects: Project[];
 }
 
 export type ServerlessFunction = {
@@ -65,4 +62,35 @@ export interface ListDeploymentSummaryResponse {
 export type ApiPath = {
   id: string;
   name: string;
+};
+
+export type AccessToken = {
+  id: string;
+  teamId?: string;
+  name: string;
+  expiresAt: string;
+};
+
+export type PreviewPathError = {
+  contentType: string;
+  invalidPreviewPathFormat: boolean;
+  emptyPreviewPathInput: boolean;
+};
+
+export type Errors = {
+  authentication: {
+    invalidToken: boolean;
+    expiredToken: boolean;
+    invalidTeamScope: boolean;
+  };
+  projectSelection: {
+    projectNotFound: boolean;
+    cannotFetchProjects: boolean;
+  };
+  apiPathSelection: {
+    apiPathNotFound: boolean;
+    apiPathsEmpty: boolean;
+    cannotFetchApiPaths: boolean;
+  };
+  previewPathSelection: PreviewPathError[];
 };

@@ -24,6 +24,7 @@ export default defineConfig(() => ({
       '@test': path.resolve(__dirname, './test'),
       '@locations': path.resolve(__dirname, './src/locations'),
       '@contexts': path.resolve(__dirname, './src/contexts'),
+      '@reducers': path.resolve(__dirname, './src/reducers'),
     },
   },
 

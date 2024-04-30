@@ -24,6 +24,7 @@
       "@utils/*": ["./src/utils/*"],
       "@test/*": ["./test/*"],
       "@contexts/*": ["./src/contexts/*"],
+      "@reducers/*": ["./src/reducers/*"],
     },
     "jsx": "react-jsx"
   },
