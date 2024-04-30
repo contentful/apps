@@ -61,6 +61,12 @@ export type AccessToken = {
   expiresAt: string;
 };
 
+type PreviewPathError = {
+  contentType: string;
+  invalidPreviewPathFormat: boolean;
+  emptyPreviewPathInput: boolean;
+};
+
 export type Errors = {
   authentication: {
     invalidToken: boolean;
@@ -76,8 +82,5 @@ export type Errors = {
     apiPathsEmpty: boolean;
     cannotFetchApiPaths: boolean;
   };
-  previewPathSelection: {
-    invalidPreviewPathFormat: boolean;
-    emptyPreviewPathInput: boolean;
-  };
+  previewPathSelection: PreviewPathError[];
 };

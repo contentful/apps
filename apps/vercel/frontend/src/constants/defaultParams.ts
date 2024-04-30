@@ -23,8 +23,5 @@ export const initialErrors: Errors = {
     apiPathsEmpty: false,
     cannotFetchApiPaths: false,
   },
-  previewPathSelection: {
-    invalidPreviewPathFormat: false,
-    emptyPreviewPathInput: false,
-  },
+  previewPathSelection: [],
 };

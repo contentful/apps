@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo } from 'react';
 import {
   Box,
   FormControl,
@@ -11,15 +11,17 @@ import { CloseIcon } from '@contentful/f36-icons';
 import { debounce } from 'lodash';
 import tokens from '@contentful/f36-tokens';
 import { ContentType } from '@contentful/app-sdk';
-
 import {
   ApplyContentTypePreviewPathSelectionPayload,
   ContentTypePreviewPathSelection,
+  PreviewPathError,
 } from '@customTypes/configPage';
 import { styles } from './ContentTypePreviewPathSelectionRow.styles';
 import { copies } from '@constants/copies';
 import { Select } from '@components/common/Select/Select';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
+import { errorsActions } from '@constants/enums';
+import { useError } from '@hooks/useError/useError';
 
 interface Props {
   contentTypes: ContentType[];
@@ -27,6 +29,7 @@ interface Props {
   onParameterUpdate: (parameters: ApplyContentTypePreviewPathSelectionPayload) => void;
   onRemoveRow: (parameters: ContentTypePreviewPathSelection) => void;
   renderLabel?: boolean;
+  onError: (error: PreviewPathError) => void;
 }
 
 export const ContentTypePreviewPathSelectionRow = ({
@@ -35,10 +38,18 @@ export const ContentTypePreviewPathSelectionRow = ({
   onParameterUpdate,
   onRemoveRow,
   renderLabel,
+  onError,
 }: Props) => {
-  const [isPreviewPathInvalid, setIsPreviewPathInvalid] = useState(false);
-  const [isPreviewPathEmpty, setIsPreviewPathEmpty] = useState(false);
-  const { isAppConfigurationSaved, isLoading } = useContext(ConfigPageContext);
+  const { isAppConfigurationSaved, isLoading, dispatchErrors, errors } =
+    useContext(ConfigPageContext);
+
+  const currentRowError = errors.previewPathSelection.find(
+    (error) => error.contentType === configuredContentTypePreviewPathSelection.contentType
+  );
+  const { message, isError } = useError({
+    error: currentRowError,
+    contentType: configuredContentTypePreviewPathSelection.contentType,
+  });
 
   const { contentType: configuredContentType, previewPath: configuredPreviewPath } =
     configuredContentTypePreviewPathSelection;
@@ -84,23 +95,49 @@ export const ContentTypePreviewPathSelectionRow = ({
   useEffect(() => {
     const isPreviewPathEmpty =
       isAppConfigurationSaved && !configuredPreviewPath && !!configuredContentType;
-    setIsPreviewPathEmpty(isPreviewPathEmpty);
+    onError({
+      contentType: configuredContentType,
+      invalidPreviewPathFormat: false,
+      emptyPreviewPathInput: isPreviewPathEmpty,
+    });
+    // if (isPreviewPathEmpty) {
+    //   onError({ contentType: configuredContentType, invalidPreviewPathFormat: false, emptyPreviewPathInput: true })
+    //   // dispatchErrors({
+    //   //   type: errorsActions.UPDATE_PREVIEW_PATH_ERRORS,
+    //   //   payload: { contentType: configuredContentType, invalidPreviewPathFormat: false, emptyPreviewPath: true }
+    //   // })
+    // }
   }, [isAppConfigurationSaved, configuredPreviewPath, configuredContentType]);
 
   useEffect(() => {
-    if (!isAppConfigurationSaved) setIsPreviewPathInvalid(false);
-    else if (configuredPreviewPath) {
+    if (!isAppConfigurationSaved) {
+      dispatchErrors({
+        type: errorsActions.RESET_PREVIEW_PATH_ERRORS,
+      });
+    } else if (configuredPreviewPath) {
       const isPreviewPathValid = validatePreviewPath(configuredPreviewPath);
-      setIsPreviewPathInvalid(!isPreviewPathValid);
+      onError({
+        contentType: configuredContentType,
+        invalidPreviewPathFormat: !isPreviewPathValid,
+        emptyPreviewPathInput: false,
+      });
+      // if (!isPreviewPathValid) {
+      //   console.log('hitting here>>>')
+      //   onError({ contentType: configuredContentType, invalidPreviewPathFormat: true, emptyPreviewPathInput: false })
+      //   // dispatchErrors({
+      //   //   type: errorsActions.UPDATE_PREVIEW_PATH_ERRORS,
+      //   //   payload: { contentType: configuredContentType, invalidPreviewPath: true, emptyPreviewPath: false }
+      //   // })
+      // }
     }
   }, [isAppConfigurationSaved, configuredPreviewPath]);
 
   const itemAlignment = useMemo(() => {
-    if (isPreviewPathEmpty || isPreviewPathInvalid) {
+    if (isError) {
       return !renderLabel ? 'baseline' : 'normal';
     }
     return 'flex-end';
-  }, [isPreviewPathInvalid, isPreviewPathEmpty, renderLabel]);
+  }, [isError, renderLabel]);
 
   return (
     <Box className={styles.wrapper}>
@@ -130,14 +167,9 @@ export const ContentTypePreviewPathSelectionRow = ({
               isDisabled={!configuredContentType || !contentTypes.length}
               onChange={debouncedHandlePreviewPathInputChange}
               placeholder={inputs.previewPath.placeholder}
-              isInvalid={isPreviewPathInvalid}
+              isInvalid={isError}
             />
-            {isPreviewPathEmpty && (
-              <ValidationMessage>{inputs.previewPath.emptyErrorMessage}</ValidationMessage>
-            )}
-            {isPreviewPathInvalid && (
-              <ValidationMessage>{inputs.previewPath.invalidFormattingMessage}</ValidationMessage>
-            )}
+            {isError && <ValidationMessage>{message}</ValidationMessage>}
           </Box>
           <IconButton onClick={handleRemoveRow} icon={<CloseIcon />} aria-label={'Delete row'} />
         </Flex>

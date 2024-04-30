@@ -1,6 +1,6 @@
 import { initialErrors } from '@constants/defaultParams';
 import { errorsActions } from '@constants/enums';
-import { Errors } from '@customTypes/configPage';
+import { Errors, PreviewPathError } from '@customTypes/configPage';
 
 type UpdateAuthenticationError = {
   type: errorsActions.UPDATE_AUTHENTICATION_ERRORS;
@@ -23,7 +23,7 @@ type UpdateApiPathSelectionError = {
 
 type UpdatePreviewPathError = {
   type: errorsActions.UPDATE_PREVIEW_PATH_ERRORS;
-  payload: keyof Errors['previewPathSelection'];
+  payload: PreviewPathError[];
 };
 
 type ResetPreviewPathErrors = {
@@ -88,21 +88,35 @@ const errorsReducer = (state: Errors, action: ErrorAction): Errors => {
       };
     }
     case UPDATE_PREVIEW_PATH_ERRORS: {
-      const previewPathErrorType = action.payload;
+      const payload = action.payload;
+      const filtered = payload.filter(
+        (previewPath) => previewPath.invalidPreviewPathFormat || previewPath.emptyPreviewPathInput
+      );
       return {
         ...state,
-        previewPathSelection: {
-          ...state.previewPathSelection,
-          [previewPathErrorType]: true,
-        },
+        previewPathSelection: filtered,
       };
+      // console.log('am I getting each payload??> ', payload.contentType)
+      // const currentState = state.previewPathSelection;
+      // console.log('currentState>>>>', currentState)
+      // const filteredCurrentState = remove(currentState, (obj) => obj.contentType === payload.contentType);
+      // console.log('filtered>>>', filteredCurrentState, payload.contentType)
+      // return {
+      //   ...state,
+      //   previewPathSelection: [
+      //     ...filteredCurrentState,
+      //     {
+      //       invalidPreviewPathFormat: payload.invalidPreviewPath,
+      //       emptyPreviewPathInput: payload.emptyPreviewPath,
+      //       contentType: payload.contentType
+      //     }
+      //   ],
+      // };
     }
     case RESET_PREVIEW_PATH_ERRORS: {
       return {
         ...state,
-        previewPathSelection: {
-          ...initialErrors.previewPathSelection,
-        },
+        previewPathSelection: [...initialErrors.previewPathSelection],
       };
     }
     default:

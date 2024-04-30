@@ -31,7 +31,7 @@ const ConfigScreen = () => {
 
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [errors, dispatchErrors] = useReducer(errorsReducer, initialErrors);
-  const { isError: isAuthenticationError } = useError(errors.authentication);
+  const { isError: isAuthenticationError } = useError({ error: errors.authentication });
   const { validateToken, fetchProjects, fetchApiPaths } = useFetchAndValidateData({
     dispatchErrors,
     dispatchParameters,

@@ -37,8 +37,7 @@ export const SelectSection = ({
   const { placeholder, label, emptyMessage, helpText: helpTextCopy } = copies.configPage[section];
   const { isLoading, dispatchParameters, handleAppConfigurationChange } =
     useContext(ConfigPageContext);
-    
-  const { isError, message } = useError(error);
+  const { isError, message } = useError({ error });
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     if (section === singleSelectionSections.PROJECT_SELECTION_SECTION) {

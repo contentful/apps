@@ -8,7 +8,7 @@ describe('useError', () => {
     const authError = { invalidToken: true, invalidTeamScope: false, expiredToken: false };
 
     renderHook(() => {
-      const { isError, message } = useError(authError);
+      const { isError, message } = useError({ error: authError });
       expect(message).toBe(errorMessages.invalidToken);
       expect(isError).toBe(true);
     });
@@ -18,9 +18,25 @@ describe('useError', () => {
     const authError = { invalidToken: false, invalidTeamScope: false, expiredToken: false };
 
     renderHook(() => {
-      const { isError, message } = useError(authError);
+      const { isError, message } = useError({ error: authError });
       expect(message).toBeFalsy();
       expect(isError).toBe(false);
+    });
+  });
+
+  it('should return error message when error provided includes a contentType', async () => {
+    const previewPathError = {
+      contentType: 'article',
+      invalidPreviewPathFormat: false,
+      emptyPreviewPathInput: true,
+    };
+
+    renderHook(() => {
+      const { message } = useError({
+        error: previewPathError,
+        contentType: previewPathError.contentType,
+      });
+      expect(message).toBe(errorMessages.emptyPreviewPathInput);
     });
   });
 });

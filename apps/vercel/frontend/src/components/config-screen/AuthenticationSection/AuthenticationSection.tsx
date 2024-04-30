@@ -22,7 +22,7 @@ export const AuthenticationSection = ({ handleTokenChange }: Props) => {
   const { title, input, link } = copies.configPage.authenticationSection;
   const { parameters, isLoading, errors } = useContext(ConfigPageContext);
   const authenticationError = errors.authentication;
-  const { message, isError } = useError(authenticationError);
+  const { message, isError } = useError({ error: authenticationError });
 
   const showError = Boolean(parameters.vercelAccessToken && isError && !isLoading);
 
