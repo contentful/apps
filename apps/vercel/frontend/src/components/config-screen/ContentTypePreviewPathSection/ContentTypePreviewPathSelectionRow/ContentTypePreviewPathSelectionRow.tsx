@@ -14,7 +14,6 @@ import { ContentType } from '@contentful/app-sdk';
 import {
   ApplyContentTypePreviewPathSelectionPayload,
   ContentTypePreviewPathSelection,
-  PreviewPathError,
 } from '@customTypes/configPage';
 import { styles } from './ContentTypePreviewPathSelectionRow.styles';
 import { copies } from '@constants/copies';
@@ -29,7 +28,6 @@ interface Props {
   onParameterUpdate: (parameters: ApplyContentTypePreviewPathSelectionPayload) => void;
   onRemoveRow: (parameters: ContentTypePreviewPathSelection) => void;
   renderLabel?: boolean;
-  onError: (error: PreviewPathError) => void;
 }
 
 export const ContentTypePreviewPathSelectionRow = ({
@@ -38,7 +36,6 @@ export const ContentTypePreviewPathSelectionRow = ({
   onParameterUpdate,
   onRemoveRow,
   renderLabel,
-  onError,
 }: Props) => {
   const { isAppConfigurationSaved, isLoading, dispatchErrors, errors } =
     useContext(ConfigPageContext);
@@ -95,18 +92,16 @@ export const ContentTypePreviewPathSelectionRow = ({
   useEffect(() => {
     const isPreviewPathEmpty =
       isAppConfigurationSaved && !configuredPreviewPath && !!configuredContentType;
-    onError({
-      contentType: configuredContentType,
-      invalidPreviewPathFormat: false,
-      emptyPreviewPathInput: isPreviewPathEmpty,
-    });
-    // if (isPreviewPathEmpty) {
-    //   onError({ contentType: configuredContentType, invalidPreviewPathFormat: false, emptyPreviewPathInput: true })
-    //   // dispatchErrors({
-    //   //   type: errorsActions.UPDATE_PREVIEW_PATH_ERRORS,
-    //   //   payload: { contentType: configuredContentType, invalidPreviewPathFormat: false, emptyPreviewPath: true }
-    //   // })
-    // }
+    if (isPreviewPathEmpty) {
+      dispatchErrors({
+        type: errorsActions.UPDATE_PREVIEW_PATH_ERRORS,
+        payload: {
+          contentType: configuredContentType,
+          invalidPreviewPathFormat: false,
+          emptyPreviewPathInput: true,
+        },
+      });
+    }
   }, [isAppConfigurationSaved, configuredPreviewPath, configuredContentType]);
 
   useEffect(() => {
@@ -116,19 +111,16 @@ export const ContentTypePreviewPathSelectionRow = ({
       });
     } else if (configuredPreviewPath) {
       const isPreviewPathValid = validatePreviewPath(configuredPreviewPath);
-      onError({
-        contentType: configuredContentType,
-        invalidPreviewPathFormat: !isPreviewPathValid,
-        emptyPreviewPathInput: false,
-      });
-      // if (!isPreviewPathValid) {
-      //   console.log('hitting here>>>')
-      //   onError({ contentType: configuredContentType, invalidPreviewPathFormat: true, emptyPreviewPathInput: false })
-      //   // dispatchErrors({
-      //   //   type: errorsActions.UPDATE_PREVIEW_PATH_ERRORS,
-      //   //   payload: { contentType: configuredContentType, invalidPreviewPath: true, emptyPreviewPath: false }
-      //   // })
-      // }
+      if (!isPreviewPathValid) {
+        dispatchErrors({
+          type: errorsActions.UPDATE_PREVIEW_PATH_ERRORS,
+          payload: {
+            contentType: configuredContentType,
+            invalidPreviewPathFormat: true,
+            emptyPreviewPathInput: false,
+          },
+        });
+      }
     }
   }, [isAppConfigurationSaved, configuredPreviewPath]);
 

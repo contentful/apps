@@ -1,24 +1,21 @@
 import { PlusIcon } from '@contentful/f36-icons';
 import { Button, Tooltip } from '@contentful/f36-components';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext } from 'react';
 
 import {
   ApplyContentTypePreviewPathSelectionPayload,
   ContentTypePreviewPathSelection,
-  PreviewPathError,
 } from '@customTypes/configPage';
 import { ContentTypePreviewPathSelectionRow } from '../ContentTypePreviewPathSelectionRow/ContentTypePreviewPathSelectionRow';
 import { getAvailableContentTypes } from '@utils/getAvailableContentTypes';
-import { errorsActions, parametersActions } from '@constants/enums';
+import { parametersActions } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { copies } from '@constants/copies';
 
 export const ContentTypePreviewPathSelectionList = () => {
   const [addRow, setAddRow] = useState<boolean>(false);
-  const [previewPathErrors, setPreviewPathErrors] = useState<PreviewPathError[]>([]);
 
-  const { dispatchParameters, parameters, contentTypes, dispatchErrors, errors } =
-    useContext(ConfigPageContext);
+  const { dispatchParameters, parameters, contentTypes } = useContext(ConfigPageContext);
   const { contentTypePreviewPathSelections } = parameters;
 
   const { button } = copies.configPage.contentTypePreviewPathSection;
@@ -49,33 +46,6 @@ export const ContentTypePreviewPathSelectionList = () => {
     setAddRow(true);
   };
 
-  const handleErrors = (pathError: PreviewPathError) => {
-    setPreviewPathErrors((prev) => {
-      const isDuplicateRowError = prev.some(
-        (prevPathError) => prevPathError.contentType === pathError.contentType
-      );
-      const newErrors = prev.map((existingError) => {
-        if (existingError.contentType === pathError.contentType) {
-          existingError.contentType = pathError.contentType;
-          existingError.emptyPreviewPathInput = pathError.emptyPreviewPathInput;
-          existingError.invalidPreviewPathFormat = pathError.invalidPreviewPathFormat;
-        }
-        return existingError;
-      });
-      const previewPathErrors = isDuplicateRowError ? newErrors : [...newErrors, pathError];
-      return previewPathErrors;
-    });
-  };
-
-  useEffect(() => {
-    if (previewPathErrors.length) {
-      dispatchErrors({
-        type: errorsActions.UPDATE_PREVIEW_PATH_ERRORS,
-        payload: previewPathErrors,
-      });
-    }
-  }, [previewPathErrors]);
-
   // disable add button if there is a row with empty fields present, when all content types are already selected, or no content types exist
   const isAddButtonDisabled =
     addRow ||
@@ -97,7 +67,6 @@ export const ContentTypePreviewPathSelectionList = () => {
         onParameterUpdate={handleUpdateParameters}
         onRemoveRow={handleRemoveRow}
         renderLabel={index === 0}
-        onError={handleErrors}
       />
     ));
   };

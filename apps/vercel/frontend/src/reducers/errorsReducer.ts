@@ -23,7 +23,7 @@ type UpdateApiPathSelectionError = {
 
 type UpdatePreviewPathError = {
   type: errorsActions.UPDATE_PREVIEW_PATH_ERRORS;
-  payload: PreviewPathError[];
+  payload: PreviewPathError;
 };
 
 type ResetPreviewPathErrors = {
@@ -88,30 +88,23 @@ const errorsReducer = (state: Errors, action: ErrorAction): Errors => {
       };
     }
     case UPDATE_PREVIEW_PATH_ERRORS: {
-      const payload = action.payload;
-      const filtered = payload.filter(
-        (previewPath) => previewPath.invalidPreviewPathFormat || previewPath.emptyPreviewPathInput
+      const pathError = action.payload;
+      const isDuplicateRowError = state.previewPathSelection.some(
+        (prevPathError) => prevPathError.contentType === pathError.contentType
       );
+      const newErrors = state.previewPathSelection.map((existingError) => {
+        if (existingError.contentType === pathError.contentType) {
+          existingError.contentType = pathError.contentType;
+          existingError.emptyPreviewPathInput = pathError.emptyPreviewPathInput;
+          existingError.invalidPreviewPathFormat = pathError.invalidPreviewPathFormat;
+        }
+        return existingError;
+      });
+      const previewPathErrors = isDuplicateRowError ? newErrors : [...newErrors, pathError];
       return {
         ...state,
-        previewPathSelection: filtered,
+        previewPathSelection: previewPathErrors,
       };
-      // console.log('am I getting each payload??> ', payload.contentType)
-      // const currentState = state.previewPathSelection;
-      // console.log('currentState>>>>', currentState)
-      // const filteredCurrentState = remove(currentState, (obj) => obj.contentType === payload.contentType);
-      // console.log('filtered>>>', filteredCurrentState, payload.contentType)
-      // return {
-      //   ...state,
-      //   previewPathSelection: [
-      //     ...filteredCurrentState,
-      //     {
-      //       invalidPreviewPathFormat: payload.invalidPreviewPath,
-      //       emptyPreviewPathInput: payload.emptyPreviewPath,
-      //       contentType: payload.contentType
-      //     }
-      //   ],
-      // };
     }
     case RESET_PREVIEW_PATH_ERRORS: {
       return {

@@ -4,22 +4,17 @@ import { ContentTypePreviewPathSelectionRow } from './ContentTypePreviewPathSele
 import { mockContentTypes } from '@test/mocks/mockContentTypes';
 import { copies } from '@constants/copies';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
+import { errorMessages } from '@constants/errorMessages';
+import lodash from 'lodash';
 
 const { inputs } = copies.configPage.contentTypePreviewPathSection;
-
-vi.mock('lodash', () => ({
-  debounce: (fn: { cancel: () => void }) => {
-    fn.cancel = vi.fn();
-    return fn;
-  },
-}));
 
 const selection = { contentType: 'blog', previewPath: 'test-blog-path-1' };
 
 describe('ContentTypePreviewPathSelectionRow', () => {
   it('calls handler to update parameters when each input is provided', () => {
     const mockOnUpdate = vi.fn();
-    const { unmount } = render(
+    const { unmount } = renderConfigPageComponent(
       <ContentTypePreviewPathSelectionRow
         contentTypes={mockContentTypes}
         onParameterUpdate={mockOnUpdate}
@@ -41,7 +36,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
 
   it('calls handler to remove row when remove button is clicked', () => {
     const mockOnRemoveRow = vi.fn();
-    const { unmount } = render(
+    const { unmount } = renderConfigPageComponent(
       <ContentTypePreviewPathSelectionRow
         contentTypes={mockContentTypes}
         onParameterUpdate={() => null}
@@ -58,7 +53,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
   });
 
   it('renders selection row without configured selections provided', () => {
-    const { unmount } = render(
+    const { unmount } = renderConfigPageComponent(
       <ContentTypePreviewPathSelectionRow
         contentTypes={mockContentTypes}
         onParameterUpdate={() => null}
@@ -72,7 +67,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
   });
 
   it('renders selection row with configured selection provided', () => {
-    const { unmount } = render(
+    const { unmount } = renderConfigPageComponent(
       <ContentTypePreviewPathSelectionRow
         contentTypes={mockContentTypes}
         onParameterUpdate={() => null}
@@ -86,7 +81,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
   });
 
   it('renders message when no content types exist', () => {
-    const { unmount } = render(
+    const { unmount } = renderConfigPageComponent(
       <ContentTypePreviewPathSelectionRow
         contentTypes={[]}
         onParameterUpdate={() => null}
@@ -100,7 +95,20 @@ describe('ContentTypePreviewPathSelectionRow', () => {
   });
 
   it('renders message when preview path is empty and user has saved config', () => {
+    vi.spyOn(lodash, 'pickBy').mockReturnValue({
+      contentType: 'blog',
+      emptyPreviewPathInput: true,
+    });
     const selection = { contentType: 'blog', previewPath: '' };
+    const errors = {
+      previewPathSelection: [
+        {
+          contentType: selection.contentType,
+          invalidPreviewPathFormat: false,
+          emptyPreviewPathInput: true,
+        },
+      ],
+    };
     const { unmount } = renderConfigPageComponent(
       <ContentTypePreviewPathSelectionRow
         contentTypes={mockContentTypes}
@@ -108,14 +116,27 @@ describe('ContentTypePreviewPathSelectionRow', () => {
         onRemoveRow={() => null}
         configuredContentTypePreviewPathSelection={selection}
       />,
-      { isAppConfigurationSaved: true }
+      { isAppConfigurationSaved: true, errors }
     );
 
-    expect(screen.getByText(inputs.previewPath.emptyErrorMessage)).toBeTruthy();
+    expect(screen.getByText(errorMessages.emptyPreviewPathInput)).toBeTruthy();
     unmount();
   });
 
   it('renders error message when preview path is invalid and user has saved config', () => {
+    vi.spyOn(lodash, 'pickBy').mockReturnValue({
+      contentType: 'blog',
+      invalidPreviewPathFormat: true,
+    });
+    const errors = {
+      previewPathSelection: [
+        {
+          contentType: selection.contentType,
+          invalidPreviewPathFormat: true,
+          emptyPreviewPathInput: false,
+        },
+      ],
+    };
     const { unmount } = renderConfigPageComponent(
       <ContentTypePreviewPathSelectionRow
         contentTypes={mockContentTypes}
@@ -123,10 +144,10 @@ describe('ContentTypePreviewPathSelectionRow', () => {
         onRemoveRow={() => null}
         configuredContentTypePreviewPathSelection={selection}
       />,
-      { isAppConfigurationSaved: true }
+      { isAppConfigurationSaved: true, errors }
     );
 
-    expect(screen.getByText(inputs.previewPath.invalidFormattingMessage)).toBeTruthy();
+    expect(screen.getByText(errorMessages.invalidPreviewPathFormat)).toBeTruthy();
     unmount();
   });
 });
