@@ -9,21 +9,22 @@ import {
   ValidationMessage,
 } from '@contentful/f36-components';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
-
 import { styles } from './AuthenticationSection.styles';
 import { copies } from '@constants/copies';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
+import { useError } from '@hooks/useError/useError';
 
 interface Props {
-  isTokenValid: boolean;
   handleTokenChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const AuthenticationSection = ({ handleTokenChange, isTokenValid }: Props) => {
+export const AuthenticationSection = ({ handleTokenChange }: Props) => {
   const { title, input, link } = copies.configPage.authenticationSection;
-  const { parameters, isLoading } = useContext(ConfigPageContext);
+  const { parameters, isLoading, errors } = useContext(ConfigPageContext);
+  const authenticationError = errors.authentication;
+  const { message, isError } = useError({ error: authenticationError });
 
-  const showError = Boolean(parameters.vercelAccessToken && !isTokenValid && !isLoading);
+  const showError = Boolean(parameters.vercelAccessToken && isError && !isLoading);
 
   return (
     <Box className={styles.box}>
@@ -54,7 +55,7 @@ export const AuthenticationSection = ({ handleTokenChange, isTokenValid }: Props
           </TextLink>{' '}
           to create an access token for your account.
         </HelpText>
-        {showError && <ValidationMessage>{input.errorMessage}</ValidationMessage>}
+        {showError && <ValidationMessage>{message}</ValidationMessage>}
       </FormControl>
     </Box>
   );
