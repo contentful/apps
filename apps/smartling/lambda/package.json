@@ -13,7 +13,7 @@
     "deploy:test": "npm run deploy"
   },
   "dependencies": {
-    "@contentful/smartling-frontend": "^1.7.71",
+    "@contentful/smartling-frontend": "file:contentful-smartling-frontend-1.7.71.tgz",
     "@types/express": "^4.17.2",
     "@types/jest": "^27.5.2",
     "node-fetch": "^2.6.1",

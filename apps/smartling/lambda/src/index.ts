@@ -7,10 +7,24 @@ import { Issuer } from 'openid-client';
 import { URL } from 'url';
 
 function requestProxier(proxyUrl: string, proxyPathPrefix = '') {
+  console.log('[ index.ts ] requestProxier() proxyUrl => ', proxyUrl);
+
   return async (req: express.Request, res: express.Response) => {
+    const joined = path.join(proxyPathPrefix, req.url);
+
+    console.log('[ index.ts ] requestProxier() joined => ', joined);
+    console.log('[ index.ts ] requestProxier() req.url => ', req.url);
+
     const url = new URL(path.join(proxyPathPrefix, req.url), proxyUrl);
-    const response = await fetch(url.href);
-    response.body.pipe(res);
+
+    console.log('[ index.ts ] requestProxier() url => ', url);
+
+    try {
+      const response = await fetch(url.origin);
+      response.body.pipe(res);
+    } catch (error) {
+      console.error('error => ', error);
+    }
   };
 }
 
@@ -35,6 +49,8 @@ export function makeApp(fetchFn: any, issuer: any) {
   const app = express() as Express;
 
   app.get('/', async (req, res) => {
+    console.log('[ lambda ] / req => ', req);
+
     if (!req.query.code) {
       console.error('No auth code was provided during Smartling OAuth handshake!');
 
@@ -70,6 +86,8 @@ export function makeApp(fetchFn: any, issuer: any) {
 
   // @ts-ignore
   app.get('/refresh', async (req, res) => {
+    console.log('[ lambda ] /refresh req => ', req);
+
     const { refresh_token } = req.query;
 
     if (!refresh_token) {
@@ -97,6 +115,8 @@ export function makeApp(fetchFn: any, issuer: any) {
 
   // @ts-ignore
   app.get('/entry', async (req, res) => {
+    console.log('[ lambda ] /entry req => ', req);
+
     const { entryId, projectId, spaceId } = req.query;
 
     const smartlingRes = await fetchFn(
@@ -116,10 +136,17 @@ export function makeApp(fetchFn: any, issuer: any) {
 
   // @ts-ignore
   app.get('/openauth', (_req, res) => {
+    console.log('[ lambda ] openauth/ req => ', _req);
+
     res.redirect(
       `https://sso.smartling.com/auth/realms/Smartling/protocol/openid-connect/auth?response_type=code&client_id=${process.env.CLIENT_ID}`
     );
   });
+
+  console.log('[ Lambda ] makeApp() process.env.LOCAL_DEV => ', process.env.LOCAL_DEV);
+  console.log('[ Lambda ] makeApp() process.env.FRONTEND_URL => ', process.env.FRONTEND_URL);
+  console.log('[ Lambda ] makeApp() process.env.CLIENT_ID => ', process.env.CLIENT_ID);
+  console.log('[ Lambda ] makeApp() process.env.CLIENT_SECRET => ', process.env.CLIENT_SECRET);
 
   if (process.env.LOCAL_DEV === 'true' && process.env.FRONTEND_URL) {
     // in development mode, proxy requests to the frontend development server running at FRONTEND_URL

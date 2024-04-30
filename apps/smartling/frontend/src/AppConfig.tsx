@@ -11,7 +11,6 @@ import {
   Note,
 } from '@contentful/forma-36-react-components';
 import get from 'lodash.get';
-// @ts-ignore 2307
 import logo from './logo.svg';
 
 interface Props {
