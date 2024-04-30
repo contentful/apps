@@ -4,7 +4,7 @@ import { Select } from '@components/common/Select/Select';
 import { Errors, Path, Project } from '@customTypes/configPage';
 import { copies } from '@constants/copies';
 import { FormControl } from '@contentful/f36-components';
-import { parametersActions, singleSelectionSections } from '@constants/enums';
+import { errorsActions, parametersActions, singleSelectionSections } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { useError } from '@hooks/useError/useError';
 
@@ -35,7 +35,7 @@ export const SelectSection = ({
   handleInvalidSelectionError,
 }: Props) => {
   const { placeholder, label, emptyMessage, helpText: helpTextCopy } = copies.configPage[section];
-  const { isLoading, dispatchParameters, handleAppConfigurationChange } =
+  const { isLoading, dispatchParameters, handleAppConfigurationChange, dispatchErrors } =
     useContext(ConfigPageContext);
   const { isError, message } = useError({ error });
 
@@ -47,6 +47,14 @@ export const SelectSection = ({
       dispatchParameters({
         type: parametersActions.APPLY_API_PATH,
         payload: '',
+      });
+
+      dispatchErrors({
+        type: errorsActions.RESET_PROJECT_SELECTION_ERRORS,
+      });
+    } else if (section === singleSelectionSections.API_PATH_SELECTION_SECTION) {
+      dispatchErrors({
+        type: errorsActions.RESET_API_PATH_SELECTION_ERRORS,
       });
     }
 
