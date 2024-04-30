@@ -19,10 +19,7 @@ export const useFetchAndValidateData = ({
   vercelClient,
   teamId,
 }: FetchAndValidateData) => {
-  const validateToken = async (
-    onComplete: (valid: boolean) => void,
-    newVercelClient?: VercelClient
-  ) => {
+  const validateToken = async (onComplete: () => void, newVercelClient?: VercelClient) => {
     if (vercelClient) {
       try {
         const client = newVercelClient || vercelClient;
@@ -39,8 +36,6 @@ export const useFetchAndValidateData = ({
           dispatchErrors({
             type: errorsActions.RESET_AUTHENTICATION_ERRORS,
           });
-
-          onComplete(response.ok);
         }
       } catch (e) {
         const err = e as Error;
@@ -49,6 +44,7 @@ export const useFetchAndValidateData = ({
           payload: (err.message as keyof Errors['authentication']) || 'invalidToken',
         });
       }
+      onComplete();
     }
   };
 
