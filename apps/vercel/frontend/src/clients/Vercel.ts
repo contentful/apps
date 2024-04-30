@@ -84,6 +84,7 @@ export default class VercelClient implements VercelAPIClient {
     }
 
     const apiPaths = this.filterServerlessFunctions(deploymentData.serverlessFunctions);
+    if (!apiPaths.length) throw new Error(errorTypes.API_PATHS_EMPTY);
     const formattedApiPaths = this.formatApiPaths(apiPaths);
 
     return formattedApiPaths;

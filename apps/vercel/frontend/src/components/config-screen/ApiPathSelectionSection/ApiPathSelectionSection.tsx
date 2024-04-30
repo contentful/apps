@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, ChangeEvent } from 'react';
 import { Path } from '@customTypes/configPage';
 import { SectionWrapper } from '@components/common/SectionWrapper/SectionWrapper';
 import { SelectSection } from '@components/common/SelectSection/SelectSection';
@@ -20,7 +20,19 @@ interface Props {
 export const ApiPathSelectionSection = ({ paths }: Props) => {
   const [renderSelect, setRenderSelect] = useState(false);
   const sectionId = singleSelectionSections.API_PATH_SELECTION_SECTION;
-  const { parameters, isLoading, dispatchErrors, errors } = useContext(ConfigPageContext);
+  const { parameters, isLoading, dispatchErrors, errors, dispatchParameters } =
+    useContext(ConfigPageContext);
+
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    dispatchParameters({
+      type: parametersActions.APPLY_API_PATH,
+      payload: event.target.value,
+    });
+
+    dispatchErrors({
+      type: errorsActions.RESET_API_PATH_SELECTION_ERRORS,
+    });
+  };
 
   const handleInvalidSelectionError = () => {
     dispatchErrors({
@@ -54,15 +66,15 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
         <SelectSection
           selectedOption={parameters.selectedApiPath}
           options={paths}
-          parameterAction={parametersActions.APPLY_API_PATH}
           handleInvalidSelectionError={handleInvalidSelectionError}
+          handleChange={handleChange}
           section={sectionId}
           id={sectionId}
           helpText={helpText}
           error={errors.apiPathSelection}
         />
       ) : (
-        <TextFieldSection value={parameters.selectedApiPath} />
+        <TextFieldSection error={errors.apiPathSelection} value={parameters.selectedApiPath} />
       )}
     </SectionWrapper>
   );

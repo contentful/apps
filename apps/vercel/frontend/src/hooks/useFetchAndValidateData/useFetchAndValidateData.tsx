@@ -78,11 +78,21 @@ export const useFetchAndValidateData = ({
           type: errorsActions.RESET_API_PATH_SELECTION_ERRORS,
         });
       } catch (e) {
+        const err = e as Error;
         console.error(e);
-        dispatchErrors({
-          type: errorsActions.UPDATE_API_PATH_SELECTION_ERRORS,
-          payload: errorTypes.CANNOT_FETCH_API_PATHS,
-        });
+        const errorAction = errorsActions.UPDATE_API_PATH_SELECTION_ERRORS;
+
+        if (err.message === errorTypes.API_PATHS_EMPTY) {
+          dispatchErrors({
+            type: errorAction,
+            payload: errorTypes.API_PATHS_EMPTY,
+          });
+        } else {
+          dispatchErrors({
+            type: errorAction,
+            payload: errorTypes.CANNOT_FETCH_API_PATHS,
+          });
+        }
         setApiPaths([]);
       }
     }

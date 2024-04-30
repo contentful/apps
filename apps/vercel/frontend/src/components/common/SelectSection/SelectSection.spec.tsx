@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AppInstallationParameters } from '@customTypes/configPage';
 import { SelectSection } from './SelectSection';
 import { copies } from '@constants/copies';
-import { parametersActions, singleSelectionSections } from '@constants/enums';
+import { singleSelectionSections } from '@constants/enums';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
 import { errorMessages } from '@constants/errorMessages';
 
@@ -24,8 +24,8 @@ describe('SelectSection', () => {
         options={paths}
         section={ID}
         id={ID}
-        parameterAction={parametersActions.APPLY_API_PATH}
         handleInvalidSelectionError={vi.fn()}
+        handleChange={vi.fn()}
         selectedOption={parameters.selectedApiPath}
       />
     );
@@ -41,8 +41,8 @@ describe('SelectSection', () => {
 
   it('renders list of projects to select', async () => {
     const user = userEvent.setup();
-
     const mockHandleAppConfigurationChange = vi.fn();
+    const mockHandleChange = vi.fn();
     const ID = singleSelectionSections.PROJECT_SELECTION_SECTION;
     const { placeholder, helpText } = copies.configPage.projectSelectionSection;
     const { unmount } = renderConfigPageComponent(
@@ -50,7 +50,7 @@ describe('SelectSection', () => {
         options={projects}
         section={ID}
         id={ID}
-        parameterAction={parametersActions.APPLY_API_PATH}
+        handleChange={mockHandleChange}
         handleInvalidSelectionError={vi.fn()}
         selectedOption={parameters.selectedApiPath}
       />,
@@ -65,6 +65,7 @@ describe('SelectSection', () => {
     expect(screen.getByText(projects[0].name)).toBeTruthy();
 
     user.selectOptions(screen.getByTestId('optionsSelect'), projects[0].name);
+    await waitFor(() => expect(mockHandleChange).toBeCalled());
     await waitFor(() => expect(mockHandleAppConfigurationChange).not.toBeCalled());
     unmount();
   });
@@ -78,8 +79,8 @@ describe('SelectSection', () => {
         options={projects}
         section={ID}
         id={ID}
-        parameterAction={parametersActions.APPLY_API_PATH}
         selectedOption={'non-existent-id'}
+        handleChange={vi.fn()}
         handleInvalidSelectionError={mockHandleInvalidSelectionError}
         error={projectSelectionError}
       />
