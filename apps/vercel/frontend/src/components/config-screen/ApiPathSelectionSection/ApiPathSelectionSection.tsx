@@ -10,8 +10,7 @@ import {
 } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { TextFieldSection } from './TextFieldSection/TextFieldSection';
-import { HelpText, TextLink } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { DraftModeHelpText } from './HelpText/HelpText';
 
 interface Props {
   paths: Path[];
@@ -40,21 +39,6 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
     });
   };
 
-  const helpText = (
-    <HelpText>
-      Select the route from your application that enables Draft Mode. See our{' '}
-      <TextLink
-        icon={<ExternalLinkIcon />}
-        alignIcon="end"
-        href="http://www.example.com"
-        target="_blank"
-        rel="noopener noreferrer">
-        Vercel developer guide
-      </TextLink>{' '}
-      for instructions on setting up a Draft Mode route handler. UPDATE LINK
-    </HelpText>
-  );
-
   const renderInput = () => {
     if (paths.length === 0 && !isLoading) {
       return <TextFieldSection />;
@@ -68,7 +52,7 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
         handleChange={handleChange}
         section={sectionId}
         id={sectionId}
-        helpText={helpText}
+        helpText={<DraftModeHelpText />}
         error={errors.apiPathSelection}
       />
     );

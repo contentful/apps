@@ -7,9 +7,10 @@ import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { SelectionWrapper } from '@components/common/SelectionWrapper/SelectionWrapper';
 import { debounce } from 'lodash';
 import { useError } from '@hooks/useError/useError';
+import { DraftModeHelpText } from '../HelpText/HelpText';
 
 export const TextFieldSection = () => {
-  const { textInputPlaceholder, label, textInputHelpText } = copies.configPage.pathSelectionSection;
+  const { textInputPlaceholder, label } = copies.configPage.pathSelectionSection;
   const { isLoading, dispatchParameters, dispatchErrors, parameters, errors } =
     useContext(ConfigPageContext);
   const { isError, message } = useError({ error: errors.apiPathSelection });
@@ -46,7 +47,7 @@ export const TextFieldSection = () => {
         isLoading={isLoading}
         isRequired={true}
         errorMessage={message}
-        helpText={textInputHelpText}>
+        helpText={<DraftModeHelpText />}>
         <TextInput
           defaultValue={parameters.selectedApiPath}
           onChange={debouncedHandleApiPathInputChange}
