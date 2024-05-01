@@ -91,6 +91,7 @@ export type Errors = {
     apiPathNotFound: boolean;
     apiPathsEmpty: boolean;
     cannotFetchApiPaths: boolean;
+    invalidDeploymentData: boolean;
   };
   previewPathSelection: PreviewPathError[];
 };

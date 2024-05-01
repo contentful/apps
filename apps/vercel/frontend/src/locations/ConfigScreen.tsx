@@ -18,7 +18,7 @@ import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
 import { GettingStartedSection } from '@components/config-screen/GettingStartedSection/GettingStartedSection';
 import errorsReducer from '@reducers/errorsReducer';
 import { useError } from '@hooks/useError/useError';
-import { useFetchAndValidateData } from '@hooks/useFetchAndValidateData/useFetchAndValidateData';
+import { useFetchData } from '@hooks/useFetchData/useFetchData';
 
 const ConfigScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +32,7 @@ const ConfigScreen = () => {
   const [parameters, dispatchParameters] = useReducer(parameterReducer, initialParameters);
   const [errors, dispatchErrors] = useReducer(errorsReducer, initialErrors);
   const { isError: isAuthenticationError } = useError({ error: errors.authentication });
-  const { validateToken, fetchProjects, fetchApiPaths } = useFetchAndValidateData({
+  const { validateToken, fetchProjects, fetchApiPaths } = useFetchData({
     dispatchErrors,
     dispatchParameters,
     vercelClient,

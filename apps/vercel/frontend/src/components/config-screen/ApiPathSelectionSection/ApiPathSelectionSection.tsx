@@ -20,6 +20,7 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
   const sectionId = singleSelectionSections.API_PATH_SELECTION_SECTION;
   const { parameters, isLoading, dispatchErrors, errors, dispatchParameters } =
     useContext(ConfigPageContext);
+  const { invalidDeploymentData, cannotFetchApiPaths } = errors.apiPathSelection;
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatchParameters({
@@ -40,7 +41,7 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
   };
 
   const renderInput = () => {
-    if (paths.length === 0 && !isLoading) {
+    if ((paths.length === 0 && !isLoading) || invalidDeploymentData || cannotFetchApiPaths) {
       return <TextFieldSection />;
     }
 

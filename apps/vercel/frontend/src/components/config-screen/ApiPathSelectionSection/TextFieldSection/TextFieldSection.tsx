@@ -53,6 +53,7 @@ export const TextFieldSection = () => {
           onChange={debouncedHandleApiPathInputChange}
           placeholder={textInputPlaceholder}
           isInvalid={isError}
+          data-testid="apiPathInput"
         />
       </SelectionWrapper>
     </FormControl>
