@@ -237,8 +237,7 @@ const AccessSection = (props: Props) => {
             <HyperLink
               body={teamsAppInfo}
               substring={teamsAppLink}
-              // TODO: update link to app documentation
-              href={'https://www.contentful.com/help/apps-at-contentful/'}
+              href={'https://www.contentful.com/help/microsoft-teams-app'}
             />
           </Box>
         </Flex>
