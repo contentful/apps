@@ -128,7 +128,7 @@ const ConfigScreen = () => {
     if (parameters.selectedProject) {
       getApiPaths();
     }
-  }, [parameters.selectedProject, vercelClient]);
+  }, [parameters.selectedProject, vercelClient, parameters.teamId]);
 
   const updateTokenValidityState = () => {
     setIsLoading(false);

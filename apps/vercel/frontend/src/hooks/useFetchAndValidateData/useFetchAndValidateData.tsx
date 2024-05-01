@@ -79,7 +79,6 @@ export const useFetchAndValidateData = ({
         });
       } catch (e) {
         const err = e as Error;
-        console.error(e);
         const errorAction = errorsActions.UPDATE_API_PATH_SELECTION_ERRORS;
 
         if (err.message === errorTypes.API_PATHS_EMPTY) {
@@ -88,6 +87,7 @@ export const useFetchAndValidateData = ({
             payload: errorTypes.API_PATHS_EMPTY,
           });
         } else {
+          console.error(e);
           dispatchErrors({
             type: errorAction,
             payload: errorTypes.CANNOT_FETCH_API_PATHS,

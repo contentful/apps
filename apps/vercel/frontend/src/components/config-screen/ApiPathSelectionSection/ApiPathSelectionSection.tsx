@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, ChangeEvent } from 'react';
+import { useContext, ChangeEvent } from 'react';
 import { Path } from '@customTypes/configPage';
 import { SectionWrapper } from '@components/common/SectionWrapper/SectionWrapper';
 import { SelectSection } from '@components/common/SelectSection/SelectSection';
@@ -18,7 +18,6 @@ interface Props {
 }
 
 export const ApiPathSelectionSection = ({ paths }: Props) => {
-  const [renderSelect, setRenderSelect] = useState(false);
   const sectionId = singleSelectionSections.API_PATH_SELECTION_SECTION;
   const { parameters, isLoading, dispatchErrors, errors, dispatchParameters } =
     useContext(ConfigPageContext);
@@ -41,10 +40,6 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
     });
   };
 
-  useEffect(() => {
-    setRenderSelect(paths.length > 0 || isLoading);
-  }, [paths, isLoading]);
-
   const helpText = (
     <HelpText>
       Select the route from your application that enables Draft Mode. See our{' '}
@@ -60,22 +55,24 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
     </HelpText>
   );
 
-  return (
-    <SectionWrapper testId={sectionId}>
-      {renderSelect ? (
-        <SelectSection
-          selectedOption={parameters.selectedApiPath}
-          options={paths}
-          handleInvalidSelectionError={handleInvalidSelectionError}
-          handleChange={handleChange}
-          section={sectionId}
-          id={sectionId}
-          helpText={helpText}
-          error={errors.apiPathSelection}
-        />
-      ) : (
-        <TextFieldSection error={errors.apiPathSelection} value={parameters.selectedApiPath} />
-      )}
-    </SectionWrapper>
-  );
+  const renderInput = () => {
+    if (paths.length === 0 && !isLoading) {
+      return <TextFieldSection />;
+    }
+
+    return (
+      <SelectSection
+        selectedOption={parameters.selectedApiPath}
+        options={paths}
+        handleInvalidSelectionError={handleInvalidSelectionError}
+        handleChange={handleChange}
+        section={sectionId}
+        id={sectionId}
+        helpText={helpText}
+        error={errors.apiPathSelection}
+      />
+    );
+  };
+
+  return <SectionWrapper testId={sectionId}>{renderInput()}</SectionWrapper>;
 };
