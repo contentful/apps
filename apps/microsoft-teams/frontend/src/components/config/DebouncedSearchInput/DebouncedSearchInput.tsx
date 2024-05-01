@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Box, IconButton, TextInput } from '@contentful/f36-components';
+import { Box, TextInput } from '@contentful/f36-components';
 import { SearchIcon } from '@contentful/f36-icons';
 import { debounce } from 'lodash';
 
@@ -19,12 +19,7 @@ const DebouncedSearchInput = ({ onChange = () => {}, placeholder, disabled = fal
           placeholder={placeholder}
           onChange={debouncedHandleChange}
           isDisabled={disabled}
-        />
-        <IconButton
-          icon={<SearchIcon variant="muted" />}
-          aria-label="magnifying glass icon"
-          aria-hidden={true}
-          isDisabled={true}
+          icon={<SearchIcon />}
         />
       </TextInput.Group>
     </Box>
