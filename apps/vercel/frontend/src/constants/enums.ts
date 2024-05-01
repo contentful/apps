@@ -34,4 +34,6 @@ export enum errorTypes {
   CANNOT_FETCH_API_PATHS = 'cannotFetchApiPaths',
   INVALID_PREVIEW_PATH_FORMAT = 'invalidPreviewPathFormat',
   EMPTY_PREVIEW_PATH_INPUT = 'emptyPreviewPathInput',
+  API_PATHS_EMPTY = 'apiPathsEmpty',
+  INVALID_DEPLOYMENT_DATA = 'invalidDeploymentData',
 }

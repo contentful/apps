@@ -3,22 +3,21 @@ import { ErrorAction } from '@reducers/errorsReducer';
 import { Dispatch } from 'react';
 import { errorTypes, errorsActions, parametersActions } from '@constants/enums';
 import { ApiPath, Errors, Project } from '@customTypes/configPage';
-import { validateApiPathData } from '@utils/validateApiPathData/validateApiPathData';
 import { ParameterAction } from '@reducers/parameterReducer';
 
-interface FetchAndValidateData {
+interface FetchData {
   dispatchParameters: Dispatch<ParameterAction>;
   dispatchErrors: Dispatch<ErrorAction>;
   vercelClient: VercelClient | null;
   teamId: string | undefined;
 }
 
-export const useFetchAndValidateData = ({
+export const useFetchData = ({
   dispatchErrors,
   dispatchParameters,
   vercelClient,
   teamId,
-}: FetchAndValidateData) => {
+}: FetchData) => {
   const validateToken = async (onComplete: () => void, newVercelClient?: VercelClient) => {
     if (vercelClient) {
       try {
@@ -73,16 +72,31 @@ export const useFetchAndValidateData = ({
     if (vercelClient && teamId) {
       try {
         const data = await vercelClient.listApiPaths(selectedProject, teamId);
-        setApiPaths(validateApiPathData(data) ? data : []);
+        setApiPaths(data);
         dispatchErrors({
           type: errorsActions.RESET_API_PATH_SELECTION_ERRORS,
         });
       } catch (e) {
-        console.error(e);
-        dispatchErrors({
-          type: errorsActions.UPDATE_API_PATH_SELECTION_ERRORS,
-          payload: errorTypes.CANNOT_FETCH_API_PATHS,
-        });
+        const err = e as Error;
+        const errorAction = errorsActions.UPDATE_API_PATH_SELECTION_ERRORS;
+
+        if (err.message === errorTypes.API_PATHS_EMPTY) {
+          dispatchErrors({
+            type: errorAction,
+            payload: errorTypes.API_PATHS_EMPTY,
+          });
+        } else if (err.message === errorTypes.INVALID_DEPLOYMENT_DATA) {
+          dispatchErrors({
+            type: errorAction,
+            payload: errorTypes.INVALID_DEPLOYMENT_DATA,
+          });
+        } else {
+          console.error(e);
+          dispatchErrors({
+            type: errorAction,
+            payload: errorTypes.CANNOT_FETCH_API_PATHS,
+          });
+        }
         setApiPaths([]);
       }
     }

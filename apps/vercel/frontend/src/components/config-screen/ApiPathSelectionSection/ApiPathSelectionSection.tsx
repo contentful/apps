@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, ChangeEvent } from 'react';
 import { Path } from '@customTypes/configPage';
 import { SectionWrapper } from '@components/common/SectionWrapper/SectionWrapper';
 import { SelectSection } from '@components/common/SelectSection/SelectSection';
@@ -10,17 +10,28 @@ import {
 } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { TextFieldSection } from './TextFieldSection/TextFieldSection';
-import { HelpText, TextLink } from '@contentful/f36-components';
-import { ExternalLinkIcon } from '@contentful/f36-icons';
+import { DraftModeHelpText } from './HelpText/HelpText';
 
 interface Props {
   paths: Path[];
 }
 
 export const ApiPathSelectionSection = ({ paths }: Props) => {
-  const [renderSelect, setRenderSelect] = useState(false);
   const sectionId = singleSelectionSections.API_PATH_SELECTION_SECTION;
-  const { parameters, isLoading, dispatchErrors, errors } = useContext(ConfigPageContext);
+  const { parameters, isLoading, dispatchErrors, errors, dispatchParameters } =
+    useContext(ConfigPageContext);
+  const { invalidDeploymentData, cannotFetchApiPaths } = errors.apiPathSelection;
+
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    dispatchParameters({
+      type: parametersActions.APPLY_API_PATH,
+      payload: event.target.value,
+    });
+
+    dispatchErrors({
+      type: errorsActions.RESET_API_PATH_SELECTION_ERRORS,
+    });
+  };
 
   const handleInvalidSelectionError = () => {
     dispatchErrors({
@@ -29,41 +40,24 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
     });
   };
 
-  useEffect(() => {
-    setRenderSelect(paths.length > 0 || isLoading);
-  }, [paths, isLoading]);
+  const renderInput = () => {
+    if ((paths.length === 0 && !isLoading) || invalidDeploymentData || cannotFetchApiPaths) {
+      return <TextFieldSection />;
+    }
 
-  const helpText = (
-    <HelpText>
-      Select the route from your application that enables Draft Mode. See our{' '}
-      <TextLink
-        icon={<ExternalLinkIcon />}
-        alignIcon="end"
-        href="http://www.example.com"
-        target="_blank"
-        rel="noopener noreferrer">
-        Vercel developer guide
-      </TextLink>{' '}
-      for instructions on setting up a Draft Mode route handler. UPDATE LINK
-    </HelpText>
-  );
+    return (
+      <SelectSection
+        selectedOption={parameters.selectedApiPath}
+        options={paths}
+        handleInvalidSelectionError={handleInvalidSelectionError}
+        handleChange={handleChange}
+        section={sectionId}
+        id={sectionId}
+        helpText={<DraftModeHelpText />}
+        error={errors.apiPathSelection}
+      />
+    );
+  };
 
-  return (
-    <SectionWrapper testId={sectionId}>
-      {renderSelect ? (
-        <SelectSection
-          selectedOption={parameters.selectedApiPath}
-          options={paths}
-          parameterAction={parametersActions.APPLY_API_PATH}
-          handleInvalidSelectionError={handleInvalidSelectionError}
-          section={sectionId}
-          id={sectionId}
-          helpText={helpText}
-          error={errors.apiPathSelection}
-        />
-      ) : (
-        <TextFieldSection value={parameters.selectedApiPath} />
-      )}
-    </SectionWrapper>
-  );
+  return <SectionWrapper testId={sectionId}>{renderInput()}</SectionWrapper>;
 };

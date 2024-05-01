@@ -22,6 +22,7 @@ export const initialErrors: Errors = {
     apiPathNotFound: false,
     apiPathsEmpty: false,
     cannotFetchApiPaths: false,
+    invalidDeploymentData: false,
   },
   previewPathSelection: [],
 };

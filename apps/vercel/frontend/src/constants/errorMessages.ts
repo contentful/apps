@@ -4,11 +4,12 @@ export const errorMessages = {
   expiredToken: 'Token has expired.',
   projectNotFound:
     'The project you have configured is no longer available. Please select another one.',
-  cannotFetchProjects: 'Cannot retrieve Vercel projects.',
+  cannotFetchProjects: 'We had trouble fetching your Vercel projects.',
   apiPathNotFound:
-    'The path you have configured is no longer available. Please select another one.',
-  apiPathsEmpty: 'No paths currently configured in selected project.',
-  cannotFetchApiPaths: 'Cannot retrieve paths.',
+    'The route you previously selected is no longer available. Please select another one.',
+  apiPathsEmpty: "It looks like your Vercel project doesn't have any routes configured yet.",
+  cannotFetchApiPaths: 'We had trouble fetching routes for this Vercel project.',
   invalidPreviewPathFormat: 'Path must start with a "/", and include a {token}.',
   emptyPreviewPathInput: 'Field is empty.',
+  invalidDeploymentData: 'We had trouble fetching routes for this Vercel project.',
 };
