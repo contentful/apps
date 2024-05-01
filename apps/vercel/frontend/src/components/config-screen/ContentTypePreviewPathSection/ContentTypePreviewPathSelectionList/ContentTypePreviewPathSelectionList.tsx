@@ -8,14 +8,14 @@ import {
 } from '@customTypes/configPage';
 import { ContentTypePreviewPathSelectionRow } from '../ContentTypePreviewPathSelectionRow/ContentTypePreviewPathSelectionRow';
 import { getAvailableContentTypes } from '@utils/getAvailableContentTypes';
-import { actions } from '@constants/enums';
+import { parametersActions } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { copies } from '@constants/copies';
 
 export const ContentTypePreviewPathSelectionList = () => {
   const [addRow, setAddRow] = useState<boolean>(false);
 
-  const { dispatch, parameters, contentTypes } = useContext(ConfigPageContext);
+  const { dispatchParameters, parameters, contentTypes } = useContext(ConfigPageContext);
   const { contentTypePreviewPathSelections } = parameters;
 
   const { button } = copies.configPage.contentTypePreviewPathSection;
@@ -27,8 +27,8 @@ export const ContentTypePreviewPathSelectionList = () => {
 
   const handleUpdateParameters = (parameters: ApplyContentTypePreviewPathSelectionPayload) => {
     if (addRow) setAddRow(false);
-    dispatch({
-      type: actions.ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
+    dispatchParameters({
+      type: parametersActions.ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
       payload: parameters,
     });
   };
@@ -36,8 +36,8 @@ export const ContentTypePreviewPathSelectionList = () => {
   const handleRemoveRow = (parameters: ContentTypePreviewPathSelection) => {
     if (addRow) setAddRow(false);
 
-    dispatch({
-      type: actions.REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
+    dispatchParameters({
+      type: parametersActions.REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
       payload: parameters,
     });
   };

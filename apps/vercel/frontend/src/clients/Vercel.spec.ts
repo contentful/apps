@@ -1,4 +1,4 @@
-import { Mock, afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import VercelClient from './Vercel';
 import { mockDeploymentSummary } from '@test/mocks';
 
@@ -11,13 +11,17 @@ describe('VercelClient', () => {
     client = new VercelClient('');
   });
 
-  afterAll(() => {
+  afterEach(() => {
     vi.restoreAllMocks();
   });
 
   describe('#checkToken', () => {
     describe('valid', () => {
       beforeEach(() => {
+        (fetch as Mock).mockImplementationOnce(() => ({
+          ok: true,
+          json: vi.fn(() => new Promise((resolve) => resolve({ token: { teamId: '1234' } }))),
+        }));
         (fetch as Mock).mockImplementationOnce(() => ({
           ok: true,
           json: vi.fn(),
@@ -35,14 +39,12 @@ describe('VercelClient', () => {
       beforeEach(() => {
         (fetch as Mock).mockImplementationOnce(() => ({
           ok: false,
-          json: vi.fn(),
+          json: vi.fn(() => new Promise((rejects) => rejects({ token: { teamId: '1234' } }))),
         }));
       });
 
       it('returns false for invalid token', async () => {
-        const res = await client.checkToken();
-
-        expect(res.ok).toBe(false);
+        await expect(client.checkToken()).rejects.toThrowError();
       });
     });
   });

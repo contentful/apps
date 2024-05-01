@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { mockSdk } from '@test/mocks';
 import { mockParameters } from '@test/mocks/mockSdk';
-import { actions } from '@constants/enums';
+import { parametersActions } from '@constants/enums';
 import useInitializeParameters from './useInitializeParameters';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
@@ -18,7 +18,7 @@ describe('useInitializeParameters', () => {
     await waitFor(() => expect(dispatchMock).toBeCalled());
 
     expect(dispatchMock).toHaveBeenCalledWith({
-      type: actions.APPLY_CONTENTFUL_PARAMETERS,
+      type: parametersActions.APPLY_CONTENTFUL_PARAMETERS,
       payload: mockParameters,
     });
 

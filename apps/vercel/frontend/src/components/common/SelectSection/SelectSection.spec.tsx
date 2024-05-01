@@ -5,8 +5,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { AppInstallationParameters } from '@customTypes/configPage';
 import { SelectSection } from './SelectSection';
 import { copies } from '@constants/copies';
-import { actions, singleSelectionSections } from '@constants/enums';
+import { parametersActions, singleSelectionSections } from '@constants/enums';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
+import { errorMessages } from '@constants/errorMessages';
 
 const parameters = { selectedApiPath: '', selectedProject: '' } as AppInstallationParameters;
 const paths = [{ id: 'path-1', name: 'Path/1' }];
@@ -17,13 +18,14 @@ const projects = [
 describe('SelectSection', () => {
   it('renders list of api paths to select', () => {
     const ID = singleSelectionSections.API_PATH_SELECTION_SECTION;
-    const { placeholder, errorMessage } = copies.configPage.pathSelectionSection;
+    const { placeholder } = copies.configPage.pathSelectionSection;
     const { unmount } = render(
       <SelectSection
         options={paths}
         section={ID}
         id={ID}
-        action={actions.APPLY_API_PATH}
+        parameterAction={parametersActions.APPLY_API_PATH}
+        handleInvalidSelectionError={vi.fn()}
         selectedOption={parameters.selectedApiPath}
       />
     );
@@ -33,7 +35,7 @@ describe('SelectSection', () => {
     select.click();
 
     expect(screen.getByText(paths[0].name)).toBeTruthy();
-    expect(screen.queryByText(errorMessage)).toBeFalsy();
+    expect(screen.queryByText(errorMessages.apiPathNotFound)).toBeFalsy();
     unmount();
   });
 
@@ -42,13 +44,14 @@ describe('SelectSection', () => {
 
     const mockHandleAppConfigurationChange = vi.fn();
     const ID = singleSelectionSections.PROJECT_SELECTION_SECTION;
-    const { placeholder, helpText, errorMessage } = copies.configPage.projectSelectionSection;
+    const { placeholder, helpText } = copies.configPage.projectSelectionSection;
     const { unmount } = renderConfigPageComponent(
       <SelectSection
         options={projects}
         section={ID}
         id={ID}
-        action={actions.APPLY_API_PATH}
+        parameterAction={parametersActions.APPLY_API_PATH}
+        handleInvalidSelectionError={vi.fn()}
         selectedOption={parameters.selectedApiPath}
       />,
       { handleAppConfigurationChange: mockHandleAppConfigurationChange }
@@ -56,7 +59,7 @@ describe('SelectSection', () => {
     const select = screen.getByText(placeholder);
     expect(select).toBeTruthy();
     expect(screen.getByText(helpText)).toBeTruthy();
-    expect(screen.queryByText(errorMessage)).toBeFalsy();
+    expect(screen.queryByText(errorMessages.projectNotFound)).toBeFalsy();
 
     user.click(select);
     expect(screen.getByText(projects[0].name)).toBeTruthy();
@@ -68,18 +71,22 @@ describe('SelectSection', () => {
 
   it('renders error message when selected option no longer exists', () => {
     const ID = singleSelectionSections.PROJECT_SELECTION_SECTION;
-    const { errorMessage } = copies.configPage.projectSelectionSection;
+    const projectSelectionError = { projectNotFound: true, cannotFetchProjects: false };
+    const mockHandleInvalidSelectionError = vi.fn(() => {});
     const { unmount } = render(
       <SelectSection
         options={projects}
         section={ID}
         id={ID}
-        action={actions.APPLY_API_PATH}
+        parameterAction={parametersActions.APPLY_API_PATH}
         selectedOption={'non-existent-id'}
+        handleInvalidSelectionError={mockHandleInvalidSelectionError}
+        error={projectSelectionError}
       />
     );
 
-    expect(screen.getByText(errorMessage)).toBeTruthy();
+    expect(screen.getByText(errorMessages.projectNotFound)).toBeTruthy();
+    expect(mockHandleInvalidSelectionError).toBeCalled();
     unmount();
   });
 });
