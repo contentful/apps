@@ -41,7 +41,6 @@ export const Select = ({
         id="optionsSelect"
         data-testid="optionsSelect"
         name="optionsSelect"
-        data-testid="optionsSelect"
         isInvalid={Boolean(errorMessage)}
         value={value}
         onChange={onChange}>

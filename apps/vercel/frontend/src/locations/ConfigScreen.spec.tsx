@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi, beforeAll, afterEach, afterAll } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, expect, it, vi, beforeAll } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen from './ConfigScreen';
