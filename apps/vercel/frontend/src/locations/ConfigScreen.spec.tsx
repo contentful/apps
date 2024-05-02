@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, expect, it, vi, beforeAll } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi, beforeAll, afterEach, afterAll } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen from './ConfigScreen';
@@ -18,20 +18,10 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
 describe('ConfigScreen', () => {
   beforeAll(() => {
     mockSdk.cma.contentType.getMany = vi.fn().mockResolvedValue({ items: [] });
-  });
-  it('renders only authentication section on mount', async () => {
-    const { unmount } = render(<ConfigScreen />);
-
-    expect(await screen.findByText('Connect Vercel')).toBeTruthy();
-    expect(screen.getByText('Vercel Access Token')).toBeTruthy();
-    expect(screen.queryByTestId(projectSelectionSectionTestId)).toBeFalsy();
-    expect(screen.queryByTestId(pathSelectionSectionTestId)).toBeFalsy();
-    expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
-    unmount();
-  });
-
-  it('renders the sections sequentially', async () => {
-    vi.spyOn(VercelClient.prototype, 'checkToken').mockResolvedValue({ ok: true });
+    vi.spyOn(VercelClient.prototype, 'checkToken').mockResolvedValue({
+      ok: true,
+      data: { id: 'team-id', name: 'token-name', expiresAt: '', teamId: '12345' },
+    });
     vi.spyOn(VercelClient.prototype, 'listProjects').mockResolvedValue({
       projects: [
         {
@@ -45,6 +35,23 @@ describe('ConfigScreen', () => {
         },
       ],
     });
+    vi.spyOn(VercelClient.prototype, 'listApiPaths').mockResolvedValue([
+      { id: 'api-path-1', name: 'Api Path 1' },
+    ]);
+  });
+  it('renders only authentication section on mount', async () => {
+    const { unmount } = render(<ConfigScreen />);
+
+    expect(await screen.findByText('Connect Vercel')).toBeTruthy();
+    expect(screen.getByText('Vercel Access Token')).toBeTruthy();
+    expect(screen.queryByTestId(projectSelectionSectionTestId)).toBeFalsy();
+    expect(screen.queryByTestId(pathSelectionSectionTestId)).toBeFalsy();
+    expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
+    unmount();
+  });
+
+  it('renders the sections sequentially', async () => {
+    const user = userEvent.setup();
     const { unmount } = render(<ConfigScreen />);
 
     expect(await screen.findByText('Connect Vercel')).toBeTruthy();
@@ -58,11 +65,17 @@ describe('ConfigScreen', () => {
     expect(screen.queryByTestId(pathSelectionSectionTestId)).toBeFalsy();
     expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
 
-    const user = userEvent.setup();
-    user.selectOptions(screen.getByTestId('optionsSelect'), 'Project 1');
+    const selectDropdowns = await screen.findAllByTestId('optionsSelect');
+
+    user.selectOptions(selectDropdowns[0], 'Project 1');
 
     const apiPathSection = await screen.findByTestId(pathSelectionSectionTestId);
     expect(apiPathSection).toBeTruthy();
+
+    const updatedSelectDropdowns = await screen.findAllByTestId('optionsSelect');
+    user.selectOptions(updatedSelectDropdowns[1], 'Api Path 1');
+
+    expect(await screen.findByTestId('content-type-preview-path-section')).toBeTruthy();
     unmount();
   });
 });
