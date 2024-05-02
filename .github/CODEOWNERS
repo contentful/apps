@@ -4,3 +4,7 @@
 apps/graphql-playground @contentful/team-developer-experience
 examples @contentful/team-developer-experience
 
+examples/function-mock-shop @contentful/team-monet
+examples/function-potterdb @contentful/team-monet
+examples/function-potterdb-rest-api @contentful/team-monet
+examples/function-templates @contentful/team-monet

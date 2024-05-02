@@ -1,18 +1,28 @@
+import React, { useCallback, useEffect, useState } from 'react';
 import { Card, Collapse, Flex, IconButton, TextLink } from '@contentful/f36-components';
 import { CloseIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import arrayMove from 'array-move';
-import * as React from 'react';
-import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
+import { UniqueIdentifier } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+
 import {
-  Asset,
-  Config,
-  DeleteFn,
-  ThumbnailFn,
-  GetAdditionalDataFn,
-  AdditionalData,
-} from '../interfaces';
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
+import { Asset, Config, ThumbnailFn, GetAdditionalDataFn, AdditionalData } from '../interfaces';
 import FileIcon from '../Icons/FileIcon';
 
 interface Props {
@@ -24,13 +34,8 @@ interface Props {
   getAdditionalData: GetAdditionalDataFn | null;
 }
 
-interface SortableContainerProps {
-  disabled: boolean;
-  config: Config;
-  resources: Asset[];
-  deleteFn: DeleteFn;
-  makeThumbnail: ThumbnailFn;
-  getAdditionalData: GetAdditionalDataFn | null;
+interface AssetWithId extends Asset {
+  id: UniqueIdentifier;
 }
 
 interface DragHandleProps {
@@ -46,6 +51,7 @@ interface SortableElementProps extends DragHandleProps {
   disabled: boolean;
   onDelete: () => void;
   additionalData: AdditionalData | null;
+  uniqueId: UniqueIdentifier;
 }
 
 const styles = {
@@ -121,164 +127,205 @@ const AdditionalDataDisplay = ({ additionalData }: AdditionalDataDisplayProps) =
   );
 };
 
-const DragHandle = SortableHandle<DragHandleProps>(
-  ({ url, alt, additionalData }: DragHandleProps) => {
-    const [isExpanded, setIsExpanded] = React.useState(false);
+const DragHandle = ({ url, alt, additionalData }: DragHandleProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
 
-    if (!url && !alt) {
+  if (!url && !alt) {
+    return (
+      <div className={styles.altTextContainer}>
+        <p className={styles.altTextDisplay}>Asset not available</p>
+      </div>
+    );
+  }
+
+  if (additionalData) {
+    // if additional data is provided then the "more details" section will be visible
+    if (!url) {
       return (
-        <div className={styles.altTextContainer}>
-          <p className={styles.altTextDisplay}>Asset not available</p>
-        </div>
-      );
-    }
-
-    if (additionalData) {
-      // if additional data is provided then the "more details" section will be visible
-      if (!url) {
-        return (
-          <>
-            <div>
-              <Flex justifyContent="center" title={alt}>
-                <FileIcon />
-              </Flex>
-            </div>
-            <AdditionalDataDisplay additionalData={additionalData} />
-          </>
-        );
-      } else {
-        return (
-          <>
-            <div>
-              <img src={url} alt={alt} title={alt} />
-            </div>
-            <Collapse isExpanded={isExpanded}>
-              {<AdditionalDataDisplay additionalData={additionalData} />}
-            </Collapse>
-            <TextLink
-              as="button"
-              onClick={() => setIsExpanded((currentIsExpanded) => !currentIsExpanded)}
-              className={styles.textlink}>
-              {isExpanded ? 'Hide details' : 'More details'}
-            </TextLink>
-          </>
-        );
-      }
-    } else {
-      // display default asset card when no additional data is provided
-      if (!url) {
-        return (
-          <div className={styles.altTextContainer}>
-            <FileIcon />
-            <p className={styles.altTextDisplay} title={alt}>
-              {alt}
-            </p>
+        <>
+          <div>
+            <Flex justifyContent="center" title={alt}>
+              <FileIcon />
+            </Flex>
           </div>
-        );
-      } else {
-        return (
+          <AdditionalDataDisplay additionalData={additionalData} />
+        </>
+      );
+    } else {
+      return (
+        <>
           <div>
             <img src={url} alt={alt} title={alt} />
           </div>
-        );
-      }
+          <Collapse isExpanded={isExpanded}>
+            {<AdditionalDataDisplay additionalData={additionalData} />}
+          </Collapse>
+          <TextLink
+            as="button"
+            onClick={() => setIsExpanded((currentIsExpanded) => !currentIsExpanded)}
+            className={styles.textlink}>
+            {isExpanded ? 'Hide details' : 'More details'}
+          </TextLink>
+        </>
+      );
+    }
+  } else {
+    // display default asset card when no additional data is provided
+    if (!url) {
+      return (
+        <div className={styles.altTextContainer}>
+          <FileIcon />
+          <p className={styles.altTextDisplay} title={alt}>
+            {alt}
+          </p>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <img src={url} alt={alt} title={alt} />
+        </div>
+      );
     }
   }
-);
+};
 
-const SortableItem = SortableElement<SortableElementProps>((props: SortableElementProps) => {
+const SortableItem = ({
+  url,
+  alt,
+  disabled,
+  onDelete,
+  additionalData,
+  uniqueId,
+}: SortableElementProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: uniqueId,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <Card className={styles.card(props.disabled)}>
-      <DragHandle url={props.url} alt={props.alt} additionalData={props.additionalData} />
-      {!props.disabled && (
+    <Card
+      className={styles.card(disabled)}
+      ref={setNodeRef}
+      style={style}
+      key={uniqueId}
+      {...attributes}
+      {...listeners}>
+      <DragHandle url={url} alt={alt} additionalData={additionalData} />
+      {!disabled && (
         <IconButton
           variant="transparent"
           icon={<CloseIcon variant="muted" />}
           aria-label="Close"
-          onClick={props.onDelete}
+          onClick={onDelete}
           className={styles.remove}
         />
       )}
     </Card>
   );
-});
+};
 
-const SortableList = SortableContainer<SortableContainerProps>((props: SortableContainerProps) => {
-  // Provide stable keys for all resources so images don't blink.
-  const { list } = props.resources.reduce(
-    (acc, resource, index) => {
-      const [url, alt] = props.makeThumbnail(resource, props.config);
+export const SortableComponent = ({
+  resources,
+  makeThumbnail,
+  getAdditionalData,
+  config,
+  disabled,
+  onChange,
+}: Props) => {
+  const [items, setItems] = useState<AssetWithId[]>([]);
 
-      const additionalData = props.getAdditionalData?.(resource) || null;
-
-      const item = { url, alt, key: `url-unknown-${index}`, additionalData };
-      const counts = { ...acc.counts };
-
-      // URLs are used as keys.
-      // It is possible to include the same image more than once.
-      // We count usages of the same URL and use the count in keys.
-      // This can be considered an edge-case but still - should be covered.
-      if (url) {
-        counts[url] = counts[url] || 1;
-        item.key = [url, counts[url]].join('-');
-        counts[url] += 1;
-      }
-
-      return {
-        counts,
-        list: [...acc.list, item],
-      };
+  const deleteItem = useCallback(
+    (index: UniqueIdentifier) => {
+      const myResources = [...resources];
+      myResources.splice(Number(index), 1);
+      onChange(myResources);
     },
-    { counts: {}, list: [] }
-  ) as { list: Asset[] };
+    [resources]
+  );
+
+  useEffect(() => {
+    const myItems = resources.reduce(
+      (acc, resource, index) => {
+        const [url, alt] = makeThumbnail(resource, config);
+        const additionalData = getAdditionalData?.(resource) || null;
+        const counts = { ...acc.counts };
+        const item = JSON.parse(
+          JSON.stringify({ url, alt, key: `url-unknown-${index}`, additionalData, ...resource })
+        );
+
+        // URLs are used as keys.
+        // It is possible to include the same image more than once.
+        // We count usages of the same URL and use the count in keys.
+        // This can be considered an edge-case but still - should be covered.
+        if (url) {
+          counts[url] = counts[url] || 1;
+          item.key = [url, counts[url]].join('-');
+          counts[url] += 1;
+        }
+
+        return {
+          counts,
+          list: [...acc.list, item],
+        };
+      },
+      { counts: {}, list: [] }
+    );
+
+    setItems(myItems.list);
+  }, [resources, makeThumbnail, getAdditionalData, setItems]);
+
+  const handleDragEnd = useCallback(
+    (event) => {
+      const { active, over } = event;
+
+      if (active.id !== over?.id) {
+        const oldIndex = items.findIndex((i) => i.key === active.id);
+        const newIndex = items.findIndex((i) => i.key === over.id);
+        const sortedItems = arrayMove(items, oldIndex, newIndex);
+
+        onChange(sortedItems);
+        setItems(sortedItems);
+      }
+    },
+    [items, onChange, setItems]
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   return (
-    <div className={styles.container}>
-      <div className={styles.grid}>
-        {list.map(({ url, alt, key, additionalData }, index) => {
-          return (
-            <SortableItem
-              disabled={props.disabled}
-              key={key}
-              url={url}
-              alt={alt}
-              index={index}
-              onDelete={() => props.deleteFn(index)}
-              additionalData={additionalData}
-            />
-          );
-        })}
-      </div>
-    </div>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={items?.map((i) => i.key)} strategy={verticalListSortingStrategy}>
+        <div className={styles.container} data-testid="container">
+          <div className={styles.grid} data-testid="grid">
+            {items.map(({ key, alt, url, additionalData }) => (
+              <div key={key}>
+                <SortableItem
+                  disabled={disabled}
+                  url={url}
+                  alt={alt}
+                  uniqueId={key}
+                  onDelete={() => deleteItem(key)}
+                  additionalData={additionalData}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </SortableContext>
+    </DndContext>
   );
-});
-
-export class SortableComponent extends React.Component<Props> {
-  onSortEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    const resources = arrayMove(this.props.resources, oldIndex, newIndex);
-    this.props.onChange(resources);
-  };
-
-  deleteItem = (index: number) => {
-    const resources = [...this.props.resources];
-    resources.splice(index, 1);
-    this.props.onChange(resources);
-  };
-
-  render() {
-    return (
-      <SortableList
-        disabled={this.props.disabled}
-        onSortStart={(_, e) => e.preventDefault()} // Fixes FF glitches.
-        onSortEnd={this.onSortEnd}
-        axis="xy"
-        resources={this.props.resources}
-        config={this.props.config}
-        deleteFn={this.deleteItem}
-        useDragHandle
-        makeThumbnail={this.props.makeThumbnail}
-        getAdditionalData={this.props.getAdditionalData}
-      />
-    );
-  }
-}
+};

@@ -1,13 +1,16 @@
 import { createContext, Dispatch } from 'react';
 import { ContentType } from '@contentful/app-sdk';
-import { ParameterAction } from '@components/parameterReducer';
-import { AppInstallationParameters } from '@customTypes/configPage';
+import { ParameterAction } from '@reducers/parameterReducer';
+import { AppInstallationParameters, Errors } from '@customTypes/configPage';
+import { ErrorAction } from '@reducers/errorsReducer';
 
 interface ConfigPageContextValue {
   isAppConfigurationSaved: boolean;
   contentTypes: ContentType[];
   parameters: AppInstallationParameters;
-  dispatch: Dispatch<ParameterAction>;
+  errors: Errors;
+  dispatchParameters: Dispatch<ParameterAction>;
+  dispatchErrors: Dispatch<ErrorAction>;
   handleAppConfigurationChange: () => void;
   isLoading: boolean;
 }
@@ -23,8 +26,10 @@ export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
     children,
     isAppConfigurationSaved,
     contentTypes,
-    dispatch,
+    dispatchParameters,
+    dispatchErrors,
     parameters,
+    errors,
     handleAppConfigurationChange,
     isLoading,
   } = props;
@@ -34,8 +39,10 @@ export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
       value={{
         isAppConfigurationSaved,
         contentTypes,
-        dispatch,
+        dispatchParameters,
+        dispatchErrors,
         parameters,
+        errors,
         handleAppConfigurationChange,
         isLoading,
       }}>

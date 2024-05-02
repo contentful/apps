@@ -5,6 +5,8 @@ import { AppInstallationParameters } from '@customTypes/configPage';
 import { AuthenticationSection } from './AuthenticationSection';
 import { copies } from '@constants/copies';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
+import { errorMessages } from '@constants/errorMessages';
+import { initialErrors } from '@constants/defaultParams';
 
 const { input } = copies.configPage.authenticationSection;
 
@@ -13,10 +15,9 @@ describe('AuthenticationSection', () => {
     const parameters = {
       vercelAccessToken: '',
     } as unknown as AppInstallationParameters;
-    renderConfigPageComponent(
-      <AuthenticationSection handleTokenChange={vi.fn()} isTokenValid={false} />,
-      { parameters }
-    );
+    renderConfigPageComponent(<AuthenticationSection handleTokenChange={vi.fn()} />, {
+      parameters,
+    });
 
     const tokenInput = screen.getByPlaceholderText(input.placeholder);
 
@@ -27,7 +28,7 @@ describe('AuthenticationSection', () => {
     const parameters = {
       vercelAccessToken: '12345',
     } as unknown as AppInstallationParameters;
-    renderConfigPageComponent(<AuthenticationSection handleTokenChange={vi.fn()} isTokenValid />, {
+    renderConfigPageComponent(<AuthenticationSection handleTokenChange={vi.fn()} />, {
       parameters,
     });
 
@@ -40,12 +41,20 @@ describe('AuthenticationSection', () => {
     const parameters = {
       vercelAccessToken: '12345',
     } as unknown as AppInstallationParameters;
-    renderConfigPageComponent(
-      <AuthenticationSection handleTokenChange={vi.fn()} isTokenValid={false} />,
-      { parameters }
-    );
+    const errors = {
+      ...initialErrors,
+      authentication: {
+        invalidToken: true,
+        invalidTeamScope: false,
+        expiredToken: false,
+      },
+    };
+    renderConfigPageComponent(<AuthenticationSection handleTokenChange={vi.fn()} />, {
+      parameters,
+      errors,
+    });
 
-    const status = screen.getByText(input.errorMessage);
+    const status = screen.getByText(errorMessages.invalidToken);
     const token = screen.queryByText(parameters.vercelAccessToken);
 
     expect(status).toBeTruthy();

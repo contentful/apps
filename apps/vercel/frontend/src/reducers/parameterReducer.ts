@@ -1,4 +1,4 @@
-import { actions } from '@constants/enums';
+import { parametersActions } from '@constants/enums';
 import {
   AppInstallationParameters,
   ApplyContentTypePreviewPathSelectionPayload,
@@ -6,32 +6,37 @@ import {
 } from '@customTypes/configPage';
 
 type VercelAccessTokenAction = {
-  type: actions.UPDATE_VERCEL_ACCESS_TOKEN;
+  type: parametersActions.UPDATE_VERCEL_ACCESS_TOKEN;
   payload: string;
 };
 
 type VercelSelectedProjectAction = {
-  type: actions.APPLY_SELECTED_PROJECT;
+  type: parametersActions.APPLY_SELECTED_PROJECT;
   payload: string;
 };
 
 type ApplyContentfulParametersAction = {
-  type: actions.APPLY_CONTENTFUL_PARAMETERS;
+  type: parametersActions.APPLY_CONTENTFUL_PARAMETERS;
   payload: AppInstallationParameters;
 };
 
 type AddContentTypePreviewPathSelectionAction = {
-  type: actions.ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION;
+  type: parametersActions.ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION;
   payload: ApplyContentTypePreviewPathSelectionPayload;
 };
 
 type RemoveContentTypePreviewPathSelection = {
-  type: actions.REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION;
+  type: parametersActions.REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION;
   payload: ContentTypePreviewPathSelection;
 };
 
 type ApplyApiPath = {
-  type: actions.APPLY_API_PATH;
+  type: parametersActions.APPLY_API_PATH;
+  payload: string;
+};
+
+type ApplyTeamId = {
+  type: parametersActions.APPLY_TEAM_ID;
   payload: string;
 };
 
@@ -41,7 +46,8 @@ export type ParameterAction =
   | VercelSelectedProjectAction
   | AddContentTypePreviewPathSelectionAction
   | RemoveContentTypePreviewPathSelection
-  | ApplyApiPath;
+  | ApplyApiPath
+  | ApplyTeamId;
 
 const {
   UPDATE_VERCEL_ACCESS_TOKEN,
@@ -50,7 +56,8 @@ const {
   ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
   REMOVE_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
   APPLY_API_PATH,
-} = actions;
+  APPLY_TEAM_ID,
+} = parametersActions;
 
 const parameterReducer = (
   state: AppInstallationParameters,
@@ -115,6 +122,13 @@ const parameterReducer = (
       return {
         ...state,
         selectedApiPath: apiPath,
+      };
+    }
+    case APPLY_TEAM_ID: {
+      const teamId = action.payload;
+      return {
+        ...state,
+        teamId,
       };
     }
     default:

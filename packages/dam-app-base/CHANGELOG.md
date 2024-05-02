@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.3.1](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.3.0...@contentful/dam-app-base@2.3.1) (2024-04-30)
+
+**Note:** Version bump only for package @contentful/dam-app-base
+
+# [2.3.0](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.2.20...@contentful/dam-app-base@2.3.0) (2024-04-30)
+
+### Features
+
+- **dam-app-base:** replace react-searchable-hoc with dndkit ([#7431](https://github.com/contentful/apps/issues/7431)) ([c0a859d](https://github.com/contentful/apps/commit/c0a859d3853419f198194197323190cfe1db68df))
+
 ## [2.2.20](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.2.19...@contentful/dam-app-base@2.2.20) (2024-04-17)
 
 ### Bug Fixes

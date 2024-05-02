@@ -65,8 +65,6 @@ export type ValidateParametersFn = (parameters: Record<string, any>) => string |
  */
 export type ThumbnailFn = (asset: Asset, config: Config) => [string, string | undefined];
 
-export type DeleteFn = (index: number) => void;
-
 /**
  * Function that gets called within the Iframe when the app is rendered in a dialog location.
  *

@@ -1,21 +1,23 @@
+import { errorTypes } from '@constants/enums';
 import {
   ApiPath,
-  CreateDeploymentInput,
-  Deployment,
   ListDeploymentSummaryResponse,
   ListProjectsResponse,
   ServerlessFunction,
+  AccessToken,
+  Deployment,
 } from '@customTypes/configPage';
 
-interface CheckTokenResponse {
+interface GetToken {
   ok: boolean;
+  data: AccessToken;
 }
 
 interface VercelAPIClient {
-  checkToken: () => Promise<CheckTokenResponse>;
-  listProjects: () => Promise<ListProjectsResponse>;
-  createDeployment: (input: CreateDeploymentInput) => Promise<Deployment>;
-  getDeploymentById: (deploymentId: string) => Promise<Deployment>;
+  checkToken: () => Promise<GetToken>;
+  getToken: () => Promise<Response>;
+  listProjects: (teamId?: string) => Promise<ListProjectsResponse>;
+  listApiPaths: (projectId: string, teamId?: string) => Promise<ApiPath[]>;
 }
 
 export default class VercelClient implements VercelAPIClient {
@@ -28,35 +30,90 @@ export default class VercelClient implements VercelAPIClient {
     });
   }
 
-  async checkToken(): Promise<CheckTokenResponse> {
-    const res = await fetch(`${this.baseEndpoint}/v5/user/tokens`, {
-      headers: this.buildHeaders(),
-      method: 'GET',
-    });
-
-    return { ok: res.ok };
+  private buildTeamIdQueryParam(teamId?: string): string {
+    return teamId ? `&teamId=${teamId}` : '';
   }
 
-  async listProjects(): Promise<ListProjectsResponse> {
-    const res = await fetch(`${this.baseEndpoint}/v9/projects`, {
+  async checkToken(): Promise<GetToken> {
+    const res = await this.getToken();
+    if (!res.ok) throw new Error(errorTypes.INVALID_TOKEN);
+
+    const { token } = await res.json();
+
+    if (!token.teamId) throw new Error(errorTypes.INVALID_TEAM_SCOPE);
+    if (Number(token.expiresAt) <= Date.now()) throw new Error(errorTypes.EXPIRED_TOKEN);
+
+    return { ok: res.ok, data: token };
+  }
+
+  async getToken(): Promise<Response> {
+    const res = await fetch(`${this.baseEndpoint}/v5/user/tokens/current`, {
       headers: this.buildHeaders(),
       method: 'GET',
     });
 
-    const data = await res.json();
+    return res;
+  }
 
+  async listProjects(teamId?: string): Promise<ListProjectsResponse> {
+    let projectData: Response;
+    try {
+      projectData = await fetch(
+        `${this.baseEndpoint}/v9/projects?${this.buildTeamIdQueryParam(teamId)}`,
+        {
+          headers: this.buildHeaders(),
+          method: 'GET',
+        }
+      );
+    } catch (e) {
+      console.error(e);
+      throw new Error(errorTypes.CANNOT_FETCH_PROJECTS);
+    }
+
+    const data = await projectData.json();
     return data;
+  }
+
+  async listApiPaths(projectId: string, teamId?: string): Promise<ApiPath[]> {
+    let deploymentData: ListDeploymentSummaryResponse = { serverlessFunctions: [] };
+    try {
+      deploymentData = await this.listDeploymentSummary(projectId, teamId);
+    } catch (e) {
+      console.error(e);
+      throw new Error(errorTypes.CANNOT_FETCH_API_PATHS);
+    }
+
+    if (
+      !deploymentData?.serverlessFunctions ||
+      !Array.isArray(deploymentData.serverlessFunctions)
+    ) {
+      throw new Error(errorTypes.INVALID_DEPLOYMENT_DATA);
+    }
+
+    const apiPaths = this.filterServerlessFunctions(deploymentData.serverlessFunctions);
+
+    if (!apiPaths.length) throw new Error(errorTypes.API_PATHS_EMPTY);
+
+    const formattedApiPaths = this.formatApiPaths(apiPaths);
+
+    return formattedApiPaths;
   }
 
   async listDeploymentSummary(
     projectId: string,
+    teamId?: string,
     deploymentId?: string
   ): Promise<ListDeploymentSummaryResponse> {
     let data: ListDeploymentSummaryResponse = { serverlessFunctions: [] };
     try {
-      const latestDeploymentId = deploymentId || (await this.getLatestDeploymentId(projectId));
+      const latestDeployment = await this.getLatestProjectDeployment(projectId, teamId);
+      const latestDeploymentId = deploymentId || latestDeployment.uid;
       const res = await fetch(
-        `${this.baseEndpoint}/v6/deployments/${latestDeploymentId}/files/outputs?file=..%2Fdeploy_metadata.json`,
+        `${
+          this.baseEndpoint
+        }/v6/deployments/${latestDeploymentId}/files/outputs?file=..%2Fdeploy_metadata.json&${this.buildTeamIdQueryParam(
+          teamId
+        )}`,
         {
           headers: this.buildHeaders(),
           method: 'GET',
@@ -72,58 +129,21 @@ export default class VercelClient implements VercelAPIClient {
     return data;
   }
 
-  async listApiPaths(projectId: string): Promise<ApiPath[]> {
-    let deploymentData: ListDeploymentSummaryResponse = { serverlessFunctions: [] };
-    try {
-      deploymentData = await this.listDeploymentSummary(projectId);
-    } catch (e) {
-      console.error(e);
-      throw new Error('Failed to fetch API paths.');
-    }
-
-    const apiPaths = this.filterServerlessFunctions(deploymentData.serverlessFunctions);
-    const formattedApiPaths = this.formatApiPaths(apiPaths);
-
-    return formattedApiPaths;
-  }
-
-  async getLatestDeploymentId(projectId: string): Promise<string> {
-    const res = await fetch(`${this.baseEndpoint}/v6/deployments?projectId=${projectId}`, {
-      headers: this.buildHeaders(),
-      method: 'GET',
-    });
+  async getLatestProjectDeployment(projectId: string, teamId?: string): Promise<Deployment> {
+    const res = await fetch(
+      `${this.baseEndpoint}/v6/deployments?projectId=${projectId}&${this.buildTeamIdQueryParam(
+        teamId
+      )}`,
+      {
+        headers: this.buildHeaders(),
+        method: 'GET',
+      }
+    );
 
     const data = await res.json();
 
     // Vercel returns deployments sorted by date in descending order
-    return data.deployments[0].uid;
-  }
-
-  async createDeployment({ project }: CreateDeploymentInput): Promise<Deployment> {
-    const res = await fetch(`${this.baseEndpoint}/v13/deployments`, {
-      headers: this.buildHeaders(),
-      method: 'POST',
-      body: JSON.stringify({
-        name: project.name,
-        deploymentId: project.targets.production.id,
-        target: 'production',
-      }),
-    });
-
-    const data = await res.json();
-
-    return data;
-  }
-
-  async getDeploymentById(deploymentId: string): Promise<Deployment> {
-    const res = await fetch(`${this.baseEndpoint}/v13/deployments/${deploymentId}`, {
-      headers: this.buildHeaders(),
-      method: 'GET',
-    });
-
-    const data = await res.json();
-
-    return data;
+    return data.deployments[0];
   }
 
   private filterServerlessFunctions(data: ServerlessFunction[]) {

@@ -7,7 +7,6 @@ export const copies = {
       input: {
         label: 'Vercel Access Token',
         placeholder: 'ex. atE2sdftcIp01O1isdfXc3QTdT4...',
-        errorMessage: 'Invalid access token',
       },
       link: {
         href: 'https://vercel.com/docs/rest-api#creating-an-access-token',
@@ -17,8 +16,6 @@ export const copies = {
       label: 'Project',
       placeholder: 'Select a project',
       emptyMessage: 'No Vercel projects are available',
-      errorMessage:
-        'The project you have configured is no longer available. Please select another one.',
       helpText: 'Connect to a project associated with your website or experience.',
     },
     pathSelectionSection: {
@@ -26,8 +23,6 @@ export const copies = {
       placeholder: 'Select a route',
       textInputPlaceholder: 'Ex: api/enable-draft',
       emptyMessage: 'No paths currently configured.',
-      errorMessage:
-        'The path you have configured is no longer available. Please select another one.',
       helpText: undefined, // defined as React component
       textInputHelpText: 'Set a Vercel route to enable your draft mode.',
     },
