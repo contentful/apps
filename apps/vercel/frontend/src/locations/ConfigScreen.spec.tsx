@@ -5,6 +5,7 @@ import { mockCma, mockSdk } from '../../test/mocks';
 import ConfigScreen from './ConfigScreen';
 import VercelClient from '@clients/Vercel';
 import { singleSelectionSections } from '@constants/enums';
+import { copies } from '@constants/copies';
 
 const projectSelectionSectionTestId = singleSelectionSections.PROJECT_SELECTION_SECTION;
 const pathSelectionSectionTestId = singleSelectionSections.API_PATH_SELECTION_SECTION;
@@ -66,6 +67,10 @@ describe('ConfigScreen', () => {
     expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
 
     const selectDropdowns = await screen.findAllByTestId('optionsSelect');
+    const dropdownPlaceholder = await screen.findByText(
+      copies.configPage.projectSelectionSection.placeholder
+    );
+    expect(dropdownPlaceholder).toBeTruthy();
 
     user.selectOptions(selectDropdowns[0], 'Project 1');
 
