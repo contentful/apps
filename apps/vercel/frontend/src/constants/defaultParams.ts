@@ -16,6 +16,7 @@ export const initialErrors: Errors = {
   },
   projectSelection: {
     projectNotFound: false,
+    protectionBypassIsDisabled: false,
     cannotFetchProjects: false,
     invalidSpaceId: false,
   },

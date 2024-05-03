@@ -84,6 +84,7 @@ describe('SelectSection', () => {
       projectNotFound: true,
       cannotFetchProjects: false,
       invalidSpaceId: false,
+      protectionBypassIsDisabled: false,
     };
     const mockHandleInvalidSelectionError = vi.fn(() => {});
     const { unmount } = render(
