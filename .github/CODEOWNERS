@@ -1,4 +1,5 @@
 # team integrations owns all code in this repository by default
+
 * @contentful/team-integrations
 
 apps/graphql-playground @contentful/team-developer-experience
@@ -8,3 +9,8 @@ examples/function-mock-shop @contentful/team-monet
 examples/function-potterdb @contentful/team-monet
 examples/function-potterdb-rest-api @contentful/team-monet
 examples/function-templates @contentful/team-monet
+
+# package.json and package-lock.json should be unowned so that dependabot can automatically update dependencies
+
+**/package.json
+**/package-lock.json
