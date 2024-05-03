@@ -1,3 +1,8 @@
+## Overview
+
+This frontend module for the Vercel marketplace app was created using the Contentful App Framework.
+To make the app look and feel like Contentful, Contentful's design system, [Forma 36](https://f36.contentful.com/), was leveraged.
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -18,27 +23,10 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.
 Your app is ready to be deployed!
 
-## Libraries to use
+#### `npm run test`
 
-To make your app look and feel like Contentful use the following libraries:
+Runs the spec files within the module, and remains in watch mode.
 
-- [Forma 36](https://f36.contentful.com/) – Contentful's design system
-- [Contentful Field Editors](https://www.contentful.com/developers/docs/extensibility/field-editors/) – Contentful's field editor React components
-
-## Using the `contentful-management` SDK
-
-In the default create contentful app output, a contentful management client is
-passed into each location. This can be used to interact with Contentful's
-management API. For example
-
-```js
-// Use the client
-cma.locale.getMany({}).then((locales) => console.log(locales));
-```
-
-Visit the [`contentful-management` documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#using-the-contentful-management-library)
-to find out more.
-
-## Learn More
+## Learn more about the app framework
 
 [Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.
