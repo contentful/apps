@@ -1,11 +1,14 @@
+import React from 'react';
 import { GlobalStyles } from '@contentful/f36-components';
 import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import LocalhostWarning from './components/LocalhostWarning';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const container = document.getElementById('root')!;
+const queryClient = new QueryClient();
 const root = createRoot(container);
 
 if (process.env.NODE_ENV === 'development' && window.self === window.top) {
@@ -15,7 +18,9 @@ if (process.env.NODE_ENV === 'development' && window.self === window.top) {
   root.render(
     <SDKProvider>
       <GlobalStyles />
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
     </SDKProvider>
   );
 }
