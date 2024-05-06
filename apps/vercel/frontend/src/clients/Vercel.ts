@@ -167,7 +167,9 @@ export default class VercelClient implements VercelAPIClient {
       const contentfulSpaceIdEnv = envs.find((env) => env.key === CONTENTFUL_SPACE_ID);
       if (contentfulSpaceIdEnv) {
         const res = await fetch(
-          `${this.baseEndpoint}/v1/projects/${projectId}/env/${contentfulSpaceIdEnv.id}`,
+          `${this.baseEndpoint}/v1/projects/${projectId}/env/${
+            contentfulSpaceIdEnv.id
+          }?${this.buildTeamIdQueryParam(teamId)}`,
           {
             headers: this.buildHeaders(),
             method: 'GET',
