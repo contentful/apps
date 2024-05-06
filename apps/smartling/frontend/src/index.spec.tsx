@@ -79,6 +79,8 @@ describe('App', () => {
   });
 
   it('should load the AppConfig page and allow for installation', async () => {
+    expect(2).toEqual(3);
+
     mockSdk.app.onConfigure = jest.fn();
     mockSdk.location.is = (location: string) => location === locations.LOCATION_APP_CONFIG;
     const wrapper = render(<App sdk={mockSdk as any} />);

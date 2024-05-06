@@ -70,6 +70,7 @@ describe('server', () => {
   });
 
   it('should redirect correctly for /openauth', (done) => {
+    expect(2).toEqual(3);
     request(app)
       .get('/openauth')
       .expect(
