@@ -4,6 +4,7 @@ import { screen } from '@testing-library/react';
 import { ApiPathSelectionSection } from './ApiPathSelectionSection';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
 import { ApiPath } from '@customTypes/configPage';
+import { copies } from '@constants/copies';
 
 describe('ApiPathSelectionSection', () => {
   it('renders dropdown when paths are present and no errors are present', () => {
@@ -60,6 +61,19 @@ describe('ApiPathSelectionSection', () => {
 
     const input = screen.getByTestId('apiPathInput');
     expect(input).toBeTruthy();
+    unmount();
+  });
+
+  it('renders no selected value in dropdown when apiPathNotFound error', () => {
+    const paths = [{ id: 'path-1', name: 'Path/1' }];
+    const errors = { apiPathSelection: { apiPathNotFound: true }, selectedApiPath: 'path-1' };
+    const { unmount } = renderConfigPageComponent(
+      <ApiPathSelectionSection paths={paths} />,
+      errors
+    );
+
+    const emptyInput = screen.getByText(copies.configPage.pathSelectionSection.placeholder);
+    expect(emptyInput).toBeTruthy();
     unmount();
   });
 });
