@@ -34,7 +34,7 @@ export const SelectSection = ({
 }: Props) => {
   const { placeholder, label, emptyMessage, helpText: helpTextCopy } = copies.configPage[section];
   const { isLoading } = useContext(ConfigPageContext);
-  const { isError, message } = useError({ error });
+  const { message } = useError({ error });
 
   useEffect(() => {
     if (!isLoading) {
@@ -51,7 +51,7 @@ export const SelectSection = ({
   return (
     <FormControl marginBottom="spacingS" id={id} isRequired={true}>
       <Select
-        value={isError ? '' : selectedOption}
+        value={selectedOption}
         onChange={handleChange}
         placeholder={placeholder}
         emptyMessage={emptyMessage}

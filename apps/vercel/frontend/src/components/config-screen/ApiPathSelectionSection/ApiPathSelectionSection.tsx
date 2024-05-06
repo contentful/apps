@@ -22,6 +22,8 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
     useContext(ConfigPageContext);
   const { invalidDeploymentData, cannotFetchApiPaths } = errors.apiPathSelection;
 
+  const selectedOption = errors.apiPathSelection ? '' : parameters.selectedApiPath;
+
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatchParameters({
       type: parametersActions.APPLY_API_PATH,
@@ -47,7 +49,7 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
 
     return (
       <SelectSection
-        selectedOption={parameters.selectedApiPath}
+        selectedOption={selectedOption}
         options={paths}
         handleInvalidSelectionError={handleInvalidSelectionError}
         handleChange={handleChange}

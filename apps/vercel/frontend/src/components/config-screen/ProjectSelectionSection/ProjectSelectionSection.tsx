@@ -10,6 +10,7 @@ import {
   singleSelectionSections,
 } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
+import { useFetchData } from '@hooks/useFetchData/useFetchData';
 
 interface Props {
   projects: Project[];
@@ -17,10 +18,23 @@ interface Props {
 
 export const ProjectSelectionSection = ({ projects }: Props) => {
   const sectionId = singleSelectionSections.PROJECT_SELECTION_SECTION;
-  const { parameters, errors, dispatchErrors, dispatchParameters, handleAppConfigurationChange } =
-    useContext(ConfigPageContext);
+  const {
+    parameters,
+    errors,
+    dispatchErrors,
+    dispatchParameters,
+    handleAppConfigurationChange,
+    sdk,
+    vercelClient,
+  } = useContext(ConfigPageContext);
+  const { validateProjectEnv } = useFetchData({
+    dispatchErrors,
+    dispatchParameters,
+    vercelClient,
+    teamId: parameters.teamId,
+  });
 
-  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = async (event: ChangeEvent<HTMLSelectElement>) => {
     // indicate app config change when project has been re-selected
     handleAppConfigurationChange();
 
@@ -35,9 +49,8 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
       payload: event.target.value,
     });
 
-    dispatchErrors({
-      type: errorsActions.RESET_PROJECT_SELECTION_ERRORS,
-    });
+    const currentSpaceId = sdk.ids.space;
+    await validateProjectEnv(currentSpaceId, event.target.value);
   };
 
   const handleInvalidSelectionError = () => {
@@ -47,10 +60,12 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
     });
   };
 
+  const selectedOption = errors.projectSelection.projectNotFound ? '' : parameters.selectedProject;
+
   return (
     <SectionWrapper testId={sectionId}>
       <SelectSection
-        selectedOption={parameters.selectedProject}
+        selectedOption={selectedOption}
         options={projects}
         handleInvalidSelectionError={handleInvalidSelectionError}
         section={sectionId}

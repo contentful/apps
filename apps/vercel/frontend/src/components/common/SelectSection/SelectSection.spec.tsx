@@ -72,7 +72,11 @@ describe('SelectSection', () => {
 
   it('renders error message when selected option no longer exists', () => {
     const ID = singleSelectionSections.PROJECT_SELECTION_SECTION;
-    const projectSelectionError = { projectNotFound: true, cannotFetchProjects: false };
+    const projectSelectionError = {
+      projectNotFound: true,
+      cannotFetchProjects: false,
+      invalidSpaceId: false,
+    };
     const mockHandleInvalidSelectionError = vi.fn(() => {});
     const { unmount } = render(
       <SelectSection

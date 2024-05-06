@@ -2,9 +2,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { mockContentTypes } from '../mocks/mockContentTypes';
 import { mockContentTypePreviewPathSelections } from '../mocks/mockContentTypePreviewPathSelections';
-import { ConfigPageContext } from '../../src/contexts/ConfigPageProvider';
-import { AppInstallationParameters, Errors } from '../../src/customTypes/configPage';
+import { ConfigPageContext } from '@contexts/ConfigPageProvider';
+import { AppInstallationParameters, Errors } from '@customTypes/configPage';
 import { initialErrors } from '@constants/defaultParams';
+import { mockSdk } from '@test/mocks';
 
 export const renderConfigPageComponent = (
   children: React.ReactNode,
@@ -26,6 +27,8 @@ export const renderConfigPageComponent = (
         isAppConfigurationSaved: false,
         handleAppConfigurationChange: () => null,
         isLoading: false,
+        sdk: mockSdk,
+        vercelClient: null,
         ...overrides,
       }}>
       {children}
