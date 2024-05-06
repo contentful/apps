@@ -31,6 +31,7 @@ const mockSdk: any = {
   },
   ids: {
     app: 'test-app',
+    space: '1234',
   },
   cma: {
     contentType: {
