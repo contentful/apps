@@ -16,7 +16,7 @@ interface Props {
   options: Path[] | Project[];
   section: CopySection;
   id: string;
-  handleInvalidSelectionError: () => void;
+  handleNotFoundError: () => void;
   handleChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   helpText?: string | React.ReactNode;
   error?: Errors['projectSelection'] | Errors['apiPathSelection'];
@@ -29,12 +29,12 @@ export const SelectSection = ({
   id,
   helpText,
   error,
-  handleInvalidSelectionError,
+  handleNotFoundError,
   handleChange,
 }: Props) => {
   const { placeholder, label, emptyMessage, helpText: helpTextCopy } = copies.configPage[section];
   const { isLoading } = useContext(ConfigPageContext);
-  const { isError, message } = useError({ error });
+  const { message } = useError({ error });
 
   useEffect(() => {
     if (!isLoading) {
@@ -43,7 +43,7 @@ export const SelectSection = ({
       const areOptionsAvailable = options.length === 0;
 
       if (!isValidSelection && !areOptionsAvailable) {
-        handleInvalidSelectionError();
+        handleNotFoundError();
       }
     }
   }, [selectedOption, options, isLoading]);
@@ -51,7 +51,7 @@ export const SelectSection = ({
   return (
     <FormControl marginBottom="spacingS" id={id} isRequired={true}>
       <Select
-        value={isError ? '' : selectedOption}
+        value={selectedOption}
         onChange={handleChange}
         placeholder={placeholder}
         emptyMessage={emptyMessage}

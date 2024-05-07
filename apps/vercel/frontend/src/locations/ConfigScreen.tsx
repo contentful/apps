@@ -165,6 +165,8 @@ const ConfigScreen = () => {
       dispatchErrors={dispatchErrors}
       isLoading={isLoading}
       parameters={parameters}
+      sdk={sdk}
+      vercelClient={vercelClient}
       errors={errors}>
       <Box className={styles.body}>
         <Box>
