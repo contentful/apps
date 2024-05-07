@@ -28,8 +28,8 @@ export const useConnect = () => {
 
       if (token) {
         try {
-          await api.install({ workspaces: [workspace.id] });
           const installationUuid = uuidv4();
+          await api.install({ workspaces: [workspace.id], installationUuid });
           setInstallationUuid(installationUuid);
 
           await apiClient.createAuthToken(sdk, cma, token, installationUuid);
