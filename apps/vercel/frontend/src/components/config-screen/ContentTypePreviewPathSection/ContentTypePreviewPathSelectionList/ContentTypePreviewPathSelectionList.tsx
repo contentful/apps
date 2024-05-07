@@ -67,6 +67,7 @@ export const ContentTypePreviewPathSelectionList = () => {
         onParameterUpdate={handleUpdateParameters}
         onRemoveRow={handleRemoveRow}
         renderLabel={index === 0}
+        rowId={index}
       />
     ));
   };
