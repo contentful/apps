@@ -15,7 +15,7 @@
     "graphql": "16.8.1",
     "graphql-yoga": "4.0.5",
     "react": "18.3.1",
-    "react-dom": "18.2.0",
+    "react-dom": "18.3.1",
     "react-scripts": "5.0.1"
   },
   "scripts": {
@@ -51,7 +51,7 @@
     "@tsconfig/create-react-app": "2.0.4",
     "@types/node": "16.18.96",
     "@types/react": "18.3.1",
-    "@types/react-dom": "18.2.25",
+    "@types/react-dom": "18.3.0",
     "cross-env": "7.0.3",
     "esbuild": "0.20.2",
     "prettier": "^3.2.5",
