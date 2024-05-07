@@ -71,6 +71,7 @@ const styles = {
       margin: '10px',
       position: 'relative',
       cursor: disabled ? 'move' : 'pointer',
+      minHeight: '130px',
       img: {
         display: 'block',
         maxWidth: '150px',
@@ -81,11 +82,12 @@ const styles = {
     }),
   remove: css({
     position: 'absolute',
-    top: '-10px',
-    right: '-10px',
+    top: '-5px',
+    right: '-5px',
     backgroundColor: 'white',
     padding: 0,
     minHeight: 'initial',
+    minWidth: '25px',
   }),
   altTextContainer: css({
     display: 'flex',
