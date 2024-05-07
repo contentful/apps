@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { CharacterAttributes, CharacterProps } from '../types';
 
-async function fetchCharacters(): Promise<CharacterAttributes[]> {
+
+async function fetchCharacters(filter: string): Promise<CharacterAttributes[]> {
   const characterProps: CharacterProps[] = await fetch(
-    'https://api.potterdb.com/v1/characters?page[size]=200'
+    `https://api.potterdb.com/v1/characters?filter[name_cont]=${filter}`
   )
     .then((response) => response.json())
     .then((data) => data.data);
@@ -18,10 +19,10 @@ type HookResult = {
   isLoading: boolean;
 };
 
-export function useCharacters(): HookResult {
+export function useCharacters(filter: string): HookResult {
   const { isLoading, data: characters } = useQuery<CharacterAttributes[]>({
-    queryKey: ['characters'],
-    queryFn: fetchCharacters,
+    queryKey: ['characters', filter],
+    queryFn: () => fetchCharacters(filter),
     retry: false,
   });
 
