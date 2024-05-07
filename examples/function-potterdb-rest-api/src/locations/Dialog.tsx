@@ -12,7 +12,7 @@ import { CharacterAttributes } from '../types';
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
 
-  const [filter, setFilter] = useState<string>(''); 
+  const [filter, setFilter] = useState<string>('');
   const [searchText, setSearchText] = useState('');
 
   const handleChange = (search: string) => {
@@ -21,7 +21,7 @@ const Dialog = () => {
 
   const handleSubmit = () => {
     setSearchText(filter);
-  }
+  };
 
   const { isLoading, characters } = useCharacters(searchText);
 
@@ -46,16 +46,16 @@ const Dialog = () => {
         <Button onClick={() => selectCharacter(undefined)}>Dismiss</Button>
       </Modal.Header>
       <Modal.Content>
-      <Form onSubmit={handleSubmit}>
-      <FormControl>
-        <FormControl.Label>Character 🪄</FormControl.Label>
-        <TextInput
-        value={filter}
-        placeholder="Search for a character"
-        onChange={(e) => handleChange(e.target.value)}
-      />
-      </FormControl>
-    </Form>
+        <Form onSubmit={handleSubmit}>
+          <FormControl>
+            <FormControl.Label>Character 🪄</FormControl.Label>
+            <TextInput
+              value={filter}
+              placeholder="Search for a character"
+              onChange={(e) => handleChange(e.target.value)}
+            />
+          </FormControl>
+        </Form>
         <CharactersList characters={characters} onSelect={selectCharacter} />
       </Modal.Content>
       <Modal.Controls>

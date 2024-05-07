@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { CharacterAttributes, CharacterProps } from '../types';
 
-
 async function fetchCharacters(filter: string): Promise<CharacterAttributes[]> {
   const characterProps: CharacterProps[] = await fetch(
     `https://api.potterdb.com/v1/characters?filter[name_cont]=${filter}`
