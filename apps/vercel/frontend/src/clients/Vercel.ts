@@ -180,7 +180,7 @@ export default class VercelClient implements VercelAPIClient {
         return data.value === currentSpaceId;
       }
     } catch (e) {
-      // let user continue if there is an validating env value
+      // let user continue if there is an error validating env value
       console.error(e);
     }
 

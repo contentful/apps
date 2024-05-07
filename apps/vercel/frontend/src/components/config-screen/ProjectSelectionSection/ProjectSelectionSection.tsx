@@ -34,7 +34,7 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
     teamId: parameters.teamId,
   });
 
-  const handleChange = async (event: ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     // indicate app config change when project has been re-selected
     handleAppConfigurationChange();
 
