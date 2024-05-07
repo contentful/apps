@@ -15,8 +15,8 @@ const Dialog = () => {
   const [filter, setFilter] = useState<string>('');
   const [searchText, setSearchText] = useState('');
 
-  const handleChange = (search: string) => {
-    setFilter(search); // Update the filter state with user input
+  const handleChange = (filter: string) => {
+    setFilter(filter);
   };
 
   const handleSubmit = () => {
