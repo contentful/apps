@@ -35,7 +35,7 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
     });
   };
 
-  const handleInvalidSelectionError = () => {
+  const handlePathNotFoundError = () => {
     dispatchErrors({
       type: errorsActions.UPDATE_API_PATH_SELECTION_ERRORS,
       payload: errorTypes.API_PATH_NOT_FOUND,
@@ -51,7 +51,7 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
       <SelectSection
         selectedOption={selectedOption}
         options={paths}
-        handleInvalidSelectionError={handleInvalidSelectionError}
+        handleNotFoundError={handlePathNotFoundError}
         handleChange={handleChange}
         section={sectionId}
         id={sectionId}

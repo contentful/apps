@@ -1,13 +1,14 @@
+import { AppInstallationParameters } from '@customTypes/configPage';
 import { vi } from 'vitest';
 
-export const mockParameters = {
+const SPACE_ID = '1234';
+
+export const mockParameters: AppInstallationParameters = {
   vercelAccessToken: 'abc-123',
   selectedProject: 'test-project-id',
-  projects: [
-    {
-      id: 'test-project-id',
-      name: 'test project',
-    },
+  selectedApiPath: 'test-api-path',
+  contentTypePreviewPathSelections: [
+    { contentType: 'test-content-type', previewPath: 'test-preview-path' },
   ],
 };
 
@@ -26,12 +27,11 @@ const mockSdk: any = {
     installation: {
       vercelAccessToken: mockParameters.vercelAccessToken,
       selectedProject: mockParameters.selectedProject,
-      projects: mockParameters.projects,
     },
   },
   ids: {
     app: 'test-app',
-    space: '1234',
+    space: SPACE_ID,
   },
   cma: {
     contentType: {

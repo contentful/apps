@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext } from 'react';
+import { ChangeEvent, useContext, useEffect } from 'react';
 
 import { Project } from '@customTypes/configPage';
 import { SectionWrapper } from '@components/common/SectionWrapper/SectionWrapper';
@@ -48,12 +48,17 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
       type: parametersActions.APPLY_SELECTED_PROJECT,
       payload: event.target.value,
     });
-
-    const currentSpaceId = sdk.ids.space;
-    await validateProjectEnv(currentSpaceId, event.target.value);
   };
 
-  const handleInvalidSelectionError = () => {
+  useEffect(() => {
+    const currentSpaceId = sdk.ids.space;
+    const validateProjectSelectionEnv = async () => {
+      await validateProjectEnv(currentSpaceId, parameters.selectedProject);
+    };
+    if (parameters.selectedProject) validateProjectSelectionEnv();
+  }, [parameters.selectedProject, vercelClient, parameters.teamId]);
+
+  const handleProjectNotFoundError = () => {
     dispatchErrors({
       type: errorsActions.UPDATE_PROJECT_SELECTION_ERRORS,
       payload: errorTypes.PROJECT_NOT_FOUND,
@@ -67,7 +72,7 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
       <SelectSection
         selectedOption={selectedOption}
         options={projects}
-        handleInvalidSelectionError={handleInvalidSelectionError}
+        handleNotFoundError={handleProjectNotFoundError}
         section={sectionId}
         id={sectionId}
         error={errors.projectSelection}

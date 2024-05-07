@@ -37,6 +37,7 @@ describe('ProjectSelectionSection', () => {
   });
 
   it('handles project selection', async () => {
+    const user = userEvent.setup();
     const mockValidation = vi.fn().mockImplementationOnce(() => Promise.resolve());
     vi.spyOn(fetchData, 'useFetchData').mockReturnValue({
       validateProjectEnv: mockValidation,
@@ -44,20 +45,17 @@ describe('ProjectSelectionSection', () => {
       fetchProjects: vi.fn(),
       fetchApiPaths: vi.fn(),
     });
-    const user = userEvent.setup();
     const mockHandleAppConfigurationChange = vi.fn();
     const mockDispatchParameters = vi.fn();
-    const parameters = {
+    const overrides = {
       dispatchParameters: mockDispatchParameters,
       handleAppConfigurationChange: mockHandleAppConfigurationChange,
+      parameters: { teamId: '1234', selectedProject: projects[0].id },
     } as unknown as AppInstallationParameters;
-    const projects = [
-      { id: 'project-1', name: 'Project 1', targets: { production: { id: 'project-1' } }, env: [] },
-    ];
-    const { unmount } = renderConfigPageComponent(
-      <ProjectSelectionSection projects={projects} />,
-      parameters
-    );
+
+    const { unmount } = renderConfigPageComponent(<ProjectSelectionSection projects={projects} />, {
+      ...overrides,
+    });
 
     const selectDropdown = screen.getByTestId('optionsSelect');
 

@@ -16,7 +16,7 @@ interface Props {
   options: Path[] | Project[];
   section: CopySection;
   id: string;
-  handleInvalidSelectionError: () => void;
+  handleNotFoundError: () => void;
   handleChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   helpText?: string | React.ReactNode;
   error?: Errors['projectSelection'] | Errors['apiPathSelection'];
@@ -29,7 +29,7 @@ export const SelectSection = ({
   id,
   helpText,
   error,
-  handleInvalidSelectionError,
+  handleNotFoundError,
   handleChange,
 }: Props) => {
   const { placeholder, label, emptyMessage, helpText: helpTextCopy } = copies.configPage[section];
@@ -43,7 +43,7 @@ export const SelectSection = ({
       const areOptionsAvailable = options.length === 0;
 
       if (!isValidSelection && !areOptionsAvailable) {
-        handleInvalidSelectionError();
+        handleNotFoundError();
       }
     }
   }, [selectedOption, options, isLoading]);

@@ -24,7 +24,7 @@ describe('SelectSection', () => {
         options={paths}
         section={ID}
         id={ID}
-        handleInvalidSelectionError={vi.fn()}
+        handleNotFoundError={vi.fn()}
         handleChange={vi.fn()}
         selectedOption={parameters.selectedApiPath}
       />
@@ -51,7 +51,7 @@ describe('SelectSection', () => {
         section={ID}
         id={ID}
         handleChange={mockHandleChange}
-        handleInvalidSelectionError={vi.fn()}
+        handleNotFoundError={vi.fn()}
         selectedOption={parameters.selectedApiPath}
       />,
       { handleAppConfigurationChange: mockHandleAppConfigurationChange }
@@ -85,7 +85,7 @@ describe('SelectSection', () => {
         id={ID}
         selectedOption={'non-existent-id'}
         handleChange={vi.fn()}
-        handleInvalidSelectionError={mockHandleInvalidSelectionError}
+        handleNotFoundError={mockHandleInvalidSelectionError}
         error={projectSelectionError}
       />
     );
