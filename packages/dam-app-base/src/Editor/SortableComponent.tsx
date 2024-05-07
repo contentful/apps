@@ -3,7 +3,7 @@ import { Card, Collapse, Flex, IconButton, TextLink } from '@contentful/f36-comp
 import { CloseIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { css } from 'emotion';
-import { UniqueIdentifier } from '@dnd-kit/core';
+import { DragEndEvent, UniqueIdentifier } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
 import {
@@ -280,12 +280,12 @@ export const SortableComponent = ({
   }, [resources, makeThumbnail, getAdditionalData, setItems]);
 
   const handleDragEnd = useCallback(
-    (event) => {
+    (event: DragEndEvent) => {
       const { active, over } = event;
 
-      if (active.id !== over?.id) {
+      if (active?.id !== over?.id) {
         const oldIndex = items.findIndex((i) => i.key === active.id);
-        const newIndex = items.findIndex((i) => i.key === over.id);
+        const newIndex = items.findIndex((i) => i.key === over?.id);
         const sortedItems = arrayMove(items, oldIndex, newIndex);
 
         onChange(sortedItems);
