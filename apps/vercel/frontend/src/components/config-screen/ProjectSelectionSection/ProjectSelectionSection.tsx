@@ -35,6 +35,10 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
   });
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    if (event.target.value === parameters.selectedProject) {
+      return;
+    }
+
     // indicate app config change when project has been re-selected
     handleAppConfigurationChange();
 
@@ -52,10 +56,7 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
 
   useEffect(() => {
     const selectedProject = projects.find((project) => project.id === parameters.selectedProject);
-    const protectionBypassIsDisabled =
-      selectedProject &&
-      selectedProject.protectionBypass &&
-      !Object.keys(selectedProject.protectionBypass).length;
+    const protectionBypassIsDisabled = selectedProject && !selectedProject.protectionBypass;
 
     if (protectionBypassIsDisabled) {
       dispatchErrors({

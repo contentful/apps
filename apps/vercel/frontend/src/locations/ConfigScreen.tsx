@@ -158,6 +158,7 @@ const ConfigScreen = () => {
     renderPostAuthComponents &&
     !errors.projectSelection.projectNotFound &&
     !errors.projectSelection.cannotFetchProjects &&
+    !errors.projectSelection.protectionBypassIsDisabled &&
     parameters.selectedProject &&
     projects.length;
 
