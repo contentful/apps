@@ -4,14 +4,14 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "4.23.0",
-    "@contentful/f36-components": "4.64.0",
+    "@contentful/f36-components": "4.65.5",
     "@contentful/f36-tokens": "4.0.5",
     "@contentful/react-apps-toolkit": "1.2.16",
     "@segment/analytics-next": "^1.51.3",
     "@sentry/react": "^7.44.2",
     "@testing-library/user-event": "14.4.3",
     "@types/chart.js": "^2.9.37",
-    "@types/lodash": "4.17.0",
+    "@types/lodash": "4.17.1",
     "@types/react-chartjs-2": "^2.5.7",
     "chart.js": "^4.2.1",
     "contentful-management": "10.31.4",
@@ -21,7 +21,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "17.0.2",
     "react-scripts": "5.0.1",
-    "zod": "3.22.5"
+    "zod": "3.23.6"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
