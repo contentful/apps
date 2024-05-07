@@ -2,6 +2,7 @@ import type { FunctionEventHandler, FunctionEventType } from '@contentful/node-a
 
 type InstallationParameters = {
   apiEndpoint: string;
+  url: string;
 };
 
 type EventHandler = FunctionEventHandler<FunctionEventType, InstallationParameters>;
@@ -33,11 +34,17 @@ const queryHandler: QueryHandler = async (event, context) => {
   // and set per installation.
   const { apiEndpoint } = context.appInstallationParameters;
 
+  let mockShopUrl = apiEndpoint;
+  if (!mockShopUrl) {
+    mockShopUrl = 'https://mock.shop/api';
+    console.warn(`No API url configured, falling back to '${mockShopUrl}'`);
+  }
+
   // Make a request to the third party API.
   // The expected return type aligns with the
   // one outlined in the GraphQL specs:
   // https://spec.graphql.org/October2021/#sec-Response
-  const response = await fetch(apiEndpoint, {
+  const response = await fetch(mockShopUrl, {
     body: JSON.stringify({
       query: event.query,
       operationName: event.operationName,

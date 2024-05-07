@@ -57,7 +57,7 @@ const ConfigScreen = () => {
           </FormControl.HelpText>
           {!parameters.apiEndpoint && (
             <FormControl.ValidationMessage>
-              Please, provide API endpoint
+              Please, provide the API endpoint "https://mock.shop/api"
             </FormControl.ValidationMessage>
           )}
         </FormControl>
