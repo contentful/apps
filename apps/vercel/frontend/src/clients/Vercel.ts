@@ -162,7 +162,7 @@ export default class VercelClient implements VercelAPIClient {
     teamId: string
   ) {
     try {
-      const data = await this.listProject(projectId, teamId);
+      const data = await this.getProject(projectId, teamId);
       const envs = data.env;
       const contentfulSpaceIdEnv = envs.find((env) => env.key === CONTENTFUL_SPACE_ID);
       if (contentfulSpaceIdEnv) {
@@ -187,7 +187,7 @@ export default class VercelClient implements VercelAPIClient {
     return false;
   }
 
-  private async listProject(projectId: string, teamId: string): Promise<Project> {
+  private async getProject(projectId: string, teamId: string): Promise<Project> {
     let projectData: Response;
     try {
       projectData = await fetch(
