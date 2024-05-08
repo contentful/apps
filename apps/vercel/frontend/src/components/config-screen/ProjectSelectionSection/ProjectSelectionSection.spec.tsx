@@ -55,7 +55,7 @@ describe('ProjectSelectionSection', () => {
     const overrides = {
       dispatchParameters: mockDispatchParameters,
       handleAppConfigurationChange: mockHandleAppConfigurationChange,
-      parameters: { teamId: '1234', selectedProject: projects[0].id },
+      parameters: { teamId: '1234', selectedProject: 'project 2' },
     } as unknown as AppInstallationParameters;
 
     const { unmount } = renderConfigPageComponent(<ProjectSelectionSection projects={projects} />, {

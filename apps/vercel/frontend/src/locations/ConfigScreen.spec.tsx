@@ -33,6 +33,7 @@ describe('ConfigScreen', () => {
               id: '',
             },
           },
+          protectionBypass: {},
           env: [],
         },
       ],
