@@ -6,6 +6,11 @@ import { copies } from '@constants/copies';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
 import { errorMessages } from '@constants/errorMessages';
 import lodash from 'lodash';
+import { mockSdk } from '@test/mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 const { inputs } = copies.configPage.contentTypePreviewPathSection;
 

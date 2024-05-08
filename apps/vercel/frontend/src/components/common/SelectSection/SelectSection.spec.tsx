@@ -8,6 +8,11 @@ import { copies } from '@constants/copies';
 import { singleSelectionSections } from '@constants/enums';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
 import { errorMessages } from '@constants/errorMessages';
+import { mockSdk } from '@test/mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 const parameters = { selectedApiPath: '', selectedProject: '' } as AppInstallationParameters;
 const paths = [{ id: 'path-1', name: 'Path/1' }];

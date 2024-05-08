@@ -7,8 +7,13 @@ import { copies } from '@constants/copies';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
 import { errorMessages } from '@constants/errorMessages';
 import { initialErrors } from '@constants/defaultParams';
+import { mockSdk } from '@test/mocks';
 
 const { input } = copies.configPage.authenticationSection;
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('AuthenticationSection', () => {
   it('renders input when token is not yet inputed', () => {

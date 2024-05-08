@@ -5,6 +5,11 @@ import { TextFieldSection } from './TextFieldSection';
 import { copies } from '@constants/copies';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
 import { errorMessages } from '@constants/errorMessages';
+import { mockSdk } from '@test/mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('TextFieldSection', () => {
   it('renders text field with value', () => {
