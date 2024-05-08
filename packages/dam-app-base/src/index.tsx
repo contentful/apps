@@ -1,21 +1,23 @@
 import { ConfigAppSDK, DialogAppSDK, FieldAppSDK, init, locations } from '@contentful/app-sdk';
 import { GlobalStyles } from '@contentful/f36-components';
 import * as React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+
 import AppConfig from './AppConfig/AppConfig';
 import Field from './Editor/Field';
 import { Integration } from './interfaces';
 
 export function setup(integration: Integration) {
   init((sdk) => {
-    const root = document.getElementById('root');
+    const container = document.getElementById('root') as HTMLElement;
+    const root = createRoot(container);
 
     if (sdk.location.is(locations.LOCATION_DIALOG)) {
       integration.renderDialog(sdk as DialogAppSDK);
     }
 
     if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
-      render(
+      root.render(
         <>
           <GlobalStyles />
           <Field
@@ -28,13 +30,12 @@ export function setup(integration: Integration) {
             customUpdateStateValue={integration.customUpdateStateValue ?? null}
             getAdditionalData={integration.getAdditionalData ?? null}
           />
-        </>,
-        root
+        </>
       );
     }
 
     if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-      render(
+      root.render(
         <>
           <GlobalStyles />
           <AppConfig
@@ -46,8 +47,7 @@ export function setup(integration: Integration) {
             color={integration.color}
             description={integration.description}
           />
-        </>,
-        root
+        </>
       );
     }
   });

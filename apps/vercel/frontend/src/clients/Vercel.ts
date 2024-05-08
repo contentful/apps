@@ -6,7 +6,11 @@ import {
   ServerlessFunction,
   AccessToken,
   Deployment,
+  ProjectEnv,
+  Project,
 } from '@customTypes/configPage';
+
+const CONTENTFUL_SPACE_ID = 'CONTENTFUL_SPACE_ID';
 
 interface GetToken {
   ok: boolean;
@@ -18,6 +22,12 @@ interface VercelAPIClient {
   getToken: () => Promise<Response>;
   listProjects: (teamId?: string) => Promise<ListProjectsResponse>;
   listApiPaths: (projectId: string, teamId?: string) => Promise<ApiPath[]>;
+  validateProjectContentfulSpaceId: (
+    currentSpaceId: string,
+    projectId: string,
+    teamId: string,
+    envs: ProjectEnv[]
+  ) => Promise<boolean>;
 }
 
 export default class VercelClient implements VercelAPIClient {
@@ -146,9 +156,61 @@ export default class VercelClient implements VercelAPIClient {
     return data.deployments[0];
   }
 
+  async validateProjectContentfulSpaceId(
+    currentSpaceId: string,
+    projectId: string,
+    teamId: string
+  ) {
+    try {
+      const data = await this.getProject(projectId, teamId);
+      const envs = data.env;
+      const contentfulSpaceIdEnv = envs.find((env) => env.key === CONTENTFUL_SPACE_ID);
+      if (contentfulSpaceIdEnv) {
+        const res = await fetch(
+          `${this.baseEndpoint}/v1/projects/${projectId}/env/${
+            contentfulSpaceIdEnv.id
+          }?${this.buildTeamIdQueryParam(teamId)}`,
+          {
+            headers: this.buildHeaders(),
+            method: 'GET',
+          }
+        );
+
+        const data = await res.json();
+        return data.value === currentSpaceId;
+      }
+    } catch (e) {
+      // let user continue if there is an error validating env value
+      console.error(e);
+    }
+
+    return false;
+  }
+
+  private async getProject(projectId: string, teamId: string): Promise<Project> {
+    let projectData: Response;
+    try {
+      projectData = await fetch(
+        `${this.baseEndpoint}/v9/projects/${projectId}?${this.buildTeamIdQueryParam(teamId)}`,
+        {
+          headers: this.buildHeaders(),
+          method: 'GET',
+        }
+      );
+    } catch (e) {
+      console.error(e);
+      throw new Error('Cannot fetch project data.');
+    }
+
+    const data = await projectData.json();
+    return data;
+  }
+
   private filterServerlessFunctions(data: ServerlessFunction[]) {
+    const irrelevantServerlessFunctionType = 'ISR';
     return data.filter(
-      (file: ServerlessFunction) => file.type === 'Page' && file.path.includes('api')
+      (file: ServerlessFunction) =>
+        file.type != irrelevantServerlessFunctionType && file.path.includes('api')
     );
   }
 

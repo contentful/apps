@@ -78,9 +78,11 @@ describe('AppConfig', () => {
       expect(configInput.value).toEqual(expected);
     });
 
-    [/Some object/, /Some other object/].forEach((labelRe) => {
-      const fieldCheckbox = getByLabelText(labelRe) as HTMLInputElement;
-      expect(fieldCheckbox.checked).toBe(false);
+    [/Some object/, /Some other object/].forEach(async (labelRe) => {
+      await waitFor(() => {
+        const fieldCheckbox = getByLabelText(labelRe) as HTMLInputElement;
+        expect(fieldCheckbox.checked).toBe(false);
+      });
     });
   });
 

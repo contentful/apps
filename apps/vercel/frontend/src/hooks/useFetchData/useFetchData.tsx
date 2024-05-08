@@ -102,5 +102,30 @@ export const useFetchData = ({
     }
   };
 
-  return { validateToken, fetchProjects, fetchApiPaths };
+  const validateProjectEnv = async (currentSpaceId: string, projectId: string) => {
+    if (vercelClient && teamId)
+      try {
+        const isProjectSelectionValid = await vercelClient.validateProjectContentfulSpaceId(
+          currentSpaceId,
+          projectId,
+          teamId
+        );
+        if (!isProjectSelectionValid) throw new Error(errorTypes.INVALID_SPACE_ID);
+        else {
+          dispatchErrors({
+            type: errorsActions.RESET_PROJECT_SELECTION_ERRORS,
+          });
+        }
+      } catch (e) {
+        const err = e as Error;
+        if (err.message === errorTypes.INVALID_SPACE_ID) {
+          dispatchErrors({
+            type: errorsActions.UPDATE_PROJECT_SELECTION_ERRORS,
+            payload: errorTypes.INVALID_SPACE_ID,
+          });
+        }
+      }
+  };
+
+  return { validateToken, fetchProjects, fetchApiPaths, validateProjectEnv };
 };

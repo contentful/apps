@@ -1,7 +1,7 @@
 {
   "name": "@contentful/dam-app-base",
   "description": "Library to build an app to integrate your Digital Asset Management (DAM) system of choice with Contentful",
-  "version": "2.3.3",
+  "version": "3.0.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "Contentful GmbH",
@@ -15,13 +15,13 @@
     "directory": "packages/dam-app-base"
   },
   "devDependencies": {
-    "@testing-library/react": "12.1.5",
+    "@testing-library/react": "15.0.7",
     "@types/jest": "27.5.0",
-    "@types/react": "17.0.43",
-    "@types/react-dom": "18.0.3",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
     "jest": "27.5.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "rimraf": "3.0.2",
     "ts-jest": "27.1.5",
     "typedoc": "0.25.13",
@@ -38,8 +38,8 @@
     "emotion": "^10.0.0"
   },
   "peerDependencies": {
-    "react": "^16.3.0 || ^17.0.0",
-    "react-dom": "^16.3.0 || ^17.0.0"
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "scripts": {
     "build": "rimraf lib && tsc",

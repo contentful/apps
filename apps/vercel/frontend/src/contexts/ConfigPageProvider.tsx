@@ -1,8 +1,9 @@
 import { createContext, Dispatch } from 'react';
-import { ContentType } from '@contentful/app-sdk';
+import { ConfigAppSDK, ContentType } from '@contentful/app-sdk';
 import { ParameterAction } from '@reducers/parameterReducer';
 import { AppInstallationParameters, Errors } from '@customTypes/configPage';
 import { ErrorAction } from '@reducers/errorsReducer';
+import VercelClient from '@clients/Vercel';
 
 interface ConfigPageContextValue {
   isAppConfigurationSaved: boolean;
@@ -13,6 +14,8 @@ interface ConfigPageContextValue {
   dispatchErrors: Dispatch<ErrorAction>;
   handleAppConfigurationChange: () => void;
   isLoading: boolean;
+  sdk: ConfigAppSDK;
+  vercelClient: VercelClient | null;
 }
 
 export interface ChannelContextProviderProps extends ConfigPageContextValue {
@@ -32,6 +35,8 @@ export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
     errors,
     handleAppConfigurationChange,
     isLoading,
+    sdk,
+    vercelClient,
   } = props;
 
   return (
@@ -45,6 +50,8 @@ export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
         errors,
         handleAppConfigurationChange,
         isLoading,
+        sdk,
+        vercelClient,
       }}>
       {children}
     </ConfigPageContext.Provider>

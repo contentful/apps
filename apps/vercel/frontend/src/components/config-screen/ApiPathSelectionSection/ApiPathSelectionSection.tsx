@@ -20,7 +20,9 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
   const sectionId = singleSelectionSections.API_PATH_SELECTION_SECTION;
   const { parameters, isLoading, dispatchErrors, errors, dispatchParameters } =
     useContext(ConfigPageContext);
-  const { invalidDeploymentData, cannotFetchApiPaths } = errors.apiPathSelection;
+  const { invalidDeploymentData, cannotFetchApiPaths, apiPathNotFound } = errors.apiPathSelection;
+
+  const selectedOption = apiPathNotFound ? '' : parameters.selectedApiPath;
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     dispatchParameters({
@@ -33,7 +35,7 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
     });
   };
 
-  const handleInvalidSelectionError = () => {
+  const handlePathNotFoundError = () => {
     dispatchErrors({
       type: errorsActions.UPDATE_API_PATH_SELECTION_ERRORS,
       payload: errorTypes.API_PATH_NOT_FOUND,
@@ -47,9 +49,9 @@ export const ApiPathSelectionSection = ({ paths }: Props) => {
 
     return (
       <SelectSection
-        selectedOption={parameters.selectedApiPath}
+        selectedOption={selectedOption}
         options={paths}
-        handleInvalidSelectionError={handleInvalidSelectionError}
+        handleNotFoundError={handlePathNotFoundError}
         handleChange={handleChange}
         section={sectionId}
         id={sectionId}

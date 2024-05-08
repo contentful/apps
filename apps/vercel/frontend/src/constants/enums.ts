@@ -36,4 +36,5 @@ export enum errorTypes {
   EMPTY_PREVIEW_PATH_INPUT = 'emptyPreviewPathInput',
   API_PATHS_EMPTY = 'apiPathsEmpty',
   INVALID_DEPLOYMENT_DATA = 'invalidDeploymentData',
+  INVALID_SPACE_ID = 'invalidSpaceId',
 }

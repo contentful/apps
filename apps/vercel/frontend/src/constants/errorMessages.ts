@@ -12,4 +12,6 @@ export const errorMessages = {
   invalidPreviewPathFormat: 'Path must start with a "/", and include a {token}.',
   emptyPreviewPathInput: 'Field is empty.',
   invalidDeploymentData: 'We had trouble fetching routes for this Vercel project.',
+  invalidSpaceId:
+    'It looks like you’ve configured an environment variable, CONTENTFUL_SPACE_ID, in the selected Vercel project that doesn’t match the id of the space where this app is installed.',
 };

@@ -17,6 +17,11 @@ export interface AppInstallationParameters {
   teamId?: string;
 }
 
+export type ProjectEnv = {
+  key: string;
+  id: string;
+  value: string;
+};
 export interface Project {
   id: string;
   name: string;
@@ -25,6 +30,7 @@ export interface Project {
       id: string;
     };
   };
+  env: ProjectEnv[];
 }
 
 export interface Deployment {
@@ -86,6 +92,7 @@ export type Errors = {
   projectSelection: {
     projectNotFound: boolean;
     cannotFetchProjects: boolean;
+    invalidSpaceId: boolean;
   };
   apiPathSelection: {
     apiPathNotFound: boolean;

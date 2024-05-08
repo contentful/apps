@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import React from 'react';
-import { Box, Button, Modal } from '@contentful/f36-components';
+import { Box, Button, Form, FormControl, Modal, TextInput } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 
@@ -11,7 +11,19 @@ import { CharacterAttributes } from '../types';
 
 const Dialog = () => {
   const sdk = useSDK<DialogAppSDK>();
-  const { isLoading, characters } = useCharacters();
+
+  const [filter, setFilter] = useState<string>('');
+  const [searchText, setSearchText] = useState('');
+
+  const handleChange = (filter: string) => {
+    setFilter(filter);
+  };
+
+  const handleSubmit = () => {
+    setSearchText(filter);
+  };
+
+  const { isLoading, characters } = useCharacters(searchText);
 
   useEffect(() => {
     // Since we run in an iframe, we need to set the height of the iframe.
@@ -34,6 +46,16 @@ const Dialog = () => {
         <Button onClick={() => selectCharacter(undefined)}>Dismiss</Button>
       </Modal.Header>
       <Modal.Content>
+        <Form onSubmit={handleSubmit}>
+          <FormControl>
+            <FormControl.Label>Character 🪄</FormControl.Label>
+            <TextInput
+              value={filter}
+              placeholder="Search for a character"
+              onChange={(e) => handleChange(e.target.value)}
+            />
+          </FormControl>
+        </Form>
         <CharactersList characters={characters} onSelect={selectCharacter} />
       </Modal.Content>
       <Modal.Controls>

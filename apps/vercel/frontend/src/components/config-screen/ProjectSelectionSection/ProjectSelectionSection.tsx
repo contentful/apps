@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext } from 'react';
+import { ChangeEvent, useContext, useEffect } from 'react';
 
 import { Project } from '@customTypes/configPage';
 import { SectionWrapper } from '@components/common/SectionWrapper/SectionWrapper';
@@ -10,6 +10,7 @@ import {
   singleSelectionSections,
 } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
+import { useFetchData } from '@hooks/useFetchData/useFetchData';
 
 interface Props {
   projects: Project[];
@@ -17,8 +18,21 @@ interface Props {
 
 export const ProjectSelectionSection = ({ projects }: Props) => {
   const sectionId = singleSelectionSections.PROJECT_SELECTION_SECTION;
-  const { parameters, errors, dispatchErrors, dispatchParameters, handleAppConfigurationChange } =
-    useContext(ConfigPageContext);
+  const {
+    parameters,
+    errors,
+    dispatchErrors,
+    dispatchParameters,
+    handleAppConfigurationChange,
+    sdk,
+    vercelClient,
+  } = useContext(ConfigPageContext);
+  const { validateProjectEnv } = useFetchData({
+    dispatchErrors,
+    dispatchParameters,
+    vercelClient,
+    teamId: parameters.teamId,
+  });
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     // indicate app config change when project has been re-selected
@@ -34,25 +48,31 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
       type: parametersActions.APPLY_SELECTED_PROJECT,
       payload: event.target.value,
     });
-
-    dispatchErrors({
-      type: errorsActions.RESET_PROJECT_SELECTION_ERRORS,
-    });
   };
 
-  const handleInvalidSelectionError = () => {
+  useEffect(() => {
+    const currentSpaceId = sdk.ids.space;
+    const validateProjectSelectionEnv = async () => {
+      await validateProjectEnv(currentSpaceId, parameters.selectedProject);
+    };
+    if (parameters.selectedProject) validateProjectSelectionEnv();
+  }, [parameters.selectedProject, vercelClient, parameters.teamId]);
+
+  const handleProjectNotFoundError = () => {
     dispatchErrors({
       type: errorsActions.UPDATE_PROJECT_SELECTION_ERRORS,
       payload: errorTypes.PROJECT_NOT_FOUND,
     });
   };
 
+  const selectedOption = errors.projectSelection.projectNotFound ? '' : parameters.selectedProject;
+
   return (
     <SectionWrapper testId={sectionId}>
       <SelectSection
-        selectedOption={parameters.selectedProject}
+        selectedOption={selectedOption}
         options={projects}
-        handleInvalidSelectionError={handleInvalidSelectionError}
+        handleNotFoundError={handleProjectNotFoundError}
         section={sectionId}
         id={sectionId}
         error={errors.projectSelection}
