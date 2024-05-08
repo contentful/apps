@@ -150,7 +150,7 @@ const ConfigScreen = () => {
 
   const renderPostAuthComponents =
     !isAuthenticationError && hasTokenBeenValidated && parameters.teamId;
-  const renderPostProjectComponents =
+  const renderPostProjectSelectionComponents =
     renderPostAuthComponents &&
     !errors.projectSelection.projectNotFound &&
     !errors.projectSelection.cannotFetchProjects &&
@@ -180,9 +180,9 @@ const ConfigScreen = () => {
 
           {renderPostAuthComponents && <ProjectSelectionSection projects={projects} />}
 
-          {renderPostProjectComponents && <ApiPathSelectionSection paths={apiPaths} />}
+          {renderPostProjectSelectionComponents && <ApiPathSelectionSection paths={apiPaths} />}
 
-          {renderPostProjectComponents && parameters.selectedApiPath && (
+          {renderPostProjectSelectionComponents && parameters.selectedApiPath && (
             <>
               <ContentTypePreviewPathSection />
               <hr className={styles.splitter} />
