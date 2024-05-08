@@ -31,7 +31,7 @@ export interface Project {
     };
   };
   env: ProjectEnv[];
-  protectionBypass: {
+  protectionBypass?: {
     [key: string]: {
       createdAt: number;
       createdBy: string;
