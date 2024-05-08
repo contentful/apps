@@ -1,7 +1,7 @@
 import { ConfigAppSDK, DialogAppSDK, init, locations } from '@contentful/app-sdk';
 import { GlobalStyles } from '@contentful/f36-components';
 import * as React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import AppConfig from './AppConfig/AppConfig';
 import { Field, IntegrationProvider } from './Editor';
 import { Integration, Product } from './types';
@@ -9,26 +9,26 @@ import { SDKProvider } from '@contentful/react-apps-toolkit';
 
 export function setup<P extends Product = Product>(integration: Integration<P>) {
   init((sdk) => {
-    const root = document.getElementById('root');
+    const container = document.getElementById('root');
+    const root = createRoot(container!);
 
     if (sdk.location.is(locations.LOCATION_DIALOG)) {
       integration.renderDialog(sdk as DialogAppSDK);
     }
 
     if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
-      render(
+      root.render(
         <IntegrationProvider integration={integration}>
           <SDKProvider>
             <GlobalStyles />
             <Field />
           </SDKProvider>
-        </IntegrationProvider>,
-        root
+        </IntegrationProvider>
       );
     }
 
     if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-      render(
+      root.render(
         <>
           <GlobalStyles />
           <SDKProvider>
@@ -44,8 +44,7 @@ export function setup<P extends Product = Product>(integration: Integration<P>) 
               isInOrchestrationEAP={integration.isInOrchestrationEAP}
             />
           </SDKProvider>
-        </>,
-        root
+        </>
       );
     }
   });

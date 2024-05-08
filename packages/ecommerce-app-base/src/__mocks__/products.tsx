@@ -14,9 +14,8 @@ export const productsList: Product[] = [
   },
   {
     id: '4e5446e8',
-    image:
-      'https://images.ctfassets.net/juh8bvgveao4/QoAO8rqn86a4jiH1yudiN/e518fd9263b67705c3ffb041bd217bda/imageService.webp',
-    name: 'Michael Kors – Shopper “Jet Set Travel”',
+    image: 'https://contentful.getbynder.com/m/389ea2aaadc9fb72/webimage-Sample-PNG.png',
+    name: 'Michael Kors - Shopper “Jet Set Travel”',
     sku: 'A0E2300FX102203',
     externalLink: 'https://mc.commercetools.com/example-project/products/4e5446e8/general',
     description:
@@ -24,8 +23,7 @@ export const productsList: Product[] = [
   },
   {
     id: 'db3c234l',
-    image:
-      'https://images.ctfassets.net/juh8bvgveao4/QoAO8rqn86a4jiH1yudiN/e518fd9263b67705c3ffb041bd217bda/imageService.webp',
+    image: 'https://contentful.getbynder.com/m/15dd96d65fc9698b/webimage-flower.png',
     name: 'Shirt “Jenny“ Polo Ralph Lauren white',
     sku: 'M0E21300900DZN7',
     externalLink: 'https://mc.commercetools.com/example-project/products/db3c234l/general',
@@ -34,13 +32,10 @@ export const productsList: Product[] = [
   },
 ];
 
-export const products = productsList.reduce(
-  (previousValue, currentValue: Product) => {
-    previousValue[currentValue.name] = currentValue;
-    return previousValue;
-  },
-  {} as Record<string, Product>
-);
+export const products = productsList.reduce((previousValue, currentValue: Product) => {
+  previousValue[currentValue.name] = currentValue;
+  return previousValue;
+}, {} as Record<string, Product>);
 
 export const columns = [
   {
