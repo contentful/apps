@@ -76,7 +76,7 @@ const ConfigScreen = () => {
 
     async function checkToken() {
       if (vercelClient) {
-        validateToken(updateTokenValidityState);
+        await validateToken(updateTokenValidityState);
       }
     }
 
@@ -103,25 +103,19 @@ const ConfigScreen = () => {
   useEffect(() => {
     async function getProjects() {
       setIsLoading(true);
-      fetchProjects(setProjects);
+      await fetchProjects(setProjects);
       setIsLoading(false);
     }
 
-    if (parameters.vercelAccessToken && hasTokenBeenValidated && !isAuthenticationError) {
+    if (parameters.teamId) {
       getProjects();
     }
-  }, [
-    parameters.vercelAccessToken,
-    hasTokenBeenValidated,
-    isAuthenticationError,
-    vercelClient,
-    parameters.teamId,
-  ]);
+  }, [vercelClient, parameters.teamId]);
 
   useEffect(() => {
     async function getApiPaths() {
       setIsLoading(true);
-      fetchApiPaths(setApiPaths, parameters.selectedProject);
+      await fetchApiPaths(setApiPaths, parameters.selectedProject);
       setIsLoading(false);
     }
 
@@ -154,7 +148,14 @@ const ConfigScreen = () => {
     setIsAppConfigurationSaved(false);
   };
 
-  const renderPostAuthComponents = !isAuthenticationError && parameters.vercelAccessToken;
+  const renderPostAuthComponents =
+    !isAuthenticationError && hasTokenBeenValidated && parameters.teamId;
+  const renderPostProjectComponents =
+    renderPostAuthComponents &&
+    !errors.projectSelection.projectNotFound &&
+    !errors.projectSelection.cannotFetchProjects &&
+    parameters.selectedProject &&
+    projects.length;
 
   return (
     <ConfigPageProvider
@@ -179,11 +180,9 @@ const ConfigScreen = () => {
 
           {renderPostAuthComponents && <ProjectSelectionSection projects={projects} />}
 
-          {renderPostAuthComponents && parameters.selectedProject && (
-            <ApiPathSelectionSection paths={apiPaths} />
-          )}
+          {renderPostProjectComponents && <ApiPathSelectionSection paths={apiPaths} />}
 
-          {renderPostAuthComponents && parameters.selectedProject && parameters.selectedApiPath && (
+          {renderPostProjectComponents && parameters.selectedApiPath && (
             <>
               <ContentTypePreviewPathSection />
               <hr className={styles.splitter} />

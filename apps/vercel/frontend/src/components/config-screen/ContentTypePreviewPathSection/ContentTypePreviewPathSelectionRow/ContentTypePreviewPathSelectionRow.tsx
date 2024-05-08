@@ -126,7 +126,7 @@ export const ContentTypePreviewPathSelectionRow = ({
 
   const itemAlignment = useMemo(() => {
     if (isError) {
-      return !renderLabel ? 'baseline' : 'normal';
+      return renderLabel ? 'normal' : 'baseline';
     }
     return 'flex-end';
   }, [isError, renderLabel]);
@@ -154,16 +154,23 @@ export const ContentTypePreviewPathSelectionRow = ({
             {renderLabel && (
               <FormControl.Label isRequired>{inputs.previewPath.label}</FormControl.Label>
             )}
-            <TextInput
-              defaultValue={configuredPreviewPath}
-              isDisabled={!configuredContentType || !contentTypes.length}
-              onChange={debouncedHandlePreviewPathInputChange}
-              placeholder={inputs.previewPath.placeholder}
-              isInvalid={isError}
-            />
+            <Flex gap={tokens.spacing2Xs}>
+              <TextInput
+                defaultValue={configuredPreviewPath}
+                isDisabled={!configuredContentType || !contentTypes.length}
+                onChange={debouncedHandlePreviewPathInputChange}
+                placeholder={inputs.previewPath.placeholder}
+                isInvalid={isError}
+              />
+              <IconButton
+                onClick={handleRemoveRow}
+                icon={<CloseIcon />}
+                aria-label={'Delete row'}
+              />
+            </Flex>
+
             {isError && <ValidationMessage>{message}</ValidationMessage>}
           </Box>
-          <IconButton onClick={handleRemoveRow} icon={<CloseIcon />} aria-label={'Delete row'} />
         </Flex>
       </FormControl>
     </Box>
