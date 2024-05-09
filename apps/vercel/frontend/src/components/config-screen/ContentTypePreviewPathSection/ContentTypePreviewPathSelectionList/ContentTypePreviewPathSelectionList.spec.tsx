@@ -1,9 +1,14 @@
 import { screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ContentTypePreviewPathSelectionList } from './ContentTypePreviewPathSelectionList';
 import { mockContentTypePreviewPathSelections } from '@test/mocks/mockContentTypePreviewPathSelections';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
 import { AppInstallationParameters } from '@customTypes/configPage';
+import { mockSdk } from '@test/mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('ContentTypePreviewPathSelectionList', () => {
   it('renders list of selections', () => {

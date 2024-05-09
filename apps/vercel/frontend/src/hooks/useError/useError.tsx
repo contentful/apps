@@ -1,4 +1,7 @@
+import { errorTypes } from '@constants/enums';
 import { errorMessages } from '@constants/errorMessages';
+import { ConfigAppSDK } from '@contentful/app-sdk';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { Errors, PreviewPathError } from '@customTypes/configPage';
 import { isEmpty, pickBy } from 'lodash';
@@ -15,14 +18,17 @@ type ErrorKeys =
   | keyof Errors['projectSelection']
   | keyof Omit<PreviewPathError, 'contentType'>;
 
-export const getErrorMessage = (error: Error, contentType?: string) => {
+export const getErrorMessage = (error: Error, currentSpaceId: string, contentType?: string) => {
   const currentError = pickBy(error);
 
   const errorKey: ErrorKeys = contentType
     ? (Object.keys(currentError)[1] as ErrorKeys)
     : (Object.keys(currentError)[0] as ErrorKeys);
 
-  const message = errorMessages[errorKey];
+  const message =
+    errorKey === errorTypes.INVALID_SPACE_ID
+      ? errorMessages.invalidSpaceId(currentSpaceId)
+      : errorMessages[errorKey];
   return message;
 };
 
@@ -43,8 +49,9 @@ export const useError = ({
   contentType?: string;
 }) => {
   const { errors } = useContext(ConfigPageContext);
+  const sdk = useSDK<ConfigAppSDK>();
 
-  const errorMessage = error ? getErrorMessage(error, contentType) : '';
+  const errorMessage = error ? getErrorMessage(error, sdk.ids.space, contentType) : '';
   const isError = determineErrorPresence(errors, error, contentType);
   return { message: errorMessage, isError: isError };
 };

@@ -6,6 +6,11 @@ import { renderConfigPageComponent } from '@test/helpers/renderConfigPageCompone
 import { ApiPath, AppInstallationParameters } from '@customTypes/configPage';
 import { copies } from '@constants/copies';
 import userEvent from '@testing-library/user-event';
+import { mockSdk } from '@test/mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 describe('ApiPathSelectionSection', () => {
   it('renders dropdown when paths are present and no errors are present', () => {

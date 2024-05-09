@@ -7,6 +7,11 @@ import { copies } from '@constants/copies';
 import { renderConfigPageComponent } from '@test/helpers/renderConfigPageComponent';
 import userEvent from '@testing-library/user-event';
 import * as fetchData from '@hooks/useFetchData/useFetchData';
+import { mockSdk } from '@test/mocks';
+
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+}));
 
 const projects = [
   { id: 'project-1', name: 'Project 1', targets: { production: { id: 'project-1' } }, env: [] },

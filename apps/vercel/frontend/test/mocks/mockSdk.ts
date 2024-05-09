@@ -1,7 +1,7 @@
 import { AppInstallationParameters } from '@customTypes/configPage';
 import { vi } from 'vitest';
 
-const SPACE_ID = '1234';
+export const SPACE_ID = '1234';
 
 export const mockParameters: AppInstallationParameters = {
   vercelAccessToken: 'abc-123',
