@@ -23,7 +23,9 @@ export const copies = {
       placeholder: 'Select a route',
       textInputPlaceholder: 'Ex: api/enable-draft',
       emptyMessage: 'No paths currently configured.',
-      helpText: undefined, // defined as React component
+      helpText: {
+        href: 'https://www.contentful.com/help/vercel-app/#step-1-configuring-your-nextjs-application-to-support-draft-mode',
+      },
       textInputHelpText: 'Set a Vercel route to enable your draft mode.',
     },
     contentTypePreviewPathSection: {
