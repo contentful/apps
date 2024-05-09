@@ -49,7 +49,10 @@ describe('SelectSection', () => {
     const mockHandleAppConfigurationChange = vi.fn();
     const mockHandleChange = vi.fn();
     const ID = singleSelectionSections.PROJECT_SELECTION_SECTION;
-    const { placeholder, helpText } = copies.configPage.projectSelectionSection;
+    const {
+      placeholder,
+      helpText: { copy: helpTextCopy },
+    } = copies.configPage.projectSelectionSection;
     const { unmount } = renderConfigPageComponent(
       <SelectSection
         options={projects}
@@ -63,7 +66,7 @@ describe('SelectSection', () => {
     );
     const select = screen.getByText(placeholder);
     expect(select).toBeTruthy();
-    expect(screen.getByText(helpText)).toBeTruthy();
+    expect(screen.getByText(helpTextCopy)).toBeTruthy();
     expect(screen.queryByText(errorMessages.projectNotFound)).toBeFalsy();
 
     user.click(select);
