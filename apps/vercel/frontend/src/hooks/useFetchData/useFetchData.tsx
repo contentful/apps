@@ -20,6 +20,11 @@ export const useFetchData = ({
 }: FetchData) => {
   const validateToken = async (onComplete: () => void, newVercelClient?: VercelClient) => {
     if (vercelClient) {
+      // reset all authentication errors before validating again
+      dispatchErrors({
+        type: errorsActions.RESET_AUTHENTICATION_ERRORS,
+      });
+
       try {
         const client = newVercelClient || vercelClient;
         const response = await client.checkToken();
@@ -31,10 +36,6 @@ export const useFetchData = ({
               payload: response.data?.teamId,
             });
           }
-
-          dispatchErrors({
-            type: errorsActions.RESET_AUTHENTICATION_ERRORS,
-          });
         }
       } catch (e) {
         const err = e as Error;

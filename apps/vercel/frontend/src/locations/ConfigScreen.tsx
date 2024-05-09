@@ -13,7 +13,7 @@ import { ApiPath, Project } from '@customTypes/configPage';
 import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
 import { AuthenticationSection } from '@components/config-screen/AuthenticationSection/AuthenticationSection';
 import { copies } from '@constants/copies';
-import { parametersActions } from '@constants/enums';
+import { errorsActions, parametersActions } from '@constants/enums';
 import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
 import { GettingStartedSection } from '@components/config-screen/GettingStartedSection/GettingStartedSection';
 import errorsReducer from '@reducers/errorsReducer';
@@ -75,18 +75,11 @@ const ConfigScreen = () => {
     setIsLoading(true);
 
     async function checkToken() {
-      if (vercelClient) {
-        await validateToken(updateTokenValidityState);
-      }
+      await validateToken(updateTokenValidityState);
     }
 
-    if (!parameters.vercelAccessToken) {
-      // if there is no value set for the access token we will consider it valid
-      updateTokenValidityState();
-    } else {
-      checkToken();
-    }
-  }, [parameters.vercelAccessToken, parameters.teamId, vercelClient]);
+    checkToken();
+  }, [vercelClient]);
 
   useEffect(() => {
     async function getContentTypes() {
@@ -131,6 +124,7 @@ const ConfigScreen = () => {
 
   const handleTokenChange = (e: ChangeEvent<HTMLInputElement>) => {
     setIsLoading(true);
+    setHasTokenBeenValidated(false);
 
     dispatchParameters({
       type: parametersActions.UPDATE_VERCEL_ACCESS_TOKEN,
@@ -138,7 +132,14 @@ const ConfigScreen = () => {
     });
 
     async function checkToken() {
-      validateToken(updateTokenValidityState, new VercelClient(e.target.value));
+      // if the token is empty, reset all authentication errors and skip validation
+      if (e.target.value === '') {
+        dispatchErrors({
+          type: errorsActions.RESET_AUTHENTICATION_ERRORS,
+        });
+      } else {
+        await validateToken(updateTokenValidityState, new VercelClient(e.target.value));
+      }
     }
 
     checkToken();
@@ -149,7 +150,10 @@ const ConfigScreen = () => {
   };
 
   const renderPostAuthComponents =
-    !isAuthenticationError && hasTokenBeenValidated && parameters.teamId;
+    !isAuthenticationError &&
+    hasTokenBeenValidated &&
+    !!parameters.vercelAccessToken &&
+    !!parameters.teamId;
   const renderPostProjectSelectionComponents =
     renderPostAuthComponents &&
     !errors.projectSelection.projectNotFound &&
@@ -176,7 +180,7 @@ const ConfigScreen = () => {
         </Box>
         <hr className={styles.splitter} />
         <Stack spacing="spacingS" flexDirection="column">
-          {hasTokenBeenValidated && <AuthenticationSection handleTokenChange={handleTokenChange} />}
+          <AuthenticationSection handleTokenChange={handleTokenChange} />
 
           {renderPostAuthComponents && <ProjectSelectionSection projects={projects} />}
 
