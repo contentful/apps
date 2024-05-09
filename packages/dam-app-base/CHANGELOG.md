@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.1](https://github.com/contentful/apps/compare/@contentful/dam-app-base@3.0.0...@contentful/dam-app-base@3.0.1) (2024-05-09)
+
+### Bug Fixes
+
+- **dam-app-base:** sortable images should have min height ([#7637](https://github.com/contentful/apps/issues/7637)) ([15c23df](https://github.com/contentful/apps/commit/15c23df78bcdc5cbc3329f60cc7720afbddde756))
+
 # [3.0.0](https://github.com/contentful/apps/compare/@contentful/dam-app-base@2.3.3...@contentful/dam-app-base@3.0.0) (2024-05-07)
 
 - build!: drop support for react v17 and v18 (#7634) ([a746ab7](https://github.com/contentful/apps/commit/a746ab7eefb995a01512b1323c9edea238aef9ba)), closes [#7634](https://github.com/contentful/apps/issues/7634)
