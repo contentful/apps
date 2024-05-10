@@ -7,7 +7,7 @@ import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { SelectionWrapper } from '@components/common/SelectionWrapper/SelectionWrapper';
 import { debounce } from 'lodash';
 import { useError } from '@hooks/useError/useError';
-import { DraftModeHelpText } from '../HelpText/HelpText';
+import { DraftModeHelpText } from '../DraftModeHelpText/DraftModeHelpText';
 
 export const TextFieldSection = () => {
   const { textInputPlaceholder, label } = copies.configPage.pathSelectionSection;
