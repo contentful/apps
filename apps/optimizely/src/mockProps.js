@@ -34,7 +34,9 @@ export default {
     },
     space: {},
     dialogs: {},
-    navigator: {},
+    navigator: {
+      onSlideInNavigation: jest.fn(),
+    },
     notifier: {},
     ids: {
       extension: 'optimizely',
@@ -378,6 +380,8 @@ export default {
           id: 'experimentKey',
           locales: ['en-US'],
           type: 'Symbol',
+          getValue: jest.fn(),
+          onValueChanged: jest.fn(() => () => {}),
           required: false,
           validations: [],
           _defaultLocale: 'en-US',
@@ -936,64 +940,7 @@ export default {
               },
             },
           },
-          experimentKey: {
-            id: 'experimentKey',
-            locales: ['en-US'],
-            type: 'Symbol',
-            required: false,
-            validations: [],
-            _defaultLocale: 'en-US',
-            _fieldLocales: {
-              'en-US': {
-                id: 'experimentKey',
-                locale: 'en-US',
-                _valueSignal: {
-                  _id: 0,
-                  _listeners: {},
-                  __private__memoized__arguments__: [null],
-                },
-                _isDisabledSignal: {
-                  _id: 0,
-                  _listeners: {},
-                  __private__memoized__arguments__: [null],
-                },
-                _schemaErrorsChangedSignal: {
-                  _id: 0,
-                  _listeners: {},
-                  __private__memoized__arguments__: [null],
-                },
-                _channel: {
-                  _messageHandlers: {
-                    sysChanged: {
-                      _id: 1,
-                      _listeners: {},
-                    },
-                    valueChanged: {
-                      _id: 5,
-                      _listeners: {},
-                    },
-                    isDisabledChanged: {
-                      _id: 5,
-                      _listeners: {},
-                    },
-                    schemaErrorsChanged: {
-                      _id: 5,
-                      _listeners: {},
-                    },
-                    localeSettingsChanged: {
-                      _id: 1,
-                      _listeners: {},
-                    },
-                    showDisabledFieldsChanged: {
-                      _id: 1,
-                      _listeners: {},
-                    },
-                  },
-                  _responseHandlers: {},
-                },
-              },
-            },
-          },
+          
         },
       },
       editor: {

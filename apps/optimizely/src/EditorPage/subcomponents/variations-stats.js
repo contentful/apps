@@ -50,7 +50,7 @@ StatItem.propTypes = {
 };
 
 function getPercent(value) {
-  return Math.floor(value * 1000) / 10;
+  return (value * 100).toFixed(2);
 }
 
 export default function VariationStats(props) {

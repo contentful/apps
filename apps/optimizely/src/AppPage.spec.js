@@ -29,6 +29,7 @@ describe('AppPage', () => {
       ...basicProps.sdk,
       space: {
         getContentTypes: jest.fn(() => Promise.resolve(contentTypesData)),
+        updateContentType: () => {},
       },
       app: {
         setReady: jest.fn(),
@@ -36,6 +37,7 @@ describe('AppPage', () => {
         onConfigure: jest.fn((fn) => {
           configFunc = fn;
         }),
+        onConfigurationCompleted: () => {}
       },
     };
 
@@ -74,6 +76,7 @@ describe('AppPage', () => {
         setReady: jest.fn(),
         getParameters: jest.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
         onConfigure: jest.fn((fn) => {}),
+        onConfigurationCompleted: () => {}
       },
     };
     const props = { ...basicProps, sdk };
@@ -92,6 +95,7 @@ describe('AppPage', () => {
         setReady: jest.fn(),
         getParameters: jest.fn(() => Promise.resolve({ optimizelyProjectId: '123' })),
         onConfigure: jest.fn((fn) => {}),
+        onConfigurationCompleted: () => {}
       },
     };
     const props = { ...basicProps, accessToken: '123', sdk };

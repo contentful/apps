@@ -3,7 +3,10 @@ import PropTypes from 'prop-types';
 import { css } from 'emotion';
 import { Button } from '@contentful/forma-36-react-components';
 
-import OptimizelyLogo from './OptimizelyLogo';
+// import OptimizelyLogo from './OptimizelyLogo';
+
+// import OptimizelyLogo from '../optimizely-logo';
+import AuthButton from './AuthButton';
 
 const styles = {
   connect: css({
@@ -24,7 +27,7 @@ export default function ConnectButton({ openAuth }) {
       testId="connect-button"
       isFullWidth
       buttonType="naked">
-      <OptimizelyLogo />
+      <AuthButton/>
     </Button>
   );
 }

@@ -42,12 +42,14 @@ describe('EditorPage', () => {
     sdk = { ...sdk, space };
 
     sdk.entry.fields.experimentTitle.setValue = jest.fn();
-    sdk.entry.fields.experimentId.onValueChanged = (fn) => {
+    sdk.entry.fields.experimentKey.onValueChanged = (fn) => {
       valueChange = fn;
       return () => {};
     };
 
     const client = {
+      getProject: () => Promise.resolve(mockVariantData.project),
+      getProjectEnvironments: () => Promise.resolve(mockVariantData.environments),
       getExperiments: () => Promise.resolve(mockVariantData.experiments),
       getResultsUrl: (campaignUrl, experimentId) => {
         return `https://app.optimizely.com/v2/projects/123/results/${campaignUrl}/experiments/${experimentId}`;
@@ -61,7 +63,7 @@ describe('EditorPage', () => {
     );
 
     await wait();
-    valueChange('15049730511');
+    valueChange('landing-page-hero');
 
     await wait();
 
