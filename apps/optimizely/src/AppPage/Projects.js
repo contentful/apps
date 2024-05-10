@@ -5,7 +5,6 @@ import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
 import {
   Heading,
-  Paragraph,
   SelectField,
   Option,
   Typography,
@@ -21,7 +20,6 @@ export default function Projects({ allProjects, selectedProject, onProjectChange
   return (
     <Typography>
       <Heading>Optimizely Project</Heading>
-      <Paragraph>Works only with Optimizely Full Stack projects</Paragraph>
       <SelectField
         name="project"
         id="project"

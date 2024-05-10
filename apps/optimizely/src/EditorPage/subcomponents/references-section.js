@@ -32,7 +32,7 @@ function ReferenceItem(props) {
   return (
     <div className={styles.item}>
       <Tooltip content={`${props.entry.contentTypeName}`} place="bottom">
-        <TextLink onClick={props.onClick}>{props.entry.title}</TextLink>
+        <TextLink onClick={props.onClick}>{props.entry.title + props.separator}</TextLink>
       </Tooltip>
     </div>
   );
@@ -79,8 +79,11 @@ export default function ReferencesSection(props) {
       {props.references.length > 0 &&
         props.references.map((entry, index) => (
           <React.Fragment key={entry.id}>
-            <ReferenceItem entry={entry} onClick={onItemClick(entry.id)} />
-            {index !== props.references.length - 1 && ', '}
+            <ReferenceItem 
+              entry={entry} 
+              onClick={onItemClick(entry.id)}
+              separator = {index !== props.references.length - 1 ? ', ' : ''}
+            />
           </React.Fragment>
         ))}
       {props.references.length === 0 && (

@@ -2,6 +2,7 @@ import React from 'react';
 import { cleanup, render, configure } from '@testing-library/react';
 
 import Sidebar from '../src/Sidebar';
+import { ProjectType } from './constants';
 
 let LOCATION = 'entry-sidebar';
 let PROJECT_ID = '123';
@@ -9,11 +10,16 @@ let VALID_FIELDS = true;
 
 const mockUnsub = jest.fn();
 
+function mockClient() {
+
+}
+
 function mockSdk() {
   return {
     parameters: {
       installation: {
         optimizelyProjectId: PROJECT_ID,
+        optimizelyProjectType: ProjectType.FeatureExperimentation,
       },
     },
     location: {
@@ -32,6 +38,22 @@ function mockSdk() {
       fields: {
         experimentId: {
           getValue: jest.fn(() => 'exp123'),
+          onValueChanged: jest.fn(() => mockUnsub),
+        },
+        experimentKey: {
+          getValue: jest.fn(() => 'exp123'),
+          onValueChanged: jest.fn(() => mockUnsub),
+        },
+        environment: {
+          getValue: jest.fn(() => 'production'),
+          onValueChanged: jest.fn(() => mockUnsub),
+        },
+        flagKey: {
+          getValue: jest.fn(() => 'flag123'),
+          onValueChanged: jest.fn(() => mockUnsub),
+        },
+        revision: {
+          getValue: jest.fn(() => 'random'),
           onValueChanged: jest.fn(() => mockUnsub),
         },
         meta: {
@@ -145,9 +167,9 @@ describe('Sidebar', () => {
 
     expect(sdk.window.startAutoResizer).toHaveBeenCalledTimes(1);
 
-    expect(sdk.entry.fields.experimentId.getValue).toHaveBeenCalledTimes(1);
-    expect(sdk.entry.fields.experimentId.onValueChanged).toHaveBeenCalledTimes(1);
-    expect(typeof sdk.entry.fields.experimentId.onValueChanged.mock.calls[0][0]).toEqual(
+    expect(sdk.entry.fields.experimentKey.getValue).toHaveBeenCalledTimes(2);
+    expect(sdk.entry.fields.revision.onValueChanged).toHaveBeenCalledTimes(1);
+    expect(typeof sdk.entry.fields.revision.onValueChanged.mock.calls[0][0]).toEqual(
       'function'
     );
 
@@ -162,11 +184,11 @@ describe('Sidebar', () => {
     const { getByTestId } = render(<Sidebar sdk={sdk} />);
 
     expect(getByTestId('view-experiment').href).toBe(
-      'https://app.optimizely.com/v2/projects/123/experiments/exp123/variations'
+      'https://app.optimizely.com/v2/projects/123/flags/manage/flag123/rules/production/edit/exp123'
     );
 
     expect(getByTestId('view-all').href).toBe(
-      'https://app.optimizely.com/v2/projects/123/experiments'
+      'https://app.optimizely.com/v2/projects/123/flags/list?environment=production'
     );
   });
 });

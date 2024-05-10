@@ -4,6 +4,7 @@ import { SkeletonContainer, SkeletonBodyText } from '@contentful/forma-36-react-
 import SectionSplitter from '../EditorPage/subcomponents/section-splitter';
 import Projects from './Projects';
 import ContentTypes from './ContentTypes';
+import { ProjectType } from '../constants';
 
 export default class Config extends React.Component {
   static propTypes = {
@@ -32,9 +33,15 @@ export default class Config extends React.Component {
     });
   }
 
-  onProjectChange = (event) => {
+  onProjectChange = (allProjects, event) => {
+    const projectId = event.target.value;
+    const project = allProjects.find((p) => String(p.id) === projectId);
+    const projectType = project['is_flags_enabled'] 
+      ? ProjectType.FeatureExperimentation : ProjectType.FullStack;
+
     this.props.updateConfig({
-      optimizelyProjectId: event.target.value,
+      optimizelyProjectId: projectId,
+      optimizelyProjectType: projectType,
     });
   };
 
@@ -72,7 +79,7 @@ export default class Config extends React.Component {
   );
 
   render() {
-    const { loadingProjects } = this.state;
+    const { loadingProjects, allProjects } = this.state;
 
     const { contentTypes } = this.props.config;
     const addedContentTypes = Object.keys(contentTypes);
@@ -83,8 +90,8 @@ export default class Config extends React.Component {
           this.renderLoader()
         ) : (
           <Projects
-            allProjects={this.state.allProjects}
-            onProjectChange={this.onProjectChange}
+            allProjects={allProjects}
+            onProjectChange={(event) => this.onProjectChange(allProjects, event)}
             selectedProject={this.props.config.optimizelyProjectId}
           />
         )}

@@ -4,14 +4,16 @@ export default class OptimizelyClient {
       throw new Error('You must provide a valid access token!');
     }
 
+    this.expires = Date.now() + 1 * 60 * 1000;
     this.accessToken = accessToken;
     this.project = project;
     this.baseURL = 'https://api.optimizely.com/v2';
+    this.fxBaseUrl = 'https://api.optimizely.com/flags/v1';
     this.onReauth = onReauth;
   }
 
   makeRequest = async (url) => {
-    const response = await fetch(`${this.baseURL}${url}`, {
+    const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${this.accessToken}`,
       },
@@ -23,6 +25,7 @@ export default class OptimizelyClient {
 
     // reauthing should hopefully fix the issue
     this.onReauth();
+    return Promise.reject(new Error(`request failed for url: ${url} with status: ${response.status}`));
   };
 
   _getItemsPerPage = async (item) => {
@@ -63,9 +66,9 @@ export default class OptimizelyClient {
   _getItemsUrl = (perPage, page, item) => {
     switch (item) {
       case 'project':
-        return `/projects?per_page=${perPage.toString()}&page=${page.toString()}`;
+        return `${this.baseURL}/projects?per_page=${perPage.toString()}&page=${page.toString()}`;
       case 'experiment':
-        return `/experiments?project_id=${
+        return `${this.baseURL}/experiments?project_id=${
           this.project
         }&per_page=${perPage.toString()}&page=${page.toString()}`;
       default:
@@ -73,23 +76,56 @@ export default class OptimizelyClient {
     }
   };
 
-  getProjects() {
-    return this._getItemsPerPage('project');
+  getProjects = async () => {
+    const allProjects = await this._getItemsPerPage('project');
+    return allProjects.filter((project) => project.status === 'active');
+  }
+
+  getProject = async (projectId) => {
+    return this.makeRequest(`${this.baseURL}/projects/${projectId}`);
+  };
+
+  getProjectEnvironments = async (projectId) => {
+    return this.makeRequest(`${this.baseURL}/environments?project_id=${projectId}`);
   }
 
   getExperiment = (experimentId) => {
-    return this.makeRequest(`/experiments/${experimentId}`);
+    return this.makeRequest(`${this.baseURL}/experiments/${experimentId}`);
   };
 
   getExperiments = async () => {
     return this._getItemsPerPage('experiment');
   };
 
-  getExperimentResults = (experimentId) => {
-    return this.makeRequest(`/experiments/${experimentId}/results`);
+  getRules = async () => {
+    let url = `/projects/${this.project}/rules` +
+      '?rule_types=a/b,multi_armed_bandit&archived=false&page_window=1&per_page=100';
+
+    let items = [];
+
+    while(true) {
+      const response = await this.makeRequest(`${this.fxBaseUrl}${url}`);
+      if (response.items) {
+        items = [...items, ...response.items];
+      }
+      if (response.next_url) {
+        ([url] = response.next_url);
+      } else {
+        break;
+      }
+    }
+    return items;
   };
 
-  getResultsUrl = (campaignUrl, experimentId) => {
-    return `https://app.optimizely.com/v2/projects/${this.project}/results/${campaignUrl}/experiments/${experimentId}`;
+  getRule = async (flagKey, ruleKey, environment) => {
+    return this.makeRequest(`${this.fxBaseUrl}/projects/${this.project}/flags/${flagKey}/environments/${environment}/rules/${ruleKey}`);
+  }
+
+  getExperimentResults = (experimentId) => {
+    return this.makeRequest(`${this.baseURL}/experiments/${experimentId}/results`);
   };
 }
+
+export const getResultsUrl = (projectId, campaignUrl, experimentId) => {
+  return `https://app.optimizely.com/v2/projects/${projectId}/results/${campaignUrl}/experiments/${experimentId}`;
+};

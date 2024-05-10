@@ -31,6 +31,23 @@ const styles = {
 const NOT_SELECTED = '-1';
 
 export default function ExperimentSection(props) {
+  const displayNames = new Map();
+  if (props.experiments) {
+    props.experiments.forEach((experiment) => {
+      if (props.isFx) {
+        const flagName = experiment.flag_name;
+        const ruleKey = experiment.name || experiment.key;
+        const environment = experiment.environment_key;
+        const onOff = experiment.enabled ? 'on' : 'off';
+        const displayName = `${ruleKey} (flag: ${flagName}, environment: ${environment}, ${onOff})`
+
+        displayNames.set(experiment.id.toString(), displayName);
+      } else {
+        const displayName = `${experiment.name || experiment.key} (${experiment.status})`;
+        displayNames.set(experiment.id.toString(), displayName);
+      }
+    });
+  }
   return (
     <React.Fragment>
       <Heading element="h2" className={styles.heading}>
@@ -52,16 +69,17 @@ export default function ExperimentSection(props) {
               (experiment) => experiment.id.toString() === value
             );
             if (experiment) {
-              props.onChangeExperiment({
-                experimentId: experiment.id.toString(),
-                experimentKey: experiment.key.toString(),
-              });
+              // props.onChangeExperiment({
+              //   experimentId: experiment.id.toString(),
+              //   experimentKey: experiment.key.toString(),
+              // });
+              props.onChangeExperiment(experiment);
             }
           }
         }}
         selectProps={{
           width: 'large',
-          isDisabled: props.disabled === true || props.loaded === false,
+          isDisabled: props.hasVariations === true || props.loaded === false || props.reloadNeeded === true,
         }}
         id="experiment"
         name="experiment">
@@ -71,13 +89,13 @@ export default function ExperimentSection(props) {
             <Option value={NOT_SELECTED}>Select Optimizely experiment</Option>
             {props.experiments.map((experiment) => (
               <Option key={experiment.id.toString()} value={experiment.id.toString()}>
-                {experiment.name || experiment.key} ({experiment.status})
+                {displayNames.get(experiment.id.toString())}
               </Option>
             ))}
           </React.Fragment>
         )}
       </SelectField>
-      {props.disabled === true && (
+      {props.hasVariations === true && !props.reloadNeeded && (
         <Paragraph className={styles.clearDescription}>
           To change experiment, first{' '}
           <TextLink onClick={props.onClearVariations}>clear the content assigned</TextLink>.
@@ -94,7 +112,10 @@ export default function ExperimentSection(props) {
 
 ExperimentSection.propTypes = {
   loaded: PropTypes.bool.isRequired,
-  disabled: PropTypes.bool,
+  reloadNeeded: PropTypes.bool,
+  hasVariations: PropTypes.bool,
+  sdk: PropTypes.object.isRequired,
+  isFx: PropTypes.bool.isRequired,
   experiment: ExperimentType,
   experiments: PropTypes.arrayOf(ExperimentType.isRequired),
   onChangeExperiment: PropTypes.func.isRequired,

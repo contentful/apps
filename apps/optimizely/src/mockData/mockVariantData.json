@@ -1,4 +1,17 @@
 {
+  "project": {
+    "is_flags_enabled": true
+  },
+  "environments": [
+    {
+      "key": "development",
+      "is_primary": false
+    },
+    {
+      "key": "production",
+      "is_primary": true
+    }
+  ],
   "results": {
     "confidence_threshold": 0.9,
     "end_time": "2019-08-05T14:55:00.000000Z",

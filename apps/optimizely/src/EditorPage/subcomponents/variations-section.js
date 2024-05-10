@@ -6,6 +6,8 @@ import {
   Paragraph,
   SkeletonContainer,
   SkeletonBodyText,
+  Spinner,
+  Flex
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { ExperimentType } from './prop-types';
@@ -53,7 +55,7 @@ function mergeReferencesAndVariations(variationReferences, variations, meta) {
   return { mappedVariations, unmappedReferences };
 }
 
-export default function VariationsSection(props) {
+export default function VariationsSection(props) {  
   if (!props.loaded) {
     return (
       <Container>
@@ -71,6 +73,17 @@ export default function VariationsSection(props) {
       </Container>
     );
   }
+  
+  if (props.isFx && !props.experiment.variations) {
+    return (
+      <Container>
+         <Flex>
+          <>Loading Variations</>
+          <Spinner />
+        </Flex>
+      </Container>
+    );
+  }
 
   const { mappedVariations, unmappedReferences } = mergeReferencesAndVariations(
     props.variations,
@@ -85,6 +98,8 @@ export default function VariationsSection(props) {
       </Paragraph>
       {mappedVariations.map((item) => (
         <VariationItem
+          isFx={props.isFx}
+          disableEdit={props.disableEdit}
           variation={item.variation}
           experimentResults={props.experimentResults}
           sys={item.sys}
@@ -105,6 +120,7 @@ export default function VariationsSection(props) {
             <VariationItem
               sys={item.sys}
               key={item.sys.id}
+              disableEdit={props.disableEdit}
               onOpenEntry={props.onOpenEntry}
               onRemoveVariation={props.onRemoveVariation}
             />
@@ -117,6 +133,8 @@ export default function VariationsSection(props) {
 
 VariationsSection.propTypes = {
   loaded: PropTypes.bool.isRequired,
+  isFx: PropTypes.bool.isRequired,
+  disableEdit: PropTypes.bool.isRequired,
   experiment: ExperimentType,
   experimentResults: PropTypes.object,
   meta: PropTypes.object.isRequired,

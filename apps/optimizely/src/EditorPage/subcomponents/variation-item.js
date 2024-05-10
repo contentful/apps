@@ -44,8 +44,12 @@ const styles = {
   }),
 };
 
-function getPercentOfTraffic(variation) {
-  return Math.floor(variation.weight) / 100;
+function getPercentOfTraffic(isFxProject, variation) {
+  if (isFxProject) {
+    return (variation.percentage_included / 100.0).toFixed(2);
+  }
+
+  return (variation.weight / 100.0).toFixed(2);
 }
 
 function useEntryCard(id) {
@@ -120,8 +124,8 @@ export function SelectedReference(props) {
       contentType={entry.meta.contentType}
       dropdownListElements={
         <DropdownList>
-          <DropdownListItem onClick={props.onEditClick}>Edit</DropdownListItem>
-          <DropdownListItem onClick={props.onRemoveClick}>Remove</DropdownListItem>
+          <DropdownListItem isDisabled={props.disableEdit} onClick={props.onEditClick}>Edit</DropdownListItem>
+          <DropdownListItem isDisabled={props.disableEdit} onClick={props.onRemoveClick}>Remove</DropdownListItem>
         </DropdownList>
       }
     />
@@ -130,6 +134,7 @@ export function SelectedReference(props) {
 
 SelectedReference.propTypes = {
   sys: PropTypes.object.isRequired,
+  disableEdit: PropTypes.bool.isRequired,
   onEditClick: PropTypes.func.isRequired,
   onRemoveClick: PropTypes.func.isRequired,
 };
@@ -142,7 +147,7 @@ export default function VariationItem(props) {
       {props.variation && (
         <React.Fragment>
           <Subheading className={styles.variationTitle}>
-            {variation.key} <small>({getPercentOfTraffic(variation)}% of traffic)</small>
+            {variation.key} <small>({getPercentOfTraffic(props.isFx, variation)}% of traffic)</small>
           </Subheading>
           {variation.description && (
             <Paragraph className={styles.variationDescription}>
@@ -154,6 +159,7 @@ export default function VariationItem(props) {
       {props.sys && (
         <SelectedReference
           sys={props.sys}
+          disableEdit={props.disableEdit}
           onEditClick={() => {
             props.onOpenEntry(props.sys.id);
           }}
@@ -170,6 +176,7 @@ export default function VariationItem(props) {
       )}
       {!props.sys && (
         <VariationSelect
+          disableEdit={props.disableEdit}
           onCreate={(contentType) => {
             props.onCreateVariation(props.variation, contentType);
           }}
@@ -184,6 +191,7 @@ export default function VariationItem(props) {
 }
 
 VariationItem.propTypes = {
+  isFx: PropTypes.bool,
   variation: PropTypes.object,
   experimentResults: PropTypes.object,
   sys: PropTypes.object,
