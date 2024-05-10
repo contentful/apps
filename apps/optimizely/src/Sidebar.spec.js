@@ -10,9 +10,7 @@ let VALID_FIELDS = true;
 
 const mockUnsub = jest.fn();
 
-function mockClient() {
-
-}
+function mockClient() {}
 
 function mockSdk() {
   return {
@@ -169,9 +167,7 @@ describe('Sidebar', () => {
 
     expect(sdk.entry.fields.experimentKey.getValue).toHaveBeenCalledTimes(2);
     expect(sdk.entry.fields.revision.onValueChanged).toHaveBeenCalledTimes(1);
-    expect(typeof sdk.entry.fields.revision.onValueChanged.mock.calls[0][0]).toEqual(
-      'function'
-    );
+    expect(typeof sdk.entry.fields.revision.onValueChanged.mock.calls[0][0]).toEqual('function');
 
     unmount();
 
