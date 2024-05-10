@@ -32,7 +32,12 @@ export const SelectSection = ({
   handleNotFoundError,
   handleChange,
 }: Props) => {
-  const { placeholder, label, emptyMessage, helpText: helpTextCopy } = copies.configPage[section];
+  const {
+    placeholder,
+    label,
+    emptyMessage,
+    helpText: { copy: helpTextCopy },
+  } = copies.configPage[section];
   const { isLoading } = useContext(ConfigPageContext);
   const { message } = useError({ error });
 

@@ -10,7 +10,7 @@ import {
 } from '@constants/enums';
 import { ConfigPageContext } from '@contexts/ConfigPageProvider';
 import { TextFieldSection } from './TextFieldSection/TextFieldSection';
-import { DraftModeHelpText } from './HelpText/HelpText';
+import { DraftModeHelpText } from './DraftModeHelpText/DraftModeHelpText';
 
 interface Props {
   paths: Path[];

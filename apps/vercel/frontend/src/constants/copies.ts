@@ -16,14 +16,19 @@ export const copies = {
       label: 'Project',
       placeholder: 'Select a project',
       emptyMessage: 'No Vercel projects are available',
-      helpText: 'Connect to a project associated with your website or experience.',
+      helpText: {
+        copy: 'Connect to a project associated with your website or experience.',
+      },
     },
     pathSelectionSection: {
       label: 'Draft Mode route handler',
       placeholder: 'Select a route',
       textInputPlaceholder: 'Ex: api/enable-draft',
       emptyMessage: 'No paths currently configured.',
-      helpText: undefined, // defined as React component
+      helpText: {
+        href: 'https://www.contentful.com/help/vercel-app/#step-1-configuring-your-nextjs-application-to-support-draft-mode',
+        copy: '', // copy in DraftModeHelpText
+      },
       textInputHelpText: 'Set a Vercel route to enable your draft mode.',
     },
     contentTypePreviewPathSection: {
