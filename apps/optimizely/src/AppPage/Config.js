@@ -36,8 +36,9 @@ export default class Config extends React.Component {
   onProjectChange = (allProjects, event) => {
     const projectId = event.target.value;
     const project = allProjects.find((p) => String(p.id) === projectId);
-    const projectType = project['is_flags_enabled'] 
-      ? ProjectType.FeatureExperimentation : ProjectType.FullStack;
+    const projectType = project['is_flags_enabled']
+      ? ProjectType.FeatureExperimentation
+      : ProjectType.FullStack;
 
     this.props.updateConfig({
       optimizelyProjectId: projectId,

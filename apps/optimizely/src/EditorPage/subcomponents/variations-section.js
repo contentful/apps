@@ -7,7 +7,7 @@ import {
   SkeletonContainer,
   SkeletonBodyText,
   Spinner,
-  Flex
+  Flex,
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { ExperimentType } from './prop-types';
@@ -55,7 +55,7 @@ function mergeReferencesAndVariations(variationReferences, variations, meta) {
   return { mappedVariations, unmappedReferences };
 }
 
-export default function VariationsSection(props) {  
+export default function VariationsSection(props) {
   if (!props.loaded) {
     return (
       <Container>
@@ -73,11 +73,11 @@ export default function VariationsSection(props) {
       </Container>
     );
   }
-  
+
   if (props.isFx && !props.experiment.variations) {
     return (
       <Container>
-         <Flex>
+        <Flex>
           <>Loading Variations</>
           <Spinner />
         </Flex>

@@ -39,7 +39,7 @@ export default function ExperimentSection(props) {
         const ruleKey = experiment.name || experiment.key;
         const environment = experiment.environment_key;
         const onOff = experiment.enabled ? 'on' : 'off';
-        const displayName = `${ruleKey} (flag: ${flagName}, environment: ${environment}, ${onOff})`
+        const displayName = `${ruleKey} (flag: ${flagName}, environment: ${environment}, ${onOff})`;
 
         displayNames.set(experiment.id.toString(), displayName);
       } else {
@@ -79,7 +79,8 @@ export default function ExperimentSection(props) {
         }}
         selectProps={{
           width: 'large',
-          isDisabled: props.hasVariations === true || props.loaded === false || props.reloadNeeded === true,
+          isDisabled:
+            props.hasVariations === true || props.loaded === false || props.reloadNeeded === true,
         }}
         id="experiment"
         name="experiment">

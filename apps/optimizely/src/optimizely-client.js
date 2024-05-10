@@ -25,7 +25,9 @@ export default class OptimizelyClient {
 
     // reauthing should hopefully fix the issue
     this.onReauth();
-    return Promise.reject(new Error(`request failed for url: ${url} with status: ${response.status}`));
+    return Promise.reject(
+      new Error(`request failed for url: ${url} with status: ${response.status}`)
+    );
   };
 
   _getItemsPerPage = async (item) => {
@@ -79,7 +81,7 @@ export default class OptimizelyClient {
   getProjects = async () => {
     const allProjects = await this._getItemsPerPage('project');
     return allProjects.filter((project) => project.status === 'active');
-  }
+  };
 
   getProject = async (projectId) => {
     return this.makeRequest(`${this.baseURL}/projects/${projectId}`);
@@ -87,7 +89,7 @@ export default class OptimizelyClient {
 
   getProjectEnvironments = async (projectId) => {
     return this.makeRequest(`${this.baseURL}/environments?project_id=${projectId}`);
-  }
+  };
 
   getExperiment = (experimentId) => {
     return this.makeRequest(`${this.baseURL}/experiments/${experimentId}`);
@@ -98,18 +100,19 @@ export default class OptimizelyClient {
   };
 
   getRules = async () => {
-    let url = `/projects/${this.project}/rules` +
+    let url =
+      `/projects/${this.project}/rules` +
       '?rule_types=a/b,multi_armed_bandit&archived=false&page_window=1&per_page=100';
 
     let items = [];
 
-    while(true) {
+    while (true) {
       const response = await this.makeRequest(`${this.fxBaseUrl}${url}`);
       if (response.items) {
         items = [...items, ...response.items];
       }
       if (response.next_url) {
-        ([url] = response.next_url);
+        [url] = response.next_url;
       } else {
         break;
       }
@@ -118,8 +121,10 @@ export default class OptimizelyClient {
   };
 
   getRule = async (flagKey, ruleKey, environment) => {
-    return this.makeRequest(`${this.fxBaseUrl}/projects/${this.project}/flags/${flagKey}/environments/${environment}/rules/${ruleKey}`);
-  }
+    return this.makeRequest(
+      `${this.fxBaseUrl}/projects/${this.project}/flags/${flagKey}/environments/${environment}/rules/${ruleKey}`
+    );
+  };
 
   getExperimentResults = (experimentId) => {
     return this.makeRequest(`${this.baseURL}/experiments/${experimentId}/results`);

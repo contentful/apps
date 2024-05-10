@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Button } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
 import { css } from 'emotion';
-import {  checkAndGetField } from '../util';
+import { checkAndGetField } from '../util';
 import { ProjectType, fieldNames } from '../constants';
 import { wait } from '@testing-library/react';
 
@@ -12,7 +12,6 @@ const styles = {
     marginBottom: tokens.spacingS,
   }),
 };
-
 
 const getRuleEditUrl = (projectId, flagKey, ruleKey, environment) => {
   return `https://app.optimizely.com/v2/projects/${projectId}/flags/manage/${flagKey}/rules/${environment}/edit/${ruleKey}`;
@@ -53,11 +52,13 @@ export default function Sidebar(props) {
         return;
       }
 
-      while(isActive && props.client) {
+      while (isActive && props.client) {
         try {
           const project = await props.client.getProject(optimizelyProjectId);
           if (!isActive) return;
-          const type = project.is_flags_enabled ? ProjectType.FeatureExperimentation : ProjectType.FullStack;
+          const type = project.is_flags_enabled
+            ? ProjectType.FeatureExperimentation
+            : ProjectType.FullStack;
           setProjectType(type);
           return;
         } catch (err) {
@@ -69,7 +70,7 @@ export default function Sidebar(props) {
 
     return () => {
       isActive = false;
-    }
+    };
   }, [props.client, props.sdk, projectType]);
 
   useEffect(() => {
@@ -79,17 +80,17 @@ export default function Sidebar(props) {
     };
   }, [props.sdk.window]);
 
-  const [, forceUpdate] = useReducer(x => x + 1, 0);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   useEffect(() => {
     let unsubscribe = () => {};
     if (props.sdk.entry.fields.revision) {
       unsubscribe = props.sdk.entry.fields.revision.onValueChanged((v) => {
-        forceUpdate()
+        forceUpdate();
       });
     } else {
       unsubscribe = props.sdk.entry.fields.experimentKey.onValueChanged((v) => {
-        forceUpdate()
+        forceUpdate();
       });
     }
     return () => {
@@ -97,12 +98,14 @@ export default function Sidebar(props) {
     };
   }, [props.sdk.entry, forceUpdate]);
 
-  let disableViewButton = !projectType ||
+  let disableViewButton =
+    !projectType ||
     (projectType === ProjectType.FullStack && !experimentKey) ||
-    (projectType === ProjectType.FeatureExperimentation && (!flagKey || !environment || !experimentKey));
+    (projectType === ProjectType.FeatureExperimentation &&
+      (!flagKey || !environment || !experimentKey));
 
-  let disableListButton = !projectType ||
-    (projectType === ProjectType.FeatureExperimentation && !environment);
+  let disableListButton =
+    !projectType || (projectType === ProjectType.FeatureExperimentation && !environment);
 
   const isFx = projectType === ProjectType.FeatureExperimentation;
 
@@ -113,7 +116,11 @@ export default function Sidebar(props) {
         isFullWidth
         className={styles.button}
         disabled={disableViewButton}
-        href={isFx ? getRuleEditUrl(optimizelyProjectId, flagKey, experimentKey, environment) : getExperimentUrl(optimizelyProjectId, experimentId)}
+        href={
+          isFx
+            ? getRuleEditUrl(optimizelyProjectId, flagKey, experimentKey, environment)
+            : getExperimentUrl(optimizelyProjectId, experimentId)
+        }
         target="_blank"
         data-test-id="view-experiment">
         View in Optimizely
@@ -124,7 +131,11 @@ export default function Sidebar(props) {
         className={styles.button}
         disabled={disableListButton}
         target="_blank"
-        href={isFx ? getAllFlagsUrl(optimizelyProjectId, environment) : getAllExperimentsUrl(optimizelyProjectId)}
+        href={
+          isFx
+            ? getAllFlagsUrl(optimizelyProjectId, environment)
+            : getAllExperimentsUrl(optimizelyProjectId)
+        }
         data-test-id="view-all">
         <>{`View all ${isFx ? 'flags' : 'experiments'}`}</>
       </Button>

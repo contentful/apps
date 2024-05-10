@@ -10,4 +10,4 @@ export const useLatest = (value) => {
   return useCallback(() => {
     return ref.current;
   }, []);
-}
+};

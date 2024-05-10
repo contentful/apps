@@ -3,12 +3,7 @@ import PropTypes from 'prop-types';
 import { css } from 'emotion';
 
 import tokens from '@contentful/forma-36-tokens';
-import {
-  Heading,
-  SelectField,
-  Option,
-  Typography,
-} from '@contentful/forma-36-react-components';
+import { Heading, SelectField, Option, Typography } from '@contentful/forma-36-react-components';
 
 const styles = {
   section: css({

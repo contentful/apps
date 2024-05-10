@@ -109,14 +109,14 @@ export default class App extends React.Component {
       (event) => {
         const { data, origin } = event;
         const { token, expires } = data;
-        
+
         if (origin !== new URL(redirectUrl).origin || !token) {
           return;
         }
 
         const credential = {
           [TOKEN_KEY]: token,
-          [TOKEN_EXPIRATION] : expires,
+          [TOKEN_EXPIRATION]: expires,
         };
 
         window.localStorage.setItem(OPTI_CREDENTIALS, JSON.stringify(credential));
@@ -146,7 +146,7 @@ export default class App extends React.Component {
     const { sdk } = props;
     const { client } = state;
     const { location, parameters } = sdk;
-    
+
     if (location.is(locations.LOCATION_APP_CONFIG)) {
       return (
         <AppPage
@@ -163,7 +163,7 @@ export default class App extends React.Component {
         return <MissingProjectId />;
       }
 
-      return <Sidebar sdk={sdk} client={client}/>;
+      return <Sidebar sdk={sdk} client={client} />;
     }
 
     if (location.is(locations.LOCATION_ENTRY_EDITOR)) {

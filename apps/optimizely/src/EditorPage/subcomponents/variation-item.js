@@ -124,8 +124,12 @@ export function SelectedReference(props) {
       contentType={entry.meta.contentType}
       dropdownListElements={
         <DropdownList>
-          <DropdownListItem isDisabled={props.disableEdit} onClick={props.onEditClick}>Edit</DropdownListItem>
-          <DropdownListItem isDisabled={props.disableEdit} onClick={props.onRemoveClick}>Remove</DropdownListItem>
+          <DropdownListItem isDisabled={props.disableEdit} onClick={props.onEditClick}>
+            Edit
+          </DropdownListItem>
+          <DropdownListItem isDisabled={props.disableEdit} onClick={props.onRemoveClick}>
+            Remove
+          </DropdownListItem>
         </DropdownList>
       }
     />
@@ -147,7 +151,8 @@ export default function VariationItem(props) {
       {props.variation && (
         <React.Fragment>
           <Subheading className={styles.variationTitle}>
-            {variation.key} <small>({getPercentOfTraffic(props.isFx, variation)}% of traffic)</small>
+            {variation.key}{' '}
+            <small>({getPercentOfTraffic(props.isFx, variation)}% of traffic)</small>
           </Subheading>
           {variation.description && (
             <Paragraph className={styles.variationDescription}>

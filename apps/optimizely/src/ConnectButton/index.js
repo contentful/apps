@@ -27,7 +27,7 @@ export default function ConnectButton({ openAuth }) {
       testId="connect-button"
       isFullWidth
       buttonType="naked">
-      <AuthButton/>
+      <AuthButton />
     </Button>
   );
 }
