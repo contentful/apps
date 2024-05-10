@@ -110,7 +110,7 @@ export default class AppPage extends React.Component {
       this.props.sdk.notifier.error(`You must be connected to Optimizely to configure the app.`);
       return false;
     }
-  
+
     const { config } = this.state;
 
     if (!config.optimizelyProjectId) {
@@ -123,23 +123,22 @@ export default class AppPage extends React.Component {
     const variationContainerContentType = this.state.allContentTypes.find(
       (ct) => ct.sys.id === VARIATION_CONTAINER_ID
     );
-    
+
     if (!variationContainerContentType) {
       await this.createVariationContainerContentType();
     } else {
       const flagKeyField = variationContainerContentType.fields.find((f) => f.id === 'flagKey');
-      const environmentField = variationContainerContentType.fields.find((f) => f.id === 'environment');
+      const environmentField = variationContainerContentType.fields.find(
+        (f) => f.id === 'environment'
+      );
       const revisionField = variationContainerContentType.fields.find((f) => f.id === 'revision');
 
-
       if (!flagKeyField || !environmentField) {
-        await this.updateVariationContainerContentType(
-          variationContainerContentType, {
-            addFlagKey: !flagKeyField,
-            addEnvironment: !environmentField,
-            addRevision: !revisionField,
-          }
-        );
+        await this.updateVariationContainerContentType(variationContainerContentType, {
+          addFlagKey: !flagKeyField,
+          addEnvironment: !environmentField,
+          addRevision: !revisionField,
+        });
       }
     }
 
@@ -156,7 +155,7 @@ export default class AppPage extends React.Component {
       this.props.sdk.notifier.error('Something went wrong, please try again.');
       return false;
     }
-    
+
     return {
       parameters: {
         optimizelyProjectId: config.optimizelyProjectId,
@@ -233,27 +232,23 @@ export default class AppPage extends React.Component {
   updateVariationContainerContentType = async (variationContainer, opt) => {
     const { addFlagKey, addEnvironment, addRevision } = opt;
     if (addFlagKey) {
-      variationContainer.fields.push(
-        {
-          id: 'flagKey',
-          name: 'Flag Key',
-          type: 'Symbol',
-        },
-      );
+      variationContainer.fields.push({
+        id: 'flagKey',
+        name: 'Flag Key',
+        type: 'Symbol',
+      });
     }
 
     if (addEnvironment) {
-      variationContainer.fields.push(
-        {
-          id: 'environment',
-          name: 'Environment Key',
-          type: 'Symbol',
-        },
-      );
+      variationContainer.fields.push({
+        id: 'environment',
+        name: 'Environment Key',
+        type: 'Symbol',
+      });
     }
 
     if (addRevision) {
-      variationContainer.fields.push({ 
+      variationContainer.fields.push({
         id: 'revision',
         name: 'Revision ID',
         type: 'Symbol',
@@ -394,7 +389,7 @@ export default class AppPage extends React.Component {
           )}
         </div>
         <div className={styles.logo}>
-          <OptimizelyLogo width={60} height={60} arccolor={colors.optimizelyBlue}/>
+          <OptimizelyLogo width={60} height={60} arccolor={colors.optimizelyBlue} />
         </div>
       </>
     );

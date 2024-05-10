@@ -940,7 +940,6 @@ export default {
               },
             },
           },
-          
         },
       },
       editor: {

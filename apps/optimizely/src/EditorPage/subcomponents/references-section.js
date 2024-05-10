@@ -79,10 +79,10 @@ export default function ReferencesSection(props) {
       {props.references.length > 0 &&
         props.references.map((entry, index) => (
           <React.Fragment key={entry.id}>
-            <ReferenceItem 
-              entry={entry} 
+            <ReferenceItem
+              entry={entry}
               onClick={onItemClick(entry.id)}
-              separator = {index !== props.references.length - 1 ? ', ' : ''}
+              separator={index !== props.references.length - 1 ? ', ' : ''}
             />
           </React.Fragment>
         ))}

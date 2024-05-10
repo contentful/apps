@@ -22,7 +22,7 @@ function mockSdk() {
       onSlideInNavigation: () => {},
     },
     dialogs: {
-      selectSingleEntry: () => {}
+      selectSingleEntry: () => {},
     },
     parameters: {
       installation: {
@@ -65,8 +65,8 @@ function mockSdk() {
         },
       },
       getSys: () => {
-        id: '123'
-      }
+        id: '123';
+      },
     },
     contentType: {
       sys: {
@@ -206,7 +206,6 @@ describe('Optimizely App', () => {
         optExpire: Date.now() + 24 * 3600 * 1000,
       });
     };
-
 
     const { getByTestId } = render(<App sdk={sdk} />);
     expect(getByTestId('editor-page')).toMatchSnapshot();

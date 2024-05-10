@@ -94,7 +94,13 @@ export default function StatusBar(props) {
   };
 
   if (props.loaded) {
-    statuses = checkStatuses(statuses, props.experiment, props.variations, props.entries, props.isFx);
+    statuses = checkStatuses(
+      statuses,
+      props.experiment,
+      props.variations,
+      props.entries,
+      props.isFx
+    );
   }
 
   return (
