@@ -50,7 +50,7 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
       const accounts = (await gapi.client.analytics.management.accountSummaries.list()) || [];
       viewUrl = this.getExternalUrl(accounts);
     } catch (e) {
-      const error: GapiError = e.result ? e.result.error : e;
+      const error: GapiError = (e as any).result ? (e as any).result.error : e;
 
       return this.onError({ error: error });
     }
