@@ -1,91 +1,76 @@
 import { FunctionEventHandler as EventHandler } from '@contentful/node-apps-toolkit';
-import { AppEventRequest } from '@contentful/node-apps-toolkit/lib/requests/typings';
-const http = require('http');
+import {
+  AppEventEntry,
+  AppEventRequest,
+  FunctionEventContext,
+} from '@contentful/node-apps-toolkit/lib/requests/typings';
 
-const appEventHandlerHandler: EventHandler<'appevent.handler'> = (
+const exampleAuditServerHandler = async (event: AppEventEntry) => {
+  // Post event sys and metadata to external audit log server
+  const body = JSON.stringify({
+    sys: event.body.sys,
+    meta: event.body.metadata,
+  });
+  const options: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body).toString(),
+    },
+    body,
+  };
+
+  try {
+    const response = await fetch('http://FakeAuditLogServer.com/path/to/your/resource', options);
+    console.log('Audit log server status code:', response.status);
+
+    const responseData = await response.json();
+    console.log(responseData);
+  } catch (error) {
+    console.error('Failed to send sys and metadata to audit log server', error);
+  }
+};
+
+const exampleAnalyticsHandler = async (event: AppEventEntry) => {
+  // Create a summary of event and post it to an external analytics server
+  const body = JSON.stringify({
+    entryId: event.body.sys.id,
+    userId: event.body.sys.updatedBy,
+    eventType: 'EntryUpdated',
+  });
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body).toString(),
+    },
+    body,
+  };
+
+  try {
+    const response = await fetch('http://FakeAnalyticsServer.com/path/to/your/resource', options);
+    console.log('Analytics server status code:', response.status);
+
+    const responseData = await response.json();
+    console.log(responseData);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// Since our function only accepts filter events,
+// we can safely assume the event is of type appevent.filter
+export const handler: EventHandler<'appevent.handler'> = async (
   event: AppEventRequest,
-  context
+  context: FunctionEventContext
 ) => {
   // This function will check to see if the event is an Entry and then send it to multiple external services to be handled
-  if (event.entityType === 'Entry') {
-    exampleAuditServerHandler(event);
-    exampleAnalyticsHandler(event);
+  if (event.headers['X-Contentful-Topic'].includes('Entry')) {
+    event = event as AppEventEntry;
+    await exampleAuditServerHandler(event);
+    await exampleAnalyticsHandler(event);
   }
 
   // AppEvent Handlers don't have a response
   return;
-};
-
-const exampleAuditServerHandler = (event: AppEventRequest) => {
-  // Post entire event to external audit log server
-  const postData = JSON.stringify(event);
-  const options = {
-    hostname: 'FakeAuditLogServer.com',
-    port: 80,
-    path: '/path/to/your/resource',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData),
-    },
-  };
-
-  const req = http.request(options, (res: any) => {
-    console.log(`statusCode: ${res.statusCode}`);
-
-    res.on('data', (res: any) => {
-      console.log(res);
-    });
-  });
-
-  req.on('error', (error: any) => {
-    console.error(error);
-  });
-
-  req.write(postData);
-  req.end();
-};
-
-const exampleAnalyticsHandler = (event: AppEventRequest) => {
-  if (event.entityType !== 'Entry') {
-    return;
-  }
-
-  // Create a summary of just event and post it to an external analytics server
-  const postData = JSON.stringify({
-    userId: event.entityProps.sys.updatedBy,
-    eventType: 'EntryUpdated',
-  });
-  const options = {
-    hostname: 'FakeAnalyticsServer.com',
-    port: 80,
-    path: '/path/to/your/resource',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData),
-    },
-  };
-
-  const req = http.request(options, (res: any) => {
-    console.log(`statusCode: ${res.statusCode}`);
-
-    res.on('data', (res: any) => {
-      console.log(res);
-    });
-  });
-
-  req.on('error', (error: any) => {
-    console.error(error);
-  });
-
-  req.write(postData);
-  req.end();
-};
-
-export const handler: EventHandler = (event, context) => {
-  if (event.type === 'appevent.handler') {
-    return appEventHandlerHandler(event, context);
-  }
-  throw new Error('Unknown Event');
 };

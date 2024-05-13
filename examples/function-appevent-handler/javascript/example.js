@@ -1,82 +1,65 @@
-const http = require('http');
-
-const appEventHandlerHandler = (event, context) => {
-  if (event.entityType === 'Entry') {
-    exampleAuditServerHandler(event);
-    exampleAnalyticsHandler(event);
-  }
-
-  return;
-};
-
-const exampleAuditServerHandler = (event) => {
-  const postData = JSON.stringify(event);
+const exampleAuditServerHandler = async (event) => {
+  // Post event sys and metadata to external audit log server
+  const body = JSON.stringify({
+    sys: event.body.sys,
+    meta: event.body.metadata,
+  });
   const options = {
-    hostname: 'FakeAuditLogServer.com',
-    port: 80,
-    path: '/path/to/your/resource',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData),
+      'Content-Length': Buffer.byteLength(body).toString(),
     },
+    body,
   };
 
-  const req = http.request(options, (res) => {
-    console.log(`statusCode: ${res.statusCode}`);
+  try {
+    const response = await fetch('http://FakeAuditLogServer.com/path/to/your/resource', options);
+    console.log('Audit log server status code:', response.status);
 
-    res.on('data', (res) => {
-      console.log(res);
-    });
-  });
-
-  req.on('error', (error) => {
-    console.error(error);
-  });
-
-  req.write(postData);
-  req.end();
+    const responseData = await response.json();
+    console.log(responseData);
+  } catch (error) {
+    console.error('Failed to send sys and metadata to audit log server', error);
+  }
 };
 
-const exampleAnalyticsHandler = (event) => {
-  if (event.entityType !== 'Entry') {
-    return;
-  }
-
-  const postData = JSON.stringify({
-    userId: event.entityProps.sys.updatedBy,
+const exampleAnalyticsHandler = async (event) => {
+  // Create a summary of event and post it to an external analytics server
+  const body = JSON.stringify({
+    entryId: event.body.sys.id,
+    userId: event.body.sys.updatedBy,
     eventType: 'EntryUpdated',
   });
   const options = {
-    hostname: 'FakeAnalyticsServer.com',
-    port: 80,
-    path: '/path/to/your/resource',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData),
+      'Content-Length': Buffer.byteLength(body),
     },
+    body,
   };
 
-  const req = http.request(options, (res) => {
-    console.log(`statusCode: ${res.statusCode}`);
+  try {
+    const response = await fetch('http://FakeAnalyticsServer.com/path/to/your/resource', options);
+    console.log('Analytics server status code:', response.status);
 
-    res.on('data', (res) => {
-      console.log(res);
-    });
-  });
-
-  req.on('error', (error) => {
+    const responseData = await response.json();
+    console.log(responseData);
+  } catch (error) {
     console.error(error);
-  });
-
-  req.write(postData);
-  req.end();
+  }
 };
 
-export const handler = (event, context) => {
-  if (event.type === 'appevent.handler') {
-    return appEventHandlerHandler(event, context);
+// Since our function only accepts filter events,
+// we can safely assume the event is of type appevent.filter
+export const handler = async (event, context) => {
+  // This function will check to see if the event is an Entry and then send it to multiple external services to be handled
+  if (event.headers['X-Contentful-Topic'].includes('Entry')) {
+    await exampleAuditServerHandler(event);
+    await exampleAnalyticsHandler(event);
   }
-  throw new Error('Unknown Event');
+
+  // AppEvent Handlers don't have a response
+  return;
 };
