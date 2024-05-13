@@ -72,7 +72,9 @@ exports[`ConnectButton should match snapshot 1`] = `
               x="0"
               y="5"
             >
-               Connect with Optimizely 
+               
+              Connect with Optimizely
+               
             </text>
           </g>
         </svg>
