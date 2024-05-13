@@ -13,9 +13,11 @@ describe('GettingStartedSection', () => {
     const titleText = screen.getByText(title);
     const stepOneText = screen.getByText(contentPreviewSidebar.copy);
     const stepTwoText = screen.getByText(contentPreviewSettings.copy);
+    const helpCenterLink = screen.getByText('app setup guide');
 
     expect(titleText).toBeTruthy();
     expect(stepOneText).toBeTruthy();
     expect(stepTwoText).toBeTruthy();
+    expect(helpCenterLink).toBeTruthy();
   });
 });
