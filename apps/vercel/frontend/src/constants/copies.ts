@@ -149,6 +149,9 @@ export const copies = {
         copy: 'Within the content preview settings, you will see Vercel as an option.',
         src: './images/content-preview-settings-screen-capture.png',
       },
+      link: {
+        href: 'https://www.contentful.com/help/vercel-app/',
+      },
     },
   },
 };

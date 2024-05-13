@@ -33,6 +33,7 @@ describe('The Jira App Components', () => {
   let configureFn = () => {};
 
   beforeEach(() => {
+    jest.useFakeTimers();
     window.open = jest.fn();
     Object.defineProperty(window, 'localStorage', { writable: true, value: originalStorage });
 
@@ -74,6 +75,7 @@ describe('The Jira App Components', () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     cleanup();
   });
 
@@ -126,7 +128,6 @@ describe('The Jira App Components', () => {
     it('should go through the installation flow successfully', async () => {
       const token = '123';
       const expires = Date.now() + 600000;
-      jest.useFakeTimers();
 
       Object.defineProperty(window, 'localStorage', {
         writable: true,
