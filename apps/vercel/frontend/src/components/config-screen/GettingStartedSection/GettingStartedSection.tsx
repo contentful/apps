@@ -1,9 +1,11 @@
-import { copies } from '@constants/copies';
-import { Flex, Heading, Paragraph, Box } from '@contentful/f36-components';
+import { Flex, Heading, Paragraph, Box, TextLink } from '@contentful/f36-components';
+import { ExternalLinkIcon } from '@contentful/f36-icons';
+import tokens from '@contentful/f36-tokens';
 import { styles } from '@locations/ConfigScreen.styles';
+import { copies } from '@constants/copies';
 
 export const GettingStartedSection = () => {
-  const { contentPreviewSidebar, contentPreviewSettings, title } =
+  const { contentPreviewSidebar, contentPreviewSettings, title, link } =
     copies.configPage.gettingStartedSection;
   return (
     <Box>
@@ -15,6 +17,17 @@ export const GettingStartedSection = () => {
       <Flex>
         <Paragraph>{contentPreviewSettings.copy}</Paragraph>
         <img src={contentPreviewSettings.src} alt="Content preview settings screen capture" />
+      </Flex>
+      <Flex marginTop="spacingM" gap={tokens.spacing2Xs} alignItems="center">
+        <Paragraph marginBottom="none">Need help with app setup? Follow this</Paragraph>
+        <TextLink
+          icon={<ExternalLinkIcon />}
+          alignIcon="end"
+          href={link.href}
+          target="_blank"
+          rel="noopener noreferrer">
+          app setup guide
+        </TextLink>{' '}
       </Flex>
     </Box>
   );
