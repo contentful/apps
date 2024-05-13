@@ -19,7 +19,7 @@ export const GettingStartedSection = () => {
         <img src={contentPreviewSettings.src} alt="Content preview settings screen capture" />
       </Flex>
       <Flex marginTop="spacingM" gap={tokens.spacing2Xs} alignItems="center">
-        <Paragraph marginBottom="none">Need help with app setup? Follow this</Paragraph>
+        Need help with app setup? Follow this
         <TextLink
           icon={<ExternalLinkIcon />}
           alignIcon="end"
