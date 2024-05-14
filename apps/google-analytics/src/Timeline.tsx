@@ -50,8 +50,7 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
       const accounts = (await gapi.client.analytics.management.accountSummaries.list()) || [];
       viewUrl = this.getExternalUrl(accounts);
     } catch (e) {
-      const error: GapiError = e.result ? e.result.error : e;
-
+      const error: GapiError = this.errToGapiError(e);
       return this.onError({ error: error });
     }
 
@@ -131,6 +130,14 @@ export default class Timeline extends React.Component<TimelineProps, TimelineSta
     }
 
     return '';
+  }
+
+  errToGapiError(e: any): GapiError {
+    if (!e || typeof e !== 'object') throw new TypeError(`${e} is not an error`);
+    if ('result' in e && 'error' in e.result) {
+      return e.result.error as GapiError;
+    }
+    return e as GapiError;
   }
 
   render() {
