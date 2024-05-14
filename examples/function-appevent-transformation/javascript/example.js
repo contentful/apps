@@ -1,47 +1,47 @@
-import https from 'https';
+const geocodeApi = 'https://maps.googleapis.com/maps/api/geocode/json';
 
-const appEventTransformationingHandler = (event, context) => {
-  // If event is an entry, get lat and long fields and geocode them
-  if (event.entityType === 'Entry') {
-    const lat = event.entityProps.fields.lat;
-    const long = event.entityProps.fields.long;
-    if (lat && long) {
-      const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=YOUR_API_KEY`;
-
-      https
-        .get(url, (response) => {
-          let data = '';
-
-          response.on('data', (chunk) => {
-            data += chunk;
-          });
-
-          response.on('end', () => {
-            const result = JSON.parse(data);
-            if (result.results.length > 0) {
-              const address = result.results[0].formatted_address;
-              return address;
-            } else {
-              console.log('No results found.');
-              return null;
-            }
-          });
-        })
-        .on('error', (error) => {
-          console.error('Error:', error.message);
-        });
-    }
+async function geocode(lat, long, apiKey) {
+  const url = `${geocodeApi}?latlng=${lat},${long}&key=${apiKey}`;
+  const response = await fetch(url);
+  const result = await response.json();
+  if (result.results.length > 0) {
+    return result.results[0].formatted_address;
   } else {
-    // If event is not an entry, throw an error
-    throw new Error('Event is not an Entry');
+    console.error('No geocode results found.');
+  }
+}
+
+export const handler = async (event, context) => {
+  let address;
+
+  // Get the maps API key from the app installation parameters
+  const mapsApiKey = context.appInstallationParameters.mapsApiKey;
+  if (!mapsApiKey) {
+    console.error('No maps API key found in app installation parameters, skipping transformation.');
+  } else {
+    // If event is an entry, get lat and long fields and geocode them
+    if (event.headers['X-Contentful-Topic'].includes('Entry')) {
+      const lat = event.body.fields.lat['en-US'];
+      const long = event.body.fields.long['en-US'];
+      if (lat && long) {
+        address = await geocode(lat, long, mapsApiKey);
+      } else {
+        console.error('No lat or long fields found.');
+      }
+    }
   }
 
-  return {};
-};
-
-export const handler = (event, context) => {
-  if (event.type === 'appevent.transformation') {
-    return appEventTransformationingHandler(event, context);
-  }
-  throw new Error('Unknown Event');
+  // Return the original body and headers,
+  // the geocoded address if it exists,
+  // and a header indicating if the coordinates were geocoded successfully
+  return {
+    body: {
+      ...event.body,
+      address,
+    },
+    headers: {
+      ...event.headers,
+      'X-Is-Geocoded': address ? 'true' : 'false',
+    },
+  };
 };
