@@ -15,8 +15,8 @@ import {
 import styles from './styles';
 import { AppConfigParams, AppConfigState, AllContentTypes, ContentTypes } from './typings';
 import { getAndUpdateSavedParams } from './utils';
-import { ContentType, EditorInterface, CollectionResponse } from '@contentful/app-sdk';
 import { ReactComponent as GoogleLogo } from './ga-logo.svg';
+import { CollectionResponse, ContentType, AppState } from '@contentful/app-sdk';
 
 export default class AppConfig extends React.Component<AppConfigParams, AppConfigState> {
   state: AppConfigState = {
@@ -114,7 +114,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
     }
 
     const editorInterface = ctKeys.reduce(
-      (acc: { [key: string]: Partial<EditorInterface> }, id) => {
+      (acc: { [key: string]: Partial<AppState['EditorInterface']> }, id) => {
         const sidebarPosition: { [key: string]: object } = { sidebar: { position: 1 } };
 
         acc[id] = sidebarPosition;
@@ -363,7 +363,7 @@ export default class AppConfig extends React.Component<AppConfigParams, AppConfi
                   isDisabled={!key}
                   hasError={key ? !slugField : false}
                   value={slugField}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
                     this.handleContentTypeFieldChange(key, 'slugField', event.target.value)
                   }>
                   <option disabled value="">
