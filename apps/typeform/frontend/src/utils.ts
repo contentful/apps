@@ -51,7 +51,8 @@ export function editorInterfacesToSelectedFields(
 ): SelectedFields {
   return eis.reduce((acc, ei) => {
     const ctId = get(ei, ['sys', 'contentType', 'sys', 'id']);
-    const fieldIds = get(ei, ['controls'], [])
+    const controls = ei.controls || [];
+    const fieldIds = controls
       .filter((control) => control.widgetNamespace === 'app' && control.widgetId === appId)
       .map((control) => control.fieldId)
       .filter((fieldId) => typeof fieldId === 'string' && fieldId.length > 0);
