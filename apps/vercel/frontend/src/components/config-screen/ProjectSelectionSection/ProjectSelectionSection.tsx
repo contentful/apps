@@ -55,22 +55,15 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
   };
 
   useEffect(() => {
-    const selectedProject = projects.find((project) => project.id === parameters.selectedProject);
-    const protectionBypassIsDisabled = selectedProject && !selectedProject.protectionBypass;
-
-    if (protectionBypassIsDisabled) {
-      dispatchErrors({
-        type: errorsActions.UPDATE_PROJECT_SELECTION_ERRORS,
-        payload: errorTypes.PROTECTION_BYPASS_IS_DISABLED,
-      });
-    }
-  }, [projects, parameters.selectedProject]);
-
-  useEffect(() => {
     const currentSpaceId = sdk.ids.space;
+    const selectedProjectObject = projects.find(
+      (project) => project.id === parameters.selectedProject
+    );
+
     const validateProjectSelectionEnv = async () => {
-      await validateProjectEnv(currentSpaceId, parameters.selectedProject);
+      await validateProjectEnv(currentSpaceId, parameters.selectedProject, selectedProjectObject);
     };
+
     if (parameters.selectedProject) validateProjectSelectionEnv();
   }, [parameters.selectedProject, vercelClient, parameters.teamId]);
 
