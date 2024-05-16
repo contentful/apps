@@ -1,8 +1,10 @@
 # Vercel App Actions
 
-A collection of methods to enable frictionless integration with contentful native content previews and vercel working within the nextjs framework.
+A collection of methods to enable frictionless integration with contentful native content previews and Vercel working within the nextjs framework.
 
-## [get-preview-envs](src/actions/get-preview-envs.ts)
+## Actions
+
+### [get-preview-envs](src/actions/get-preview-envs.ts)
 
 Builds configurations, including preview urls, based on selected content types and returns a platform provided preview environment for content previews.
 
