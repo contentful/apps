@@ -8,7 +8,7 @@ A collection of methods to enable frictionless integration with contentful nativ
 
 Builds configurations, including preview urls, based on selected content types and returns a platform provided preview environment for content previews.
 
-# Testing backend actions
+## Testing
 
 1. Run
 
