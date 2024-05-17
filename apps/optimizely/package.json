@@ -3,7 +3,7 @@
   "version": "1.6.15",
   "private": true,
   "devDependencies": {
-    "@contentful/app-scripts": "^1.13.0",
+    "@contentful/app-scripts": "^1.20.0",
     "cross-env": "7.0.3"
   },
   "dependencies": {
