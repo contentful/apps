@@ -36,6 +36,7 @@ export default function VariationSelect(props) {
           }}
           toggleElement={
             <TextLink
+              disabled={props.disableEdit}
               icon="Plus"
               onClick={() => {
                 setShowDropdown(true);
@@ -59,7 +60,7 @@ export default function VariationSelect(props) {
         </Dropdown>
       </div>
       <div className={styles.item}>
-        <TextLink icon="Link" onClick={props.onLinkExistingClick}>
+        <TextLink disabled={props.disableEdit} icon="Link" onClick={props.onLinkExistingClick}>
           Link an existing entry
         </TextLink>
       </div>
@@ -68,6 +69,7 @@ export default function VariationSelect(props) {
 }
 
 VariationSelect.propTypes = {
+  disableEdit: PropTypes.bool.isRequired,
   onLinkExistingClick: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
 };

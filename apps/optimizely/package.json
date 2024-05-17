@@ -3,6 +3,7 @@
   "version": "1.6.15",
   "private": true,
   "devDependencies": {
+    "@contentful/app-scripts": "^1.13.0",
     "cross-env": "7.0.3"
   },
   "dependencies": {
@@ -18,17 +19,20 @@
     "prop-types": "15.8.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "use-methods": "0.5.1",
-    "whatwg-fetch": "3.6.20"
+    "whatwg-fetch": "3.6.19"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
+    "build:local": "npm run env:local && npm run build",
+    "env:local": "echo REACT_APP_OPTIMIZELY_CLIENT_APP_ID=${REACT_APP_OPTIMIZELY_CLIENT_APP_ID} > .env.local",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/optimizely --acl public-read",
+    "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy:test": "npm run deploy",
     "test": "TZ=UTC react-scripts test",
-    "test:ci": "TZ=UTC CI=true react-scripts test"
+    "test:ci": "TZ=UTC react-scripts test"
   },
   "eslintConfig": {
     "extends": "react-app"
