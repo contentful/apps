@@ -5,9 +5,9 @@ metadata:
   annotations:
     circleci.com/project-slug: github/contentful/apps
     github.com/project-slug: contentful/apps
-    contentful.com/ci-alert-slack: prd-integrations-engineering-bots
+    contentful.com/ci-alert-slack: prd-extensibility-bots
 
 spec:
   type: library
   lifecycle: production
-  owner: group:team-integrations
+  owner: group:team-developer-experience

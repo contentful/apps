@@ -1,9 +1,6 @@
-# team integrations owns all code in this repository by default
+# team developer experience owns all code in this repository by default
 
-* @contentful/team-integrations
-
-apps/graphql-playground @contentful/team-developer-experience
-examples @contentful/team-developer-experience
+* @contentful/team-developer-experience
 
 examples/function-mock-shop @contentful/team-monet
 examples/function-potterdb @contentful/team-monet
