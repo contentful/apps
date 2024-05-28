@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { SkuPicker } from './SkuPicker';
 import {
   MakeSaveBtnTextFn,
@@ -38,9 +38,10 @@ export function renderSkuPicker(
     showSearchBySkuOption,
   }: Props
 ): void {
-  const root = document.getElementById(elementId);
+  const container = document.getElementById(elementId);
+  const root = createRoot(container!);
 
-  render(
+  root.render(
     <SkuPicker
       sdk={sdk}
       fetchProductPreviews={fetchProductPreviews}
@@ -52,7 +53,6 @@ export function renderSkuPicker(
       makeSearchHelpText={makeSearchHelpText}
       hideSearch={hideSearch}
       showSearchBySkuOption={showSearchBySkuOption}
-    />,
-    root
+    />
   );
 }

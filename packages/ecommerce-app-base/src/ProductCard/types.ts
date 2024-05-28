@@ -1,4 +1,3 @@
-import type { ReactElement } from 'react';
 import { Product } from '../types';
 
 export type ExternalResource = Product;
@@ -11,6 +10,3 @@ export type ExternalResourceError = {
   errorMessage: string;
   errorStatus: number;
 };
-
-// This should be pulled from our own package
-export type RenderDragFn = (props: { drag: ReactElement; isDragging?: boolean }) => ReactElement;

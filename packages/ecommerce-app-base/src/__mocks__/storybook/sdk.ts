@@ -2,8 +2,6 @@ import { productsList } from '../products';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { DeepPartial } from '../DeepPartial';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 export const sdk: DeepPartial<FieldAppSDK> = {
   close: (...args) => alert(args),
   field: {

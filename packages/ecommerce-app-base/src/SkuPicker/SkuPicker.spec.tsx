@@ -18,12 +18,6 @@ const renderComponent = async (props: Props) => {
   return component;
 };
 
-jest.mock('react-sortable-hoc', () => ({
-  SortableContainer: (x: unknown) => x,
-  SortableElement: (x: unknown) => x,
-  SortableHandle: (x: unknown) => x,
-}));
-
 describe('SkuPicker', () => {
   let defaultProps: Props;
   beforeEach(() => {

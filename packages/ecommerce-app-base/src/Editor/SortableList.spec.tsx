@@ -12,12 +12,6 @@ const renderComponent = (props: Props) => {
   return render(<SortableList {...props} />);
 };
 
-jest.mock('react-sortable-hoc', () => ({
-  SortableContainer: (x: unknown) => x,
-  SortableElement: (x: unknown) => x,
-  SortableHandle: (x: unknown) => x,
-}));
-
 describe('SortableList', () => {
   afterEach(cleanup);
 

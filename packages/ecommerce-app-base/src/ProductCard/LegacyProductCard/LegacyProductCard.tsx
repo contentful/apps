@@ -1,11 +1,9 @@
-import * as React from 'react';
-import { FC, ReactElement } from 'react';
+import { FC } from 'react';
 import { Badge, Card, Heading, IconButton, Subheading } from '@contentful/f36-components';
 import { CloseIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
 import type { Product } from '../../types';
-import { SortableHandle } from 'react-sortable-hoc';
 import { ProductImage } from '../ProductImage';
 
 const IMAGE_SIZE = 48;
@@ -96,8 +94,6 @@ export interface Props {
   skuType?: string;
 }
 
-const CardDragHandle = SortableHandle(({ drag }: { drag: ReactElement }) => <>{drag}</>);
-
 export const LegacyProductCard: FC<Props> = ({
   product,
   isSortable,
@@ -108,13 +104,7 @@ export const LegacyProductCard: FC<Props> = ({
   const productIsMissing = !product.name;
 
   return (
-    <Card
-      data-test-id="sortable-list-item"
-      className={styles.card}
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      withDragHandle
-      dragHandleRender={isSortable ? ({ drag }) => <CardDragHandle drag={drag} /> : undefined}>
+    <Card data-test-id="sortable-list-item" className={styles.card} withDragHandle={isSortable}>
       <div className={styles.cardInner}>
         <ProductImage
           className={styles.imgWrapper}

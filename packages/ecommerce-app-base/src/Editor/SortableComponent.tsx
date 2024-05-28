@@ -1,11 +1,24 @@
-import arrayMove from 'array-move';
-import isEqual from 'lodash/isEqual';
-import difference from 'lodash/difference';
+import { FC, useState, useEffect, useCallback, useRef } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { mapSort } from '../utils';
 import { SortableList } from './SortableList';
 import { Config, Product, ProductPreviewsFn } from '../types';
-import { Component } from 'react';
+import { isEqual } from 'lodash';
 
 interface Props {
   sdk: FieldAppSDK;
@@ -17,66 +30,105 @@ interface Props {
   skuType?: string;
 }
 
-interface State {
-  productPreviews: Product[];
-}
+/**
+ * @description - hook to track previous version of skus prop
+ * @param skus - list of most current skus
+ * @returns previous list of skus
+ */
+const usePreviousSkus = (skus: string[]) => {
+  const skusRef = useRef<string[]>([]);
 
-export class SortableComponent extends Component<Props, State> {
-  state = {
-    productPreviews: [],
-  };
+  useEffect(() => {
+    skusRef.current = skus;
+  }, [skus]);
 
-  componentDidMount() {
-    this.updateProductPreviews();
-  }
+  return skusRef.current;
+};
 
-  componentDidUpdate({ skus: prevSKUs }: Props) {
-    if (!isEqual(this.props.skus, prevSKUs)) {
-      const lengthHasChanged = this.props.skus.length !== prevSKUs.length;
-      const skusDiffer = difference(this.props.skus, prevSKUs).length > 0;
-      const shouldRefetchProducts = lengthHasChanged || skusDiffer;
-      this.updateProductPreviews(shouldRefetchProducts);
-    }
-  }
+export const SortableComponent: FC<Props> = ({
+  sdk,
+  disabled,
+  onChange,
+  config,
+  skus,
+  fetchProductPreviews,
+  skuType,
+}) => {
+  const [productPreviews, setProductPreviews] = useState<Product[]>([]);
+  const previousSkus = usePreviousSkus(skus);
 
-  updateProductPreviews = async (shouldRefetch: boolean = true) => {
-    try {
-      const { fetchProductPreviews, skus, config, skuType } = this.props;
-      const productPreviewsUnsorted = shouldRefetch
-        ? await fetchProductPreviews(skus, config, skuType)
-        : this.state.productPreviews;
-      const productPreviews = mapSort(productPreviewsUnsorted, skus, 'sku');
-      this.setState({ productPreviews });
-    } catch {
-      this.props.sdk.notifier.error(
-        'There was an error fetching the data for the selected products.'
-      );
-    }
-  };
+  const getProductPreviews = useCallback(
+    async (shouldRefetch: boolean = true) => {
+      try {
+        const productPreviewsUnsorted = shouldRefetch
+          ? await fetchProductPreviews(skus, config, skuType)
+          : productPreviews;
+        const sortedProductPreviews = mapSort(productPreviewsUnsorted, skus, 'sku');
+        setProductPreviews(sortedProductPreviews);
+      } catch (error) {
+        sdk.notifier.error('There was an error fetching the data for the selected products.');
+      }
+    },
+    [skus, skuType, config, fetchProductPreviews, setProductPreviews, sdk.notifier, productPreviews]
+  );
 
-  onSortEnd = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    const skus = arrayMove(this.props.skus, oldIndex, newIndex);
-    this.props.onChange(skus);
-  };
+  useEffect(() => {
+    // only refetch product previews if new skus do not match previous skus
+    const sortedPreviousSkus = previousSkus.sort();
+    const sortedCurrentSkus = skus.sort();
+    const shouldRefetch = !isEqual(sortedPreviousSkus, sortedCurrentSkus);
 
-  deleteItem = (index: number) => {
-    const skus = [...this.props.skus];
-    skus.splice(index, 1);
-    this.props.onChange(skus);
-  };
+    getProductPreviews(shouldRefetch);
+  }, [skus, skuType, config, getProductPreviews, previousSkus]);
 
-  render() {
-    return (
-      <SortableList
-        disabled={this.props.disabled}
-        onSortStart={(_, e) => e.preventDefault()} // Fixes FF glitches.
-        onSortEnd={this.onSortEnd}
-        axis="xy"
-        productPreviews={this.state.productPreviews}
-        deleteFn={this.deleteItem}
-        useDragHandle
-        skuType={this.props.skuType}
-      />
-    );
-  }
-}
+  const deleteItem = useCallback(
+    (index: number) => {
+      const newSkus = [...skus];
+      newSkus.splice(index, 1);
+      onChange(newSkus);
+    },
+    [onChange, skus]
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (active.id !== over?.id) {
+        const oldIndex = productPreviews.findIndex((product) => product.id === active.id);
+        const newIndex = productPreviews.findIndex((product) => product.id === over?.id);
+        const sortedProductPreviews: Product[] = arrayMove(productPreviews, oldIndex, newIndex);
+
+        onChange(sortedProductPreviews.map((p) => p.sku));
+        setProductPreviews(sortedProductPreviews);
+      }
+    },
+    [productPreviews, onChange, setProductPreviews]
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext
+        items={productPreviews.map((p) => p.id)}
+        strategy={verticalListSortingStrategy}>
+        <SortableList
+          disabled={disabled}
+          productPreviews={productPreviews}
+          deleteFn={deleteItem}
+          skuType={skuType}
+        />
+      </SortableContext>
+    </DndContext>
+  );
+};

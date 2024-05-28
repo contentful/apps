@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Card, Collapse, TextLink } from '@contentful/f36-components';
-import { ExternalResource, ExternalResourceError, ProductCardType, RenderDragFn } from '../types';
+import { ExternalResource, ExternalResourceError, ProductCardType } from '../types';
 import { ProductCardHeader } from '../ProductCardHeader/ProductCardHeader';
 import { ProductCardBody } from '../ProductCardBody/ProductCardBody';
 import { useIntegration } from '../../Editor';
@@ -10,8 +10,6 @@ import tokens from '@contentful/f36-tokens';
 
 export const styles = {
   productCard: css({
-    marginTop: tokens.spacingXs,
-    marginBottom: tokens.spacingXs,
     '&&:hover': {
       borderColor: tokens.colorPrimary,
       cursor: 'pointer',
@@ -30,8 +28,8 @@ export interface ProductCardProps {
   handleRemove?: (index?: number) => void;
   onSelect?: (resource: ExternalResource) => void;
   isSelected?: boolean;
-  dragHandleRender?: RenderDragFn;
   isLoading?: boolean;
+  isSortable?: boolean;
   externalResourceError?: ExternalResourceError;
 }
 
@@ -46,7 +44,7 @@ export const ProductCard = (props: ProductCardProps) => {
     handleRemove,
     onSelect,
     isSelected,
-    dragHandleRender,
+    isSortable = false,
     externalResourceError,
   } = props;
 
@@ -86,8 +84,7 @@ export const ProductCard = (props: ProductCardProps) => {
         !!onSelect && onSelect(resource);
       }}
       isLoading={isLoading}
-      withDragHandle={!!dragHandleRender}
-      dragHandleRender={dragHandleRender}>
+      withDragHandle={isSortable}>
       <ProductCardHeader
         headerTitle={title}
         resource={resource}
