@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.6.13...@contentful/ecommerce-app-base@4.0.0) (2024-05-28)
+
+- build(react18)!: drop support for react v17 and v18. replace react-sortable-hoc with dnd-kit (#7666) ([8143eae](https://github.com/contentful/apps/commit/8143eaeef7579b4fae1767a0763b3f08667ece18)), closes [#7666](https://github.com/contentful/apps/issues/7666)
+
+### BREAKING CHANGES
+
+- Consumers of ecommerce-app-base are required to implement react v18
+
 ## [3.6.13](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.6.11...@contentful/ecommerce-app-base@3.6.13) (2024-05-27)
 
 **Note:** Version bump only for package @contentful/ecommerce-app-base
