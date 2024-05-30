@@ -95,6 +95,7 @@ const ConfigScreen = () => {
     ) {
       await vercelClient.updateEnvironmentVariable(
         parameters.contentfulPreviewSecret,
+        'CONTENTFUL_PREVIEW_SECRET',
         parameters.selectedProject
       );
 

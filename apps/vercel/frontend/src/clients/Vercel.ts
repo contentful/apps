@@ -30,7 +30,7 @@ interface ListEnvironmentVariables {
 interface VercelAPIClient {
   checkToken: () => Promise<GetToken>;
   getToken: () => Promise<Response>;
-  updateEnvironmentVariable: (variable: string, projectId: string) => Promise<UpdateEnvironmentVariable>;
+  updateEnvironmentVariable: (variable: string, variableName: string, projectId: string) => Promise<UpdateEnvironmentVariable>;
   listProjects: (teamId?: string) => Promise<ListProjectsResponse>;
   listApiPaths: (projectId: string, teamId?: string) => Promise<ApiPath[]>;
   validateProjectContentfulSpaceId: (
@@ -76,12 +76,12 @@ export default class VercelClient implements VercelAPIClient {
     return res;
   }
 
-  async updateEnvironmentVariable(variable: string, projectId: string): Promise<UpdateEnvironmentVariable> {
+  async updateEnvironmentVariable(variable: string, variableName: string, projectId: string): Promise<UpdateEnvironmentVariable> {
     const res = await fetch(`${this.baseEndpoint}/v10/projects/${projectId}/env`, {
       headers: this.buildHeaders(),
       method: 'POST',
       body: JSON.stringify({
-        key: 'CONTENTFUL_PREVIEW_SECRET',
+        key: variableName,
         value: variable,
         type: 'encrypted',
 
