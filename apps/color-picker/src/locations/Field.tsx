@@ -40,6 +40,9 @@ const Field = () => {
 
   const storeHexValue = sdk.field.type === 'Symbol';
 
+  const themeName = sdk.parameters.instance.themeName;
+  const themes = sdk.parameters.installation.themes;
+
   const allowCustomValue = useMemo(() => {
     const { validations } = sdk.field;
 
@@ -50,14 +53,16 @@ const Field = () => {
   }, [sdk.field, sdk.parameters.instance]);
 
   // @ts-ignore
-  const theme: Theme = sdk.parameters.installation.themes[0];
+  const theme: Theme = themes.find(
+    (t: Theme) => t.name.replace(' ', '').toLowerCase() === themeName.replace(' ', '').toLowerCase()
+  );
 
   const validatedColors = useMemo(() => {
     const { validations } = sdk.field;
 
     const acceptedValues = validations.find((validation) => validation.in)?.in;
 
-    if (acceptedValues?.at(0) && theme.colors?.at(0)) {
+    if (acceptedValues?.at(0) && theme?.colors?.at(0)) {
       return theme.colors.filter((color) => acceptedValues?.includes(color.value));
     }
 
@@ -154,6 +159,7 @@ const Field = () => {
               id: window.crypto.randomUUID(),
               name: 'Custom',
               value: e.target.value,
+              theme: theme.name,
             });
           }
         }}

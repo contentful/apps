@@ -2,6 +2,7 @@ export interface Color {
   id: string;
   name: string;
   value: string;
+  theme: Theme['name'];
 }
 
 export interface Theme {

@@ -3,16 +3,17 @@ import {
   Button,
   Card,
   Flex,
-  Note,
   Paragraph,
   Subheading,
   TextLink,
+  TextInput,
+  IconButton,
 } from '@contentful/f36-components';
-import { ExternalLinkIcon, PlusIcon } from '@contentful/f36-icons';
+import { ExternalLinkIcon, PlusIcon, DeleteIcon } from '@contentful/f36-icons';
 import tokens from '@contentful/f36-tokens';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { css } from 'emotion';
-import { useCallback, useEffect, useState } from 'react';
+import { BaseSyntheticEvent, useCallback, useEffect, useState } from 'react';
 import SwatchEditor from '../components/SwatchEditor';
 import { AppInstallationParameters, Color } from '../types';
 
@@ -32,59 +33,58 @@ const styles = {
   cardColumn: css({
     width: '600px',
   }),
+  nameInput: css({
+    width: '150px',
+  }),
 };
 
 const ConfigScreen = () => {
   const [isInstalled, setIsInstalled] = useState(false);
+  const [themeName, setThemeName] = useState('');
   const [parameters, setParameters] = useState<AppInstallationParameters>({
-    themes: [
-      {
-        id: 'default',
-        name: 'Default',
-        colors: [],
-      },
-    ],
+    themes: [],
   });
   const sdk = useSDK<ConfigAppSDK>();
 
-  const addSwatch = () => {
+  const addSwatch = (event: BaseSyntheticEvent, themeIndex: number) => {
+    const newThemes = [...parameters.themes];
+    newThemes[themeIndex].colors.push({
+      id: window.crypto.randomUUID(),
+      name: '',
+      value: '#0088cc',
+      theme: newThemes[themeIndex].name,
+    });
+    setParameters({ ...parameters, themes: newThemes });
+  };
+
+  const addTheme = () => {
     setParameters({
       ...parameters,
       themes: [
-        {
-          ...parameters.themes[0],
-          colors: [
-            ...parameters.themes[0].colors,
-            { id: window.crypto.randomUUID(), name: '', value: '#0088cc' },
-          ],
-        },
+        ...parameters.themes,
+        { id: window.crypto.randomUUID(), name: themeName, colors: [] },
       ],
     });
+    setThemeName(themeName);
   };
 
-  const removeSwatch = (swatch: Color) => {
-    setParameters({
-      ...parameters,
-      themes: [
-        {
-          ...parameters.themes[0],
-          colors: parameters.themes[0].colors.filter((i) => i.id !== swatch.id),
-        },
-      ],
-    });
+  const removeTheme = (themeIndex: number) => {
+    const newThemes = parameters.themes.filter((_, index) => index !== themeIndex);
+    setParameters({ ...parameters, themes: newThemes });
   };
 
-  const updateSwatch = (swatch: Color) => {
-    const theme = parameters.themes[0];
-    const newTheme = {
-      ...theme,
-      colors: theme.colors.map((color) => (color.id === swatch.id ? swatch : color)),
-    };
+  const removeSwatch = (themeIndex: number, swatch: Color) => {
+    const newThemes = [...parameters.themes];
+    newThemes[themeIndex].colors = newThemes[themeIndex].colors.filter((i) => i.id !== swatch.id);
+    setParameters({ ...parameters, themes: newThemes });
+  };
 
-    setParameters({
-      ...parameters,
-      themes: [newTheme],
-    });
+  const updateSwatch = (themeIndex: number, swatch: Color) => {
+    const newThemes = [...parameters.themes];
+    newThemes[themeIndex].colors = newThemes[themeIndex].colors.map((color) =>
+      color.id === swatch.id ? swatch : color
+    );
+    setParameters({ ...parameters, themes: newThemes });
   };
 
   const onConfigure = useCallback(async () => {
@@ -113,8 +113,18 @@ const ConfigScreen = () => {
     (async () => {
       const currentParameters = await sdk.app.getParameters<AppInstallationParameters>();
 
-      if (currentParameters) {
+      if (currentParameters && currentParameters.themes && currentParameters.themes.length > 0) {
         setParameters(currentParameters);
+      } else {
+        setParameters({
+          themes: [
+            {
+              id: window.crypto.randomUUID(),
+              name: 'Default Theme',
+              colors: [],
+            },
+          ],
+        });
       }
 
       sdk.app.setReady();
@@ -142,28 +152,61 @@ const ConfigScreen = () => {
         gap="spacingM"
         paddingBottom="spacingL"
         className={styles.cardColumn}>
-        <Card>
-          <div>
-            <Subheading marginBottom="spacingXs">Theme</Subheading>
-            <Paragraph>
-              Optionally, specify a set of predefined colors that editors can choose from.
-            </Paragraph>
+        {parameters.themes.map((theme, index) => (
+          <Card key={theme.id}>
+            <div>
+              <Flex justifyContent="space-between" alignItems="center">
+                <Subheading marginBottom="spacingXs">
+                  <TextInput
+                    name="ThemeName"
+                    placeholder="Theme Name"
+                    size="small"
+                    value={theme.name}
+                    onChange={(e) => {
+                      const newThemes = [...parameters.themes];
+                      newThemes[index].name = e.target.value;
+                      setParameters({ ...parameters, themes: newThemes });
+                    }}
+                    isRequired
+                    className={styles.nameInput}
+                  />
+                </Subheading>
+                <IconButton
+                  variant="transparent"
+                  size="small"
+                  aria-label="Remove theme"
+                  onClick={() => removeTheme(index)}
+                  icon={<DeleteIcon variant="muted" />}
+                />
+              </Flex>
 
-            {parameters.themes[0].colors.map((swatch) => (
-              <SwatchEditor
-                key={swatch.id}
-                swatch={swatch}
-                onChange={updateSwatch}
-                onRemove={removeSwatch}
-              />
-            ))}
+              <Paragraph>
+                Specify a set of predefined colors that editors can choose from.
+              </Paragraph>
+              {theme.colors.map((swatch) => (
+                <SwatchEditor
+                  key={swatch.id}
+                  swatch={swatch}
+                  onChange={(updatedSwatch) => updateSwatch(index, updatedSwatch)}
+                  onRemove={() => removeSwatch(index, swatch)}
+                />
+              ))}
 
-            <Button size="small" startIcon={<PlusIcon />} onClick={addSwatch}>
-              Add color
-            </Button>
-          </div>
-        </Card>
-        {isInstalled ? (
+              <Button
+                size="small"
+                startIcon={<PlusIcon />}
+                onClick={(e: BaseSyntheticEvent) => addSwatch(e, index)}>
+                Add color
+              </Button>
+            </div>
+          </Card>
+        ))}
+        {
+          <Button size="small" startIcon={<PlusIcon />} onClick={addTheme}>
+            {`${parameters.themes.length ? 'Add another theme' : 'Add a theme'}`}
+          </Button>
+        }
+        {isInstalled && (
           <Card className={styles.overflowHidden}>
             <Flex flexDirection="row" alignItems="center">
               <Flex gap="spacingXs" flexDirection="column" alignItems="flex-start">
@@ -190,10 +233,6 @@ const ConfigScreen = () => {
               />
             </Flex>
           </Card>
-        ) : (
-          <Note variant="neutral">
-            If you don't need a custom theme, go ahead and hit install in the top right!
-          </Note>
         )}
       </Flex>
     </Flex>
