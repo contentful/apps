@@ -1,5 +1,5 @@
 import React, { Component, ChangeEvent } from 'react';
-import { ConfigAppSDK } from '@contentful/app-sdk';
+import { ConfigAppSDK, OnConfigureHandlerReturn } from '@contentful/app-sdk';
 import {
   Card,
   TextField,
@@ -127,7 +127,7 @@ export default class Config extends Component<ConfigProps, ConfigState> {
     // `onConfigure` allows to configure a callback to be
     // invoked when a user attempts to install the app or update
     // its configuration.
-    props.sdk.app.onConfigure(() => this.onConfigure());
+    props.sdk.app.onConfigure(() => this.onConfigure() as OnConfigureHandlerReturn);
   }
 
   async componentDidMount() {
