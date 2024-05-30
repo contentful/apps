@@ -9,16 +9,23 @@ import { useContext } from 'react';
 
 type Error =
   | Errors['authentication']
+  | Errors['contentfulPreviewSecret']
   | Errors['apiPathSelection']
   | Errors['projectSelection']
   | PreviewPathError;
 type ErrorKeys =
   | keyof Errors['authentication']
+  | keyof Errors['contentfulPreviewSecret']
   | keyof Errors['apiPathSelection']
   | keyof Errors['projectSelection']
   | keyof Omit<PreviewPathError, 'contentType'>;
 
-export const getErrorMessage = (error: Error, currentSpaceId: string, contentType?: string) => {
+export const getErrorMessage = (
+  error: Error,
+  currentSpaceId: string,
+  key: string,
+  contentType?: string
+) => {
   const currentError = pickBy(error);
 
   const errorKey: ErrorKeys = contentType
@@ -28,11 +35,17 @@ export const getErrorMessage = (error: Error, currentSpaceId: string, contentTyp
   const message =
     errorKey === errorTypes.INVALID_SPACE_ID
       ? errorMessages.invalidSpaceId(currentSpaceId)
+      : errorKey === errorTypes.ENVIRONMENT_VARIABLE_ALREADY_EXISTS
+      ? errorMessages.environmentVariableAlreadyExists(key)
       : errorMessages[errorKey];
   return message;
 };
 
-const determineErrorPresence = (errors: Errors, currentError?: Error, contentType?: string) => {
+const determineErrorPresence = (
+  errors: Errors,
+  currentError?: Error,
+  contentType?: string
+) => {
   if (!contentType) return !isEmpty(pickBy(currentError));
   return errors.previewPathSelection.some(
     (error) =>
@@ -47,11 +60,19 @@ export const useError = ({
 }: {
   error: Error | undefined;
   contentType?: string;
+  key?: string;
 }) => {
   const { errors } = useContext(ConfigPageContext);
   const sdk = useSDK<ConfigAppSDK>();
 
-  const errorMessage = error ? getErrorMessage(error, sdk.ids.space, contentType) : '';
+  const errorMessage = error
+    ? getErrorMessage(
+        error,
+        sdk.ids.space,
+        'CONTENTFUL_PREVIEW_SECRET',
+        contentType
+      )
+    : '';
   const isError = determineErrorPresence(errors, error, contentType);
   return { message: errorMessage, isError: isError };
 };

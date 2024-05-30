@@ -24,6 +24,8 @@ export interface ChannelContextProviderProps extends ConfigPageContextValue {
 
 export const ConfigPageContext = createContext({} as ConfigPageContextValue);
 
+ConfigPageContext.displayName = 'ConfigPageContext';
+
 export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
   const {
     children,
@@ -52,7 +54,8 @@ export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
         isLoading,
         sdk,
         vercelClient,
-      }}>
+      }}
+    >
       {children}
     </ConfigPageContext.Provider>
   );

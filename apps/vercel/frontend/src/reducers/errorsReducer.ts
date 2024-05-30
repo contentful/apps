@@ -7,8 +7,18 @@ type UpdateAuthenticationError = {
   payload: keyof Errors['authentication'];
 };
 
+
 type ResetAuthenticationErrors = {
   type: errorsActions.RESET_AUTHENTICATION_ERRORS;
+};
+
+type UpdateContentfulPreviewSecretError = {
+  type: errorsActions.UPDATE_CONTENTFUL_PREVIEW_SECRET_ERRORS;
+  payload: keyof Errors['contentfulPreviewSecret'];
+};
+
+type ResetContentfulPreviewSecretErrors = {
+  type: errorsActions.RESET_CONTENTFUL_PREVIEW_SECRET_ERRORS;
 };
 
 type UpdateProjectSelectionError = {
@@ -41,6 +51,8 @@ type ResetPreviewPathErrors = {
 export type ErrorAction =
   | UpdateAuthenticationError
   | ResetAuthenticationErrors
+  | UpdateContentfulPreviewSecretError
+  | ResetContentfulPreviewSecretErrors
   | UpdateProjectSelectionError
   | ResetProjectSelectionErrors
   | UpdateApiPathSelectionError
@@ -51,6 +63,8 @@ export type ErrorAction =
 const {
   UPDATE_AUTHENTICATION_ERRORS,
   RESET_AUTHENTICATION_ERRORS,
+  UPDATE_CONTENTFUL_PREVIEW_SECRET_ERRORS,
+  RESET_CONTENTFUL_PREVIEW_SECRET_ERRORS,
   UPDATE_PROJECT_SELECTION_ERRORS,
   UPDATE_API_PATH_SELECTION_ERRORS,
   UPDATE_PREVIEW_PATH_ERRORS,
@@ -71,6 +85,7 @@ const errorsReducer = (state: Errors, action: ErrorAction): Errors => {
         },
       };
     }
+
     case RESET_AUTHENTICATION_ERRORS: {
       return {
         ...state,
@@ -79,6 +94,26 @@ const errorsReducer = (state: Errors, action: ErrorAction): Errors => {
         },
       };
     }
+
+    case UPDATE_CONTENTFUL_PREVIEW_SECRET_ERRORS: {
+      const contentfulErrorType = action.payload;
+      return {
+        ...state,
+        contentfulPreviewSecret: {
+          ...initialErrors.contentfulPreviewSecret,
+          [contentfulErrorType]: true,
+        },
+      };
+    }
+    case RESET_CONTENTFUL_PREVIEW_SECRET_ERRORS: {
+      return {
+        ...state,
+        contentfulPreviewSecret: {
+          ...initialErrors.contentfulPreviewSecret,
+        },
+      };
+    }
+
     case UPDATE_PROJECT_SELECTION_ERRORS: {
       const projectErrorType = action.payload;
       return {

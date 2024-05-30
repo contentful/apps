@@ -7,8 +7,11 @@ import VercelClient from '@clients/Vercel';
 import { singleSelectionSections } from '@constants/enums';
 import { copies } from '@constants/copies';
 
-const projectSelectionSectionTestId = singleSelectionSections.PROJECT_SELECTION_SECTION;
-const pathSelectionSectionTestId = singleSelectionSections.API_PATH_SELECTION_SECTION;
+const projectSelectionSectionTestId =
+  singleSelectionSections.PROJECT_SELECTION_SECTION;
+const pathSelectionSectionTestId =
+  singleSelectionSections.API_PATH_SELECTION_SECTION;
+const previewTokenTestId = 'preview-token';
 
 vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
@@ -21,7 +24,12 @@ describe('ConfigScreen', () => {
     mockSdk.cma.contentType.getMany = vi.fn().mockResolvedValue({ items: [] });
     vi.spyOn(VercelClient.prototype, 'checkToken').mockResolvedValue({
       ok: true,
-      data: { id: 'team-id', name: 'token-name', expiresAt: '', teamId: '12345' },
+      data: {
+        id: 'team-id',
+        name: 'token-name',
+        expiresAt: '',
+        teamId: '12345',
+      },
     });
     vi.spyOn(VercelClient.prototype, 'listProjects').mockResolvedValue({
       projects: [
@@ -47,8 +55,11 @@ describe('ConfigScreen', () => {
     expect(await screen.findByText('Connect Vercel')).toBeTruthy();
     expect(screen.getByText('Vercel Access Token')).toBeTruthy();
     expect(screen.queryByTestId(projectSelectionSectionTestId)).toBeFalsy();
+    expect(screen.queryByTestId(previewTokenTestId)).toBeFalsy();
     expect(screen.queryByTestId(pathSelectionSectionTestId)).toBeFalsy();
-    expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
+    expect(
+      screen.queryByTestId('content-type-preview-path-section')
+    ).toBeFalsy();
     unmount();
   });
 
@@ -62,10 +73,15 @@ describe('ConfigScreen', () => {
     const input = screen.getByTestId('access-token');
     fireEvent.change(input, { target: { value: '12345' } });
 
-    const projectSection = await screen.findByTestId(projectSelectionSectionTestId);
+    const projectSection = await screen.findByTestId(
+      projectSelectionSectionTestId
+    );
     expect(projectSection).toBeTruthy();
+    expect(screen.queryByTestId(previewTokenTestId)).toBeFalsy();
     expect(screen.queryByTestId(pathSelectionSectionTestId)).toBeFalsy();
-    expect(screen.queryByTestId('content-type-preview-path-section')).toBeFalsy();
+    expect(
+      screen.queryByTestId('content-type-preview-path-section')
+    ).toBeFalsy();
 
     const selectDropdowns = await screen.findAllByTestId('optionsSelect');
     const dropdownPlaceholder = await screen.findByText(
@@ -75,13 +91,20 @@ describe('ConfigScreen', () => {
 
     user.selectOptions(selectDropdowns[0], 'Project 1');
 
-    const apiPathSection = await screen.findByTestId(pathSelectionSectionTestId);
+    const apiPathSection = await screen.findByTestId(
+      pathSelectionSectionTestId
+    );
     expect(apiPathSection).toBeTruthy();
+    expect(screen.queryByTestId(previewTokenTestId)).toBeTruthy();
 
-    const updatedSelectDropdowns = await screen.findAllByTestId('optionsSelect');
+    const updatedSelectDropdowns = await screen.findAllByTestId(
+      'optionsSelect'
+    );
     user.selectOptions(updatedSelectDropdowns[1], 'Api Path 1');
 
-    expect(await screen.findByTestId('content-type-preview-path-section')).toBeTruthy();
+    expect(
+      await screen.findByTestId('content-type-preview-path-section')
+    ).toBeTruthy();
     unmount();
   });
 });

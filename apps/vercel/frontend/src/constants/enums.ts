@@ -1,5 +1,6 @@
 export enum parametersActions {
   UPDATE_VERCEL_ACCESS_TOKEN = 'updateVercelAccessToken',
+  UPDATE_CONTENTFUL_PREVIEW_SECRET = 'updateContentfulPreviewSecret',
   APPLY_CONTENTFUL_PARAMETERS = 'applyContentfulParameters',
   APPLY_SELECTED_PROJECT = 'applySelectedProject',
   ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION = 'addContentTypePreviewPathSelection',
@@ -15,7 +16,9 @@ export enum singleSelectionSections {
 
 export enum errorsActions {
   UPDATE_AUTHENTICATION_ERRORS = 'updateAuthenticationErrors',
-  RESET_AUTHENTICATION_ERRORS = 'restAuthenticationErrors',
+  RESET_AUTHENTICATION_ERRORS = 'resetAuthenticationErrors',
+  UPDATE_CONTENTFUL_PREVIEW_SECRET_ERRORS = 'updateContentfulPreviewSecretErrors',
+  RESET_CONTENTFUL_PREVIEW_SECRET_ERRORS = 'resetContentfulPreviewSecretErrors',
   UPDATE_PROJECT_SELECTION_ERRORS = 'updateProjectSelectionErrors',
   RESET_PROJECT_SELECTION_ERRORS = 'resetProjectSelectionErrors',
   UPDATE_API_PATH_SELECTION_ERRORS = 'updateApiPathSelectionErrors',
@@ -26,9 +29,12 @@ export enum errorsActions {
 
 export enum errorTypes {
   INVALID_TOKEN = 'invalidToken',
+  INVALID_CONTENTFUL_PREVIEW_SECRET = 'invalidContentfulPreviewSecret',
+  ENVIRONMENT_VARIABLE_ALREADY_EXISTS = 'environmentVariableAlreadyExists',
   INVALID_TEAM_SCOPE = 'invalidTeamScope',
   EXPIRED_TOKEN = 'expiredToken',
   PROJECT_NOT_FOUND = 'projectNotFound',
+  CANNOT_FETCH_VERCEL_ENV_VARS = 'cannotFetchVercelEnvVars',
   CANNOT_FETCH_PROJECTS = 'cannotFetchProjects',
   API_PATH_NOT_FOUND = 'apiPathNotFound',
   CANNOT_FETCH_API_PATHS = 'cannotFetchApiPaths',

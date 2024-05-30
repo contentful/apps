@@ -20,6 +20,18 @@ export const copies = {
         copy: 'Connect to a project associated with your website or experience.',
       },
     },
+    contentfulPreviewSecretSection: {
+      input: {
+        label: 'Contentful Preview Secret',
+        placeholder: 'ex. atE2sdftcIp01O1isdfXc3QTdT4...',
+      },
+      token: {
+        href: 'https://vercel.com/account/tokens',
+      },
+      docs: {
+        href: 'https://vercel.com/docs/projects/environment-variables',
+      },
+    },
     pathSelectionSection: {
       label: 'Draft Mode route handler',
       placeholder: 'Select a route',

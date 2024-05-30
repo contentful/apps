@@ -1,5 +1,8 @@
 export const errorMessages = {
   invalidToken: 'Invalid access token.',
+  invalidContentfulPreviewSecret: 'Invalid Contentful preview secret.',
+  environmentVariableAlreadyExists: (key: string) => `An environment variable with key of ${key} already exists.`,
+  cannotFetchVercelEnvVars: 'We had trouble fetching environment variables for this Vercel project.',
   invalidTeamScope: 'Token is not scoped to a team.',
   expiredToken: 'Token has expired.',
   projectNotFound:

@@ -18,7 +18,10 @@ export const useFetchData = ({
   vercelClient,
   teamId,
 }: FetchData) => {
-  const validateToken = async (onComplete: () => void, newVercelClient?: VercelClient) => {
+  const validateToken = async (
+    onComplete: () => void,
+    newVercelClient?: VercelClient
+  ) => {
     if (vercelClient) {
       // reset all authentication errors before validating again
       dispatchErrors({
@@ -41,7 +44,41 @@ export const useFetchData = ({
         const err = e as Error;
         dispatchErrors({
           type: errorsActions.UPDATE_AUTHENTICATION_ERRORS,
-          payload: (err.message as keyof Errors['authentication']) || 'invalidToken',
+          payload:
+            (err.message as keyof Errors['authentication']) || 'invalidToken',
+        });
+      }
+      onComplete();
+    }
+  };
+
+  const validateContentfulPreviewSecret = async (
+    onComplete: () => void,
+    selectedProject: string
+  ) => {
+    if (vercelClient && teamId) {
+      try {
+        console.log('selected project', selectedProject);
+        // Check if the environment variable already exists
+        const envVars = await vercelClient.listEnvironmentVariables(
+          selectedProject
+        );
+
+        const existingEnvVar = envVars.data.find(
+          (envVar) => envVar.key === 'CONTENTFUL_PREVIEW_SECRET'
+        );
+
+        if (existingEnvVar) {
+          throw new Error(errorTypes.ENVIRONMENT_VARIABLE_ALREADY_EXISTS);
+        }
+      } catch (e) {
+        console.log(e);
+        const err = e as Error;
+        dispatchErrors({
+          type: errorsActions.UPDATE_CONTENTFUL_PREVIEW_SECRET_ERRORS,
+          payload:
+            (err.message as keyof Errors['contentfulPreviewSecret']) ||
+            'invalidSecret',
         });
       }
       onComplete();
@@ -103,15 +140,20 @@ export const useFetchData = ({
     }
   };
 
-  const validateProjectEnv = async (currentSpaceId: string, projectId: string) => {
+  const validateProjectEnv = async (
+    currentSpaceId: string,
+    projectId: string
+  ) => {
     if (vercelClient && teamId)
       try {
-        const isProjectSelectionValid = await vercelClient.validateProjectContentfulSpaceId(
-          currentSpaceId,
-          projectId,
-          teamId
-        );
-        if (!isProjectSelectionValid) throw new Error(errorTypes.INVALID_SPACE_ID);
+        const isProjectSelectionValid =
+          await vercelClient.validateProjectContentfulSpaceId(
+            currentSpaceId,
+            projectId,
+            teamId
+          );
+        if (!isProjectSelectionValid)
+          throw new Error(errorTypes.INVALID_SPACE_ID);
         else {
           dispatchErrors({
             type: errorsActions.RESET_PROJECT_SELECTION_ERRORS,
@@ -128,5 +170,11 @@ export const useFetchData = ({
       }
   };
 
-  return { validateToken, fetchProjects, fetchApiPaths, validateProjectEnv };
+  return {
+    validateToken,
+    validateContentfulPreviewSecret,
+    fetchProjects,
+    fetchApiPaths,
+    validateProjectEnv,
+  };
 };

@@ -6,6 +6,7 @@ export const SPACE_ID = '1234';
 export const mockParameters: AppInstallationParameters = {
   vercelAccessToken: 'abc-123',
   selectedProject: 'test-project-id',
+  contentfulPreviewSecret: 'test-preview-secret',
   selectedApiPath: 'test-api-path',
   contentTypePreviewPathSelections: [
     { contentType: 'test-content-type', previewPath: 'test-preview-path' },

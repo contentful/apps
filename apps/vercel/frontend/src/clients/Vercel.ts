@@ -8,6 +8,7 @@ import {
   Deployment,
   ProjectEnv,
   Project,
+  VercelEnvironmentVariable,
 } from '@customTypes/configPage';
 
 const CONTENTFUL_SPACE_ID = 'CONTENTFUL_SPACE_ID';
@@ -17,9 +18,19 @@ interface GetToken {
   data: AccessToken;
 }
 
+interface UpdateEnvironmentVariable {
+  ok: boolean;
+}
+
+interface ListEnvironmentVariables {
+  ok: boolean;
+  data: VercelEnvironmentVariable[];
+}
+
 interface VercelAPIClient {
   checkToken: () => Promise<GetToken>;
   getToken: () => Promise<Response>;
+  updateEnvironmentVariable: (variable: string, projectId: string) => Promise<UpdateEnvironmentVariable>;
   listProjects: (teamId?: string) => Promise<ListProjectsResponse>;
   listApiPaths: (projectId: string, teamId?: string) => Promise<ApiPath[]>;
   validateProjectContentfulSpaceId: (
@@ -31,7 +42,7 @@ interface VercelAPIClient {
 }
 
 export default class VercelClient implements VercelAPIClient {
-  constructor(public accessToken = '', private baseEndpoint = 'https://api.vercel.com') {}
+  constructor(public accessToken = '', private baseEndpoint = 'https://api.vercel.com') { }
 
   private buildHeaders(overrides: Headers = new Headers({})): Headers {
     return new Headers({
@@ -63,6 +74,39 @@ export default class VercelClient implements VercelAPIClient {
     });
 
     return res;
+  }
+
+  async updateEnvironmentVariable(variable: string, projectId: string): Promise<UpdateEnvironmentVariable> {
+    const res = await fetch(`${this.baseEndpoint}/v10/projects/${projectId}/env`, {
+      headers: this.buildHeaders(),
+      method: 'POST',
+      body: JSON.stringify({
+        key: 'CONTENTFUL_PREVIEW_SECRET',
+        value: variable,
+        type: 'encrypted',
+
+        // TODO: Add checkbox support for target selection.
+        target: ['production', 'development', 'preview'],
+      })
+    });
+
+    if (!res.ok) throw new Error(errorTypes.INVALID_CONTENTFUL_PREVIEW_SECRET);
+
+    return { ok: res.ok };
+  }
+
+  async listEnvironmentVariables(projectId: string): Promise<ListEnvironmentVariables> {
+    const res = await fetch(`${this.baseEndpoint}/v10/projects/${projectId}/env`, {
+      headers: this.buildHeaders(),
+      method: 'GET',
+    });
+
+
+    if (!res.ok) throw new Error(errorTypes.CANNOT_FETCH_VERCEL_ENV_VARS);
+
+    const data = await res.json();
+
+    return { ok: res.ok, data: data.envs };
   }
 
   async listProjects(teamId?: string): Promise<ListProjectsResponse> {
@@ -119,8 +163,7 @@ export default class VercelClient implements VercelAPIClient {
       const latestDeployment = await this.getLatestProjectDeployment(projectId, teamId);
       const latestDeploymentId = deploymentId || latestDeployment.uid;
       const res = await fetch(
-        `${
-          this.baseEndpoint
+        `${this.baseEndpoint
         }/v6/deployments/${latestDeploymentId}/files/outputs?file=..%2Fdeploy_metadata.json&${this.buildTeamIdQueryParam(
           teamId
         )}`,
@@ -167,8 +210,7 @@ export default class VercelClient implements VercelAPIClient {
       const contentfulSpaceIdEnv = envs.find((env) => env.key === CONTENTFUL_SPACE_ID);
       if (contentfulSpaceIdEnv) {
         const res = await fetch(
-          `${this.baseEndpoint}/v1/projects/${projectId}/env/${
-            contentfulSpaceIdEnv.id
+          `${this.baseEndpoint}/v1/projects/${projectId}/env/${contentfulSpaceIdEnv.id
           }?${this.buildTeamIdQueryParam(teamId)}`,
           {
             headers: this.buildHeaders(),

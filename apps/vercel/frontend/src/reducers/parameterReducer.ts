@@ -10,6 +10,11 @@ type VercelAccessTokenAction = {
   payload: string;
 };
 
+type ContentfulPreviewSecretAction = {
+  type: parametersActions.UPDATE_CONTENTFUL_PREVIEW_SECRET;
+  payload: string;
+};
+
 type VercelSelectedProjectAction = {
   type: parametersActions.APPLY_SELECTED_PROJECT;
   payload: string;
@@ -42,6 +47,7 @@ type ApplyTeamId = {
 
 export type ParameterAction =
   | VercelAccessTokenAction
+  | ContentfulPreviewSecretAction
   | ApplyContentfulParametersAction
   | VercelSelectedProjectAction
   | AddContentTypePreviewPathSelectionAction
@@ -51,6 +57,7 @@ export type ParameterAction =
 
 const {
   UPDATE_VERCEL_ACCESS_TOKEN,
+  UPDATE_CONTENTFUL_PREVIEW_SECRET,
   APPLY_CONTENTFUL_PARAMETERS,
   APPLY_SELECTED_PROJECT,
   ADD_CONTENT_TYPE_PREVIEW_PATH_SELECTION,
@@ -69,11 +76,18 @@ const parameterReducer = (
         ...state,
         vercelAccessToken: action.payload,
       };
+
+    case UPDATE_CONTENTFUL_PREVIEW_SECRET:
+      return {
+        ...state,
+        contentfulPreviewSecret: action.payload,
+      };
     case APPLY_CONTENTFUL_PARAMETERS: {
       const parameters = action.payload;
       return {
         ...state,
         vercelAccessToken: parameters.vercelAccessToken,
+        contentfulPreviewSecret: parameters.contentfulPreviewSecret,
         contentTypePreviewPathSelections: parameters.contentTypePreviewPathSelections,
         selectedProject: parameters.selectedProject,
         selectedApiPath: parameters.selectedApiPath,
