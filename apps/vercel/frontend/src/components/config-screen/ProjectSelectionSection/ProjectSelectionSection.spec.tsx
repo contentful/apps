@@ -24,9 +24,7 @@ const projects = [
 
 describe('ProjectSelectionSection', () => {
   it('renders dropdown when paths are present and no errors are present', () => {
-    const { unmount } = renderConfigPageComponent(
-      <ProjectSelectionSection projects={projects} />
-    );
+    const { unmount } = renderConfigPageComponent(<ProjectSelectionSection projects={projects} />);
 
     const select = screen.getByTestId('optionsSelect');
     expect(select).toBeTruthy();
@@ -43,18 +41,14 @@ describe('ProjectSelectionSection', () => {
       parameters
     );
 
-    const emptyInput = screen.getByText(
-      copies.configPage.projectSelectionSection.placeholder
-    );
+    const emptyInput = screen.getByText(copies.configPage.projectSelectionSection.placeholder);
     expect(emptyInput).toBeTruthy();
     unmount();
   });
 
   it('handles project selection', async () => {
     const user = userEvent.setup();
-    const mockValidation = vi
-      .fn()
-      .mockImplementationOnce(() => Promise.resolve());
+    const mockValidation = vi.fn().mockImplementationOnce(() => Promise.resolve());
     vi.spyOn(fetchData, 'useFetchData').mockReturnValue({
       validateProjectEnv: mockValidation,
       validateToken: vi.fn(),
@@ -70,12 +64,9 @@ describe('ProjectSelectionSection', () => {
       parameters: { teamId: '1234', selectedProject: projects[0].id },
     } as unknown as AppInstallationParameters;
 
-    const { unmount } = renderConfigPageComponent(
-      <ProjectSelectionSection projects={projects} />,
-      {
-        ...overrides,
-      }
-    );
+    const { unmount } = renderConfigPageComponent(<ProjectSelectionSection projects={projects} />, {
+      ...overrides,
+    });
 
     const selectDropdown = screen.getByTestId('optionsSelect');
 

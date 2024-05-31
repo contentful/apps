@@ -138,8 +138,7 @@ export type VercelEnvironmentVariable = {
    * The encrypted value of the configuration
    */
   value: string;
-}
-
+};
 
 export type PreviewPathError = {
   contentType: string;

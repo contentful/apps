@@ -29,49 +29,40 @@ export const ContentfulPreviewSecretSection = ({
   const error = errors.contentfulPreviewSecret;
   const { message, isError } = useError({ error });
 
-  const alreadyExistsInVercel =
-    error.environmentVariableAlreadyExists && !isLoading && isError;
+  const alreadyExistsInVercel = error.environmentVariableAlreadyExists && !isLoading && isError;
 
   const showError = Boolean(
-    parameters.vercelAccessToken &&
-      isError &&
-      !isLoading &&
-      !error.environmentVariableAlreadyExists
+    parameters.vercelAccessToken && isError && !isLoading && !error.environmentVariableAlreadyExists
   );
 
   return (
     <Box className={styles.box}>
-      <FormControl id='previewToken' isRequired={true}>
-        <FormControl.Label aria-label='previewToken' htmlFor='previewToken'>
+      <FormControl id="previewToken" isRequired={true}>
+        <FormControl.Label aria-label="previewToken" htmlFor="previewToken">
           {input.label}
         </FormControl.Label>
         <TextInput
-          data-testid='preview-token'
+          data-testid="preview-token"
           spellCheck={false}
-          name='previewToken'
-          type='text'
+          name="previewToken"
+          type="text"
           placeholder={input.placeholder}
-          value={
-            alreadyExistsInVercel ? message : parameters.contentfulPreviewSecret
-          }
+          value={alreadyExistsInVercel ? message : parameters.contentfulPreviewSecret}
           onChange={handleChange}
           onBlur={handleBlur}
           isInvalid={showError}
           isDisabled={isLoading || error.environmentVariableAlreadyExists}
         />
-        <HelpText>
-          This is used to validate requests from Contentful to your Vercel app.
-        </HelpText>
+        <HelpText>This is used to validate requests from Contentful to your Vercel app.</HelpText>
         {alreadyExistsInVercel && !parameters.contentfulPreviewSecret && (
           <ValidationMessage>
             Follow{' '}
             <TextLink
               icon={<ExternalLinkIcon />}
-              alignIcon='end'
+              alignIcon="end"
               href={docs.href}
-              target='_blank'
-              rel='noopener noreferrer'
-            >
+              target="_blank"
+              rel="noopener noreferrer">
               Vercel&apos;s instructions
             </TextLink>{' '}
             to remove this environment variable before continuing.{' '}

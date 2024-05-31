@@ -65,9 +65,7 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
     });
   };
 
-  const selectedOption = errors.projectSelection.projectNotFound
-    ? ''
-    : parameters.selectedProject;
+  const selectedOption = errors.projectSelection.projectNotFound ? '' : parameters.selectedProject;
 
   return (
     <SectionWrapper testId={sectionId}>

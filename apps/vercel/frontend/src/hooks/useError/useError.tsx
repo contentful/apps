@@ -41,11 +41,7 @@ export const getErrorMessage = (
   return message;
 };
 
-const determineErrorPresence = (
-  errors: Errors,
-  currentError?: Error,
-  contentType?: string
-) => {
+const determineErrorPresence = (errors: Errors, currentError?: Error, contentType?: string) => {
   if (!contentType) return !isEmpty(pickBy(currentError));
   return errors.previewPathSelection.some(
     (error) =>
@@ -66,12 +62,7 @@ export const useError = ({
   const sdk = useSDK<ConfigAppSDK>();
 
   const errorMessage = error
-    ? getErrorMessage(
-        error,
-        sdk.ids.space,
-        'CONTENTFUL_PREVIEW_SECRET',
-        contentType
-      )
+    ? getErrorMessage(error, sdk.ids.space, 'CONTENTFUL_PREVIEW_SECRET', contentType)
     : '';
   const isError = determineErrorPresence(errors, error, contentType);
   return { message: errorMessage, isError: isError };

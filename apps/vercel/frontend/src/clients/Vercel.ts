@@ -30,7 +30,11 @@ interface ListEnvironmentVariables {
 interface VercelAPIClient {
   checkToken: () => Promise<GetToken>;
   getToken: () => Promise<Response>;
-  updateEnvironmentVariable: (variable: string, variableName: string, projectId: string) => Promise<UpdateEnvironmentVariable>;
+  updateEnvironmentVariable: (
+    variable: string,
+    variableName: string,
+    projectId: string
+  ) => Promise<UpdateEnvironmentVariable>;
   listProjects: (teamId?: string) => Promise<ListProjectsResponse>;
   listApiPaths: (projectId: string, teamId?: string) => Promise<ApiPath[]>;
   validateProjectContentfulSpaceId: (
@@ -42,7 +46,7 @@ interface VercelAPIClient {
 }
 
 export default class VercelClient implements VercelAPIClient {
-  constructor(public accessToken = '', private baseEndpoint = 'https://api.vercel.com') { }
+  constructor(public accessToken = '', private baseEndpoint = 'https://api.vercel.com') {}
 
   private buildHeaders(overrides: Headers = new Headers({})): Headers {
     return new Headers({
@@ -76,7 +80,11 @@ export default class VercelClient implements VercelAPIClient {
     return res;
   }
 
-  async updateEnvironmentVariable(variable: string, variableName: string, projectId: string): Promise<UpdateEnvironmentVariable> {
+  async updateEnvironmentVariable(
+    variable: string,
+    variableName: string,
+    projectId: string
+  ): Promise<UpdateEnvironmentVariable> {
     const res = await fetch(`${this.baseEndpoint}/v10/projects/${projectId}/env`, {
       headers: this.buildHeaders(),
       method: 'POST',
@@ -87,7 +95,7 @@ export default class VercelClient implements VercelAPIClient {
 
         // TODO: Add checkbox support for target selection.
         target: ['production', 'development', 'preview'],
-      })
+      }),
     });
 
     if (!res.ok) throw new Error(errorTypes.INVALID_CONTENTFUL_PREVIEW_SECRET);
@@ -100,7 +108,6 @@ export default class VercelClient implements VercelAPIClient {
       headers: this.buildHeaders(),
       method: 'GET',
     });
-
 
     if (!res.ok) throw new Error(errorTypes.CANNOT_FETCH_VERCEL_ENV_VARS);
 
@@ -163,7 +170,8 @@ export default class VercelClient implements VercelAPIClient {
       const latestDeployment = await this.getLatestProjectDeployment(projectId, teamId);
       const latestDeploymentId = deploymentId || latestDeployment.uid;
       const res = await fetch(
-        `${this.baseEndpoint
+        `${
+          this.baseEndpoint
         }/v6/deployments/${latestDeploymentId}/files/outputs?file=..%2Fdeploy_metadata.json&${this.buildTeamIdQueryParam(
           teamId
         )}`,
@@ -210,7 +218,8 @@ export default class VercelClient implements VercelAPIClient {
       const contentfulSpaceIdEnv = envs.find((env) => env.key === CONTENTFUL_SPACE_ID);
       if (contentfulSpaceIdEnv) {
         const res = await fetch(
-          `${this.baseEndpoint}/v1/projects/${projectId}/env/${contentfulSpaceIdEnv.id
+          `${this.baseEndpoint}/v1/projects/${projectId}/env/${
+            contentfulSpaceIdEnv.id
           }?${this.buildTeamIdQueryParam(teamId)}`,
           {
             headers: this.buildHeaders(),

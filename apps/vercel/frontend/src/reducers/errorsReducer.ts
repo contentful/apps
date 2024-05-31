@@ -7,7 +7,6 @@ type UpdateAuthenticationError = {
   payload: keyof Errors['authentication'];
 };
 
-
 type ResetAuthenticationErrors = {
   type: errorsActions.RESET_AUTHENTICATION_ERRORS;
 };

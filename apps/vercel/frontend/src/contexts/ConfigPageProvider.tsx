@@ -54,8 +54,7 @@ export const ConfigPageProvider = (props: ChannelContextProviderProps) => {
         isLoading,
         sdk,
         vercelClient,
-      }}
-    >
+      }}>
       {children}
     </ConfigPageContext.Provider>
   );
