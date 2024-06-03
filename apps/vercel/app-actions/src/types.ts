@@ -54,6 +54,7 @@ export interface AppInstallationParameters {
   selectedProject: string;
   contentTypePreviewPathSelections: ContentTypePreviewPathSelection[];
   selectedApiPath: string;
+  teamId: string;
 }
 
 /* END copied over from frontend app installation types */

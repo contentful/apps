@@ -9,7 +9,8 @@ chai.use(sinonChai);
 describe('VercelService', () => {
   const vercelAccessToken = 'vercel-access-token';
   const vercelProjectId = 'vercel-project-id';
-  const vercelService = new VercelService(vercelAccessToken);
+  const vercelTeamId = 'vercel-team-id';
+  const vercelService = new VercelService(vercelAccessToken, vercelTeamId);
   let stubbedFetch: sinon.SinonStub;
 
   beforeEach(() => {
@@ -27,7 +28,7 @@ describe('VercelService', () => {
     it('calls fetch with the appropriate values', async () => {
       await vercelService.getProject(vercelProjectId);
       expect(stubbedFetch).to.have.been.calledWith(
-        'https://api.vercel.com/v9/projects/vercel-project-id',
+        'https://api.vercel.com/v9/projects/vercel-project-id?teamId=vercel-team-id',
         {
           method: 'GET',
           headers: {
@@ -36,6 +37,25 @@ describe('VercelService', () => {
           },
         }
       );
+    });
+
+    describe('when error status (non-200) is received', () => {
+      beforeEach(() => {
+        const mockFetchResponse = makeMockFetchResponse(mockVercelProject, {}, 500);
+        sinon.restore();
+        stubbedFetch = sinon.stub(global, 'fetch');
+        stubbedFetch.resolves(mockFetchResponse);
+      });
+
+      it('throws an an error', async () => {
+        let error: any;
+        try {
+          await vercelService.getProject(vercelProjectId);
+        } catch (e) {
+          error = e;
+        }
+        expect(error).to.be.an('Error');
+      });
     });
   });
 });
