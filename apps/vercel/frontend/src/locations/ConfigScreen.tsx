@@ -13,7 +13,7 @@ import { ApiPath, Project } from '@customTypes/configPage';
 import { ApiPathSelectionSection } from '@components/config-screen/ApiPathSelectionSection/ApiPathSelectionSection';
 import { AuthenticationSection } from '@components/config-screen/AuthenticationSection/AuthenticationSection';
 import { copies } from '@constants/copies';
-import { errorsActions, parametersActions } from '@constants/enums';
+import { parametersActions } from '@constants/enums';
 import { ConfigPageProvider } from '@contexts/ConfigPageProvider';
 import { GettingStartedSection } from '@components/config-screen/GettingStartedSection/GettingStartedSection';
 import errorsReducer from '@reducers/errorsReducer';
@@ -132,14 +132,7 @@ const ConfigScreen = () => {
     });
 
     async function checkToken() {
-      // if the token is empty, reset all authentication errors and skip validation
-      if (e.target.value === '') {
-        dispatchErrors({
-          type: errorsActions.RESET_AUTHENTICATION_ERRORS,
-        });
-      } else {
-        await validateToken(updateTokenValidityState, new VercelClient(e.target.value));
-      }
+      await validateToken(updateTokenValidityState, new VercelClient(e.target.value));
     }
 
     checkToken();
@@ -159,7 +152,7 @@ const ConfigScreen = () => {
     !errors.projectSelection.projectNotFound &&
     !errors.projectSelection.cannotFetchProjects &&
     parameters.selectedProject &&
-    projects.length;
+    !!projects.length;
 
   return (
     <ConfigPageProvider

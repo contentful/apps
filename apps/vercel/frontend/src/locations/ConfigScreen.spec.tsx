@@ -34,6 +34,7 @@ describe('ConfigScreen', () => {
             },
           },
           env: [],
+          protectionBypass: {},
         },
       ],
     });

@@ -18,6 +18,7 @@ export const initialErrors: Errors = {
     projectNotFound: false,
     cannotFetchProjects: false,
     invalidSpaceId: false,
+    invalidProjectSettings: false,
   },
   apiPathSelection: {
     apiPathNotFound: false,

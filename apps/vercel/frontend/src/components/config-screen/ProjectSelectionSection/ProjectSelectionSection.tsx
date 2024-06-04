@@ -35,6 +35,10 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
   });
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    if (event.target.value === parameters.selectedProject) {
+      return;
+    }
+
     // indicate app config change when project has been re-selected
     handleAppConfigurationChange();
 
@@ -52,9 +56,14 @@ export const ProjectSelectionSection = ({ projects }: Props) => {
 
   useEffect(() => {
     const currentSpaceId = sdk.ids.space;
+    const selectedProjectObject = projects.find(
+      (project) => project.id === parameters.selectedProject
+    );
+
     const validateProjectSelectionEnv = async () => {
-      await validateProjectEnv(currentSpaceId, parameters.selectedProject);
+      await validateProjectEnv(currentSpaceId, parameters.selectedProject, selectedProjectObject);
     };
+
     if (parameters.selectedProject) validateProjectSelectionEnv();
   }, [parameters.selectedProject, vercelClient, parameters.teamId]);
 

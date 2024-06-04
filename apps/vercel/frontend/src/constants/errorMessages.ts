@@ -5,6 +5,9 @@ export const errorMessages = {
   projectNotFound:
     'The project you have configured is no longer available. Please select another one.',
   cannotFetchProjects: 'We had trouble fetching your Vercel projects.',
+  // placeholder error message for now until implement manual fix for this.
+  invalidProjectSettings:
+    'The settings that allow live preview of your Vercel project within Contentful are invalid. Please ensure bypass protection is enabled. ',
   apiPathNotFound:
     'The route you previously selected is no longer available. Please select another one.',
   apiPathsEmpty: "It looks like your Vercel project doesn't have any routes configured yet.",

@@ -30,6 +30,7 @@ export enum errorTypes {
   EXPIRED_TOKEN = 'expiredToken',
   PROJECT_NOT_FOUND = 'projectNotFound',
   CANNOT_FETCH_PROJECTS = 'cannotFetchProjects',
+  INVALID_PROJECT_SETTINGS = 'invalidProjectSettings',
   API_PATH_NOT_FOUND = 'apiPathNotFound',
   CANNOT_FETCH_API_PATHS = 'cannotFetchApiPaths',
   INVALID_PREVIEW_PATH_FORMAT = 'invalidPreviewPathFormat',

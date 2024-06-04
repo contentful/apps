@@ -11,6 +11,7 @@ import {
 } from '@customTypes/configPage';
 
 const CONTENTFUL_SPACE_ID = 'CONTENTFUL_SPACE_ID';
+const CONTENTFUL_PREVIEW_SECRET = 'CONTENTFUL_PREVIEW_SECRET';
 
 interface GetToken {
   ok: boolean;
@@ -179,6 +180,19 @@ export default class VercelClient implements VercelAPIClient {
         const data = await res.json();
         return data.value === currentSpaceId;
       }
+    } catch (e) {
+      // let user continue if there is an error validating env value
+      console.error(e);
+    }
+
+    return false;
+  }
+
+  async validateProjectPreviewSecret(projectId: string, teamId: string) {
+    try {
+      const data = await this.getProject(projectId, teamId);
+      const envs = data.env;
+      return Boolean(envs.find((env) => env.key === CONTENTFUL_PREVIEW_SECRET));
     } catch (e) {
       // let user continue if there is an error validating env value
       console.error(e);

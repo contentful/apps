@@ -31,6 +31,13 @@ export interface Project {
     };
   };
   env: ProjectEnv[];
+  protectionBypass?: {
+    [key: string]: {
+      createdAt: number;
+      createdBy: string;
+      scope: string;
+    };
+  };
 }
 
 export interface Deployment {
@@ -93,6 +100,7 @@ export type Errors = {
     projectNotFound: boolean;
     cannotFetchProjects: boolean;
     invalidSpaceId: boolean;
+    invalidProjectSettings: boolean;
   };
   apiPathSelection: {
     apiPathNotFound: boolean;
