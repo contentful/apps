@@ -5,9 +5,9 @@ export const errorMessages = {
   projectNotFound:
     'The project you have configured is no longer available. Please select another one.',
   cannotFetchProjects: 'We had trouble fetching your Vercel projects.',
-  // placeholder error message for now until implement manual fix for this.
+  // placeholder error message for now until implement automated fix for this.
   invalidProjectSettings:
-    'The settings that allow live preview of your Vercel project within Contentful are invalid. Please ensure either bypass protection is enabled or there exists a CONTENTFUL_PREVIEW_SECRET env variable within your project with Vercel Authentication disabled. ',
+    'The settings that allow live preview of your Vercel project within Contentful are invalid. Please ensure either bypass protection is enabled or that there exists a CONTENTFUL_PREVIEW_SECRET env variable within your project along with Vercel Authentication disabled. ',
   apiPathNotFound:
     'The route you previously selected is no longer available. Please select another one.',
   apiPathsEmpty: "It looks like your Vercel project doesn't have any routes configured yet.",
