@@ -8,7 +8,7 @@ export class VercelService {
       method: 'GET',
       headers: this.buildRequestHeaders(),
     });
-    await this.maybeThrowApiError(response);
+    await this.handleApiError(response);
     const vercelProject = await response.json();
     this.assertVercelProject(vercelProject);
     return vercelProject;
@@ -16,7 +16,7 @@ export class VercelService {
 
   // cheap and dirty error handling -- could later provide a more structured error response
   // when API errors are encountered
-  private async maybeThrowApiError(response: Response): Promise<void> {
+  private async handleApiError(response: Response): Promise<void> {
     if (response.status < 400) return;
     const errorResponse: string = await response.text();
     const { status } = response;
