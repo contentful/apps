@@ -5,53 +5,7 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 
 import AppConfig from './AppConfig';
 import { definitions } from './parameters.spec';
-
-const contentTypes = [
-  {
-    sys: { id: 'ct1' },
-    name: 'CT1',
-    fields: [
-      { id: 'product_x', name: 'Product X', type: 'Symbol' },
-      { id: 'y', name: 'Y', type: 'Object' },
-    ],
-  },
-  {
-    sys: { id: 'ct2' },
-    name: 'CT2',
-    fields: [
-      { id: 'foo', name: 'FOO', type: 'Text' },
-      { id: 'z', name: 'Z', type: 'Array', items: { type: 'Symbol' } },
-    ],
-  },
-  {
-    sys: { id: 'ct3' },
-    name: 'CT3',
-    fields: [
-      { id: 'bar', name: 'BAR', type: 'Object' },
-      { id: 'baz', name: 'BAZ', type: 'Object' },
-      { id: 'product_d', name: 'Product D', type: 'Array', items: { type: 'Symbol' } },
-      { id: 'product_a', name: 'Product A', type: 'Symbol' },
-    ],
-  },
-];
-
-const makeSdkMock = () => ({
-  ids: {
-    app: 'some-app',
-  },
-  hostnames: {
-    webapp: 'app.contentful.com',
-  },
-  space: {
-    getContentTypes: jest.fn().mockResolvedValue({ items: contentTypes }),
-    getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] }),
-  },
-  app: {
-    setReady: jest.fn(),
-    getParameters: jest.fn().mockResolvedValue(null),
-    onConfigure: jest.fn().mockReturnValue(undefined),
-  },
-});
+import { makeSdkMock } from '../__mocks__';
 
 const validate = () => null; // Means no error
 

@@ -31,6 +31,15 @@ interface Props {
 }
 
 /**
+ * @description - helper function to compare two lists of skus for order agnostic equality
+ */
+const skusAreEqual = (prevSkus: string[], currentSkus: string[]): boolean => {
+  const sortedPreviousSkus = [...prevSkus].sort();
+  const sortedCurrentSkus = [...currentSkus].sort();
+  return !isEqual(sortedPreviousSkus, sortedCurrentSkus);
+};
+
+/**
  * @description - hook to track previous version of skus prop
  * @param skus - list of most current skus
  * @returns previous list of skus
@@ -57,28 +66,31 @@ export const SortableComponent: FC<Props> = ({
   const [productPreviews, setProductPreviews] = useState<Product[]>([]);
   const previousSkus = usePreviousSkus(skus);
 
-  const getProductPreviews = useCallback(
-    async (shouldRefetch: boolean = true) => {
-      try {
-        const productPreviewsUnsorted = shouldRefetch
-          ? await fetchProductPreviews(skus, config, skuType)
-          : productPreviews;
+  const getProductPreviews = useCallback(async () => {
+    try {
+      const shouldRefetch = skusAreEqual([...previousSkus], [...skus]);
+
+      if (shouldRefetch) {
+        const productPreviewsUnsorted = await fetchProductPreviews(skus, config, skuType);
         const sortedProductPreviews = mapSort(productPreviewsUnsorted, skus, 'sku');
         setProductPreviews(sortedProductPreviews);
-      } catch (error) {
-        sdk.notifier.error('There was an error fetching the data for the selected products.');
       }
-    },
-    [skus, skuType, config, fetchProductPreviews, setProductPreviews, sdk.notifier, productPreviews]
-  );
+    } catch (error) {
+      sdk.notifier.error('There was an error fetching the data for the selected products.');
+    }
+  }, [skus, skuType, config, fetchProductPreviews, setProductPreviews, sdk.notifier, previousSkus]);
 
+  /**
+   * @description - Compare previous list of skus (see `usePreviousSkus`) to the list of skus
+   * passed as a prop.  If the previous & current skus differ (a sku was added/removed, order agnostic),
+   * then fetch/refetch associated productPreviews given list of skus.
+   */
   useEffect(() => {
-    // only refetch product previews if new skus do not match previous skus
-    const sortedPreviousSkus = previousSkus.sort();
-    const sortedCurrentSkus = skus.sort();
-    const shouldRefetch = !isEqual(sortedPreviousSkus, sortedCurrentSkus);
+    const shouldRefetch = skusAreEqual([...previousSkus], [...skus]);
 
-    getProductPreviews(shouldRefetch);
+    if (shouldRefetch) {
+      getProductPreviews();
+    }
   }, [skus, skuType, config, getProductPreviews, previousSkus]);
 
   const deleteItem = useCallback(
