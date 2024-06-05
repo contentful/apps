@@ -1,9 +1,10 @@
-import React, { ReactElement } from 'react';
-import { SortableElement, SortableHandle } from 'react-sortable-hoc';
+import { FC } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import tokens from '@contentful/f36-tokens';
 import { LegacyProductCard, ProductCard } from '../ProductCard';
 import { useIntegration } from './IntegrationContext';
 import { Product } from '../types';
-import { RenderDragFn } from '../ProductCard/types';
 
 export interface Props {
   product: Product;
@@ -11,28 +12,63 @@ export interface Props {
   onDelete: () => void;
   isSortable: boolean;
   skuType?: string;
-  index: number;
 }
 
-const CardDragHandle = SortableHandle(({ drag }: { drag: ReactElement }) => <>{drag}</>);
-
-export const SortableListItem = SortableElement<Props>((props: Props) => {
+export const SortableListItem: FC<Props> = ({
+  product,
+  disabled,
+  onDelete,
+  isSortable,
+  skuType,
+}: Props) => {
   const { productCardVersion, name } = useIntegration();
-  const dragHandleRender: RenderDragFn | undefined = props.isSortable
-    ? ({ drag }) => <CardDragHandle drag={drag} />
-    : undefined;
+
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: product.id,
+  });
+
+  const style = isSortable
+    ? {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        marginTop: tokens.spacingS,
+      }
+    : { marginTop: tokens.spacingS };
 
   if (productCardVersion === 'v2') {
     return (
-      <ProductCard
-        handleRemove={props.onDelete}
-        dragHandleRender={dragHandleRender}
-        productCardType={'field'}
-        resource={props.product}
-        title={`${name} - ${props.skuType!}`}
-      />
+      <div
+        ref={setNodeRef}
+        style={style}
+        key={product.id}
+        {...attributes}
+        {...listeners}
+        data-test-id={`sortable-item-${product.id}`}>
+        <ProductCard
+          handleRemove={onDelete}
+          isSortable={isSortable}
+          productCardType={'field'}
+          resource={product}
+          title={`${name} - ${skuType!}`}
+        />
+      </div>
     );
   }
 
-  return <LegacyProductCard {...props} />;
-});
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      key={product.id}
+      {...attributes}
+      {...listeners}
+      data-test-id={`sortable-item-${product.id}`}>
+      <LegacyProductCard
+        product={product}
+        disabled={disabled}
+        onDelete={onDelete}
+        isSortable={isSortable}
+      />
+    </div>
+  );
+};

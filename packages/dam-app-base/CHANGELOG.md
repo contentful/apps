@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.5](https://github.com/contentful/apps/compare/@contentful/dam-app-base@3.0.4...@contentful/dam-app-base@3.0.5) (2024-06-03)
+
+### Bug Fixes
+
+- use index for deleting asset [ZEND-5025] ([#7932](https://github.com/contentful/apps/issues/7932)) ([af76064](https://github.com/contentful/apps/commit/af760642f7c4563c05afca87fe9299751fa0e7d2))
+
+## [3.0.4](https://github.com/contentful/apps/compare/@contentful/dam-app-base@3.0.3...@contentful/dam-app-base@3.0.4) (2024-05-29)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.65.7 to 4.65.8 ([#7893](https://github.com/contentful/apps/issues/7893)) ([35cb963](https://github.com/contentful/apps/commit/35cb963814a43d88861cb7a386d981c5179c8691))
+
+## [3.0.3](https://github.com/contentful/apps/compare/@contentful/dam-app-base@3.0.2...@contentful/dam-app-base@3.0.3) (2024-05-24)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.65.6 to 4.65.7 ([#7836](https://github.com/contentful/apps/issues/7836)) ([c2ccc7a](https://github.com/contentful/apps/commit/c2ccc7a0aeac5fdcf2e76cd7e2c082c9f5fcea40))
+
 ## [3.0.2](https://github.com/contentful/apps/compare/@contentful/dam-app-base@3.0.1...@contentful/dam-app-base@3.0.2) (2024-05-14)
 
 ### Bug Fixes

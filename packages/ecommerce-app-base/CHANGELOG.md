@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.2](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.1...@contentful/ecommerce-app-base@4.0.2) (2024-05-29)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.65.7 to 4.65.8 ([#7893](https://github.com/contentful/apps/issues/7893)) ([35cb963](https://github.com/contentful/apps/commit/35cb963814a43d88861cb7a386d981c5179c8691))
+
+## [4.0.1](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.0...@contentful/ecommerce-app-base@4.0.1) (2024-05-29)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+# [4.0.0](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.6.13...@contentful/ecommerce-app-base@4.0.0) (2024-05-28)
+
+- build(react18)!: drop support for react v17 and v18. replace react-sortable-hoc with dnd-kit (#7666) ([8143eae](https://github.com/contentful/apps/commit/8143eaeef7579b4fae1767a0763b3f08667ece18)), closes [#7666](https://github.com/contentful/apps/issues/7666)
+
+### BREAKING CHANGES
+
+- Consumers of ecommerce-app-base are required to implement react v18
+
+## [3.6.13](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.6.11...@contentful/ecommerce-app-base@3.6.13) (2024-05-27)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [3.6.12](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.6.11...@contentful/ecommerce-app-base@3.6.12) (2024-05-27)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [3.6.11](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.6.10...@contentful/ecommerce-app-base@3.6.11) (2024-05-24)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.65.6 to 4.65.7 ([#7836](https://github.com/contentful/apps/issues/7836)) ([c2ccc7a](https://github.com/contentful/apps/commit/c2ccc7a0aeac5fdcf2e76cd7e2c082c9f5fcea40))
+
 ## [3.6.10](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@3.6.9...@contentful/ecommerce-app-base@3.6.10) (2024-05-17)
 
 ### Bug Fixes

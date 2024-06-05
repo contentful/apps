@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import * as React from 'react';
+import React from 'react';
 import { useState } from 'react';
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
@@ -54,7 +54,13 @@ const styles = {
   }),
 };
 
-export const ProductImage: FC<Props> = ({ src, alt, width, height, className }) => {
+export const ProductImage: FC<Props> = ({
+  src,
+  alt,
+  width = '100px',
+  height = '100px',
+  className,
+}) => {
   const [loaded, setLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -89,5 +95,3 @@ export const ProductImage: FC<Props> = ({ src, alt, width, height, className }) 
     </div>
   );
 };
-
-ProductImage.defaultProps = { width: '100px', height: '100px' };

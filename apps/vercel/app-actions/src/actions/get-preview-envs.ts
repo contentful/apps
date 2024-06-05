@@ -23,9 +23,10 @@ export const handler = withAsyncAppActionErrorHandling(
       selectedProject: vercelProjectId,
       contentTypePreviewPathSelections,
       selectedApiPath,
+      teamId,
     } = await fetchAppInstallationParameters(appActionCallContext, cma);
 
-    const vercelService = new VercelService(vercelAccessToken);
+    const vercelService = new VercelService(vercelAccessToken, teamId);
     const vercelProject = await vercelService.getProject(vercelProjectId);
 
     const previewUrlsByContentType = buildPreviewUrlsForContentTypes(

@@ -23,10 +23,11 @@ export const makeMockPlainClient = (responses: any[], stub: sinon.SinonStub): Pl
 
 export const makeMockFetchResponse = (
   body: object,
-  headers: Record<string, string> = {}
+  headers: Record<string, string> = {},
+  status: number = 200
 ): Response => {
   const responseBody = JSON.stringify(body);
-  return new Response(responseBody, { headers });
+  return new Response(responseBody, { headers, status });
 };
 
 export const makeMockAppActionCallContext = (
@@ -53,6 +54,7 @@ export const mockAppInstallationParameters: AppInstallationParameters = {
     { contentType: 'blog', previewPath: '/blogs/{entry.fields.slug}' },
   ],
   selectedApiPath: 'api/enable-draft',
+  teamId: 'vercel-team-id',
 };
 
 export const makeMockAppInstallation = (

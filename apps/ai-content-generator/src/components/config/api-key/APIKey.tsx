@@ -60,7 +60,7 @@ const APIKey = (props: Props) => {
           type="text"
           name="apikey"
           placeholder="sk-...4svb"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setLocalApiKey(e.target.value)}
+          onInput={(e: ChangeEvent<HTMLInputElement>) => setLocalApiKey(e.target.value)}
           onBlur={handleBlur}
           isInvalid={displayInvalidMessage}
         />

@@ -11,14 +11,8 @@ const defaultProps: Props = {
 };
 
 const renderComponent = (props: Props) => {
-  return render(<SortableListItem index={0} {...props} />);
+  return render(<SortableListItem {...props} />);
 };
-
-jest.mock('react-sortable-hoc', () => ({
-  SortableContainer: (x: unknown) => x,
-  SortableElement: (x: unknown) => x,
-  SortableHandle: (x: unknown) => x,
-}));
 
 describe('SortableListItem', () => {
   afterEach(cleanup);
