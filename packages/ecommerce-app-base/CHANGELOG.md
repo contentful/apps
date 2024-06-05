@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.3](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.2...@contentful/ecommerce-app-base@4.0.3) (2024-06-05)
+
+### Bug Fixes
+
+- **ecommerce-app-base:** drag-n-drop bug in refetch logic that was causing infinite loop ([#7944](https://github.com/contentful/apps/issues/7944)) ([e5dcf5a](https://github.com/contentful/apps/commit/e5dcf5a2a3ba6879708085d719e86c961f3eaac9))
+
 ## [4.0.2](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.1...@contentful/ecommerce-app-base@4.0.2) (2024-05-29)
 
 ### Bug Fixes
