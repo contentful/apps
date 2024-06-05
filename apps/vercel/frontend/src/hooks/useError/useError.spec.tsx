@@ -59,6 +59,7 @@ describe('useError', () => {
       invalidSpaceId: true,
       projectNotFound: false,
       cannotFetchProjects: false,
+      invalidProjectSettings: false,
     };
 
     renderHook(
