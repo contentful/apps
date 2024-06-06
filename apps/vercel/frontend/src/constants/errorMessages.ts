@@ -4,6 +4,8 @@ export const errorMessages = {
   expiredToken: 'Token has expired.',
   projectNotFound:
     'The project you have configured is no longer available. Please select another one.',
+  protectionBypassIsDisabled:
+    'The project you have configured does not have protection bypass enabled. Please enable it. Note that your Vercel project will need to be redeployed in order for the change to take effect.',
   cannotFetchProjects: 'We had trouble fetching your Vercel projects.',
   apiPathNotFound:
     'The route you previously selected is no longer available. Please select another one.',

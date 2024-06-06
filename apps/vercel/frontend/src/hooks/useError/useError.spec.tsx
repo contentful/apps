@@ -58,6 +58,7 @@ describe('useError', () => {
     const projectSelectionerror = {
       invalidSpaceId: true,
       projectNotFound: false,
+      protectionBypassIsDisabled: false,
       cannotFetchProjects: false,
     };
 

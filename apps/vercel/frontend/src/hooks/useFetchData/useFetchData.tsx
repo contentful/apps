@@ -103,20 +103,30 @@ export const useFetchData = ({
     }
   };
 
-  const validateProjectEnv = async (currentSpaceId: string, projectId: string) => {
-    if (vercelClient && teamId)
+  const validateProjectEnv = async (
+    currentSpaceId: string,
+    projectId: string,
+    selectedProject?: Project
+  ) => {
+    if (vercelClient && teamId) {
       try {
         const isProjectSelectionValid = await vercelClient.validateProjectContentfulSpaceId(
           currentSpaceId,
           projectId,
           teamId
         );
-        if (!isProjectSelectionValid) throw new Error(errorTypes.INVALID_SPACE_ID);
-        else {
-          dispatchErrors({
-            type: errorsActions.RESET_PROJECT_SELECTION_ERRORS,
-          });
+        if (!isProjectSelectionValid) {
+          throw new Error(errorTypes.INVALID_SPACE_ID);
         }
+
+        const protectionBypassIsDisabled = selectedProject && !selectedProject.protectionBypass;
+        if (protectionBypassIsDisabled) {
+          throw new Error(errorTypes.PROTECTION_BYPASS_IS_DISABLED);
+        }
+
+        dispatchErrors({
+          type: errorsActions.RESET_PROJECT_SELECTION_ERRORS,
+        });
       } catch (e) {
         const err = e as Error;
         if (err.message === errorTypes.INVALID_SPACE_ID) {
@@ -125,7 +135,15 @@ export const useFetchData = ({
             payload: errorTypes.INVALID_SPACE_ID,
           });
         }
+
+        if (err.message === errorTypes.PROTECTION_BYPASS_IS_DISABLED) {
+          dispatchErrors({
+            type: errorsActions.UPDATE_PROJECT_SELECTION_ERRORS,
+            payload: errorTypes.PROTECTION_BYPASS_IS_DISABLED,
+          });
+        }
       }
+    }
   };
 
   return { validateToken, fetchProjects, fetchApiPaths, validateProjectEnv };
