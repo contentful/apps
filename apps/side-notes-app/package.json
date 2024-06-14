@@ -6,7 +6,7 @@
     "@contentful/app-sdk": "^4.23.1",
     "@contentful/f36-components": "4.67.0",
     "@contentful/f36-tokens": "4.0.5",
-    "@contentful/field-editor-boolean": "1.4.13",
+    "@contentful/field-editor-boolean": "1.4.14",
     "@contentful/field-editor-checkbox": "^1.2.0",
     "@contentful/field-editor-date": "1.6.13",
     "@contentful/field-editor-dropdown": "^1.2.0",
