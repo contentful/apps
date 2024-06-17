@@ -31,7 +31,7 @@
     "sentry-release": "SENTRY_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug new -p marketplace-apps $SENTRY_RELEASE && sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $SENTRY_RELEASE && sentry-cli releases --log-level=debug finalize $SENTRY_RELEASE && sentry-cli releases --log-level=debug deploys $SENTRY_RELEASE new -e production"
   },
   "dependencies": {
-    "lerna": "^6.6.2"
+    "lerna": "^8.1.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
