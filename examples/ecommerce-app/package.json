@@ -31,5 +31,8 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "."
+  "homepage": ".",
+  "overrides": {
+    "ws": "^8.17.1"
+  }
 }

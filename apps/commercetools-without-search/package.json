@@ -30,5 +30,8 @@
     "> 1%",
     "not ie <= 11"
   ],
-  "homepage": "."
+  "homepage": ".",
+  "overrides": {
+    "ws": "^8.17.1"
+  }
 }

@@ -56,5 +56,8 @@
     "esbuild": "^0.21.0",
     "typescript": "4.9.5"
   },
-  "homepage": "."
+  "homepage": ".",
+  "overrides": {
+    "ws": "^8.17.1"
+  }
 }
