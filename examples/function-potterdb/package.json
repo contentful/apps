@@ -42,12 +42,12 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.23.0",
+    "@contentful/app-scripts": "1.24.0",
     "@contentful/node-apps-toolkit": "^3.4.2",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.3.1",
     "@tsconfig/create-react-app": "2.0.5",
-    "@types/node": "16.18.98",
+    "@types/node": "16.18.99",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "cross-env": "7.0.3",
