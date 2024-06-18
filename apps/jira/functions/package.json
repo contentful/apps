@@ -41,5 +41,8 @@
     "tslint-config-standard": "^9.0.0",
     "tslint-no-unused-expression-chai": "^0.1.4",
     "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "ws": "^8.17.1"
   }
 }
