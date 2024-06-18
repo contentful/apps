@@ -242,12 +242,12 @@ export const SortableComponent = ({
   const [items, setItems] = useState<AssetWithId[]>([]);
 
   const deleteItem = useCallback(
-    (index: UniqueIdentifier) => {
+    (index: number) => {
       const myResources = [...resources];
-      myResources.splice(Number(index), 1);
+      myResources.splice(index, 1);
       onChange(myResources);
     },
-    [resources]
+    [resources, onChange]
   );
 
   useEffect(() => {
@@ -313,14 +313,14 @@ export const SortableComponent = ({
       <SortableContext items={items?.map((i) => i.key)} strategy={verticalListSortingStrategy}>
         <div className={styles.container} data-testid="container">
           <div className={styles.grid} data-testid="grid">
-            {items.map(({ key, alt, url, additionalData }) => (
+            {items.map(({ key, alt, url, additionalData }, index) => (
               <div key={key}>
                 <SortableItem
                   disabled={disabled}
                   url={url}
                   alt={alt}
                   uniqueId={key}
-                  onDelete={() => deleteItem(key)}
+                  onDelete={() => deleteItem(index)}
                   additionalData={additionalData}
                 />
               </div>

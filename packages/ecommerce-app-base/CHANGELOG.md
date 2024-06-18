@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.9](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.8...@contentful/ecommerce-app-base@4.0.9) (2024-06-11)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.66.0 to 4.67.0 ([#8036](https://github.com/contentful/apps/issues/8036)) ([a637d99](https://github.com/contentful/apps/commit/a637d9909780ed1a331ef332acd62122a889f0fc))
+
+## [4.0.8](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.7...@contentful/ecommerce-app-base@4.0.8) (2024-06-10)
+
+### Bug Fixes
+
+- **deps:** bump @types/lodash from 4.17.4 to 4.17.5 ([#7997](https://github.com/contentful/apps/issues/7997)) ([092284a](https://github.com/contentful/apps/commit/092284a8aec1bf87747684d4f56dd758d2ac2969))
+
+## [4.0.7](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.6...@contentful/ecommerce-app-base@4.0.7) (2024-06-07)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.65.9 to 4.66.0 ([#7978](https://github.com/contentful/apps/issues/7978)) ([044b458](https://github.com/contentful/apps/commit/044b458400c5824e39c420fe6aabb717adacb04f))
+
+## [4.0.6](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.5...@contentful/ecommerce-app-base@4.0.6) (2024-06-06)
+
+### Bug Fixes
+
+- **deps:** bump @contentful/f36-components from 4.65.8 to 4.65.9 ([#7964](https://github.com/contentful/apps/issues/7964)) ([9d5d276](https://github.com/contentful/apps/commit/9d5d27654e752355e802f4f21e094999b80efe68))
+
+## [4.0.5](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.4...@contentful/ecommerce-app-base@4.0.5) (2024-06-06)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [4.0.4](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.3...@contentful/ecommerce-app-base@4.0.4) (2024-06-06)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [4.0.3](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.2...@contentful/ecommerce-app-base@4.0.3) (2024-06-05)
+
+### Bug Fixes
+
+- **ecommerce-app-base:** drag-n-drop bug in refetch logic that was causing infinite loop ([#7944](https://github.com/contentful/apps/issues/7944)) ([e5dcf5a](https://github.com/contentful/apps/commit/e5dcf5a2a3ba6879708085d719e86c961f3eaac9))
+
 ## [4.0.2](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.1...@contentful/ecommerce-app-base@4.0.2) (2024-05-29)
 
 ### Bug Fixes

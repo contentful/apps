@@ -24,6 +24,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
         contentTypes={mockContentTypes}
         onParameterUpdate={mockOnUpdate}
         onRemoveRow={() => null}
+        rowId={0}
       />
     );
 
@@ -47,6 +48,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
         onParameterUpdate={() => null}
         onRemoveRow={mockOnRemoveRow}
         configuredContentTypePreviewPathSelection={selection}
+        rowId={0}
       />
     );
 
@@ -63,6 +65,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
         contentTypes={mockContentTypes}
         onParameterUpdate={() => null}
         onRemoveRow={() => null}
+        rowId={0}
       />
     );
 
@@ -78,6 +81,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
         onParameterUpdate={() => null}
         onRemoveRow={() => null}
         configuredContentTypePreviewPathSelection={selection}
+        rowId={0}
       />
     );
 
@@ -92,6 +96,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
         onParameterUpdate={() => null}
         onRemoveRow={() => null}
         configuredContentTypePreviewPathSelection={selection}
+        rowId={0}
       />
     );
 
@@ -120,6 +125,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
         onParameterUpdate={vi.fn()}
         onRemoveRow={() => null}
         configuredContentTypePreviewPathSelection={selection}
+        rowId={0}
       />,
       { isAppConfigurationSaved: true, errors }
     );
@@ -148,6 +154,7 @@ describe('ContentTypePreviewPathSelectionRow', () => {
         onParameterUpdate={vi.fn()}
         onRemoveRow={() => null}
         configuredContentTypePreviewPathSelection={selection}
+        rowId={0}
       />,
       { isAppConfigurationSaved: true, errors }
     );

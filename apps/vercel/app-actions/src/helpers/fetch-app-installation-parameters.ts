@@ -6,6 +6,7 @@ const REQUIRED_PARAMS = [
   'selectedProject',
   'contentTypePreviewPathSelections',
   'selectedApiPath',
+  'teamId',
 ];
 
 function assertAppInstallationParameters(

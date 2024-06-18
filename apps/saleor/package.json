@@ -10,7 +10,7 @@
   "dependencies": {
     "@contentful/app-sdk": "4.13.0",
     "@contentful/ecommerce-app-base": "3.1.48",
-    "@types/lodash": "4.17.4",
+    "@types/lodash": "4.17.5",
     "core-js": "3.37.1",
     "graphql": "15.8.0",
     "graphql-tag": "2.12.6",

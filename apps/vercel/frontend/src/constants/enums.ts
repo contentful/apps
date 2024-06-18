@@ -29,6 +29,7 @@ export enum errorTypes {
   INVALID_TEAM_SCOPE = 'invalidTeamScope',
   EXPIRED_TOKEN = 'expiredToken',
   PROJECT_NOT_FOUND = 'projectNotFound',
+  PROTECTION_BYPASS_IS_DISABLED = 'protectionBypassIsDisabled',
   CANNOT_FETCH_PROJECTS = 'cannotFetchProjects',
   API_PATH_NOT_FOUND = 'apiPathNotFound',
   CANNOT_FETCH_API_PATHS = 'cannotFetchApiPaths',

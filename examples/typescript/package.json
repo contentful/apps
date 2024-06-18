@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.25.0",
-    "@contentful/f36-components": "4.65.8",
+    "@contentful/f36-components": "4.67.0",
     "@contentful/f36-tokens": "4.0.5",
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.46.4",
@@ -38,11 +38,11 @@
     ]
   },
   "devDependencies": {
-    "@contentful/app-scripts": "1.21.0",
+    "@contentful/app-scripts": "1.24.0",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.3.1",
-    "@tsconfig/create-react-app": "2.0.4",
-    "@types/node": "16.18.97",
+    "@tsconfig/create-react-app": "2.0.5",
+    "@types/node": "16.18.99",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "cross-env": "7.0.3",

@@ -1,16 +1,27 @@
 import { VercelProject } from '../types';
 
 export class VercelService {
-  constructor(readonly accessToken: string) {}
+  constructor(readonly accessToken: string, readonly teamId: string) {}
 
   public async getProject(projectId: string): Promise<VercelProject> {
     const response = await fetch(this.buildProjectUrl(projectId), {
       method: 'GET',
       headers: this.buildRequestHeaders(),
     });
+    await this.handleApiError(response);
     const vercelProject = await response.json();
     this.assertVercelProject(vercelProject);
     return vercelProject;
+  }
+
+  // cheap and dirty error handling -- could later provide a more structured error response
+  // when API errors are encountered
+  private async handleApiError(response: Response): Promise<void> {
+    if (response.status < 400) return;
+    const errorResponse: string = await response.text();
+    const { status } = response;
+    const msg = `Vercel API error: ${errorResponse} [status: ${status}]`;
+    throw new Error(msg);
   }
 
   private buildRequestHeaders() {
@@ -21,7 +32,9 @@ export class VercelService {
   }
 
   private buildProjectUrl(projectId: string) {
-    return `https://api.vercel.com/v9/projects/${projectId}`;
+    const url = new URL(`https://api.vercel.com/v9/projects/${projectId}`);
+    url.searchParams.set('teamId', this.teamId);
+    return url.toString();
   }
 
   private assertVercelProject(value: unknown): asserts value is VercelProject {

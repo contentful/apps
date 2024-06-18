@@ -28,6 +28,7 @@ interface Props {
   onParameterUpdate: (parameters: ApplyContentTypePreviewPathSelectionPayload) => void;
   onRemoveRow: (parameters: ContentTypePreviewPathSelection) => void;
   renderLabel?: boolean;
+  rowId: number;
 }
 
 export const ContentTypePreviewPathSelectionRow = ({
@@ -36,6 +37,7 @@ export const ContentTypePreviewPathSelectionRow = ({
   onParameterUpdate,
   onRemoveRow,
   renderLabel,
+  rowId,
 }: Props) => {
   const { isAppConfigurationSaved, isLoading, dispatchErrors, errors } =
     useContext(ConfigPageContext);
@@ -133,7 +135,7 @@ export const ContentTypePreviewPathSelectionRow = ({
 
   return (
     <Box className={styles.wrapper}>
-      <FormControl marginBottom="spacingM" id="contentTypePreviewPathSelection">
+      <FormControl marginBottom="spacingM" id={'contentTypePreviewPathSelection-' + rowId}>
         <Flex
           flexDirection="row"
           justifyContent="space-evenly"
