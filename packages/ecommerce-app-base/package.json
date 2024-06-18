@@ -76,5 +76,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "lint": "eslint src"
+  },
+  "overrides": {
+    "ws": "^8.17.1"
   }
 }
