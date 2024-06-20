@@ -14,14 +14,14 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --no-ci --since master --include-dependencies",
-    "bootstrap:ci": "lerna bootstrap --ci --concurrency=1 --since=${SINCE:-master} --include-dependencies",
+    "bootstrap:ci": "lerna bootstrap --ci --since=${SINCE:-master} --include-dependencies",
     "clean": "lerna clean",
-    "lint": "lerna run lint --concurrency=3 --since=${SINCE:-master} --include-dependencies",
-    "verify-config": "lerna run verify-config --concurrency=3 --since=${SINCE:-master} --include-dependencies",
-    "build": "lerna run build --concurrency=1 --stream --since=${SINCE:-master} --include-dependencies",
-    "test": "lerna run test:ci --concurrency=1 --stream --since=${SINCE:-master} --include-dependencies",
-    "deploy": "lerna run deploy --concurrency=3 --since=${SINCE:-master}",
-    "deploy:test": "lerna run deploy:test --concurrency=3 --since=${SINCE:-master}",
+    "lint": "lerna run lint --since=${SINCE:-master} --include-dependencies",
+    "verify-config": "lerna run verify-config --since=${SINCE:-master} --include-dependencies",
+    "build": "lerna run build --stream --since=${SINCE:-master} --include-dependencies",
+    "test": "lerna run test:ci --stream --since=${SINCE:-master} --include-dependencies",
+    "deploy": "lerna run deploy --since=${SINCE:-master}",
+    "deploy:test": "lerna run deploy:test --since=${SINCE:-master}",
     "post-deploy": "lerna run post-deploy",
     "publish-packages": "lerna version --conventional-commits --no-private --force-git-tag --create-release github --yes && lerna publish from-git --yes",
     "prettier:list": "npx prettier@2.8.8 --list-different",
@@ -31,7 +31,7 @@
     "sentry-release": "SENTRY_RELEASE=$(git rev-parse --short HEAD); sentry-cli releases --log-level=debug new -p marketplace-apps $SENTRY_RELEASE && sentry-cli releases --log-level=debug set-commits --auto --ignore-missing $SENTRY_RELEASE && sentry-cli releases --log-level=debug finalize $SENTRY_RELEASE && sentry-cli releases --log-level=debug deploys $SENTRY_RELEASE new -e production"
   },
   "dependencies": {
-    "lerna": "^6.6.2"
+    "lerna": "^8.1.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
