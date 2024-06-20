@@ -4,7 +4,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "build": "rimraf built && tsc",
+    "build": "pnpx rimraf built && tsc",
     "lint": "tslint --project ./tsconfig.json",
     "lint-fix": "tslint --project ./tsconfig.json --fix",
     "test": "ts-mocha '**/*.spec.ts'",

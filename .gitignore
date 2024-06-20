@@ -10,3 +10,4 @@ tags
 lerna-debug.log
 .eslintcache
 .tool-versions
+.nx

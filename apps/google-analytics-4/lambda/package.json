@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "debug": "NODE_ENV=development SLS_DEBUG=* node inspect ./node_modules/serverless/bin/serverless.js offline",
-    "build": "NODE_ENV=production rimraf ./build && tsc",
+    "build": "NODE_ENV=production pnpx rimraf ./build && tsc",
     "lint": "eslint --max-warnings=0 .",
     "start:dev": "NODE_ENV=development nodemon",
     "test": "NODE_ENV=test TS_NODE_TRANSPILE_ONLY=1 mocha --exit -r dotenv/config",

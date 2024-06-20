@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "NODE_ENV=production rimraf ./build && tsc",
+    "build": "NODE_ENV=production pnpx rimraf ./build && tsc",
     "lint": "eslint --max-warnings=0 .",
     "start": "NODE_ENV=development nodemon",
     "deploy:test": "NODE_ENV=test sls deploy --stage test",

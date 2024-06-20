@@ -42,8 +42,8 @@
     "react-dom": "18.2.0"
   },
   "scripts": {
-    "build": "rimraf lib && tsc",
-    "build:docs": "rimraf docs && typedoc",
+    "build": "pnpx rimraf lib && tsc",
+    "build:docs": "pnpx rimraf docs && typedoc",
     "prepublishOnly": "npm run build && npm run build:docs",
     "test": "jest --watch",
     "test:ci": "jest"
