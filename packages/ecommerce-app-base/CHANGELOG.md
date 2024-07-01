@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.14](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.13...@contentful/ecommerce-app-base@4.0.14) (2024-06-28)
+
+### Bug Fixes
+
+- **deps:** bump @types/lodash from 4.17.5 to 4.17.6 ([#8212](https://github.com/contentful/apps/issues/8212)) ([2f4e7b9](https://github.com/contentful/apps/commit/2f4e7b9fdc3b309fa6dcf6126b5b2d82b9cf7849))
+
+## [4.0.13](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.12...@contentful/ecommerce-app-base@4.0.13) (2024-06-28)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [4.0.12](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.11...@contentful/ecommerce-app-base@4.0.12) (2024-06-25)
+
+### Bug Fixes
+
+- **deps:** bump @storybook/addon-a11y from 7.6.19 to 7.6.20 ([#8159](https://github.com/contentful/apps/issues/8159)) ([1266bc0](https://github.com/contentful/apps/commit/1266bc06bd7e4a0814459b3c572d8ae2860ea472))
+
+## [4.0.11](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.10...@contentful/ecommerce-app-base@4.0.11) (2024-06-24)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
+## [4.0.10](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.9...@contentful/ecommerce-app-base@4.0.10) (2024-06-19)
+
+**Note:** Version bump only for package @contentful/ecommerce-app-base
+
 ## [4.0.9](https://github.com/contentful/apps/compare/@contentful/ecommerce-app-base@4.0.8...@contentful/ecommerce-app-base@4.0.9) (2024-06-11)
 
 ### Bug Fixes

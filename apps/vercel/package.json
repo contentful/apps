@@ -18,7 +18,7 @@
     "@contentful/app-scripts": "1.15.0",
     "contentful-management": "^11.24.3",
     "dotenv": "^16.3.1",
-    "esbuild": "^0.21.0"
+    "esbuild": "^0.22.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.1"
