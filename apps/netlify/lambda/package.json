@@ -25,5 +25,8 @@
     "express": "4.19.2",
     "lodash.get": "^4.4.2",
     "node-fetch": "2.7.0"
+  },
+  "overrides": {
+    "ws": "^8.17.1"
   }
 }

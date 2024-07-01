@@ -39,5 +39,8 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
     "tslint-no-unused-expression-chai": "^0.1.4"
+  },
+  "overrides": {
+    "ws": "^8.17.1"
   }
 }
