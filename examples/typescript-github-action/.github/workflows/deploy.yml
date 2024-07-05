@@ -4,7 +4,6 @@ jobs:
   deploy_job:
     runs-on: ubuntu-latest
     name: Deploy app to Contentful
-    if: contains(github.ref, 'main') || contains(github.ref, 'master')
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js 16.x
