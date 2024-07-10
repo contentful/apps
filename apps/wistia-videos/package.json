@@ -51,5 +51,8 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "^1.7.10"
+  },
+  "overrides": {
+    "ws": "^8.17.1"
   }
 }
