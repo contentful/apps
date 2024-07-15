@@ -4,12 +4,12 @@
   "private": true,
   "dependencies": {
     "@contentful/app-sdk": "^4.28.0",
-    "@contentful/f36-components": "4.67.1",
+    "@contentful/f36-components": "4.67.2",
     "@contentful/f36-icons": "^4.28.2",
     "@contentful/f36-tokens": "4.0.5",
     "@contentful/field-editor-single-line": "^1.4.2",
     "@contentful/react-apps-toolkit": "1.2.16",
-    "@tanstack/react-query": "^5.50.1",
+    "@tanstack/react-query": "^5.51.1",
     "contentful-management": "10.46.4",
     "emotion": "10.0.27",
     "react": "18.3.1",
@@ -52,7 +52,7 @@
     "@types/react-dom": "18.3.0",
     "cross-env": "7.0.3",
     "esbuild": "0.23.0",
-    "prettier": "^3.3.2",
+    "prettier": "^3.3.3",
     "typescript": "4.9.5"
   },
   "homepage": "."
