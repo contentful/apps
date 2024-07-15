@@ -110,6 +110,7 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+    - dependency-name: "@contentful/f36-components"
 
 - package-ecosystem: npm
   directory: "/examples/javascript"
@@ -128,6 +129,7 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+    - dependency-name: '@contentful/f36-components'
 
 - package-ecosystem: npm
   directory: "/examples/function-mock-shop"
@@ -146,6 +148,7 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+    - dependency-name: '@contentful/f36-components'
 
 - package-ecosystem: npm
   directory: "/examples/function-potterdb"
@@ -164,6 +167,7 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+    - dependency-name: '@contentful/f36-components'
 
 - package-ecosystem: npm
   directory: "/examples/function-potterdb-rest-api"
@@ -182,6 +186,7 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+    - dependency-name: '@contentful/f36-components'
 
 - package-ecosystem: npm
   directory: "/examples/function-templates/javascript"
@@ -200,6 +205,7 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+    - dependency-name: '@contentful/f36-components'
 
 - package-ecosystem: npm
   directory: "/examples/function-templates/typescript"
@@ -218,6 +224,7 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+    - dependency-name: '@contentful/f36-components'
 
 - package-ecosystem: docker
   directory: "/apps/slack/lambda/"
