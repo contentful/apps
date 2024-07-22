@@ -25,7 +25,7 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "@segment/analytics-next": "^1.51.0",
     "@uiw/react-codemirror": "^4.19.4",
-    "codemirror": "5.65.16",
+    "codemirror": "5.65.17",
     "contentful-management": "10.7.0",
     "emotion": "10.0.27",
     "react": "18.2.0",
