@@ -1,10 +1,20 @@
-const gptModels = [
-  { id: 'gpt-3.5-turbo', name: 'GPT-3.5', textLimit: 12000 },
-  { id: 'gpt-3.5-turbo-16k', name: 'GPT-3.5 16k', textLimit: 12000 },
-  { id: 'gpt-4', name: 'GPT-4' },
-  { id: 'gpt-4-32k', name: 'GPT-4 32k' },
-];
+import OpenAI from 'openai';
 
-const defaultModelId = gptModels[0].id;
+async function getGptModels(apiKey: string) {
+  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+  const list = await openai.models.list();
 
-export { gptModels, defaultModelId };
+  console.log('List', list.data);
+  return list.data;
+}
+
+async function getDefaultModel(apiKey: string) {
+  const list = await getGptModels(apiKey);
+
+  return list[0];
+}
+
+const defaultModelId = 'text-davinci-003';
+const DEFAULT_TEXT_LIMIT = 12000;
+
+export { getGptModels, getDefaultModel, defaultModelId, DEFAULT_TEXT_LIMIT };
