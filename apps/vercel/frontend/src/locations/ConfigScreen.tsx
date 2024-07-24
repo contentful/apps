@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect, useReducer, ChangeEvent } from 'react';
-import { ConfigAppSDK, ContentType } from '@contentful/app-sdk';
+import { ConfigAppSDK } from '@contentful/app-sdk';
 import { Box, Heading, Paragraph, Stack } from '@contentful/f36-components';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { styles } from './ConfigScreen.styles';
@@ -19,11 +19,12 @@ import { GettingStartedSection } from '@components/config-screen/GettingStartedS
 import errorsReducer from '@reducers/errorsReducer';
 import { useError } from '@hooks/useError/useError';
 import { useFetchData } from '@hooks/useFetchData/useFetchData';
+import useGetContentTypes from '@hooks/useGetContentTypes/useGetContentTypes';
 
 const ConfigScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasTokenBeenValidated, setHasTokenBeenValidated] = useState(false);
-  const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
+  // const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
   const [isAppConfigurationSaved, setIsAppConfigurationSaved] = useState(true);
@@ -83,17 +84,7 @@ const ConfigScreen = () => {
     checkToken();
   }, [vercelClient]);
 
-  useEffect(() => {
-    async function getContentTypes() {
-      const contentTypesResponse = await sdk.cma.contentType.getMany({});
-
-      if (contentTypesResponse.items && contentTypesResponse.items.length) {
-        setContentTypes(contentTypesResponse.items || []);
-      }
-    }
-
-    getContentTypes();
-  }, []);
+  const { contentTypes, loading, error } = useGetContentTypes();
 
   useEffect(() => {
     async function getProjects() {
@@ -145,6 +136,8 @@ const ConfigScreen = () => {
   };
 
   const renderPostAuthComponents =
+    !loading &&
+    !error &&
     !isAuthenticationError &&
     hasTokenBeenValidated &&
     !!parameters.vercelAccessToken &&
