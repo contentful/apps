@@ -1,0 +1,1 @@
+export { useGetContentTypes } from './useGetContentTypes';

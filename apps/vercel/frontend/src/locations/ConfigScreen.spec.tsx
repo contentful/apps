@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi, beforeAll } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { mockCma, mockSdk } from '../../test/mocks';
+import { mockCma, mockContentTypes, mockSdk } from '../../test/mocks';
 import ConfigScreen from './ConfigScreen';
 import VercelClient from '@clients/Vercel';
 import { singleSelectionSections } from '@constants/enums';
@@ -14,6 +14,12 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
   useAutoResizer: () => {},
+}));
+
+vi.mock('@hooks/useGetContentTypes', () => ({
+  useGetContentTypes: () => ({
+    contentTypes: mockContentTypes,
+  }),
 }));
 
 describe('ConfigScreen', () => {
