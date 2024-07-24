@@ -10,7 +10,7 @@ import { CONTENT_TYPE_LIMIT } from '@constants/contentTypeLimit';
  * @returns allContentTypes
  */
 
-const useGetContentTypes = () => {
+export const useGetContentTypes = () => {
   const [allContentTypes, setAllContentTypes] = useState<ContentTypeProps[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error>();
@@ -62,5 +62,3 @@ const useGetContentTypes = () => {
 
   return { contentTypes: allContentTypes, loading, error };
 };
-
-export default useGetContentTypes;

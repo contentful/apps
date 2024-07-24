@@ -19,7 +19,7 @@ import { GettingStartedSection } from '@components/config-screen/GettingStartedS
 import errorsReducer from '@reducers/errorsReducer';
 import { useError } from '@hooks/useError/useError';
 import { useFetchData } from '@hooks/useFetchData/useFetchData';
-import useGetContentTypes from '@hooks/useGetContentTypes/useGetContentTypes';
+import { useGetContentTypes } from '@hooks/useGetContentTypes';
 
 const ConfigScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
