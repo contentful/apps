@@ -12,7 +12,7 @@ vi.mock('@contentful/react-apps-toolkit', () => ({
   useCMA: () => mockCma,
 }));
 
-describe.skip('useGetContentTypes', () => {
+describe('useGetContentTypes', () => {
   it('should return content types', async () => {
     mockSdk.cma.contentType.getMany = vi.fn().mockReturnValueOnce(mockGetManyContentType);
     const { result } = renderHook(() => useGetContentTypes());
