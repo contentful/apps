@@ -24,7 +24,6 @@ import { useGetContentTypes } from '@hooks/useGetContentTypes';
 const ConfigScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasTokenBeenValidated, setHasTokenBeenValidated] = useState(false);
-  // const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [apiPaths, setApiPaths] = useState<ApiPath[]>([]);
   const [isAppConfigurationSaved, setIsAppConfigurationSaved] = useState(true);
