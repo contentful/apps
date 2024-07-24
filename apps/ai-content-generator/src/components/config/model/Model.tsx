@@ -21,7 +21,6 @@ const Model = (props: Props) => {
       if (!apiKey) return;
       if (gptModels.length) return;
       const models = await getGptModels(apiKey);
-      console.log('Models', models);
       setGptModels(models.sort((a, b) => a.id.localeCompare(b.id)));
     }
     fetchGptModels();
