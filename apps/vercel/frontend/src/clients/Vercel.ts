@@ -208,10 +208,12 @@ export default class VercelClient implements VercelAPIClient {
 
   private filterServerlessFunctions(data: ServerlessFunction[]) {
     const irrelevantServerlessFunctionType = 'ISR';
-    return data.filter((file: ServerlessFunction) =>
-      file.type !== irrelevantServerlessFunctionType &&
-      file.path.includes('api') &&
-      !file.path.endsWith('.rsc')
+
+    return data.filter(
+      (file: ServerlessFunction) =>
+        file.type !== irrelevantServerlessFunctionType &&
+        file.path.includes('api') &&
+        !file.path.endsWith('.rsc')
     );
   }
 
