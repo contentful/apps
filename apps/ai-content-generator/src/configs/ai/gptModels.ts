@@ -1,10 +1,11 @@
-import OpenAI from 'openai';
+import AI from '@utils/aiApi';
+import { modelsBaseUrl } from './baseUrl';
 
 async function getGptModels(apiKey: string) {
-  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
-  const list = await openai.models.list();
+  const ai = new AI(modelsBaseUrl, apiKey);
+  const models = await ai.getModels();
 
-  return list.data;
+  return models.data;
 }
 
 async function getDefaultModel(apiKey: string) {

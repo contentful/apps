@@ -24,7 +24,7 @@ const Model = (props: Props) => {
       setGptModels(models.sort((a, b) => a.id.localeCompare(b.id)));
     }
     fetchGptModels();
-  }, [gptModels]);
+  }, [apiKey, gptModels]);
 
   const modelList = gptModels.map((model) => (
     <Select.Option key={model.id} value={model.id}>
