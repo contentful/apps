@@ -2,7 +2,7 @@ import { ChatCompletionRequestMessage } from 'openai';
 import { streamToParsedText } from './aiHelpers';
 import { validateResponseStatus } from './handleAiApiErrors';
 import { defaultModelId } from '@configs/ai/gptModels';
-import { Model } from 'openai/resources';
+import { Model } from 'openai';
 
 /**
  * This class is used to interact with OpenAI's API.

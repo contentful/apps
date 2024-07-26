@@ -4,7 +4,7 @@ import { getGptModels, defaultModelId } from '@configs/ai/gptModels';
 import { ModelText } from '../configText';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 import { ConfigErrors } from '../configText';
-import { Model as OpenAiModel } from 'openai/resources';
+import { Model as OpenAiModel } from 'openai';
 
 interface Props {
   apiKey: string;
