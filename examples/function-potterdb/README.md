@@ -10,7 +10,7 @@ Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app --example function-potterdb
+npx create-contentful-app@latest --example function-potterdb
 ```
 
 ## Available Scripts
