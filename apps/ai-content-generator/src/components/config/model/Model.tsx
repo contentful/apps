@@ -1,21 +1,34 @@
-import { ChangeEvent, Dispatch } from 'react';
+import { ChangeEvent, Dispatch, useEffect, useState } from 'react';
 import { FormControl, Select } from '@contentful/f36-components';
-import { gptModels, defaultModelId } from '@configs/ai/gptModels';
+import { getGptModels, defaultModelId } from '@configs/ai/gptModels';
 import { ModelText } from '../configText';
 import { ParameterAction, ParameterReducer } from '../parameterReducer';
 import { ConfigErrors } from '../configText';
+import { Model as OpenAiModel } from 'openai';
 
 interface Props {
+  apiKey: string;
   model: string;
   dispatch: Dispatch<ParameterReducer>;
 }
 
 const Model = (props: Props) => {
-  const { model, dispatch } = props;
+  const { apiKey, model, dispatch } = props;
+  const [gptModels, setGptModels] = useState<OpenAiModel[]>([]);
+
+  useEffect(() => {
+    async function fetchGptModels() {
+      if (!apiKey) return;
+      if (gptModels.length) return;
+      const models = await getGptModels(apiKey);
+      setGptModels(models.sort((a, b) => a.id.localeCompare(b.id)));
+    }
+    fetchGptModels();
+  }, [apiKey, gptModels]);
 
   const modelList = gptModels.map((model) => (
     <Select.Option key={model.id} value={model.id}>
-      {model.name}
+      {model.id}
     </Select.Option>
   ));
 

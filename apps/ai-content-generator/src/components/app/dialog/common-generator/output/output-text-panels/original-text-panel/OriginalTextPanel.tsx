@@ -8,11 +8,8 @@ import { DialogText } from '@configs/features/featureTypes';
 import { css } from '@emotion/react';
 import { tokenWarning } from '@configs/token-warning/tokenWarning';
 import { SegmentEvents } from '@configs/segment/segmentEvent';
-import { useSDK } from '@contentful/react-apps-toolkit';
-import AppInstallationParameters from '@components/config/appInstallationParameters';
-import { DialogAppSDK } from '@contentful/app-sdk';
-import { gptModels } from '@configs/ai/gptModels';
 import { errorMessages } from '@components/app/dialog/common-generator/errorMessages';
+import { DEFAULT_TEXT_LIMIT } from '@configs/ai/gptModels';
 
 const styles = {
   panel: css({
@@ -41,9 +38,7 @@ const OriginalTextPanel = (props: Props) => {
     generate();
   };
 
-  const sdk = useSDK<DialogAppSDK<AppInstallationParameters>>();
-  const model = gptModels.find((model) => model.id === sdk.parameters.installation.model);
-  const textLimit = model?.textLimit;
+  const textLimit = DEFAULT_TEXT_LIMIT;
 
   const handleOriginalTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const type = isNewText

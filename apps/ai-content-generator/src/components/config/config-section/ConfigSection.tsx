@@ -21,7 +21,7 @@ const ConfigSection = (props: Props) => {
       <Box>
         <Form>
           <APIKey apiKey={apiKey} isInvalid={!isApiKeyValid} dispatch={dispatch} />
-          <Model model={model} dispatch={dispatch} />
+          <Model apiKey={apiKey} model={model} dispatch={dispatch} />
         </Form>
       </Box>
     </Flex>

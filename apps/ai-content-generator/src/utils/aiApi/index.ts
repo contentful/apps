@@ -2,6 +2,7 @@ import { ChatCompletionRequestMessage } from 'openai';
 import { streamToParsedText } from './aiHelpers';
 import { validateResponseStatus } from './handleAiApiErrors';
 import { defaultModelId } from '@configs/ai/gptModels';
+import { Model } from 'openai';
 
 /**
  * This class is used to interact with OpenAI's API.
@@ -96,7 +97,7 @@ class AI {
    * This function calls OpenAI's models endpoint in order to test whether the API Key is valid.
    * @returns Promise<Response>
    */
-  getModels = async (): Promise<Response> => {
+  getModels = async (): Promise<{ object: 'list'; data: Model[] }> => {
     const headers = {
       Authorization: `Bearer ${this.apiKey}`,
       'Content-Type': 'application/json',

@@ -1,10 +1,20 @@
-const gptModels = [
-  { id: 'gpt-3.5-turbo', name: 'GPT-3.5', textLimit: 12000 },
-  { id: 'gpt-3.5-turbo-16k', name: 'GPT-3.5 16k', textLimit: 12000 },
-  { id: 'gpt-4', name: 'GPT-4' },
-  { id: 'gpt-4-32k', name: 'GPT-4 32k' },
-];
+import AI from '@utils/aiApi';
+import { modelsBaseUrl } from './baseUrl';
 
-const defaultModelId = gptModels[0].id;
+async function getGptModels(apiKey: string) {
+  const ai = new AI(modelsBaseUrl, apiKey);
+  const models = await ai.getModels();
 
-export { gptModels, defaultModelId };
+  return models.data;
+}
+
+async function getDefaultModel(apiKey: string) {
+  const list = await getGptModels(apiKey);
+
+  return list[0];
+}
+
+const defaultModelId = 'gpt-3.5-turbo';
+const DEFAULT_TEXT_LIMIT = 12000;
+
+export { getGptModels, getDefaultModel, defaultModelId, DEFAULT_TEXT_LIMIT };
