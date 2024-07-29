@@ -14,11 +14,11 @@
     "start": "npm run build && serverless offline --httpPort 3000"
   },
   "dependencies": {
-    "aws-sdk": "^2.1659.0",
+    "aws-sdk": "^2.1664.0",
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.141",
+    "@types/aws-lambda": "^8.10.142",
     "@types/lodash": "^4.17.5",
     "@types/chai": "^4.3.16",
     "@types/mocha": "^10.0.7",
@@ -26,7 +26,7 @@
     "@types/node-fetch": "^2.6.4",
     "@types/request": "^2.48.12",
     "@types/sinon-chai": "^3.2.12",
-    "mocha": "^10.6.0",
+    "mocha": "^10.7.0",
     "nock": "^11.9.1",
     "rimraf": "^3.0.2",
     "serverless": "^3.31.0",
