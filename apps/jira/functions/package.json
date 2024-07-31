@@ -40,6 +40,6 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
     "tslint-no-unused-expression-chai": "^0.1.4",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.4"
   }
 }
