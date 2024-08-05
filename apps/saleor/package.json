@@ -11,7 +11,7 @@
     "@contentful/app-sdk": "4.13.0",
     "@contentful/ecommerce-app-base": "3.1.48",
     "@types/lodash": "4.17.7",
-    "core-js": "3.37.1",
+    "core-js": "3.38.0",
     "graphql": "15.9.0",
     "graphql-tag": "2.12.6",
     "lodash": "4.17.21",
