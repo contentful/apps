@@ -5,6 +5,7 @@ import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
 import get from 'lodash/get';
 import { ProductPreviews } from './ProductPreviews/ProductPreviews';
+import { SortableComponent } from './ProductPreviewsV2/SortableComponent';
 import { CategoryPreviews } from './CategoryPreviews/CategoryPreviews';
 import { fetchProductPreviews } from '../api/fetchProductPreviews';
 import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
@@ -147,7 +148,16 @@ export default class Field extends React.Component<Props, State> {
                 }
               />
             ) : (
-              <ProductPreviews
+              // <ProductPreviews
+              //   sdk={this.props.sdk}
+              //   disabled={editingDisabled}
+              //   skus={data}
+              //   onChange={this.updateStateValue}
+              //   fetchProductPreviews={(skus) =>
+              //     fetchProductPreviews(skus, this.props.sdk.parameters as SAPParameters)
+              //   }
+              // />
+              <SortableComponent
                 sdk={this.props.sdk}
                 disabled={editingDisabled}
                 skus={data}
