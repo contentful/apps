@@ -89,6 +89,7 @@ export default class Field extends React.Component<Props, State> {
   };
 
   updateStateValue = (skus: string[]) => {
+    console.log(skus);
     this.setState({ value: skus });
 
     if (skus.length > 0) {
