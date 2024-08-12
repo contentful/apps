@@ -122,7 +122,7 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
   const [imageHasErrored, setImageHasErrored] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-    id: product.id,
+    id: `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${product.sku}`,
   });
 
   const style = isSortable

@@ -66,6 +66,8 @@ export const SortableComponent: FC<Props> = ({
   const [productPreviews, setProductPreviews] = useState<Product[]>([]);
   const previousSkus = usePreviousSkus(skus);
 
+  console.log(skus);
+
   const getProductPreviews = useCallback(async () => {
     try {
       const shouldRefetch = skusAreEqual([...previousSkus], [...skus]);
@@ -105,13 +107,28 @@ export const SortableComponent: FC<Props> = ({
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
+      console.log('active', active);
+      console.log('over', over);
 
       if (active.id !== over?.id) {
-        const oldIndex = productPreviews.findIndex((product) => product.id === active.id);
-        const newIndex = productPreviews.findIndex((product) => product.id === over?.id);
+        const oldIndex = productPreviews.findIndex(
+          (product) =>
+            `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${product.sku}` ===
+            active.id
+        );
+        const newIndex = productPreviews.findIndex(
+          (product) =>
+            `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${product.sku}` ===
+            over?.id
+        );
         const sortedProductPreviews: Product[] = arrayMove(productPreviews, oldIndex, newIndex);
 
-        onChange(sortedProductPreviews.map((p) => p.sku));
+        onChange(
+          sortedProductPreviews.map(
+            (p) =>
+              `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${p.sku}`
+          )
+        );
         setProductPreviews(sortedProductPreviews);
       }
     },
@@ -129,11 +146,15 @@ export const SortableComponent: FC<Props> = ({
     })
   );
 
+  const mapping = (p: any) => {
+    const id = `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${p.sku}`;
+    // console.log(p, id);
+    return id;
+  };
+
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext
-        items={productPreviews.map((p) => p.id)}
-        strategy={verticalListSortingStrategy}>
+      <SortableContext items={productPreviews.map(mapping)} strategy={verticalListSortingStrategy}>
         <SortableList
           disabled={disabled}
           productPreviews={productPreviews}
