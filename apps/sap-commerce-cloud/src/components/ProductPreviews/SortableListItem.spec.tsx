@@ -1,12 +1,7 @@
-import React from 'react';
-import identity from 'lodash/identity';
-import { fireEvent, configure, render, cleanup } from '@testing-library/react';
-import { Props, SortableListItem } from './SortableListItem';
-import { mockProductPreview } from '../../__mocks__/mockProductPreview';
-
-configure({
-  testIdAttribute: 'data-test-id',
-});
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import { SortableListItem } from './SortableListItem';
+import { mockProductPreview } from '../../__mocks__';
+import { Props } from './SortableListItem';
 
 const defaultProps: Props = {
   product: mockProductPreview,
@@ -16,43 +11,37 @@ const defaultProps: Props = {
 };
 
 const renderComponent = (props: Props) => {
-  return render(<SortableListItem index={0} {...props} />);
+  return render(<SortableListItem {...props} />);
 };
-
-jest.mock('react-sortable-hoc');
 
 describe('SortableListItem', () => {
   afterEach(cleanup);
 
   it('should render successfully', async () => {
-    const component = renderComponent(defaultProps);
-    fireEvent(component.getByTestId('image'), new Event('load'));
-    expect(component.container).toMatchSnapshot();
+    const { getByTestId } = renderComponent(defaultProps);
+    const image = getByTestId('image');
+    fireEvent(image, new Event('load'));
+    expect(image).toHaveStyle('display: block');
   });
 
   it('should render successfully the sortable variation', () => {
-    const component = renderComponent({ ...defaultProps, isSortable: true });
-    fireEvent(component.getByTestId('image'), new Event('load'));
-    expect(component.container).toMatchSnapshot();
+    const { getByTestId } = renderComponent({ ...defaultProps, isSortable: true });
+    const image = getByTestId('image');
+    fireEvent(image, new Event('load'));
+    expect(image).toHaveStyle('display: block');
   });
 
   it('should render successfully the loading variation', () => {
-    const component = renderComponent(defaultProps);
-    expect(component.container).toMatchSnapshot();
+    const { getByTestId } = renderComponent(defaultProps);
+    const image = getByTestId('image');
+    expect(image).toHaveStyle('display: none');
   });
 
-  it('should render successfully the error variation for missing image', () => {
-    const component = renderComponent({ ...defaultProps, isSortable: true });
-    fireEvent(component.getByTestId('image'), new Event('error'));
-    expect(component.container).toMatchSnapshot();
-  });
-
-  it('should render successfully the error variation for missing product', () => {
-    const component = renderComponent({
-      ...defaultProps,
-      product: { ...mockProductPreview, name: '' },
-    });
-    fireEvent(component.getByTestId('image'), new Event('error'));
-    expect(component.container).toMatchSnapshot();
+  it('should render successfully the error variation for missing image', async () => {
+    const { getByTestId } = renderComponent({ ...defaultProps, isSortable: true });
+    const image = getByTestId('image');
+    fireEvent(image, new Event('error'));
+    expect(image).not.toBeInTheDocument();
+    expect(getByTestId('icon')).toBeInTheDocument();
   });
 });

@@ -1,5 +1,5 @@
 import get from 'lodash/get';
-import { Product, Category, Hash, ConfigurationParameters } from '../interfaces';
+import { Product, Hash, ConfigurationParameters } from '../interfaces';
 
 export const productTransformer =
   (
@@ -28,24 +28,6 @@ export const productTransformer =
         .replaceAll('</em>', ''),
       sku,
       productUrl: productUrl,
-    };
-  };
-
-export const categoryTransformer =
-  ({ projectKey, locale }: ConfigurationParameters) =>
-  (item: Hash): Category => {
-    const id = get(item, ['id'], '');
-    const externalLink =
-      (projectKey && id && `https://mc.commercetools.com/${projectKey}/categories/${id}/general`) ||
-      '';
-    return {
-      id,
-      name: get(item, ['name', locale === undefined ? '' : locale], ''),
-      slug: get(item, ['slug', locale === undefined ? '' : locale], ''),
-      isMissing: false,
-      sku: '',
-      image: '',
-      externalLink,
     };
   };
 
