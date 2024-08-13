@@ -19,6 +19,7 @@ import { fetchBaseSites } from '../api/fetchBaseSites';
 import { AppParameters, Error, Product, SAPParameters } from '../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
+import { formatProductUrl } from '../utils';
 
 interface DialogProps {
   sdk: DialogAppSDK<AppParameters>;
@@ -120,7 +121,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
     if (event.target.checked) {
       if (!existingProducts.includes(skuId)) {
         const apiEndpoint = get(this.props.sdk.parameters.invocation, 'apiEndpoint', '');
-        existingProducts.push(`${apiEndpoint}/occ/v2/${this.state.baseSite}/products/${skuId}`);
+        existingProducts.push(formatProductUrl(apiEndpoint, this.state.baseSite, skuId));
         this.setState({
           selectedProducts: existingProducts,
         });

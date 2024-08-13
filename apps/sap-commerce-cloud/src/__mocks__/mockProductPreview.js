@@ -4,4 +4,5 @@ export const mockProductPreview = {
   id: '123',
   name: 'Mock Category',
   isMissing: false,
+  productUrl: '/product/abc1234',
 };

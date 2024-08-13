@@ -89,7 +89,6 @@ export default class Field extends React.Component<Props, State> {
   };
 
   updateStateValue = (skus: string[]) => {
-    console.log(skus);
     this.setState({ value: skus });
 
     if (skus.length > 0) {
@@ -139,16 +138,17 @@ export default class Field extends React.Component<Props, State> {
         {hasItems && (
           <div className={styles.sortable}>
             {isPickerTypeSetToCategory ? (
-              <CategoryPreviews
-                sdk={this.props.sdk}
-                disabled={editingDisabled}
-                categories={data}
-                onChange={this.updateStateValue}
-                fetchCategoryPreviews={(categories) =>
-                  fetchCategoryPreviews(categories, config.installation)
-                }
-              />
+              <div></div>
             ) : (
+              // <CategoryPreviews
+              //   sdk={this.props.sdk}
+              //   disabled={editingDisabled}
+              //   categories={data}
+              //   onChange={this.updateStateValue}
+              //   fetchCategoryPreviews={(categories) =>
+              //     fetchCategoryPreviews(categories, config.installation)
+              //   }
+              // />
               // <ProductPreviews
               //   sdk={this.props.sdk}
               //   disabled={editingDisabled}

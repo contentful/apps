@@ -3,6 +3,7 @@ import { DialogExtensionSDK } from '@contentful/app-sdk';
 import { CheckBoxFn, Product } from '../../interfaces';
 import { Button, Checkbox, TableCell, TableRow } from '@contentful/forma-36-react-components';
 import get from 'lodash/get';
+import { formatProductUrl } from '../../utils';
 
 interface Props {
   sdk: DialogExtensionSDK;
@@ -15,7 +16,7 @@ interface Props {
 export class ProductList extends React.Component<Props> {
   selectButtonClickEvent(sku: string) {
     const apiEndpoint = get(this.props.sdk.parameters.invocation, 'apiEndpoint', '');
-    this.props.sdk.close([`${apiEndpoint}/occ/v2/${this.props.baseSite}/products/${sku}`]);
+    this.props.sdk.close([formatProductUrl(apiEndpoint, this.props.baseSite, sku)]);
   }
 
   render() {

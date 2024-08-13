@@ -1,8 +1,6 @@
 import { FC, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-// import { LegacyProductCard, ProductCard } from '../ProductCard';
-// import { useIntegration } from './IntegrationContext';
 import { Product } from '../../interfaces';
 import { css } from 'emotion';
 import {
@@ -117,12 +115,11 @@ const styles = {
 };
 
 export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSortable }: Props) => {
-  // const { productCardVersion, name } = useIntegration();
   const [imageHasLoaded, setImageLoaded] = useState(false);
   const [imageHasErrored, setImageHasErrored] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-    id: `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${product.sku}`,
+    id: product.productUrl,
   });
 
   const style = isSortable
