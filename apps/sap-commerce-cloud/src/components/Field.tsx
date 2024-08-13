@@ -27,7 +27,6 @@ const styles = {
   }),
   logo: css({
     display: 'block',
-    // width: "30px",
     height: '30px',
     marginRight: tokens.spacingM,
   }),

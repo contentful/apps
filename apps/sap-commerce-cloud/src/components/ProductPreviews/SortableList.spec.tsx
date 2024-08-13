@@ -1,4 +1,4 @@
-import { render, cleanup, screen } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 import { Props, SortableList } from './SortableList';
 import { mockProductPreview } from '../../__mocks__';
 
