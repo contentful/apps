@@ -17,17 +17,15 @@ import {
 import { FieldAppSDK } from '@contentful/app-sdk';
 import { mapSort } from '../../utils';
 import { SortableList } from './SortableList';
-import { Product, ProductPreviewsFn, PreviewsFn } from '../../interfaces';
+import { Product, PreviewsFn } from '../../interfaces';
 import { isEqual } from 'lodash';
 
 interface Props {
   sdk: FieldAppSDK;
   disabled: boolean;
   onChange: (skus: string[]) => void;
-  // config: Config;
   skus: string[];
   fetchProductPreviews: PreviewsFn;
-  // skuType?: string;
 }
 
 /**
@@ -58,15 +56,11 @@ export const SortableComponent: FC<Props> = ({
   sdk,
   disabled,
   onChange,
-  // config,
   skus,
   fetchProductPreviews,
-  // skuType,
 }) => {
   const [productPreviews, setProductPreviews] = useState<Product[]>([]);
   const previousSkus = usePreviousSkus(skus);
-
-  console.log(skus);
 
   const getProductPreviews = useCallback(async () => {
     try {
@@ -74,7 +68,7 @@ export const SortableComponent: FC<Props> = ({
 
       if (shouldRefetch) {
         const productPreviewsUnsorted = await fetchProductPreviews(skus);
-        const sortedProductPreviews = mapSort(productPreviewsUnsorted, skus, 'sku');
+        const sortedProductPreviews = mapSort(productPreviewsUnsorted, skus, 'productUrl');
         setProductPreviews(sortedProductPreviews);
       }
     } catch (error) {
@@ -111,24 +105,11 @@ export const SortableComponent: FC<Props> = ({
       console.log('over', over);
 
       if (active.id !== over?.id) {
-        const oldIndex = productPreviews.findIndex(
-          (product) =>
-            `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${product.sku}` ===
-            active.id
-        );
-        const newIndex = productPreviews.findIndex(
-          (product) =>
-            `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${product.sku}` ===
-            over?.id
-        );
+        const oldIndex = productPreviews.findIndex((product) => product.productUrl === active.id);
+        const newIndex = productPreviews.findIndex((product) => product.productUrl === over?.id);
         const sortedProductPreviews: Product[] = arrayMove(productPreviews, oldIndex, newIndex);
 
-        onChange(
-          sortedProductPreviews.map(
-            (p) =>
-              `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${p.sku}`
-          )
-        );
+        onChange(sortedProductPreviews.map((p) => p.productUrl));
         setProductPreviews(sortedProductPreviews);
       }
     },
@@ -146,21 +127,12 @@ export const SortableComponent: FC<Props> = ({
     })
   );
 
-  const mapping = (p: any) => {
-    const id = `https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/${p.sku}`;
-    // console.log(p, id);
-    return id;
-  };
-
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={productPreviews.map(mapping)} strategy={verticalListSortingStrategy}>
-        <SortableList
-          disabled={disabled}
-          productPreviews={productPreviews}
-          deleteFn={deleteItem}
-          // skuType={skuType}
-        />
+      <SortableContext
+        items={productPreviews.map((p) => p.productUrl)}
+        strategy={verticalListSortingStrategy}>
+        <SortableList disabled={disabled} productPreviews={productPreviews} deleteFn={deleteItem} />
       </SortableContext>
     </DndContext>
   );

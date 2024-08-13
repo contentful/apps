@@ -68,6 +68,7 @@ export interface Product {
   name: string;
   externalLink?: string;
   isMissing?: boolean;
+  productUrl: string;
 }
 
 export interface Error {

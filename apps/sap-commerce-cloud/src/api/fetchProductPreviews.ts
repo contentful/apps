@@ -12,9 +12,13 @@ export async function fetchProductPreviews(
 
   let totalResponse: any[] = [];
   let skuIds: string[] = [];
+  let skuIdsToSkusMap: { [key: string]: string } = {};
 
   for (const sku of skus) {
-    skuIds.push(sku.split('/products/').pop() as string);
+    const skuId = sku.split('/products/').pop() as string;
+    skuIds.push(skuId);
+    skuIdsToSkusMap[skuId] = sku;
+
     const url = `${sku}?fields=code,name,summary,price(formattedValue,DEFAULT),images(galleryIndex,FULL),averageRating,stock(DEFAULT),description,availableForPickup,url,numberOfReviews,manufacturer,categories(FULL),priceRange,multidimensional,configuratorType,configurable,tags`;
     const response = await fetch(url);
     if (response.ok) {
@@ -23,7 +27,7 @@ export async function fetchProductPreviews(
     }
   }
 
-  const products = totalResponse.map(productTransformer(parameters.installation));
+  const products = totalResponse.map(productTransformer(parameters.installation, skuIdsToSkusMap));
   const foundSKUs = products.map((product: { sku: any }) => product.sku);
   const missingProducts = difference(skuIds, foundSKUs).map((sku) => ({
     sku: sku.split('/products/').pop(),
@@ -31,6 +35,7 @@ export async function fetchProductPreviews(
     id: '',
     name: '',
     isMissing: true,
+    productUrl: skuIdsToSkusMap[sku],
   }));
   return [...products, ...missingProducts];
 }
