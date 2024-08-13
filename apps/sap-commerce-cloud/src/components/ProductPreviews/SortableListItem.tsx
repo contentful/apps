@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { SortableElement, SortableHandle } from 'react-sortable-hoc';
+import { FC, useState } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Product } from '../../interfaces';
 import { css } from 'emotion';
 import {
   Card,
@@ -14,7 +16,6 @@ import {
   Typography,
 } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
-import { Product } from '../../interfaces';
 
 export interface Props {
   product: Product;
@@ -113,19 +114,35 @@ const styles = {
   }),
 };
 
-const CardDragHandle = SortableHandle(() => (
-  <FormaCardDragHandle className={styles.dragHandle}>Reorder product</FormaCardDragHandle>
-));
+export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSortable }: Props) => {
+  const [imageHasLoaded, setImageLoaded] = useState(false);
+  const [imageHasErrored, setImageHasErrored] = useState(false);
 
-export const SortableListItem = SortableElement<Props>(
-  ({ product, disabled, isSortable, onDelete }: Props) => {
-    const [imageHasLoaded, setImageLoaded] = useState(false);
-    const [imageHasErrored, setImageHasErrored] = useState(false);
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: product.productUrl,
+  });
 
-    return (
-      <Card className={styles.card}>
+  const style = isSortable
+    ? {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        marginTop: tokens.spacingS,
+      }
+    : { marginTop: tokens.spacingS };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      key={product.id}
+      {...attributes}
+      {...listeners}
+      data-testid={`sortable-item-${product.id}`}>
+      <Card className={styles.card} data-testid="sortable-list-item">
         <>
-          {isSortable && <CardDragHandle />}
+          {isSortable && (
+            <FormaCardDragHandle className={styles.dragHandle}>Reorder product</FormaCardDragHandle>
+          )}
           {!imageHasLoaded && !imageHasErrored && (
             <SkeletonContainer className={styles.skeletonImage}>
               <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
@@ -133,7 +150,7 @@ export const SortableListItem = SortableElement<Props>(
           )}
           {imageHasErrored && (
             <div className={styles.errorImage}>
-              <Icon icon={product.isMissing ? 'ErrorCircle' : 'Asset'} />
+              <Icon icon={product.isMissing ? 'ErrorCircle' : 'Asset'} data-testid="icon" />
             </div>
           )}
           {!imageHasErrored && (
@@ -144,7 +161,7 @@ export const SortableListItem = SortableElement<Props>(
                 onError={() => setImageHasErrored(true)}
                 src={product.image}
                 alt={product.name}
-                data-test-id="image"
+                data-testid="image"
               />
             </div>
           )}
@@ -176,6 +193,6 @@ export const SortableListItem = SortableElement<Props>(
           </div>
         )}
       </Card>
-    );
-  }
-);
+    </div>
+  );
+};

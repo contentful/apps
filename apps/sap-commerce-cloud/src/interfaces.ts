@@ -68,6 +68,7 @@ export interface Product {
   name: string;
   externalLink?: string;
   isMissing?: boolean;
+  productUrl: string;
 }
 
 export interface Error {
@@ -274,16 +275,6 @@ export interface Integration {
 
 export type Hash = Record<string, any>;
 
-export interface Category {
-  slug: string;
-  id: string;
-  name: string;
-  externalLink?: string;
-  isMissing?: boolean;
-  sku: string;
-  image: string;
-}
-
 export interface ConfigurationParameters {
   projectKey?: string;
   clientId?: string;
@@ -296,8 +287,6 @@ export interface ConfigurationParameters {
 }
 
 export type PreviewsFn = (skus: string[]) => Promise<Product[]>;
-
-export type PickerMode = 'product' | 'category';
 
 export type CheckBoxFn = (event: any) => void;
 
