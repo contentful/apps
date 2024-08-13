@@ -137,8 +137,8 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
       key={product.id}
       {...attributes}
       {...listeners}
-      data-test-id={`sortable-item-${product.id}`}>
-      <Card className={styles.card}>
+      data-testid={`sortable-item-${product.id}`}>
+      <Card className={styles.card} data-testid="sortable-list-item">
         <>
           {isSortable && (
             <FormaCardDragHandle className={styles.dragHandle}>Reorder product</FormaCardDragHandle>
@@ -150,7 +150,7 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
           )}
           {imageHasErrored && (
             <div className={styles.errorImage}>
-              <Icon icon={product.isMissing ? 'ErrorCircle' : 'Asset'} />
+              <Icon icon={product.isMissing ? 'ErrorCircle' : 'Asset'} data-testid="icon" />
             </div>
           )}
           {!imageHasErrored && (
@@ -161,7 +161,7 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
                 onError={() => setImageHasErrored(true)}
                 src={product.image}
                 alt={product.name}
-                data-test-id="image"
+                data-testid="image"
               />
             </div>
           )}

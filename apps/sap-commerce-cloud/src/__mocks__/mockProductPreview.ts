@@ -1,4 +1,6 @@
-export const mockProductPreview = {
+import { Product } from '../interfaces';
+
+export const mockProductPreview: Product = {
   sku: 'abc1234',
   image: '',
   id: '123',
