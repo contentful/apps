@@ -3,7 +3,7 @@ import EntryEditor from './EntryEditor';
 import { render } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../test/mocks';
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
   useCMA: () => mockCma,
 }));

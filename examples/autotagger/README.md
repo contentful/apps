@@ -1,4 +1,3 @@
-```markdown
 ## AI Autotagger Example Function
 
 This project includes an example of using the Contentful Management API (CMA) within an App Event Handler Function to automatically tag entries based on their content using OpenAI's GPT-4 model.
@@ -28,6 +27,10 @@ Defines the functions, their paths, and configurations used in the app:
 
 - **autotagger**: Automatically tags entries using AI.
 - **filter**: Ensures only selected content types are autotagged.
+
+## Utilizing App Event handler Functions
+
+This app utilizes [app events](https://www.contentful.com/developers/docs/extensibility/app-framework/app-events/) to subscribe to the `Entry.auto_save` event. Once you have built and uploaded your app to Contentful, link the autotagger and filter functions to your app event subscription and subscribe to the `Entry.auto_save` event using the [CMA](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/app-event-subscriptions/app-event-subscription/update-or-subscribe-to-events/console/js-plain) or the [Events](https://app.contentful.com/deeplink?link=app-definition&tab=events) tab on the App details page.
 
 ## Libraries to use
 
@@ -61,13 +64,13 @@ Execute create-contentful-app with npm, npx, or yarn to bootstrap the example:
 
 ```bash
 # npx
-npx create-contentful-app --typescript
+npx create-contentful-app --example autotagger
 
 # npm
-npm init contentful-app -- --typescript
+npm init contentful-app -- --example autotagger
 
 # Yarn
-yarn create contentful-app --typescript
+yarn create contentful-app --example autotagger
 ```
 
 ## Available Scripts
@@ -105,4 +108,3 @@ For this command to work, the following environment variables must be set:
 - `CONTENTFUL_ORG_ID` - The ID of your organization
 - `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
 - `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
-```
