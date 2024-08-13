@@ -1,4 +1,3 @@
-import { PickerMode } from '../interfaces';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
@@ -31,7 +30,7 @@ export interface EditorInterface {
 }
 
 export type CompatibleFields = Record<string, Field[]>;
-export type FieldsConfig = Record<string, Record<string, PickerMode | undefined> | undefined>;
+export type FieldsConfig = Record<string, Record<string, string | undefined> | undefined>;
 
 function isCompatibleField(field: Field): boolean {
   return field.type === 'Symbol';

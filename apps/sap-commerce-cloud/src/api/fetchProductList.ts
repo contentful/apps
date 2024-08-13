@@ -27,7 +27,9 @@ export async function fetchProductList(
   );
   const responseJson = await response.json();
   if (response.ok) {
-    const products = responseJson['products'].map(productTransformer(parameters.installation));
+    const products = responseJson['products'].map(
+      productTransformer(parameters.installation, {}, baseSite)
+    );
     updateTotalPages(responseJson['pagination']['totalPages']);
     if (!products.length) {
       return {
