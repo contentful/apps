@@ -1,0 +1,22 @@
+{
+  "functions": [
+    {
+      "id": "autotagger",
+      "name": "Autotagger ✨",
+      "description": "Automatically tag your entries using AI.",
+      "path": "functions/autotagger.js",
+      "entryFile": "functions/autotagger.ts",
+      "allowNetworks": ["api.flinkly.com", "api.openai.com"],
+      "accepts": ["appevent.handler"]
+    },
+    {
+      "id": "filter",
+      "name": "Selected Content Types Filter 🛑",
+      "description": "Ensure only selected content types are autotagged.",
+      "path": "functions/selected-content-types-filter.js",
+      "entryFile": "functions/selected-content-types-filter.ts",
+      "allowNetworks": [],
+      "accepts": ["appevent.filter"]
+    }
+  ]
+}
