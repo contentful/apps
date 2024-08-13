@@ -4,10 +4,8 @@ import { FieldAppSDK } from '@contentful/app-sdk';
 import { css } from 'emotion';
 import tokens from '@contentful/forma-36-tokens';
 import get from 'lodash/get';
-import { ProductPreviews } from './ProductPreviews/ProductPreviews';
-import { CategoryPreviews } from './CategoryPreviews/CategoryPreviews';
+import { SortableComponent } from './ProductPreviews/SortableComponent';
 import { fetchProductPreviews } from '../api/fetchProductPreviews';
-import { fetchCategoryPreviews } from '../api/fetchCategoryPreviews';
 import logo from '../logo.png';
 import { AppParameters, SAPParameters } from '../interfaces';
 
@@ -29,7 +27,6 @@ const styles = {
   }),
   logo: css({
     display: 'block',
-    // width: "30px",
     height: '30px',
     marginRight: tokens.spacingM,
   }),
@@ -42,16 +39,9 @@ function fieldValueToState(value?: string | string[]): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-function makeCTAText(fieldType: string, pickerMode: 'category' | 'product') {
+function makeCTAText(fieldType: string) {
   const isArray = fieldType === 'Array';
-  const beingSelected =
-    pickerMode === 'category'
-      ? isArray
-        ? 'categories'
-        : 'a category'
-      : isArray
-      ? 'products'
-      : 'a product';
+  const beingSelected = isArray ? 'products' : 'a product';
   return `Select ${beingSelected}`;
 }
 
@@ -75,18 +65,6 @@ export default class Field extends React.Component<Props, State> {
     });
   }
 
-  getPickerMode = () => {
-    const { sdk } = this.props;
-    const contentTypeId = sdk.contentType.sys.id;
-    const fieldId = sdk.field.id;
-
-    return get(
-      sdk,
-      ['parameters', 'installation', 'fieldsConfig', contentTypeId, fieldId],
-      'product'
-    );
-  };
-
   updateStateValue = (skus: string[]) => {
     this.setState({ value: skus });
 
@@ -104,7 +82,7 @@ export default class Field extends React.Component<Props, State> {
     const skus = await sdk.dialogs.openCurrentApp({
       allowHeightOverflow: true,
       position: 'center',
-      title: makeCTAText(sdk.field.type, this.getPickerMode()),
+      title: makeCTAText(sdk.field.type),
       shouldCloseOnOverlayClick: true,
       shouldCloseOnEscapePress: true,
       parameters: {
@@ -112,7 +90,6 @@ export default class Field extends React.Component<Props, State> {
         fieldValue: fieldValueToState(sdk.field.getValue()),
         fieldType: sdk.field.type,
         fieldId: sdk.field.id,
-        pickerMode: this.getPickerMode(),
       },
       width: 1400,
       minHeight: 600,
@@ -127,36 +104,22 @@ export default class Field extends React.Component<Props, State> {
   render = () => {
     const { value: data, editingDisabled } = this.state;
 
-    const isPickerTypeSetToCategory = this.getPickerMode() === 'category';
     const hasItems = data.length > 0;
-    const config = this.props.sdk.parameters;
     const fieldType = get(this.props, ['sdk', 'field', 'type'], '');
 
     return (
       <>
         {hasItems && (
           <div className={styles.sortable}>
-            {isPickerTypeSetToCategory ? (
-              <CategoryPreviews
-                sdk={this.props.sdk}
-                disabled={editingDisabled}
-                categories={data}
-                onChange={this.updateStateValue}
-                fetchCategoryPreviews={(categories) =>
-                  fetchCategoryPreviews(categories, config.installation)
-                }
-              />
-            ) : (
-              <ProductPreviews
-                sdk={this.props.sdk}
-                disabled={editingDisabled}
-                skus={data}
-                onChange={this.updateStateValue}
-                fetchProductPreviews={(skus) =>
-                  fetchProductPreviews(skus, this.props.sdk.parameters as SAPParameters)
-                }
-              />
-            )}
+            <SortableComponent
+              sdk={this.props.sdk}
+              disabled={editingDisabled}
+              skus={data}
+              onChange={this.updateStateValue}
+              fetchProductPreviews={(skus) =>
+                fetchProductPreviews(skus, this.props.sdk.parameters as SAPParameters)
+              }
+            />
           </div>
         )}
         <div className={styles.container}>
@@ -167,7 +130,7 @@ export default class Field extends React.Component<Props, State> {
             size="small"
             onClick={this.onDialogOpen}
             disabled={editingDisabled}>
-            {makeCTAText(fieldType, this.getPickerMode())}
+            {makeCTAText(fieldType)}
           </Button>
         </div>
       </>
