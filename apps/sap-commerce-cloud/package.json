@@ -27,9 +27,9 @@
     "deploy": "npm run deploy:sap && npm run deploy:sap-with-air",
     "deploy:sap": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id GdOFzqcDrEbmn2teDQE2i --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:sap-with-air": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1PoDbrB3qO6oaN6uANGhK2 --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test:TODO": "npm run deploy:test:sap && npm run deploy:test:sap-with-air",
-    "deploy:test:sap": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test:sap-with-air": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${TEST_ORG_ID} --definition-id ${TEST_APP_ID} --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test": "npm run deploy:test:sap && npm run deploy:test:sap-with-air",
+    "deploy:test:sap": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7xd4hIywW2diyQTdedfE8U --token ${CONTENTFUL_CMA_TOKEN}",
+    "deploy:test:sap-with-air": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6iZK9k1JbcwNdyK7Dg3aEm --token ${CONTENTFUL_CMA_TOKEN}",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
