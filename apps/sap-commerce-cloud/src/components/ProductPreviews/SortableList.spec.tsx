@@ -1,6 +1,6 @@
 import { render, cleanup } from '@testing-library/react';
 import { Props, SortableList } from './SortableList';
-import { mockProductPreview } from '../../__mocks__/mockProductPreview';
+import { mockProductPreview } from '../../__mocks__';
 
 const defaultProps: Props = {
   disabled: false,
@@ -16,7 +16,8 @@ describe('SortableList', () => {
   afterEach(cleanup);
 
   it('should render successfully', async () => {
-    const component = renderComponent(defaultProps);
-    expect(component.container).toMatchSnapshot();
+    const { queryAllByTestId } = renderComponent(defaultProps);
+
+    expect(queryAllByTestId(`sortable-list-item`)).toHaveLength(1);
   });
 });
