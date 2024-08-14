@@ -1,13 +1,12 @@
 import React from 'react';
 import { Button } from '@contentful/forma-36-react-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { css } from 'emotion';
-import tokens from '@contentful/forma-36-tokens';
 import get from 'lodash/get';
-import { SortableComponent } from './ProductPreviews/SortableComponent';
-import { fetchProductPreviews } from '../api/fetchProductPreviews';
-import logo from '../logo.png';
-import { AppParameters, SAPParameters } from '../interfaces';
+import { SortableComponent } from '../ProductPreviews/SortableComponent';
+import { fetchProductPreviews } from '../../api/fetchProductPreviews';
+import logo from '../../logo.png';
+import { AppParameters, SAPParameters } from '../../interfaces';
+import { styles } from './Field.styles';
 
 interface Props {
   sdk: FieldAppSDK<AppParameters>;
@@ -17,20 +16,6 @@ interface State {
   value: string[];
   editingDisabled: boolean;
 }
-
-const styles = {
-  sortable: css({
-    marginBottom: tokens.spacingM,
-  }),
-  container: css({
-    display: 'flex',
-  }),
-  logo: css({
-    display: 'block',
-    height: '30px',
-    marginRight: tokens.spacingM,
-  }),
-};
 
 function fieldValueToState(value?: string | string[]): string[] {
   if (!value) {
