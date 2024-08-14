@@ -13,13 +13,15 @@ import {
   TextInput,
 } from '@contentful/forma-36-react-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { ProductList } from './Dialog/ProductList';
-import { fetchProductList } from '../api/fetchProductList';
-import { fetchBaseSites } from '../api/fetchBaseSites';
-import { AppParameters, Error, Product, SAPParameters } from '../interfaces';
+import { ProductList } from './ProductList';
+import { fetchProductList } from '../../api/fetchProductList';
+import { fetchBaseSites } from '../../api/fetchBaseSites';
+import { AppParameters, Error, Product, SAPParameters } from '../../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
-import { formatProductUrl } from '../utils';
+import { formatProductUrl } from '../../utils';
+import { styles } from './Dialog.styles';
+import { cx } from '@emotion/css';
 
 interface DialogProps {
   sdk: DialogAppSDK<AppParameters>;
@@ -169,13 +171,12 @@ export default class Dialog extends React.Component<DialogProps, State> {
           columns="1fr 1fr 1fr 1fr 1fr"
           rowGap="spacingM"
           columnGap="spacingM"
-          style={{ marginTop: '15px', paddingLeft: '20px' }}>
+          className={styles.grid}>
           <GridItem>
             <TextInput
               type="text"
               placeholder={'Search Term...'}
-              className="f36-margin-bottom--m"
-              style={{ width: '250px' }}
+              className={cx(styles.textInput, 'f36-margin-bottom--m')}
               value={this.state.query}
               onChange={this.updateSearchTerm}
               onKeyPress={(event) => {
@@ -216,7 +217,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
           )}
         </Grid>
 
-        <Table style={{ padding: '20px' }}>
+        <Table className={styles.table}>
           {this.state.errors?.length ? (
             <TableBody>
               <TableRow>
@@ -235,7 +236,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
             <>
               <TableHead>
                 <TableRow>
-                  <TableCell style={{ width: '10%' }}>Select</TableCell>
+                  <TableCell className={styles.tableCell}>Select</TableCell>
                   <TableCell>Code</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Image</TableCell>
@@ -255,7 +256,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
             <></>
           )}
         </Table>
-        <div style={{ margin: '20px' }}>
+        <div className={styles.pagination}>
           {this.state.page > 0 ? (
             <Button buttonType="primary" onClick={this.prevPageButtonEvent}>
               Previous
@@ -266,7 +267,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
           {this.state.page + 1 < this.state.totalPages ? (
             <Button
               buttonType="primary"
-              style={{ marginLeft: '20px' }}
+              className={styles.nextButton(this.state.page)}
               onClick={this.nextPageButtonEvent}>
               Next
             </Button>
@@ -279,7 +280,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
             buttonType="primary"
             icon="Done"
             onClick={this.selectMultipleProductsClickEvent}
-            style={{ margin: '20px' }}>
+            className={styles.selectProductsButton}>
             Select Products
           </Button>
         ) : (
