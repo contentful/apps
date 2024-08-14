@@ -2,15 +2,16 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ParameterDefinition } from '../interfaces';
 import AppConfig from './AppConfig';
+import { vi } from 'vitest';
 
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
     const mockSdk: any = {
       app: {
-        onConfigure: jest.fn(),
-        getParameters: jest.fn().mockReturnValueOnce({}),
-        setReady: jest.fn(),
-        getCurrentState: jest.fn(),
+        onConfigure: vi.fn(),
+        getParameters: vi.fn().mockReturnValueOnce({}),
+        setReady: vi.fn(),
+        getCurrentState: vi.fn(),
       },
       hostnames: {
         webapp: 'app.contentful.com',
@@ -20,7 +21,7 @@ describe('Config Screen component', () => {
         environment: 'master',
       },
       space: {
-        getContentTypes: jest.fn().mockReturnValue({
+        getContentTypes: vi.fn().mockReturnValue({
           items: [
             {
               sys: { id: 'some-id' },
@@ -35,7 +36,7 @@ describe('Config Screen component', () => {
             },
           ],
         }),
-        getEditorInterfaces: jest.fn().mockReturnValue({
+        getEditorInterfaces: vi.fn().mockReturnValue({
           items: [
             {
               sys: { contentType: { sys: { id: 'some-id' } } },
