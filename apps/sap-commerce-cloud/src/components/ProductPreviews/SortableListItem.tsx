@@ -3,19 +3,18 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Product } from '../../interfaces';
 import {
+  AssetIcon,
+  Badge,
   Card,
-  CardDragHandle as FormaCardDragHandle,
   Heading,
-  Icon,
-  IconButton,
   SkeletonContainer,
   SkeletonImage,
   Subheading,
-  Tag,
-  Typography,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+} from '@contentful/f36-components';
+import { IconButton } from '@contentful/f36-button';
+import tokens from '@contentful/f36-tokens';
 import { styles } from './SortableListItem.styles';
+import { CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 
 export interface Props {
   product: Product;
@@ -53,7 +52,9 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
       <Card className={styles.card} data-testid="sortable-list-item">
         <>
           {isSortable && (
-            <FormaCardDragHandle className={styles.dragHandle}>Reorder product</FormaCardDragHandle>
+            <Card withDragHandle={true} className={styles.dragHandle}>
+              Reorder product
+            </Card>
           )}
           {!imageHasLoaded && !imageHasErrored && (
             <SkeletonContainer className={styles.skeletonImage}>
@@ -62,7 +63,11 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
           )}
           {imageHasErrored && (
             <div className={styles.errorImage}>
-              <Icon icon={product.isMissing ? 'ErrorCircle' : 'Asset'} data-testid="icon" />
+              {product.isMissing ? (
+                <ErrorCircleIcon data-testid="icon" />
+              ) : (
+                <AssetIcon data-testid="icon" />
+              )}
             </div>
           )}
           {!imageHasErrored && (
@@ -78,28 +83,25 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
             </div>
           )}
           <section className={styles.description}>
-            <Typography>
-              <Heading className={styles.heading(product)}>
-                {product.isMissing || !product.name ? product.sku : product.name}
-              </Heading>
-              {product.isMissing && <Tag tagType="negative">Product missing</Tag>}
-              {!product.isMissing && product.name && (
-                <Subheading className={styles.subheading}>{product.sku}</Subheading>
-              )}
-            </Typography>
+            <Heading className={styles.heading(product)}>
+              {product.isMissing || !product.name ? product.sku : product.name}
+            </Heading>
+            {product.isMissing && <Badge variant="negative">Product missing</Badge>}
+            {!product.isMissing && product.name && (
+              <Subheading className={styles.subheading}>{product.sku}</Subheading>
+            )}
           </section>
         </>
         {!disabled && (
           <div className={styles.actions}>
             {product.externalLink && (
               <a target="_blank" rel="noopener noreferrer" href={product.externalLink}>
-                <Icon icon="ExternalLink" color="muted" />
+                <ExternalLinkIcon variant="muted" />
               </a>
             )}
             <IconButton
-              label="Delete"
-              iconProps={{ icon: 'Close' }}
-              buttonType="muted"
+              icon={<CloseIcon variant="muted" />}
+              aria-label="Delete"
               onClick={onDelete}
             />
           </div>
