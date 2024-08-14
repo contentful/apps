@@ -111,6 +111,7 @@ export default class Field extends React.Component<Props, State> {
         <div className={styles.container}>
           <img src={logo} alt="Logo" className={styles.logo} />
           <IconButton
+            variant="secondary"
             icon={<ShoppingCartIcon size="small" variant="muted" />}
             onClick={this.onDialogOpen}
             aria-label={makeCTAText(fieldType)}

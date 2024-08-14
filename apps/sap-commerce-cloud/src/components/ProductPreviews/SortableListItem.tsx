@@ -6,6 +6,7 @@ import {
   AssetIcon,
   Badge,
   Card,
+  Flex,
   Heading,
   SkeletonContainer,
   SkeletonImage,
@@ -49,13 +50,8 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
       {...attributes}
       {...listeners}
       data-testid={`sortable-item-${product.id}`}>
-      <Card className={styles.card} data-testid="sortable-list-item">
-        <>
-          {isSortable && (
-            <Card withDragHandle={true} className={styles.dragHandle}>
-              Reorder product
-            </Card>
-          )}
+      <Card withDragHandle={isSortable} className={styles.card} data-testid="sortable-list-item">
+        <Flex>
           {!imageHasLoaded && !imageHasErrored && (
             <SkeletonContainer className={styles.skeletonImage}>
               <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
@@ -91,21 +87,21 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
               <Subheading className={styles.subheading}>{product.sku}</Subheading>
             )}
           </section>
-        </>
-        {!disabled && (
-          <div className={styles.actions}>
-            {product.externalLink && (
-              <a target="_blank" rel="noopener noreferrer" href={product.externalLink}>
-                <ExternalLinkIcon variant="muted" />
-              </a>
-            )}
-            <IconButton
-              icon={<CloseIcon variant="muted" />}
-              aria-label="Delete"
-              onClick={onDelete}
-            />
-          </div>
-        )}
+          {!disabled && (
+            <div className={styles.actions}>
+              {product.externalLink && (
+                <a target="_blank" rel="noopener noreferrer" href={product.externalLink}>
+                  <ExternalLinkIcon variant="muted" />
+                </a>
+              )}
+              <IconButton
+                icon={<CloseIcon variant="muted" />}
+                aria-label="Delete"
+                onClick={onDelete}
+              />
+            </div>
+          )}
+        </Flex>
       </Card>
     </div>
   );

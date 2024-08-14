@@ -199,7 +199,8 @@ export default class Dialog extends React.Component<DialogProps, State> {
           </GridItem>
           <GridItem>
             <IconButton
-              icon={<SearchIcon variant="primary" />}
+              variant="primary"
+              icon={<SearchIcon />}
               aria-label="search"
               onClick={() => this.searchButtonClickEvent()}>
               Search
@@ -208,7 +209,8 @@ export default class Dialog extends React.Component<DialogProps, State> {
           {isFieldTypeArray ? (
             <GridItem>
               <IconButton
-                icon={<DoneIcon variant="primary" />}
+                variant="primary"
+                icon={<DoneIcon />}
                 onClick={this.selectMultipleProductsClickEvent}
                 aria-label="Select Products">
                 Select Products
@@ -279,7 +281,8 @@ export default class Dialog extends React.Component<DialogProps, State> {
         </div>
         {isFieldTypeArray ? (
           <IconButton
-            icon={<DoneIcon variant="primary" />}
+            variant="primary"
+            icon={<DoneIcon />}
             onClick={this.selectMultipleProductsClickEvent}
             aria-label="Select Products"
             className={styles.selectProductsButton}>
