@@ -2,11 +2,12 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import { SortableListItem } from './SortableListItem';
 import { mockProductPreview } from '../../__mocks__';
 import { Props } from './SortableListItem';
+import { vi } from 'vitest';
 
 const defaultProps: Props = {
   product: mockProductPreview,
   disabled: false,
-  onDelete: jest.fn(),
+  onDelete: vi.fn(),
   isSortable: false,
 };
 
