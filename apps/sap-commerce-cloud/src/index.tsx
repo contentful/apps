@@ -7,8 +7,8 @@ import '@contentful/forma-36-tokens/dist/css/index.css';
 import './index.css';
 import AppConfig from './AppConfig/AppConfig';
 
-import Field from './components/Field';
-import Dialog from './components/Dialog';
+import Field from './components/Field/Field';
+import Dialog from './components/Dialog/Dialog';
 import { AppParameters } from './interfaces';
 
 init(async (sdk) => {
