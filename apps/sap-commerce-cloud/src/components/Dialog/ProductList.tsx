@@ -36,7 +36,8 @@ export class ProductList extends React.Component<Props> {
               <TableCell>
                 {isFieldTypeSymbol ? (
                   <IconButton
-                    icon={<DoneIcon variant="primary" />}
+                    variant="primary"
+                    icon={<DoneIcon />}
                     onClick={() => this.selectButtonClickEvent(product.sku)}
                     aria-label="Select">
                     Select
