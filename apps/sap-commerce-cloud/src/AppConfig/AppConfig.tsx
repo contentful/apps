@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { ChangeEvent, useState, useEffect } from 'react';
 
 import { CollectionResponse, ConfigAppSDK } from '@contentful/app-sdk';
 import {
@@ -40,14 +40,14 @@ interface Props {
 }
 
 export default function AppConfig(props: Props) {
-  const [contentTypes, setContentTypes] = React.useState<ContentType[]>([]);
-  const [compatibleFields, setCompatibleFields] = React.useState<CompatibleFields>({});
-  const [selectedFields, setSelectedFields] = React.useState<SelectedFields>({});
-  const [parameters, setParameters] = React.useState<Config>(
+  const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
+  const [compatibleFields, setCompatibleFields] = useState<CompatibleFields>({});
+  const [selectedFields, setSelectedFields] = useState<SelectedFields>({});
+  const [parameters, setParameters] = useState<Config>(
     toInputParameters(props.parameterDefinitions, null)
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     init();
   }, []);
 
@@ -93,7 +93,7 @@ export default function AppConfig(props: Props) {
     };
   };
 
-  const onParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const onParameterChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
 
     setParameters((prevParameters) => ({
