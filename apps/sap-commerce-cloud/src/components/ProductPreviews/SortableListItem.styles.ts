@@ -1,5 +1,5 @@
 import { css } from 'emotion';
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 import { Product } from '../../interfaces';
 
 const IMAGE_SIZE = 48;
@@ -46,7 +46,7 @@ export const styles = {
       }),
       '&:hover': {
         svg: css({
-          fill: tokens.colorContrastDark,
+          fill: tokens.colorBlack,
         }),
       },
     }),
@@ -64,7 +64,7 @@ export const styles = {
       ...(product.name && { textTransform: 'capitalize' }),
     }),
   subheading: css({
-    color: tokens.colorElementDarkest,
+    color: tokens.gray500,
     fontSize: tokens.fontSizeS,
     marginBottom: 0,
   }),
@@ -74,14 +74,14 @@ export const styles = {
     padding: tokens.spacingM,
   }),
   errorImage: css({
-    backgroundColor: tokens.colorElementLightest,
+    backgroundColor: tokens.gray100,
     borderRadius: '3px',
     margin: tokens.spacingM,
     width: `${IMAGE_SIZE}px`,
     height: `${IMAGE_SIZE}px`,
     position: 'relative',
     svg: css({
-      fill: tokens.colorTextLight,
+      fill: tokens.gray600,
       width: '100%',
       height: '50%',
       position: 'absolute',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@contentful/forma-36-react-components';
+import { IconButton } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import get from 'lodash/get';
 import { SortableComponent } from '../ProductPreviews/SortableComponent';
@@ -7,6 +7,7 @@ import { fetchProductPreviews } from '../../api/fetchProductPreviews';
 import logo from '../../logo.png';
 import { AppParameters, SAPParameters } from '../../interfaces';
 import { styles } from './Field.styles';
+import { ShoppingCartIcon } from '@contentful/f36-icons';
 
 interface Props {
   sdk: FieldAppSDK<AppParameters>;
@@ -109,14 +110,14 @@ export default class Field extends React.Component<Props, State> {
         )}
         <div className={styles.container}>
           <img src={logo} alt="Logo" className={styles.logo} />
-          <Button
-            icon="ShoppingCart"
-            buttonType="muted"
-            size="small"
+          <IconButton
+            variant="secondary"
+            icon={<ShoppingCartIcon size="small" variant="muted" />}
             onClick={this.onDialogOpen}
-            disabled={editingDisabled}>
+            aria-label={makeCTAText(fieldType)}
+            isDisabled={editingDisabled}>
             {makeCTAText(fieldType)}
-          </Button>
+          </IconButton>
         </div>
       </>
     );

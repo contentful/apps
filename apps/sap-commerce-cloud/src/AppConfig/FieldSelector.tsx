@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { styles } from './FieldSelector.styles';
-import { Form, Subheading, CheckboxField, Typography } from '@contentful/forma-36-react-components';
+import { Form, Subheading, FormControl, Checkbox } from '@contentful/f36-components';
 
 import { ContentType, CompatibleFields, SelectedFields } from './fields';
 
@@ -32,7 +32,7 @@ export default class FieldSelector extends React.Component<Props> {
     const { compatibleFields, contentTypes, selectedFields } = this.props;
 
     return (
-      <Typography>
+      <>
         {contentTypes.map((ct) => {
           const fields = compatibleFields[ct.sys.id];
           return (
@@ -40,22 +40,23 @@ export default class FieldSelector extends React.Component<Props> {
               <Subheading>{ct.name}</Subheading>
               <Form>
                 {fields.map((field) => (
-                  <CheckboxField
-                    key={field.id}
-                    id={`field-box-${ct.sys.id}-${field.id}`}
-                    labelText={field.name}
-                    helpText={`${
-                      field.type === 'Symbol' ? 'Short text' : 'Short text, list'
-                    } · Field ID: ${field.id}`}
-                    checked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                    onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
-                  />
+                  <FormControl id={`field-box-${ct.sys.id}-${field.id}`}>
+                    <Checkbox
+                      key={field.id}
+                      helpText={`${
+                        field.type === 'Symbol' ? 'Short text' : 'Short text, list'
+                      } · Field ID: ${field.id}`}
+                      isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
+                      onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}>
+                      {field.name}
+                    </Checkbox>
+                  </FormControl>
                 ))}
               </Form>
             </div>
           );
         })}
-      </Typography>
+      </>
     );
   }
 }
