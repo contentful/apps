@@ -3,6 +3,7 @@ import {
   Button,
   Grid,
   GridItem,
+  IconButton,
   Option,
   Select,
   Table,
@@ -11,7 +12,7 @@ import {
   TableHead,
   TableRow,
   TextInput,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { fetchProductList } from '../../api/fetchProductList';
@@ -22,6 +23,7 @@ import union from 'lodash/union';
 import { formatProductUrl } from '../../utils';
 import { styles } from './Dialog.styles';
 import { cx } from '@emotion/css';
+import { DoneIcon, SearchIcon } from '@contentful/f36-icons';
 
 interface DialogProps {
   sdk: DialogAppSDK<AppParameters>;
@@ -196,21 +198,23 @@ export default class Dialog extends React.Component<DialogProps, State> {
             </Select>
           </GridItem>
           <GridItem>
-            <Button
-              buttonType="primary"
-              icon="Search"
+            <IconButton
+              variant="primary"
+              icon={<SearchIcon />}
+              aria-label="search"
               onClick={() => this.searchButtonClickEvent()}>
               Search
-            </Button>
+            </IconButton>
           </GridItem>
           {isFieldTypeArray ? (
             <GridItem>
-              <Button
-                buttonType="primary"
-                icon="Done"
-                onClick={this.selectMultipleProductsClickEvent}>
+              <IconButton
+                variant="primary"
+                icon={<DoneIcon />}
+                onClick={this.selectMultipleProductsClickEvent}
+                aria-label="Select Products">
                 Select Products
-              </Button>
+              </IconButton>
             </GridItem>
           ) : (
             <></>
@@ -258,7 +262,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
         </Table>
         <div className={styles.pagination}>
           {this.state.page > 0 ? (
-            <Button buttonType="primary" onClick={this.prevPageButtonEvent}>
+            <Button variant="primary" onClick={this.prevPageButtonEvent}>
               Previous
             </Button>
           ) : (
@@ -266,7 +270,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
           )}
           {this.state.page + 1 < this.state.totalPages ? (
             <Button
-              buttonType="primary"
+              variant="primary"
               className={styles.nextButton(this.state.page)}
               onClick={this.nextPageButtonEvent}>
               Next
@@ -276,13 +280,14 @@ export default class Dialog extends React.Component<DialogProps, State> {
           )}
         </div>
         {isFieldTypeArray ? (
-          <Button
-            buttonType="primary"
-            icon="Done"
+          <IconButton
+            variant="primary"
+            icon={<DoneIcon />}
             onClick={this.selectMultipleProductsClickEvent}
+            aria-label="Select Products"
             className={styles.selectProductsButton}>
             Select Products
-          </Button>
+          </IconButton>
         ) : (
           <></>
         )}

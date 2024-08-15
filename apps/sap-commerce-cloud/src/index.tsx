@@ -1,9 +1,6 @@
 import { render } from 'react-dom';
 
 import { init, locations, FieldAppSDK, DialogAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
-import '@contentful/forma-36-react-components/dist/styles.css';
-import '@contentful/forma-36-fcss/dist/styles.css';
-import '@contentful/forma-36-tokens/dist/css/index.css';
 import './index.css';
 import AppConfig from './AppConfig/AppConfig';
 

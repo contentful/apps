@@ -1,5 +1,5 @@
 import { css } from 'emotion';
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 
 export const styles = {
   body: css({
@@ -32,7 +32,7 @@ export const styles = {
     marginBottom: tokens.spacingL,
     border: 0,
     height: '1px',
-    backgroundColor: tokens.colorElementMid,
+    backgroundColor: tokens.gray300,
   }),
   icon: css({
     display: 'flex',

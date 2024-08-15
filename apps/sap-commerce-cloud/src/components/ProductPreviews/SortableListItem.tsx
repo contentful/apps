@@ -3,19 +3,19 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Product } from '../../interfaces';
 import {
+  AssetIcon,
+  Badge,
   Card,
-  CardDragHandle as FormaCardDragHandle,
+  Flex,
   Heading,
-  Icon,
   IconButton,
   SkeletonContainer,
   SkeletonImage,
   Subheading,
-  Tag,
-  Typography,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+} from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { styles } from './SortableListItem.styles';
+import { CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 
 export interface Props {
   product: Product;
@@ -50,11 +50,8 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
       {...attributes}
       {...listeners}
       data-testid={`sortable-item-${product.id}`}>
-      <Card className={styles.card} data-testid="sortable-list-item">
-        <>
-          {isSortable && (
-            <FormaCardDragHandle className={styles.dragHandle}>Reorder product</FormaCardDragHandle>
-          )}
+      <Card withDragHandle={isSortable} className={styles.card} data-testid="sortable-list-item">
+        <Flex>
           {!imageHasLoaded && !imageHasErrored && (
             <SkeletonContainer className={styles.skeletonImage}>
               <SkeletonImage width={IMAGE_SIZE} height={IMAGE_SIZE} />
@@ -62,7 +59,11 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
           )}
           {imageHasErrored && (
             <div className={styles.errorImage}>
-              <Icon icon={product.isMissing ? 'ErrorCircle' : 'Asset'} data-testid="icon" />
+              {product.isMissing ? (
+                <ErrorCircleIcon data-testid="icon" />
+              ) : (
+                <AssetIcon data-testid="icon" />
+              )}
             </div>
           )}
           {!imageHasErrored && (
@@ -78,32 +79,29 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
             </div>
           )}
           <section className={styles.description}>
-            <Typography>
-              <Heading className={styles.heading(product)}>
-                {product.isMissing || !product.name ? product.sku : product.name}
-              </Heading>
-              {product.isMissing && <Tag tagType="negative">Product missing</Tag>}
-              {!product.isMissing && product.name && (
-                <Subheading className={styles.subheading}>{product.sku}</Subheading>
-              )}
-            </Typography>
-          </section>
-        </>
-        {!disabled && (
-          <div className={styles.actions}>
-            {product.externalLink && (
-              <a target="_blank" rel="noopener noreferrer" href={product.externalLink}>
-                <Icon icon="ExternalLink" color="muted" />
-              </a>
+            <Heading className={styles.heading(product)}>
+              {product.isMissing || !product.name ? product.sku : product.name}
+            </Heading>
+            {product.isMissing && <Badge variant="negative">Product missing</Badge>}
+            {!product.isMissing && product.name && (
+              <Subheading className={styles.subheading}>{product.sku}</Subheading>
             )}
-            <IconButton
-              label="Delete"
-              iconProps={{ icon: 'Close' }}
-              buttonType="muted"
-              onClick={onDelete}
-            />
-          </div>
-        )}
+          </section>
+          {!disabled && (
+            <div className={styles.actions}>
+              {product.externalLink && (
+                <a target="_blank" rel="noopener noreferrer" href={product.externalLink}>
+                  <ExternalLinkIcon variant="muted" />
+                </a>
+              )}
+              <IconButton
+                icon={<CloseIcon variant="muted" />}
+                aria-label="Delete"
+                onClick={onDelete}
+              />
+            </div>
+          )}
+        </Flex>
       </Card>
     </div>
   );
