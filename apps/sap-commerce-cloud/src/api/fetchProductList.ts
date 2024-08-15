@@ -10,7 +10,7 @@ export async function fetchProductList(
   updateTotalPages: UpdateTotalPagesFn,
   applicationInterfaceKey: string
 ): Promise<Response> {
-  if (!baseSite.length) {
+  if (!baseSite?.length) {
     return {
       products: [],
       errors: [],

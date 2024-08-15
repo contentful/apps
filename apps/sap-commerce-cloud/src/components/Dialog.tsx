@@ -63,6 +63,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
       this.updateTotalPages,
       this.props.applicationInterfaceKey
     );
+    console.log(products);
     this.setState({
       baseSite: this.state.baseSite,
       baseSites: this.state.baseSites,
@@ -78,17 +79,25 @@ export default class Dialog extends React.Component<DialogProps, State> {
       this.props.sdk.parameters as SAPParameters,
       this.props.applicationInterfaceKey
     );
+    console.log(baseSites, this.props.sdk.parameters.installation);
     let finalBaseSites: string[] = [];
-    const installationConfigBaseSites = get(this.props.sdk.parameters.invocation, 'baseSites', '');
-    if (installationConfigBaseSites.length > 0) {
-      for (const baseSite of baseSites) {
-        if (installationConfigBaseSites.split(',').includes(baseSite)) {
-          finalBaseSites.push(baseSite);
-        }
-      }
-    } else {
-      finalBaseSites = baseSites;
-    }
+    const installationConfigBaseSites = get(
+      this.props.sdk.parameters.installation,
+      'baseSites',
+      ''
+    );
+    console.log(installationConfigBaseSites);
+    // if (installationConfigBaseSites.length > 0) {
+    //   for (const baseSite of baseSites) {
+    //     if (installationConfigBaseSites.split(',').includes(baseSite)) {
+    //       finalBaseSites.push(baseSite);
+    //     }
+    //   }
+    // } else {
+    //   finalBaseSites = baseSites;
+    // }
+    finalBaseSites = [...baseSites, 'powertools-spa'];
+    console.log(finalBaseSites);
     this.setState({
       baseSite: finalBaseSites[0],
       baseSites: finalBaseSites,

@@ -63,6 +63,10 @@ export default function Dialog() {
     async function fetchProductList() {
       setLoading(true);
       try {
+        console.log('headers for request:', {
+          'Content-Type': 'application/json',
+          'application-interface-key': apiKey,
+        });
         const req = await sdk.cma.appActionCall.createWithResponse(
           {
             appActionId: 'fetchProductList',
@@ -79,6 +83,7 @@ export default function Dialog() {
         );
 
         const res = JSON.parse(req.response.body);
+        console.log('RES', res);
 
         if (res.body) {
           const transformedProducts = res.body.products.map(
@@ -93,6 +98,9 @@ export default function Dialog() {
         console.error('Error fetching product list:', error);
       }
     }
+
+    // console.log('params', sdk.parameters);
+    // console.log('apikey', apiKey);
 
     fetchProductList();
   }, [sdk, page, query]);
