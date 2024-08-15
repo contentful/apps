@@ -16,8 +16,8 @@
     "@emotion/css": "^11.13.0",
     "cross-env": "^7.0.3",
     "lodash.get": "^4.4.2",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "scripts": {
     "start": "vite",
@@ -54,8 +54,8 @@
     "@types/jest": "^26.0.20",
     "@types/lodash.get": "^4.4.6",
     "@types/node": "^20.0.0",
-    "@types/react": "^17.0.2",
-    "@types/react-dom": "^17.0.1",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^2.0.5",
     "happy-dom": "^14.12.3",
