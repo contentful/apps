@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { ChangeEvent } from 'react';
 import { styles } from './FieldSelector.styles';
 import { Form, Subheading, FormControl, Checkbox } from '@contentful/f36-components';
 
@@ -11,13 +11,18 @@ interface Props {
   onSelectedFieldsChange: Function;
 }
 
-export default class FieldSelector extends React.Component<Props> {
-  onSelectedFieldChange = (
+export default function FieldSelector({
+  contentTypes,
+  compatibleFields,
+  selectedFields,
+  onSelectedFieldsChange,
+}: Props) {
+  const onSelectedFieldChange = (
     ctId: string,
     fieldId: string,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: ChangeEvent<HTMLInputElement>
   ) => {
-    const updated = { ...this.props.selectedFields };
+    const updated = { ...selectedFields };
 
     if (e.currentTarget.checked) {
       updated[ctId] = (updated[ctId] || []).concat([fieldId]);
@@ -25,38 +30,33 @@ export default class FieldSelector extends React.Component<Props> {
       updated[ctId] = (updated[ctId] || []).filter((cur) => cur !== fieldId);
     }
 
-    this.props.onSelectedFieldsChange(updated);
+    onSelectedFieldsChange(updated);
   };
 
-  render() {
-    const { compatibleFields, contentTypes, selectedFields } = this.props;
-
-    return (
-      <>
-        {contentTypes.map((ct) => {
-          const fields = compatibleFields[ct.sys.id];
-          return (
-            <div key={ct.sys.id} className={styles.fieldSelector}>
-              <Subheading>{ct.name}</Subheading>
-              <Form>
-                {fields.map((field) => (
-                  <FormControl id={`field-box-${ct.sys.id}-${field.id}`}>
-                    <Checkbox
-                      key={field.id}
-                      helpText={`${
-                        field.type === 'Symbol' ? 'Short text' : 'Short text, list'
-                      } · Field ID: ${field.id}`}
-                      isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                      onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}>
-                      {field.name}
-                    </Checkbox>
-                  </FormControl>
-                ))}
-              </Form>
-            </div>
-          );
-        })}
-      </>
-    );
-  }
+  return (
+    <>
+      {contentTypes.map((ct) => {
+        const fields = compatibleFields[ct.sys.id];
+        return (
+          <div key={ct.sys.id} className={styles.fieldSelector}>
+            <Subheading>{ct.name}</Subheading>
+            <Form>
+              {fields.map((field) => (
+                <FormControl id={`field-box-${ct.sys.id}-${field.id}`} key={field.id}>
+                  <Checkbox
+                    helpText={`${
+                      field.type === 'Symbol' ? 'Short text' : 'Short text, list'
+                    } · Field ID: ${field.id}`}
+                    isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
+                    onChange={onSelectedFieldChange.bind(null, ct.sys.id, field.id)}>
+                    {field.name}
+                  </Checkbox>
+                </FormControl>
+              ))}
+            </Form>
+          </div>
+        );
+      })}
+    </>
+  );
 }
