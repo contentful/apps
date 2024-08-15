@@ -1,4 +1,4 @@
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { init, locations, FieldAppSDK, DialogAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import './index.css';
@@ -9,7 +9,11 @@ import Dialog from './components/Dialog/Dialog';
 import { AppParameters } from './interfaces';
 
 init(async (sdk) => {
-  const root = document.getElementById('root');
+  const rootEl = document.getElementById('root');
+  if (!rootEl) {
+    throw new Error('Root element not found');
+  }
+  const root = createRoot(rootEl);
 
   const ComponentLocationSettings = [
     {
@@ -58,7 +62,7 @@ init(async (sdk) => {
   // Select a component depending on a location in which the app is rendered.
   ComponentLocationSettings.forEach((componentLocationSetting) => {
     if (sdk.location.is(componentLocationSetting.location)) {
-      render(componentLocationSetting.component, root);
+      root.render(componentLocationSetting.component);
     }
   });
 });
