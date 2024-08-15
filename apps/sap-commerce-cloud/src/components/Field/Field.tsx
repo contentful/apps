@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, IconButton } from '@contentful/f36-components';
+import { IconButton } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import get from 'lodash/get';
 import { SortableComponent } from '../ProductPreviews/SortableComponent';

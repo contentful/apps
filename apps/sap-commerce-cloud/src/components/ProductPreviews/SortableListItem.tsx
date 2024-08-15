@@ -8,11 +8,11 @@ import {
   Card,
   Flex,
   Heading,
+  IconButton,
   SkeletonContainer,
   SkeletonImage,
   Subheading,
 } from '@contentful/f36-components';
-import { IconButton } from '@contentful/f36-button';
 import tokens from '@contentful/f36-tokens';
 import { styles } from './SortableListItem.styles';
 import { CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';

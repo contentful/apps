@@ -3,6 +3,7 @@ import {
   Button,
   Grid,
   GridItem,
+  IconButton,
   Option,
   Select,
   Table,
@@ -12,7 +13,6 @@ import {
   TableRow,
   TextInput,
 } from '@contentful/f36-components';
-import { IconButton } from '@contentful/f36-button';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { fetchProductList } from '../../api/fetchProductList';
