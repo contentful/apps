@@ -152,7 +152,7 @@ export default class AppConfig extends React.Component<Props, State> {
                 const key = `config-input-${def.id}`;
 
                 return (
-                  <FormControl id="inputId">
+                  <FormControl id={key}>
                     <FormControl.Label>{def.name}</FormControl.Label>
                     <TextInput
                       isRequired={def.required}
