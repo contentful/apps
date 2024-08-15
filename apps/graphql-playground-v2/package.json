@@ -1,0 +1,40 @@
+{
+  "name": "graphql-playground-v2",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@contentful/app-sdk": "^4.23.1",
+    "@contentful/f36-components": "^4.54.0",
+    "@contentful/f36-tokens": "^4.0.2",
+    "@contentful/f36-workbench": "^4.21.0",
+    "@contentful/forma-36-react-components": "^3.100.7",
+    "@contentful/react-apps-toolkit": "^1.2.16",
+    "@graphiql/toolkit": "^0.9.1",
+    "@originjs/vite-plugin-commonjs": "^1.0.3",
+    "@tanstack/react-query": "^4.36.1",
+    "emotion": "10.0.27",
+    "graphiql": "^3.0.9",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "vite-plugin-eslint": "^1.8.1"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build --mode ${NODE_ENV:='production'}",
+    "test": "vitest",
+    "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./dist --organization-id ${DEV_TESTING_ORG_ID} --definition-id A8dr1iHtz78TyWqrUFb72 --token ${TEST_CMA_TOKEN}"
+  },
+  "devDependencies": {
+    "@contentful/app-scripts": "^1.13.0",
+    "@testing-library/jest-dom": "^5.11.5",
+    "@testing-library/react": "^11.1.2",
+    "@types/jest": "^26.0.15",
+    "@types/react": "^17.0.69",
+    "@types/react-dom": "^17.0.22",
+    "@vitejs/plugin-react": "^4.1.1",
+    "happy-dom": "9.20.3",
+    "typescript": "^5.2.2",
+    "vite": "^4.5.0",
+    "vitest": "^0.34.6"
+  }
+}
