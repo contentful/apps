@@ -22,11 +22,13 @@ export const handler = async (payload: AppActionCallParameters, context: AppActi
 
     return {
       status: 'Success',
+      // @ts-ignore
       baseSites: res.baseSites,
     };
   } catch (err) {
     return {
       status: 'Failed',
+      // @ts-ignore
       body: err.message,
     };
   }

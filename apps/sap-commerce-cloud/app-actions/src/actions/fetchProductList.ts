@@ -26,6 +26,7 @@ export const handler = async (payload: AppActionCallParameters, context: AppActi
   } catch (err) {
     return {
       success: false,
+      // @ts-ignore
       body: err.message,
     };
   }

@@ -47,7 +47,9 @@ export const handler = async (payload: AppActionCallParameters) => {
           },
         });
         const json = await req.json();
+        // @ts-ignore
         totalProducts.push(json);
+        // @ts-ignore
         skuIds.push(`${json.code}`);
       })
     );
@@ -74,6 +76,7 @@ export const handler = async (payload: AppActionCallParameters) => {
   } catch (err) {
     return {
       status: 'Failed',
+      // @ts-ignore
       body: err.message,
     };
   }

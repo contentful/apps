@@ -11,11 +11,14 @@
   },
   "dependencies": {
     "@contentful/node-apps-toolkit": "^2.6.0",
+    "lodash.difference": "^4.5.0",
     "lodash.get": "^4.4.2"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.0",
     "@types/chai": "^4.3.5",
+    "@types/lodash.difference": "^4.5.9",
+    "@types/lodash.get": "^4.4.9",
     "@types/mocha": "^10.0.1",
     "@types/sinon": "^10.0.16",
     "@types/sinon-chai": "^3.2.12",

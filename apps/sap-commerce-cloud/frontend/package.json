@@ -1,6 +1,6 @@
 {
-  "name": "sap-commerce",
-  "version": "0.2.0",
+  "name": "@contenful/sap-commerce-cloud-frontend",
+  "version": "1.0.0",
   "private": true,
   "homepage": "./",
   "dependencies": {
@@ -23,14 +23,7 @@
     "start": "vite",
     "build": "vite build",
     "test": "vitest --logHeapUsage --coverage",
-    "test:ci": "vitest",
-    "deploy": "npm run deploy:sap && npm run deploy:sap-with-air",
-    "deploy:sap": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id GdOFzqcDrEbmn2teDQE2i --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:sap-with-air": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 1PoDbrB3qO6oaN6uANGhK2 --token ${CONTENTFUL_CMA_TOKEN}",
-    "deploy:test": "npm run deploy:test:sap && npm run deploy:test:sap-with-air",
-    "deploy:test:sap": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 7xd4hIywW2diyQTdedfE8U --token ${TEST_CMA_TOKEN}",
-    "deploy:test:sap-with-air": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 6iZK9k1JbcwNdyK7Dg3aEm --token ${TEST_CMA_TOKEN}",
-    "eject": "react-scripts eject"
+    "test:ci": "vitest"
   },
   "eslintConfig": {
     "extends": "react-app"
