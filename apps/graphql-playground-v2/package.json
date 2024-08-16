@@ -9,7 +9,7 @@
     "@contentful/f36-workbench": "^4.21.0",
     "@contentful/forma-36-react-components": "^3.100.7",
     "@contentful/react-apps-toolkit": "^1.2.16",
-    "@graphiql/toolkit": "^0.9.1",
+    "@graphiql/toolkit": "^0.10.0",
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@tanstack/react-query": "^4.36.1",
     "emotion": "10.0.27",
