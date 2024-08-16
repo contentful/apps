@@ -7,7 +7,9 @@ export default defineConfig(() => ({
     port: 3000,
   },
   build: {
-    outDir: './build',
+    // the parent project that combines both the frontend and the hosted app action backend needs to be able to override
+    // the default location to its own build path
+    outDir: process.env.BUILD_PATH || './build',
   },
   plugins: [react()],
   test: {
