@@ -1,0 +1,119 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Field > should render 1`] = `
+<div>
+  <div
+    class="css-k008qs"
+  >
+    <img
+      alt="Logo"
+      class="css-do5lj7"
+      src="/src/logo.png"
+    />
+    <button
+      aria-label="Select products"
+      class="css-ketnjv"
+      data-test-id="cf-ui-icon-button"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="css-3u52eb"
+      >
+        <svg
+          aria-hidden="true"
+          class="css-1jrff5x"
+          color="currentColor"
+          data-test-id="cf-ui-icon"
+          role="img"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"
+          />
+          <path
+            d="M0 0h24v24H0z"
+            fill="none"
+          />
+        </svg>
+      </span>
+      <span
+        class="css-40g50j"
+      >
+        Select products
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Field > should render correctly 1`] = `
+<div>
+  <div
+    class="css-acwcvw"
+  >
+    <div
+      class="css-t5irqm"
+    />
+    <div
+      id="DndDescribedBy-0"
+      style="display: none;"
+    >
+      
+    To pick up a draggable item, press the space bar.
+    While dragging, use the arrow keys to move the item.
+    Press space again to drop the item in its new position, or press escape to cancel.
+  
+    </div>
+    <div
+      aria-atomic="true"
+      aria-live="assertive"
+      id="DndLiveRegion-0"
+      role="status"
+      style="position: fixed; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip-path: inset(100%); white-space: nowrap;"
+    />
+  </div>
+  <div
+    class="css-k008qs"
+  >
+    <img
+      alt="Logo"
+      class="css-do5lj7"
+      src="/src/logo.png"
+    />
+    <button
+      aria-label="Select products"
+      class="css-ketnjv"
+      data-test-id="cf-ui-icon-button"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="css-3u52eb"
+      >
+        <svg
+          aria-hidden="true"
+          class="css-1jrff5x"
+          color="currentColor"
+          data-test-id="cf-ui-icon"
+          role="img"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"
+          />
+          <path
+            d="M0 0h24v24H0z"
+            fill="none"
+          />
+        </svg>
+      </span>
+      <span
+        class="css-40g50j"
+      >
+        Select products
+      </span>
+    </button>
+  </div>
+</div>
+`;
