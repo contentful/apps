@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { ChangeEvent, useState, useEffect } from 'react';
 
 import { CollectionResponse, ConfigAppSDK } from '@contentful/app-sdk';
 import {
@@ -39,31 +39,22 @@ interface Props {
   description: string;
 }
 
-interface State {
-  contentTypes: ContentType[];
-  compatibleFields: CompatibleFields;
-  selectedFields: SelectedFields;
-  parameters: Config;
-}
+export default function AppConfig(props: Props) {
+  const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
+  const [compatibleFields, setCompatibleFields] = useState<CompatibleFields>({});
+  const [selectedFields, setSelectedFields] = useState<SelectedFields>({});
+  const [parameters, setParameters] = useState<Config>(
+    toInputParameters(props.parameterDefinitions, null)
+  );
 
-export default class AppConfig extends React.Component<Props, State> {
-  state = {
-    contentTypes: [],
-    compatibleFields: {},
-    selectedFields: {},
-    parameters: toInputParameters(this.props.parameterDefinitions, null),
-    verifying: false,
-    token: null,
-  };
+  useEffect(() => {
+    init();
+  }, []);
 
-  componentDidMount() {
-    this.init();
-  }
+  const init = async () => {
+    const { space, app, ids } = props.sdk;
 
-  init = async () => {
-    const { space, app, ids } = this.props.sdk;
-
-    app.onConfigure(this.onAppConfigure);
+    app.onConfigure(onAppConfigure);
 
     const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
       space.getContentTypes(),
@@ -80,64 +71,43 @@ export default class AppConfig extends React.Component<Props, State> {
       return fields && fields.length > 0;
     });
 
-    this.setState(
-      {
-        contentTypes: filteredContentTypes,
-        compatibleFields,
-        selectedFields: editorInterfacesToSelectedFields(editorInterfaces, ids.app),
-        parameters: toInputParameters(this.props.parameterDefinitions, parameters),
-      },
-      () => app.setReady()
-    );
+    setContentTypes(filteredContentTypes);
+    setCompatibleFields(compatibleFields);
+    setSelectedFields(editorInterfacesToSelectedFields(editorInterfaces, ids.app));
+    setParameters(toInputParameters(props.parameterDefinitions, parameters));
+
+    app.setReady();
   };
 
-  onAppConfigure = () => {
-    const { parameters, contentTypes, selectedFields } = this.state;
-    const error = this.props.validateParameters(parameters);
+  const onAppConfigure = () => {
+    const error = props.validateParameters(parameters);
 
     if (error) {
-      this.props.sdk.notifier.error(error);
+      props.sdk.notifier.error(error);
       return false;
     }
 
     return {
-      parameters: toAppParameters(this.props.parameterDefinitions, parameters),
+      parameters: toAppParameters(props.parameterDefinitions, parameters),
       targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
     };
   };
 
-  render() {
-    return (
-      <>
-        <div className={styles.background(this.props.color)} />
-        <div className={styles.body}>
-          <Heading>About {this.props.name}</Heading>
-          <Paragraph>{this.props.description}</Paragraph>
-          <hr className={styles.splitter} />
-          {this.renderApp()}
-        </div>
-        <div className={styles.icon}>
-          <img src={this.props.logo} alt="App logo" />
-        </div>
-      </>
-    );
-  }
-
-  onParameterChange = (key: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const onParameterChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
 
-    this.setState((state) => ({
-      parameters: { ...state.parameters, [key]: value },
+    setParameters((prevParameters) => ({
+      ...prevParameters,
+      [key]: value,
     }));
   };
 
-  onSelectedFieldsChange = (selectedFields: SelectedFields) => {
-    this.setState({ selectedFields });
+  const onSelectedFieldsChange = (selectedFields: SelectedFields) => {
+    setSelectedFields(selectedFields);
   };
 
-  renderApp() {
-    const { contentTypes, compatibleFields, selectedFields, parameters } = this.state;
-    const { parameterDefinitions, sdk } = this.props;
+  const renderApp = () => {
+    const { parameterDefinitions, sdk } = props;
     const { ids, hostnames } = sdk;
     const { space, environment } = ids;
     const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
@@ -163,7 +133,7 @@ export default class AppConfig extends React.Component<Props, State> {
                       width={def.type === 'Symbol' ? 'large' : 'medium'}
                       type={def.type === 'Symbol' ? 'text' : 'number'}
                       value={parameters[def.id]}
-                      onChange={this.onParameterChange.bind(this, def.id)}
+                      onChange={(e) => onParameterChange(def.id, e)}
                     />
                     <FormControl.HelpText>{def.description}</FormControl.HelpText>
                   </FormControl>
@@ -208,9 +178,24 @@ export default class AppConfig extends React.Component<Props, State> {
           contentTypes={contentTypes}
           compatibleFields={compatibleFields}
           selectedFields={selectedFields}
-          onSelectedFieldsChange={this.onSelectedFieldsChange}
+          onSelectedFieldsChange={onSelectedFieldsChange}
         />
       </>
     );
-  }
+  };
+
+  return (
+    <>
+      <div className={styles.background(props.color)} />
+      <div className={styles.body}>
+        <Heading>About {props.name}</Heading>
+        <Paragraph>{props.description}</Paragraph>
+        <hr className={styles.splitter} />
+        {renderApp()}
+      </div>
+      <div className={styles.icon}>
+        <img src={props.logo} alt="App logo" />
+      </div>
+    </>
+  );
 }
