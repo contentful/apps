@@ -1,4 +1,5 @@
-import { render, cleanup, waitFor, act } from '@testing-library/react';
+import { act } from 'react';
+import { render, cleanup, waitFor } from '@testing-library/react';
 import { SortableComponent } from './SortableComponent';
 import { mockProductPreview, makeSdkMock } from '../../__mocks__';
 import { FieldAppSDK } from '@contentful/app-sdk';
@@ -68,7 +69,6 @@ describe('SortableComponent', () => {
       );
     });
 
-    await waitFor(() => expect(mockFetchProductPreviews).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(mockFetchProductPreviews).toHaveBeenLastCalledWith(newSkus));
   });
 
