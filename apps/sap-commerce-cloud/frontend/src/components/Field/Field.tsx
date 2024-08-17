@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { IconButton } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import get from 'lodash/get';
@@ -11,11 +11,6 @@ import { ShoppingCartIcon } from '@contentful/f36-icons';
 
 interface Props {
   sdk: FieldAppSDK<AppParameters>;
-}
-
-interface State {
-  value: string[];
-  editingDisabled: boolean;
 }
 
 function fieldValueToState(value?: string | string[]): string[] {
@@ -31,40 +26,39 @@ function makeCTAText(fieldType: string) {
   return `Select ${beingSelected}`;
 }
 
-export default class Field extends React.Component<Props, State> {
-  state = {
-    value: fieldValueToState(this.props.sdk.field.getValue()),
-    editingDisabled: true,
-  };
+const Field: React.FC<Props> = ({ sdk }) => {
+  const [value, setValue] = useState<string[]>(fieldValueToState(sdk.field.getValue()));
+  const [editingDisabled, setEditingDisabled] = useState<boolean>(true);
 
-  componentDidMount() {
-    this.props.sdk.window.startAutoResizer();
+  useEffect(() => {
+    sdk.window.startAutoResizer();
 
-    // Handle external changes (e.g. when multiple authors are working on the same entry).
-    this.props.sdk.field.onValueChanged((value?: string[] | string) => {
-      this.setState({ value: fieldValueToState(value) });
+    const detachOnValueChanged = sdk.field.onValueChanged((newValue?: string[] | string) => {
+      setValue(fieldValueToState(newValue));
     });
 
-    // Disable editing (e.g. when field is not editable due to R&P).
-    this.props.sdk.field.onIsDisabledChanged((editingDisabled: boolean) => {
-      this.setState({ editingDisabled });
+    const detachOnIsDisabledChanged = sdk.field.onIsDisabledChanged((isDisabled: boolean) => {
+      setEditingDisabled(isDisabled);
     });
-  }
 
-  updateStateValue = (skus: string[]) => {
-    this.setState({ value: skus });
+    return () => {
+      detachOnValueChanged();
+      detachOnIsDisabledChanged();
+    };
+  }, [sdk]);
+
+  const updateStateValue = (skus: string[]) => {
+    setValue(skus);
 
     if (skus.length > 0) {
-      const value = this.props.sdk.field.type === 'Array' ? skus : skus[0];
-      this.props.sdk.field.setValue(value);
+      const fieldValue = sdk.field.type === 'Array' ? skus : skus[0];
+      sdk.field.setValue(fieldValue);
     } else {
-      this.props.sdk.field.removeValue();
+      sdk.field.removeValue();
     }
   };
 
-  onDialogOpen = async () => {
-    const { sdk } = this.props;
-
+  const onDialogOpen = async () => {
     const skus = await sdk.dialogs.openCurrentApp({
       allowHeightOverflow: true,
       position: 'center',
@@ -80,46 +74,45 @@ export default class Field extends React.Component<Props, State> {
       width: 1400,
       minHeight: 600,
     });
+
     const result = Array.isArray(skus) ? skus : [];
 
     if (result.length) {
-      this.updateStateValue(result);
+      updateStateValue(result);
     }
   };
 
-  render = () => {
-    const { value: data, editingDisabled } = this.state;
+  const hasItems = value.length > 0;
+  const fieldType = get(sdk, ['field', 'type'], '');
 
-    const hasItems = data.length > 0;
-    const fieldType = get(this.props, ['sdk', 'field', 'type'], '');
-
-    return (
-      <>
-        {hasItems && (
-          <div className={styles.sortable}>
-            <SortableComponent
-              sdk={this.props.sdk}
-              disabled={editingDisabled}
-              skus={data}
-              onChange={this.updateStateValue}
-              fetchProductPreviews={(skus) =>
-                fetchProductPreviews(skus, this.props.sdk.parameters as SAPParameters)
-              }
-            />
-          </div>
-        )}
-        <div className={styles.container}>
-          <img src={logo} alt="Logo" className={styles.logo} />
-          <IconButton
-            variant="secondary"
-            icon={<ShoppingCartIcon size="small" variant="muted" />}
-            onClick={this.onDialogOpen}
-            aria-label={makeCTAText(fieldType)}
-            isDisabled={editingDisabled}>
-            {makeCTAText(fieldType)}
-          </IconButton>
+  return (
+    <>
+      {hasItems && (
+        <div className={styles.sortable}>
+          <SortableComponent
+            sdk={sdk}
+            disabled={editingDisabled}
+            skus={value}
+            onChange={updateStateValue}
+            fetchProductPreviews={(skus) =>
+              fetchProductPreviews(skus, sdk.parameters as SAPParameters)
+            }
+          />
         </div>
-      </>
-    );
-  };
-}
+      )}
+      <div className={styles.container}>
+        <img src={logo} alt="Logo" className={styles.logo} />
+        <IconButton
+          variant="secondary"
+          icon={<ShoppingCartIcon size="small" variant="muted" />}
+          onClick={onDialogOpen}
+          aria-label={makeCTAText(fieldType)}
+          isDisabled={editingDisabled}>
+          {makeCTAText(fieldType)}
+        </IconButton>
+      </div>
+    </>
+  );
+};
+
+export default Field;
