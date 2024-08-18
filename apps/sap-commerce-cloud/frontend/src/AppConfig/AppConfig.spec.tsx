@@ -6,8 +6,8 @@ import { vi } from 'vitest';
 
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
+    // eslint-disable-next-line
     const mockSdk: any = {
-      // eslint-disable-line
       app: {
         onConfigure: vi.fn(),
         getParameters: vi.fn().mockReturnValueOnce({}),

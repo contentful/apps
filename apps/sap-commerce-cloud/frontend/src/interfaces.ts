@@ -53,8 +53,8 @@ export type AppParameters = {
   baseSites: string;
 };
 
+// eslint-disable-next-line
 export interface SAPParameters extends ParametersAPI<AppParameters, {}, {}> {
-  // eslint-disable-line
   installation: {
     apiEndpoint: string;
     baseSites: string;
@@ -110,7 +110,7 @@ export type MakeCTAFn = (fieldType: string) => string;
 /**
  * Custom code that validates installation parameters that is run before saving.
  *
- * @param parameters Object containg the entered parameters.
+ * @param parameters Object containing the entered parameters.
  * @returns `string` containing an error message. `null` if the parameters are valid.
  */
 export type ValidateParametersFn = (parameters: Config) => string | null;
@@ -221,7 +221,7 @@ export interface Integration {
   /**
    * Custom code that validates installation parameters that is run before saving.
    *
-   * @param parameters Object containg the entered parameters.
+   * @param parameters Object containing the entered parameters.
    * @returns `string` containing an error message. `null` if the parameters are valid.
    */
   validateParameters: ValidateParametersFn;
