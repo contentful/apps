@@ -16,9 +16,9 @@ export const productTransformer =
     const sku = get(item, ['code'], '');
     const productUrl = skuIdsToSkusMap[sku]
       ? skuIdsToSkusMap[sku]
-      : baseSite
+      : baseSite // eslint-disable-next-line
       ? `${apiEndpoint}/occ/v2/${baseSite}/products/${sku}`
-      : '';
+      : ''; // eslint-disable-line
 
     return {
       id,
