@@ -33,10 +33,15 @@ export type SelectedFields = Record<string, string[] | undefined>;
 
 function isCompatibleField(field: Field) {
   const isArray = field.type === 'Array';
-  return field.type === 'Symbol' || (isArray && (field.items as FieldItems).type === 'Symbol');
+  return (
+    field.type === 'Symbol' ||
+    (isArray && (field.items as FieldItems).type === 'Symbol')
+  );
 }
 
-export function getCompatibleFields(contentTypes: ContentType[]): CompatibleFields {
+export function getCompatibleFields(
+  contentTypes: ContentType[],
+): CompatibleFields {
   return contentTypes.reduce((acc, ct) => {
     return {
       ...acc,
@@ -47,12 +52,15 @@ export function getCompatibleFields(contentTypes: ContentType[]): CompatibleFiel
 
 export function editorInterfacesToSelectedFields(
   eis: EditorInterface[],
-  appId?: string
+  appId?: string,
 ): SelectedFields {
   return eis.reduce((acc, ei) => {
     const ctId = get(ei, ['sys', 'contentType', 'sys', 'id']);
     const fieldIds = get(ei, ['controls'], [])
-      .filter((control) => control.widgetNamespace === 'app' && control.widgetId === appId)
+      .filter(
+        (control) =>
+          control.widgetNamespace === 'app' && control.widgetId === appId,
+      )
       .map((control) => control.fieldId)
       .filter((fieldId) => typeof fieldId === 'string' && fieldId.length > 0);
 
@@ -66,14 +74,16 @@ export function editorInterfacesToSelectedFields(
 
 export function selectedFieldsToTargetState(
   contentTypes: ContentType[],
-  selectedFields: SelectedFields
+  selectedFields: SelectedFields,
 ) {
   return {
     EditorInterface: contentTypes.reduce((acc, ct) => {
       const { id } = ct.sys;
       const fields = selectedFields[id] || [];
       const targetState =
-        fields.length > 0 ? { controls: fields.map((fieldId) => ({ fieldId })) } : {};
+        fields.length > 0
+          ? { controls: fields.map((fieldId) => ({ fieldId })) }
+          : {};
 
       return { ...acc, [id]: targetState };
     }, {}),

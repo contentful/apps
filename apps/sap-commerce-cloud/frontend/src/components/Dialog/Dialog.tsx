@@ -29,6 +29,14 @@ interface DialogProps {
   sdk: DialogAppSDK<AppParameters>;
 }
 
+interface Event {
+  target: {
+    value: string;
+    id: string;
+    checked?: boolean;
+  };
+}
+
 interface State {
   baseSite: string;
   baseSites: string[];
@@ -64,7 +72,7 @@ export default class Dialog extends React.Component<DialogProps, State> {
       this.state.query,
       this.state.page,
       this.props.sdk.parameters as SAPParameters,
-      this.updateTotalPages
+      this.updateTotalPages,
     );
     this.setState({
       baseSite: this.state.baseSite,
@@ -77,12 +85,18 @@ export default class Dialog extends React.Component<DialogProps, State> {
   };
 
   loadBaseSites = async () => {
-    const baseSites = await fetchBaseSites(this.props.sdk.parameters as SAPParameters);
+    const baseSites = await fetchBaseSites(
+      this.props.sdk.parameters as SAPParameters,
+    );
     let finalBaseSites: string[] = [];
-    const installationConfigBaseSites = get(this.props.sdk.parameters.invocation, 'baseSites', '');
-    if (installationConfigBaseSites.length > 0) {
+    const installationConfigBaseSites = get(
+      this.props.sdk.parameters.invocation,
+      'baseSites',
+      '',
+    );
+    if (`${installationConfigBaseSites}`.length > 0) {
       for (const baseSite of baseSites) {
-        if (installationConfigBaseSites.split(',').includes(baseSite)) {
+        if (`${installationConfigBaseSites}`.split(',').includes(baseSite)) {
           finalBaseSites.push(baseSite);
         }
       }
@@ -99,14 +113,14 @@ export default class Dialog extends React.Component<DialogProps, State> {
     });
   };
 
-  updateSearchTerm = (event: any) => {
+  updateSearchTerm = (event: Event) => {
     this.setState({
       ...this.state,
       query: event.target.value,
     });
   };
 
-  updateBaseSite = (event: any) => {
+  updateBaseSite = (event: Event) => {
     this.setState(
       {
         ...this.state,
@@ -114,18 +128,25 @@ export default class Dialog extends React.Component<DialogProps, State> {
       },
       () => {
         this.load();
-      }
+      },
     );
   };
 
-  multiProductsCheckBoxClickEvent = (event: any) => {
+  multiProductsCheckBoxClickEvent = (event: unknown) => {
     let existingProducts: string[] = this.state.selectedProducts;
-    const skuId: string = event.target.id;
+    const typedEvent = event as Event;
+    const skuId: string = typedEvent.target.id;
 
-    if (event.target.checked) {
+    if (typedEvent.target.checked) {
       if (!existingProducts.includes(skuId)) {
-        const apiEndpoint = get(this.props.sdk.parameters.invocation, 'apiEndpoint', '');
-        existingProducts.push(formatProductUrl(apiEndpoint, this.state.baseSite, skuId));
+        const apiEndpoint = get(
+          this.props.sdk.parameters.invocation,
+          'apiEndpoint',
+          '',
+        );
+        existingProducts.push(
+          formatProductUrl(`${apiEndpoint}`, this.state.baseSite, skuId),
+        );
         this.setState({
           selectedProducts: existingProducts,
         });
@@ -146,7 +167,11 @@ export default class Dialog extends React.Component<DialogProps, State> {
   };
 
   selectMultipleProductsClickEvent = () => {
-    const currentField = get(this.props.sdk.parameters.invocation, 'fieldValue', [] as string[]);
+    const currentField = get(
+      this.props.sdk.parameters.invocation,
+      'fieldValue',
+      [] as string[],
+    ) as string[];
     const updatedField = union(currentField, this.state.selectedProducts);
 
     this.props.sdk.close(updatedField);
@@ -166,14 +191,16 @@ export default class Dialog extends React.Component<DialogProps, State> {
 
   render() {
     const isFieldTypeArray =
-      (get(this.props.sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
+      (get(this.props.sdk.parameters.invocation, 'fieldType', '') as string) ===
+      'Array';
     return (
       <>
         <Grid
           columns="1fr 1fr 1fr 1fr 1fr"
           rowGap="spacingM"
           columnGap="spacingM"
-          className={styles.grid}>
+          className={styles.grid}
+        >
           <GridItem>
             <TextInput
               type="text"
@@ -202,7 +229,8 @@ export default class Dialog extends React.Component<DialogProps, State> {
               variant="primary"
               icon={<SearchIcon />}
               aria-label="search"
-              onClick={() => this.searchButtonClickEvent()}>
+              onClick={() => this.searchButtonClickEvent()}
+            >
               Search
             </IconButton>
           </GridItem>
@@ -212,7 +240,8 @@ export default class Dialog extends React.Component<DialogProps, State> {
                 variant="primary"
                 icon={<DoneIcon />}
                 onClick={this.selectMultipleProductsClickEvent}
-                aria-label="Select Products">
+                aria-label="Select Products"
+              >
                 Select Products
               </IconButton>
             </GridItem>
@@ -272,7 +301,8 @@ export default class Dialog extends React.Component<DialogProps, State> {
             <Button
               variant="primary"
               className={styles.nextButton(this.state.page)}
-              onClick={this.nextPageButtonEvent}>
+              onClick={this.nextPageButtonEvent}
+            >
               Next
             </Button>
           ) : (
@@ -285,7 +315,8 @@ export default class Dialog extends React.Component<DialogProps, State> {
             icon={<DoneIcon />}
             onClick={this.selectMultipleProductsClickEvent}
             aria-label="Select Products"
-            className={styles.selectProductsButton}>
+            className={styles.selectProductsButton}
+          >
             Select Products
           </IconButton>
         ) : (

@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, cleanup } from '@testing-library/react';
 import { Props, SortableList } from './SortableList';
 import { mockProductPreview } from '../../__mocks__';

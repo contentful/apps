@@ -103,7 +103,10 @@ export default class Field extends React.Component<Props, State> {
               skus={data}
               onChange={this.updateStateValue}
               fetchProductPreviews={(skus) =>
-                fetchProductPreviews(skus, this.props.sdk.parameters as SAPParameters)
+                fetchProductPreviews(
+                  skus,
+                  this.props.sdk.parameters as SAPParameters,
+                )
               }
             />
           </div>
@@ -115,7 +118,8 @@ export default class Field extends React.Component<Props, State> {
             icon={<ShoppingCartIcon size="small" variant="muted" />}
             onClick={this.onDialogOpen}
             aria-label={makeCTAText(fieldType)}
-            isDisabled={editingDisabled}>
+            isDisabled={editingDisabled}
+          >
             {makeCTAText(fieldType)}
           </IconButton>
         </div>

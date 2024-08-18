@@ -1,4 +1,4 @@
-import { ChangeEvent, useState, useEffect } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react';
 
 import { CollectionResponse, ConfigAppSDK } from '@contentful/app-sdk';
 import {
@@ -25,7 +25,12 @@ import {
   selectedFieldsToTargetState,
 } from './fields';
 
-import { AppParameters, Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
+import {
+  AppParameters,
+  Config,
+  ParameterDefinition,
+  ValidateParametersFn,
+} from '../interfaces';
 
 import { styles } from './AppConfig.styles';
 
@@ -41,10 +46,12 @@ interface Props {
 
 export default function AppConfig(props: Props) {
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
-  const [compatibleFields, setCompatibleFields] = useState<CompatibleFields>({});
+  const [compatibleFields, setCompatibleFields] = useState<CompatibleFields>(
+    {},
+  );
   const [selectedFields, setSelectedFields] = useState<SelectedFields>({});
   const [parameters, setParameters] = useState<Config>(
-    toInputParameters(props.parameterDefinitions, null)
+    toInputParameters(props.parameterDefinitions, null),
   );
 
   useEffect(() => {
@@ -62,8 +69,12 @@ export default function AppConfig(props: Props) {
       app.getParameters(),
     ]);
 
-    const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items;
-    const editorInterfaces = (eisResponse as CollectionResponse<EditorInterface>).items;
+    const contentTypes = (
+      contentTypesResponse as CollectionResponse<ContentType>
+    ).items;
+    const editorInterfaces = (
+      eisResponse as CollectionResponse<EditorInterface>
+    ).items;
 
     const compatibleFields = getCompatibleFields(contentTypes);
     const filteredContentTypes = contentTypes.filter((ct) => {
@@ -73,7 +84,9 @@ export default function AppConfig(props: Props) {
 
     setContentTypes(filteredContentTypes);
     setCompatibleFields(compatibleFields);
-    setSelectedFields(editorInterfacesToSelectedFields(editorInterfaces, ids.app));
+    setSelectedFields(
+      editorInterfacesToSelectedFields(editorInterfaces, ids.app),
+    );
     setParameters(toInputParameters(props.parameterDefinitions, parameters));
 
     app.setReady();
@@ -110,7 +123,8 @@ export default function AppConfig(props: Props) {
     const { parameterDefinitions, sdk } = props;
     const { ids, hostnames } = sdk;
     const { space, environment } = ids;
-    const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
+    const hasConfigurationOptions =
+      parameterDefinitions && parameterDefinitions.length > 0;
 
     return (
       <>
@@ -122,7 +136,7 @@ export default function AppConfig(props: Props) {
                 const key = `config-input-${def.id}`;
 
                 return (
-                  <FormControl id={key}>
+                  <FormControl key={key} id={key}>
                     <FormControl.Label>{def.name}</FormControl.Label>
                     <TextInput
                       isRequired={def.required}
@@ -132,10 +146,14 @@ export default function AppConfig(props: Props) {
                       maxLength={255}
                       width={def.type === 'Symbol' ? 'large' : 'medium'}
                       type={def.type === 'Symbol' ? 'text' : 'number'}
-                      value={parameters[def.id]}
-                      onChange={(e) => onParameterChange(def.id, e)}
+                      value={`${parameters[def.id]}`}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        onParameterChange(def.id, e)
+                      }
                     />
-                    <FormControl.HelpText>{def.description}</FormControl.HelpText>
+                    <FormControl.HelpText>
+                      {def.description}
+                    </FormControl.HelpText>
                   </FormControl>
                 );
               })}
@@ -147,8 +165,8 @@ export default function AppConfig(props: Props) {
         {contentTypes.length > 0 ? (
           <Paragraph>
             This app can only be used with <strong>Short text</strong> or{' '}
-            <strong>Short text, list</strong> fields. Select which fields you’d like to enable for
-            this app.
+            <strong>Short text, list</strong> fields. Select which fields you’d
+            like to enable for this app.
           </Paragraph>
         ) : (
           <>
@@ -157,8 +175,11 @@ export default function AppConfig(props: Props) {
               <strong>Short text, list</strong> fields.
             </Paragraph>
             <Note variant="warning">
-              There are <strong>no content types with Short text or Short text, list</strong> fields
-              in this environment. You can add one in your{' '}
+              There are{' '}
+              <strong>
+                no content types with Short text or Short text, list
+              </strong>{' '}
+              fields in this environment. You can add one in your{' '}
               <TextLink
                 variant="primary"
                 target="_blank"
@@ -167,7 +188,8 @@ export default function AppConfig(props: Props) {
                   environment === 'master'
                     ? `https://${hostnames.webapp}/spaces/${space}/content_types`
                     : `https://${hostnames.webapp}/spaces/${space}/environments/${environment}/content_types`
-                }>
+                }
+              >
                 content model
               </TextLink>{' '}
               and assign it to the app from this screen.

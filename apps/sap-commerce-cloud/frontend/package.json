@@ -23,7 +23,8 @@
     "start": "vite",
     "build": "vite build",
     "test": "vitest --logHeapUsage --coverage",
-    "test:ci": "vitest"
+    "test:ci": "vitest",
+    "lint": "eslint ."
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -49,9 +50,16 @@
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^2.0.5",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.35.0",
     "happy-dom": "^14.12.3",
+    "prettier": "^3.3.3",
     "typescript": "^4.1.5",
     "vite": "^5.4.0",
     "vitest": "2.0.5"

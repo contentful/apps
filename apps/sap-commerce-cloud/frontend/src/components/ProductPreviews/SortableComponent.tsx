@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useCallback, useRef } from 'react';
+import React, { FC, useState, useEffect, useCallback, useRef } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -68,13 +68,26 @@ export const SortableComponent: FC<Props> = ({
 
       if (shouldRefetch) {
         const productPreviewsUnsorted = await fetchProductPreviews(skus);
-        const sortedProductPreviews = mapSort(productPreviewsUnsorted, skus, 'productUrl');
+        const sortedProductPreviews = mapSort(
+          productPreviewsUnsorted,
+          skus,
+          'productUrl',
+        );
         setProductPreviews(sortedProductPreviews);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      sdk.notifier.error('There was an error fetching the data for the selected products.');
+      sdk.notifier.error(
+        'There was an error fetching the data for the selected products.',
+      );
     }
-  }, [skus, fetchProductPreviews, setProductPreviews, sdk.notifier, previousSkus]);
+  }, [
+    skus,
+    fetchProductPreviews,
+    setProductPreviews,
+    sdk.notifier,
+    previousSkus,
+  ]);
 
   /**
    * @description - Compare previous list of skus (see `usePreviousSkus`) to the list of skus
@@ -95,7 +108,7 @@ export const SortableComponent: FC<Props> = ({
       newSkus.splice(index, 1);
       onChange(newSkus);
     },
-    [onChange, skus]
+    [onChange, skus],
   );
 
   const handleDragEnd = useCallback(
@@ -105,15 +118,23 @@ export const SortableComponent: FC<Props> = ({
       console.log('over', over);
 
       if (active.id !== over?.id) {
-        const oldIndex = productPreviews.findIndex((product) => product.productUrl === active.id);
-        const newIndex = productPreviews.findIndex((product) => product.productUrl === over?.id);
-        const sortedProductPreviews: Product[] = arrayMove(productPreviews, oldIndex, newIndex);
+        const oldIndex = productPreviews.findIndex(
+          (product) => product.productUrl === active.id,
+        );
+        const newIndex = productPreviews.findIndex(
+          (product) => product.productUrl === over?.id,
+        );
+        const sortedProductPreviews: Product[] = arrayMove(
+          productPreviews,
+          oldIndex,
+          newIndex,
+        );
 
         onChange(sortedProductPreviews.map((p) => p.productUrl));
         setProductPreviews(sortedProductPreviews);
       }
     },
-    [productPreviews, onChange, setProductPreviews]
+    [productPreviews, onChange, setProductPreviews],
   );
 
   const sensors = useSensors(
@@ -124,15 +145,24 @@ export const SortableComponent: FC<Props> = ({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
       <SortableContext
         items={productPreviews.map((p) => p.productUrl)}
-        strategy={verticalListSortingStrategy}>
-        <SortableList disabled={disabled} productPreviews={productPreviews} deleteFn={deleteItem} />
+        strategy={verticalListSortingStrategy}
+      >
+        <SortableList
+          disabled={disabled}
+          productPreviews={productPreviews}
+          deleteFn={deleteItem}
+        />
       </SortableContext>
     </DndContext>
   );

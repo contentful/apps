@@ -7,6 +7,7 @@ import { vi } from 'vitest';
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
     const mockSdk: any = {
+      // eslint-disable-line
       app: {
         onConfigure: vi.fn(),
         getParameters: vi.fn().mockReturnValueOnce({}),
@@ -59,7 +60,7 @@ describe('Config Screen component', () => {
             },
           ] as ParameterDefinition[]
         }
-        validateParameters={(parameters: Record<string, string>) => {
+        validateParameters={() => {
           return '';
         }}
         logo=""
@@ -68,7 +69,7 @@ describe('Config Screen component', () => {
         description={`
             The SAP Commerce Cloud app allows content creators to select products from their
             SAP Commerce Cloud instance and reference them inside of Contentful entries.`}
-      />
+      />,
     );
 
     // simulate the user clicking the install button
@@ -76,8 +77,8 @@ describe('Config Screen component', () => {
 
     expect(
       getByText(
-        'The SAP Commerce Cloud app allows content creators to select products from their SAP Commerce Cloud instance and reference them inside of Contentful entries.'
-      )
+        'The SAP Commerce Cloud app allows content creators to select products from their SAP Commerce Cloud instance and reference them inside of Contentful entries.',
+      ),
     ).toBeInTheDocument();
   });
 });

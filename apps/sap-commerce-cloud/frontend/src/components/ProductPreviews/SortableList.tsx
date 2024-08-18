@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { DeleteFn, Product } from '../../interfaces';
 import { SortableListItem } from './SortableListItem';
 import { styles } from './SortableList.styles';
@@ -9,7 +9,11 @@ export interface Props {
   deleteFn: DeleteFn;
 }
 
-export const SortableList: FC<Props> = ({ disabled, deleteFn, productPreviews = [] }) => {
+export const SortableList: FC<Props> = ({
+  disabled,
+  deleteFn,
+  productPreviews = [],
+}) => {
   const itemsAreSortable = productPreviews.length > 1;
 
   return (

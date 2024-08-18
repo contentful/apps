@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, cleanup, waitFor, act } from '@testing-library/react';
 import { SortableComponent } from './SortableComponent';
 import { mockProductPreview, makeSdkMock } from '../../__mocks__';
@@ -33,15 +34,19 @@ describe('SortableComponent', () => {
           skus={skus}
           onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
-        />
+        />,
       );
     });
 
-    await waitFor(() => expect(mockFetchProductPreviews).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(mockFetchProductPreviews).toHaveBeenLastCalledWith(skus));
+    await waitFor(() =>
+      expect(mockFetchProductPreviews).toHaveBeenCalledTimes(1),
+    );
+    await waitFor(() =>
+      expect(mockFetchProductPreviews).toHaveBeenLastCalledWith(skus),
+    );
   });
 
-  it('refetches list of products for associated skus, when skus are added/removed', async () => {
+  it('re-fetches list of products for associated skus, when skus are added/removed', async () => {
     const newSkus = [...skus, 'new-sku-item'];
 
     act(() => {
@@ -53,7 +58,7 @@ describe('SortableComponent', () => {
           skus={skus}
           onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
-        />
+        />,
       );
 
       // rerender with additional sku
@@ -64,12 +69,16 @@ describe('SortableComponent', () => {
           disabled={false}
           onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
-        />
+        />,
       );
     });
 
-    await waitFor(() => expect(mockFetchProductPreviews).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(mockFetchProductPreviews).toHaveBeenLastCalledWith(newSkus));
+    await waitFor(() =>
+      expect(mockFetchProductPreviews).toHaveBeenCalledTimes(2),
+    );
+    await waitFor(() =>
+      expect(mockFetchProductPreviews).toHaveBeenLastCalledWith(newSkus),
+    );
   });
 
   it('does NOT refetch list of products when skus have simply been reordered', async () => {
@@ -84,7 +93,7 @@ describe('SortableComponent', () => {
           skus={skus}
           onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
-        />
+        />,
       );
 
       // rerender with new skus, just reordered
@@ -95,10 +104,12 @@ describe('SortableComponent', () => {
           disabled={false}
           onChange={vi.fn()}
           fetchProductPreviews={mockFetchProductPreviews}
-        />
+        />,
       );
     });
 
-    await waitFor(() => expect(mockFetchProductPreviews).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(mockFetchProductPreviews).toHaveBeenCalledTimes(1),
+    );
   });
 });

@@ -1,16 +1,16 @@
 import difference from 'lodash/difference';
-import { Product, SAPParameters } from '../interfaces';
+import { Hash, Product, SAPParameters } from '../interfaces';
 import { productTransformer } from './dataTransformers';
 
 export async function fetchProductPreviews(
   skus: string[],
-  parameters: SAPParameters
+  parameters: SAPParameters,
 ): Promise<Product[]> {
   if (!skus.length) {
     return [];
   }
 
-  let totalResponse: any[] = [];
+  let totalResponse: Hash[] = [];
   let skuIds: string[] = [];
   let skuIdsToSkusMap: { [key: string]: string } = {};
 
@@ -27,10 +27,12 @@ export async function fetchProductPreviews(
     }
   }
 
-  const products = totalResponse.map(productTransformer(parameters.installation, skuIdsToSkusMap));
-  const foundSKUs = products.map((product: { sku: any }) => product.sku);
+  const products = totalResponse.map(
+    productTransformer(parameters.installation, skuIdsToSkusMap),
+  );
+  const foundSKUs = products.map((product: { sku: string }) => product.sku);
   const missingProducts = difference(skuIds, foundSKUs).map((sku) => ({
-    sku: sku.split('/products/').pop(),
+    sku: sku.split('/products/').pop() || '',
     image: '',
     id: '',
     name: '',

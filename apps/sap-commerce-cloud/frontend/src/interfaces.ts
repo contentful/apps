@@ -1,10 +1,14 @@
-import { DialogExtensionSDK, FieldExtensionSDK, ParametersAPI } from '@contentful/app-sdk';
+import {
+  DialogExtensionSDK,
+  FieldExtensionSDK,
+  ParametersAPI,
+} from '@contentful/app-sdk';
 import { FieldsConfig } from './components/fields';
 
 /**
  * Object containing all information configured on the app configuration page.
  */
-export type Config = Record<string, any>;
+export type Config = Record<string, unknown>;
 
 /**
  * Definition of app configuration parameters
@@ -28,7 +32,7 @@ export interface ParameterDefinition {
   /**
    * Default value
    */
-  default?: any;
+  default?: unknown;
 
   /**
    * Parameter type
@@ -50,6 +54,7 @@ export type AppParameters = {
 };
 
 export interface SAPParameters extends ParametersAPI<AppParameters, {}, {}> {
+  // eslint-disable-line
   installation: {
     apiEndpoint: string;
     baseSites: string;
@@ -91,7 +96,7 @@ interface ProductsFnResponse {
 
 export type ProductsFn = (
   search: string,
-  pagination?: Partial<Pagination>
+  pagination?: Partial<Pagination>,
 ) => Promise<ProductsFnResponse>;
 
 /**
@@ -108,7 +113,7 @@ export type MakeCTAFn = (fieldType: string) => string;
  * @param parameters Object containg the entered parameters.
  * @returns `string` containing an error message. `null` if the parameters are valid.
  */
-export type ValidateParametersFn = (parameters: Record<string, string>) => string | null;
+export type ValidateParametersFn = (parameters: Config) => string | null;
 
 /**
  * Function that returns a list for a given list of skus. The returned value is used to render a product preview.
@@ -117,7 +122,10 @@ export type ValidateParametersFn = (parameters: Record<string, string>) => strin
  * @param config App configuration
  * @returns List of Products which is used to render a preview.
  */
-export type ProductPreviewsFn = (skus: string[], config: Config) => Promise<Product[]>;
+export type ProductPreviewsFn = (
+  skus: string[],
+  config: Config,
+) => Promise<Product[]>;
 export type DeleteFn = (index: number) => void;
 
 /**
@@ -161,7 +169,7 @@ export type RenderDialogFn = (sdk: DialogExtensionSDK) => void;
 export type OpenDialogFn = (
   sdk: FieldExtensionSDK,
   currentValue: string[] | string,
-  config: Config
+  config: Config,
 ) => Promise<string[]>;
 
 /**
@@ -171,7 +179,10 @@ export type OpenDialogFn = (
  * @param config App configuration
  * @returns true, if the button in the field location should be disabled. false, if the button should be enabled
  */
-export type DisabledPredicateFn = (currentValue: string[], config: Config) => boolean;
+export type DisabledPredicateFn = (
+  currentValue: string[],
+  config: Config,
+) => boolean;
 
 export interface Integration {
   /**
@@ -273,7 +284,7 @@ export interface Integration {
   isDisabled: DisabledPredicateFn;
 }
 
-export type Hash = Record<string, any>;
+export type Hash = Record<string, any>; // eslint-disable-line
 
 export interface ConfigurationParameters {
   projectKey?: string;
@@ -288,6 +299,6 @@ export interface ConfigurationParameters {
 
 export type PreviewsFn = (skus: string[]) => Promise<Product[]>;
 
-export type CheckBoxFn = (event: any) => void;
+export type CheckBoxFn = (event: any) => void; // eslint-disable-line
 
 export type UpdateTotalPagesFn = (totalPages: number) => void;

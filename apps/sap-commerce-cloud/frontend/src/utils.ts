@@ -7,7 +7,7 @@ import { Product } from './interfaces';
 export const mapSort = <T extends Product, K extends keyof T>(
   array: T[],
   order: (T[K] | string)[],
-  key: K
+  key: K,
 ): T[] => {
   const sorted = array.slice().sort((a, b) => {
     const A = a[key];
@@ -24,6 +24,10 @@ export const mapSort = <T extends Product, K extends keyof T>(
  * @param baseSite
  * @returns string
  */
-export const formatProductUrl = (apiEndpoint: string, baseSite: string, sku: string): string => {
+export const formatProductUrl = (
+  apiEndpoint: string,
+  baseSite: string,
+  sku: string,
+): string => {
   return `${apiEndpoint}/occ/v2/${baseSite}/products/${sku}`;
 };

@@ -13,7 +13,9 @@ const mockParameterDefinition: ParameterDefinition = {
 describe('parameters', () => {
   describe('toInputParameters', () => {
     it('handles lack of parameters', () => {
-      const parameterDefinitions: ParameterDefinition[] = [mockParameterDefinition];
+      const parameterDefinitions: ParameterDefinition[] = [
+        mockParameterDefinition,
+      ];
       const result = toInputParameters(parameterDefinitions, {});
 
       expect(result).toEqual({
@@ -22,7 +24,9 @@ describe('parameters', () => {
     });
 
     it('resolves parameters to string values', () => {
-      const parameterDefinitions: ParameterDefinition[] = [mockParameterDefinition];
+      const parameterDefinitions: ParameterDefinition[] = [
+        mockParameterDefinition,
+      ];
       const result = toInputParameters(parameterDefinitions, {
         id: 'some-key',
         name: 'some-key-name',

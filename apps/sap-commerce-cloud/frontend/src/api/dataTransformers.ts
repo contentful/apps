@@ -5,7 +5,7 @@ export const productTransformer =
   (
     { apiEndpoint }: ConfigurationParameters,
     skuIdsToSkusMap: { [key: string]: string },
-    baseSite?: string
+    baseSite?: string,
   ) =>
   (item: Hash): Product => {
     const id = get(item, ['id'], '');

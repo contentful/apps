@@ -1,14 +1,21 @@
-import { ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 import { styles } from './FieldSelector.styles';
-import { Form, Subheading, FormControl, Checkbox } from '@contentful/f36-components';
+import {
+  Form,
+  Subheading,
+  FormControl,
+  Checkbox,
+} from '@contentful/f36-components';
 
 import { ContentType, CompatibleFields, SelectedFields } from './fields';
+
+type FieldsChangedFunction = (unknown: SelectedFields) => unknown;
 
 interface Props {
   contentTypes: ContentType[];
   compatibleFields: CompatibleFields;
   selectedFields: SelectedFields;
-  onSelectedFieldsChange: Function;
+  onSelectedFieldsChange: FieldsChangedFunction;
 }
 
 export default function FieldSelector({
@@ -20,7 +27,7 @@ export default function FieldSelector({
   const onSelectedFieldChange = (
     ctId: string,
     fieldId: string,
-    e: ChangeEvent<HTMLInputElement>
+    e: ChangeEvent<HTMLInputElement>,
   ) => {
     const updated = { ...selectedFields };
 
@@ -42,13 +49,25 @@ export default function FieldSelector({
             <Subheading>{ct.name}</Subheading>
             <Form>
               {fields.map((field) => (
-                <FormControl id={`field-box-${ct.sys.id}-${field.id}`} key={field.id}>
+                <FormControl
+                  id={`field-box-${ct.sys.id}-${field.id}`}
+                  key={field.id}
+                >
                   <Checkbox
                     helpText={`${
-                      field.type === 'Symbol' ? 'Short text' : 'Short text, list'
+                      field.type === 'Symbol'
+                        ? 'Short text'
+                        : 'Short text, list'
                     } · Field ID: ${field.id}`}
-                    isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
-                    onChange={onSelectedFieldChange.bind(null, ct.sys.id, field.id)}>
+                    isChecked={(selectedFields[ct.sys.id] || []).includes(
+                      field.id,
+                    )}
+                    onChange={onSelectedFieldChange.bind(
+                      null,
+                      ct.sys.id,
+                      field.id,
+                    )}
+                  >
                     {field.name}
                   </Checkbox>
                 </FormControl>

@@ -30,13 +30,18 @@ export interface EditorInterface {
 }
 
 export type CompatibleFields = Record<string, Field[]>;
-export type FieldsConfig = Record<string, Record<string, string | undefined> | undefined>;
+export type FieldsConfig = Record<
+  string,
+  Record<string, string | undefined> | undefined
+>;
 
 function isCompatibleField(field: Field): boolean {
   return field.type === 'Symbol';
 }
 
-export function getCompatibleFields(contentTypes: ContentType[]): CompatibleFields {
+export function getCompatibleFields(
+  contentTypes: ContentType[],
+): CompatibleFields {
   return contentTypes.reduce((acc, ct) => {
     return {
       ...acc,
@@ -48,12 +53,15 @@ export function getCompatibleFields(contentTypes: ContentType[]): CompatibleFiel
 export function editorInterfacesToSelectedFields(
   eis: EditorInterface[],
   fieldsConfig: FieldsConfig,
-  appId?: string
+  appId?: string,
 ): FieldsConfig {
   return eis.reduce((acc, ei) => {
     const ctId = get(ei, ['sys', 'contentType', 'sys', 'id']);
     const fieldIds = get(ei, ['controls'], [])
-      .filter((control) => control.widgetNamespace === 'app' && control.widgetId === appId)
+      .filter(
+        (control) =>
+          control.widgetNamespace === 'app' && control.widgetId === appId,
+      )
       .map((control) => control.fieldId)
       .filter((fieldId) => typeof fieldId === 'string' && fieldId.length > 0);
 
@@ -72,14 +80,16 @@ export function editorInterfacesToSelectedFields(
 
 export function selectedFieldsToTargetState(
   contentTypes: ContentType[],
-  selectedFields: FieldsConfig
+  selectedFields: FieldsConfig,
 ) {
   return {
     EditorInterface: contentTypes.reduce((acc, ct) => {
       const { id } = ct.sys;
       const fields = Object.keys(selectedFields[id] || {});
       const targetState =
-        fields.length > 0 ? { controls: fields.map((fieldId) => ({ fieldId })) } : {};
+        fields.length > 0
+          ? { controls: fields.map((fieldId) => ({ fieldId })) }
+          : {};
 
       return { ...acc, [id]: targetState };
     }, {}),

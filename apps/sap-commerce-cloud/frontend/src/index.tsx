@@ -1,6 +1,13 @@
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { init, locations, FieldAppSDK, DialogAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
+import {
+  init,
+  locations,
+  FieldAppSDK,
+  DialogAppSDK,
+  ConfigAppSDK,
+} from '@contentful/app-sdk';
 import './index.css';
 import AppConfig from './AppConfig/AppConfig';
 

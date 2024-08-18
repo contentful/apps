@@ -1,12 +1,25 @@
 import { Response, SAPParameters, UpdateTotalPagesFn } from '../interfaces';
 import { productTransformer } from './dataTransformers';
 
+interface JSONResponse {
+  products: [];
+  errors: [];
+  pagination: {
+    totalPages: number;
+  };
+}
+
+interface FetchProductResponse {
+  json: () => Promise<JSONResponse>;
+  ok: boolean;
+}
+
 export async function fetchProductList(
   baseSite: string,
   searchQuery: string,
   page: number,
   parameters: SAPParameters,
-  updateTotalPages: UpdateTotalPagesFn
+  updateTotalPages: UpdateTotalPagesFn,
 ): Promise<Response> {
   if (!baseSite.length) {
     return {
@@ -15,7 +28,7 @@ export async function fetchProductList(
     };
   }
 
-  const response: any = await fetch(
+  const response: FetchProductResponse = await fetch(
     parameters.installation.apiEndpoint +
       '/occ/v2/' +
       baseSite +
@@ -23,12 +36,12 @@ export async function fetchProductList(
       '?query=' +
       searchQuery +
       '&fields=FULL&currentPage=' +
-      page
+      page,
   );
   const responseJson = await response.json();
   if (response.ok) {
     const products = responseJson['products'].map(
-      productTransformer(parameters.installation, {}, baseSite)
+      productTransformer(parameters.installation, {}, baseSite),
     );
     updateTotalPages(responseJson['pagination']['totalPages']);
     if (!products.length) {

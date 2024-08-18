@@ -1,3 +1,4 @@
+import React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { SortableListItem } from './SortableListItem';
 import { mockProductPreview } from '../../__mocks__';
@@ -26,7 +27,10 @@ describe('SortableListItem', () => {
   });
 
   it('should render successfully the sortable variation', () => {
-    const { getByTestId } = renderComponent({ ...defaultProps, isSortable: true });
+    const { getByTestId } = renderComponent({
+      ...defaultProps,
+      isSortable: true,
+    });
     const image = getByTestId('image');
     fireEvent(image, new Event('load'));
     expect(image).toHaveStyle('display: block');
@@ -39,7 +43,10 @@ describe('SortableListItem', () => {
   });
 
   it('should render successfully the error variation for missing image', async () => {
-    const { getByTestId } = renderComponent({ ...defaultProps, isSortable: true });
+    const { getByTestId } = renderComponent({
+      ...defaultProps,
+      isSortable: true,
+    });
     const image = getByTestId('image');
     fireEvent(image, new Event('error'));
     expect(image).not.toBeInTheDocument();
