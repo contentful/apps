@@ -24,7 +24,7 @@
     "build": "vite build",
     "test": "vitest --logHeapUsage --coverage",
     "test:ci": "vitest",
-    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}' --max-warnings 0",
     "lint:fix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix"
   },
   "eslintConfig": {
