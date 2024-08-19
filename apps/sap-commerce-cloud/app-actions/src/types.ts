@@ -48,4 +48,4 @@ export interface BaseSite {
   uid: string;
 }
 
-export type BaseSites = BaseSite[];
+export type BaseSites = { baseSites: BaseSite[] };

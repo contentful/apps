@@ -9,18 +9,7 @@
       "path": "actions/fetchBaseSites.js",
       "entryFile": "./app-actions/src/actions/fetchBaseSites.ts",
       "allowNetworks": [],
-      "parameters": [
-        {
-          "id": "sapApiEndpoint",
-          "name": "SAP API Endpoint",
-          "type": "Symbol"
-        },
-        {
-          "id": "apiKey",
-          "name": "SAP API Key",
-          "type": "Symbol"
-        }
-      ]
+      "parameters": []
     },
     {
       "id": "fetchProductList",

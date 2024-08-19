@@ -1,41 +1,23 @@
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
-import get from 'lodash.get';
-import { Hash } from '../types';
+import { AppActionCallResponse } from '../types';
+import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
+import { fetchApiEndpoint } from '../helpers/fetchApiEndpoint';
+import { SapService } from '../services/sapService';
 
-interface AppActionCallParameters {
-  apiKey: string;
-  sapApiEndpoint: string;
-}
+export const handler = withAsyncAppActionErrorHandling(
+  async (_payload: {}, context: AppActionCallContext): Promise<AppActionCallResponse<string[]>> => {
+    const {
+      cma,
+      appActionCallContext: { appInstallationId },
+    } = context;
+    const apiEndpoint = await fetchApiEndpoint(cma, appInstallationId);
 
-export const handler = async (payload: AppActionCallParameters, context: AppActionCallContext) => {
-  const { sapApiEndpoint, apiKey } = payload;
-  try {
-    const req = await fetch(sapApiEndpoint, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'application-interface-key': apiKey,
-      },
-    });
-
-    const res = await req.json();
+    const sapService = new SapService(apiEndpoint);
+    const baseSites = await sapService.getBaseSites();
 
     return {
-      status: 'Success',
-      // @ts-ignore
-      baseSites: res.baseSites,
-    };
-  } catch (err) {
-    return {
-      status: 'Failed',
-      // @ts-ignore
-      body: err.message,
+      ok: true,
+      data: baseSites,
     };
   }
-};
-
-export const baseSiteTransformer =
-  () =>
-  (item: Hash): string => {
-    return get(item, ['uid'], '');
-  };
+);
