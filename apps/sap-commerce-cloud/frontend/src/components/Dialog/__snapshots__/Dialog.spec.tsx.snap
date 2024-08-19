@@ -25,7 +25,20 @@ exports[`Dialog > renders correctly and matches snapshot 1`] = `
         <select
           class="css-hcyaiw"
           data-test-id="cf-ui-select"
-        />
+        >
+          <option
+            data-test-id="cf-ui-select-option"
+            value="site1"
+          >
+            site1
+          </option>
+          <option
+            data-test-id="cf-ui-select-option"
+            value="site2"
+          >
+            site2
+          </option>
+        </select>
         <svg
           aria-hidden="true"
           class="css-14n9xrq"

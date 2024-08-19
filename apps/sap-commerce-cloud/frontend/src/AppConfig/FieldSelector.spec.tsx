@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import FieldSelector from './FieldSelector';
 import { vi, describe, it, expect } from 'vitest';
+import { mockContentTypes } from '../__mocks__';
 
 const contentTypes = [
   {
@@ -33,15 +34,15 @@ describe('FieldSelector', () => {
   it('renders content types and fields correctly', () => {
     render(
       <FieldSelector
-        contentTypes={contentTypes}
+        contentTypes={mockContentTypes}
         compatibleFields={compatibleFields}
         selectedFields={selectedFields}
         onSelectedFieldsChange={vi.fn()}
       />
     );
 
-    expect(screen.getByText('Content Type 1')).toBeInTheDocument();
-    expect(screen.getByText('Content Type 2')).toBeInTheDocument();
+    expect(screen.getByText(mockContentTypes[0].name)).toBeInTheDocument();
+    expect(screen.getByText(mockContentTypes[1].name)).toBeInTheDocument();
     expect(screen.getByText('Field 1')).toBeInTheDocument();
     expect(screen.getByText('Field 2')).toBeInTheDocument();
     expect(screen.getByText('Field 3')).toBeInTheDocument();
@@ -59,7 +60,7 @@ describe('FieldSelector', () => {
 
     render(
       <FieldSelector
-        contentTypes={contentTypes}
+        contentTypes={mockContentTypes}
         compatibleFields={compatibleFields}
         selectedFields={selectedFields}
         onSelectedFieldsChange={onSelectedFieldsChangeMock}
@@ -80,7 +81,7 @@ describe('FieldSelector', () => {
 
     render(
       <FieldSelector
-        contentTypes={contentTypes}
+        contentTypes={mockContentTypes}
         compatibleFields={compatibleFields}
         selectedFields={{
           ct1: ['field1', 'field2'],

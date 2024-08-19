@@ -2,17 +2,14 @@ import { render, screen } from '@testing-library/react';
 import { ProductList } from './ProductList';
 import { vi } from 'vitest';
 import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { makeSdkMock } from '../../__mocks__';
 
 describe('ProductList', () => {
   it('renders', () => {
     const { container } = render(
       <ProductList
         {...{
-          sdk: {
-            parameters: {
-              invocation: {},
-            },
-          } as unknown as DialogExtensionSDK,
+          sdk: makeSdkMock() as unknown as DialogExtensionSDK,
           products: [],
           selectedProducts: [],
           baseSite: '',
@@ -24,10 +21,11 @@ describe('ProductList', () => {
   });
   it('selectButtonClickEvent', async () => {
     const close = vi.fn();
-    const { container } = render(
+    render(
       <ProductList
         {...{
           sdk: {
+            ...makeSdkMock(),
             parameters: {
               invocation: {
                 fieldType: 'Symbol',

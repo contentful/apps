@@ -3,10 +3,10 @@ import { vi } from 'vitest';
 import Dialog from './Dialog';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { AppParameters, Product } from '../../interfaces';
+import { makeSdkMock } from '../../__mocks__';
 
 describe('Dialog', () => {
-  let sdkMock: DialogAppSDK<AppParameters>;
-
+  const sdkMock = makeSdkMock() as unknown as DialogAppSDK<AppParameters>;
   beforeAll(() => {
     vi.mock('../../api/fetchBaseSites', () => ({
       fetchBaseSites: vi.fn(() => Promise.resolve(['site1', 'site2'])),
@@ -34,30 +34,6 @@ describe('Dialog', () => {
         return Promise.resolve({ products, errors: [] });
       }),
     }));
-
-    sdkMock = {
-      window: {
-        startAutoResizer: vi.fn(),
-      },
-      space: {
-        sys: {
-          id: 'spaceId',
-        },
-      },
-      dialogs: {
-        openCurrentApp: vi.fn(),
-      },
-      parameters: {
-        installation: {},
-        invocation: {
-          apiEndpoint: 'https://api.example.com',
-          baseSites: 'site1,site2',
-          fieldValue: [],
-        },
-      },
-      cma: {},
-      cmaAdapter: {},
-    } as unknown as DialogAppSDK<AppParameters>;
   });
 
   afterAll(() => {

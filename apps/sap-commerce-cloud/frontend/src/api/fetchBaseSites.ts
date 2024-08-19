@@ -8,6 +8,7 @@ export async function fetchBaseSites(parameters: SAPParameters): Promise<string[
     const response = await fetch(url);
     if (response.ok) {
       const responseJson = await response.json();
+      console.log(responseJson['baseSites'].map(baseSiteTransformer()));
       const baseSites = responseJson['baseSites'].map(baseSiteTransformer());
       return baseSites;
     }

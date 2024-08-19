@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import { fetchProductList } from './fetchProductList';
+import { mockApiEndpoint, mockBaseSite, mockFetch } from '../__mocks__';
 
 const originalFetch = global.fetch;
 describe('fetchProductList', () => {
@@ -7,37 +8,18 @@ describe('fetchProductList', () => {
     global.fetch = originalFetch;
   });
   it('should fetch product list', async () => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        json: () =>
-          Promise.resolve({
-            pagination: { totalPages: 1 },
-            products: [{ id: '123' }],
-          }),
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        headers: new Headers(),
-        redirected: false,
-        type: 'basic' as ResponseType,
-        url: '',
-        clone: () => new Response(),
-        body: null,
-        bodyUsed: false,
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-        blob: () => Promise.resolve(new Blob()),
-        formData: () => Promise.resolve(new FormData()),
-        text: () => Promise.resolve(''),
-      })
-    );
+    global.fetch = mockFetch({
+      pagination: { totalPages: 1 },
+      products: [{ id: '123' }],
+    });
     const response = await fetchProductList(
       'electronics-spa',
       'product',
       1,
       {
         installation: {
-          apiEndpoint: 'http://localhost:9002',
-          baseSites: 'electronics-spa',
+          apiEndpoint: mockApiEndpoint,
+          baseSites: mockBaseSite,
         },
         instance: 'electronics',
         invocation: '123',
@@ -49,7 +31,7 @@ describe('fetchProductList', () => {
         id: '123',
         image: '',
         name: '',
-        productUrl: 'http://localhost:9002/occ/v2/electronics-spa/products/',
+        productUrl: 'localhost:9002/occ/v2/electronics-spa/products/',
         sku: '',
       },
     ]);
@@ -64,8 +46,8 @@ describe('fetchProductList', () => {
         1,
         {
           installation: {
-            apiEndpoint: 'http://localhost:9002',
-            baseSites: 'electronics-spa',
+            apiEndpoint: mockApiEndpoint,
+            baseSites: mockBaseSite,
           },
           instance: 'electronics',
           invocation: '123',
@@ -82,8 +64,8 @@ describe('fetchProductList', () => {
       1,
       {
         installation: {
-          apiEndpoint: 'http://localhost:9002',
-          baseSites: 'electronics-spa',
+          apiEndpoint: mockApiEndpoint,
+          baseSites: mockBaseSite,
         },
         instance: 'electronics',
         invocation: '123',
@@ -94,37 +76,18 @@ describe('fetchProductList', () => {
   });
 
   it('should return an empty array if no products are found', async () => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        json: () =>
-          Promise.resolve({
-            pagination: { totalPages: 1 },
-            products: [],
-          }),
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        headers: new Headers(),
-        redirected: false,
-        type: 'basic' as ResponseType,
-        url: '',
-        text: () => Promise.resolve(''),
-        clone: () => new Response(),
-        body: null,
-        bodyUsed: false,
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-        blob: () => Promise.resolve(new Blob()),
-        formData: () => Promise.resolve(new FormData()),
-      })
-    );
+    global.fetch = mockFetch({
+      pagination: { totalPages: 1 },
+      products: [],
+    });
     const response = await fetchProductList(
       'electronics-spa',
       'product',
       1,
       {
         installation: {
-          apiEndpoint: 'http://localhost:9002',
-          baseSites: 'electronics-spa',
+          apiEndpoint: mockApiEndpoint,
+          baseSites: mockBaseSite,
         },
         instance: 'electronics',
         invocation: '123',

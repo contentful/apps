@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import { fetchProductPreviews } from './fetchProductPreviews';
+import { mockApiEndpoint, mockBaseSite, mockFetch } from '../__mocks__';
 
 const originalFetch = global.fetch;
 describe('fetchProductPreviews', () => {
@@ -7,29 +8,11 @@ describe('fetchProductPreviews', () => {
     global.fetch = originalFetch;
   });
   it('should fetch product previews', async () => {
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        json: () => Promise.resolve(),
-        ok: true,
-        text: () => Promise.resolve(''),
-        status: 200,
-        statusText: 'OK',
-        headers: new Headers(),
-        redirected: false,
-        type: 'basic' as ResponseType,
-        url: '',
-        clone: () => new Response(),
-        body: null,
-        bodyUsed: false,
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-        blob: () => Promise.resolve(new Blob()),
-        formData: () => Promise.resolve(new FormData()),
-      })
-    );
+    global.fetch = mockFetch({});
     const productPreviews = await fetchProductPreviews(['1', '2'], {
       installation: {
-        apiEndpoint: 'http://localhost:9002',
-        baseSites: 'electronics-spa',
+        apiEndpoint: mockApiEndpoint,
+        baseSites: mockBaseSite,
       },
       instance: 'electronics',
       invocation: '123',
@@ -72,8 +55,8 @@ describe('fetchProductPreviews', () => {
     await expect(
       fetchProductPreviews(['1', '2'], {
         installation: {
-          apiEndpoint: 'http://localhost:9002',
-          baseSites: 'electronics-spa',
+          apiEndpoint: mockApiEndpoint,
+          baseSites: mockBaseSite,
         },
         instance: 'electronics',
         invocation: '123',
