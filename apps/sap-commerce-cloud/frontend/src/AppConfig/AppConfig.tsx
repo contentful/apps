@@ -48,50 +48,49 @@ export default function AppConfig(props: Props) {
   );
 
   useEffect(() => {
-    init();
-  }, []);
+    const init = async () => {
+      const { space, app, ids } = props.sdk;
 
-  const init = async () => {
-    const { space, app, ids } = props.sdk;
+      app.onConfigure(onAppConfigure);
 
-    app.onConfigure(onAppConfigure);
+      const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
+        space.getContentTypes(),
+        space.getEditorInterfaces(),
+        app.getParameters(),
+      ]);
 
-    const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
-      space.getContentTypes(),
-      space.getEditorInterfaces(),
-      app.getParameters(),
-    ]);
+      const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items;
+      const editorInterfaces = (eisResponse as CollectionResponse<EditorInterface>).items;
 
-    const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items;
-    const editorInterfaces = (eisResponse as CollectionResponse<EditorInterface>).items;
+      const compatibleFields = getCompatibleFields(contentTypes);
+      const filteredContentTypes = contentTypes.filter((ct) => {
+        const fields = compatibleFields[ct.sys.id];
+        return fields && fields.length > 0;
+      });
 
-    const compatibleFields = getCompatibleFields(contentTypes);
-    const filteredContentTypes = contentTypes.filter((ct) => {
-      const fields = compatibleFields[ct.sys.id];
-      return fields && fields.length > 0;
-    });
+      setContentTypes(filteredContentTypes);
+      setCompatibleFields(compatibleFields);
+      setSelectedFields(editorInterfacesToSelectedFields(editorInterfaces, ids.app));
+      setParameters(toInputParameters(props.parameterDefinitions, parameters));
 
-    setContentTypes(filteredContentTypes);
-    setCompatibleFields(compatibleFields);
-    setSelectedFields(editorInterfacesToSelectedFields(editorInterfaces, ids.app));
-    setParameters(toInputParameters(props.parameterDefinitions, parameters));
-
-    app.setReady();
-  };
-
-  const onAppConfigure = () => {
-    const error = props.validateParameters(parameters);
-
-    if (error) {
-      props.sdk.notifier.error(error);
-      return false;
-    }
-
-    return {
-      parameters: toAppParameters(props.parameterDefinitions, parameters),
-      targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
+      app.setReady();
     };
-  };
+    const onAppConfigure = () => {
+      const error = props.validateParameters(parameters);
+
+      if (error) {
+        props.sdk.notifier.error(error);
+        return false;
+      }
+
+      return {
+        parameters: toAppParameters(props.parameterDefinitions, parameters),
+        targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
+      };
+    };
+
+    init();
+  }, [props, contentTypes, parameters, selectedFields]);
 
   const onParameterChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
@@ -133,7 +132,9 @@ export default function AppConfig(props: Props) {
                       width={def.type === 'Symbol' ? 'large' : 'medium'}
                       type={def.type === 'Symbol' ? 'text' : 'number'}
                       value={parameters[def.id]}
-                      onChange={(e) => onParameterChange(def.id, e)}
+                      onChange={(e) =>
+                        onParameterChange(def.id, e as ChangeEvent<HTMLInputElement>)
+                      }
                     />
                     <FormControl.HelpText>{def.description}</FormControl.HelpText>
                   </FormControl>
