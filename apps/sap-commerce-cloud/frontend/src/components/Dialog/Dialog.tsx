@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ChangeEvent } from 'react';
+import React, { useEffect, useState, ChangeEvent, useCallback } from 'react';
 import {
   Button,
   Grid,
@@ -39,44 +39,46 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [errors, setErrors] = useState<ErrorType[]>([]);
 
+  const load = useCallback(() => {
+    const load = async () => {
+      const { products, errors } = await fetchProductList(
+        baseSite,
+        query,
+        page,
+        sdk.parameters as SAPParameters,
+        setTotalPages
+      );
+      setProducts(products);
+      setErrors(errors);
+    };
+    return load;
+  }, [baseSite, query, page, sdk.parameters]);
+
   useEffect(() => {
+    const loadBaseSites = async () => {
+      const baseSites = await fetchBaseSites(sdk.parameters as SAPParameters);
+      const installationConfigBaseSites = `${get(sdk.parameters.invocation, 'baseSites', '')}`;
+      let finalBaseSites: string[] = [];
+
+      if (installationConfigBaseSites.length > 0) {
+        finalBaseSites = baseSites.filter((site) =>
+          installationConfigBaseSites.split(',').includes(site)
+        );
+      } else {
+        finalBaseSites = baseSites;
+      }
+
+      setBaseSite(finalBaseSites[0]);
+      setBaseSites(finalBaseSites);
+      setProducts([]);
+      setSelectedProducts([]);
+    };
     const initialize = async () => {
       await loadBaseSites();
       load();
     };
     initialize();
-  }, []);
-
-  const load = async () => {
-    const { products, errors } = await fetchProductList(
-      baseSite,
-      query,
-      page,
-      sdk.parameters as SAPParameters,
-      setTotalPages
-    );
-    setProducts(products);
-    setErrors(errors);
-  };
-
-  const loadBaseSites = async () => {
-    const baseSites = await fetchBaseSites(sdk.parameters as SAPParameters);
-    const installationConfigBaseSites = `${get(sdk.parameters.invocation, 'baseSites', '')}`;
-    let finalBaseSites: string[] = [];
-
-    if (installationConfigBaseSites.length > 0) {
-      finalBaseSites = baseSites.filter((site) =>
-        installationConfigBaseSites.split(',').includes(site)
-      );
-    } else {
-      finalBaseSites = baseSites;
-    }
-
-    setBaseSite(finalBaseSites[0]);
-    setBaseSites(finalBaseSites);
-    setProducts([]);
-    setSelectedProducts([]);
-  };
+  }, [load, sdk.parameters]);
 
   const updateSearchTerm = (event: ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
