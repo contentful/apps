@@ -1,5 +1,4 @@
-import { act } from 'react';
-import { render, cleanup, waitFor } from '@testing-library/react';
+import { act, render, cleanup, waitFor } from '@testing-library/react';
 import { SortableComponent } from './SortableComponent';
 import { mockProductPreview, makeSdkMock } from '../../__mocks__';
 import { FieldAppSDK } from '@contentful/app-sdk';
