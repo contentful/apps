@@ -23,6 +23,7 @@
   },
   "scripts": {
     "start": "vite",
+    "dev": "vite --force",
     "build": "vite build",
     "test": "vitest --logHeapUsage --coverage",
     "test:ci": "vitest",
