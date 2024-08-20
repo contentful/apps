@@ -25,6 +25,10 @@ describe('fetchBaseSites.handler', () => {
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
   });
 
+  afterEach(async () => {
+    stubbedFetch.restore();
+  });
+
   it('returns the base sites result', async () => {
     const result = await handler({}, context);
     expect(result).to.have.property('ok', true);
