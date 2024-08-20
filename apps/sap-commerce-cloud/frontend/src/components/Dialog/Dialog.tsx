@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useState, ChangeEvent, useCallback } from 'react';
 import {
   Button,
   Grid,
@@ -17,7 +17,7 @@ import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
 import { fetchProductList } from '../../api/fetchProductList';
 import { fetchBaseSites } from '../../api/fetchBaseSites';
-import { AppParameters, Error, Product, SAPParameters } from '../../interfaces';
+import { AppParameters, Error as ErrorType, Product, SAPParameters } from '../../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
 import { formatProductUrl } from '../../utils';
@@ -29,269 +29,222 @@ interface DialogProps {
   sdk: DialogAppSDK<AppParameters>;
 }
 
-interface State {
-  baseSite: string;
-  baseSites: string[];
-  query: string;
-  page: number;
-  totalPages: number;
-  products: Product[];
-  selectedProducts: string[];
-  errors: Error[];
-}
+const Dialog: React.FC<DialogProps> = ({ sdk }) => {
+  const [baseSite, setBaseSite] = useState('');
+  const [baseSites, setBaseSites] = useState<string[]>([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [errors, setErrors] = useState<ErrorType[]>([]);
 
-export default class Dialog extends React.Component<DialogProps, State> {
-  state: State = {
-    baseSite: '',
-    baseSites: [],
-    query: '',
-    page: 0,
-    totalPages: 0,
-    products: [],
-    selectedProducts: [],
-    errors: [],
-  };
+  const load = useCallback(() => {
+    const load = async () => {
+      const { products, errors } = await fetchProductList(
+        baseSite,
+        query,
+        page,
+        sdk.parameters as SAPParameters,
+        setTotalPages
+      );
+      setProducts(products);
+      setErrors(errors);
+    };
+    return load;
+  }, [baseSite, query, page, sdk.parameters]);
 
-  componentDidMount() {
-    this.loadBaseSites().then(() => {
-      this.load();
-    });
-  }
+  useEffect(() => {
+    const loadBaseSites = async () => {
+      const baseSites = await fetchBaseSites(sdk.parameters as SAPParameters);
+      const installationConfigBaseSites = `${get(sdk.parameters.invocation, 'baseSites', '')}`;
+      let finalBaseSites: string[] = [];
 
-  load = async () => {
-    const { products, errors } = await fetchProductList(
-      this.state.baseSite,
-      this.state.query,
-      this.state.page,
-      this.props.sdk.parameters as SAPParameters,
-      this.updateTotalPages
-    );
-    this.setState({
-      baseSite: this.state.baseSite,
-      baseSites: this.state.baseSites,
-      query: this.state.query,
-      products: products,
-      selectedProducts: this.state.selectedProducts,
-      errors: errors,
-    });
-  };
-
-  loadBaseSites = async () => {
-    const baseSites = await fetchBaseSites(this.props.sdk.parameters as SAPParameters);
-    let finalBaseSites: string[] = [];
-    const installationConfigBaseSites = get(this.props.sdk.parameters.invocation, 'baseSites', '');
-    if (installationConfigBaseSites.length > 0) {
-      for (const baseSite of baseSites) {
-        if (installationConfigBaseSites.split(',').includes(baseSite)) {
-          finalBaseSites.push(baseSite);
-        }
+      if (installationConfigBaseSites.length > 0) {
+        finalBaseSites = baseSites.filter((site) =>
+          installationConfigBaseSites.split(',').includes(site)
+        );
+      } else {
+        finalBaseSites = baseSites;
       }
-    } else {
-      finalBaseSites = baseSites;
-    }
-    this.setState({
-      baseSite: finalBaseSites[0],
-      baseSites: finalBaseSites,
-      query: this.state.query,
-      page: this.state.page,
-      products: [],
-      selectedProducts: [],
-    });
+
+      setBaseSite(finalBaseSites[0]);
+      setBaseSites(finalBaseSites);
+      setProducts([]);
+      setSelectedProducts([]);
+    };
+    const initialize = async () => {
+      await loadBaseSites();
+      load();
+    };
+    initialize();
+  }, [load, sdk.parameters]);
+
+  const updateSearchTerm = (event: ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value);
   };
 
-  updateSearchTerm = (event: any) => {
-    this.setState({
-      ...this.state,
-      query: event.target.value,
-    });
+  const updateBaseSite = (event: ChangeEvent<HTMLSelectElement>) => {
+    setBaseSite(event.target.value);
+    load();
   };
 
-  updateBaseSite = (event: any) => {
-    this.setState(
-      {
-        ...this.state,
-        baseSite: event.target.value,
-      },
-      () => {
-        this.load();
-      }
-    );
-  };
-
-  multiProductsCheckBoxClickEvent = (event: any) => {
-    let existingProducts: string[] = this.state.selectedProducts;
-    const skuId: string = event.target.id;
+  const multiProductsCheckBoxClickEvent = (event: ChangeEvent<HTMLInputElement>) => {
+    const skuId = event.target.id;
+    let updatedProducts = [...selectedProducts];
 
     if (event.target.checked) {
-      if (!existingProducts.includes(skuId)) {
-        const apiEndpoint = get(this.props.sdk.parameters.invocation, 'apiEndpoint', '');
-        existingProducts.push(formatProductUrl(apiEndpoint, this.state.baseSite, skuId));
-        this.setState({
-          selectedProducts: existingProducts,
-        });
+      if (!updatedProducts.includes(skuId)) {
+        const apiEndpoint = `${get(sdk.parameters.invocation, 'apiEndpoint', '')}`;
+        updatedProducts.push(formatProductUrl(apiEndpoint, baseSite, skuId));
       }
     } else {
-      if (existingProducts.includes(skuId)) {
-        const skuIndex = existingProducts.indexOf(skuId);
-        existingProducts.splice(skuIndex, 1);
-        this.setState({
-          selectedProducts: existingProducts,
-        });
-      }
+      updatedProducts = updatedProducts.filter((id) => id !== skuId);
     }
+
+    setSelectedProducts(updatedProducts);
   };
 
-  updateTotalPages = (totalPages: number) => {
-    this.setState({ totalPages });
+  const selectMultipleProductsClickEvent = () => {
+    const currentField = get(sdk.parameters.invocation, 'fieldValue', [] as string[]);
+    if (!Array.isArray(currentField)) {
+      sdk.close([]);
+      return;
+    }
+    const updatedField = union(currentField, selectedProducts);
+
+    sdk.close(updatedField);
   };
 
-  selectMultipleProductsClickEvent = () => {
-    const currentField = get(this.props.sdk.parameters.invocation, 'fieldValue', [] as string[]);
-    const updatedField = union(currentField, this.state.selectedProducts);
-
-    this.props.sdk.close(updatedField);
+  const searchButtonClickEvent = () => {
+    load();
   };
 
-  searchButtonClickEvent() {
-    this.load();
-  }
-
-  nextPageButtonEvent = () => {
-    this.setState({ page: this.state.page + 1 }, this.load);
+  const nextPageButtonEvent = () => {
+    setPage((prevPage) => prevPage + 1);
+    load();
   };
 
-  prevPageButtonEvent = () => {
-    this.setState({ page: this.state.page - 1 }, this.load);
+  const prevPageButtonEvent = () => {
+    setPage((prevPage) => prevPage - 1);
+    load();
   };
 
-  render() {
-    const isFieldTypeArray =
-      (get(this.props.sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
-    return (
-      <>
-        <Grid
-          columns="1fr 1fr 1fr 1fr 1fr"
-          rowGap="spacingM"
-          columnGap="spacingM"
-          className={styles.grid}>
-          <GridItem>
-            <TextInput
-              type="text"
-              placeholder={'Search Term...'}
-              className={cx(styles.textInput, 'f36-margin-bottom--m')}
-              value={this.state.query}
-              onChange={this.updateSearchTerm}
-              onKeyPress={(event) => {
-                if (event.key === 'Enter') {
-                  this.load();
-                }
-              }}
-            />
-          </GridItem>
-          <GridItem>
-            <Select onChange={this.updateBaseSite}>
-              {this.state.baseSites.map((baseSite) => (
-                <Option key={baseSite} value={baseSite}>
-                  {baseSite}
-                </Option>
-              ))}
-            </Select>
-          </GridItem>
+  const isFieldTypeArray = (get(sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
+
+  return (
+    <>
+      <Grid
+        columns="1fr 1fr 1fr 1fr 1fr"
+        rowGap="spacingM"
+        columnGap="spacingM"
+        className={styles.grid}>
+        <GridItem>
+          <TextInput
+            type="text"
+            placeholder={'Search Term...'}
+            className={cx(styles.textInput, 'f36-margin-bottom--m')}
+            value={query}
+            onChange={updateSearchTerm}
+            onKeyPress={(event) => {
+              if (event.key === 'Enter') {
+                load();
+              }
+            }}
+          />
+        </GridItem>
+        <GridItem>
+          <Select onChange={updateBaseSite} value={baseSite}>
+            {baseSites.map((site) => (
+              <Option key={site} value={site}>
+                {site}
+              </Option>
+            ))}
+          </Select>
+        </GridItem>
+        <GridItem>
+          <IconButton
+            variant="primary"
+            icon={<SearchIcon />}
+            aria-label="search"
+            onClick={searchButtonClickEvent}>
+            Search
+          </IconButton>
+        </GridItem>
+        {isFieldTypeArray && (
           <GridItem>
             <IconButton
               variant="primary"
-              icon={<SearchIcon />}
-              aria-label="search"
-              onClick={() => this.searchButtonClickEvent()}>
-              Search
+              icon={<DoneIcon />}
+              onClick={selectMultipleProductsClickEvent}
+              aria-label="Select Products">
+              Select Products
             </IconButton>
           </GridItem>
-          {isFieldTypeArray ? (
-            <GridItem>
-              <IconButton
-                variant="primary"
-                icon={<DoneIcon />}
-                onClick={this.selectMultipleProductsClickEvent}
-                aria-label="Select Products">
-                Select Products
-              </IconButton>
-            </GridItem>
-          ) : (
-            <></>
-          )}
-        </Grid>
-
-        <Table className={styles.table}>
-          {this.state.errors?.length ? (
-            <TableBody>
-              <TableRow>
-                {this.state.errors.map((error) => (
-                  <TableCell key={error.message}>
-                    {' '}
-                    {error.type} : {error.message}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableBody>
-          ) : (
-            <></>
-          )}
-          {this.state.products?.length ? (
-            <>
-              <TableHead>
-                <TableRow>
-                  <TableCell className={styles.tableCell}>Select</TableCell>
-                  <TableCell>Code</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Image</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <ProductList
-                  sdk={this.props.sdk}
-                  products={this.state.products}
-                  baseSite={this.state.baseSite}
-                  selectedProducts={this.state.selectedProducts}
-                  checkboxFn={this.multiProductsCheckBoxClickEvent}
-                />
-              </TableBody>
-            </>
-          ) : (
-            <></>
-          )}
-        </Table>
-        <div className={styles.pagination}>
-          {this.state.page > 0 ? (
-            <Button variant="primary" onClick={this.prevPageButtonEvent}>
-              Previous
-            </Button>
-          ) : (
-            <></>
-          )}
-          {this.state.page + 1 < this.state.totalPages ? (
-            <Button
-              variant="primary"
-              className={styles.nextButton(this.state.page)}
-              onClick={this.nextPageButtonEvent}>
-              Next
-            </Button>
-          ) : (
-            <></>
-          )}
-        </div>
-        {isFieldTypeArray ? (
-          <IconButton
-            variant="primary"
-            icon={<DoneIcon />}
-            onClick={this.selectMultipleProductsClickEvent}
-            aria-label="Select Products"
-            className={styles.selectProductsButton}>
-            Select Products
-          </IconButton>
-        ) : (
-          <></>
         )}
-      </>
-    );
-  }
-}
+      </Grid>
+
+      <Table className={styles.table}>
+        {errors?.length > 0 && (
+          <TableBody>
+            <TableRow>
+              {errors.map((error) => (
+                <TableCell key={error.message}>
+                  {error.type} : {error.message}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableBody>
+        )}
+        {products?.length > 0 && (
+          <>
+            <TableHead>
+              <TableRow>
+                <TableCell className={styles.tableCell}>Select</TableCell>
+                <TableCell>Code</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Image</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <ProductList
+                sdk={sdk}
+                products={products}
+                baseSite={baseSite}
+                selectedProducts={selectedProducts}
+                checkboxFn={multiProductsCheckBoxClickEvent}
+              />
+            </TableBody>
+          </>
+        )}
+      </Table>
+      <div className={styles.pagination}>
+        {page > 0 && (
+          <Button variant="primary" onClick={prevPageButtonEvent}>
+            Previous
+          </Button>
+        )}
+        {page + 1 < totalPages && (
+          <Button
+            variant="primary"
+            className={styles.nextButton(page)}
+            onClick={nextPageButtonEvent}>
+            Next
+          </Button>
+        )}
+      </div>
+      {isFieldTypeArray && (
+        <IconButton
+          variant="primary"
+          icon={<DoneIcon />}
+          onClick={selectMultipleProductsClickEvent}
+          aria-label="Select Products"
+          className={styles.selectProductsButton}>
+          Select Products
+        </IconButton>
+      )}
+    </>
+  );
+};
+
+export default Dialog;
