@@ -43,9 +43,23 @@ export type AppActionCallResponse<T> = AppActionCallResponseSuccess<T> | AppActi
 
 // WIP types
 export interface BaseSite {
-  channel: string;
-  name: string;
+  channel?: string;
+  defaultLanguage?: {
+    active: boolean;
+    isocode: string;
+    name: string;
+    nativeName: string;
+  };
+  isolated: boolean;
+  locale?: string;
+  name?: string;
+  theme?: string;
   uid: string;
 }
 
-export type BaseSites = BaseSite[];
+export type BaseSites = { baseSites: BaseSite[] };
+
+export type AppInstallationParameters = {
+  apiEndpoint: string;
+  baseSites: string;
+};
