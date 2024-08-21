@@ -1,0 +1,13 @@
+{
+  "sys": { "id": "TMDB:Person" },
+  "name": "Person",
+  "defaultFieldMapping": {
+    "title": "{ /name }",
+    "subtitle": "Person ID: { /urn }",
+    "externalUrl": "{ /externalUrl }",
+    "image": {
+      "url": "{ /image/url }",
+      "altText": "{ /name }"
+    }
+  }
+}

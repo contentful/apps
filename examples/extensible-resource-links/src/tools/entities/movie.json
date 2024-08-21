@@ -1,0 +1,13 @@
+{
+  "sys": { "id": "TMDB:Movie" },
+  "name": "Movie",
+  "defaultFieldMapping": {
+    "title": "{ /name }",
+    "subtitle": "Movie ID: { /urn }",
+    "externalUrl": "{ /externalUrl }",
+    "image": {
+      "url": "{ /image/url }",
+      "altText": "{ /name }"
+    }
+  }
+}
