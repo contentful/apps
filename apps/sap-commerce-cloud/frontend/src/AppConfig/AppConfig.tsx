@@ -1,4 +1,4 @@
-import { ChangeEvent, useState, useEffect } from 'react';
+import { ChangeEvent, useState, useEffect, useCallback } from 'react';
 
 import { CollectionResponse, ConfigAppSDK } from '@contentful/app-sdk';
 import {
@@ -55,29 +55,37 @@ export default function AppConfig({
     toInputParameters(parameterDefinitions, null)
   );
 
-  const { space, app, ids } = sdk;
+  const onAppConfigure = useCallback(() => {
+    const error = validateParameters(parameters);
+
+    if (error) {
+      sdk.notifier.error(error);
+      return false;
+    }
+
+    return {
+      parameters: toAppParameters(parameterDefinitions, parameters),
+      targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
+    };
+  }, [
+    contentTypes,
+    parameterDefinitions,
+    parameters,
+    sdk.notifier,
+    selectedFields,
+    validateParameters,
+  ]);
 
   useEffect(() => {
-    const onAppConfigure = () => {
-      const error = validateParameters(parameters);
+    sdk.app.onConfigure(onAppConfigure);
+  }, [sdk, onAppConfigure]);
 
-      if (error) {
-        sdk.notifier.error(error);
-        return false;
-      }
-
-      return {
-        parameters: toAppParameters(parameterDefinitions, parameters),
-        targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
-      };
-    };
-    const init = async () => {
-      app.onConfigure(onAppConfigure);
-
+  useEffect(() => {
+    (async () => {
       const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
-        space.getContentTypes(),
-        space.getEditorInterfaces(),
-        app.getParameters(),
+        sdk.space.getContentTypes(),
+        sdk.space.getEditorInterfaces(),
+        sdk.app.getParameters(),
       ]);
 
       const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items;
@@ -91,15 +99,12 @@ export default function AppConfig({
 
       setContentTypes(filteredContentTypes);
       setCompatibleFields(compatibleFields);
-      setSelectedFields(editorInterfacesToSelectedFields(editorInterfaces, ids.app));
+      setSelectedFields(editorInterfacesToSelectedFields(editorInterfaces, sdk.ids.app));
       setParameters(toInputParameters(parameterDefinitions, parameters));
 
-      app.setReady();
-    };
-
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      sdk.app.setReady();
+    })();
+  }, [sdk, parameterDefinitions]);
 
   const onParameterChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
