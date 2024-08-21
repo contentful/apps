@@ -24,6 +24,7 @@ import { formatProductUrl } from '../../utils';
 import { styles } from './Dialog.styles';
 import { cx } from '@emotion/css';
 import { DoneIcon, SearchIcon } from '@contentful/f36-icons';
+import { useDebounce } from 'use-debounce';
 
 interface DialogProps {
   sdk: DialogAppSDK<AppParameters>;
@@ -33,6 +34,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const [baseSite, setBaseSite] = useState('');
   const [baseSites, setBaseSites] = useState<string[]>([]);
   const [query, setQuery] = useState('');
+  const [debouncedQuery] = useDebounce(query, 300);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
@@ -42,14 +44,14 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const load = useCallback(async () => {
     const { products, errors } = await fetchProductList(
       baseSite,
-      query,
+      debouncedQuery,
       page,
       sdk.parameters as SAPParameters,
       setTotalPages
     );
     setProducts(products);
     setErrors(errors);
-  }, [baseSite, query, page, sdk.parameters]);
+  }, [baseSite, debouncedQuery, page, sdk.parameters]);
 
   useEffect(() => {
     const loadBaseSites = async () => {
@@ -137,7 +139,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
         <GridItem>
           <TextInput
             type="text"
-            placeholder={'Search Term...'}
+            placeholder={'Type to search...'}
             className={cx(styles.textInput, 'f36-margin-bottom--m')}
             value={query}
             onChange={updateSearchTerm}
@@ -157,17 +159,8 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
             ))}
           </Select>
         </GridItem>
-        <GridItem>
-          <IconButton
-            variant="primary"
-            icon={<SearchIcon />}
-            aria-label="search"
-            onClick={searchButtonClickEvent}>
-            Search
-          </IconButton>
-        </GridItem>
         {isFieldTypeArray && (
-          <GridItem>
+          <GridItem className={styles.selectButton}>
             <IconButton
               variant="primary"
               icon={<DoneIcon />}
