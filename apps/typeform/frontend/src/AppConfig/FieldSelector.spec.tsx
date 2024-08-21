@@ -2,15 +2,7 @@ import React from 'react';
 import { configure, render, cleanup } from '@testing-library/react';
 import FieldSelector, { Props } from './FieldSelector';
 import { typeforms } from '../__mocks__/typeforms';
-import { sdk as mockSdk } from '../__mocks__/sdk';
-
-configure({
-  testIdAttribute: 'data-test-id',
-});
-
-window.fetch = jest.fn(() => ({
-  json: () => typeforms,
-})) as any;
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 
 const defaultProps: Props = {
   contentTypes: [
@@ -36,10 +28,15 @@ const defaultProps: Props = {
     ct2: [],
   },
   selectedFields: {},
-  onSelectedFieldsChange: jest.fn(),
+  onSelectedFieldsChange: vi.fn(),
 };
 
 describe('FieldSelector', () => {
+  beforeEach(() => {
+    window.fetch = vi.fn(() => ({
+      json: () => typeforms,
+    })) as any;
+  });
   afterEach(cleanup);
 
   it('should render successfully with no preselected fields', async () => {

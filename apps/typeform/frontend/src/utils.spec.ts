@@ -3,6 +3,7 @@ import {
   editorInterfacesToSelectedFields,
   selectedFieldsToTargetState,
 } from './utils';
+import { describe, it, expect } from 'vitest';
 
 const contentTypes = [
   {

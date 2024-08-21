@@ -82,6 +82,7 @@ export function selectedFieldsToTargetState(
 }
 
 export const isUserAuthenticated = () => {
+  console.dir({ window: window.localStorage });
   return window.localStorage.getItem('token') ? true : false;
 };
 

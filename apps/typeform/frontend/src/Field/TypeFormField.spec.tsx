@@ -1,23 +1,26 @@
 import React from 'react';
-import { configure, render, cleanup } from '@testing-library/react';
+import { configure, render } from '@testing-library/react';
 import { TypeFormField } from './TypeFormField';
 import { typeforms } from '../__mocks__/typeforms';
 import { sdk as mockSdk } from '../__mocks__/sdk';
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 
-configure({
-  testIdAttribute: 'data-test-id',
-});
-
-describe('TypeFormField', () => {
+describe.only('TypeFormField', () => {
   beforeEach(() => {
-    window.fetch = jest.fn(() => ({
+    window.fetch = vi.fn(() => ({
       json: () => typeforms,
     })) as any;
   });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.resetAllMocks();
+  });
+
   it('should render successfully when the user is signed in', async () => {
     Object.defineProperty(window, 'localStorage', {
       value: {
-        getItem: jest.fn(() => 'some token'),
+        getItem: vi.fn(() => 'some token'),
       },
       writable: true,
     });
@@ -26,10 +29,10 @@ describe('TypeFormField', () => {
     expect(component.container).toMatchSnapshot();
   });
 
-  it('should render the auth button when the user is not authenticated', async () => {
+  it.only('should render the auth button when the user is not authenticated', async () => {
     Object.defineProperty(window, 'localStorage', {
       value: {
-        getItem: jest.fn(() => null),
+        getItem: vi.fn(() => null),
       },
       writable: true,
     });
@@ -41,12 +44,12 @@ describe('TypeFormField', () => {
   it('should render the error screen if something goes wrong', async () => {
     Object.defineProperty(window, 'localStorage', {
       value: {
-        getItem: jest.fn(() => 'token'),
+        getItem: vi.fn(() => 'token'),
       },
       writable: true,
     });
 
-    window.fetch = jest.fn(() => ({
+    window.fetch = vi.fn(() => ({
       json: () => new Error(),
     })) as any;
 
