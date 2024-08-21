@@ -14,7 +14,7 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --no-ci --since master --include-dependencies",
-    "bootstrap:ci": "lerna bootstrap --ci --concurrency=1 --since=${SINCE:-master} --include-dependencies",
+    "bootstrap:ci": "lerna bootstrap --ci --concurrency=1 --since=${SINCE:-master} --include-dependencies --use-workspaces",
     "clean": "lerna clean",
     "lint": "lerna run lint --concurrency=3 --since=${SINCE:-master} --include-dependencies",
     "verify-config": "lerna run verify-config --concurrency=3 --since=${SINCE:-master} --include-dependencies",
