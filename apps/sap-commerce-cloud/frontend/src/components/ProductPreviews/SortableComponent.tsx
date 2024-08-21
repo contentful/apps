@@ -101,8 +101,6 @@ export const SortableComponent: FC<Props> = ({
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
-      console.log('active', active);
-      console.log('over', over);
 
       if (active.id !== over?.id) {
         const oldIndex = productPreviews.findIndex((product) => product.productUrl === active.id);

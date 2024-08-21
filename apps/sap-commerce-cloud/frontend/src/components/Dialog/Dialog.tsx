@@ -39,19 +39,16 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [errors, setErrors] = useState<ErrorType[]>([]);
 
-  const load = useCallback(() => {
-    const load = async () => {
-      const { products, errors } = await fetchProductList(
-        baseSite,
-        query,
-        page,
-        sdk.parameters as SAPParameters,
-        setTotalPages
-      );
-      setProducts(products);
-      setErrors(errors);
-    };
-    return load;
+  const load = useCallback(async () => {
+    const { products, errors } = await fetchProductList(
+      baseSite,
+      query,
+      page,
+      sdk.parameters as SAPParameters,
+      setTotalPages
+    );
+    setProducts(products);
+    setErrors(errors);
   }, [baseSite, query, page, sdk.parameters]);
 
   useEffect(() => {
@@ -73,11 +70,9 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
       setProducts([]);
       setSelectedProducts([]);
     };
-    const initialize = async () => {
-      await loadBaseSites();
-      load();
-    };
-    initialize();
+
+    loadBaseSites();
+    load();
   }, [load, sdk.parameters]);
 
   const updateSearchTerm = (event: ChangeEvent<HTMLInputElement>) => {

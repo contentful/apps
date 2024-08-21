@@ -3,17 +3,6 @@ import FieldSelector from './FieldSelector';
 import { vi, describe, it, expect } from 'vitest';
 import { mockContentTypes } from '../__mocks__';
 
-const contentTypes = [
-  {
-    sys: { id: 'ct1' },
-    name: 'Content Type 1',
-  },
-  {
-    sys: { id: 'ct2' },
-    name: 'Content Type 2',
-  },
-];
-
 const compatibleFields = {
   ct1: [
     { id: 'field1', name: 'Field 1', type: 'Symbol' },
