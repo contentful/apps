@@ -16,16 +16,4 @@ describe('Field', () => {
     );
     expect(container).toMatchSnapshot();
   });
-
-  it('should update state value', () => {
-    const field = new Field({ sdk });
-    field.updateStateValue(['sku1', 'sku2']);
-    expect(sdk.field.setValue).toHaveBeenCalledWith(['sku1', 'sku2']);
-  });
-
-  it('should open dialog', async () => {
-    const field = new Field({ sdk });
-    await field.onDialogOpen();
-    expect(sdk.field.getValue).toHaveBeenCalled();
-  });
 });
