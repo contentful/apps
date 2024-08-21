@@ -33,18 +33,15 @@ const Field: React.FC<Props> = ({ sdk }) => {
   useEffect(() => {
     sdk.window.startAutoResizer();
 
-    const detachOnValueChanged = sdk.field.onValueChanged((newValue?: string[] | string) => {
+    // Handle external changes (e.g. when multiple authors are working on the same entry).
+    sdk.field.onValueChanged((newValue?: string[] | string) => {
       setValue(fieldValueToState(newValue));
     });
 
-    const detachOnIsDisabledChanged = sdk.field.onIsDisabledChanged((isDisabled: boolean) => {
+    // Disable editing (e.g. when field is not editable due to R&P).
+    sdk.field.onIsDisabledChanged((isDisabled: boolean) => {
       setEditingDisabled(isDisabled);
     });
-
-    return () => {
-      detachOnValueChanged();
-      detachOnIsDisabledChanged();
-    };
   }, [sdk]);
 
   const updateStateValue = (skus: string[]) => {
