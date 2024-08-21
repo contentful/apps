@@ -4,37 +4,37 @@
   "private": true,
   "main": "build/index.html",
   "devDependencies": {
-    "@types/react": "^16.9.23",
-    "@types/react-dom": "^16.9.5",
+    "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/react": "^16.0.0",
+    "@types/lodash": "^4.17.7",
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
     "cross-env": "^7.0.3",
-    "react-test-renderer": "^17.0.2",
+    "happy-dom": "^14.12.3",
     "sass": "^1.26.2",
-    "typescript": "^3.8.3"
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "vitest": "^2.0.5"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.23.0",
+    "@contentful/f36-components": "^4.68.1",
+    "@contentful/f36-icons": "^4.29.0",
     "@contentful/forma-36-fcss": "^0.3.5",
-    "@contentful/forma-36-react-components": "^3.100.7",
     "@contentful/forma-36-tokens": "^0.11.2",
-    "@testing-library/react": "^10.0.1",
+    "@emotion/css": "^11.13.0",
     "@typeform/embed-react": "^4.0.0",
-    "@types/jest": "^25.1.4",
-    "@types/lodash": "^4.14.149",
-    "core-js": "^3.2.1",
-    "emotion": "^10.0.27",
-    "jest-environment-jsdom": "^29.0.1",
-    "jsdom": "^20.0.0",
-    "prop-types": "^15.7.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "5.0.1",
+    "lodash": "^4.17.21",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
-    "test": "react-scripts test",
-    "test:ci": "CI=true react-scripts test"
+    "start": "vite",
+    "build": "tsc -p tsconfig.json && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "eslintConfig": {
     "extends": "react-app"
