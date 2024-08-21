@@ -127,7 +127,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
         <GridItem>
           <TextInput
             type="text"
-            placeholder={'Type to search...'}
+            placeholder={'Type to search products'}
             className={cx(styles.textInput, 'f36-margin-bottom--m')}
             value={query}
             onChange={updateSearchTerm}

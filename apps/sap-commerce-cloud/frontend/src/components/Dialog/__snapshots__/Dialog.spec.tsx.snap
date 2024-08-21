@@ -11,7 +11,7 @@ exports[`Dialog > renders correctly and matches snapshot 1`] = `
       <input
         class="f36-margin-bottom--m css-1w37lto"
         data-test-id="cf-ui-text-input"
-        placeholder="Search Term..."
+        placeholder="Type to search products"
         type="text"
         value=""
       />
@@ -51,42 +51,6 @@ exports[`Dialog > renders correctly and matches snapshot 1`] = `
           />
         </svg>
       </div>
-    </div>
-    <div
-      class="css-1vawd3v"
-    >
-      <button
-        aria-label="search"
-        class="css-12lzd3d"
-        data-test-id="cf-ui-icon-button"
-        type="button"
-      >
-        <span
-          class="css-3u52eb"
-        >
-          <svg
-            aria-hidden="true"
-            class="css-d29jlb"
-            color="currentColor"
-            data-test-id="cf-ui-icon"
-            role="img"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-            />
-            <path
-              d="M0 0h24v24H0z"
-              fill="none"
-            />
-          </svg>
-        </span>
-        <span
-          class="css-40g50j"
-        >
-          Search
-        </span>
-      </button>
     </div>
   </div>
   <table
