@@ -21,6 +21,7 @@
     "start": "cross-env BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "lint": "eslint src --max-warnings 0",
     "eject": "react-scripts eject",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -60,6 +61,7 @@
     "@types/node": "16.18.39",
     "@types/react": "18.2.18",
     "@types/react-dom": "18.2.7",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
     "babel-plugin-named-exports-order": "^0.0.2",
     "cross-env": "7.0.3",
     "esbuild": "^0.23.0",
