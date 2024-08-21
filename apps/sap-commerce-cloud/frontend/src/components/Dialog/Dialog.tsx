@@ -54,6 +54,10 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   }, [baseSite, debouncedQuery, page, sdk.parameters]);
 
   useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
     const loadBaseSites = async () => {
       const baseSites = await fetchBaseSites(sdk.parameters as SAPParameters);
       const installationConfigBaseSites = `${get(sdk.parameters.invocation, 'baseSites', '')}`;
@@ -74,17 +78,11 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
     };
 
     loadBaseSites();
-    load();
-  }, [load, sdk.parameters]);
+  }, [sdk.parameters]);
 
-  const updateSearchTerm = (event: ChangeEvent<HTMLInputElement>) => {
-    setQuery(event.target.value);
-  };
+  const updateSearchTerm = (event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value);
 
-  const updateBaseSite = (event: ChangeEvent<HTMLSelectElement>) => {
-    setBaseSite(event.target.value);
-    load();
-  };
+  const updateBaseSite = (event: ChangeEvent<HTMLSelectElement>) => setBaseSite(event.target.value);
 
   const multiProductsCheckBoxClickEvent = (event: ChangeEvent<HTMLInputElement>) => {
     const skuId = event.target.id;
@@ -113,19 +111,9 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
     sdk.close(updatedField);
   };
 
-  const searchButtonClickEvent = () => {
-    load();
-  };
+  const nextPageButtonEvent = () => setPage((prevPage) => prevPage + 1);
 
-  const nextPageButtonEvent = () => {
-    setPage((prevPage) => prevPage + 1);
-    load();
-  };
-
-  const prevPageButtonEvent = () => {
-    setPage((prevPage) => prevPage - 1);
-    load();
-  };
+  const prevPageButtonEvent = () => setPage((prevPage) => prevPage - 1);
 
   const isFieldTypeArray = (get(sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
 
@@ -143,11 +131,6 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
             className={cx(styles.textInput, 'f36-margin-bottom--m')}
             value={query}
             onChange={updateSearchTerm}
-            onKeyPress={(event) => {
-              if (event.key === 'Enter') {
-                load();
-              }
-            }}
           />
         </GridItem>
         <GridItem>
