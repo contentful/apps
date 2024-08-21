@@ -12,6 +12,7 @@
     "@emotion/react": "^11.11.1",
     "@segment/analytics-next": "^1.55.0",
     "contentful-management": "11.14.0",
+    "eslint-plugin-jsx-a11y": "^6.9.0",
     "openai": "^3.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
