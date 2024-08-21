@@ -39,18 +39,39 @@ interface Props {
   description: string;
 }
 
-export default function AppConfig(props: Props) {
+export default function AppConfig({
+  sdk,
+  parameterDefinitions,
+  validateParameters,
+  logo,
+  name,
+  color,
+  description,
+}: Props) {
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [compatibleFields, setCompatibleFields] = useState<CompatibleFields>({});
   const [selectedFields, setSelectedFields] = useState<SelectedFields>({});
   const [parameters, setParameters] = useState<Config>(
-    toInputParameters(props.parameterDefinitions, null)
+    toInputParameters(parameterDefinitions, null)
   );
 
-  useEffect(() => {
-    const init = async () => {
-      const { space, app, ids } = props.sdk;
+  const { space, app, ids } = sdk;
 
+  useEffect(() => {
+    const onAppConfigure = () => {
+      const error = validateParameters(parameters);
+
+      if (error) {
+        sdk.notifier.error(error);
+        return false;
+      }
+
+      return {
+        parameters: toAppParameters(parameterDefinitions, parameters),
+        targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
+      };
+    };
+    const init = async () => {
       app.onConfigure(onAppConfigure);
 
       const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
@@ -71,26 +92,14 @@ export default function AppConfig(props: Props) {
       setContentTypes(filteredContentTypes);
       setCompatibleFields(compatibleFields);
       setSelectedFields(editorInterfacesToSelectedFields(editorInterfaces, ids.app));
-      setParameters(toInputParameters(props.parameterDefinitions, parameters));
+      setParameters(toInputParameters(parameterDefinitions, parameters));
 
       app.setReady();
     };
-    const onAppConfigure = () => {
-      const error = props.validateParameters(parameters);
-
-      if (error) {
-        props.sdk.notifier.error(error);
-        return false;
-      }
-
-      return {
-        parameters: toAppParameters(props.parameterDefinitions, parameters),
-        targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
-      };
-    };
 
     init();
-  }, [props, contentTypes, parameters, selectedFields]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onParameterChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
@@ -106,7 +115,6 @@ export default function AppConfig(props: Props) {
   };
 
   const renderApp = () => {
-    const { parameterDefinitions, sdk } = props;
     const { ids, hostnames } = sdk;
     const { space, environment } = ids;
     const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
@@ -121,11 +129,10 @@ export default function AppConfig(props: Props) {
                 const key = `config-input-${def.id}`;
 
                 return (
-                  <FormControl id={key}>
+                  <FormControl key={key} id={key}>
                     <FormControl.Label>{def.name}</FormControl.Label>
                     <TextInput
                       isRequired={def.required}
-                      key={key}
                       id={key}
                       name={key}
                       maxLength={255}
@@ -187,15 +194,15 @@ export default function AppConfig(props: Props) {
 
   return (
     <>
-      <div className={styles.background(props.color)} />
+      <div className={styles.background(color)} />
       <div className={styles.body}>
-        <Heading>About {props.name}</Heading>
-        <Paragraph>{props.description}</Paragraph>
+        <Heading>About {name}</Heading>
+        <Paragraph>{description}</Paragraph>
         <hr className={styles.splitter} />
         {renderApp()}
       </div>
       <div className={styles.icon}>
-        <img src={props.logo} alt="App logo" />
+        <img src={logo} alt="App logo" />
       </div>
     </>
   );
