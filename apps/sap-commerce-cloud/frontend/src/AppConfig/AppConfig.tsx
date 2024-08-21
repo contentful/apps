@@ -1,4 +1,4 @@
-import { ChangeEvent, useState, useEffect } from 'react';
+import { ChangeEvent, useState, useEffect, useCallback } from 'react';
 
 import { CollectionResponse, ConfigAppSDK } from '@contentful/app-sdk';
 import {
@@ -39,24 +39,53 @@ interface Props {
   description: string;
 }
 
-export default function AppConfig(props: Props) {
+export default function AppConfig({
+  sdk,
+  parameterDefinitions,
+  validateParameters,
+  logo,
+  name,
+  color,
+  description,
+}: Props) {
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [compatibleFields, setCompatibleFields] = useState<CompatibleFields>({});
   const [selectedFields, setSelectedFields] = useState<SelectedFields>({});
   const [parameters, setParameters] = useState<Config>(
-    toInputParameters(props.parameterDefinitions, null)
+    toInputParameters(parameterDefinitions, null)
   );
 
+  const onAppConfigure = useCallback(() => {
+    const error = validateParameters(parameters);
+
+    if (error) {
+      sdk.notifier.error(error);
+      return false;
+    }
+
+    return {
+      parameters: toAppParameters(parameterDefinitions, parameters),
+      targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
+    };
+  }, [
+    contentTypes,
+    parameterDefinitions,
+    parameters,
+    sdk.notifier,
+    selectedFields,
+    validateParameters,
+  ]);
+
   useEffect(() => {
-    const init = async () => {
-      const { space, app, ids } = props.sdk;
+    sdk.app.onConfigure(onAppConfigure);
+  }, [sdk, onAppConfigure]);
 
-      app.onConfigure(onAppConfigure);
-
+  useEffect(() => {
+    (async () => {
       const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
-        space.getContentTypes(),
-        space.getEditorInterfaces(),
-        app.getParameters(),
+        sdk.space.getContentTypes(),
+        sdk.space.getEditorInterfaces(),
+        sdk.app.getParameters(),
       ]);
 
       const contentTypes = (contentTypesResponse as CollectionResponse<ContentType>).items;
@@ -70,27 +99,12 @@ export default function AppConfig(props: Props) {
 
       setContentTypes(filteredContentTypes);
       setCompatibleFields(compatibleFields);
-      setSelectedFields(editorInterfacesToSelectedFields(editorInterfaces, ids.app));
-      setParameters(toInputParameters(props.parameterDefinitions, parameters));
+      setSelectedFields(editorInterfacesToSelectedFields(editorInterfaces, sdk.ids.app));
+      setParameters(toInputParameters(parameterDefinitions, parameters));
 
-      app.setReady();
-    };
-    const onAppConfigure = () => {
-      const error = props.validateParameters(parameters);
-
-      if (error) {
-        props.sdk.notifier.error(error);
-        return false;
-      }
-
-      return {
-        parameters: toAppParameters(props.parameterDefinitions, parameters),
-        targetState: selectedFieldsToTargetState(contentTypes, selectedFields),
-      };
-    };
-
-    init();
-  }, [props, contentTypes, parameters, selectedFields]);
+      sdk.app.setReady();
+    })();
+  }, [sdk, parameterDefinitions]);
 
   const onParameterChange = (key: string, e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
@@ -106,7 +120,6 @@ export default function AppConfig(props: Props) {
   };
 
   const renderApp = () => {
-    const { parameterDefinitions, sdk } = props;
     const { ids, hostnames } = sdk;
     const { space, environment } = ids;
     const hasConfigurationOptions = parameterDefinitions && parameterDefinitions.length > 0;
@@ -121,11 +134,10 @@ export default function AppConfig(props: Props) {
                 const key = `config-input-${def.id}`;
 
                 return (
-                  <FormControl id={key}>
+                  <FormControl key={key} id={key}>
                     <FormControl.Label>{def.name}</FormControl.Label>
                     <TextInput
                       isRequired={def.required}
-                      key={key}
                       id={key}
                       name={key}
                       maxLength={255}
@@ -187,15 +199,15 @@ export default function AppConfig(props: Props) {
 
   return (
     <>
-      <div className={styles.background(props.color)} />
+      <div className={styles.background(color)} />
       <div className={styles.body}>
-        <Heading>About {props.name}</Heading>
-        <Paragraph>{props.description}</Paragraph>
+        <Heading>About {name}</Heading>
+        <Paragraph>{description}</Paragraph>
         <hr className={styles.splitter} />
         {renderApp()}
       </div>
       <div className={styles.icon}>
-        <img src={props.logo} alt="App logo" />
+        <img src={logo} alt="App logo" />
       </div>
     </>
   );
