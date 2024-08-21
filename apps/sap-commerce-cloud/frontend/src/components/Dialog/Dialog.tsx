@@ -23,7 +23,7 @@ import union from 'lodash/union';
 import { formatProductUrl } from '../../utils';
 import { styles } from './Dialog.styles';
 import { cx } from '@emotion/css';
-import { DoneIcon, SearchIcon } from '@contentful/f36-icons';
+import { DoneIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
 
 interface DialogProps {
