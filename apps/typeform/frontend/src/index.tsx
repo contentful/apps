@@ -1,13 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
-import {
-  init,
-  locations,
-  AppExtensionSDK,
-  FieldExtensionSDK,
-  DialogExtensionSDK,
-} from '@contentful/app-sdk';
-import '@contentful/forma-36-react-components/dist/styles.css';
+import { init, locations, ConfigAppSDK, FieldAppSDK, DialogAppSDK } from '@contentful/app-sdk';
+import { GlobalStyles } from '@contentful/f36-components';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import Authentication from './Auth';
 import { TypeFormField } from './Field/TypeFormField';
@@ -20,15 +14,27 @@ if (window.location.search.includes('token')) {
 } else {
   init((sdk) => {
     if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
-      render(<Authentication sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
+      render(
+        <>
+          <GlobalStyles />
+          <Authentication sdk={sdk as ConfigAppSDK} />
+        </>,
+        document.getElementById('root')
+      );
     } else if (sdk.location.is(locations.LOCATION_DIALOG)) {
       render(
-        <TypeformPreviewWidget sdk={sdk as DialogExtensionSDK} />,
+        <>
+          <GlobalStyles />
+          <TypeformPreviewWidget sdk={sdk as DialogAppSDK} />
+        </>,
         document.getElementById('root')
       );
     } else if (sdk.location.is(locations.LOCATION_ENTRY_FIELD)) {
       render(
-        <TypeFormField sdk={sdk as AppExtensionSDK & FieldExtensionSDK} />,
+        <>
+          <GlobalStyles />
+          <TypeFormField sdk={sdk as ConfigAppSDK & FieldAppSDK} />
+        </>,
         document.getElementById('root')
       );
     }

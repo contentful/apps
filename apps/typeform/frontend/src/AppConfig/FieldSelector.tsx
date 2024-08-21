@@ -1,7 +1,7 @@
 import * as React from 'react';
 import tokens from '@contentful/forma-36-tokens';
-import { css } from 'emotion';
-import { Form, Subheading, CheckboxField, Typography } from '@contentful/forma-36-react-components';
+import { css } from '@emotion/css';
+import { Form, Subheading, Checkbox } from '@contentful/f36-components';
 
 import { ContentType, CompatibleFields, SelectedFields } from '../typings';
 
@@ -33,7 +33,7 @@ export default class FieldSelector extends React.Component<Props> {
     const { compatibleFields, contentTypes, selectedFields } = this.props;
 
     return (
-      <Typography>
+      <>
         {contentTypes.map((ct) => {
           const fields = compatibleFields[ct.sys.id];
           return (
@@ -41,12 +41,12 @@ export default class FieldSelector extends React.Component<Props> {
               <Subheading>{ct.name}</Subheading>
               <Form>
                 {fields.map((field) => (
-                  <CheckboxField
+                  <Checkbox
                     key={field.id}
                     id={`field-box-${ct.sys.id}-${field.id}`}
-                    labelText={field.name}
+                    name={field.name}
                     helpText={`Field ID: ${field.id}`}
-                    checked={(selectedFields[ct.sys.id] || []).includes(field.id)}
+                    isChecked={(selectedFields[ct.sys.id] || []).includes(field.id)}
                     onChange={this.onSelectedFieldChange.bind(this, ct.sys.id, field.id)}
                   />
                 ))}
@@ -54,7 +54,7 @@ export default class FieldSelector extends React.Component<Props> {
             </div>
           );
         })}
-      </Typography>
+      </>
     );
   }
 }
