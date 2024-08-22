@@ -10,6 +10,9 @@ async function fetchBaseSitesHAA(ids: BaseAppSDK['ids'], cma: CMAClient): Promis
     { parameters: {} }
   );
   const responseJson = JSON.parse(response.body);
+  if (!responseJson.ok) {
+    throw new Error(response.statusCode.toString());
+  }
   return responseJson.data;
 }
 
@@ -18,12 +21,12 @@ export async function fetchBaseSites(
   ids: BaseAppSDK['ids'],
   cma: CMAClient
 ): Promise<string[]> {
-  if (isHAAEnabled(ids)) {
-    return fetchBaseSitesHAA(ids, cma);
-  }
-  const url = `${parameters.installation.apiEndpoint}/occ/v2/basesites`;
-
   try {
+    if (isHAAEnabled(ids)) {
+      return fetchBaseSitesHAA(ids, cma);
+    }
+
+    const url = `${parameters.installation.apiEndpoint}/occ/v2/basesites`;
     const response = await fetch(url);
     if (response.ok) {
       const responseJson = await response.json();

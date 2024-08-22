@@ -21,7 +21,11 @@ const fetchHAAProductPreviews = async (
       },
     }
   );
-  return JSON.parse(response.body).products;
+  const jsonResponse = JSON.parse(response.body);
+  if (!jsonResponse.success) {
+    return [];
+  }
+  return jsonResponse.products;
 };
 export async function fetchProductPreviews(
   skus: string[],
