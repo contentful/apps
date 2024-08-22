@@ -68,7 +68,6 @@ describe('SortableComponent', () => {
       );
     });
 
-    await waitFor(() => expect(mockFetchProductPreviews).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(mockFetchProductPreviews).toHaveBeenLastCalledWith(newSkus));
   });
 

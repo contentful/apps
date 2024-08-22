@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Field > should render 1`] = `
+exports[`Field Component > should render without crashing 1`] = `
 <div>
   <div
     class="css-k008qs"

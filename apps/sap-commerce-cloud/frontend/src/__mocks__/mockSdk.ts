@@ -15,8 +15,8 @@ export const makeSdkMock = () => ({
   field: {
     type: 'Array',
     removeValue: vi.fn(),
-    onValueChanged: vi.fn(),
-    onIsDisabledChanged: vi.fn(),
+    onValueChanged: vi.fn((value) => value),
+    onIsDisabledChanged: vi.fn((value) => value),
     getValue: vi.fn(),
     id: 'fieldId',
     setValue: vi.fn((value) => {
