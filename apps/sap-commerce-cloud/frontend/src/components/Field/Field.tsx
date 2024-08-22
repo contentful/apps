@@ -92,7 +92,7 @@ const Field: React.FC<Props> = ({ sdk }) => {
             skus={value}
             onChange={updateStateValue}
             fetchProductPreviews={(skus) =>
-              fetchProductPreviews(skus, sdk.parameters as SAPParameters)
+              fetchProductPreviews(skus, sdk.parameters as SAPParameters, sdk.ids, sdk.cma)
             }
           />
         </div>

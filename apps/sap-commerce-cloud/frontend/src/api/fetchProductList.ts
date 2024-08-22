@@ -38,6 +38,44 @@ export async function transformResponse(
   return { products: [], errors: responseJson['errors'] };
 }
 
+type FetchHAAProductListParams = {
+  url: string;
+  baseSite: string;
+  searchQuery: string;
+  parameters: SAPParameters;
+  updateTotalPages: UpdateTotalPagesFn;
+  ids: BaseAppSDK['ids'];
+  cma: CMAClient;
+};
+const fetchHAAProductList = async ({
+  baseSite,
+  searchQuery,
+  url,
+  parameters,
+  updateTotalPages,
+  ids,
+  cma,
+}: FetchHAAProductListParams): Promise<ProductListResponse> => {
+  const { response } = await cma.appActionCall.createWithResponse(
+    {
+      appActionId: 'fetchProductList',
+      environmentId: ids.environment,
+      spaceId: ids.space,
+      appDefinitionId: ids.app!,
+    },
+    {
+      parameters: {
+        sapApiEndpoint: url,
+        apiKey: ids.app,
+      },
+    }
+  );
+  const responseJson = JSON.parse(response.body);
+  return transformResponse(
+    { ok: responseJson.success, responseJson },
+    { baseSite, searchQuery, parameters, updateTotalPages }
+  );
+};
 type FetchProductListParams = {
   baseSite: string;
   searchQuery: string;
@@ -72,25 +110,15 @@ export async function fetchProductList({
     '&fields=FULL&currentPage=' +
     page;
   if (isHAAEnabled(ids)) {
-    const { response } = await cma.appActionCall.createWithResponse(
-      {
-        appActionId: 'fetchProductList',
-        environmentId: ids.environment,
-        spaceId: ids.space,
-        appDefinitionId: ids.app!,
-      },
-      {
-        parameters: {
-          sapApiEndpoint: url,
-          apiKey: ids.app,
-        },
-      }
-    );
-    const responseJson = JSON.parse(response.body);
-    return transformResponse(
-      { ok: responseJson.success, responseJson },
-      { baseSite, searchQuery, parameters, updateTotalPages }
-    );
+    return fetchHAAProductList({
+      baseSite,
+      searchQuery,
+      url,
+      parameters,
+      updateTotalPages,
+      ids,
+      cma,
+    });
   }
   const response: any = await fetch(url);
   const responseJson = await response.json();

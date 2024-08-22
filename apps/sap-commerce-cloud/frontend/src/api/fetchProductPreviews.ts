@@ -1,13 +1,44 @@
 import difference from 'lodash/difference';
 import { Product, SAPParameters } from '../interfaces';
 import { productTransformer } from './dataTransformers';
+import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
+import { isHAAEnabled } from '../helpers/isHAAEnabled';
 
+const fetchHAAProductPreviews = async (
+  skus: string[],
+  parameters: SAPParameters,
+  ids: BaseAppSDK['ids'],
+  cma: CMAClient
+): Promise<Product[]> => {
+  const { response } = await cma.appActionCall.createWithResponse(
+    {
+      appActionId: 'fetchProductList',
+      environmentId: ids.environment,
+      spaceId: ids.space,
+      appDefinitionId: ids.app!,
+    },
+    {
+      parameters: {
+        sapApiEndpoint: parameters.installation.apiEndpoint,
+        apiKey: ids.app,
+        skus: JSON.stringify(skus),
+      },
+    }
+  );
+  return JSON.parse(response.body).products;
+};
 export async function fetchProductPreviews(
   skus: string[],
-  parameters: SAPParameters
+  parameters: SAPParameters,
+  ids: BaseAppSDK['ids'],
+  cma: CMAClient
 ): Promise<Product[]> {
   if (!skus.length) {
     return [];
+  }
+
+  if (isHAAEnabled(ids)) {
+    return fetchHAAProductPreviews(skus, parameters, ids, cma);
   }
 
   let totalResponse: any[] = [];
