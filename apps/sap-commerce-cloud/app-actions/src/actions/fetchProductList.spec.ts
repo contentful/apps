@@ -25,6 +25,10 @@ describe('fetchProductList.handler', () => {
     context = makeMockAppActionCallContext(cmaClientMockResponses, cmaRequestStub);
   });
 
+  afterEach(async () => {
+    stubbedFetch.restore();
+  });
+
   it('returns the product list result', async () => {
     const result = await handler(
       {
