@@ -127,6 +127,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
         <GridItem>
           <TextInput
             type="text"
+            aria-label="Search products"
             placeholder={'Type to search products'}
             className={cx(styles.textInput, 'f36-margin-bottom--m')}
             value={query}
@@ -191,13 +192,14 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
       </Table>
       <div className={styles.pagination}>
         {page > 0 && (
-          <Button variant="primary" onClick={prevPageButtonEvent}>
+          <Button variant="primary" onClick={prevPageButtonEvent} aria-label="Previous page">
             Previous
           </Button>
         )}
         {page + 1 < totalPages && (
           <Button
             variant="primary"
+            aria-label="Next page"
             className={styles.nextButton(page)}
             onClick={nextPageButtonEvent}>
             Next
