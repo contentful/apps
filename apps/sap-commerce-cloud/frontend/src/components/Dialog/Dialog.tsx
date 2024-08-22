@@ -15,7 +15,6 @@ import {
 } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
-import { fetchProductList } from '../../api/fetchProductList';
 import { fetchBaseSites } from '../../api/fetchBaseSites';
 import { AppParameters, Error as ErrorType, Product, SAPParameters } from '../../interfaces';
 import get from 'lodash/get';
@@ -25,6 +24,7 @@ import { styles } from './Dialog.styles';
 import { cx } from '@emotion/css';
 import { DoneIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
+import { fetchProductList } from '../../api/fetchProductList';
 
 interface DialogProps {
   sdk: DialogAppSDK<AppParameters>;
@@ -42,16 +42,18 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const [errors, setErrors] = useState<ErrorType[]>([]);
 
   const load = useCallback(async () => {
-    const { products, errors } = await fetchProductList(
+    const { products, errors } = await fetchProductList({
       baseSite,
-      debouncedQuery,
+      searchQuery: debouncedQuery,
       page,
-      sdk.parameters as SAPParameters,
-      setTotalPages
-    );
+      parameters: sdk.parameters as SAPParameters,
+      updateTotalPages: setTotalPages,
+      ids: sdk.ids,
+      cma: sdk.cma,
+    });
     setProducts(products);
     setErrors(errors);
-  }, [baseSite, debouncedQuery, page, sdk.parameters]);
+  }, [baseSite, debouncedQuery, page, sdk.parameters, sdk.ids, sdk.cma]);
 
   useEffect(() => {
     load();
