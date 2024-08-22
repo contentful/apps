@@ -9,4 +9,5 @@ export const styles = {
   pagination: css({ margin: tokens.spacingL }),
   nextButton: (page: number) => css({ marginLeft: page > 0 ? tokens.spacingL : '' }),
   selectProductsButton: css({ margin: tokens.spacingL }),
+  selectButton: css({ justifySelf: 'flex-end' }),
 };
