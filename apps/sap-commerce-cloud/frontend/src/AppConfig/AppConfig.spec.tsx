@@ -3,13 +3,18 @@ import { render } from '@testing-library/react';
 import { ParameterDefinition } from '../interfaces';
 import AppConfig from './AppConfig';
 import { makeSdkMock } from '../__mocks__';
+import { vi } from 'vitest';
+import { mockCma } from '../__mocks__/mockCma';
 
 const description =
   'The SAP Commerce Cloud app allows content creators to select products from their SAP Commerce Cloud instance and reference them inside of Contentful entries.';
-
+vi.mock('contentful-management', () => ({
+  createClient: () => mockCma,
+}));
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
     const mockSdk: any = makeSdkMock();
+
     const { getByText } = render(
       <AppConfig
         sdk={mockSdk}

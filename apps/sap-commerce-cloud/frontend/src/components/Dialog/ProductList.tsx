@@ -1,4 +1,4 @@
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { CheckBoxFn, Product } from '../../interfaces';
 import { Checkbox, IconButton, TableCell, TableRow } from '@contentful/f36-components';
 import get from 'lodash/get';
@@ -6,7 +6,7 @@ import { formatProductUrl } from '../../utils';
 import { DoneIcon } from '@contentful/f36-icons';
 
 interface Props {
-  sdk: DialogExtensionSDK;
+  sdk: DialogAppSDK;
   products: Product[];
   selectedProducts: string[];
   baseSite: string;
