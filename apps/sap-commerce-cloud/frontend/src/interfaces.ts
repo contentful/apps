@@ -1,4 +1,4 @@
-import { DialogExtensionSDK, FieldExtensionSDK, ParametersAPI } from '@contentful/app-sdk';
+import { DialogAppSDK, FieldAppSDK, ParametersAPI } from '@contentful/app-sdk';
 import { FieldsConfig } from './AppConfig/fields';
 
 /**
@@ -136,7 +136,7 @@ export type DeleteFn = (index: number) => void;
  *
  * @param sdk [DialogExtensionSDK](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/)
  */
-export type RenderDialogFn = (sdk: DialogExtensionSDK) => void;
+export type RenderDialogFn = (sdk: DialogAppSDK) => void;
 
 /**
  * Function that gets called when app wants to open a dialog. Should return an updated list of skus as a Promise.
@@ -159,7 +159,7 @@ export type RenderDialogFn = (sdk: DialogExtensionSDK) => void;
  * @returns Promise containing a list of selected skus
  */
 export type OpenDialogFn = (
-  sdk: FieldExtensionSDK,
+  sdk: FieldAppSDK,
   currentValue: string[] | string,
   config: Config
 ) => Promise<string[]>;

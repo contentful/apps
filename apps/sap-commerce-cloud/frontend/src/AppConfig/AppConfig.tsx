@@ -28,6 +28,7 @@ import {
 import { AppParameters, Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
 
 import { styles } from './AppConfig.styles';
+import { createClient } from 'contentful-management';
 
 interface Props {
   sdk: ConfigAppSDK<AppParameters>;
@@ -82,9 +83,13 @@ export default function AppConfig({
 
   useEffect(() => {
     (async () => {
+      const cma = createClient({ apiAdapter: sdk.cmaAdapter });
+      const space = await cma.getSpace(sdk.ids.space);
+      const environment = await space.getEnvironment(sdk.ids.environment);
+
       const [contentTypesResponse, eisResponse, parameters] = await Promise.all([
-        sdk.space.getContentTypes(),
-        sdk.space.getEditorInterfaces(),
+        environment.getContentTypes(),
+        environment.getEditorInterfaces(),
         sdk.app.getParameters(),
       ]);
 
