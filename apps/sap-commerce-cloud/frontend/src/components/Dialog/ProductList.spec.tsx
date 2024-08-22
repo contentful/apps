@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { ProductList } from './ProductList';
 import { vi } from 'vitest';
-import { DialogExtensionSDK } from '@contentful/app-sdk';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import { makeSdkMock } from '../../__mocks__';
 
 describe('ProductList', () => {
@@ -9,7 +9,7 @@ describe('ProductList', () => {
     const { container } = render(
       <ProductList
         {...{
-          sdk: makeSdkMock() as unknown as DialogExtensionSDK,
+          sdk: makeSdkMock() as unknown as DialogAppSDK,
           products: [],
           selectedProducts: [],
           baseSite: '',
@@ -32,7 +32,7 @@ describe('ProductList', () => {
               },
             },
             close,
-          } as unknown as DialogExtensionSDK,
+          } as unknown as DialogAppSDK,
           products: [{ sku: '123', image: '', id: '', name: '', productUrl: '' }],
           selectedProducts: [],
           baseSite: '',
