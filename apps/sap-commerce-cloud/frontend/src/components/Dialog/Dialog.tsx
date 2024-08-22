@@ -23,7 +23,8 @@ import union from 'lodash/union';
 import { formatProductUrl } from '../../utils';
 import { styles } from './Dialog.styles';
 import { cx } from '@emotion/css';
-import { DoneIcon, SearchIcon } from '@contentful/f36-icons';
+import { DoneIcon } from '@contentful/f36-icons';
+import { useDebounce } from 'use-debounce';
 
 interface DialogProps {
   sdk: DialogAppSDK<AppParameters>;
@@ -33,6 +34,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const [baseSite, setBaseSite] = useState('');
   const [baseSites, setBaseSites] = useState<string[]>([]);
   const [query, setQuery] = useState('');
+  const [debouncedQuery] = useDebounce(query, 300);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
@@ -42,14 +44,18 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const load = useCallback(async () => {
     const { products, errors } = await fetchProductList(
       baseSite,
-      query,
+      debouncedQuery,
       page,
       sdk.parameters as SAPParameters,
       setTotalPages
     );
     setProducts(products);
     setErrors(errors);
-  }, [baseSite, query, page, sdk.parameters]);
+  }, [baseSite, debouncedQuery, page, sdk.parameters]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   useEffect(() => {
     const loadBaseSites = async () => {
@@ -72,17 +78,11 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
     };
 
     loadBaseSites();
-    load();
-  }, [load, sdk.parameters]);
+  }, [sdk.parameters]);
 
-  const updateSearchTerm = (event: ChangeEvent<HTMLInputElement>) => {
-    setQuery(event.target.value);
-  };
+  const updateSearchTerm = (event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value);
 
-  const updateBaseSite = (event: ChangeEvent<HTMLSelectElement>) => {
-    setBaseSite(event.target.value);
-    load();
-  };
+  const updateBaseSite = (event: ChangeEvent<HTMLSelectElement>) => setBaseSite(event.target.value);
 
   const multiProductsCheckBoxClickEvent = (event: ChangeEvent<HTMLInputElement>) => {
     const skuId = event.target.id;
@@ -111,19 +111,9 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
     sdk.close(updatedField);
   };
 
-  const searchButtonClickEvent = () => {
-    load();
-  };
+  const nextPageButtonEvent = () => setPage((prevPage) => prevPage + 1);
 
-  const nextPageButtonEvent = () => {
-    setPage((prevPage) => prevPage + 1);
-    load();
-  };
-
-  const prevPageButtonEvent = () => {
-    setPage((prevPage) => prevPage - 1);
-    load();
-  };
+  const prevPageButtonEvent = () => setPage((prevPage) => prevPage - 1);
 
   const isFieldTypeArray = (get(sdk.parameters.invocation, 'fieldType', '') as string) === 'Array';
 
@@ -137,15 +127,10 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
         <GridItem>
           <TextInput
             type="text"
-            placeholder={'Search Term...'}
+            placeholder={'Type to search products'}
             className={cx(styles.textInput, 'f36-margin-bottom--m')}
             value={query}
             onChange={updateSearchTerm}
-            onKeyPress={(event) => {
-              if (event.key === 'Enter') {
-                load();
-              }
-            }}
           />
         </GridItem>
         <GridItem>
@@ -157,17 +142,8 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
             ))}
           </Select>
         </GridItem>
-        <GridItem>
-          <IconButton
-            variant="primary"
-            icon={<SearchIcon />}
-            aria-label="search"
-            onClick={searchButtonClickEvent}>
-            Search
-          </IconButton>
-        </GridItem>
         {isFieldTypeArray && (
-          <GridItem>
+          <GridItem className={styles.selectButton}>
             <IconButton
               variant="primary"
               icon={<DoneIcon />}

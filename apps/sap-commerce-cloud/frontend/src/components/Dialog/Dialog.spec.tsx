@@ -69,7 +69,7 @@ describe('Dialog', () => {
     render(<Dialog sdk={sdkMock} />);
     await waitFor(() => screen.getByText('Product 1'));
 
-    const searchInput = screen.getByPlaceholderText('Search Term...');
+    const searchInput = screen.getByPlaceholderText('Type to search products');
     fireEvent.change(searchInput, { target: { value: 'Product 1' } });
     fireEvent.keyPress(searchInput, { key: 'Enter', code: 'Enter' });
 
