@@ -8,7 +8,7 @@ describe('fetchProductPreviews', () => {
   afterAll(() => {
     global.fetch = originalFetch;
   });
-  it('should fetch product previews', async () => {
+  it('should fetch product previews  from HAA', async () => {
     const mockSDK = makeSdkMock();
     const mockSDKAction = vi.fn(() =>
       Promise.resolve({
@@ -46,7 +46,7 @@ describe('fetchProductPreviews', () => {
       },
     ]);
   });
-  it('should fetch product previews from HAA', async () => {
+  it('should fetch product previews', async () => {
     const mockSDK = makeSdkMock();
     global.fetch = mockFetch({});
     const productPreviews = await fetchProductPreviews(

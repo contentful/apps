@@ -3,6 +3,7 @@ import { Product, SAPParameters } from '../interfaces';
 import { productTransformer } from './dataTransformers';
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
 import { isHAAEnabled } from '../helpers/isHAAEnabled';
+import { toHAAParams } from '../helpers/toHAAParams';
 
 const fetchHAAProductPreviews = async (
   skus: string[],
@@ -11,12 +12,7 @@ const fetchHAAProductPreviews = async (
   cma: CMAClient
 ): Promise<Product[]> => {
   const { response } = await cma.appActionCall.createWithResponse(
-    {
-      appActionId: 'fetchProductList',
-      environmentId: ids.environment,
-      spaceId: ids.space,
-      appDefinitionId: ids.app!,
-    },
+    toHAAParams('fetchProductPreview', ids),
     {
       parameters: {
         sapApiEndpoint: parameters.installation.apiEndpoint,

@@ -2,6 +2,7 @@ import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
 import { Response as ProductListResponse, SAPParameters, UpdateTotalPagesFn } from '../interfaces';
 import { productTransformer } from './dataTransformers';
 import { isHAAEnabled } from '../helpers/isHAAEnabled';
+import { toHAAParams } from '../helpers/toHAAParams';
 
 type TransformParams = {
   baseSite: string;
@@ -57,12 +58,7 @@ const fetchHAAProductList = async ({
   cma,
 }: FetchHAAProductListParams): Promise<ProductListResponse> => {
   const { response } = await cma.appActionCall.createWithResponse(
-    {
-      appActionId: 'fetchProductList',
-      environmentId: ids.environment,
-      spaceId: ids.space,
-      appDefinitionId: ids.app!,
-    },
+    toHAAParams('fetchProductList', ids),
     {
       parameters: {
         sapApiEndpoint: url,

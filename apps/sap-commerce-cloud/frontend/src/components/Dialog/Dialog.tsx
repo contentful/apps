@@ -61,7 +61,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
 
   useEffect(() => {
     const loadBaseSites = async () => {
-      const baseSites = await fetchBaseSites(sdk.parameters as SAPParameters);
+      const baseSites = await fetchBaseSites(sdk.parameters as SAPParameters, sdk.ids, sdk.cma);
       const installationConfigBaseSites = `${get(sdk.parameters.invocation, 'baseSites', '')}`;
       let finalBaseSites: string[] = [];
 
@@ -80,7 +80,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
     };
 
     loadBaseSites();
-  }, [sdk.parameters]);
+  }, [sdk.cma, sdk.ids, sdk.parameters]);
 
   const updateSearchTerm = (event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value);
 
