@@ -1,6 +1,10 @@
-import { BaseSites } from '../types';
-import { AIR_HEADER } from '../constants';
-import { baseSiteTransformer } from '../../../frontend/src/api/dataTransformers';
+import difference from 'lodash.difference';
+import {
+  baseSiteTransformer,
+  productDetailsTransformer,
+} from '../../../frontend/src/api/dataTransformers';
+import { AIR_HEADER, DEFAULT_FIELDS } from '../constants';
+import { BaseSites, Product } from '../types';
 
 export class SapService {
   constructor(readonly apiEndpoint: string) {}
@@ -18,6 +22,61 @@ export class SapService {
     this.assertBaseSiteResponse(responseBody);
     const baseSites = responseBody['baseSites'].map(baseSiteTransformer());
     return baseSites;
+  }
+
+  public async getProductDetails(
+    baseSite: string,
+    skus: any
+  ): Promise<{ products: Product[]; status: string }> {
+    try {
+      const totalProducts: Product[] = [];
+      const skuIds: string[] = [];
+      const parsedSkus = JSON.parse(skus);
+
+      await Promise.all(
+        parsedSkus.map(async (sku: string) => {
+          const id = sku.split('/products/').pop();
+          const req = await fetch(
+            `${this.apiEndpoint}/occ/v2/${baseSite}/products/${id}?fields=${DEFAULT_FIELDS.join(
+              ','
+            )}`,
+            {
+              method: 'GET',
+              headers: this.buildRequestHeaders(),
+            }
+          );
+          const json = await req.json();
+          // @ts-ignore
+          totalProducts.push(json);
+          // @ts-ignore
+          skuIds.push(`${json.code}`);
+        })
+      );
+
+      const products: Product[] = totalProducts.map(
+        productDetailsTransformer({
+          apiEndpoint: this.apiEndpoint,
+        })
+      );
+
+      const foundSKUs = products.map((product) => product.sku);
+      const missingProducts: Product[] = difference(skuIds, foundSKUs).map((sku) => ({
+        sku: sku?.split('/products/').pop(),
+        image: '',
+        id: '',
+        name: '',
+        isMissing: true,
+        productUrl: '',
+      }));
+
+      return { status: 'Success', products: [...products, ...missingProducts] };
+    } catch (err) {
+      return {
+        status: 'Failed',
+        // @ts-ignore
+        body: err.message,
+      };
+    }
   }
 
   // basic error handling for now, could update later when we encounter SAP API errors
