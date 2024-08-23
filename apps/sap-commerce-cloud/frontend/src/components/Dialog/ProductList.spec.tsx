@@ -40,7 +40,7 @@ describe('ProductList', () => {
         }}
       />
     );
-    const selectButton = await screen.findByLabelText('Select');
+    const selectButton = await screen.findByLabelText('Select product');
     selectButton.click();
     expect(close).toHaveBeenCalled();
   });
