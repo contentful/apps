@@ -22,14 +22,19 @@
       "allowNetworks": [],
       "parameters": [
         {
-          "id": "sapApiEndpoint",
-          "name": "SAP API Endpoint",
+          "id": "baseSite",
+          "name": "SAP Base Site",
           "type": "Symbol"
         },
         {
-          "id": "apiKey",
-          "name": "SAP API key",
+          "id": "searchQuery",
+          "name": "SAP Product List Search Query",
           "type": "Symbol"
+        },
+        {
+          "id": "page",
+          "name": "SAP Product List Current Page",
+          "type": "Number"
         }
       ]
     },

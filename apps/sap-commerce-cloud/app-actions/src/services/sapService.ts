@@ -4,7 +4,7 @@ import {
   productTransformer,
 } from '../../../frontend/src/api/dataTransformers';
 import { AIR_HEADER, DEFAULT_FIELDS } from '../constants';
-import { BaseSites, Product } from '../types';
+import { BaseSites, Product, ProductList } from '../types';
 
 export class SapService {
   constructor(readonly apiEndpoint: string) {}
@@ -20,8 +20,24 @@ export class SapService {
     await this.handleApiError(response);
     const responseBody = await response.json();
     this.assertBaseSiteResponse(responseBody);
-    const baseSites = responseBody['baseSites'].map(baseSiteTransformer());
-    return baseSites;
+    return responseBody['baseSites'].map(baseSiteTransformer());
+  }
+
+  public async getProductList(
+    baseSite: string,
+    searchQuery: string = '',
+    page: number = 0
+  ): Promise<string[]> {
+    const url = `${this.apiEndpoint}/occ/v2/${baseSite}/products/search/?query=${searchQuery}&fields=FULL&currentPage=${page}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.buildRequestHeaders(),
+    });
+
+    await this.handleApiError(response);
+    const responseBody = await response.json();
+    this.assertProductListResponse(responseBody, searchQuery);
+    return responseBody['products'];
   }
 
   public async getProductDetails(skus: string): Promise<{ products: Product[]; status: string }> {
@@ -109,5 +125,17 @@ export class SapService {
       throw new TypeError('invalid type returned from SAP Commerce Cloud');
     if (Object.hasOwn(value, 'errors')) throw new TypeError('received error response from SAP');
     if (!('code' in value)) throw new TypeError('missing `code` attribute in value');
+  }
+
+  private assertProductListResponse(
+    value: unknown,
+    searchQuery: string
+  ): asserts value is ProductList {
+    if (typeof value !== 'object' || !value)
+      throw new TypeError('invalid type returned from SAP Commerce Cloud');
+    if (!('products' in value)) throw new TypeError('missing `products` attribute in value');
+    if (!Array.isArray(value.products)) throw new TypeError('products is not an array');
+    if (value.products.length === 0)
+      throw new TypeError(`Products not found for search term ${searchQuery}`);
   }
 }
