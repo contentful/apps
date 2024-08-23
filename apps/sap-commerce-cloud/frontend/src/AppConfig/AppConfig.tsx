@@ -152,6 +152,7 @@ export default function AppConfig({
                       onChange={(e) =>
                         onParameterChange(def.id, e as ChangeEvent<HTMLInputElement>)
                       }
+                      aria-label={def.name}
                     />
                     <FormControl.HelpText>{def.description}</FormControl.HelpText>
                   </FormControl>

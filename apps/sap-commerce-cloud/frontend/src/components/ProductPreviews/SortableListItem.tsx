@@ -96,7 +96,7 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
               )}
               <IconButton
                 icon={<CloseIcon variant="muted" />}
-                aria-label="Delete"
+                aria-label={`Delete ${product.name}`}
                 onClick={onDelete}
               />
             </div>
