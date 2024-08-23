@@ -1,7 +1,28 @@
 import difference from 'lodash/difference';
 import { Product, SAPParameters } from '../interfaces';
 import { productTransformer } from './dataTransformers';
+import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
+import { toHAAParams } from '../helpers/toHAAParams';
 
+export const fetchProductPreviewsHAA = async (
+  skus: string[],
+  ids: BaseAppSDK['ids'],
+  cma: CMAClient
+): Promise<Product[]> => {
+  const { response } = await cma.appActionCall.createWithResponse(
+    toHAAParams('fetchProductPreview', ids),
+    {
+      parameters: {
+        skus: JSON.stringify(skus),
+      },
+    }
+  );
+  const jsonResponse = JSON.parse(response.body);
+  if (!jsonResponse.ok) {
+    return [];
+  }
+  return jsonResponse.data;
+};
 export async function fetchProductPreviews(
   skus: string[],
   parameters: SAPParameters

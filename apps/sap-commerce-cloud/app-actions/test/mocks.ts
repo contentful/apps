@@ -203,4 +203,5 @@ export const mockSapProductList = {
       volumePricesFlag: false,
     },
   ],
+  pagination: {},
 };

@@ -27,7 +27,7 @@ export class SapService {
     baseSite: string,
     searchQuery: string = '',
     page: number = 0
-  ): Promise<string[]> {
+  ): Promise<{ products: Product[]; pagination: unknown }> {
     const url = `${this.apiEndpoint}/occ/v2/${baseSite}/products/search/?query=${searchQuery}&fields=FULL&currentPage=${page}`;
     const response = await fetch(url, {
       method: 'GET',
@@ -36,8 +36,11 @@ export class SapService {
 
     await this.handleApiError(response);
     const responseBody = await response.json();
-    this.assertProductListResponse(responseBody, searchQuery);
-    return responseBody['products'];
+    this.assertProductListResponse(responseBody);
+    const products = responseBody['products'].map(
+      productTransformer({ apiEndpoint: this.apiEndpoint }, {}, baseSite)
+    );
+    return { products, pagination: responseBody['pagination'] };
   }
 
   public async getProductDetails(skus: string): Promise<{ products: Product[]; status: string }> {
@@ -128,14 +131,12 @@ export class SapService {
   }
 
   private assertProductListResponse(
-    value: unknown,
-    searchQuery: string
-  ): asserts value is ProductList {
+    value: unknown
+  ): asserts value is { products: ProductList; pagination: unknown } {
     if (typeof value !== 'object' || !value)
       throw new TypeError('invalid type returned from SAP Commerce Cloud');
     if (!('products' in value)) throw new TypeError('missing `products` attribute in value');
     if (!Array.isArray(value.products)) throw new TypeError('products is not an array');
-    if (value.products.length === 0)
-      throw new TypeError(`Products not found for search term ${searchQuery}`);
+    if (!('pagination' in value)) throw new TypeError('missing `pagination` attribute in value');
   }
 }
