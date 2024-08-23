@@ -100,3 +100,45 @@ export const mockSapBaseSites: BaseSites = {
     },
   ],
 };
+
+export const mockSapProductPreview = {
+  availableForPickup: false,
+  categories: [],
+  code: 'MZ-FG-E101',
+  configurable: false,
+  description:
+    'With over 50km of battery assisted range, B2BBestrun Pro will go wherever your ride takes you. The high energy density of this Lithium Polymer cell ensures maximum travel time.',
+  images: [
+    [
+      { url: 'https://www.b2bbestrun.com/image1.jpg' },
+      { url: 'https://www.b2bbestrun.com/image2.jpg' },
+    ],
+  ],
+  manufacturer: 'B2BBestrun Bicycles',
+  multidimensional: false,
+  name: 'Pro',
+  numberOfReviews: 0,
+  price: {
+    currencyIso: 'USD',
+    formattedValue: '$1,349.00',
+    priceType: 'BUY',
+    value: 1349,
+  },
+  priceRange: {},
+  stock: {
+    isValueRounded: false,
+    stockLevel: 308,
+    stockLevelStatus: 'inStock',
+  },
+  summary: 'Long ride? Meet your ultimate travel companion.',
+  url: '/Open-Catalogue/Bicycles/Cruise-Bikes/Pro/p/MZ-FG-E101',
+};
+
+export const mockSapProductPreviewRejection = {
+  errors: [
+    {
+      message: "Product with code 'CONF_BLAH' not found!",
+      type: 'UnknownIdentifierError',
+    },
+  ],
+};

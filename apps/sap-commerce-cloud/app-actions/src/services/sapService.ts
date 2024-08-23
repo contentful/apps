@@ -38,12 +38,17 @@ export class SapService {
             method: 'GET',
             headers: this.buildRequestHeaders(),
           });
-          const json = await req.json();
-          // @ts-ignore
-          totalProducts.push(json);
-          // @ts-ignore
-          skuIds.push(`${json.code}`);
-          skuIdsToSkusMap[id] = sku;
+
+          console.log('req', req);
+
+          if (req.ok) {
+            const json = await req.json();
+            // @ts-ignore
+            totalProducts.push(json);
+            // @ts-ignore
+            skuIds.push(`${json.code}`);
+            skuIdsToSkusMap[id] = sku;
+          }
         })
       );
 
