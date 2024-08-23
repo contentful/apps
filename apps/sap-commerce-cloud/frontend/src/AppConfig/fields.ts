@@ -30,6 +30,7 @@ export interface EditorInterface {
 
 export type CompatibleFields = Record<string, Field[]>;
 export type SelectedFields = Record<string, string[] | undefined>;
+export type FieldsConfig = Record<string, Record<string, string | undefined> | undefined>;
 
 function isCompatibleField(field: Field) {
   const isArray = field.type === 'Array';
