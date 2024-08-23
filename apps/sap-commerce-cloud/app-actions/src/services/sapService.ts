@@ -1,7 +1,7 @@
 import difference from 'lodash.difference';
 import {
   baseSiteTransformer,
-  productDetailsTransformer,
+  productTransformer,
 } from '../../../frontend/src/api/dataTransformers';
 import { AIR_HEADER, DEFAULT_FIELDS } from '../constants';
 import { BaseSites, Product } from '../types';
@@ -24,50 +24,50 @@ export class SapService {
     return baseSites;
   }
 
-  public async getProductDetails(
-    baseSite: string,
-    skus: any
-  ): Promise<{ products: Product[]; status: string }> {
+  public async getProductDetails(skus: string): Promise<{ products: Product[]; status: string }> {
     try {
       const totalProducts: Product[] = [];
       const skuIds: string[] = [];
       const parsedSkus = JSON.parse(skus);
+      let skuIdsToSkusMap: { [key: string]: string } = {};
 
       await Promise.all(
         parsedSkus.map(async (sku: string) => {
-          const id = sku.split('/products/').pop();
-          const req = await fetch(
-            `${this.apiEndpoint}/occ/v2/${baseSite}/products/${id}?fields=${DEFAULT_FIELDS.join(
-              ','
-            )}`,
-            {
-              method: 'GET',
-              headers: this.buildRequestHeaders(),
-            }
-          );
+          const id = sku.split('/products/').pop() as string;
+          const req = await fetch(`${sku}?fields=${DEFAULT_FIELDS.join(',')}`, {
+            method: 'GET',
+            headers: this.buildRequestHeaders(),
+          });
           const json = await req.json();
           // @ts-ignore
           totalProducts.push(json);
           // @ts-ignore
           skuIds.push(`${json.code}`);
+          skuIdsToSkusMap[id] = sku;
         })
       );
 
       const products: Product[] = totalProducts.map(
-        productDetailsTransformer({
-          apiEndpoint: this.apiEndpoint,
-        })
+        productTransformer(
+          {
+            apiEndpoint: this.apiEndpoint,
+          },
+          skuIdsToSkusMap
+        )
       );
 
       const foundSKUs = products.map((product) => product.sku);
-      const missingProducts: Product[] = difference(skuIds, foundSKUs).map((sku) => ({
-        sku: sku?.split('/products/').pop(),
-        image: '',
-        id: '',
-        name: '',
-        isMissing: true,
-        productUrl: '',
-      }));
+      const missingProducts: Product[] = difference(skuIds, foundSKUs).map((sku) => {
+        let id = sku?.split('/products/').pop() as string;
+        return {
+          sku: id,
+          image: '',
+          id: '',
+          name: '',
+          isMissing: true,
+          productUrl: skuIdsToSkusMap[id],
+        };
+      });
 
       return { status: 'Success', products: [...products, ...missingProducts] };
     } catch (err) {

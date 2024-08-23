@@ -1,13 +1,10 @@
-import get from 'lodash/get';
-import difference from 'lodash/difference';
-import { Product, Hash, ConfigurationParameters, AppActionCallResponse } from '../types';
-import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
+import { withAsyncAppActionErrorHandling } from '../helpers/error-handling';
 import { fetchApiEndpoint } from '../helpers/fetchApiEndpoint';
 import { SapService } from '../services/sapService';
+import { AppActionCallResponse, Product } from '../types';
 
 interface AppActionCallParameters {
-  baseSite: string;
   skus: string;
 }
 export const handler = withAsyncAppActionErrorHandling(
@@ -15,7 +12,7 @@ export const handler = withAsyncAppActionErrorHandling(
     payload: AppActionCallParameters,
     context: AppActionCallContext
   ): Promise<AppActionCallResponse<Product[]>> => {
-    const { baseSite, skus } = payload;
+    const { skus } = payload;
     const {
       cma,
       appActionCallContext: { appInstallationId },
@@ -23,7 +20,7 @@ export const handler = withAsyncAppActionErrorHandling(
     const apiEndpoint = await fetchApiEndpoint(cma, appInstallationId);
 
     const sapService = new SapService(apiEndpoint);
-    const productResponse = await sapService.getProductDetails(baseSite, skus);
+    const productResponse = await sapService.getProductDetails(skus);
 
     return {
       ok: true,
