@@ -23,7 +23,6 @@ import { styles } from './Dialog.styles';
 import { cx } from '@emotion/css';
 import { DoneIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
-import { fetchProductList } from '../../api/fetchProductList';
 import useAPI from '../../hooks/useAPI';
 
 interface DialogProps {
@@ -43,18 +42,16 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const sapAPI = useAPI(sdk.parameters as SAPParameters, sdk.ids, sdk.cma);
 
   const load = useCallback(async () => {
-    const { products, errors } = await fetchProductList({
+    const { products, errors } = await sapAPI.fetchProductList({
       baseSite,
       searchQuery: debouncedQuery,
       page,
       parameters: sdk.parameters as SAPParameters,
       updateTotalPages: setTotalPages,
-      ids: sdk.ids,
-      cma: sdk.cma,
     });
     setProducts(products);
     setErrors(errors);
-  }, [baseSite, debouncedQuery, page, sdk.parameters, sdk.ids, sdk.cma]);
+  }, [sapAPI, baseSite, debouncedQuery, page, sdk.parameters]);
 
   useEffect(() => {
     load();
