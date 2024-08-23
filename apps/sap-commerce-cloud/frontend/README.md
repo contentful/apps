@@ -6,7 +6,7 @@ In the project directory, you can run:
 
 ### Install packages
 
-`npm i` 
+`npm i`
 
 ### Set development ENV
 
@@ -14,7 +14,7 @@ Copy the contents of .env.development.sample into a new file called .env.develop
 
 #### `npm run start`
 
-Creates or updates your app definition in contentful, and runs the app in development mode.
+Run this command from the frontend folder. Creates or updates your app definition in contentful, and runs the app in development mode.
 Open your app to view it in the browser.
 
 The page will reload if you make edits.
@@ -28,6 +28,11 @@ It correctly bundles React in production mode and optimizes the build for the be
 The build is minified and the filenames include the hashes.
 Your app is ready to be deployed!
 
+#### `npm run test`
+
+Runs all tests on the frontend.
+A code coverage report is generated.
+
 ## Libraries to use
 
 To make your app look and feel like Contentful use the following libraries:
@@ -38,5 +43,3 @@ To make your app look and feel like Contentful use the following libraries:
 ## Learn More
 
 [Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.
-
-Create Contentful App uses [Create React App](https://create-react-app.dev/). You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started) and how to further customize your app.
