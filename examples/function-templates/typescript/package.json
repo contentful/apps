@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "@contentful/node-apps-toolkit": "^3.6.1",
-    "@tsconfig/recommended": "1.0.6",
+    "@tsconfig/recommended": "1.0.7",
     "esbuild": "0.23.1"
   }
 }
