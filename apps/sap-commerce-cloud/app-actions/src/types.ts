@@ -59,6 +59,24 @@ export interface BaseSite {
 
 export type BaseSites = { baseSites: BaseSite[] };
 
+export type ProductListProduct = {
+  code: string;
+  configurable: boolean;
+  configuratorType: string;
+  description: string;
+  firstVariantImage: string;
+  images?: string[];
+  manufacturer: string;
+  multidimensional: boolean;
+  name: string;
+  priceRange: Record<string, any>;
+  summary: string;
+  url: string;
+  volumePricesFlag: boolean;
+};
+
+export type ProductList = ProductListProduct[];
+
 export type AppInstallationParameters = {
   apiEndpoint: string;
   baseSites: string;
