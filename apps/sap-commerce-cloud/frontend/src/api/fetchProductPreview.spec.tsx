@@ -29,14 +29,6 @@ describe('fetchProductPreviews', () => {
     global.fetch = mockFetch({});
     const productPreviews = await fetchProductPreviewsHAA(
       ['1', '2'],
-      {
-        installation: {
-          apiEndpoint: mockApiEndpoint,
-          baseSites: mockBaseSite,
-        },
-        instance: 'electronics',
-        invocation: '123',
-      },
       mockSDK.ids as BaseAppSDK['ids'],
       mockSDK.cma as any
     );

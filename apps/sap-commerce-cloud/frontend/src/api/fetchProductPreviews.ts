@@ -6,7 +6,6 @@ import { toHAAParams } from '../helpers/toHAAParams';
 
 export const fetchProductPreviewsHAA = async (
   skus: string[],
-  parameters: SAPParameters,
   ids: BaseAppSDK['ids'],
   cma: CMAClient
 ): Promise<Product[]> => {
@@ -14,8 +13,6 @@ export const fetchProductPreviewsHAA = async (
     toHAAParams('fetchProductPreview', ids),
     {
       parameters: {
-        sapApiEndpoint: parameters.installation.apiEndpoint,
-        apiKey: ids.app,
         skus: JSON.stringify(skus),
       },
     }

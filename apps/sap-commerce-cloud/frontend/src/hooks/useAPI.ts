@@ -36,7 +36,7 @@ const useAPI = (parameters: SAPParameters, ids: BaseAppSDK['ids'], cma: CMAClien
   const fetchuseProductPreviewsWrapper = useCallback(
     async (skus: string[]) => {
       if (isAppHAAApp) {
-        return fetchProductPreviewsHAA(skus, parameters, ids, cma);
+        return fetchProductPreviewsHAA(skus, ids, cma);
       }
       return fetchProductPreviews(skus, parameters);
     },
