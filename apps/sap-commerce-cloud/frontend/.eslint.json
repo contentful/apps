@@ -7,9 +7,10 @@
       "plugin:react-hooks/recommended",
       "airbnb",
       "prettier",
-      "plugin:prettier/recommended"
+      "plugin:prettier/recommended",
+      "plugin:jsx-a11y/recommended"
     ],
-    "plugins": ["@typescript-eslint", "react", "react-hooks", "prettier"],
+    "plugins": ["@typescript-eslint", "react", "react-hooks", "prettier", "jsx-a11y"],
     "env": {
       "browser": true,
       "es2021": true
