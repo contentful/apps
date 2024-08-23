@@ -33,7 +33,7 @@ export function ProductList(props: Props) {
                   variant="primary"
                   icon={<DoneIcon />}
                   onClick={() => selectButtonClickEvent(product.sku)}
-                  aria-label="Select">
+                  aria-label="Select product">
                   Select
                 </IconButton>
               ) : (
@@ -41,6 +41,7 @@ export function ProductList(props: Props) {
                   id={product.sku}
                   defaultChecked={checkboxValue}
                   onChange={props.checkboxFn}
+                  aria-label={product.name}
                 />
               )}
             </TableCell>

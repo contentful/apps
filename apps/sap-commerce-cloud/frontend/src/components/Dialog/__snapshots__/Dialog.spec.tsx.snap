@@ -9,6 +9,7 @@ exports[`Dialog > renders correctly and matches snapshot 1`] = `
       class="css-1vawd3v"
     >
       <input
+        aria-label="Search products"
         class="f36-margin-bottom--m css-1w37lto"
         data-test-id="cf-ui-text-input"
         placeholder="Type to search products"
@@ -114,6 +115,7 @@ exports[`Dialog > renders correctly and matches snapshot 1`] = `
               for="P1"
             >
               <input
+                aria-label="Product 1"
                 class="css-199qhtr"
                 id="P1"
                 role="checkbox"
@@ -177,6 +179,7 @@ exports[`Dialog > renders correctly and matches snapshot 1`] = `
               for="P2"
             >
               <input
+                aria-label="Product 2"
                 class="css-199qhtr"
                 id="P2"
                 role="checkbox"
@@ -229,6 +232,7 @@ exports[`Dialog > renders correctly and matches snapshot 1`] = `
     class="css-hvj582"
   >
     <button
+      aria-label="Next page"
       class="css-1nbom3p"
       data-test-id="cf-ui-button"
       type="button"

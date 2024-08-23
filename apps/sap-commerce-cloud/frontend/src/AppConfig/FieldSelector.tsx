@@ -44,6 +44,7 @@ export default function FieldSelector({
               {fields.map((field) => (
                 <FormControl id={`field-box-${ct.sys.id}-${field.id}`} key={field.id}>
                   <Checkbox
+                    aria-label={field.name}
                     helpText={`${
                       field.type === 'Symbol' ? 'Short text' : 'Short text, list'
                     } · Field ID: ${field.id}`}
