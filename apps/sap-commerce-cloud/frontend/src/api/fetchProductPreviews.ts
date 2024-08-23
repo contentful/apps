@@ -18,10 +18,10 @@ export const fetchProductPreviewsHAA = async (
     }
   );
   const jsonResponse = JSON.parse(response.body);
-  if (!jsonResponse.success) {
+  if (!jsonResponse.ok) {
     return [];
   }
-  return jsonResponse.products;
+  return jsonResponse.data;
 };
 export async function fetchProductPreviews(
   skus: string[],
