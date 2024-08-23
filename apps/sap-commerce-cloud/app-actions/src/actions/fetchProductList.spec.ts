@@ -9,7 +9,7 @@ import {
 import { AppInstallationProps } from 'contentful-management';
 import { AppActionCallContext } from '@contentful/node-apps-toolkit';
 import { handler } from './fetchProductList';
-import { AppActionCallResponseSuccess } from '../types';
+import { AppActionCallResponseSuccess, Product } from '../types';
 
 describe('fetchProductList.handler', () => {
   let cmaRequestStub: sinon.SinonStub;
@@ -39,8 +39,10 @@ describe('fetchProductList.handler', () => {
       context
     );
     expect(result).to.have.property('ok', true);
-    const productList = (result as AppActionCallResponseSuccess<string[]>).data;
-    expect(productList).to.be.an('array');
-    expect(productList).to.have.length(3);
+    const productResponse = (
+      result as AppActionCallResponseSuccess<{ products: Product[]; pagination: unknown }>
+    ).data;
+    expect(productResponse.products).to.be.an('array');
+    expect(productResponse.products).to.have.length(3);
   });
 });
