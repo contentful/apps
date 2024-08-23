@@ -3,12 +3,6 @@ import { Response as ProductListResponse, SAPParameters, UpdateTotalPagesFn } fr
 import { productTransformer } from './dataTransformers';
 import { toHAAParams } from '../helpers/toHAAParams';
 
-type FetchUrlParams = {
-  baseSite: string;
-  searchQuery: string;
-  page: number;
-  parameters: SAPParameters;
-};
 export type FetchProductListParams = {
   baseSite: string;
   searchQuery: string;
@@ -16,45 +10,32 @@ export type FetchProductListParams = {
   parameters: SAPParameters;
   updateTotalPages: UpdateTotalPagesFn;
 };
-type FetchHAAProductListParams = FetchProductListParams & {
+type FetchHAAProductListParams = Omit<FetchProductListParams, 'parameters'> & {
   ids: BaseAppSDK['ids'];
   cma: CMAClient;
-};
-const makeUrl = ({ baseSite, searchQuery, page, parameters }: FetchUrlParams) => {
-  return (
-    parameters.installation.apiEndpoint +
-    '/occ/v2/' +
-    baseSite +
-    '/products/search' +
-    '?query=' +
-    searchQuery +
-    '&fields=FULL&currentPage=' +
-    page
-  );
 };
 export async function fetchProductListHAA({
   baseSite,
   searchQuery,
   page,
-  parameters,
   updateTotalPages,
   ids,
   cma,
 }: FetchHAAProductListParams): Promise<ProductListResponse> {
-  const url = makeUrl({ baseSite, searchQuery, page, parameters });
   const { response } = await cma.appActionCall.createWithResponse(
     toHAAParams('fetchProductList', ids),
     {
       parameters: {
-        sapApiEndpoint: url,
-        apiKey: ids.app,
+        baseSite,
+        searchQuery,
+        page,
       },
     }
   );
   const responseJson = JSON.parse(response.body);
-  if (responseJson.success) {
-    const products = responseJson['products'];
-    updateTotalPages(responseJson['pagination']['totalPages']);
+  if (responseJson.ok) {
+    const products = responseJson['data']['products'];
+    updateTotalPages(responseJson['data']['pagination']['totalPages']);
     if (!products.length) {
       return {
         products: [],
@@ -84,7 +65,15 @@ export async function fetchProductList({
       errors: [],
     };
   }
-  const url = makeUrl({ baseSite, searchQuery, page, parameters });
+  const url =
+    parameters.installation.apiEndpoint +
+    '/occ/v2/' +
+    baseSite +
+    '/products/search' +
+    '?query=' +
+    searchQuery +
+    '&fields=FULL&currentPage=' +
+    page;
   const response: any = await fetch(url);
   const responseJson = await response.json();
 

@@ -13,7 +13,7 @@ import {
 interface SAPAPI {
   fetchBaseSites: () => Promise<string[]>;
   fetchProductPreviews: (skus: string[]) => Promise<Product[]>;
-  fetchProductList: (params: FetchProductListParams) => Promise<Response>;
+  fetchProductList: (params: Omit<FetchProductListParams, 'parameters'>) => Promise<Response>;
 }
 
 /**
@@ -21,7 +21,7 @@ interface SAPAPI {
  *
  * @returns SAPAPI
  */
-const useAPI = (parameters: SAPParameters, ids: BaseAppSDK['ids'], cma: CMAClient): SAPAPI => {
+const useAPI = (sapParameters: SAPParameters, ids: BaseAppSDK['ids'], cma: CMAClient): SAPAPI => {
   const isAppHAAApp = useMemo(() => {
     return isHAAEnabled(ids);
   }, [ids]);
@@ -30,26 +30,26 @@ const useAPI = (parameters: SAPParameters, ids: BaseAppSDK['ids'], cma: CMAClien
     if (isAppHAAApp) {
       return fetchBaseSitesHAA(ids, cma);
     }
-    return fetchBaseSites(parameters);
-  }, [cma, ids, isAppHAAApp, parameters]);
+    return fetchBaseSites(sapParameters);
+  }, [cma, ids, isAppHAAApp, sapParameters]);
 
   const fetchuseProductPreviewsWrapper = useCallback(
     async (skus: string[]) => {
       if (isAppHAAApp) {
         return fetchProductPreviewsHAA(skus, ids, cma);
       }
-      return fetchProductPreviews(skus, parameters);
+      return fetchProductPreviews(skus, sapParameters);
     },
-    [cma, ids, isAppHAAApp, parameters]
+    [cma, ids, isAppHAAApp, sapParameters]
   );
   const fetchuseProductListWrapper = useCallback(
-    async (params: FetchProductListParams) => {
+    async (fetchParams: Omit<FetchProductListParams, 'parameters'>) => {
       if (isAppHAAApp) {
-        return fetchProductListHAA({ ...params, ids, cma });
+        return fetchProductListHAA({ ...fetchParams, ids, cma });
       }
-      return fetchProductList(params);
+      return fetchProductList({ ...fetchParams, parameters: sapParameters });
     },
-    [cma, ids, isAppHAAApp]
+    [cma, ids, isAppHAAApp, sapParameters]
   );
 
   return {

@@ -46,12 +46,11 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
       baseSite,
       searchQuery: debouncedQuery,
       page,
-      parameters: sdk.parameters as SAPParameters,
       updateTotalPages: setTotalPages,
     });
     setProducts(products);
     setErrors(errors);
-  }, [sapAPI, baseSite, debouncedQuery, page, sdk.parameters]);
+  }, [sapAPI, baseSite, debouncedQuery, page]);
 
   useEffect(() => {
     load();
