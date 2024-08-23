@@ -14,8 +14,8 @@ describe('fetchProductPreviews', () => {
       Promise.resolve({
         response: {
           body: JSON.stringify({
-            success: true,
-            products: [{ id: '123' }],
+            ok: true,
+            data: [{ id: '123' }],
           }),
         },
       })

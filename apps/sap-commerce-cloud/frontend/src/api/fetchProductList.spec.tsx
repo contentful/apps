@@ -43,9 +43,11 @@ describe('fetchProductList', () => {
       Promise.resolve({
         response: {
           body: JSON.stringify({
-            success: true,
-            pagination: { totalPages: 1 },
-            products: [{ id: '123' }],
+            ok: true,
+            data: {
+              pagination: { totalPages: 1 },
+              products: [{ id: '123' }],
+            },
           }),
         },
       })
