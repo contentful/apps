@@ -1,10 +1,9 @@
 import { baseSiteTransformer } from './dataTransformers';
 import { SAPParameters } from '../interfaces';
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
-import { isHAAEnabled } from '../helpers/isHAAEnabled';
 import { toHAAParams } from '../helpers/toHAAParams';
 
-async function fetchBaseSitesHAA(ids: BaseAppSDK['ids'], cma: CMAClient): Promise<string[]> {
+export async function fetchBaseSitesHAA(ids: BaseAppSDK['ids'], cma: CMAClient): Promise<string[]> {
   const { response } = await cma.appActionCall.createWithResponse(
     toHAAParams('fetchBaseSites', ids),
     { parameters: {} }
@@ -16,16 +15,8 @@ async function fetchBaseSitesHAA(ids: BaseAppSDK['ids'], cma: CMAClient): Promis
   return responseJson.data;
 }
 
-export async function fetchBaseSites(
-  parameters: SAPParameters,
-  ids: BaseAppSDK['ids'],
-  cma: CMAClient
-): Promise<string[]> {
+export async function fetchBaseSites(parameters: SAPParameters): Promise<string[]> {
   try {
-    if (isHAAEnabled(ids)) {
-      return fetchBaseSitesHAA(ids, cma);
-    }
-
     const url = `${parameters.installation.apiEndpoint}/occ/v2/basesites`;
     const response = await fetch(url);
     if (response.ok) {
