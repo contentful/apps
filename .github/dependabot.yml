@@ -20,6 +20,23 @@ updates:
     - dependency-name: "serverless"
       versions:
         - ">=3"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/apps/ai-image-tagging/lambda"
@@ -38,6 +55,23 @@ updates:
     - dependency-name: "serverless"
       versions:
         - ">=3"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/apps/slack/lambda"
@@ -56,6 +90,23 @@ updates:
     - dependency-name: "serverless"
       versions:
         - ">=3"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/apps/jira/functions"
@@ -74,6 +125,23 @@ updates:
     - dependency-name: "serverless"
       versions:
         - ">=3"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/apps/netlify/lambda"
@@ -92,6 +160,23 @@ updates:
     - dependency-name: "serverless"
       versions:
         - ">=3"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/examples/typescript"
@@ -110,6 +195,23 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/examples/javascript"
@@ -128,6 +230,23 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/examples/function-mock-shop"
@@ -146,6 +265,23 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/examples/function-potterdb"
@@ -164,6 +300,23 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/examples/function-potterdb-rest-api"
@@ -182,6 +335,23 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/examples/function-templates/javascript"
@@ -200,6 +370,23 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: npm
   directory: "/examples/function-templates/typescript"
@@ -218,6 +405,23 @@ updates:
     - dependency-name: "emotion"
       versions:
         - ">=11"
+  groups:
+    production-dependencies:
+      applies-to: version-updates
+      dependency-type: production
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
+    dev-dependencies:
+      applies-to: version-updates
+      dependency-type: development
+      update-types:
+        - minor
+        - patch
+      patterns:
+        - '*'
 
 - package-ecosystem: docker
   directory: "/apps/slack/lambda/"
