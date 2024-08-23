@@ -3,11 +3,11 @@ import { IconButton } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import get from 'lodash/get';
 import { SortableComponent } from '../ProductPreviews/SortableComponent';
-import { fetchProductPreviews } from '../../api/fetchProductPreviews';
 import logo from '../../logo.png';
 import { AppParameters, SAPParameters } from '../../interfaces';
 import { styles } from './Field.styles';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
+import useAPI from '../../hooks/useAPI';
 
 interface Props {
   sdk: FieldAppSDK<AppParameters>;
@@ -29,6 +29,7 @@ function makeCTAText(fieldType: string) {
 const Field: React.FC<Props> = ({ sdk }) => {
   const [value, setValue] = useState<string[]>(fieldValueToState(sdk.field.getValue()));
   const [editingDisabled, setEditingDisabled] = useState<boolean>(true);
+  const sapAPI = useAPI(sdk.parameters as SAPParameters, sdk.ids, sdk.cma);
 
   useEffect(() => {
     sdk.window.startAutoResizer();
@@ -91,9 +92,7 @@ const Field: React.FC<Props> = ({ sdk }) => {
             disabled={editingDisabled}
             skus={value}
             onChange={updateStateValue}
-            fetchProductPreviews={(skus) =>
-              fetchProductPreviews(skus, sdk.parameters as SAPParameters, sdk.ids, sdk.cma)
-            }
+            fetchProductPreviews={sapAPI.fetchProductPreviews}
           />
         </div>
       )}

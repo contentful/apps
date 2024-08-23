@@ -2,10 +2,9 @@ import difference from 'lodash/difference';
 import { Product, SAPParameters } from '../interfaces';
 import { productTransformer } from './dataTransformers';
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
-import { isHAAEnabled } from '../helpers/isHAAEnabled';
 import { toHAAParams } from '../helpers/toHAAParams';
 
-const fetchHAAProductPreviews = async (
+export const fetchProductPreviewsHAA = async (
   skus: string[],
   parameters: SAPParameters,
   ids: BaseAppSDK['ids'],
@@ -29,16 +28,10 @@ const fetchHAAProductPreviews = async (
 };
 export async function fetchProductPreviews(
   skus: string[],
-  parameters: SAPParameters,
-  ids: BaseAppSDK['ids'],
-  cma: CMAClient
+  parameters: SAPParameters
 ): Promise<Product[]> {
   if (!skus.length) {
     return [];
-  }
-
-  if (isHAAEnabled(ids)) {
-    return fetchHAAProductPreviews(skus, parameters, ids, cma);
   }
 
   let totalResponse: any[] = [];

@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { fetchProductPreviews } from './fetchProductPreviews';
+import { fetchProductPreviews, fetchProductPreviewsHAA } from './fetchProductPreviews';
 import { mockApiEndpoint, mockBaseSite, mockFetch, makeSdkMock } from '../__mocks__';
 import { BaseAppSDK } from '@contentful/app-sdk';
 
@@ -8,7 +8,7 @@ describe('fetchProductPreviews', () => {
   afterAll(() => {
     global.fetch = originalFetch;
   });
-  it('should fetch product previews  from HAA', async () => {
+  it('should fetch product previews from HAA', async () => {
     const mockSDK = makeSdkMock();
     const mockSDKAction = vi.fn(() =>
       Promise.resolve({
@@ -27,7 +27,7 @@ describe('fetchProductPreviews', () => {
       },
     };
     global.fetch = mockFetch({});
-    const productPreviews = await fetchProductPreviews(
+    const productPreviews = await fetchProductPreviewsHAA(
       ['1', '2'],
       {
         installation: {
@@ -47,21 +47,15 @@ describe('fetchProductPreviews', () => {
     ]);
   });
   it('should fetch product previews', async () => {
-    const mockSDK = makeSdkMock();
     global.fetch = mockFetch({});
-    const productPreviews = await fetchProductPreviews(
-      ['1', '2'],
-      {
-        installation: {
-          apiEndpoint: mockApiEndpoint,
-          baseSites: mockBaseSite,
-        },
-        instance: 'electronics',
-        invocation: '123',
+    const productPreviews = await fetchProductPreviews(['1', '2'], {
+      installation: {
+        apiEndpoint: mockApiEndpoint,
+        baseSites: mockBaseSite,
       },
-      mockSDK.ids as BaseAppSDK['ids'],
-      mockSDK.cma as any
-    );
+      instance: 'electronics',
+      invocation: '123',
+    });
     expect(productPreviews).toEqual([
       {
         id: '',
@@ -96,22 +90,16 @@ describe('fetchProductPreviews', () => {
     ]);
   });
   it('should throw an error if the request fails', async () => {
-    const mockSDK = makeSdkMock();
     global.fetch = vi.fn(() => Promise.reject(new Error('Failed to fetch')));
     await expect(
-      fetchProductPreviews(
-        ['1', '2'],
-        {
-          installation: {
-            apiEndpoint: mockApiEndpoint,
-            baseSites: mockBaseSite,
-          },
-          instance: 'electronics',
-          invocation: '123',
+      fetchProductPreviews(['1', '2'], {
+        installation: {
+          apiEndpoint: mockApiEndpoint,
+          baseSites: mockBaseSite,
         },
-        mockSDK.ids as BaseAppSDK['ids'],
-        mockSDK.cma as any
-      )
+        instance: 'electronics',
+        invocation: '123',
+      })
     ).rejects.toThrow();
   });
 });
