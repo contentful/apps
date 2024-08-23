@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import {
   makeMockAppActionCallContext,
   makeMockAppInstallation,
+  makeMockFetchRejection,
   makeMockFetchResponse,
   mockSapProductPreview,
   mockSapProductPreviewRejection,
@@ -39,8 +40,8 @@ describe('fetchProductPreview.handler', () => {
     expect(productPreviews[0].sku).to.equal('MZ-FG-E101');
   });
 
-  it('misses', async () => {
-    const mockFetchResponse = makeMockFetchResponse(mockSapProductPreviewRejection);
+  it('handles when a product could not be found', async () => {
+    const mockFetchResponse = makeMockFetchRejection(mockSapProductPreviewRejection);
     stubbedFetch = sinon.stub(global, 'fetch');
     stubbedFetch.resolves(mockFetchResponse);
     cmaRequestStub = sinon.stub();
@@ -52,8 +53,7 @@ describe('fetchProductPreview.handler', () => {
     expect(result).to.have.property('ok', true);
     const response = result as AppActionCallResponseSuccess<Product[]>;
 
-    // TODO
-    // expect(response.data.length).to.equal(2);
-    // expect(response.data[0].sku).to.equal(true);
+    expect(response.data.length).to.equal(1);
+    expect(response.data[0].isMissing).to.equal(true);
   });
 });

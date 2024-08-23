@@ -28,6 +28,13 @@ export const makeMockFetchResponse = (
   const responseBody = JSON.stringify(body);
   return new Response(responseBody, { headers });
 };
+export const makeMockFetchRejection = (
+  body: object,
+  headers: Record<string, string> = {}
+): Response => {
+  const responseBody = JSON.stringify(body);
+  return new Response(responseBody, { headers, status: 400 });
+};
 
 export const makeMockAppActionCallContext = (
   responses: any[],

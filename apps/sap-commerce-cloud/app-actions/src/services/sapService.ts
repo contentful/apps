@@ -34,20 +34,18 @@ export class SapService {
       await Promise.all(
         parsedSkus.map(async (sku: string) => {
           const id = sku.split('/products/').pop() as string;
+          skuIds.push(id);
+          skuIdsToSkusMap[id] = sku;
+
           const req = await fetch(`${sku}?fields=${DEFAULT_FIELDS.join(',')}`, {
             method: 'GET',
             headers: this.buildRequestHeaders(),
           });
 
-          console.log('req', req);
-
           if (req.ok) {
             const json = await req.json();
-            // @ts-ignore
+            this.assertProductPreviewsResponse(json);
             totalProducts.push(json);
-            // @ts-ignore
-            skuIds.push(`${json.code}`);
-            skuIdsToSkusMap[id] = sku;
           }
         })
       );
@@ -104,5 +102,12 @@ export class SapService {
     if (typeof value !== 'object' || !value)
       throw new TypeError('invalid type returned from SAP Commerce Cloud');
     if (!('baseSites' in value)) throw new TypeError('missing `baseSites` attribute in value');
+  }
+
+  private assertProductPreviewsResponse(value: unknown): asserts value is Product {
+    if (typeof value !== 'object' || !value)
+      throw new TypeError('invalid type returned from SAP Commerce Cloud');
+    if (Object.hasOwn(value, 'errors')) throw new TypeError('received error response from SAP');
+    if (!('code' in value)) throw new TypeError('missing `code` attribute in value');
   }
 }
