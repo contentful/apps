@@ -44,18 +44,8 @@
       "allowNetworks": [],
       "parameters": [
         {
-          "id": "sapApiEndpoint",
-          "name": "SAP API Endpoint",
-          "type": "Symbol"
-        },
-        {
-          "id": "apiKey",
-          "name": "SAP API key",
-          "type": "Symbol"
-        },
-        {
           "id": "skus",
-          "name": "SAP Products skus",
+          "name": "SAP SKU list (json)",
           "type": "Symbol"
         }
       ]
