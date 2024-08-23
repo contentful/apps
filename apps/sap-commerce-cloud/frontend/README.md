@@ -8,10 +8,6 @@ In the project directory, you can run:
 
 `npm i`
 
-### Set development ENV
-
-Copy the contents of .env.development.sample into a new file called .env.development (calls to SAP will only work from localhost with this added)
-
 #### `npm run start`
 
 Run this command from the frontend folder. Creates or updates your app definition in contentful, and runs the app in development mode.
