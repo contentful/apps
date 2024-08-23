@@ -15,8 +15,6 @@ import {
 } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from './ProductList';
-import { fetchProductList } from '../../api/fetchProductList';
-import { fetchBaseSites } from '../../api/fetchBaseSites';
 import { AppParameters, Error as ErrorType, Product, SAPParameters } from '../../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
@@ -25,6 +23,7 @@ import { styles } from './Dialog.styles';
 import { cx } from '@emotion/css';
 import { DoneIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
+import useAPI from '../../hooks/useAPI';
 
 interface DialogProps {
   sdk: DialogAppSDK<AppParameters>;
@@ -40,18 +39,18 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [errors, setErrors] = useState<ErrorType[]>([]);
+  const sapAPI = useAPI(sdk.parameters as SAPParameters, sdk.ids, sdk.cma);
 
   const load = useCallback(async () => {
-    const { products, errors } = await fetchProductList(
+    const { products, errors } = await sapAPI.fetchProductList({
       baseSite,
-      debouncedQuery,
+      searchQuery: debouncedQuery,
       page,
-      sdk.parameters as SAPParameters,
-      setTotalPages
-    );
+      updateTotalPages: setTotalPages,
+    });
     setProducts(products);
     setErrors(errors);
-  }, [baseSite, debouncedQuery, page, sdk.parameters]);
+  }, [sapAPI, baseSite, debouncedQuery, page]);
 
   useEffect(() => {
     load();
@@ -59,7 +58,7 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
 
   useEffect(() => {
     const loadBaseSites = async () => {
-      const baseSites = await fetchBaseSites(sdk.parameters as SAPParameters);
+      const baseSites = await sapAPI.fetchBaseSites();
       const installationConfigBaseSites = `${get(sdk.parameters.invocation, 'baseSites', '')}`;
       let finalBaseSites: string[] = [];
 
@@ -78,7 +77,8 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
     };
 
     loadBaseSites();
-  }, [sdk.parameters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sdk.cma, sdk.ids, sdk.parameters]);
 
   const updateSearchTerm = (event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value);
 

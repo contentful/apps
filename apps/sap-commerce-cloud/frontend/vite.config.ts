@@ -16,5 +16,6 @@ export default defineConfig(() => ({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['/src/setupTests.ts'],
+    env: { VITE_SAP_APP_ID: 'TEST_SAP_APP_ID', VITE_SAP_AIR_APP_ID: 'TEST_SAP_AIR_APP_ID' },
   },
 }));

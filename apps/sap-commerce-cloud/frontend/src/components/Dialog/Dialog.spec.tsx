@@ -13,7 +13,7 @@ describe('Dialog', () => {
     }));
 
     vi.mock('../../api/fetchProductList', () => ({
-      fetchProductList: vi.fn((baseSite, query, page, parameters, updateTotalPages) => {
+      fetchProductList: vi.fn(({ updateTotalPages }) => {
         const products: Product[] = [
           {
             id: 'product1',
