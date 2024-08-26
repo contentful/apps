@@ -26,14 +26,14 @@ const useAPI = (sapParameters: SAPParameters, ids: BaseAppSDK['ids'], cma: CMACl
     return isHAAEnabled(ids);
   }, [ids]);
 
-  const fetchuseBaseSitesWrapper = useCallback(async () => {
+  const fetchBaseSitesWrapper = useCallback(async () => {
     if (isAppHAAApp) {
       return fetchBaseSitesHAA(ids, cma);
     }
     return fetchBaseSites(sapParameters);
   }, [cma, ids, isAppHAAApp, sapParameters]);
 
-  const fetchuseProductPreviewsWrapper = useCallback(
+  const fetchProductPreviewsWrapper = useCallback(
     async (skus: string[]) => {
       if (isAppHAAApp) {
         return fetchProductPreviewsHAA(skus, ids, cma);
@@ -42,7 +42,8 @@ const useAPI = (sapParameters: SAPParameters, ids: BaseAppSDK['ids'], cma: CMACl
     },
     [cma, ids, isAppHAAApp, sapParameters]
   );
-  const fetchuseProductListWrapper = useCallback(
+
+  const fetchProductListWrapper = useCallback(
     async (fetchParams: Omit<FetchProductListParams, 'parameters'>) => {
       if (isAppHAAApp) {
         return fetchProductListHAA({ ...fetchParams, ids, cma });
@@ -52,11 +53,14 @@ const useAPI = (sapParameters: SAPParameters, ids: BaseAppSDK['ids'], cma: CMACl
     [cma, ids, isAppHAAApp, sapParameters]
   );
 
-  return {
-    fetchBaseSites: fetchuseBaseSitesWrapper,
-    fetchProductPreviews: fetchuseProductPreviewsWrapper,
-    fetchProductList: fetchuseProductListWrapper,
-  };
+  return useMemo(
+    () => ({
+      fetchBaseSites: fetchBaseSitesWrapper,
+      fetchProductPreviews: fetchProductPreviewsWrapper,
+      fetchProductList: fetchProductListWrapper,
+    }),
+    [fetchBaseSitesWrapper, fetchProductPreviewsWrapper, fetchProductListWrapper]
+  );
 };
 
 export default useAPI;
