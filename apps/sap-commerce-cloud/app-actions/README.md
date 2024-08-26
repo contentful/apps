@@ -20,6 +20,10 @@ This action is used to fetch a list of products from SAP Commerce Cloud.
 
 This action is used to fetch a list of product previews from SAP Commerce Cloud.
 
+For example:
+
+npm run call-app-action -- --appActionId=fetchProductPreview --params='{ "skus": "[\"https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/blah/products/CONF_SCREWDRIVER_S\", \"https://api.cm77gs48zv-contentfu1-d1-public.model-t.cc.commerce.ondemand.com/occ/v2/powertools-spa/products/MZ-FG-E101\"]" }' --spaceId=SPACE_ID --accessToken=TOKEN_HERE
+
 ## Testing
 
 1. Build the app:
