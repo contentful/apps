@@ -1,4 +1,4 @@
-import { ChangeEvent, useState, useEffect, useCallback } from 'react';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 
 import { CollectionResponse, ConfigAppSDK } from '@contentful/app-sdk';
 import {
@@ -25,13 +25,13 @@ import {
   selectedFieldsToTargetState,
 } from '@components/AppConfig/fields';
 
-import { AppParameters, Config, ParameterDefinition, ValidateParametersFn } from '@interfaces';
+import { Config, ParameterDefinition, ValidateParametersFn } from '@interfaces';
 
 import { styles } from '@components/AppConfig/AppConfig.styles';
+import { useSDK } from '@contentful/react-apps-toolkit';
 import { createClient } from 'contentful-management';
 
 interface Props {
-  sdk: ConfigAppSDK<AppParameters>;
   parameterDefinitions: ParameterDefinition[];
   validateParameters: ValidateParametersFn;
   logo: string;
@@ -41,7 +41,6 @@ interface Props {
 }
 
 export default function AppConfig({
-  sdk,
   parameterDefinitions,
   validateParameters,
   logo,
@@ -49,6 +48,7 @@ export default function AppConfig({
   color,
   description,
 }: Props) {
+  const sdk = useSDK<ConfigAppSDK>();
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [compatibleFields, setCompatibleFields] = useState<CompatibleFields>({});
   const [selectedFields, setSelectedFields] = useState<SelectedFields>({});

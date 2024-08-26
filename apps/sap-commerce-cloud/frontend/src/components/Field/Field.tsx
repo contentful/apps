@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { IconButton } from '@contentful/f36-components';
 import { FieldAppSDK } from '@contentful/app-sdk';
 import get from 'lodash/get';
 import { SortableComponent } from '@components/ProductPreviews/SortableComponent';
 import logo from '../../logo.png';
-import { AppParameters, SAPParameters } from '@interfaces';
+import { SAPParameters } from '@interfaces';
 import { styles } from '@components/Field/Field.styles';
 import { ShoppingCartIcon } from '@contentful/f36-icons';
 import useAPI from '@hooks/useAPI';
-
-interface Props {
-  sdk: FieldAppSDK<AppParameters>;
-}
+import { useEffect, useState } from 'react';
+import { IconButton } from '@contentful/f36-components';
+import { useSDK } from '@contentful/react-apps-toolkit';
 
 function fieldValueToState(value?: string | string[]): string[] {
   if (!value) {
@@ -26,10 +23,11 @@ function makeCTAText(fieldType: string) {
   return `Select ${beingSelected}`;
 }
 
-export default function Field({ sdk }: Props) {
+export default function Field() {
+  const sdk = useSDK<FieldAppSDK>();
   const [value, setValue] = useState<string[]>(fieldValueToState(sdk.field.getValue()));
   const [editingDisabled, setEditingDisabled] = useState<boolean>(true);
-  const sapAPI = useAPI(sdk.parameters as SAPParameters, sdk.ids, sdk.cma);
+  const sapAPI = useAPI(sdk.parameters.installation as unknown as SAPParameters, sdk.ids, sdk.cma);
 
   useEffect(() => {
     sdk.window.startAutoResizer();
