@@ -60,6 +60,63 @@ exports[`Dialog > renders correctly and matches snapshot 1`] = `
     class="css-1ka9h0v"
     data-test-id="cf-ui-table"
   >
+    <div
+      class="css-1n2mv2k"
+    >
+      <div
+        class="css-1pcvc58"
+        data-test-id="cf-ui-spinner"
+      >
+        <svg
+          class="css-1fukqml"
+          viewBox="0 0 60 51"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title>
+            Loading…
+          </title>
+          <g
+            class="css-13v0zw6"
+            transform="translate(10,33.528168)"
+          >
+            <g
+              class="css-1ufd1q7"
+            >
+              <circle
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
+          <g
+            class="css-ilfgln"
+            transform="translate(30,33.528168)"
+          >
+            <g
+              class="css-3oea63"
+            >
+              <circle
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
+          <g
+            class="css-wb1brl"
+            transform="translate(50,33.528168)"
+          >
+            <g
+              class="css-fj27a4"
+            >
+              <circle
+                r="6"
+                transform="translate(0,10.471832)"
+              />
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
     <thead
       class="css-1sojo49"
       data-test-id="cf-ui-table-head"
