@@ -1,11 +1,13 @@
 import { useEffect, useState, ChangeEvent, useCallback } from 'react';
 import {
   Button,
+  Flex,
   Grid,
   GridItem,
   IconButton,
   Option,
   Select,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -40,14 +42,18 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [errors, setErrors] = useState<ErrorType[]>([]);
   const sapAPI = useAPI(sdk.parameters as SAPParameters, sdk.ids, sdk.cma);
+  const [isLoading, setIsLoading] = useState(false);
 
   const load = useCallback(async () => {
-    const { products, errors } = await sapAPI.fetchProductList({
-      baseSite,
-      searchQuery: debouncedQuery,
-      page,
-      updateTotalPages: setTotalPages,
-    });
+    setIsLoading(true);
+    const { products, errors } = await sapAPI
+      .fetchProductList({
+        baseSite,
+        searchQuery: debouncedQuery,
+        page,
+        updateTotalPages: setTotalPages,
+      })
+      .finally(() => setIsLoading(false));
     setProducts(products);
     setErrors(errors);
   }, [sapAPI, baseSite, debouncedQuery, page]);
@@ -157,6 +163,12 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
       </Grid>
 
       <Table className={styles.table}>
+        {isLoading && (
+          <Flex justifyContent="center" alignItems="center">
+            <Spinner size="large" />
+          </Flex>
+        )}
+
         {errors?.length > 0 && (
           <TableBody>
             <TableRow>
