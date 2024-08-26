@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import FieldSelector from './FieldSelector';
 import { vi, describe, it, expect } from 'vitest';
-import { mockContentTypes } from '../__mocks__';
+import { mockContentTypes } from '../../__mocks__';
 
 const compatibleFields = {
   ct1: [

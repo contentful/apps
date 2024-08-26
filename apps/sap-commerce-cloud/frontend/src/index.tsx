@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 
 import { init, locations, FieldAppSDK, DialogAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import './index.css';
-import AppConfig from './AppConfig/AppConfig';
+import AppConfig from './components/AppConfig/AppConfig';
 
 import Field from './components/Field/Field';
 import Dialog from './components/Dialog/Dialog';

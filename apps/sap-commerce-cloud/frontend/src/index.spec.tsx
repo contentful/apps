@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { locations } from '@contentful/app-sdk';
-import AppConfig from './AppConfig/AppConfig';
+import AppConfig from './components/AppConfig/AppConfig';
 
 let renderMock: any;
 
