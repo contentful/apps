@@ -16,7 +16,7 @@ import {
   TextInput,
 } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { ProductList } from './ProductList';
+import { ProductList } from '@components/Dialog/ProductList';
 import { AppParameters, Error as ErrorType, Product, SAPParameters } from '../../interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';

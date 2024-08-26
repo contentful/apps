@@ -1,5 +1,5 @@
 import { DialogAppSDK, FieldAppSDK, ParametersAPI } from '@contentful/app-sdk';
-import { FieldsConfig } from './AppConfig/fields';
+import { FieldsConfig } from './components/AppConfig/fields';
 
 /**
  * Object containing all information configured on the app configuration page.

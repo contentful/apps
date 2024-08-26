@@ -1,4 +1,4 @@
-import { ParameterDefinition } from '../interfaces';
+import { ParameterDefinition } from '../../interfaces';
 import { toInputParameters } from './parameters';
 
 const mockParameterDefinition: ParameterDefinition = {

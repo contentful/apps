@@ -25,7 +25,7 @@ import {
   selectedFieldsToTargetState,
 } from './fields';
 
-import { AppParameters, Config, ParameterDefinition, ValidateParametersFn } from '../interfaces';
+import { AppParameters, Config, ParameterDefinition, ValidateParametersFn } from '../../interfaces';
 
 import { styles } from './AppConfig.styles';
 import { createClient } from 'contentful-management';
