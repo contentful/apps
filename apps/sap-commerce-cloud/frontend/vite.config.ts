@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import path from 'path';
 
 export default defineConfig(() => ({
   base: '', // relative paths
@@ -12,6 +13,15 @@ export default defineConfig(() => ({
     outDir: process.env.BUILD_PATH || './build',
   },
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@components': path.resolve(__dirname, './src/components'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@api': path.resolve(__dirname, './src/api'),
+      '@interfaces': path.resolve(__dirname, './src/interfaces'),
+      '@__mocks__': path.resolve(__dirname, './src/__mocks__'),
+    },
+  },
   test: {
     environment: 'happy-dom',
     globals: true,

@@ -1,4 +1,4 @@
-import { mockContentTypes } from '../__mocks__';
+import { mockContentTypes } from '../../__mocks__';
 import {
   getCompatibleFields,
   selectedFieldsToTargetState,
