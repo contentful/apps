@@ -1,4 +1,3 @@
-import React from 'react';
 import { render } from '@testing-library/react';
 import { ParameterDefinition } from '@interfaces';
 import AppConfig from '@components/AppConfig/AppConfig';
@@ -11,13 +10,17 @@ const description =
 vi.mock('contentful-management', () => ({
   createClient: () => mockCma,
 }));
+
+const mockSdk = makeSdkMock();
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+  useCMA: () => mockCma,
+}));
+
 describe('Config Screen component', () => {
   it('Component text exists', async () => {
-    const mockSdk: any = makeSdkMock();
-
     const { getByText } = render(
       <AppConfig
-        sdk={mockSdk}
         parameterDefinitions={
           [
             {

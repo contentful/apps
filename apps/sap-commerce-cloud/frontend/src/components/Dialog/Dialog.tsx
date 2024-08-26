@@ -1,4 +1,6 @@
-import { useEffect, useState, ChangeEvent, useCallback } from 'react';
+import { styles } from '@components/Dialog/Dialog.styles';
+import { ProductList } from '@components/Dialog/ProductList';
+import { DialogAppSDK } from '@contentful/app-sdk';
 import {
   Button,
   Flex,
@@ -15,23 +17,19 @@ import {
   TableRow,
   TextInput,
 } from '@contentful/f36-components';
-import { DialogAppSDK } from '@contentful/app-sdk';
-import { ProductList } from '@components/Dialog/ProductList';
-import { AppParameters, Error as ErrorType, Product, SAPParameters } from '@interfaces';
+import { DoneIcon } from '@contentful/f36-icons';
+import { useSDK } from '@contentful/react-apps-toolkit';
+import { cx } from '@emotion/css';
+import useAPI from '@hooks/useAPI';
+import { Error as ErrorType, Product, SAPParameters } from '@interfaces';
+import { formatProductUrl } from '@utils';
 import get from 'lodash/get';
 import union from 'lodash/union';
-import { formatProductUrl } from '@utils';
-import { styles } from '@components/Dialog/Dialog.styles';
-import { cx } from '@emotion/css';
-import { DoneIcon } from '@contentful/f36-icons';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
-import useAPI from '@hooks/useAPI';
 
-interface Props {
-  sdk: DialogAppSDK<AppParameters>;
-}
-
-export default function Dialog({ sdk }: Props) {
+export default function Dialog() {
+  const sdk = useSDK<DialogAppSDK>();
   const [baseSite, setBaseSite] = useState('');
   const [baseSites, setBaseSites] = useState<string[]>([]);
   const [query, setQuery] = useState('');
@@ -41,7 +39,7 @@ export default function Dialog({ sdk }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [errors, setErrors] = useState<ErrorType[]>([]);
-  const sapAPI = useAPI(sdk.parameters as SAPParameters, sdk.ids, sdk.cma);
+  const sapAPI = useAPI(sdk.parameters as unknown as SAPParameters, sdk.ids, sdk.cma);
   const [isLoading, setIsLoading] = useState(false);
 
   const load = useCallback(async () => {

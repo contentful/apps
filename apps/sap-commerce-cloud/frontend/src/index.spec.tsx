@@ -1,6 +1,10 @@
-import { vi } from 'vitest';
+import { mockCma } from '@__mocks__/mockCma';
+import { makeSdkMock } from '@__mocks__/mockSdk';
 import { locations } from '@contentful/app-sdk';
 import AppConfig from '@components/AppConfig/AppConfig';
+import { SDKProvider } from '@contentful/react-apps-toolkit';
+import { PropsWithChildren } from 'react';
+import { vi } from 'vitest';
 
 let renderMock: any;
 
@@ -27,6 +31,18 @@ document.body.innerHTML = '<div id="root"></div>';
 describe('index.tsx', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    vi.mock('contentful-management', () => ({
+      createClient: () => mockCma,
+    }));
+
+    const mockSdk = makeSdkMock();
+    vi.mock('@contentful/react-apps-toolkit', () => ({
+      useSDK: () => mockSdk,
+      useCMA: () => mockCma,
+      SDKProvider: ({ children }: PropsWithChildren<React.ReactNode>) => children,
+    }));
+
     mockLocation = locations.LOCATION_APP_CONFIG;
 
     renderMock = vi.fn();
@@ -41,15 +57,16 @@ describe('index.tsx', () => {
     await import('./index');
 
     expect(renderMock).toHaveBeenCalledWith(
-      <AppConfig
-        sdk={expect.anything()}
-        name="SAP Commerce Cloud App"
-        description={expect.any(String)}
-        logo={expect.any(String)}
-        color={expect.any(String)}
-        parameterDefinitions={expect.any(Array)}
-        validateParameters={expect.any(Function)}
-      />
+      <SDKProvider>
+        <AppConfig
+          name="SAP Commerce Cloud App"
+          description={expect.any(String)}
+          logo={expect.any(String)}
+          color={expect.any(String)}
+          parameterDefinitions={expect.any(Array)}
+          validateParameters={expect.any(Function)}
+        />
+      </SDKProvider>
     );
   });
 });

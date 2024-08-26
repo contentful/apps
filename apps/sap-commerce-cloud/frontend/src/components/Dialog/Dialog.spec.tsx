@@ -1,12 +1,17 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
-import Dialog from '@components/Dialog/Dialog';
-import { DialogAppSDK } from '@contentful/app-sdk';
-import { AppParameters, Product } from '@interfaces';
+import { mockCma } from '@__mocks__/mockCma';
 import { makeSdkMock } from '@__mocks__/mockSdk';
+import Dialog from '@components/Dialog/Dialog';
+import { Product } from '@interfaces';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
+
+const mockSdk = makeSdkMock();
+vi.mock('@contentful/react-apps-toolkit', () => ({
+  useSDK: () => mockSdk,
+  useCMA: () => mockCma,
+}));
 
 describe('Dialog', () => {
-  const sdkMock = makeSdkMock() as unknown as DialogAppSDK<AppParameters>;
   beforeAll(() => {
     vi.mock('@api/fetchBaseSites', () => ({
       fetchBaseSites: vi.fn(() => Promise.resolve(['site1', 'site2'])),
@@ -41,13 +46,13 @@ describe('Dialog', () => {
   });
 
   it('renders correctly and matches snapshot', async () => {
-    const { container } = render(<Dialog sdk={sdkMock} />);
+    const { container } = render(<Dialog />);
     await waitFor(() => screen.getByText('Product 1'));
     expect(container).toMatchSnapshot();
   });
 
   it('loads base sites and products on mount', async () => {
-    render(<Dialog sdk={sdkMock} />);
+    render(<Dialog />);
     await waitFor(() => {
       expect(screen.getByText('Product 1')).toBeInTheDocument();
       expect(screen.getByText('Product 2')).toBeInTheDocument();
@@ -55,7 +60,7 @@ describe('Dialog', () => {
   });
 
   it('updates products when base site is changed', async () => {
-    render(<Dialog sdk={sdkMock} />);
+    render(<Dialog />);
     await waitFor(() => screen.getByText('Product 1'));
 
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'site2' } });
@@ -66,7 +71,7 @@ describe('Dialog', () => {
   });
 
   it('updates products when search term is entered', async () => {
-    render(<Dialog sdk={sdkMock} />);
+    render(<Dialog />);
     await waitFor(() => screen.getByText('Product 1'));
 
     const searchInput = screen.getByPlaceholderText('Type to search products');
@@ -79,7 +84,7 @@ describe('Dialog', () => {
   });
 
   it('handles pagination correctly', async () => {
-    render(<Dialog sdk={sdkMock} />);
+    render(<Dialog />);
     await waitFor(() => screen.getByText('Product 1'));
 
     fireEvent.click(screen.getByText('Next'));
