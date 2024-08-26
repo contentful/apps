@@ -1,9 +1,9 @@
-import { mockContentTypes } from '../../__mocks__';
+import { mockContentTypes } from '@__mocks__/mockContentTypes';
 import {
   getCompatibleFields,
   selectedFieldsToTargetState,
   editorInterfacesToSelectedFields,
-} from './fields';
+} from '@components/AppConfig/fields';
 
 describe('getCompatibleFields', () => {
   it('should return compatible fields', () => {

@@ -1,7 +1,6 @@
-import { FC } from 'react';
-import { DeleteFn, Product } from '../../interfaces';
-import { SortableListItem } from './SortableListItem';
-import { styles } from './SortableList.styles';
+import { DeleteFn, Product } from '@interfaces';
+import { SortableListItem } from '@components/ProductPreviews/SortableListItem';
+import { styles } from '@components/ProductPreviews/SortableList.styles';
 
 export interface Props {
   disabled: boolean;
@@ -9,7 +8,7 @@ export interface Props {
   deleteFn: DeleteFn;
 }
 
-export const SortableList: FC<Props> = ({ disabled, deleteFn, productPreviews = [] }) => {
+export function SortableList({ disabled, deleteFn, productPreviews = [] }: Props) {
   const itemsAreSortable = productPreviews.length > 1;
 
   return (
@@ -27,4 +26,4 @@ export const SortableList: FC<Props> = ({ disabled, deleteFn, productPreviews = 
       })}
     </div>
   );
-};
+}

@@ -1,14 +1,14 @@
 import { BaseAppSDK, CMAClient } from '@contentful/app-sdk';
 import { useCallback, useMemo } from 'react';
-import { Product, SAPParameters, Response } from '../interfaces';
+import { Product, SAPParameters, Response } from '@interfaces';
 import { isHAAEnabled } from '../helpers/isHAAEnabled';
-import { fetchBaseSitesHAA, fetchBaseSites } from '../api/fetchBaseSites';
-import { fetchProductPreviews, fetchProductPreviewsHAA } from '../api/fetchProductPreviews';
+import { fetchBaseSitesHAA, fetchBaseSites } from '@api/fetchBaseSites';
+import { fetchProductPreviews, fetchProductPreviewsHAA } from '@api/fetchProductPreviews';
 import {
   fetchProductList,
   fetchProductListHAA,
   FetchProductListParams,
-} from '../api/fetchProductList';
+} from '@api/fetchProductList';
 
 interface SAPAPI {
   fetchBaseSites: () => Promise<string[]>;

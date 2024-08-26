@@ -19,6 +19,7 @@ export default defineConfig(() => ({
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@api': path.resolve(__dirname, './src/api'),
       '@interfaces': path.resolve(__dirname, './src/interfaces'),
+      '@utils': path.resolve(__dirname, './src/utils'),
       '@__mocks__': path.resolve(__dirname, './src/__mocks__'),
     },
   },

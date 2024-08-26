@@ -1,10 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ParameterDefinition } from '../../interfaces';
-import AppConfig from './AppConfig';
-import { makeSdkMock } from '../../__mocks__/mockSdk';
+import { ParameterDefinition } from '@interfaces';
+import AppConfig from '@components/AppConfig/AppConfig';
+import { makeSdkMock } from '@__mocks__/mockSdk';
 import { vi } from 'vitest';
-import { mockCma } from '../../__mocks__/mockCma';
+import { mockCma } from '@__mocks__/mockCma';
 
 const description =
   'The SAP Commerce Cloud app allows content creators to select products from their SAP Commerce Cloud instance and reference them inside of Contentful entries.';

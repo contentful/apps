@@ -1,8 +1,8 @@
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { CheckBoxFn, Product } from '../../interfaces';
+import { CheckBoxFn, Product } from '@interfaces';
 import { Checkbox, IconButton, TableCell, TableRow } from '@contentful/f36-components';
 import get from 'lodash/get';
-import { formatProductUrl } from '../../utils';
+import { formatProductUrl } from '@utils';
 import { DoneIcon } from '@contentful/f36-icons';
 
 interface Props {
@@ -13,18 +13,18 @@ interface Props {
   checkboxFn: CheckBoxFn;
 }
 
-export function ProductList(props: Props) {
+export function ProductList({ sdk, products, selectedProducts, baseSite, checkboxFn }: Props) {
   const selectButtonClickEvent = (sku: string) => {
-    const apiEndpoint = get(props.sdk.parameters.invocation, 'apiEndpoint', '') as string;
-    props.sdk.close([formatProductUrl(apiEndpoint, props.baseSite, sku)]);
+    const apiEndpoint = get(sdk.parameters.invocation, 'apiEndpoint', '') as string;
+    sdk.close([formatProductUrl(apiEndpoint, baseSite, sku)]);
   };
 
   const isFieldTypeSymbol =
-    (get(props.sdk.parameters.invocation, 'fieldType', '') as string) === 'Symbol';
+    (get(sdk.parameters.invocation, 'fieldType', '') as string) === 'Symbol';
   return (
     <>
-      {props.products.map((product, index) => {
-        const checkboxValue = props.selectedProducts.includes(props.baseSite + ':' + product.sku);
+      {products.map((product, index) => {
+        const checkboxValue = selectedProducts.includes(baseSite + ':' + product.sku);
         return (
           <TableRow key={product.sku}>
             <TableCell>
@@ -40,7 +40,7 @@ export function ProductList(props: Props) {
                 <Checkbox
                   id={product.sku}
                   defaultChecked={checkboxValue}
-                  onChange={props.checkboxFn}
+                  onChange={checkboxFn}
                   aria-label={product.name}
                 />
               )}

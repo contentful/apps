@@ -1,18 +1,18 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
-import Dialog from './Dialog';
+import Dialog from '@components/Dialog/Dialog';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { AppParameters, Product } from '../../interfaces';
-import { makeSdkMock } from '../../__mocks__';
+import { AppParameters, Product } from '@interfaces';
+import { makeSdkMock } from '@__mocks__/mockSdk';
 
 describe('Dialog', () => {
   const sdkMock = makeSdkMock() as unknown as DialogAppSDK<AppParameters>;
   beforeAll(() => {
-    vi.mock('../../api/fetchBaseSites', () => ({
+    vi.mock('@api/fetchBaseSites', () => ({
       fetchBaseSites: vi.fn(() => Promise.resolve(['site1', 'site2'])),
     }));
 
-    vi.mock('../../api/fetchProductList', () => ({
+    vi.mock('@api/fetchProductList', () => ({
       fetchProductList: vi.fn(({ updateTotalPages }) => {
         const products: Product[] = [
           {

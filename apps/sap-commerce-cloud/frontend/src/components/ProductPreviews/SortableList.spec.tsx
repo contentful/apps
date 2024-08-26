@@ -1,6 +1,6 @@
 import { render, cleanup } from '@testing-library/react';
-import { Props, SortableList } from './SortableList';
-import { mockProductPreview } from '../../__mocks__';
+import { Props, SortableList } from '@components/ProductPreviews/SortableList';
+import { mockProductPreview } from '@__mocks__/mockProductPreview';
 import { vi } from 'vitest';
 
 const defaultProps: Props = {
