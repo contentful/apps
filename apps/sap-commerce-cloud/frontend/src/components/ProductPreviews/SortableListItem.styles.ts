@@ -1,6 +1,6 @@
 import { css } from 'emotion';
 import tokens from '@contentful/f36-tokens';
-import { Product } from '../../interfaces';
+import { Product } from '@interfaces';
 
 const IMAGE_SIZE = 48;
 

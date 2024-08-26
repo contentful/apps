@@ -21,7 +21,8 @@
       "@components/*": ["./src/components/*"],
       "@helpers/*": ["./src/helpers/*"],
       "@hooks/*": ["./src/hooks/*"],
-      "@interfaces/*": ["./src/interfaces"],
+      "@interfaces": ["./src/interfaces"],
+      "@utils": ["./src/utils"],
       "@__mocks__/*": ["./src/__mocks__/*"],
     }
   },

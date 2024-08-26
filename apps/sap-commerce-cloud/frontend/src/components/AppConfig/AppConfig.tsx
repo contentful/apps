@@ -11,9 +11,9 @@ import {
   TextLink,
 } from '@contentful/f36-components';
 
-import FieldSelector from './FieldSelector';
+import FieldSelector from '@components/AppConfig/FieldSelector';
 
-import { toAppParameters, toInputParameters } from './parameters';
+import { toAppParameters, toInputParameters } from '@components/AppConfig/parameters';
 
 import {
   CompatibleFields,
@@ -23,11 +23,11 @@ import {
   getCompatibleFields,
   SelectedFields,
   selectedFieldsToTargetState,
-} from './fields';
+} from '@components/AppConfig/fields';
 
-import { AppParameters, Config, ParameterDefinition, ValidateParametersFn } from '../../interfaces';
+import { AppParameters, Config, ParameterDefinition, ValidateParametersFn } from '@interfaces';
 
-import { styles } from './AppConfig.styles';
+import { styles } from '@components/AppConfig/AppConfig.styles';
 import { createClient } from 'contentful-management';
 
 interface Props {

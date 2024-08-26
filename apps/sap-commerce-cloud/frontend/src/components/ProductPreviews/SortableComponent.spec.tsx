@@ -1,8 +1,9 @@
 import { act, render, cleanup, waitFor } from '@testing-library/react';
-import { SortableComponent } from './SortableComponent';
-import { mockProductPreview, makeSdkMock } from '../../__mocks__';
+import { SortableComponent } from '@components/ProductPreviews/SortableComponent';
+import { makeSdkMock } from '@__mocks__/mockSdk';
+import { mockProductPreview } from '@__mocks__/mockProductPreview';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { PreviewsFn } from '../../interfaces';
+import { PreviewsFn } from '@interfaces';
 import { vi } from 'vitest';
 
 const mockSdk = makeSdkMock();

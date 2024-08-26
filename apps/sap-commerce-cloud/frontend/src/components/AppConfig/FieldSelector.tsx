@@ -1,8 +1,8 @@
 import { ChangeEvent } from 'react';
-import { styles } from './FieldSelector.styles';
+import { styles } from '@components/AppConfig/FieldSelector.styles';
 import { Form, Subheading, FormControl, Checkbox } from '@contentful/f36-components';
 
-import { ContentType, CompatibleFields, SelectedFields } from './fields';
+import { ContentType, CompatibleFields, SelectedFields } from '@components/AppConfig/fields';
 
 interface Props {
   contentTypes: ContentType[];

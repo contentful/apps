@@ -1,5 +1,5 @@
-import { ParameterDefinition } from '../../interfaces';
-import { toInputParameters } from './parameters';
+import { ParameterDefinition } from '@interfaces';
+import { toInputParameters } from '@components/AppConfig/parameters';
 
 const mockParameterDefinition: ParameterDefinition = {
   id: 'someTestid',

@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { SortableListItem } from './SortableListItem';
-import { mockProductPreview } from '../../__mocks__';
-import { Props } from './SortableListItem';
+import { SortableListItem } from '@components/ProductPreviews/SortableListItem';
+import { mockProductPreview } from '@__mocks__/mockProductPreview';
+import { Props } from '@components/ProductPreviews/SortableListItem';
 import { vi } from 'vitest';
 
 const defaultProps: Props = {
