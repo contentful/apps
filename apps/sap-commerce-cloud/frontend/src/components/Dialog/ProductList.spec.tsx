@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import { ProductList } from './ProductList';
+import { ProductList } from '@components/Dialog/ProductList';
 import { vi } from 'vitest';
 import { DialogAppSDK } from '@contentful/app-sdk';
-import { makeSdkMock } from '../../__mocks__';
+import { makeSdkMock } from '@__mocks__/mockSdk';
 
 describe('ProductList', () => {
   it('renders', () => {

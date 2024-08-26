@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -15,9 +15,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { mapSort } from '../../utils';
-import { SortableList } from './SortableList';
-import { Product, PreviewsFn } from '../../interfaces';
+import { mapSort } from '@utils';
+import { SortableList } from '@components/ProductPreviews/SortableList';
+import { Product, PreviewsFn } from '@interfaces';
 import { isEqual } from 'lodash';
 
 interface Props {
@@ -52,13 +52,7 @@ const usePreviousSkus = (skus: string[]) => {
   return skusRef.current;
 };
 
-export const SortableComponent: FC<Props> = ({
-  sdk,
-  disabled,
-  onChange,
-  skus,
-  fetchProductPreviews,
-}) => {
+export function SortableComponent({ sdk, disabled, onChange, skus, fetchProductPreviews }: Props) {
   const [productPreviews, setProductPreviews] = useState<Product[]>([]);
   const previousSkus = usePreviousSkus(skus);
 
@@ -134,4 +128,4 @@ export const SortableComponent: FC<Props> = ({
       </SortableContext>
     </DndContext>
   );
-};
+}

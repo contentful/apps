@@ -2,11 +2,11 @@ import { createRoot } from 'react-dom/client';
 
 import { init, locations, FieldAppSDK, DialogAppSDK, ConfigAppSDK } from '@contentful/app-sdk';
 import './index.css';
-import AppConfig from './components/AppConfig/AppConfig';
+import AppConfig from '@components/AppConfig/AppConfig';
 
-import Field from './components/Field/Field';
-import Dialog from './components/Dialog/Dialog';
-import { AppParameters } from './interfaces';
+import Field from '@components/Field/Field';
+import Dialog from '@components/Dialog/Dialog';
+import { AppParameters } from '@interfaces';
 
 init(async (sdk) => {
   const rootEl = document.getElementById('root');

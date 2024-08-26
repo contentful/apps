@@ -1,4 +1,4 @@
-import { Product } from './interfaces';
+import { Product } from '@interfaces';
 /**
  * Used to sort fetched products previews in the same
  * order that the SKUs were added to the field value.

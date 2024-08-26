@@ -17,21 +17,21 @@ import {
 } from '@contentful/f36-components';
 import { DialogAppSDK } from '@contentful/app-sdk';
 import { ProductList } from '@components/Dialog/ProductList';
-import { AppParameters, Error as ErrorType, Product, SAPParameters } from '../../interfaces';
+import { AppParameters, Error as ErrorType, Product, SAPParameters } from '@interfaces';
 import get from 'lodash/get';
 import union from 'lodash/union';
-import { formatProductUrl } from '../../utils';
-import { styles } from './Dialog.styles';
+import { formatProductUrl } from '@utils';
+import { styles } from '@components/Dialog/Dialog.styles';
 import { cx } from '@emotion/css';
 import { DoneIcon } from '@contentful/f36-icons';
 import { useDebounce } from 'use-debounce';
-import useAPI from '../../hooks/useAPI';
+import useAPI from '@hooks/useAPI';
 
-interface DialogProps {
+interface Props {
   sdk: DialogAppSDK<AppParameters>;
 }
 
-const Dialog: React.FC<DialogProps> = ({ sdk }) => {
+export default function Dialog({ sdk }: Props) {
   const [baseSite, setBaseSite] = useState('');
   const [baseSites, setBaseSites] = useState<string[]>([]);
   const [query, setQuery] = useState('');
@@ -230,6 +230,4 @@ const Dialog: React.FC<DialogProps> = ({ sdk }) => {
       )}
     </>
   );
-};
-
-export default Dialog;
+}

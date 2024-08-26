@@ -1,8 +1,8 @@
 import { render, fireEvent, cleanup } from '@testing-library/react';
-import Field from './Field';
+import Field from '@components/Field/Field';
 import { FieldAppSDK } from '@contentful/app-sdk';
-import { makeSdkMock } from '../../__mocks__';
-import { fetchProductPreviews } from '../../api/fetchProductPreviews';
+import { makeSdkMock } from '@__mocks__/mockSdk';
+import { fetchProductPreviews } from '@api/fetchProductPreviews';
 import { vi } from 'vitest';
 
 const sdk = makeSdkMock();

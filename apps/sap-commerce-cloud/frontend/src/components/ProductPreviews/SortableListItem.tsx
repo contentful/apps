@@ -1,7 +1,7 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Product } from '../../interfaces';
+import { Product } from '@interfaces';
 import {
   AssetIcon,
   Badge,
@@ -14,7 +14,7 @@ import {
   Subheading,
 } from '@contentful/f36-components';
 import tokens from '@contentful/f36-tokens';
-import { styles } from './SortableListItem.styles';
+import { styles } from '@components/ProductPreviews/SortableListItem.styles';
 import { CloseIcon, ErrorCircleIcon, ExternalLinkIcon } from '@contentful/f36-icons';
 
 export interface Props {
@@ -26,7 +26,7 @@ export interface Props {
 
 const IMAGE_SIZE = 48;
 
-export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSortable }: Props) => {
+export function SortableListItem({ product, disabled, onDelete, isSortable }: Props) {
   const [imageHasLoaded, setImageLoaded] = useState(false);
   const [imageHasErrored, setImageHasErrored] = useState(false);
 
@@ -105,4 +105,4 @@ export const SortableListItem: FC<Props> = ({ product, disabled, onDelete, isSor
       </Card>
     </div>
   );
-};
+}
