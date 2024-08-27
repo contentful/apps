@@ -1,42 +1,31 @@
-This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
+# SAP Commerce Cloud App
 
-## Available Scripts
+An app that allows you to connect your SAP Commerce Cloud catalogue with Contentful.
 
-In the project directory, you can run:
+## Installation and Usage
 
-### Install packages
+See the [Contentful Connector for SAP Commerce Cloud Marketplace listing](https://www.contentful.com/marketplace/sap-commerce-cloud-connector) for information about how to install and use the app. Also view the two help center documentation resources below for additional information:
 
-`npm i` 
+- [SAP App guide](https://www.contentful.com/help/sap-app)
+- [Configuring base site URL in backoffice](https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/0fa6bcf4736c46f78c248512391eb467/07f7eaaf85b94ee9b2ded952880379ef.html)
 
-### Set development ENV
+### Frontend
 
-Copy the contents of .env.development.sample into a new file called .env.development (calls to SAP will only work from localhost with this added)
+The frontend lives in the `frontend/` folder.
+Instructions for installing or updating the app and running tests can be found in the README file for the frontend.
 
-#### `npm run start`
+### Available scripts
 
-Creates or updates your app definition in contentful, and runs the app in development mode.
-Open your app to view it in the browser.
-
-The page will reload if you make edits.
-You will also see any lint errors in the console.
+#### `npm run create-app-definition`
 
 #### `npm run build`
 
-Builds the app for production to the `build` folder.
-It correctly bundles React in production mode and optimizes the build for the best performance.
+#### `npm run build-app-actions`
 
-The build is minified and the filenames include the hashes.
-Your app is ready to be deployed!
+#### `npm run build-frontend`
 
-## Libraries to use
+#### `npm run deploy`
 
-To make your app look and feel like Contentful use the following libraries:
+See package.json in root folder for full list of deploy commands for deploying the app to test, and deploying with or without the SAP air-header
 
-- [Forma 36](https://f36.contentful.com/) – Contentful's design system
-- [Contentful Fields Editors](https://www.contentful.com/developers/docs/extensibility/field-editors/) – Contentful's field editor React components
-
-## Learn More
-
-[Read more](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/) and check out the video on how to use the CLI.
-
-Create Contentful App uses [Create React App](https://create-react-app.dev/). You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started) and how to further customize your app.
+#### `npm run call-app-action`

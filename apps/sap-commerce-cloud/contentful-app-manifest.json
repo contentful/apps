@@ -1,0 +1,59 @@
+{
+  "actions": [
+    {
+      "id": "fetchBaseSites",
+      "name": "SAP fetch base sites",
+      "category": "Custom",
+      "description": "This action is used to fetch a list of base sites from SAP Commerce Cloud.",
+      "type": "function",
+      "path": "actions/fetchBaseSites.js",
+      "entryFile": "./app-actions/src/actions/fetchBaseSites.ts",
+      "allowNetworks": [],
+      "parameters": []
+    },
+    {
+      "id": "fetchProductList",
+      "name": "SAP fetch product list",
+      "category": "Custom",
+      "description": "This action is used to fetch a list of products from SAP Commerce Cloud.",
+      "type": "function",
+      "path": "actions/fetchProductList.js",
+      "entryFile": "./app-actions/src/actions/fetchProductList.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "baseSite",
+          "name": "SAP Base Site",
+          "type": "Symbol"
+        },
+        {
+          "id": "searchQuery",
+          "name": "SAP Product List Search Query",
+          "type": "Symbol"
+        },
+        {
+          "id": "page",
+          "name": "SAP Product List Current Page",
+          "type": "Number"
+        }
+      ]
+    },
+    {
+      "id": "fetchProductPreview",
+      "name": "SAP fetch product preview",
+      "category": "Custom",
+      "description": "This action is used to fetch a list of product previews from SAP Commerce Cloud.",
+      "type": "function",
+      "path": "actions/fetchProductPreview.js",
+      "entryFile": "./app-actions/src/actions/fetchProductPreview.ts",
+      "allowNetworks": [],
+      "parameters": [
+        {
+          "id": "skus",
+          "name": "SAP SKU list (json)",
+          "type": "Symbol"
+        }
+      ]
+    }
+  ]
+}
