@@ -27,7 +27,7 @@ export default function Field() {
   const sdk = useSDK<FieldAppSDK>();
   const [value, setValue] = useState<string[]>(fieldValueToState(sdk.field.getValue()));
   const [editingDisabled, setEditingDisabled] = useState<boolean>(true);
-  const sapAPI = useAPI(sdk.parameters.installation as unknown as SAPParameters, sdk.ids, sdk.cma);
+  const sapAPI = useAPI(sdk.parameters as unknown as SAPParameters, sdk.ids, sdk.cma);
 
   useEffect(() => {
     sdk.window.startAutoResizer();
