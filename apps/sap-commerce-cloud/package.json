@@ -1,6 +1,6 @@
 {
   "name": "@contentful/sap-commerce-cloud",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "scripts": {
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "build": "rimraf ./build && npm run build-frontend && npm run build-app-actions",
