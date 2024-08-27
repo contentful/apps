@@ -1,5 +1,6 @@
 {
   "name": "@contentful/sap-commerce-cloud-app-actions",
+  "private": true,
   "version": "1.0.2",
   "main": "index.js",
   "scripts": {
