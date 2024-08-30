@@ -7,7 +7,7 @@
       "path": "functions/index.js",
       "entryFile": "functions/index.ts",
       "allowNetworks": ["api.themoviedb.org"],
-      "accepts": ["resources.search", "resources.lookup"]
+      "accepts": []
     }
   ]
 }
