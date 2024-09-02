@@ -69,7 +69,15 @@ const ConfigScreen = () => {
           {!parameters.tmdbAccessToken && (
             <FormControl.ValidationMessage>
               Please, provide a valid API token. You can get one by signing up
-              at <TextLink href="https://www.themoviedb.org/">TMDB</TextLink>.
+              at{' '}
+              <TextLink
+                href="https://www.themoviedb.org/"
+                target="_blank"
+                rel="noopener noreferer"
+              >
+                TMDB
+              </TextLink>
+              .
             </FormControl.ValidationMessage>
           )}
         </FormControl>
