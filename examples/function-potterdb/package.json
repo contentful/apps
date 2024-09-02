@@ -9,7 +9,7 @@
     "@contentful/f36-tokens": "4.0.5",
     "@contentful/field-editor-single-line": "^1.4.4",
     "@contentful/react-apps-toolkit": "1.2.16",
-    "@tanstack/react-query": "^5.52.3",
+    "@tanstack/react-query": "^5.53.2",
     "contentful-management": "10.46.4",
     "emotion": "10.0.27",
     "react": "18.3.1",
