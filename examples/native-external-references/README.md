@@ -39,18 +39,18 @@ This project was bootstrapped with [Create Contentful App](https://github.com/co
   - The latest LTS version of [Node.js](https://nodejs.org/en/)
 
 > **NOTE:**
-> Please make sure you consistently choose the same **Organization ID** that has the Extensible Resource Links functionality during any setup steps that require you to select the organization.
+> Please make sure you consistently choose the same **Organization ID** that has the Native external references functionality during any setup steps that require you to select the organization.
 
 # Description
 
 Contentful provides a method for integrating content from external sources using the [App Framework](https://www.contentful.com/developers/docs/extensibility/app-framework/). The [App Marketplace](https://www.contentful.com/marketplace/) currently offers complete solutions tailored for specific systems such as [Shopify](https://www.contentful.com/help/external-references-with-shopify/) or [commercetools](https://www.contentful.com/help/external-references-with-commercetools/). However, connecting to other systems requires developing custom frontend apps with bespoke implementation.
 
-To overcome these challenges, we offer a more streamlined and cohesive approach to linking third-party systems through existing content model Reference Fields. This upgraded version of fields is referred to as **Extensible Resource Links**.
+To overcome these challenges, we offer a more streamlined and cohesive approach to linking third-party systems through existing content model Reference Fields. This upgraded version of fields is referred to as **Native external references**.
 
 This example is designed to walk you through the beta version of the extended linking feature. Currently, the application setup primarily revolves around command-line operations. However, you can also view the connected content displayed in the user interface. 
 For the purpose of this example, we will be connecting to the [Movie Database](https://www.themoviedb.org/) external system.
 
-With Extensible Resource Links we introduce the following new entity types that allow us to model the data from third-party systems in Contentful:
+With Native external references we introduce the following new entity types that allow us to model the data from third-party systems in Contentful:
 
 - `Resource Provider` - a third-party system that provides resources. Each provider can have multiple resource types. In our example: a `TMDB` provider.
 - `Resource Type` - a specific type of resource (not the resource itself) that is provided by a resource provider. In our example: `Movie` and `Person` .
@@ -66,7 +66,7 @@ To get started with your application, you need to make a local copy of the examp
 > Make sure you replace `<name-of-your-app>` with the name of your choice.
 
 ```bash
-npx create-contentful-app@latest <name-of-your-app> --example extensible-resource-links
+npx create-contentful-app@latest <name-of-your-app> --example native-external-references
 ```
 
 Once the process finishes, navigate to the directory that was created by running this command:
@@ -105,7 +105,7 @@ You will need to answer the following questions on the terminal. Feel free to pr
 
 5. The next steps will lead you through the process of providing a Contentful access token to the application and specifying the organization to which the application should be assigned.
 > **NOTE:**
-> Make sure the organization ID you select here is the Organization that has access to the Extensible Resource Links feature.
+> Make sure the organization ID you select here is the Organization that has access to the Native external references feature.
 
 You now have a basic application that can be enriched with additional information that will enable the example project you downloaded to function properly.
 
@@ -211,7 +211,7 @@ We are representing _Resource Types_ in a similar structure:
 
 ## Functions
 
-The example app is using [Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/) to provide a connection between Contentful and the TMDB API. In the `functions/index.ts` file we are defining two events that are necessary for Extensible Resource Links to function properly:
+The example app is using [Functions](https://www.contentful.com/developers/docs/extensibility/app-framework/functions/) to provide a connection between Contentful and the TMDB API. In the `functions/index.ts` file we are defining two events that are necessary for Native external references to function properly:
 
 - `search` - retrieval of specific content based on search queries
 - `lookup` - retrieval of specific content based on URNs (IDs)
