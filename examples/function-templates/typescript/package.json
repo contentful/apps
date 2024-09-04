@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "@contentful/node-apps-toolkit": "^3.7.0",
+    "@contentful/node-apps-toolkit": "^3.8.0",
     "@tsconfig/recommended": "1.0.7",
     "esbuild": "0.23.1"
   }
