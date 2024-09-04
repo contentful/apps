@@ -21,33 +21,41 @@ const Sidebar = () => {
 
   const someParameter = 'some parameter';
 
-  return <>
-    <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>
-    <Paragraph>{`Time is ${state.timestamp}`}</Paragraph>
-    <Button onClick={() => {
-      dispatch({
-        type: 'SET_TIME',
-        payload: new Date().toString(),
-      });
-    }}>SET TIME</Button>
-    <Button onClick={async () => {
-      const serializedDialogState = await sdk.dialogs.openCurrentApp({
-        shouldCloseOnEscapePress: false,
-        shouldCloseOnOverlayClick: false,
-        title: 'Dialog',
-        minHeight: 360,
-        parameters: {
-          serializedSidebarState: JSON.stringify(state),
-        },
-      });
-      if (serializedDialogState) {
-        dispatch({
-          type: 'SET_WHOLE_STATE',
-          payload: JSON.parse(serializedDialogState),
-        });
-      }
-    }}>OPEN DIALOG</Button>
-  </>;
+  return (
+    <>
+      <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>
+      <Paragraph>{`Time is ${state.timestamp}`}</Paragraph>
+      <Button
+        onClick={() => {
+          dispatch({
+            type: 'SET_TIME',
+            payload: new Date().toString(),
+          });
+        }}>
+        SET TIME
+      </Button>
+      <Button
+        onClick={async () => {
+          const serializedDialogState = await sdk.dialogs.openCurrentApp({
+            shouldCloseOnEscapePress: false,
+            shouldCloseOnOverlayClick: false,
+            title: 'Dialog',
+            minHeight: 360,
+            parameters: {
+              serializedSidebarState: JSON.stringify(state),
+            },
+          });
+          if (serializedDialogState) {
+            dispatch({
+              type: 'SET_WHOLE_STATE',
+              payload: JSON.parse(serializedDialogState),
+            });
+          }
+        }}>
+        OPEN DIALOG
+      </Button>
+    </>
+  );
 };
 
 export default Sidebar;
