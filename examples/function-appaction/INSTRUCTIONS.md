@@ -3,8 +3,11 @@
 Use this command below to install the template.
 
 ```
-npx create-contentful-app@latest --function appaction
+npx create-contentful-app@latest --example function-appaction
 ```
+
+- After installing the template, create a new app defintion in Contentful, and build + upload your app bundle (using the UI or included 'upload' script in package.json)
+- Navigate to the app action tab on the app defintion and create a new app action. Choose 'function-invocation' as the type and select the function you just uploaded. Hit save, and you're ready to see the function invoked by the app action on the Page location.
 
 ### Creating an app
 
@@ -21,9 +24,3 @@ You will need to set the following environment variables as listed below:
 ### Uploading the code to Contentful
 
 It as simple using the CLI command `npm run upload-ci`. This will perform two actions: upload the code, linking it to the app, and then finally activating the code ready for usage in both
-
-## Utilizing app event filter functions
-
-When you create an app that utilizes [app events](https://www.contentful.com/developers/docs/extensibility/app-framework/app-events/), you can define the entities and topics for these events. However, you may also want to do some additional filtering for these app events. For example, you might want to filter Entry events so that they are only sent for certain content types. App event filter functions are a flexible way of making app events even more powerful for your apps.
-
-Once you have built and uploaded your functions to Contentful, link them to your app event subscription using the [CMA](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/app-event-subscriptions/app-event-subscription/update-or-subscribe-to-events/console/js-plain) or the [Events](https://app.contentful.com/deeplink?link=app-definition&tab=events) tab on the App details page.  
