@@ -1,3 +1,5 @@
+import { mockCma } from './mockCma';
+
 const mockSdk: any = {
   app: {
     onConfigure: jest.fn(),
@@ -8,6 +10,7 @@ const mockSdk: any = {
   ids: {
     app: 'test-app',
   },
+  cma: mockCma,
 };
 
 export { mockSdk };

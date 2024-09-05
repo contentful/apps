@@ -9,9 +9,6 @@ const Page = () => {
   const [appActions, setAppActions] = useState<CollectionProp<AppActionProps>>();
 
   useMemo(async () => {
-    console.log('sdk', sdk);
-    console.log('sdk.cma', sdk.cma);
-    console.log('sdk.cma.appAction', sdk.cma.appAction);
     setAppActions(
       await sdk.cma.appAction.getMany({
         organizationId: sdk.ids.organization,
@@ -38,8 +35,11 @@ const Page = () => {
 
   return (
     <>
+      <h1>App Actions</h1>
       {appActions?.items.map((action) => (
-        <Button onClick={() => handleAction(action)}>{action.name}</Button>
+        <Button key={action.sys.id} onClick={() => handleAction(action)}>
+          {action.name}
+        </Button>
       ))}
     </>
   );
