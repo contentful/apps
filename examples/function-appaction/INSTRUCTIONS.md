@@ -3,8 +3,11 @@
 Use this command below to install the template.
 
 ```
-npx create-contentful-app@latest --function appaction
+npx create-contentful-app@latest --example function-appaction
 ```
+
+- After installing the template, create a new app defintion in Contentful, and build + upload your app bundle (using the UI or included 'upload' script in package.json)
+- Navigate to the app action tab on the app defintion and create a new app action. Choose 'function-invocation' as the type and select the function you just uploaded. Hit save, and you're ready to see the function invoked by the app action on the Page location.
 
 ### Creating an app
 
