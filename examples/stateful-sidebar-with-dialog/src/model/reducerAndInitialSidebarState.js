@@ -14,6 +14,6 @@ export function reducer(state, { type, payload }) {
 
 export function initialSidebarState() {
   return {
-    timestamp: 'SET ME!'
+    timestamp: 'SET ME!',
   };
 }
