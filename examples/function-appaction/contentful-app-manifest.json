@@ -1,0 +1,15 @@
+{
+  "functions": [
+    {
+      "id": "example",
+      "name": "Example App Action Call Function",
+      "description": "This is an example to help you learn how App Action functions work.",
+      "path": "functions/example.js",
+      "entryFile": "functions/example.ts",
+      "allowNetworks": [],
+      "accepts": [
+        "appaction.call"
+      ]
+    }
+  ]
+}
