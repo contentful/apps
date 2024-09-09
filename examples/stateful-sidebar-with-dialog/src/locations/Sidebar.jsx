@@ -24,12 +24,15 @@ const Sidebar = () => {
   return <>
     <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>
     <Paragraph>{`Time is ${state.timestamp}`}</Paragraph>
-    <Button onClick={() => {
-      dispatch({
-        type: 'SET_TIME',
-        payload: new Date().toString(),
-      });
-    }}>SET TIME</Button>
+      <Button
+        onClick={() => {
+          dispatch({
+            type: 'SET_TIME',
+            payload: new Date().toString(),
+          });
+        }}>
+        SET TIME
+      </Button>
       <Button
         onClick={async () => {
           const serializedDialogState = await sdk.dialogs.openCurrentApp({
