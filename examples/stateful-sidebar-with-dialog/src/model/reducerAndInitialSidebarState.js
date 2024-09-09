@@ -1,5 +1,3 @@
-
-
 export function reducer(state, { type, payload }) {
   if (type === 'SET_TIME') {
     return {
