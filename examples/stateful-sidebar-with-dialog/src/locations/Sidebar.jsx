@@ -21,9 +21,10 @@ const Sidebar = () => {
 
   const someParameter = 'some parameter';
 
-  return <>
-    <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>
-    <Paragraph>{`Time is ${state.timestamp}`}</Paragraph>
+  return (
+    <>
+      <Paragraph>Hello Sidebar Component (AppId: {sdk.ids.app})</Paragraph>
+      <Paragraph>{`Time is ${state.timestamp}`}</Paragraph>
       <Button
         onClick={() => {
           dispatch({
@@ -53,7 +54,9 @@ const Sidebar = () => {
         }}>
         OPEN DIALOG
       </Button>
-  </>;
+    </>
+  );
 };
 
 export default Sidebar;
+
