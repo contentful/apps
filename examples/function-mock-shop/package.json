@@ -7,7 +7,7 @@
     "@contentful/f36-components": "4.69.0",
     "@contentful/f36-tokens": "4.0.5",
     "@contentful/react-apps-toolkit": "1.2.16",
-    "@tanstack/react-query": "^5.54.1",
+    "@tanstack/react-query": "^5.55.2",
     "contentful-management": "10.46.4",
     "emotion": "10.0.27",
     "graphql-request": "^6.1.0",
