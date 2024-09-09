@@ -33,7 +33,7 @@ const Dialog = () => {
       onClick={() => {
         sdk.close(JSON.stringify(state));
       }}>CLOSE</Button>
-  </>;
+    </>;
 };
 
 export default Dialog;
