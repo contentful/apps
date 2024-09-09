@@ -30,23 +30,26 @@ const Sidebar = () => {
         payload: new Date().toString(),
       });
     }}>SET TIME</Button>
-    <Button onClick={async () => {
-      const serializedDialogState = await sdk.dialogs.openCurrentApp({
-        shouldCloseOnEscapePress: false,
-        shouldCloseOnOverlayClick: false,
-        title: 'Dialog',
-        minHeight: 360,
-        parameters: {
-          serializedSidebarState: JSON.stringify(state),
-        },
-      });
-      if (serializedDialogState) {
-        dispatch({
-          type: 'SET_WHOLE_STATE',
-          payload: JSON.parse(serializedDialogState),
-        });
-      }
-    }}>OPEN DIALOG</Button>
+      <Button
+        onClick={async () => {
+          const serializedDialogState = await sdk.dialogs.openCurrentApp({
+            shouldCloseOnEscapePress: false,
+            shouldCloseOnOverlayClick: false,
+            title: 'Dialog',
+            minHeight: 360,
+            parameters: {
+              serializedSidebarState: JSON.stringify(state),
+            },
+          });
+          if (serializedDialogState) {
+            dispatch({
+              type: 'SET_WHOLE_STATE',
+              payload: JSON.parse(serializedDialogState),
+            });
+          }
+        }}>
+        OPEN DIALOG
+      </Button>
   </>;
 };
 
