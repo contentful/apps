@@ -113,10 +113,6 @@ const queryHandler: EventHandler<'graphql.query'> = async (event, context) => {
 
   const response = await yoga.fetch('http://this-does-not-matter.com/graphql', request, context);
 
-  if (response.type !== 'default') {
-    throw new Error('Unsupported GraphQL result type');
-  }
-
   return response.json();
 };
 

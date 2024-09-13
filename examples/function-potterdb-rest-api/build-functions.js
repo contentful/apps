@@ -2,6 +2,8 @@ const esbuild = require('esbuild');
 const { join, parse, resolve } = require('path');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
+const { NodeModulesPolyfillPlugin } = require('@esbuild-plugins/node-modules-polyfill');
+const { NodeGlobalsPolyfillPlugin } = require('@esbuild-plugins/node-globals-polyfill');
 
 const manifest = require('./contentful-app-manifest.json');
 
@@ -61,13 +63,15 @@ const main = async (watch = false) => {
     const config = {
       entryPoints: getEntryPoints(),
       bundle: true,
-      minify: true,
-      platform: 'node',
       outdir: 'build',
-      logLevel: 'info',
       format: 'esm',
-      target: 'es6',
-      external: ['node:*'],
+      target: 'es2022',
+      define: {
+        global: 'globalThis',
+      },
+      plugins: [NodeModulesPolyfillPlugin(), NodeGlobalsPolyfillPlugin()],
+      logLevel: 'info',
+      minify: true,
     };
 
     if (watch) {
