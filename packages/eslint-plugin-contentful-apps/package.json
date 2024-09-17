@@ -20,7 +20,7 @@
   },
   "author": "Contentful GmbH",
   "license": "MIT",
-  "description": "Base eslint configuration for Contentful apps",
+  "description": "Eslint plugin for Contentful App Framework Apps",
   "scripts": {
     "build": "rm -rf ./dist && tsup",
     "prepublishOnly": "npm run build"
