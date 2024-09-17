@@ -13,6 +13,7 @@ commands:
       - run:
           name: Setup GitHub packages
           command: |
+            rm -f ./.npmrc
             echo "//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_WRITE_TOKEN}" > ~/.npmrc
             echo "@contentful:registry=https://npm.pkg.github.com" >> ~/.npmrc
       - run:
