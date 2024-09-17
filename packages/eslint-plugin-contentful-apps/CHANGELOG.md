@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.1](https://github.com/contentful/apps/compare/@contentful/eslint-plugin-contentful-apps@0.1.0...@contentful/eslint-plugin-contentful-apps@0.1.1) (2024-09-17)
+
+### Bug Fixes
+
+- eslint-plugin-contentful-apps build script typo ([#8909](https://github.com/contentful/apps/issues/8909)) ([a46d0d1](https://github.com/contentful/apps/commit/a46d0d1548e7b4c95ad7bc920b54a944a60dd1b2))
+
 # 0.1.0 (2024-09-17)
 
 ### Features
