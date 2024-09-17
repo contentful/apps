@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.7.13",
+    "@contentful/eslint-plugin-contentful-apps": "^0.1.4",
     "@originjs/vite-plugin-commonjs": "^1.0.3",
     "@testing-library/react": "14.0.0",
     "@types/jest": "^29.5.3",
