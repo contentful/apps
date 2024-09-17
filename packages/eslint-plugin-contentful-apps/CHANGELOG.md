@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.3](https://github.com/contentful/apps/compare/@contentful/eslint-plugin-contentful-apps@0.1.2...@contentful/eslint-plugin-contentful-apps@0.1.3) (2024-09-17)
+
+### Bug Fixes
+
+- (eslint-plugin-contentful-apps) add repository config [] ([#8911](https://github.com/contentful/apps/issues/8911)) ([0d7be92](https://github.com/contentful/apps/commit/0d7be9288e92cd3f58a4ab25f8a5bb5b76a7f6ec))
+
 ## [0.1.2](https://github.com/contentful/apps/compare/@contentful/eslint-plugin-contentful-apps@0.1.1...@contentful/eslint-plugin-contentful-apps@0.1.2) (2024-09-17)
 
 ### Bug Fixes
