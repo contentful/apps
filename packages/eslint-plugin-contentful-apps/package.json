@@ -13,6 +13,11 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/contentful/apps.git",
+    "directory": "packages/eslint-plugin-contentful-apps"
+  },
   "author": "Contentful GmbH",
   "license": "MIT",
   "description": "Base eslint configuration for Contentful apps",
