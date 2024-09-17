@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.4](https://github.com/contentful/apps/compare/@contentful/eslint-plugin-contentful-apps@0.1.3...@contentful/eslint-plugin-contentful-apps@0.1.4) (2024-09-17)
+
+### Bug Fixes
+
+- (publish) remove registry config in repo npmrc ([#8917](https://github.com/contentful/apps/issues/8917)) ([b8576a9](https://github.com/contentful/apps/commit/b8576a92e6d29cd06f6a10f9cb896f6990fcb285))
+- package publishing [] ([#8912](https://github.com/contentful/apps/issues/8912)) ([4d728ad](https://github.com/contentful/apps/commit/4d728ad4618a8bebf91c9cc228de60896a62d47c))
+
 ## [0.1.3](https://github.com/contentful/apps/compare/@contentful/eslint-plugin-contentful-apps@0.1.2...@contentful/eslint-plugin-contentful-apps@0.1.3) (2024-09-17)
 
 ### Bug Fixes
