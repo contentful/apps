@@ -9,14 +9,13 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
-    require.resolve('../../../ally.js'),
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'react'],
+  plugins: ['@typescript-eslint', 'react', '@contentful/eslint-plugin-contentful-apps'],
   rules: {
     'react/no-unknown-property': ['error', { ignore: ['css'] }],
   },

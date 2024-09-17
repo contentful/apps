@@ -9,7 +9,6 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier',
-    require.resolve('../../../ally.js'),
   ],
   parser: '@typescript-eslint/parser',
   rules: {
@@ -30,4 +29,5 @@ module.exports = {
       version: 'detect',
     },
   },
+  plugins: ['@contentful/eslint-plugin-contentful-apps'],
 };
