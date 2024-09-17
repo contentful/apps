@@ -7,9 +7,12 @@
   "exports": {
     "require": "./dist/index.js",
     "import": "./dist/index.mjs",
-    "default": "./dist/index.js",
-    "node": "./dist/index.js"
+    "node": "./dist/index.js",
+    "default": "./dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "author": "Contentful GmbH",
   "license": "MIT",
   "description": "Base eslint configuration for Contentful apps",
