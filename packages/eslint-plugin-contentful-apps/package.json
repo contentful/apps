@@ -15,7 +15,7 @@
   "description": "Base eslint configuration for Contentful apps",
   "scripts": {
     "build": "rm -rf ./dist && tsup",
-    "prepublishOnly": "npm run builld"
+    "prepublishOnly": "npm run build"
   },
   "tsup": {
     "entry": [
