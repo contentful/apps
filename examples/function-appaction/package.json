@@ -40,21 +40,19 @@
   },
   "devDependencies": {
     "@contentful/app-scripts": "1.27.0",
-    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+    "@contentful/node-apps-toolkit": "^3.9.0",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@testing-library/jest-dom": "5.17.0",
     "@testing-library/react": "14.3.1",
     "@tsconfig/create-react-app": "2.0.5",
+    "@tsconfig/recommended": "1.0.3",
     "@types/node": "16.18.106",
     "@types/react": "18.3.5",
     "@types/react-dom": "18.3.0",
     "cross-env": "7.0.3",
-    "typescript": "4.9.5",
-    "@contentful/node-apps-toolkit": "^3.8.0",
-    "@tsconfig/recommended": "1.0.3",
-    "@types/sentiment": "^5.0.4",
     "esbuild": "0.19.2",
-    "sentiment": "^5.0.2"
+    "typescript": "4.9.5"
   },
   "homepage": "."
 }
