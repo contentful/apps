@@ -1,7 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8'));
-
 module.exports = {
   plugins: ['jsx-a11y'],
   rules: {
@@ -22,7 +18,6 @@ module.exports = {
     'jsx-a11y/role-supports-aria-props': 'warn',
   },
   meta: {
-    name: pkg.name,
-    version: pkg.version,
+    name: '@contentful/eslint-plugin-contentful-apps',
   },
 };
