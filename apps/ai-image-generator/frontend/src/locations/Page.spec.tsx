@@ -1,4 +1,3 @@
-import React from 'react';
 import Page from './Page';
 import { render } from '@testing-library/react';
 import { mockCma, mockSdk } from '../../test/mocks';

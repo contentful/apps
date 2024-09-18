@@ -29,7 +29,7 @@ const Sidebar = () => {
           appActionId: 'amplifyBuildAction',
           environmentId: sdk.ids.environment,
           spaceId: sdk.ids.space,
-          appDefinitionId: sdk.ids.app!,
+          appDefinitionId: `${sdk.ids.app}`,
         },
         {
           parameters: {

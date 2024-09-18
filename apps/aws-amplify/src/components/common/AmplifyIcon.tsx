@@ -3,7 +3,7 @@ export const AWSAmplifyBrand = {
   url: 'https://aws.amazon.com/amplify/',
 };
 
-export default function AmplifyIcon(props: any) {
+export default function AmplifyIcon(props: Record<string, unknown>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
