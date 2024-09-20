@@ -18,10 +18,10 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.143",
+    "@types/aws-lambda": "^8.10.145",
     "@types/lodash": "^4.17.5",
-    "@types/chai": "^4.3.17",
-    "@types/mocha": "^10.0.7",
+    "@types/chai": "^4.3.19",
+    "@types/mocha": "^10.0.8",
     "@types/node": "^12.12.14",
     "@types/node-fetch": "^2.6.4",
     "@types/request": "^2.48.12",
@@ -40,6 +40,6 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
     "tslint-no-unused-expression-chai": "^0.1.4",
-    "typescript": "^5.4.5"
+    "typescript": "^5.6.2"
   }
 }
