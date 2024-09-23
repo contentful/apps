@@ -1,12 +1,12 @@
 import DisclaimerSection from './DisclaimerSection';
 import { render, screen } from '@testing-library/react';
-import configPageCopies from 'constants/configPageCopies';
+import configPageCopies from '@constants/configPageCopies';
 
 const { getByText } = screen;
 const { sectionTitle, linkSubstring } = configPageCopies.disclaimerSection;
 
 describe('DisclaimerSection component', () => {
-  it('Component mounts without correct content', async () => {
+  it('Component mounts without correct coqntent', async () => {
     render(<DisclaimerSection />);
 
     const title = getByText(sectionTitle);

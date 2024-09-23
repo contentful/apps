@@ -1,8 +1,8 @@
 import { useCallback, useState, useEffect } from 'react';
 import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
-import ConfigPage from 'components/config/ConfigPage/ConfigPage';
-import { configPageErrorMessages } from 'constants/errorMessages';
+import ConfigPage from '@components/config/ConfigPage/ConfigPage';
+import { configPageErrorMessages } from '@constants/errorMessages';
 import { AppInstallationParameters, InstallErrors } from 'types/configPage';
 
 const ConfigScreen = () => {

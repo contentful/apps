@@ -1,6 +1,6 @@
+import configPageCopies from '@constants/configPageCopies';
 import CostSection from './CostSection';
 import { render, screen } from '@testing-library/react';
-import configPageCopies from 'constants/configPageCopies';
 
 const { getByText } = screen;
 const { sectionTitle, pricingLinkSubstring, creditLinkSubstring } = configPageCopies.costSection;
