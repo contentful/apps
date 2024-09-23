@@ -1,5 +1,5 @@
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { VercelBrand } from '@components/common/VercelIcon';
 
 export const styles = {

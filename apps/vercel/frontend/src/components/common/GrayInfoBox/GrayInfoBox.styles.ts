@@ -1,5 +1,5 @@
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useStyles = (rootOptions: any) => ({
