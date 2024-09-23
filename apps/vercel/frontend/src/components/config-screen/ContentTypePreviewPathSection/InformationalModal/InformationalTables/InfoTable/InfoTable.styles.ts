@@ -1,5 +1,5 @@
 import tokens from '@contentful/f36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { INFORMATIONAL_MODAL_COLUMN_WIDTH } from '@constants/styles';
 
 export const styles = {
