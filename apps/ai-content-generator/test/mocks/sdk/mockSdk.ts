@@ -1,14 +1,14 @@
-import { mockSdkParameters } from '..';
-import { createSDK } from './utils/createSdk';
-import { vi } from 'vitest';
-import {
-  mockGetManyContentType,
-  mockEditorInterface,
-  mockContentType,
-} from './contentTypes/mockContentType';
-import { mockEntry } from './entry/mockEntry';
 import AppInstallationParameters from '@components/config/appInstallationParameters';
 import { DialogInvocationParameters } from '@locations/Dialog';
+import { vi } from 'vitest';
+import { mockSdkParameters } from '..';
+import {
+  mockContentType,
+  mockEditorInterface,
+  mockGetManyContentType,
+} from './contentTypes/mockContentType';
+import { mockEntry } from './entry/mockEntry';
+import { createSDK } from './utils/createSdk';
 
 class MockSdk {
   sdk: ReturnType<typeof createSDK>;
