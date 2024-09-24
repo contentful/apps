@@ -11,7 +11,6 @@ interface Props {
 export function TypeformPreviewWidget({ sdk }: Props) {
   const { value } = sdk.parameters.invocation as Hash;
   const formId = value.split('/').pop();
-  console.log('formId', formId);
   useEffect(() => {
     sdk.window.updateHeight(SDK_WINDOW_HEIGHT);
   }, [sdk.window]);
