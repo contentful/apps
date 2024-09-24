@@ -24,3 +24,5 @@ You will need to set the following environment variables as listed below:
 ### Uploading the code to Contentful
 
 It as simple using the CLI command `npm run upload-ci`. This will perform two actions: upload the code, linking it to the app, and then finally activating the code ready for usage in both
+
+Note: Node.js version 18 is the minimal required version for this upload command.
