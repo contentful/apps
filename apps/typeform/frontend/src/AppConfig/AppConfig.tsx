@@ -4,13 +4,12 @@ import get from 'lodash/get';
 import {
   Heading,
   Paragraph,
-  Typography,
   TextLink,
   Select,
   Option,
   FormLabel,
   Note,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
 import FieldSelector from './FieldSelector';
 import {
   CompatibleFields,
@@ -182,7 +181,7 @@ export class AppConfig extends React.Component<Props, State> {
         <div className={styles.body}>
           <div>
             <div>
-              <Typography>
+              <>
                 <Heading>About Typeform</Heading>
                 <Paragraph className={styles.aboutP}>
                   The{' '}
@@ -194,20 +193,20 @@ export class AppConfig extends React.Component<Props, State> {
                   </TextLink>{' '}
                   app allows you to reference your forms from Typeform without leaving Contentful.
                 </Paragraph>
-              </Typography>
+              </>
               <hr className={styles.splitter} />
             </div>
             <div>
-              <Typography>
+              <>
                 <Heading>Configuration</Heading>
-                <FormLabel htmlFor="workspaceId" required>
+                <FormLabel htmlFor="workspaceId" isRequired>
                   Typeform workspace
                 </FormLabel>
                 <Select
                   id="workspaceId"
                   name="workspaceId"
                   onChange={(event: any) => this.setWorkSpaceId(event.currentTarget.value)}
-                  hasError={workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
+                  isInvalid={workspaces.length > 0 && !this.selectedWorkspaceIdIsValid()}
                   value={selectedWorkspaceId}
                   data-test-id="typeform-select">
                   <Option key="" value="">
@@ -219,9 +218,9 @@ export class AppConfig extends React.Component<Props, State> {
                     </Option>
                   ))}
                 </Select>
-              </Typography>
+              </>
               <hr className={styles.splitter} />
-              <Typography>
+              <>
                 <Heading>Assign to content types</Heading>
                 {contentTypes.length > 0 ? (
                   <>
@@ -237,11 +236,11 @@ export class AppConfig extends React.Component<Props, State> {
                     />
                   </>
                 ) : (
-                  <Note noteType="warning">
+                  <Note variant="warning">
                     There are <strong>no content types with fields of type Short Text</strong>{' '}
                     fields in this environment. You can add one in your{' '}
                     <TextLink
-                      linkType="primary"
+                      variant="primary"
                       target="_blank"
                       rel="noopener noreferrer"
                       href={
@@ -254,7 +253,7 @@ export class AppConfig extends React.Component<Props, State> {
                     and assign it to the app from this screen.
                   </Note>
                 )}
-              </Typography>
+              </>
             </div>
           </div>
         </div>

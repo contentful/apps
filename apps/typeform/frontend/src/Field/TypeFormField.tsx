@@ -7,6 +7,7 @@ import { styles } from './styles';
 // @ts-ignore 2307
 import logo from './typeform-icon.svg';
 import { isUserAuthenticated, getToken, resetLocalStorage } from '../utils';
+import { EditIcon, EntryIcon } from '@contentful/f36-icons';
 
 interface Props {
   sdk: FieldExtensionSDK & AppExtensionSDK;
@@ -184,7 +185,7 @@ export function TypeFormField({ sdk }: Props) {
   if (!isUserAuthenticated()) {
     return (
       <TypeformOAuth
-        data-test-id="typeform-auth"
+        aria-label="typeform-auth"
         isFullWidth={false}
         setToken={(token: string) =>
           dispatch({ type: ACTION_TYPES.UPDATE_TOKEN, payload: { token } })
@@ -199,7 +200,7 @@ export function TypeFormField({ sdk }: Props) {
 
   if (error) {
     return (
-      <Note noteType="negative">
+      <Note variant="negative">
         We could not fetch your typeforms. Please make sure you have selected a valid Typeform
         workspace and are logged in.
       </Note>
@@ -222,7 +223,7 @@ export function TypeFormField({ sdk }: Props) {
     <React.Fragment>
       <div className={styles.field}>
         <img alt="TypeForm Logo" src={logo} className={styles.logo} />
-        <Select onChange={onChange} value={value} data-test-id="typeform-select">
+        <Select onChange={onChange} value={value}>
           <Option key="" value="">
             {forms.length === 0 ? 'No forms available' : 'Choose a typeform'}
           </Option>
@@ -238,26 +239,26 @@ export function TypeFormField({ sdk }: Props) {
           <TextLink
             href={`https://admin.typeform.com/form/${selectedForm.id}/create`}
             target="_blank"
-            icon="Edit"
+            icon={<EditIcon />}
             rel="noopener noreferrer"
             className={styles.editButton}
-            disabled={!value}>
+            isDisabled={!value}>
             Edit
           </TextLink>
           {selectedForm.isPublic ? (
             PreviewButton
           ) : (
             <Tooltip
-              containerElement="span"
+              as="span"
               content="You can not preview this typeform because it is private"
-              place="right">
+              placement="right">
               {PreviewButton}
             </Tooltip>
           )}
           <TextLink
             href={`https://admin.typeform.com/form/${selectedForm.id}/results`}
             target="_blank"
-            icon="Entry"
+            icon={<EntryIcon />}
             rel="noopener noreferrer"
             className={styles.editButton}>
             Results
@@ -265,7 +266,7 @@ export function TypeFormField({ sdk }: Props) {
         </div>
       )}
       {hasStaleData && (
-        <Note noteType="negative">
+        <Note variant="negative">
           The typeform you have selected in Contentful no longer exists in your workspace.{' '}
           <TextLink onClick={() => dispatch({ type: ACTION_TYPES.RESET })}>Clear field</TextLink>.
         </Note>
