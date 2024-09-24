@@ -5,7 +5,8 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.2.0",
     "@testing-library/react": "11.2.5",
-    "cross-env": "7.0.3"
+    "cross-env": "7.0.3",
+    "jsdom": "^25.0.1"
   },
   "scripts": {
     "start": "vite",
@@ -20,6 +21,7 @@
     "@contentful/forma-36-fcss": "0.3.5",
     "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.2",
+    "@emotion/css": "^11.13.0",
     "hex-rgb": "4.3.0",
     "lodash.camelcase": "4.3.0",
     "prop-types": "15.8.1",
