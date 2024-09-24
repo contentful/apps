@@ -3,7 +3,7 @@ import { ConfigAppSDK } from '@contentful/app-sdk';
 import { useSDK } from '@contentful/react-apps-toolkit';
 import { configPageErrorMessages } from '@constants/errorMessages';
 import ConfigPage from '@components/config/ConfigPage/ConfigPage';
-import { AppInstallationParameters, InstallErrors } from '@types/configPage';
+import { AppInstallationParameters, InstallErrors } from '../types/configPage';
 
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({});

@@ -1,11 +1,11 @@
 import { Box, Heading } from '@contentful/f36-components';
 import APIKey from '@components/config/ApiKeySection/APIKeySection';
-import { AppInstallationParameters } from 'types/configPage';
 import configPageCopies from '@constants/configPageCopies';
 import CostSection from '@components/config/CostSection/CostSection';
 import DisclaimerSection from '@components/config/DisclaimerSection/DisclaimerSection';
 import GettingStartedSection from '../GettingStartedSection/GettingStartedSection';
 import { styles } from './ConfigPage.styles';
+import { AppInstallationParameters } from '../../../types/configPage';
 
 interface ParameterObject {
   [key: string]: string;
