@@ -23,7 +23,6 @@
     "start:dev": "NODE_ENV='development' && npm start",
     "build": "vite build --mode ${NODE_ENV:='production'}",
     "test": "vitest --logHeapUsage --coverage",
-    "eject": "react-scripts eject",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
