@@ -1,12 +1,14 @@
+import { vi } from 'vitest';
+
 export const mockSdk = {
   app: {
-    onConfigure: jest.fn(),
-    getParameters: jest.fn().mockReturnValueOnce({}),
-    setReady: jest.fn(),
-    getCurrentState: jest.fn(),
+    onConfigure: vi.fn(),
+    getParameters: vi.fn().mockReturnValueOnce({}),
+    setReady: vi.fn(),
+    getCurrentState: vi.fn(),
   },
   window: {
-    startAutoResizer: jest.fn(),
+    startAutoResizer: vi.fn(),
   },
   parameters: {
     installation: {
@@ -15,6 +17,6 @@ export const mockSdk = {
     },
   },
   field: {
-    getValue: jest.fn(),
+    getValue: vi.fn(),
   },
 };
