@@ -6,7 +6,7 @@
       "description": "This is an example to help you learn how App Action functions work.",
       "path": "functions/example.js",
       "entryFile": "functions/example.ts",
-      "allowNetworks": [],
+      "allowNetworks": ["api.contentful.com"],
       "accepts": [
         "appaction.call"
       ]
