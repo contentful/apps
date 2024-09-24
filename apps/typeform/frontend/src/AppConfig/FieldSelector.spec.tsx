@@ -3,12 +3,13 @@ import { configure, render, cleanup } from '@testing-library/react';
 import FieldSelector, { Props } from './FieldSelector';
 import { typeforms } from '../__mocks__/typeforms';
 import { sdk as mockSdk } from '../__mocks__/sdk';
+import { vi } from 'vitest';
 
 configure({
   testIdAttribute: 'data-test-id',
 });
 
-window.fetch = jest.fn(() => ({
+window.fetch = vi.fn(() => ({
   json: () => typeforms,
 })) as any;
 
@@ -36,7 +37,7 @@ const defaultProps: Props = {
     ct2: [],
   },
   selectedFields: {},
-  onSelectedFieldsChange: jest.fn(),
+  onSelectedFieldsChange: vi.fn(),
 };
 
 describe('FieldSelector', () => {

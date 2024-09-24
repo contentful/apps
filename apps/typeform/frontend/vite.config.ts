@@ -1,6 +1,5 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import eslint from 'vite-plugin-eslint';
 
 export default defineConfig(() => ({
   base: '', // relative paths
@@ -16,7 +15,6 @@ export default defineConfig(() => ({
 
   test: {
     environment: 'happy-dom',
-    setupFiles: 'src/setupTests.ts',
     globals: true,
   },
 }));
