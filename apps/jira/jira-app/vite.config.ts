@@ -5,7 +5,6 @@ export default defineConfig({
     port: 3000,
   },
   build: {
-    outDir: 'build',
     lib: {
       entry: 'src/index.tsx',
       name: 'Jira-App',
