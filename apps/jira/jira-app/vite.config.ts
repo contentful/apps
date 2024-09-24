@@ -8,8 +8,6 @@ export default defineConfig({
     outDir: 'build',
     lib: {
       entry: 'src/index.tsx',
-      // set outgoing directory is build
-
       name: 'Jira-App',
       fileName: (format) => `jira-app.${format}.js`,
     },
