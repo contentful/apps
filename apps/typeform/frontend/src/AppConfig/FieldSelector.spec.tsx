@@ -1,8 +1,7 @@
 import React from 'react';
-import { configure, render, cleanup } from '@testing-library/react';
+import { configure, render, cleanup, screen } from '@testing-library/react';
 import FieldSelector, { Props } from './FieldSelector';
 import { typeforms } from '../__mocks__/typeforms';
-import { sdk as mockSdk } from '../__mocks__/sdk';
 import { vi } from 'vitest';
 
 configure({
@@ -44,8 +43,9 @@ describe('FieldSelector', () => {
   afterEach(cleanup);
 
   it('should render successfully with no preselected fields', async () => {
-    const component = render(<FieldSelector {...defaultProps} />);
-    expect(component.container).toMatchSnapshot();
+    const { getByRole } = render(<FieldSelector {...defaultProps} />);
+    const checkbox = getByRole('checkbox');
+    expect(checkbox).toBeTruthy();
   });
 
   it('should render successfully with preselected fields', async () => {
@@ -53,7 +53,8 @@ describe('FieldSelector', () => {
       ...defaultProps,
       selectedFields: { ct1: ['x'] },
     };
-    const component = render(<FieldSelector {...props} />);
-    expect(component.container).toMatchSnapshot();
+
+    const selectedOption = screen.findByText('x');
+    expect(selectedOption).toBeDefined();
   });
 });

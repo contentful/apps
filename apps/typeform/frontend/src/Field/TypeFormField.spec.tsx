@@ -23,7 +23,7 @@ describe('TypeFormField', () => {
       writable: true,
     });
     const component = render(<TypeFormField sdk={mockSdk} />);
-    await component.findByTestId('typeform-select');
+    await component.findByText(/Choose a typeform/);
     expect(component.container).toMatchSnapshot();
   });
 
@@ -35,7 +35,7 @@ describe('TypeFormField', () => {
       writable: true,
     });
     const component = render(<TypeFormField sdk={mockSdk} />);
-    await component.findByTestId('typeform-auth');
+    await component.getByLabelText('typeform-auth');
     expect(component.container).toMatchSnapshot();
   });
 
