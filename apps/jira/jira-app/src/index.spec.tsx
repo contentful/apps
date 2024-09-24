@@ -8,7 +8,6 @@ import mockContentTypes from './mockResponses/mockContentTypes.json';
 import JiraClient from './jiraClient';
 import fetchMock from 'fetch-mock';
 import standalone from './standalone';
-import { vi, Mock } from 'vitest';
 
 configure({
   testIdAttribute: 'data-test-id',
@@ -22,7 +21,7 @@ function mockUseSDK() {
   };
 }
 
-vi.mock('@contentful/react-apps-toolkit', () => ({
+jest.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockUseSDK(),
 }));
 
@@ -34,12 +33,12 @@ describe('The Jira App Components', () => {
   let configureFn = () => {};
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    window.open = vi.fn();
+    jest.useFakeTimers();
+    window.open = jest.fn();
     Object.defineProperty(window, 'localStorage', { writable: true, value: originalStorage });
 
-    Date.now = vi.fn(() => 100);
-    Math.random = vi.fn(() => 0.5);
+    Date.now = jest.fn(() => 100);
+    Math.random = jest.fn(() => 0.5);
 
     mockSdk = {
       ids: {
@@ -48,22 +47,22 @@ describe('The Jira App Components', () => {
         user: '123',
       },
       app: {
-        setReady: vi.fn(),
-        isInstalled: vi.fn().mockReturnValue(Promise.resolve(false)),
-        getParameters: vi.fn().mockReturnValue(Promise.resolve(null)),
-        onConfigure: vi.fn((fn) => {
+        setReady: jest.fn(),
+        isInstalled: jest.fn().mockReturnValue(Promise.resolve(false)),
+        getParameters: jest.fn().mockReturnValue(Promise.resolve(null)),
+        onConfigure: jest.fn((fn) => {
           configureFn = fn;
         }),
       },
       space: {
-        getContentTypes: vi.fn().mockReturnValue(Promise.resolve(mockContentTypes)),
-        getEditorInterfaces: vi.fn().mockResolvedValue({ items: [] }),
+        getContentTypes: jest.fn().mockReturnValue(Promise.resolve(mockContentTypes)),
+        getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] }),
       },
       notifier: {
-        error: vi.fn(),
+        error: jest.fn(),
       },
       window: {
-        startAutoResizer: vi.fn(),
+        startAutoResizer: jest.fn(),
       },
       user: {
         firstName: 'David',
@@ -76,7 +75,7 @@ describe('The Jira App Components', () => {
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
     cleanup();
   });
 
@@ -93,14 +92,14 @@ describe('The Jira App Components', () => {
       const token = '123';
       const expireTime = Date.now() + 600000;
 
-      const source: MessageEventSource = { close: vi.fn() } as any;
-      (window.open as Mock).mockReturnValue(source);
+      const source: MessageEventSource = { close: jest.fn() } as any;
+      (window.open as jest.Mock).mockReturnValue(source);
 
       fireEvent.click(oauthButton);
       fireEvent(window, new MessageEvent('message', { data: { token, expireTime }, source }));
 
       expect(window.open).toHaveBeenCalledWith(
-        'https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=XD9k9QU9VT4Rt26u6lbO3NM0fOqvvXan&scope=read%3Ajira-user%20read%3Ajira-work%20write%3Ajira-work&redirect_uri=https%3A%2F%2Fapi.jira.ctfapps.net%2Fauth&response_type=code&state=http%3A%2F%2Flocalhost%3A3000%2F&prompt=consent',
+        'https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=XD9k9QU9VT4Rt26u6lbO3NM0fOqvvXan&scope=read%3Ajira-user%20read%3Ajira-work%20write%3Ajira-work&redirect_uri=https%3A%2F%2Fapi.jira.ctfapps.net%2Fauth&response_type=code&state=http%3A%2F%2Flocalhost%2F&prompt=consent',
         'Jira Contentful',
         'left=150,top=10,width=800,height=900'
       );
@@ -115,8 +114,8 @@ describe('The Jira App Components', () => {
       const oauthButton = wrapper.getByTestId('oauth-button');
       const error = '123';
 
-      const source: MessageEventSource = { close: vi.fn() } as any;
-      (window.open as Mock).mockReturnValue(source);
+      const source: MessageEventSource = { close: jest.fn() } as any;
+      (window.open as jest.Mock).mockReturnValue(source);
 
       fireEvent.click(oauthButton);
       fireEvent(window, new MessageEvent('message', { data: { error }, source }));
@@ -133,7 +132,7 @@ describe('The Jira App Components', () => {
       Object.defineProperty(window, 'localStorage', {
         writable: true,
         value: {
-          getItem: vi.fn((item: string) => {
+          getItem: jest.fn((item: string) => {
             switch (item) {
               case 'token':
                 return token;
@@ -143,8 +142,8 @@ describe('The Jira App Components', () => {
                 return null;
             }
           }),
-          setItem: vi.fn(),
-          removeItem: vi.fn(),
+          setItem: jest.fn(),
+          removeItem: jest.fn(),
         },
       });
 
@@ -183,7 +182,7 @@ describe('The Jira App Components', () => {
         target: { value: 'extensibility' },
       });
 
-      vi.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(1000);
 
       await wait(() => {
         wrapper.getByTestId('search-result-project');
@@ -222,7 +221,7 @@ describe('The Jira App Components', () => {
       Object.defineProperty(window, 'localStorage', {
         writable: true,
         value: {
-          getItem: vi.fn((item: string) => {
+          getItem: jest.fn((item: string) => {
             switch (item) {
               case 'token':
                 return token;
@@ -232,8 +231,8 @@ describe('The Jira App Components', () => {
                 return null;
             }
           }),
-          setItem: vi.fn(),
-          removeItem: vi.fn(),
+          setItem: jest.fn(),
+          removeItem: jest.fn(),
         },
       });
 
@@ -277,7 +276,7 @@ describe('The Jira App Components', () => {
   });
 
   describe('Location: ENTRY_SIDEBAR, Component: <Jira />', () => {
-    const unauthHandler = vi.fn();
+    const unauthHandler = jest.fn();
     const jiraClient = new JiraClient(
       '123',
       '1000',
@@ -366,13 +365,13 @@ describe('The Jira App Components', () => {
           href: `http://localhost:1234?token=123&expiresIn=10`,
         },
         opener: {
-          postMessage: vi.fn(),
+          postMessage: jest.fn(),
         },
         localStorage: {
-          setItem: vi.fn(),
+          setItem: jest.fn(),
         },
         history: {
-          replaceState: vi.fn(),
+          replaceState: jest.fn(),
         },
       };
 
@@ -391,13 +390,13 @@ describe('The Jira App Components', () => {
           href: `http://localhost:1234?token=123&&error=${errorMessage}`,
         },
         opener: {
-          postMessage: vi.fn(),
+          postMessage: jest.fn(),
         },
         localStorage: {
-          setItem: vi.fn(),
+          setItem: jest.fn(),
         },
         history: {
-          replaceState: vi.fn(),
+          replaceState: jest.fn(),
         },
       };
 
@@ -413,13 +412,13 @@ describe('The Jira App Components', () => {
           href: 'http://localhost:1234',
         },
         opener: {
-          postMessage: vi.fn(),
+          postMessage: jest.fn(),
         },
         localStorage: {
-          setItem: vi.fn(),
+          setItem: jest.fn(),
         },
         history: {
-          replaceState: vi.fn(),
+          replaceState: jest.fn(),
         },
       };
 
