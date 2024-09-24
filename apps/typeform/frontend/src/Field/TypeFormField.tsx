@@ -144,7 +144,6 @@ export function TypeFormField({ sdk }: Props) {
           });
         }
       } catch (error) {
-        console.log({ error });
         // only show error dialog is the user is logged in
         if (isUserAuthenticated()) {
           dispatch({ type: ACTION_TYPES.ERROR });
