@@ -9,7 +9,7 @@ import {
   Spinner,
   Card,
   Button,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
 import styled from 'styled-components';
 // import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
@@ -155,7 +155,7 @@ const Field = (props: FieldProps) => {
                         <Card
                           onClick={() => updateVideoIds(item.id)}
                           style={{ height: '100px', padding: '7px' }}
-                          selected={selectedIds.findIndex((id) => item.id === id) !== -1}>
+                          isSelected={selectedIds.findIndex((id) => item.id === id) !== -1}>
                           <StyledImageContainer>
                             <img src={item.thumbnail.url} alt={item.name} />
                           </StyledImageContainer>

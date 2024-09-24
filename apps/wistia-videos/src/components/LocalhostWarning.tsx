@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paragraph, TextLink, Note } from '@contentful/forma-36-react-components';
+import { Paragraph, TextLink, Note } from '@contentful/f36-components';
 
 const LocalhostWarning = () => {
   return (

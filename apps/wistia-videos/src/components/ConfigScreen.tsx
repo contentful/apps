@@ -4,19 +4,19 @@ import {
   Button,
   Heading,
   Flex,
-  Workbench,
+  FormControl,
   Paragraph,
-  TextField,
   TextLink,
   Notification,
-  Dropdown,
-  DropdownList,
-  DropdownListItem,
   Pill,
-} from '@contentful/forma-36-react-components';
+  TextInput,
+  Menu,
+} from '@contentful/f36-components';
+import { Workbench } from '@contentful/f36-workbench';
 import { css } from 'emotion';
 import { fetchProjects } from '../functions/getVideos';
 import { ProjectReduced, WistiaError } from './helpers/types';
+import { styles } from './ConfigScreen.styles';
 
 export interface AppInstallationParameters {
   apiBearerToken?: string;
@@ -163,15 +163,18 @@ const Config = (props: ConfigProps) => {
           <Paragraph>Please provide your access bearer token for the Wistia Data API.</Paragraph>
           <Flex flexDirection="column" marginTop="spacingM">
             <div style={{ marginBottom: '20px' }}>
-              <TextField
-                required
-                validationMessage={requiredMessage || ''}
-                name="apiBearerTokenInput"
-                id="apiBearerTokenInput"
-                labelText="Wistia Data API access bearer token"
-                onChange={() => setShowButton(true)}
-                value={parameters.apiBearerToken}
-              />
+              <FormControl id="apiBearerTokenInput">
+                <FormControl.Label>=Wistia Data API access bearer token</FormControl.Label>
+                <TextInput
+                  isRequired
+                  name="apiBearerTokenInput"
+                  onChange={() => setShowButton(true)}
+                  value={parameters.apiBearerToken}
+                />
+                <FormControl.ValidationMessage>
+                  {requiredMessage || ''}
+                </FormControl.ValidationMessage>
+              </FormControl>
             </div>
             <div style={{ marginBottom: '5px' }}>
               <Paragraph>
@@ -189,7 +192,7 @@ const Config = (props: ConfigProps) => {
           </Flex>
           {(!fetchedProjects?.length || showButton) && (
             <Flex marginTop="spacingL">
-              <Button onClick={() => getInputValue()} loading={loading}>
+              <Button onClick={() => getInputValue()} isLoading={loading}>
                 Display Wistia projects
               </Button>
             </Flex>
@@ -198,7 +201,7 @@ const Config = (props: ConfigProps) => {
             {!!fetchedProjects?.length && (
               <>
                 <Flex marginBottom="spacingXs">
-                  <Heading element="h2">Choose projects to exclude from the app.</Heading>
+                  <Heading as="h2">Choose projects to exclude from the app.</Heading>
                 </Flex>
                 <Flex marginBottom="spacingL">
                   <Paragraph>
@@ -219,26 +222,29 @@ const Config = (props: ConfigProps) => {
                   </Flex>
                 )}
                 {fetchedProjects.length > 0 ? (
-                  <Dropdown
-                    isOpen
-                    isFullWidth
-                    isAutoalignmentEnabled={false}
-                    position={'bottom-left'}>
-                    <DropdownList className={'dropdown-list'} maxHeight={500}>
-                      {fetchedProjects.map((item) => (
-                        <DropdownListItem
-                          onClick={() => addExcludedProject(item)}
-                          isActive={
-                            parameters.excludedProjects?.findIndex(
-                              (project) => project.hashedId === item?.hashedId
-                            ) !== -1
-                          }
-                          key={`key-${item.id}`}>
-                          {item.name}
-                        </DropdownListItem>
-                      ))}
-                    </DropdownList>
-                  </Dropdown>
+                  <div className={css(styles.projectMenu)}>
+                    <Menu
+                      isOpen
+                      isFullWidth
+                      isAutoalignmentEnabled={false}
+                      usePortal={false}
+                      placement="bottom-end">
+                      <Menu.List style={{ position: 'unset' }}>
+                        {fetchedProjects.map((item) => (
+                          <Menu.Item
+                            onClick={() => addExcludedProject(item)}
+                            isActive={
+                              parameters.excludedProjects?.findIndex(
+                                (project) => project.hashedId === item?.hashedId
+                              ) !== -1
+                            }
+                            key={`key-${item.id}`}>
+                            {item.name}
+                          </Menu.Item>
+                        ))}
+                      </Menu.List>
+                    </Menu>
+                  </div>
                 ) : null}
               </>
             )}
