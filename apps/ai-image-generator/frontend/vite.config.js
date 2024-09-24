@@ -1,5 +1,8 @@
-import { defineConfig } from 'vitest/config';
+import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 import react from '@vitejs/plugin-react-swc';
+import { splitVendorChunkPlugin } from 'vite';
+import eslint from 'vite-plugin-eslint';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   base: '',
@@ -11,7 +14,17 @@ export default defineConfig({
     // the default location to its own build path
     outDir: process.env.BUILD_PATH || './build',
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    viteCommonjs(),
+    splitVendorChunkPlugin(),
+    { ...eslint({ failOnWarning: true }), apply: 'build' },
+    {
+      ...eslint({ failOnWarning: false, failOnError: false, emitWarning: true, emitError: true }),
+      apply: 'serve',
+      enforce: 'post',
+    },
+  ],
   test: {
     globals: true,
     environment: 'jsdom',
