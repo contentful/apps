@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react-swc';
 import { splitVendorChunkPlugin } from 'vite';
 import eslint from 'vite-plugin-eslint';
 import { defineConfig } from 'vitest/config';
+import dts from 'vite-plugin-dts';
+import path from 'path';
 
 export default defineConfig({
   base: '',
@@ -24,7 +26,17 @@ export default defineConfig({
       apply: 'serve',
       enforce: 'post',
     },
+    dts({
+      insertTypesEntry: true,
+    }),
   ],
+  resolve: {
+    alias: {
+      '@components': path.resolve(__dirname, './src/components'),
+      '@constants': path.resolve(__dirname, './src/constants'),
+      '@types': path.resolve(__dirname, './src/types'),
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/create-react-app/tsconfig.json",
+  "extends": "@tsconfig/vite-react/tsconfig.json",
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
@@ -16,21 +16,15 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "src",
+    "baseUrl": ".",
     "sourceMap": true,
     "inlineSources": true,
     "sourceRoot": "/src",
     "paths": {
       "@components/*": ["./src/components/*"],
       "@configs/*": ["./src/configs/*"],
+      "@types/*": ["./src/types/*"],
       "@constants/*": ["./src/constants/*"],
-      "@context/*": ["./src/context/*"],
-      "@customTypes/*": ["./src/customTypes/*"],
-      "@helpers/*": ["./src/helpers/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@locations/*": ["./src/locations/*"],
-      "@test/*": ["./test/*"],
-      "@utils/*": ["./src/utils/*"]
     }
   },
   "include": ["src", "test"],
