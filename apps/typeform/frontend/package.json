@@ -20,21 +20,26 @@
     "@typeform/embed-react": "^4.0.0",
     "@types/jest": "^25.1.4",
     "@types/lodash": "^4.14.149",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-v8": "^2.1.1",
     "core-js": "^3.2.1",
     "emotion": "^10.0.27",
+    "happy-dom": "^15.7.4",
     "jest-environment-jsdom": "^29.0.1",
     "jsdom": "^20.0.0",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-scripts": "5.0.1",
+    "vite": "^5.4.7",
+    "vite-plugin-eslint": "^1.8.1",
+    "vitest": "^2.1.1",
     "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
-    "test": "react-scripts test",
-    "test:ci": "CI=true react-scripts test"
+    "start": "vite",
+    "build": "vite build",
+    "test": "vitest --logHeapUsage --coverage",
+    "test:ci": "vitest"
   },
   "eslintConfig": {
     "extends": "react-app"
