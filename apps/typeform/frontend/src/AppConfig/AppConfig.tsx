@@ -113,6 +113,7 @@ export class AppConfig extends React.Component<Props, State> {
       const result: WorkspacesResponse = await response.json();
       this.setState({ workspaces: this.normalizeWorkspaceResponse(result) });
     } catch (_error) {
+      console.log({ _error });
       this.props.sdk.notifier.error(
         'There was a problem fetching your Typeform workspaces. Please try again.'
       );
