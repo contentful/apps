@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { vi } from 'vitest';
 
 import mockProps from '../../test/mockProps';
 import { FocalPointDialog } from './FocalPointDialog';
@@ -8,8 +7,8 @@ import { FocalPointDialog } from './FocalPointDialog';
 const props = {
   file: mockProps.file,
   focalPoint: mockProps.focalPoint,
-  onClose: vi.fn(),
-  onSave: vi.fn(),
+  onClose: jest.fn(),
+  onSave: jest.fn(),
   sdk: mockProps.sdk,
 };
 
