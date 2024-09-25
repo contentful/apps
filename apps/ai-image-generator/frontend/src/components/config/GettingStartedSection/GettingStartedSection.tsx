@@ -1,7 +1,7 @@
 import { Card, Flex, Text } from '@contentful/f36-components';
 import { styles } from './GettingStartedSection.styles';
 
-import configPageCopies from 'constants/configPageCopies';
+import configPageCopies from '@constants/configPageCopies';
 
 import getStartedImageGeneration from '../../../assets/getStartedImageGeneration.jpg';
 import getStartedSelectAndEdit from '../../../assets/getStartedSelectAndEdit.jpg';

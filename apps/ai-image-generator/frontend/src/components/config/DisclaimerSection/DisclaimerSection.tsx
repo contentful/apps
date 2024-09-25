@@ -1,6 +1,6 @@
 import { Flex, Subheading, Text } from '@contentful/f36-components';
 import { HyperLink } from '@contentful/integration-component-library';
-import configPageCopies from 'constants/configPageCopies';
+import configPageCopies from '@constants/configPageCopies';
 
 const DisclaimerSection = () => {
   const { sectionTitle, linkBody, linkSubstring, linkHref } = configPageCopies.disclaimerSection;
