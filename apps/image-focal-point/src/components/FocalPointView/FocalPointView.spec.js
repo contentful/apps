@@ -2,15 +2,14 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { FocalPointView } from './FocalPointView';
-import { vi } from 'vitest';
 
 const props = {
   focalPoint: {
     x: 10,
     y: 30,
   },
-  showFocalPointDialog: vi.fn(),
-  resetFocalPoint: vi.fn(),
+  showFocalPointDialog: jest.fn(),
+  resetFocalPoint: jest.fn(),
 };
 
 describe('FocalPointView', () => {
