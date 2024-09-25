@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 export const sdk: any = {
   ids: {
     space: 'test-space',
@@ -5,25 +7,25 @@ export const sdk: any = {
     user: '123',
   },
   app: {
-    setReady: jest.fn(),
-    isInstalled: jest.fn().mockReturnValue(Promise.resolve(false)),
-    getParameters: jest.fn().mockReturnValue(Promise.resolve(null)),
-    onConfigure: jest.fn(),
+    setReady: vi.fn(),
+    isInstalled: vi.fn().mockReturnValue(Promise.resolve(false)),
+    getParameters: vi.fn().mockReturnValue(Promise.resolve(null)),
+    onConfigure: vi.fn(),
   },
   space: {
-    getContentTypes: jest.fn().mockReturnValue(Promise.resolve([])),
-    getEditorInterfaces: jest.fn().mockResolvedValue({ items: [] }),
+    getContentTypes: vi.fn().mockReturnValue(Promise.resolve([])),
+    getEditorInterfaces: vi.fn().mockResolvedValue({ items: [] }),
   },
   notifier: {
-    error: jest.fn(),
+    error: vi.fn(),
   },
   window: {
-    startAutoResizer: jest.fn(),
+    startAutoResizer: vi.fn(),
   },
   field: {
-    getValue: jest.fn().mockReturnValue('field-value'),
-    setValue: jest.fn(),
-    removeValue: jest.fn(),
+    getValue: vi.fn().mockReturnValue('field-value'),
+    setValue: vi.fn(),
+    removeValue: vi.fn(),
   },
   parameters: {
     installation: {
