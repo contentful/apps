@@ -7,8 +7,7 @@ describe('Field component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Field sdk={mockSdk} />);
 
-    expect(
-      getByText(/GraphQL playground is not supported in the Entry field location./)
-    ).toBeInTheDocument();
+    const element = getByText(/GraphQL playground is not supported in the Entry field location./);
+    expect(element.hasAttribute('class')).toBe(true);
   });
 });

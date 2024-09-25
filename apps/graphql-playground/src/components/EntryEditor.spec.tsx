@@ -9,8 +9,9 @@ describe('Entry component', () => {
       render(<EntryEditor sdk={mockSdk} />);
     });
 
-    expect(
-      screen.getByText(/GraphQL playground is not supported in the Entry editor location./)
-    ).toBeInTheDocument();
+    const element = screen.getByText(
+      /GraphQL playground is not supported in the Entry editor location./
+    );
+    expect(element.hasAttribute('class')).toBe(true);
   });
 });
