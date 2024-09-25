@@ -8,6 +8,7 @@ export default defineConfig({
     outDir: 'build',
     lib: {
       entry: 'src/index.jsx',
+      name: 'graphql-playground',
     },
   },
 });
