@@ -1,5 +1,4 @@
 import React from 'react';
-import { vi } from 'vitest';
 import { cleanup, render, wait, configure, fireEvent } from '@testing-library/react';
 
 import mockProps from '../../test/mockProps';
@@ -14,15 +13,15 @@ describe('AppView', () => {
       sdk: {
         ...mockProps.sdk,
         space: {
-          getContentTypes: vi.fn(() => ({
+          getContentTypes: jest.fn(() => ({
             items: [],
           })),
         },
         app: {
-          setReady: vi.fn(),
-          isInstalled: vi.fn(),
-          onConfigure: vi.fn(),
-          onConfigurationCompleted: vi.fn(),
+          setReady: jest.fn(),
+          isInstalled: jest.fn(),
+          onConfigure: jest.fn(),
+          onConfigurationCompleted: jest.fn(),
         },
       },
     };
