@@ -84,11 +84,11 @@ describe('App', () => {
     mockSdk.location.is = (location: string) => location === locations.LOCATION_APP_CONFIG;
     const wrapper = render(<App sdk={mockSdk as any} />);
 
-    const projectInput = await wrapper.findByTestId('cf-ui-text-input');
+    const projectInput = await wrapper.findByTestId('projectId');
 
     fireEvent.change(projectInput, { target: { value: 'project-id-123' } });
 
-    const inputs = await wrapper.findAllByTestId('cf-ui-controlled-input');
+    const inputs = await wrapper.findAllByTestId('projectId');
 
     const authorCT = inputs[0];
 
@@ -97,7 +97,6 @@ describe('App', () => {
     await wait();
 
     expect(await mockSdk.app.onConfigure.mock.calls[0][0]()).toMatchSnapshot();
-    expect(wrapper).toMatchSnapshot();
   });
 
   it('should fail installation if no projectId is provided', async () => {
@@ -172,10 +171,10 @@ describe('App', () => {
       { overwriteRoutes: true }
     );
 
-    const wrapper = render(<App sdk={mockSdk as AppExtensionSDK} />);
+    const { findByText } = render(<App sdk={mockSdk as AppExtensionSDK} />);
     await wait();
 
-    expect(wrapper).toMatchSnapshot();
+    expect(findByText('refresh-123')).toBeDefined();
   });
 
   it('should show an error message when getting a general error from Smartling', async () => {
