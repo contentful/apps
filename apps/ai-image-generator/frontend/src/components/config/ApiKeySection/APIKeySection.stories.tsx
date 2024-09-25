@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import ApiKeySection from './APIKeySection';
+import ApiKeySection, { Props as ApiKeySectionProps } from './APIKeySection';
 
-const meta = {
+const meta: Meta<ApiKeySectionProps> = {
   title: 'config/APIKey',
   component: ApiKeySection,
   parameters: {
     layout: 'centered',
   },
-} satisfies Meta<typeof ApiKeySection>;
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<ApiKeySectionProps>;
 
 export const Default: Story = {};
 

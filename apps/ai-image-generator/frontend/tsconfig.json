@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/create-react-app/tsconfig.json",
+  "extends": "@tsconfig/vite-react/tsconfig.json",
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
@@ -11,15 +11,21 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "src",
+    "baseUrl": ".",
     "sourceMap": true,
     "inlineSources": true,
-    "sourceRoot": "/src"
+    "sourceRoot": "/src",
+    "paths": {
+      "@components/*": ["./src/components/*"],
+      "@configs/*": ["./src/configs/*"],
+      "@types/*": ["./src/types/*"],
+      "@constants/*": ["./src/constants/*"],
+    }
   },
   "include": ["src", "test"],
   "exclude": ["node_modules"]

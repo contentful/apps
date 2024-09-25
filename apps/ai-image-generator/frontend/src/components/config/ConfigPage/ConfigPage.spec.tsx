@@ -1,6 +1,6 @@
 import ConfigPage from './ConfigPage';
 import { render, screen } from '@testing-library/react';
-import configPageCopies from 'constants/configPageCopies';
+import configPageCopies from '@constants/configPageCopies';
 
 const { getByText, getByTestId } = screen;
 const { pageTitle } = configPageCopies.configPage;

@@ -1,5 +1,5 @@
 import { Flex, HelpText, Subheading, Text } from '@contentful/f36-components';
-import configPageCopies from 'constants/configPageCopies';
+import configPageCopies from '@constants/configPageCopies';
 import { HyperLink } from '@contentful/integration-component-library';
 import { styles } from './CostSection.styles';
 import { ExternalLinkIcon } from '@contentful/f36-icons';
