@@ -1,25 +1,24 @@
 import React from 'react';
 import { App } from './index';
 import { render, cleanup, configure } from '@testing-library/react';
-import { vi } from 'vitest';
 
 import mockProps from './test/mockProps';
 
 const sdk = {
   ...mockProps.sdk,
   field: {
-    getValue: vi.fn(),
-    onValueChanged: vi.fn(),
-    setValue: vi.fn(),
-    removeValue: vi.fn(),
+    getValue: jest.fn(),
+    onValueChanged: jest.fn(),
+    setValue: jest.fn(),
+    removeValue: jest.fn(),
   },
   window: {
-    startAutoResizer: vi.fn(),
+    startAutoResizer: jest.fn(),
   },
 };
 
-vi.mock('./utils', () => ({
-  getField: vi.fn(),
+jest.mock('./utils', () => ({
+  getField: jest.fn(),
   isCompatibleImageField: () => true,
 }));
 
@@ -33,7 +32,7 @@ function renderComponent(sdk) {
 
 describe('App', () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    jest.resetAllMocks();
   });
 
   afterEach(cleanup);
