@@ -21,7 +21,7 @@
     "zustand": "^4.2.0"
   },
   "scripts": {
-    "start": "PORT=1234 cross-env BROWSER=none vite",
+    "start": "vite",
     "build": "vite build",
     "test": "vitest --logHeapUsage --coverage",    
     "lint": "eslint --ext .ts,.tsx,.js,.jsx,.svg ./",
