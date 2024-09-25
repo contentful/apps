@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { vi } from 'vitest';
 
 import { FocalPointView } from './FocalPointView';
 
@@ -9,8 +8,8 @@ const props = {
     x: 10,
     y: 30,
   },
-  showFocalPointDialog: vi.fn(),
-  resetFocalPoint: vi.fn(),
+  showFocalPointDialog: jest.fn(),
+  resetFocalPoint: jest.fn(),
 };
 
 describe('FocalPointView', () => {

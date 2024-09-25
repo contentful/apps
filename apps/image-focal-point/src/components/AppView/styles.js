@@ -1,5 +1,5 @@
 import tokens from '@contentful/forma-36-tokens';
-import { css } from '@emotion/css';
+import { css } from 'emotion';
 
 export const styles = {
   body: css({
