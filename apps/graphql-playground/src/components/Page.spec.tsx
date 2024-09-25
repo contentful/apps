@@ -7,10 +7,9 @@ describe('Page component', () => {
   it('Component text exists', () => {
     const { getByText } = render(<Page sdk={mockSdk} />);
 
-    expect(
-      getByText(
-        'To use GraphQL playground. Please define the CPA installation parameter in your app configuration.'
-      )
-    ).toBeInTheDocument();
+    const element = getByText(
+      'To use GraphQL playground. Please define the CPA installation parameter in your app configuration.'
+    );
+    expect(element.hasAttribute('class')).toBe(true);
   });
 });
