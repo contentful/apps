@@ -7,9 +7,9 @@ export default defineConfig({
   build: {
     outDir: 'build',
     lib: {
-      entry: 'src/index.tsx',
-      name: 'Jira-App',
-      fileName: (format) => `jira-app.${format}.js`,
+      entry: 'src/index.jsx',
+      name: 'Image-Focal-Point',
+      fileName: (format) => `image-focal-point.${format}.js`,
     },
   },
 });
