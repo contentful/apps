@@ -1,12 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import GettingStartedSection from './GettingStartedSection';
-import configPageCopies from 'constants/configPageCopies';
+import configPageCopies from '@constants/configPageCopies';
 import { mockSdk } from '../../../../test/mocks';
+import { vi } from 'vitest';
 
 const { getByText } = screen;
 const { sectionTitle } = configPageCopies.gettingStartedSection;
 
-jest.mock('@contentful/react-apps-toolkit', () => ({
+vi.mock('@contentful/react-apps-toolkit', () => ({
   useSDK: () => mockSdk,
 }));
 

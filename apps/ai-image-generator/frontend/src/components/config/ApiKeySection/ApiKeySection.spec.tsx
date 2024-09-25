@@ -1,6 +1,6 @@
-import APIKey from './APIKeySection';
 import { render, screen } from '@testing-library/react';
-import configPageCopies from 'constants/configPageCopies';
+import configPageCopies from '@constants/configPageCopies';
+import APIKey from './APIKeySection';
 
 const { getByText, getByTestId } = screen;
 const { sectionTitle, linkSubstring } = configPageCopies.apiKeySection;

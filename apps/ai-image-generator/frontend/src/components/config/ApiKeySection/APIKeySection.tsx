@@ -1,9 +1,9 @@
 import { ChangeEvent, useState } from 'react';
 import { FormControl, TextInput } from '@contentful/f36-components';
 import { HyperLink } from '@contentful/integration-component-library';
-import configPageCopies from 'constants/configPageCopies';
+import configPageCopies from '@constants/configPageCopies';
 
-interface Props {
+export interface Props {
   apiKey?: string;
   handleApiKey: (value: { apiKey: string }) => void;
 }
