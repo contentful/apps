@@ -6,6 +6,7 @@
     "@testing-library/react": "8.0.4",
     "@types/jest": "24.0.15",
     "@types/lodash.get": "^4.4.6",
+    "@types/node": "^20.0.0",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "@types/webpack-env": "1.18.5",
@@ -18,23 +19,27 @@
     "whatwg-fetch": "^3.0.0"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
-    "test": "TZ=UTC react-scripts test",
-    "test:ci": "CI=true react-scripts test",
-    "test:dev": "TZ=UTC react-scripts test"
+    "start": "vite",
+    "build": "vite build",
+    "test": "vitest",
+    "test:ci": "vitest",
+    "test:dev": "TZ=UTC vitest"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.23.0",
     "@contentful/forma-36-fcss": "^0.3.5",
     "@contentful/forma-36-react-components": "^3.100.7",
     "@contentful/forma-36-tokens": "^0.11.2",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-v8": "^2.1.1",
     "contentful-management": "10.31.4",
+    "happy-dom": "^15.7.4",
     "lodash.get": "^4.4.2",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-scripts": "^5.0.1"
+    "vite": "^5.4.8",
+    "vitest": "^2.1.1"
   },
   "private": true,
   "eslintConfig": {

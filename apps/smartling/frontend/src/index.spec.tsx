@@ -7,6 +7,7 @@ import fetchMock from 'fetch-mock';
 import App from './App';
 import contentTypeResponse from './mockData/contentTypeResponse.json';
 import entryMockResponse from './mockData/entryMockResponse.json';
+import { vi } from 'vitest';
 
 configure({
   testIdAttribute: 'data-test-id',
@@ -79,7 +80,7 @@ describe('App', () => {
   });
 
   it('should load the AppConfig page and allow for installation', async () => {
-    mockSdk.app.onConfigure = jest.fn();
+    mockSdk.app.onConfigure = vi.fn();
     mockSdk.location.is = (location: string) => location === locations.LOCATION_APP_CONFIG;
     const wrapper = render(<App sdk={mockSdk as any} />);
 
@@ -100,7 +101,7 @@ describe('App', () => {
   });
 
   it('should fail installation if no projectId is provided', async () => {
-    mockSdk.app.onConfigure = jest.fn();
+    mockSdk.app.onConfigure = vi.fn();
     mockSdk.location.is = (location: string) => location === locations.LOCATION_APP_CONFIG;
 
     render(<App sdk={mockSdk as any} />);
@@ -120,7 +121,7 @@ describe('App', () => {
 
   it('should try to refresh then open the oauth modal', async () => {
     mockSdk.location.is = (location: string) => location === locations.LOCATION_ENTRY_SIDEBAR;
-    window.open = jest.fn();
+    window.open = vi.fn();
 
     fetchMock.get('/entry?spaceId=space-123&projectId=project-id-123&entryId=entry-123', {});
     fetchMock.get('/refresh?refresh_token=', 401);
@@ -140,12 +141,12 @@ describe('App', () => {
 
   it('should get a new refresh token then get the entry', async () => {
     mockSdk.location.is = (location: string) => location === locations.LOCATION_ENTRY_SIDEBAR;
-    window.open = jest.fn();
+    window.open = vi.fn();
 
     Object.defineProperty(window, 'localStorage', {
       writable: true,
       value: {
-        getItem: jest.fn((item: string) => {
+        getItem: vi.fn((item: string) => {
           switch (item) {
             case 'token':
               return 'access-123';
@@ -155,8 +156,8 @@ describe('App', () => {
               return null;
           }
         }),
-        setItem: jest.fn(),
-        removeItem: jest.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
       },
     });
 
@@ -183,7 +184,7 @@ describe('App', () => {
     Object.defineProperty(window, 'localStorage', {
       writable: true,
       value: {
-        getItem: jest.fn((item: string) => {
+        getItem: vi.fn((item: string) => {
           switch (item) {
             case 'token':
               return 'access-123';
@@ -193,8 +194,8 @@ describe('App', () => {
               return null;
           }
         }),
-        setItem: jest.fn(),
-        removeItem: jest.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
       },
     });
 

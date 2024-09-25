@@ -1,4 +1,2549 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`App > should get a new refresh token then get the entry 1`] = `
+{
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="smartling-status"
+      >
+        <div>
+          <p
+            class="Paragraph__Paragraph___2aO-9 info-p"
+            data-test-id="cf-ui-paragraph"
+          >
+            Smartling status
+          </p>
+        </div>
+        <div>
+          <div
+            class="Flex__Flex___Cpju1"
+            data-test-id="cf-ui-flex"
+            style="justify-content: start; align-items: bottom;"
+          >
+            <div
+              class="Tag__Tag___Y-myd job-status Tag__Tag--primary___2Hk3I"
+              data-test-id="cf-ui-tag"
+            >
+              In Progress
+            </div>
+            <span
+              class="Tooltip__TooltipContainer___3YlPf tooltip"
+            >
+              <svg
+                class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il"
+                data-test-id="cf-ui-icon"
+                height="1em"
+                viewBox="0 0 24 24"
+                width="1em"
+              >
+                <path
+                  d="M0 0h24v24H0z"
+                  fill="none"
+                />
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+      <button
+        class="Button__Button___1ZfFj request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+        data-test-id="request-translation"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+          tabindex="-1"
+        >
+          <span
+            class="Button__Button__label___3tcOj"
+          >
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+              data-test-id="cf-ui-icon"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+            >
+              <path
+                d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+              />
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+            </svg>
+             Request Translation
+          </span>
+        </span>
+      </button>
+      <div
+        class="smartling-entry"
+      >
+        <div
+          class="submission-list"
+        >
+          <p
+            class="Paragraph__Paragraph___2aO-9 info-p"
+            data-test-id="cf-ui-paragraph"
+          >
+            Translation submissions
+          </p>
+          <div
+            aria-pressed="false"
+            class="Card__Card___1_26G submission Card__Card--padding-default___xgDF9 Card__Card--is-interactive___3nFqr"
+            data-test-id="cf-ui-card"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="info"
+            >
+              <div
+                class="locale"
+              >
+                fr-FR
+              </div>
+              <span
+                class="Tooltip__TooltipContainer___3YlPf"
+              >
+                <div
+                  class="progress-bar"
+                >
+                  <div
+                    style="width: 0%;"
+                  />
+                </div>
+              </span>
+            </div>
+            <div
+              class="status"
+            >
+              <div
+                class="Tag__Tag___Y-myd tag Tag__Tag--primary___2Hk3I"
+                data-test-id="cf-ui-tag"
+              >
+                In Progress
+              </div>
+              <br />
+              <div
+                class="date"
+              >
+                Submitted 
+                Jan 29, 2020, 7:05 AM
+              </div>
+            </div>
+          </div>
+          <div
+            aria-pressed="false"
+            class="Card__Card___1_26G submission Card__Card--padding-default___xgDF9 Card__Card--is-interactive___3nFqr"
+            data-test-id="cf-ui-card"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="info"
+            >
+              <div
+                class="locale"
+              >
+                German (Germany)
+              </div>
+            </div>
+            <div
+              class="status"
+            >
+              <div
+                class="Tag__Tag___Y-myd tag Tag__Tag--positive___1cepi"
+                data-test-id="cf-ui-tag"
+              >
+                Completed
+              </div>
+              <br />
+            </div>
+          </div>
+        </div>
+      </div>
+      <p
+        class="Paragraph__Paragraph___2aO-9 smartling-more-info"
+        data-test-id="cf-ui-paragraph"
+      >
+        <a
+          class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+          data-test-id="cf-ui-text-link"
+          href="https://help.smartling.com/hc/en-us/articles/360000546974-Contentful-Connector-Overview"
+          rel="noopener"
+          target="_blank"
+        >
+          <span
+            class="TabFocusTrap__TabFocusTrap___39Vty"
+            tabindex="-1"
+          >
+            Learn how Smartling works with Contentful 
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--tiny___V4Pr9 Icon__Icon--secondary___1ztcw"
+              data-test-id="cf-ui-icon"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+            >
+              <path
+                d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+              />
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+            </svg>
+          </span>
+        </a>
+      </p>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="smartling-status"
+    >
+      <div>
+        <p
+          class="Paragraph__Paragraph___2aO-9 info-p"
+          data-test-id="cf-ui-paragraph"
+        >
+          Smartling status
+        </p>
+      </div>
+      <div>
+        <div
+          class="Flex__Flex___Cpju1"
+          data-test-id="cf-ui-flex"
+          style="justify-content: start; align-items: bottom;"
+        >
+          <div
+            class="Tag__Tag___Y-myd job-status Tag__Tag--primary___2Hk3I"
+            data-test-id="cf-ui-tag"
+          >
+            In Progress
+          </div>
+          <span
+            class="Tooltip__TooltipContainer___3YlPf tooltip"
+          >
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--primary___3M4Il"
+              data-test-id="cf-ui-icon"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+            >
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+              />
+            </svg>
+          </span>
+        </div>
+      </div>
+    </div>
+    <button
+      class="Button__Button___1ZfFj request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+      data-test-id="request-translation"
+      type="button"
+    >
+      <span
+        class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+        tabindex="-1"
+      >
+        <span
+          class="Button__Button__label___3tcOj"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+           Request Translation
+        </span>
+      </span>
+    </button>
+    <div
+      class="smartling-entry"
+    >
+      <div
+        class="submission-list"
+      >
+        <p
+          class="Paragraph__Paragraph___2aO-9 info-p"
+          data-test-id="cf-ui-paragraph"
+        >
+          Translation submissions
+        </p>
+        <div
+          aria-pressed="false"
+          class="Card__Card___1_26G submission Card__Card--padding-default___xgDF9 Card__Card--is-interactive___3nFqr"
+          data-test-id="cf-ui-card"
+          role="button"
+          tabindex="0"
+        >
+          <div
+            class="info"
+          >
+            <div
+              class="locale"
+            >
+              fr-FR
+            </div>
+            <span
+              class="Tooltip__TooltipContainer___3YlPf"
+            >
+              <div
+                class="progress-bar"
+              >
+                <div
+                  style="width: 0%;"
+                />
+              </div>
+            </span>
+          </div>
+          <div
+            class="status"
+          >
+            <div
+              class="Tag__Tag___Y-myd tag Tag__Tag--primary___2Hk3I"
+              data-test-id="cf-ui-tag"
+            >
+              In Progress
+            </div>
+            <br />
+            <div
+              class="date"
+            >
+              Submitted 
+              Jan 29, 2020, 7:05 AM
+            </div>
+          </div>
+        </div>
+        <div
+          aria-pressed="false"
+          class="Card__Card___1_26G submission Card__Card--padding-default___xgDF9 Card__Card--is-interactive___3nFqr"
+          data-test-id="cf-ui-card"
+          role="button"
+          tabindex="0"
+        >
+          <div
+            class="info"
+          >
+            <div
+              class="locale"
+            >
+              German (Germany)
+            </div>
+          </div>
+          <div
+            class="status"
+          >
+            <div
+              class="Tag__Tag___Y-myd tag Tag__Tag--positive___1cepi"
+              data-test-id="cf-ui-tag"
+            >
+              Completed
+            </div>
+            <br />
+          </div>
+        </div>
+      </div>
+    </div>
+    <p
+      class="Paragraph__Paragraph___2aO-9 smartling-more-info"
+      data-test-id="cf-ui-paragraph"
+    >
+      <a
+        class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+        data-test-id="cf-ui-text-link"
+        href="https://help.smartling.com/hc/en-us/articles/360000546974-Contentful-Connector-Overview"
+        rel="noopener"
+        target="_blank"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty"
+          tabindex="-1"
+        >
+          Learn how Smartling works with Contentful 
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--tiny___V4Pr9 Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+        </span>
+      </a>
+    </p>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`App > should load the AppConfig page and allow for installation 1`] = `
+{
+  "parameters": {
+    "projectId": "project-id-123",
+  },
+  "targetState": {
+    "EditorInterface": {
+      "author": {
+        "sidebar": {
+          "position": 1,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`App > should load the AppConfig page and allow for installation 2`] = `
+{
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="app"
+      >
+        <div
+          class="background"
+        />
+        <div
+          class="body"
+        >
+          <div
+            class="config"
+          >
+            <div
+              class="section"
+            >
+              <div
+                class="Typography__Typography___1ZUfE"
+                data-test-id="cf-ui-text-container"
+              >
+                <h1
+                  class="Heading__Heading___83D3K f36-margin-bottom--m"
+                  data-test-id="cf-ui-heading"
+                >
+                  About Smartling
+                </h1>
+                <p
+                  class="Paragraph__Paragraph___2aO-9 about-p f36-margin-bottom--m"
+                  data-test-id="cf-ui-paragraph"
+                >
+                  The
+                   
+                  <a
+                    class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+                    data-test-id="cf-ui-text-link"
+                    href="https://dashboard.smartling.com"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <span
+                      class="TabFocusTrap__TabFocusTrap___39Vty"
+                      tabindex="-1"
+                    >
+                      Smartling
+                    </span>
+                  </a>
+                   
+                  app allows you to view the status of your translation without leaving Contentful.
+                </p>
+              </div>
+              <hr />
+            </div>
+            <div
+              class="section"
+            >
+              <div
+                class="Typography__Typography___1ZUfE"
+                data-test-id="cf-ui-text-container"
+              >
+                <h1
+                  class="Heading__Heading___83D3K f36-margin-bottom--m"
+                  data-test-id="cf-ui-heading"
+                >
+                  Configuration
+                </h1>
+              </div>
+              <div
+                class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK project-id"
+                data-test-id="projectId"
+              >
+                <div
+                  class="TextField__TextField__label-wrapper___2-MJT"
+                >
+                  <label
+                    class="FormLabel__FormLabel___3d6zQ"
+                    data-test-id="cf-ui-form-label"
+                    for="projectId"
+                  >
+                    Smartling project ID
+                    <span
+                      class="FormLabel__FormLabel__required-text___3mvdm"
+                    >
+                      (
+                      required
+                      )
+                    </span>
+                  </label>
+                </div>
+                <div
+                  class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
+                >
+                  <input
+                    class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
+                    data-test-id="cf-ui-text-input"
+                    id="projectId"
+                    name="projectId"
+                    required=""
+                    value="project-id-123"
+                  />
+                </div>
+                <div
+                  class="TextField__TextField__hints___3Di2P"
+                >
+                  <p
+                    class="HelpText__HelpText___uWbja TextField__TextField__help-text___p4rVf"
+                    data-test-id="cf-ui-help-text"
+                  >
+                    To get the project ID, see the 'Project Settings &gt; API' of your Smartling project.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="Typography__Typography___1ZUfE"
+                data-test-id="cf-ui-text-container"
+              >
+                <h1
+                  class="Heading__Heading___83D3K f36-margin-bottom--m"
+                  data-test-id="cf-ui-heading"
+                >
+                  Assign to content types
+                </h1>
+                <p
+                  class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
+                  data-test-id="cf-ui-paragraph"
+                >
+                  Select which content types to use with Smartling.
+                </p>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup___2mLmO"
+                data-test-id="cf-ui-field-group"
+              >
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-author"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Author"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Author"
+                        name="Author"
+                        type="checkbox"
+                        value="author"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Author"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Author"
+                      >
+                        Author
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-country"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Country"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Country"
+                        name="Country"
+                        type="checkbox"
+                        value="country"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Country"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Country"
+                      >
+                        Country
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-jobListing"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Job Listing"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Job Listing"
+                        name="Job Listing"
+                        type="checkbox"
+                        value="jobListing"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Job Listing"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Job Listing"
+                      >
+                        Job Listing
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-imageWithMoreFocalPoints"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Image with Focal Points"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Image with Focal Points"
+                        name="Image with Focal Points"
+                        type="checkbox"
+                        value="imageWithMoreFocalPoints"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Image with Focal Points"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Image with Focal Points"
+                      >
+                        Image with Focal Points
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-imageWithFocalPoint"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Image with Focal Point"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Image with Focal Point"
+                        name="Image with Focal Point"
+                        type="checkbox"
+                        value="imageWithFocalPoint"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Image with Focal Point"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Image with Focal Point"
+                      >
+                        Image with Focal Point
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-cloudinaryImage"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="BynderImage"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="BynderImage"
+                        name="BynderImage"
+                        type="checkbox"
+                        value="cloudinaryImage"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="BynderImage"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="BynderImage"
+                      >
+                        BynderImage
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-heroImage"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Hero Image"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Hero Image"
+                        name="Hero Image"
+                        type="checkbox"
+                        value="heroImage"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Hero Image"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Hero Image"
+                      >
+                        Hero Image
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-article"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Article"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Article"
+                        name="Article"
+                        type="checkbox"
+                        value="article"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Article"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Article"
+                      >
+                        Article
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-text"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Featured"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Featured"
+                        name="Featured"
+                        type="checkbox"
+                        value="text"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Featured"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Featured"
+                      >
+                        Featured
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-page"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Page"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Page"
+                        name="Page"
+                        type="checkbox"
+                        value="page"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Page"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Page"
+                      >
+                        Page
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-variationContainer"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Variation Container"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Variation Container"
+                        name="Variation Container"
+                        type="checkbox"
+                        value="variationContainer"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Variation Container"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Variation Container"
+                      >
+                        Variation Container
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-imageCarousel"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="Image Carousel"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="Image Carousel"
+                        name="Image Carousel"
+                        type="checkbox"
+                        value="imageCarousel"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="Image Carousel"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="Image Carousel"
+                      >
+                        Image Carousel
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="FieldGroup__FieldGroup__item___2qkC3"
+                >
+                  <div
+                    class="ControlledInputField__ControlledInputField___2uIG9"
+                    data-test-id="ct-item-cta"
+                  >
+                    <div
+                      class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                    >
+                      <input
+                        aria-label="CTA"
+                        class="ControlledInput__ControlledInput___2XK3j"
+                        data-test-id="cf-ui-controlled-input"
+                        id="CTA"
+                        name="CTA"
+                        type="checkbox"
+                        value="cta"
+                      />
+                      <label
+                        class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                        for="CTA"
+                      >
+                        <svg
+                          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                          data-test-id="cf-ui-icon"
+                          height="1em"
+                          viewBox="0 0 24 24"
+                          width="1em"
+                        >
+                          <path
+                            d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                          />
+                        </svg>
+                      </label>
+                    </div>
+                    <div>
+                      <label
+                        class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                        data-test-id="cf-ui-form-label"
+                        for="CTA"
+                      >
+                        CTA
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="logo"
+        >
+          <img
+            alt=""
+            src="/src/logo.svg"
+          />
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="app"
+    >
+      <div
+        class="background"
+      />
+      <div
+        class="body"
+      >
+        <div
+          class="config"
+        >
+          <div
+            class="section"
+          >
+            <div
+              class="Typography__Typography___1ZUfE"
+              data-test-id="cf-ui-text-container"
+            >
+              <h1
+                class="Heading__Heading___83D3K f36-margin-bottom--m"
+                data-test-id="cf-ui-heading"
+              >
+                About Smartling
+              </h1>
+              <p
+                class="Paragraph__Paragraph___2aO-9 about-p f36-margin-bottom--m"
+                data-test-id="cf-ui-paragraph"
+              >
+                The
+                 
+                <a
+                  class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+                  data-test-id="cf-ui-text-link"
+                  href="https://dashboard.smartling.com"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <span
+                    class="TabFocusTrap__TabFocusTrap___39Vty"
+                    tabindex="-1"
+                  >
+                    Smartling
+                  </span>
+                </a>
+                 
+                app allows you to view the status of your translation without leaving Contentful.
+              </p>
+            </div>
+            <hr />
+          </div>
+          <div
+            class="section"
+          >
+            <div
+              class="Typography__Typography___1ZUfE"
+              data-test-id="cf-ui-text-container"
+            >
+              <h1
+                class="Heading__Heading___83D3K f36-margin-bottom--m"
+                data-test-id="cf-ui-heading"
+              >
+                Configuration
+              </h1>
+            </div>
+            <div
+              class="TextField__TextField___Sf6eo TextField__TextField--full___11DBK project-id"
+              data-test-id="projectId"
+            >
+              <div
+                class="TextField__TextField__label-wrapper___2-MJT"
+              >
+                <label
+                  class="FormLabel__FormLabel___3d6zQ"
+                  data-test-id="cf-ui-form-label"
+                  for="projectId"
+                >
+                  Smartling project ID
+                  <span
+                    class="FormLabel__FormLabel__required-text___3mvdm"
+                  >
+                    (
+                    required
+                    )
+                  </span>
+                </label>
+              </div>
+              <div
+                class="TextInput__TextInput___36-K- TextInput__TextInput--full___1EJEW"
+              >
+                <input
+                  class="TextInput__TextInput__input___27vDB a11y__focus-border--default___60AXp"
+                  data-test-id="cf-ui-text-input"
+                  id="projectId"
+                  name="projectId"
+                  required=""
+                  value="project-id-123"
+                />
+              </div>
+              <div
+                class="TextField__TextField__hints___3Di2P"
+              >
+                <p
+                  class="HelpText__HelpText___uWbja TextField__TextField__help-text___p4rVf"
+                  data-test-id="cf-ui-help-text"
+                >
+                  To get the project ID, see the 'Project Settings &gt; API' of your Smartling project.
+                </p>
+              </div>
+            </div>
+            <div
+              class="Typography__Typography___1ZUfE"
+              data-test-id="cf-ui-text-container"
+            >
+              <h1
+                class="Heading__Heading___83D3K f36-margin-bottom--m"
+                data-test-id="cf-ui-heading"
+              >
+                Assign to content types
+              </h1>
+              <p
+                class="Paragraph__Paragraph___2aO-9 f36-margin-bottom--m"
+                data-test-id="cf-ui-paragraph"
+              >
+                Select which content types to use with Smartling.
+              </p>
+            </div>
+            <div
+              class="FieldGroup__FieldGroup___2mLmO"
+              data-test-id="cf-ui-field-group"
+            >
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-author"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Author"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Author"
+                      name="Author"
+                      type="checkbox"
+                      value="author"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Author"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Author"
+                    >
+                      Author
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-country"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Country"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Country"
+                      name="Country"
+                      type="checkbox"
+                      value="country"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Country"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Country"
+                    >
+                      Country
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-jobListing"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Job Listing"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Job Listing"
+                      name="Job Listing"
+                      type="checkbox"
+                      value="jobListing"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Job Listing"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Job Listing"
+                    >
+                      Job Listing
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-imageWithMoreFocalPoints"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Image with Focal Points"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Image with Focal Points"
+                      name="Image with Focal Points"
+                      type="checkbox"
+                      value="imageWithMoreFocalPoints"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Image with Focal Points"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Image with Focal Points"
+                    >
+                      Image with Focal Points
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-imageWithFocalPoint"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Image with Focal Point"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Image with Focal Point"
+                      name="Image with Focal Point"
+                      type="checkbox"
+                      value="imageWithFocalPoint"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Image with Focal Point"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Image with Focal Point"
+                    >
+                      Image with Focal Point
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-cloudinaryImage"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="BynderImage"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="BynderImage"
+                      name="BynderImage"
+                      type="checkbox"
+                      value="cloudinaryImage"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="BynderImage"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="BynderImage"
+                    >
+                      BynderImage
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-heroImage"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Hero Image"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Hero Image"
+                      name="Hero Image"
+                      type="checkbox"
+                      value="heroImage"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Hero Image"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Hero Image"
+                    >
+                      Hero Image
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-article"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Article"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Article"
+                      name="Article"
+                      type="checkbox"
+                      value="article"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Article"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Article"
+                    >
+                      Article
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-text"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Featured"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Featured"
+                      name="Featured"
+                      type="checkbox"
+                      value="text"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Featured"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Featured"
+                    >
+                      Featured
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-page"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Page"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Page"
+                      name="Page"
+                      type="checkbox"
+                      value="page"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Page"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Page"
+                    >
+                      Page
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-variationContainer"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Variation Container"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Variation Container"
+                      name="Variation Container"
+                      type="checkbox"
+                      value="variationContainer"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Variation Container"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Variation Container"
+                    >
+                      Variation Container
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-imageCarousel"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="Image Carousel"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="Image Carousel"
+                      name="Image Carousel"
+                      type="checkbox"
+                      value="imageCarousel"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="Image Carousel"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="Image Carousel"
+                    >
+                      Image Carousel
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="FieldGroup__FieldGroup__item___2qkC3"
+              >
+                <div
+                  class="ControlledInputField__ControlledInputField___2uIG9"
+                  data-test-id="ct-item-cta"
+                >
+                  <div
+                    class="ControlledInput__Checkbox___ra2TY ControlledInputField__ControlledInputField__input___3OMYB"
+                  >
+                    <input
+                      aria-label="CTA"
+                      class="ControlledInput__ControlledInput___2XK3j"
+                      data-test-id="cf-ui-controlled-input"
+                      id="CTA"
+                      name="CTA"
+                      type="checkbox"
+                      value="cta"
+                    />
+                    <label
+                      class="ControlledInput__Input__ghost___2bBB9 ControlledInput__Checkbox__ghost___1Oqlk"
+                      for="CTA"
+                    >
+                      <svg
+                        class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--white___3GVPJ"
+                        data-test-id="cf-ui-icon"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                      >
+                        <path
+                          d="M20.7071 5.29289C21.0976 5.68342 21.0976 6.31658 20.7071 6.70711L9.70711 17.7071C9.51957 17.8946 9.26522 18 9 18C8.73478 18 8.48043 17.8946 8.29289 17.7071L3.29289 12.7071C2.90237 12.3166 2.90237 11.6834 3.29289 11.2929C3.68342 10.9024 4.31658 10.9024 4.70711 11.2929L9 15.5858L19.2929 5.29289C19.6834 4.90237 20.3166 4.90237 20.7071 5.29289Z"
+                        />
+                      </svg>
+                    </label>
+                  </div>
+                  <div>
+                    <label
+                      class="FormLabel__FormLabel___3d6zQ ControlledInputField__ControlledInputField__label___a9J52"
+                      data-test-id="cf-ui-form-label"
+                      for="CTA"
+                    >
+                      CTA
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="logo"
+      >
+        <img
+          alt=""
+          src="/src/logo.svg"
+        />
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`App > should render the sidebar app with signing and request button 1`] = `
+{
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <button
+        class="Button__Button___1ZfFj signin Button__Button--primary___JImeO Button__Button--full-width___3Fmpo"
+        data-test-id="open-dialog"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+          tabindex="-1"
+        >
+          <span
+            class="Button__Button__label___3tcOj"
+          >
+            Sign in with Smartling
+          </span>
+        </span>
+      </button>
+      <br />
+      <button
+        class="Button__Button___1ZfFj request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+        data-test-id="request-translation"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+          tabindex="-1"
+        >
+          <span
+            class="Button__Button__label___3tcOj"
+          >
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+              data-test-id="cf-ui-icon"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+            >
+              <path
+                d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+              />
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+            </svg>
+             Request Translation
+          </span>
+        </span>
+      </button>
+    </div>
+  </body>,
+  "container": <div>
+    <button
+      class="Button__Button___1ZfFj signin Button__Button--primary___JImeO Button__Button--full-width___3Fmpo"
+      data-test-id="open-dialog"
+      type="button"
+    >
+      <span
+        class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+        tabindex="-1"
+      >
+        <span
+          class="Button__Button__label___3tcOj"
+        >
+          Sign in with Smartling
+        </span>
+      </span>
+    </button>
+    <br />
+    <button
+      class="Button__Button___1ZfFj request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+      data-test-id="request-translation"
+      type="button"
+    >
+      <span
+        class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+        tabindex="-1"
+      >
+        <span
+          class="Button__Button__label___3tcOj"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+           Request Translation
+        </span>
+      </span>
+    </button>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`App > should show an error message when getting a general error from Smartling 1`] = `
+{
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="smartling-status"
+      >
+        <div>
+          <p
+            class="Paragraph__Paragraph___2aO-9 info-p"
+            data-test-id="cf-ui-paragraph"
+          >
+            Smartling status
+          </p>
+        </div>
+        <div>
+          <div
+            class="Tag__Tag___Y-myd job-status Tag__Tag--negative___12luW"
+            data-test-id="cf-ui-tag"
+          >
+            Disconnected
+          </div>
+        </div>
+      </div>
+      <button
+        class="Button__Button___1ZfFj request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+        data-test-id="request-translation"
+        type="button"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+          tabindex="-1"
+        >
+          <span
+            class="Button__Button__label___3tcOj"
+          >
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+              data-test-id="cf-ui-icon"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+            >
+              <path
+                d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+              />
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+            </svg>
+             Request Translation
+          </span>
+        </span>
+      </button>
+      <div
+        class="Note__Note___2eSKN general-error Note__Note--negative___3fkwL"
+        data-test-id="cf-ui-note"
+      >
+        <div
+          class="Note__Note__icon___20RqC"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--negative___1dled"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+            />
+          </svg>
+        </div>
+        <div
+          class="Note__Note__info___2m_-K"
+        >
+          <div
+            class="Note__Note__title___2nwpx"
+          >
+            Connection error
+          </div>
+          <div
+            class="Note__Note__content___H1pf-"
+          >
+            Please ensure that you have access to the connected Smartling project.
+            <br />
+            <a
+              class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+              data-test-id="cf-ui-text-link"
+              href="https://contentful.com/developers/docs/extensibility/apps/smartling/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <span
+                class="TabFocusTrap__TabFocusTrap___39Vty"
+                tabindex="-1"
+              >
+                View documentation
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <p
+        class="Paragraph__Paragraph___2aO-9 smartling-more-info"
+        data-test-id="cf-ui-paragraph"
+      >
+        <a
+          class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+          data-test-id="cf-ui-text-link"
+          href="https://help.smartling.com/hc/en-us/articles/360000546974-Contentful-Connector-Overview"
+          rel="noopener"
+          target="_blank"
+        >
+          <span
+            class="TabFocusTrap__TabFocusTrap___39Vty"
+            tabindex="-1"
+          >
+            Learn how Smartling works with Contentful 
+            <svg
+              class="Icon__Icon___38Epv Icon__Icon--tiny___V4Pr9 Icon__Icon--secondary___1ztcw"
+              data-test-id="cf-ui-icon"
+              height="1em"
+              viewBox="0 0 24 24"
+              width="1em"
+            >
+              <path
+                d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+              />
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+            </svg>
+          </span>
+        </a>
+      </p>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="smartling-status"
+    >
+      <div>
+        <p
+          class="Paragraph__Paragraph___2aO-9 info-p"
+          data-test-id="cf-ui-paragraph"
+        >
+          Smartling status
+        </p>
+      </div>
+      <div>
+        <div
+          class="Tag__Tag___Y-myd job-status Tag__Tag--negative___12luW"
+          data-test-id="cf-ui-tag"
+        >
+          Disconnected
+        </div>
+      </div>
+    </div>
+    <button
+      class="Button__Button___1ZfFj request-translation Button__Button--muted___2Wair Button__Button--full-width___3Fmpo"
+      data-test-id="request-translation"
+      type="button"
+    >
+      <span
+        class="TabFocusTrap__TabFocusTrap___39Vty Button__Button__inner-wrapper___3qrNC"
+        tabindex="-1"
+      >
+        <span
+          class="Button__Button__label___3tcOj"
+        >
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--small___1yGZK Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+           Request Translation
+        </span>
+      </span>
+    </button>
+    <div
+      class="Note__Note___2eSKN general-error Note__Note--negative___3fkwL"
+      data-test-id="cf-ui-note"
+    >
+      <div
+        class="Note__Note__icon___20RqC"
+      >
+        <svg
+          class="Icon__Icon___38Epv Icon__Icon--medium___3Pezi Icon__Icon--negative___1dled"
+          data-test-id="cf-ui-icon"
+          height="1em"
+          viewBox="0 0 24 24"
+          width="1em"
+        >
+          <path
+            d="M0 0h24v24H0z"
+            fill="none"
+          />
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+          />
+        </svg>
+      </div>
+      <div
+        class="Note__Note__info___2m_-K"
+      >
+        <div
+          class="Note__Note__title___2nwpx"
+        >
+          Connection error
+        </div>
+        <div
+          class="Note__Note__content___H1pf-"
+        >
+          Please ensure that you have access to the connected Smartling project.
+          <br />
+          <a
+            class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+            data-test-id="cf-ui-text-link"
+            href="https://contentful.com/developers/docs/extensibility/apps/smartling/"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <span
+              class="TabFocusTrap__TabFocusTrap___39Vty"
+              tabindex="-1"
+            >
+              View documentation
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <p
+      class="Paragraph__Paragraph___2aO-9 smartling-more-info"
+      data-test-id="cf-ui-paragraph"
+    >
+      <a
+        class="TextLink__TextLink___1biUr a11y__focus-outline--default___2hwb1 TextLink__TextLink--primary___2Vc9F"
+        data-test-id="cf-ui-text-link"
+        href="https://help.smartling.com/hc/en-us/articles/360000546974-Contentful-Connector-Overview"
+        rel="noopener"
+        target="_blank"
+      >
+        <span
+          class="TabFocusTrap__TabFocusTrap___39Vty"
+          tabindex="-1"
+        >
+          Learn how Smartling works with Contentful 
+          <svg
+            class="Icon__Icon___38Epv Icon__Icon--tiny___V4Pr9 Icon__Icon--secondary___1ztcw"
+            data-test-id="cf-ui-icon"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+          >
+            <path
+              d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"
+            />
+            <path
+              d="M0 0h24v24H0z"
+              fill="none"
+            />
+          </svg>
+        </span>
+      </a>
+    </p>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
 
 exports[`App should get a new refresh token then get the entry 1`] = `
 Object {
