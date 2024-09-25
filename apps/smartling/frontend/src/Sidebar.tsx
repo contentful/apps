@@ -4,7 +4,7 @@ import {
   Icon,
   Button,
   Paragraph,
-  Tag,
+  Badge,
   Card,
   Tooltip,
   TextLink,
@@ -13,8 +13,9 @@ import {
   Spinner,
   Note,
   Flex,
-} from '@contentful/forma-36-react-components';
+} from '@contentful/f36-components';
 import smartlingClient from './smartlingClient';
+import { ExternalLinkIcon, InfoCircleIcon } from '@contentful/f36-icons';
 
 interface Props {
   sdk: SidebarExtensionSDK;
@@ -249,11 +250,11 @@ export default class Sidebar extends React.Component<Props, State> {
     const requestButton = (
       <Button
         testId="request-translation"
-        buttonType="muted"
+        variant="secondary"
         isFullWidth
         className="request-translation"
         onClick={() => window.open(smartlingLink)}>
-        <Icon icon="ExternalLink" color="secondary" /> Request Translation
+        <ExternalLinkIcon variant="secondary" /> Request Translation
       </Button>
     );
 
@@ -262,7 +263,7 @@ export default class Sidebar extends React.Component<Props, State> {
         <>
           <Button
             testId="open-dialog"
-            buttonType="primary"
+            variant="primary"
             isFullWidth
             className="signin"
             onClick={() => this.runAuthFlow()}>
@@ -295,14 +296,14 @@ export default class Sidebar extends React.Component<Props, State> {
 
       statusTag = (
         <Flex justifyContent="start" alignItems="bottom">
-          <Tag className="job-status" tagType={getStatusColor(smartlingEntry.assetStatus)}>
+          <Badge className="job-status" variant={getStatusColor(smartlingEntry.assetStatus)}>
             {smartlingEntry.assetStatus}
-          </Tag>
+          </Badge>
           <Tooltip
-            place="top"
+            placement="top"
             targetWrapperClassName="tooltip"
             content={submissionStatusLongText(smartlingEntry.assetStatus)}>
-            <Icon icon="InfoCircle" />
+            <InfoCircleIcon />
           </Tooltip>
         </Flex>
       );
@@ -328,9 +329,9 @@ export default class Sidebar extends React.Component<Props, State> {
                     )}
                   </div>
                   <div className="status">
-                    <Tag className="tag" tagType={getStatusColor(sub.status)}>
+                    <Badge className="tag" variant={getStatusColor(sub.status)}>
                       {formatSubmissionStatus(sub.status)}
-                    </Tag>
+                    </Badge>
                     <br />
                     {showSubmittedByStatus(sub.status) && (
                       <div className="date">Submitted {formatDate(sub.submitted)}</div>
@@ -352,13 +353,13 @@ export default class Sidebar extends React.Component<Props, State> {
       }
     } else if (generalError) {
       statusTag = (
-        <Tag className="job-status" tagType="negative">
+        <Badge className="job-status" variant="negative">
           Disconnected
-        </Tag>
+        </Badge>
       );
 
       smartlingBody = (
-        <Note title="Connection error" noteType="negative" className="general-error">
+        <Note title="Connection error" variant="negative" className="general-error">
           Please ensure that you have access to the connected Smartling project.
           <br />
           <TextLink
@@ -387,7 +388,7 @@ export default class Sidebar extends React.Component<Props, State> {
             target="_blank"
             rel="noopener">
             Learn how Smartling works with Contentful&nbsp;
-            <Icon size="tiny" icon="ExternalLink" color="secondary" />
+            <ExternalLinkIcon size="tiny" variant="secondary" />
           </TextLink>
         </Paragraph>
       </>
