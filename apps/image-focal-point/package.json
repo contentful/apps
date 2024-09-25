@@ -5,28 +5,30 @@
   "devDependencies": {
     "@contentful/app-scripts": "1.2.0",
     "@testing-library/react": "11.2.5",
-    "cross-env": "7.0.3"
+    "cross-env": "7.0.3",
+    "jsdom": "^25.0.1"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
+    "start": "vite",
+    "build": "vite build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 342Q2DqCjmsdN5BJCEPkrJ --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 5cb68XsD3xpF57XvKGGVJJ --token ${TEST_CMA_TOKEN}",
-    "test": "react-scripts test",
-    "test:ci": "CI=true react-scripts test"
+    "test": "vitest",
+    "test:ci": "CI=true vitest"
   },
   "dependencies": {
     "@contentful/app-sdk": "4.9.0",
     "@contentful/forma-36-fcss": "0.3.5",
     "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.2",
-    "emotion": "10.0.27",
+    "@emotion/css": "^11.13.0",
     "hex-rgb": "4.3.0",
     "lodash.camelcase": "4.3.0",
     "prop-types": "15.8.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-scripts": "5.0.1"
+    "vite": "^5.4.8",
+    "vitest": "^2.1.1"
   },
   "eslintConfig": {
     "extends": "react-app"
