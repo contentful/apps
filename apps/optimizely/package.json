@@ -7,32 +7,36 @@
     "cross-env": "7.0.3"
   },
   "dependencies": {
+    "@babel/preset-react": "^7.24.7",
     "@contentful/app-sdk": "4.9.0",
     "@contentful/forma-36-fcss": "0.3.5",
     "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.2",
     "@testing-library/react": "8.0.7",
     "@use-it/interval": "0.1.4",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-v8": "^2.1.1",
     "emotion": "10.0.27",
     "lodash.get": "4.4.2",
     "lodash.intersection": "4.4.0",
     "prop-types": "15.8.1",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
-    "react-scripts": "^5.0.1",
+    "react": "16.14",
+    "react-dom": "16.14",
     "use-methods": "0.5.1",
+    "vite": "^5.4.8",
+    "vitest": "^2.1.1",
     "whatwg-fetch": "3.6.20"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "start": "vite",
+    "build": "vite build",
     "build:local": "npm run env:local && npm run build",
     "env:local": "echo REACT_APP_OPTIMIZELY_CLIENT_APP_ID=${REACT_APP_OPTIMIZELY_CLIENT_APP_ID} > .env.local",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/optimizely --acl public-read",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy:test": "npm run deploy",
-    "test": "TZ=UTC react-scripts test",
-    "test:ci": "TZ=UTC react-scripts test"
+    "test": "TZ=UTC vite test",
+    "test:ci": "TZ=UTC vite test"
   },
   "eslintConfig": {
     "extends": "react-app"
