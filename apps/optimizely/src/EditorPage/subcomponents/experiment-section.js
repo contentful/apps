@@ -1,14 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
-import {
-  Heading,
-  SelectField,
-  Option,
-  Paragraph,
-  TextLink,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+import { FormControl, Heading, Paragraph, Select, TextLink } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { ExperimentType } from './prop-types';
 
 const styles = {
@@ -53,49 +47,53 @@ export default function ExperimentSection(props) {
       <Heading element="h2" className={styles.heading}>
         Experiment:
       </Heading>
-      <SelectField
-        labelText="Optimizely experiment"
-        required
-        value={props.experiment ? props.experiment.id.toString() : ''}
-        onChange={(e) => {
-          const value = e.target.value;
-          if (value === NOT_SELECTED) {
-            props.onChangeExperiment({
-              experimentId: '',
-              experimentKey: '',
-            });
-          } else {
-            const experiment = props.experiments.find(
-              (experiment) => experiment.id.toString() === value
-            );
-            if (experiment) {
-              // props.onChangeExperiment({
-              //   experimentId: experiment.id.toString(),
-              //   experimentKey: experiment.key.toString(),
-              // });
-              props.onChangeExperiment(experiment);
+      <FormControl>
+        <FormControl.Label>Optimizely experiment</FormControl.Label>
+        <Select
+          isRequired
+          value={props.experiment ? props.experiment.id.toString() : ''}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === NOT_SELECTED) {
+              props.onChangeExperiment({
+                experimentId: '',
+                experimentKey: '',
+              });
+            } else {
+              const experiment = props.experiments.find(
+                (experiment) => experiment.id.toString() === value
+              );
+              if (experiment) {
+                // props.onChangeExperiment({
+                //   experimentId: experiment.id.toString(),
+                //   experimentKey: experiment.key.toString(),
+                // });
+                props.onChangeExperiment(experiment);
+              }
             }
+          }}
+          width="large"
+          isDisabled={
+            props.hasVariations === true || props.loaded === false || props.reloadNeeded === true
           }
-        }}
-        selectProps={{
-          width: 'large',
-          isDisabled:
-            props.hasVariations === true || props.loaded === false || props.reloadNeeded === true,
-        }}
-        id="experiment"
-        name="experiment">
-        {props.loaded === false && <Option value={NOT_SELECTED}>Fetching experiments...</Option>}
-        {props.loaded && (
-          <React.Fragment>
-            <Option value={NOT_SELECTED}>Select Optimizely experiment</Option>
-            {props.experiments.map((experiment) => (
-              <Option key={experiment.id.toString()} value={experiment.id.toString()}>
-                {displayNames.get(experiment.id.toString())}
-              </Option>
-            ))}
-          </React.Fragment>
-        )}
-      </SelectField>
+          id="experiment"
+          name="experiment">
+          {props.loaded === false && (
+            <Select.Option value={NOT_SELECTED}>Fetching experiments...</Select.Option>
+          )}
+          {props.loaded && (
+            <React.Fragment>
+              <Select.Option value={NOT_SELECTED}>Select Optimizely experiment</Select.Option>
+              {props.experiments.map((experiment) => (
+                <Select.Option key={experiment.id.toString()} value={experiment.id.toString()}>
+                  {displayNames.get(experiment.id.toString())}
+                </Select.Option>
+              ))}
+            </React.Fragment>
+          )}
+        </Select>
+      </FormControl>
+
       {props.hasVariations === true && !props.reloadNeeded && (
         <Paragraph className={styles.clearDescription}>
           To change experiment, first{' '}

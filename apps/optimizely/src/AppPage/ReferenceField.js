@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash.get';
-import { CheckboxField } from '@contentful/forma-36-react-components';
+import { Checkbox, FormControl } from '@contentful/f36-components';
 import { VARIATION_CONTAINER_ID } from './constants';
 import { css } from '@emotion/css';
 import RefToolTip from './RefToolTip';
@@ -26,14 +26,15 @@ export default function ReferenceField({ id, checked, contentType, onSelect }) {
 
   return (
     <div className={styles.container}>
-      <CheckboxField
-        id={`reference-field-${id}`}
-        checked={checked || disabled}
-        disabled={disabled}
-        onChange={(e) => onSelect(e.target.checked)}
-        labelText={field.name}
-        labelIsLight={true}
-      />
+      <FormControl id={`reference-field-${id}`}>
+        <FormControl.Label htmlFor={`reference-field-${id}`}>{field.name}</FormControl.Label>
+        <Checkbox
+          isChecked={checked || disabled}
+          isDisabled={disabled}
+          onChange={(e) => onSelect(e.target.checked)}
+        />
+      </FormControl>
+
       {disabled ? <RefToolTip /> : null}
     </div>
   );

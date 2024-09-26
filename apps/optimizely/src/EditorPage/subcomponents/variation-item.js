@@ -2,16 +2,8 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
 import useInterval from '@use-it/interval';
-import {
-  Paragraph,
-  Subheading,
-  EntryCard,
-  DropdownList,
-  DropdownListItem,
-  Note,
-  TextLink,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+import { Paragraph, Subheading, EntryCard, Note, TextLink, Menu } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { SDKContext, GlobalStateContext } from './all-context';
 import VariationSelect from './variation-select';
 import VariationStats from './variations-stats';
@@ -101,7 +93,7 @@ export function SelectedReference(props) {
 
   if (error) {
     return (
-      <Note noteType="warning" title="Entry is missing" className={styles.missingNote}>
+      <Note variant="warning" title="Entry is missing" className={styles.missingNote}>
         <TextLink linkType="secondary" onClick={props.onRemoveClick}>
           Remove missing entry
         </TextLink>
@@ -122,15 +114,15 @@ export function SelectedReference(props) {
       description={entry.meta.description}
       status={entry.meta.status}
       contentType={entry.meta.contentType}
-      dropdownListElements={
-        <DropdownList>
-          <DropdownListItem isDisabled={props.disableEdit} onClick={props.onEditClick}>
+      actions={
+        <Menu>
+          <Menu.Item isDisabled={props.disableEdit} onClick={props.onEditClick}>
             Edit
-          </DropdownListItem>
-          <DropdownListItem isDisabled={props.disableEdit} onClick={props.onRemoveClick}>
+          </Menu.Item>
+          <Menu.Item isDisabled={props.disableEdit} onClick={props.onRemoveClick}>
             Remove
-          </DropdownListItem>
-        </DropdownList>
+          </Menu.Item>
+        </Menu>
       }
     />
   );

@@ -8,8 +8,8 @@ import {
   SkeletonBodyText,
   Spinner,
   Flex,
-} from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+} from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { ExperimentType } from './prop-types';
 import VariationItem from './variation-item';
 

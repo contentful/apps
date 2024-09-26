@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 import { css } from '@emotion/css';
-import { Heading, Typography, Paragraph } from '@contentful/forma-36-react-components';
+import { Heading, Paragraph } from '@contentful/f36-components';
 
 import Connect from './Connect';
 import Config from './Config';
@@ -360,7 +360,7 @@ export default class AppPage extends React.Component {
         <div className={styles.background} />
         <div className={styles.body}>
           <div>
-            <Typography>
+            <>
               <Heading>Connect Optimizely</Heading>
               {!this.props.client ? (
                 <Connect openAuth={this.props.openAuth} />
@@ -373,7 +373,7 @@ export default class AppPage extends React.Component {
                   </Paragraph>
                 </>
               )}
-            </Typography>
+            </>
           </div>
           {!!this.props.client && (
             <>

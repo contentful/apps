@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
-import tokens from '@contentful/forma-36-tokens';
-import { Note } from '@contentful/forma-36-react-components';
+import tokens from '@contentful/f36-tokens';
+import { Note } from '@contentful/f36-components';
 
 const styles = {
   container: css({
@@ -39,7 +39,7 @@ export function isValidContentType(contentType) {
 export function MissingProjectId() {
   return (
     <div className={styles.container} data-test-id="missing-project">
-      <Note noteType="negative">
+      <Note variant="negative">
         Please, set <strong>Optimizely Project ID</strong> in Extension settings.
       </Note>
     </div>
@@ -50,7 +50,7 @@ export function IncorrectContentType(props) {
   const title = `Extension "${props.sdk.ids.extension}" cannot be assigned to this content type`;
   return (
     <div className={styles.container} data-test-id="incorrect-type">
-      <Note noteType="negative" title={title}>
+      <Note variant="negative" title={title}>
         <div>
           <strong>Required:</strong>{' '}
           {requiredFields.map((item) => `${item.id} (${item.type})`).join(', ')}
