@@ -35,8 +35,8 @@
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/optimizely --acl public-read",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy:test": "npm run deploy",
-    "test": "TZ=UTC vite test",
-    "test:ci": "TZ=UTC vite test"
+    "test": "vite test",
+    "test:ci": "vite test"
   },
   "eslintConfig": {
     "extends": "react-app"
