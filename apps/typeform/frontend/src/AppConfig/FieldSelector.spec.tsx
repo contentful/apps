@@ -1,14 +1,14 @@
 import React from 'react';
-import { configure, render, cleanup, screen } from '@testing-library/react';
+import { configure, render, cleanup } from '@testing-library/react';
 import FieldSelector, { Props } from './FieldSelector';
 import { typeforms } from '../__mocks__/typeforms';
-import { vi } from 'vitest';
+import { sdk as mockSdk } from '../__mocks__/sdk';
 
 configure({
   testIdAttribute: 'data-test-id',
 });
 
-window.fetch = vi.fn(() => ({
+window.fetch = jest.fn(() => ({
   json: () => typeforms,
 })) as any;
 
@@ -36,16 +36,15 @@ const defaultProps: Props = {
     ct2: [],
   },
   selectedFields: {},
-  onSelectedFieldsChange: vi.fn(),
+  onSelectedFieldsChange: jest.fn(),
 };
 
 describe('FieldSelector', () => {
   afterEach(cleanup);
 
   it('should render successfully with no preselected fields', async () => {
-    const { getByRole } = render(<FieldSelector {...defaultProps} />);
-    const checkbox = getByRole('checkbox');
-    expect(checkbox).toBeTruthy();
+    const component = render(<FieldSelector {...defaultProps} />);
+    expect(component.container).toMatchSnapshot();
   });
 
   it('should render successfully with preselected fields', async () => {
@@ -53,8 +52,7 @@ describe('FieldSelector', () => {
       ...defaultProps,
       selectedFields: { ct1: ['x'] },
     };
-
-    const selectedOption = screen.findByText('x');
-    expect(selectedOption).toBeDefined();
+    const component = render(<FieldSelector {...props} />);
+    expect(component.container).toMatchSnapshot();
   });
 });
