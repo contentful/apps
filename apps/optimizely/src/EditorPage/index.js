@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events, jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import useMethods from 'use-methods';
 import tokens from '@contentful/forma-36-tokens';
 import { Note, Paragraph, Modal } from '@contentful/forma-36-react-components';

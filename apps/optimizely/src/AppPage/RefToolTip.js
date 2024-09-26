@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tooltip, Icon } from '@contentful/forma-36-react-components';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 
 const styles = {
   tooltip: css({

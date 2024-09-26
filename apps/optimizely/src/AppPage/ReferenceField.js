@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import get from 'lodash.get';
 import { CheckboxField } from '@contentful/forma-36-react-components';
 import { VARIATION_CONTAINER_ID } from './constants';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import RefToolTip from './RefToolTip';
 
 const styles = {
