@@ -1,7 +1,7 @@
 import * as React from 'react';
 import debounce from 'lodash/debounce';
 import { render } from 'react-dom';
-import { init, locations, AppExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
+import { locations, AppExtensionSDK, SidebarExtensionSDK, init } from '@contentful/app-sdk';
 import '@contentful/forma-36-react-components/dist/styles.css';
 import './index.css';
 import AppConfig from './AppConfig';
@@ -222,6 +222,7 @@ export class SidebarExtension extends React.Component<
 }
 
 init((sdk) => {
+  console.log('sdk', sdk);
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     render(<AppConfig sdk={sdk as AppExtensionSDK} />, document.getElementById('root'));
   } else if (sdk.location.is(locations.LOCATION_ENTRY_SIDEBAR)) {

@@ -1,5 +1,11 @@
 import { AppExtensionSDK, SidebarExtensionSDK } from '@contentful/app-sdk';
 
+declare module '*.svg' {
+  import React = require('react');
+  const content: React.FunctionComponent<React.SVGProps<SVGSVGElement> & { title?: string }>;
+  export default content;
+}
+
 // eslint-disable-next-line no-undef, @typescript-eslint/no-use-before-define
 export interface AppConfigParams {
   sdk: AppExtensionSDK;
