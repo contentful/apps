@@ -2,7 +2,7 @@ import React, { useState, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@contentful/forma-36-react-components';
 import tokens from '@contentful/forma-36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { checkAndGetField } from '../util';
 import { ProjectType, fieldNames } from '../constants';
 import { wait } from '@testing-library/react';

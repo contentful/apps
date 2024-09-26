@@ -6,7 +6,7 @@ import {
   DropdownList,
   DropdownListItem,
 } from '@contentful/forma-36-react-components';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/forma-36-tokens';
 import { GlobalStateContext } from './all-context';
 

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import useInterval from '@use-it/interval';
 import {
   Paragraph,

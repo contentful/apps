@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash.get';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/forma-36-tokens';
 import { Button } from '@contentful/forma-36-react-components';
 

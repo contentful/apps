@@ -1,5 +1,5 @@
 import React from 'react';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/forma-36-tokens';
 
 const styles = {

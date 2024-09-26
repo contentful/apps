@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import tokens from '@contentful/forma-36-tokens';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import { Heading, Typography, Paragraph } from '@contentful/forma-36-react-components';
 
 import Connect from './Connect';

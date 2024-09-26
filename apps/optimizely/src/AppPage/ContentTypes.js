@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import tokens from '@contentful/forma-36-tokens';
 import { VARIATION_CONTAINER_ID } from './constants';
 import { hasReferenceFieldsLinkingToEntry } from './ReferenceForm';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import {
   Heading,
   Paragraph,

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { css } from 'emotion';
+import { css } from '@emotion/css';
 import tokens from '@contentful/forma-36-tokens';
 import { Note } from '@contentful/forma-36-react-components';
 
