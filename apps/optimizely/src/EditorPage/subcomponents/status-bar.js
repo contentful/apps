@@ -1,10 +1,11 @@
 import React from 'react';
 import { css } from '@emotion/css';
 import PropTypes from 'prop-types';
-import { Icon } from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+import { Icon } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { Status } from './constants';
 import { getEntryStatus } from './utils';
+import { CheckCircleIcon, ChevronRightIcon, InfoCircleIcon } from '@contentful/f36-icons';
 
 const styles = {
   note: css({
@@ -34,12 +35,12 @@ const styles = {
 function StatusItem(props) {
   return (
     <div className={styles.item}>
-      <Icon
-        className={styles.itemIcon}
-        icon={props.active ? 'CheckCircle' : 'InfoCircle'}
-        color={props.active ? 'positive' : 'muted'}
-        size="small"
-      />
+      {props.active ? (
+        <CheckCircleIcon className={styles.itemIcon} size="small" variant="positive" />
+      ) : (
+        <InfoCircleIcon className={styles.itemIcon} size="small" variant="secondary" />
+      )}
+
       <span>{props.children}</span>
     </div>
   );
@@ -51,7 +52,7 @@ StatusItem.propTypes = {
 };
 
 function StatusSeparator() {
-  return <Icon className={styles.itemSeparator} icon="ChevronRight" size="small" color="muted" />;
+  return <ChevronRightIcon size="small" variant="secondary" />;
 }
 
 const checkStatuses = (statuses, experiment, variations, entries, isFx) => {

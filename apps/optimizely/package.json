@@ -9,9 +9,9 @@
   "dependencies": {
     "@babel/preset-react": "^7.24.7",
     "@contentful/app-sdk": "4.9.0",
-    "@contentful/forma-36-fcss": "0.3.5",
-    "@contentful/forma-36-react-components": "3.100.7",
-    "@contentful/forma-36-tokens": "0.11.2",
+    "@contentful/f36-components": "^4.70.0",
+    "@contentful/f36-icons": "^4.29.0",
+    "@contentful/f36-tokens": "^4.0.5",
     "@emotion/css": "^11.13.0",
     "@testing-library/react": "8.0.7",
     "@use-it/interval": "0.1.4",

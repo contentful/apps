@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
-import { Button } from '@contentful/forma-36-react-components';
+import { Button } from '@contentful/f36-components';
 
 // import OptimizelyLogo from './OptimizelyLogo';
 
@@ -26,7 +26,7 @@ export default function ConnectButton({ openAuth }) {
       onClick={openAuth}
       testId="connect-button"
       isFullWidth
-      buttonType="naked">
+      variant="naked">
       <AuthButton />
     </Button>
   );

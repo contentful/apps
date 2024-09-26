@@ -11,9 +11,6 @@ export default defineConfig(() => ({
     include: /.*\.jsx?$/,
     exclude: [],
   },
-  define: {
-    'process.env': {},
-  },
   optimizeDeps: {
     esbuildOptions: {
       loader: {

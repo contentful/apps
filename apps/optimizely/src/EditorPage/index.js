@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
 import useMethods from 'use-methods';
-import tokens from '@contentful/forma-36-tokens';
-import { Note, Paragraph, Modal } from '@contentful/forma-36-react-components';
+import tokens from '@contentful/f36-tokens';
+import { Note, Paragraph, Modal } from '@contentful/f36-components';
 import StatusBar from './subcomponents/status-bar';
 import ReferencesSection from './subcomponents/references-section';
 import ExperimentSection from './subcomponents/experiment-section';
@@ -646,7 +646,7 @@ export default function EditorPage(props) {
   const { combinedLinkValidationType } = state.referenceInfo || {};
   if (combinedLinkValidationType === COMBINED_LINK_VALIDATION_CONFLICT) {
     return (
-      <Note noteType="negative" title="Conflict">
+      <Note variant="negative" title="Conflict">
         Validations of reference fields in incoming references yield conflicting references for the
         Variation Container. Loosen validations or change incoming references so there is at least
         one shared Content Type validation.
@@ -674,7 +674,7 @@ export default function EditorPage(props) {
           />
           <SectionSplitter />
           {showAuth && (
-            <Note noteType="warning" className={styles.paragraph}>
+            <Note variant="warning" className={styles.paragraph}>
               Your Optimizely session will expire soon. Click here to{' '}
               <a onClick={props.openAuth} className={styles.link} data-test-id="preemptive-connect">
                 connect with Optimizely.
@@ -722,7 +722,7 @@ export default function EditorPage(props) {
 EditorPage.propTypes = {
   openAuth: PropTypes.func.isRequired,
   client: PropTypes.any,
-  expires: PropTypes.string.isRequired,
+  expires: PropTypes.number.isRequired,
   sdk: PropTypes.shape({
     space: PropTypes.object.isRequired,
     ids: PropTypes.object.isRequired,

@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/css';
 
-import tokens from '@contentful/forma-36-tokens';
-import { Heading, SelectField, Option, Typography } from '@contentful/forma-36-react-components';
+import tokens from '@contentful/f36-tokens';
+import { Heading, Select, Option, FormControl } from '@contentful/f36-components';
 
 const styles = {
   section: css({
@@ -13,27 +13,29 @@ const styles = {
 
 export default function Projects({ allProjects, selectedProject, onProjectChange }) {
   return (
-    <Typography>
+    <>
       <Heading>Optimizely Project</Heading>
-      <SelectField
-        name="project"
-        id="project"
-        labelText="Project"
-        required={true}
-        className={styles.section}
-        value={selectedProject ? selectedProject.toString() : ''}
-        onChange={onProjectChange}
-        selectProps={{ isDisabled: !allProjects }}
-        width="large">
-        <Option value="">Select Optimizely Project</Option>
-        {!!allProjects.length &&
-          allProjects.map((p) => (
-            <Option key={p.id} value={p.id.toString()}>
-              {p.name}
-            </Option>
-          ))}
-      </SelectField>
-    </Typography>
+      <FormControl>
+        <FormControl.Label>Project</FormControl.Label>
+        <Select
+          name="project"
+          id="project"
+          isRequired={true}
+          className={styles.section}
+          value={selectedProject ? selectedProject.toString() : ''}
+          onChange={onProjectChange}
+          isDisabled={!allProjects}
+          width="large">
+          <Option value="">Select Optimizely Project</Option>
+          {!!allProjects.length &&
+            allProjects.map((p) => (
+              <Option key={p.id} value={p.id.toString()}>
+                {p.name}
+              </Option>
+            ))}
+        </Select>
+      </FormControl>
+    </>
   );
 }
 

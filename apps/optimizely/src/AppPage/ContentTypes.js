@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 import { VARIATION_CONTAINER_ID } from './constants';
 import { hasReferenceFieldsLinkingToEntry } from './ReferenceForm';
 import { css } from '@emotion/css';
@@ -12,12 +12,11 @@ import {
   TableRow,
   TableCell,
   TextLink,
-  SelectField,
-  Option,
   Modal,
-  Typography,
   SectionHeading,
-} from '@contentful/forma-36-react-components';
+  Select,
+  FormControl,
+} from '@contentful/f36-components';
 import ReferenceField, { hasFieldLinkValidations } from './ReferenceField';
 import RefToolTip from './RefToolTip';
 
@@ -138,11 +137,11 @@ export default function ContentTypes({
 
   return (
     <>
-      <Typography>
+      <>
         <Heading>Content types</Heading>
         <Paragraph>Select the content types for which you want to enable A/B testing</Paragraph>
         <Button
-          buttonType="muted"
+          variant="secondary"
           onClick={() => toggleModal(true)}
           disabled={!addableContentTypes.length}
           testId="add-content">
@@ -164,35 +163,40 @@ export default function ContentTypes({
             </tbody>
           </Table>
         ) : null}
-      </Typography>
+      </>
       <Modal title="Add content type" isShown={modalOpen} onClose={closeModal}>
         {({ title, onClose }) => (
           <React.Fragment>
             <Modal.Header title={title} onClose={onClose} />
             <Modal.Content>
-              <Typography>
+              <>
                 <Paragraph>
                   Select the content type and the reference fields you want to enable for
                   experimentation. You&rsquo;ll be able to change this later.
                 </Paragraph>
-                <SelectField
-                  id="content-types"
-                  name="content-types"
-                  labelText="Content Type"
-                  selectProps={{ width: 'medium', isDisabled: isEditMode }}
-                  onChange={(e) => onSelectContentType(e.target.value)}
-                  value={selectedContentType || ''}
-                  testId="content-type-selector"
-                  required>
-                  <Option value="" disabled>
-                    Select content type
-                  </Option>
-                  {addableContentTypes.map((ct) => (
-                    <Option key={ct.sys.id} value={ct.sys.id}>
-                      {ct.name}
-                    </Option>
-                  ))}
-                </SelectField>
+                <FormControl>
+                  <FormControl.Label>Content Type</FormControl.Label>
+                  <Select
+                    id="content-types"
+                    name="content-types"
+                    labelText="Content Type"
+                    isDisabled={isEditMode}
+                    width="medium"
+                    onChange={(e) => onSelectContentType(e.target.value)}
+                    value={selectedContentType || ''}
+                    testId="content-type-selector"
+                    isRequired>
+                    <Select.Option value="" disabled>
+                      Select content type
+                    </Select.Option>
+                    {addableContentTypes.map((ct) => (
+                      <Select.Option key={ct.sys.id} value={ct.sys.id}>
+                        {ct.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </FormControl>
+
                 {referenceFields.length > 0 && (
                   <>
                     <SectionHeading className={styles.sectionHeading}>
@@ -212,16 +216,16 @@ export default function ContentTypes({
                     </div>
                   </>
                 )}
-              </Typography>
+              </>
             </Modal.Content>
             <Modal.Controls>
               <Button
                 disabled={!selectedContentType}
                 onClick={addContentTypeCloseModal}
-                buttonType="positive">
+                variant="positive">
                 Save
               </Button>
-              <Button onClick={onClose} buttonType="muted">
+              <Button onClick={onClose} variant="secondary">
                 Close
               </Button>
             </Modal.Controls>
@@ -288,7 +292,7 @@ function ContentTypeRow({
           <TextLink
             onClick={() => onClickDelete(contentTypeId)}
             className={styles.link}
-            linkType="negative">
+            variant="negative">
             Delete
           </TextLink>
         )}

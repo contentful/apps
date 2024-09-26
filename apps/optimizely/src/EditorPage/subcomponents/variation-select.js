@@ -1,14 +1,10 @@
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import {
-  TextLink,
-  Dropdown,
-  DropdownList,
-  DropdownListItem,
-} from '@contentful/forma-36-react-components';
+import { Menu, TextLink } from '@contentful/f36-components';
 import { css } from '@emotion/css';
-import tokens from '@contentful/forma-36-tokens';
+import tokens from '@contentful/f36-tokens';
 import { GlobalStateContext } from './all-context';
+import { PlusIcon } from '@contentful/f36-icons';
 
 const styles = {
   container: css({
@@ -29,35 +25,35 @@ export default function VariationSelect(props) {
   return (
     <div className={styles.container}>
       <div className={styles.item}>
-        <Dropdown
+        <Menu
           isOpen={isDropdownShown}
           onClose={() => {
             setShowDropdown(false);
-          }}
-          toggleElement={
+          }}>
+          <Menu.Trigger>
             <TextLink
-              disabled={props.disableEdit}
-              icon="Plus"
+              isDisabled={props.disableEdit}
+              icon={<PlusIcon />}
               onClick={() => {
                 setShowDropdown(true);
               }}>
               Create entry and link
             </TextLink>
-          }>
-          <DropdownList maxHeight={300}>
-            <DropdownListItem isTitle>Select content type</DropdownListItem>
+          </Menu.Trigger>
+          <Menu.List maxHeight={300}>
+            <Menu.SectionTitle isTitle>Select content type</Menu.SectionTitle>
             {linkContentTypes.map((value, index) => (
-              <DropdownListItem
+              <Menu.ListItem
                 key={value}
                 onClick={() => {
                   props.onCreate(value);
                   setShowDropdown(false);
                 }}>
                 {linkContentTypeNames[index]}
-              </DropdownListItem>
+              </Menu.ListItem>
             ))}
-          </DropdownList>
-        </Dropdown>
+          </Menu.List>
+        </Menu>
       </div>
       <div className={styles.item}>
         <TextLink disabled={props.disableEdit} icon="Link" onClick={props.onLinkExistingClick}>

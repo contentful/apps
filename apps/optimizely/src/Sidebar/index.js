@@ -1,17 +1,11 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '@contentful/forma-36-react-components';
-import tokens from '@contentful/forma-36-tokens';
+import { Button, ButtonGroup, Stack } from '@contentful/f36-components';
+import tokens from '@contentful/f36-tokens';
 import { css } from '@emotion/css';
 import { checkAndGetField } from '../util';
 import { ProjectType, fieldNames } from '../constants';
 import { wait } from '@testing-library/react';
-
-const styles = {
-  button: css({
-    marginBottom: tokens.spacingS,
-  }),
-};
 
 const getRuleEditUrl = (projectId, flagKey, ruleKey, environment) => {
   return `https://app.optimizely.com/v2/projects/${projectId}/flags/manage/${flagKey}/rules/${environment}/edit/${ruleKey}`;
@@ -111,34 +105,34 @@ export default function Sidebar(props) {
 
   return (
     <div data-test-id="sidebar">
-      <Button
-        buttonType="primary"
-        isFullWidth
-        className={styles.button}
-        disabled={disableViewButton}
-        href={
-          isFx
-            ? getRuleEditUrl(optimizelyProjectId, flagKey, experimentKey, environment)
-            : getExperimentUrl(optimizelyProjectId, experimentId)
-        }
-        target="_blank"
-        data-test-id="view-experiment">
-        View in Optimizely
-      </Button>
-      <Button
-        buttonType="muted"
-        isFullWidth
-        className={styles.button}
-        disabled={disableListButton}
-        target="_blank"
-        href={
-          isFx
-            ? getAllFlagsUrl(optimizelyProjectId, environment)
-            : getAllExperimentsUrl(optimizelyProjectId)
-        }
-        data-test-id="view-all">
-        <>{`View all ${isFx ? 'flags' : 'experiments'}`}</>
-      </Button>
+      <Stack variant="spaced" flexDirection="column">
+        <Button
+          variant="primary"
+          isFullWidth
+          isDisabled={disableViewButton}
+          href={
+            isFx
+              ? getRuleEditUrl(optimizelyProjectId, flagKey, experimentKey, environment)
+              : getExperimentUrl(optimizelyProjectId, experimentId)
+          }
+          target="_blank"
+          data-test-id="view-experiment">
+          View in Optimizely
+        </Button>
+        <Button
+          variant="secondary"
+          isFullWidth
+          isDisabled={disableListButton}
+          target="_blank"
+          href={
+            isFx
+              ? getAllFlagsUrl(optimizelyProjectId, environment)
+              : getAllExperimentsUrl(optimizelyProjectId)
+          }
+          data-test-id="view-all">
+          <>{`View all ${isFx ? 'flags' : 'experiments'}`}</>
+        </Button>
+      </Stack>
     </div>
   );
 }
