@@ -1,15 +1,14 @@
 /* global global */
 import { render } from 'react-dom';
-
-jest.mock('react-dom');
+import { vi } from 'vitest';
 
 function loadEntryPoint() {
-  jest.isolateModules(() => {
+  vi.resetModules(() => {
     require('./index');
   });
 }
 
-jest.mock('react-dom');
+vi.mock('react-dom');
 
 const mockSdk = {
   location: {
@@ -26,7 +25,7 @@ const mockSdk = {
     webapp: 'app.contentful.com',
   },
   entry: {
-    onSysChanged: jest.fn(() => ({
+    onSysChanged: vi.fn(() => ({
       id: '123',
       space: {
         sys: {
@@ -37,24 +36,24 @@ const mockSdk = {
     })),
     fields: {
       slug: {
-        getValue: jest.fn(() => 'preview-slug'),
+        getValue: vi.fn(() => 'preview-slug'),
       },
     },
   },
   window: {
-    startAutoResizer: jest.fn(),
+    startAutoResizer: vi.fn(),
   },
   notifier: {
-    success: jest.fn(),
-    error: jest.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
   },
 };
 
 function doSdkMock() {
-  jest.doMock('@contentful/app-sdk', () => {
+  vi.doMock('@contentful/app-sdk', () => {
     return {
       __esModule: true,
-      init: jest.fn((fn) => fn(mockSdk)),
+      init: vi.fn((fn) => fn(mockSdk)),
       locations: {
         LOCATION_ENTRY_SIDEBAR: 'entry-sidebar',
       },
@@ -66,10 +65,10 @@ let fetchSpy;
 let getElementByIdSpy;
 describe('Gatsby Preview entry point', () => {
   beforeEach(() => {
-    fetchSpy = jest.spyOn(window, 'fetch');
+    fetchSpy = vi.spyOn(window, 'fetch');
     fetchSpy.mockImplementation(() => Promise.resolve());
 
-    getElementByIdSpy = jest.spyOn(document, 'getElementById');
+    getElementByIdSpy = vi.spyOn(document, 'getElementById');
     getElementByIdSpy.mockImplementation((id) => id);
 
     doSdkMock();
@@ -79,12 +78,14 @@ describe('Gatsby Preview entry point', () => {
     fetchSpy.mockRestore();
     getElementByIdSpy.mockRestore();
     render.mockClear();
-    jest.unmock('@contentful/app-sdk');
+    vi.unmock('@contentful/app-sdk');
   });
 
-  it('should initialize the app', () => {
-    loadEntryPoint();
+  it('should initialize the app', async () => {
+    await import('./index');
+    // loadEntryPoint();
 
+    console.log(render.mock.calls);
     const [renderedComponent, root] = render.mock.calls[0];
     expect(renderedComponent.props).toEqual({ sdk: mockSdk });
     expect(root).toEqual('root');

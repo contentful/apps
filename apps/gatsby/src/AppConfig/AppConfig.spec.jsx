@@ -1,5 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
+import { vi } from 'vitest';
 import { enabledContentTypesToTargetState, AppConfig } from './AppConfig';
 
 function delay(ms) {
@@ -71,7 +72,7 @@ describe('<AppConfig />', () => {
     it('validates url fields and returns correct values if valid', async () => {
       let configure;
       const mockSdk = makeMockSdk({
-        onConfigure: jest.fn((cb) => {
+        onConfigure: vi.fn((cb) => {
           configure = cb;
         }),
       });
@@ -91,7 +92,7 @@ describe('<AppConfig />', () => {
     it('returns false if previewUrl is invalid', async () => {
       let configure;
       const mockSdk = makeMockSdk({
-        onConfigure: jest.fn((cb) => {
+        onConfigure: vi.fn((cb) => {
           configure = cb;
         }),
         previewUrl: 'not-a-real-url',
@@ -108,7 +109,7 @@ describe('<AppConfig />', () => {
     it('returns false if webhookUrl is invalid', async () => {
       let configure;
       const mockSdk = makeMockSdk({
-        onConfigure: jest.fn((cb) => {
+        onConfigure: vi.fn((cb) => {
           configure = cb;
         }),
         webhookUrl: 'not-a-real-url',
@@ -125,7 +126,7 @@ describe('<AppConfig />', () => {
     it('returns false if contentSyncUrl is invalid', async () => {
       let configure;
       const mockSdk = makeMockSdk({
-        onConfigure: jest.fn((cb) => {
+        onConfigure: vi.fn((cb) => {
           configure = cb;
         }),
         contentSyncUrl: 'not-a-real-url',
