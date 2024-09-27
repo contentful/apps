@@ -7,6 +7,11 @@ export default defineConfig({
   define: {
     global: {},
   },
+  resolve: {
+    alias: {
+      'node-fetch': 'isomorphic-fetch',
+    },
+  },
   build: {
     outDir: 'build',
     lib: {
