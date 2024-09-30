@@ -14,11 +14,13 @@
     "@contentful/f36-tokens": "^4.0.5",
     "@emotion/css": "^11.13.0",
     "@rollup/plugin-commonjs": "^28.0.0",
+    "@sheerun/mutationobserver-shim": "^0.3.3",
     "@testing-library/react": "8.0.7",
     "@use-it/interval": "0.1.4",
     "@vitejs/plugin-react": "^4.3.1",
     "@vitest/coverage-v8": "^2.1.1",
     "enzyme-adapter-react-16": "^1.15.8",
+    "jsdom": "^25.0.1",
     "lodash.get": "4.4.2",
     "lodash.intersection": "4.4.0",
     "prop-types": "15.8.1",
@@ -26,7 +28,7 @@
     "react-dom": "16.14",
     "redux-dynamic-modules-core": "^5.2.3",
     "rollup": "^4.22.5",
-    "use-methods": "0.5.1",
+    "use-methods": "^0.5.1",
     "vite": "^5.4.8",
     "vite-plugin-commonjs": "^0.10.3",
     "vitest": "^2.1.1",
@@ -34,14 +36,14 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "rm -rf build && vite build",
     "build:local": "npm run env:local && npm run build",
     "env:local": "echo REACT_APP_OPTIMIZELY_CLIENT_APP_ID=${REACT_APP_OPTIMIZELY_CLIENT_APP_ID} > .env.local",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/optimizely --acl public-read",
     "create-app-definition": "contentful-app-scripts create-app-definition",
     "deploy:test": "npm run deploy",
-    "test": "vite test",
-    "test:ci": "vite test"
+    "test": "vitest",
+    "test:ci": "vitest"
   },
   "eslintConfig": {
     "extends": "react-app"
