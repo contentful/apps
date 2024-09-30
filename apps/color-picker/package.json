@@ -7,33 +7,38 @@
     "@contentful/f36-components": "4.67.0",
     "@contentful/f36-tokens": "4.0.5",
     "@contentful/react-apps-toolkit": "1.2.16",
-    "@emotion/css": "^11.13.0",
     "@tsconfig/create-react-app": "1.0.3",
-    "@vitejs/plugin-legacy": "^5.4.2",
-    "@vitejs/plugin-react": "^4.3.2",
     "contentful-management": "8.2.2",
+    "emotion": "10.0.27",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "regenerator-runtime": "^0.14.1",
-    "vite": "^5.4.8",
-    "vite-plugin-babel": "^1.2.0"
+    "react-scripts": "5.0.1"
   },
   "scripts": {
-    "start": "vite",
-    "build": "vite build",
+    "start": "cross-env BROWSER=none react-scripts start",
+    "build": "react-scripts build",
     "deploy": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEFINITIONS_ORG_ID} --definition-id 4Vy3oAINwRgnxakoTz06tG --token ${CONTENTFUL_CMA_TOKEN}",
     "deploy:test": "contentful-app-scripts upload --ci --bundle-dir ./build --organization-id ${DEV_TESTING_ORG_ID} --definition-id 1az8RJ5AOvWt3MdyVsTn3r --token ${TEST_CMA_TOKEN}"
   },
   "eslintConfig": {
     "extends": "react-app"
   },
-  "browserslist": [
-    "last 2 Chrome versions"
-  ],
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.25.4",
     "@contentful/app-scripts": "^0.15.8",
     "@types/jest": "27.4.1",
+    "@types/node": "17.0.23",
     "@types/react": "17.0.43",
     "@types/react-dom": "17.0.14",
     "cross-env": "7.0.3",
