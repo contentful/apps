@@ -9,17 +9,23 @@ export default defineConfig(() => ({
     port: 3000,
   },
   optimizeDeps: {
-    include: ['node_modules/@sheerun/mutationobserver-shim/dist/mutationobserver.min.js'],
     esbuildOptions: {
       loader: {
         '.js': 'jsx',
       },
     },
   },
+  resolve: {
+    alias: {
+      default: 'node_modules/@sheerun/mutationobserver-shim/dist/mutationobserver.min.js',
+    },
+  },
   build: {
     outDir: 'build',
     commonjsOptions: {
-      include: [/node_modules/],
+      // exclude: ['*/index.js', 'node_modules/@testing-library/dom/dist/@testing-library/dom.esm.js', 'node_modules/@sheerun/mutationobserver-shim/dist/mutationobserver.min.js',],
+      include: ['node_modules/**'],
+      // include: ['node_modules/**', '**/index.js', '**/warning.js', '**/truncate.js', '**/dayjs.min.js', '**/utc.js', '**/relativeTime.js', '**/calendar.js', '**/react/jsx-runtime.js', '**/react-modal/lib/index.js', '**/lodash.get/index.js', '**/lodash.intersection/index.js', '**/use-methods/dist/index.js', '**/@testing-library/dom/dist/@testing-library/dom.esm.js', '**/pretty-format/build-es5/index.js'],
     },
   },
 
@@ -34,15 +40,7 @@ export default defineConfig(() => ({
     include: /.*\.jsx?$/,
     exclude: [],
   },
-  plugins: [
-    react(),
-    commonjs({
-      include: /node_modules/,
-      namedExports: {
-        'node_modules/react/index.js': ['createContext'],
-      },
-    }),
-  ],
+  plugins: [react(), commonjs()],
   test: {
     environment: 'happy-dom',
     globals: true,
