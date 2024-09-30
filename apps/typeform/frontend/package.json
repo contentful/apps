@@ -37,7 +37,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "rm -rf build && vite build",    
     "test": "vitest --logHeapUsage --coverage",
     "test:ci": "vitest"
   },

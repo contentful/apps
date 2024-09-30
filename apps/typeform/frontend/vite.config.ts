@@ -7,7 +7,9 @@ export default defineConfig(() => ({
     port: 3000,
   },
   plugins: [react()],
-
+  build: {
+    outDir: process.env.BUILD_PATH || './build',
+  },
   test: {
     environment: 'happy-dom',
     globals: true,

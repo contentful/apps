@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "esnext",
     "module": "esnext",
     "strict": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "rootDir": "./src",
     "experimentalDecorators": true,
     "esModuleInterop": true,
