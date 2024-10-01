@@ -102,6 +102,10 @@ export default function Sidebar(props) {
     !projectType || (projectType === ProjectType.FeatureExperimentation && !environment);
 
   const isFx = projectType === ProjectType.FeatureExperimentation;
+  console.log(
+    { optimizelyProjectId, environment, flagKey, experimentKey },
+    getRuleEditUrl(optimizelyProjectId, flagKey, experimentKey, environment)
+  );
 
   return (
     <div data-test-id="sidebar">
@@ -116,7 +120,7 @@ export default function Sidebar(props) {
               : getExperimentUrl(optimizelyProjectId, experimentId)
           }
           target="_blank"
-          data-test-id="view-experiment">
+          testId="view-experiment">
           View in Optimizely
         </Button>
         <Button
@@ -129,7 +133,7 @@ export default function Sidebar(props) {
               ? getAllFlagsUrl(optimizelyProjectId, environment)
               : getAllExperimentsUrl(optimizelyProjectId)
           }
-          data-test-id="view-all">
+          testId="view-all">
           <>{`View all ${isFx ? 'flags' : 'experiments'}`}</>
         </Button>
       </Stack>
