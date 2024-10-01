@@ -1,24 +1,29 @@
+import { vi } from 'vitest';
+
+const parameters = {
+  installation: {
+    displayDataTypes: 'true',
+    iconStyle: {},
+    collapsed: 'true',
+    theme: {},
+  },
+  instance: {},
+  configOptions: {},
+};
+
 const mockSdk: any = {
   app: {
-    onConfigure: jest.fn(),
-    getParameters: jest.fn().mockReturnValueOnce({}),
-    setReady: jest.fn(),
-    getCurrentState: jest.fn(),
+    onConfigure: vi.fn(),
+    getParameters: vi.fn().mockReturnValueOnce(parameters),
+    setReady: vi.fn(),
+    getCurrentState: vi.fn(),
   },
   ids: {
     app: 'test-app',
   },
-  parameters: {
-    installation: {
-      displayDataTypes: 'true',
-      iconStyle: {},
-      collapsed: 'true',
-      theme: {},
-    },
-    instance: {},
-  },
+  parameters,
   entry: {
-    getSys: jest.fn().mockReturnValue({ id: 'test-id' }),
+    getSys: vi.fn().mockReturnValue({ id: 'test-id' }),
   },
 };
 

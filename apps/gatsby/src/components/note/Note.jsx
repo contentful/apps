@@ -1,3 +1,4 @@
+import React from 'react';
 import { Note as F36Note, Flex, TextLink } from '@contentful/forma-36-react-components';
 
 const Note = () => {
