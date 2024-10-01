@@ -4,9 +4,8 @@
   "private": true,
   "devDependencies": {
     "@testing-library/react": "8.0.4",
-    "@types/jest": "24.0.15",
     "@types/lodash": "4.17.7",
-    "@types/node": "13.7.0",
+    "@types/node": "^22.7.2",
     "@types/react": "16.8.17",
     "@types/react-dom": "16.8.4",
     "@types/webpack-env": "1.18.5",
@@ -18,16 +17,16 @@
     "@contentful/forma-36-fcss": "0.3.5",
     "@contentful/forma-36-react-components": "3.100.7",
     "@contentful/forma-36-tokens": "0.11.2",
-    "emotion": "10.0.27",
+    "@emotion/css": "^11.13.0",
     "lodash": "4.17.21",
     "prop-types": "15.8.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-scripts": "5.0.1"
+    "vite": "^5.4.8"
   },
   "scripts": {
-    "start": "cross-env BROWSER=none react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider build",
+    "start": "vite",
+    "build": "vite build",
     "deploy": "aws s3 sync ./build ${STATIC_S3_BASE}/google-analytics --acl public-read",
     "deploy:test": "npm run deploy"
   },
