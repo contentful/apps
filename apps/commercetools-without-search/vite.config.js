@@ -14,9 +14,5 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
-    lib: {
-      entry: 'src/index.tsx',
-      name: 'commerce-tools-without-search',
-    },
   },
 });
