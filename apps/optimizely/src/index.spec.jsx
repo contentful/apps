@@ -3,9 +3,10 @@ import React from 'react';
 import { cleanup, render, configure } from '@testing-library/react';
 
 import App from '../src';
+import { vi } from 'vitest';
 global.window.close = () => {};
 global.window.encodeURIComponent = (x) => x;
-global.window.addEventListener = jest.fn();
+global.window.addEventListener = vi.fn();
 
 const LOCATION_ENTRY_SIDEBAR = 'entry-sidebar';
 const LOCATION_ENTRY_EDITOR = 'entry-editor';
@@ -30,7 +31,7 @@ function mockSdk() {
       },
     },
     location: {
-      is: jest.fn((l) => {
+      is: vi.fn((l) => {
         return l === LOCATION;
       }),
     },
@@ -44,24 +45,24 @@ function mockSdk() {
     entry: {
       fields: {
         experimentId: {
-          getValue: jest.fn(() => 'exp123'),
-          onValueChanged: jest.fn(() => jest.fn()),
+          getValue: vi.fn(() => 'exp123'),
+          onValueChanged: vi.fn(() => vi.fn()),
         },
         experimentKey: {
-          getValue: jest.fn(() => 'exp123'),
-          onValueChanged: jest.fn(() => jest.fn()),
+          getValue: vi.fn(() => 'exp123'),
+          onValueChanged: vi.fn(() => vi.fn()),
         },
         experimentTitle: {
-          getValue: jest.fn(() => 'exp123'),
-          onValueChanged: jest.fn(() => jest.fn()),
+          getValue: vi.fn(() => 'exp123'),
+          onValueChanged: vi.fn(() => vi.fn()),
         },
         meta: {
-          getValue: jest.fn(),
-          onValueChanged: jest.fn(() => jest.fn()),
+          getValue: vi.fn(),
+          onValueChanged: vi.fn(() => vi.fn()),
         },
         variations: {
-          getValue: jest.fn(),
-          onValueChanged: jest.fn(() => jest.fn()),
+          getValue: vi.fn(),
+          onValueChanged: vi.fn(() => vi.fn()),
         },
       },
       getSys: () => {
@@ -199,7 +200,7 @@ describe('Optimizely App', () => {
     PROJECT_ID = '123';
     VALID_FIELDS = true;
     const sdk = mockSdk();
-    Storage.prototype.setItem = jest.fn();
+    Storage.prototype.setItem = vi.fn();
     Storage.prototype.getItem = () => {
       return JSON.stringify({
         optToken: 'token',

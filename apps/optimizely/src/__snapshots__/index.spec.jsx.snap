@@ -1,0 +1,486 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Optimizely App > should render the editor page 1`] = `
+<div
+  class="css-175t7kh"
+  data-test-id="editor-page"
+>
+  <div
+    class="css-3p38p2"
+  >
+    <div
+      class="css-1eow32f"
+    >
+      <svg
+        aria-hidden="true"
+        class="css-uoder css-1jrff5x"
+        data-test-id="cf-ui-icon"
+        role="img"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
+      <span>
+        Select experiment
+      </span>
+    </div>
+    <svg
+      aria-hidden="true"
+      class="css-1jrff5x"
+      data-test-id="cf-ui-icon"
+      role="img"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
+      />
+    </svg>
+    <div
+      class="css-1eow32f"
+    >
+      <svg
+        aria-hidden="true"
+        class="css-uoder css-1jrff5x"
+        data-test-id="cf-ui-icon"
+        role="img"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
+      <span>
+        Add content
+      </span>
+    </div>
+    <svg
+      aria-hidden="true"
+      class="css-1jrff5x"
+      data-test-id="cf-ui-icon"
+      role="img"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
+      />
+    </svg>
+    <div
+      class="css-1eow32f"
+    >
+      <svg
+        aria-hidden="true"
+        class="css-uoder css-1jrff5x"
+        data-test-id="cf-ui-icon"
+        role="img"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
+      <span>
+        Publish variations
+      </span>
+    </div>
+    <svg
+      aria-hidden="true"
+      class="css-1jrff5x"
+      data-test-id="cf-ui-icon"
+      role="img"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M8.62623 18.7071C8.2357 18.3166 8.2357 17.6834 8.62623 17.2929L13.9191 12L8.62623 6.70711C8.2357 6.31658 8.2357 5.68342 8.62623 5.29289C9.01675 4.90237 9.64992 4.90237 10.0404 5.29289L16.0404 11.2929C16.431 11.6834 16.431 12.3166 16.0404 12.7071L10.0404 18.7071C9.64992 19.0976 9.01675 19.0976 8.62623 18.7071Z"
+      />
+    </svg>
+    <div
+      class="css-1eow32f"
+    >
+      <svg
+        aria-hidden="true"
+        class="css-uoder css-1jrff5x"
+        data-test-id="cf-ui-icon"
+        role="img"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M0 0h24v24H0z"
+          fill="none"
+        />
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
+      <span>
+        Start experiment
+      </span>
+    </div>
+  </div>
+  <hr
+    class="css-10hsrou"
+  />
+  <h1
+    class="css-1fobf8d css-ow69k3"
+    data-test-id="cf-ui-heading"
+    element="h2"
+  >
+    Referenced in:
+  </h1>
+  <div
+    class="css-1y5g446"
+  >
+    <svg
+      aria-label="Loading component..."
+      class="css-13o7eu2"
+      data-test-id="cf-ui-skeleton-form"
+      height="30px"
+      role="img"
+      width="100%"
+    >
+      <title>
+        Loading component...
+      </title>
+      <rect
+        clip-path="url(#references-section)"
+        height="100%"
+        style="fill: url(#cf-ui-skeleton-clip-gradient_8291);"
+        width="100%"
+        x="0"
+        y="0"
+      />
+      <defs>
+        <clippath
+          id="references-section"
+        >
+          <rect
+            height="16"
+            rx="4px"
+            ry="4px"
+            width="100%"
+            x="0"
+            y="0"
+          />
+        </clippath>
+        <lineargradient
+          id="cf-ui-skeleton-clip-gradient_8291"
+        >
+          <stop
+            offset="0%"
+            stop-color="#e5ebed"
+            stop-opacity="1"
+          >
+            <animate
+              attributeName="stop-color"
+              dur="2s"
+              id="animation_806"
+              repeatCount="indefinite"
+              values="#e5ebed; #f7f9fa; #e5ebed"
+            />
+          </stop>
+          <stop
+            offset="50%"
+            stop-color="#f7f9fa"
+            stop-opacity="1"
+          >
+            <animate
+              attributeName="stop-color"
+              begin="animation_806.begin+0.25s"
+              dur="2s"
+              repeatCount="indefinite"
+              values="#e5ebed; #f7f9fa; #e5ebed"
+            />
+          </stop>
+          <stop
+            offset="100%"
+            stop-color="#e5ebed"
+            stop-opacity="1"
+          >
+            <animate
+              attributeName="stop-color"
+              begin="animation_806.begin+0.5s"
+              dur="2s"
+              repeatCount="indefinite"
+              values="#e5ebed; #f7f9fa; #e5ebed"
+            />
+          </stop>
+        </lineargradient>
+      </defs>
+    </svg>
+  </div>
+  <hr
+    class="css-10hsrou"
+  />
+  <h1
+    class="css-1fobf8d css-ow69k3"
+    data-test-id="cf-ui-heading"
+    element="h2"
+  >
+    Experiment:
+  </h1>
+  <div
+    class="css-1fobf8d"
+    data-test-id="cf-ui-form-control"
+    role="group"
+  >
+    <label
+      class="css-1ry5edl"
+      data-test-id="cf-ui-form-label"
+      for="field-_1250"
+      id="field-_1250-label"
+    >
+      Optimizely experiment
+    </label>
+    <div
+      class="css-1jmxdak"
+    >
+      <select
+        aria-describedby="experiment-helptext"
+        aria-required="true"
+        class="css-x49t8d"
+        data-test-id="cf-ui-select"
+        disabled=""
+        id="experiment"
+        name="experiment"
+        required=""
+        width="large"
+      >
+        <option
+          data-test-id="cf-ui-select-option"
+          value="-1"
+        >
+          Fetching experiments...
+        </option>
+      </select>
+      <svg
+        aria-hidden="true"
+        class="css-14n9xrq"
+        data-test-id="cf-ui-icon"
+        role="img"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z"
+        />
+      </svg>
+    </div>
+  </div>
+  <hr
+    class="css-10hsrou"
+  />
+  <h1
+    class="css-ow69k3"
+    data-test-id="cf-ui-heading"
+    element="h2"
+  >
+    Variations:
+  </h1>
+  <div
+    class="css-1pfvl5o"
+  >
+    <svg
+      aria-label="Loading component..."
+      class="css-13o7eu2"
+      data-test-id="cf-ui-skeleton-form"
+      height="100"
+      role="img"
+      width="100%"
+    >
+      <title>
+        Loading component...
+      </title>
+      <rect
+        clip-path="url(#variations-section)"
+        height="100%"
+        style="fill: url(#cf-ui-skeleton-clip-gradient_4460);"
+        width="100%"
+        x="0"
+        y="0"
+      />
+      <defs>
+        <clippath
+          id="variations-section"
+        >
+          <rect
+            height="16"
+            rx="4px"
+            ry="4px"
+            width="100%"
+            x="0"
+            y="20"
+          />
+          <rect
+            height="16"
+            rx="4px"
+            ry="4px"
+            width="100%"
+            x="0"
+            y="44"
+          />
+          <rect
+            height="16"
+            rx="4px"
+            ry="4px"
+            width="80%"
+            x="0"
+            y="68"
+          />
+        </clippath>
+        <lineargradient
+          id="cf-ui-skeleton-clip-gradient_4460"
+        >
+          <stop
+            offset="0%"
+            stop-color="#e5ebed"
+            stop-opacity="1"
+          >
+            <animate
+              attributeName="stop-color"
+              dur="2s"
+              id="animation_4455"
+              repeatCount="indefinite"
+              values="#e5ebed; #f7f9fa; #e5ebed"
+            />
+          </stop>
+          <stop
+            offset="50%"
+            stop-color="#f7f9fa"
+            stop-opacity="1"
+          >
+            <animate
+              attributeName="stop-color"
+              begin="animation_4455.begin+0.25s"
+              dur="2s"
+              repeatCount="indefinite"
+              values="#e5ebed; #f7f9fa; #e5ebed"
+            />
+          </stop>
+          <stop
+            offset="100%"
+            stop-color="#e5ebed"
+            stop-opacity="1"
+          >
+            <animate
+              attributeName="stop-color"
+              begin="animation_4455.begin+0.5s"
+              dur="2s"
+              repeatCount="indefinite"
+              values="#e5ebed; #f7f9fa; #e5ebed"
+            />
+          </stop>
+        </lineargradient>
+      </defs>
+    </svg>
+  </div>
+</div>
+`;
+
+exports[`Optimizely App > should render the incorrect type message 1`] = `
+<div
+  class="css-hvj582"
+  data-test-id="incorrect-type"
+>
+  <article
+    class="css-ep96ao"
+    data-test-id="cf-ui-note"
+  >
+    <svg
+      aria-hidden="true"
+      class="css-77587x"
+      data-test-id="cf-ui-icon"
+      role="img"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M0 0h24v24H0z"
+        fill="none"
+      />
+      <path
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+      />
+    </svg>
+    <div
+      class="css-j7qwjs"
+    >
+      <h2
+        class="css-1fgrah0"
+        data-test-id="cf-ui-heading"
+      >
+        Extension "undefined" cannot be assigned to this content type
+      </h2>
+      <div
+        class="css-n69953"
+      >
+        <div>
+          <strong>
+            Required:
+          </strong>
+           
+          experimentTitle (Symbol), experimentId (Symbol), experimentKey (Symbol), meta (Object), variations (Array)
+        </div>
+        <div>
+          <strong>
+            Missing:
+          </strong>
+           
+          experimentKey (Symbol)
+        </div>
+      </div>
+    </div>
+  </article>
+</div>
+`;
+
+exports[`Optimizely App > should render the missing project on the sidebar 1`] = `
+<div
+  class="css-hvj582"
+  data-test-id="missing-project"
+>
+  <article
+    class="css-ep96ao"
+    data-test-id="cf-ui-note"
+  >
+    <svg
+      aria-hidden="true"
+      class="css-t1jt9x"
+      data-test-id="cf-ui-icon"
+      role="img"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M0 0h24v24H0z"
+        fill="none"
+      />
+      <path
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+      />
+    </svg>
+    <div
+      class="css-j7qwjs"
+    >
+      <div
+        class="css-n69953"
+      >
+        Please, set 
+        <strong>
+          Optimizely Project ID
+        </strong>
+         in Extension settings.
+      </div>
+    </div>
+  </article>
+</div>
+`;

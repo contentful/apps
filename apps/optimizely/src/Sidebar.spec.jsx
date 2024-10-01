@@ -3,12 +3,13 @@ import { cleanup, render, configure } from '@testing-library/react';
 
 import Sidebar from '../src/Sidebar';
 import { ProjectType } from './constants';
+import { vi } from 'vitest';
 
 let LOCATION = 'entry-sidebar';
 let PROJECT_ID = '123';
 let VALID_FIELDS = true;
 
-const mockUnsub = jest.fn();
+const mockUnsub = vi.fn();
 
 function mockClient() {}
 
@@ -21,13 +22,13 @@ function mockSdk() {
       },
     },
     location: {
-      is: jest.fn((l) => {
+      is: vi.fn((l) => {
         return l === LOCATION;
       }),
     },
     window: {
-      startAutoResizer: jest.fn(),
-      stopAutoResizer: jest.fn(),
+      startAutoResizer: vi.fn(),
+      stopAutoResizer: vi.fn(),
     },
     ids: {},
     space: {},
@@ -35,32 +36,32 @@ function mockSdk() {
     entry: {
       fields: {
         experimentId: {
-          getValue: jest.fn(() => 'exp123'),
-          onValueChanged: jest.fn(() => mockUnsub),
+          getValue: vi.fn(() => 'exp123'),
+          onValueChanged: vi.fn(() => mockUnsub),
         },
         experimentKey: {
-          getValue: jest.fn(() => 'exp123'),
-          onValueChanged: jest.fn(() => mockUnsub),
+          getValue: vi.fn(() => 'exp123'),
+          onValueChanged: vi.fn(() => mockUnsub),
         },
         environment: {
-          getValue: jest.fn(() => 'production'),
-          onValueChanged: jest.fn(() => mockUnsub),
+          getValue: vi.fn(() => 'production'),
+          onValueChanged: vi.fn(() => mockUnsub),
         },
         flagKey: {
-          getValue: jest.fn(() => 'flag123'),
-          onValueChanged: jest.fn(() => mockUnsub),
+          getValue: vi.fn(() => 'flag123'),
+          onValueChanged: vi.fn(() => mockUnsub),
         },
         revision: {
-          getValue: jest.fn(() => 'random'),
-          onValueChanged: jest.fn(() => mockUnsub),
+          getValue: vi.fn(() => 'random'),
+          onValueChanged: vi.fn(() => mockUnsub),
         },
         meta: {
-          getValue: jest.fn(),
-          onValueChanged: jest.fn(() => jest.fn()),
+          getValue: vi.fn(),
+          onValueChanged: vi.fn(() => vi.fn()),
         },
         variations: {
-          getValue: jest.fn(),
-          onValueChanged: jest.fn(() => jest.fn()),
+          getValue: vi.fn(),
+          onValueChanged: vi.fn(() => vi.fn()),
         },
       },
     },
@@ -160,7 +161,7 @@ describe('Sidebar', () => {
 
   it('should run all lifecycle methods', () => {
     const sdk = mockSdk();
-
+    console.log({ sdk }, sdk.contentType.fields);
     const { unmount } = render(<Sidebar sdk={sdk} />);
 
     expect(sdk.window.startAutoResizer).toHaveBeenCalledTimes(1);
@@ -177,6 +178,10 @@ describe('Sidebar', () => {
 
   it('should use the project ID to create urls', () => {
     const sdk = mockSdk();
+    // console.log({sdk}, sdk.contentType.fields.experimentKey.getValue())
+    const { optimizelyProjectId, optimizelyProjectType } = sdk.parameters.installation;
+    console.log({ optimizelyProjectType });
+
     const { getByTestId } = render(<Sidebar sdk={sdk} />);
 
     expect(getByTestId('view-experiment').href).toBe(
