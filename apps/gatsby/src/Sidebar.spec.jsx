@@ -1,5 +1,6 @@
 /* global global */
 import React from 'react';
+import { vi } from 'vitest';
 import { render, cleanup, fireEvent } from '@testing-library/react';
 
 import Sidebar from './Sidebar';
@@ -32,19 +33,19 @@ const getMockSdk = () => ({
     webapp: 'app.contentful.com',
   },
   entry: {
-    onSysChanged: jest.fn((cb) => {
+    onSysChanged: vi.fn((cb) => {
       cb(getMockContent());
     }),
-    getSys: jest.fn(() => getMockContent()),
+    getSys: vi.fn(() => getMockContent()),
     fields: {
       slug: {
-        getValue: jest.fn(() => 'preview-slug'),
+        getValue: vi.fn(() => 'preview-slug'),
       },
     },
-    save: jest.fn(() => Promise.resolve()),
+    save: vi.fn(() => Promise.resolve()),
   },
   window: {
-    startAutoResizer: jest.fn(),
+    startAutoResizer: vi.fn(),
   },
   ids: {
     contentType: `content-type`,
@@ -67,8 +68,8 @@ describe('Gatsby App Sidebar', () => {
   });
 
   it('should call window.fetch and window.open with the correct urls when a user has not added a Content Sync Url', async () => {
-    const mockFetch = jest.fn(() => Promise.resolve({ ok: true }));
-    const mockWindowOpen = jest.fn();
+    const mockFetch = vi.fn(() => Promise.resolve({ ok: true }));
+    const mockWindowOpen = vi.fn();
 
     global.fetch = mockFetch;
     global.open = mockWindowOpen;
@@ -92,8 +93,8 @@ describe('Gatsby App Sidebar', () => {
   });
 
   it('should call window.fetch and window.open with the correct urls when a user has added a Content Sync Url', async () => {
-    const mockFetch = jest.fn(() => Promise.resolve({ ok: true }));
-    const mockWindowOpen = jest.fn();
+    const mockFetch = vi.fn(() => Promise.resolve({ ok: true }));
+    const mockWindowOpen = vi.fn();
     global.fetch = mockFetch;
     global.open = mockWindowOpen;
 
