@@ -83,9 +83,8 @@ describe('Gatsby Preview entry point', () => {
 
   it('should initialize the app', async () => {
     await import('./index');
-    // loadEntryPoint();
+    loadEntryPoint();
 
-    console.log(render.mock.calls);
     const [renderedComponent, root] = render.mock.calls[0];
     expect(renderedComponent.props).toEqual({ sdk: mockSdk });
     expect(root).toEqual('root');
