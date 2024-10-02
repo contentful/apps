@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Heading, Paragraph, TextField } from '@contentful/forma-36-react-components';
+import { Heading, Paragraph, FormControl, TextInput, Flex } from '@contentful/f36-components';
 import { styles } from './styles';
 
 export function InstallationContent({
@@ -25,35 +25,41 @@ export function InstallationContent({
         To help you get started, we are going to create a content type for you with a title field,
         an image field and a focal point field.
       </Paragraph>
-      <TextField
-        className={styles.input}
-        labelText="Content type name"
-        name="contentTypeName"
-        textInputProps={{
-          placeholder: 'e.g. Image with Focal Point',
-          testId: 'content-type-name-input',
-        }}
-        helpText="You can use this content type to wrap images with focal point data"
-        value={contentTypeName}
-        onChange={onContentTypeNameChange}
-        testId="content-type-name"
-        id="content-type-name"
-        validationMessage={validationMessageName}
-        required
-      />
-      <TextField
-        className={styles.input}
-        labelText="Content type ID"
-        name="contentTypeId"
-        helpText="The ID is generated from the name, you can also set it manually"
-        value={contentTypeId}
-        onChange={onContentTypeIdChange}
-        id="content-type-id"
-        testId="content-type-id"
-        textInputProps={{ testId: 'content-type-id-input' }}
-        validationMessage={validationMessageId}
-        required
-      />
+      <FormControl id="content-type-name">
+        <FormControl.Label>Content type name</FormControl.Label>
+        <TextInput
+          placeholder="e.g. Image with Focal Point"
+          name="contentTypeName"
+          value={contentTypeName}
+          onChange={onContentTypeNameChange}
+          className={styles.input}
+          required
+        />
+        <Flex justifyContent="space-between">
+          <FormControl.HelpText>
+            You can use this content type to wrap images with focal point data
+          </FormControl.HelpText>
+          <FormControl.Counter />
+        </Flex>
+        <FormControl.ValidationMessage>{validationMessageName}</FormControl.ValidationMessage>
+      </FormControl>
+      <FormControl id="content-type-id">
+        <FormControl.Label>Content type ID</FormControl.Label>
+        <TextInput
+          name="contentTypeId"
+          value={contentTypeId}
+          onChange={onContentTypeIdChange}
+          className={styles.input}
+          required
+        />
+        <Flex justifyContent="space-between">
+          <FormControl.HelpText>
+            The ID is generated from the name, you can also set it manually
+          </FormControl.HelpText>
+          <FormControl.Counter />
+        </Flex>
+        <FormControl.ValidationMessage>{validationMessageId}</FormControl.ValidationMessage>
+      </FormControl>
     </>
   );
 }
